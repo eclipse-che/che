@@ -456,7 +456,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     terminals.put(terminalId, newTerminal);
     view.addProcessNode(terminalNode);
     terminalWidget.asWidget().ensureDebugId(terminalName);
-    view.addWidget(terminalId, terminalName, terminalNode.getTitleIcon(), terminalWidget, false);
+    view.addWidget(terminalId, terminalName, terminalNode.getTitleIcon(), terminalWidget, true);
     refreshStopButtonState(terminalId);
 
     workspaceAgentProvider.get().setActivePart(this);
@@ -661,7 +661,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     commandId = commandNode.getId();
     addChildToMachineNode(commandNode, machineTreeNode, activate);
 
-    addOutputConsole(commandId, commandNode, outputConsole, false, activate);
+    addOutputConsole(commandId, commandNode, outputConsole, true, activate);
 
     refreshStopButtonState(commandId);
     workspaceAgentProvider.get().setActivePart(this);
@@ -686,7 +686,7 @@ public class ProcessesPanelPresenter extends BasePresenter
       final String id,
       final ProcessTreeNode processNode,
       final OutputConsole outputConsole,
-      final boolean machineConsole,
+      final boolean removable,
       final boolean activate) {
     consoles.put(id, outputConsole);
     consoleCommands.put(outputConsole, id);
@@ -697,7 +697,7 @@ public class ProcessesPanelPresenter extends BasePresenter
           public void setWidget(final IsWidget widget) {
             view.addProcessNode(processNode);
             view.addWidget(
-                id, outputConsole.getTitle(), outputConsole.getTitleIcon(), widget, machineConsole);
+                id, outputConsole.getTitle(), outputConsole.getTitleIcon(), widget, removable);
             if (!MACHINE_NODE.equals(processNode.getType())) {
               ProcessTreeNode node = view.getNodeById(id);
               if (activate) {
@@ -810,7 +810,6 @@ public class ProcessesPanelPresenter extends BasePresenter
     }
 
     removeChildFromMachineNode(node, parentNode);
-    view.selectNode(neighborNode);
     notifyTreeNodeSelected(neighborNode);
   }
 
@@ -959,7 +958,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     // add output for the machine if it is not exist
     if (!consoles.containsKey(machineName)) {
       OutputConsole outputConsole = commandConsoleFactory.create(machineName);
-      addOutputConsole(machineName, machineNode, outputConsole, true, activate);
+      addOutputConsole(machineName, machineNode, outputConsole, false, activate);
     }
 
     return machineNode;
@@ -1021,7 +1020,6 @@ public class ProcessesPanelPresenter extends BasePresenter
     }
 
     view.setProcessesData(rootNode);
-    selectDevMachine();
   }
 
   @Override
@@ -1106,7 +1104,7 @@ public class ProcessesPanelPresenter extends BasePresenter
                       getAndPrintProcessLogs(console, pid);
                       subscribeToProcess(console, pid);
 
-                      addCommandOutput(machineName, console, false);
+                      addCommandOutput(machineName, console, true);
                     } else {
                       final CommandImpl commandByName = commandOptional.get();
                       macroProcessorProvider
@@ -1130,7 +1128,7 @@ public class ProcessesPanelPresenter extends BasePresenter
                                   getAndPrintProcessLogs(console, pid);
                                   subscribeToProcess(console, pid);
 
-                                  addCommandOutput(machineName, console, false);
+                                  addCommandOutput(machineName, console, true);
                                 }
                               });
                     }

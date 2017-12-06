@@ -23,6 +23,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.MachineFailedEvent;
 import org.eclipse.che.ide.api.workspace.event.MachineRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.MachineStartingEvent;
+import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.MachineStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
@@ -54,6 +55,9 @@ class MachineStatusEventHandler {
 
           final String machineName = event.getMachineName();
           final String workspaceId = event.getIdentity().getWorkspaceId();
+
+          eventBus.fireEvent(
+              new MachineStatusChangedEvent(machineName, workspaceId, event.getEventType()));
 
           workspaceServiceClient
               .getWorkspace(workspaceId)

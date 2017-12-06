@@ -12,9 +12,11 @@
 -->
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:svg="urn:import:org.vectomatic.dom.svg.ui">
 
     <ui:with field="machineResources" type="org.eclipse.che.ide.machine.MachineResources"/>
+    <ui:with field="resources" type="org.eclipse.che.ide.Resources" />
 
     <ui:style>
 
@@ -22,73 +24,206 @@
             overflow: auto;
             background-color: #191c28;
             user-select: text;
+            position: relative;
         }
 
-        .content {
-            font-family: "Droid Sans Mono", monospace;
+        .table {
+            width: 100%;
+        }
+
+        .table * {
+            user-select: text;
+        }
+
+        .table > tbody > tr > td {
+            font-family: monospace;
             font-size: 11px;
             line-height: 13px;
-            margin-left: 10px;
-            margin-top: 0px;
-            margin-bottom: 0px;
-            margin-right: 10px;
+            white-space: pre;
         }
 
-        .content *[rel="step-name"] {
-            color: #f0c530;
+        .table > tbody > tr > td > hr {
+            border: none;
+            border-top: 1px solid rgba(160, 169, 183, 0.2);
+            margin-top: 15px;
+            margin-bottom: 15px;
         }
 
-        .content *[rel="machine-name"] {
-            color: #8e42d1;
+        .machineIcon {
+            text-align: center;
+            position: relative;
+            width: 60px;
         }
 
-        .content *[rel="image-name"] {
+        .machineIcon > div {
+            width: 54px;
+            height: 42px;
+            position: absolute;
+            left: 4px;
+            top: 4px;
         }
 
-        .content *[rel="progress"],
-        .content *[rel="progress-value"] {
+        .machineTitle {
+            color: white;
+            font-size: 13px!important;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(160, 169, 183, 0.2);
+            height: 20px;
+            line-height: 20px!important;
+            padding-top: 11px;
+        }
+
+        .machineImage {
+            border-bottom: 1px solid rgba(160, 169, 183, 0.2);
+            height: 20px;
+            line-height: 20px!important;
+            padding-top: 11px;
+        }
+
+        .machineState {
+            font-size: 12px!important;
+            border-bottom: 1px solid rgba(160, 169, 183, 0.2);
+            height: 20px;
+            line-height: 20px!important;
+            padding-top: 11px;
+        }
+
+        .machineState[rel="starting"] {
             color: #4973c1;
         }
 
-        .content *[rel="done"] {
+        .machineState[rel="running"] {
             color: #3aa461;
         }
 
-        .content pre {
-            display: inline;
-            transition: all 1s ease-in-out;
+        .machineState[rel="stopped"] {
+            color: #adadad;
+        }
+
+        .installerRow {
+            height: 16px;
+        }
+
+        .list {
+            width: 25px;
+            text-align: right;
+            padding-right: 3px;
+        }
+
+        .machine,
+        .installer {
+            width: 130px;
+        }
+
+        .machine {
+            color: #8e42d1;
+        }
+
+        .delim {
+            width: 8px;
+        }
+
+        .image {
+            width: 272px;
+        }
+
+        .installerDescription {
+            width: 230px;
+            max-width: 300px;
+        }
+
+        .state {
+            width: 200px;
+        }
+
+        .status {
+        }
+
+        .state[rel="starting"] {
+            color: #4973c1;
+        }
+
+        .state[rel="running"] {
+            color: #4973c1;
+        }
+
+        .status[rel="starting"] {
+            color: #4973c1;
+        }
+
+        .status[rel="running"],
+        .status[rel="ok"] {
+            color: #3aa461;
         }
 
     </ui:style>
 
     <!-- Be careful when changing the following. It may broke the result widget. -->
     <g:HTMLPanel styleName="{style.panel}">
-        <pre class="{style.content}">
+        <div style="position: absolute; left: 10px; right: 10px;">
 
-<pre ui:field="waitingWorkspaceTitle" style="display: none;"><br/>Waiting workspace machines to be booted...</pre>
+            <table cellpadding="0" cellspacing="0" class="{style.table}" border="0">
+                <tbody ui:field="tableBody">
 
-<pre ui:field="preparingWorkspaceRuntime" style="display: none;">
-<hr style="border: none; border-top: 1px solid rgba(160, 169, 183, 0.2);" />
-<pre rel="step-name">Preparing workspace runtimes:</pre> Retrieving workspace's stacks...
-<pre ui:field="preparingWorkspaceRuntimeItems">
-<pre>  - <pre rel="machine-name"></pre> | image <pre rel="image-name"></pre> | <pre rel="progress"></pre> <pre rel="progress-value"></pre></pre>
-</pre></pre>
-<pre ui:field="startingWorkspaceRuntimes" style="display: none;">
-<hr style="border: none; border-top: 1px solid rgba(160, 169, 183, 0.2);" />
-<pre rel="step-name">Starting workspace runtimes:</pre> Creating and starting containers...
-<pre ui:field="startingWorkspaceRuntimesItems">
-<pre>  - <pre rel="machine-name"></pre> | image <pre rel="image-name"></pre> | <pre rel="progress"></pre> <pre rel="progress-value"></pre></pre>
-</pre></pre><pre ui:field="initializingWorkspaceAgents" style="display:none;">
-<hr style="border: none; border-top: 1px solid rgba(160, 169, 183, 0.2);" />
-<pre rel="step-name">Initializing exec agents:</pre> Installing and starting exec agents in containers...
-<pre>  - <pre rel="machine-name"></pre> | image <pre rel="image-name"></pre> | <pre rel="progress"></pre> <pre rel="progress-value"></pre></pre>
-</pre>
-<pre ui:field="workspaceStarted" style="display: none;">
-<hr style="border: none; border-top: 1px solid rgba(160, 169, 183, 0.2);" />
-<pre rel="done">Workspace successfully started</pre>
+                    <tr ui:field="waitingWorkspaceSection" style="height: 40px;">
+                        <td colspan="8" style="color: #f0c530; height: 50px; line-height: 50px;">Starting and configuring your workspace machines</td>
+                    </tr>
 
-<hr style="border: none; border-top: 1px solid rgba(160, 169, 183, 0.2);" />
-</pre></pre>
+                    <tr ui:field="workspaceStartedSection" style="display: none; height: 40px;">
+                        <td colspan="8" style="color: #3aa461; height: 50px; line-height: 50px;">Your workspace is ready to be used</td>
+                    </tr>
+
+                    <tr ui:field="workspaceStoppedSection" style="display: none; height: 40px;">
+                        <td colspan="8" style="color: #f0c530; height: 50px; line-height: 50px;">Workspace stopped</td>
+                    </tr>
+
+                    <tr ui:field="workspaceFailedSection" style="display: none; height: 40px;">
+                        <td colspan="8" style="color: red; height: 50px; line-height: 50px;">Your workspace failed to start</td>
+                    </tr>
+
+                    <!-- Used as anchor when inserting elements. Insert machine elements before this element. -->
+                    <tr ui:field="machinesSectionAnchor" style="display: none;" />
+
+                    <!--
+                        Machine section
+                    -->
+                    <tr ui:field="machineTemplate">
+                        <td rowspan="2" class="{style.machineIcon}" id="machine-icon">
+                            <div><svg:SVGImage resource="{resources.machineCube}" /></div>
+                        </td>
+
+                        <td colspan="3" class="{style.machineTitle}" id="machine-title"> </td>
+                        <td colspan="3" class="{style.machineImage}" id="machine-image">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                        <td class="{style.machineState}" rel="stopped" id="machine-state">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                    </tr>
+
+                    <tr ui:field="machineInlineDelimiterTemplate"><td colspan="7" style="height: 10px;"></td></tr>
+
+                    <tr ui:field="installerTemplate" class="{style.installerRow}">
+                        <td class="{style.list}">•</td>
+                        <td class="{style.installer}" id="installer-name">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                        <td class="{style.delim}">|</td>
+                        <td class="{style.installerDescription}" id="installer-description">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                        <td class="{style.delim}">|</td>
+                        <td class="{style.state}" rel="running" id="installer-state">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                        <td class="{style.status}" rel="ok" id="installer-status">&nbsp;&nbsp;</td>
+                    </tr>
+
+                    <tr ui:field="machinesDelimiterTemplate"><td colspan="8" style="height: 15px;"></td></tr>
+
+                    <tr ui:field="workspaceStartedSectionFooter" style="display: none;">
+                        <td colspan="8"><hr/>Workspace machines successfully started and configured<br/>&nbsp;</td>
+                    </tr>
+
+                    <tr ui:field="workspaceFailedSectionFooter" style="display: none;">
+                        <td colspan="8"><hr/>Unable to start workspace<br/>&nbsp;</td>
+                    </tr>
+
+                </tbody>
+            </table>
+
+        </div>
+
     </g:HTMLPanel>
 
 </ui:UiBinder>

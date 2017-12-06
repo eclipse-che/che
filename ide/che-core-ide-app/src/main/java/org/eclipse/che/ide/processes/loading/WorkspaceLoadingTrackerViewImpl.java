@@ -12,17 +12,19 @@ package org.eclipse.che.ide.processes.loading;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
-import com.google.gwt.dom.client.PreElement;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.TableRowElement;
+import com.google.gwt.dom.client.TableSectionElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /** View for tracking workspace loading progress. */
 public class WorkspaceLoadingTrackerViewImpl extends Composite
@@ -31,66 +33,366 @@ public class WorkspaceLoadingTrackerViewImpl extends Composite
   interface WorkspaceLoadingTrackerViewImplUiBinder
       extends UiBinder<Widget, WorkspaceLoadingTrackerViewImpl> {}
 
-  private static final int MACHINE_NAME_WIDTH = 25;
-  private static final int IMAGE_NAME_WIDTH = 35;
-  private static final int PROGRESS_WIDTH = 33;
+  @UiField TableSectionElement tableBody;
 
-  private static final String LOADING_CHAR1 = "&blk14;";
-  private static final String LOADING_CHAR2 = "&blk34;";
+  /* Anchor for inserting table elements */
+  @UiField TableRowElement machinesSectionAnchor;
 
-  private static final String ANIMATION_START = "    ";
+  /* Templates */
+  @UiField TableRowElement machineTemplate;
+  @UiField TableRowElement machineInlineDelimiterTemplate;
+  @UiField TableRowElement installerTemplate;
+  @UiField TableRowElement machinesDelimiterTemplate;
 
-  @UiField PreElement waitingWorkspaceTitle;
+  @UiField TableRowElement waitingWorkspaceSection;
 
-  @UiField PreElement preparingWorkspaceRuntime;
+  @UiField TableRowElement workspaceStartedSection;
+  @UiField TableRowElement workspaceStartedSectionFooter;
 
-  @UiField PreElement preparingWorkspaceRuntimeItems;
+  @UiField TableRowElement workspaceStoppedSection;
 
-  private Node preparingWorkspaceRuntimeOriginalItem;
-  private Node preparingWorkspaceRuntimeOriginalNewLine;
+  @UiField TableRowElement workspaceFailedSection;
+  @UiField TableRowElement workspaceFailedSectionFooter;
 
-  @UiField PreElement startingWorkspaceRuntimes;
+  private Set<Element> animatedElements = new HashSet<>();
 
-  @UiField PreElement startingWorkspaceRuntimesItems;
+  private native void log(String msg) /*-{ console.log(msg); }-*/;
 
-  private Node startingWorkspaceRuntimesOriginalItem;
-  private Node startingWorkspaceRuntimesOriginalNewLine;
+  private class Installer {
+    // Installer section element
+    Element section;
 
-  @UiField PreElement initializingWorkspaceAgents;
+    // Installer name element
+    Element name;
 
-  @UiField PreElement workspaceStarted;
+    // Installer description element
+    Element description;
 
-  private Map<String, Node> step1Nodes = new LinkedHashMap<>();
-  private Map<String, Node> step2Nodes = new LinkedHashMap<>();
+    // Installer state element
+    Element state;
 
-  private List<Element> animatedElements = new ArrayList<>();
+    // Installer status element
+    Element status;
+
+    public Installer(String installerName, String installerDescription) {
+      // Clone installerTemplate node
+      section = installerTemplate.cloneNode(true).cast();
+
+      // Find machine cells
+      for (int i = 0; i < section.getChildNodes().getLength(); i++) {
+        Node n = section.getChildNodes().getItem(i);
+        if (Node.ELEMENT_NODE != n.getNodeType()) {
+          continue;
+        }
+
+        Element e = n.cast();
+        switch (e.getId()) {
+          case "installer-name":
+            name = e;
+            break;
+          case "installer-description":
+            description = e;
+            break;
+          case "installer-state":
+            state = e;
+            break;
+          case "installer-status":
+            status = e;
+            break;
+        }
+      }
+
+      name.setInnerText(installerName);
+      description.setInnerText(installerDescription);
+    }
+
+    void setStarting() {
+      state.setAttribute("rel", "starting");
+      state.setInnerText("Starting");
+
+      status.setAttribute("rel", "starting");
+      status.setInnerText("|");
+
+      animatedElements.add(status);
+    }
+
+    void setRunning() {
+      state.setAttribute("rel", "running");
+      state.setInnerText("Running");
+
+      status.setAttribute("rel", "ok");
+      status.setInnerText("OK");
+
+      animatedElements.remove(status);
+    }
+
+    void setStopped() {
+      state.setAttribute("rel", "stopped");
+      state.setInnerText("");
+
+      status.setAttribute("rel", "stopped");
+      status.setInnerText("");
+    }
+  }
+
+  private class Machine {
+    // Machine section element
+    Element section;
+
+    // Machine icon element
+    Element icon;
+
+    // Machine title element
+    Element title;
+
+    // Machine image element
+    // `image [eclipse/mysql]`
+    Element image;
+
+    // Machine state element
+    // content: STARTING, RUNNING, STOPPED
+    // rel: starting, running, stopped
+    Element state;
+
+    // Inline delimiter element
+    Element inlineDelimiter;
+
+    // Machine installers
+    Map<String, Installer> installers;
+
+    // Machines delimiter element;
+    Element machinesDelimiter;
+
+    /**
+     * Creates machine section, inline delimiter and machines delimiter
+     *
+     * @param machineName machine name
+     */
+    public Machine(String machineName) {
+      installers = new HashMap<>();
+
+      // Clone machineTemplate node
+      section = machineTemplate.cloneNode(true).cast();
+
+      // Find machine cells
+      for (int i = 0; i < section.getChildNodes().getLength(); i++) {
+        Node n = section.getChildNodes().getItem(i);
+        if (Node.ELEMENT_NODE != n.getNodeType()) {
+          continue;
+        }
+
+        Element e = n.cast();
+        switch (e.getId()) {
+          case "machine-icon":
+            icon = e;
+            break;
+          case "machine-title":
+            title = e;
+            break;
+          case "machine-image":
+            image = e;
+            break;
+          case "machine-state":
+            state = e;
+            break;
+        }
+      }
+
+      // Set title
+      title.setInnerText(machineName);
+
+      // Clone inline delimiter
+      inlineDelimiter = machineInlineDelimiterTemplate.cloneNode(true).cast();
+
+      // Clone machines delimiter
+      machinesDelimiter = machinesDelimiterTemplate.cloneNode(true).cast();
+    }
+
+    /**
+     * Sets image name
+     *
+     * @param imageName image name
+     */
+    void setImageName(String imageName) {
+      image.setInnerText("image [" + imageName + "]");
+    }
+
+    /**
+     * Set machine state. Possible values: starting, running, stopped.
+     *
+     * @param newState new state
+     */
+    void setState(String newState) {
+      state.setAttribute("rel", newState.toLowerCase());
+      state.setInnerText(newState.toUpperCase());
+    }
+
+    /**
+     * Creates and adds an installer.
+     *
+     * @param installerId installer id
+     * @param installerName installer name
+     * @param installerDescription installer description
+     */
+    void addInstaller(String installerId, String installerName, String installerDescription) {
+      if (installers.containsKey(installerId)) {
+        return;
+      }
+
+      Installer installer = new Installer(installerName, installerDescription);
+
+      installers.put(installerId, installer);
+
+      tableBody.insertBefore(installer.section, machinesDelimiter);
+
+      // Update `rowspan` attribute of machine icon cell
+      icon.setAttribute("rowspan", "" + (2 + installers.size()));
+    }
+  }
+
+  private Map<String, Machine> machines = new HashMap<>();
 
   @Inject
   public WorkspaceLoadingTrackerViewImpl(WorkspaceLoadingTrackerViewImplUiBinder uiBinder) {
     initWidget(uiBinder.createAndBindUi(this));
 
-    // initialize element templates
-    preparingWorkspaceRuntimeOriginalItem =
-        preparingWorkspaceRuntimeItems.getChildNodes().getItem(0);
-    preparingWorkspaceRuntimeOriginalNewLine =
-        preparingWorkspaceRuntimeItems.getChildNodes().getItem(1);
-    preparingWorkspaceRuntimeItems.removeChild(preparingWorkspaceRuntimeOriginalItem);
-    preparingWorkspaceRuntimeItems.removeChild(preparingWorkspaceRuntimeOriginalNewLine);
-
-    startingWorkspaceRuntimesOriginalItem =
-        startingWorkspaceRuntimesItems.getChildNodes().getItem(0);
-    startingWorkspaceRuntimesOriginalNewLine =
-        startingWorkspaceRuntimesItems.getChildNodes().getItem(1);
-    startingWorkspaceRuntimesItems.removeChild(startingWorkspaceRuntimesOriginalItem);
-    startingWorkspaceRuntimesItems.removeChild(startingWorkspaceRuntimesOriginalNewLine);
+    // Remove templates from the table
+    machineTemplate.removeFromParent();
+    machineInlineDelimiterTemplate.removeFromParent();
+    installerTemplate.removeFromParent();
+    machinesDelimiterTemplate.removeFromParent();
 
     animationTimer.scheduleRepeating(200);
   }
 
   @Override
-  public void startLoading() {
-    waitingWorkspaceTitle.getStyle().clearDisplay();
-    preparingWorkspaceRuntime.getStyle().clearDisplay();
+  public void addMachine(String machineName) {
+    // create machine
+    Machine machine = new Machine(machineName);
+
+    // remember it
+    machines.put(machineName, machine);
+
+    // insert machine section
+    tableBody.insertBefore(machine.section, machinesSectionAnchor);
+    tableBody.insertBefore(machine.inlineDelimiter, machinesSectionAnchor);
+    tableBody.insertBefore(machine.machinesDelimiter, machinesSectionAnchor);
+  }
+
+  @Override
+  public void setMachineImageName(String machineName, String imageName) {
+    Machine machine = machines.get(machineName);
+    if (machine != null) {
+      machine.setImageName(imageName);
+    }
+  }
+
+  @Override
+  public void setMachineStarting(String machineName) {
+    Machine machine = machines.get(machineName);
+    if (machine != null) {
+      machine.setState("starting");
+    }
+  }
+
+  @Override
+  public void setMachineRunning(String machineName) {
+    Machine machine = machines.get(machineName);
+    if (machine != null) {
+      machine.setState("running");
+    }
+  }
+
+  @Override
+  public void addInstaller(
+      String machineName, String installerId, String installerName, String installerDescription) {
+
+    Machine machine = machines.get(machineName);
+    if (machine != null) {
+      machine.addInstaller(installerId, installerName, installerDescription);
+    }
+  }
+
+  @Override
+  public void setInstallerStarting(String machineName, String installerId) {
+    Machine machine = machines.get(machineName);
+    if (machine != null) {
+      Installer installer = machine.installers.get(installerId);
+      if (installer != null) {
+        installer.setStarting();
+      }
+    }
+  }
+
+  @Override
+  public void setInstallerRunning(String machineName, String installerId) {
+    Machine machine = machines.get(machineName);
+    if (machine != null) {
+      Installer installer = machine.installers.get(installerId);
+      if (installer != null) {
+        installer.setRunning();
+      }
+    }
+  }
+
+  @Override
+  public void showWorkspaceStarting() {
+    waitingWorkspaceSection.getStyle().clearDisplay();
+
+    workspaceStartedSection.getStyle().setDisplay(Style.Display.NONE);
+    workspaceStartedSectionFooter.getStyle().setDisplay(Style.Display.NONE);
+
+    workspaceStoppedSection.getStyle().setDisplay(Style.Display.NONE);
+
+    workspaceFailedSection.getStyle().setDisplay(Style.Display.NONE);
+    workspaceFailedSectionFooter.getStyle().setDisplay(Style.Display.NONE);
+  }
+
+  @Override
+  public void showWorkspaceStarted() {
+    waitingWorkspaceSection.getStyle().setDisplay(Style.Display.NONE);
+
+    workspaceStartedSection.getStyle().clearDisplay();
+    workspaceStartedSectionFooter.getStyle().clearDisplay();
+
+    workspaceStoppedSection.getStyle().setDisplay(Style.Display.NONE);
+
+    workspaceFailedSection.getStyle().setDisplay(Style.Display.NONE);
+    workspaceFailedSectionFooter.getStyle().setDisplay(Style.Display.NONE);
+  }
+
+  @Override
+  public void showWorkspaceStopped() {
+    waitingWorkspaceSection.getStyle().setDisplay(Style.Display.NONE);
+
+    workspaceStartedSection.getStyle().setDisplay(Style.Display.NONE);
+    workspaceStartedSectionFooter.getStyle().setDisplay(Style.Display.NONE);
+
+    workspaceStoppedSection.getStyle().clearDisplay();
+
+    for (Machine machine : machines.values()) {
+      machine.setState("stopped");
+
+      for (Installer installer : machine.installers.values()) {
+        installer.setStopped();
+      }
+    }
+
+    workspaceFailedSection.getStyle().setDisplay(Style.Display.NONE);
+    workspaceFailedSectionFooter.getStyle().setDisplay(Style.Display.NONE);
+  }
+
+  @Override
+  public void showWorkspaceFailed(String error) {
+    waitingWorkspaceSection.getStyle().setDisplay(Style.Display.NONE);
+
+    workspaceStartedSection.getStyle().setDisplay(Style.Display.NONE);
+    workspaceStartedSectionFooter.getStyle().setDisplay(Style.Display.NONE);
+
+    workspaceStoppedSection.getStyle().setDisplay(Style.Display.NONE);
+
+    workspaceFailedSection.getStyle().clearDisplay();
+    workspaceFailedSectionFooter.getStyle().clearDisplay();
   }
 
   private Timer animationTimer =
@@ -98,282 +400,51 @@ public class WorkspaceLoadingTrackerViewImpl extends Composite
         @Override
         public void run() {
           for (Element e : animatedElements) {
-            String text = e.getInnerText();
+            String text = e.getInnerHTML();
+            if ("".equals(text.trim())) {
+              text = "    ";
+            }
+
             switch (text) {
               case "    ":
-                e.setInnerText("/   ");
+                e.setInnerHTML("/   ");
                 break;
               case "/   ":
-                e.setInnerText("//  ");
+                e.setInnerHTML("//  ");
                 break;
               case "//  ":
-                e.setInnerText("/// ");
+                e.setInnerHTML("/// ");
                 break;
               case "/// ":
-                e.setInnerText("////");
+                e.setInnerHTML("////");
                 break;
               case "////":
-                e.setInnerText(" ///");
+                e.setInnerHTML(" ///");
                 break;
               case " ///":
-                e.setInnerText("  //");
+                e.setInnerHTML("  //");
                 break;
               case "  //":
-                e.setInnerText("   /");
+                e.setInnerHTML("   /");
                 break;
               case "   /":
-                e.setInnerText("    ");
+                e.setInnerHTML("    ");
                 break;
 
               case "/":
-                e.setInnerText("-");
+                e.setInnerHTML("-");
                 break;
               case "-":
-                e.setInnerText("\\");
+                e.setInnerHTML("\\");
                 break;
               case "\\":
-                e.setInnerText("|");
+                e.setInnerHTML("|");
                 break;
               case "|":
-                e.setInnerText("/");
+                e.setInnerHTML("/");
                 break;
             }
           }
         }
       };
-
-  @Override
-  public void pullMachine(String machine) {
-    // add machine node to pull
-    Node cloned = preparingWorkspaceRuntimeOriginalItem.cloneNode(true);
-    step1Nodes.put(machine, cloned);
-
-    Node clonedRet = preparingWorkspaceRuntimeOriginalNewLine.cloneNode(true);
-
-    preparingWorkspaceRuntimeItems.appendChild(cloned);
-    preparingWorkspaceRuntimeItems.appendChild(clonedRet);
-
-    for (int i = 0; i < cloned.getChildNodes().getLength(); i++) {
-      Node n = cloned.getChildNodes().getItem(i);
-      if (Node.ELEMENT_NODE != n.getNodeType()) {
-        continue;
-      }
-
-      Element e = n.cast();
-      if ("machine-name".equals(e.getAttribute("rel"))) {
-        e.setInnerText(expandString(machine, MACHINE_NAME_WIDTH));
-        continue;
-      }
-
-      if ("image-name".equals(e.getAttribute("rel"))) {
-        e.setInnerText(expandString("...", IMAGE_NAME_WIDTH));
-        continue;
-      }
-
-      if ("progress".equals(e.getAttribute("rel"))) {
-        e.setInnerHTML(expandString("Preparing...", PROGRESS_WIDTH));
-        continue;
-      }
-
-      if ("progress-value".equals(e.getAttribute("rel"))) {
-        // must be animated
-        e.setInnerText(ANIMATION_START);
-        animatedElements.add(e);
-        continue;
-      }
-    }
-  }
-
-  @Override
-  public void setMachineImage(String machine, String image) {
-    Node cloned = step1Nodes.get(machine);
-    if (cloned == null) {
-      return;
-    }
-
-    for (int i = 0; i < cloned.getChildNodes().getLength(); i++) {
-      Node n = cloned.getChildNodes().getItem(i);
-      if (Node.ELEMENT_NODE != n.getNodeType()) {
-        continue;
-      }
-
-      Element e = n.cast();
-
-      if ("image-name".equals(e.getAttribute("rel"))) {
-        e.setInnerText(expandString("[" + image + "]", IMAGE_NAME_WIDTH));
-        continue;
-      }
-    }
-  }
-
-  private String getLoadingProgressBar(int percents) {
-    int maxChars = 25;
-
-    int chars = maxChars * percents / 100;
-
-    String result = "";
-
-    for (int i = 0; i < maxChars; i++) {
-      result += i < chars ? LOADING_CHAR2 : LOADING_CHAR1;
-    }
-
-    return result;
-  }
-
-  @Override
-  public void onPullingProgress(String machine, int percents) {
-    Node cloned = step1Nodes.get(machine);
-    if (cloned == null) {
-      return;
-    }
-
-    for (int i = 0; i < cloned.getChildNodes().getLength(); i++) {
-      Node n = cloned.getChildNodes().getItem(i);
-      if (Node.ELEMENT_NODE != n.getNodeType()) {
-        continue;
-      }
-
-      Element e = n.cast();
-
-      if ("progress".equals(e.getAttribute("rel"))) {
-        e.setInnerHTML("Pulling " + getLoadingProgressBar(percents));
-        continue;
-      }
-
-      if ("progress-value".equals(e.getAttribute("rel"))) {
-        e.setInnerText(percents + "%");
-        continue;
-      }
-    }
-  }
-
-  @Override
-  public void onPullingComplete(String machine) {
-    Node cloned = step1Nodes.get(machine);
-    if (cloned == null) {
-      return;
-    }
-
-    for (int i = 0; i < cloned.getChildNodes().getLength(); i++) {
-      Node n = cloned.getChildNodes().getItem(i);
-      if (Node.ELEMENT_NODE != n.getNodeType()) {
-        continue;
-      }
-
-      Element e = n.cast();
-
-      if ("progress".equals(e.getAttribute("rel"))) {
-        e.setInnerText(expandString("Retrieved", PROGRESS_WIDTH));
-        continue;
-      }
-
-      if ("progress-value".equals(e.getAttribute("rel"))) {
-        e.setInnerText("OK");
-        e.setAttribute("rel", "done");
-        continue;
-      }
-    }
-  }
-
-  private String expandString(String source, int length) {
-    String result = source;
-
-    if (result.length() > length) {
-      return result.substring(0, length - 3) + "...";
-    }
-
-    while (result.length() < length) {
-      result += " ";
-    }
-
-    return result;
-  }
-
-  @Override
-  public void startWorkspaceMachines() {
-    startingWorkspaceRuntimes.getStyle().clearDisplay();
-  }
-
-  @Override
-  public void startWorkspaceMachine(String machine, String image) {
-    // add machine node to pull
-    Node cloned = startingWorkspaceRuntimesOriginalItem.cloneNode(true);
-    step2Nodes.put(machine, cloned);
-
-    Node clonedRet = startingWorkspaceRuntimesOriginalNewLine.cloneNode(true);
-
-    startingWorkspaceRuntimesItems.appendChild(cloned);
-    startingWorkspaceRuntimesItems.appendChild(clonedRet);
-
-    for (int i = 0; i < cloned.getChildNodes().getLength(); i++) {
-      Node n = cloned.getChildNodes().getItem(i);
-      if (Node.ELEMENT_NODE != n.getNodeType()) {
-        continue;
-      }
-
-      Element e = n.cast();
-      if ("machine-name".equals(e.getAttribute("rel"))) {
-        e.setInnerText(expandString(machine, MACHINE_NAME_WIDTH));
-        continue;
-      }
-
-      if ("image-name".equals(e.getAttribute("rel"))) {
-        e.setInnerText(expandString("[" + image + "]", IMAGE_NAME_WIDTH));
-        continue;
-      }
-
-      if ("progress".equals(e.getAttribute("rel"))) {
-        e.setInnerText(expandString("Starting...", PROGRESS_WIDTH));
-        continue;
-      }
-
-      if ("progress-value".equals(e.getAttribute("rel"))) {
-        // must be animated
-        e.setInnerText(ANIMATION_START);
-        animatedElements.add(e);
-        continue;
-      }
-    }
-  }
-
-  @Override
-  public void onMachineRunning(String machine) {
-    Node cloned = step2Nodes.get(machine);
-    if (cloned == null) {
-      return;
-    }
-
-    for (int i = 0; i < cloned.getChildNodes().getLength(); i++) {
-      Node n = cloned.getChildNodes().getItem(i);
-      if (Node.ELEMENT_NODE != n.getNodeType()) {
-        continue;
-      }
-
-      Element e = n.cast();
-
-      if ("progress".equals(e.getAttribute("rel"))) {
-        e.setInnerText(expandString("Running", PROGRESS_WIDTH));
-        continue;
-      }
-
-      if ("progress-value".equals(e.getAttribute("rel"))) {
-        e.setInnerText("OK");
-        e.setAttribute("rel", "done");
-        continue;
-      }
-    }
-  }
-
-  @Override
-  public void showInitializingWorkspaceAgents() {
-    initializingWorkspaceAgents.getStyle().clearDisplay();
-  }
-
-  @Override
-  public void onWorkspaceStarted() {
-    workspaceStarted.getStyle().clearDisplay();
-
-    animatedElements.clear();
-    animationTimer.cancel();
-  }
 }

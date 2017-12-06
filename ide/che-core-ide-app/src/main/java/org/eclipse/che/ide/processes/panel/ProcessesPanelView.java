@@ -36,7 +36,7 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
 
   /** Add process widget */
   void addWidget(
-      String processId, String title, SVGResource icon, IsWidget widget, boolean machineConsole);
+      String processId, String title, SVGResource icon, IsWidget widget, boolean removable);
 
   /** Select given process node */
   void selectNode(ProcessTreeNode node);
