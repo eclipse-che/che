@@ -29,7 +29,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 
 /**
  * Provides a unique PVC for each workspace.
@@ -52,7 +51,6 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   private final String pvcQuantity;
   private final String pvcAccessMode;
   private final OpenShiftClientFactory clientFactory;
-  private final OpenShiftProjectFactory factory;
 
   @Inject
   public UniqueWorkspacePVCStrategy(
@@ -60,14 +58,12 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
       @Named("che.infra.openshift.pvc.name") String pvcName,
       @Named("che.infra.openshift.pvc.quantity") String pvcQuantity,
       @Named("che.infra.openshift.pvc.access_mode") String pvcAccessMode,
-      OpenShiftClientFactory clientFactory,
-      OpenShiftProjectFactory factory) {
+      OpenShiftClientFactory clientFactory) {
     this.pvcName = pvcName;
     this.pvcQuantity = pvcQuantity;
     this.projectName = projectName;
     this.pvcAccessMode = pvcAccessMode;
     this.clientFactory = clientFactory;
-    this.factory = factory;
   }
 
   @Override
@@ -82,7 +78,6 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
         addMachineVolumes(workspaceId, claims, podSpec, container, machineConfig);
       }
     }
-    factory.create(workspaceId).persistentVolumeClaims().createIfNotExist(claims.values());
   }
 
   private void addMachineVolumes(

@@ -10,18 +10,20 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project.pvc;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.workspace.infrastructure.openshift.Constants.SUBPATHS_PROPERTY_FMT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
@@ -38,7 +40,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftPersistentVolumeClaims;
@@ -91,7 +92,7 @@ public class CommonPVCStrategyTest {
   @BeforeMethod
   public void setup() throws Exception {
     commonPVCStrategy =
-        new CommonPVCStrategy(PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, pvcSubPathHelper, factory);
+        new CommonPVCStrategy(PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, pvcSubPathHelper);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     InternalMachineConfig machine1 = mock(InternalMachineConfig.class);
@@ -155,9 +156,6 @@ public class CommonPVCStrategyTest {
     verify(podSpec, times(4)).getVolumes();
     // 1 addition + 1 check
     verify(podSpec2, times(2)).getVolumes();
-    verify(pvcSubPathHelper)
-        .createDirs(
-            WORKSPACE_ID, expectedVolumeDir(VOLUME_1_NAME), expectedVolumeDir(VOLUME_2_NAME));
     assertFalse(podSpec.getVolumes().isEmpty());
     assertFalse(podSpec2.getVolumes().isEmpty());
     assertFalse(container.getVolumeMounts().isEmpty());
@@ -176,22 +174,40 @@ public class CommonPVCStrategyTest {
 
     commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
 
-    verify(factory).create(WORKSPACE_ID);
     assertNotEquals(osEnv.getPersistentVolumeClaims().get(PVC_NAME), provisioned);
   }
 
-  @Test(expectedExceptions = InfrastructureException.class)
-  public void throwInfrastructureExceptionWhenOsProjectCreationFailed() throws Exception {
-    when(factory.create(any())).thenThrow(new InfrastructureException("Project creation failed"));
-
+  @Test
+  public void testAddsPVCWithSubpaths() throws Exception {
     commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
+
+    final Map<String, PersistentVolumeClaim> actual = osEnv.getPersistentVolumeClaims();
+    assertFalse(actual.isEmpty());
+    assertTrue(actual.containsKey(PVC_NAME));
+    assertEquals(
+        (String[])
+            actual
+                .get(PVC_NAME)
+                .getAdditionalProperties()
+                .get(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID)),
+        new String[] {expectedVolumeDir(VOLUME_1_NAME), expectedVolumeDir(VOLUME_2_NAME)});
   }
 
-  @Test(expectedExceptions = InfrastructureException.class)
-  public void throwInfrastructureExceptionWhenPVCCreationFailed() throws Exception {
-    doThrow(InfrastructureException.class).when(osPVCs).createIfNotExist(any());
+  @Test
+  public void testDoNotAddsSubpathsWhenPreCreationIsNotNeeded() throws Exception {
+    commonPVCStrategy =
+        new CommonPVCStrategy(PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, false, pvcSubPathHelper);
 
     commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
+
+    final Map<String, PersistentVolumeClaim> actual = osEnv.getPersistentVolumeClaims();
+    assertFalse(actual.isEmpty());
+    assertTrue(actual.containsKey(PVC_NAME));
+    assertFalse(
+        actual
+            .get(PVC_NAME)
+            .getAdditionalProperties()
+            .containsKey(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID)));
   }
 
   @Test
@@ -224,7 +240,7 @@ public class CommonPVCStrategyTest {
     when(objectMeta.getName()).thenReturn(name);
   }
 
-  private String expectedVolumeDir(String volumeName) {
+  private static String expectedVolumeDir(String volumeName) {
     return WORKSPACE_ID + '/' + volumeName;
   }
 }

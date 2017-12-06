@@ -13,9 +13,7 @@ package org.eclipse.che.workspace.infrastructure.openshift.project.pvc;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.pvc.CommonPVCStrategyTest.mockName;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,11 +35,9 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftPersistentVolumeClaims;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 import org.mockito.Mock;
@@ -80,7 +76,6 @@ public class UniqueWorkspacePVCStrategyTest {
   @Mock private OpenShiftClient client;
   @Mock private OpenShiftProjectFactory factory;
   @Mock private OpenShiftProject osProject;
-  @Mock private OpenShiftPersistentVolumeClaims osPVCs;
   @Mock private Pod pod;
   @Mock private Pod pod2;
   @Mock private PodSpec podSpec;
@@ -95,7 +90,7 @@ public class UniqueWorkspacePVCStrategyTest {
   public void setup() throws Exception {
     uniqueWorkspacePVCStrategy =
         new UniqueWorkspacePVCStrategy(
-            PROJECT_NAME, PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, clientFactory, factory);
+            PROJECT_NAME, PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, clientFactory);
     when(clientFactory.create()).thenReturn(client);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
@@ -137,8 +132,6 @@ public class UniqueWorkspacePVCStrategyTest {
 
     when(factory.create(WORKSPACE_ID)).thenReturn(osProject);
 
-    when(osProject.persistentVolumeClaims()).thenReturn(osPVCs);
-
     mockName(pod, POD_NAME);
     mockName(pod2, POD_NAME_2);
   }
@@ -152,16 +145,8 @@ public class UniqueWorkspacePVCStrategyTest {
 
     uniqueWorkspacePVCStrategy.prepare(osEnv, WORKSPACE_ID);
 
-    verify(factory).create(WORKSPACE_ID);
     assertNotEquals(
         osEnv.getPersistentVolumeClaims().get(PVC_UNIQUE_NAME + '-' + VOLUME_1_NAME), provisioned);
-  }
-
-  @Test(expectedExceptions = InfrastructureException.class)
-  public void throwInfrastructureExceptionWhenPVCCreationFailed() throws Exception {
-    doThrow(InfrastructureException.class).when(osPVCs).createIfNotExist(any());
-
-    uniqueWorkspacePVCStrategy.prepare(osEnv, WORKSPACE_ID);
   }
 
   @Test

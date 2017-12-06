@@ -12,20 +12,25 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toSet;
+import static org.eclipse.che.workspace.infrastructure.openshift.Constants.SUBPATHS_PROPERTY_FMT;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.Watcher.Action;
 import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import javax.inject.Inject;
@@ -50,10 +55,12 @@ import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftPersistentVolumeClaims;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.eclipse.che.workspace.infrastructure.openshift.project.event.ContainerEvent;
 import org.eclipse.che.workspace.infrastructure.openshift.project.event.ContainerEventHandler;
 import org.eclipse.che.workspace.infrastructure.openshift.project.event.PodActionHandler;
+import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.PVCSubPathHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,6 +82,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
   private final Map<String, OpenShiftMachine> machines;
   private final int machineStartTimeoutMin;
   private final OpenShiftProject project;
+  private final PVCSubPathHelper pvcSubPathHelper;
 
   @Inject
   public OpenShiftInternalRuntime(
@@ -83,6 +91,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       EventService eventService,
       OpenShiftBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
+      PVCSubPathHelper pvcSubPathHelper,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project,
       @Assisted List<Warning> warnings) {
@@ -90,6 +99,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
     this.eventService = eventService;
     this.bootstrapperFactory = bootstrapperFactory;
     this.serverCheckerFactory = serverCheckerFactory;
+    this.pvcSubPathHelper = pvcSubPathHelper;
     this.machineStartTimeoutMin = machineStartTimeoutMin;
     this.project = project;
     this.machines = new ConcurrentHashMap<>();
@@ -99,6 +109,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
   protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
     try {
       final OpenShiftEnvironment osEnv = getContext().getEnvironment();
+      preparePVCs(osEnv);
 
       List<Service> createdServices = new ArrayList<>();
       for (Service service : osEnv.getServices().values()) {
@@ -180,6 +191,34 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       bootstrapperFactory
           .create(getContext().getIdentity(), machineConfig.getInstallers(), machine)
           .bootstrap();
+  }
+
+  /**
+   * Creates OpenShift PVCs from given OpenShift environment and pre creates subpaths if needed.
+   *
+   * @param osEnv OpenShift environment
+   * @throws InfrastructureException when failed to get existing PVCs in given OpenShift namespace
+   * @throws InfrastructureException when failed to create one of given PVCs
+   * @throws InfrastructureException when any error occurs while preparing workspace's PVCs
+   */
+  @VisibleForTesting
+  void preparePVCs(OpenShiftEnvironment osEnv) throws InfrastructureException {
+    final Collection<PersistentVolumeClaim> claims = osEnv.getPersistentVolumeClaims().values();
+    final OpenShiftPersistentVolumeClaims pvcs = project.persistentVolumeClaims();
+    final Set<String> existing =
+        pvcs.get().stream().map(p -> p.getMetadata().getName()).collect(toSet());
+    final String workspaceId = getContext().getIdentity().getWorkspaceId();
+    for (PersistentVolumeClaim pvc : claims) {
+      final String[] subpaths =
+          (String[])
+              pvc.getAdditionalProperties().remove(format(SUBPATHS_PROPERTY_FMT, workspaceId));
+      if (!existing.contains(pvc.getMetadata().getName())) {
+        pvcs.create(pvc);
+      }
+      if (subpaths != null && subpaths.length > 0) {
+        pvcSubPathHelper.createDirs(workspaceId, subpaths);
+      }
+    }
   }
 
   /**
