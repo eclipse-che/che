@@ -201,7 +201,7 @@ public class CustomSqlMigrationResolver extends BaseMigrationResolver {
           ByteSource.wrap(script.resource.loadAsBytes()).hash(Hashing.crc32()).asInt());
       migration.setExecutor(
           new SqlMigrationExecutor(
-              dbSupport, script.resource, placeholderReplacer, flywayConfiguration.getEncoding()));
+              dbSupport, script.resource, placeholderReplacer, flywayConfiguration));
       if (migrations.put(migration.getVersion(), migration) != null) {
         throw new FlywayException("Two migrations with the same version detected");
       }
