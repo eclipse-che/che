@@ -12,6 +12,9 @@ package org.eclipse.che.plugin.java.languageserver;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM_REQUEST_TIMEOUT;
+import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.CLASS_PATH_TREE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_CONTENT_NODE_BY_PATH;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES;
@@ -25,6 +28,7 @@ import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_FOLD
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_PROJECT_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_IN_FILE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TEST_BY_CURSOR_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EFFECTIVE_POM_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_CLASS_PATH_TREE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EXTERNAL_LIBRARIES_CHILDREN_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EXTERNAL_LIBRARIES_COMMAND;
@@ -111,6 +115,13 @@ public class JavaLanguageServerExtensionService {
         .paramsAsDto(FileStructureCommandParameters.class)
         .resultAsListOfDto(ExtendedSymbolInformationDto.class)
         .withFunction(this::executeFileStructure);
+
+    requestHandler
+        .newConfiguration()
+        .methodName("java/effective-pom")
+        .paramsAsString()
+        .resultAsString()
+        .withFunction(this::getEffectivePom);
 
     requestHandler
         .newConfiguration()
@@ -309,7 +320,7 @@ public class JavaLanguageServerExtensionService {
   private List<ExtendedSymbolInformationDto> executeFileStructure(
       FileStructureCommandParameters params) {
     LOG.info("Requesting files structure for {}", params);
-    params.setUri(LanguageServiceUtils.prefixURI(params.getUri()));
+    params.setUri(prefixURI(params.getUri()));
     CompletableFuture<Object> result =
         executeCommand(FILE_STRUCTURE_COMMAND, singletonList(params));
     Type targetClassType = new TypeToken<ArrayList<ExtendedSymbolInformation>>() {}.getType();
@@ -325,6 +336,28 @@ public class JavaLanguageServerExtensionService {
               })
           .map(ExtendedSymbolInformationDto::new)
           .collect(Collectors.toList());
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  /**
+   * Retrieves effective pom for specified project.
+   *
+   * @param projectPath path to project relatively to projects root (e.g. /projects)
+   * @return effective pom for given project
+   */
+  public String getEffectivePom(String projectPath) {
+    final String projectUri = prefixURI(projectPath);
+
+    CompletableFuture<Object> result =
+        executeCommand(GET_EFFECTIVE_POM_COMMAND, singletonList(projectUri));
+
+    Type targetClassType = new TypeToken<String>() {}.getType();
+    try {
+      return gson.fromJson(
+          gson.toJson(result.get(EFFECTIVE_POM_REQUEST_TIMEOUT, TimeUnit.SECONDS)),
+          targetClassType);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }

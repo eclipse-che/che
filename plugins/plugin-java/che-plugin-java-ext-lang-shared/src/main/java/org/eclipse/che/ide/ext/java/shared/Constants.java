@@ -28,6 +28,10 @@ public final class Constants {
 
   public static final String JAVAC = "javac";
 
+  // LS requests timeout constants
+  public static final int FILE_STRUCTURE_REQUEST_TIMEOUT = 10_000;
+  public static final int EFFECTIVE_POM_REQUEST_TIMEOUT = 30_000;
+
   // JSON RPC methods
   public static final String FILE_STRUCTURE = "java/filestructure";
   public static final String EXTERNAL_LIBRARIES = "java/externalLibraries";
