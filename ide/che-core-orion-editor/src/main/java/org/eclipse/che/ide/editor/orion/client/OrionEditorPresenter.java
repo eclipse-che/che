@@ -1222,7 +1222,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                     resolve.apply(null);
                     return;
                   }
-                  Container parent = getLastParent(project);
+                  Container parent = getRoot(project);
                   if (!(parent instanceof Project)) {
                     resolve.apply(null);
                     return;
@@ -1238,14 +1238,12 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                 }));
   }
 
-  private Container getLastParent(Container container) {
-    Container parent = container.getParent();
-    if (parent != null) {
-      parent = getLastParent(parent);
-    } else {
-      return container;
+  private Container getRoot(Container container) {
+    Container root = container;
+    while (root.getParent() != null) {
+      root = root.getParent();
     }
-    return parent;
+    return root;
   }
 
   @Override
