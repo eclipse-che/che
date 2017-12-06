@@ -69,30 +69,6 @@ public class SshKeyProviderImpl implements SshKeyProvider {
               .withMessage("Unable get private ssh key")
               .withErrorCode(ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY));
     }
-
-    //    final String publicKey = pair.getPublicKey();
-    //    if (publicKey != null) {
-    //      final Optional<SshKeyUploader> optionalKeyUploader =
-    //          sshKeyUploaders.stream().filter(keyUploader -> keyUploader.match(url)).findFirst();
-    //      if (optionalKeyUploader.isPresent()) {
-    //        final SshKeyUploader uploader = optionalKeyUploader.get();
-    //        try {
-    //          uploader.uploadKey(publicKey);
-    //        } catch (IOException e) {
-    //          throw new ServerException(e.getMessage(), e);
-    //        } catch (UnauthorizedException e) {
-    //          // action might fail without uploaded public SSH key.
-    //          LOG.warn(
-    //              String.format(
-    //                  "Unable upload public SSH key with %s",
-    // uploader.getClass().getSimpleName()),
-    //              e);
-    //        }
-    //      } else {
-    //        // action might fail without uploaded public SSH key.
-    //        LOG.warn(String.format("Not found ssh key uploader for %s", host));
-    //      }
-    //    }
     return privateKey.getBytes();
   }
 }
