@@ -117,14 +117,6 @@ public class MavenMessagesHandler {
     List<String> updatedProjects = dto.getUpdatedProjects();
     Set<String> projectToRefresh = computeUniqueHiLevelProjects(updatedProjects);
 
-    Log.info(getClass(), "projects to refresh: " + projectToRefresh.toString());
-
-    // Temporary delay synchronization, because maven server sends update events in the same time,
-    // when other synchronization call may be performed, such as rename project.
-    // Will be reworked in nearest future, temporary solution.
-    //    new DelayedTask() {
-    //      @Override
-    //      public void onExecute() {
     for (final String path : projectToRefresh) {
       appContext
           .getWorkspaceRoot()
@@ -136,8 +128,6 @@ public class MavenMessagesHandler {
                 }
               });
     }
-    //      }
-    //    }.delay(100);
 
     pomEditorReconciler.reconcilePoms(updatedProjects);
   }

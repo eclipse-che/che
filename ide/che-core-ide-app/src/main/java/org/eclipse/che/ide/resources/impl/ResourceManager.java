@@ -141,9 +141,6 @@ public final class ResourceManager {
   /** Internal store, which caches requested resources from the server. */
   private ResourceStore store;
 
-  /** Cached dto project configuration. */
-  //  private ProjectConfigDto[] cachedConfigs;
-
   @Inject
   public ResourceManager(
       ProjectServiceClient ps,
@@ -189,12 +186,8 @@ public final class ResourceManager {
                   store.clear();
 
                   if (dtoConfigs.isEmpty()) {
-                    //                    cachedConfigs = new ProjectConfigDto[0];
                     return NO_PROJECTS;
                   }
-
-                  //                  cachedConfigs = dtoConfigs.toArray(new
-                  // ProjectConfigDto[dtoConfigs.size()]);
 
                   Project[] projects = NO_PROJECTS;
 
@@ -417,13 +410,6 @@ public final class ResourceManager {
                           ps.getProjects()
                               .thenPromise(
                                   updatedConfiguration -> {
-                                    // cache new configs
-                                    //                                    cachedConfigs =
-                                    //
-                                    // updatedConfiguration.toArray(
-                                    //                                            new
-                                    // ProjectConfigDto[updatedConfiguration.size()]);
-
                                     for (ProjectConfigDto projectConfigDto : configList) {
                                       if (projectConfigDto.getPath().equals(path.toString())) {
                                         final Project newResource =
@@ -516,9 +502,6 @@ public final class ResourceManager {
                               .then(
                                   (Function<ProjectConfigDto, Project>)
                                       config -> {
-                                        //                                        cachedConfigs =
-                                        // add(cachedConfigs, config);
-
                                         Resource project =
                                             resourceFactory.newProjectImpl(
                                                 config, ResourceManager.this);
@@ -915,7 +898,6 @@ public final class ResourceManager {
 
                 if (tempResource.getLocation().equals(path)) {
                   resource = tempResource;
-                  Log.info(getClass(), "fire update event for: " + resource);
                   eventBus.fireEvent(
                       new ResourceChangedEvent(new ResourceDeltaImpl(resource, UPDATED)));
                 }
@@ -978,16 +960,11 @@ public final class ResourceManager {
   }
 
   private void inspectProject(Project project) {
-    //    final Optional<ProjectConfigDto> optionalConfig =
-    // findProjectConfigDto(project.getLocation());
-
-    //    if (optionalConfig.isPresent()) {
     final Optional<ProblemProjectMarker> optionalMarker = getProblemMarker(project);
 
     if (optionalMarker.isPresent()) {
       project.addMarker(optionalMarker.get());
     }
-    //    }
   }
 
   private boolean isResourceOpened(final Resource resource) {
@@ -1036,8 +1013,6 @@ public final class ResourceManager {
       case "folder":
         return resourceFactory.newFolderImpl(path, this);
       case "project":
-        //        final Optional<ProjectConfigDto> config = findProjectConfigDto(path);
-
         ProjectConfigDto config = reference.getProjectConfig();
 
         if (config != null) {
@@ -1049,16 +1024,6 @@ public final class ResourceManager {
         throw new IllegalArgumentException("Failed to recognize resource type to create.");
     }
   }
-
-  //  private Optional<ProjectConfigDto> findProjectConfigDto(final Path path) {
-  //    for (ProjectConfigDto config : cachedConfigs) {
-  //      if (Path.valueOf(config.getPath()).equals(path)) {
-  //        return of(config);
-  //      }
-  //    }
-  //
-  //    return absent();
-  //  }
 
   private Optional<ProblemProjectMarker> getProblemMarker(ProjectConfig projectConfigDto) {
     List<? extends ProjectProblem> problems = projectConfigDto.getProblems();
@@ -1075,13 +1040,6 @@ public final class ResourceManager {
   }
 
   protected Promise<Resource[]> synchronize(final Container container) {
-    //    return ps.getProjects()
-    //        .thenPromise(
-    //            updatedConfiguration -> {
-    //              cachedConfigs =
-    //                  updatedConfiguration.toArray(new
-    // ProjectConfigDto[updatedConfiguration.size()]);
-
     final int[] maxDepth = new int[] {1};
 
     final Optional<Resource[]> descendants = store.getAll(container.getLocation());
@@ -1119,60 +1077,6 @@ public final class ResourceManager {
 
               return promises.resolve(null);
             });
-
-    //              Container[] holder = new Container[] {container};
-    //              Optional<ProjectConfigDto> config =
-    // findProjectConfigDto(holder[0].getLocation());
-
-    //              if (container.isFolder() && config.isPresent()) {
-    //                 folder becomes a project
-    //                store.dispose(holder[0].getLocation(), false);
-    //                Project project =
-    //                    resourceFactory.newProjectImpl(config.get(), ResourceManager.this);
-    //                store.register(project);
-    //                holder[0] = project;
-    //              } else if (container.isProject() && !config.isPresent()) {
-    //                 project becomes a folder
-    //                store.dispose(holder[0].getLocation(), false);
-    //                Folder folder =
-    //                    resourceFactory.newFolderImpl(holder[0].getLocation(),
-    // ResourceManager.this);
-    //                store.register(folder);
-    //                holder[0] = folder;
-    //              }
-
-    //              Promise<Void> chain = promises.resolve(null);
-    //
-    //              if (descendants.isPresent()) {
-    //                for (Resource resource : descendants.get()) {
-    //                  chain =
-    //                      chain.thenPromise(
-    //                          ignored ->
-    //                              findResource(resource.getLocation(), false)
-    //                                  .thenPromise(optResource ->
-    // promises.resolve(null)));
-    //                }
-    //              }
-    //
-    //              return chain.thenPromise(ignored ->
-    // promises.resolve(descendants.get()));
-
-    //              if (holder[0].isProject()) {
-    //                final Optional<ProjectConfigDto> config =
-    //                    findProjectConfigDto(holder[0].getLocation());
-    //
-    //                if (config.isPresent()) {
-    //                  store.dispose(holder[0].getLocation(), true);
-    //                  final ProjectImpl project =
-    //                      resourceFactory.newProjectImpl(config.get(),
-    // ResourceManager.this);
-    //
-    //                  store.register(project);
-    //                  holder[0] = project;
-    //                }
-    //              }
-
-    //            });
   }
 
   protected Promise<ResourceDelta[]> synchronize(final ResourceDelta[] deltas) {
@@ -1215,34 +1119,6 @@ public final class ResourceManager {
   }
 
   private Promise<Void> onExternalDeltaAdded(final ResourceDelta delta) {
-    //    if (delta.getToPath().segmentCount() == 1) {
-    //      return ps.getProjects()
-    //          .thenPromise(
-    //              updatedConfiguration -> {
-    //                //                cachedConfigs =
-    //                //                    updatedConfiguration.toArray(new
-    //                // ProjectConfigDto[updatedConfiguration.size()]);
-    //                // todo refactor this
-    //                //                for (ProjectConfigDto config : cachedConfigs) {
-    //                //                  if
-    // (Path.valueOf(config.getPath()).equals(delta.getToPath())) {
-    //                //                    final Project project =
-    //                //                        resourceFactory.newProjectImpl(config,
-    //                // ResourceManager.this);
-    //                //
-    //                //                    store.register(project);
-    //                //
-    //                //                    eventBus.fireEvent(
-    //                //                        new ResourceChangedEvent(new
-    // ResourceDeltaImpl(project,
-    //                // ADDED)));
-    //                //                  }
-    //                //                }
-    //
-    //                return promises.resolve(null);
-    //              });
-    //    }
-
     return findResource(delta.getToPath())
         .thenPromise(
             resource -> {

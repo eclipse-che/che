@@ -161,14 +161,6 @@ public class EditorTabWidget extends Composite
   /** {@inheritDoc} */
   @Override
   public void update(@NotNull PartPresenter part) {
-    //    title.setText(part.getTitle());
-
-    //    if (part instanceof EditorPartPresenter) {
-    //      final EditorPartPresenter editorPartPresenter = (EditorPartPresenter) part;
-    //      file = editorPartPresenter.getEditorInput().getFile();
-    //      icon = editorPartPresenter.getTitleImage();
-    //      iconPanel.setWidget(getIcon());
-    //    }
   }
 
   /** {@inheritDoc} */
