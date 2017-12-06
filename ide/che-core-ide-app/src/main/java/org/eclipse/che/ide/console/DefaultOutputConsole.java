@@ -75,13 +75,16 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
   }
 
   /**
-   * Print colored text in the console.
+   * Print colored text in the console in the true color format.
    *
-   * @param text text to be printed
-   * @param color color of the text or NULL
+   * @param text text to print;
+   * @param background background color component;
+   * @param red red color component;
+   * @param blue color component;
+   * @param green color component;
    */
-  public void printText(String text, String color) {
-    view.print(text, color);
+  public void printText(String text, int background, int red, int blue, int green) {
+    view.print(text, background, red, blue, green);
 
     for (ActionDelegate actionDelegate : actionDelegates) {
       actionDelegate.onConsoleOutput(this);

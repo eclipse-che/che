@@ -44,7 +44,7 @@ public class PrinterOutputConsole extends OutputConsoleViewImpl implements Print
   @Override
   public void print(String text, OutputType type) {
     if (type == OutputType.STDERR) {
-      print(text, "#FF4343");
+      print(text, 38, 255, 67, 67);
     } else {
       print(text);
     }

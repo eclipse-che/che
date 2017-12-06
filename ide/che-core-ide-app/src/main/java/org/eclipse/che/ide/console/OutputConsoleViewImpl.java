@@ -36,7 +36,6 @@ import org.eclipse.che.ide.terminal.TerminalInitializePromiseHolder;
 import org.eclipse.che.ide.terminal.TerminalJso;
 import org.eclipse.che.ide.terminal.TerminalOptionsJso;
 import org.eclipse.che.ide.ui.Tooltip;
-import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.requirejs.ModuleHolder;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
@@ -54,6 +53,8 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
   private static final OutputConsoleViewUiBinder UI_BINDER =
           GWT.create(OutputConsoleViewUiBinder.class);
+
+  private static final String DEFAULT_TEXT_COLOR = "\\x1b[0m";
 
   private ActionDelegate delegate;
 
@@ -200,10 +201,21 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     terminalJso.writeln(text);
   }
 
+  /**
+   * Note: current widget doesn't support yet all true color palette.
+   * It renders colors by approximation algorithm.
+   *
+   * @param text text to print;
+   * @param background background color component;
+   * @param red red color component;
+   * @param blue color component;
+   * @param green color component;
+   */
   @Override
-  public void print(String text, String color) {
-    // todo handle colors...
-//    terminalJso.writeln(text);
+  public void print(String text, int background, int red, int blue, int green) {
+    String color = "\\x1b[" + background + ";2;" + red + ";" + blue + ";" + green + "m";
+    text = color + text + DEFAULT_TEXT_COLOR;
+    print(text);
   }
 
   @Override

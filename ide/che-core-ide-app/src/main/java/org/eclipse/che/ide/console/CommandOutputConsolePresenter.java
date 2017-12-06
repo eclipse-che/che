@@ -137,8 +137,8 @@ public class CommandOutputConsolePresenter
   public Consumer<ProcessStdErrEventDto> getStdErrConsumer() {
     return event -> {
       String text = event.getText();
-      String color = "red";
-      view.print(text, color);
+      // render red text
+      view.print(text, 38, 255, 0, 0);
 
       for (ActionDelegate actionDelegate : actionDelegates) {
         actionDelegate.onConsoleOutput(CommandOutputConsolePresenter.this);

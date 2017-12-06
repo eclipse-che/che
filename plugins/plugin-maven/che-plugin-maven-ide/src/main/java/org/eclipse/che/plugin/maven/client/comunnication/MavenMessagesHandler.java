@@ -146,16 +146,16 @@ public class MavenMessagesHandler {
       case START:
         processesPanelPresenter.addCommandOutput(outputConsole);
         outputConsole.clearOutputsButtonClicked();
-        outputConsole.printText(message, "green");
+        outputConsole.printText(message, 38, 0, 128, 0);
         break;
       case IN_PROGRESS:
         outputConsole.printText(message);
         break;
       case DONE:
-        outputConsole.printText(message, "green");
+        outputConsole.printText(message, 38, 0, 128, 0);
         break;
       case ERROR:
-        outputConsole.printText(message, "red");
+        outputConsole.printText(message, 38, 255, 0, 0);
         break;
       default:
         break;
