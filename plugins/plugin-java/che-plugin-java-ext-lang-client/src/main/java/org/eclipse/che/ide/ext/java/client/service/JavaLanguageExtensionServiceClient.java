@@ -12,15 +12,15 @@ package org.eclipse.che.ide.ext.java.client.service;
 
 import static org.eclipse.che.api.promises.client.js.JsPromiseError.create;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
-import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM_REQUEST_TIMEOUT;
-import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.CLASS_PATH_TREE;
-import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_CONTENT_NODE_BY_PATH;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES_CHILDREN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHILDREN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_NODE_CONTENT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE_REQUEST_TIMEOUT;
+import static org.eclipse.che.ide.ext.java.shared.Constants.REQUEST_TIMEOUT;
 
 import com.google.gwt.jsonp.client.TimeoutException;
 import com.google.inject.Inject;
@@ -28,7 +28,6 @@ import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
@@ -55,12 +54,12 @@ public class JavaLanguageExtensionServiceClient {
           requestTransmitter
               .newRequest()
               .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-              .methodName("java/file-structure")
+              .methodName(FILE_STRUCTURE)
               .paramsAsDto(params)
               .sendAndReceiveResultAsListOfDto(
                   ExtendedSymbolInformation.class, FILE_STRUCTURE_REQUEST_TIMEOUT)
               .onSuccess(resolve::apply)
-              .onTimeout(() -> reject.apply(create(new TimeoutException("Timeout"))))
+              .onTimeout(() -> onTimeout(reject))
               .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error)));
         });
   }
@@ -79,13 +78,12 @@ public class JavaLanguageExtensionServiceClient {
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName("java/effective-pom")
                 .paramsAsString(pathToProject)
-                .sendAndReceiveResultAsString(EFFECTIVE_POM_REQUEST_TIMEOUT)
+                .sendAndReceiveResultAsString(REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(
                     () ->
                         reject.apply(
-                            create(
-                                new TimeoutException("Timeout while getting effective pom."))))
+                            create(new TimeoutException("Timeout while getting effective pom."))))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
   }
 
@@ -103,7 +101,7 @@ public class JavaLanguageExtensionServiceClient {
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName(EXTERNAL_LIBRARIES)
                 .paramsAsDto(params)
-                .sendAndReceiveResultAsListOfDto(Jar.class, 10000)
+                .sendAndReceiveResultAsListOfDto(Jar.class, REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
@@ -123,7 +121,7 @@ public class JavaLanguageExtensionServiceClient {
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName(CLASS_PATH_TREE)
                 .paramsAsString(projectPath)
-                .sendAndReceiveResultAsListOfDto(ClasspathEntryDto.class, 10000)
+                .sendAndReceiveResultAsListOfDto(ClasspathEntryDto.class, REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
@@ -143,7 +141,7 @@ public class JavaLanguageExtensionServiceClient {
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName(EXTERNAL_LIBRARIES_CHILDREN)
                 .paramsAsDto(params)
-                .sendAndReceiveResultAsListOfDto(JarEntry.class, 10000)
+                .sendAndReceiveResultAsListOfDto(JarEntry.class, REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
@@ -163,7 +161,7 @@ public class JavaLanguageExtensionServiceClient {
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName(EXTERNAL_LIBRARY_CHILDREN)
                 .paramsAsDto(params)
-                .sendAndReceiveResultAsListOfDto(JarEntry.class, 10000)
+                .sendAndReceiveResultAsListOfDto(JarEntry.class, REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
@@ -183,7 +181,7 @@ public class JavaLanguageExtensionServiceClient {
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName(EXTERNAL_LIBRARY_ENTRY)
                 .paramsAsDto(params)
-                .sendAndReceiveResultAsDto(JarEntry.class, 10000)
+                .sendAndReceiveResultAsDto(JarEntry.class, REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
@@ -201,9 +199,9 @@ public class JavaLanguageExtensionServiceClient {
             requestTransmitter
                 .newRequest()
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-                .methodName(EXTERNAL_CONTENT_NODE_BY_PATH)
+                .methodName(EXTERNAL_NODE_CONTENT)
                 .paramsAsDto(params)
-                .sendAndReceiveResultAsString(10000)
+                .sendAndReceiveResultAsString(REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));

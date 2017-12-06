@@ -13,23 +13,22 @@ package org.eclipse.che.plugin.java.languageserver;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
-import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM_REQUEST_TIMEOUT;
-import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.CLASS_PATH_TREE;
-import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_CONTENT_NODE_BY_PATH;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES_CHILDREN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHILDREN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_NODE_CONTENT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.REQUEST_TIMEOUT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_ENTRY_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_FOLDER_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_PROJECT_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_IN_FILE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TEST_BY_CURSOR_COMMAND;
-import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EFFECTIVE_POM_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_CLASS_PATH_TREE_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EFFECTIVE_POM_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EXTERNAL_LIBRARIES_CHILDREN_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EXTERNAL_LIBRARIES_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_CHILDREN_COMMAND;
@@ -153,7 +152,7 @@ public class JavaLanguageServerExtensionService {
 
     requestHandler
         .newConfiguration()
-        .methodName(EXTERNAL_CONTENT_NODE_BY_PATH)
+        .methodName(EXTERNAL_NODE_CONTENT)
         .paramsAsDto(ExternalLibrariesParameters.class)
         .resultAsString()
         .withFunction(this::getLibraryNodeContentByPath);
@@ -356,46 +355,45 @@ public class JavaLanguageServerExtensionService {
     Type targetClassType = new TypeToken<String>() {}.getType();
     try {
       return gson.fromJson(
-          gson.toJson(result.get(EFFECTIVE_POM_REQUEST_TIMEOUT, TimeUnit.SECONDS)),
-          targetClassType);
+          gson.toJson(result.get(REQUEST_TIMEOUT, TimeUnit.SECONDS)), targetClassType);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
   }
 
   private List<Jar> getProjectExternalLibraries(ExternalLibrariesParameters params) {
-    params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
+    params.setProjectUri(prefixURI(params.getProjectUri()));
     Type type = new TypeToken<ArrayList<Jar>>() {}.getType();
     return doGetList(GET_EXTERNAL_LIBRARIES_COMMAND, params, type);
   }
 
   private List<JarEntry> getExternalLibrariesChildren(ExternalLibrariesParameters params) {
-    params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
+    params.setProjectUri(prefixURI(params.getProjectUri()));
     Type type = new TypeToken<ArrayList<JarEntry>>() {}.getType();
     return doGetList(GET_EXTERNAL_LIBRARIES_CHILDREN_COMMAND, params, type);
   }
 
   private List<JarEntry> getLibraryChildren(ExternalLibrariesParameters params) {
-    params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
+    params.setProjectUri(prefixURI(params.getProjectUri()));
     Type type = new TypeToken<ArrayList<JarEntry>>() {}.getType();
     return doGetList(GET_LIBRARY_CHILDREN_COMMAND, params, type);
   }
 
   private List<ClasspathEntryDto> getClasspathTree(String projectPath) {
-    String projectUri = LanguageServiceUtils.prefixURI(projectPath);
+    String projectUri = prefixURI(projectPath);
     Type type = new TypeToken<ArrayList<ClasspathEntry>>() {}.getType();
     List<ClasspathEntry> entries = doGetList(GET_CLASS_PATH_TREE_COMMAND, projectUri, type);
     return convertToClasspathEntryDto(entries);
   }
 
   private JarEntry getLibraryEntry(ExternalLibrariesParameters params) {
-    params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
+    params.setProjectUri(prefixURI(params.getProjectUri()));
     Type type = new TypeToken<JarEntry>() {}.getType();
     return doGetOne(GET_LIBRARY_ENTRY_COMMAND, params, type);
   }
 
   private String getLibraryNodeContentByPath(ExternalLibrariesParameters params) {
-    params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
+    params.setProjectUri(prefixURI(params.getProjectUri()));
     Type type = new TypeToken<String>() {}.getType();
     return doGetOne(GET_LIBRARY_NODE_CONTENT_BY_PATH_COMMAND, params, type);
   }
