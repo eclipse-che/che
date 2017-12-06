@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.workspaces.notjavastack;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
+
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -30,7 +32,7 @@ import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class CreateWorkspaceWithCppStackTest {
-  private final String WORKSPACE = NameGenerator.generate("WsCpp", 4);
+  private final String WORKSPACE = NameGenerator.generate("project", 4);
 
   @Inject private TestUser defaultTestUser;
   @Inject private NavigationBar navigationBar;
@@ -71,6 +73,6 @@ public class CreateWorkspaceWithCppStackTest {
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
     projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab(60);
+    terminal.waitTerminalConsole(PREPARING_WS_TIMEOUT_SEC);
   }
 }

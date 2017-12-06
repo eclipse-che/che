@@ -103,16 +103,14 @@ public class ProjectStateAfterRenameWorkspaceTest {
     workspaceDetails.clickOpenInIdeWsBtn();
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
-
     projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME);
     try {
-      projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
+      projectExplorer.waitItem(PROJECT_NAME);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/3574");
     }
-
+    projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
     projectExplorer.waitItem(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     events.clickProjectEventsTab();
