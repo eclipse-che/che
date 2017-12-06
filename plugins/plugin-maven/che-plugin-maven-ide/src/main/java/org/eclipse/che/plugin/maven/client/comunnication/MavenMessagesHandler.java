@@ -22,7 +22,6 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.console.CommandConsoleFactory;
 import org.eclipse.che.ide.console.DefaultOutputConsole;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
-import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.maven.client.MavenJsonRpcHandler;
 import org.eclipse.che.plugin.maven.client.comunnication.progressor.background.BackgroundLoaderPresenter;
 import org.eclipse.che.plugin.maven.shared.dto.ArchetypeOutput;
