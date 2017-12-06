@@ -34,7 +34,7 @@
         <module>plugins</module>
         <module>ide/che-ide-core</module>
         <module>ide/che-ide-gwt-app</module>
-        <!--<module>dashboard</module>-->
+        <module>dashboard</module>
         <module>assembly</module>
         <module>selenium</module>
     </modules>
