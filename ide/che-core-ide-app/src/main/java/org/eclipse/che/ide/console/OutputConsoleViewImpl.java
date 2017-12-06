@@ -52,9 +52,9 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
   interface OutputConsoleViewUiBinder extends UiBinder<Widget, OutputConsoleViewImpl> {}
 
   private static final OutputConsoleViewUiBinder UI_BINDER =
-          GWT.create(OutputConsoleViewUiBinder.class);
+      GWT.create(OutputConsoleViewUiBinder.class);
 
-  private static final String DEFAULT_TEXT_COLOR = "\\x1b[0m";
+  private static final String DEFAULT_TEXT_COLOR = "\u001B[0m";
 
   private ActionDelegate delegate;
 
@@ -202,8 +202,8 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
   }
 
   /**
-   * Note: current widget doesn't support yet all true color palette.
-   * It renders colors by approximation algorithm.
+   * Note: current widget doesn't support yet all true color palette. It renders colors by
+   * approximation algorithm.
    *
    * @param text text to print;
    * @param background background color component;
@@ -212,8 +212,9 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
    * @param green color component;
    */
   @Override
-  public void print(String text, int background, int red, int blue, int green) {
-    String color = "\\x1b[" + background + ";2;" + red + ";" + blue + ";" + green + "m";
+  public void print(
+      String text, int background, int red, int blue, int green) { // Todo use byte not int
+    String color = "\u001B[" + background + ";2;" + red + ";" + blue + ";" + green + "m";
     text = color + text + DEFAULT_TEXT_COLOR;
     print(text);
   }
