@@ -94,7 +94,7 @@ public class ProjectStateAfterRefreshTest {
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsp");
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.waitProjectExplorer();
 
     seleniumWebDriver.navigate().refresh();
@@ -123,16 +123,16 @@ public class ProjectStateAfterRefreshTest {
 
   private void openFilesInEditor() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/webapp/WEB-INF/jsp" + "/guess_num.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/WEB-INF" + "/web.xml");
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 }

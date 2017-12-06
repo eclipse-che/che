@@ -91,7 +91,7 @@ public class CheckRestoringSplitEditorTest {
       fail("Known issue https://github.com/eclipse/che/issues/7729", ex);
     }
 
-    editor.waitActiveEditor();
+    editor.waitActive();
     if (popupDialogsBrowser.isAlertPresent()) {
       popupDialogsBrowser.acceptAlert();
     }
@@ -122,9 +122,9 @@ public class CheckRestoringSplitEditorTest {
       Pair<Integer, Integer> pair)
       throws IOException {
 
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.selectTabByName(nameOfEditorTab);
-    editor.waitSpecifiedValueForLineAndChar(pair.first, pair.second);
+    editor.waitLineAndCharForCurrentActive(pair.first, pair.second);
     editor.waitTextInDefinedSplitEditor(
         numOfEditor, LOAD_PAGE_TIMEOUT_SEC, expectedTextAfterRefresh);
   }
@@ -134,7 +134,7 @@ public class CheckRestoringSplitEditorTest {
 
     projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.openContextMenuForTabByName(javaClassTab);
     editor.runActionForTabFromContextMenu(SPIT_HORISONTALLY);
     editor.selectTabByIndexEditorWindowAndOpenMenu(0, javaClassTab);
@@ -148,13 +148,13 @@ public class CheckRestoringSplitEditorTest {
 
   private void setPositionsForSplittedEditor() {
     editor.selectTabByIndexEditorWindow(0, javaClassTab);
-    editor.setCursorToDefinedLineAndChar(
+    editor.setCursorToDefinedLineAndCharForVisible(
         cursorPositionForJavaFile.first, cursorPositionForJavaFile.second);
     editor.selectTabByName(readmeFileName);
-    editor.setCursorToDefinedLineAndChar(
+    editor.setCursorToDefinedLineAndCharForCurrentActive(
         cursorPositionForReadMeFile.first, cursorPositionForReadMeFile.second);
     editor.selectTabByName(pomFileTab);
-    editor.setCursorToDefinedLineAndChar(
+    editor.setCursorToDefinedLineAndCharForCurrentActive(
         cursorPositionForPomFile.first, cursorPositionForPomFile.second);
   }
 }

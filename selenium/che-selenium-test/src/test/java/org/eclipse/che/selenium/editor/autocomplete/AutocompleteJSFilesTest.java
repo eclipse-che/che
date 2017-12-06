@@ -85,7 +85,7 @@ public class AutocompleteJSFilesTest {
     loader.waitOnClosed();
     projectExplorer.waitItemInVisibleArea("newJsFile.js");
 
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
     editor.setCursorToLine(1);
 

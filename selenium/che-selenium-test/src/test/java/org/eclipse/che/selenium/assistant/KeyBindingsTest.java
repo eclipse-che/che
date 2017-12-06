@@ -101,7 +101,7 @@ public class KeyBindingsTest {
     projectExplorer.quickExpandWithJavaScript();
 
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.KEY_BINDINGS);

@@ -68,7 +68,7 @@ public class FailNotPrivateFieldTest {
     setFieldsForTest("testfail0");
     projectExplorer.scrollToItemByPath(PROJECT_NAME + "/src/main/webapp");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -88,7 +88,7 @@ public class FailNotPrivateFieldTest {
   public void testFail3() throws Exception {
     setFieldsForTest("testfail3");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -108,7 +108,7 @@ public class FailNotPrivateFieldTest {
   public void testFail7() throws Exception {
     setFieldsForTest("testfail7");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -129,7 +129,7 @@ public class FailNotPrivateFieldTest {
   public void testFail10() throws Exception {
     setFieldsForTest("testfail10");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -150,7 +150,7 @@ public class FailNotPrivateFieldTest {
   public void testFail14() throws Exception {
     setFieldsForTest("testfail14");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
