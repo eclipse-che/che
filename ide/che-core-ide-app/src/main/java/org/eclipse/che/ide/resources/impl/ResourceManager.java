@@ -800,15 +800,16 @@ public final class ResourceManager {
 
   Promise<Optional<Container>> getContainer(final Path absolutePath) {
     return findResource(absolutePath)
-        .thenPromise(optResource -> {
-          if (optResource.isPresent()) {
-            Resource resource = optResource.get();
-            checkState(resource instanceof Container, "Not a container");
-            return promises.resolve(of((Container) resource));
-          }
+        .thenPromise(
+            optResource -> {
+              if (optResource.isPresent()) {
+                Resource resource = optResource.get();
+                checkState(resource instanceof Container, "Not a container");
+                return promises.resolve(of((Container) resource));
+              }
 
-          return promises.resolve(absent());
-        });
+              return promises.resolve(absent());
+            });
   }
 
   protected Promise<Optional<File>> getFile(final Path absolutePath) {

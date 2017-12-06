@@ -160,8 +160,7 @@ public class EditorTabWidget extends Composite
 
   /** {@inheritDoc} */
   @Override
-  public void update(@NotNull PartPresenter part) {
-  }
+  public void update(@NotNull PartPresenter part) {}
 
   /** {@inheritDoc} */
   @Override
