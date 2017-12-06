@@ -56,7 +56,7 @@ public class WorkspaceDtoDeserializer {
           "Fail to read workspace template {} for infrastructure {} because {} ",
           templateName,
           infrastructure,
-          e.getLocalizedMessage());
+          e.getMessage());
       throw new RuntimeException(e.getLocalizedMessage(), e);
     }
   }
