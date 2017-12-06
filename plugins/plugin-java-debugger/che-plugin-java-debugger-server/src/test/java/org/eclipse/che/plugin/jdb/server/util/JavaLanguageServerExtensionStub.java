@@ -34,7 +34,7 @@ public class JavaLanguageServerExtensionStub extends JavaLanguageServerExtension
   }
 
   @Override
-  public String debuggerLocationToFqn(String target, int lineNumber) {
+  public String identifyFqnInResource(String target, int lineNumber) {
     int srcPos = target.indexOf(SRC);
     int beginIndex = srcPos + SRC.length();
     int endIndex = target.endsWith(".java") ? target.length() - 5 : target.length();
@@ -43,7 +43,7 @@ public class JavaLanguageServerExtensionStub extends JavaLanguageServerExtension
   }
 
   @Override
-  public Location fqnToDebuggerLocation(String fqn, int lineNumber) {
+  public Location findResourcesByFqn(String fqn, int lineNumber) {
     int innerClassStartPos = fqn.indexOf("$");
     if (innerClassStartPos != -1) {
       fqn = fqn.substring(0, innerClassStartPos);

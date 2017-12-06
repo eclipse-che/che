@@ -217,8 +217,12 @@ public class JavaDebugger implements EventsHandler, Debugger {
   @Override
   public void addBreakpoint(Breakpoint breakpoint) throws DebuggerException {
     final int lineNumber = breakpoint.getLocation().getLineNumber();
+    final String target = breakpoint.getLocation().getTarget();
     final String className =
-        languageServer.debuggerLocationToFqn(breakpoint.getLocation().getTarget(), lineNumber);
+        !target.endsWith(".java")
+            ? target
+            : languageServer.identifyFqnInResource(
+                breakpoint.getLocation().getTarget(), lineNumber);
 
     List<ReferenceType> classes = vm.classesByName(className);
     // it may mean that class doesn't loaded by a target JVM yet
@@ -327,8 +331,11 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
   @Override
   public void deleteBreakpoint(Location location) throws DebuggerException {
+    final String target = location.getTarget();
     final String className =
-        languageServer.debuggerLocationToFqn(location.getTarget(), location.getLineNumber());
+        !target.endsWith(".java")
+            ? target
+            : languageServer.identifyFqnInResource(location.getTarget(), location.getLineNumber());
 
     final int lineNumber = location.getLineNumber();
     EventRequestManager requestManager = getEventManager();

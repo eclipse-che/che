@@ -88,7 +88,7 @@ public class JdbLocation implements Location {
 
   private Location getLocation(com.sun.jdi.Location jdiLocation) {
     try {
-      return languageServer.fqnToDebuggerLocation(
+      return languageServer.findResourcesByFqn(
           jdiLocation.declaringType().name(), jdiLocation.lineNumber());
     } catch (Exception e) {
       return new LocationImpl(jdiLocation.declaringType().name(), jdiLocation.lineNumber());

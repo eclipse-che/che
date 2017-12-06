@@ -51,7 +51,7 @@ import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.jdt.ls.extension.api.Commands;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
-import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocationParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocation;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
@@ -344,7 +344,7 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
-  public String debuggerLocationToFqn(String filePath, int lineNumber) {
+  public String identifyFqnInResource(String filePath, int lineNumber) {
     CompletableFuture<Object> result =
         getLanguageServer()
             .getWorkspaceService()
@@ -360,7 +360,7 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
-  public Location fqnToDebuggerLocation(String fqn, int lineNumber) {
+  public Location findResourcesByFqn(String fqn, int lineNumber) {
     CompletableFuture<Object> result =
         getLanguageServer()
             .getWorkspaceService()
@@ -370,12 +370,11 @@ public class JavaLanguageServerExtensionService {
                     ImmutableList.of(fqn, String.valueOf(lineNumber))));
 
     try {
-      List<ResourceLocationParameters> location =
+      List<ResourceLocation> location =
           gson.fromJson(
               gson.toJson(result.get(10, TimeUnit.SECONDS)),
-              new com.google.common.reflect.TypeToken<
-                  List<ResourceLocationParameters>>() {}.getType());
-      ResourceLocationParameters rlp = location.get(0);
+              new com.google.common.reflect.TypeToken<List<ResourceLocation>>() {}.getType());
+      ResourceLocation rlp = location.get(0);
 
       boolean externalResource = rlp.getLibId() != null;
       return new LocationImpl(
