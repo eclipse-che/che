@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.swagger;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-import com.google.gson.stream.MalformedJsonException;
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
@@ -21,7 +20,6 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Swagger;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
