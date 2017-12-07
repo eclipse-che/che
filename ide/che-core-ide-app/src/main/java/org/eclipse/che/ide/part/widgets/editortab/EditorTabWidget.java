@@ -127,6 +127,14 @@ public class EditorTabWidget extends Composite
 
     closeButton.addDomHandler(
         event -> editorAgent.closeEditor(relatedEditorPart), ClickEvent.getType());
+
+    relatedEditorPart.addPropertyListener(
+        (source, propId) -> {
+          if (propId == EditorPartPresenter.PROP_INPUT) {
+            file = relatedEditorPart.getEditorInput().getFile();
+            title.setText(file.getDisplayName());
+          }
+        });
   }
 
   @Override
@@ -160,7 +168,14 @@ public class EditorTabWidget extends Composite
 
   /** {@inheritDoc} */
   @Override
-  public void update(@NotNull PartPresenter part) {}
+  public void update(@NotNull PartPresenter part) {
+    if (part instanceof EditorPartPresenter) {
+      EditorPartPresenter editorPartPresenter = (EditorPartPresenter) part;
+      file = editorPartPresenter.getEditorInput().getFile();
+      icon = editorPartPresenter.getTitleImage();
+      iconPanel.setWidget(getIcon());
+    }
+  }
 
   /** {@inheritDoc} */
   @Override
