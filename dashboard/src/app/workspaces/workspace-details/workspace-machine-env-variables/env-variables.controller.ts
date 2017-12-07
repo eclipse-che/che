@@ -33,7 +33,7 @@ export class EnvVariablesController {
   private environmentManager: EnvironmentManager;
   private isEnvVarEditable: boolean;
   private isBulkChecked: boolean = false;
-  private envVariables: { [envVarName: string]: string };
+  private envVariables: { [envVarName: string]: string } = {};
   private envVariablesSelectedStatus: { [envVarName: string]: boolean } = {};
   private envVariablesList: Array<IEnvironmentVariable> = [];
   private envVariablesSelectedNumber: number = 0;
@@ -47,8 +47,9 @@ export class EnvVariablesController {
     this.$mdDialog = $mdDialog;
     this.confirmDialogService = confirmDialogService;
 
+    this.buildVariablesList(this.selectedMachine);
     const deRegistrationFn = $scope.$watch(() => {
-      return angular.isDefined(this.environmentManager) && this.selectedMachine;
+      return this.selectedMachine;
     }, (selectedMachine: IEnvironmentManagerMachine) => {
       this.buildVariablesList(selectedMachine);
     }, true);
@@ -63,15 +64,15 @@ export class EnvVariablesController {
    * @param selectedMachine {IEnvironmentManagerMachine}
    */
   buildVariablesList(selectedMachine: IEnvironmentManagerMachine): void {
-    if (!selectedMachine) {
+    if (!selectedMachine || angular.isUndefined(this.environmentManager)) {
       return;
     }
     this.isEnvVarEditable = this.environmentManager.canEditEnvVariables(selectedMachine);
     this.envVariables = this.environmentManager.getEnvVariables(selectedMachine);
+    this.envVariablesList = [];
     if (!angular.isObject(this.envVariables)) {
       return;
     }
-    this.envVariablesList = [];
     Object.keys(this.envVariables).forEach((key: string) => {
       this.envVariablesList.push({name: key, value: this.envVariables[key]});
     });
@@ -135,6 +136,7 @@ export class EnvVariablesController {
     }
     this.envVariables[name] = value;
     this.environmentManager.setEnvVariables(this.selectedMachine, this.envVariables);
+    this.buildVariablesList(this.selectedMachine);
     this.onChange();
   }
 
@@ -167,6 +169,7 @@ export class EnvVariablesController {
       });
       this.deselectAllVariables();
       this.isBulkChecked = false;
+      this.environmentManager.setEnvVariables(this.selectedMachine, this.envVariables);
       this.onChange();
       this.buildVariablesList(this.selectedMachine);
     });
@@ -180,6 +183,7 @@ export class EnvVariablesController {
     const promise = this.confirmDialogService.showConfirmDialog('Remove variable', 'Would you like to delete this variable?', 'Delete');
     promise.then(() => {
       delete this.envVariables[variableName];
+      this.environmentManager.setEnvVariables(this.selectedMachine, this.envVariables);
       this.onChange();
       this.buildVariablesList(this.selectedMachine);
     });

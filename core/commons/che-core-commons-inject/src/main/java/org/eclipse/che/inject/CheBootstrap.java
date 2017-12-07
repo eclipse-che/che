@@ -44,6 +44,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.inject.lifecycle.DestroyModule;
 import org.eclipse.che.inject.lifecycle.Destroyer;
 import org.eclipse.che.inject.lifecycle.InitModule;
@@ -118,6 +119,10 @@ public class CheBootstrap extends EverrestGuiceContextListener {
   private static final String NULL = "NULL";
 
   private final List<Module> modules = new ArrayList<>();
+
+  static {
+    Thread.setDefaultUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance());
+  }
 
   @Override
   public void contextDestroyed(ServletContextEvent sce) {

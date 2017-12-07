@@ -49,10 +49,10 @@ export class CheAPI {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheWorkspace: CheWorkspace, cheFactory: CheFactory, cheFactoryTemplate: CheFactoryTemplate, cheProfile: CheProfile,
-              chePreferences: ChePreferences, cheProjectTemplate: CheProjectTemplate, cheService: CheService,
-              cheStack: CheStack, cheOAuthProvider: CheOAuthProvider, cheAgent: CheAgent, cheSsh: CheSsh,
-              cheUser: CheUser, chePermissions: che.api.IChePermissions, cheOrganization: che.api.ICheOrganization) {
+  constructor(cheWorkspace: CheWorkspace, cheFactory: CheFactory, cheFactoryTemplate: CheFactoryTemplate,
+              cheProfile: CheProfile, chePreferences: ChePreferences, cheProjectTemplate: CheProjectTemplate,
+              cheService: CheService, cheStack: CheStack, cheOAuthProvider: CheOAuthProvider, cheAgent: CheAgent,
+              cheSsh: CheSsh, cheUser: CheUser, chePermissions: che.api.IChePermissions, cheOrganization: che.api.ICheOrganization) {
     this.cheWorkspace = cheWorkspace;
     this.cheProfile = cheProfile;
     this.cheFactory = cheFactory;

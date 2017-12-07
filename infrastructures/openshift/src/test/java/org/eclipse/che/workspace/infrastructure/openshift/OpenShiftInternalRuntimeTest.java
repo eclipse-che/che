@@ -11,6 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.FAILED;
@@ -142,7 +143,8 @@ public class OpenShiftInternalRuntimeTest {
             bootstrapperFactory,
             serverCheckerFactory,
             context,
-            project);
+            project,
+            emptyList());
     when(context.getEnvironment()).thenReturn(osEnv);
     when(serverCheckerFactory.create(any(), anyString(), any())).thenReturn(serversChecker);
     when(context.getIdentity()).thenReturn(IDENTITY);
@@ -286,16 +288,6 @@ public class OpenShiftInternalRuntimeTest {
     doThrow(InfrastructureException.class).when(project).cleanUp();
 
     internalRuntime.internalStop(emptyMap());
-  }
-
-  @Test(expectedExceptions = InfrastructureException.class)
-  public void throwsInfrastructureExceptionWhenMachineAbnormallyStopped() throws Exception {
-    doThrow(InfrastructureException.class).when(pods).watch(any());
-
-    internalRuntime.internalStart(emptyMap());
-
-    verify(project, times(2)).cleanUp();
-    verify(project, never()).pods();
   }
 
   @Test

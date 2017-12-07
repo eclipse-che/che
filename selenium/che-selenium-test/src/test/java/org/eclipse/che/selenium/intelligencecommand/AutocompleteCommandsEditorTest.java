@@ -125,12 +125,14 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.waitTextIntoEditor("${server.tomcat8-debug}");
     commandsEditor.typeTextIntoEditor(Keys.ENTER.toString());
     commandsEditor.waitActiveEditor();
-    commandsEditor.typeTextIntoEditor("ssh");
+    commandsEditor.typeTextIntoEditor("wsagent");
     commandsEditor.launchAutocomplete();
-    commandsEditor.waitTextIntoEditor("${server.ssh}");
+    commandsEditor.waitTextIntoAutocompleteContainer("${server.wsagent/ws}");
+    commandsEditor.selectItemIntoAutocompleteAndPasteByDoubleClick("/ws}");
+    commandsEditor.waitTextIntoEditor("${server.wsagent/ws}");
     commandsEditor.clickOnRunButton();
     consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS);
-    consoles.waitExpectedTextIntoPreviewUrl("ssh");
+    consoles.waitExpectedTextIntoPreviewUrl("ws:");
   }
 
   @Test(priority = 3)

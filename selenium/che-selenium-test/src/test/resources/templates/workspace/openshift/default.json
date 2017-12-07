@@ -1,21 +1,34 @@
 {
-  "environments": {
-    "replaced_name": {
-      "machines": {
-        "app/main": {
-          "installers": [
+  "environments":{
+    "replaced_name":{
+      "machines":{
+        "dev-machine":{
+          "installers":[
             "org.eclipse.che.terminal",
             "org.eclipse.che.ws-agent"
           ],
           "attributes": {
             "memoryLimitBytes": "desired_memory_value"
+          },
+          "servers":{
+            "tomcat8-debug":{
+              "protocol":"http",
+              "port":"8000"
+            },
+            "codeserver":{
+              "protocol":"http",
+              "port":"9876"
+            },
+            "tomcat8":{
+              "protocol":"http",
+              "port":"8080"
+            }
           }
         }
       },
-      "recipe": {
-        "content": "kind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: app\n  spec:\n    containers:\n      -\n        image: rhche/centos_jdk8:latest\n        name: main\n        ports:\n          -\n            containerPort: 8080\n            protocol: TCP",
-        "contentType": "application/x-yaml",
-        "type": "openshift"
+      "recipe":{
+        "location":"eclipse/ubuntu_jdk8",
+        "type":"dockerimage"
       }
     }
   },

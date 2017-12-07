@@ -1,5 +1,77 @@
 # Change Log
 
+## [6.0.0-M2](https://github.com/eclipse/che/tree/6.0.0-M2) (2017-11-23)
+[Full Changelog](https://github.com/eclipse/che/compare/5.21.0...6.0.0-M2)
+
+## [5.21.0](https://github.com/eclipse/che/tree/5.21.0) (2017-11-22)
+[Full Changelog](https://github.com/eclipse/che/compare/5.20.1...5.21.0)
+
+**Merged pull requests:**
+
+- RELEASE: Set next development version [\#7503](https://github.com/eclipse/che/pull/7503) ([riuvshin](https://github.com/riuvshin))
+- Prevent NPE after applying the refactoring session [\#7458](https://github.com/eclipse/che/pull/7458) ([vzhukovskii](https://github.com/vzhukovskii))
+- Do not index files from File Index excludes [\#7096](https://github.com/eclipse/che/pull/7096) ([RomanNikitenko](https://github.com/RomanNikitenko))
+- Remove test method from the CheckFileWatcherExcludeFeatureTest selenium test  [\#7487](https://github.com/eclipse/che/pull/7487) ([SkorikSergey](https://github.com/SkorikSergey))
+- \[ WIP \] Import selenium changes from che6\(mainly in "CodenvyEditor", "CommandsExplorer"\)  [\#7484](https://github.com/eclipse/che/pull/7484) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Avoid executing chown command if the user is not a sudoer [\#7471](https://github.com/eclipse/che/pull/7471) ([l0rd](https://github.com/l0rd))
+- Import selenium changes from che6 to master [\#7470](https://github.com/eclipse/che/pull/7470) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Remove unneeded let in LS csharp script [\#7457](https://github.com/eclipse/che/pull/7457) ([mmorhun](https://github.com/mmorhun))
+- Fix samples.json loading [\#7452](https://github.com/eclipse/che/pull/7452) ([riuvshin](https://github.com/riuvshin))
+- CHE-6855: Fix GDB regression on breakpoint stop [\#7450](https://github.com/eclipse/che/pull/7450) ([mmorhun](https://github.com/mmorhun))
+- Fix top line position of editor at refreshing page [\#7443](https://github.com/eclipse/che/pull/7443) ([RomanNikitenko](https://github.com/RomanNikitenko))
+- Update version of openjdk base image to 8u131 [\#7439](https://github.com/eclipse/che/pull/7439) ([l0rd](https://github.com/l0rd))
+- add bugfix versions [\#7405](https://github.com/eclipse/che/pull/7405) ([riuvshin](https://github.com/riuvshin))
+- Housekeeping of selenium tests [\#7397](https://github.com/eclipse/che/pull/7397) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Rework selenium tests from organizations package [\#7389](https://github.com/eclipse/che/pull/7389) ([SkorikSergey](https://github.com/SkorikSergey))
+- Fixed domain in set stack permissions while 'manageSystem' action check [\#7382](https://github.com/eclipse/che/pull/7382) ([akorneta](https://github.com/akorneta))
+- Update deployment-config.yaml [\#7370](https://github.com/eclipse/che/pull/7370) ([JamesDrummond](https://github.com/JamesDrummond))
+- Add method deleteMachineKey\(\) for codenvy assembly [\#7360](https://github.com/eclipse/che/pull/7360) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Rework testing of Find Text Feature results presentation [\#7355](https://github.com/eclipse/che/pull/7355) ([SkorikSergey](https://github.com/SkorikSergey))
+- \[cli\] Adds a check for linuxkit in addition to moby kernel [\#7326](https://github.com/eclipse/che/pull/7326) ([benoitf](https://github.com/benoitf))
+- added style for css elements for css file types [\#7320](https://github.com/eclipse/che/pull/7320) ([arunkumar413](https://github.com/arunkumar413))
+- Another attempt to fix the tests that are only failing on master CI [\#7317](https://github.com/eclipse/che/pull/7317) ([davidfestal](https://github.com/davidfestal))
+- Fix one test and include tests that had been left ignored [\#7316](https://github.com/eclipse/che/pull/7316) ([davidfestal](https://github.com/davidfestal))
+- Fix OpenShift deployment script after new KC config maps have been added [\#7301](https://github.com/eclipse/che/pull/7301) ([l0rd](https://github.com/l0rd))
+- Update RenameProjectTest selenium test [\#7291](https://github.com/eclipse/che/pull/7291) ([SkorikSergey](https://github.com/SkorikSergey))
+- Fix for replace stacks not working when agents was on multiline [\#7286](https://github.com/eclipse/che/pull/7286) ([JPinkney](https://github.com/JPinkney))
+- port Fix kc db import on os  [\#7259](https://github.com/eclipse/che/pull/7259) ([riuvshin](https://github.com/riuvshin))
+- If workspace base image does not have labels, skip merge of image labels [\#7252](https://github.com/eclipse/che/pull/7252) ([osallou](https://github.com/osallou))
+- findResource method refactoring related to hierarchical load resource tree [\#7250](https://github.com/eclipse/che/pull/7250) ([vzhukovskii](https://github.com/vzhukovskii))
+- Multi tenant workspace cleaning [\#7243](https://github.com/eclipse/che/pull/7243) ([davidfestal](https://github.com/davidfestal))
+- port \#7212 to master [\#7236](https://github.com/eclipse/che/pull/7236) ([riuvshin](https://github.com/riuvshin))
+- DynaModule plugin test: Avoid timestamp usage when copying dependency + sorting files issue [\#7218](https://github.com/eclipse/che/pull/7218) ([benoitf](https://github.com/benoitf))
+- Fixed replace\_stacks.json after addition of dotnet-centos [\#7214](https://github.com/eclipse/che/pull/7214) ([JPinkney](https://github.com/JPinkney))
+- Removed scl enable rh-nodejs dependency \(centos-nodejs\) [\#7209](https://github.com/eclipse/che/pull/7209) ([JPinkney](https://github.com/JPinkney))
+- Dashboard: fixed ability to re-run of diagnostics feature [\#7197](https://github.com/eclipse/che/pull/7197) ([akurinnoy](https://github.com/akurinnoy))
+- Adopt unit test to changes made in MavenMessagesHandler [\#7192](https://github.com/eclipse/che/pull/7192) ([vzhukovskii](https://github.com/vzhukovskii))
+- osio-1281: OpenShift - do not set host for routes while workspace creation [\#7184](https://github.com/eclipse/che/pull/7184) ([ibuziuk](https://github.com/ibuziuk))
+- Increase timeout for waiting that notification panel is closed [\#7172](https://github.com/eclipse/che/pull/7172) ([SkorikSergey](https://github.com/SkorikSergey))
+- Added Traefik's docker.network label to fix multiuser single\_port [\#7170](https://github.com/eclipse/che/pull/7170) ([hickey](https://github.com/hickey))
+- Don't run git selenium tests simultaneously [\#7148](https://github.com/eclipse/che/pull/7148) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Check if C\# language server client is already there before downloading it [\#7116](https://github.com/eclipse/che/pull/7116) ([l0rd](https://github.com/l0rd))
+- Invoke File Watcher 'create' consumer when item is created [\#7115](https://github.com/eclipse/che/pull/7115) ([RomanNikitenko](https://github.com/RomanNikitenko))
+- Dashboard: added a new way to update factory configuration JSON [\#7107](https://github.com/eclipse/che/pull/7107) ([akurinnoy](https://github.com/akurinnoy))
+- Fix Organization selenium tests [\#7100](https://github.com/eclipse/che/pull/7100) ([SkorikSergey](https://github.com/SkorikSergey))
+- Create che dir when this one doesn't exist at adding to File Watcher excludes [\#7097](https://github.com/eclipse/che/pull/7097) ([RomanNikitenko](https://github.com/RomanNikitenko))
+- Don't unregister the cached resource to have consistent tree representation of files [\#7076](https://github.com/eclipse/che/pull/7076) ([vzhukovskii](https://github.com/vzhukovskii))
+- Temporary disable synchronization call [\#7070](https://github.com/eclipse/che/pull/7070) ([vzhukovskii](https://github.com/vzhukovskii))
+- Add support for Docker SecurityOpt \(allowing GDB Debugging on unprivileged docker containers\) [\#6856](https://github.com/eclipse/che/pull/6856) ([hkolvenbach](https://github.com/hkolvenbach))
+- Adding logstash-logback dependencies to avoid classloading issue when using logstash-logback appenders [\#6539](https://github.com/eclipse/che/pull/6539) ([sunix](https://github.com/sunix))
+
+## [5.20.1](https://github.com/eclipse/che/tree/5.20.1) (2017-11-16)
+[Full Changelog](https://github.com/eclipse/che/compare/5.18.1...5.20.1)
+
+## [5.18.1](https://github.com/eclipse/che/tree/5.18.1) (2017-11-03)
+[Full Changelog](https://github.com/eclipse/che/compare/6.0.0-M1...5.18.1)
+
+## [6.0.0-M1](https://github.com/eclipse/che/tree/6.0.0-M1) (2017-11-02)
+[Full Changelog](https://github.com/eclipse/che/compare/5.20.0...6.0.0-M1)
+
+**Merged pull requests:**
+
+- Backport of che-dev image from che6 branch [\#7118](https://github.com/eclipse/che/pull/7118) ([skabashnyuk](https://github.com/skabashnyuk))
+
+
 ## [5.19.0](https://github.com/eclipse/che/tree/5.19.0) (2017-10-14)
 [Full Changelog](https://github.com/eclipse/che/compare/5.18.0...5.19.0)
 

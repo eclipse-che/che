@@ -89,7 +89,7 @@ public class RenameVirtualMethodsTest {
         try {
           refactor.clickCancelButtonRefactorForm();
         } catch (Exception ex) {
-          ex.printStackTrace();
+          LOG.warn(ex.getLocalizedMessage());
           seleniumWebDriver.navigate().refresh();
         }
       }
