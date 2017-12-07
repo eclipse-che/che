@@ -18,10 +18,12 @@ import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
+import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.ide.ext.java.client.tree.JavaNodeFactory;
 import org.eclipse.che.ide.ext.java.client.tree.library.JarFileNode;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.plugin.debugger.ide.debug.FileResourceLocationHandler;
 
 /**
@@ -32,24 +34,27 @@ import org.eclipse.che.plugin.debugger.ide.debug.FileResourceLocationHandler;
 @Singleton
 public class ExternalResourceLocationHandler extends FileResourceLocationHandler {
 
-  private final JavaNavigationService javaNavigationService;
+  private DtoFactory dtoFactory;
+  private JavaLanguageExtensionServiceClient service;
   private final JavaNodeFactory nodeFactory;
 
   @Inject
   public ExternalResourceLocationHandler(
       EditorAgent editorAgent,
+      DtoFactory dtoFactory,
       AppContext appContext,
-      JavaNavigationService javaNavigationService,
+      JavaLanguageExtensionServiceClient service,
       JavaNodeFactory nodeFactory) {
     super(editorAgent, appContext);
+    this.dtoFactory = dtoFactory;
+    this.service = service;
 
-    this.javaNavigationService = javaNavigationService;
     this.nodeFactory = nodeFactory;
   }
 
   @Override
   public boolean isSuitedFor(Location location) {
-    return location.isExternalResource() && location.getExternalResourceId() != 0;
+    return location.isExternalResource() && location.getExternalResourceId() != null;
   }
 
   @Override
@@ -73,11 +78,15 @@ public class ExternalResourceLocationHandler extends FileResourceLocationHandler
       final Location location, final AsyncCallback<VirtualFile> callback) {
 
     final String className = extractOuterClassFqn(location.getTarget());
-    final int libId = location.getExternalResourceId();
+    final String libId = location.getExternalResourceId();
     final Path projectPath = new Path(location.getResourceProjectPath());
 
-    javaNavigationService
-        .getEntry(projectPath, libId, className)
+    ExternalLibrariesParameters params = dtoFactory.createDto(ExternalLibrariesParameters.class);
+    params.setProjectUri(location.getResourceProjectPath());
+    params.setNodeId(libId);
+    params.setNodePath(className);
+    service
+        .libraryEntry(params)
         .then(
             jarEntry -> {
               final JarFileNode file =

@@ -612,7 +612,8 @@ public class JavaNavigation {
     OpenDeclarationDescriptor dto =
         DtoFactory.getInstance().createDto(OpenDeclarationDescriptor.class);
     dto.setPath(classFile.getType().getFullyQualifiedName());
-    dto.setLibId(classFile.getAncestor(IPackageFragmentRoot.PACKAGE_FRAGMENT_ROOT).hashCode());
+    dto.setLibId(
+        classFile.getAncestor(IPackageFragmentRoot.PACKAGE_FRAGMENT_ROOT).getHandleIdentifier());
     dto.setBinary(true);
     if (classFile.getSourceRange() != null) {
       if (element instanceof ISourceReference) {
