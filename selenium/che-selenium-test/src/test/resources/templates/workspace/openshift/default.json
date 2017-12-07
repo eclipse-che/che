@@ -27,7 +27,7 @@
         }
       },
       "recipe":{
-        "location":"rhche/centos_jdk8",
+        "location":"eclipse/ubuntu_jdk8",
         "type":"dockerimage"
       }
     }

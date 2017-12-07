@@ -17,6 +17,13 @@ newly created [OAuth application](https://github.com/settings/developers).
 Set `CHE_LOCAL_CONF_DIR` environment variable and point to the folder where selenium tests configuration will be stored.
 Create file `selenium.properties` in that folder with the following content:
 ```
+# Credentials of Eclipse Che multiuser assemblies
+che.admin_user.email=<CHE_ADMIN_EMAIL>
+che.admin_user.password=<CHE_ADMIN_PASSWORD>
+
+che.test_user.email=<CHE_USER_EMAIL>
+che.test_user.password=<CHE_USER_PASSWORD>
+
 # GitHub account credentials
 github.username=<MAIN_GITHUB_USERNAME>
 github.password=<MAIN_GITHUB_PASSWORD>
@@ -67,7 +74,7 @@ Options:
     --multiuser                         Run tests of Multi User Che
 
 Modes (defines environment to run tests):
-    local                               All tests will be run in a Web browser on the developer machine.
+    -Mlocal                             All tests will be run in a Web browser on the developer machine.
                                         Recommended if test visualization is needed and for debugging purpose.
 
         Options that go with 'local' mode:
@@ -77,8 +84,7 @@ Modes (defines environment to run tests):
                                         Web browsers will be opened on the developer machine.
                                         Default value is in range [2,5] and depends on available RAM.
 
-
-    grid (default)                      All tests will be run in parallel among several docker containers.
+    -Mgrid (default)                    All tests will be run in parallel among several docker containers.
                                         One container per thread. Recommended to run test suite.
 
         Options that go with 'grid' mode:
@@ -86,7 +92,6 @@ Modes (defines environment to run tests):
                                         Default value is in range [2,5] and depends on available RAM.
 
 Define tests scope:
-    --all-tests                         Run all tests within the suite despite of <exclude>/<include> sections in the test suite.
     --test=<TEST_CLASS>                 Single test to run
     --suite=<SUITE>                     Test suite to run, found:
                                             * CheSuite.xml
@@ -100,17 +105,18 @@ Handle failing tests:
 Other options:
     --debug                             Run tests in debug mode
     --skip-sources-validation           Fast build. Skips source validation and enforce plugins
+    --workspace-pool-size=[<SIZE>|auto] Size of test workspace pool.
+                                        Default value is 0, that means that test workspaces are created on demand.
 
 HOW TO of usage:
     Test Eclipse Che single user assembly:
-        ./selenium-tests.sh -Mgrid
         ./selenium-tests.sh
 
     Test Eclipse Che multi user assembly:
         ./selenium-tests.sh --multiuser
 
     Test Eclipse Che assembly and automatically rerun failing tests:
-        ./selenium-tests.sh -Mgrid --rerun
+        ./selenium-tests.sh --rerun
 
     Run single test or package of tests:
         ./selenium-tests.sh <...> --test=<TEST>
