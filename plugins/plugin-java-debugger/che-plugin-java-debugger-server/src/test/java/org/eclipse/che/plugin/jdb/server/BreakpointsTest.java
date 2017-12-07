@@ -46,7 +46,7 @@ public class BreakpointsTest {
 
     Location location =
         new LocationImpl(
-            "/test/src/org/eclipse/BreakpointsTest.java", 19, false, -1, "/test", null, -1);
+            "/test/src/org/eclipse/BreakpointsTest.java", 19, false, null, "/test", null, -1);
 
     events = new ArrayBlockingQueue<>(10);
     debugger = startJavaDebugger(new BreakpointImpl(location), events);
@@ -65,7 +65,7 @@ public class BreakpointsTest {
   public void shouldAddBreakpointInsideMethod() throws Exception {
     Location location =
         new LocationImpl(
-            "/test/src/org/eclipse/BreakpointsTest.java", 35, false, -1, "/test", null, -1);
+            "/test/src/org/eclipse/BreakpointsTest.java", 35, false, null, "/test", null, -1);
 
     try {
       debugger.addBreakpoint(new BreakpointImpl(location, false, null));
@@ -95,7 +95,7 @@ public class BreakpointsTest {
   @Test(priority = 1)
   public void shouldAddBreakpointByFqn() throws Exception {
     Location location =
-        new LocationImpl("org.eclipse.BreakpointsTest", 20, false, -1, "/test", null, -1);
+        new LocationImpl("org.eclipse.BreakpointsTest", 20, false, null, "/test", null, -1);
 
     try {
       debugger.addBreakpoint(new BreakpointImpl(location, false, null));
@@ -128,7 +128,7 @@ public class BreakpointsTest {
   public void shouldAddBreakpointInsideInnerClass() throws Exception {
     Location location =
         new LocationImpl(
-            "/test/src/org/eclipse/BreakpointsTest.java", 40, false, -1, "/test", null, -1);
+            "/test/src/org/eclipse/BreakpointsTest.java", 40, false, null, "/test", null, -1);
 
     try {
       debugger.addBreakpoint(new BreakpointImpl(location, false, null));
@@ -159,7 +159,7 @@ public class BreakpointsTest {
   public void shouldAddBreakpointInsideAnonymousClass() throws Exception {
     Location location =
         new LocationImpl(
-            "/test/src/org/eclipse/BreakpointsTest.java", 24, false, -1, "/test", null, -1);
+            "/test/src/org/eclipse/BreakpointsTest.java", 24, false, null, "/test", null, -1);
 
     try {
       debugger.addBreakpoint(new BreakpointImpl(location, false, null));
@@ -190,7 +190,7 @@ public class BreakpointsTest {
   public void shouldAddBreakpointInsideLambdaFunction() throws Exception {
     Location location =
         new LocationImpl(
-            "/test/src/org/eclipse/BreakpointsTest.java", 30, false, -1, "/test", null, -1);
+            "/test/src/org/eclipse/BreakpointsTest.java", 30, false, null, "/test", null, -1);
 
     try {
       debugger.addBreakpoint(new BreakpointImpl(location, false, null));
@@ -230,7 +230,7 @@ public class BreakpointsTest {
   public void shouldRemoveBreakpoint() throws Exception {
     Location location =
         new LocationImpl(
-            "/test/src/org/eclipse/BreakpointsTest.java", 35, false, -1, "/test", null, -1);
+            "/test/src/org/eclipse/BreakpointsTest.java", 35, false, null, "/test", null, -1);
 
     debugger.addBreakpoint(new BreakpointImpl(location, false, null));
     assertEquals(debugger.getAllBreakpoints().size(), 1);
@@ -243,7 +243,7 @@ public class BreakpointsTest {
   public void shouldReturnAllBreakpoints() throws Exception {
     Location location =
         new LocationImpl(
-            "/test/src/org/eclipse/BreakpointsTest.java", 35, false, -1, "/test", null, -1);
+            "/test/src/org/eclipse/BreakpointsTest.java", 35, false, null, "/test", null, -1);
     debugger.addBreakpoint(new BreakpointImpl(location, false, null));
 
     List<Breakpoint> breakpoints = debugger.getAllBreakpoints();
