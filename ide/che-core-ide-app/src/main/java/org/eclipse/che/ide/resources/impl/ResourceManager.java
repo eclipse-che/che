@@ -1054,26 +1054,39 @@ public final class ResourceManager {
       }
     }
 
-    return findResource(container.getLocation())
-        .thenPromise(
-            updatedContainer -> {
-              if (updatedContainer.isPresent()) {
-                return getRemoteResources(container, maxDepth[0], true)
-                    .thenPromise(
-                        resources -> {
-                          eventBus.fireEvent(
-                              new ResourceChangedEvent(
-                                  new ResourceDeltaImpl(
-                                      updatedContainer.get(), SYNCHRONIZED | DERIVED)));
-                          eventBus.fireEvent(
-                              new ResourceChangedEvent(
-                                  new ResourceDeltaImpl(updatedContainer.get(), UPDATED)));
-                          return promises.resolve(resources);
-                        });
-              }
+    if (container.getLocation().isRoot()) {
+      return getRemoteResources(container, maxDepth[0], true)
+          .thenPromise(
+              resources -> {
+                eventBus.fireEvent(
+                    new ResourceChangedEvent(
+                        new ResourceDeltaImpl(container, SYNCHRONIZED | DERIVED)));
+                eventBus.fireEvent(
+                    new ResourceChangedEvent(new ResourceDeltaImpl(container, UPDATED)));
+                return promises.resolve(resources);
+              });
+    } else {
+      return findResource(container.getLocation())
+          .thenPromise(
+              updatedContainer -> {
+                if (updatedContainer.isPresent()) {
+                  return getRemoteResources(container, maxDepth[0], true)
+                      .thenPromise(
+                          resources -> {
+                            eventBus.fireEvent(
+                                new ResourceChangedEvent(
+                                    new ResourceDeltaImpl(
+                                        updatedContainer.get(), SYNCHRONIZED | DERIVED)));
+                            eventBus.fireEvent(
+                                new ResourceChangedEvent(
+                                    new ResourceDeltaImpl(updatedContainer.get(), UPDATED)));
+                            return promises.resolve(resources);
+                          });
+                }
 
-              return promises.resolve(null);
-            });
+                return promises.resolve(null);
+              });
+    }
   }
 
   protected Promise<ResourceDelta[]> synchronize(final ResourceDelta[] deltas) {
