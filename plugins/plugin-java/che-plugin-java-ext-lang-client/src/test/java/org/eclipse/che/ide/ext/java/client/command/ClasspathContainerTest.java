@@ -22,7 +22,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathChangedEvent;
-import org.eclipse.che.ide.ext.java.client.project.classpath.service.ClasspathServiceClient;
+import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +36,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class ClasspathContainerTest {
   private static final String PROJECT_PATH = "/project1";
 
-  @Mock private ClasspathServiceClient classpathServiceClient;
+  @Mock private JavaLanguageExtensionServiceClient classpathServiceClient;
   @Mock private EventBus eventBus;
 
   @Mock private Promise<List<ClasspathEntryDto>> classpathEntries;
@@ -45,7 +45,7 @@ public class ClasspathContainerTest {
 
   @Before
   public void setUp() throws Exception {
-    when(classpathServiceClient.getClasspath(anyString())).thenReturn(classpathEntries);
+    when(classpathServiceClient.classpathTree(anyString())).thenReturn(classpathEntries);
   }
 
   @Test
@@ -57,7 +57,7 @@ public class ClasspathContainerTest {
   public void classpathShouldBeAdded() throws Exception {
     Promise<List<ClasspathEntryDto>> entries = classpathContainer.getClasspathEntries(PROJECT_PATH);
 
-    verify(classpathServiceClient).getClasspath(PROJECT_PATH);
+    verify(classpathServiceClient).classpathTree(PROJECT_PATH);
     assertEquals(classpathEntries, entries);
   }
 
@@ -69,7 +69,7 @@ public class ClasspathContainerTest {
 
     Promise<List<ClasspathEntryDto>> entries = classpathContainer.getClasspathEntries(PROJECT_PATH);
 
-    verify(classpathServiceClient, never()).getClasspath(PROJECT_PATH);
+    verify(classpathServiceClient, never()).classpathTree(PROJECT_PATH);
     assertEquals(classpathEntries, entries);
   }
 }
