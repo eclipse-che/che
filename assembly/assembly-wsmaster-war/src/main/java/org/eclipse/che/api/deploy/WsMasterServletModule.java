@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Singleton;
 import org.apache.catalina.filters.CorsFilter;
-import org.eclipse.che.commons.logback.filter.RequestIdLoggerFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 
@@ -44,7 +43,6 @@ public class WsMasterServletModule extends ServletModule {
     bind(CorsFilter.class).in(Singleton.class);
 
     filter("/*").through(CorsFilter.class, corsFilterParams);
-    filter("/*").through(RequestIdLoggerFilter.class);
 
     serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
     install(new org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule());
