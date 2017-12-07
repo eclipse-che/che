@@ -150,14 +150,14 @@ public class WorkspaceDetailsTest {
     workspaceMachines.selectMachine("Workspace Agents", "dev-machine");
     agents.forEach(
         (name, value) -> {
-          workspaceAgents.checkInstallerExists(name);
+          workspaceAgents.checkAgentExists(name);
         });
 
     // switch all agents and save changes
     agents.forEach(
         (name, value) -> {
-          Assert.assertEquals(workspaceAgents.getInstallerState(name), value);
-          workspaceAgents.switchInstallerState(name);
+          Assert.assertEquals(workspaceAgents.getAgentState(name), value);
+          workspaceAgents.switchAgentState(name);
           WaitUtils.sleepQuietly(1);
         });
     clickOnSaveButton();
@@ -166,13 +166,13 @@ public class WorkspaceDetailsTest {
     // Java-MySql stack)
     agents.forEach(
         (name, value) -> {
-          workspaceAgents.switchInstallerState(name);
+          workspaceAgents.switchAgentState(name);
           loader.waitOnClosed();
         });
     clickOnSaveButton();
     agents.forEach(
         (name, value) -> {
-          Assert.assertEquals(workspaceAgents.getInstallerState(name), value);
+          Assert.assertEquals(workspaceAgents.getAgentState(name), value);
         });
   }
 

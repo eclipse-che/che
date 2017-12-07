@@ -30,40 +30,34 @@ public class WorkspaceAgents {
   }
 
   private interface Locators {
-    String INSTALLER_NAME = "//span[@agent-name='%s']";
-    String INSTALLER_DESCRIPTION = "//span[@agent-description='%s']";
-    String INSTALLER_STATE = "//md-switch[@agent-switch='%s']";
+    String AGENT_NAME = "//span[@agent-name='%s']";
+    String AGENT_DESCRIPTION = "//span[@agent-description='%s']";
+    String AGENT_STATE = "//md-switch[@agent-switch='%s']";
   }
 
-  public void checkInstallerExists(String installerName) {
+  public void checkAgentExists(String agentName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            visibilityOfElementLocated(By.xpath(format(Locators.INSTALLER_NAME, installerName))));
+        .until(visibilityOfElementLocated(By.xpath(format(Locators.AGENT_NAME, agentName))));
   }
 
-  public void switchInstallerState(String installerName) {
+  public void switchAgentState(String agentName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            visibilityOfElementLocated(By.xpath(format(Locators.INSTALLER_STATE, installerName))))
+        .until(visibilityOfElementLocated(By.xpath(format(Locators.AGENT_STATE, agentName))))
         .click();
   }
 
-  public Boolean getInstallerState(String installerName) {
+  public Boolean getAgentState(String agentName) {
     String state =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(
-                visibilityOfElementLocated(
-                    By.xpath(format(Locators.INSTALLER_STATE, installerName))))
+            .until(visibilityOfElementLocated(By.xpath(format(Locators.AGENT_STATE, agentName))))
             .getAttribute("aria-checked");
 
     return Boolean.parseBoolean(state);
   }
 
-  public String checkInstallerDescription(String installerName) {
+  public String checkAgentDescription(String agentName) {
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format(Locators.INSTALLER_DESCRIPTION, installerName))))
+        .until(visibilityOfElementLocated(By.xpath(format(Locators.AGENT_DESCRIPTION, agentName))))
         .getText();
   }
 }
