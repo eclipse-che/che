@@ -46,7 +46,13 @@ public class EvaluateExpressionTest1 {
 
     Location location =
         new LocationImpl(
-            "/test/src/org/eclipse/EvaluateExpressionTest1.java", 21, false, -1, "/test", null, -1);
+            "/test/src/org/eclipse/EvaluateExpressionTest1.java",
+            21,
+            false,
+            null,
+            "/test",
+            null,
+            -1);
     debuggerEvents = new ArrayBlockingQueue<>(10);
     debugger = startJavaDebugger(new BreakpointImpl(location), debuggerEvents);
     ensureSuspendAtDesiredLocation(location, debuggerEvents);

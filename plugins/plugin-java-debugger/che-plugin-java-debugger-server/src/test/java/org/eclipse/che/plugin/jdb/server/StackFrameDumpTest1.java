@@ -56,7 +56,7 @@ public class StackFrameDumpTest1 {
 
     Location location =
         new LocationImpl(
-            "/test/src/org/eclipse/StackFrameDumpTest1.java", 25, false, -1, "/test", null, -1);
+            "/test/src/org/eclipse/StackFrameDumpTest1.java", 25, false, null, "/test", null, -1);
     debugger = startJavaDebugger(new BreakpointImpl(location), callback);
 
     ensureSuspendAtDesiredLocation(location, callback);
