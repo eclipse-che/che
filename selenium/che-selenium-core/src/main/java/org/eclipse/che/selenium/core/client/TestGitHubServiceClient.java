@@ -53,6 +53,8 @@ public class TestGitHubServiceClient {
           .setAuthorizationHeader(createBasicAuthHeader(username, password))
           .useDeleteMethod()
           .request();
+
+      logApiRateLimit(username, password); // TODO remove
     }
   }
 
@@ -64,6 +66,8 @@ public class TestGitHubServiceClient {
         .usePostMethod()
         .setBody(key)
         .request();
+
+    logApiRateLimit(username, password); // TODO remove
   }
 
   public void uploadPublicKey(
@@ -88,6 +92,8 @@ public class TestGitHubServiceClient {
             .request()
             .asList(GitHubKey.class);
 
+    logApiRateLimit(username, password); // TODO remove
+
     return keys.stream().filter(key -> title.equals(key.getTitle())).collect(toList());
   }
 
@@ -104,6 +110,8 @@ public class TestGitHubServiceClient {
         .setAuthorizationHeader(createBasicAuthHeader(username, password))
         .setBody(new JsonStringMapImpl<Object>(m))
         .request();
+
+    logApiRateLimit(username, password); // TODO remove
   }
 
   @SuppressWarnings("unchecked")
@@ -116,6 +124,9 @@ public class TestGitHubServiceClient {
             .useGetMethod()
             .setAuthorizationHeader(createBasicAuthHeader(username, password))
             .request();
+
+    logApiRateLimit(username, password); // TODO remove
+
     List<Map<String, String>> prs =
         response.as(List.class, new TypeToken<List<Map<String, String>>>() {}.getType());
     return prs.stream()
@@ -134,6 +145,8 @@ public class TestGitHubServiceClient {
         .setAuthorizationHeader(createBasicAuthHeader(username, password))
         .setBody(ImmutableMap.of("state", "close"))
         .request();
+
+    logApiRateLimit(username, password); // TODO remove
   }
 
   public void deleteBranch(
@@ -154,6 +167,8 @@ public class TestGitHubServiceClient {
         .useDeleteMethod()
         .setAuthorizationHeader(createBasicAuthHeader(username, password))
         .request();
+
+    logApiRateLimit(username, password); // TODO remove
   }
 
   public void deleteRepo(final String repository, final String username, final String password)
@@ -164,6 +179,8 @@ public class TestGitHubServiceClient {
         .useDeleteMethod()
         .setAuthorizationHeader(createBasicAuthHeader(username, password))
         .request();
+
+    logApiRateLimit(username, password); // TODO remove
   }
 
   public List<String> getAllGrants(final String username, final String password) throws Exception {
@@ -174,6 +191,9 @@ public class TestGitHubServiceClient {
             .useGetMethod()
             .setAuthorizationHeader(createBasicAuthHeader(username, password))
             .request();
+
+    logApiRateLimit(username, password); // TODO remove
+
     @SuppressWarnings("unchecked")
     List<Map<String, String>> grants =
         response.as(List.class, new TypeToken<List<Map<String, String>>>() {}.getType());
@@ -190,6 +210,8 @@ public class TestGitHubServiceClient {
           .useDeleteMethod()
           .setAuthorizationHeader(createBasicAuthHeader(username, password))
           .request();
+
+      logApiRateLimit(username, password); // TODO remove
     }
 
     LOG.debug("Application grants '{}' were removed from github.com", grandsId);
@@ -204,6 +226,8 @@ public class TestGitHubServiceClient {
             .useGetMethod()
             .setAuthorizationHeader(createBasicAuthHeader(username, password))
             .request();
+
+    logApiRateLimit(username, password); // TODO remove
 
     return obtainNameFromResponse(response);
   }
@@ -236,6 +260,8 @@ public class TestGitHubServiceClient {
             .setAuthorizationHeader(createBasicAuthHeader(username, password))
             .request();
 
+    logApiRateLimit(username, password); // TODO remove
+
     @SuppressWarnings("unchecked")
     List<Map<String, String>> properties =
         response.as(List.class, new TypeToken<List<Map<String, String>>>() {}.getType());
@@ -260,5 +286,26 @@ public class TestGitHubServiceClient {
     }
 
     return primaryPublicGithubEmails.get(0).get("email");
+  }
+
+  /* temporary method to investigate an error https://github.com/eclipse/che/issues/7695 */
+  private void logApiRateLimit(final String username, final String password) {
+    try {
+      String result =
+          requestFactory
+              .fromUrl("https://api.github.com/rate_limit")
+              .useGetMethod()
+              .setAuthorizationHeader(createBasicAuthHeader(username, password))
+              .request()
+              .asString();
+      LOG.info(
+          String.format(">>>>>>>> GitHub API rate limits for user '%s': %s", username, result));
+      LOG.info(
+          ">>>>>>>> "
+              + java.util.Arrays.toString(
+                  java.util.Arrays.copyOf(Thread.currentThread().getStackTrace(), 8)));
+    } catch (Exception e) {
+      LOG.warn(">>>>>>>> GitHub API rate limits request error", e);
+    }
   }
 }
