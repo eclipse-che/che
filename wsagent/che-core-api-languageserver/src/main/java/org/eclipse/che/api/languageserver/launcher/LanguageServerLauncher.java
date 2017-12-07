@@ -35,7 +35,7 @@ public interface LanguageServerLauncher {
   /**
    * Denotes if the language server will be launched in a local environment or remote (i.e. if
    * <code>isLocal</code> returns <code>true</code> than the server is launched in the local
-   * physical/virtual machine, otherwise means that the sever is launched in the remote machine)
+   * physical/virtual machine, otherwise means that the server is launched in the remote machine)
    */
   default boolean isLocal() {
     return true;

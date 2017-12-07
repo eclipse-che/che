@@ -22,18 +22,18 @@ import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.api.languageserver.registry.ServerInitializer;
 import org.eclipse.che.api.languageserver.registry.ServerInitializerImpl;
+import org.eclipse.che.api.languageserver.remote.LanguageServerRemoteModule;
 import org.eclipse.che.api.languageserver.service.LanguageRegistryService;
 import org.eclipse.che.api.languageserver.service.LanguageServerInitializationHandler;
 import org.eclipse.che.api.languageserver.service.TextDocumentService;
 import org.eclipse.che.api.languageserver.service.WorkspaceService;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
-import org.eclipse.che.api.languageserver.sidecar.LanguageServerSidecarModule;
 
 public class LanguageServerModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    install(new LanguageServerSidecarModule());
+    install(new LanguageServerRemoteModule());
 
     bind(LanguageServerRegistry.class).to(LanguageServerRegistryImpl.class);
     bind(ServerInitializer.class).to(ServerInitializerImpl.class);

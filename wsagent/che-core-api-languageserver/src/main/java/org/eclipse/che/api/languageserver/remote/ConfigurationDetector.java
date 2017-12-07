@@ -8,13 +8,20 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.languageserver.sidecar;
+package org.eclipse.che.api.languageserver.remote;
 
 import java.util.Map;
 import javax.inject.Singleton;
 
+/** Detects if machine server attributes indicates that we are dealing with language server. */
 @Singleton
 class ConfigurationDetector {
+  /**
+   * Tests attributes for a language server indicator
+   *
+   * @param attributes map with machine server attributes
+   * @return true if language server is detected, false otherwise
+   */
   boolean isDetected(Map<String, String> attributes) {
     return "ls".equals(attributes.get("type"));
   }

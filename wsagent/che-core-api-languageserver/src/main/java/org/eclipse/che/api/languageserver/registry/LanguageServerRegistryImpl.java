@@ -30,9 +30,9 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
+import org.eclipse.che.api.languageserver.remote.RemoteLsLauncherProvider;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
-import org.eclipse.che.api.languageserver.sidecar.LanguageServerLauncherProvider;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
@@ -53,7 +53,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
   private final String apiEndpoint;
   private final HttpJsonRequestFactory httpJsonRequestFactory;
-  private final Set<LanguageServerLauncherProvider> launcherProviders;
+  private final Set<RemoteLsLauncherProvider> launcherProviders;
   private final List<LanguageDescription> languages;
   private final List<LanguageServerLauncher> launchers;
   private final AtomicInteger serverId = new AtomicInteger();
@@ -72,7 +72,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
   public LanguageServerRegistryImpl(
       @Named("che.api") String apiEndpoint,
       HttpJsonRequestFactory httpJsonRequestFactory,
-      Set<LanguageServerLauncherProvider> launcherProviders,
+      Set<RemoteLsLauncherProvider> launcherProviders,
       Set<LanguageServerLauncher> languageServerLaunchers,
       Set<LanguageDescription> languages,
       Provider<ProjectManager> projectManagerProvider,
@@ -208,7 +208,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     List<LanguageServerLauncher> combinedLaunchers = new LinkedList<>(launchers);
     Workspace workspace = getWorkspaceConfiguration();
     if (workspace != null) {
-      for (LanguageServerLauncherProvider launcherProvider : launcherProviders) {
+      for (RemoteLsLauncherProvider launcherProvider : launcherProviders) {
         combinedLaunchers.addAll(launcherProvider.getAll(workspace));
       }
     }

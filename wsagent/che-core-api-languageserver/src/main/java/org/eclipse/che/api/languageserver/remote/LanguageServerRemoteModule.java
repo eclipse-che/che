@@ -8,17 +8,17 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.languageserver.sidecar;
+package org.eclipse.che.api.languageserver.remote;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
-public class LanguageServerSidecarModule extends AbstractModule {
+public class LanguageServerRemoteModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    Multibinder.newSetBinder(binder(), LanguageServerLauncherProvider.class)
+    Multibinder.newSetBinder(binder(), RemoteLsLauncherProvider.class)
         .addBinding()
-        .to(SocketLanguageServerLauncherProvider.class);
+        .to(SocketLsLauncherProvider.class);
   }
 }

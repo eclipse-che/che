@@ -8,12 +8,23 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.languageserver.sidecar;
+package org.eclipse.che.api.languageserver.remote;
 
 import java.util.Set;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 
-public interface LanguageServerLauncherProvider {
+/**
+ * Provides remote language server launcher instances constructed according to workspace
+ * configuration. The launchers (depending on context) may in fact not physically launch the
+ * language servers but establish a remote connection to already launched servers.
+ */
+public interface RemoteLsLauncherProvider {
+  /**
+   * Get all remote language server launchers that are configured in a workspace configuration.
+   *
+   * @param workspace workspace configuration
+   * @return set of language server launchers
+   */
   Set<LanguageServerLauncher> getAll(Workspace workspace);
 }

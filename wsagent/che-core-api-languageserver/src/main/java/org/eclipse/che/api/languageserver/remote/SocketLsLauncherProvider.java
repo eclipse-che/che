@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.languageserver.sidecar;
+package org.eclipse.che.api.languageserver.remote;
 
 import static java.util.Collections.unmodifiableSet;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -36,9 +36,10 @@ import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 
+/** Provides socket based language server launchers */
 @Singleton
-class SocketLanguageServerLauncherProvider implements LanguageServerLauncherProvider {
-  private static final Logger LOG = getLogger(SocketLanguageServerLauncherProvider.class);
+class SocketLsLauncherProvider implements RemoteLsLauncherProvider {
+  private static final Logger LOG = getLogger(SocketLsLauncherProvider.class);
 
   private final ConfigurationDetector configurationDetector;
   private final ConfigurationExtractor configurationExtractor;
@@ -46,7 +47,7 @@ class SocketLanguageServerLauncherProvider implements LanguageServerLauncherProv
   private final Map<String, LanguageServerLauncher> lslRegistry = new ConcurrentHashMap<>();
 
   @Inject
-  public SocketLanguageServerLauncherProvider(
+  public SocketLsLauncherProvider(
       ConfigurationDetector configurationDetector, ConfigurationExtractor configurationExtractor) {
     this.configurationDetector = configurationDetector;
     this.configurationExtractor = configurationExtractor;

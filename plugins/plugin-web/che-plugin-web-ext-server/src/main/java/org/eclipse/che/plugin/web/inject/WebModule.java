@@ -14,10 +14,12 @@ import static java.util.Arrays.asList;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
+import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.web.shared.Constants;
+import org.eclipse.che.plugin.web.typescript.TSLSLauncher;
 import org.eclipse.che.plugin.web.typescript.TypeScriptProjectType;
 
 /** The module that contains configuration of the server side part of the Web plugin */
@@ -33,9 +35,9 @@ public class WebModule extends AbstractModule {
         Multibinder.newSetBinder(binder(), ProjectTypeDef.class);
     projectTypeMultibinder.addBinding().to(TypeScriptProjectType.class);
 
-    //    Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
-    //        .addBinding()
-    //        .to(TSLSLauncher.class);
+    Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
+        .addBinding()
+        .to(TSLSLauncher.class);
     LanguageDescription description = new LanguageDescription();
     description.setFileExtensions(asList(EXTENSIONS));
     description.setLanguageId(Constants.TS_LANG);

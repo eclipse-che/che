@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.languageserver.sidecar;
+package org.eclipse.che.api.languageserver.remote;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
@@ -24,6 +24,12 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.languageserver.registry.DocumentFilter;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
 
+/**
+ * This class is responsible for language server description extraction out of server attributes
+ * map. It is expected that there will be specific attribute named <code>config</code> that will
+ * contain serialized json data that represents all language server configuration data. Structure of
+ * json corresponds to {@link LanguageServerDescription} class with all aggregated classes
+ */
 @Singleton
 class ConfigurationExtractor {
   private final JsonParser jsonParser;
