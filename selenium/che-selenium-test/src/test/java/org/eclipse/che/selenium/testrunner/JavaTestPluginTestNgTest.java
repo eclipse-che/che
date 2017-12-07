@@ -133,12 +133,12 @@ public class JavaTestPluginTestNgTest {
 
     // then
     editor.waitActive();
-    editor.setCursorToDefinedLineAndCharForVisible(25, 17);
+    editor.goToCursorPositionVisible(25, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
-    editor.setCursorToDefinedLineAndCharForVisible(30, 17);
+    editor.goToCursorPositionVisible(30, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
@@ -157,12 +157,12 @@ public class JavaTestPluginTestNgTest {
 
     // then
     editor.waitActive();
-    editor.setCursorToDefinedLineAndCharForVisible(25, 17);
+    editor.goToCursorPositionVisible(25, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
-    editor.setCursorToDefinedLineAndCharForVisible(30, 17);
+    editor.goToCursorPositionVisible(30, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);

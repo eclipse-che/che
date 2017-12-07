@@ -85,7 +85,7 @@ public class AutocompleteProposalJavaDocTest {
     // when
     editor.waitActive();
     loader.waitOnClosed();
-    editor.setCursorToDefinedLineAndCharForVisible(30, 30);
+    editor.goToCursorPositionVisible(30, 30);
     editor.launchAutocompleteAndWaitContainer();
     editor.selectAutocompleteProposal("concat(String part1, String part2, char divider) : String");
 
@@ -107,7 +107,7 @@ public class AutocompleteProposalJavaDocTest {
     // when
     editor.waitActive();
     loader.waitOnClosed();
-    editor.setCursorToDefinedLineAndCharForVisible(19, 1);
+    editor.goToCursorPositionVisible(19, 1);
     editor.launchAutocompleteAndWaitContainer();
     editor.selectAutocompleteProposal("App()");
 
@@ -120,7 +120,7 @@ public class AutocompleteProposalJavaDocTest {
     // when
     editor.waitActive();
     loader.waitOnClosed();
-    editor.setCursorToDefinedLineAndCharForVisible(24, 20);
+    editor.goToCursorPositionVisible(24, 20);
     editor.launchAutocompleteAndWaitContainer();
     editor.selectAutocompleteProposal("isEquals(Object o) : boolean");
 
@@ -143,12 +143,12 @@ public class AutocompleteProposalJavaDocTest {
     editor.waitActive();
     loader.waitOnClosed();
     editor.selectTabByName(BOOK_IMPL_CLASS_NAME);
-    editor.setCursorToDefinedLineAndCharForVisible(14, 4);
+    editor.goToCursorPositionVisible(14, 4);
     editor.typeTextIntoEditor("UPDATE. ");
 
     editor.selectTabByName(APP_CLASS_NAME);
     editor.waitActive();
-    editor.setCursorToDefinedLineAndCharForVisible(21, 12);
+    editor.goToCursorPositionVisible(21, 12);
     editor.launchAutocompleteAndWaitContainer();
     editor.selectAutocompleteProposal("BookImpl");
 
@@ -161,7 +161,7 @@ public class AutocompleteProposalJavaDocTest {
     // when
     editor.waitActive();
     loader.waitOnClosed();
-    editor.setCursorToDefinedLineAndCharForVisible(24, 20);
+    editor.goToCursorPositionVisible(24, 20);
     editor.launchAutocompleteAndWaitContainer();
     editor.selectAutocompleteProposal("hashCode() : int");
 
@@ -177,7 +177,7 @@ public class AutocompleteProposalJavaDocTest {
     // when
     editor.waitActive();
     loader.waitOnClosed();
-    editor.setCursorToDefinedLineAndCharForVisible(30, 23);
+    editor.goToCursorPositionVisible(30, 23);
     editor.launchAutocompleteAndWaitContainer();
     editor.selectAutocompleteProposal("info(String arg0) : void");
 
@@ -195,7 +195,7 @@ public class AutocompleteProposalJavaDocTest {
 
     editor.selectTabByName(APP_CLASS_NAME);
     loader.waitOnClosed();
-    editor.setCursorToDefinedLineAndCharForVisible(30, 23);
+    editor.goToCursorPositionVisible(30, 23);
     editor.launchAutocompleteAndWaitContainer();
     editor.selectAutocompleteProposal("info(String msg) : void");
 

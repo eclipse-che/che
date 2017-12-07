@@ -94,7 +94,7 @@ public class RefactoringFeatureTest {
     projectExplorer1.waitItem(PROJECT_NAME);
     prepareFiles(editor1, projectExplorer1);
     prepareFiles(editor2, projectExplorer2);
-    editor1.setCursorToDefinedLineAndCharForVisible(21, 14);
+    editor1.goToCursorPositionVisible(21, 14);
     doRenameRefactor();
     checkWatching(expectedMessAfterRename);
     editor2.waitTabIsNotPresent(renamedClassName);

@@ -124,7 +124,7 @@ public class CheckRestoringSplitEditorTest {
 
     editor.waitActive();
     editor.selectTabByName(nameOfEditorTab);
-    editor.waitLineAndCharForCurrentActive(pair.first, pair.second);
+    editor.waitCursorPosition(pair.first, pair.second);
     editor.waitTextInDefinedSplitEditor(
         numOfEditor, LOAD_PAGE_TIMEOUT_SEC, expectedTextAfterRefresh);
   }
@@ -148,13 +148,11 @@ public class CheckRestoringSplitEditorTest {
 
   private void setPositionsForSplittedEditor() {
     editor.selectTabByIndexEditorWindow(0, javaClassTab);
-    editor.setCursorToDefinedLineAndCharForVisible(
+    editor.goToCursorPositionVisible(
         cursorPositionForJavaFile.first, cursorPositionForJavaFile.second);
     editor.selectTabByName(readmeFileName);
-    editor.setCursorToDefinedLineAndCharForCurrentActive(
-        cursorPositionForReadMeFile.first, cursorPositionForReadMeFile.second);
+    editor.goToPosition(cursorPositionForReadMeFile.first, cursorPositionForReadMeFile.second);
     editor.selectTabByName(pomFileTab);
-    editor.setCursorToDefinedLineAndCharForCurrentActive(
-        cursorPositionForPomFile.first, cursorPositionForPomFile.second);
+    editor.goToPosition(cursorPositionForPomFile.first, cursorPositionForPomFile.second);
   }
 }

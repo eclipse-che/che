@@ -96,7 +96,7 @@ public class ImplementationBaseOperationsTest {
 
     // check the 'implementation' for abstract class
     projectExplorer.openItemByVisibleNameInExplorer(ABSTRACT_CLASS_NAME + ".java");
-    editor.setCursorToDefinedLineAndCharForVisible(15, 25);
+    editor.goToCursorPositionVisible(15, 25);
     editor.waitActive();
     editor.waitTextElementsActiveLine("Empl");
     editor.launchImplementationFormByKeyboard();
@@ -117,7 +117,7 @@ public class ImplementationBaseOperationsTest {
 
     // check the 'implementations' for interface
     projectExplorer.openItemByVisibleNameInExplorer(INTERFACE_NAME + ".java");
-    editor.setCursorToDefinedLineAndCharForVisible(15, 20);
+    editor.goToCursorPositionVisible(15, 20);
     editor.waitTextElementsActiveLine("Employee");
     editor.launchImplementationFormByKeyboard();
     editor.waitActiveTabFileName("EmployeeHourlyWages");

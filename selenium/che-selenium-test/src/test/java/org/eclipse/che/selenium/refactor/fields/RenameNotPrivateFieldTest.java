@@ -113,7 +113,7 @@ public class RenameNotPrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndCharForVisible(13, 9);
+    editor.goToCursorPositionVisible(13, 9);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("g");
     loader.waitOnClosed();
@@ -300,7 +300,7 @@ public class RenameNotPrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndCharForVisible(14, 9);
+    editor.goToCursorPositionVisible(14, 9);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("ZORRO");
     loader.waitOnClosed();
@@ -317,7 +317,7 @@ public class RenameNotPrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndCharForVisible(16, 14);
+    editor.goToCursorPositionVisible(16, 14);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("ZORRO");
     loader.waitOnClosed();
@@ -333,7 +333,7 @@ public class RenameNotPrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndCharForVisible(13, 17);
+    editor.goToCursorPositionVisible(13, 17);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("test1");
     loader.waitOnClosed();

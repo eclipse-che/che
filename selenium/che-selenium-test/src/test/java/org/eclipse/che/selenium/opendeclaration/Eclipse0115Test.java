@@ -58,7 +58,7 @@ public class Eclipse0115Test {
     projectExplorer.openItemByPath(PROJECT_NAME + PATH_TO_PACKAGE_PREFIX + "X.java");
     editor.waitActive();
     editor.waitMarkerInPosition(WARNING_MARKER, 14);
-    editor.setCursorToDefinedLineAndCharForVisible(32, 14);
+    editor.goToCursorPositionVisible(32, 14);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitSpecifiedValueForLineAndChar(35, 24);
   }

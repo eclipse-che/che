@@ -163,7 +163,7 @@ public class PullRequestPluginTest {
     // change content
     editor.waitActive();
     editor.deleteAllContent();
-    editor.setCursorToDefinedLineAndCharForVisible(1, 1);
+    editor.goToCursorPositionVisible(1, 1);
     editor.typeTextIntoEditor("Time: " + TIME);
 
     // create branch
@@ -191,7 +191,7 @@ public class PullRequestPluginTest {
     explorer.openItemByPath(FIRST_PROJECT_NAME + "/README.md");
     editor.waitActive();
     editor.deleteAllContent();
-    editor.setCursorToDefinedLineAndCharForVisible(1, 1);
+    editor.goToCursorPositionVisible(1, 1);
     editor.typeTextIntoEditor("Update: " + TIME);
     pullRequestPanel.clickUpdatePRBtn();
     pullRequestPanel.clickOkCommitBtn();

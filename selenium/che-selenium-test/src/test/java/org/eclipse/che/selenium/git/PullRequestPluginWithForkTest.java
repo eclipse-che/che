@@ -131,7 +131,7 @@ public class PullRequestPluginWithForkTest {
     // change content
     editor.waitActive();
     editor.deleteAllContent();
-    editor.setCursorToDefinedLineAndCharForVisible(1, 1);
+    editor.goToCursorPositionVisible(1, 1);
     editor.typeTextIntoEditor(time.toString());
     pullRequestPanel.clickPullRequestBtn();
     pullRequestPanel.enterComment(comment);
@@ -152,7 +152,7 @@ public class PullRequestPluginWithForkTest {
     explorer.openItemByPath(PROJECT_NAME + "/README.md");
     editor.waitActive();
     editor.deleteAllContent();
-    editor.setCursorToDefinedLineAndCharForVisible(1, 1);
+    editor.goToCursorPositionVisible(1, 1);
     editor.typeTextIntoEditor("Update " + time.toString());
     pullRequestPanel.clickUpdatePRBtn();
     pullRequestPanel.clickOkCommitBtn();

@@ -57,7 +57,7 @@ public class Eclipse0087Test {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test/Test.java");
     editor.waitActive();
     editor.waitMarkerInPosition(WARNING_MARKER, 12);
-    editor.setCursorToDefinedLineAndCharForVisible(12, 45);
+    editor.goToCursorPositionVisible(12, 45);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("Myclass0087");
     editor.waitSpecifiedValueForLineAndChar(13, 14);

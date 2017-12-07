@@ -72,7 +72,7 @@ public class CheckRecentFilesAndRevealResourceTest {
     projectExplorer.openItemByPath(PATH_TO_FILE_FIRST_PROJECT);
     loader.waitOnClosed();
     editor.waitActive();
-    editor.setCursorToDefinedLineAndCharForVisible(5, 1);
+    editor.goToCursorPositionVisible(5, 1);
     projectExplorer.collapseProjectTreeByOptionsButton();
     projectExplorer.waitDisappearItemByPath(PATH_TO_FILE_FIRST_PROJECT);
     menu.runCommand(

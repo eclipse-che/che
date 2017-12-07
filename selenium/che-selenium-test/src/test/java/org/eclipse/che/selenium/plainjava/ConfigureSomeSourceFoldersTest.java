@@ -83,7 +83,7 @@ public class ConfigureSomeSourceFoldersTest {
     projectExplorer.waitItem(PROJECT_NAME + "/source/" + newJavaClassName + ".java");
     codenvyEditor.waitTextIntoEditor("public class NewClass {");
     codenvyEditor.waitAllMarkersDisappear(ERROR_MARKER);
-    codenvyEditor.setCursorToDefinedLineAndCharForVisible(2, 24);
+    codenvyEditor.goToCursorPositionVisible(2, 24);
     codenvyEditor.typeTextIntoEditor(Keys.ENTER.toString());
     String methodForChecking =
         " public static String typeCheckMess(){\n"

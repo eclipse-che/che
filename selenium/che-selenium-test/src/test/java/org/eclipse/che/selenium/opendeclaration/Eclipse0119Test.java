@@ -55,7 +55,7 @@ public class Eclipse0119Test {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT_NAME + PATH_TO_PACKAGE_PREFIX + "Test.java");
     editor.waitActive();
-    editor.setCursorToDefinedLineAndCharForVisible(15, 28);
+    editor.goToCursorPositionVisible(15, 28);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("Collections");
     editor.waitSpecifiedValueForLineAndChar(14, 35);

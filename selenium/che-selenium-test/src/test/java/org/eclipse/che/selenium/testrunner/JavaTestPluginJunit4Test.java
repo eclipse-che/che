@@ -135,7 +135,7 @@ public class JavaTestPluginJunit4Test {
     projectExplorer.openItemByPath(PATH_TO_JUNIT4_ANOTHER_TEST);
     editor.waitActive();
 
-    editor.setCursorToDefinedLineAndCharForVisible(27, 5);
+    editor.goToCursorPositionVisible(27, 5);
 
     // when
     menu.runCommand(RUN_MENU, TEST, TEST_DROP_DAWN_ITEM);
@@ -147,7 +147,7 @@ public class JavaTestPluginJunit4Test {
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
     // then
 
-    editor.setCursorToDefinedLineAndCharForVisible(32, 5);
+    editor.goToCursorPositionVisible(32, 5);
     menu.runCommand(RUN_MENU, TEST, TEST_DROP_DAWN_ITEM);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
@@ -157,7 +157,7 @@ public class JavaTestPluginJunit4Test {
         testErrorMessage.startsWith(APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE),
         "Actual message was: " + testErrorMessage);
 
-    editor.setCursorToDefinedLineAndCharForVisible(38, 5);
+    editor.goToCursorPositionVisible(38, 5);
     menu.runCommand(RUN_MENU, TEST, TEST_DROP_DAWN_ITEM);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsIgnored("shouldBeIgnoredOfAppAnother");

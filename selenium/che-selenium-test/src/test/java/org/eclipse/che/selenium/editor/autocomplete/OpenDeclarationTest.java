@@ -99,7 +99,7 @@ public class OpenDeclarationTest {
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     loader.waitOnClosed();
 
-    editor.setCursorToDefinedLineAndCharForVisible(26, 10);
+    editor.goToCursorPositionVisible(26, 10);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("DNSNameServiceDescriptor");
     editor.waitActive();
@@ -108,7 +108,7 @@ public class OpenDeclarationTest {
     editor.closeFileByNameWithSaving("DNSNameServiceDescriptor");
     editor.waitTabIsNotPresent("DNSNameServiceDescriptor");
     editor.selectTabByName("AppController");
-    editor.setCursorToDefinedLineAndCharForVisible(27, 39);
+    editor.goToCursorPositionVisible(27, 39);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("DNSNameServiceDescriptor");
     editor.setCursorToLine(11);
@@ -117,7 +117,7 @@ public class OpenDeclarationTest {
 
     // check an ability to download source
     editor.selectTabByName("AppController");
-    editor.setCursorToDefinedLineAndCharForVisible(30, 12);
+    editor.goToCursorPositionVisible(30, 12);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("ModelAndView");
     // editor.waitTextIntoEditor(expectedTextBeforeDownloadSources);
@@ -129,7 +129,7 @@ public class OpenDeclarationTest {
 
     // check go to class
     editor.selectTabByName("AppController");
-    editor.setCursorToDefinedLineAndCharForVisible(30, 12);
+    editor.goToCursorPositionVisible(30, 12);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("ModelAndView");
     editor.waitTextElementsActiveLine("ModelAndView");
@@ -138,14 +138,14 @@ public class OpenDeclarationTest {
 
     // Check go to method
     editor.selectTabByName("AppController");
-    editor.setCursorToDefinedLineAndCharForVisible(43, 16);
+    editor.goToCursorPositionVisible(43, 16);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("ModelAndView");
     editor.waitTextElementsActiveLine("addObject");
     editor.waitSpecifiedValueForLineAndChar(226, 22);
 
     // Check go to inner method
-    editor.setCursorToDefinedLineAndCharForVisible(227, 9);
+    editor.goToCursorPositionVisible(227, 9);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("ModelAndView");
     editor.waitTextElementsActiveLine("getModelMap()");

@@ -84,7 +84,7 @@ public class FailParametersTest {
     projectExplorer.openItemByPath(pathToCurrentPackage);
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndCharForVisible(
+    editor.goToCursorPositionVisible(
         testParamObj.getStrCursorPosition(), testParamObj.getLineCursorPosition());
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();

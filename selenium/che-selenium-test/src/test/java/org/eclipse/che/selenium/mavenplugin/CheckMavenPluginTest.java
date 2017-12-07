@@ -83,9 +83,9 @@ public class CheckMavenPluginTest {
   public void shouldExcludeModules() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     editor.waitActive();
-    editor.setCursorToDefinedLineAndCharForVisible(25, 8);
+    editor.goToCursorPositionVisible(25, 8);
     editor.typeTextIntoEditor("!--");
-    editor.setCursorToDefinedLineAndCharForVisible(26, 32);
+    editor.goToCursorPositionVisible(26, 32);
     editor.typeTextIntoEditor("--");
     try {
       projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", SIMPLE_FOLDER);
@@ -103,17 +103,17 @@ public class CheckMavenPluginTest {
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
     editor.waitActive();
-    editor.setCursorToDefinedLineAndCharForVisible(17, 1);
+    editor.goToCursorPositionVisible(17, 1);
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass2 = new TestClass();");
     editor.waitAllMarkersDisappear(ERROR_MARKER);
   }
 
   private void includeModulesInTheParentPom() {
-    editor.setCursorToDefinedLineAndCharForVisible(26, 32);
+    editor.goToCursorPositionVisible(26, 32);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
-    editor.setCursorToDefinedLineAndCharForVisible(25, 8);
+    editor.goToCursorPositionVisible(25, 8);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());

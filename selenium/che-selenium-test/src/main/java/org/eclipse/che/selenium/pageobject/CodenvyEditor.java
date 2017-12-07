@@ -535,7 +535,7 @@ public class CodenvyEditor {
    * @param positionLine is the specified number line
    * @param positionChar is the specified number char
    */
-  public void setCursorToDefinedLineAndCharForVisible(int positionLine, int positionChar) {
+  public void goToCursorPositionVisible(int positionLine, int positionChar) {
     openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
     waitActive();
     waitSpecifiedValueForLineAndChar(positionLine, positionChar);
@@ -547,10 +547,10 @@ public class CodenvyEditor {
    * @param positionLine is the specified number line
    * @param positionChar is the specified number char
    */
-  public void setCursorToDefinedLineAndCharForCurrentActive(int positionLine, int positionChar) {
+  public void goToPosition(int positionLine, int positionChar) {
     openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
     waitActive();
-    waitLineAndCharForCurrentActive(positionLine, positionChar);
+    waitCursorPosition(positionLine, positionChar);
   }
 
   private void openGoToLineFormAndSetCursorToPosition(int positionLine, int positionChar) {
@@ -1351,7 +1351,7 @@ public class CodenvyEditor {
    * @return char and line position from current visible, active and focused editor (usual uses with
    *     split editor)
    */
-  public Pair<Integer, Integer> getCursorPositionsFromCurentActive() {
+  public Pair<Integer, Integer> getCursorPositionsFromActive() {
     String xpathToCurrentActiveCursorPosition =
         "//div[@active and @focused]/parent::div[@id='gwt-debug-multiSplitPanel-tabsPanel']/div[@active and @focused]/parent::div[@id='gwt-debug-multiSplitPanel-tabsPanel']/parent::div/parent::div/following-sibling::div//div[@active]//div[@id='gwt-debug-cursorPosition']";
     waitActive();
@@ -1367,12 +1367,12 @@ public class CodenvyEditor {
    * @param linePosition expected line position
    * @param charPosition expected char position
    */
-  public void waitLineAndCharForCurrentActive(final int linePosition, final int charPosition) {
+  public void waitCursorPosition(final int linePosition, final int charPosition) {
     redrawDriverWait.until(
         (ExpectedCondition<Boolean>)
             webDriver ->
-                (getCursorPositionsFromCurentActive().first == linePosition)
-                    && (getCursorPositionsFromCurentActive().second == charPosition));
+                (getCursorPositionsFromActive().first == linePosition)
+                    && (getCursorPositionsFromActive().second == charPosition));
   }
 
   private Pair<Integer, Integer> getCursorPositionFromWebElement(WebElement webElement) {

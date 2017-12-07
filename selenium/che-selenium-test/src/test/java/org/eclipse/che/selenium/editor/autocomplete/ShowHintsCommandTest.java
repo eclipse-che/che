@@ -98,7 +98,7 @@ public class ShowHintsCommandTest {
     editor.typeTextIntoEditor(Keys.TAB.toString());
     editor.typeTextIntoEditor(CONSTRUCTOR);
     editor.waitTextIntoEditor(CONSTRUCTOR);
-    editor.setCursorToDefinedLineAndCharForVisible(28, 41);
+    editor.goToCursorPositionVisible(28, 41);
     editor.callShowHintsPopUp();
     editor.waitShowHintsPopUpOpened();
     editor.waitExpTextIntoShowHintsPopUp(TEXT_IN_POP_UP_2);
