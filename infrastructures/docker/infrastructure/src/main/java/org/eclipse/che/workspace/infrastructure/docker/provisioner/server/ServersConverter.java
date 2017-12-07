@@ -47,7 +47,15 @@ public class ServersConverter implements DockerEnvironmentProvisioner {
                   .getServers()
                   .forEach(
                       (key, value) -> {
-                        container.getPorts().add(value.getPort());
+                        // Add ports and exposes if server should be publicly accessible.
+                        // To make server workspace-wide accessible add only exposes.
+                        if (!"true"
+                            .equals(
+                                value
+                                    .getAttributes()
+                                    .get(ServerConfig.INTERNAL_SERVER_ATTRIBUTE))) {
+                          container.getPorts().add(value.getPort());
+                        }
                         container.addExpose(value.getPort());
                       });
             });
