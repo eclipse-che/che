@@ -72,7 +72,7 @@ public class JdbLocation implements Location {
   }
 
   @Override
-  public int getExternalResourceId() {
+  public String getExternalResourceId() {
     return internal.getExternalResourceId();
   }
 
