@@ -78,7 +78,8 @@ public class FetchPresenter implements FetchView.ActionDelegate {
       NotificationManager notificationManager,
       BranchSearcher branchSearcher,
       GitOutputConsoleFactory gitOutputConsoleFactory,
-      ProcessesPanelPresenter processesPanelPresenter, OAuthServiceClient oauthServiceClient) {
+      ProcessesPanelPresenter processesPanelPresenter,
+      OAuthServiceClient oauthServiceClient) {
     this.dtoFactory = dtoFactory;
     this.view = view;
     this.branchSearcher = branchSearcher;
