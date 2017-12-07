@@ -85,14 +85,15 @@ public class JavaDebuggerUtils {
     String typeProjectPath = type.getJavaProject().getPath().toOSString();
     if (type.isBinary()) {
       IClassFile classFile = type.getClassFile();
-      int libId = classFile.getAncestor(IPackageFragmentRoot.PACKAGE_FRAGMENT_ROOT).hashCode();
+      String libId =
+          classFile.getAncestor(IPackageFragmentRoot.PACKAGE_FRAGMENT_ROOT).getHandleIdentifier();
       return new LocationImpl(fqn, location.lineNumber(), true, libId, typeProjectPath, null, -1);
     } else {
       ICompilationUnit compilationUnit = type.getCompilationUnit();
       typeProjectPath = type.getJavaProject().getPath().toOSString();
       String resourcePath = compilationUnit.getPath().toOSString();
       return new LocationImpl(
-          resourcePath, location.lineNumber(), false, -1, typeProjectPath, null, -1);
+          resourcePath, location.lineNumber(), false, null, typeProjectPath, null, -1);
     }
   }
 
