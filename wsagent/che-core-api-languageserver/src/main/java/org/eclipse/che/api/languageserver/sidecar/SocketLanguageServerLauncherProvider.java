@@ -16,7 +16,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.*;
+import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -122,6 +124,11 @@ class SocketLanguageServerLauncherProvider implements LanguageServerLauncherProv
         throw new LanguageServerException(
             "Can't launch language server for project: " + projectPath, e);
       }
+    }
+
+    @Override
+    public boolean isLocal() {
+      return false;
     }
 
     @Override
