@@ -21,42 +21,46 @@ import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
-import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
+import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.ide.ext.java.client.tree.JavaNodeFactory;
-import org.eclipse.che.ide.ext.java.shared.Jar;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.project.node.SyntheticNodeUpdateEvent;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.data.settings.NodeSettings;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
+import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 
 /** @author Vlad Zhukovskiy */
 @Beta
 public class LibrariesNode extends SyntheticNode<Path> implements ResourceChangedHandler {
 
-  private final JavaNavigationService service;
   private final JavaNodeFactory nodeFactory;
+  private DtoFactory dtoFactory;
   private final JavaResources javaResources;
-  private EventBus eventBus;
+  private final EventBus eventBus;
+  private final JavaLanguageExtensionServiceClient service;
 
   @Inject
   public LibrariesNode(
       @Assisted Path project,
       @Assisted NodeSettings nodeSettings,
-      JavaNavigationService service,
+      JavaLanguageExtensionServiceClient service,
       JavaNodeFactory nodeFactory,
+      DtoFactory dtoFactory,
       JavaResources javaResources,
       EventBus eventBus) {
     super(project, nodeSettings);
     this.service = service;
     this.nodeFactory = nodeFactory;
+    this.dtoFactory = dtoFactory;
     this.javaResources = javaResources;
     this.eventBus = eventBus;
 
@@ -65,22 +69,21 @@ public class LibrariesNode extends SyntheticNode<Path> implements ResourceChange
 
   @Override
   protected Promise<List<Node>> getChildrenImpl() {
-
+    ExternalLibrariesParameters params = dtoFactory.createDto(ExternalLibrariesParameters.class);
+    params.setProjectUri(getData().toString());
     return service
-        .getExternalLibraries(getData())
+        .externalLibraries(params)
         .then(
-            new Function<List<Jar>, List<Node>>() {
-              @Override
-              public List<Node> apply(List<Jar> jars) throws FunctionException {
-                List<Node> nodes = newArrayListWithCapacity(jars.size());
+            (Function<List<Jar>, List<Node>>)
+                jars -> {
+                  List<Node> nodes = newArrayListWithCapacity(jars.size());
 
-                for (Jar jar : jars) {
-                  nodes.add(nodeFactory.newJarNode(jar, getData(), getSettings()));
-                }
+                  for (Jar jar : jars) {
+                    nodes.add(nodeFactory.newJarNode(jar, getData(), getSettings()));
+                  }
 
-                return nodes;
-              }
-            });
+                  return nodes;
+                });
   }
 
   @Override

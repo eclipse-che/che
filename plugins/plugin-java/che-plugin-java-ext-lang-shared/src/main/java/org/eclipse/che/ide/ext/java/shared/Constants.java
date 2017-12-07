@@ -30,8 +30,17 @@ public final class Constants {
   public static final String JAVAC = "javac";
 
   // LS requests timeout constants
-  public static final int FILE_STRUCTURE_REQUEST_TIMEOUT = 10_000;
+  public static final int REQUEST_TIMEOUT = 10_000;
   public static final int EFFECTIVE_POM_REQUEST_TIMEOUT = 30_000;
+
+  // JSON RPC methods
+  public static final String FILE_STRUCTURE = "java/filestructure";
+  public static final String EXTERNAL_LIBRARIES = "java/externalLibraries";
+  public static final String EXTERNAL_LIBRARIES_CHILDREN = "java/externalLibrariesChildren";
+  public static final String EXTERNAL_LIBRARY_CHILDREN = "java/libraryChildren";
+  public static final String EXTERNAL_LIBRARY_ENTRY = "java/libraryEntry";
+  public static final String EXTERNAL_NODE_CONTENT = "java/libraryNodeContentByPath";
+  public static final String CLASS_PATH_TREE = "java/classpathTree";
 
   private Constants() {
     throw new UnsupportedOperationException("Unused constructor.");
