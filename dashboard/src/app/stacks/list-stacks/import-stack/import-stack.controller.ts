@@ -191,7 +191,7 @@ export class ImportStackController {
     // add ws-agent to default dev-machine for dockerfile recipe format
     defaultEnv.machines = DOCKERFILE === this.recipeFormat ? {
       'dev-machine': {
-        'agents': [],
+        'installers': [],
         'attributes': {
           'memoryLimitBytes': 2147483648
         }

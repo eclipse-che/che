@@ -20,7 +20,6 @@
           "installers": [
             "org.eclipse.che.terminal",
             "org.eclipse.che.ws-agent",
-            "org.eclipse.che.ssh",
             "org.eclipse.che.ls.csharp"
           ],
           "attributes": {

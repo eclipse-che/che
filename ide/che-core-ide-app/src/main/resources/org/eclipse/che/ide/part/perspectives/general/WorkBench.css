@@ -54,16 +54,16 @@
     opacity: 1;
 }
 
-.ide-work-bench-split-panel-left svg[name="workBenchIconMinimize"] {
+.ide-work-bench-split-panel-left *[name="workBenchIconMinimize"] {
 }
 
-.ide-work-bench-split-panel-right svg[name="workBenchIconMinimize"] {
+.ide-work-bench-split-panel-right *[name="workBenchIconMinimize"] {
     -webkit-transform: rotate(180deg);
     -moz-transform: rotate(180deg);
     transform: rotate(180deg);
 }
 
-.ide-work-bench-split-panel-bottom svg[name="workBenchIconMinimize"] {
+.ide-work-bench-split-panel-bottom *[name="workBenchIconMinimize"] {
     -webkit-transform: rotate(-90deg);
     -moz-transform: rotate(-90deg);
     transform: rotate(-90deg);

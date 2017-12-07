@@ -93,6 +93,7 @@ public class WorkspacePresenter
   public void go(AcceptsOneWidget container) {
     mainMenu.go(view.getMenuPanel());
     toolbarPresenter.go(view.getToolbarPanel());
+    bottomMenu.go(view.getStatusPanel());
 
     container.setWidget(view);
   }

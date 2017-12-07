@@ -45,6 +45,8 @@ public class WorkspaceViewImpl extends LayoutPanel implements WorkspaceView {
 
   @UiField SimplePanel toolbarPanel, noToolbarPanel;
 
+  @UiField SimplePanel statusPanel;
+
   ActionDelegate delegate;
 
   private boolean toolbar = true;
@@ -91,5 +93,10 @@ public class WorkspaceViewImpl extends LayoutPanel implements WorkspaceView {
   @Override
   public AcceptsOneWidget getToolbarPanel() {
     return toolbarPanel;
+  }
+
+  @Override
+  public AcceptsOneWidget getStatusPanel() {
+    return statusPanel;
   }
 }

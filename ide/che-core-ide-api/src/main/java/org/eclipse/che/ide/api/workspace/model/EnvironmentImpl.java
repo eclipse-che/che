@@ -10,15 +10,10 @@
  */
 package org.eclipse.che.ide.api.workspace.model;
 
-import static java.util.stream.Collectors.toList;
-
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
@@ -28,12 +23,8 @@ public class EnvironmentImpl implements Environment {
 
   private RecipeImpl recipe;
   private Map<String, MachineConfigImpl> machines;
-  private List<WarningImpl> warnings;
 
-  public EnvironmentImpl(
-      Recipe recipe,
-      Map<String, ? extends MachineConfig> machines,
-      List<? extends Warning> warnings) {
+  public EnvironmentImpl(Recipe recipe, Map<String, ? extends MachineConfig> machines) {
     if (recipe != null) {
       this.recipe = new RecipeImpl(recipe);
     }
@@ -46,13 +37,10 @@ public class EnvironmentImpl implements Environment {
                   Collectors.toMap(
                       Map.Entry::getKey, entry -> new MachineConfigImpl(entry.getValue())));
     }
-    if (warnings != null) {
-      this.warnings = warnings.stream().map(WarningImpl::new).collect(toList());
-    }
   }
 
   public EnvironmentImpl(Environment environment) {
-    this(environment.getRecipe(), environment.getMachines(), environment.getWarnings());
+    this(environment.getRecipe(), environment.getMachines());
   }
 
   public RecipeImpl getRecipe() {
@@ -68,14 +56,6 @@ public class EnvironmentImpl implements Environment {
   }
 
   @Override
-  public List<? extends WarningImpl> getWarnings() {
-    if (warnings == null) {
-      warnings = new ArrayList<>();
-    }
-    return warnings;
-  }
-
-  @Override
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;
@@ -84,9 +64,7 @@ public class EnvironmentImpl implements Environment {
       return false;
     }
     final EnvironmentImpl that = (EnvironmentImpl) obj;
-    return Objects.equals(recipe, that.recipe)
-        && getMachines().equals(that.getMachines())
-        && getWarnings().equals(that.getWarnings());
+    return Objects.equals(recipe, that.recipe) && getMachines().equals(that.getMachines());
   }
 
   @Override
@@ -94,19 +72,11 @@ public class EnvironmentImpl implements Environment {
     int hash = 7;
     hash = 31 * hash + Objects.hashCode(recipe);
     hash = 31 * hash + getMachines().hashCode();
-    hash = 31 * hash + getWarnings().hashCode();
     return hash;
   }
 
   @Override
   public String toString() {
-    return "EnvironmentImpl{"
-        + "recipe="
-        + recipe
-        + ", machines="
-        + machines
-        + ", warnings="
-        + warnings
-        + '}';
+    return "EnvironmentImpl{" + "recipe=" + recipe + ", machines=" + machines + '}';
   }
 }

@@ -938,6 +938,9 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("macro.workspace.name.description")
   String macroWorkspaceNameDescription();
 
+  @Key("macro.workspace.namespace.description")
+  String macroWorkspaceNamespaceDescription();
+
   @Key("macro.explorer.current.file.name.description")
   String macroExplorerCurrentFileNameDescription();
 
@@ -1086,6 +1089,9 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("macro.current.project.path.description")
   String macroCurrentProjectPathDescription();
+
+  @Key("macro.current.project.eldest.parent.path.description")
+  String macroCurrentProjectEldestParentPathDescription();
 
   @Key("macro.current.project.relpath.description")
   String macroCurrentProjectRelpathDescription();

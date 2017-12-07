@@ -36,6 +36,7 @@ RUN mkdir $HOME/.m2 && \
    rm /home/user/tomcat8.zip;\
    mkdir /home/user/tomcat8/webapps;\
    sed -i -- 's/autoDeploy=\"false\"/autoDeploy=\"true\"/g' /home/user/tomcat8/conf/server.xml; \
+   sed -i 's/<Context>/<Context reloadable=\"true\">/g' /home/user/tomcat8/conf/context.xml; \
    echo "export MAVEN_OPTS=\$JAVA_OPTS" >> /home/user/.bashrc
 
 USER user

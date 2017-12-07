@@ -57,14 +57,14 @@ public class KeyBindingsTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    ide.open(testWorkspace);
-
     URL resource = KeyBindings.class.getResource("/projects/default-spring-project");
     projectServiceClient.importProject(
         testWorkspace.getId(),
         Paths.get(resource.toURI()),
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
+
+    ide.open(testWorkspace);
   }
 
   @Test

@@ -11,6 +11,7 @@
 'use strict';
 
 interface IEditor {
+  refresh: Function;
   on(name: string, listener: (...args: any[]) => any);
   getDoc(): any;
 }
@@ -59,6 +60,9 @@ export class CheEditorController {
     this.editorOptions = {
       mode: angular.isString(this.editorMode) ? this.editorMode : 'application/json',
       onLoad: (editor: IEditor) => {
+        $timeout(() => {
+          editor.refresh();
+        }, 500);
         const doc = editor.getDoc();
         editor.on('change', () => {
           $timeout(() => {
@@ -92,7 +96,7 @@ export class CheEditorController {
             if (angular.isFunction(this.onContentChange)) {
               this.onContentChange({editorState: this.editorState});
             }
-          }, 1000);
+          }, 1500);
         });
       }
     };

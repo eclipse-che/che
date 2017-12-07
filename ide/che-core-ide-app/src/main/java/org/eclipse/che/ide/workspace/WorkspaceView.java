@@ -33,6 +33,13 @@ public interface WorkspaceView extends View<WorkspaceView.ActionDelegate> {
   /** @return toolbar panel */
   AcceptsOneWidget getToolbarPanel();
 
+  /**
+   * Returns status panel ( an information panel located under actions panel )
+   *
+   * @return status panel
+   */
+  AcceptsOneWidget getStatusPanel();
+
   /** Sets visibility of toolbar. */
   void showToolbar(boolean show);
 

@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard;
 
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -18,7 +20,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Ann Shumilova */
@@ -34,11 +35,11 @@ public class ProjectSourcePage {
   }
 
   public enum Sources {
-    SAMPLES("Samples"),
-    BLANK("Blank"),
-    GIT("Git"),
-    GITHUB("Github"),
-    ZIP("Zip");
+    SAMPLES("samples"),
+    BLANK("blank"),
+    GIT("git"),
+    GITHUB("github"),
+    ZIP("zip");
 
     private final String title;
 
@@ -48,67 +49,93 @@ public class ProjectSourcePage {
   }
 
   private interface Locators {
-    String ADD_OR_IMPORT_PROJECT_BUTTON_XPATH = "//*[@id=\"ADD_PROJECT\"]";
-
-    String POPOVER_CSS = "project-source-selector";
-    String POPOVER_XPATH = "project-source-selector";
-    String ADD_BUTTON_XPATH = "//che-button-primary[@che-button-title='Add']";
-
-    String SOURCE_XPATH = "//che-toggle-joined-button//span[text()='%s']";
-
-    String SAMPLE_XPATH = "//template-selector-item//span[text()='%s']";
-    String SAMPLE_CHECKBOX_XPATH = "//md-checkbox[@aria-label='Sample %s']";
-
-    String GIT_REPO_XPATH = "//input[@name='remoteGitURL']";
-    String ZIP_XPATH = "//input[@name='remoteZipURL']";
-    String ZIP_SKIP_ROOT_XPATH = "//div[contains(@class, 'skip-root-container')]/md-checkbox";
+    String ADD_OR_IMPORT_PROJECT_BUTTON = "ADD_PROJECT";
+    String PROJECT_SOURCE_SELECTOR = "project-source-selector";
+    String SAMPLES_BUTTON = "%s-button";
+    String SAMPLE_CHECKBOX = "//div[@id='sample-%s']/md-checkbox";
+    String TEMPLATE_NAME = "//span[contains(@class,'template-selector-item-name')]";
+    String TEMPLATE_DESCRIPTION = "//span[contains(@class,'template-selector-item-description')]";
+    String GIT_REPO_XPATH = "remote-git-url-input";
+    String ZIP_XPATH = "remote-zip-url-input";
+    String ZIP_SKIP_ROOT_XPATH = "zip-skip-root-folder-checkbox";
+    String ADD_PROJECT_BUTTON = "add-project-button";
+    String CANCEL_BUTTON = "cancel-button";
   }
 
-  @FindBy(xpath = Locators.ADD_OR_IMPORT_PROJECT_BUTTON_XPATH)
+  public interface Template {
+    String WEB_JAVA_SPRING = "web-java-spring";
+    String CONSOLE_JAVA_SIMPLE = "console-java-simple";
+    String WEB_JAVA_PETCLINIC = "web-java-petclinic";
+  }
+
+  @FindBy(id = Locators.ADD_OR_IMPORT_PROJECT_BUTTON)
   WebElement addOrImportProjectButton;
 
-  @FindBy(css = Locators.POPOVER_CSS)
-  WebElement popover;
+  @FindBy(id = Locators.PROJECT_SOURCE_SELECTOR)
+  WebElement projectSourceSelector;
 
-  @FindBy(xpath = Locators.GIT_REPO_XPATH)
+  @FindBy(id = Locators.GIT_REPO_XPATH)
   WebElement gitRepositoryInput;
 
-  @FindBy(xpath = Locators.ZIP_XPATH)
+  @FindBy(id = Locators.ZIP_XPATH)
   WebElement zipLocationInput;
 
-  @FindBy(xpath = Locators.ZIP_SKIP_ROOT_XPATH)
+  @FindBy(id = Locators.ZIP_SKIP_ROOT_XPATH)
   WebElement zipSkipRoot;
 
-  @FindBy(xpath = Locators.ADD_BUTTON_XPATH)
-  WebElement addButton;
+  @FindBy(id = Locators.CANCEL_BUTTON)
+  WebElement cancelButton;
 
-  public void clickAddOrImportProjectButton() {
+  @FindBy(id = Locators.ADD_PROJECT_BUTTON)
+  WebElement addProjectButton;
+
+  public void clickOnAddOrImportProjectButton() {
     addOrImportProjectButton.click();
   }
 
+  // wait that the Project Source Selector visible
   public void waitOpened() {
     new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOADER_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(Locators.POPOVER_CSS)));
+        .until(visibilityOf(projectSourceSelector));
   }
 
+  /**
+   * select type of created project
+   *
+   * @param source is type of the existing templates
+   */
   public void selectSourceTab(Sources source) {
     WebElement sourceTab =
-        seleniumWebDriver.findElement(By.xpath(String.format(Locators.SOURCE_XPATH, source.title)));
+        seleniumWebDriver.findElement(By.id(String.format(Locators.SAMPLES_BUTTON, source.title)));
     sourceTab.click();
   }
 
+  /**
+   * Select project sample
+   *
+   * @param name name of sample
+   */
   public void selectSample(String name) {
     WebElement sample =
-        seleniumWebDriver.findElement(
-            By.xpath(String.format(Locators.SAMPLE_CHECKBOX_XPATH, name)));
+        seleniumWebDriver.findElement(By.xpath(String.format(Locators.SAMPLE_CHECKBOX, name)));
     sample.click();
   }
 
+  /**
+   * Enter Git URL for project in the 'New Project' tab
+   *
+   * @param url URL for project on git repository
+   */
   public void typeGitRepositoryLocation(String url) {
     gitRepositoryInput.clear();
     gitRepositoryInput.sendKeys(url);
   }
 
+  /**
+   * Enter ZIP URL for project in the 'New Project' tab
+   *
+   * @param url URL for zip archive
+   */
   public void typeZipLocation(String url) {
     zipLocationInput.clear();
     zipLocationInput.sendKeys(url);
@@ -118,7 +145,11 @@ public class ProjectSourcePage {
     zipSkipRoot.click();
   }
 
-  public void clickAdd() {
-    addButton.click();
+  public void clickOnAddProjectButton() {
+    addProjectButton.click();
+  }
+
+  public void clickOnCancelProjectButton() {
+    cancelButton.click();
   }
 }

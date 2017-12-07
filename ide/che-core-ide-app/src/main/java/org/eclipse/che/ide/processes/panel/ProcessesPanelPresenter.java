@@ -501,7 +501,7 @@ public class ProcessesPanelPresenter extends BasePresenter
 
     // user
     final String userName;
-    String user = machine.get().getProperties().get("config.user");
+    String user = machine.get().getAttributes().get("config.user");
     if (isNullOrEmpty(user)) {
       userName = "root";
     } else {

@@ -223,8 +223,7 @@ public class WorkspaceLoadingTrackerImpl
   }
 
   @Override
-  public void onInstallerFailed(InstallerFailedEvent event) {
-  }
+  public void onInstallerFailed(InstallerFailedEvent event) {}
 
   @Override
   public void onWorkspaceStarting(WorkspaceStartingEvent event) {
