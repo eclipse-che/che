@@ -11,34 +11,34 @@
  */
 package org.eclipse.che.ide.ext.java.client.editor;
 
+import static org.eclipse.che.ide.api.editor.text.LinearRange.createWithStart;
+
 import com.google.common.base.Optional;
 import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
-import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.Container;
-import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
+import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.ide.ext.java.client.tree.JavaNodeFactory;
 import org.eclipse.che.ide.ext.java.client.tree.library.JarFileNode;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
-import org.eclipse.che.ide.ext.java.shared.JarEntry;
 import org.eclipse.che.ide.ext.java.shared.OpenDeclarationDescriptor;
-import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 
 /**
  * @author Evgen Vidolob
@@ -48,18 +48,24 @@ import org.eclipse.che.ide.util.loging.Log;
 public class OpenDeclarationFinder {
 
   private final EditorAgent editorAgent;
+  private DtoFactory dtoFactory;
   private final JavaNavigationService navigationService;
+  private JavaLanguageExtensionServiceClient extensionService;
   private final AppContext appContext;
   private JavaNodeFactory javaNodeFactory;
 
   @Inject
   public OpenDeclarationFinder(
       EditorAgent editorAgent,
+      DtoFactory dtoFactory,
       JavaNavigationService navigationService,
+      JavaLanguageExtensionServiceClient extensionService,
       AppContext appContext,
       JavaNodeFactory javaNodeFactory) {
     this.editorAgent = editorAgent;
+    this.dtoFactory = dtoFactory;
     this.navigationService = navigationService;
+    this.extensionService = extensionService;
     this.appContext = appContext;
     this.javaNodeFactory = javaNodeFactory;
   }
@@ -93,12 +99,9 @@ public class OpenDeclarationFinder {
       navigationService
           .findDeclaration(project.get().getLocation(), fqn, offset)
           .then(
-              new Operation<OpenDeclarationDescriptor>() {
-                @Override
-                public void apply(OpenDeclarationDescriptor result) throws OperationException {
-                  if (result != null) {
-                    handleDescriptor(project.get().getLocation(), result);
-                  }
+              result -> {
+                if (result != null) {
+                  handleDescriptor(project.get().getLocation(), result);
                 }
               });
 
@@ -109,12 +112,9 @@ public class OpenDeclarationFinder {
               file.getLocation().toString().replace('/', '.'),
               offset)
           .then(
-              new Operation<OpenDeclarationDescriptor>() {
-                @Override
-                public void apply(OpenDeclarationDescriptor result) throws OperationException {
-                  if (result != null) {
-                    handleDescriptor(((JarFileNode) file).getProject(), result);
-                  }
+              result -> {
+                if (result != null) {
+                  handleDescriptor(((JarFileNode) file).getProject(), result);
                 }
               });
     }
@@ -134,7 +134,7 @@ public class OpenDeclarationFinder {
         if (editor instanceof TextEditor) {
           ((TextEditor) editor)
               .getDocument()
-              .setSelectedRange(LinearRange.createWithStart(offset).andLength(0), true);
+              .setSelectedRange(createWithStart(offset).andLength(0), true);
           editor.activate(); // force set focus to the editor
         }
       }
@@ -146,102 +146,98 @@ public class OpenDeclarationFinder {
     final EditorPartPresenter openedEditor =
         editorAgent.getOpenedEditor(Path.valueOf(descriptor.getPath()));
     if (openedEditor != null) {
-      editorAgent.openEditor(
-          openedEditor.getEditorInput().getFile(),
-          new OpenEditorCallbackImpl() {
-            @Override
-            public void onEditorOpened(EditorPartPresenter editor) {
-              setCursorAndActivateEditor(editor, descriptor.getOffset());
-            }
-
-            @Override
-            public void onEditorActivated(EditorPartPresenter editor) {
-              setCursorAndActivateEditor(editor, descriptor.getOffset());
-            }
-          });
+      activateOpenedEditor(descriptor, openedEditor);
       return;
     }
 
     if (descriptor.isBinary()) {
-      navigationService
-          .getEntry(projectPath, descriptor.getLibId(), descriptor.getPath())
-          .then(
-              new Operation<JarEntry>() {
-                @Override
-                public void apply(final JarEntry entry) throws OperationException {
-                  navigationService
-                      .getContent(projectPath, descriptor.getLibId(), Path.valueOf(entry.getPath()))
-                      .then(
-                          new Operation<ClassContent>() {
-                            @Override
-                            public void apply(ClassContent content) throws OperationException {
-                              final VirtualFile file =
-                                  javaNodeFactory.newJarFileNode(
-                                      entry, descriptor.getLibId(), projectPath, null);
-                              editorAgent.openEditor(
-                                  file,
-                                  new OpenEditorCallbackImpl() {
-                                    @Override
-                                    public void onEditorOpened(final EditorPartPresenter editor) {
-                                      Scheduler.get()
-                                          .scheduleDeferred(
-                                              new Scheduler.ScheduledCommand() {
-                                                @Override
-                                                public void execute() {
-                                                  if (editor instanceof TextEditor) {
-                                                    ((TextEditor) editor)
-                                                        .getDocument()
-                                                        .setSelectedRange(
-                                                            LinearRange.createWithStart(
-                                                                    descriptor.getOffset())
-                                                                .andLength(0),
-                                                            true);
-                                                    editor.activate();
-                                                  }
-                                                }
-                                              });
-                                    }
-                                  });
-                            }
-                          });
-                }
-              });
+      getLibraryEntry(projectPath, descriptor);
     } else {
-      appContext
-          .getWorkspaceRoot()
-          .getFile(descriptor.getPath())
-          .then(
-              new Operation<Optional<File>>() {
-                @Override
-                public void apply(Optional<File> file) throws OperationException {
-                  if (file.isPresent()) {
-                    editorAgent.openEditor(
-                        file.get(),
-                        new OpenEditorCallbackImpl() {
-                          @Override
-                          public void onEditorOpened(final EditorPartPresenter editor) {
-                            Scheduler.get()
-                                .scheduleDeferred(
-                                    new Scheduler.ScheduledCommand() {
-                                      @Override
-                                      public void execute() {
-                                        if (editor instanceof TextEditor) {
-                                          ((TextEditor) editor)
-                                              .getDocument()
-                                              .setSelectedRange(
-                                                  LinearRange.createWithStart(
-                                                          descriptor.getOffset())
-                                                      .andLength(0),
-                                                  true);
-                                          editor.activate();
-                                        }
-                                      }
-                                    });
-                          }
-                        });
-                  }
-                }
-              });
+      openFileFromWorkspace(descriptor);
     }
+  }
+
+  private void activateOpenedEditor(
+      OpenDeclarationDescriptor descriptor, EditorPartPresenter openedEditor) {
+    editorAgent.openEditor(
+        openedEditor.getEditorInput().getFile(),
+        new OpenEditorCallbackImpl() {
+          @Override
+          public void onEditorOpened(EditorPartPresenter editor) {
+            setCursorAndActivateEditor(editor, descriptor.getOffset());
+          }
+
+          @Override
+          public void onEditorActivated(EditorPartPresenter editor) {
+            setCursorAndActivateEditor(editor, descriptor.getOffset());
+          }
+        });
+  }
+
+  private void openFileFromWorkspace(OpenDeclarationDescriptor descriptor) {
+    appContext
+        .getWorkspaceRoot()
+        .getFile(descriptor.getPath())
+        .then(
+            file -> {
+              if (file.isPresent()) {
+                openEditor(descriptor, file.get());
+              }
+            });
+  }
+
+  private void getLibraryEntry(Path projectPath, OpenDeclarationDescriptor descriptor) {
+    ExternalLibrariesParameters entryParams =
+        dtoFactory.createDto(ExternalLibrariesParameters.class);
+    entryParams.setNodeId(descriptor.getLibId());
+    entryParams.setNodePath(descriptor.getPath());
+    entryParams.setProjectUri(projectPath.toString());
+    extensionService
+        .libraryEntry(entryParams)
+        .then(
+            entry -> {
+              openBinaryContent(projectPath, descriptor, entry);
+            });
+  }
+
+  private void openBinaryContent(
+      Path projectPath, OpenDeclarationDescriptor descriptor, JarEntry entry) {
+    ExternalLibrariesParameters params = dtoFactory.createDto(ExternalLibrariesParameters.class);
+    params.setNodeId(descriptor.getLibId());
+    params.setNodePath(entry.getPath());
+    params.setProjectUri(projectPath.toString());
+    extensionService
+        .libraryNodeContentByPath(params)
+        .then(
+            content -> {
+              final VirtualFile file =
+                  javaNodeFactory.newJarFileNode(entry, descriptor.getLibId(), projectPath, null);
+              openEditor(descriptor, file);
+            });
+  }
+
+  private void openEditor(OpenDeclarationDescriptor descriptor, VirtualFile file) {
+    editorAgent.openEditor(
+        file,
+        new OpenEditorCallbackImpl() {
+          @Override
+          public void onEditorOpened(final EditorPartPresenter editor) {
+            OpenDeclarationFinder.this.onEditorOpened(editor, descriptor);
+          }
+        });
+  }
+
+  private void onEditorOpened(EditorPartPresenter editor, OpenDeclarationDescriptor descriptor) {
+    Scheduler.get()
+        .scheduleDeferred(
+            () -> {
+              if (!(editor instanceof TextEditor)) {
+                return;
+              }
+              ((TextEditor) editor)
+                  .getDocument()
+                  .setSelectedRange(createWithStart(descriptor.getOffset()).andLength(0), true);
+              editor.activate();
+            });
   }
 }
