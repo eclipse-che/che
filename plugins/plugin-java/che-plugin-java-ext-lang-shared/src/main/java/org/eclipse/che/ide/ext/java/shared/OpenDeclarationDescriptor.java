@@ -16,9 +16,9 @@ import org.eclipse.che.dto.shared.DTO;
 /** @author Evgen Vidolob */
 @DTO
 public interface OpenDeclarationDescriptor {
-  int getLibId();
+  String getLibId();
 
-  void setLibId(int libId);
+  void setLibId(String libId);
 
   int getOffset();
 
