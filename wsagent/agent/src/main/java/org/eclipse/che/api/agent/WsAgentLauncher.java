@@ -54,6 +54,7 @@ public class WsAgentLauncher implements AgentLauncher {
   private final long wsAgentMaxStartTimeMs;
   private final long wsAgentPingDelayMs;
   private final String pingTimedOutErrorMessage;
+  private final int wsAgentPingSuccessThreshold;
   private final String wsAgentRunCommand;
 
   @Inject
@@ -64,12 +65,14 @@ public class WsAgentLauncher implements AgentLauncher {
       @Nullable @Named("machine.ws_agent.run_command") String wsAgentRunCommand,
       @Named("che.workspace.agent.dev.max_start_time_ms") long wsAgentMaxStartTimeMs,
       @Named("che.workspace.agent.dev.ping_delay_ms") long wsAgentPingDelayMs,
+      @Named("che.workspace.agent.dev.ping_success_threshold") int wsAgentPingSuccessThreshold,
       @Named("che.workspace.agent.dev.ping_timeout_error_msg") String pingTimedOutErrorMessage) {
     this.machineProcessManagerProvider = machineProcessManagerProvider;
     this.wsAgentPingRequestFactory = wsAgentPingRequestFactory;
     this.wsAgentHealthChecker = wsAgentHealthChecker;
     this.wsAgentMaxStartTimeMs = wsAgentMaxStartTimeMs;
     this.wsAgentPingDelayMs = wsAgentPingDelayMs;
+    this.wsAgentPingSuccessThreshold = wsAgentPingSuccessThreshold;
     this.pingTimedOutErrorMessage = pingTimedOutErrorMessage;
     this.wsAgentRunCommand = wsAgentRunCommand;
   }
@@ -121,12 +124,19 @@ public class WsAgentLauncher implements AgentLauncher {
           wsAgentPingUrl,
           pingStartTimestamp);
 
+      int pingSuccess = 0;
       while (System.currentTimeMillis() - pingStartTimestamp < wsAgentMaxStartTimeMs) {
         if (pingWsAgent(machine)) {
-          return;
+          pingSuccess++;
         } else {
-          Thread.sleep(wsAgentPingDelayMs);
+          pingSuccess = 0;
         }
+
+        if (pingSuccess == wsAgentPingSuccessThreshold) {
+          return;
+        }
+
+        Thread.sleep(wsAgentPingDelayMs);
       }
     } catch (BadRequestException | ServerException | NotFoundException e) {
       throw new ServerException(e.getServiceError());

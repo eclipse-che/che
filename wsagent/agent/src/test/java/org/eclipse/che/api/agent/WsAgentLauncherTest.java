@@ -52,6 +52,7 @@ public class WsAgentLauncherTest {
   private static final String WS_AGENT_PORT = Constants.WS_AGENT_PORT;
   private static final long WS_AGENT_MAX_START_TIME_MS = 1000;
   private static final long WS_AGENT_PING_DELAY_MS = 1;
+  private static final int WS_AGENT_PING_SUCCESS_THRESHOLD = 5;
   private static final String WS_AGENT_SERVER_LOCATION = "ws-agent.com:456789/";
   private static final String WS_AGENT_SERVER_URL = "http://" + WS_AGENT_SERVER_LOCATION;
   private static final String WS_AGENT_SERVER_LOCATION_EXT = "ws-agent-ext.com:456789/";
@@ -84,6 +85,7 @@ public class WsAgentLauncherTest {
             null,
             WS_AGENT_MAX_START_TIME_MS,
             WS_AGENT_PING_DELAY_MS,
+            WS_AGENT_PING_SUCCESS_THRESHOLD,
             WS_AGENT_TIMED_OUT_MESSAGE);
     pingRequest = Mockito.mock(HttpJsonRequest.class, new SelfReturningAnswer());
     Mockito.when(agent.getScript()).thenReturn("script");
@@ -119,8 +121,9 @@ public class WsAgentLauncherTest {
   public void shouldPingWsAgentAfterStart() throws Exception {
     wsAgentLauncher.launch(machine, agent);
 
-    Mockito.verify(wsAgentHealthChecker).check(any(Machine.class));
-    Mockito.verify(pingResponse).getCode();
+    Mockito.verify(wsAgentHealthChecker, Mockito.times(WS_AGENT_PING_SUCCESS_THRESHOLD))
+        .check(any(Machine.class));
+    Mockito.verify(pingResponse, Mockito.times(WS_AGENT_PING_SUCCESS_THRESHOLD)).getCode();
   }
 
   @Test
@@ -131,8 +134,9 @@ public class WsAgentLauncherTest {
 
     wsAgentLauncher.launch(machine, agent);
 
-    Mockito.verify(wsAgentHealthChecker, Mockito.times(2)).check(any(Machine.class));
-    Mockito.verify(pingResponse).getCode();
+    Mockito.verify(wsAgentHealthChecker, Mockito.times(1 + WS_AGENT_PING_SUCCESS_THRESHOLD))
+        .check(any(Machine.class));
+    Mockito.verify(pingResponse, Mockito.times(WS_AGENT_PING_SUCCESS_THRESHOLD)).getCode();
   }
 
   @Test
@@ -146,20 +150,22 @@ public class WsAgentLauncherTest {
 
     wsAgentLauncher.launch(machine, agent);
 
-    Mockito.verify(wsAgentHealthChecker, Mockito.times(3)).check(any(Machine.class));
-    Mockito.verify(pingResponse, Mockito.times(3)).getCode();
+    Mockito.verify(wsAgentHealthChecker, Mockito.times(2 + WS_AGENT_PING_SUCCESS_THRESHOLD))
+        .check(any(Machine.class));
+    Mockito.verify(pingResponse, Mockito.times(2 + WS_AGENT_PING_SUCCESS_THRESHOLD)).getCode();
   }
 
   @Test
-  public void shouldNotPingWsAgentAfterFirstSuccessfulPing() throws Exception {
+  public void shouldNotPingWsAgentAfterSuccessThresholdPing() throws Exception {
     Mockito.when(wsAgentHealthChecker.check(any(Machine.class)))
         .thenThrow(new ServerException(""))
         .thenReturn(pingResponse);
 
     wsAgentLauncher.launch(machine, agent);
 
-    Mockito.verify(wsAgentHealthChecker, Mockito.times(2)).check(any(Machine.class));
-    Mockito.verify(pingResponse).getCode();
+    Mockito.verify(wsAgentHealthChecker, Mockito.times(1 + WS_AGENT_PING_SUCCESS_THRESHOLD))
+        .check(any(Machine.class));
+    Mockito.verify(pingResponse, Mockito.times(WS_AGENT_PING_SUCCESS_THRESHOLD)).getCode();
   }
 
   @Test(
@@ -218,5 +224,19 @@ public class WsAgentLauncherTest {
     Mockito.when(wsAgentHealthChecker.check(any(Machine.class))).thenThrow(new ServerException(""));
 
     wsAgentLauncher.launch(machine, agent);
+  }
+
+  @Test
+  public void shouldContinuePingWsAgentAfterNotConsecutiveSuccessThresholdPing() throws Exception {
+    Mockito.when(wsAgentHealthChecker.check(any(Machine.class)))
+        .thenReturn(pingResponse)
+        .thenThrow(new ServerException(""))
+        .thenReturn(pingResponse);
+
+    wsAgentLauncher.launch(machine, agent);
+
+    Mockito.verify(wsAgentHealthChecker, Mockito.times(2 + WS_AGENT_PING_SUCCESS_THRESHOLD))
+        .check(any(Machine.class));
+    Mockito.verify(pingResponse, Mockito.times(1 + WS_AGENT_PING_SUCCESS_THRESHOLD)).getCode();
   }
 }
