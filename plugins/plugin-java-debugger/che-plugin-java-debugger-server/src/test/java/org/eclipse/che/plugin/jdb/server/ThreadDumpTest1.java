@@ -56,7 +56,7 @@ public class ThreadDumpTest1 {
     debugger = new JavaDebugger("localhost", parseInt(getProperty("debug.port")), events::add);
     Location location =
         new LocationImpl(
-            "/test/src/org/eclipse/ThreadDumpTest1.java", 26, false, -1, "/test", null, -1);
+            "/test/src/org/eclipse/ThreadDumpTest1.java", 26, false, null, "/test", null, -1);
     BreakpointImpl breakpoint = new BreakpointImpl(location);
 
     debugger.start(new StartActionImpl(Collections.singletonList(breakpoint)));
