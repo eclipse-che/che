@@ -21,10 +21,6 @@ import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.P
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.List;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -35,9 +31,8 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathResolver;
-import org.eclipse.che.ide.ext.java.client.project.classpath.service.ClasspathServiceClient;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
+import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 
 /**
  * The action which marks a folder into the project as source folder.
@@ -47,7 +42,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 @Singleton
 public class MarkDirAsSourceAction extends AbstractPerspectiveAction {
   private final AppContext appContext;
-  private final ClasspathServiceClient classpathService;
+  private final JavaLanguageExtensionServiceClient extensionService;
   private final ClasspathResolver classpathResolver;
   private final NotificationManager notificationManager;
 
@@ -55,7 +50,7 @@ public class MarkDirAsSourceAction extends AbstractPerspectiveAction {
   public MarkDirAsSourceAction(
       JavaResources javaResources,
       AppContext appContext,
-      ClasspathServiceClient classpathService,
+      JavaLanguageExtensionServiceClient extensionService,
       ClasspathResolver classpathResolver,
       NotificationManager notificationManager,
       JavaLocalizationConstant locale) {
@@ -66,7 +61,7 @@ public class MarkDirAsSourceAction extends AbstractPerspectiveAction {
         javaResources.sourceFolder());
 
     this.appContext = appContext;
-    this.classpathService = classpathService;
+    this.extensionService = extensionService;
     this.classpathResolver = classpathResolver;
     this.notificationManager = notificationManager;
   }
@@ -81,24 +76,18 @@ public class MarkDirAsSourceAction extends AbstractPerspectiveAction {
 
     checkState(project.isPresent());
 
-    classpathService
-        .getClasspath(project.get().getLocation().toString())
+    extensionService
+        .classpathTree(project.get().getLocation().toString())
         .then(
-            new Operation<List<ClasspathEntryDto>>() {
-              @Override
-              public void apply(List<ClasspathEntryDto> arg) throws OperationException {
-                classpathResolver.resolveClasspathEntries(arg);
-                classpathResolver.getSources().add(resource.getLocation().toString());
-                classpathResolver.updateClasspath();
-              }
+            classpathEntries -> {
+              classpathResolver.resolveClasspathEntries(classpathEntries);
+              classpathResolver.getSources().add(resource.getLocation().toString());
+              classpathResolver.updateClasspath();
             })
         .catchError(
-            new Operation<PromiseError>() {
-              @Override
-              public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(
-                    "Can't get classpath", arg.getMessage(), FAIL, EMERGE_MODE);
-              }
+            error -> {
+              notificationManager.notify(
+                  "Can't get classpath", error.getMessage(), FAIL, EMERGE_MODE);
             });
   }
 

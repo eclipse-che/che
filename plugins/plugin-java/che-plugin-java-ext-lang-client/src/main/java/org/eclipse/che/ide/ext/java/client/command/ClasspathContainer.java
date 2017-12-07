@@ -20,7 +20,7 @@ import java.util.Map;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathChangedEvent;
-import org.eclipse.che.ide.ext.java.client.project.classpath.service.ClasspathServiceClient;
+import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 
 /**
@@ -32,14 +32,13 @@ import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 public class ClasspathContainer implements ClasspathChangedEvent.ClasspathChangedHandler {
   public static String JRE_CONTAINER = "org.eclipse.jdt.launching.JRE_CONTAINER";
 
-  private final ClasspathServiceClient classpathServiceClient;
-
+  private final JavaLanguageExtensionServiceClient extensionService;
   private Map<String, Promise<List<ClasspathEntryDto>>> classpathes;
 
   @Inject
-  public ClasspathContainer(ClasspathServiceClient classpathServiceClient, EventBus eventBus) {
-    this.classpathServiceClient = classpathServiceClient;
-
+  public ClasspathContainer(
+      JavaLanguageExtensionServiceClient extensionService, EventBus eventBus) {
+    this.extensionService = extensionService;
     classpathes = new HashMap<>();
 
     eventBus.addHandler(ClasspathChangedEvent.TYPE, this);
@@ -56,7 +55,7 @@ public class ClasspathContainer implements ClasspathChangedEvent.ClasspathChange
     if (classpathes.containsKey(projectPath)) {
       return classpathes.get(projectPath);
     } else {
-      Promise<List<ClasspathEntryDto>> result = classpathServiceClient.getClasspath(projectPath);
+      Promise<List<ClasspathEntryDto>> result = extensionService.classpathTree(projectPath);
       classpathes.put(projectPath, result);
       return result;
     }
