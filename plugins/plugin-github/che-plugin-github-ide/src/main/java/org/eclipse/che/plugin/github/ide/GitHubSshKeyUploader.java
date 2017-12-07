@@ -21,9 +21,9 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
-import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
 import org.eclipse.che.security.oauth.JsOAuthWindow;
 import org.eclipse.che.security.oauth.OAuthCallback;
@@ -90,6 +90,10 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
 
                 @Override
                 protected void onFailure(Throwable e) {
+                  if (e instanceof UnauthorizedException) {
+                    oAuthLoginStart();
+                    return;
+                  }
                   callback.onFailure(e);
                 }
               });
