@@ -23,12 +23,14 @@ import java.util.Map.Entry;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 
 /**
  * Provides a unique PVC for each workspace.
@@ -51,6 +53,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   private final String pvcQuantity;
   private final String pvcAccessMode;
   private final OpenShiftClientFactory clientFactory;
+  private final OpenShiftProjectFactory factory;
 
   @Inject
   public UniqueWorkspacePVCStrategy(
@@ -58,25 +61,38 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
       @Named("che.infra.openshift.pvc.name") String pvcName,
       @Named("che.infra.openshift.pvc.quantity") String pvcQuantity,
       @Named("che.infra.openshift.pvc.access_mode") String pvcAccessMode,
+      OpenShiftProjectFactory factory,
       OpenShiftClientFactory clientFactory) {
     this.pvcName = pvcName;
     this.pvcQuantity = pvcQuantity;
     this.projectName = projectName;
     this.pvcAccessMode = pvcAccessMode;
     this.clientFactory = clientFactory;
+    this.factory = factory;
   }
 
   @Override
-  public void prepare(OpenShiftEnvironment osEnv, String workspaceId)
+  public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-    Map<String, PersistentVolumeClaim> claims = osEnv.getPersistentVolumeClaims();
+    final Map<String, PersistentVolumeClaim> claims = osEnv.getPersistentVolumeClaims();
     for (Pod pod : osEnv.getPods().values()) {
       final PodSpec podSpec = pod.getSpec();
       for (Container container : podSpec.getContainers()) {
         final String machineName = Names.machineName(pod, container);
         InternalMachineConfig machineConfig = osEnv.getMachines().get(machineName);
-        addMachineVolumes(workspaceId, claims, podSpec, container, machineConfig);
+        addMachineVolumes(identity.getWorkspaceId(), claims, podSpec, container, machineConfig);
       }
+    }
+  }
+
+  @Override
+  public void prepare(OpenShiftEnvironment osEnv, String workspaceId)
+      throws InfrastructureException {
+    if (!osEnv.getPersistentVolumeClaims().isEmpty()) {
+      factory
+          .create(workspaceId)
+          .persistentVolumeClaims()
+          .createIfNotExist(osEnv.getPersistentVolumeClaims().values());
     }
   }
 

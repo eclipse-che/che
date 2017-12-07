@@ -12,8 +12,12 @@ package org.eclipse.che.workspace.infrastructure.openshift.project.pvc;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.pvc.CommonPVCStrategyTest.mockName;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,10 +38,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftPersistentVolumeClaims;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 import org.mockito.Mock;
@@ -71,11 +79,15 @@ public class UniqueWorkspacePVCStrategyTest {
   private static final String VOLUME_1_NAME = "vol1";
   private static final String VOLUME_2_NAME = "vol2";
 
+  private static final RuntimeIdentity IDENTITY =
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "usr1");
+
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private OpenShiftClientFactory clientFactory;
   @Mock private OpenShiftClient client;
   @Mock private OpenShiftProjectFactory factory;
   @Mock private OpenShiftProject osProject;
+  @Mock private OpenShiftPersistentVolumeClaims pvcs;
   @Mock private Pod pod;
   @Mock private Pod pod2;
   @Mock private PodSpec podSpec;
@@ -84,13 +96,13 @@ public class UniqueWorkspacePVCStrategyTest {
   @Mock private Container container2;
   @Mock private Container container3;
 
-  private UniqueWorkspacePVCStrategy uniqueWorkspacePVCStrategy;
+  private UniqueWorkspacePVCStrategy strategy;
 
   @BeforeMethod
   public void setup() throws Exception {
-    uniqueWorkspacePVCStrategy =
+    strategy =
         new UniqueWorkspacePVCStrategy(
-            PROJECT_NAME, PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, clientFactory);
+            PROJECT_NAME, PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, factory, clientFactory);
     when(clientFactory.create()).thenReturn(client);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
@@ -131,29 +143,30 @@ public class UniqueWorkspacePVCStrategyTest {
     when(container3.getVolumeMounts()).thenReturn(new ArrayList<>());
 
     when(factory.create(WORKSPACE_ID)).thenReturn(osProject);
+    when(osProject.persistentVolumeClaims()).thenReturn(pvcs);
 
     mockName(pod, POD_NAME);
     mockName(pod2, POD_NAME_2);
   }
 
   @Test
-  public void testReplacePVCWhenItsAlreadyInOsEnvironment() throws Exception {
+  public void testReplacePVCWhenItsAlreadyInOpenShiftEnvironment() throws Exception {
     final Map<String, PersistentVolumeClaim> claims = new HashMap<>();
     final PersistentVolumeClaim provisioned = mock(PersistentVolumeClaim.class);
     claims.put(PVC_UNIQUE_NAME + '-' + VOLUME_1_NAME, provisioned);
     when(osEnv.getPersistentVolumeClaims()).thenReturn(claims);
 
-    uniqueWorkspacePVCStrategy.prepare(osEnv, WORKSPACE_ID);
+    strategy.provision(osEnv, IDENTITY);
 
     assertNotEquals(
         osEnv.getPersistentVolumeClaims().get(PVC_UNIQUE_NAME + '-' + VOLUME_1_NAME), provisioned);
   }
 
   @Test
-  public void addPVCWithUniqueNameToOsEnv() throws Exception {
+  public void testProvisionPVCWithUniqueName() throws Exception {
     when(osEnv.getPersistentVolumeClaims()).thenReturn(new HashMap<>());
 
-    uniqueWorkspacePVCStrategy.prepare(osEnv, WORKSPACE_ID);
+    strategy.provision(osEnv, IDENTITY);
 
     verify(container, times(2)).getVolumeMounts();
     verify(container2).getVolumeMounts();
@@ -174,6 +187,26 @@ public class UniqueWorkspacePVCStrategyTest {
   }
 
   @Test
+  public void testCreatesPVCsOnPrepare() throws Exception {
+    final PersistentVolumeClaim pvc = mockName(mock(PersistentVolumeClaim.class), PVC_NAME);
+    when(osEnv.getPersistentVolumeClaims()).thenReturn(singletonMap(PVC_NAME, pvc));
+    doNothing().when(pvcs).createIfNotExist(any());
+
+    strategy.prepare(osEnv, WORKSPACE_ID);
+
+    verify(pvcs).createIfNotExist(any());
+  }
+
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void throwsInfrastructureExceptionWhenFailedToCreatePVCs() throws Exception {
+    final PersistentVolumeClaim pvc = mockName(mock(PersistentVolumeClaim.class), PVC_NAME);
+    when(osEnv.getPersistentVolumeClaims()).thenReturn(singletonMap(PVC_NAME, pvc));
+    doThrow(InfrastructureException.class).when(pvcs).createIfNotExist(any());
+
+    strategy.prepare(osEnv, WORKSPACE_ID);
+  }
+
+  @Test
   public void testRemovesPVCWhenCleanupCalled() throws Exception {
     final MixedOperation mixedOperation = mock(MixedOperation.class);
     final NonNamespaceOperation namespace = mock(NonNamespaceOperation.class);
@@ -183,7 +216,7 @@ public class UniqueWorkspacePVCStrategyTest {
     doReturn(resource).when(namespace).withName(PVC_NAME + '-' + WORKSPACE_ID);
     when(resource.delete()).thenReturn(true);
 
-    uniqueWorkspacePVCStrategy.cleanup(WORKSPACE_ID);
+    strategy.cleanup(WORKSPACE_ID);
 
     verify(resource).delete();
   }
@@ -198,7 +231,7 @@ public class UniqueWorkspacePVCStrategyTest {
     doReturn(resource).when(namespace).withName(PVC_NAME + '-' + WORKSPACE_ID);
     when(resource.delete()).thenReturn(false);
 
-    uniqueWorkspacePVCStrategy.cleanup(WORKSPACE_ID);
+    strategy.cleanup(WORKSPACE_ID);
 
     verify(resource).delete();
   }

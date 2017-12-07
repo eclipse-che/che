@@ -102,7 +102,7 @@ public class PVCSubPathHelper {
    * @param workspaceId workspace identifier
    * @param dirs workspace directories to create
    */
-  public void createDirs(String workspaceId, String... dirs) {
+  void createDirs(String workspaceId, String... dirs) {
     execute(workspaceId, MKDIR_COMMAND_BASE, dirs);
   }
 
