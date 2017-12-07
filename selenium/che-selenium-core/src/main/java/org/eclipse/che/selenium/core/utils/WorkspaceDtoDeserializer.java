@@ -13,15 +13,17 @@ package org.eclipse.che.selenium.core.utils;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
-import java.io.File;
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
+import com.google.gson.JsonSyntaxException;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.net.URL;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.apache.commons.io.FileUtils;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.selenium.core.workspace.TestWorkspaceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Creates workspace config from JSON stored in resources. Takes into account current infrastructure
@@ -31,6 +33,9 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspaceImpl;
  * @author Alexander Garagatyi
  */
 public class WorkspaceDtoDeserializer {
+
+  private static final Logger LOG = LoggerFactory.getLogger(WorkspaceDtoDeserializer.class);
+
   @Inject
   @Named("che.selenium.infrastructure")
   private String infrastructure;
@@ -38,25 +43,21 @@ public class WorkspaceDtoDeserializer {
   public WorkspaceConfigDto deserializeWorkspaceTemplate(String templateName) {
     requireNonNull(templateName);
 
-    String pathToTemplate =
-        TestWorkspaceImpl.class
-            .getResource(format("/templates/workspace/%s/%s", infrastructure, templateName))
-            .getPath();
-
-    File templateFile = new File(pathToTemplate);
-    if (!templateFile.isFile()) {
-      throw new RuntimeException(
-          format(
-              "Workspace template %s file %s doesn't exist or not a file",
-              templateName, templateFile));
-    }
-
-    String json;
     try {
-      json = FileUtils.readFileToString(templateFile, Charset.forName("UTF-8"));
-    } catch (IOException e) {
-      throw new RuntimeException("Could not read template " + templateName);
+
+      URL url =
+          Resources.getResource(
+              WorkspaceDtoDeserializer.class,
+              format("/templates/workspace/%s/%s", infrastructure, templateName));
+      return DtoFactory.getInstance()
+          .createDtoFromJson(Resources.toString(url, Charsets.UTF_8), WorkspaceConfigDto.class);
+    } catch (IOException | IllegalArgumentException | JsonSyntaxException e) {
+      LOG.error(
+          "Fail to read workspace template {} for infrastructure {} because {} ",
+          templateName,
+          infrastructure,
+          e.getMessage());
+      throw new RuntimeException(e.getLocalizedMessage(), e);
     }
-    return DtoFactory.getInstance().createDtoFromJson(json, WorkspaceConfigDto.class);
   }
 }

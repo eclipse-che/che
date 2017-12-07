@@ -152,58 +152,61 @@
             margin-top: 1em;
         }
     </ui:style>
-    <g:ScrollPanel>
-        <g:HTMLPanel addStyleNames="{style.panel}" debugId="contribute-pull-request-panel">
-            <div class="{style.section} {style.repository}">
-                <g:Label addStyleNames="{style.title}" text="{messages.contributePartRepositorySectionTitle}"/>
-                <div class="{style.fieldItem} {style.horizontal}">
-                    <i class="fa fa-link {style.icon} {style.link}"></i>
-                    <g:Anchor ui:field="repositoryUrl" addStyleNames="{style.field} {style.link}" target="_blank"/>
-                </div>
-                <div class="{style.fieldItem} {style.horizontal}">
-                    <i class="fa fa-code-fork {style.icon}"></i>
-                    <g:Label ui:field="contributeToBranch" addStyleNames="{style.field}"/>
-                </div>
-                <div class="{style.fieldItem} {style.horizontal}">
-                    <i class="fa fa-bookmark {style.icon}"></i>
-                    <g:Label ui:field="projectName" addStyleNames="{style.field}"/>
-                </div>
-            </div>
-            <div class="{style.section} {style.border}">
-                <g:Label addStyleNames="{style.title}" text="{messages.contributePartConfigureContributionSectionTitle}"/>
-                <div class="{style.fieldItem}">
-                    <g:Label addStyleNames="{style.label}"
-                             text="{messages.contributePartConfigureContributionSectionContributionBranchNameLabel}"/>
-                    <div class="{style.branchField}">
-                        <che:CustomListBox ui:field="contributionBranchName"
-                                           addStyleNames="{style.field} {resources.contributeCss.inputField}"/>
-                        <svg:SVGPushButton ui:field="refreshContributionBranchNameListButton" resource="{resources.refreshIcon}"/>
+    <g:FlowPanel>
+        <g:ScrollPanel ui:field="contributePanel">
+            <g:HTMLPanel addStyleNames="{style.panel}" debugId="contribute-pull-request-panel">
+                <div class="{style.section} {style.repository}">
+                    <g:Label addStyleNames="{style.title}" text="{messages.contributePartRepositorySectionTitle}"/>
+                    <div class="{style.fieldItem} {style.horizontal}">
+                        <i class="fa fa-link {style.icon} {style.link}"></i>
+                        <g:Anchor ui:field="repositoryUrl" addStyleNames="{style.field} {style.link}" target="_blank"/>
+                    </div>
+                    <div class="{style.fieldItem} {style.horizontal}">
+                        <i class="fa fa-code-fork {style.icon}"></i>
+                        <g:Label ui:field="contributeToBranch" addStyleNames="{style.field}"/>
+                    </div>
+                    <div class="{style.fieldItem} {style.horizontal}">
+                        <i class="fa fa-bookmark {style.icon}"></i>
+                        <g:Label ui:field="projectName" addStyleNames="{style.field}"/>
                     </div>
                 </div>
-                <div class="{style.fieldItem}">
-                    <g:Label addStyleNames="{style.label}"
-                             text="{messages.contributePartConfigureContributionSectionContributionTitleLabel}"/>
-                    <my:PasteAwareTextBox ui:field="contributionTitle" addStyleNames="{style.field} {resources.contributeCss.inputField}"/>
+                <div class="{style.section} {style.border}">
+                    <g:Label addStyleNames="{style.title}" text="{messages.contributePartConfigureContributionSectionTitle}"/>
+                    <div class="{style.fieldItem}">
+                        <g:Label addStyleNames="{style.label}"
+                                 text="{messages.contributePartConfigureContributionSectionContributionBranchNameLabel}"/>
+                        <div class="{style.branchField}">
+                            <che:CustomListBox ui:field="contributionBranchName"
+                                               addStyleNames="{style.field} {resources.contributeCss.inputField}"/>
+                            <svg:SVGPushButton ui:field="refreshContributionBranchNameListButton" resource="{resources.refreshIcon}"/>
+                        </div>
+                    </div>
+                    <div class="{style.fieldItem}">
+                        <g:Label addStyleNames="{style.label}"
+                                 text="{messages.contributePartConfigureContributionSectionContributionTitleLabel}"/>
+                        <my:PasteAwareTextBox ui:field="contributionTitle" addStyleNames="{style.field} {resources.contributeCss.inputField}"/>
+                    </div>
+                    <div class="{style.fieldItem}">
+                        <g:Label addStyleNames="{style.label}"
+                                 text="{messages.contributePartConfigureContributionSectionContributionCommentLabel}"/>
+                        <g:TextArea height="60px" ui:field="contributionComment"
+                                    addStyleNames="{style.field} {resources.contributeCss.inputField} {style.fixed-textarea}"/>
+                    </div>
+                    <g:Button width="104px" addStyleNames="{style.contributeButton} {resources.contributeCss.blueButton}"
+                              ui:field="contributeButton"
+                              text="{messages.contributePartConfigureContributionSectionButtonContributeText}"/>
                 </div>
-                <div class="{style.fieldItem}">
-                    <g:Label addStyleNames="{style.label}"
-                             text="{messages.contributePartConfigureContributionSectionContributionCommentLabel}"/>
-                    <g:TextArea height="60px" ui:field="contributionComment"
-                                addStyleNames="{style.field} {resources.contributeCss.inputField} {style.fixed-textarea}"/>
-                </div>
-                <g:Button width="104px" addStyleNames="{style.contributeButton} {resources.contributeCss.blueButton}"
-                          ui:field="contributeButton"
-                          text="{messages.contributePartConfigureContributionSectionButtonContributeText}"/>
-            </div>
-            <g:FlowPanel ui:field="statusSection" addStyleNames="{style.section} {style.border}" debugId="statusSection">
-                <g:Label addStyleNames="{style.title}" text="{messages.contributePartStatusSectionTitle}"/>
-                <g:InlineLabel ui:field="statusSectionMessage" addStyleNames="{style.statusMessage}" debugId="statusSectionMessage"/>
-            </g:FlowPanel>
-            <g:HTMLPanel ui:field="newContributionSection" addStyleNames="{style.section} {style.newContribution} {style.border}">
-                <g:Button ui:field="openPullRequestOnVcsHostButton" addStyleNames="{resources.contributeCss.openOnVcsButton}"/>
-                <g:Button ui:field="newContributionButton" addStyleNames="{resources.contributeCss.blueButton}"
-                          text="{messages.contributePartNewContributionSectionButtonNewText}"/>
+                <g:FlowPanel ui:field="statusSection" addStyleNames="{style.section} {style.border}" debugId="statusSection">
+                    <g:Label addStyleNames="{style.title}" text="{messages.contributePartStatusSectionTitle}"/>
+                    <g:InlineLabel ui:field="statusSectionMessage" addStyleNames="{style.statusMessage}" debugId="statusSectionMessage"/>
+                </g:FlowPanel>
+                <g:HTMLPanel ui:field="newContributionSection" addStyleNames="{style.section} {style.newContribution} {style.border}">
+                    <g:Button ui:field="openPullRequestOnVcsHostButton" addStyleNames="{resources.contributeCss.openOnVcsButton}"/>
+                    <g:Button ui:field="newContributionButton" addStyleNames="{resources.contributeCss.blueButton}"
+                              text="{messages.contributePartNewContributionSectionButtonNewText}"/>
+                </g:HTMLPanel>
             </g:HTMLPanel>
-        </g:HTMLPanel>
-    </g:ScrollPanel>
+        </g:ScrollPanel>
+        <g:FlowPanel ui:field="stubPanel" width="100%" height="100%"/>
+    </g:FlowPanel>
 </ui:UiBinder>
