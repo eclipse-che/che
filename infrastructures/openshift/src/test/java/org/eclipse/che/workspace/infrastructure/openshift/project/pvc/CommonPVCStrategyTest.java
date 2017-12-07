@@ -12,12 +12,14 @@ package org.eclipse.che.workspace.infrastructure.openshift.project.pvc;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static org.eclipse.che.workspace.infrastructure.openshift.Constants.SUBPATHS_PROPERTY_FMT;
+import static org.eclipse.che.workspace.infrastructure.openshift.project.pvc.CommonPVCStrategy.SUBPATHS_PROPERTY_FMT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -39,7 +41,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftPersistentVolumeClaims;
@@ -74,6 +79,11 @@ public class CommonPVCStrategyTest {
   private static final String VOLUME_1_NAME = "vol1";
   private static final String VOLUME_2_NAME = "vol2";
 
+  private static final String[] WORKSPACE_SUBPATHS = {"/projects", "/logs"};
+
+  private static final RuntimeIdentity IDENTITY =
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "usr1");
+
   @Mock private Pod pod;
   @Mock private Pod pod2;
   @Mock private PodSpec podSpec;
@@ -85,14 +95,15 @@ public class CommonPVCStrategyTest {
   @Mock private PVCSubPathHelper pvcSubPathHelper;
   @Mock private OpenShiftProjectFactory factory;
   @Mock private OpenShiftProject osProject;
-  @Mock private OpenShiftPersistentVolumeClaims osPVCs;
+  @Mock private OpenShiftPersistentVolumeClaims pvcs;
 
   private CommonPVCStrategy commonPVCStrategy;
 
   @BeforeMethod
   public void setup() throws Exception {
     commonPVCStrategy =
-        new CommonPVCStrategy(PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, pvcSubPathHelper);
+        new CommonPVCStrategy(
+            PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, true, pvcSubPathHelper, factory);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     InternalMachineConfig machine1 = mock(InternalMachineConfig.class);
@@ -136,17 +147,17 @@ public class CommonPVCStrategyTest {
     when(pvcSubPathHelper.removeDirsAsync(anyString(), any(String.class)))
         .thenReturn(CompletableFuture.completedFuture(null));
     when(factory.create(WORKSPACE_ID)).thenReturn(osProject);
-    when(osProject.persistentVolumeClaims()).thenReturn(osPVCs);
+    when(osProject.persistentVolumeClaims()).thenReturn(pvcs);
 
     mockName(pod, POD_NAME);
     mockName(pod2, POD_NAME_2);
   }
 
   @Test
-  public void addPVCWithConfiguredNameToOsEnv() throws Exception {
+  public void testProvisionVolumesIntoOpenShiftEnvironment() throws Exception {
     when(osEnv.getPersistentVolumeClaims()).thenReturn(new HashMap<>());
 
-    commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
+    commonPVCStrategy.provision(osEnv, IDENTITY);
 
     // 2 volumes in machine1
     verify(container, times(2)).getVolumeMounts();
@@ -166,20 +177,20 @@ public class CommonPVCStrategyTest {
   }
 
   @Test
-  public void testReplacePVCWhenItsAlreadyInOsEnvironment() throws Exception {
+  public void testReplacePVCWhenItsAlreadyInOpenShiftEnvironment() throws Exception {
     final Map<String, PersistentVolumeClaim> claims = new HashMap<>();
     final PersistentVolumeClaim provisioned = mock(PersistentVolumeClaim.class);
     claims.put(PVC_NAME, provisioned);
     when(osEnv.getPersistentVolumeClaims()).thenReturn(claims);
 
-    commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
+    commonPVCStrategy.provision(osEnv, IDENTITY);
 
     assertNotEquals(osEnv.getPersistentVolumeClaims().get(PVC_NAME), provisioned);
   }
 
   @Test
-  public void testAddsPVCWithSubpaths() throws Exception {
-    commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
+  public void testProvisionVolumesWithSubpathsIntoOpenShiftEnviromnent() throws Exception {
+    commonPVCStrategy.provision(osEnv, IDENTITY);
 
     final Map<String, PersistentVolumeClaim> actual = osEnv.getPersistentVolumeClaims();
     assertFalse(actual.isEmpty());
@@ -196,9 +207,10 @@ public class CommonPVCStrategyTest {
   @Test
   public void testDoNotAddsSubpathsWhenPreCreationIsNotNeeded() throws Exception {
     commonPVCStrategy =
-        new CommonPVCStrategy(PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, false, pvcSubPathHelper);
+        new CommonPVCStrategy(
+            PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, false, pvcSubPathHelper, factory);
 
-    commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
+    commonPVCStrategy.provision(osEnv, IDENTITY);
 
     final Map<String, PersistentVolumeClaim> actual = osEnv.getPersistentVolumeClaims();
     assertFalse(actual.isEmpty());
@@ -211,20 +223,54 @@ public class CommonPVCStrategyTest {
   }
 
   @Test
-  public void testDoNothingWhenNoMachineWithWsAgentFoundInOsEnvironment() throws Exception {
-    final Pod pod = mock(Pod.class);
+  public void testDoNotProvisioningWhenNoMachineWithWsAgentFound() throws Exception {
+    final Pod pod = mockName(mock(Pod.class), "testPod");
     final PodSpec podSpec = mock(PodSpec.class);
     final Container container = mock(Container.class);
-    mockName(pod, "testPod");
     when(pod.getSpec()).thenReturn(podSpec);
     when(osEnv.getPods()).thenReturn(singletonMap("testPod", pod));
     when(podSpec.getContainers()).thenReturn(singletonList(container));
     when(container.getName()).thenReturn("container");
 
-    commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
+    commonPVCStrategy.provision(osEnv, IDENTITY);
 
     verify(container, never()).getVolumeMounts();
     verify(podSpec, never()).getVolumes();
+  }
+
+  @Test
+  public void testCreatesPVCsWithSubpathsOnPrepare() throws Exception {
+    final PersistentVolumeClaim pvc = mockName(mock(PersistentVolumeClaim.class), PVC_NAME);
+    when(osEnv.getPersistentVolumeClaims()).thenReturn(singletonMap(PVC_NAME, pvc));
+    final Map<String, Object> subPaths = new HashMap<>();
+    subPaths.put(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID), WORKSPACE_SUBPATHS);
+    when(pvc.getAdditionalProperties()).thenReturn(subPaths);
+    doNothing().when(pvcSubPathHelper).createDirs(WORKSPACE_ID, WORKSPACE_SUBPATHS);
+
+    commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
+
+    verify(pvcs).get();
+    verify(pvcs).create(pvc);
+    verify(pvcSubPathHelper).createDirs(any(), any());
+  }
+
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void throwsInfrastructureExceptionWhenFailedToGetExistingPVCs() throws Exception {
+    when(osEnv.getPersistentVolumeClaims())
+        .thenReturn(singletonMap(PVC_NAME, mock(PersistentVolumeClaim.class)));
+    doThrow(InfrastructureException.class).when(pvcs).get();
+
+    commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
+  }
+
+  @Test(expectedExceptions = InfrastructureException.class)
+  public void throwsInfrastructureExceptionWhenPVCCreationFailed() throws Exception {
+    final PersistentVolumeClaim claim = mockName(mock(PersistentVolumeClaim.class), PVC_NAME);
+    when(osEnv.getPersistentVolumeClaims()).thenReturn(singletonMap(PVC_NAME, claim));
+    when(pvcs.get()).thenReturn(emptyList());
+    doThrow(InfrastructureException.class).when(pvcs).create(any());
+
+    commonPVCStrategy.prepare(osEnv, WORKSPACE_ID);
   }
 
   @Test
@@ -234,10 +280,11 @@ public class CommonPVCStrategyTest {
     verify(pvcSubPathHelper).removeDirsAsync(WORKSPACE_ID, WORKSPACE_ID);
   }
 
-  static void mockName(HasMetadata obj, String name) {
+  static <T extends HasMetadata> T mockName(T obj, String name) {
     final ObjectMeta objectMeta = mock(ObjectMeta.class);
     when(obj.getMetadata()).thenReturn(objectMeta);
     when(objectMeta.getName()).thenReturn(name);
+    return obj;
   }
 
   private static String expectedVolumeDir(String volumeName) {

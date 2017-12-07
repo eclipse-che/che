@@ -37,11 +37,5 @@ public final class Constants {
   public static final String MACHINE_NAME_ANNOTATION_FMT =
       "org.eclipse.che.container.%s.machine_name";
 
-  /**
-   * The additional property name with the wildcard reserved for workspace id. Formatted property
-   * with the real workspace id is used to get workspace subpaths directories.
-   */
-  public static final String SUBPATHS_PROPERTY_FMT = "che.workspace.%s.subpaths";
-
   private Constants() {}
 }

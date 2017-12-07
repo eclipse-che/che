@@ -11,7 +11,6 @@
 package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
@@ -19,7 +18,6 @@ import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.FAI
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STARTING;
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_ORIGINAL_NAME_LABEL;
-import static org.eclipse.che.workspace.infrastructure.openshift.Constants.SUBPATHS_PROPERTY_FMT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -45,7 +43,6 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.IntOrStringBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Service;
@@ -57,8 +54,6 @@ import io.fabric8.openshift.api.model.RouteSpec;
 import io.fabric8.openshift.api.model.RouteTargetReference;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -81,13 +76,12 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInternalRunti
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapper;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftPersistentVolumeClaims;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftPods;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftRoutes;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftServices;
 import org.eclipse.che.workspace.infrastructure.openshift.project.event.ContainerEvent;
-import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.PVCSubPathHelper;
+import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspaceVolumesStrategy;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -107,7 +101,6 @@ public class OpenShiftInternalRuntimeTest {
   private static final int INTERNAL_PORT = 4411;
 
   private static final String WORKSPACE_ID = "workspace123";
-  private static final String PVC_NAME = WORKSPACE_ID + "-data";
   private static final String POD_NAME = "app";
   private static final String ROUTE_NAME = "test-route";
   private static final String SERVICE_NAME = "test-service";
@@ -117,7 +110,6 @@ public class OpenShiftInternalRuntimeTest {
   private static final String ROUTE_HOST = "localhost";
   private static final String M1_NAME = POD_NAME + '/' + CONTAINER_NAME_1;
   private static final String M2_NAME = POD_NAME + '/' + CONTAINER_NAME_2;
-  private static final String[] WORKSPACE_SUBPATHS = {"/projects", "/logs"};
 
   private static final RuntimeIdentity IDENTITY =
       new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "usr1");
@@ -133,8 +125,7 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private OpenShiftRoutes routes;
   @Mock private OpenShiftPods pods;
   @Mock private OpenShiftBootstrapper bootstrapper;
-  @Mock private PVCSubPathHelper pvcSubPathHelper;
-  @Mock private OpenShiftPersistentVolumeClaims pvcs;
+  @Mock private WorkspaceVolumesStrategy volumesStrategy;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
@@ -153,7 +144,7 @@ public class OpenShiftInternalRuntimeTest {
             eventService,
             bootstrapperFactory,
             serverCheckerFactory,
-            pvcSubPathHelper,
+            volumesStrategy,
             context,
             project,
             emptyList());
@@ -182,8 +173,6 @@ public class OpenShiftInternalRuntimeTest {
     when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(routes.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(pods.create(any())).thenAnswer(a -> a.getArguments()[0]);
-    when(project.persistentVolumeClaims()).thenReturn(pvcs);
-    when(pvcs.get()).thenReturn(Collections.emptyList());
     when(osEnv.getServices()).thenReturn(allServices);
     when(osEnv.getRoutes()).thenReturn(allRoutes);
     when(osEnv.getPods()).thenReturn(allPods);
@@ -331,42 +320,6 @@ public class OpenShiftInternalRuntimeTest {
 
     verify(eventService, never()).publish(any());
   }
-
-  @Test
-  public void testCreatesPVCWithSubpathsOnRuntimeStart() throws Exception {
-    final PersistentVolumeClaim pvc = mock(PersistentVolumeClaim.class);
-    mockName(PVC_NAME, pvc);
-    when(osEnv.getPersistentVolumeClaims()).thenReturn(singletonMap(PVC_NAME, pvc));
-    final Map<String, Object> subPaths = new HashMap<>();
-    subPaths.put(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID), WORKSPACE_SUBPATHS);
-    when(pvc.getAdditionalProperties()).thenReturn(subPaths);
-    doNothing().when(pvcSubPathHelper).createDirs(WORKSPACE_ID, WORKSPACE_SUBPATHS);
-
-    internalRuntime.internalStart(emptyMap());
-
-    verify(pvcs).get();
-    verify(pvcs).create(pvc);
-    verify(pvcSubPathHelper).createDirs(any(), any());
-  }
-
-  @Test(expectedExceptions = InfrastructureException.class)
-  public void throwsInfrastructureExceptionWhenFailedToGetExistingPVCs() throws Exception {
-    doThrow(InfrastructureException.class).when(pvcs).get();
-
-    internalRuntime.internalStart(emptyMap());
-  }
-
-  @Test(expectedExceptions = InfrastructureException.class)
-  public void throwsInfrastructureExceptionWhenPVCCreationFailed() throws Exception {
-    when(osEnv.getPersistentVolumeClaims())
-        .thenReturn(singletonMap(PVC_NAME, mock(PersistentVolumeClaim.class)));
-    doThrow(InfrastructureException.class).when(pvcs).create(any());
-
-    internalRuntime.internalStart(emptyMap());
-  }
-
-  @Test
-  public void throwsInfrastructureExceptionWhen() throws Exception {}
 
   private static MachineStatusEvent newEvent(String machineName, MachineStatus status) {
     return DtoFactory.newDto(MachineStatusEvent.class)
