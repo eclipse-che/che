@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-multiuser-integration-tests</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>5.21.1-SNAPSHOT</version>
+        <version>5.21.1</version>
     </parent>
     <artifactId>che-multiuser-postgresql-tck</artifactId>
     <packaging>jar</packaging>

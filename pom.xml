@@ -20,7 +20,7 @@
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>5.21.1-SNAPSHOT</version>
+    <version>5.21.1</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -41,7 +41,7 @@
     <scm>
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
         <developerConnection>scm:git:git@github.com:eclipse/che.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>5.21.1</tag>
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>

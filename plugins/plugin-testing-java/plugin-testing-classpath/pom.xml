@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-testing-java-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.21.1-SNAPSHOT</version>
+        <version>5.21.1</version>
     </parent>
     <artifactId>che-plugin-testing-classpath</artifactId>
     <name>Che Plugin :: Java Testing :: Classpath</name>
