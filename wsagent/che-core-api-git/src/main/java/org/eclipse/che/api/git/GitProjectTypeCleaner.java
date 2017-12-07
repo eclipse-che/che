@@ -34,13 +34,11 @@ import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.slf4j.Logger;
 
 /**
- * Cleanup project config after removing git repository.
- * Here will be cleaned:
- * - git project type
- * - all related attributes (like current branch, remote repository and etc)
- * - source information
+ * Cleanup project config after removing git repository. Here will be cleaned: - git project type -
+ * all related attributes (like current branch, remote repository and etc) - source information
  *
- * @author Vitalii Parfonov */
+ * @author Vitalii Parfonov
+ */
 @Singleton
 public class GitProjectTypeCleaner implements EventSubscriber<GitRepositoryDeletedEvent> {
 
