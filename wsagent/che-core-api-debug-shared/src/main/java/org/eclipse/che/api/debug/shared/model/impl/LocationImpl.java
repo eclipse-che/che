@@ -21,7 +21,7 @@ public class LocationImpl implements Location {
   private final String target;
   private final int lineNumber;
   private final boolean externalResource;
-  private final int externalResourceId;
+  private final String externalResourceId;
   private final String resourceProjectPath;
   private final Method method;
   private final long threadId;
@@ -30,7 +30,7 @@ public class LocationImpl implements Location {
       String target,
       int lineNumber,
       boolean externalResource,
-      int externalResourceId,
+      String externalResourceId,
       String resourceProjectPath,
       Method method,
       long threadId) {
@@ -47,17 +47,21 @@ public class LocationImpl implements Location {
       String target,
       int lineNumber,
       boolean externalResource,
-      int externalResourceId,
+      String externalResourceId,
       String resourceProjectPath) {
     this(target, lineNumber, externalResource, externalResourceId, resourceProjectPath, null, -1);
   }
 
   public LocationImpl(String target, int lineNumber, String resourceProjectPath) {
-    this(target, lineNumber, false, 0, resourceProjectPath, null, -1);
+    this(target, lineNumber, false, null, resourceProjectPath, null, -1);
   }
 
   public LocationImpl(String target, int lineNumber) {
-    this(target, lineNumber, false, 0, null, null, -1);
+    this(target, lineNumber, false, null, null, null, -1);
+  }
+
+  public LocationImpl(String target) {
+    this(target, 0, false, null, null, null, -1);
   }
 
   @Override
@@ -76,7 +80,7 @@ public class LocationImpl implements Location {
   }
 
   @Override
-  public int getExternalResourceId() {
+  public String getExternalResourceId() {
     return externalResourceId;
   }
 
@@ -102,7 +106,7 @@ public class LocationImpl implements Location {
     LocationImpl location = (LocationImpl) o;
     return lineNumber == location.lineNumber
         && externalResource == location.externalResource
-        && externalResourceId == location.externalResourceId
+        && externalResourceId.equals(location.externalResourceId)
         && threadId == location.threadId
         && equal(target, location.target)
         && equal(resourceProjectPath, location.resourceProjectPath)
