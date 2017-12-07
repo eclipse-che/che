@@ -10,29 +10,33 @@
  */
 package org.eclipse.che.api.languageserver.registry;
 
+import static javax.ws.rs.core.UriBuilder.fromUri;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+import javax.ws.rs.core.UriBuilder;
+import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.api.languageserver.sidecar.LanguageServerLauncherProvider;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.workspace.server.WorkspaceService;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -44,6 +48,12 @@ import org.slf4j.LoggerFactory;
 public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
   private static final Logger LOG = LoggerFactory.getLogger(LanguageServerRegistryImpl.class);
+
+  private static final String WORKSPACE_ID = System.getenv("CHE_WORKSPACE_ID");
+
+  private final String apiEndpoint;
+  private final HttpJsonRequestFactory httpJsonRequestFactory;
+  private final Set<LanguageServerLauncherProvider> launcherProviders;
   private final List<LanguageDescription> languages;
   private final List<LanguageServerLauncher> launchers;
   private final AtomicInteger serverId = new AtomicInteger();
@@ -60,12 +70,18 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
   @Inject
   public LanguageServerRegistryImpl(
+      @Named("che.api") String apiEndpoint,
+      HttpJsonRequestFactory httpJsonRequestFactory,
+      Set<LanguageServerLauncherProvider> launcherProviders,
       Set<LanguageServerLauncher> languageServerLaunchers,
       Set<LanguageDescription> languages,
       Provider<ProjectManager> projectManagerProvider,
       ServerInitializer initializer,
       EventService eventService,
       CheLanguageClientFactory clientFactory) {
+    this.apiEndpoint = apiEndpoint;
+    this.httpJsonRequestFactory = httpJsonRequestFactory;
+    this.launcherProviders = launcherProviders;
     this.languages = new ArrayList<>(languages);
     this.launchers = new ArrayList<>(languageServerLaunchers);
     this.projectManagerProvider = projectManagerProvider;
@@ -189,8 +205,16 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     if (language == null) {
       return Collections.emptyList();
     }
+    List<LanguageServerLauncher> combinedLaunchers = new LinkedList<>(launchers);
+    Workspace workspace = getWorkspaceConfiguration();
+    if (workspace != null) {
+      for (LanguageServerLauncherProvider launcherProvider : launcherProviders) {
+        combinedLaunchers.addAll(launcherProvider.getAll(workspace));
+      }
+    }
+
     List<LanguageServerLauncher> result = new ArrayList<>();
-    for (LanguageServerLauncher launcher : launchers) {
+    for (LanguageServerLauncher launcher : combinedLaunchers) {
       if (launcher.isAbleToLaunch()) {
         int score = matchScore(launcher.getDescription(), fileUri, language.getLanguageId());
         if (score > 0) {
@@ -344,5 +368,24 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       }
     }
     return null;
+  }
+
+  private Workspace getWorkspaceConfiguration() {
+    UriBuilder builder =
+        fromUri(apiEndpoint)
+            .path(WorkspaceService.class)
+            .path(WorkspaceService.class, "getByKey")
+            .queryParam("includeServers", true);
+
+    String href = builder.build(WORKSPACE_ID).toString();
+    try {
+      return httpJsonRequestFactory
+          .fromUrl(href)
+          .useGetMethod()
+          .request()
+          .asDto(WorkspaceDto.class);
+    } catch (IOException | ApiException e) {
+      return null;
+    }
   }
 }

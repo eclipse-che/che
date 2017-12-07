@@ -21,8 +21,10 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.concurrent.CompletableFuture;
 import javax.inject.Provider;
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
@@ -90,6 +92,9 @@ public class LanguageServerRegistryImplTest {
     registry =
         spy(
             new LanguageServerRegistryImpl(
+                "",
+                mock(HttpJsonRequestFactory.class),
+                new HashSet<>(),
                 Collections.singleton(languageServerLauncher),
                 Collections.singleton(languageDescription),
                 pmp,

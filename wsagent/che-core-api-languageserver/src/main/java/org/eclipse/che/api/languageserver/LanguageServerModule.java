@@ -27,11 +27,14 @@ import org.eclipse.che.api.languageserver.service.LanguageServerInitializationHa
 import org.eclipse.che.api.languageserver.service.TextDocumentService;
 import org.eclipse.che.api.languageserver.service.WorkspaceService;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.api.languageserver.sidecar.LanguageServerSidecarModule;
 
 public class LanguageServerModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    install(new LanguageServerSidecarModule());
+
     bind(LanguageServerRegistry.class).to(LanguageServerRegistryImpl.class);
     bind(ServerInitializer.class).to(ServerInitializerImpl.class);
     bind(LanguageRegistryService.class);
