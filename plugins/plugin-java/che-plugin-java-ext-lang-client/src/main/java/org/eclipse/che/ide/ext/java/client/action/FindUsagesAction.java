@@ -19,7 +19,7 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.ext.java.client.search.FindUsagesPresenter;
+import org.eclipse.che.ide.ext.java.client.search.FindUsagesPresenterJls;
 
 /**
  * Action invoked 'find usages' search for java elements
@@ -29,13 +29,13 @@ import org.eclipse.che.ide.ext.java.client.search.FindUsagesPresenter;
 @Singleton
 public class FindUsagesAction extends JavaEditorAction {
 
-  private FindUsagesPresenter presenter;
+  private FindUsagesPresenterJls presenter;
 
   @Inject
   public FindUsagesAction(
       JavaLocalizationConstant constant,
       EditorAgent editorAgent,
-      FindUsagesPresenter presenter,
+      FindUsagesPresenterJls presenter,
       Resources resources,
       FileTypeRegistry fileTypeRegistry) {
     super(

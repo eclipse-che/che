@@ -5,8 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
+ * Contributors: Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.plugin.java.languageserver;
 
@@ -67,6 +66,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
@@ -104,6 +105,9 @@ import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.WorkspaceEdit;
+import org.eclipse.che.jdt.ls.extension.api.dto.UsagesResponse;
+import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls;
+import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.CollectionTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EitherTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EnumTypeAdapterFactory;
@@ -223,6 +227,12 @@ public class JavaLanguageServerExtensionService {
         .paramsAsDto(TextDocumentPositionParams.class)
         .resultAsDto(ImplementersResponseDto.class)
         .withFunction(this::findImplementers);
+    requestHandler
+        .newConfiguration()
+        .methodName("java/usages")
+        .paramsAsDto(TextDocumentPositionParams.class)
+        .resultAsDto(UsagesResponse.class)
+        .withFunction(this::usages);
   }
 
   /**
@@ -728,6 +738,113 @@ public class JavaLanguageServerExtensionService {
     LanguageServiceUtils.fixLocation(symbol.getInfo().getLocation());
     for (ExtendedSymbolInformation child : symbol.getChildren()) {
       fixLocation(child);
+    }
+  }
+
+  public String identifyFqnInResource(String filePath, int lineNumber) {
+    CompletableFuture<Object> result =
+        getLanguageServer()
+            .getWorkspaceService()
+            .executeCommand(
+                new ExecuteCommandParams(
+                    Commands.IDENTIFY_FQN_IN_RESOURCE,
+                    ImmutableList.of(prefixURI(filePath), String.valueOf(lineNumber))));
+
+    try {
+      return (String) result.get(10, TimeUnit.SECONDS);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  private UsagesResponse usages(TextDocumentPositionParams parameters) {
+    String uri = LanguageServiceUtils.prefixURI(parameters.getUri());
+    parameters.setUri(uri);
+    parameters.getTextDocument().setUri(uri);
+    try {
+      CompletableFuture<Object> responses =
+          getLanguageServer()
+              .getWorkspaceService()
+              .executeCommand(
+                  new ExecuteCommandParams(
+                      Commands.REFERENCES_COMMAND, Collections.singletonList(parameters)));
+      Type targetClassType = new TypeToken<ArrayList<UsagesResponse>>() {}.getType();
+      List<UsagesResponse> results =
+          gson.fromJson(gson.toJson(responses.get(10, TimeUnit.SECONDS)), targetClassType);
+      if (results.isEmpty()) {
+        return null;
+      }
+      results
+          .get(0)
+          .getSearchResults()
+          .forEach(
+              result -> {
+                iterate(
+                    result,
+                    r -> r.getChildren(),
+                    r -> {
+                      r.setUri(LanguageServiceUtils.fixUri(r.getUri()));
+                    });
+              });
+      return new DtoServerImpls.UsagesResponseDto(results.get(0));
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  public Location findResourcesByFqn(String fqn, int lineNumber) {
+    Type type = new TypeToken<List<Either<String, ResourceLocation>>>() {}.getType();
+    List<Either<String, ResourceLocation>> location =
+        doGetList(
+            Commands.FIND_RESOURCES_BY_FQN,
+            ImmutableList.of(fqn, String.valueOf(lineNumber)),
+            type);
+
+    Either<String, ResourceLocation> l = location.get(0);
+
+    if (l.isLeft()) {
+      return new LocationImpl(l.getLeft(), lineNumber, null);
+    } else {
+      return new LocationImpl(
+          l.getRight().getFqn(), lineNumber, true, l.getRight().getLibId(), null);
+    }
+  }
+
+  /** Update jdt.ls workspace accordingly to added or removed projects. */
+  public JobResult updateWorkspace(UpdateWorkspaceParameters updateWorkspaceParameters) {
+    if (updateWorkspaceParameters.getAddedProjectsUri().isEmpty()) {
+      if (!findInitializedLanguageServer().isPresent()) {
+        return new JobResult(
+            Severity.OK,
+            0,
+            "Skipped. Language server not initialized. Workspace updating is not required.");
+      }
+    }
+
+    Type type = new TypeToken<JobResult>() {}.getType();
+    return doGetOne(
+        Commands.UPDATE_WORKSPACE,
+        singletonList(updateWorkspaceParameters),
+        type,
+        REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT,
+        TimeUnit.MILLISECONDS);
+  }
+
+  /**
+   * Organizes imports in a file or in a directory.
+   *
+   * @param path the path to the file or to the directory
+   */
+  public WorkspaceEdit organizeImports(String path) {
+    Type type = new TypeToken<WorkspaceEdit>() {}.getType();
+    return doGetOne("java.edit.organizeImports", singletonList(prefixURI(path)), type);
+  }
+  
+  private <T> void iterate(
+      T root, Function<T, List<T>> childrenAccessor, Consumer<T> elementHandler) {
+    elementHandler.accept(root);
+    for (T child : childrenAccessor.apply(root)) {
+      iterate(child, childrenAccessor, elementHandler);
     }
   }
 }
