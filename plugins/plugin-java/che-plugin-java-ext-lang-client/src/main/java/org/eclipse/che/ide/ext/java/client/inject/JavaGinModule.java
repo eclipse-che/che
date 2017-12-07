@@ -125,6 +125,9 @@ public class JavaGinModule extends AbstractGinModule {
     install(
         new GinFactoryModuleBuilder()
             .build(org.eclipse.che.ide.ext.java.client.navigation.factory.NodeFactory.class));
+    install(
+        new GinFactoryModuleBuilder()
+            .build(org.eclipse.che.ide.ext.java.client.search.NodeFactory.class));
 
     GinMultibinder<PreferencePagePresenter> settingsBinder =
         GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class);

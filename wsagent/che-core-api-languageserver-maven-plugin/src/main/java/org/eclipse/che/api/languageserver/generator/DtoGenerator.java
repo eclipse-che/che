@@ -104,7 +104,8 @@ public abstract class DtoGenerator {
       String targetName,
       String targetPackage,
       String[] sourcePackages,
-      String[] classNames)
+      String[] classNames,
+      String[] imports)
       throws IOException {
     File targetFile =
         new File(
@@ -164,6 +165,12 @@ public abstract class DtoGenerator {
       out.println("import org.eclipse.che.api.languageserver.util.EitherUtil;");
       out.println("import org.eclipse.che.api.languageserver.util.JsonUtil;");
       out.println("import org.eclipse.che.api.languageserver.shared.util.JsonDecision;");
+
+      for (String toImport : imports) {
+        out.print("import ");
+        out.print(toImport);
+        out.println(";");
+      }
 
       for (Class<? extends Object> clazz : allTypes) {
         out.print("import ");

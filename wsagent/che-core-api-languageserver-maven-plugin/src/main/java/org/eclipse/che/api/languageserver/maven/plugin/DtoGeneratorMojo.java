@@ -33,6 +33,9 @@ public class DtoGeneratorMojo extends AbstractMojo {
   @Parameter(property = "classes", required = false)
   private String[] classes = new String[] {};
 
+  @Parameter(property = "imports", required = false)
+  private String[] imports = new String[] {};
+
   @Parameter(property = "genClassName", required = true)
   private String genClassName;
 
@@ -54,7 +57,7 @@ public class DtoGeneratorMojo extends AbstractMojo {
 
     try {
       generator.generate(
-          new File(outputDirectory), targetClass, targetPackage, dtoPackages, classes);
+          new File(outputDirectory), targetClass, targetPackage, dtoPackages, classes, imports);
     } catch (IOException e) {
       throw new MojoExecutionException("Generation failed", e);
     }

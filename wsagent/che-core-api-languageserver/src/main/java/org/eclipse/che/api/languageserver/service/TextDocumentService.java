@@ -1,12 +1,9 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2012-2017 Red Hat, Inc. All rights reserved. This program and the accompanying
+ * materials are made available under the terms of the Eclipse Public License v1.0 which accompanies
+ * this distribution, and is available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *   Red Hat, Inc. - initial API and implementation
+ * Contributors: Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.api.languageserver.service;
 
@@ -17,8 +14,12 @@ import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.re
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removeUriScheme;
 
 import com.google.inject.Singleton;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,6 +37,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
@@ -58,8 +61,16 @@ import org.eclipse.che.api.languageserver.shared.model.ExtendedTextDocumentEdit;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedTextEdit;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceEdit;
 import org.eclipse.che.api.languageserver.shared.model.RenameResult;
+import org.eclipse.che.api.languageserver.shared.model.SnippetParameters;
+import org.eclipse.che.api.languageserver.shared.model.SnippetResult;
+import org.eclipse.che.api.languageserver.shared.util.LinearRangeComparator;
 import org.eclipse.che.api.languageserver.util.LSOperation;
+import org.eclipse.che.api.languageserver.util.LineReader;
 import org.eclipse.che.api.languageserver.util.OperationUtil;
+import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.VirtualFileEntry;
+import org.eclipse.che.api.vfs.VirtualFile;
+import org.eclipse.che.jdt.ls.extension.api.dto.LinearRange;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IRegion;
@@ -103,12 +114,16 @@ public class TextDocumentService {
 
   private final LanguageServerRegistry languageServerRegistry;
   private final RequestHandlerConfigurator requestHandler;
+  private ProjectManager projectManager;
 
   @Inject
   public TextDocumentService(
-      LanguageServerRegistry languageServerRegistry, RequestHandlerConfigurator requestHandler) {
+      LanguageServerRegistry languageServerRegistry,
+      RequestHandlerConfigurator requestHandler,
+      ProjectManager projectManager) {
     this.languageServerRegistry = languageServerRegistry;
     this.requestHandler = requestHandler;
+    this.projectManager = projectManager;
   }
 
   @PostConstruct
@@ -169,6 +184,13 @@ public class TextDocumentService {
         .paramsAsString()
         .resultAsString()
         .withFunction(this::getFileContent);
+
+    requestHandler
+        .newConfiguration()
+        .methodName("textDocument/snippets")
+        .paramsAsDto(SnippetParameters.class)
+        .resultAsListOfDto(SnippetResult.class)
+        .withFunction(this::getSnippets);
   }
 
   private List<CommandDto> codeAction(CodeActionParams params) {
@@ -949,6 +971,52 @@ public class TextDocumentService {
       throw new JsonRpcException(-27000, e.getMessage());
     }
     return result[0];
+  }
+
+  private List<SnippetResult> getSnippets(SnippetParameters params) {
+    try {
+      List<SnippetResult> result = new ArrayList<>();
+      String uri = params.getUri();
+      if (LanguageServiceUtils.isWorkspaceUri(uri)) {
+        uri = LanguageServiceUtils.workspaceURIToFileURI(uri);
+      }
+      Reader content = null;
+
+      if (LanguageServiceUtils.isProjectUri(uri)) {
+        VirtualFileEntry child =
+            projectManager.getProjectsRoot().getChild(LanguageServiceUtils.removePrefixUri(uri));
+        if (child != null) {
+          VirtualFile vf = child.getVirtualFile();
+          content = new InputStreamReader(new BufferedInputStream(vf.getContent()));
+        }
+      } else {
+        String fileContent = getFileContent(uri);
+        if (fileContent != null) {
+          content = new StringReader(fileContent);
+        }
+      }
+
+      if (content != null) {
+        try {
+          ArrayList<LinearRange> ranges = new ArrayList<>(params.getRanges());
+          Collections.sort(ranges, LinearRangeComparator.INSTANCE);
+          LineReader lineReader = new LineReader(content);
+          for (LinearRange range : ranges) {
+            lineReader.readTo(range.getOffset());
+            result.add(new SnippetResult(range, lineReader.getCurrentLine()));
+          }
+          return result;
+        } finally {
+          content.close();
+        }
+      } else {
+        LOG.error("did not find file " + params.getUri());
+        throw new JsonRpcException(-27000, "File not found for edit: " + params.getUri());
+      }
+    } catch (ServerException | ForbiddenException | IOException e) {
+      LOG.error("error editing file", e);
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
   }
 
   private <P> void dtoToNothing(String name, Class<P> pClass, Consumer<P> consumer) {

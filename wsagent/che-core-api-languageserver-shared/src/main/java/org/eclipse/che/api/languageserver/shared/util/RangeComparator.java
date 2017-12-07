@@ -19,6 +19,8 @@ import org.eclipse.lsp4j.Range;
 public class RangeComparator implements Comparator<Range> {
   Comparator<Position> positionComparator = new PositionComparator();
 
+  public static RangeComparator INSTANCE = new RangeComparator();
+
   @Override
   public int compare(Range o1, Range o2) {
     int starts = positionComparator.compare(o1.getStart(), o2.getStart());

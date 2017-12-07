@@ -1,0 +1,93 @@
+package org.eclipse.che.ide.ext.java.client.search;
+
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import java.util.ArrayList;
+import java.util.List;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.api.promises.client.js.Executor;
+import org.eclipse.che.ide.ext.java.client.JavaResources;
+import org.eclipse.che.ide.ui.smartTree.data.AbstractTreeNode;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.presentation.HasNewPresentation;
+import org.eclipse.che.ide.ui.smartTree.presentation.NewNodePresentation;
+import org.eclipse.che.jdt.ls.extension.api.dto.SearchResult;
+import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.SymbolKindHelper;
+
+public class ElementNode extends AbstractTreeNode implements HasNewPresentation {
+
+  private SearchResult element;
+  private PromiseProvider promiseProvider;
+  private JavaResources resources;
+  private NodeFactory nodeFactory;
+  private FindUsagesPresenterJls presenter;
+  private SymbolKindHelper symbolHelper;
+
+  @Inject
+  public ElementNode(
+      @Assisted SearchResult pkg,
+      PromiseProvider promiseProvider,
+      JavaResources resources,
+      NodeFactory nodeFactory,
+      FindUsagesPresenterJls presenter,
+      SymbolKindHelper symbolHelper) {
+    this.element = pkg;
+    this.promiseProvider = promiseProvider;
+    this.resources = resources;
+    this.nodeFactory = nodeFactory;
+    this.presenter = presenter;
+    this.symbolHelper = symbolHelper;
+  }
+
+  @Override
+  public String getName() {
+    return element.getName();
+  }
+
+  @Override
+  public boolean isLeaf() {
+    return false;
+  }
+
+  @Override
+  public NewNodePresentation getPresentation() {
+    return new NewNodePresentation.Builder()
+        .withIcon(symbolHelper.getIcon(element.getKind()))
+        .withNodeText(element.getName())
+        .build();
+  }
+
+  @Override
+  protected Promise<List<Node>> getChildrenImpl() {
+    if (!element.getMatches().isEmpty()) {
+      return presenter
+          .computeMatches(this)
+          .then(
+              (List<Node> matches) -> {
+                List<Node> result = new ArrayList<>(matches);
+                result.addAll(computeChildren());
+                return result;
+              });
+    } else {
+      return promiseProvider.create(
+          Executor.create(
+              (resolve, reject) -> {
+                resolve.apply(computeChildren());
+              }));
+    }
+  }
+
+  private List<Node> computeChildren() {
+    List<Node> result = new ArrayList<>();
+
+    for (SearchResult child : element.getChildren()) {
+      result.add(nodeFactory.createElementNode(child));
+    }
+    return result;
+  }
+
+  public SearchResult getElement() {
+    return element;
+  }
+}
