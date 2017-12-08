@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -92,6 +94,7 @@ import org.eclipse.che.ide.console.CompositeOutputConsole;
 import org.eclipse.che.ide.console.DefaultOutputConsole;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
+import org.eclipse.che.ide.processes.ProcessTreeNode.ProcessNodeType;
 import org.eclipse.che.ide.processes.ProcessTreeNodeSelectedEvent;
 import org.eclipse.che.ide.processes.actions.AddTabMenuFactory;
 import org.eclipse.che.ide.processes.actions.ConsoleTreeContextMenu;
@@ -210,7 +213,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     machineNodes = new HashMap<>();
     machines = new HashMap<>();
     rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, new ArrayList<ProcessTreeNode>());
-    terminals = new HashMap<>();
+    terminals = new LinkedHashMap<>(3, 0.75f, true);
     consoles = new HashMap<>();
     consoleCommands = new HashMap<>();
 
@@ -330,6 +333,37 @@ public class ProcessesPanelPresenter extends BasePresenter
       terminals.get(terminalId).stopTerminal();
       terminals.remove(terminalId);
     }
+  }
+
+  /**
+   * Provides terminal depends on the current state of IDE:
+   *
+   * <ul>
+   *   <li>One or more terminals is present -> activates last active terminal
+   *   <li>Terminal is absent -> opens new terminal for the selected machine and activates terminal
+   *       tab
+   * </ul>
+   */
+  public void provideTerminal() {
+    if (terminals.isEmpty()) {
+      newTerminal(TerminalOptionsJso.createDefault(), true);
+      return;
+    }
+
+    String lastActiveTerminalId = "";
+    Iterator<String> iterator = terminals.keySet().iterator();
+    while (iterator.hasNext()) {
+      lastActiveTerminalId = iterator.next();
+    }
+
+    ProcessTreeNode terminalNode = view.getNodeById(lastActiveTerminalId);
+    if (terminalNode == null) {
+      newTerminal(TerminalOptionsJso.createDefault(), true);
+      return;
+    }
+
+    workspaceAgentProvider.get().setActivePart(this);
+    view.selectNode(terminalNode);
   }
 
   /** Opens new terminal for the selected machine. */
@@ -585,16 +619,23 @@ public class ProcessesPanelPresenter extends BasePresenter
     setSelection(new Selection.NoSelectionProvided());
 
     if (node != null) {
-      if (ProcessTreeNode.ProcessNodeType.MACHINE_NODE == node.getType()) {
-        final MachineImpl machine = getMachine(node.getId());
-        if (machine != null) {
-          setSelection(new Selection<>(machine));
-        }
+      String nodeId = node.getId();
+      ProcessNodeType nodeType = node.getType();
+      switch (nodeType) {
+        case MACHINE_NODE:
+          final MachineImpl machine = getMachine(nodeId);
+          if (machine != null) {
+            setSelection(new Selection<>(machine));
+          }
 
-        view.showProcessOutput(node.getName());
-      } else {
-        view.showProcessOutput(node.getId());
-        refreshStopButtonState(node.getId());
+          view.showProcessOutput(node.getName());
+          break;
+        case TERMINAL_NODE:
+          terminals.get(nodeId);
+          // fall through
+        default:
+          view.showProcessOutput(nodeId);
+          refreshStopButtonState(nodeId);
       }
     }
 

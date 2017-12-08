@@ -15,6 +15,7 @@ import static org.eclipse.che.ide.api.parts.PartStack.State.HIDDEN;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
+import javax.inject.Singleton;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackStateChangedEvent;
@@ -23,6 +24,7 @@ import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 
 /** Presenter to manage Panel selector widget and perspective layout. */
+@Singleton
 public class PanelSelectorPresenter implements Presenter, PanelSelectorView.ActionDelegate {
 
   private PanelSelectorView view;
