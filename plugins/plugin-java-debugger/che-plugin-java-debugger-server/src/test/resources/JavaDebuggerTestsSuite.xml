@@ -17,11 +17,11 @@
         <classes>
             <class name="org.eclipse.che.plugin.jdb.server.BreakpointsTest"/>
             <class name="org.eclipse.che.plugin.jdb.server.BreakpointConditionTest"/>
-            <class name="org.eclipse.che.plugin.jdb.server.ThreadDumpTest1"/>
+            <class name="org.eclipse.che.plugin.jdb.server.ThreadDumpTest"/>
             <class name="org.eclipse.che.plugin.jdb.server.SuspendPolicyTest"/>
             <class name="org.eclipse.che.plugin.jdb.server.StackFrameDumpTest1"/>
-            <class name="org.eclipse.che.plugin.jdb.server.GetValueTest1"/>
-            <class name="org.eclipse.che.plugin.jdb.server.EvaluateExpressionTest1"/>
+            <class name="org.eclipse.che.plugin.jdb.server.GetValueTest"/>
+            <class name="org.eclipse.che.plugin.jdb.server.EvaluateExpressionTest"/>
             <class name="org.eclipse.che.plugin.jdb.server.JavaDebuggerTest"/>
         </classes>
     </test>
