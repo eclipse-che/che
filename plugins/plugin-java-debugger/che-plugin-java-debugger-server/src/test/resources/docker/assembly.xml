@@ -14,36 +14,36 @@
 <assembly>
     <files>
         <file>
-            <source>${project.build.testOutputDirectory}/workspace/test/src/org/eclipse/ThreadDumpTest1.java</source>
+            <source>${project.build.testOutputDirectory}/testclasses/BreakpointsTest.java</source>
             <outputDirectory>./org/eclipse</outputDirectory>
         </file>
         <file>
+            <source>${project.build.testOutputDirectory}/testclasses/BreakpointsByConditionTest.java</source>
+            <outputDirectory>./org/eclipse</outputDirectory>
+        </file>
+       <file>
             <source>${project.build.testOutputDirectory}/workspace/test/src/org/eclipse/SuspendPolicyTest.java</source>
             <outputDirectory>./org/eclipse</outputDirectory>
         </file>
         <file>
-            <source>${project.build.testOutputDirectory}/workspace/test/src/org/eclipse/StackFrameDumpTest1.java</source>
+            <source>${project.build.testOutputDirectory}/testclasses/ThreadDumpTest.java</source>
             <outputDirectory>./org/eclipse</outputDirectory>
         </file>
         <file>
-            <source>${project.build.testOutputDirectory}/workspace/test/src/org/eclipse/GetValueTest1.java</source>
+            <source>${project.build.testOutputDirectory}/testclasses/StackFrameDumpTest.java</source>
             <outputDirectory>./org/eclipse</outputDirectory>
         </file>
         <file>
-            <source>${project.build.testOutputDirectory}/workspace/test/src/org/eclipse/EvaluateExpressionTest1.java</source>
+            <source>${project.build.testOutputDirectory}/testclasses/GetValueTest.java</source>
             <outputDirectory>./org/eclipse</outputDirectory>
         </file>
         <file>
-            <source>${project.build.testOutputDirectory}/workspace/test/src/org/eclipse/BreakpointsTest.java</source>
+            <source>${project.build.testOutputDirectory}/testclasses/EvaluateExpressionTest.java</source>
             <outputDirectory>./org/eclipse</outputDirectory>
         </file>
         <file>
-            <source>${project.build.testOutputDirectory}/workspace/test/src/org/eclipse/BreakpointsByConditionTest.java</source>
+            <source>${project.build.testOutputDirectory}/testclasses/HelloWorld.java</source>
             <outputDirectory>./org/eclipse</outputDirectory>
-        </file>
-        <file>
-            <source>${project.build.testOutputDirectory}/workspace/test/src/com/HelloWorld.java</source>
-            <outputDirectory>./com</outputDirectory>
         </file>
         <file>
             <source>${project.build.testOutputDirectory}/docker/entrypoint.sh</source>
