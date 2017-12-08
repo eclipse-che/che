@@ -38,6 +38,7 @@ import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_OUTPUT_DIR_COMMA
 import static org.eclipse.che.jdt.ls.extension.api.Commands.RESOLVE_CLASSPATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.TEST_DETECT_COMMAND;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -55,16 +56,20 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
+import org.eclipse.che.jdt.ls.extension.api.Commands;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
+import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocation;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
@@ -74,6 +79,7 @@ import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.CollectionTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EitherTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EnumTypeAdapterFactory;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -468,5 +474,49 @@ public class JavaLanguageServerExtensionService {
     }
 
     return result;
+  }
+
+  public String identifyFqnInResource(String filePath, int lineNumber) {
+    CompletableFuture<Object> result =
+        getLanguageServer()
+            .getWorkspaceService()
+            .executeCommand(
+                new ExecuteCommandParams(
+                    Commands.IDENTIFY_FQN_IN_RESOURCE,
+                    ImmutableList.of(prefixURI(filePath), String.valueOf(lineNumber))));
+
+    try {
+      return (String) result.get(10, TimeUnit.SECONDS);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  public Location findResourcesByFqn(String fqn, int lineNumber) {
+    CompletableFuture<Object> result =
+        getLanguageServer()
+            .getWorkspaceService()
+            .executeCommand(
+                new ExecuteCommandParams(
+                    Commands.FIND_RESOURCES_BY_FQN,
+                    ImmutableList.of(fqn, String.valueOf(lineNumber))));
+
+    try {
+      List<Either<String, ResourceLocation>> location =
+          gson.fromJson(
+              gson.toJson(result.get(10, TimeUnit.SECONDS)),
+              new com.google.common.reflect.TypeToken<
+                  List<Either<String, ResourceLocation>>>() {}.getType());
+      Either<String, ResourceLocation> l = location.get(0);
+
+      if (l.isLeft()) {
+        return new LocationImpl(l.getLeft(), lineNumber, null);
+      } else {
+        return new LocationImpl(
+            l.getRight().getFqn(), lineNumber, true, l.getRight().getLibId(), null);
+      }
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
   }
 }
