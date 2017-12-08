@@ -92,7 +92,7 @@ public class ConvertToProjectFromConfigurationTest {
         "file.php", pathToPhpFile, TestProjectExplorerContextMenuConstants.SubMenuNew.FILE);
     projectExplorer.waitItemInVisibleArea("file.php");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/phpFolder/file.php");
-    editor.waitActiveEditor();
+    editor.waitActive();
     actionsFactory
         .createAction(seleniumWebDriver)
         .sendKeys(getContentFromFile("file.php"))
@@ -122,7 +122,7 @@ public class ConvertToProjectFromConfigurationTest {
         "fileJS", pathToJsFile, TestProjectExplorerContextMenuConstants.SubMenuNew.JAVASCRIPT_FILE);
     projectExplorer.waitItemInVisibleArea("fileJS.js");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsFolder/fileJS.js");
-    editor.waitActiveEditor();
+    editor.waitActive();
     actionsFactory
         .createAction(seleniumWebDriver)
         .sendKeys(getContentFromFile("file.js"))

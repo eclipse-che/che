@@ -92,7 +92,7 @@ public class FindUsagesBaseOperationTest {
 
     // Check basic operations of the 'find usages' panel
     editor.selectTabByName("AppController");
-    editor.setCursorToDefinedLineAndChar(26, 17);
+    editor.goToCursorPositionVisible(26, 17);
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.FIND_USAGES);
@@ -106,7 +106,7 @@ public class FindUsagesBaseOperationTest {
     findUsages.waitSelectedElementInFindUsagesPanel("numGuessByUser");
     // Check basic operations of the 'find usages' panel
     editor.selectTabByName("AppController");
-    editor.setCursorToDefinedLineAndChar(26, 17);
+    editor.goToCursorPositionVisible(26, 17);
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.FIND_USAGES);

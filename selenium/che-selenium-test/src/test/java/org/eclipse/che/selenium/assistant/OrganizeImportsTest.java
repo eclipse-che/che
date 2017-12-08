@@ -89,7 +89,7 @@ public class OrganizeImportsTest {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_CLASS_IN_SPRING_PACKAGE);
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(15);
     editor.deleteCurrentLine();
     editor.waitMarkerInPosition(ERROR_MARKER, 24);
@@ -108,7 +108,7 @@ public class OrganizeImportsTest {
     editor.typeTextIntoEditorWithoutDelayForSaving(
         "import org.springframework.web.servlet.ModelAndView;");
     loader.waitOnClosed();
-    editor.setCursorToDefinedLineAndChar(20, 8);
+    editor.goToCursorPositionVisible(20, 8);
     editor.launchPropositionAssistPanel();
     editor.enterTextIntoFixErrorPropByEnter("Organize imports");
     loader.waitOnClosed();
@@ -123,7 +123,7 @@ public class OrganizeImportsTest {
           editor.checkWhatTextLinePresentOnce(
               "import org.springframework.web.servlet.ModelAndView;"));
     }
-    editor.setCursorToDefinedLineAndChar(29, 23);
+    editor.goToCursorPositionVisible(29, 23);
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.QUICK_FIX);

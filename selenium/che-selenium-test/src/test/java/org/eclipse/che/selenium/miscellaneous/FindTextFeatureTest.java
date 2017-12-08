@@ -150,7 +150,7 @@ public class FindTextFeatureTest {
         "1:   Filesystem 1K-blocks Used Available Use% Mounted on");
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
     editor.waitActiveTabFileName(fileNameCreatedFromTerminal);
-    assertEquals(editor.getPositionOfLine(), 1);
+    assertEquals(editor.getPositionVisible(), 1);
 
     // Create a file from API
     createFileFromAPI(PROJECT_NAME, fileNameCreatedFromAPI, content);
@@ -172,7 +172,7 @@ public class FindTextFeatureTest {
         format("/%s/readme.api", PROJECT_NAME), "1:   FindTextFeatureTest");
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
     editor.waitActiveTabFileName(fileNameCreatedFromAPI);
-    assertEquals(editor.getPositionOfLine(), 1);
+    assertEquals(editor.getPositionVisible(), 1);
 
     editor.closeAllTabsByContextMenu();
   }
@@ -241,10 +241,10 @@ public class FindTextFeatureTest {
         pathToQuessNumFile,
         "25:    java.lang.String attempt = (java.lang.String)request.getAttribute(\"num\");");
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitActiveTabFileName("guess_num.jsp");
     editor.waitTextIntoEditor("String");
-    assertEquals(editor.getPositionOfLine(), 25);
+    assertEquals(editor.getPositionVisible(), 25);
 
     // Check that the Find Info panel state restored
     consoles.closeProcessesArea();
@@ -265,10 +265,10 @@ public class FindTextFeatureTest {
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
     findTextPage.selectItemInFindInfoPanelByDoubleClick(
         pathToSayHelloFile, "20:    public String sayHello(String name)");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitActiveTabFileName("SayHello");
     editor.waitTextIntoEditor("String");
-    assertEquals(editor.getPositionOfLine(), 20);
+    assertEquals(editor.getPositionVisible(), 20);
 
     editor.closeAllTabsByContextMenu();
   }

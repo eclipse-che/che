@@ -123,7 +123,7 @@ public class JavaDocPopupTest {
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
     loader.waitOnClosed();
     // Class javadoc popup
-    editor.setCursorToDefinedLineAndChar(25, 105);
+    editor.goToCursorPositionVisible(25, 105);
 
     editor.openJavaDocPopUp();
     editor.waitJavaDocPopUpOpened();
@@ -134,8 +134,8 @@ public class JavaDocPopupTest {
 
     // Annotation javadoc popup
     editor.typeTextIntoEditor(Keys.CONTROL.toString());
-    editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(24, 6);
+    editor.waitActive();
+    editor.goToCursorPositionVisible(24, 6);
 
     editor.openJavaDocPopUp();
     editor.waitJavaDocPopUpOpened();
@@ -146,7 +146,7 @@ public class JavaDocPopupTest {
     editor.typeTextIntoEditor(Keys.CONTROL.toString());
 
     // Class name javadoc popup
-    editor.setCursorToDefinedLineAndChar(21, 17);
+    editor.goToCursorPositionVisible(21, 17);
     editor.openJavaDocPopUp();
     editor.waitJavaDocPopUpOpened();
     editor.checkTextToBePresentInJavaDocPopUp(CLASS_NAME_TEXT);
@@ -161,7 +161,7 @@ public class JavaDocPopupTest {
     editor.typeTextIntoEditor("public AppController() {}");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
 
-    editor.setCursorToDefinedLineAndChar(24, 15);
+    editor.goToCursorPositionVisible(24, 15);
     editor.openJavaDocPopUp();
     editor.checkTextToBePresentInJavaDocPopUp(CONSTRUCTOR_TEXT);
 
@@ -186,7 +186,7 @@ public class JavaDocPopupTest {
     editor.typeTextIntoEditor("TestClass abc = new TestClass(); Object testObject = new Object();");
     editor.typeTextIntoEditor(Keys.HOME.toString());
 
-    editor.setCursorToDefinedLineAndChar(24, 5);
+    editor.goToCursorPositionVisible(24, 5);
     editor.openJavaDocPopUp();
     editor.checkTextToBePresentInJavaDocPopUp(JAVA_DOC_FOR_TEST_CLASS);
 
@@ -194,7 +194,7 @@ public class JavaDocPopupTest {
     editor.waitJavaDocPopUpClosed();
     editor.typeTextIntoEditor(Keys.CONTROL.toString());
 
-    editor.setCursorToDefinedLineAndChar(24, 35);
+    editor.goToCursorPositionVisible(24, 35);
     editor.openJavaDocPopUp();
     editor.waitJavaDocPopUpOpened();
     editor.checkTextToBePresentInJavaDocPopUp(JAVA_DOC_FOR_OBJECT);

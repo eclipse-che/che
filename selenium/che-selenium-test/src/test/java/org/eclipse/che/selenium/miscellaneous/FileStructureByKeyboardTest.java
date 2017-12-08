@@ -172,6 +172,6 @@ public class FileStructureByKeyboardTest {
         PROJECT_NAME + "/src" + "/main" + "/java" + "/com/codenvy/qa/" + fileName + ".java");
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src" + "/main" + "/java" + "/com/codenvy/qa/" + fileName + ".java");
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 }

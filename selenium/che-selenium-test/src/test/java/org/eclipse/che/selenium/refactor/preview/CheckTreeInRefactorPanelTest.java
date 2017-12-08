@@ -60,8 +60,8 @@ public class CheckTreeInRefactorPanelTest {
     loader.waitOnClosed();
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(26, 17);
+    editor.waitActive();
+    editor.goToCursorPositionVisible(26, 17);
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactorPanel.waitRenameParametersFormIsOpen();

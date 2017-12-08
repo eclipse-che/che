@@ -82,9 +82,9 @@ public class FailParametersTest {
   private void checkRefactoring(TestParams testParamObj) throws Exception {
     setFieldsForTest(testParamObj.getNameTest());
     projectExplorer.openItemByPath(pathToCurrentPackage);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(
+    editor.goToCursorPositionVisible(
         testParamObj.getStrCursorPosition(), testParamObj.getLineCursorPosition());
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
