@@ -61,7 +61,7 @@
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt</artifactId>
-                <version>0.7.0</version>
+                <version>${io.jsonwebtoken.jjwt.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.tomcat</groupId>
