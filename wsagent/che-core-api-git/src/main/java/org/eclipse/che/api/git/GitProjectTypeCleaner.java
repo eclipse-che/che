@@ -91,7 +91,11 @@ public class GitProjectTypeCleaner implements EventSubscriber<GitRepositoryDelet
       LOG.error(
           "Project {} not found for removing {} type", projectPath, GitProjectType.DISPLAY_NAME, e);
     } catch (ServerException e) {
-      e.printStackTrace();
+      LOG.error(
+          "Exception occurred during removing {} project type for project {}",
+          projectPath,
+          GitProjectType.DISPLAY_NAME,
+          e);
     } catch (ConflictException | BadRequestException | ForbiddenException ignore) {
       // should never be here
       LOG.warn(

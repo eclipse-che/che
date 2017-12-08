@@ -90,7 +90,11 @@ public class ContributionProjectTypeCleaner implements EventSubscriber<GitReposi
           CONTRIBUTION_PROJECT_TYPE_ID,
           e);
     } catch (ServerException e) {
-      e.printStackTrace();
+      LOG.error(
+          "Exception occurred during removing {} project type for project ",
+          CONTRIBUTION_PROJECT_TYPE_ID,
+          projectPath,
+          e);
     } catch (ConflictException | BadRequestException | ForbiddenException ignore) {
       // should never be here
       LOG.warn(
