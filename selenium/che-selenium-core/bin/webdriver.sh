@@ -423,7 +423,7 @@ HOW TO of usage:
         ${CALLER} -Mlocal --test=<TEST> --debug
 
     Analyse tests results:
-        ${CALLER} --compare-with-ci [CI job number]
+        ${CALLER} --compare-with-ci [BUILD NUMBER]
 "
 
     printf "%s" "${usage}"
@@ -497,8 +497,8 @@ fetchFailedTestsNumber() {
 }
 
 detectLatestResultsUrl() {
-    local job=$(curl -s ${BASE_ACTUAL_RESULTS_URL} | tr '\n' ' ' | sed 's/.*Last build (#\([0-9]\+\)).*/\1/')
-    echo ${BASE_ACTUAL_RESULTS_URL}${job}"/testReport/"
+    local build=$(curl -s ${BASE_ACTUAL_RESULTS_URL} | tr '\n' ' ' | sed 's/.*Last build (#\([0-9]\+\)).*/\1/')
+    echo ${BASE_ACTUAL_RESULTS_URL}${build}"/testReport/"
 }
 
 # Fetches list of failed tests and failed configurations.
@@ -507,7 +507,7 @@ fetchActualResults() {
     unset ACTUAL_RESULTS
     unset ACTUAL_RESULTS_URL
 
-    # define the URL of CI job to compare result with it
+    # define the URL of CI job to compare result with result on it
     if [[ ${CHE_MULTIUSER} == true ]]; then
       local nameOfCIJob=che-multiuser-integration-tests-che6
     else
@@ -516,11 +516,11 @@ fetchActualResults() {
 
     [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/$nameOfCIJob/"; }
 
-    local job=$(echo $@ | sed 's/.*--compare-with-ci\W\+\([0-9]\+\).*/\1/')
-    if [[ ! ${job} =~ ^[0-9]+$ ]]; then
+    local build=$(echo $@ | sed 's/.*--compare-with-ci\W\+\([0-9]\+\).*/\1/')
+    if [[ ! ${build} =~ ^[0-9]+$ ]]; then
         ACTUAL_RESULTS_URL=$(detectLatestResultsUrl)
     else
-        ACTUAL_RESULTS_URL=${BASE_ACTUAL_RESULTS_URL}${job}"/testReport/"
+        ACTUAL_RESULTS_URL=${BASE_ACTUAL_RESULTS_URL}${build}"/testReport/"
     fi
 
     # get list of failed tests from CI server, remove duplicates from it and sort
@@ -650,11 +650,11 @@ printProposals() {
     fi
 
     echo "[TEST]"
-    echo "[TEST] To compare tests results with the latest CI job"
+    echo "[TEST] To compare tests results with the latest results on CI job"
     echo -e "[TEST] \t${BLUE}${CUR_DIR}/${CALLER} ${cmd} --compare-with-ci${NO_COLOUR}"
     echo "[TEST]"
-    echo "[TEST] To compare tests results with results of the specific CI job"
-    echo -e "[TEST] \t${BLUE}${CUR_DIR}/${CALLER} ${cmd} --compare-with-ci CI_JOB_NUMBER${NO_COLOUR}"
+    echo "[TEST] To compare local tests results with certain build on CI job"
+    echo -e "[TEST] \t${BLUE}${CUR_DIR}/${CALLER} ${cmd} --compare-with-ci [BUILD NUMBER]${NO_COLOUR}"
     echo "[TEST]"
     echo "[TEST]"
 }

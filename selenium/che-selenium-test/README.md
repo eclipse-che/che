@@ -132,7 +132,7 @@ HOW TO of usage:
         ./selenium-tests.sh -Mlocal --test=<TEST> --debug
 
     Analyse tests results:
-        ./selenium-tests.sh --compare-with-ci [CI job number]
+        ./selenium-tests.sh --compare-with-ci [BUILD NUMBER]
 ```
 
 
