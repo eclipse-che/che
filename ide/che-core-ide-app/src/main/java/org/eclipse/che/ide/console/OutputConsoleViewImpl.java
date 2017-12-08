@@ -58,8 +58,6 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
   private ActionDelegate delegate;
 
-  private final TerminalInitializePromiseHolder promiseHolder;
-  private final ModuleHolder moduleHolder;
   private static final int SCROLL_BACK = 5000;
 
   @UiField protected DockLayoutPanel consolePanel;
@@ -90,9 +88,6 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
       MachineResources resources,
       CoreLocalizationConstant localization,
       TerminalInitializePromiseHolder promiseHolder) {
-    this.promiseHolder = promiseHolder;
-    this.moduleHolder = moduleHolder;
-
     initWidget(UI_BINDER.createAndBindUi(this));
 
     reRunProcessButton.add(new SVGImage(resources.reRunIcon()));
