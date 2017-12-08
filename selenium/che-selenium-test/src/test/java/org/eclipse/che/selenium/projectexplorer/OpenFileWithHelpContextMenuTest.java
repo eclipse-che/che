@@ -183,10 +183,10 @@ public class OpenFileWithHelpContextMenuTest {
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_FOR_EXPAND + "/AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.closeFileByNameWithSaving("AppController");
     projectExplorer.openItemByPath(PATH_TO_WEB_APP + "/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.closeFileByNameWithSaving("index.jsp");
 
     openFileFromContextMenu(PATH_TO_JAVA_CLASS, NAME_JAVA_CLASS, APP_CONTROLLER_TEXT);
@@ -215,7 +215,7 @@ public class OpenFileWithHelpContextMenuTest {
     loader.waitOnClosed();
     editor.waitTabIsPresent(fileName);
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(expectedContent);
   }
 }

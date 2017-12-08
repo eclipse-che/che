@@ -130,7 +130,7 @@ public class DeletePackageFromContextMenuTest {
 
   private void openItemByPath(String path) {
     projectExplorer.openItemByPath(path);
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
   }
 }

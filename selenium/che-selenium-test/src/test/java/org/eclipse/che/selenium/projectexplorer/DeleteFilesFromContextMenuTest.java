@@ -89,9 +89,9 @@ public class DeleteFilesFromContextMenuTest {
     notificationsPopupPanel.waitProgressPopupPanelClose();
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_FOR_EXPAND + "/AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.openItemByPath(PATH_TO_WEB_APP + "/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
 
     // delete java class file

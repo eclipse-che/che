@@ -91,7 +91,7 @@ public class CheckReplaceFeatureInEditorTest {
     editor.closeAllTabs();
     projectExplorer.openItemByVisibleNameInExplorer("README.md");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(expectedReplace);
   }
 
@@ -105,7 +105,7 @@ public class CheckReplaceFeatureInEditorTest {
     editor.closeAllTabs();
     projectExplorer.openItemByVisibleNameInExplorer("README.md");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(expectedReplaceAll);
   }
 }

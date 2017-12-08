@@ -69,10 +69,10 @@ public class ProjectStateAfterWorkspaceRestartTest {
     projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
 
     // stop and start workspace
@@ -101,7 +101,7 @@ public class ProjectStateAfterWorkspaceRestartTest {
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
     projectExplorer.openItemByPath(PROJECT_NAME + "/README.md");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextNotPresentIntoEditor(EXP_TEXT_NOT_PRESENT);
     editor.waitTextIntoEditor("Developer Workspace");
   }

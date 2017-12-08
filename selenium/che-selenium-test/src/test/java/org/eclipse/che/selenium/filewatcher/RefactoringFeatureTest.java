@@ -94,7 +94,7 @@ public class RefactoringFeatureTest {
     projectExplorer1.waitItem(PROJECT_NAME);
     prepareFiles(editor1, projectExplorer1);
     prepareFiles(editor2, projectExplorer2);
-    editor1.setCursorToDefinedLineAndChar(21, 14);
+    editor1.goToCursorPositionVisible(21, 14);
     doRenameRefactor();
     checkWatching(expectedMessAfterRename);
     editor2.waitTabIsNotPresent(renamedClassName);
@@ -113,7 +113,7 @@ public class RefactoringFeatureTest {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_GREETING_FILE);
     editor.waitTabIsPresent(originClassName.replace(".java", ""));
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 
   private void doRenameRefactor() {

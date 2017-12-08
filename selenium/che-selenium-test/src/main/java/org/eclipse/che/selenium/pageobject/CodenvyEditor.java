@@ -12,8 +12,20 @@ package org.eclipse.che.selenium.pageobject;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.*;
-import static org.openqa.selenium.support.ui.ExpectedConditions.*;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.inject.Inject;
@@ -32,7 +44,13 @@ import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindAll;
 import org.openqa.selenium.support.FindBy;
@@ -251,13 +269,13 @@ public class CodenvyEditor {
    *
    * @param userTimeOut timeout defined of the user
    */
-  public void waitActiveEditor(int userTimeOut) {
+  public void waitActive(int userTimeOut) {
     loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, userTimeOut).until(visibilityOf(activeEditorContainer));
   }
 
   /** wait active editor */
-  public void waitActiveEditor() {
+  public void waitActive() {
     loader.waitOnClosed();
     loadPageDriverWait.until(visibilityOf(activeEditorContainer));
   }
@@ -268,7 +286,7 @@ public class CodenvyEditor {
    * @return text from active tab of orion editor
    */
   public String getVisibleTextFromEditor() {
-    waitActiveEditor();
+    waitActive();
     List<WebElement> lines =
         elemDriverWait.until(
             presenceOfAllElementsLocatedBy(By.xpath(Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH)));
@@ -281,7 +299,7 @@ public class CodenvyEditor {
    * @param indexOfEditor index of editor that was split
    */
   public String getTextFromSplitEditor(int indexOfEditor) {
-    waitActiveEditor();
+    waitActive();
     List<WebElement> lines =
         elemDriverWait.until(
             presenceOfAllElementsLocatedBy(By.xpath(Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH)));
@@ -507,17 +525,35 @@ public class CodenvyEditor {
     loader.waitOnClosed();
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    waitActiveEditor();
+    waitActive();
     expectedNumberOfActiveLine(positionLine);
   }
 
   /**
-   * set cursor in specified position
+   * set cursor in specified position for current visible editor
    *
    * @param positionLine is the specified number line
    * @param positionChar is the specified number char
    */
-  public void setCursorToDefinedLineAndChar(int positionLine, int positionChar) {
+  public void goToCursorPositionVisible(int positionLine, int positionChar) {
+    openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
+    waitActive();
+    waitSpecifiedValueForLineAndChar(positionLine, positionChar);
+  }
+
+  /**
+   * set cursor in specified position for current active and focused editor
+   *
+   * @param positionLine is the specified number line
+   * @param positionChar is the specified number char
+   */
+  public void goToPosition(int positionLine, int positionChar) {
+    openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
+    waitActive();
+    waitCursorPosition(positionLine, positionChar);
+  }
+
+  private void openGoToLineFormAndSetCursorToPosition(int positionLine, int positionChar) {
     loader.waitOnClosed();
     actionsFactory
         .createAction(seleniumWebDriver)
@@ -530,8 +566,6 @@ public class CodenvyEditor {
     loader.waitOnClosed();
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    waitActiveEditor();
-    waitSpecifiedValueForLineAndChar(positionLine, positionChar);
   }
 
   /** launch code assistant with ctrl+space keys and wait container is open */
@@ -1037,7 +1071,7 @@ public class CodenvyEditor {
   }
 
   public void waitDefaultColorTab(final String fileName) {
-    waitActiveEditor();
+    waitActive();
     boolean isEditorFocused =
         !(seleniumWebDriver
                 .findElement(
@@ -1178,7 +1212,7 @@ public class CodenvyEditor {
    * @param position position of the breakpoint
    */
   public void setInactiveBreakpoint(int position) {
-    waitActiveEditor();
+    waitActive();
     waitDebugerLineIsVisible(position);
     seleniumWebDriver
         .findElement(By.xpath(String.format(Locators.DEBUGGER_PREFIX_XPATH, position)))
@@ -1193,7 +1227,7 @@ public class CodenvyEditor {
    * @param position position of the breakpoint
    */
   public void setBreakPointAndWaitActiveState(int position) {
-    waitActiveEditor();
+    waitActive();
     waitDebugerLineIsVisible(position);
     seleniumWebDriver
         .findElement(By.xpath(String.format(Locators.DEBUGGER_PREFIX_XPATH, position)))
@@ -1202,7 +1236,7 @@ public class CodenvyEditor {
   }
 
   public void setBreakpoint(int position) {
-    waitActiveEditor();
+    waitActive();
     waitDebugerLineIsVisible(position);
     seleniumWebDriver
         .findElement(By.xpath(String.format(Locators.DEBUGGER_PREFIX_XPATH, position)))
@@ -1296,32 +1330,64 @@ public class CodenvyEditor {
    * @param text is the text of elements active line
    */
   public void waitTextElementsActiveLine(final String text) {
-    waitActiveEditor();
+    waitActive();
     redrawDriverWait.until(visibilityOf(activeLineXpath));
     redrawDriverWait.until(
         (ExpectedCondition<Boolean>) driver -> activeLineXpath.getText().contains(text));
   }
 
   /** get positions of the current line and char */
-  public Pair<Integer, Integer> getCurrentCursorPositions() {
-    waitActiveEditor();
+  public Pair<Integer, Integer> getCurrentCursorPositionsFromVisible() {
+    waitActive();
     WebElement currentActiveElement =
         activeLineNumbers.stream().filter(webElement -> webElement.isDisplayed()).findFirst().get();
-    int[] currentCursorPosition =
-        Arrays.asList(
-                redrawDriverWait.until(visibilityOf(currentActiveElement)).getText().split(":"))
+    return getCursorPositionFromWebElement(currentActiveElement);
+  }
+
+  /**
+   * Check that editor active and focused on first step. After that get cursor position. Note! For
+   * correct work a editor must be active.
+   *
+   * @return char and line position from current visible, active and focused editor (usual uses with
+   *     split editor)
+   */
+  public Pair<Integer, Integer> getCursorPositionsFromActive() {
+    String xpathToCurrentActiveCursorPosition =
+        "//div[@active and @focused]/parent::div[@id='gwt-debug-multiSplitPanel-tabsPanel']/div[@active and @focused]/parent::div[@id='gwt-debug-multiSplitPanel-tabsPanel']/parent::div/parent::div/following-sibling::div//div[@active]//div[@id='gwt-debug-cursorPosition']";
+    waitActive();
+    return getCursorPositionFromWebElement(
+        redrawDriverWait.until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(xpathToCurrentActiveCursorPosition))));
+  }
+
+  /**
+   * wait specified values for Line and Char cursor positions in the Codenvy editor
+   *
+   * @param linePosition expected line position
+   * @param charPosition expected char position
+   */
+  public void waitCursorPosition(final int linePosition, final int charPosition) {
+    redrawDriverWait.until(
+        (ExpectedCondition<Boolean>)
+            webDriver ->
+                (getCursorPositionsFromActive().first == linePosition)
+                    && (getCursorPositionsFromActive().second == charPosition));
+  }
+
+  private Pair<Integer, Integer> getCursorPositionFromWebElement(WebElement webElement) {
+    int[] currentCursorPositions =
+        Arrays.asList(webElement.getText().split(":"))
             .stream()
             .mapToInt(Integer::parseInt)
             .toArray();
-    Pair<Integer, Integer> cursorPosition =
-        new Pair<>(currentCursorPosition[0], currentCursorPosition[1]);
-    return cursorPosition;
+    return new Pair<Integer, Integer>(currentCursorPositions[0], currentCursorPositions[1]);
   }
 
   /** get number of current active line */
-  public int getPositionOfLine() {
-    waitActiveEditor();
-    return getCurrentCursorPositions().first;
+  public int getPositionVisible() {
+    waitActive();
+    return getCurrentCursorPositionsFromVisible().first;
   }
 
   /**
@@ -1330,9 +1396,9 @@ public class CodenvyEditor {
    * @param expectedLine expected number of active line
    */
   public void expectedNumberOfActiveLine(final int expectedLine) {
-    waitActiveEditor();
+    waitActive();
     redrawDriverWait.until(
-        (ExpectedCondition<Boolean>) driver -> expectedLine == getPositionOfLine());
+        (ExpectedCondition<Boolean>) driver -> expectedLine == getPositionVisible());
   }
 
   /**
@@ -1341,7 +1407,7 @@ public class CodenvyEditor {
    * @return char value
    */
   public int getPositionOfChar() {
-    return getCurrentCursorPositions().second;
+    return getCurrentCursorPositionsFromVisible().second;
   }
 
   /**
@@ -1354,7 +1420,7 @@ public class CodenvyEditor {
     redrawDriverWait.until(
         (ExpectedCondition<Boolean>)
             webDriver ->
-                (getPositionOfLine() == linePosition) && (getPositionOfChar() == charPosition));
+                (getPositionVisible() == linePosition) && (getPositionOfChar() == charPosition));
   }
 
   /**
@@ -1386,7 +1452,7 @@ public class CodenvyEditor {
         seleniumWebDriver.findElement(
             By.xpath(String.format(Locators.SELECTED_ITEM_IN_EDITOR, nameElement)));
     item.click();
-    waitActiveEditor();
+    waitActive();
   }
 
   /**

@@ -126,6 +126,7 @@ import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -1222,8 +1223,12 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                     resolve.apply(null);
                     return;
                   }
-
-                  String vcsName = project.getAttribute(VCS_PROVIDER_NAME);
+                  Container parent = getRoot(project);
+                  if (!(parent instanceof Project)) {
+                    resolve.apply(null);
+                    return;
+                  }
+                  String vcsName = ((Project) parent).getAttribute(VCS_PROVIDER_NAME);
                   VcsChangeMarkerRenderFactory vcsChangeMarkerRenderFactory =
                       vcsChangeMarkerRenderFactoryMap.get(vcsName);
                   if (vcsChangeMarkerRenderFactory != null) {
@@ -1232,6 +1237,14 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                   }
                   resolve.apply(null);
                 }));
+  }
+
+  private Container getRoot(Container container) {
+    Container root = container;
+    while (root.getParent() != null) {
+      root = root.getParent();
+    }
+    return root;
   }
 
   @Override
