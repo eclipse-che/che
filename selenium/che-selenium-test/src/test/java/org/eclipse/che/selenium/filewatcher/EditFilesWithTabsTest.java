@@ -123,7 +123,7 @@ public class EditFilesWithTabsTest {
     String path_for_expand = projectName + "/src/main/java/org.eclipse.qa.examples";
     projectExplorer.openItemByPath(path_for_expand.replace(".", "/") + "/AppController.java");
 
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 
   /** Performs checking that notifications do not appear for inactive tabs */

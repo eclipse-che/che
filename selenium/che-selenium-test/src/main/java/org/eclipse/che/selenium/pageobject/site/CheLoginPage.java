@@ -56,8 +56,7 @@ public class CheLoginPage implements LoginPage {
     this.seleniumWebDriver = seleniumWebDriver;
     PageFactory.initElements(seleniumWebDriver, this);
 
-    webDriverWait =
-        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC);
+    webDriverWait = new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC);
   }
 
   @Override

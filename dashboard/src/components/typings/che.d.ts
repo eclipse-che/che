@@ -161,7 +161,13 @@ declare namespace che {
       getValues(): any[];
     }
 
-  }
+    export interface ICheRecipeTypes {
+      DOCKERFILE: string;
+      DOCKERIMAGE: string;
+      COMPOSE: string;
+      OPENSHIFT: string;
+      getValues(): Array<string>;
+    }
 
   export namespace service {
 
@@ -308,6 +314,7 @@ declare namespace che {
   }
 
   export interface IRecipe {
+    id?: string;
     content?: string;
     location?: string;
     contentType?: string;
@@ -325,7 +332,7 @@ declare namespace che {
     };
     volumes?: {
       [volumeRef: string]: IEnvironmentMachineVolume
-    }
+    };
   }
 
   export interface IEnvironmentMachineServer {
@@ -355,7 +362,7 @@ declare namespace che {
   }
 
   export interface IWorkspaceRuntimeMachine {
-    properties: { [propName: string]: string };
+    attributes: { [propName: string]: string };
     servers: { [serverName: string]: IWorkspaceRuntimeMachineServer };
   }
 

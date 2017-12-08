@@ -89,7 +89,7 @@ public class FileOpenedAfterCreationTest {
     askForValueDialog.typeTextInFieldName("TestClass");
     askForValueDialog.clickOkBtnNewJavaClass();
     editor.waitActiveTabFileName("TestClass");
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
     editor.waitTextIntoEditor(EXPECTED_TEXT_1);
   }

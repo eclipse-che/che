@@ -135,7 +135,7 @@ public class NavigationByKeyboardTest {
     projectExplorer.waitItemIsSelected(PATH_TO_SECOND_MODULE + "/AppController.java");
 
     projectExplorer.sendToItemEnterKey();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(EXPECTED_TEXT_IN_JAVA_FILE);
 
     projectExplorer.selectVisibleItem(nameFirstModule);

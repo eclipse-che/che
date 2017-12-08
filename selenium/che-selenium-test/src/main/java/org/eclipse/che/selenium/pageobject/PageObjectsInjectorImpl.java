@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.pageobject;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.selenium.core.CheSeleniumWebDriverRelatedModule;
@@ -23,14 +24,11 @@ import org.eclipse.che.selenium.pageobject.site.CheLoginPage;
 /** @author Dmytro Nochevnov */
 @Singleton
 public class PageObjectsInjectorImpl extends PageObjectsInjector {
-
-  private static final String CHE_MULTIUSER = "che.multiuser";
-
   @Inject private CheSeleniumWebDriverRelatedModule cheSeleniumWebDriverRelatedModule;
 
   @Inject
-  @javax.inject.Named(CHE_MULTIUSER)
-  boolean isMultiuser;
+  @Named("che.multiuser")
+  private boolean isMultiuser;
 
   @Override
   public Map<Class<?>, Object> getDependenciesWithWebdriver(SeleniumWebDriver seleniumWebDriver) {

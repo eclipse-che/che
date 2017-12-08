@@ -66,7 +66,7 @@ public class BreakpointReorderingTest {
 
   @Test
   public void shouldNotRemoveBreakpointWhenFirstCharacterRemoved() throws Exception {
-    editor.setCursorToDefinedLineAndChar(26, 1);
+    editor.goToCursorPositionVisible(26, 1);
     actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.DELETE).build().perform();
 
     editor.waitInactiveBreakpoint(26);
@@ -74,7 +74,7 @@ public class BreakpointReorderingTest {
 
   @Test(priority = 1)
   public void shouldNotRemoveBreakpointWhenLastCharacterRemoved() throws Exception {
-    editor.setCursorToDefinedLineAndChar(26, 65);
+    editor.goToCursorPositionVisible(26, 65);
     actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.BACK_SPACE).build().perform();
 
     editor.waitInactiveBreakpoint(26);
@@ -102,7 +102,7 @@ public class BreakpointReorderingTest {
 
   @Test(priority = 3)
   public void shouldReorderBreakpointsWhenLineAdded() throws Exception {
-    editor.setCursorToDefinedLineAndChar(26, 1);
+    editor.goToCursorPositionVisible(26, 1);
     actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ENTER).build().perform();
 
     editor.waitInactiveBreakpoint(30);

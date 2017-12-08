@@ -20,7 +20,7 @@ export  interface IInitData {
   workspaceDetails: che.IWorkspace;
 }
 
-const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Agents', 'Servers', 'Env_Variables', 'Config', 'SSH'];
+const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Installers', 'Servers', 'Env_Variables', 'Config', 'SSH'];
 
 const STOPPING = WorkspaceStatus[WorkspaceStatus.STOPPING];
 const STOPPED = WorkspaceStatus[WorkspaceStatus.STOPPED];
@@ -228,7 +228,6 @@ export class WorkspaceDetailsController {
       return;
     }
     this.editMode = !angular.equals(this.originWorkspaceDetails.config, this.workspaceDetails.config);
-
     if (this.editMode === false) {
       this.editModeMessage = '';
       this.showApplyMessage = false;

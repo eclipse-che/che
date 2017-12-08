@@ -183,7 +183,7 @@ public class CommandsEditor extends CodenvyEditor {
 
   public void setFocusIntoTypeCommandsEditor(String commandsEditorType) {
     redrawWait.until(visibilityOfElementLocated(By.xpath(commandsEditorType))).click();
-    waitActiveEditor();
+    waitActive();
   }
 
   public void waitTextIntoDescriptionMacrosForm(String expText) {
@@ -287,6 +287,6 @@ public class CommandsEditor extends CodenvyEditor {
     loader.waitOnClosed();
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    waitActiveEditor();
+    waitActive();
   }
 }

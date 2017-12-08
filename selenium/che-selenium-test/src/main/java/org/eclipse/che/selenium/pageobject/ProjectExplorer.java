@@ -847,7 +847,7 @@ public class ProjectExplorer {
     String pathToFile = path.replace('.', '/') + '/' + fileName;
     waitItem(pathToFile);
     openItemByPath(pathToFile);
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 
   /**
@@ -864,7 +864,7 @@ public class ProjectExplorer {
     String pathToFile = path.replace('.', '/') + '/' + fileName;
     waitItem(pathToFile);
     openItemByPath(pathToFile);
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 
   /**

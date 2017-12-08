@@ -94,7 +94,7 @@ public class KeysInjector {
                       return;
                   }
 
-                  final String containerId = machine.getRuntime().getProperties().get("id");
+                  final String containerId = machine.getRuntime().getAttributes().get("id");
                   StringBuilder command = new StringBuilder("mkdir ~/.ssh/ -p");
                   for (String publicKey : publicKeys) {
                       command.append("&& echo '")

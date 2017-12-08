@@ -42,7 +42,7 @@ public interface MachineConfig {
   /** Returns environment variables of machine. */
   Map<String, String> getEnv();
 
-  /** Returns attributes of resources of machine. */
+  /** Returns attributes of machine. */
   Map<String, String> getAttributes();
 
   /** Returns volumes of machine */
