@@ -131,7 +131,7 @@ public class BranchTest {
 
     // Create change in index.jsp
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.PAGE_DOWN.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(CHANGE_CONTENT_1);

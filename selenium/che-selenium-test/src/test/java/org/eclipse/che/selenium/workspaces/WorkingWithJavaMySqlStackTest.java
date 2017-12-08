@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
@@ -17,6 +18,9 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.COMMON;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.RUN;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
@@ -48,12 +52,12 @@ import org.testng.annotations.Test;
 public class WorkingWithJavaMySqlStackTest {
   private static final String WORKSPACE = NameGenerator.generate("java-mysql", 4);
   private static final String PROJECT_NAME = "web-java-petclinic";
-  private static final String BUIL_AND_DEPLOY_PROCESS = PROJECT_NAME + ":build and deploy";
+  private static final String BUILD_AND_DEPLOY_PROCESS = PROJECT_NAME + ":build and deploy";
 
   private static final List<String> infoDataBases =
       Arrays.asList("Database", "information_schema", "petclinic", "mysql");
   private static final String MSG_CLOSE_PROCESS =
-      String.format(
+      format(
           "The process %s:build and deploy will be terminated after closing console. Do you want to continue?",
           PROJECT_NAME);
 
@@ -99,20 +103,21 @@ public class WorkingWithJavaMySqlStackTest {
     currentWindow = seleniumWebDriver.getWindowHandle();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME, APPLICATION_START_TIMEOUT_SEC);
+    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME, PROJECT_FOLDER);
+    loader.waitOnClosed();
     projectExplorer.selectItem(PROJECT_NAME);
 
     // Select the db machine and perform 'show databases'
-    consoles.startCommandFromProcessesArea("db", Consoles.CommandsGoal.COMMON, "show databases");
-    consoles.waitTabNameProcessIsPresent("db");
+    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, "show databases", "db");
+    consoles.waitTabNameProcessIsPresent("show databases");
     for (String text : infoDataBases) {
       consoles.waitExpectedTextIntoConsole(text);
     }
 
     // Build and deploy the web application
-    consoles.startCommandFromProcessesArea(
-        "dev-machine", Consoles.CommandsGoal.RUN, BUIL_AND_DEPLOY_PROCESS);
-    consoles.waitTabNameProcessIsPresent(BUIL_AND_DEPLOY_PROCESS);
-    consoles.waitProcessInProcessConsoleTree(BUIL_AND_DEPLOY_PROCESS);
+    consoles.startCommandFromProcessesArea("dev-machine", RUN, BUILD_AND_DEPLOY_PROCESS);
+    consoles.waitTabNameProcessIsPresent(BUILD_AND_DEPLOY_PROCESS);
+    consoles.waitProcessInProcessConsoleTree(BUILD_AND_DEPLOY_PROCESS);
     consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS, UPDATING_PROJECT_TIMEOUT_SEC);
     consoles.waitExpectedTextIntoConsole("Server startup in", PREPARING_WS_TIMEOUT_SEC);
     consoles.waitPreviewUrlIsPresent();
@@ -126,12 +131,12 @@ public class WorkingWithJavaMySqlStackTest {
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
     // Close terminal tab for 'build and deploy' process
-    consoles.waitProcessInProcessConsoleTree(BUIL_AND_DEPLOY_PROCESS);
-    consoles.waitTabNameProcessIsPresent(BUIL_AND_DEPLOY_PROCESS);
-    consoles.closeProcessByTabName(BUIL_AND_DEPLOY_PROCESS);
+    consoles.waitProcessInProcessConsoleTree(BUILD_AND_DEPLOY_PROCESS);
+    consoles.waitTabNameProcessIsPresent(BUILD_AND_DEPLOY_PROCESS);
+    consoles.closeProcessByTabName(BUILD_AND_DEPLOY_PROCESS);
     askDialog.acceptDialogWithText(MSG_CLOSE_PROCESS);
-    consoles.waitProcessIsNotPresentInProcessConsoleTree(BUIL_AND_DEPLOY_PROCESS);
-    consoles.waitTabNameProcessIsNotPresent(BUIL_AND_DEPLOY_PROCESS);
+    consoles.waitProcessIsNotPresentInProcessConsoleTree(BUILD_AND_DEPLOY_PROCESS);
+    consoles.waitTabNameProcessIsNotPresent(BUILD_AND_DEPLOY_PROCESS);
 
     // Check that tomcat is not running
     consoles.selectProcessByTabName("Terminal");

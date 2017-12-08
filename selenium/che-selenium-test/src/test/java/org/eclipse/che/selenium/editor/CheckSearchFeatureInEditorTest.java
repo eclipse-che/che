@@ -65,7 +65,7 @@ public class CheckSearchFeatureInEditorTest {
     loader.waitOnClosed();
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     searchReplacePanel.openSearchReplacePanel();
     searchReplacePanel.enterTextInFindInput(FIND_TEXT);
     WaitUtils.sleepQuietly(2);

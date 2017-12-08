@@ -72,7 +72,7 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.typeTextIntoEditor(MAVEN_COMMAND);
     commandsEditor.waitTextIntoEditor(MAVEN_COMMAND);
     commandsEditor.typeTextIntoEditor(Keys.ENTER.toString());
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.typeTextIntoEditor("echo ");
     commandsEditor.typeTextIntoEditor("type");
     commandsEditor.launchAutocompleteAndWaitContainer();
@@ -87,7 +87,7 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.waitAutocompleteContainerIsClosed();
     commandsEditor.waitTextIntoEditor("${editor.current.project.type");
     commandsEditor.typeTextIntoEditor(Keys.ENTER.toString());
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.typeTextIntoEditor("echo ");
     commandsEditor.typeTextIntoEditor("na");
     commandsEditor.launchAutocompleteAndWaitContainer();
@@ -117,20 +117,22 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.selectAutocompleteProposal("omcat8}");
     commandsEditor.waitTextIntoDescriptionMacrosForm("Returns address of the tomcat8 server");
     commandsEditor.closeAutocomplete();
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.deleteAllContent();
     commandsEditor.typeTextIntoEditor("omcat8");
     commandsEditor.launchAutocompleteAndWaitContainer();
     commandsEditor.selectItemIntoAutocompleteAndPasteByDoubleClick("-debug}");
     commandsEditor.waitTextIntoEditor("${server.tomcat8-debug}");
     commandsEditor.typeTextIntoEditor(Keys.ENTER.toString());
-    commandsEditor.waitActiveEditor();
-    commandsEditor.typeTextIntoEditor("ssh");
+    commandsEditor.waitActive();
+    commandsEditor.typeTextIntoEditor("wsagent");
     commandsEditor.launchAutocomplete();
-    commandsEditor.waitTextIntoEditor("${server.ssh}");
+    commandsEditor.waitTextIntoAutocompleteContainer("${server.wsagent/ws}");
+    commandsEditor.selectItemIntoAutocompleteAndPasteByDoubleClick("/ws}");
+    commandsEditor.waitTextIntoEditor("${server.wsagent/ws}");
     commandsEditor.clickOnRunButton();
     consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS);
-    consoles.waitExpectedTextIntoPreviewUrl("ssh");
+    consoles.waitExpectedTextIntoPreviewUrl("ws:");
   }
 
   @Test(priority = 3)
@@ -141,7 +143,7 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.setFocusIntoTypeCommandsEditor(COMMAND_LINE_EDITOR);
     commandsEditor.setCursorToLine(2);
     commandsEditor.selectLineAndDelete();
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.launchAutocompleteAndWaitContainer();
     commandsEditor.selectItemIntoAutocompleteAndPasteByDoubleClick("${current.class.fqn}");
     commandsEditor.waitAutocompleteContainerIsClosed();

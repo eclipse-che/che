@@ -82,7 +82,7 @@ public class CheckFileWatcherExcludeFeatureTest {
     String pathToExcludedFile = PROJECT_NAME + "/" + fileNameForExcluding;
     projectExplorer.waitItemInVisibleArea(FILE_WATCHER_IGNORE_FILE_NAME);
     projectExplorer.openItemByVisibleNameInExplorer(FILE_WATCHER_IGNORE_FILE_NAME);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(fileNameForExcluding);
 
     // Remove the file from the File Watcher Excludes feature and check that the file name is not
@@ -101,7 +101,7 @@ public class CheckFileWatcherExcludeFeatureTest {
 
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByVisibleNameInExplorer(fileNameForExluding);
-    editor.waitActiveEditor();
+    editor.waitActive();
 
     // Check that changes with file in the Terminal appeared in the Editor
     terminal.selectTerminalTab();
@@ -128,7 +128,7 @@ public class CheckFileWatcherExcludeFeatureTest {
     // Close file and open again and check that the file content is changed
     editor.clickOnCloseFileIcon(fileNameForExluding);
     projectExplorer.openItemByVisibleNameInExplorer(fileNameForExluding);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor("/projects/" + PROJECT_NAME);
     doFileWatcherExcludeOperation(pathToExcludedFile, REMOVE_FROM_FILE_WATCHER_EXCLUDES);
   }
@@ -145,7 +145,7 @@ public class CheckFileWatcherExcludeFeatureTest {
 
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByVisibleNameInExplorer(fileNameForExcluding);
-    editor.waitActiveEditor();
+    editor.waitActive();
 
     // Change content of file from the excluded folder
     terminal.selectTerminalTab();
@@ -165,7 +165,7 @@ public class CheckFileWatcherExcludeFeatureTest {
     // Reopen the file and check that its content changed
     editor.clickOnCloseFileIcon("AppController");
     projectExplorer.openItemByVisibleNameInExplorer(fileNameForExcluding);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(pathToJavaFile);
     doFileWatcherExcludeOperation(
         PROJECT_NAME + "/" + FOLDER_NAME_FOR_EXCLUDE, REMOVE_FROM_FILE_WATCHER_EXCLUDES);

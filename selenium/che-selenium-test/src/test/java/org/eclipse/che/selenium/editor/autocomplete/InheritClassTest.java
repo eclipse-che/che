@@ -96,7 +96,7 @@ public class InheritClassTest {
     editor.waitTabIsPresent("CodenvyTestInherite");
     loader.waitOnClosed();
 
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(3);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
@@ -113,10 +113,10 @@ public class InheritClassTest {
     editor.waitAutocompleteContainerIsClosed();
     editor.waitTextIntoEditor("CodenvyTestInherite extends CodenvyTest");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
 
     editor.selectTabByName("AppController");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(32);
     editor.typeTextIntoEditor("Code");
     editor.launchAutocompleteAndWaitContainer();

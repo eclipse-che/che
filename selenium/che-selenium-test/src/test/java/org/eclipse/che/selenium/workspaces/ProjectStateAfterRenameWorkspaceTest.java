@@ -85,7 +85,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
 
     // go to dashboard and rename ws
     dashboard.open();
@@ -119,6 +119,6 @@ public class ProjectStateAfterRenameWorkspaceTest {
     events.waitExpectedMessage(RUNNING_WORKSPACE_MESS);
     editor.waitTabIsPresent("index.jsp");
     editor.waitTabIsPresent("AppController");
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 }

@@ -45,7 +45,7 @@ public class WorkingWithNodeWsTest {
   private static final String WORKSPACE = NameGenerator.generate("WorkingWithNode", 4);
   private static final String PROJECT_NAME = "web-nodejs-simple";
   private static final String RUN_PROCESS = PROJECT_NAME + ":run";
-  private static final String INSTALL_DEPENDENCIES = PROJECT_NAME + ":install dependencies";
+  private static final String INSTALL_DEPENDENCIES_PROCESS = PROJECT_NAME + ":install dependencies";
   private static final String ASK_DIALOG_MSG_ANGULAR_APP =
       "The process web-nodejs-simple:run will be terminated after closing console. Do you want to continue?";
 
@@ -93,8 +93,8 @@ public class WorkingWithNodeWsTest {
     projectExplorer.selectItem(PROJECT_NAME);
 
     // Perform run web nodeJs application
-    consoles.startCommandFromProcessesArea("dev-machine", BUILD, INSTALL_DEPENDENCIES);
-    consoles.waitTabNameProcessIsPresent(INSTALL_DEPENDENCIES);
+    consoles.startCommandFromProcessesArea("dev-machine", BUILD, INSTALL_DEPENDENCIES_PROCESS);
+    consoles.waitTabNameProcessIsPresent(INSTALL_DEPENDENCIES_PROCESS);
     consoles.waitExpectedTextIntoConsole("bower_components/angular", APPLICATION_START_TIMEOUT_SEC);
 
     consoles.startCommandFromProcessesArea("dev-machine", RUN, RUN_PROCESS);

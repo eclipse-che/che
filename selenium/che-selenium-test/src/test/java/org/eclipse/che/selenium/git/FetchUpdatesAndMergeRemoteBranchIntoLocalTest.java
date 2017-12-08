@@ -183,7 +183,7 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
 
     // Open changed in first project files file_1, file_2 and removed file
     projectExplorer.openItemByPath(PROJECT_2 + "/" + FILE_FOR_CHANGE);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextNotPresentIntoEditor(MESSAGE_FOR_CHANGE_CONTENT);
     projectExplorer.openItemByPath(
         PROJECT_2 + "/src/main/java/commenttest/" + FILE_FOR_CHANGE_2 + ".java");
@@ -203,7 +203,7 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     // Checking merging
     consoles.closeProcessesArea();
     projectExplorer.openItemByPath(PROJECT_2 + "/" + FILE_FOR_CHANGE);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(MESSAGE_FOR_CHANGE_CONTENT);
     projectExplorer.openItemByPath(
         PROJECT_2 + "/src/main/java/commenttest/" + FILE_FOR_CHANGE_2 + ".java");
@@ -242,11 +242,11 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
   private void typeTextAndSaveIntoTextFile(String projectName, String text, String fileName) {
     projectExplorer.openItemByPath(projectName + "/" + fileName);
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.selectLineAndDelete();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(text);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(text);
     editor.waitTabFileWithSavedStatus(fileName);
     editor.closeFileByNameWithSaving(fileName);
@@ -256,9 +256,9 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
   private void typeTextAndSaveIntoJavaClass(String text, String className) {
     editor.setCursorToLine(1);
     editor.selectLineAndDelete();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(text);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(text);
     editor.waitTabFileWithSavedStatus(className);
     editor.closeFileByNameWithSaving(className);

@@ -75,6 +75,10 @@ import {WorkspaceConfigService} from '../workspace-config.service';
 import {CheRecipeService} from './che-recipe.service';
 import {CheProjectItem} from './workspace-projects/project-item/project-item.directive';
 import {ProjectItemCtrl} from './workspace-projects/project-item/project-item.controller';
+import {ProjectRepository} from './workspace-projects/project-details/repository/project-repository.directive';
+import {ProjectRepositoryController} from './workspace-projects/project-details/repository/project-repository.controller';
+import {ProjectDetailsController} from './workspace-projects/project-details/project-details.controller';
+import {NoGithubOauthDialogController} from '../create-workspace/project-source-selector/add-import-project/import-github-project/oauth-dialog/no-github-oauth-dialog.controller';
 
 
 /**
@@ -100,6 +104,10 @@ export class WorkspaceDetailsConfig {
 
     register.directive('cheProjectItem', CheProjectItem);
     register.controller('ProjectItemCtrl', ProjectItemCtrl);
+    register.controller('ProjectDetailsController', ProjectDetailsController);
+    register.controller('ProjectRepositoryController', ProjectRepositoryController);
+    register.directive('projectRepository', ProjectRepository);
+    register.controller('NoGithubOauthDialogController', NoGithubOauthDialogController);
 
     register.controller('AddProjectPopoverController', AddProjectPopoverController);
     register.directive('addProjectPopover', AddProjectPopover);
@@ -159,24 +167,33 @@ export class WorkspaceDetailsConfig {
 
     // config routes
     register.app.config(($routeProvider: che.route.IRouteProvider) => {
-      $routeProvider.accessWhen('/workspace/:namespace*/:workspaceName', {
-        title: (params: any) => {
-          return params.workspaceName;
-        },
-        reloadOnSearch: false,
-        templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
-        controller: 'WorkspaceDetailsController',
-        controllerAs: 'workspaceDetailsController',
-        resolve: {
-          initData: ['$q', '$route', 'cheWorkspace', 'workspaceConfigService', ($q: ng.IQService, $route: ng.route.IRouteService, cheWorkspace: CheWorkspace, workspaceConfigService: WorkspaceConfigService) => {
-            return workspaceConfigService.resolveWorkspaceRoute().then(() => {
-              const {namespace, workspaceName} = $route.current.params;
-              const workspaceDetails = cheWorkspace.getWorkspaceByName(namespace, workspaceName);
-              return {namespaceId: namespace, workspaceName: workspaceName, workspaceDetails: workspaceDetails};
-            });
-          }]
-        }
-      });
+      $routeProvider
+        .accessWhen('/workspace/:namespace*/:workspaceName/:projectName', {
+          title: (params: any) => {
+            return params.workspaceName + ' | ' + params.projectName;
+          },
+          templateUrl: 'app/workspaces/workspace-details/workspace-projects/project-details/project-details.html',
+          controller: 'ProjectDetailsController',
+          controllerAs: 'projectDetailsController'
+        })
+        .accessWhen('/workspace/:namespace*/:workspaceName', {
+          title: (params: any) => {
+            return params.workspaceName;
+          },
+          reloadOnSearch: false,
+          templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
+          controller: 'WorkspaceDetailsController',
+          controllerAs: 'workspaceDetailsController',
+          resolve: {
+            initData: ['$q', '$route', 'cheWorkspace', 'workspaceConfigService', ($q: ng.IQService, $route: ng.route.IRouteService, cheWorkspace: CheWorkspace, workspaceConfigService: WorkspaceConfigService) => {
+              return workspaceConfigService.resolveWorkspaceRoute().then(() => {
+                const {namespace, workspaceName} = $route.current.params;
+                const workspaceDetails = cheWorkspace.getWorkspaceByName(namespace, workspaceName);
+                return {namespaceId: namespace, workspaceName: workspaceName, workspaceDetails: workspaceDetails};
+              });
+            }]
+          }
+        });
     });
   }
 }

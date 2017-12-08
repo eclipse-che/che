@@ -146,7 +146,7 @@ deploy_che_to_ocp() {
     docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} destroy --quiet --skip:pull --skip:nightly
     docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} config --skip:pull --skip:nightly
     cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
-    bash deploy_che.sh
+    bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
     wait_until_server_is_booted
 }
 
@@ -193,7 +193,7 @@ parse_args() {
     CHE_MULTIUSER - set CHE multi user mode, default: false (single user) \\n
 "
 
-
+    DEPLOY_SCRIPT_ARGS=""
 
     if [ $# -eq 0 ]; then
         echo "No arguments supplied"
@@ -205,6 +205,9 @@ parse_args() {
       CHE_MULTIUSER=true
     fi
 
+    if [[ "$@" == *"--update"* ]]; then
+      DEPLOY_SCRIPT_ARGS="-c rollupdate"
+    fi
 
     for i in "${@}"
     do
@@ -222,6 +225,9 @@ parse_args() {
                shift
            ;;
            --multiuser)
+               shift
+           ;;
+           --update)
                shift
            ;;
            *)

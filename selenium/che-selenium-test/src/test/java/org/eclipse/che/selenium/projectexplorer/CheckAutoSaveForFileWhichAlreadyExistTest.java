@@ -111,7 +111,7 @@ public class CheckAutoSaveForFileWhichAlreadyExistTest {
   }
 
   private void addChangingToFile(String fileName, int line, String text) {
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(line);
     editor.typeTextIntoEditor("\n");
     editor.setCursorToLine(line);

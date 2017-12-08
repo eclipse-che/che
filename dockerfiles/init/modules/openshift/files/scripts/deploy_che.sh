@@ -235,6 +235,18 @@ CHE_IMAGE_SANITIZED=$(echo "${CHE_IMAGE}" | sed 's/\//\\\//g')
 CHE_KEYCLOAK_OSO_ENDPOINT=${CHE_KEYCLOAK_OSO_ENDPOINT:-${DEFAULT_CHE_KEYCLOAK_OSO_ENDPOINT}}
 KEYCLOAK_GITHUB_ENDPOINT=${KEYCLOAK_GITHUB_ENDPOINT:-${DEFAULT_KEYCLOAK_GITHUB_ENDPOINT}}
 
+get_che_pod_config() {
+DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-openshift.yml
+CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
+DEFAULT_CHE_CONFIG_FILE_PATH=./che-config
+CHE_CONFIG_FILE_PATH=${CHE_CONFIG_FILE_PATH:-${DEFAULT_CHE_CONFIG_FILE_PATH}}
+cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
+    sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
+    sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
+    inject_che_config "#CHE_MASTER_CONFIG" "${CHE_CONFIG_FILE_PATH}" | \
+    if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi #| \
+}
+
 # ---------------------------------------
 # Verify that we have all env var are set
 # ---------------------------------------
@@ -276,37 +288,13 @@ oc project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
 echo "done!"
 
 # -------------------------------------------------------------
-# If command == cleanup then delete all openshift objects
-# -------------------------------------------------------------
-if [ "${COMMAND}" == "cleanup" ]; then
-  echo "[CHE] Deleting all OpenShift objects..."
-  oc delete all --all
-  echo "[CHE] Cleanup successfully started. Use \"oc get all\" to verify that all resources have been deleted."
-  exit 0
-# -------------------------------------------------------------
-# If command == rollupdate then update Che
-# -------------------------------------------------------------
-elif [ "${COMMAND}" == "rollupdate" ]; then
-  echo "[CHE] Rollout latest version of Che..."
-  oc rollout latest che
-  echo "[CHE] Rollaout successfully started"
-  exit 0
-# ----------------------------------------------------------------
-# At this point command should be "deploy" otherwise it's an error
-# ----------------------------------------------------------------
-elif [ "${COMMAND}" != "deploy" ]; then
-  echo "[CHE] **ERROR**: Command \"${COMMAND}\" is not a valid command. Aborting."
-  exit 1
-fi
-
-# -------------------------------------------------------------
 # Deploying secondary servers
 # for postgres and optionally Keycloak
 # -------------------------------------------------------------
 
 COMMAND_DIR=$(dirname "$0")
 
-if [ "${CHE_MULTIUSER}" == "true" ]; then
+if [[ "${CHE_MULTIUSER}" == "true" ]] && [[ "${COMMAND}" == "deploy" ]]; then
     if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
         "${COMMAND_DIR}"/multi-user/deploy_postgres_and_keycloak.sh
     else
@@ -344,6 +332,29 @@ else
   CHE_KEYCLOAK_CLIENT__ID=${CHE_KEYCLOAK_CLIENT__ID:-"openshiftio-public"}
 fi
 
+# -------------------------------------------------------------
+# If command == cleanup then delete all openshift objects
+# -------------------------------------------------------------
+if [ "${COMMAND}" == "cleanup" ]; then
+  echo "[CHE] Deleting all OpenShift objects..."
+  oc delete all --all
+  echo "[CHE] Cleanup successfully started. Use \"oc get all\" to verify that all resources have been deleted."
+  exit 0
+# -------------------------------------------------------------
+# If command == rollupdate then update Che
+# -------------------------------------------------------------
+elif [ "${COMMAND}" == "rollupdate" ]; then
+  echo "[CHE] Update CHE pod"
+  get_che_pod_config | oc apply -f -
+  echo "[CHE] Update successfully started"
+  exit 0
+# ----------------------------------------------------------------
+# At this point command should be "deploy" otherwise it's an error
+# ----------------------------------------------------------------
+elif [ "${COMMAND}" != "deploy" ]; then
+  echo "[CHE] **ERROR**: Command \"${COMMAND}\" is not a valid command. Aborting."
+  exit 1
+fi
 
 # -------------------------------------------------------------
 # Verify that Che ServiceAccount has admin rights at project level
@@ -390,17 +401,7 @@ fi
 # ----------------------------------------------
 echo
 echo "[CHE] Deploying Che on ${OPENSHIFT_FLAVOR} (image ${CHE_IMAGE})"
-
-DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-openshift.yml
-CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
-DEFAULT_CHE_CONFIG_FILE_PATH=./che-config
-CHE_CONFIG_FILE_PATH=${CHE_CONFIG_FILE_PATH:-${DEFAULT_CHE_CONFIG_FILE_PATH}}
-cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
-    sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
-    sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
-    inject_che_config "#CHE_MASTER_CONFIG" "${CHE_CONFIG_FILE_PATH}" | \
-    if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi | \
-    oc apply --force=true -f -
+get_che_pod_config | oc apply --force=true -f -
 echo
 
 if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then

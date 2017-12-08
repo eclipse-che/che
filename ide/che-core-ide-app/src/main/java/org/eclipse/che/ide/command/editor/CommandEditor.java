@@ -231,6 +231,7 @@ public class CommandEditor extends AbstractEditorPresenter
               if (!initialCommandName.equals(editedCommand.getName())) {
                 input.setFile(nodeFactory.newCommandFileNode(editedCommand));
                 initialCommandName = editedCommand.getName();
+                firePropertyChange(PROP_INPUT);
               }
 
               updateDirtyState(false);

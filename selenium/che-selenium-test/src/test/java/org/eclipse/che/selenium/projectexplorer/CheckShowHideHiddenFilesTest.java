@@ -59,7 +59,7 @@ public class CheckShowHideHiddenFilesTest {
     projectExplorer.waitItem(PATH_TO_CLASSPATH_FILE);
     projectExplorer.openItemByPath(PATH_TO_CLASSPATH_FILE);
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(CLASSPATH_CONTENT);
     loader.waitOnClosed();
     menu.runCommand(

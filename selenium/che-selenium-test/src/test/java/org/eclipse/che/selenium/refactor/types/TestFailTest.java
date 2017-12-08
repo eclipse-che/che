@@ -92,7 +92,7 @@ public class TestFailTest {
   public void testFail26() {
     loader.waitOnClosed();
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     services.invokeRefactorWizardForProjectExplorerItem(pathToCurrentPackage + "/A.java");
     doRefactorWithWifget(renameItem);
     refactorPanel.waitTextInErrorMessage("Compilation unit 'B.java' already exists");
@@ -102,7 +102,7 @@ public class TestFailTest {
   @Test(priority = 1)
   public void testFail35() {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     services.invokeRefactorWizardForProjectExplorerItem(pathToCurrentPackage + "/A.java");
     doRefactorWithWifget(renameItem);
     askDialog.waitFormToOpen();
@@ -114,7 +114,7 @@ public class TestFailTest {
   @Test(priority = 2)
   public void testFail80() {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     services.invokeRefactorWizardForProjectExplorerItem(pathToCurrentPackage + "/A.java");
     doRefactorWithWifget(renameItem);
     askDialog.waitFormToOpen();

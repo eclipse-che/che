@@ -15,7 +15,6 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARTIFACT_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.POM_XML;
 
-import com.google.common.base.Optional;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -36,16 +35,15 @@ public class PomInterceptor implements ResourceInterceptor {
   @Override
   public void intercept(Resource resource) {
     if (resource.isFile() && POM_XML.equals(resource.getName())) {
-      final Optional<Project> project = resource.getRelatedProject();
+      Project project = resource.getProject();
 
-      if (!project.isPresent() || !project.get().isTypeOf(MAVEN_ID)) {
-        return;
-      }
-
-      final String artifact = project.get().getAttribute(ARTIFACT_ID);
-
-      if (!isNullOrEmpty(artifact)) {
-        resource.addMarker(new PresentableTextMarker(artifact));
+      if (project != null
+          && project.isTypeOf(MAVEN_ID)
+          && resource.getParent().getLocation().equals(project.getLocation())) {
+        String artifact = project.getAttribute(ARTIFACT_ID);
+        if (!isNullOrEmpty(artifact)) {
+          resource.addMarker(new PresentableTextMarker(artifact));
+        }
       }
     }
   }

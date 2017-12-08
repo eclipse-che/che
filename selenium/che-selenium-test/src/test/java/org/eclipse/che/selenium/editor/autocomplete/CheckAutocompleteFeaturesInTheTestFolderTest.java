@@ -68,8 +68,8 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
   }
 
   private void checkOpenDeclaration() {
-    editor.setCursorToDefinedLineAndChar(35, 21);
-    editor.waitActiveEditor();
+    editor.goToCursorPositionVisible(35, 21);
+    editor.waitActive();
     editor.waitSpecifiedValueForLineAndChar(35, 21);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("Test");
@@ -92,7 +92,7 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
 
   private void checkAutocompletion() {
     editor.returnFocusInCurrentLine();
-    editor.setCursorToDefinedLineAndChar(29, 25);
+    editor.goToCursorPositionVisible(29, 25);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitSpecifiedValueForLineAndChar(30, 9);
     editor.typeTextIntoEditor("Test");
@@ -113,7 +113,7 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
   }
 
   private void checkJavadoc() {
-    editor.setCursorToDefinedLineAndChar(28, 21);
+    editor.goToCursorPositionVisible(28, 21);
     editor.openJavaDocPopUp();
     String expectedTextInJavaDoc =
         "The String class represents character strings. "

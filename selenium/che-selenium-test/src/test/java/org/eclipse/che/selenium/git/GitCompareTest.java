@@ -161,7 +161,7 @@ public class GitCompareTest {
     git.closeGroupGitCompareForm();
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/com/codenvy/example/spring/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor("//***che***codenvy***");
 
     // check the 'git compare' after commit
