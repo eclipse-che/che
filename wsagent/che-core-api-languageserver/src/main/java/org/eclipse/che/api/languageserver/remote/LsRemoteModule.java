@@ -13,7 +13,7 @@ package org.eclipse.che.api.languageserver.remote;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
-public class LanguageServerRemoteModule extends AbstractModule {
+public class LsRemoteModule extends AbstractModule {
 
   @Override
   protected void configure() {

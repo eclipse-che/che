@@ -21,7 +21,7 @@ import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
  */
 public interface RemoteLsLauncherProvider {
   /**
-   * Get all remote language server launchers that are configured in a workspace configuration.
+   * Get all remote language server launchers that are mentioned in a workspace configuration.
    *
    * @param workspace workspace configuration
    * @return set of language server launchers

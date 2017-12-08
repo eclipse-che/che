@@ -31,11 +31,11 @@ import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
  * json corresponds to {@link LanguageServerDescription} class with all aggregated classes
  */
 @Singleton
-class ConfigurationExtractor {
+class LsConfigurationExtractor {
   private final JsonParser jsonParser;
 
   @Inject
-  ConfigurationExtractor(JsonParser jsonParser) {
+  LsConfigurationExtractor(JsonParser jsonParser) {
     this.jsonParser = jsonParser;
   }
 

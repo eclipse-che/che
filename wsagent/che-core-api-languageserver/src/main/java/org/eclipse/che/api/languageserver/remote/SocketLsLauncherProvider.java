@@ -41,16 +41,17 @@ import org.slf4j.Logger;
 class SocketLsLauncherProvider implements RemoteLsLauncherProvider {
   private static final Logger LOG = getLogger(SocketLsLauncherProvider.class);
 
-  private final ConfigurationDetector configurationDetector;
-  private final ConfigurationExtractor configurationExtractor;
+  private final LsConfigurationDetector lsConfigurationDetector;
+  private final LsConfigurationExtractor lsConfigurationExtractor;
 
   private final Map<String, LanguageServerLauncher> lslRegistry = new ConcurrentHashMap<>();
 
   @Inject
   public SocketLsLauncherProvider(
-      ConfigurationDetector configurationDetector, ConfigurationExtractor configurationExtractor) {
-    this.configurationDetector = configurationDetector;
-    this.configurationExtractor = configurationExtractor;
+      LsConfigurationDetector lsConfigurationDetector,
+      LsConfigurationExtractor lsConfigurationExtractor) {
+    this.lsConfigurationDetector = lsConfigurationDetector;
+    this.lsConfigurationExtractor = lsConfigurationExtractor;
   }
 
   @Override
@@ -71,11 +72,11 @@ class SocketLsLauncherProvider implements RemoteLsLauncherProvider {
           continue;
         }
 
-        if (!configurationDetector.isDetected(serverAttributes)) {
+        if (!lsConfigurationDetector.isDetected(serverAttributes)) {
           continue;
         }
 
-        LanguageServerDescription description = configurationExtractor.extract(serverAttributes);
+        LanguageServerDescription description = lsConfigurationExtractor.extract(serverAttributes);
 
         try {
           URI uri = new URI(serverUrl);

@@ -15,7 +15,7 @@ import javax.inject.Singleton;
 
 /** Detects if machine server attributes indicates that we are dealing with language server. */
 @Singleton
-class ConfigurationDetector {
+class LsConfigurationDetector {
   /**
    * Tests attributes for a language server indicator
    *
