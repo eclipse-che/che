@@ -11,10 +11,10 @@
  */
 package org.eclipse.che.plugin.jdb.server;
 
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.ensureSuspendAtDesiredLocation;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.findMainThreadId;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.startJavaDebugger;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.ensureDebuggerSuspendAtLocation;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.findMainThreadId;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.startJavaDebugger;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -33,7 +33,6 @@ import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
-import org.eclipse.che.plugin.jdb.server.util.ProjectApiUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -44,23 +43,17 @@ import org.testng.annotations.Test;
  *
  * @author Anatolii Bazko
  */
-public class GetValueTest1 {
+public class GetValueTest {
 
   private JavaDebugger debugger;
-  private BlockingQueue<DebuggerEvent> debuggerEvents;
+  private BlockingQueue<DebuggerEvent> debuggerEvents = new ArrayBlockingQueue<>(10);;
   private long mainThreadId;
 
   @BeforeClass
   public void setUp() throws Exception {
-    ProjectApiUtils.ensure();
-
-    Location location =
-        new LocationImpl(
-            "/test/src/org/eclipse/GetValueTest1.java", 27, false, -1, "/test", null, -1);
-    debuggerEvents = new ArrayBlockingQueue<>(10);
+    Location location = new LocationImpl("/test/src/org/eclipse/GetValueTest.java", 27, "/test");
     debugger = startJavaDebugger(new BreakpointImpl(location), debuggerEvents);
-
-    ensureSuspendAtDesiredLocation(location, debuggerEvents);
+    ensureDebuggerSuspendAtLocation(location, debuggerEvents);
 
     mainThreadId = findMainThreadId(debugger);
   }

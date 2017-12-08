@@ -11,9 +11,9 @@
  */
 package org.eclipse.che.plugin.jdb.server;
 
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.ensureSuspendAtDesiredLocation;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.startJavaDebugger;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.ensureDebuggerSuspendAtLocation;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.startJavaDebugger;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -25,7 +25,6 @@ import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
-import org.eclipse.che.plugin.jdb.server.util.ProjectApiUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -36,21 +35,17 @@ import org.testng.annotations.Test;
  *
  * @author Anatolii Bazko
  */
-public class EvaluateExpressionTest1 {
+public class EvaluateExpressionTest {
 
   private JavaDebugger debugger;
-  private BlockingQueue<DebuggerEvent> debuggerEvents;
+  private BlockingQueue<DebuggerEvent> debuggerEvents = new ArrayBlockingQueue<>(10);;
 
   @BeforeClass
   public void setUp() throws Exception {
-    ProjectApiUtils.ensure();
-
     Location location =
-        new LocationImpl(
-            "/test/src/org/eclipse/EvaluateExpressionTest1.java", 22, false, -1, "/test", null, -1);
-    debuggerEvents = new ArrayBlockingQueue<>(10);
+        new LocationImpl("/test/src/org/eclipse/EvaluateExpressionTest.java", 22, "/test");
     debugger = startJavaDebugger(new BreakpointImpl(location), debuggerEvents);
-    ensureSuspendAtDesiredLocation(location, debuggerEvents);
+    ensureDebuggerSuspendAtLocation(location, debuggerEvents);
   }
 
   @AfterClass
