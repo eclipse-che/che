@@ -64,7 +64,7 @@ public class QuickFixAndCodeAssistantFeaturesTest {
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
 
     editor.setCursorToLine(28);
     editor.typeTextIntoEditor(TEXT_FOR_WARNING);

@@ -93,7 +93,7 @@ public class FindUsagesBaseOperationTest {
 
     // Check basic operations of the 'find usages' panel
     editor.selectTabByName("AppController");
-    editor.setCursorToDefinedLineAndChar(26, 17);
+    editor.goToCursorPositionVisible(26, 17);
     menu.runCommand(ASSISTANT, FIND_USAGES);
     loader.waitOnClosed();
     findUsages.waitFindUsagesPanelIsOpen();
@@ -106,7 +106,7 @@ public class FindUsagesBaseOperationTest {
 
     // Check basic operations of the 'find usages' panel
     editor.selectTabByName("AppController");
-    editor.setCursorToDefinedLineAndChar(26, 17);
+    editor.goToCursorPositionVisible(26, 17);
     menu.runCommand(ASSISTANT, FIND_USAGES);
     loader.waitOnClosed();
     findUsages.waitFindUsagesPanelIsOpen();

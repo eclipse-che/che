@@ -68,7 +68,7 @@ public class IllegalTypeNameTest {
     loader.waitOnClosed();
     setFieldsForTest("testIllegalTypeName4");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     Assert.assertEquals(editor.getVisibleTextFromEditor(), contentFromInA);
     editor.waitTextIntoEditor(contentFromInA);
     projectExplorer.selectVisibleItem("A.java");

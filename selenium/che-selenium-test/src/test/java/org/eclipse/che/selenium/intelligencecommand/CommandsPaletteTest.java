@@ -111,7 +111,7 @@ public class CommandsPaletteTest {
     loader.waitOnClosed();
     commandsExplorer.chooseCommandTypeInContextMenu(commandType);
     loader.waitOnClosed();
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.clickOnCancelCommandEditorButton();
     loader.waitOnClosed();
   }

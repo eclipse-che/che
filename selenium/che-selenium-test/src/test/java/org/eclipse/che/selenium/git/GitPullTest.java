@@ -91,7 +91,7 @@ public class GitPullTest {
     // Change contents index.jsp
     loader.waitOnClosed();
     projectExplorer.openItemByPath(FIRST_PROJECT_NAME + "/my-webapp/src/main/webapp/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(NEW_CONTENT_JSP);
     editor.waitTextIntoEditor(NEW_CONTENT_JSP);
     editor.waitTabFileWithSavedStatus("index.jsp");
@@ -102,7 +102,7 @@ public class GitPullTest {
     // Change contents in java file
     projectExplorer.openItemByPath(
         FIRST_PROJECT_NAME + "/my-webapp/src/main/java/helloworld/GreetingController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.DOWN.toString());
     editor.typeTextIntoEditor(NEW_CONTENT_JAVA);
     editor.waitTextIntoEditor(NEW_CONTENT_JAVA);
@@ -172,10 +172,10 @@ public class GitPullTest {
     // check changes in the second project
     projectExplorer.openItemByPath(
         SECOND_PROJECT_NAME + "/my-webapp/src/main/java/helloworld/GreetingController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(NEW_CONTENT_JAVA);
     projectExplorer.openItemByPath(SECOND_PROJECT_NAME + "/my-webapp/src/main/webapp/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(NEW_CONTENT_JSP);
     projectExplorer.waitItemIsDisappeared(
         SECOND_PROJECT_NAME + "/my-webapp/src/main/webapp/WEB-INF/web.xml");

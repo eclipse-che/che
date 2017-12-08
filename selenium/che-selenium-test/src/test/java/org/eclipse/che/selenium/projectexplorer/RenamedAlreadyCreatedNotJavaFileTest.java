@@ -63,7 +63,7 @@ public class RenamedAlreadyCreatedNotJavaFileTest {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_WEB_APP + "/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.selectItem(PATH_TO_FILE);
     loader.waitOnClosed();
     editor.waitTabIsPresent("index.jsp");

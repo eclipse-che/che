@@ -83,7 +83,7 @@ public class ConfigureSomeSourceFoldersTest {
     projectExplorer.waitItem(PROJECT_NAME + "/source/" + newJavaClassName + ".java");
     codenvyEditor.waitTextIntoEditor("public class NewClass {");
     codenvyEditor.waitAllMarkersDisappear(ERROR_MARKER);
-    codenvyEditor.setCursorToDefinedLineAndChar(2, 24);
+    codenvyEditor.goToCursorPositionVisible(2, 24);
     codenvyEditor.typeTextIntoEditor(Keys.ENTER.toString());
     String methodForChecking =
         " public static String typeCheckMess(){\n"
@@ -104,7 +104,7 @@ public class ConfigureSomeSourceFoldersTest {
     projectExplorer.clickOnNewContextMenuItem(JAVA_CLASS);
     askForValueDialog.createJavaFileByNameAndType(name, CLASS);
     projectExplorer.waitItemInVisibleArea(name + ".java");
-    codenvyEditor.waitActiveEditor();
+    codenvyEditor.waitActive();
     loader.waitOnClosed();
     codenvyEditor.waitTabIsPresent(name);
   }

@@ -120,7 +120,7 @@ public class PushingChangesTest {
     // Change contents index.jsp
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT_NAME + "/my-webapp/src/main/webapp/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(NEW_CONTENT_JSP);
     editor.waitTabFileWithSavedStatus("index.jsp");
     loader.waitOnClosed();
@@ -129,7 +129,7 @@ public class PushingChangesTest {
 
     // Edit GreetingController.java
     projectExplorer.openItemByVisibleNameInExplorer("GreetingController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.DOWN.toString());
     editor.typeTextIntoEditor(NEW_CONTENT_JAVA);
     editor.waitTextIntoEditor(NEW_CONTENT_JAVA);

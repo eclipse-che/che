@@ -566,7 +566,10 @@ public class ProjectServiceApi {
     wsPath = absolutize(wsPath);
 
     ItemReference asDto = fsDtoConverter.asDto(wsPath);
-    ItemReference asLinkedDto = injectFolderLinks(asDto);
+    ItemReference asLinkedDto =
+        fsManager.isFile(wsPath)
+            ? injectFileLinks(vcsStatusInjector.injectVcsStatus(asDto))
+            : injectFolderLinks(asDto);
     return newDto(TreeElement.class)
         .withNode(asLinkedDto)
         .withChildren(getTreeRecursively(wsPath, depth, includeFiles));

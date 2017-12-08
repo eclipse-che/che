@@ -72,7 +72,7 @@ public class CheckMavenPluginTest {
     createNewFileFromMenuFile("TestClass", AskForValueDialog.JavaFiles.CLASS, ".java");
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(14);
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass = new TestClass();");
@@ -82,10 +82,10 @@ public class CheckMavenPluginTest {
   @Test(priority = 1)
   public void shouldExcludeModules() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
-    editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(25, 8);
+    editor.waitActive();
+    editor.goToCursorPositionVisible(25, 8);
     editor.typeTextIntoEditor("!--");
-    editor.setCursorToDefinedLineAndChar(26, 32);
+    editor.goToCursorPositionVisible(26, 32);
     editor.typeTextIntoEditor("--");
     try {
       projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", SIMPLE_FOLDER);
@@ -102,18 +102,18 @@ public class CheckMavenPluginTest {
     includeModulesInTheParentPom();
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
-    editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(17, 1);
+    editor.waitActive();
+    editor.goToCursorPositionVisible(17, 1);
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass2 = new TestClass();");
     editor.waitAllMarkersDisappear(ERROR_MARKER);
   }
 
   private void includeModulesInTheParentPom() {
-    editor.setCursorToDefinedLineAndChar(26, 32);
+    editor.goToCursorPositionVisible(26, 32);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
-    editor.setCursorToDefinedLineAndChar(25, 8);
+    editor.goToCursorPositionVisible(25, 8);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());

@@ -75,7 +75,7 @@ public class CheckBreakPointStateTest {
         "AppController.java:29\n" + "AppController.java:30\n" + "AppController.java:31";
 
     projectExplorer.openItemByPath(PATH_TO_PROJECT_WITH_TWO_CLASSES + "AdditonalClass.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setInactiveBreakpoint(7);
     editor.setInactiveBreakpoint(9);
     debugPanel.openDebugPanel();

@@ -53,8 +53,8 @@ public class Eclipse0091Test {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test/Test.java");
-    editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(13, 5);
+    editor.waitActive();
+    editor.goToCursorPositionVisible(13, 5);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("MyAnnot");
     editor.waitSpecifiedValueForLineAndChar(13, 19);

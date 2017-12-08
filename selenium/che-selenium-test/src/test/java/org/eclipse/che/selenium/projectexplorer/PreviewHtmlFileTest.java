@@ -75,7 +75,7 @@ public class PreviewHtmlFileTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME + "/file.html");
     projectExplorer.openItemByPath(PROJECT_NAME + "/file.html");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(19);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.ARROW_UP.toString());
