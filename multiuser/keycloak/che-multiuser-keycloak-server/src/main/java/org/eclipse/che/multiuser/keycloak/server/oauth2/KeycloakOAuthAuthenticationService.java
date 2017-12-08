@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -34,6 +35,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.core.BadRequestException;
@@ -46,8 +48,6 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.annotations.Required;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakSettings;
-import org.keycloak.common.util.Base64Url;
-import org.keycloak.common.util.KeycloakUriBuilder;
 
 @Path("/oauth")
 public class KeycloakOAuthAuthenticationService {
@@ -55,12 +55,19 @@ public class KeycloakOAuthAuthenticationService {
 
   @Context SecurityContext security;
 
-  @Inject KeycloakSettings keycloakConfiguration;
+  private final KeycloakSettings keycloakConfiguration;
 
-  @Inject HttpJsonRequestFactory requestFactory;
+  private final HttpJsonRequestFactory requestFactory;
+
+  @Inject
+  public KeycloakOAuthAuthenticationService(
+      KeycloakSettings keycloakConfiguration, HttpJsonRequestFactory requestFactory) {
+    this.keycloakConfiguration = keycloakConfiguration;
+    this.requestFactory = requestFactory;
+  }
 
   /**
-   * Redirect request
+   * Performs local and Keycloak accounts linking
    *
    * @return typically Response that redirect user for OAuth provider site
    */
@@ -76,10 +83,10 @@ public class KeycloakOAuthAuthenticationService {
     if (jwtToken == null) {
       throw new BadRequestException("No token provided.");
     }
-    DefaultClaims token = (DefaultClaims) jwtToken.getBody();
-    final String clientId = token.getAudience();
+    DefaultClaims claims = (DefaultClaims) jwtToken.getBody();
+    final String clientId = claims.getAudience();
     final String nonce = UUID.randomUUID().toString();
-    final String sessionState = token.get("session_state", String.class);
+    final String sessionState = claims.get("session_state", String.class);
     MessageDigest md;
     try {
       md = MessageDigest.getInstance("SHA-256");
@@ -88,10 +95,10 @@ public class KeycloakOAuthAuthenticationService {
     }
     final String input = nonce + sessionState + clientId + oauthProvider;
     byte[] check = md.digest(input.getBytes(StandardCharsets.UTF_8));
-    final String hash = Base64Url.encode(check);
+    final String hash = Base64.getUrlEncoder().encodeToString(check);
     request.getSession().setAttribute("hash", hash); // TODO: for what?
     String accountLinkUrl =
-        KeycloakUriBuilder.fromUri(keycloakConfiguration.get().get(AUTH_SERVER_URL_SETTING))
+        UriBuilder.fromUri(keycloakConfiguration.get().get(AUTH_SERVER_URL_SETTING))
             .path("/realms/{realm}/broker/{provider}/link")
             .queryParam("nonce", nonce)
             .queryParam("hash", hash)
@@ -103,7 +110,7 @@ public class KeycloakOAuthAuthenticationService {
   }
 
   /**
-   * Gets OAuth token for user.
+   * Gets OAuth token for user from Keycloak.
    *
    * @param oauthProvider OAuth provider name
    * @return OAuthToken
@@ -120,8 +127,7 @@ public class KeycloakOAuthAuthenticationService {
       String token =
           requestFactory
               .fromUrl(
-                  KeycloakUriBuilder.fromUri(
-                          keycloakConfiguration.get().get(AUTH_SERVER_URL_SETTING))
+                  UriBuilder.fromUri(keycloakConfiguration.get().get(AUTH_SERVER_URL_SETTING))
                       .path("/realms/{realm}/broker/{provider}/token")
                       .build(keycloakConfiguration.get().get(REALM_SETTING), oauthProvider)
                       .toString())

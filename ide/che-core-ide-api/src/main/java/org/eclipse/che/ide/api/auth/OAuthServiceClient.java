@@ -18,8 +18,12 @@ import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 
-/** @author Sergii Leschenko
- *  @author Max Shaposhnyk
+/**
+ * Serves connections to OauthAuthentication service.
+ * Allows to get OAuth tokens via callback or as promise.
+ *
+ * @author Sergii Leschenko
+ * @author Max Shaposhnyk
  */
 public class OAuthServiceClient {
   private final AsyncRequestFactory asyncRequestFactory;
