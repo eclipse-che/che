@@ -80,7 +80,7 @@ public class ExecutiveProjectManager implements ProjectManager {
   }
 
   @Override
-  public Optional<RegisteredProject> get(String wsPath) {
+  public synchronized Optional<RegisteredProject> get(String wsPath) {
     return projectConfigRegistry.get(wsPath);
   }
 
@@ -163,7 +163,7 @@ public class ExecutiveProjectManager implements ProjectManager {
   }
 
   @Override
-  public Set<RegisteredProject> updateAll(Set<ProjectConfig> projectConfigs)
+  public synchronized Set<RegisteredProject> updateAll(Set<ProjectConfig> projectConfigs)
       throws ForbiddenException, ServerException, NotFoundException, ConflictException,
           BadRequestException {
     Set<RegisteredProject> projects = new HashSet<>();
@@ -177,7 +177,7 @@ public class ExecutiveProjectManager implements ProjectManager {
   }
 
   @Override
-  public RegisteredProject update(ProjectConfig projectConfig)
+  public synchronized RegisteredProject update(ProjectConfig projectConfig)
       throws ForbiddenException, ServerException, NotFoundException, ConflictException,
           BadRequestException {
     RegisteredProject project = projectConfigRegistry.put(projectConfig, true, false);
@@ -187,7 +187,7 @@ public class ExecutiveProjectManager implements ProjectManager {
   }
 
   @Override
-  public Set<RegisteredProject> deleteAll(Set<String> wsPaths)
+  public synchronized Set<RegisteredProject> deleteAll(Set<String> wsPaths)
       throws ServerException, ForbiddenException, NotFoundException, ConflictException {
     Set<RegisteredProject> projects = new HashSet<>();
 
@@ -199,7 +199,7 @@ public class ExecutiveProjectManager implements ProjectManager {
   }
 
   @Override
-  public Optional<RegisteredProject> delete(String wsPath)
+  public synchronized Optional<RegisteredProject> delete(String wsPath)
       throws ServerException, ForbiddenException, NotFoundException, ConflictException {
     fsManager.delete(wsPath);
 
@@ -213,7 +213,7 @@ public class ExecutiveProjectManager implements ProjectManager {
   }
 
   @Override
-  public Set<RegisteredProject> deleteAll()
+  public synchronized Set<RegisteredProject> deleteAll()
       throws ServerException, ForbiddenException, ConflictException {
     Set<RegisteredProject> deleted = new HashSet<>();
     for (RegisteredProject registeredProject : projectConfigRegistry.getAll()) {
@@ -228,7 +228,7 @@ public class ExecutiveProjectManager implements ProjectManager {
   }
 
   @Override
-  public RegisteredProject copy(String srcWsPath, String dstWsPath, boolean overwrite)
+  public synchronized RegisteredProject copy(String srcWsPath, String dstWsPath, boolean overwrite)
       throws ServerException, NotFoundException, ConflictException, ForbiddenException {
     fsManager.copy(srcWsPath, dstWsPath);
 
@@ -253,7 +253,7 @@ public class ExecutiveProjectManager implements ProjectManager {
   }
 
   @Override
-  public RegisteredProject setType(String wsPath, String type, boolean asMixin)
+  public synchronized RegisteredProject setType(String wsPath, String type, boolean asMixin)
       throws ConflictException, NotFoundException, ServerException, BadRequestException,
           ForbiddenException {
 
@@ -291,7 +291,7 @@ public class ExecutiveProjectManager implements ProjectManager {
   }
 
   @Override
-  public RegisteredProject removeType(String wsPath, String type)
+  public synchronized RegisteredProject removeType(String wsPath, String type)
       throws ConflictException, NotFoundException, ServerException, BadRequestException,
           ForbiddenException {
 
@@ -345,7 +345,7 @@ public class ExecutiveProjectManager implements ProjectManager {
   }
 
   @Override
-  public RegisteredProject move(String srcWsPath, String dstWsPath, boolean overwrite)
+  public synchronized RegisteredProject move(String srcWsPath, String dstWsPath, boolean overwrite)
       throws ServerException, NotFoundException, ConflictException, ForbiddenException {
     fsManager.move(srcWsPath, dstWsPath);
 
