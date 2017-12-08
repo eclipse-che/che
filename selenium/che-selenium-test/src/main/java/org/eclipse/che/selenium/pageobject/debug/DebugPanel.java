@@ -300,14 +300,14 @@ public class DebugPanel {
    */
   public void waitExpectedResultInEvaluateExpression(final String expVal) {
     final String locator = "//div[text()='Result:']/parent::div/following-sibling::div/textarea";
+    WebElement webElement =
+        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+            .until(visibilityOfElementLocated(xpath(locator)));
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver -> {
-                  return seleniumWebDriver
-                      .findElement(xpath(locator))
-                      .getAttribute("value")
-                      .equals(expVal);
+                  return webElement.getAttribute("value").equals(expVal);
                 });
   }
 
