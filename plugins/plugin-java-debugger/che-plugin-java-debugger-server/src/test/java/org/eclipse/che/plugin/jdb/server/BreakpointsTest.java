@@ -10,9 +10,9 @@
  */
 package org.eclipse.che.plugin.jdb.server;
 
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.ensureSuspendAtDesiredLocation;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.startJavaDebugger;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.ensureDebuggerSuspendAtLocation;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.startJavaDebugger;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -29,7 +29,6 @@ import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-import org.eclipse.che.plugin.jdb.server.util.ProjectApiUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -38,20 +37,13 @@ import org.testng.annotations.Test;
 public class BreakpointsTest {
 
   private JavaDebugger debugger;
-  private BlockingQueue<DebuggerEvent> events;
+  private BlockingQueue<DebuggerEvent> events = new ArrayBlockingQueue<>(10);
 
   @BeforeClass
   public void setUp() throws Exception {
-    ProjectApiUtils.ensure();
-
-    Location location =
-        new LocationImpl(
-            "/test/src/org/eclipse/BreakpointsTest.java", 19, false, null, "/test", null, -1);
-
-    events = new ArrayBlockingQueue<>(10);
+    Location location = new LocationImpl("/test/src/org/eclipse/BreakpointsTest.java", 19, "/test");
     debugger = startJavaDebugger(new BreakpointImpl(location), events);
-
-    ensureSuspendAtDesiredLocation(location, events);
+    ensureDebuggerSuspendAtLocation(location, events);
   }
 
   @AfterClass
@@ -125,99 +117,6 @@ public class BreakpointsTest {
   }
 
   @Test(priority = 2)
-  public void shouldAddBreakpointInsideInnerClass() throws Exception {
-    Location location =
-        new LocationImpl(
-            "/test/src/org/eclipse/BreakpointsTest.java", 40, false, null, "/test", null, -1);
-
-    try {
-      debugger.addBreakpoint(new BreakpointImpl(location, false, null));
-    } catch (DebuggerException e) {
-      // class might not be loaded yet
-    }
-
-    debugger.resume(new ResumeActionImpl());
-
-    DebuggerEvent debuggerEvent = events.take();
-    assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
-
-    Breakpoint actualBreakpoint = ((BreakpointActivatedEvent) debuggerEvent).getBreakpoint();
-    Location actualLocation = actualBreakpoint.getLocation();
-    assertEquals(actualLocation.getLineNumber(), 40);
-    assertEquals(actualLocation.getTarget(), "/test/src/org/eclipse/BreakpointsTest.java");
-    assertTrue(actualBreakpoint.isEnabled());
-
-    debuggerEvent = events.take();
-    assertTrue(debuggerEvent instanceof SuspendEvent);
-
-    Location suspendLocation = ((SuspendEvent) debuggerEvent).getLocation();
-    assertEquals(suspendLocation.getLineNumber(), 40);
-    assertEquals(actualLocation.getTarget(), "/test/src/org/eclipse/BreakpointsTest.java");
-  }
-
-  @Test(priority = 3)
-  public void shouldAddBreakpointInsideAnonymousClass() throws Exception {
-    Location location =
-        new LocationImpl(
-            "/test/src/org/eclipse/BreakpointsTest.java", 24, false, null, "/test", null, -1);
-
-    try {
-      debugger.addBreakpoint(new BreakpointImpl(location, false, null));
-    } catch (DebuggerException e) {
-      // class might not be loaded yet
-    }
-
-    debugger.resume(new ResumeActionImpl());
-
-    DebuggerEvent debuggerEvent = events.take();
-    assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
-
-    Breakpoint actualBreakpoint = ((BreakpointActivatedEvent) debuggerEvent).getBreakpoint();
-    Location actualLocation = actualBreakpoint.getLocation();
-    assertEquals(actualLocation.getLineNumber(), 24);
-    assertEquals(actualLocation.getTarget(), "/test/src/org/eclipse/BreakpointsTest.java");
-    assertTrue(actualBreakpoint.isEnabled());
-
-    debuggerEvent = events.take();
-    assertTrue(debuggerEvent instanceof SuspendEvent);
-
-    Location suspendLocation = ((SuspendEvent) debuggerEvent).getLocation();
-    assertEquals(suspendLocation.getLineNumber(), 24);
-    assertEquals(actualLocation.getTarget(), "/test/src/org/eclipse/BreakpointsTest.java");
-  }
-
-  @Test(priority = 4)
-  public void shouldAddBreakpointInsideLambdaFunction() throws Exception {
-    Location location =
-        new LocationImpl(
-            "/test/src/org/eclipse/BreakpointsTest.java", 30, false, null, "/test", null, -1);
-
-    try {
-      debugger.addBreakpoint(new BreakpointImpl(location, false, null));
-    } catch (DebuggerException e) {
-      // class might not be loaded yet
-    }
-
-    debugger.resume(new ResumeActionImpl());
-
-    DebuggerEvent debuggerEvent = events.take();
-    assertTrue(debuggerEvent instanceof BreakpointActivatedEvent);
-
-    Breakpoint actualBreakpoint = ((BreakpointActivatedEvent) debuggerEvent).getBreakpoint();
-    Location actualLocation = actualBreakpoint.getLocation();
-    assertEquals(actualLocation.getLineNumber(), 30);
-    assertEquals(actualLocation.getTarget(), "/test/src/org/eclipse/BreakpointsTest.java");
-    assertTrue(actualBreakpoint.isEnabled());
-
-    debuggerEvent = events.take();
-    assertTrue(debuggerEvent instanceof SuspendEvent);
-
-    Location suspendLocation = ((SuspendEvent) debuggerEvent).getLocation();
-    assertEquals(suspendLocation.getLineNumber(), 30);
-    assertEquals(actualLocation.getTarget(), "/test/src/org/eclipse/BreakpointsTest.java");
-  }
-
-  @Test(priority = 4)
   public void shouldRemoveAllBreakpoints() throws Exception {
     assertFalse(debugger.getAllBreakpoints().isEmpty());
 
@@ -226,7 +125,7 @@ public class BreakpointsTest {
     assertTrue(debugger.getAllBreakpoints().isEmpty());
   }
 
-  @Test(priority = 5)
+  @Test(priority = 3)
   public void shouldRemoveBreakpoint() throws Exception {
     Location location =
         new LocationImpl(
@@ -239,7 +138,7 @@ public class BreakpointsTest {
     assertTrue(debugger.getAllBreakpoints().isEmpty());
   }
 
-  @Test(priority = 6)
+  @Test(priority = 4)
   public void shouldReturnAllBreakpoints() throws Exception {
     Location location =
         new LocationImpl(
@@ -258,13 +157,13 @@ public class BreakpointsTest {
     assertTrue(actualBreakpoint.isEnabled());
   }
 
-  @Test(priority = 7, expectedExceptions = DebuggerException.class)
+  @Test(priority = 5, expectedExceptions = DebuggerException.class)
   public void shouldNotAddBreakpointToCommentedLine() throws Exception {
     Location location = new LocationImpl("/test/src/org/eclipse/BreakpointsTest.java", 1, "/test");
     debugger.addBreakpoint(new BreakpointImpl(location));
   }
 
-  @Test(priority = 8, expectedExceptions = DebuggerException.class)
+  @Test(priority = 6, expectedExceptions = DebuggerException.class)
   public void shouldNotAddBreakpointToNonExecutedLine() throws Exception {
     Location location = new LocationImpl("/test/src/org/eclipse/BreakpointsTest.java", 42, "/test");
     debugger.addBreakpoint(new BreakpointImpl(location));

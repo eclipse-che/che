@@ -10,8 +10,7 @@
  */
 package org.eclipse.che.api.debug.shared.model.impl;
 
-import static com.google.common.base.Objects.equal;
-
+import com.google.common.base.Objects;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.Method;
 
@@ -105,16 +104,16 @@ public class LocationImpl implements Location {
     LocationImpl location = (LocationImpl) o;
     return lineNumber == location.lineNumber
         && externalResource == location.externalResource
-        && externalResourceId.equals(location.externalResourceId)
         && threadId == location.threadId
-        && equal(target, location.target)
-        && equal(resourceProjectPath, location.resourceProjectPath)
-        && equal(method, location.method);
+        && Objects.equal(target, location.target)
+        && Objects.equal(externalResourceId, location.externalResourceId)
+        && Objects.equal(resourceProjectPath, location.resourceProjectPath)
+        && Objects.equal(method, location.method);
   }
 
   @Override
   public int hashCode() {
-    return com.google.common.base.Objects.hashCode(
+    return Objects.hashCode(
         target,
         lineNumber,
         externalResource,
@@ -134,8 +133,9 @@ public class LocationImpl implements Location {
         + lineNumber
         + ", externalResource="
         + externalResource
-        + ", externalResourceId="
+        + ", externalResourceId='"
         + externalResourceId
+        + '\''
         + ", resourceProjectPath='"
         + resourceProjectPath
         + '\''
