@@ -17,6 +17,8 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
@@ -79,10 +81,21 @@ public class ExternalResourceLocationHandler extends FileResourceLocationHandler
 
     final String className = extractOuterClassFqn(location.getTarget());
     final String libId = location.getExternalResourceId();
-    final Path projectPath = new Path(location.getResourceProjectPath());
+
+    Resource resource = appContext.getResource();
+    if (resource == null) {
+      callback.onFailure(new IllegalStateException("Resource is undefined"));
+      return;
+    }
+
+    Project project = resource.getProject();
+    if (project == null) {
+      callback.onFailure(new IllegalStateException("Project is undefined"));
+      return;
+    }
 
     ExternalLibrariesParameters params = dtoFactory.createDto(ExternalLibrariesParameters.class);
-    params.setProjectUri(location.getResourceProjectPath());
+    params.setProjectUri(project.getPath());
     params.setNodeId(libId);
     params.setNodePath(className);
     service
@@ -90,7 +103,8 @@ public class ExternalResourceLocationHandler extends FileResourceLocationHandler
         .then(
             jarEntry -> {
               final JarFileNode file =
-                  nodeFactory.newJarFileNode(jarEntry, libId, projectPath, null);
+                  nodeFactory.newJarFileNode(
+                      jarEntry, libId, Path.valueOf(project.getPath()), null);
               callback.onSuccess(file);
             })
         .catchError(

@@ -11,15 +11,18 @@
  */
 package org.eclipse;
 
-public class EvaluateExpressionTest1 {
-    public static void main(String[] args) throws Exception {
-        int i = 1;
-        do1(i);
-    }
+public class StackFrameDumpTest {
+  private static String v = "something";
+  public static void main(String[] args) throws Exception {
+    do1(1);
+  }
 
-    private static void do1(int i) {
-        i = 2;
-        System.out.println("Set breakpoint here.");
-    }
+  private static void do1(int i) {
+    int j = 1;
+    do2(String.valueOf(i + j));
+  }
+
+  private static void do2(String str) {
+    System.out.println(str);
+  }
 }
-
