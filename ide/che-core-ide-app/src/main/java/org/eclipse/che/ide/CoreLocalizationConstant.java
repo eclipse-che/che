@@ -128,6 +128,42 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("mixedProjectDeleteMessage")
   String mixedProjectDeleteMessage();
 
+  @Key("action.switch.editor.displaying.title")
+  String switchEditorDisplayingTitle();
+
+  @Key("action.switch.editor.displaying.description")
+  String switchEditorDisplayingDescription();
+
+  @Key("action.switch.project.explorer.displaying.title")
+  String switchProjectExplorerDisplayingTitle();
+
+  @Key("action.switch.project.explorer.displaying.description")
+  String switchProjectExplorerDisplayingDescription();
+
+  @Key("action.switch.command.explorer.displaying.title")
+  String switchCommandExplorerDisplayingTitle();
+
+  @Key("action.switch.command.explorer.displaying.description")
+  String switchCommandExplorerDisplayingDescription();
+
+  @Key("action.switch.find.part.displaying.title")
+  String switchFindPartDisplayingTitle();
+
+  @Key("action.switch.find.part.displaying.description")
+  String switchFindPartDisplayingDescription();
+
+  @Key("action.switch.event.logs.displaying.title")
+  String switchEventLogsDisplayingTitle();
+
+  @Key("action.switch.event.logs.displaying.description")
+  String switchEventLogsDisplayingDescription();
+
+  @Key("action.switch.terminal.displaying.title")
+  String switchTerminalDisplayingTitle();
+
+  @Key("action.switch.terminal.displaying.description")
+  String switchTerminalDisplayingDescription();
+
   /* RenameItem */
   @Key("action.rename.text")
   String renameItemActionText();

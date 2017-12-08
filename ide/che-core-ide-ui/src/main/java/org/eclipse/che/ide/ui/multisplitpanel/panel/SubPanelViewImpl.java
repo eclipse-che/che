@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DeckLayoutPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
@@ -212,19 +213,23 @@ public class SubPanelViewImpl extends Composite
   }
 
   @Override
-  public void activateWidget(WidgetToShow widget) {
-    final Tab tab = widgets2Tabs.get(widget);
+  public void activateWidget(WidgetToShow widgetToActivate) {
+    final Tab tab = widgets2Tabs.get(widgetToActivate);
     if (tab != null) {
       selectTab(tab);
     }
 
-    widgetsPanel.showWidget(widget.getWidget().asWidget());
+    IsWidget widget = widgetToActivate.getWidget();
+    widgetsPanel.showWidget(widget.asWidget());
+    if (widget instanceof Focusable) {
+      ((Focusable) widget).setFocus(true);
+    }
 
     // add 'active' attribute for active widget for testing purpose
     for (WidgetToShow widgetToShow : widgets2Tabs.keySet()) {
       widgetToShow.getWidget().asWidget().getElement().removeAttribute("active");
     }
-    widget.getWidget().asWidget().getElement().setAttribute("active", "");
+    widget.asWidget().getElement().setAttribute("active", "");
   }
 
   @Override

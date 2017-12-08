@@ -271,4 +271,11 @@ public interface ContributeMessages extends Messages {
 
   @Key("stub.text.should.be.selected.only.one.project")
   String stubTextShouldBeSelectedOnlyOneProject();
+
+  // Switch contribute part action
+  @Key("action.switch.contribute.part.displaying.title")
+  String switchContributePartDisplayingTitle();
+
+  @Key("action.switch.contribute.part.displaying.description")
+  String switchContributePartDisplayingDescription();
 }
