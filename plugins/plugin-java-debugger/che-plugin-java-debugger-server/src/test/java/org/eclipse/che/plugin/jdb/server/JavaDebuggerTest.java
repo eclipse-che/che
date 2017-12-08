@@ -14,6 +14,7 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -97,7 +98,7 @@ public class JavaDebuggerTest {
     Location location = ((SuspendEvent) debuggerEvent).getLocation();
     assertEquals(location.getTarget(), "/test/src/org/eclipse/HelloWorld.java");
     assertEquals(location.getLineNumber(), 20);
-    assertEquals(location.getExternalResourceId(), 0);
+    assertNull(location.getExternalResourceId());
     assertEquals(location.getResourceProjectPath(), "/test");
 
     debugger.stepInto(new StepIntoActionImpl());

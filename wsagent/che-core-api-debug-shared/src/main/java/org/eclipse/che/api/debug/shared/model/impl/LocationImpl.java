@@ -11,9 +11,6 @@
 package org.eclipse.che.api.debug.shared.model.impl;
 
 import com.google.common.base.Objects;
-
-import static com.google.common.base.Objects.equal;
-
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.Method;
 

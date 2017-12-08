@@ -16,6 +16,7 @@ import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.start
 import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.List;
@@ -102,7 +103,7 @@ public class ThreadDumpTest {
     Location location = stackFrameDump.getLocation();
     assertEquals(location.getLineNumber(), 26);
     assertEquals(location.getTarget(), "/test/src/org/eclipse/ThreadDumpTest.java");
-    assertEquals(location.getExternalResourceId(), 0);
+    assertNull(location.getExternalResourceId());
     assertEquals(location.getResourceProjectPath(), "/test");
 
     Method method = location.getMethod();

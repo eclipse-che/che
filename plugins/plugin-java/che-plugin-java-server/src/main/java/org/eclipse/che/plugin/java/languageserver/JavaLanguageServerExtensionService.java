@@ -13,16 +13,27 @@ package org.eclipse.che.plugin.java.languageserver;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
-import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removePrefixUri;
+import static org.eclipse.che.ide.ext.java.shared.Constants.CLASS_PATH_TREE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM_REQUEST_TIMEOUT;
-import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE_REQUEST_TIMEOUT;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES_CHILDREN;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHILDREN;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_NODE_CONTENT;
+import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_ENTRY_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_FOLDER_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_PROJECT_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_IN_FILE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TEST_BY_CURSOR_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_CLASS_PATH_TREE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EFFECTIVE_POM_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EXTERNAL_LIBRARIES_CHILDREN_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EXTERNAL_LIBRARIES_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_CHILDREN_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_ENTRY_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_NODE_CONTENT_BY_PATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_OUTPUT_DIR_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.RESOLVE_CLASSPATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.TEST_DETECT_COMMAND;
@@ -35,6 +46,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -48,9 +60,15 @@ import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
+import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.jdt.ls.extension.api.Commands;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
+import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
+import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocation;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
@@ -72,6 +90,8 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Mäder
  */
 public class JavaLanguageServerExtensionService {
+  private static final int TIMEOUT = 10;
+
   private final Gson gson;
   private final LanguageServerRegistry registry;
 
@@ -96,7 +116,7 @@ public class JavaLanguageServerExtensionService {
   public void configureMethods() {
     requestHandler
         .newConfiguration()
-        .methodName("java/file-structure")
+        .methodName(FILE_STRUCTURE)
         .paramsAsDto(FileStructureCommandParameters.class)
         .resultAsListOfDto(ExtendedSymbolInformationDto.class)
         .withFunction(this::executeFileStructure);
@@ -107,6 +127,48 @@ public class JavaLanguageServerExtensionService {
         .paramsAsString()
         .resultAsString()
         .withFunction(this::getEffectivePom);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(EXTERNAL_LIBRARIES)
+        .paramsAsDto(ExternalLibrariesParameters.class)
+        .resultAsListOfDto(Jar.class)
+        .withFunction(this::getProjectExternalLibraries);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(EXTERNAL_LIBRARIES_CHILDREN)
+        .paramsAsDto(ExternalLibrariesParameters.class)
+        .resultAsListOfDto(JarEntry.class)
+        .withFunction(this::getExternalLibrariesChildren);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(EXTERNAL_LIBRARY_CHILDREN)
+        .paramsAsDto(ExternalLibrariesParameters.class)
+        .resultAsListOfDto(JarEntry.class)
+        .withFunction(this::getLibraryChildren);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(EXTERNAL_LIBRARY_ENTRY)
+        .paramsAsDto(ExternalLibrariesParameters.class)
+        .resultAsDto(JarEntry.class)
+        .withFunction(this::getLibraryEntry);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(EXTERNAL_NODE_CONTENT)
+        .paramsAsDto(ExternalLibrariesParameters.class)
+        .resultAsString()
+        .withFunction(this::getLibraryNodeContentByPath);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(CLASS_PATH_TREE)
+        .paramsAsString()
+        .resultAsListOfDto(ClasspathEntryDto.class)
+        .withFunction(this::getClasspathTree);
   }
 
   /**
@@ -120,7 +182,7 @@ public class JavaLanguageServerExtensionService {
         executeCommand(GET_OUTPUT_DIR_COMMAND, singletonList(projectUri));
     Type targetClassType = new TypeToken<String>() {}.getType();
     try {
-      return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+      return gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), targetClassType);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
@@ -142,7 +204,7 @@ public class JavaLanguageServerExtensionService {
     Type targetClassType = new TypeToken<ArrayList<TestPosition>>() {}.getType();
     try {
       List<TestPosition> positions =
-          gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+          gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), targetClassType);
       return positions.stream().map(TestPositionDto::new).collect(Collectors.toList());
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
@@ -160,7 +222,7 @@ public class JavaLanguageServerExtensionService {
         executeCommand(RESOLVE_CLASSPATH_COMMAND, singletonList(projectUri));
     Type targetClassType = new TypeToken<ArrayList<String>>() {}.getType();
     try {
-      return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+      return gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), targetClassType);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
@@ -260,7 +322,7 @@ public class JavaLanguageServerExtensionService {
    * @param params command parameters {@link FileStructureCommandParameters}
    * @return file structure tree
    */
-  public List<ExtendedSymbolInformationDto> executeFileStructure(
+  private List<ExtendedSymbolInformationDto> executeFileStructure(
       FileStructureCommandParameters params) {
     LOG.info("Requesting files structure for {}", params);
     params.setUri(prefixURI(params.getUri()));
@@ -269,7 +331,7 @@ public class JavaLanguageServerExtensionService {
     Type targetClassType = new TypeToken<ArrayList<ExtendedSymbolInformation>>() {}.getType();
     try {
       List<ExtendedSymbolInformation> symbols =
-          gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+          gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), targetClassType);
       return symbols
           .stream()
           .map(
@@ -306,6 +368,43 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
+  private List<Jar> getProjectExternalLibraries(ExternalLibrariesParameters params) {
+    params.setProjectUri(prefixURI(params.getProjectUri()));
+    Type type = new TypeToken<ArrayList<Jar>>() {}.getType();
+    return doGetList(GET_EXTERNAL_LIBRARIES_COMMAND, params, type);
+  }
+
+  private List<JarEntry> getExternalLibrariesChildren(ExternalLibrariesParameters params) {
+    params.setProjectUri(prefixURI(params.getProjectUri()));
+    Type type = new TypeToken<ArrayList<JarEntry>>() {}.getType();
+    return doGetList(GET_EXTERNAL_LIBRARIES_CHILDREN_COMMAND, params, type);
+  }
+
+  private List<JarEntry> getLibraryChildren(ExternalLibrariesParameters params) {
+    params.setProjectUri(prefixURI(params.getProjectUri()));
+    Type type = new TypeToken<ArrayList<JarEntry>>() {}.getType();
+    return doGetList(GET_LIBRARY_CHILDREN_COMMAND, params, type);
+  }
+
+  private List<ClasspathEntryDto> getClasspathTree(String projectPath) {
+    String projectUri = prefixURI(projectPath);
+    Type type = new TypeToken<ArrayList<ClasspathEntry>>() {}.getType();
+    List<ClasspathEntry> entries = doGetList(GET_CLASS_PATH_TREE_COMMAND, projectUri, type);
+    return convertToClasspathEntryDto(entries);
+  }
+
+  private JarEntry getLibraryEntry(ExternalLibrariesParameters params) {
+    params.setProjectUri(prefixURI(params.getProjectUri()));
+    Type type = new TypeToken<JarEntry>() {}.getType();
+    return doGetOne(GET_LIBRARY_ENTRY_COMMAND, params, type);
+  }
+
+  private String getLibraryNodeContentByPath(ExternalLibrariesParameters params) {
+    params.setProjectUri(prefixURI(params.getProjectUri()));
+    Type type = new TypeToken<String>() {}.getType();
+    return doGetOne(GET_LIBRARY_NODE_CONTENT_BY_PATH_COMMAND, params, type);
+  }
+
   private List<String> executeFindTestsCommand(
       String commandId,
       String fileUri,
@@ -315,12 +414,23 @@ public class JavaLanguageServerExtensionService {
       List<String> classes) {
     TestFindParameters parameters =
         new TestFindParameters(fileUri, methodAnnotation, projectAnnotation, offset, classes);
-    CompletableFuture<Object> result = executeCommand(commandId, singletonList(parameters));
-    Type targetClassType = new TypeToken<ArrayList<String>>() {}.getType();
+    Type type = new TypeToken<ArrayList<String>>() {}.getType();
+    return doGetList(commandId, parameters, type);
+  }
+
+  private <T, P> List<T> doGetList(String command, P params, Type type) {
+    CompletableFuture<Object> result = executeCommand(command, singletonList(params));
     try {
-      return gson.fromJson(
-          gson.toJson(result.get(FILE_STRUCTURE_REQUEST_TIMEOUT, TimeUnit.SECONDS)),
-          targetClassType);
+      return gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), type);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  private <T, P> T doGetOne(String command, P params, Type type) {
+    CompletableFuture<Object> result = executeCommand(command, singletonList(params));
+    try {
+      return gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), type);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
@@ -343,6 +453,27 @@ public class JavaLanguageServerExtensionService {
     for (ExtendedSymbolInformation child : symbol.getChildren()) {
       fixLocation(child);
     }
+  }
+
+  private List<ClasspathEntryDto> convertToClasspathEntryDto(
+      List<ClasspathEntry> classpathEntries) {
+    List<ClasspathEntryDto> result = new LinkedList<>();
+    for (ClasspathEntry classpathEntry : classpathEntries) {
+      ClasspathEntryDto classpathEntryDto =
+          DtoFactory.newDto(ClasspathEntryDto.class)
+              .withEntryKind(classpathEntry.getEntryKind())
+              .withPath(classpathEntry.getPath());
+
+      List<ClasspathEntry> children = classpathEntry.getChildren();
+
+      if (children != null) {
+        classpathEntryDto.withExpandedEntries(convertToClasspathEntryDto(children));
+      }
+
+      result.add(classpathEntryDto);
+    }
+
+    return result;
   }
 
   public String identifyFqnInResource(String filePath, int lineNumber) {
@@ -375,7 +506,7 @@ public class JavaLanguageServerExtensionService {
           gson.fromJson(
               gson.toJson(result.get(10, TimeUnit.SECONDS)),
               new com.google.common.reflect.TypeToken<
-                  Either<String, ResourceLocation>>() {}.getType());
+                  List<Either<String, ResourceLocation>>>() {}.getType());
       Either<String, ResourceLocation> l = location.get(0);
 
       if (l.isLeft()) {
