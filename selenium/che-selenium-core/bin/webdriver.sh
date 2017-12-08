@@ -53,13 +53,14 @@ initVariables() {
 
     readonly MAX_RERUN=2
 
+    export CHE_MULTIUSER=${CHE_MULTIUSER:-false}
+
     # CALLER variable contains parent caller script name
     # CUR_DIR variable contains the current directory where CALLER is executed
     [[ -z ${CALLER+x} ]] && { CALLER=$(basename $0); }
     [[ -z ${CUR_DIR+x} ]] && { CUR_DIR=$(cd "$(dirname "$0")"; pwd); }
 
     [[ -z ${API_SUFFIX+x} ]] && { API_SUFFIX="/api/"; }
-    [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/che-integration-tests-che6/"; }
 
     MODE="grid"
     GRID_OPTIONS="-Dgrid.mode=true"
@@ -78,7 +79,6 @@ initVariables() {
     PRODUCT_PROTOCOL="http"
     PRODUCT_HOST=$(detectDockerInterfaceIp)
     PRODUCT_PORT=8080
-    export CHE_MULTIUSER=${CHE_MULTIUSER:-false}
 
     unset DEBUG_OPTIONS
     unset MAVEN_OPTIONS
@@ -506,6 +506,15 @@ detectLatestResultsUrl() {
 fetchActualResults() {
     unset ACTUAL_RESULTS
     unset ACTUAL_RESULTS_URL
+
+    # define the URL of CI job to compare result with it
+    if [[ ${CHE_MULTIUSER} == true ]]; then
+      local nameOfCIJob=che-multiuser-integration-tests-che6
+    else
+      local nameOfCIJob=che-integration-tests-che6
+    fi
+
+    [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/$nameOfCIJob/"; }
 
     local job=$(echo $@ | sed 's/.*--compare-with-ci\W\+\([0-9]\+\).*/\1/')
     if [[ ! ${job} =~ ^[0-9]+$ ]]; then
