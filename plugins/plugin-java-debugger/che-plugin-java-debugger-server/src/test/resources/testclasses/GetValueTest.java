@@ -11,18 +11,19 @@
  */
 package org.eclipse;
 
-public class StackFrameDumpTest1 {
-    private static String v = "something";
-    public static void main(String[] args) throws Exception {
-        do1(1);
-    }
+public class GetValueTest {
+  private String var1 = "field1";
+  private static final String var2 = "field2";
 
-    private static void do1(int i) {
-        int j = 1;
-        do2(String.valueOf(i + j));
-    }
+  public static void main(String[] args) throws Exception {
+    do1(1);
+  }
 
-    private static void do2(String str) {
-        System.out.println(str);
-    }
+  private static void do1(int i) {
+    String var1 = "var1";
+    String var2 = "var2";
+    i = 2;
+
+    System.out.println("Set breakpoint here.");
+  }
 }
