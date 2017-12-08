@@ -3,17 +3,19 @@
 # PLEASE DON'T MODIFY BY HAND
 # ###################################
 
+<% if scope.lookupvar('che::che_multiuser') == 'true' -%>
 version: '2.1'
 services:
+<% end -%>
+
+  ########################
+  # CHE
+  ########################
   che:
     image: <%= ENV["IMAGE_CHE"] %>
     mem_limit: 750m
     memswap_limit: 0
-    healthcheck:
-      test: curl -sS <%= scope.lookupvar('che::che_server_url') -%>/api/system/state || exit 1
-      interval: 1m30s
-      timeout: 10s
-      retries: 3
+
     env_file:
 <% if @compose_file_for_containers == true -%>
       - '<%= ENV["CHE_CONTAINER_ROOT"] %>/instance/config/che/che.env'
