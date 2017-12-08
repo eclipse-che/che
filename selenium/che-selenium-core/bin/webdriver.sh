@@ -78,6 +78,7 @@ initVariables() {
     PRODUCT_PROTOCOL="http"
     PRODUCT_HOST=$(detectDockerInterfaceIp)
     PRODUCT_PORT=8080
+    export CHE_MULTIUSER=${CHE_MULTIUSER:-false}
 
     unset DEBUG_OPTIONS
     unset MAVEN_OPTIONS
@@ -97,15 +98,15 @@ checkParameters() {
     for var in "$@"; do
         if [[ "$var" =~ --web-driver-version=.* ]]; then :
         elif [[ "$var" =~ --web-driver-port=[0-9]+$ ]]; then :
-        elif [[ "$var" == "--http" ]]; then :
-        elif [[ "$var" == "--https" ]]; then :
-        elif [[ "$var" == "--che" ]]; then :
+        elif [[ "$var" == --http ]]; then :
+        elif [[ "$var" == --https ]]; then :
+        elif [[ "$var" == --che ]]; then :
         elif [[ "$var" =~ --host=.* ]]; then :
         elif [[ "$var" =~ --port=.* ]]; then :
         elif [[ "$var" =~ --threads=[0-9]+$ ]]; then :
-        elif [[ "$var" == "--rerun" ]]; then :
-        elif [[ "$var" == "--debug" ]]; then :
-        elif [[ "$var" == "--all-tests" ]]; then
+        elif [[ "$var" == --rerun ]]; then :
+        elif [[ "$var" == --debug ]]; then :
+        elif [[ "$var" == --all-tests ]]; then
             echo "[WARN] '--all-tests' parameter is outdated and is being ignored"
 
         elif [[ "$var" =~ --test=.* ]]; then
@@ -130,17 +131,18 @@ checkParameters() {
                 exit 1;
             }
 
-        elif [[ "$var" == "--failed-tests" ]]; then :
-        elif [[ "$var" == "--regression-tests" ]]; then :
+        elif [[ "$var" == --failed-tests ]]; then :
+        elif [[ "$var" == --regression-tests ]]; then :
         elif [[ "$var" =~ -M.* ]]; then :
         elif [[ "$var" =~ -P.* ]]; then :
-        elif [[ "$var" == "--help" ]]; then :
-        elif [[ "$var" == "--compare-with-ci" ]]; then :
+        elif [[ "$var" == --help ]]; then :
+        elif [[ "$var" == --compare-with-ci ]]; then :
         elif [[ "$var" =~ ^--workspace-pool-size=(auto|[0-9]+)$ ]]; then :
         elif [[ "$var" =~ ^[0-9]+$ ]] && [[ $@ =~ --compare-with-ci[[:space:]]$var ]]; then :
         elif [[ "$var" =~ ^-D.* ]]; then :
         elif [[ "$var" =~ ^-[[:alpha:]]$ ]]; then :
-        elif [[ "$var" == "--skip-sources-validation" ]]; then :
+        elif [[ "$var" == --skip-sources-validation ]]; then :
+        elif [[ "$var" == --multiuser ]]; then :
         else
             printHelp
             echo "[TEST] Unrecognized or misused parameter "${var}
@@ -161,10 +163,10 @@ applyCustomOptions() {
                 WEBDRIVER_PORT=$(echo "$var" | sed -e "s/--web-driver-port=//g")
             fi
 
-        elif [[ "$var" == "--http" ]]; then
+        elif [[ "$var" == --http ]]; then
             PRODUCT_PROTOCOL="http"
 
-        elif [[ "$var" == "--https" ]]; then
+        elif [[ "$var" == --https ]]; then
             PRODUCT_PROTOCOL="https"
 
         elif [[ "$var" =~ --host=.* ]]; then
@@ -179,15 +181,18 @@ applyCustomOptions() {
         elif [[ "$var" =~ --workspace-pool-size=.* ]]; then
             WORKSPACE_POOL_SIZE=$(echo "$var" | sed -e "s/--workspace-pool-size=//g")
 
-        elif [[ "$var" == "--rerun" ]]; then
+        elif [[ "$var" == --rerun ]]; then
             RERUN=true
 
-        elif [[ "$var" == "--debug" ]]; then
+        elif [[ "$var" == --debug ]]; then
             DEBUG_OPTIONS="-Dmaven.failsafe.debug"
             NODE_CHROME_DEBUG_SUFFIX="-debug"
 
-        elif [[ "$var" == "--compare-with-ci" ]]; then
+        elif [[ "$var" == --compare-with-ci ]]; then
             COMPARE_WITH_CI=true
+
+        elif [[ "$var" == --multiuser ]]; then
+            CHE_MULTIUSER=true
 
         fi
     done
@@ -215,11 +220,11 @@ defineTestsScope() {
         elif [[ "$var" =~ --suite=.* ]]; then
             TESTS_SCOPE="-DrunSuite=src/test/resources/suites/"$(echo "$var" | sed -e "s/--suite=//g")
 
-        elif [[ "$var" == "--failed-tests" ]]; then
+        elif [[ "$var" == --failed-tests ]]; then
             generateTestNgFailedReport $(fetchFailedTests)
             TESTS_SCOPE="-DrunSuite=${TESTNG_FAILED_SUITE}"
 
-        elif [[ "$var" == "--regression-tests" ]]; then
+        elif [[ "$var" == --regression-tests ]]; then
             generateTestNgFailedReport $(findRegressions)
             TESTS_SCOPE="-DrunSuite=${TESTNG_FAILED_SUITE}"
         fi

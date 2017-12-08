@@ -31,22 +31,6 @@ for var in "$@"; do
     fi
 done
 
-index=0
-params=($*)
-cheMultiuserValue=${CHE_MULTIUSER:-false}
-for var in "$@"; do
-    if [[ "$var" =~ --multiuser ]]; then
-        cheMultiuserValue=true
-        unset params[$index]                     # remove "--multiuser" from parameters
-        break
-    fi
-    let "index+=1"
-done
-
-export CHE_MULTIUSER=$cheMultiuserValue
-
-set -- "${params[@]}"
-
 mvn $CLEAN_GOAL dependency:unpack-dependencies \
     -DincludeArtifactIds=che-selenium-core \
     -DincludeGroupIds=org.eclipse.che.selenium \
