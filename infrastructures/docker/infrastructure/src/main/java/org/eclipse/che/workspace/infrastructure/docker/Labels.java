@@ -105,9 +105,7 @@ public final class Labels {
       if (server.getPath() != null) {
         labels.put(String.format(SERVER_PATH_LABEL_FMT, ref), server.getPath());
       }
-      if (server.getAttributes() != null) {
-        labels.put(String.format(SERVER_ATTR_LABEL_FMT, ref), GSON.toJson(server.getAttributes()));
-      }
+      labels.put(String.format(SERVER_ATTR_LABEL_FMT, ref), GSON.toJson(server.getAttributes()));
       return this;
     }
 
