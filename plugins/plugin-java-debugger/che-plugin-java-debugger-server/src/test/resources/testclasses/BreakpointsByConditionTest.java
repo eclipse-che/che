@@ -10,20 +10,13 @@
  */
 package org.eclipse;
 
-public class GetValueTest1 {
-    private              String var1 = "field1";
-    private static final String var2 = "field2";
+/** @author Anatolii Bazko */
+public class BreakpointsByConditionTest {
 
-    public static void main(String[] args) throws Exception {
-        do1(1);
+  public static void main(String[] args) {
+    int k = 0;
+    for (int i = 0; i < 10; i++) {
+      k = i;
     }
-
-    private static void do1(int i) {
-        String var1 = "var1";
-        String var2 = "var2";
-        i = 2;
-
-        System.out.println("Set breakpoint here.");
-    }
+  }
 }
-
