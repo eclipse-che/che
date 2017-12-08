@@ -63,8 +63,8 @@ public class CheckFileWatcherExcludeFeatureTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     menu.runCommand(
-            TestMenuCommandsConstants.Project.PROJECT,
-            TestMenuCommandsConstants.Project.SHOW_HIDE_HIDDEN_FILES);
+        TestMenuCommandsConstants.Project.PROJECT,
+        TestMenuCommandsConstants.Project.SHOW_HIDE_HIDDEN_FILES);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.selectItem(PROJECT_NAME);
     doFileWatcherExcludeOperation(PROJECT_NAME + "/" + "pom.xml", ADD_TO_FILE_WATCHER_EXCLUDES);
@@ -72,7 +72,7 @@ public class CheckFileWatcherExcludeFeatureTest {
   }
 
   @AfterMethod
-  public void closeOpenedTabs(){
+  public void closeOpenedTabs() {
     editor.closeAllTabsByContextMenu();
   }
 
@@ -92,10 +92,9 @@ public class CheckFileWatcherExcludeFeatureTest {
     projectExplorer.openItemByVisibleNameInExplorer(FILE_WATCHER_IGNORE_FILE_NAME);
     editor.selectTabByName(FILE_WATCHER_IGNORE_FILE_NAME);
     editor.waitTextNotPresentIntoEditor(fileNameForExcluding);
-
   }
 
- // @Test
+  @Test
   public void testFeatureAfterExcludingFile() {
     String fileNameForExluding = "README.md";
     String pathToExcludedFile = PROJECT_NAME + "/" + fileNameForExluding;
@@ -132,10 +131,9 @@ public class CheckFileWatcherExcludeFeatureTest {
     editor.waitActiveEditor();
     editor.waitTextIntoEditor("/projects/" + PROJECT_NAME);
     doFileWatcherExcludeOperation(pathToExcludedFile, REMOVE_FROM_FILE_WATCHER_EXCLUDES);
-
   }
 
-//  @Test
+  //  @Test
   public void testFeatureAfterExcludingFolder() {
     String fileNameForExcluding = "AppController.java";
     String pathToJavaFile =
@@ -171,11 +169,9 @@ public class CheckFileWatcherExcludeFeatureTest {
     editor.waitTextIntoEditor(pathToJavaFile);
     doFileWatcherExcludeOperation(
         PROJECT_NAME + "/" + FOLDER_NAME_FOR_EXCLUDE, REMOVE_FROM_FILE_WATCHER_EXCLUDES);
-
-
   }
 
-//  @Test
+  //  @Test
   public void testIsNotExcludeOperationEventAboutIgnoreFile() {
     projectExplorer.waitItem(PROJECT_NAME);
 

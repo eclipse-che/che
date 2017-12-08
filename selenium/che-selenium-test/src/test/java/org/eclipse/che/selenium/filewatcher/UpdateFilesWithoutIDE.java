@@ -10,6 +10,10 @@
  */
 package org.eclipse.che.selenium.filewatcher;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FileWatcherExcludeOperations.REMOVE_FROM_FILE_WATCHER_EXCLUDES;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -67,6 +71,11 @@ public class UpdateFilesWithoutIDE {
 
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
+  private static final String NAME_FILETXT_2 = "file2.txt";
+  private static final String FILE3_TXT = "file3.txt";
+  private static final String EXPECTED_MESSAGE_2 = "File '" + NAME_FILETXT_2 + "' is updated";
+  private static final String EXPECTED_MESSAGE_3 = "File '" + FILE3_TXT + "' is updated";
+
   @BeforeClass
   public void setUp() throws Exception {
     URL resource = getClass().getResource("/projects/spring-project-for-file-watcher-tabs");
@@ -78,37 +87,63 @@ public class UpdateFilesWithoutIDE {
 
     events1.clickEventLogBtn();
     events2.clickEventLogBtn();
+
+    prepareFilesToCheck(NAME_FILETXT_2);
   }
 
-  @Test
-  public void checkEditingFileWithoutIDE() throws Exception {
-    String nameFiletxt2 = "file2.txt";
-    String nameFiletxt3 = "file3.txt";
-    String expectedMessage2 = "File '" + nameFiletxt2 + "' is updated";
-    String expectedMessage3 = "File '" + nameFiletxt3 + "' is updated";
-    projectExplorer1.openItemByPath(PROJECT_NAME);
-    projectExplorer2.openItemByPath(PROJECT_NAME);
-    projectExplorer1.openItemByPath(PROJECT_NAME + "/" + nameFiletxt2);
-    editor1.waitActiveEditor();
-    projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameFiletxt2);
-    editor1.waitActiveEditor();
-
+  // @Test
+  public void shouldWatchEditedFileWithoutIDE() throws Exception {
     testProjectServiceClient.updateFile(
-        ws.getId(), PROJECT_NAME + "/" + nameFiletxt2, Long.toString(System.currentTimeMillis()));
+        ws.getId(), PROJECT_NAME + "/" + NAME_FILETXT_2, Long.toString(System.currentTimeMillis()));
 
-    events1.waitExpectedMessage(expectedMessage2, 10);
-    projectExplorer1.openItemByPath(PROJECT_NAME + "/" + nameFiletxt3);
+    events1.waitExpectedMessage(EXPECTED_MESSAGE_2, LOAD_PAGE_TIMEOUT_SEC);
+    projectExplorer1.openItemByPath(PROJECT_NAME + "/" + FILE3_TXT);
     editor1.waitActiveEditor();
-    projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameFiletxt3);
+    projectExplorer2.openItemByPath(PROJECT_NAME + "/" + FILE3_TXT);
     editor2.waitActiveEditor();
 
     String currentTimeInMs = Long.toString(System.currentTimeMillis());
     testProjectServiceClient.updateFile(
-        ws.getId(), PROJECT_NAME + "/" + nameFiletxt3, Long.toString(System.currentTimeMillis()));
+        ws.getId(), PROJECT_NAME + "/" + FILE3_TXT, Long.toString(System.currentTimeMillis()));
 
-    editor1.waitTextIntoEditor(currentTimeInMs, 5);
-    editor2.waitTextIntoEditor(currentTimeInMs, 5);
-    events1.waitExpectedMessage(expectedMessage3, 10);
-    events2.waitExpectedMessage(expectedMessage3, 10);
+    editor1.waitTextIntoEditor(currentTimeInMs, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    editor2.waitTextIntoEditor(currentTimeInMs, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    events1.waitExpectedMessage(EXPECTED_MESSAGE_3, LOAD_PAGE_TIMEOUT_SEC);
+    events2.waitExpectedMessage(EXPECTED_MESSAGE_3, LOAD_PAGE_TIMEOUT_SEC);
+  }
+
+  @Test
+  public void shouldNotWatchExcludedFiles() throws Exception {
+    String currentTimeInMs = Long.toString(System.currentTimeMillis());
+    excludeFileFromFileWatcher(PROJECT_NAME + "/" + NAME_FILETXT_2);
+    testProjectServiceClient.updateFile(
+        ws.getId(), PROJECT_NAME + "/" + NAME_FILETXT_2, currentTimeInMs);
+    editor1.waitTextNotPresentIntoEditor(currentTimeInMs);
+    editor2.waitTextNotPresentIntoEditor(currentTimeInMs);
+    events1.waitMessageIsNotPresent(EXPECTED_MESSAGE_2);
+    events2.waitMessageIsNotPresent(EXPECTED_MESSAGE_2);
+    editor1.closeAllTabs();
+    editor2.closeAllTabs();
+    projectExplorer1.openItemByPath(PROJECT_NAME + "/" + NAME_FILETXT_2);
+    projectExplorer2.openItemByPath(PROJECT_NAME + "/" + NAME_FILETXT_2);
+    editor1.waitTextIntoEditor(currentTimeInMs);
+    editor2.waitTextIntoEditor(currentTimeInMs);
+  }
+
+  private void excludeFileFromFileWatcher(String pathToExcludedFile) {
+    projectExplorer1.selectItem(pathToExcludedFile);
+    projectExplorer1.openContextMenuByPathSelectedItem(pathToExcludedFile);
+    projectExplorer1.waitContextMenu();
+    projectExplorer1.clickOnItemInContextMenu(REMOVE_FROM_FILE_WATCHER_EXCLUDES);
+    projectExplorer1.waitContextMenuPopUpClosed();
+  }
+
+  private void prepareFilesToCheck(String nameOfOpenedFile) {
+    projectExplorer1.openItemByPath(PROJECT_NAME);
+    projectExplorer2.openItemByPath(PROJECT_NAME);
+    projectExplorer1.openItemByPath(PROJECT_NAME + "/" + nameOfOpenedFile);
+    editor1.waitActiveEditor();
+    projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameOfOpenedFile);
+    editor1.waitActiveEditor();
   }
 }
