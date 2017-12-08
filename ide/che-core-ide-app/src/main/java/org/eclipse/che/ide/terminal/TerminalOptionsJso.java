@@ -34,4 +34,9 @@ public class TerminalOptionsJso extends Jso {
         this.scrollback = scrollBack;
         return this;
     }-*/;
+
+  public final native TerminalOptionsJso withReadOnly(boolean readOnly) /*-{
+      this.readOnly = readOnly;
+      return this;
+  }-*/;
 }

@@ -158,7 +158,8 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
               TerminalOptionsJso termOps =
                   TerminalOptionsJso.createDefault()
                       .withFocusOnOpen(false)
-                      .withScrollBack(SCROLL_BACK);
+                      .withScrollBack(SCROLL_BACK)
+                      .withReadOnly(true);
 
               this.terminalJso = TerminalJso.create(terminalSource, termOps);
               terminalJso.open(consoleLines.asWidget().getElement());

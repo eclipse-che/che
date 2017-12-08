@@ -1239,20 +1239,6 @@ public class ProcessesPanelPresenter extends BasePresenter
     }
   }
 
-  //  /**
-  //   * Prints text to the machine console.
-  //   *
-  //   * @param machineName machine name
-  //   * @param text text to be printed
-  //   * @param color color of the text or NULL
-  //   */
-  //  public void printMachineOutput(String machineName, String text, String color) {
-  //    OutputConsole console = consoles.get(machineName);
-  //    if (console != null && console instanceof DefaultOutputConsole) {
-  //      ((DefaultOutputConsole) console).printText(text, color);
-  //    }
-  //  }
-
   /**
    * Returns the console text for the specified machine.
    *
