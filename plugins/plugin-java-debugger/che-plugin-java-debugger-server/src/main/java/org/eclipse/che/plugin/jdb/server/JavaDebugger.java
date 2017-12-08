@@ -72,13 +72,13 @@ import org.eclipse.che.api.debug.shared.model.impl.event.DisconnectEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
 import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
+import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.eclipse.che.plugin.jdb.server.expression.Evaluator;
 import org.eclipse.che.plugin.jdb.server.expression.ExpressionException;
 import org.eclipse.che.plugin.jdb.server.expression.ExpressionParser;
 import org.eclipse.che.plugin.jdb.server.model.JdbLocation;
 import org.eclipse.che.plugin.jdb.server.model.JdbMethod;
 import org.eclipse.che.plugin.jdb.server.model.JdbStackFrame;
-import org.eclipse.che.plugin.jdb.server.utils.JavaDebuggerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,11 +93,11 @@ import org.slf4j.LoggerFactory;
  */
 public class JavaDebugger implements EventsHandler, Debugger {
   private static final Logger LOG = LoggerFactory.getLogger(JavaDebugger.class);
-  private static final JavaDebuggerUtils debuggerUtil = new JavaDebuggerUtils();
 
   private final String host;
   private final int port;
   private final DebuggerCallback debuggerCallback;
+  private final JavaLanguageServerExtensionService languageServer;
 
   /**
    * A mapping of source file names to breakpoints. This mapping is used to set breakpoints in files
@@ -129,10 +129,16 @@ public class JavaDebugger implements EventsHandler, Debugger {
    * @param port the Java Debug Wire Protocol (JDWP) port
    * @throws DebuggerException when connection to Java VM is not established
    */
-  JavaDebugger(String host, int port, DebuggerCallback debuggerCallback) throws DebuggerException {
+  JavaDebugger(
+      JavaLanguageServerExtensionService languageServer,
+      String host,
+      int port,
+      DebuggerCallback debuggerCallback)
+      throws DebuggerException {
     this.host = host;
     this.port = port;
     this.debuggerCallback = debuggerCallback;
+    this.languageServer = languageServer;
     connect();
   }
 
@@ -212,8 +218,14 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
   @Override
   public void addBreakpoint(Breakpoint breakpoint) throws DebuggerException {
-    final String className = debuggerUtil.findFqnByPosition(breakpoint.getLocation());
     final int lineNumber = breakpoint.getLocation().getLineNumber();
+    final String target = breakpoint.getLocation().getTarget();
+    final String className =
+        !target.endsWith(".java")
+            ? target
+            : languageServer.identifyFqnInResource(
+                breakpoint.getLocation().getTarget(), lineNumber);
+
     List<ReferenceType> classes = vm.classesByName(className);
     // it may mean that class doesn't loaded by a target JVM yet
     if (classes.isEmpty()) {
@@ -323,7 +335,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
       breakPoints.add(
           newDto(BreakpointDto.class)
               .withEnabled(true)
-              .withLocation(asDto(new JdbLocation(location))));
+              .withLocation(asDto(new JdbLocation(languageServer, location))));
     }
     breakPoints.sort(BREAKPOINT_COMPARATOR);
     return breakPoints;
@@ -333,7 +345,12 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
   @Override
   public void deleteBreakpoint(Location location) throws DebuggerException {
-    final String className = debuggerUtil.findFqnByPosition(location);
+    final String target = location.getTarget();
+    final String className =
+        !target.endsWith(".java")
+            ? target
+            : languageServer.identifyFqnInResource(location.getTarget(), location.getLineNumber());
+
     final int lineNumber = location.getLineNumber();
     EventRequestManager requestManager = getEventManager();
     List<BreakpointRequest> snapshot = new ArrayList<>(requestManager.breakpointRequests());
@@ -391,7 +408,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
   public StackFrameDump getStackFrameDump(long threadId, int frameIndex) throws DebuggerException {
     lock.lock();
     try {
-      return new JdbStackFrame(getJdiStackFrame(threadId, frameIndex));
+      return new JdbStackFrame(languageServer, getJdiStackFrame(threadId, frameIndex));
     } finally {
       lock.unlock();
     }
@@ -406,7 +423,11 @@ public class JavaDebugger implements EventsHandler, Debugger {
       try {
         for (StackFrame f : t.frames()) {
           frames.add(
-              new JdbStackFrame(f, emptyList(), emptyList(), new JdbLocation(f, new JdbMethod(f))));
+              new JdbStackFrame(
+                  f,
+                  emptyList(),
+                  emptyList(),
+                  new JdbLocation(languageServer, f, new JdbMethod(f))));
         }
       } catch (IncompatibleThreadStateException ignored) {
         // Thread isn't suspended. Information isn't available.
@@ -484,7 +505,8 @@ public class JavaDebugger implements EventsHandler, Debugger {
   @Override
   public SimpleValue getValue(VariablePath variablePath, long threadId, int frameIndex)
       throws DebuggerException {
-    JdbStackFrame jdbStackFrame = new JdbStackFrame(getJdiStackFrame(threadId, frameIndex));
+    JdbStackFrame jdbStackFrame =
+        new JdbStackFrame(languageServer, getJdiStackFrame(threadId, frameIndex));
 
     Optional<? extends Variable> targetVar;
 
@@ -602,7 +624,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
     if (hitBreakpoint) {
       try {
 
-        Location location = new JdbLocation(event.thread().frame(0));
+        Location location = new JdbLocation(languageServer, event.thread().frame(0));
 
         SuspendPolicy suspendPolicy = toSuspendPolicy(event.request().suspendPolicy());
         debuggerCallback.onEvent(new SuspendEventImpl(location, suspendPolicy));
@@ -623,7 +645,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
     try {
       StackFrame jdiFrame = event.thread().frame(0);
-      JdbLocation jdbLocation = new JdbLocation(jdiFrame);
+      JdbLocation jdbLocation = new JdbLocation(languageServer, jdiFrame);
       SuspendPolicy suspendPolicy = toSuspendPolicy(event.request().suspendPolicy());
       debuggerCallback.onEvent(new SuspendEventImpl(jdbLocation, suspendPolicy));
       return false;
@@ -762,7 +784,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
       return stackFrame;
     }
     try {
-      stackFrame = new JdbStackFrame(getCurrentThread().frame(0));
+      stackFrame = new JdbStackFrame(languageServer, getCurrentThread().frame(0));
     } catch (IncompatibleThreadStateException e) {
       throw new DebuggerException("Thread is not suspended. ", e);
     }
