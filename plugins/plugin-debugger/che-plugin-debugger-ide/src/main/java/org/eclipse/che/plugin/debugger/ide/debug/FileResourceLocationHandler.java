@@ -32,8 +32,8 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 @Singleton
 public class FileResourceLocationHandler implements DebuggerLocationHandler {
 
-  private final EditorAgent editorAgent;
-  private final AppContext appContext;
+  protected final EditorAgent editorAgent;
+  protected final AppContext appContext;
 
   @Inject
   public FileResourceLocationHandler(EditorAgent editorAgent, AppContext appContext) {
