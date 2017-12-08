@@ -12,9 +12,9 @@ package org.eclipse.che.plugin.jdb.server;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.debugger.server.DtoConverter.asDto;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.ensureSuspendAtDesiredLocation;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.startJavaDebugger;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.ensureDebuggerSuspendAtLocation;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.startJavaDebugger;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
@@ -36,7 +36,6 @@ import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-import org.eclipse.che.plugin.jdb.server.util.ProjectApiUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -46,20 +45,16 @@ import org.testng.annotations.Test;
  *
  * @author Anatolii Bazko
  */
-public class StackFrameDumpTest1 {
+public class StackFrameDumpTest {
   private JavaDebugger debugger;
   private BlockingQueue<DebuggerEvent> callback = new ArrayBlockingQueue<>(10);
 
   @BeforeClass
   public void setUp() throws Exception {
-    ProjectApiUtils.ensure();
-
     Location location =
-        new LocationImpl(
-            "/test/src/org/eclipse/StackFrameDumpTest1.java", 25, false, null, "/test", null, -1);
+        new LocationImpl("/test/src/org/eclipse/StackFrameDumpTest.java", 25, "/test");
     debugger = startJavaDebugger(new BreakpointImpl(location), callback);
-
-    ensureSuspendAtDesiredLocation(location, callback);
+    ensureDebuggerSuspendAtLocation(location, callback);
   }
 
   @AfterClass
@@ -88,7 +83,7 @@ public class StackFrameDumpTest1 {
 
     LocationDto location = stackFrame.getLocation();
     assertEquals(location.getLineNumber(), 25);
-    assertEquals(location.getTarget(), "/test/src/org/eclipse/StackFrameDumpTest1.java");
+    assertEquals(location.getTarget(), "/test/src/org/eclipse/StackFrameDumpTest.java");
 
     MethodDto method = location.getMethod();
     assertEquals(method.getName(), "do2");
@@ -134,7 +129,7 @@ public class StackFrameDumpTest1 {
 
     LocationDto location = stackFrame.getLocation();
     assertEquals(location.getLineNumber(), 21);
-    assertEquals(location.getTarget(), "/test/src/org/eclipse/StackFrameDumpTest1.java");
+    assertEquals(location.getTarget(), "/test/src/org/eclipse/StackFrameDumpTest.java");
 
     MethodDto method = location.getMethod();
     assertEquals(method.getName(), "do1");
@@ -188,7 +183,7 @@ public class StackFrameDumpTest1 {
 
     LocationDto location = stackFrame.getLocation();
     assertEquals(location.getLineNumber(), 16);
-    assertEquals(location.getTarget(), "/test/src/org/eclipse/StackFrameDumpTest1.java");
+    assertEquals(location.getTarget(), "/test/src/org/eclipse/StackFrameDumpTest.java");
 
     MethodDto method = location.getMethod();
     assertEquals(method.getName(), "main");

@@ -10,20 +10,18 @@
  */
 package org.eclipse;
 
-public class GetValueTest1 {
-    private              String var1 = "field1";
-    private static final String var2 = "field2";
+public class StackFrameDumpTest {
+  private static String v = "something";
+  public static void main(String[] args) throws Exception {
+    do1(1);
+  }
 
-    public static void main(String[] args) throws Exception {
-        do1(1);
-    }
+  private static void do1(int i) {
+    int j = 1;
+    do2(String.valueOf(i + j));
+  }
 
-    private static void do1(int i) {
-        String var1 = "var1";
-        String var2 = "var2";
-        i = 2;
-
-        System.out.println("Set breakpoint here.");
-    }
+  private static void do2(String str) {
+    System.out.println(str);
+  }
 }
-
