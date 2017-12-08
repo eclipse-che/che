@@ -497,6 +497,14 @@ public class ContributePartPresenter extends BasePresenter
     resetView();
   }
 
+  public void showStub(String stubContent) {
+    view.showStub(stubContent);
+  }
+
+  public void showContent() {
+    view.showContent();
+  }
+
   /**
    * Defines a single update operation. Single update operations are required as view is shared
    * between multiple projects. If context is switched view should not be updated with the updates
