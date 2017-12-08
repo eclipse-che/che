@@ -22,8 +22,9 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -31,18 +32,19 @@ import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class CreateWorkspaceWithAndroidStackTest {
-  private final String WORKSPACE = NameGenerator.generate("WsAndroid", 4);
+  private final String WORKSPACE = NameGenerator.generate("project", 4);
 
   @Inject private TestUser defaultTestUser;
   @Inject private NavigationBar navigationBar;
   @Inject private CreateWorkspace createWorkspace;
   @Inject private Dashboard dashboard;
-  @Inject private DashboardWorkspace dashboardWorkspace;
+  @Inject private WorkspaceDetails workspaceDetails;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
   @Inject private MachineTerminal terminal;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private Workspaces workspaces;
 
   @BeforeClass
   public void setUp() {
@@ -56,21 +58,21 @@ public class CreateWorkspaceWithAndroidStackTest {
 
   @Test
   public void createWorkspaceWithAndroidStackTest() {
-    navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
-    dashboardWorkspace.waitToolbarTitleName("Workspaces");
-    dashboardWorkspace.clickOnNewWorkspaceBtn();
+    dashboard.waitDashboardToolbarTitle();
+    dashboard.selectWorkspacesItemOnDashboard();
+    dashboard.waitToolbarTitleName("Workspaces");
+    workspaces.clickOnNewWorkspaceBtn();
 
     createWorkspace.waitToolbar();
     createWorkspace.typeWorkspaceName(WORKSPACE);
     createWorkspace.selectStack(TestStacksConstants.ANDROID.getId());
     createWorkspace.setMachineRAM("2");
-    createWorkspace.clickCreate();
+    createWorkspace.clickOnCreateWorkspaceButton();
 
     dashboard.waitNotificationIsClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
     projectExplorer.waitProjectExplorer();
-    loader.waitOnClosed();
     terminal.waitTerminalConsole(PREPARING_WS_TIMEOUT_SEC);
   }
 }

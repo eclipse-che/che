@@ -86,7 +86,7 @@ public class DashboardFactory {
 
   private interface Locators {
 
-    String FACTOTY_TAB_XPATH = "//span[text()='Factories']";
+    String FACTORY_TAB_XPATH = "//span[text()='Factories']";
     String FACTORY_LIST_CONTAINER_CSS = "md-content.factories-list-factories";
     String CREATE_FACTORY_ICON_XPATH = "//a/span[text()='Create Factory']";
     String WORKSPACE_ITEM_XPATH = "//div[@class='project-name']/a[text()='%s']";
@@ -112,7 +112,7 @@ public class DashboardFactory {
         "//div[@che-label-name='Configure Actions']//span[text()='Add']//parent::button";
   }
 
-  @FindBy(xpath = Locators.FACTOTY_TAB_XPATH)
+  @FindBy(xpath = Locators.FACTORY_TAB_XPATH)
   WebElement factoryNavBarItem;
 
   @FindBy(css = Locators.FACTORY_LIST_CONTAINER_CSS)
