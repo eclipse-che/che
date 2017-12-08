@@ -12,12 +12,13 @@
 package org.eclipse.che.plugin.jdb.server.util;
 
 import static java.lang.System.getProperty;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
-import com.google.common.collect.ImmutableMap;
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VirtualMachine;
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
@@ -32,24 +33,41 @@ import org.eclipse.che.plugin.jdb.server.JavaDebugger;
 import org.eclipse.che.plugin.jdb.server.JavaDebuggerFactory;
 
 /** @author Anatolii Bazko */
-public class JavaDebuggerUtils {
+public class JavaDebuggerTestUtils {
 
-  /** Connects to process and starts debug. */
+  /** Initializes and starts java debugger with adding the given breakpoint. */
   public static JavaDebugger startJavaDebugger(
       Breakpoint breakpoint, BlockingQueue<DebuggerEvent> debuggerEvents) throws Exception {
-    Map<String, String> connectionProperties =
-        ImmutableMap.of("host", "localhost", "port", getProperty("debug.port"));
 
-    JavaDebuggerFactory factory = new JavaDebuggerFactory();
-    JavaDebugger debugger =
-        (JavaDebugger) factory.create(connectionProperties, debuggerEvents::add);
-
+    JavaDebugger debugger = initJavaDebugger(debuggerEvents);
     debugger.start(new StartActionImpl(singletonList(breakpoint)));
 
     return debugger;
   }
 
-  public static void ensureSuspendAtDesiredLocation(
+  /** Initializes and starts java debugger. */
+  public static JavaDebugger startJavaDebugger(BlockingQueue<DebuggerEvent> debuggerEvents)
+      throws Exception {
+
+    JavaDebugger debugger = initJavaDebugger(debuggerEvents);
+    debugger.start(new StartActionImpl(emptyList()));
+
+    return debugger;
+  }
+
+  /** Initializes java debugger. */
+  public static JavaDebugger initJavaDebugger(BlockingQueue<DebuggerEvent> debuggerEvents)
+      throws DebuggerException {
+
+    Map<String, String> connectionProperties = new HashMap<>();
+    connectionProperties.put("host", "localhost");
+    connectionProperties.put("port", getProperty("debug.port"));
+
+    JavaDebuggerFactory factory = new JavaDebuggerFactory(new JavaLanguageServerExtensionStub());
+    return (JavaDebugger) factory.create(connectionProperties, debuggerEvents::add);
+  }
+
+  public static void ensureDebuggerSuspendAtLocation(
       Location desiredLocation, BlockingQueue<DebuggerEvent> debuggerEvents)
       throws InterruptedException {
     for (; ; ) {

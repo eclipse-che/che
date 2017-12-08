@@ -42,7 +42,7 @@ public class ZendDbgLocationHandler {
 
   public static final Location createVFS(
       String target, String resourceProjectPath, int lineNumber) {
-    return new LocationImpl(target, lineNumber, false, "", resourceProjectPath, null, -1);
+    return new LocationImpl(target, lineNumber, false, null, resourceProjectPath, null, -1);
   }
 
   public static final Location createDBG(String resourcePath, int lineNumber) {
@@ -92,7 +92,7 @@ public class ZendDbgLocationHandler {
         "/projects" + vfsLocation.getTarget(),
         vfsLocation.getLineNumber(),
         false,
-        "",
+        null,
         vfsLocation.getResourceProjectPath(),
         null,
         -1);

@@ -11,16 +11,15 @@
  */
 package org.eclipse.che.plugin.jdb.server;
 
-import static java.lang.Integer.parseInt;
-import static java.lang.System.getProperty;
 import static java.util.stream.Collectors.toList;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.ensureSuspendAtDesiredLocation;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.ensureDebuggerSuspendAtLocation;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.startJavaDebugger;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -34,34 +33,24 @@ import org.eclipse.che.api.debug.shared.model.ThreadStatus;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
-import org.eclipse.che.api.debug.shared.model.impl.action.StartActionImpl;
+import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
 import org.eclipse.che.api.debugger.server.DtoConverter;
-import org.eclipse.che.plugin.jdb.server.util.ProjectApiUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/**
- * Test ThreadDump when all threads are suspended.
- *
- * @author Anatolii Bazko
- */
-public class ThreadDumpTest1 {
+/** @author Anatolii Bazko */
+public class ThreadDumpTest {
   private JavaDebugger debugger;
   private BlockingQueue<DebuggerEvent> events = new ArrayBlockingQueue<>(10);
 
   @BeforeClass
   public void setUp() throws Exception {
-    ProjectApiUtils.ensure();
-
-    debugger = new JavaDebugger("localhost", parseInt(getProperty("debug.port")), events::add);
     Location location =
         new LocationImpl(
-            "/test/src/org/eclipse/ThreadDumpTest1.java", 27, false, -1, "/test", null, -1);
-    BreakpointImpl breakpoint = new BreakpointImpl(location);
-
-    debugger.start(new StartActionImpl(Collections.singletonList(breakpoint)));
-    ensureSuspendAtDesiredLocation(location, events);
+            "/test/src/org/eclipse/ThreadDumpTest.java", 27, false, null, "/test", null, -1);
+    debugger = startJavaDebugger(new BreakpointImpl(location), events);
+    ensureDebuggerSuspendAtLocation(location, events);
   }
 
   @AfterClass
@@ -72,13 +61,26 @@ public class ThreadDumpTest1 {
   }
 
   @Test
-  public void shouldGetThreadDump() throws Exception {
+  public void shouldGetThreadDumpWhenApplicationIsStopped() throws Exception {
     List<ThreadStateDto> threads =
         debugger.getThreadDump().stream().map(DtoConverter::asDto).collect(toList());
 
     validateMainThreadDump(threads);
     validateSomeThreadDump(threads);
     validateFinalizerThreadDump(threads);
+  }
+
+  @Test(priority = 1)
+  public void shouldGetThreadDumpWhenApplicationIsRun() throws Exception {
+    debugger.resume(new ResumeActionImpl());
+
+    List<ThreadStateDto> threads =
+        debugger.getThreadDump().stream().map(DtoConverter::asDto).collect(toList());
+
+    for (ThreadState t : threads) {
+      assertFalse(t.isSuspended());
+      assertTrue(t.getFrames().isEmpty());
+    }
   }
 
   private void validateMainThreadDump(List<ThreadStateDto> threads) {
@@ -130,7 +132,7 @@ public class ThreadDumpTest1 {
     Location location = stackFrameDump.getLocation();
     assertEquals(location.getLineNumber(), -1);
     assertEquals(location.getTarget(), "java.lang.Object");
-    assertNull(location.getResourceProjectPath());
+    assertEquals(location.getResourceProjectPath(), "/test");
 
     Method method = location.getMethod();
     assertEquals(method.getName(), "wait");
