@@ -84,7 +84,6 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
 
   private Project project;
 
-
   @Inject
   public CommitPresenter(
       CommitView view,
@@ -262,19 +261,22 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
             });
   }
 
-  protected void pushAuthenticated(final Path location, final String branch, final String remote,
-      final String providerName) {
-    oAuthServiceClient.getToken(providerName)
-        .thenPromise(token ->
-            service.push(
-                location,
-                singletonList(branch),
-                remote,
-                false,
-                token.getToken(),
-                token.getToken()))
-        .catchError((Function<PromiseError, StatusNotification>) error -> notificationManager
-            .notify(constant.pushFail(), FAIL, FLOAT_MODE));
+  protected void pushAuthenticated(
+      final Path location, final String branch, final String remote, final String providerName) {
+    oAuthServiceClient
+        .getToken(providerName)
+        .thenPromise(
+            token ->
+                service.push(
+                    location,
+                    singletonList(branch),
+                    remote,
+                    false,
+                    token.getToken(),
+                    token.getToken()))
+        .catchError(
+            (Function<PromiseError, StatusNotification>)
+                error -> notificationManager.notify(constant.pushFail(), FAIL, FLOAT_MODE));
   }
 
   @Override

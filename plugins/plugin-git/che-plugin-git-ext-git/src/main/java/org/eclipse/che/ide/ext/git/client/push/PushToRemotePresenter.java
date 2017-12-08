@@ -330,17 +330,22 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
     view.close();
   }
 
-  protected void pushAuthenticated(final String repository, final String providerName,
-      GitOutputConsole console, StatusNotification notification) {
-        oAuthServiceClient.getToken(providerName)
-        .thenPromise(token -> service
-            .push(
-                project.getLocation(),
-                getRefs(),
-                repository,
-                view.isForcePushSelected(),
-                token.getToken(),
-                token.getToken()))
+  protected void pushAuthenticated(
+      final String repository,
+      final String providerName,
+      GitOutputConsole console,
+      StatusNotification notification) {
+    oAuthServiceClient
+        .getToken(providerName)
+        .thenPromise(
+            token ->
+                service.push(
+                    project.getLocation(),
+                    getRefs(),
+                    repository,
+                    view.isForcePushSelected(),
+                    token.getToken(),
+                    token.getToken()))
         .then(
             response -> {
               console.print(response.getCommandOutput());
@@ -352,10 +357,11 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                 notification.setTitle(constant.pushSuccess(repository));
               }
             })
-        .catchError(error -> {
-          handleError(error.getCause(), notification, console);
-          processesPanelPresenter.addCommandOutput(console);
-        });
+        .catchError(
+            error -> {
+              handleError(error.getCause(), notification, console);
+              processesPanelPresenter.addCommandOutput(console);
+            });
   }
 
   /** @return list of refs to push */

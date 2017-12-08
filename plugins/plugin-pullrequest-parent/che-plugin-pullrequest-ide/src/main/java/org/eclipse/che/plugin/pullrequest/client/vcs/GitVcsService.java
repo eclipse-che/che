@@ -236,24 +236,27 @@ public class GitVcsService implements VcsService {
   }
 
   public Promise<PushResponse> pushBranchAuthenticated(
-       final String remote, final String localBranchName, final String providerName) {
-    return oAuthServiceClient.getToken(providerName)
-        .thenPromise(token -> service
-            .push(
-                appContext.getRootProject().getLocation(),
-                Collections.singletonList(localBranchName),
-                remote,
-                true,
-                token.getToken(),
-                token.getToken()))
-        .catchErrorPromise(error -> {
-          if (BRANCH_UP_TO_DATE_ERROR_MESSAGE.equalsIgnoreCase(error.getMessage())) {
-            return Promises.reject(
-                JsPromiseError.create(new BranchUpToDateException(localBranchName)));
-          } else {
-            return Promises.reject(error);
-          }
-        });
+      final String remote, final String localBranchName, final String providerName) {
+    return oAuthServiceClient
+        .getToken(providerName)
+        .thenPromise(
+            token ->
+                service.push(
+                    appContext.getRootProject().getLocation(),
+                    Collections.singletonList(localBranchName),
+                    remote,
+                    true,
+                    token.getToken(),
+                    token.getToken()))
+        .catchErrorPromise(
+            error -> {
+              if (BRANCH_UP_TO_DATE_ERROR_MESSAGE.equalsIgnoreCase(error.getMessage())) {
+                return Promises.reject(
+                    JsPromiseError.create(new BranchUpToDateException(localBranchName)));
+              } else {
+                return Promises.reject(error);
+              }
+            });
   }
 
   /**

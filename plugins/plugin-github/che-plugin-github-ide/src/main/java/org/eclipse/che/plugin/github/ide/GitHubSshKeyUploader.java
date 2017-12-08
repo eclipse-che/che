@@ -78,29 +78,32 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
     this.callback = callback;
     this.userId = userId;
 
-    oAuthServiceClient.getToken("github")
-        .then(result -> {
-          gitHubService.updatePublicKey(
-              result.getToken(),
-              new AsyncRequestCallback<Void>() {
-                @Override
-                protected void onSuccess(Void o) {
-                  callback.onSuccess(o);
-                }
+    oAuthServiceClient
+        .getToken("github")
+        .then(
+            result -> {
+              gitHubService.updatePublicKey(
+                  result.getToken(),
+                  new AsyncRequestCallback<Void>() {
+                    @Override
+                    protected void onSuccess(Void o) {
+                      callback.onSuccess(o);
+                    }
 
-                @Override
-                protected void onFailure(Throwable e) {
-                  if (e instanceof UnauthorizedException) {
-                    oAuthLoginStart();
-                    return;
-                  }
-                  callback.onFailure(e);
-                }
-              });
-        })
-        .catchError(error -> {
-            oAuthLoginStart();
-        });
+                    @Override
+                    protected void onFailure(Throwable e) {
+                      if (e instanceof UnauthorizedException) {
+                        oAuthLoginStart();
+                        return;
+                      }
+                      callback.onFailure(e);
+                    }
+                  });
+            })
+        .catchError(
+            error -> {
+              oAuthLoginStart();
+            });
   }
 
   /** Log in github */

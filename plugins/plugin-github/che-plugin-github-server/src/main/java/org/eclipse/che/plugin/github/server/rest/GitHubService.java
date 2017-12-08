@@ -74,7 +74,8 @@ public class GitHubService {
   private static final Logger LOG = LoggerFactory.getLogger(GitHubService.class);
 
   @Inject
-  public GitHubService(GitHubDTOFactory gitHubDTOFactory,
+  public GitHubService(
+      GitHubDTOFactory gitHubDTOFactory,
       GitHubKeyUploader githubKeyUploader,
       SshServiceClient sshServiceClient,
       GitHubFactory gitHubFactory) {
@@ -105,8 +106,7 @@ public class GitHubService {
   @Path("list/user")
   @Produces(MediaType.APPLICATION_JSON)
   public GitHubRepositoryList listRepositoriesByUser(
-      @QueryParam("username") String userName,
-      @HeaderParam(AUTH_HEADER_NAME) String oauthToken)
+      @QueryParam("username") String userName, @HeaderParam(AUTH_HEADER_NAME) String oauthToken)
       throws ApiException {
     try {
       return gitHubDTOFactory.createRepositoriesList(
@@ -137,8 +137,7 @@ public class GitHubService {
   @Path("list/account")
   @Produces(MediaType.APPLICATION_JSON)
   public GitHubRepositoryList listRepositoriesByAccount(
-      @QueryParam("account") String account,
-      @HeaderParam(AUTH_HEADER_NAME) String oauthToken)
+      @QueryParam("account") String account, @HeaderParam(AUTH_HEADER_NAME) String oauthToken)
       throws ApiException {
     GitHub gitHub = gitHubFactory.oauthConnect(oauthToken);
     try {
@@ -226,7 +225,8 @@ public class GitHubService {
       GitHubIssueCommentInput input)
       throws ApiException {
     try {
-      gitHubFactory.oauthConnect(oauthToken)
+      gitHubFactory
+          .oauthConnect(oauthToken)
           .getUser(user)
           .getRepository(repository)
           .getIssue(Integer.getInteger(issue))
@@ -248,7 +248,8 @@ public class GitHubService {
       throws ApiException {
     try {
       return gitHubDTOFactory.createPullRequestsList(
-          gitHubFactory.oauthConnect(oauthToken)
+          gitHubFactory
+              .oauthConnect(oauthToken)
               .getUser(user)
               .getRepository(repository)
               .queryPullRequests()
@@ -272,7 +273,8 @@ public class GitHubService {
       throws ApiException {
     try {
       return gitHubDTOFactory.createPullRequestsList(
-          gitHubFactory.oauthConnect(oauthToken)
+          gitHubFactory
+              .oauthConnect(oauthToken)
               .getUser(user)
               .getRepository(repository)
               .getPullRequest(Integer.valueOf(pullRequestId)));
@@ -293,7 +295,8 @@ public class GitHubService {
       throws ApiException {
     try {
       GHPullRequest pullRequest =
-          gitHubFactory.oauthConnect(oauthToken)
+          gitHubFactory
+              .oauthConnect(oauthToken)
               .getUser(user)
               .getRepository(repository)
               .createPullRequest(
@@ -319,7 +322,8 @@ public class GitHubService {
       throws ServerException, UnauthorizedException {
     try {
       final GHPullRequest ghPullRequest =
-          gitHubFactory.oauthConnect(oauthToken)
+          gitHubFactory
+              .oauthConnect(oauthToken)
               .getUser(user)
               .getRepository(repository)
               .getPullRequest(Integer.valueOf(pullRequestId));
@@ -376,7 +380,8 @@ public class GitHubService {
       throws ApiException {
     try {
       return gitHubDTOFactory.createCollaborators(
-          gitHubFactory.oauthConnect(oauthToken)
+          gitHubFactory
+              .oauthConnect(oauthToken)
               .getUser(user)
               .getRepository(repository)
               .getCollaborators());

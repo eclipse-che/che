@@ -228,7 +228,11 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<PushResponse> push(
-      Path project, List<String> refSpec, String remote, boolean force, String username,
+      Path project,
+      List<String> refSpec,
+      String remote,
+      boolean force,
+      String username,
       String password) {
     PushRequest pushRequest =
         dtoFactory
@@ -420,10 +424,13 @@ public class GitServiceClientImpl implements GitServiceClient {
     return asyncRequestFactory.createPostRequest(url, fetchRequest).send();
   }
 
-
   @Override
   public Promise<Void> fetch(
-      Path project, String remote, List<String> refspec, boolean removeDeletedRefs, String username,
+      Path project,
+      String remote,
+      List<String> refspec,
+      boolean removeDeletedRefs,
+      String username,
       String password) {
     FetchRequest fetchRequest =
         dtoFactory
@@ -452,8 +459,13 @@ public class GitServiceClientImpl implements GitServiceClient {
   }
 
   @Override
-  public Promise<PullResponse> pull(Path project, String refSpec, String remote, boolean rebase,
-      String username, String password) {
+  public Promise<PullResponse> pull(
+      Path project,
+      String refSpec,
+      String remote,
+      boolean rebase,
+      String username,
+      String password) {
     PullRequest pullRequest =
         dtoFactory
             .createDto(PullRequest.class)

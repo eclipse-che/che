@@ -19,8 +19,8 @@ import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 
 /**
- * Serves connections to OauthAuthentication service.
- * Allows to get OAuth tokens via callback or as promise.
+ * Serves connections to OauthAuthentication service. Allows to get OAuth tokens via callback or as
+ * promise.
  *
  * @author Sergii Leschenko
  * @author Max Shaposhnyk
@@ -31,7 +31,9 @@ public class OAuthServiceClient {
   private final DtoUnmarshallerFactory unmarshallerFactory;
 
   @Inject
-  public OAuthServiceClient(AppContext appContext, AsyncRequestFactory asyncRequestFactory,
+  public OAuthServiceClient(
+      AppContext appContext,
+      AsyncRequestFactory asyncRequestFactory,
       DtoUnmarshallerFactory unmarshallerFactory) {
     this.asyncRequestFactory = asyncRequestFactory;
     this.restContext = appContext.getMasterApiEndpoint() + "/oauth";

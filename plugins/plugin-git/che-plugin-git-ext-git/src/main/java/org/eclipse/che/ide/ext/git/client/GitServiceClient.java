@@ -68,7 +68,6 @@ public interface GitServiceClient {
    */
   Promise<Void> fetch(Path project, String remote, List<String> refspec, boolean removeDeletedRefs);
 
-
   /**
    * Fetch changes from remote repository to local one (sends request over WebSocket).
    *
@@ -85,9 +84,14 @@ public interface GitServiceClient {
    * @param removeDeletedRefs if <code>true</code> then delete removed refs from local repository
    * @param username username to perform vcs authorization
    * @param password password to perform vcs authorization
-  */
-  Promise<Void> fetch(Path project, String remote, List<String> refspec, boolean removeDeletedRefs,
-      String username, String password);
+   */
+  Promise<Void> fetch(
+      Path project,
+      String remote,
+      List<String> refspec,
+      boolean removeDeletedRefs,
+      String username,
+      String password);
 
   /**
    * Get the list of the branches. For now, all branches cannot be returned at once, so the
@@ -233,8 +237,13 @@ public interface GitServiceClient {
    * @param username username to perform vcs authorization
    * @param password password to perform vcs authorization
    */
-  Promise<PullResponse> pull(Path project, String refSpec, String remote, boolean rebase,
-      String username, String password);
+  Promise<PullResponse> pull(
+      Path project,
+      String refSpec,
+      String remote,
+      boolean rebase,
+      String username,
+      String password);
 
   /**
    * Push changes from local repository to remote one (sends request over WebSocket).
@@ -260,8 +269,13 @@ public interface GitServiceClient {
    * @param username username to perform vcs authorization
    * @param password password to perform vcs authorization
    */
-  Promise<PushResponse> push(Path project, List<String> refSpec, String remote, boolean force,
-      String username, String password);
+  Promise<PushResponse> push(
+      Path project,
+      List<String> refSpec,
+      String remote,
+      boolean force,
+      String username,
+      String password);
 
   /**
    * Clones one remote repository to local one (over WebSocket).

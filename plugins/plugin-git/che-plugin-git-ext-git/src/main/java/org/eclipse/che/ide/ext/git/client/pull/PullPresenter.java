@@ -188,28 +188,36 @@ public class PullPresenter implements PullView.ActionDelegate {
             });
   }
 
-  protected void pullAuthenticated(String providerName, GitOutputConsole console,
-      StatusNotification notification) {
-    oauthServiceClient.getToken(providerName)
-        .thenPromise(token ->
-            service
-                .pull(project.getLocation(), getRefs(), view.getRepositoryName(), view.getRebase(),
-                    token.getToken(), token.getToken()))
-        .then(response -> {
-          console.print(response.getCommandOutput(), GREEN_COLOR);
-          consolesPanelPresenter.addCommandOutput(console);
-          notification.setStatus(SUCCESS);
-          if (response.getCommandOutput().contains("Already up-to-date")) {
-            notification.setTitle(constant.pullUpToDate());
-          } else {
-            project.synchronize();
-            notification.setTitle(constant.pullSuccess(view.getRepositoryUrl()));
-          }
-        })
-        .catchError(error -> {
-          notification.setStatus(FAIL);
-          handleError(error.getCause(), PULL_COMMAND_NAME, notification);
-        });
+  protected void pullAuthenticated(
+      String providerName, GitOutputConsole console, StatusNotification notification) {
+    oauthServiceClient
+        .getToken(providerName)
+        .thenPromise(
+            token ->
+                service.pull(
+                    project.getLocation(),
+                    getRefs(),
+                    view.getRepositoryName(),
+                    view.getRebase(),
+                    token.getToken(),
+                    token.getToken()))
+        .then(
+            response -> {
+              console.print(response.getCommandOutput(), GREEN_COLOR);
+              consolesPanelPresenter.addCommandOutput(console);
+              notification.setStatus(SUCCESS);
+              if (response.getCommandOutput().contains("Already up-to-date")) {
+                notification.setTitle(constant.pullUpToDate());
+              } else {
+                project.synchronize();
+                notification.setTitle(constant.pullSuccess(view.getRepositoryUrl()));
+              }
+            })
+        .catchError(
+            error -> {
+              notification.setStatus(FAIL);
+              handleError(error.getCause(), PULL_COMMAND_NAME, notification);
+            });
   }
 
   /** @return list of refs to fetch */

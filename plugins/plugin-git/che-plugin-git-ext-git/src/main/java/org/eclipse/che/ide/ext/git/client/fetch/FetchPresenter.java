@@ -196,15 +196,22 @@ public class FetchPresenter implements FetchView.ActionDelegate {
     view.close();
   }
 
-
-  protected void fetchAuthenticated(String providerName, String remoteUrl, GitOutputConsole console,
+  protected void fetchAuthenticated(
+      String providerName,
+      String remoteUrl,
+      GitOutputConsole console,
       StatusNotification notification) {
-    oauthServiceClient.getToken(providerName)
-        .thenPromise(token ->
-            service
-                .fetch(
-                    project.getLocation(), view.getRepositoryName(), getRefs(),
-                    view.isRemoveDeletedRefs(), token.getToken(), token.getToken()))
+    oauthServiceClient
+        .getToken(providerName)
+        .thenPromise(
+            token ->
+                service.fetch(
+                    project.getLocation(),
+                    view.getRepositoryName(),
+                    getRefs(),
+                    view.isRemoveDeletedRefs(),
+                    token.getToken(),
+                    token.getToken()))
         .then(
             ignored -> {
               console.print(constant.fetchSuccess(remoteUrl));
