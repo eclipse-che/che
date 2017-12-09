@@ -73,7 +73,7 @@ public class TransitiveDependencyTest {
     projectExplorer.waitLibraryIsPresent(TRANSITIVE_DEPENDENCY_FOR_MAIN_LIBRARY);
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
 
     deleteDependency();
 
@@ -83,7 +83,7 @@ public class TransitiveDependencyTest {
   }
 
   private void deleteDependency() {
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
     for (int i = 36; i <= 40; i++) {
       editor.setCursorToLine(i);

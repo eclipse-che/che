@@ -132,7 +132,7 @@ public class CheckoutToRemoteBranchTest {
     // Make some change in java file
     uniqueValue2 = String.valueOf(System.currentTimeMillis());
     projectExplorer.openItemByVisibleNameInExplorer("GreetingController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.selectLineAndDelete(2);
     editor.typeTextIntoEditor("//" + uniqueValue);
     editor.waitTextIntoEditor(uniqueValue);
@@ -145,7 +145,7 @@ public class CheckoutToRemoteBranchTest {
     // Make some change in jsp file
     projectExplorer.openItemByVisibleNameInExplorer("index.jsp");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.selectLineAndDelete(1);
     editor.typeTextIntoEditor("<!" + uniqueValue2 + ">");
     editor.waitTextIntoEditor(uniqueValue2);

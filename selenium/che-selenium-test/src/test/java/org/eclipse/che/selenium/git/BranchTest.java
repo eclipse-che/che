@@ -131,7 +131,7 @@ public class BranchTest {
 
     // Create change in index.jsp
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.PAGE_DOWN.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(CHANGE_CONTENT_1);
@@ -298,7 +298,6 @@ public class BranchTest {
     git.waitBranchInTheList(TEST_BRANCH);
     git.selectBranchAndClickCheckoutBtn(TEST_BRANCH);
     git.closeBranchesForm();
-    System.out.println(git.gitStatusBar.getTextStatus());
     git.waitGitStatusBarWithMess(CONFLICT_MESSAGE);
   }
 

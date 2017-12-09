@@ -19,9 +19,9 @@ import org.eclipse.che.dto.shared.DTO;
 public interface MachineDto extends Machine {
 
   @Override
-  Map<String, String> getProperties();
+  Map<String, String> getAttributes();
 
-  MachineDto withProperties(Map<String, String> properties);
+  MachineDto withAttributes(Map<String, String> attributes);
 
   @Override
   Map<String, ServerDto> getServers();

@@ -97,7 +97,7 @@ public class PushChangeNotUpdatedRepoTest {
     loader.waitOnClosed();
     editor.selectLineAndDelete();
     editor.waitEditorIsEmpty();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(MESSAGE_FOR_CHANGE);
     editor.waitTabFileWithSavedStatus(FILE_FOR_CHANGED_1);
     editor.closeFileByNameWithSaving(FILE_FOR_CHANGED_1);
@@ -127,10 +127,10 @@ public class PushChangeNotUpdatedRepoTest {
     // change one file in second project
     projectExplorer.openItemByPath(PROJECT_2 + "/" + FILE_FOR_CHANGED_2);
     projectExplorer.waitItem(PROJECT_2 + "/" + FILE_FOR_CHANGED_2);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.selectLineAndDelete();
     editor.waitEditorIsEmpty();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(MESSAGE_FOR_CHANGE);
     editor.waitTabFileWithSavedStatus(FILE_FOR_CHANGED_2);
     editor.closeFileByNameWithSaving(FILE_FOR_CHANGED_2);

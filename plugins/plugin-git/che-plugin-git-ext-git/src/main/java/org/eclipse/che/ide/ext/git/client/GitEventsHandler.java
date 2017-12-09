@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.ext.git.client;
 
+import static org.eclipse.che.api.git.shared.Constants.EVENT_GIT_FILE_CHANGED;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.HashSet;
@@ -32,7 +34,6 @@ import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 @Singleton
 public class GitEventsHandler implements GitEventSubscribable {
 
-  private static final String EVENT_GIT_FILE_CHANGED = "event/git-change";
   private static final String EVENT_GIT_STATUS_CHANGED = "event/git/status-changed";
   private static final String EVENT_GIT_CHECKOUT = "event/git-checkout";
   private static final String EVENT_GIT_REPOSITORY_INITIALIZED = "event/git/initialized";

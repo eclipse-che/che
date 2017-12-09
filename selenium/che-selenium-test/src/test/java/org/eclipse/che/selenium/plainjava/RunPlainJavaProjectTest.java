@@ -96,7 +96,7 @@ public class RunPlainJavaProjectTest {
 
     // expand the project and use library
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company/nba/MainClass.java");
-    codenvyEditor.waitActiveEditor();
+    codenvyEditor.waitActive();
     codenvyEditor.setCursorToLine(9);
     codenvyEditor.typeTextIntoEditor(Keys.TAB.toString());
     codenvyEditor.typeTextIntoEditor("Mockito mockito = new Mockito();");
@@ -123,7 +123,7 @@ public class RunPlainJavaProjectTest {
     askForValueDialog.waitNewJavaClassClose();
     projectExplorer.waitItem(PROJECT_NAME + "/src/base/test/A.java");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company/nba/MainClass.java");
-    codenvyEditor.waitActiveEditor();
+    codenvyEditor.waitActive();
     codenvyEditor.setCursorToLine(12);
     codenvyEditor.typeTextIntoEditor(Keys.TAB.toString());
     codenvyEditor.typeTextIntoEditor("A a = new A();");
@@ -144,7 +144,7 @@ public class RunPlainJavaProjectTest {
     commandsExplorer.chooseCommandTypeInContextMenu(JAVA_TYPE);
     loader.waitOnClosed();
     commandsExplorer.waitCommandInExplorerByName(JAVA_NAME);
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.waitTabFileWithSavedStatus(JAVA_NAME);
 
     // edit the name and the content of the java command into editor

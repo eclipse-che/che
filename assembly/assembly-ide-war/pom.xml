@@ -26,6 +26,22 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
         <!-- overlay the IDE GWT app’s content in the resulting WAR -->
         <dependency>
             <groupId>org.eclipse.che</groupId>
@@ -33,14 +49,17 @@
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-inject</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-j2ee</artifactId>
-            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -71,6 +90,18 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-dynamodule-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
@@ -80,6 +111,8 @@
                             <ignoredUnusedDeclaredDependencies>
                                 <!-- dependency is required just to overlay it's content -->
                                 <dep>org.eclipse.che:che-ide-gwt-app</dep>
+                                <dep>org.eclipse.che.core:che-core-commons-j2ee</dep>
+                                <dep>ch.qos.logback:logback-classic</dep>
                             </ignoredUnusedDeclaredDependencies>
                         </configuration>
                     </execution>
@@ -88,4 +121,3 @@
         </plugins>
     </build>
 </project>
-

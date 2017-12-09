@@ -109,7 +109,7 @@ public class GdbConfigurationPagePresenter
   private void setHosts(List<MachineImpl> machines) {
     Map<String, String> hosts = new HashMap<>();
     for (MachineImpl machine : machines) {
-      String host = machine.getProperties().get("network.ipAddress");
+      String host = machine.getAttributes().get("network.ipAddress");
       if (host == null) {
         continue;
       }

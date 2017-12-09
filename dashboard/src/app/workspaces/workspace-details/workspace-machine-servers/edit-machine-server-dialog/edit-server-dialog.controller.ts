@@ -50,14 +50,16 @@ export class EditMachineServerDialogController {
       if (reference === this.toEdit) {
         return;
       }
-      this.usedPorts.push(parseInt(this.servers[reference].port.toString(), 10));
+      if (this.servers[reference].port) {
+        this.usedPorts.push(parseInt(this.servers[reference].port.toString(), 10));
+      }
     });
 
     if (this.toEdit && this.servers[this.toEdit]) {
       let server = this.servers[this.toEdit];
       this.reference = this.toEdit;
       this.protocol = server.protocol;
-      this.port = parseInt(server.port.toString(), 10);
+      this.port = server.port ? parseInt(server.port.toString(), 10) : null;
       this.popupTitle = 'Edit the server';
     } else {
       this.protocol = 'http';

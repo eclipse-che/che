@@ -139,7 +139,7 @@ public class CreateNewNotJavaFilesFromContextMenuTest {
 
   public void checkDefaultTextInCodeMirrorEditorForFile(String defaultText, String fileName)
       throws InterruptedException {
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTabIsPresent(fileName);
     editor.waitTextIntoEditor(defaultText);
   }

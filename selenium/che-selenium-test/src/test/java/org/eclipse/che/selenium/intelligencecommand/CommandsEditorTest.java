@@ -82,7 +82,7 @@ public class CommandsEditorTest {
     commandsExplorer.chooseCommandTypeInContextMenu(JAVA_TYPE);
     loader.waitOnClosed();
     commandsExplorer.waitCommandInExplorerByName(JAVA_NAME);
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.waitTabFileWithSavedStatus(JAVA_NAME);
     commandsEditor.clickOnCancelCommandEditorButton();
     commandsEditor.waitTabIsNotPresent(JAVA_NAME);
@@ -90,7 +90,7 @@ public class CommandsEditorTest {
     // edit name of the java command into editor
     commandsExplorer.waitCommandExplorerIsOpened();
     commandsExplorer.selectCommandByName(JAVA_NAME);
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.typeTextIntoNameCommandField(NAME_COMMAND);
     commandsEditor.waitTextIntoNameCommandField(NAME_COMMAND);
     commandsEditor.waitTabCommandWithUnsavedStatus(JAVA_NAME);

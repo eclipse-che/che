@@ -38,6 +38,7 @@ import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.server.type.Variable;
 import org.eclipse.che.api.workspace.shared.ProjectProblemImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Internal Project implementation. It is supposed that it is object always consistent.
@@ -68,7 +69,7 @@ public class RegisteredProject implements ProjectConfig {
   @AssistedInject
   public RegisteredProject(
       @Assisted("folder") String folder,
-      @Assisted("config") ProjectConfig config,
+      @Assisted("config") @Nullable ProjectConfig config,
       @Assisted("updated") boolean updated,
       @Assisted("detected") boolean detected,
       ProjectTypesFactory projectTypesFactory,

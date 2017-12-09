@@ -72,7 +72,7 @@ public class MacrosCommandsEditorTest {
     commandsEditor.setCursorToLine(1);
     commandsEditor.typeTextIntoEditor(Keys.ENTER.toString());
     commandsEditor.typeTextIntoEditor(Keys.ARROW_UP.toString());
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.typeTextIntoEditor("echo ");
     commandsEditor.selectMacrosLinkInCommandsEditor(EDITOR_MACROS_LINK);
     commandsEditor.typeTextIntoSearchMacroField("rel");
@@ -93,7 +93,7 @@ public class MacrosCommandsEditorTest {
     consoles.waitExpectedTextIntoConsole("/" + PROJ_NAME + "/src/Main.java");
     commandsEditor.setCursorToLine(1);
     commandsEditor.selectLineAndDelete();
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.typeTextIntoEditor("echo ");
     commandsEditor.selectMacrosLinkInCommandsEditor(EDITOR_MACROS_LINK);
     commandsEditor.selectMacroCommand("${current.class.fqn}");
@@ -111,7 +111,7 @@ public class MacrosCommandsEditorTest {
     commandsEditor.cancelFormInEditorByEscape();
     commandsEditor.setFocusIntoTypeCommandsEditor(PREVIEW_URL_EDITOR);
     commandsEditor.setCursorToLine(1);
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.selectMacrosLinkInCommandsEditor(PREVIEW_MACROS_LINK);
     commandsEditor.typeTextIntoSearchMacroField("server.");
     commandsEditor.waitTextIntoSearchMacroField("server.");
@@ -119,7 +119,6 @@ public class MacrosCommandsEditorTest {
       "${server.codeserver}",
       "${server.exec-agent/http}",
       "${server.exec-agent/ws}",
-      "${server.ssh}",
       "${server.terminal}",
       "${server.tomcat8-debug}",
       "${server.tomcat8}",
@@ -130,23 +129,23 @@ public class MacrosCommandsEditorTest {
     for (String macrosItem : macrosItems) {
       commandsEditor.waitTextIntoMacrosContainer(macrosItem);
     }
-    commandsEditor.enterMacroCommandByEnter("${server.ssh}");
-    commandsEditor.waitTextIntoEditor("${server.ssh");
+    commandsEditor.enterMacroCommandByEnter("${server.wsagent/http}");
+    commandsEditor.waitTextIntoEditor("${server.wsagent/http");
     commandsEditor.clickOnRunButton();
-    consoles.waitExpectedTextIntoPreviewUrl("ssh");
+    consoles.waitExpectedTextIntoPreviewUrl("http");
     commandsEditor.setFocusIntoTypeCommandsEditor(PREVIEW_URL_EDITOR);
     commandsEditor.setCursorToLine(1);
     commandsEditor.selectLineAndDelete();
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.selectMacrosLinkInCommandsEditor(PREVIEW_MACROS_LINK);
-    commandsEditor.selectMacroCommand("${server.ssh}");
+    commandsEditor.selectMacroCommand("${server.wsagent/http}");
     commandsEditor.typeTextIntoEditor(Keys.ARROW_UP.toString());
     commandsEditor.typeTextIntoEditor(Keys.SPACE.toString());
-    commandsEditor.waitMacroCommandIsSelected("${server.ssh}");
-    commandsEditor.enterMacroCommandByDoubleClick("${server.ssh}");
-    commandsEditor.waitTextIntoEditor("${server.ssh}");
+    commandsEditor.waitMacroCommandIsSelected("${server.wsagent/http}");
+    commandsEditor.enterMacroCommandByDoubleClick("${server.wsagent/http}");
+    commandsEditor.waitTextIntoEditor("${server.wsagent/http}");
     commandsEditor.clickOnRunButton();
-    consoles.waitExpectedTextIntoPreviewUrl("ssh");
+    consoles.waitExpectedTextIntoPreviewUrl("http");
   }
 
   private void createNewJavaCommand() {

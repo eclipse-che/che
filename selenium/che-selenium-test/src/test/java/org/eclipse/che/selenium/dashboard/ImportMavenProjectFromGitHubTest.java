@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GIT;
+
 import com.google.inject.Inject;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -21,9 +23,10 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -34,7 +37,7 @@ public class ImportMavenProjectFromGitHubTest {
   private static final String PROJECT_NAME = "guess-project";
 
   @Inject private Dashboard dashboard;
-  @Inject private DashboardWorkspace dashboardWorkspace;
+  @Inject private WorkspaceDetails workspaceDetails;
   @Inject private Loader loader;
   @Inject private ProjectExplorer explorer;
   @Inject private NavigationBar navigationBar;
@@ -43,6 +46,7 @@ public class ImportMavenProjectFromGitHubTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestUser defaultTestUser;
+  @Inject private Workspaces workspaces;
 
   @BeforeClass
   public void setUp() {
@@ -56,21 +60,21 @@ public class ImportMavenProjectFromGitHubTest {
 
   @Test
   public void checkAbilityImportMavenProjectTest() throws ExecutionException, InterruptedException {
-    navigationBar.waitNavigationBar();
-    navigationBar.clickOnMenu(NavigationBar.MenuItem.WORKSPACES);
+    dashboard.waitDashboardToolbarTitle();
+    dashboard.selectWorkspacesItemOnDashboard();
 
-    dashboardWorkspace.clickOnNewWorkspaceBtn();
+    workspaces.clickOnNewWorkspaceBtn();
     createWorkspace.waitToolbar();
     createWorkspace.selectStack(TestStacksConstants.JAVA.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
 
-    projectSourcePage.clickAddOrImportProjectButton();
+    projectSourcePage.clickOnAddOrImportProjectButton();
 
-    projectSourcePage.selectSourceTab(ProjectSourcePage.Sources.GIT);
+    projectSourcePage.selectSourceTab(GIT);
     projectSourcePage.typeGitRepositoryLocation("https://github.com/iedexmain1/guess-project.git");
-    projectSourcePage.clickAdd();
+    projectSourcePage.clickOnAddProjectButton();
 
-    createWorkspace.clickCreate();
+    createWorkspace.clickOnCreateWorkspaceButton();
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
 

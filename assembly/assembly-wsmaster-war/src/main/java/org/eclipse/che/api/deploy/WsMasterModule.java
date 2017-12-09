@@ -203,10 +203,7 @@ public class WsMasterModule extends AbstractModule {
     Multibinder.newSetBinder(binder(), ServiceTermination.class)
         .addBinding()
         .to(org.eclipse.che.api.workspace.server.WorkspaceServiceTermination.class);
-    // FIXME: spi
-    //
-    // bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInWorkspaceFilter.class);
-    //        bind(org.eclipse.che.api.agent.server.filters.AddExecInstallerInStackFilter.class);
+
     final Map<String, String> persistenceProperties = new HashMap<>();
     persistenceProperties.put(PersistenceUnitProperties.TARGET_SERVER, "None");
     persistenceProperties.put(PersistenceUnitProperties.LOGGING_LOGGER, "DefaultLogger");

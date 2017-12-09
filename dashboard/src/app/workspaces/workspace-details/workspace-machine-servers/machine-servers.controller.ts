@@ -49,8 +49,9 @@ export class MachineServersController {
     this.$mdDialog = $mdDialog;
     this.confirmDialogService = confirmDialogService;
 
+    this.buildServersList(this.selectedMachine);
     const deRegistrationFn = $scope.$watch(() => {
-      return angular.isDefined(this.environmentManager) && this.selectedMachine;
+      return this.selectedMachine;
     }, (selectedMachine: IEnvironmentManagerMachine) => {
       this.buildServersList(selectedMachine);
     }, true);
@@ -65,7 +66,7 @@ export class MachineServersController {
    * @param selectedMachine {IEnvironmentManagerMachine}
    */
   buildServersList(selectedMachine: IEnvironmentManagerMachine): void {
-    if (!selectedMachine) {
+    if (!selectedMachine || !this.environmentManager) {
       return;
     }
     this.servers = this.environmentManager.getServers(selectedMachine);
