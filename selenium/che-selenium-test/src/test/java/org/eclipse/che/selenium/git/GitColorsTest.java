@@ -156,7 +156,7 @@ public class GitColorsTest {
       editor.waitYellowTab("newFile");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7792");
+      fail("Known issue https://github.com/eclipse/che/issues/7792", ex);
     }
 
     // check that the file color is yellow
@@ -217,7 +217,7 @@ public class GitColorsTest {
       projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/README.md");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7792");
+      fail("Known issue https://github.com/eclipse/che/issues/7792", ex);
     }
 
     editor.waitDefaultColorTab("newFile");
