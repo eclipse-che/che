@@ -91,6 +91,7 @@ import org.eclipse.che.ide.console.CommandOutputConsolePresenter;
 import org.eclipse.che.ide.console.CompositeOutputConsole;
 import org.eclipse.che.ide.console.DefaultOutputConsole;
 import org.eclipse.che.ide.machine.MachineResources;
+import org.eclipse.che.ide.processes.DisplayMachineOutputEvent;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
 import org.eclipse.che.ide.processes.ProcessTreeNodeSelectedEvent;
 import org.eclipse.che.ide.processes.actions.AddTabMenuFactory;
@@ -230,10 +231,32 @@ public class ProcessesPanelPresenter extends BasePresenter
     eventBus.addHandler(
         ActivateProcessOutputEvent.TYPE, event -> setActiveProcessOutput(event.getPid()));
     eventBus.addHandler(BasicIDEInitializedEvent.TYPE, this);
+    eventBus.addHandler(DisplayMachineOutputEvent.TYPE, this::displayMachineOutput);
 
     Scheduler.get().scheduleDeferred(() -> workspaceLoadingTrackerProvider.get().startTracking());
 
     Scheduler.get().scheduleDeferred(this::updateMachineList);
+  }
+
+  protected void displayMachineOutput(DisplayMachineOutputEvent event) {
+    String machineName = event.getMachineName();
+    OutputConsole outputConsole = consoles.get(machineName);
+
+    if (outputConsole == null) {
+      return;
+    }
+
+    outputConsole.go(
+        widget -> {
+          String title = outputConsole.getTitle();
+          SVGResource icon = outputConsole.getTitleIcon();
+          view.addWidget(machineName, title, icon, widget, true);
+          ProcessTreeNode node = view.getNodeById(machineName);
+          view.selectNode(node);
+          notifyTreeNodeSelected(node);
+        });
+
+    outputConsole.addActionDelegate(this);
   }
 
   /** Updates list of the machines from application context. */
@@ -958,7 +981,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     // add output for the machine if it is not exist
     if (!consoles.containsKey(machineName)) {
       OutputConsole outputConsole = commandConsoleFactory.create(machineName);
-      addOutputConsole(machineName, machineNode, outputConsole, false, activate);
+      addOutputConsole(machineName, machineNode, outputConsole, true, activate);
     }
 
     return machineNode;

@@ -38,6 +38,7 @@ public class ProcessesGinModule extends AbstractGinModule {
         .in(Singleton.class);
     install(new GinFactoryModuleBuilder().build(ConsoleTreeContextMenuFactory.class));
     install(new GinFactoryModuleBuilder().build(AddTabMenuFactory.class));
+    bind(ProcessPanelActionsModule.class).asEagerSingleton();
 
     GinMapBinder.newMapBinder(binder(), String.class, ProcessTreeNodeRenderStrategy.class)
         .addBinding(COMMAND_NODE.getStringValue())
