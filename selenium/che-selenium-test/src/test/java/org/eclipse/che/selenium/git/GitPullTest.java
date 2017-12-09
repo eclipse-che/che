@@ -14,6 +14,8 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestSshServiceClient;
@@ -30,6 +32,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
+import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
@@ -39,12 +42,14 @@ import org.testng.annotations.Test;
 public class GitPullTest {
   private static final String FIRST_PROJECT_NAME = NameGenerator.generate("FirstProject-", 4);
   private static final String SECOND_PROJECT_NAME = NameGenerator.generate("SecondProject-", 4);
-  private static final String REPO_NAME = "gitPullTest";
+  private static final String REPO_NAME = NameGenerator.generate("GitPullTest", 3);
   private static final String NEW_CONTENT_JSP = "<!-- JSP change -->";
   private static final String NEW_CONTENT_JAVA = "/* Java change */";
   private static final String DEFAULT_COMMIT_SSH = "f99b08d23946ac4dc2749650e67875b4672e339c";
   private static final String COMMIT_MESSAGE = "edited and removed";
   private static final String PUSH_MSG = "Pushed to origin";
+  private GitHub gitHub;
+  private GHRepository gitHubRepository;
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
@@ -71,12 +76,13 @@ public class GitPullTest {
 
   @BeforeClass
   public void prepare() throws Exception {
-    GitHub gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
-    gitHub
-        .getRepository(gitHubUsername + "/" + "gitPullTest")
-        .getRef("heads/master")
-        .updateTo(DEFAULT_COMMIT_SSH, true);
+    gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
+    gitHubRepository = gitHub.createRepository(REPO_NAME).create();
+    String commitMess = String.format("new_content_was_added %s ", System.currentTimeMillis());
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
+    Path entryPath =
+        Paths.get(getClass().getResource("/projects/depended-on-git/gitPullTest").getPath());
+    gitHubClientService.addContentToRepository(entryPath, commitMess, gitHubRepository);
     ide.open(ws);
   }
 
@@ -84,13 +90,10 @@ public class GitPullTest {
   public void pullTest() throws Exception {
     // Reset test repository's HEAD to default commit
 
-    gitHubClientService.hardResetHeadToCommit(
-        REPO_NAME, DEFAULT_COMMIT_SSH, gitHubUsername, gitHubPassword);
     projectExplorer.waitProjectExplorer();
-
-    String repoUrl = "git@github.com:" + gitHubUsername + "/gitPullTest.git";
+    String repoUrl = String.format("git@github.com:%s/%s.git", gitHubUsername, REPO_NAME);
     git.importJavaApp(repoUrl, SECOND_PROJECT_NAME, Wizard.TypeProject.MAVEN);
-    git.importJavaApp(repoUrl, FIRST_PROJECT_NAME, Wizard.TypeProject.MAVEN);
+    // git.importJavaApp(repoUrl, FIRST_PROJECT_NAME, Wizard.TypeProject.MAVEN);
 
     projectExplorer.quickExpandWithJavaScript();
     // Change contents index.jsp

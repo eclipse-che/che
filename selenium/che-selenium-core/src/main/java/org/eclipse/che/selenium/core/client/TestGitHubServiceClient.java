@@ -21,15 +21,20 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import javax.xml.bind.DatatypeConverter;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.dto.server.JsonStringMapImpl;
 import org.eclipse.che.plugin.github.shared.GitHubKey;
+import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
 
 /** @author Mihail Kuznyetsov. */
@@ -227,24 +232,18 @@ public class TestGitHubServiceClient {
     return "Basic " + base64;
   }
 
-  public String getUserPublicPrimaryEmail(String username, String password) throws Exception {
-    String url = "https://api.github.com/user/public_emails";
-    HttpJsonResponse response =
-        requestFactory
-            .fromUrl(url)
-            .useGetMethod()
-            .setAuthorizationHeader(createBasicAuthHeader(username, password))
-            .request();
+  public void addContentToRepository(
+      Path pathToContent, String commitMess, GHRepository ghRepository) throws IOException {
+    List<Pair<Path, Path>> projectEntries =
+        Files.walk(pathToContent)
+            .filter(Files::isRegularFile)
+            .map(path -> Pair.of(path, pathToContent.relativize(path)))
+            .collect(Collectors.toList());
 
-    @SuppressWarnings("unchecked")
-    List<Map<String, String>> properties =
-        response.as(List.class, new TypeToken<List<Map<String, String>>>() {}.getType());
-
-    if (properties.isEmpty()) {
-      throw new NoSuchElementException("The list with github emails is empty");
+    for (Pair<Path, Path> projectEntry : projectEntries) {
+      ghRepository.createContent(
+          Files.readAllBytes(projectEntry.first), commitMess, projectEntry.second.toString());
     }
-
-    return filterPropertiesAndGetGithubPrimaryEmail(properties);
   }
 
   private String filterPropertiesAndGetGithubPrimaryEmail(List<Map<String, String>> properties) {
