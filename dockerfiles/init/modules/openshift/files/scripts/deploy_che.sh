@@ -434,11 +434,11 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
     sed "s/    che-openshift-precreate-subpaths: \"false\"/    che-openshift-precreate-subpaths: \"true\"/" | \
     sed "s/    che.predefined.stacks.reload_on_start: \"true\"/    che.predefined.stacks.reload_on_start: \"false\"/" | \
     sed "s/    remote-debugging-enabled: \"false\"/    remote-debugging-enabled: \"${CHE_DEBUGGING_ENABLED}\"/" | \
-    sed "s|    keycloak-oso-endpoint:.*|    keycloak-oso-endpoint: ${KEYCLOAK_OSO_ENDPOINT}|" | \
-    sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
-    sed "s|    che-keycloak-auth-server-url:.*|    che-keycloak-auth-server-url: ${CHE_KEYCLOAK_AUTH__SERVER__URL}|" | \
-    sed "s|    che-keycloak-realm:.*|    che-keycloak-realm: ${CHE_KEYCLOAK_REALM}|" | \
-    sed "s|    che-keycloak-client-id:.*|    che-keycloak-client-id: ${CHE_KEYCLOAK_CLIENT__ID}|" | \
+    sed "s|    keycloak-oso-endpoint:.*|    keycloak-oso-endpoint: \"${KEYCLOAK_OSO_ENDPOINT}\"|" | \
+    sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: \"${KEYCLOAK_GITHUB_ENDPOINT}\"|" | \
+    sed "s|    che-keycloak-auth-server-url:.*|    che-keycloak-auth-server-url: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"|" | \
+    sed "s|    che-keycloak-realm:.*|    che-keycloak-realm: \"${CHE_KEYCLOAK_REALM}\"|" | \
+    sed "s|    che-keycloak-client-id:.*|    che-keycloak-client-id: \"${CHE_KEYCLOAK_CLIENT__ID}\"|" | \
     grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
     sed "$MULTI_USER_HEALTH_CHECK_REPLACEMENT_STRING" | \
@@ -451,11 +451,11 @@ elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   echo "[CHE] Deploying Che on OSIO (image ${CHE_IMAGE})"
   curl -sSL http://central.maven.org/maven2/io/fabric8/tenant/apps/che/"${OSIO_VERSION}"/che-"${OSIO_VERSION}"-openshift.yml | \
     if [ ! -z "${OPENSHIFT_NAMESPACE_URL+x}" ]; then sed "s/    hostname-http:.*/    hostname-http: ${OPENSHIFT_NAMESPACE_URL}/" ; else cat -; fi | \
-    sed "s|    keycloak-oso-endpoint:.*|    keycloak-oso-endpoint: ${KEYCLOAK_OSO_ENDPOINT}|" | \
-    sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
-    sed "s|    che-keycloak-auth-server-url:.*|    che-keycloak-auth-server-url: ${CHE_KEYCLOAK_AUTH__SERVER__URL}|" | \
-    sed "s|    che-keycloak-realm:.*|    che-keycloak-realm: ${CHE_KEYCLOAK_REALM}|" | \
-    sed "s|    che-keycloak-client-id:.*|    che-keycloak-client-id: ${CHE_KEYCLOAK_CLIENT__ID}|" | \
+    sed "s|    keycloak-oso-endpoint:.*|    keycloak-oso-endpoint: \"${KEYCLOAK_OSO_ENDPOINT}\"|" | \
+    sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: \"${KEYCLOAK_GITHUB_ENDPOINT}\"|" | \
+    sed "s|    che-keycloak-auth-server-url:.*|    che-keycloak-auth-server-url: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"|" | \
+    sed "s|    che-keycloak-realm:.*|    che-keycloak-realm: \"${CHE_KEYCLOAK_REALM}\"|" | \
+    sed "s|    che-keycloak-client-id:.*|    che-keycloak-client-id: \"${CHE_KEYCLOAK_CLIENT__ID}\"|" | \
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
     if [ "${CHE_KEYCLOAK_DISABLED}" == "true" ]; then sed "s/    keycloak-disabled: \"false\"/    keycloak-disabled: \"true\"/" ; else cat -; fi | \
@@ -471,12 +471,12 @@ else
     if [ ! -z "${OPENSHIFT_NAMESPACE_URL+x}" ]; then sed "s/    hostname-http:.*/    hostname-http: ${OPENSHIFT_NAMESPACE_URL}/" ; else cat -; fi | \
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
-    sed "s|    keycloak-oso-endpoint:.*|    keycloak-oso-endpoint: ${KEYCLOAK_OSO_ENDPOINT}|" | \
-    sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: ${KEYCLOAK_GITHUB_ENDPOINT}|" | \
+    sed "s|    keycloak-oso-endpoint:.*|    keycloak-oso-endpoint: \"${KEYCLOAK_OSO_ENDPOINT}\"|" | \
+    sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: \"${KEYCLOAK_GITHUB_ENDPOINT}\"|" | \
     sed "s/    keycloak-disabled:.*/    keycloak-disabled: \"${CHE_KEYCLOAK_DISABLED}\"/" | \
-    sed "s|    che-keycloak-auth-server-url:.*|    che-keycloak-auth-server-url: ${CHE_KEYCLOAK_AUTH__SERVER__URL}|" | \
-    sed "s|    che-keycloak-realm:.*|    che-keycloak-realm: ${CHE_KEYCLOAK_REALM}|" | \
-    sed "s|    che-keycloak-client-id:.*|    che-keycloak-client-id: ${CHE_KEYCLOAK_CLIENT__ID}|" | \
+    sed "s|    che-keycloak-auth-server-url:.*|    che-keycloak-auth-server-url: \"${CHE_KEYCLOAK_AUTH__SERVER__URL}\"|" | \
+    sed "s|    che-keycloak-realm:.*|    che-keycloak-realm: \"${CHE_KEYCLOAK_REALM}\"|" | \
+    sed "s|    che-keycloak-client-id:.*|    che-keycloak-client-id: \"${CHE_KEYCLOAK_CLIENT__ID}\"|" | \
     if [ "${CHE_LOG_LEVEL}" == "DEBUG" ]; then sed "s/    log-level: \"INFO\"/    log-level: \"DEBUG\"/" ; else cat -; fi | \
     if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    che-openshift-secure-routes: \"true\"/    che-openshift-secure-routes: \"false\"/" ; else cat -; fi | \
     if [ "${ENABLE_SSL}" == "false" ]; then sed "s/    che-secure-external-urls: \"true\"/    che-secure-external-urls: \"false\"/" ; else cat -; fi | \
