@@ -20,7 +20,6 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Swagger;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -48,9 +47,9 @@ public class SwaggerTest {
 
     try {
       assertTrue(swagger.getWsNamesFromWorkspacePage().contains(workspace.getName()));
-    } catch (IllegalStateException | StaleElementReferenceException ex) {
+    } catch (RuntimeException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/6015", ex);
+      fail("Known issue https://github.com/eclipse/che/issues/7705", ex);
     }
   }
 }

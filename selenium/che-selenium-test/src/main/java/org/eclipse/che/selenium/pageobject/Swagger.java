@@ -127,6 +127,9 @@ public class Swagger {
         new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
             .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.RESPONSE_BODY)))
             .getText();
+    System.out.println("---------------SWAGGER-OUTPUT-START------------------------");
+    System.out.println(json);
+    System.out.println("---------------SWAGGER-OUTPUT-END--------------------------");
     List<WorkspaceDto> workspaces =
         DtoFactory.getInstance().createListDtoFromJson(json, WorkspaceDto.class);
     return workspaces
