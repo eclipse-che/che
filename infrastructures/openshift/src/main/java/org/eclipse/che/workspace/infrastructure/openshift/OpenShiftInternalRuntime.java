@@ -36,7 +36,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
-import org.eclipse.che.api.workspace.server.URLRewriter;
+import org.eclipse.che.api.workspace.server.URLRewriter.NoOpURLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -54,6 +54,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProje
 import org.eclipse.che.workspace.infrastructure.openshift.project.event.ContainerEvent;
 import org.eclipse.che.workspace.infrastructure.openshift.project.event.ContainerEventHandler;
 import org.eclipse.che.workspace.infrastructure.openshift.project.event.PodActionHandler;
+import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspaceVolumesStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,14 +76,16 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
   private final Map<String, OpenShiftMachine> machines;
   private final int machineStartTimeoutMin;
   private final OpenShiftProject project;
+  private final WorkspaceVolumesStrategy volumesStrategy;
 
   @Inject
   public OpenShiftInternalRuntime(
       @Named("che.infra.openshift.machine_start_timeout_min") int machineStartTimeoutMin,
-      URLRewriter.NoOpURLRewriter urlRewriter,
+      NoOpURLRewriter urlRewriter,
       EventService eventService,
       OpenShiftBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
+      WorkspaceVolumesStrategy volumesStrategy,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project,
       @Assisted List<Warning> warnings) {
@@ -90,6 +93,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
     this.eventService = eventService;
     this.bootstrapperFactory = bootstrapperFactory;
     this.serverCheckerFactory = serverCheckerFactory;
+    this.volumesStrategy = volumesStrategy;
     this.machineStartTimeoutMin = machineStartTimeoutMin;
     this.project = project;
     this.machines = new ConcurrentHashMap<>();
@@ -99,6 +103,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
   protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
     try {
       final OpenShiftEnvironment osEnv = getContext().getEnvironment();
+      volumesStrategy.prepare(osEnv, getContext().getIdentity().getWorkspaceId());
 
       List<Service> createdServices = new ArrayList<>();
       for (Service service : osEnv.getServices().values()) {
