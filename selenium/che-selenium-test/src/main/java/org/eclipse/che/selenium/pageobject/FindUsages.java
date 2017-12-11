@@ -10,8 +10,12 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -24,7 +28,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Aleksandr Shmaraev on 16.12.15 */
@@ -63,22 +66,19 @@ public class FindUsages {
   /** wait the 'find usages' panel is open */
   public void waitFindUsagesPanelIsOpen() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(By.id(Locators.FIND_USAGES_INFO_PANEL)));
+        .until(visibilityOfElementLocated(By.id(Locators.FIND_USAGES_INFO_PANEL)));
   }
 
   /** wait the 'find usages' panel is closed */
-  public void waitFindUsegesPanelIsClosed() {
+  public void waitFindUsagesPanelIsClosed() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(
-                By.id(Locators.FIND_USAGES_INFO_PANEL)));
+        .until(invisibilityOfElementLocated(By.id(Locators.FIND_USAGES_INFO_PANEL)));
   }
 
   /** click on the find tab */
   public void clickFindUsagesIcon() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(findUsagesIcon))
+        .until(visibilityOf(findUsagesIcon))
         .click();
   }
 
@@ -119,8 +119,7 @@ public class FindUsages {
   public void clickOnIconNodeInFindUsagesPanel(String nameNode) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.FIND_USAGES_ICON_NODE, nameNode))))
+            visibilityOfElementLocated(By.xpath(format(Locators.FIND_USAGES_ICON_NODE, nameNode))))
         .click();
   }
 
@@ -132,11 +131,8 @@ public class FindUsages {
   public void selectNodeInFindUsagesByDoubleClick(String node) {
     WebElement findUsagesNode =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(
-                ExpectedConditions.visibilityOfElementLocated(
-                    By.xpath(String.format(Locators.FIND_USAGES_NODE, node))));
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(findUsagesNode));
+            .until(visibilityOfElementLocated(By.xpath(format(Locators.FIND_USAGES_NODE, node))));
+    findUsagesNode.click();
     actionsFactory.createAction(seleniumWebDriver).doubleClick(findUsagesNode).perform();
   }
 
@@ -147,9 +143,7 @@ public class FindUsages {
    */
   public void selectNodeInFindUsagesPanel(String node) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.FIND_USAGES_NODE, node))))
+        .until(visibilityOfElementLocated(By.xpath(format(Locators.FIND_USAGES_NODE, node))))
         .click();
   }
 
@@ -172,9 +166,10 @@ public class FindUsages {
   public void selectHighlightedItemInFindUsagesByDoubleClick(int numLine) {
     WebElement findHighlightedItem =
         seleniumWebDriver.findElement(
-            By.xpath(String.format(Locators.FIND_USAGES_HIGHLIGHTED_ITEM, numLine)));
+            By.xpath(format(Locators.FIND_USAGES_HIGHLIGHTED_ITEM, numLine)));
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(findHighlightedItem));
+        .until(visibilityOf(findHighlightedItem));
+    findHighlightedItem.click();
     actionsFactory.createAction(seleniumWebDriver).doubleClick(findHighlightedItem).perform();
   }
 
@@ -182,11 +177,11 @@ public class FindUsages {
   public void waitSelectedElementInFindUsagesPanel(String nameElement) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.FIND_USAGES_HIGHLIGHTED_ITEM, nameElement))));
+            visibilityOfElementLocated(
+                By.xpath(format(Locators.FIND_USAGES_HIGHLIGHTED_ITEM, nameElement))));
     final WebElement item =
         seleniumWebDriver.findElement(
-            By.xpath(String.format(Locators.FIND_USAGES_HIGHLIGHTED_ITEM, nameElement)));
+            By.xpath(format(Locators.FIND_USAGES_HIGHLIGHTED_ITEM, nameElement)));
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             (WebDriver webDriver) ->

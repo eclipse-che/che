@@ -10,13 +10,20 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_USAGES;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
+import static org.openqa.selenium.Keys.ARROW_DOWN;
+import static org.openqa.selenium.Keys.ARROW_LEFT;
+import static org.openqa.selenium.Keys.ARROW_RIGHT;
+import static org.openqa.selenium.Keys.ARROW_UP;
+import static org.openqa.selenium.Keys.ENTER;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Events;
@@ -25,15 +32,12 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
 public class FindUsagesBaseOperationTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("FindUsagesProject", 4);
-  private static final String PATH_FOR_EXPAND =
-      PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples";
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
 
   private static final String EXPECTED_TEXT =
       "Usages of numGuessByUser [3 occurrences]\n"
@@ -76,10 +80,7 @@ public class FindUsagesBaseOperationTest {
   public void setUp() throws Exception {
     URL resource = getClass().getResource("/projects/guess-project");
     testProjectServiceClient.importProject(
-        workspace.getId(),
-        Paths.get(resource.toURI()),
-        PROJECT_NAME,
-        ProjectTemplates.MAVEN_SPRING);
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
     ide.open(workspace);
   }
 
@@ -93,23 +94,20 @@ public class FindUsagesBaseOperationTest {
     // Check basic operations of the 'find usages' panel
     editor.selectTabByName("AppController");
     editor.goToCursorPositionVisible(26, 17);
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.FIND_USAGES);
+    menu.runCommand(ASSISTANT, FIND_USAGES);
     loader.waitOnClosed();
     findUsages.waitFindUsagesPanelIsOpen();
     events.clickEventLogBtn();
-    findUsages.waitFindUsegesPanelIsClosed();
+    findUsages.waitFindUsagesPanelIsClosed();
     findUsages.clickFindUsagesIcon();
     findUsages.waitFindUsagesPanelIsOpen();
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT);
     findUsages.waitSelectedElementInFindUsagesPanel("numGuessByUser");
+
     // Check basic operations of the 'find usages' panel
     editor.selectTabByName("AppController");
     editor.goToCursorPositionVisible(26, 17);
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.FIND_USAGES);
+    menu.runCommand(ASSISTANT, FIND_USAGES);
     loader.waitOnClosed();
     findUsages.waitFindUsagesPanelIsOpen();
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT);
@@ -130,79 +128,69 @@ public class FindUsagesBaseOperationTest {
     findUsages.selectNodeInFindUsagesByDoubleClick("AppController");
     findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
-
-    // try-catch was added because test fails while trying to open node by click action
-    // issue: https://github.com/eclipse/che/issues/6499
-    try {
-      findUsages.clickOnIconNodeInFindUsagesPanel(
-          "handleRequest(HttpServletRequest, HttpServletResponse)");
-    } catch (org.openqa.selenium.TimeoutException ex) {
-      findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
-      findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
-      findUsages.clickOnIconNodeInFindUsagesPanel(
-          "handleRequest(HttpServletRequest, HttpServletResponse)");
-    }
+    findUsages.clickOnIconNodeInFindUsagesPanel(
+        "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_2);
 
     // Check nodes in the 'find usages' panel by 'Enter'
     findUsages.selectNodeInFindUsagesPanel(PROJECT_NAME);
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ENTER.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ENTER.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
     findUsages.selectNodeInFindUsagesPanel("org.eclipse.qa.examples");
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ENTER.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
     findUsages.selectNodeInFindUsagesPanel("AppController");
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ENTER.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
     findUsages.selectNodeInFindUsagesPanel(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ENTER.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_1);
     findUsages.selectNodeInFindUsagesPanel("AppController");
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ENTER.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ENTER.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
     findUsages.selectNodeInFindUsagesPanel(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ENTER.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_2);
 
     // Check nodes in the 'find usages' panel by keyboard
     findUsages.selectNodeInFindUsagesPanel(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ARROW_LEFT.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_LEFT.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ARROW_RIGHT.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_RIGHT.toString());
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_2);
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ARROW_UP.toString());
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ARROW_UP.toString());
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ARROW_UP.toString());
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ARROW_LEFT.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_UP.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_UP.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_UP.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_LEFT.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ARROW_RIGHT.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_RIGHT.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ARROW_DOWN.toString());
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ARROW_RIGHT.toString());
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ARROW_DOWN.toString());
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ARROW_RIGHT.toString());
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ARROW_DOWN.toString());
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ARROW_RIGHT.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_DOWN.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_RIGHT.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_DOWN.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_RIGHT.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_DOWN.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_RIGHT.toString());
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_2);
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_1);
 
     // Check the found items in the editor
     findUsages.selectHighlightedItemInFindUsagesByDoubleClick(29);
-    editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
+    editor.typeTextIntoEditor(ARROW_LEFT.toString());
     editor.expectedNumberOfActiveLine(29);
     editor.waitTextElementsActiveLine("numGuessByUser");
     findUsages.selectNodeInFindUsagesPanel(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ARROW_DOWN.toString());
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ARROW_DOWN.toString());
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ARROW_DOWN.toString());
-    findUsages.sendCommandByKeyboardInFindUsagespanel(Keys.ENTER.toString());
-    editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_DOWN.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_DOWN.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ARROW_DOWN.toString());
+    findUsages.sendCommandByKeyboardInFindUsagespanel(ENTER.toString());
+    editor.typeTextIntoEditor(ARROW_LEFT.toString());
     editor.expectedNumberOfActiveLine(33);
     editor.waitTextElementsActiveLine("numGuessByUser");
   }

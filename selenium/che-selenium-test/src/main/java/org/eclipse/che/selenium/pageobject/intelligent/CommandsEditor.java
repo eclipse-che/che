@@ -145,14 +145,14 @@ public class CommandsEditor extends CodenvyEditor {
   }
 
   /**
-   * wait the command tab with specified name with '*' unsaved status
+   * wait the command tab with specified name with unsaved status
    *
    * @param nameCommand name of tab command
    */
   public void waitTabCommandWithUnsavedStatus(String nameCommand) {
     elemDriverWait.until(
         visibilityOfElementLocated(
-            By.xpath(String.format(Locators.ACTIVE_TAB_FILE_NAME, "* " + nameCommand))));
+            By.xpath(String.format(Locators.ACTIVE_TAB_UNSAVED_FILE_NAME, nameCommand))));
   }
 
   public void typeTextIntoNameCommandField(String nameCommand) {

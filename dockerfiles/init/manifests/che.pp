@@ -13,8 +13,8 @@ node default {
   $docker_ip = getValue("CHE_DOCKER_IP","172.17.0.1")
   $docker_host = getValue("DOCKER_HOST","tcp://localhost:2375")
   $che_user = getValue("CHE_USER","root")
-  $che_server_xmx = getValue("CHE_SERVER_XMX","2048")
   $che_server_url = getValue("CHE_SERVER_URL", "${che_protocol}://${che_ip}:${che_port}")
+  $che_master_container_ram = getValue("CHE_MASTER_CONTAINER_RAM", "750m")
 
   ###############################
   # Http proxy configuration

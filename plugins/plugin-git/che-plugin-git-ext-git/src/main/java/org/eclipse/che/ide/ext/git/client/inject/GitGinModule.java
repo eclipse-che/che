@@ -57,6 +57,7 @@ import org.eclipse.che.ide.ext.git.client.panel.GitPanelViewImpl;
 import org.eclipse.che.ide.ext.git.client.panel.RepositoryNodeFactory;
 import org.eclipse.che.ide.ext.git.client.plugins.EditorTabsColorizer;
 import org.eclipse.che.ide.ext.git.client.plugins.GitChangeMarkerManager;
+import org.eclipse.che.ide.ext.git.client.plugins.GitCheckoutNotifier;
 import org.eclipse.che.ide.ext.git.client.plugins.ProjectExplorerTreeColorizer;
 import org.eclipse.che.ide.ext.git.client.preference.CommitterPreferencePresenter;
 import org.eclipse.che.ide.ext.git.client.pull.PullView;
@@ -131,5 +132,6 @@ public class GitGinModule extends AbstractGinModule {
     bind(ProjectExplorerTreeColorizer.class).asEagerSingleton();
     bind(EditorTabsColorizer.class).asEagerSingleton();
     bind(GitChangeMarkerManager.class).asEagerSingleton();
+    bind(GitCheckoutNotifier.class).asEagerSingleton();
   }
 }

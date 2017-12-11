@@ -152,6 +152,8 @@ public class CodenvyEditor {
     public static final String ACTIVE_LINE_HIGHLIGHT =
         "//div[@class='annotationLine currentLine' and @role='presentation']";
     public static final String ACTIVE_TAB_FILE_NAME = "//div[@active]/descendant::div[text()='%s']";
+    public static final String ACTIVE_TAB_UNSAVED_FILE_NAME =
+        "//div[@active and @unsaved]//div[text()='%s']";
     public static final String TAB_FILE_NAME_XPATH =
         "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']";
     public static final String TAB_FILE_NAME_AND_STYLE =

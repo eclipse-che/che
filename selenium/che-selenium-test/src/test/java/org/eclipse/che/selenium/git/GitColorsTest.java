@@ -20,19 +20,24 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.G
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.FILE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.*;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -42,6 +47,11 @@ public class GitColorsTest {
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
+  @Inject private TestUser productUser;
+
+  @Inject
+  @Named("github.username")
+  private String gitHubUsername;
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
@@ -53,9 +63,11 @@ public class GitColorsTest {
   @Inject private CodenvyEditor editor;
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
   @BeforeClass
   public void prepare() throws Exception {
+    testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
     testProjectServiceClient.importProject(
         ws.getId(),
         Paths.get(getClass().getResource("/projects/default-spring-project").toURI()),
@@ -139,7 +151,13 @@ public class GitColorsTest {
     askForValueDialog.typeAndWaitText("newFile");
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    editor.waitYellowTab("newFile");
+
+    try {
+      editor.waitYellowTab("newFile");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7792", ex);
+    }
 
     // check that the file color is yellow
     projectExplorer.waitYellowNode(PROJECT_NAME + "/newFile");
@@ -194,8 +212,14 @@ public class GitColorsTest {
     git.waitCommitFormClosed();
 
     // Check files are colored in default color
-    projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/newFile");
-    projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/README.md");
+    try {
+      projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/newFile");
+      projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/README.md");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7792", ex);
+    }
+
     editor.waitDefaultColorTab("newFile");
     editor.waitDefaultColorTab("README.md");
   }
