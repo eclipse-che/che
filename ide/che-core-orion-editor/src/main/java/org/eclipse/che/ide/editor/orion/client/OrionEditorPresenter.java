@@ -12,6 +12,7 @@ package org.eclipse.che.ide.editor.orion.client;
 
 import static java.lang.Boolean.parseBoolean;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.project.shared.Constants.VCS_PROVIDER_NAME;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -1227,7 +1228,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                     resolve.apply(null);
                     return;
                   }
-                  String vcsName = ((Project) parent).getAttribute("vcs.provider.name");
+                  String vcsName = ((Project) parent).getAttribute(VCS_PROVIDER_NAME);
                   VcsChangeMarkerRenderFactory vcsChangeMarkerRenderFactory =
                       vcsChangeMarkerRenderFactoryMap.get(vcsName);
                   if (vcsChangeMarkerRenderFactory != null) {

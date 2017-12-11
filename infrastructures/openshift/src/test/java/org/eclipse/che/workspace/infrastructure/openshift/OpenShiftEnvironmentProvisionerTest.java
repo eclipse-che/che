@@ -15,12 +15,12 @@ import static org.mockito.Mockito.inOrder;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.route.TlsRouteProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.server.ServersConverter;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.VolumesProvisioner;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -36,7 +36,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class OpenShiftEnvironmentProvisionerTest {
 
-  @Mock private VolumesProvisioner volumesProvisioner;
+  @Mock private WorkspaceVolumesStrategy volumesStrategy;
   @Mock private UniqueNamesProvisioner uniqueNamesProvisioner;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
@@ -53,15 +53,16 @@ public class OpenShiftEnvironmentProvisionerTest {
   public void setUp() {
     osInfraProvisioner =
         new OpenShiftEnvironmentProvisioner(
-            volumesProvisioner,
+            true,
             uniqueNamesProvisioner,
             tlsRouteProvisioner,
             serversProvisioner,
             envVarsProvisioner,
-            restartPolicyRewriter);
+            restartPolicyRewriter,
+            volumesStrategy);
     provisionOrder =
         inOrder(
-            volumesProvisioner,
+            volumesStrategy,
             uniqueNamesProvisioner,
             tlsRouteProvisioner,
             serversProvisioner,
@@ -75,7 +76,7 @@ public class OpenShiftEnvironmentProvisionerTest {
 
     provisionOrder.verify(serversProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(envVarsProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
-    provisionOrder.verify(volumesProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(volumesStrategy).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(restartPolicyRewriter).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(uniqueNamesProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(tlsRouteProvisioner).provision(eq(osEnv), eq(runtimeIdentity));

@@ -176,9 +176,14 @@ public class ProjectServiceApi {
       throws ConflictException, ForbiddenException, ServerException, NotFoundException, IOException,
           UnauthorizedException, BadRequestException {
 
-    Set<RegisteredProject> registeredProjects =
-        projectManager.doImport(
-            new HashSet<>(projectConfigs), rewrite, jsonRpcImportConsumer(clientId));
+    projectManager.doImport(
+        new HashSet<>(projectConfigs), rewrite, jsonRpcImportConsumer(clientId));
+
+    Set<RegisteredProject> registeredProjects = new HashSet<>(projectConfigs.size());
+
+    for (NewProjectConfigDto projectConfig : projectConfigs) {
+      registeredProjects.add(projectManager.update(projectConfig));
+    }
 
     Set<ProjectConfigDto> result =
         registeredProjects
