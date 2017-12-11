@@ -375,7 +375,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
         fromUri(apiEndpoint)
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "getByKey")
-            .queryParam("includeServers", true);
+            .queryParam("includeInternalServers", true);
 
     String href = builder.build(WORKSPACE_ID).toString();
     try {

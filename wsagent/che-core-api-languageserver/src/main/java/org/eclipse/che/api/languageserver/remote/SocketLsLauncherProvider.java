@@ -84,7 +84,7 @@ class SocketLsLauncherProvider implements RemoteLsLauncherProvider {
           int port = uri.getPort();
 
           SocketLanguageServerLauncher launcher =
-              new SocketLanguageServerLauncher(description, machineName, 4417);
+              new SocketLanguageServerLauncher(description, host, port);
           lslRegistry.put(machineName + serverName, launcher);
         } catch (URISyntaxException e) {
           LOG.error("Can't parse server url: {}", serverUrl, e);
