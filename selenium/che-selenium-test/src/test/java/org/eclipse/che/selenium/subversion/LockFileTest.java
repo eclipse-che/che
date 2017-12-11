@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.S
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Subversion.SVN_RELEASE_LOCK;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -32,6 +33,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.subversion.Subversion;
 import org.eclipse.che.selenium.pageobject.subversion.SvnCommit;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -93,7 +95,14 @@ public class LockFileTest {
       editor.typeTextIntoEditor("changes for commit");
       projectExplorer.openItemByPath(LOCKED_FILE_PATH);
       menu.runCommand(SUBVERSION, SVN_COMMIT);
-      svnCommit.waitMainFormOpened();
+
+      try {
+        svnCommit.waitMainFormOpened();
+      } catch (TimeoutException ex) {
+        // remove try-catch block after issue has been resolved
+        fail("https://github.com/eclipse/che-plugin-svn/issues/1", ex);
+      }
+
       svnCommit.typeCommitMess("message");
       svnCommit.clickCommitBtn();
       projectExplorer.selectItem(LOCKED_FILE_PATH);

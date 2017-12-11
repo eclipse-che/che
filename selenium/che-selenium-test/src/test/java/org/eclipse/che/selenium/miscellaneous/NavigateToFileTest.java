@@ -74,7 +74,7 @@ public class NavigateToFileTest {
     testProjectServiceClient.importProject(
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME_2, MAVEN_SIMPLE);
     testCommandServiceClient.createCommand(
-        format("touch /projects/%s/%s", PROJECT_NAME_2, FILE_CREATED_FROM_CONSOLE),
+        format("ls > /projects/%s/%s", PROJECT_NAME_2, FILE_CREATED_FROM_CONSOLE),
         COMMAND_FOR_FILE_CREATION,
         CUSTOM,
         workspace.getId());
