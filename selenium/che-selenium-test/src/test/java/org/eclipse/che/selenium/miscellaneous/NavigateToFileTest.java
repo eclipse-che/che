@@ -41,8 +41,8 @@ import org.testng.annotations.Test;
 
 /** Created by aleksandr shmaraev on 10.12.15 */
 public class NavigateToFileTest {
-  private static final String PROJECT_NAME = "NavigateFile";
-  private static final String PROJECT_NAME_2 = "NavigateFile_2";
+  private static final String PROJECT_NAME = "project";
+  private static final String PROJECT_NAME_2 = "project_2";
   private static final String FILE_CREATED_FROM_CONSOLE = "createdFrom.con";
   private static final String COMMAND_FOR_FILE_CREATION = "createFile";
   private static final String HIDDEN_FOLDER_NAME = ".hiddenFolder";
