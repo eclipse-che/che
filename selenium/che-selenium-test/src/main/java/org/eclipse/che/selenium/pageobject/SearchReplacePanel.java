@@ -90,7 +90,7 @@ public class SearchReplacePanel {
 
   /** Open 'Search and Replace' panel by using key combination ALT+F for opened file in editor */
   public void openSearchReplacePanel() {
-    editor.waitActiveEditor();
+    editor.waitActive();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     action.keyDown(Keys.CONTROL).sendKeys("f").keyUp(Keys.CONTROL).perform();
     waitSearchReplacePanel();

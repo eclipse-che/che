@@ -24,6 +24,5 @@
     <name>Che Plugin :: Orion :: Parent</name>
     <modules>
         <module>che-plugin-orion-compare</module>
-        <module>che-plugin-orion-editor</module>
     </modules>
 </project>

@@ -158,7 +158,7 @@ public class CreateProjectsForArtikPluginTest {
 
   private void checkTextInEditorForFile(String defaultText, String fileName)
       throws InterruptedException {
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTabIsPresent(fileName);
     editor.waitTextIntoEditor(defaultText);
   }

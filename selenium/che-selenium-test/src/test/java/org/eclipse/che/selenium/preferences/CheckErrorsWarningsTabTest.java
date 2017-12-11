@@ -78,9 +78,9 @@ public class CheckErrorsWarningsTabTest {
     notificationsPopupPanel.waitProgressPopupPanelClose();
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.deleteAllContent();
     editor.typeTextIntoEditorWithoutDelayForSaving(embedCode);
     loader.waitOnClosed();

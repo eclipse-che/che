@@ -10,18 +10,32 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project.pvc;
 
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.ConfigurationProvisioner;
 
 /**
  * Defines a basic set of operations for workspace volume provisioning strategies.
  *
  * @author Anton Korneta
  */
-public interface WorkspaceVolumesStrategy {
+public interface WorkspaceVolumesStrategy extends ConfigurationProvisioner {
+
+  /**
+   * Configures the workspace PVCs, volumes, claim bindings with a strategy specific options.
+   *
+   * @param osEnv OpenShift environment
+   * @param identity runtime identity
+   * @throws InfrastructureException when any error occurs while provisioning volumes
+   */
+  @Override
+  void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
+      throws InfrastructureException;
 
   /**
    * Prepares volumes for backup of workspace data on a specific machine in a strategy specific way.
+   * Note that this step, depending on the strategy, may take some time.
    *
    * @param osEnv OpenShift environment that changes as a result of preparation
    * @param workspaceId the workspace identifier for which volumes will be prepared

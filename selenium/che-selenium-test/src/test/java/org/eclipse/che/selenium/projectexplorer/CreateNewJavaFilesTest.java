@@ -107,7 +107,7 @@ public class CreateNewJavaFilesTest {
   }
 
   private void checkDefaultTextInEditorForFile(String defaultText, String fileName) {
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTabIsPresent(fileName);
     loader.waitOnClosed();
     editor.waitTextIntoEditor(defaultText);

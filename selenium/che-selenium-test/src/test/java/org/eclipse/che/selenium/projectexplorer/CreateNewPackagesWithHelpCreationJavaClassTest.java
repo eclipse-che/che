@@ -69,7 +69,7 @@ public class CreateNewPackagesWithHelpCreationJavaClassTest {
     askForValueDialog.createJavaFileByNameAndType(
         NEW_PACKAGE_NAME1 + "." + JAVA1, AskForValueDialog.JavaFiles.CLASS);
 
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTabIsPresent("TestClass1");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/tu");
 
@@ -84,7 +84,7 @@ public class CreateNewPackagesWithHelpCreationJavaClassTest {
     askForValueDialog.createJavaFileByNameAndType(
         NEW_PACKAGE_NAME2 + "." + JAVA2, AskForValueDialog.JavaFiles.CLASS);
 
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTabIsPresent("TestClass2");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test/ua");
     projectExplorer.waitItemInVisibleArea("TestClass2.java");

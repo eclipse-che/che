@@ -74,9 +74,9 @@ public class DeletePackageTest {
 
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_FOR_EXPAND + "/AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.openItemByPath(PATH_TO_WEB_APP + "/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
 
     projectExplorer.waitItem(PATH_TO_WEB_INF + "/spring-servlet.xml");
     projectExplorer.openItemByPath(PATH_TO_WEB_INF + "/spring-servlet.xml");

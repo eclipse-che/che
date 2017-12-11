@@ -83,7 +83,7 @@ public class DebuggerWatchExpressionTest {
 
     projectExplorer.openItemByPath(PROJECT + PATH_TO_CLASS);
 
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(19);
     editor.setBreakpoint(19);
 

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.workspace.server;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
@@ -47,6 +48,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -56,9 +58,11 @@ import org.eclipse.che.api.workspace.server.token.MachineTokenException;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
+import org.eclipse.che.api.workspace.shared.dto.MachineDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
+import org.eclipse.che.api.workspace.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -184,10 +188,17 @@ public class WorkspaceService extends Service {
                 })
           )
           @PathParam("key")
-          String key)
+          String key,
+      @ApiParam("Whether to include internal servers into runtime or not")
+          @DefaultValue("false")
+          @QueryParam("includeInternalServers")
+          String includeInternalServers)
       throws NotFoundException, ServerException, ForbiddenException, BadRequestException {
     validateKey(key);
-    return asDtoWithLinksAndToken(workspaceManager.getWorkspace(key));
+    boolean bIncludeInternalServers =
+        isNullOrEmpty(includeInternalServers) || Boolean.parseBoolean(includeInternalServers);
+    return filterServers(
+        asDtoWithLinksAndToken(workspaceManager.getWorkspace(key)), bIncludeInternalServers);
   }
 
   @GET
@@ -796,5 +807,31 @@ public class WorkspaceService extends Service {
     }
 
     return workspaceDto;
+  }
+
+  private WorkspaceDto filterServers(WorkspaceDto workspace, boolean includeInternal) {
+    // no runtime - nothing to filter
+    if (workspace.getRuntime() == null) {
+      return workspace;
+    }
+    // if it is needed to include internal there is nothing to filter
+    if (includeInternal) {
+      return workspace;
+    }
+    for (MachineDto machine : workspace.getRuntime().getMachines().values()) {
+      Map<String, ServerDto> filteredServers = new HashMap<>();
+      machine
+          .getServers()
+          .forEach(
+              (name, server) -> {
+                if (!"true"
+                    .equals(server.getAttributes().get(ServerConfig.INTERNAL_SERVER_ATTRIBUTE))) {
+                  filteredServers.put(name, server);
+                }
+              });
+      machine.withServers(filteredServers);
+    }
+
+    return workspace;
   }
 }

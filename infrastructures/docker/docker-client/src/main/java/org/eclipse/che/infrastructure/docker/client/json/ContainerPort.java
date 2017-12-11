@@ -10,10 +10,13 @@
  */
 package org.eclipse.che.infrastructure.docker.client.json;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 /**
- * Defines information about container port which was published to the host
+ * Defines information about container port which was exposed or published.
  *
  * @author Alexander Andrienko
+ * @author Alexander Garagatyi
  */
 public class ContainerPort {
   private int privatePort;
@@ -28,6 +31,8 @@ public class ContainerPort {
     this.privatePort = privatePort;
   }
 
+  /** When public port is {@code null} the port was not published but just exposed. */
+  @Nullable
   public int getPublicPort() {
     return publicPort;
   }

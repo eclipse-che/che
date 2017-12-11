@@ -105,7 +105,7 @@ public class UpdateListOfLibraryTest {
     loader.waitOnClosed();
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
 
     addNewDependency();
 
@@ -134,7 +134,7 @@ public class UpdateListOfLibraryTest {
   }
 
   private void addNewDependency() {
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
     editor.setCursorToLine(43);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -166,7 +166,7 @@ public class UpdateListOfLibraryTest {
   }
 
   private void deleteDependency() {
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
     for (int i = 27; i <= 32; i++) {
       editor.setCursorToLine(i);

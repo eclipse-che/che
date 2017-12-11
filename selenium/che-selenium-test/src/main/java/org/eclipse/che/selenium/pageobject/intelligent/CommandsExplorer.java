@@ -233,7 +233,7 @@ public class CommandsExplorer {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(getCommandByName(commandName)));
     new Actions(seleniumWebDriver).doubleClick(getCommandByName(commandName)).build().perform();
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.clickOnRunButton();
     commandsEditor.clickOnCancelCommandEditorButton();
   }

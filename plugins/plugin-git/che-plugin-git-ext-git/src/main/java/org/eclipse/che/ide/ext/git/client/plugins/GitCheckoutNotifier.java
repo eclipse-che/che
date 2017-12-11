@@ -12,6 +12,7 @@ package org.eclipse.che.ide.ext.git.client.plugins;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -20,8 +21,10 @@ import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.ExternalResourceDelta;
 import org.eclipse.che.ide.ext.git.client.GitEventSubscribable;
 import org.eclipse.che.ide.ext.git.client.GitEventsSubscriber;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -82,6 +85,8 @@ public class GitCheckoutNotifier implements GitEventsSubscriber {
     }
 
     // Update project attributes from server.
-    appContext.getWorkspaceRoot().synchronize();
+
+    Path path = Path.valueOf("/" + gitCheckoutEventDto.getProjectName());
+    appContext.getWorkspaceRoot().synchronize(new ExternalResourceDelta(path, path, UPDATED));
   }
 }

@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.git.client.panel;
 
 import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
+import static org.eclipse.che.api.project.shared.Constants.VCS_PROVIDER_NAME;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
@@ -366,6 +367,6 @@ public class GitPanelPresenter extends BasePresenter
 
   /** Returns true if given project is under git version control system, false otherwise. */
   private boolean isProjectUnderGit(Project project) {
-    return VCS_GIT.equals(project.getAttribute("vcs.provider.name"));
+    return VCS_GIT.equals(project.getAttribute(VCS_PROVIDER_NAME));
   }
 }
