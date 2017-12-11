@@ -71,7 +71,7 @@ public class JavaTestPluginTestNgTest {
   public static final String END_OF_FAILED_TEST =
       "===============================================Default SuiteTotal tests run: 1, Failures: 1, Skips: 0===============================================";
 
-  @InjectTestWorkspace(template = WorkspaceTemplate.CODENVY_UBUNTU_JDK8)
+  @InjectTestWorkspace(template = WorkspaceTemplate.UBUNTU_JDK8)
   private TestWorkspace ws;
 
   @Inject private Ide ide;
