@@ -10,16 +10,14 @@
  */
 package org.eclipse.che.selenium.filewatcher;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FileWatcherExcludeOperations.ADD_TO_FILE_WATCHER_EXCLUDES;
-
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.constant.TestStacksConstants;
+import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -31,6 +29,9 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 /** @author Musienko Maxim */
 public class UpdateFilesWithoutIDE {
@@ -71,79 +72,48 @@ public class UpdateFilesWithoutIDE {
 
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
-  private static final String NAME_FILETXT_2 = "file2.txt";
-  private static final String FILE3_TXT = "file3.txt";
-  private static final String EXPECTED_MESSAGE_2 = "File '" + NAME_FILETXT_2 + "' is updated";
-  private static final String EXPECTED_MESSAGE_3 = "File '" + FILE3_TXT + "' is updated";
-
   @BeforeClass
   public void setUp() throws Exception {
     URL resource = getClass().getResource("/projects/spring-project-for-file-watcher-tabs");
     testProjectServiceClient.importProject(
-        ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING);
+            ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING);
 
     ide1.open(ws);
     ide2.open(ws);
 
     events1.clickEventLogBtn();
     events2.clickEventLogBtn();
-
-    prepareFilesToCheck(NAME_FILETXT_2);
   }
 
   @Test
-  public void shouldWatchEditedFileWithoutIDE() throws Exception {
-    testProjectServiceClient.updateFile(
-        ws.getId(), PROJECT_NAME + "/" + NAME_FILETXT_2, Long.toString(System.currentTimeMillis()));
-
-    events1.waitExpectedMessage(EXPECTED_MESSAGE_2, LOAD_PAGE_TIMEOUT_SEC);
-    projectExplorer1.openItemByPath(PROJECT_NAME + "/" + FILE3_TXT);
+  public void checkEditingFileWithoutIDE() throws Exception {
+    String nameFiletxt2 = "file2.txt";
+    String nameFiletxt3 = "file3.txt";
+    String expectedMessage2 = "File '" + nameFiletxt2 + "' is updated";
+    String expectedMessage3 = "File '" + nameFiletxt3 + "' is updated";
+    projectExplorer1.openItemByPath(PROJECT_NAME);
+    projectExplorer2.openItemByPath(PROJECT_NAME);
+    projectExplorer1.openItemByPath(PROJECT_NAME + "/" + nameFiletxt2);
     editor1.waitActive();
-    projectExplorer2.openItemByPath(PROJECT_NAME + "/" + FILE3_TXT);
+    projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameFiletxt2);
+    editor1.waitActive();
+
+    testProjectServiceClient.updateFile(
+            ws.getId(), PROJECT_NAME + "/" + nameFiletxt2, Long.toString(System.currentTimeMillis()));
+
+    events1.waitExpectedMessage(expectedMessage2, LOAD_PAGE_TIMEOUT_SEC);
+    projectExplorer1.openItemByPath(PROJECT_NAME + "/" + nameFiletxt3);
+    editor1.waitActive();
+    projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameFiletxt3);
     editor2.waitActive();
 
     String currentTimeInMs = Long.toString(System.currentTimeMillis());
     testProjectServiceClient.updateFile(
-        ws.getId(), PROJECT_NAME + "/" + FILE3_TXT, Long.toString(System.currentTimeMillis()));
+            ws.getId(), PROJECT_NAME + "/" + nameFiletxt3, Long.toString(System.currentTimeMillis()));
 
     editor1.waitTextIntoEditor(currentTimeInMs, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     editor2.waitTextIntoEditor(currentTimeInMs, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
-    events1.waitExpectedMessage(EXPECTED_MESSAGE_3, LOAD_PAGE_TIMEOUT_SEC);
-    events2.waitExpectedMessage(EXPECTED_MESSAGE_3, LOAD_PAGE_TIMEOUT_SEC);
-  }
-
-  @Test
-  public void shouldNotWatchExcludedFiles() throws Exception {
-    String currentTimeInMs = Long.toString(System.currentTimeMillis());
-    excludeFileFromFileWatcher(PROJECT_NAME + "/" + NAME_FILETXT_2);
-    testProjectServiceClient.updateFile(
-        ws.getId(), PROJECT_NAME + "/" + NAME_FILETXT_2, currentTimeInMs);
-    editor1.waitTextNotPresentIntoEditor(currentTimeInMs);
-    editor2.waitTextNotPresentIntoEditor(currentTimeInMs);
-    events1.waitMessageIsNotPresent(EXPECTED_MESSAGE_2);
-    events2.waitMessageIsNotPresent(EXPECTED_MESSAGE_2);
-    editor1.closeAllTabs();
-    editor2.closeAllTabs();
-    projectExplorer1.openItemByPath(PROJECT_NAME + "/" + NAME_FILETXT_2);
-    projectExplorer2.openItemByPath(PROJECT_NAME + "/" + NAME_FILETXT_2);
-    editor1.waitTextIntoEditor(currentTimeInMs);
-    editor2.waitTextIntoEditor(currentTimeInMs);
-  }
-
-  private void excludeFileFromFileWatcher(String pathToExcludedFile) {
-    projectExplorer1.selectItem(pathToExcludedFile);
-    projectExplorer1.openContextMenuByPathSelectedItem(pathToExcludedFile);
-    projectExplorer1.waitContextMenu();
-    projectExplorer1.clickOnItemInContextMenu(ADD_TO_FILE_WATCHER_EXCLUDES);
-    projectExplorer1.waitContextMenuPopUpClosed();
-  }
-
-  private void prepareFilesToCheck(String nameOfOpenedFile) {
-    projectExplorer1.openItemByPath(PROJECT_NAME);
-    projectExplorer2.openItemByPath(PROJECT_NAME);
-    projectExplorer1.openItemByPath(PROJECT_NAME + "/" + nameOfOpenedFile);
-    editor1.waitActive();
-    projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameOfOpenedFile);
-    editor1.waitActive();
+    events1.waitExpectedMessage(expectedMessage3, LOAD_PAGE_TIMEOUT_SEC);
+    events2.waitExpectedMessage(expectedMessage3, LOAD_PAGE_TIMEOUT_SEC);
   }
 }
