@@ -471,9 +471,8 @@ public class ProjectExplorerPresenter extends BasePresenter
   }
 
   /** Collapse all non-leaf nodes. */
-  @Deprecated
   public void collapseAll() {
-    view.collapseAll();
+    doCollapse();
   }
 
   /**

@@ -43,6 +43,8 @@ import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
 import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
 import static org.eclipse.che.ide.part.editor.recent.RecentFileStore.RECENT_GROUP_ID;
 import static org.eclipse.che.ide.projecttype.BlankProjectWizardRegistrar.BLANK_CATEGORY;
+import static org.eclipse.che.ide.util.input.KeyCodeMap.ARROW_DOWN;
+import static org.eclipse.che.ide.util.input.KeyCodeMap.ARROW_UP;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.inject.Inject;
@@ -195,6 +197,8 @@ public class StandardComponentInitializer {
   public static final String EVENT_LOGS_DISPLAYING_MODE = "eventLogsDisplayingMode";
   public static final String EDITOR_DISPLAYING_MODE = "editorDisplayingMode";
   public static final String TERMINAL_DISPLAYING_MODE = "terminalDisplayingMode";
+  public static final String REVEAL_RESOURCE = "revealResourceInProjectTree";
+  public static final String COLLAPSE_ALL = "collapseAll";
 
   public interface ParserResource extends ClientBundle {
     @Source("org/eclipse/che/ide/blank.svg")
@@ -602,9 +606,6 @@ public class StandardComponentInitializer {
     editGroup.add(switchPreviousEditorAction);
     editGroup.add(switchNextEditorAction);
 
-    editGroup.addSeparator();
-    editGroup.add(revealResourceAction);
-
     // Assistant (New Menu)
     DefaultActionGroup assistantGroup =
         (DefaultActionGroup) actionManager.getAction(GROUP_ASSISTANT);
@@ -691,6 +692,7 @@ public class StandardComponentInitializer {
     resourceOperation.add(downloadResourceAction);
     resourceOperation.add(refreshPathAction);
     resourceOperation.add(linkWithEditorAction);
+    resourceOperation.add(collapseAllAction);
     resourceOperation.addSeparator();
     resourceOperation.add(convertFolderToProjectAction);
     resourceOperation.addSeparator();
@@ -711,6 +713,7 @@ public class StandardComponentInitializer {
     partMenuGroup.add(hidePartAction);
     partMenuGroup.add(restorePartAction);
     partMenuGroup.add(showConsoleTreeAction);
+    partMenuGroup.add(revealResourceAction);
     partMenuGroup.add(collapseAllAction);
     partMenuGroup.add(refreshPathAction);
     partMenuGroup.add(linkWithEditorAction);
@@ -731,12 +734,12 @@ public class StandardComponentInitializer {
     actionManager.registerAction("goInto", goIntoAction);
     actionManager.registerAction(SHOW_REFERENCE, showReferenceAction);
 
-    actionManager.registerAction("collapseAll", collapseAllAction);
+    actionManager.registerAction(REVEAL_RESOURCE, revealResourceAction);
+    actionManager.registerAction(COLLAPSE_ALL, collapseAllAction);
 
     actionManager.registerAction("openFile", openFileAction);
     actionManager.registerAction(SWITCH_LEFT_TAB, switchPreviousEditorAction);
     actionManager.registerAction(SWITCH_RIGHT_TAB, switchNextEditorAction);
-    actionManager.registerAction("scrollFromSource", revealResourceAction);
 
     changeResourceGroup.add(cutResourceAction);
     changeResourceGroup.add(copyResourceAction);
@@ -808,6 +811,9 @@ public class StandardComponentInitializer {
     editorContextMenuGroup.addSeparator();
     editorContextMenuGroup.add(fullTextSearchAction);
     editorContextMenuGroup.add(closeActiveEditorAction);
+
+    editorContextMenuGroup.addSeparator();
+    editorContextMenuGroup.add(revealResourceAction);
 
     // Define hot-keys
     keyBinding
@@ -882,6 +888,13 @@ public class StandardComponentInitializer {
     keyBinding
         .getGlobal()
         .addKey(new KeyBuilder().alt().charCode('T').build(), TERMINAL_DISPLAYING_MODE);
+
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().action().charCode(ARROW_DOWN).build(), REVEAL_RESOURCE);
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().action().charCode(ARROW_UP).build(), COLLAPSE_ALL);
 
     if (UserAgent.isMac()) {
       keyBinding
