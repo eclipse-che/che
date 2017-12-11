@@ -72,10 +72,10 @@ public class CheckFileWatcherExcludeFeatureTest {
 
   @AfterMethod
   public void closeOpenedTabs() {
-    editor.closeAllTabsByContextMenu();
+    editor.closeAllTabs();
   }
 
-  // @Test
+  @Test
   public void checkFileWatcherIgnoreFileAfterIncludingAndExcludingFileWatching() throws Exception {
     String fileNameForExcluding = "pom.xml";
     String pathToExcludedFile = PROJECT_NAME + "/" + fileNameForExcluding;
@@ -139,10 +139,10 @@ public class CheckFileWatcherExcludeFeatureTest {
     editor.waitTextIntoEditor(currentTimeInMs);
   }
 
-  //  @Test
+  @Test
   public void testIsNotExcludeOperationEventAboutIgnoreFile() {
     projectExplorer.waitItem(PROJECT_NAME);
-
+    projectExplorer.openItemByPath(PROJECT_NAME + "/" + "README.md");
     // Clear event log
     events.clickEventLogBtn();
     events.clearAllMessages();
