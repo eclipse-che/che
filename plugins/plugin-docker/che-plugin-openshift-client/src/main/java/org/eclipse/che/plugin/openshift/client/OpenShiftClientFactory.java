@@ -23,7 +23,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import okhttp3.Authenticator;
 import okhttp3.Interceptor;
-import okhttp3.Interceptor.Chain;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
