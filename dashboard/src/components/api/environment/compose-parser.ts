@@ -31,7 +31,11 @@ export class ComposeParser {
    */
   parse(content: string): IComposeRecipe {
     const recipe = jsyaml.load(content);
-    this.validate(recipe);
+    if (recipe && !recipe.services) { // if it is machine recipe
+      this.validate({services: recipe});
+    } else {
+      this.validate(recipe);
+    }
     return recipe;
   }
 

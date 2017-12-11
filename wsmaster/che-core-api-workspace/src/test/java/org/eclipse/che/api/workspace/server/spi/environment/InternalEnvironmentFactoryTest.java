@@ -11,6 +11,7 @@
 package org.eclipse.che.api.workspace.server.spi.environment;
 
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
@@ -35,7 +35,6 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -74,7 +73,7 @@ public class InternalEnvironmentFactoryTest {
     InternalRecipe retrievedRecipe = mock(InternalRecipe.class);
     doReturn(retrievedRecipe).when(recipeRetriever).getRecipe(any());
 
-    EnvironmentImpl env = new EnvironmentImpl(recipe, null, null);
+    EnvironmentImpl env = new EnvironmentImpl(recipe, null);
 
     // when
     environmentFactory.create(env);
@@ -92,8 +91,7 @@ public class InternalEnvironmentFactoryTest {
 
     List<String> sourceInstallers = singletonList("ws-agent");
     MachineConfigImpl machineConfig = new MachineConfigImpl().withInstallers(sourceInstallers);
-    EnvironmentImpl env =
-        new EnvironmentImpl(null, ImmutableMap.of("machine", machineConfig), null);
+    EnvironmentImpl env = new EnvironmentImpl(null, ImmutableMap.of("machine", machineConfig));
 
     // when
     environmentFactory.create(env);
@@ -108,7 +106,8 @@ public class InternalEnvironmentFactoryTest {
   @Test
   public void shouldUseNormalizedServersWhileInternalEnvironmentCreation() throws Exception {
     // given
-    ServerConfigImpl server = new ServerConfigImpl("8080", "http", "/api");
+    ServerConfigImpl server =
+        new ServerConfigImpl("8080", "http", "/api", singletonMap("key", "value"));
 
     Map<String, ServerConfig> normalizedServers =
         ImmutableMap.of("server", mock(ServerConfig.class));
@@ -117,8 +116,7 @@ public class InternalEnvironmentFactoryTest {
     ImmutableMap<String, ServerConfigImpl> sourceServers = ImmutableMap.of("server", server);
     MachineConfigImpl machineConfig = new MachineConfigImpl(null, sourceServers, null, null, null);
 
-    EnvironmentImpl env =
-        new EnvironmentImpl(null, ImmutableMap.of("machine", machineConfig), null);
+    EnvironmentImpl env = new EnvironmentImpl(null, ImmutableMap.of("machine", machineConfig));
 
     // when
     environmentFactory.create(env);
@@ -128,29 +126,6 @@ public class InternalEnvironmentFactoryTest {
     verify(environmentFactory).doCreate(any(), machinesCaptor.capture(), any());
     Map<String, InternalMachineConfig> internalMachines = machinesCaptor.getValue();
     assertEquals(internalMachines.get("machine").getServers(), normalizedServers);
-  }
-
-  @Test
-  public void shouldUseSourceWarningsEnvVarsAndAttributesWhileInternalEnvironmentCreation()
-      throws Exception {
-    // given
-    List<Warning> sourceWarnings = singletonList(new WarningImpl(123, "message"));
-    ImmutableMap<String, String> sourceEnv = ImmutableMap.of("CHE_API", "localhost");
-    ImmutableMap<String, String> sourceAttributes = ImmutableMap.of("attribute", "value");
-    MachineConfigImpl machineConfig =
-        new MachineConfigImpl(null, null, sourceEnv, sourceAttributes, null);
-
-    EnvironmentImpl env =
-        new EnvironmentImpl(null, ImmutableMap.of("machine", machineConfig), sourceWarnings);
-
-    // when
-    environmentFactory.create(env);
-
-    // then
-    verify(environmentFactory).doCreate(any(), machinesCaptor.capture(), eq(sourceWarnings));
-    Map<String, InternalMachineConfig> internalMachines = machinesCaptor.getValue();
-    assertEquals(internalMachines.get("machine").getEnv(), sourceEnv);
-    assertEquals(internalMachines.get("machine").getAttributes(), sourceAttributes);
   }
 
   @Test
@@ -169,9 +144,12 @@ public class InternalEnvironmentFactoryTest {
 
   @Test
   public void normalizeServersProtocols() throws InfrastructureException {
-    ServerConfigImpl serverWithoutProtocol = new ServerConfigImpl("8080", "http", "/api");
-    ServerConfigImpl udpServer = new ServerConfigImpl("8080/udp", "http", "/api");
-    ServerConfigImpl normalizedServer = new ServerConfigImpl("8080/tcp", "http", "/api");
+    ServerConfigImpl serverWithoutProtocol =
+        new ServerConfigImpl("8080", "http", "/api", singletonMap("key", "value"));
+    ServerConfigImpl udpServer =
+        new ServerConfigImpl("8080/udp", "http", "/api", singletonMap("key", "value"));
+    ServerConfigImpl normalizedServer =
+        new ServerConfigImpl("8080/tcp", "http", "/api", singletonMap("key", "value"));
 
     Map<String, ServerConfig> servers = new HashMap<>();
     servers.put("serverWithoutProtocol", serverWithoutProtocol);

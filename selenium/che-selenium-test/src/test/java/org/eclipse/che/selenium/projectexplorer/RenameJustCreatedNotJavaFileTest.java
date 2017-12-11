@@ -60,7 +60,7 @@ public class RenameJustCreatedNotJavaFileTest {
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_WEB_APP + "/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/webapp");
 
     // create new jsp file
@@ -73,7 +73,7 @@ public class RenameJustCreatedNotJavaFileTest {
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
     projectExplorer.waitItemInVisibleArea("newFile.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTabIsPresent("newFile.jsp");
 
     // rename file

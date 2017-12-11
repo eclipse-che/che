@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.ssh.key.client.upload;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.util.StringUtils.isNullOrEmpty;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -76,10 +77,21 @@ public class UploadSshKeyPresenter implements UploadSshKeyView.ActionDelegate {
     view.setEncoding(FormPanel.ENCODING_MULTIPART);
 
     String action = restContext + "/ssh";
+    StringBuilder queryParametersBuilder = new StringBuilder();
 
     String csrfToken = appContext.getProperties().get("X-CSRF-Token");
-    if (csrfToken != null) {
-      action += "?X-CSRF-Token=" + csrfToken;
+    if (!isNullOrEmpty(csrfToken)) {
+      queryParametersBuilder.append("&X-CSRF-Token=").append(csrfToken);
+    }
+
+    String machineToken = appContext.getWorkspace().getRuntime().getMachineToken();
+    if (!isNullOrEmpty(machineToken)) {
+      queryParametersBuilder.append("&token=").append(machineToken);
+    }
+
+    String queryParameters = queryParametersBuilder.toString();
+    if (!isNullOrEmpty(queryParameters)) {
+      action += queryParameters.replaceFirst("&", "?");
     }
 
     view.setAction(action);

@@ -82,7 +82,7 @@ public class NodeJsDebugTest {
         TestMenuCommandsConstants.Run.DEBUG + "/" + nameOfDebugCommand);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
     editorPageObj.waitTabFileWithSavedStatus(APP_FILE);
-    editorPageObj.waitActiveEditor();
+    editorPageObj.waitActive();
     debugPanel.waitDebugHighlightedText("var greetings = require(\"./greetings.js\");");
     checkDebugStepsFeatures();
     checkEvaluationFeatures();
@@ -114,7 +114,7 @@ public class NodeJsDebugTest {
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OVER);
     debugPanel.waitDebugHighlightedText("var b = greetings.sayHelloInEnglish();");
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_INTO);
-    editorPageObj.waitActiveEditor();
+    editorPageObj.waitActive();
     editorPageObj.waitTabIsPresent("greetings.js");
     debugPanel.waitDebugHighlightedText("return \"HELLO\";");
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OUT);

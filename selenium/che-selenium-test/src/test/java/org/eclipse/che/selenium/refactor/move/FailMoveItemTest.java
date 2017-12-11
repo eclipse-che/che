@@ -73,7 +73,7 @@ public class FailMoveItemTest {
   public void checkFailMoveItem17() throws Exception {
     setFieldsForTest("testfail17");
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A17.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     projectExplorer.selectItem(pathToPackageInChePrefix + "/r/A17.java");
     projectExplorer.launchRefactorMoveByKeyboard();

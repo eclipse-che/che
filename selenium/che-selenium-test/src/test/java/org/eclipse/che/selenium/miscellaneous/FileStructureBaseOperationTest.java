@@ -86,7 +86,7 @@ public class FileStructureBaseOperationTest {
     // Check the opening and closing the 'file structure' form
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.FILE_STRUCTURE);
@@ -124,7 +124,7 @@ public class FileStructureBaseOperationTest {
 
     // Check the the 'file structure' is not present in the menu
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     menu.runCommand(TestMenuCommandsConstants.Assistant.ASSISTANT);
     menu.waitCommandIsNotPresentInMenu(TestMenuCommandsConstants.Assistant.FILE_STRUCTURE);
   }

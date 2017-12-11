@@ -111,7 +111,7 @@ public class JavaTestPluginTestNgTest {
     projectExplorer.openItemByPath(PATH_TO_TEST_CLASS);
     // when
 
-    editor.waitActiveEditor();
+    editor.waitActive();
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
 
     // then
@@ -132,13 +132,13 @@ public class JavaTestPluginTestNgTest {
     projectExplorer.openItemByPath(PATH_TO_ANOTHER_TEST_CLASS);
 
     // then
-    editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(25, 17);
+    editor.waitActive();
+    editor.goToCursorPositionVisible(25, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
-    editor.setCursorToDefinedLineAndChar(30, 17);
+    editor.goToCursorPositionVisible(30, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
@@ -156,13 +156,13 @@ public class JavaTestPluginTestNgTest {
     projectExplorer.openItemByPath(PATH_TO_ANOTHER_TEST_CLASS);
 
     // then
-    editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(25, 17);
+    editor.waitActive();
+    editor.goToCursorPositionVisible(25, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
-    editor.setCursorToDefinedLineAndChar(30, 17);
+    editor.goToCursorPositionVisible(30, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);

@@ -29,6 +29,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.fs.server.PathTransformer;
 
+/** Performs workspace file system related operations after method parameters are validated. */
 @Singleton
 public class ExecutiveFsManager implements FsManager {
 

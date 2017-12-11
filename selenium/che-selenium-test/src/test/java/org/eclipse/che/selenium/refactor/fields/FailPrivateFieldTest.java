@@ -69,7 +69,7 @@ public class FailPrivateFieldTest {
   public void testFail0() throws Exception {
     setFieldsForTest("testfail0");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -89,7 +89,7 @@ public class FailPrivateFieldTest {
   public void testFail4() throws Exception {
     setFieldsForTest("testfail4");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -109,7 +109,7 @@ public class FailPrivateFieldTest {
   public void testFail6() throws Exception {
     setFieldsForTest("testfail6");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -131,7 +131,7 @@ public class FailPrivateFieldTest {
   public void testFail7() throws Exception {
     setFieldsForTest("testfail7");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());

@@ -136,9 +136,8 @@ public class PartStackViewImpl extends Composite
 
   /** Adds button to hide part stack. */
   private void addHideButton() {
-    SVGImage hide = new SVGImage(resources.collapseExpandIcon());
-    hide.getElement().setAttribute("name", "workBenchIconMinimize");
-    ToolButton hideToolButton = new ToolButton(hide);
+    ToolButton hideToolButton = new ToolButton(FontAwesome.CARET_SQUARE_O_LEFT);
+    hideToolButton.getElement().setAttribute("name", "workBenchIconMinimize");
     hideButton.add(hideToolButton);
 
     hideToolButton.addClickHandler(

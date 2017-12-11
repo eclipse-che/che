@@ -82,7 +82,7 @@ public class MoveItemsTest {
   public void checkMoveItem0() throws Exception {
     setFieldsForTest("test0");
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A0.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     projectExplorer.selectVisibleItem("A0.java");
     menu.runCommand(
@@ -114,7 +114,7 @@ public class MoveItemsTest {
   public void checkMoveItem1() throws Exception {
     setFieldsForTest("test1");
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A1.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     projectExplorer.selectItem(pathToPackageInChePrefix + "/r/A1.java");
     projectExplorer.launchRefactorMoveByKeyboard();
@@ -135,10 +135,10 @@ public class MoveItemsTest {
     setFieldsForTest("test2");
     setFieldsForTestB("test2");
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A2.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/fred2/B2.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInB);
     projectExplorer.selectItem(pathToPackageInChePrefix + "/r/A2.java");
     editor.closeFileByNameWithSaving("B2");
@@ -170,10 +170,10 @@ public class MoveItemsTest {
     setFieldsForTest("test3");
     setFieldsForTestB("test3");
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/r/A3.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/fred3/B3.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInB);
     projectExplorer.selectItem(pathToPackageInChePrefix + "/r/r/A3.java");
     projectExplorer.launchRefactorMoveByKeyboard();
@@ -197,7 +197,7 @@ public class MoveItemsTest {
   public void checkMoveItem5() throws Exception {
     setFieldsForTest("test5");
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A5.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     projectExplorer.selectItem(pathToPackageInChePrefix + "/r/A5.java");
     projectExplorer.launchRefactorMoveByKeyboard();
@@ -219,7 +219,7 @@ public class MoveItemsTest {
   public void checkMoveItem6() throws Exception {
     setFieldsForTest("test6");
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A6.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     projectExplorer.selectItem(pathToPackageInChePrefix + "/r/A6.java");
     projectExplorer.launchRefactorMoveByKeyboard();
@@ -239,7 +239,7 @@ public class MoveItemsTest {
   public void checkMoveItem7() throws Exception {
     setFieldsForTest("test7");
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A7.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     projectExplorer.selectItem(pathToPackageInChePrefix + "/r/A7.java");
     menu.runCommand(
@@ -264,7 +264,7 @@ public class MoveItemsTest {
   public void checkMoveItem8() throws Exception {
     setFieldsForTest("test8");
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/java/lang/reflect/Klass.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     projectExplorer.selectItem(pathToPackageInChePrefix + "/java/lang/reflect/Klass.java");
     projectExplorer.launchRefactorMoveByKeyboard();
@@ -285,7 +285,7 @@ public class MoveItemsTest {
   public void checkMoveItem9() throws Exception {
     setFieldsForTest("test9");
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A9.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     projectExplorer.selectItem(pathToPackageInChePrefix + "/r/A9.java");
     projectExplorer.launchRefactorMoveByKeyboard();

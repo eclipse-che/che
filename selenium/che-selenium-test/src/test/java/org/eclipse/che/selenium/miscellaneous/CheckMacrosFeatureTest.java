@@ -76,7 +76,7 @@ public class CheckMacrosFeatureTest {
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME + "/README.md");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTabIsPresent("README.md");
 
     projectExplorer.invokeCommandWithContextMenu(
@@ -111,7 +111,7 @@ public class CheckMacrosFeatureTest {
     loader.waitOnClosed();
     commandsExplorer.waitCommandInExplorerByName(
         TestIntelligentCommandsConstants.CommandsDefaultNames.CUSTOM_NAME);
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.waitTabFileWithSavedStatus(
         TestIntelligentCommandsConstants.CommandsDefaultNames.CUSTOM_NAME);
     commandsEditor.clickOnCancelCommandEditorButton();
@@ -121,7 +121,7 @@ public class CheckMacrosFeatureTest {
     commandsExplorer.waitCommandExplorerIsOpened();
     commandsExplorer.selectCommandByName(
         TestIntelligentCommandsConstants.CommandsDefaultNames.CUSTOM_NAME);
-    editor.waitActiveEditor();
+    editor.waitActive();
     commandsEditor.typeTextIntoNameCommandField(commandName);
     commandsEditor.waitTextIntoNameCommandField(commandName);
     commandsEditor.waitTabCommandWithUnsavedStatus(

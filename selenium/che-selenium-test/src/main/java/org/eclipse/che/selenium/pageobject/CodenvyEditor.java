@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
@@ -34,10 +35,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
@@ -49,6 +52,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.FindAll;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -134,8 +138,7 @@ public class CodenvyEditor {
 
     public static final String CONTEXT_MENU = "//div[@id='menu-lock-layer-id']/div[2]";
     public static final String EDITOR_TABS_PANEL = "gwt-debug-multiSplitPanel-tabsPanel";
-    public static final String ACTIVE_LINE_NUMBER =
-        "//div[@class='textviewSelection']/following::div[contains(text(),':')]";
+    public static final String ACTIVE_LINE_NUMBER = "gwt-debug-cursorPosition";
     public static final String POSITION_CURSOR_NUMBER =
         "//div[@id='gwt-debug-editorPartStack-contentPanel']//div[text()='%s']";
     public static final String ACTIVE_EDITOR_ENTRY_POINT =
@@ -149,6 +152,8 @@ public class CodenvyEditor {
     public static final String ACTIVE_LINE_HIGHLIGHT =
         "//div[@class='annotationLine currentLine' and @role='presentation']";
     public static final String ACTIVE_TAB_FILE_NAME = "//div[@active]/descendant::div[text()='%s']";
+    public static final String ACTIVE_TAB_UNSAVED_FILE_NAME =
+        "//div[@active and @unsaved]//div[text()='%s']";
     public static final String TAB_FILE_NAME_XPATH =
         "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']";
     public static final String TAB_FILE_NAME_AND_STYLE =
@@ -225,8 +230,8 @@ public class CodenvyEditor {
   @FindBy(id = Locators.EDITOR_TABS_PANEL)
   private WebElement editorTabsPanel;
 
-  @FindBy(xpath = Locators.ACTIVE_LINE_NUMBER)
-  private WebElement activeLineNumber;
+  @FindAll({@FindBy(id = Locators.ACTIVE_LINE_NUMBER)})
+  private List<WebElement> activeLineNumbers;
 
   @FindBy(xpath = Locators.AUTOCOMPLETE_CONTAINER)
   private WebElement autocompleteContainer;
@@ -258,18 +263,21 @@ public class CodenvyEditor {
   @FindBy(xpath = Locators.AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP)
   private WebElement autocompleteProposalJavaDocPopup;
 
+  @FindBy(xpath = Locators.ALL_TABS_XPATH)
+  private WebElement someOpenedTab;
+
   /**
    * wait active editor
    *
    * @param userTimeOut timeout defined of the user
    */
-  public void waitActiveEditor(int userTimeOut) {
+  public void waitActive(int userTimeOut) {
     loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, userTimeOut).until(visibilityOf(activeEditorContainer));
   }
 
   /** wait active editor */
-  public void waitActiveEditor() {
+  public void waitActive() {
     loader.waitOnClosed();
     loadPageDriverWait.until(visibilityOf(activeEditorContainer));
   }
@@ -280,7 +288,7 @@ public class CodenvyEditor {
    * @return text from active tab of orion editor
    */
   public String getVisibleTextFromEditor() {
-    waitActiveEditor();
+    waitActive();
     List<WebElement> lines =
         elemDriverWait.until(
             presenceOfAllElementsLocatedBy(By.xpath(Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH)));
@@ -293,7 +301,7 @@ public class CodenvyEditor {
    * @param indexOfEditor index of editor that was split
    */
   public String getTextFromSplitEditor(int indexOfEditor) {
-    waitActiveEditor();
+    waitActive();
     List<WebElement> lines =
         elemDriverWait.until(
             presenceOfAllElementsLocatedBy(By.xpath(Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH)));
@@ -344,7 +352,7 @@ public class CodenvyEditor {
       loadPageDriverWait.until(
           (ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
     } catch (Exception ex) {
-      ex.printStackTrace();
+      LOG.warn(ex.getLocalizedMessage());
       WaitUtils.sleepQuietly(REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
       attachElemDriverWait.until(
           (ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
@@ -393,6 +401,19 @@ public class CodenvyEditor {
             visibilityOfElementLocated(
                 By.xpath(String.format(Locators.TAB_FILE_CLOSE_ICON, fileName))))
         .click();
+  }
+
+  /**
+   * checks if some tab is opened in the Editor
+   *
+   * @return true if any tab is open
+   */
+  public boolean isAnyTabsOpened() {
+    try {
+      return someOpenedTab.isDisplayed();
+    } catch (NoSuchElementException ex) {
+      return false;
+    }
   }
 
   /** get all open editor tabs and close this */
@@ -506,17 +527,35 @@ public class CodenvyEditor {
     loader.waitOnClosed();
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    waitActiveEditor();
+    waitActive();
     expectedNumberOfActiveLine(positionLine);
   }
 
   /**
-   * set cursor in specified position
+   * set cursor in specified position for current visible editor
    *
    * @param positionLine is the specified number line
    * @param positionChar is the specified number char
    */
-  public void setCursorToDefinedLineAndChar(int positionLine, int positionChar) {
+  public void goToCursorPositionVisible(int positionLine, int positionChar) {
+    openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
+    waitActive();
+    waitSpecifiedValueForLineAndChar(positionLine, positionChar);
+  }
+
+  /**
+   * set cursor in specified position for current active and focused editor
+   *
+   * @param positionLine is the specified number line
+   * @param positionChar is the specified number char
+   */
+  public void goToPosition(int positionLine, int positionChar) {
+    openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
+    waitActive();
+    waitCursorPosition(positionLine, positionChar);
+  }
+
+  private void openGoToLineFormAndSetCursorToPosition(int positionLine, int positionChar) {
     loader.waitOnClosed();
     actionsFactory
         .createAction(seleniumWebDriver)
@@ -529,8 +568,6 @@ public class CodenvyEditor {
     loader.waitOnClosed();
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    waitActiveEditor();
-    waitSpecifiedValueForLineAndChar(positionLine, positionChar);
   }
 
   /** launch code assistant with ctrl+space keys and wait container is open */
@@ -1018,7 +1055,7 @@ public class CodenvyEditor {
   }
 
   public void waitGreenTab(String fileName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(
@@ -1027,7 +1064,7 @@ public class CodenvyEditor {
   }
 
   public void waitBlueTab(String fileName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(
@@ -1036,7 +1073,7 @@ public class CodenvyEditor {
   }
 
   public void waitDefaultColorTab(final String fileName) {
-    waitActiveEditor();
+    waitActive();
     boolean isEditorFocused =
         !(seleniumWebDriver
                 .findElement(
@@ -1046,7 +1083,7 @@ public class CodenvyEditor {
             == null);
     final String currentStateEditorColor =
         isEditorFocused ? "rgba(255, 255, 255, 1)" : "rgba(170, 170, 170, 1)";
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver ->
@@ -1177,7 +1214,7 @@ public class CodenvyEditor {
    * @param position position of the breakpoint
    */
   public void setInactiveBreakpoint(int position) {
-    waitActiveEditor();
+    waitActive();
     waitDebugerLineIsVisible(position);
     seleniumWebDriver
         .findElement(By.xpath(String.format(Locators.DEBUGGER_PREFIX_XPATH, position)))
@@ -1192,7 +1229,7 @@ public class CodenvyEditor {
    * @param position position of the breakpoint
    */
   public void setBreakPointAndWaitActiveState(int position) {
-    waitActiveEditor();
+    waitActive();
     waitDebugerLineIsVisible(position);
     seleniumWebDriver
         .findElement(By.xpath(String.format(Locators.DEBUGGER_PREFIX_XPATH, position)))
@@ -1201,7 +1238,7 @@ public class CodenvyEditor {
   }
 
   public void setBreakpoint(int position) {
-    waitActiveEditor();
+    waitActive();
     waitDebugerLineIsVisible(position);
     seleniumWebDriver
         .findElement(By.xpath(String.format(Locators.DEBUGGER_PREFIX_XPATH, position)))
@@ -1295,19 +1332,64 @@ public class CodenvyEditor {
    * @param text is the text of elements active line
    */
   public void waitTextElementsActiveLine(final String text) {
-    waitActiveEditor();
+    waitActive();
     redrawDriverWait.until(visibilityOf(activeLineXpath));
     redrawDriverWait.until(
         (ExpectedCondition<Boolean>) driver -> activeLineXpath.getText().contains(text));
   }
 
+  /** get positions of the current line and char */
+  public Pair<Integer, Integer> getCurrentCursorPositionsFromVisible() {
+    waitActive();
+    WebElement currentActiveElement =
+        activeLineNumbers.stream().filter(webElement -> webElement.isDisplayed()).findFirst().get();
+    return getCursorPositionFromWebElement(currentActiveElement);
+  }
+
+  /**
+   * Check that editor active and focused on first step. After that get cursor position. Note! For
+   * correct work a editor must be active.
+   *
+   * @return char and line position from current visible, active and focused editor (usual uses with
+   *     split editor)
+   */
+  public Pair<Integer, Integer> getCursorPositionsFromActive() {
+    String xpathToCurrentActiveCursorPosition =
+        "//div[@active and @focused]/parent::div[@id='gwt-debug-multiSplitPanel-tabsPanel']/div[@active and @focused]/parent::div[@id='gwt-debug-multiSplitPanel-tabsPanel']/parent::div/parent::div/following-sibling::div//div[@active]//div[@id='gwt-debug-cursorPosition']";
+    waitActive();
+    return getCursorPositionFromWebElement(
+        redrawDriverWait.until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(xpathToCurrentActiveCursorPosition))));
+  }
+
+  /**
+   * wait specified values for Line and Char cursor positions in the Codenvy editor
+   *
+   * @param linePosition expected line position
+   * @param charPosition expected char position
+   */
+  public void waitCursorPosition(final int linePosition, final int charPosition) {
+    redrawDriverWait.until(
+        (ExpectedCondition<Boolean>)
+            webDriver ->
+                (getCursorPositionsFromActive().first == linePosition)
+                    && (getCursorPositionsFromActive().second == charPosition));
+  }
+
+  private Pair<Integer, Integer> getCursorPositionFromWebElement(WebElement webElement) {
+    int[] currentCursorPositions =
+        Arrays.asList(webElement.getText().split(":"))
+            .stream()
+            .mapToInt(Integer::parseInt)
+            .toArray();
+    return new Pair<Integer, Integer>(currentCursorPositions[0], currentCursorPositions[1]);
+  }
+
   /** get number of current active line */
-  public int getNumberOfActiveLine() {
-    waitActiveEditor();
-    int numberLine =
-        Integer.parseInt(
-            redrawDriverWait.until(visibilityOf(activeLineNumber)).getText().split(":")[0]);
-    return numberLine;
+  public int getPositionVisible() {
+    waitActive();
+    return getCurrentCursorPositionsFromVisible().first;
   }
 
   /**
@@ -1316,29 +1398,9 @@ public class CodenvyEditor {
    * @param expectedLine expected number of active line
    */
   public void expectedNumberOfActiveLine(final int expectedLine) {
-    waitActiveEditor();
+    waitActive();
     redrawDriverWait.until(
-        (ExpectedCondition<Boolean>) driver -> expectedLine == getNumberOfActiveLine());
-  }
-
-  /**
-   * get Line value for cursor from the codenvy - editor
-   *
-   * @return line value
-   */
-  public int getPositionOfLine() {
-    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(Locators.ACTIVE_LINE_NUMBER)));
-    List<WebElement> numLines =
-        seleniumWebDriver.findElements(By.xpath(Locators.ACTIVE_LINE_NUMBER));
-    int numberLine = 0;
-    for (WebElement numLine : numLines) {
-      if (numLine.isDisplayed()) {
-        numberLine =
-            Integer.parseInt(redrawDriverWait.until(visibilityOf(numLine)).getText().split(":")[0]);
-        break;
-      }
-    }
-    return numberLine;
+        (ExpectedCondition<Boolean>) driver -> expectedLine == getPositionVisible());
   }
 
   /**
@@ -1347,18 +1409,7 @@ public class CodenvyEditor {
    * @return char value
    */
   public int getPositionOfChar() {
-    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(Locators.ACTIVE_LINE_NUMBER)));
-    List<WebElement> numLines =
-        seleniumWebDriver.findElements(By.xpath(Locators.ACTIVE_LINE_NUMBER));
-    int numberChar = 0;
-    for (WebElement numLine : numLines) {
-      if (numLine.isDisplayed()) {
-        numberChar =
-            Integer.parseInt(redrawDriverWait.until(visibilityOf(numLine)).getText().split(":")[1]);
-        break;
-      }
-    }
-    return numberChar;
+    return getCurrentCursorPositionsFromVisible().second;
   }
 
   /**
@@ -1371,7 +1422,7 @@ public class CodenvyEditor {
     redrawDriverWait.until(
         (ExpectedCondition<Boolean>)
             webDriver ->
-                (getPositionOfLine() == linePosition) && (getPositionOfChar() == charPosition));
+                (getPositionVisible() == linePosition) && (getPositionOfChar() == charPosition));
   }
 
   /**
@@ -1403,7 +1454,7 @@ public class CodenvyEditor {
         seleniumWebDriver.findElement(
             By.xpath(String.format(Locators.SELECTED_ITEM_IN_EDITOR, nameElement)));
     item.click();
-    waitActiveEditor();
+    waitActive();
   }
 
   /**
@@ -1653,6 +1704,12 @@ public class CodenvyEditor {
         invisibilityOfElementLocated(By.xpath(String.format(Locators.ITEM_TAB_LIST, tabName))));
   }
 
+  public void waitCountTabsWithProvidedName(int countTabs, String tabName) {
+    loaderDriverWait.until(
+        (ExpectedCondition<Boolean>)
+            driver -> countTabs == getAllTabsWithProvidedName(tabName).size());
+  }
+
   /**
    * Click on tab in the tab list
    *
@@ -1818,8 +1875,7 @@ public class CodenvyEditor {
               try {
                 javaDocPopupHtmlText = getJavaDocPopupText();
               } catch (StaleElementReferenceException e) {
-                LOG.error(
-                    "Can not get java doc HTML text from autocomplete context menu in editor");
+                LOG.warn("Can not get java doc HTML text from autocomplete context menu in editor");
               }
               return javaDocPopupHtmlText.length() > 0
                   && verifyJavaDoc(javaDocPopupHtmlText, expectedText);
@@ -1858,13 +1914,13 @@ public class CodenvyEditor {
   }
 
   private String getElementSrcLink(WebElement element) {
-    String srcLink = "";
-    try {
-      srcLink = element.getAttribute("src");
-    } catch (StaleElementReferenceException ex) {
-      LOG.error("src link in the context java doc window does not attached");
-    }
-    return srcLink;
+    FluentWait<WebDriver> srcLinkWait =
+        new FluentWait<WebDriver>(seleniumWebDriver)
+            .withTimeout(LOAD_PAGE_TIMEOUT_SEC, SECONDS)
+            .pollingEvery(500, MILLISECONDS)
+            .ignoring(StaleElementReferenceException.class, NoSuchElementException.class);
+
+    return srcLinkWait.until((ExpectedCondition<String>) driver -> element.getAttribute("src"));
   }
 
   private String openStreamAndGetAllText(HttpURLConnection httpURLConnection) {
@@ -1878,5 +1934,14 @@ public class CodenvyEditor {
       }
     }
     return "";
+  }
+
+  private List<WebElement> getAllTabsWithProvidedName(String tabName) {
+    return loaderDriverWait.until(
+        visibilityOfAllElementsLocatedBy(
+            By.xpath(
+                String.format(
+                    "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']",
+                    tabName))));
   }
 }

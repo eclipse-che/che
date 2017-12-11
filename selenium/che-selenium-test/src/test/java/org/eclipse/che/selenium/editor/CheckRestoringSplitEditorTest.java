@@ -10,6 +10,12 @@
  */
 package org.eclipse.che.selenium.editor;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_JAVA_MULTIMODULE;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabAction.SPIT_HORISONTALLY;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabAction.SPLIT_VERTICALLY;
+import static org.testng.Assert.fail;
+
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import java.io.IOException;
@@ -23,8 +29,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -32,6 +36,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -70,10 +75,7 @@ public class CheckRestoringSplitEditorTest {
     expectedTextFromEditor = Arrays.asList(expectedTextFromFile.split(splitter));
     URL resource = getClass().getResource("/projects/default-spring-project");
     testProjectServiceClient.importProject(
-        workspace.getId(),
-        Paths.get(resource.toURI()),
-        PROJECT_NAME,
-        ProjectTemplates.MAVEN_JAVA_MULTIMODULE);
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_JAVA_MULTIMODULE);
     ide.open(workspace);
   }
 
@@ -82,16 +84,28 @@ public class CheckRestoringSplitEditorTest {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     splitEditorAndOpenFiles();
-    setPositionsForSplittedEditor();
+    try {
+      setPositionsForSplittedEditor();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7729", ex);
+    }
 
-    editor.waitActiveEditor();
+    editor.waitActive();
     if (popupDialogsBrowser.isAlertPresent()) {
       popupDialogsBrowser.acceptAlert();
     }
 
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.waitItemInVisibleArea(javaClassName);
+
+    try {
+      projectExplorer.waitItemInVisibleArea(javaClassName);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7551", ex);
+    }
+
     notificationsPopupPanel.waitPopUpPanelsIsClosed();
     checkSplitdEditorAfterRefreshing(
         1, javaClassTab, expectedTextFromEditor.get(0), cursorPositionForJavaFile);
@@ -108,22 +122,23 @@ public class CheckRestoringSplitEditorTest {
       Pair<Integer, Integer> pair)
       throws IOException {
 
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.selectTabByName(nameOfEditorTab);
-    editor.waitSpecifiedValueForLineAndChar(pair.first, pair.second);
+    editor.waitCursorPosition(pair.first, pair.second);
     editor.waitTextInDefinedSplitEditor(
-        numOfEditor, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC, expectedTextAfterRefresh);
+        numOfEditor, LOAD_PAGE_TIMEOUT_SEC, expectedTextAfterRefresh);
   }
 
   private void splitEditorAndOpenFiles() {
     String namePomFile = "pom.xml";
+
     projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.openContextMenuForTabByName(javaClassTab);
-    editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.SPIT_HORISONTALLY);
+    editor.runActionForTabFromContextMenu(SPIT_HORISONTALLY);
     editor.selectTabByIndexEditorWindowAndOpenMenu(0, javaClassTab);
-    editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.SPLIT_VERTICALLY);
+    editor.runActionForTabFromContextMenu(SPLIT_VERTICALLY);
     loader.waitOnClosed();
     editor.selectTabByIndexEditorWindow(1, javaClassTab);
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + readmeFileName);
@@ -133,13 +148,11 @@ public class CheckRestoringSplitEditorTest {
 
   private void setPositionsForSplittedEditor() {
     editor.selectTabByIndexEditorWindow(0, javaClassTab);
-    editor.setCursorToDefinedLineAndChar(
+    editor.goToCursorPositionVisible(
         cursorPositionForJavaFile.first, cursorPositionForJavaFile.second);
     editor.selectTabByName(readmeFileName);
-    editor.setCursorToDefinedLineAndChar(
-        cursorPositionForReadMeFile.first, cursorPositionForReadMeFile.second);
+    editor.goToPosition(cursorPositionForReadMeFile.first, cursorPositionForReadMeFile.second);
     editor.selectTabByName(pomFileTab);
-    editor.setCursorToDefinedLineAndChar(
-        cursorPositionForPomFile.first, cursorPositionForPomFile.second);
+    editor.goToPosition(cursorPositionForPomFile.first, cursorPositionForPomFile.second);
   }
 }

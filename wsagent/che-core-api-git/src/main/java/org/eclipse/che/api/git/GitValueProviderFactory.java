@@ -15,7 +15,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.git.GitProjectType.GIT_CURRENT_HEAD_NAME;
 import static org.eclipse.che.api.git.GitProjectType.GIT_REPOSITORY_REMOTES;
-import static org.eclipse.che.api.git.GitProjectType.VCS_PROVIDER_NAME;
+import static org.eclipse.che.api.project.shared.Constants.VCS_PROVIDER_NAME;
 
 import com.google.inject.Inject;
 import java.util.List;

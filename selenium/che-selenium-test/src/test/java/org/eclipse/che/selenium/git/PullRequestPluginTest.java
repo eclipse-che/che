@@ -161,9 +161,9 @@ public class PullRequestPluginTest {
     explorer.openItemByPath(FIRST_PROJECT_NAME + "/README.md");
 
     // change content
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.deleteAllContent();
-    editor.setCursorToDefinedLineAndChar(1, 1);
+    editor.goToCursorPositionVisible(1, 1);
     editor.typeTextIntoEditor("Time: " + TIME);
 
     // create branch
@@ -189,9 +189,9 @@ public class PullRequestPluginTest {
     editor.closeAllTabs();
     loader.waitOnClosed();
     explorer.openItemByPath(FIRST_PROJECT_NAME + "/README.md");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.deleteAllContent();
-    editor.setCursorToDefinedLineAndChar(1, 1);
+    editor.goToCursorPositionVisible(1, 1);
     editor.typeTextIntoEditor("Update: " + TIME);
     pullRequestPanel.clickUpdatePRBtn();
     pullRequestPanel.clickOkCommitBtn();
@@ -222,7 +222,7 @@ public class PullRequestPluginTest {
     explorer.selectItem(FIRST_PROJECT_NAME);
     explorer.openItemByPath(FIRST_PROJECT_NAME);
     explorer.openItemByPath(FIRST_PROJECT_NAME + "/README.md");
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 
   private void configureTypeOfProject() {

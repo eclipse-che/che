@@ -39,10 +39,14 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
   private final List<Warning> warnings;
   private WorkspaceStatus status;
 
-  public InternalRuntime(T context, URLRewriter urlRewriter, boolean running) {
+  public InternalRuntime(
+      T context, URLRewriter urlRewriter, List<Warning> warnings, boolean running) {
     this.context = context;
     this.urlRewriter = urlRewriter;
     this.warnings = new CopyOnWriteArrayList<>();
+    if (warnings != null) {
+      this.warnings.addAll(warnings);
+    }
     if (running) {
       status = WorkspaceStatus.RUNNING;
     }
@@ -73,7 +77,7 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
                 Map.Entry::getKey,
                 e ->
                     new MachineImpl(
-                        e.getValue().getProperties(),
+                        e.getValue().getAttributes(),
                         rewriteExternalServers(e.getValue().getServers()))));
   }
 
@@ -180,9 +184,8 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
       Server incomingServer = entry.getValue();
       try {
         ServerImpl server =
-            new ServerImpl(
-                urlRewriter.rewriteURL(identity, name, incomingServer.getUrl()),
-                incomingServer.getStatus());
+            new ServerImpl(incomingServer)
+                .withUrl(urlRewriter.rewriteURL(identity, name, incomingServer.getUrl()));
         outgoing.put(name, server);
       } catch (InfrastructureException e) {
         warnings.add(new WarningImpl(101, "Malformed URL for " + name + " : " + e.getMessage()));
