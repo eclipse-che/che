@@ -876,6 +876,17 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.ls.jdt</groupId>
+                <artifactId>jdt.ls.extension.api</artifactId>
+                <version>${che.ls.jdt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.ls.jdt</groupId>
+                <artifactId>jdt.ls.extension.api</artifactId>
+                <version>${che.ls.jdt.version}</version>
+                <classifier>sources</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.ls.jdt</groupId>
                 <artifactId>jdt.ls.extension.product</artifactId>
                 <version>${che.ls.jdt.version}</version>
                 <type>tar.gz</type>
