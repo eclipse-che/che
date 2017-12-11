@@ -11,10 +11,10 @@
  */
 package org.eclipse.che.plugin.jdb.server;
 
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.ensureSuspendAtDesiredLocation;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.findMainThreadId;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.startJavaDebugger;
-import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerUtils.terminateVirtualMachineQuietly;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.ensureDebuggerSuspendAtLocation;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.findMainThreadId;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.startJavaDebugger;
+import static org.eclipse.che.plugin.jdb.server.util.JavaDebuggerTestUtils.terminateVirtualMachineQuietly;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -57,7 +57,7 @@ public class SuspendPolicyTest {
             new BreakpointImpl(location, true, new BreakpointConfigurationImpl(SuspendPolicy.ALL)),
             events);
 
-    ensureSuspendAtDesiredLocation(location, events);
+    ensureDebuggerSuspendAtLocation(location, events);
   }
 
   @AfterClass

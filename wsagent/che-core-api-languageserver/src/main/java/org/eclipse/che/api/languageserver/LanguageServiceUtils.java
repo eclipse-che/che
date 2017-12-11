@@ -11,9 +11,10 @@
  */
 package org.eclipse.che.api.languageserver;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.shared.util.Constants;
-import org.eclipse.che.api.vfs.Path;
 import org.eclipse.lsp4j.Location;
 
 /**
@@ -61,11 +62,11 @@ public class LanguageServiceUtils {
     if (!isProjectUri(fileUri)) {
       throw new LanguageServerException("Not a project URI: " + fileUri);
     }
-    Path path = Path.of(removeUriScheme(fileUri));
-    if (path.length() < 1) {
+    Path path = Paths.get(removeUriScheme(fileUri));
+    if (path.getNameCount() < 1) {
       throw new LanguageServerException("Not a project URI: " + fileUri);
     }
-    return path.subPath(0, 2).toString();
+    return path.subpath(0, 2).toString();
   }
 
   public static Location fixLocation(Location o) {
