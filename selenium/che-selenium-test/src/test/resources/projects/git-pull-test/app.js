@@ -8,17 +8,6 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package hello;
-  
- /**
- * Hello world!
- *
- */
-
-public class SayHello 
-{
-    public String sayHello(String name)
-    {
-        return "Hello, " + name;
-    }
-}
+var greetings = require("./greetings.js");
+var b = greetings.sayHelloInEnglish();
+var c="some add value" + b;
