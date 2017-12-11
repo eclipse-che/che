@@ -11,6 +11,7 @@
 package org.eclipse.che.api.core.model.workspace.config;
 
 import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
@@ -19,6 +20,13 @@ import org.eclipse.che.commons.annotation.Nullable;
  * @author Alexander Garagatyi
  */
 public interface ServerConfig {
+
+  /**
+   * {@link ServerConfig} and {@link Server} attribute name which can identify server as internal or
+   * external. Attribute value {@code true} makes a server internal, any other value or lack of the
+   * attribute makes the server external.
+   */
+  String INTERNAL_SERVER_ATTRIBUTE = "internal";
 
   /**
    * Port used by server.

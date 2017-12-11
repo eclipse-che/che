@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.swagger;
 
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -20,7 +19,6 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Swagger;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -46,11 +44,6 @@ public class SwaggerTest {
   public void checkNameProjectTest() throws Exception {
     driver.navigate().to(swaggerUrl);
 
-    try {
-      assertTrue(swagger.getWsNamesFromWorkspacePage().contains(workspace.getName()));
-    } catch (IllegalStateException | StaleElementReferenceException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/6015", ex);
-    }
+    assertTrue(swagger.getWsNamesFromWorkspacePage().contains(workspace.getName()));
   }
 }

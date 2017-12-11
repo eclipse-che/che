@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
@@ -39,12 +40,15 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** @author Andrey Chizhikov */
 @Singleton
 public class Swagger {
 
   private final SeleniumWebDriver seleniumWebDriver;
+  private static final Logger LOG = LoggerFactory.getLogger(SeleniumWebDriver.class);
 
   @Inject
   public Swagger(SeleniumWebDriver seleniumWebDriver) {
@@ -123,12 +127,27 @@ public class Swagger {
     expandWorkSpaceItem();
     clickElementByXpath(Locators.GET_WORKSPACES);
     clickTryItOutByXpath(Locators.TRY_IT_OUT);
-    String json =
-        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-            .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.RESPONSE_BODY)))
-            .getText();
-    List<WorkspaceDto> workspaces =
-        DtoFactory.getInstance().createListDtoFromJson(json, WorkspaceDto.class);
+    List<WorkspaceDto> workspaces = new ArrayList<WorkspaceDto>();
+    // Sometimes when we get text from swagger page the JSON may be in rendering state. In this case
+    // we get invalid data.
+    // In this loop we perform 2 attempts with 500 msec. delay for getting correct data after full
+    // rendering page.
+    for (int i = 0; i < 2; i++) {
+      try {
+        workspaces =
+            DtoFactory.getInstance()
+                .createListDtoFromJson(
+                    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+                        .until(
+                            ExpectedConditions.visibilityOfElementLocated(
+                                By.xpath(Locators.RESPONSE_BODY)))
+                        .getText(),
+                    WorkspaceDto.class);
+        break;
+      } catch (RuntimeException ex) {
+        WaitUtils.sleepQuietly(500, MILLISECONDS);
+      }
+    }
     return workspaces
         .stream()
         .map(workspaceDto -> workspaceDto.getConfig().getName())

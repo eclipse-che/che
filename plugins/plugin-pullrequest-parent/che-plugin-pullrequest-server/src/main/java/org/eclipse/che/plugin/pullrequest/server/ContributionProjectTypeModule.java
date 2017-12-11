@@ -27,5 +27,6 @@ public class ContributionProjectTypeModule extends AbstractModule {
     final Multibinder<ProjectTypeDef> projectTypeMultibinder =
         Multibinder.newSetBinder(binder(), ProjectTypeDef.class);
     projectTypeMultibinder.addBinding().to(ContributionProjectType.class);
+    bind(ContributionProjectTypeCleaner.class);
   }
 }

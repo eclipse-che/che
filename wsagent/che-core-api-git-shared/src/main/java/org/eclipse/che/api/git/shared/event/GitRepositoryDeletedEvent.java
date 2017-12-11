@@ -25,4 +25,10 @@ public interface GitRepositoryDeletedEvent extends GitEvent {
   void setProjectName(String projectName);
 
   GitRepositoryDeletedEvent withProjectName(String projectName);
+
+  void setProjectPath(String projectPath);
+
+  String getProjectPath();
+
+  GitRepositoryDeletedEvent withProjectPath(String projectPath);
 }

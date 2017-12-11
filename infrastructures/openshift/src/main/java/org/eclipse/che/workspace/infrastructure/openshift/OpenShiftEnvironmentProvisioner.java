@@ -11,16 +11,17 @@
 package org.eclipse.che.workspace.infrastructure.openshift;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.route.TlsRouteProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.server.ServersConverter;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.VolumesProvisioner;
 
 /**
  * Applies the set of configurations to the OpenShift environment and environment configuration with
@@ -32,7 +33,8 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.volume.Volum
 @Singleton
 public class OpenShiftEnvironmentProvisioner {
 
-  private final VolumesProvisioner volumesProvisioner;
+  private final boolean pvcEnabled;
+  private final WorkspaceVolumesStrategy volumesStrategy;
   private final UniqueNamesProvisioner uniqueNamesProvisioner;
   private final TlsRouteProvisioner tlsRouteProvisioner;
   private final ServersConverter serversConverter;
@@ -41,13 +43,15 @@ public class OpenShiftEnvironmentProvisioner {
 
   @Inject
   public OpenShiftEnvironmentProvisioner(
-      VolumesProvisioner volumesProvisioner,
+      @Named("che.infra.openshift.pvc.enabled") boolean pvcEnabled,
       UniqueNamesProvisioner uniqueNamesProvisioner,
       TlsRouteProvisioner tlsRouteProvisioner,
       ServersConverter serversConverter,
       EnvVarsConverter envVarsConverter,
-      RestartPolicyRewriter restartPolicyRewriter) {
-    this.volumesProvisioner = volumesProvisioner;
+      RestartPolicyRewriter restartPolicyRewriter,
+      WorkspaceVolumesStrategy volumesStrategy) {
+    this.pvcEnabled = pvcEnabled;
+    this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
     this.tlsRouteProvisioner = tlsRouteProvisioner;
     this.serversConverter = serversConverter;
@@ -60,7 +64,9 @@ public class OpenShiftEnvironmentProvisioner {
     // 1 stage - converting Che model env to OpenShift env
     serversConverter.provision(osEnv, identity);
     envVarsConverter.provision(osEnv, identity);
-    volumesProvisioner.provision(osEnv, identity);
+    if (pvcEnabled) {
+      volumesStrategy.provision(osEnv, identity);
+    }
 
     // 2 stage - add OpenShift env items
     restartPolicyRewriter.provision(osEnv, identity);

@@ -16,6 +16,7 @@ import static org.eclipse.che.workspace.infrastructure.openshift.ServerExposer.S
 import static org.eclipse.che.workspace.infrastructure.openshift.ServerExposer.SERVER_UNIQUE_PART_SIZE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
@@ -45,6 +46,8 @@ import org.testng.annotations.Test;
  */
 public class ServerExposerTest {
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
+  private static final Map<String, String> INTERNAL_SERVER_ATTRIBUTE_MAP =
+      singletonMap(ServerConfig.INTERNAL_SERVER_ATTRIBUTE, Boolean.TRUE.toString());
 
   private static final Pattern SERVER_PREFIX_REGEX =
       Pattern.compile('^' + SERVER_PREFIX + "[A-z0-9]{" + SERVER_UNIQUE_PART_SIZE + "}-pod-main$");
@@ -83,7 +86,7 @@ public class ServerExposerTest {
     serverExposer.expose(serversToExpose);
 
     // then
-    assertThatServerIsExposed(
+    assertThatExternalServerIsExposed(
         "http-server",
         "tcp",
         8080,
@@ -109,12 +112,12 @@ public class ServerExposerTest {
     // then
     assertEquals(openShiftEnvironment.getServices().size(), 1);
     assertEquals(openShiftEnvironment.getRoutes().size(), 1);
-    assertThatServerIsExposed(
+    assertThatExternalServerIsExposed(
         "http-server",
         "tcp",
         8080,
         new ServerConfigImpl(httpServerConfig).withAttributes(ATTRIBUTES_MAP));
-    assertThatServerIsExposed(
+    assertThatExternalServerIsExposed(
         "ws-server",
         "tcp",
         8080,
@@ -140,12 +143,12 @@ public class ServerExposerTest {
     // then
     assertEquals(openShiftEnvironment.getServices().size(), 1);
     assertEquals(openShiftEnvironment.getRoutes().size(), 2);
-    assertThatServerIsExposed(
+    assertThatExternalServerIsExposed(
         "http-server",
         "tcp",
         8080,
         new ServerConfigImpl(httpServerConfig).withAttributes(ATTRIBUTES_MAP));
-    assertThatServerIsExposed(
+    assertThatExternalServerIsExposed(
         "ws-server",
         "tcp",
         8081,
@@ -167,7 +170,7 @@ public class ServerExposerTest {
     // then
     assertEquals(openShiftEnvironment.getServices().size(), 1);
     assertEquals(openShiftEnvironment.getRoutes().size(), 1);
-    assertThatServerIsExposed(
+    assertThatExternalServerIsExposed(
         "http-server",
         "TCP",
         8080,
@@ -193,7 +196,7 @@ public class ServerExposerTest {
     serverExposer.expose(serversToExpose);
 
     // then
-    assertThatServerIsExposed(
+    assertThatExternalServerIsExposed(
         "http-server",
         "tcp",
         8080,
@@ -222,14 +225,59 @@ public class ServerExposerTest {
     assertEquals(container.getPorts().size(), 2);
     assertEquals(container.getPorts().get(1).getContainerPort(), new Integer(8080));
     assertEquals(container.getPorts().get(1).getProtocol(), "UDP");
-    assertThatServerIsExposed(
+    assertThatExternalServerIsExposed(
         "server",
         "udp",
         8080,
         new ServerConfigImpl(udpServerConfig).withAttributes(ATTRIBUTES_MAP));
   }
 
-  private void assertThatServerIsExposed(
+  @Test
+  public void shouldExposeContainerPortAndCreateServiceForInternalServer() throws Exception {
+    // given
+    ServerConfigImpl httpServerConfig =
+        new ServerConfigImpl("8080/tcp", "http", "/api", INTERNAL_SERVER_ATTRIBUTE_MAP);
+    Map<String, ServerConfigImpl> serversToExpose =
+        ImmutableMap.of("http-server", httpServerConfig);
+
+    // when
+    serverExposer.expose(serversToExpose);
+
+    // then
+    assertThatInternalServerIsExposed(
+        "http-server",
+        "tcp",
+        8080,
+        new ServerConfigImpl(httpServerConfig).withAttributes(INTERNAL_SERVER_ATTRIBUTE_MAP));
+  }
+
+  @Test
+  public void shouldExposeInternalAndExternalServers() throws Exception {
+    // given
+    ServerConfigImpl internalServerConfig =
+        new ServerConfigImpl("8080/tcp", "http", "/api", INTERNAL_SERVER_ATTRIBUTE_MAP);
+    ServerConfigImpl externalServerConfig =
+        new ServerConfigImpl("9090/tcp", "http", "/api", ATTRIBUTES_MAP);
+    Map<String, ServerConfigImpl> serversToExpose =
+        ImmutableMap.of("int-server", internalServerConfig, "ext-server", externalServerConfig);
+
+    // when
+    serverExposer.expose(serversToExpose);
+
+    // then
+    assertThatInternalServerIsExposed(
+        "int-server",
+        "tcp",
+        8080,
+        new ServerConfigImpl(internalServerConfig).withAttributes(INTERNAL_SERVER_ATTRIBUTE_MAP));
+    assertThatExternalServerIsExposed(
+        "ext-server",
+        "tcp",
+        9090,
+        new ServerConfigImpl(externalServerConfig).withAttributes(ATTRIBUTES_MAP));
+  }
+
+  private void assertThatExternalServerIsExposed(
       String serverNameRegex, String portProtocol, Integer port, ServerConfigImpl expected) {
     // then
     assertTrue(
@@ -271,10 +319,65 @@ public class ServerExposerTest {
     assertEquals(route.getSpec().getTo().getName(), service.getMetadata().getName());
     assertEquals(route.getSpec().getPort().getTargetPort().getStrVal(), servicePort.getName());
 
-    RoutesAnnotations.Deserializer routeDeserializer =
-        RoutesAnnotations.newDeserializer(route.getMetadata().getAnnotations());
-    Map<String, ServerConfigImpl> servers = routeDeserializer.servers();
+    Annotations.Deserializer annotationsDeserializer =
+        Annotations.newDeserializer(route.getMetadata().getAnnotations());
+    Map<String, ServerConfigImpl> servers = annotationsDeserializer.servers();
     ServerConfig serverConfig = servers.get(serverNameRegex);
     assertEquals(serverConfig, expected);
+  }
+
+  private void assertThatInternalServerIsExposed(
+      String serverNameRegex, String portProtocol, Integer port, ServerConfigImpl expected) {
+    // then
+    assertTrue(
+        container
+            .getPorts()
+            .stream()
+            .anyMatch(
+                p ->
+                    p.getContainerPort().equals(port)
+                        && p.getProtocol().equals(portProtocol.toUpperCase())));
+    // ensure that service is created
+
+    Service service = null;
+    for (Entry<String, Service> entry : openShiftEnvironment.getServices().entrySet()) {
+      if (SERVER_PREFIX_REGEX.matcher(entry.getKey()).matches()) {
+        service = entry.getValue();
+        break;
+      }
+    }
+    assertNotNull(service);
+
+    // ensure that required service port is exposed
+    Optional<ServicePort> servicePortOpt =
+        service
+            .getSpec()
+            .getPorts()
+            .stream()
+            .filter(p -> p.getTargetPort().getIntVal().equals(port))
+            .findAny();
+    assertTrue(servicePortOpt.isPresent());
+    ServicePort servicePort = servicePortOpt.get();
+    assertEquals(servicePort.getTargetPort().getIntVal(), port);
+    assertEquals(servicePort.getPort(), port);
+    assertEquals(servicePort.getName(), SERVER_PREFIX + "-" + port);
+
+    Annotations.Deserializer annotationsDeserializer =
+        Annotations.newDeserializer(service.getMetadata().getAnnotations());
+    Map<String, ServerConfigImpl> servers = annotationsDeserializer.servers();
+    ServerConfig serverConfig = servers.get(serverNameRegex);
+    assertEquals(serverConfig, expected);
+
+    // ensure that required route is created
+    Route route =
+        openShiftEnvironment.getRoutes().get(service.getMetadata().getName() + "-server-" + port);
+    assertEquals(route.getSpec().getTo().getName(), service.getMetadata().getName());
+    assertEquals(route.getSpec().getPort().getTargetPort().getStrVal(), servicePort.getName());
+
+    Annotations.Deserializer routeAnnotationsDeserializer =
+        Annotations.newDeserializer(route.getMetadata().getAnnotations());
+    Map<String, ServerConfigImpl> routeServers = routeAnnotationsDeserializer.servers();
+    ServerConfig routeServerConfig = routeServers.get(serverNameRegex);
+    assertNull(routeServerConfig);
   }
 }
