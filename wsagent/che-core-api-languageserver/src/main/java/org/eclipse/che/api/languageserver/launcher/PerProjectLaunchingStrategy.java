@@ -10,9 +10,9 @@
  */
 package org.eclipse.che.api.languageserver.launcher;
 
+import java.nio.file.Paths;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
-import org.eclipse.che.api.vfs.Path;
 
 public class PerProjectLaunchingStrategy implements LaunchingStrategy {
   public static final PerProjectLaunchingStrategy INSTANCE = new PerProjectLaunchingStrategy();
@@ -22,13 +22,13 @@ public class PerProjectLaunchingStrategy implements LaunchingStrategy {
   @Override
   public String getLaunchKey(String fileUri) {
     String path = LanguageServiceUtils.removePrefixUri(fileUri);
-    return Path.of(path).element(0);
+    return Paths.get(path).getName(0).toString();
   }
 
   @Override
   public boolean isApplicable(String launchKey, String fileUri) {
     String path = LanguageServiceUtils.removePrefixUri(fileUri);
-    String project = Path.of(path).element(0);
+    String project = Paths.get(path).getName(0).toString();
     return project.equals(launchKey);
   }
 
