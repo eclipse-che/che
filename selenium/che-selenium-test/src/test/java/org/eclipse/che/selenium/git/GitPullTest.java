@@ -33,6 +33,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.kohsuke.github.GHContent;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.testng.annotations.AfterClass;
@@ -94,7 +95,7 @@ public class GitPullTest {
 
     String currentTimeInMillis = Long.toString(System.currentTimeMillis());
     projectExplorer.waitProjectExplorer();
-    String repoUrl = String.format("git@github.com:%s/%s.git", gitHubUsername, REPO_NAME);
+    String repoUrl = String.format("https://github.com/%s/%s.git", gitHubUsername, REPO_NAME);
     git.importJavaApp(repoUrl, PROJECT_NAME, BLANK);
 
     prepareFilesForTest(jsFileName);
@@ -110,17 +111,15 @@ public class GitPullTest {
 
     git.waitGitStatusBarWithMess("Successfully pulled");
     git.waitGitStatusBarWithMess(
-        String.format("from git@github.com:%s/%s", gitHubUsername, REPO_NAME));
+        String.format("from https://github.com/%s/%s.git", gitHubUsername, REPO_NAME));
 
     checkPullAfterUpdatingContent(readmeTxtFileName, currentTimeInMillis);
     checkPullAfterUpdatingContent(htmlFileName, currentTimeInMillis);
     checkPullAfterUpdatingContent(readmeTxtFileName, currentTimeInMillis);
-    gitHubRepository
-        .getDirectoryContent(folderWithPlainFilesPath).remove(folderWithPlainFilesPath);
-
-
-    menu.runCommand(GIT, REMOTES_TOP, PULL);
-
+    for (GHContent ghContent : gitHubRepository.getDirectoryContent(folderWithPlainFilesPath)) {
+      ghContent.delete("remove file " + ghContent.getName());
+    }
+    performPull();
     checkPullAfterRemovingContent(
         readmeTxtFileName,
         String.format("/%s/%s/%s", PROJECT_NAME, folderWithPlainFilesPath, readmeTxtFileName));
