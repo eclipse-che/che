@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import static java.lang.Integer.parseInt;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.INTERNAL_SERVER_ATTRIBUTE;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_ORIGINAL_NAME_LABEL;
 
@@ -26,6 +27,7 @@ import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,10 +41,11 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesP
 
 /**
  * Helps to modify {@link OpenShiftEnvironment} to make servers that are configured by {@link
- * ServerConfig} public accessible.
+ * ServerConfig} publicly or workspace-wide accessible.
  *
  * <p>To make server accessible it is needed to make sure that container port is declared, create
- * {@link Service} and corresponding {@link Route} for exposing this port.
+ * {@link Service}. To make it also publicly accessible it is needed to create corresponding {@link
+ * Route} for exposing this port.
  *
  * <p>Container, service and route are linked in the following way:
  *
@@ -88,11 +91,13 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesP
  *     targetPort: [8080|web-app]     ---->> Service.spec.ports[0].[port|name]
  * </pre>
  *
- * <p>For accessing to server user will use route host. Information about servers that are exposed
- * by route are stored in its annotations.
+ * <p>For accessing publicly accessible server user will use route host. For accessing
+ * workspace-wide accessible server user will use service name. Information about servers that are
+ * exposed by route and/or service are stored in annotations of a route or service.
  *
  * @author Sergii Leshchenko
- * @see RoutesAnnotations
+ * @author Alexander Garagatyi
+ * @see Annotations
  */
 public class ServerExposer {
 
@@ -124,12 +129,24 @@ public class ServerExposer {
    */
   public void expose(Map<String, ? extends ServerConfig> servers) {
     Map<String, ServicePort> portToServicePort = exposePort(servers.values());
+    Map<String, ServerConfig> internalServers = new HashMap<>();
+    Map<String, ServerConfig> externalServers = new HashMap<>();
+
+    servers.forEach(
+        (key, value) -> {
+          if ("true".equals(value.getAttributes().get(INTERNAL_SERVER_ATTRIBUTE))) {
+            internalServers.put(key, value);
+          } else {
+            externalServers.put(key, value);
+          }
+        });
 
     Service service =
         new ServiceBuilder()
             .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + '-' + machineName)
             .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
             .withPorts(new ArrayList<>(portToServicePort.values()))
+            .withServers(internalServers)
             .build();
 
     String serviceName = service.getMetadata().getName();
@@ -138,7 +155,7 @@ public class ServerExposer {
     for (ServicePort servicePort : portToServicePort.values()) {
       int port = servicePort.getTargetPort().getIntVal();
       Map<String, ServerConfig> routesServers =
-          servers
+          externalServers
               .entrySet()
               .stream()
               .filter(e -> parseInt(e.getValue().getPort().split("/")[0]) == port)
@@ -195,7 +212,8 @@ public class ServerExposer {
   private static class ServiceBuilder {
     private String name;
     private Map<String, String> selector = new HashMap<>();
-    private List<ServicePort> ports = new ArrayList<>();
+    private List<ServicePort> ports = Collections.emptyList();
+    private Map<String, ? extends ServerConfig> serversConfigs = Collections.emptyMap();
 
     private ServiceBuilder withName(String name) {
       this.name = name;
@@ -212,12 +230,18 @@ public class ServerExposer {
       return this;
     }
 
+    private ServiceBuilder withServers(Map<String, ? extends ServerConfig> serversConfigs) {
+      this.serversConfigs = serversConfigs;
+      return this;
+    }
+
     private Service build() {
       io.fabric8.kubernetes.api.model.ServiceBuilder builder =
           new io.fabric8.kubernetes.api.model.ServiceBuilder();
       return builder
           .withNewMetadata()
           .withName(name.replace("/", "-"))
+          .withAnnotations(Annotations.newSerializer().servers(serversConfigs).annotations())
           .endMetadata()
           .withNewSpec()
           .withSelector(selector)
@@ -260,7 +284,7 @@ public class ServerExposer {
       return builder
           .withNewMetadata()
           .withName(name.replace("/", "-"))
-          .withAnnotations(RoutesAnnotations.newSerializer().servers(serversConfigs).annotations())
+          .withAnnotations(Annotations.newSerializer().servers(serversConfigs).annotations())
           .endMetadata()
           .withNewSpec()
           .withNewTo()

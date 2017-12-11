@@ -13,23 +13,21 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.fabric8.openshift.api.model.Route;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 
 /**
- * Helps to convert {@link Route} related OpenShift infrastructure entities to annotations and
+ * Helps to convert {@link ServerConfig} objects to OpenShift infrastructure annotations and
  * vise-versa.
  *
  * @author Sergii Leshchenko
  */
-public class RoutesAnnotations {
+public class Annotations {
   public static final String ANNOTATION_PREFIX = "org.eclipse.che.";
 
   public static final String SERVER_PORT_ANNOTATION_FMT = ANNOTATION_PREFIX + "server.%s.port";
@@ -58,13 +56,13 @@ public class RoutesAnnotations {
     return new Deserializer(annotations);
   }
 
-  /** Helps to serialize known route related entities to OpenShift annotations. */
+  /** Helps to serialize ServerConfig entities to OpenShift annotations. */
   public static class Serializer {
-    private final Map<String, String> annotations = new LinkedHashMap<>();
+    private final Map<String, String> annotations = new HashMap<>();
 
     /**
-     * Serializes server configuration as OpenShift Route annotations. Appends serialization result
-     * to this aggregate.
+     * Serializes server configuration as OpenShift annotations. Appends serialization result to
+     * this aggregate.
      *
      * @param ref server reference e.g. "exec-agent"
      * @param server server configuration
@@ -93,17 +91,15 @@ public class RoutesAnnotations {
     }
   }
 
-  /** Helps to deserialize OpenShift annotations to known route related entities. */
+  /** Helps to deserialize OpenShift annotations to known {@link ServerConfig} related entities. */
   public static class Deserializer {
     private final Map<String, String> annotations;
 
     public Deserializer(Map<String, String> annotations) {
-      this.annotations = Objects.requireNonNull(annotations);
+      this.annotations = annotations != null ? annotations : Collections.emptyMap();
     }
 
-    /**
-     * Retrieves server configuration from route annotations and returns (ref -> server config) map.
-     */
+    /** Retrieves server configuration from annotations and returns (ref -> server config) map. */
     public Map<String, ServerConfigImpl> servers() {
       Map<String, ServerConfigImpl> servers = new HashMap<>();
       for (Map.Entry<String, String> entry : annotations.entrySet()) {
@@ -127,5 +123,5 @@ public class RoutesAnnotations {
     }
   }
 
-  private RoutesAnnotations() {}
+  private Annotations() {}
 }

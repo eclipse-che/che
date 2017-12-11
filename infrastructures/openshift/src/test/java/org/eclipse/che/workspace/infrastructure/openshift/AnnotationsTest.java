@@ -23,11 +23,11 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.testng.annotations.Test;
 
 /**
- * Test for {@link RoutesAnnotations}.
+ * Test for {@link Annotations}.
  *
  * @author Sergii Leshchenko
  */
-public class RoutesAnnotationsTest {
+public class AnnotationsTest {
   static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
   static final Map<String, String> ATTRIBUTES = singletonMap("key", "value");
   static final String stringAttributes = GSON.toJson(ATTRIBUTES);
@@ -36,7 +36,7 @@ public class RoutesAnnotationsTest {
   @Test
   public void serialization() {
     Map<String, String> serialized =
-        RoutesAnnotations.newSerializer()
+        Annotations.newSerializer()
             .server(
                 "my-server1/http",
                 new ServerConfigImpl("8000/tcp", "http", "/api/info", ATTRIBUTES))
@@ -76,7 +76,7 @@ public class RoutesAnnotationsTest {
             .put("org.eclipse.che.server.my-server3.attributes", stringEmptyAttributes)
             .build();
 
-    RoutesAnnotations.Deserializer deserializer = RoutesAnnotations.newDeserializer(annotations);
+    Annotations.Deserializer deserializer = Annotations.newDeserializer(annotations);
 
     Map<String, ServerConfigImpl> servers = deserializer.servers();
 

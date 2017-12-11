@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.server.mapping;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,21 +19,31 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerPort;
 import org.eclipse.che.infrastructure.docker.client.json.NetworkSettings;
 import org.eclipse.che.infrastructure.docker.client.json.PortBinding;
 
-/** Maps container ports bindings to machine servers. */
+/**
+ * Maps container ports bindings to machine servers.
+ *
+ * @author Yevhenii Voevodin
+ * @author Alexander Garagatyi
+ */
 public class ServersMapper {
 
   private final String hostname;
+  private final String machineName;
 
   /**
-   * Creates mapper using given {@code hostname} as hostname for all the servers urls produced by
-   * mapper.
+   * Creates mapper using given {@code hostname} as hostname for all the servers urls which are
+   * publicly published. For workspace-wide available servers provided {@code machineName} is used
+   * as a hostname.
    */
-  public ServersMapper(String hostname) {
+  public ServersMapper(String hostname, String machineName) {
     this.hostname = hostname;
+    this.machineName = machineName;
   }
 
   /**
@@ -40,9 +52,10 @@ public class ServersMapper {
    * @param ports container ports to map
    * @param configs servers configuration map used to resolve server references
    * @return server reference -> server map. Note that if there is no server configuration for
-   *     container bound port, port+type itself(like 4022/tpc) will be used as a reference
+   *     container bound port, port+type itself(like 4022/tcp) will be used as a reference
    */
-  public Map<String, ServerImpl> map(ContainerPort[] ports, Map<String, ServerConfig> configs) {
+  public Map<String, ServerImpl> map(ContainerPort[] ports, Map<String, ServerConfig> configs)
+      throws InternalInfrastructureException {
     if (ports == null || ports.length == 0) {
       return Collections.emptyMap();
     }
@@ -82,15 +95,22 @@ public class ServersMapper {
         }
       }
 
+      String hostname;
+      if (port.getPublicPort() == 0) {
+        hostname = machineName;
+      } else {
+        hostname = this.hostname;
+      }
+
       if (refs == null) {
-        mapped.put(rawPort, new ServerImpl().withUrl(makeUrl(port, null, null)));
+        mapped.put(rawPort, new ServerImpl().withUrl(makeUrl(port, null, null, hostname)));
       } else {
         for (String ref : refs) {
           ServerConfig cfg = configs.get(ref);
           mapped.put(
               ref,
               new ServerImpl()
-                  .withUrl(makeUrl(port, cfg.getProtocol(), cfg.getPath()))
+                  .withUrl(makeUrl(port, cfg.getProtocol(), cfg.getPath(), hostname))
                   .withAttributes(cfg.getAttributes()));
         }
       }
@@ -104,7 +124,8 @@ public class ServersMapper {
    * NetworkSettings#getPorts()}.
    */
   public Map<String, ServerImpl> map(
-      Map<String, List<PortBinding>> ports, Map<String, ServerConfig> configs) {
+      Map<String, List<PortBinding>> ports, Map<String, ServerConfig> configs)
+      throws InternalInfrastructureException {
     if (ports == null) {
       return Collections.emptyMap();
     }
@@ -112,8 +133,8 @@ public class ServersMapper {
         ports
             .entrySet()
             .stream()
-            .filter(entry -> entry.getValue() != null && entry.getValue().size() == 1)
-            .map(entry -> toContainerPort(entry.getKey(), entry.getValue().get(0)))
+            .filter(entry -> entry.getValue() == null || entry.getValue().size() == 1)
+            .map(entry -> toContainerPort(entry.getKey(), entry.getValue()))
             .toArray(ContainerPort[]::new),
         configs);
   }
@@ -135,7 +156,8 @@ public class ServersMapper {
    * |------------------------------------------------------------------------|
    * </pre>
    */
-  private String makeUrl(ContainerPort port, String protocol, String path) {
+  private String makeUrl(ContainerPort port, String protocol, String path, String hostname)
+      throws InternalInfrastructureException {
     if (protocol == null) {
       if (port.getType() == null) {
         protocol = "tcp";
@@ -151,12 +173,25 @@ public class ServersMapper {
       path = '/' + path;
     }
 
-    return protocol + "://" + hostname + ':' + port.getPublicPort() + path;
+    int serverPort = port.getPublicPort() != 0 ? port.getPublicPort() : port.getPrivatePort();
+
+    try {
+      return new URI(protocol, null, hostname, serverPort, path, null, null).toString();
+    } catch (URISyntaxException e) {
+      throw new InternalInfrastructureException(
+          "Constructing of URI of server failed. Error: " + e.getLocalizedMessage());
+    }
   }
 
-  private ContainerPort toContainerPort(String rawPort, PortBinding binding) {
+  /**
+   * Creates {@link ContainerPort} from provided port information. When {@code binding} is {@code
+   * null} result represents workspace-wide accessible port, otherwise publicly available.
+   */
+  private ContainerPort toContainerPort(String rawPort, @Nullable List<PortBinding> binding) {
     ContainerPort result = new ContainerPort();
-    result.setPublicPort(Integer.parseInt(binding.getHostPort()));
+    if (binding != null) {
+      result.setPublicPort(Integer.parseInt(binding.get(0).getHostPort()));
+    }
     int slashIdx = rawPort.indexOf('/');
     if (slashIdx != -1) {
       result.setType(rawPort.substring(slashIdx + 1));

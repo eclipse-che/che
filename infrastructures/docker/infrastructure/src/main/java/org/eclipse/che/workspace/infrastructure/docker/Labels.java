@@ -14,7 +14,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -64,7 +63,7 @@ public final class Labels {
   /** Helps to serialize known entities to docker labels. */
   public static class Serializer {
 
-    private final Map<String, String> labels = new LinkedHashMap<>();
+    private final Map<String, String> labels = new HashMap<>();
 
     /**
      * Serializes machine name as docker container label. Appends serialization result to this
@@ -106,9 +105,7 @@ public final class Labels {
       if (server.getPath() != null) {
         labels.put(String.format(SERVER_PATH_LABEL_FMT, ref), server.getPath());
       }
-      if (server.getAttributes() != null) {
-        labels.put(String.format(SERVER_ATTR_LABEL_FMT, ref), GSON.toJson(server.getAttributes()));
-      }
+      labels.put(String.format(SERVER_ATTR_LABEL_FMT, ref), GSON.toJson(server.getAttributes()));
       return this;
     }
 
