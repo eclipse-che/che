@@ -61,6 +61,7 @@ public class CheckFileWatcherExcludeFeatureTest {
     ide.open(testWorkspace);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
+    //We enable hidden files because in the test we use file Watcher Ignore, which is hidden.
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.SHOW_HIDE_HIDDEN_FILES);
