@@ -10,14 +10,15 @@
  */
 package org.eclipse.che.selenium.filewatcher;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.constant.TestStacksConstants;
-import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -29,9 +30,6 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 /** @author Musienko Maxim */
 public class UpdateFilesWithoutIDE {
@@ -76,7 +74,7 @@ public class UpdateFilesWithoutIDE {
   public void setUp() throws Exception {
     URL resource = getClass().getResource("/projects/spring-project-for-file-watcher-tabs");
     testProjectServiceClient.importProject(
-            ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING);
+        ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING);
 
     ide1.open(ws);
     ide2.open(ws);
@@ -99,7 +97,7 @@ public class UpdateFilesWithoutIDE {
     editor1.waitActive();
 
     testProjectServiceClient.updateFile(
-            ws.getId(), PROJECT_NAME + "/" + nameFiletxt2, Long.toString(System.currentTimeMillis()));
+        ws.getId(), PROJECT_NAME + "/" + nameFiletxt2, Long.toString(System.currentTimeMillis()));
 
     events1.waitExpectedMessage(expectedMessage2, LOAD_PAGE_TIMEOUT_SEC);
     projectExplorer1.openItemByPath(PROJECT_NAME + "/" + nameFiletxt3);
@@ -109,7 +107,7 @@ public class UpdateFilesWithoutIDE {
 
     String currentTimeInMs = Long.toString(System.currentTimeMillis());
     testProjectServiceClient.updateFile(
-            ws.getId(), PROJECT_NAME + "/" + nameFiletxt3, Long.toString(System.currentTimeMillis()));
+        ws.getId(), PROJECT_NAME + "/" + nameFiletxt3, Long.toString(System.currentTimeMillis()));
 
     editor1.waitTextIntoEditor(currentTimeInMs, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     editor2.waitTextIntoEditor(currentTimeInMs, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
