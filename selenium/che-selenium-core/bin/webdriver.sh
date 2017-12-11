@@ -50,9 +50,6 @@ initVariables() {
     readonly FAILSAFE_REPORT="target/site/failsafe-report.html"
 
     readonly SINGLE_TEST_MSG="single test/package"
-
-    readonly MAX_RERUN=2
-
     export CHE_MULTIUSER=${CHE_MULTIUSER:-false}
 
     # CALLER variable contains parent caller script name
@@ -64,8 +61,7 @@ initVariables() {
 
     MODE="grid"
     GRID_OPTIONS="-Dgrid.mode=true"
-    RERUN=false
-
+    RERUN_ATTEMPTS=0
     BROWSER="GOOGLE_CHROME"
     WEBDRIVER_VERSION=$(curl -s http://chromedriver.storage.googleapis.com/LATEST_RELEASE)
     WEBDRIVER_PORT="9515"
@@ -104,7 +100,10 @@ checkParameters() {
         elif [[ "$var" =~ --host=.* ]]; then :
         elif [[ "$var" =~ --port=.* ]]; then :
         elif [[ "$var" =~ --threads=[0-9]+$ ]]; then :
+
         elif [[ "$var" == --rerun ]]; then :
+        elif [[ "$var" =~ ^[0-9]+$ ]] && [[ $@ =~ --rerun[[:space:]]$var ]]; then :
+
         elif [[ "$var" == --debug ]]; then :
         elif [[ "$var" == --all-tests ]]; then
             echo "[WARN] '--all-tests' parameter is outdated and is being ignored"
@@ -136,9 +135,11 @@ checkParameters() {
         elif [[ "$var" =~ -M.* ]]; then :
         elif [[ "$var" =~ -P.* ]]; then :
         elif [[ "$var" == --help ]]; then :
+
         elif [[ "$var" == --compare-with-ci ]]; then :
-        elif [[ "$var" =~ ^--workspace-pool-size=(auto|[0-9]+)$ ]]; then :
         elif [[ "$var" =~ ^[0-9]+$ ]] && [[ $@ =~ --compare-with-ci[[:space:]]$var ]]; then :
+
+        elif [[ "$var" =~ ^--workspace-pool-size=(auto|[0-9]+)$ ]]; then :
         elif [[ "$var" =~ ^-D.* ]]; then :
         elif [[ "$var" =~ ^-[[:alpha:]]$ ]]; then :
         elif [[ "$var" == --skip-sources-validation ]]; then :
@@ -181,8 +182,13 @@ applyCustomOptions() {
         elif [[ "$var" =~ --workspace-pool-size=.* ]]; then
             WORKSPACE_POOL_SIZE=$(echo "$var" | sed -e "s/--workspace-pool-size=//g")
 
-        elif [[ "$var" == --rerun ]]; then
-            RERUN=true
+        elif [[ "$var" =~ --rerun ]]; then
+            local rerunAttempts=$(echo $@ | sed 's/.*--rerun\W\+\([0-9]\+\).*/\1/')
+            if [[ "$rerunAttempts" =~ ^[0-9]+$ ]]; then
+              RERUN_ATTEMPTS=$rerunAttempts
+            else
+              RERUN_ATTEMPTS=2
+            fi
 
         elif [[ "$var" == --debug ]]; then
             DEBUG_OPTIONS="-Dmaven.failsafe.debug"
@@ -361,7 +367,7 @@ Options:
     --http                              Use 'http' protocol to connect to product
     --https                             Use 'https' protocol to connect to product
     --host=<PRODUCT_HOST>               Set host where product is deployed
-    --port=<PRODUCT_PORT>               Set port of the product
+    --port=<PRODUCT_PORT>               Set port of the product, default is 8080
     --multiuser                         Run tests of Multi User Che
 
 Modes (defines environment to run tests):
@@ -375,7 +381,7 @@ Modes (defines environment to run tests):
                                         Web browsers will be opened on the developer machine.
                                         Default value is in range [2,5] and depends on available RAM.
 
-    -Mgrid (default)                    All tests will be run in parallel on several docker containers.
+    -Mgrid (default)                    All tests will be run in parallel among several docker containers.
                                         One container per thread. Recommended to run test suite.
 
         Options that go with 'grid' mode:
@@ -390,8 +396,10 @@ Define tests scope:
 Handle failing tests:
     --failed-tests                      Rerun failed tests that left after the previous try
     --regression-tests                  Rerun regression tests that left after the previous try
-    --rerun                             Automatically rerun failing tests
-    --compare-with-ci                   Compare failed tests with results on CI server
+    --rerun [ATTEMPTS]                  Automatically rerun failing tests.
+                                        Default attempts number is 2.
+    --compare-with-ci [BUILD NUMBER]    Compare failed tests with results on CI server.
+                                        Default build is latest.
 
 Other options:
     --debug                             Run tests in debug mode
@@ -407,7 +415,7 @@ HOW TO of usage:
         ${CALLER} --multiuser
 
     Test Eclipse Che assembly and automatically rerun failing tests:
-        ${CALLER} --rerun
+        ${CALLER} --rerun [ATTEMPTS]
 
     Run single test or package of tests:
         ${CALLER} <...> --test=<TEST>
@@ -417,7 +425,7 @@ HOW TO of usage:
 
     Rerun failed tests:
         ${CALLER} <...> --failed-tests
-        ${CALLER} <...> --failed-tests --rerun
+        ${CALLER} <...> --failed-tests --rerun [ATTEMPTS]
 
     Debug selenium test:
         ${CALLER} -Mlocal --test=<TEST> --debug
@@ -433,7 +441,7 @@ printRunOptions() {
     echo "[TEST]"
     echo "[TEST] =========== RUN OPTIONS ==========================="
     echo "[TEST] Mode                : "${MODE}
-    echo "[TEST] Rerun failing tests : "${RERUN}
+    echo "[TEST] Rerun attempts      : "${RERUN_ATTEMPTS}
     echo "[TEST] ==================================================="
     echo "[TEST] Product Protocol    : "${PRODUCT_PROTOCOL}
     echo "[TEST] Product Host        : "${PRODUCT_HOST}
@@ -618,7 +626,7 @@ analyseTestsResults() {
 
 printProposals() {
     echo -e "[TEST] "${YELLOW}"PROPOSALS:"${NO_COLOUR}
-    local cmd=$(echo $@ | sed -e "s/--rerun//g" | \
+    local cmd=$(echo $@ | sed -e "s/--rerun\W*[0-9]*//g" | \
                           sed -e "s/-M[^ ]*//g" | \
                           sed -e "s/--failed-tests//g" | \
                           sed -e "s/--regression-tests//g" | \
@@ -710,7 +718,7 @@ rerunTests() {
         defineTestsScope "--failed-tests"
         runTests
 
-        if [[ ${rerun} < ${MAX_RERUN} ]]; then
+        if [[ ${rerun} < ${RERUN_ATTEMPTS} ]]; then
             rerunTests $(($rerun+1)) $@
         fi
     fi
@@ -817,7 +825,7 @@ prepareToFirstRun() {
 testProduct() {
     runTests
 
-    if [[ ${RERUN} == true ]]; then
+    if [[ ${RERUN_ATTEMPTS} > 0 ]]; then
         MAVEN_OPTIONS="${MAVEN_OPTIONS} -o"
         rerunTests 1 $@
     fi
