@@ -12,7 +12,7 @@ package org.eclipse.che.selenium.filewatcher;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FileWatcherExcludeOperations.REMOVE_FROM_FILE_WATCHER_EXCLUDES;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FileWatcherExcludeOperations.ADD_TO_FILE_WATCHER_EXCLUDES;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -91,16 +91,16 @@ public class UpdateFilesWithoutIDE {
     prepareFilesToCheck(NAME_FILETXT_2);
   }
 
-  // @Test
+  @Test
   public void shouldWatchEditedFileWithoutIDE() throws Exception {
     testProjectServiceClient.updateFile(
         ws.getId(), PROJECT_NAME + "/" + NAME_FILETXT_2, Long.toString(System.currentTimeMillis()));
 
     events1.waitExpectedMessage(EXPECTED_MESSAGE_2, LOAD_PAGE_TIMEOUT_SEC);
     projectExplorer1.openItemByPath(PROJECT_NAME + "/" + FILE3_TXT);
-    editor1.waitActiveEditor();
+    editor1.waitActive();
     projectExplorer2.openItemByPath(PROJECT_NAME + "/" + FILE3_TXT);
-    editor2.waitActiveEditor();
+    editor2.waitActive();
 
     String currentTimeInMs = Long.toString(System.currentTimeMillis());
     testProjectServiceClient.updateFile(
@@ -134,7 +134,7 @@ public class UpdateFilesWithoutIDE {
     projectExplorer1.selectItem(pathToExcludedFile);
     projectExplorer1.openContextMenuByPathSelectedItem(pathToExcludedFile);
     projectExplorer1.waitContextMenu();
-    projectExplorer1.clickOnItemInContextMenu(REMOVE_FROM_FILE_WATCHER_EXCLUDES);
+    projectExplorer1.clickOnItemInContextMenu(ADD_TO_FILE_WATCHER_EXCLUDES);
     projectExplorer1.waitContextMenuPopUpClosed();
   }
 
@@ -142,8 +142,8 @@ public class UpdateFilesWithoutIDE {
     projectExplorer1.openItemByPath(PROJECT_NAME);
     projectExplorer2.openItemByPath(PROJECT_NAME);
     projectExplorer1.openItemByPath(PROJECT_NAME + "/" + nameOfOpenedFile);
-    editor1.waitActiveEditor();
+    editor1.waitActive();
     projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameOfOpenedFile);
-    editor1.waitActiveEditor();
+    editor1.waitActive();
   }
 }
