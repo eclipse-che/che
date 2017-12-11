@@ -97,21 +97,21 @@ public class CheckFileWatcherExcludeFeatureTest {
   public void testFeatureAfterExcludingFile() throws Exception {
     String fileNameForExluding = "README.md";
     String pathToExcludedFile = PROJECT_NAME + "/" + fileNameForExluding;
-    String currentTimeInMs = Long.toString(System.currentTimeMillis());
+    String currentTimeInMillis = Long.toString(System.currentTimeMillis());
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByVisibleNameInExplorer(fileNameForExluding);
     editor.waitActive();
 
     // Add the file to exclude and check that the file content in the Editor is not changed
     doFileWatcherExcludeOperation(pathToExcludedFile, ADD_TO_FILE_WATCHER_EXCLUDES);
-    testProjectServiceClient.updateFile(testWorkspace.getId(), pathToExcludedFile, currentTimeInMs);
-    editor.waitTextNotPresentIntoEditor(currentTimeInMs);
+    testProjectServiceClient.updateFile(testWorkspace.getId(), pathToExcludedFile, currentTimeInMillis);
+    editor.waitTextNotPresentIntoEditor(currentTimeInMillis);
 
     // Close file and open again and check that the file content is changed
     editor.clickOnCloseFileIcon(fileNameForExluding);
     projectExplorer.openItemByVisibleNameInExplorer(fileNameForExluding);
     editor.waitActive();
-    editor.waitTextIntoEditor(currentTimeInMs);
+    editor.waitTextIntoEditor(currentTimeInMillis);
   }
 
   @Test
@@ -119,7 +119,7 @@ public class CheckFileWatcherExcludeFeatureTest {
     String fileNameForExcluding = "AppController.java";
     String pathToJavaFile =
         format("%s/src/main/java/org/eclipse/qa/examples/AppController.java", PROJECT_NAME);
-    String currentTimeInMs = Long.toString(System.currentTimeMillis());
+    String currentTimeInMillis = Long.toString(System.currentTimeMillis());
     // Exclude 'src' folder
     doFileWatcherExcludeOperation(
         PROJECT_NAME + "/" + FOLDER_NAME_FOR_EXCLUDE, ADD_TO_FILE_WATCHER_EXCLUDES);
@@ -128,15 +128,15 @@ public class CheckFileWatcherExcludeFeatureTest {
     projectExplorer.openItemByVisibleNameInExplorer(fileNameForExcluding);
     editor.waitActive();
 
-    testProjectServiceClient.updateFile(testWorkspace.getId(), pathToJavaFile, currentTimeInMs);
+    testProjectServiceClient.updateFile(testWorkspace.getId(), pathToJavaFile, currentTimeInMillis);
     editor.selectTabByName("AppController");
-    editor.waitTextNotPresentIntoEditor(currentTimeInMs);
+    editor.waitTextNotPresentIntoEditor(currentTimeInMillis);
 
     // Reopen the file and check that its content changed
     editor.clickOnCloseFileIcon("AppController");
     projectExplorer.openItemByVisibleNameInExplorer(fileNameForExcluding);
     editor.waitActive();
-    editor.waitTextIntoEditor(currentTimeInMs);
+    editor.waitTextIntoEditor(currentTimeInMillis);
   }
 
   @Test
