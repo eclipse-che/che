@@ -59,11 +59,6 @@
                 <version>${version.jsr305.plugin}</version>
             </dependency>
             <dependency>
-                <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt</artifactId>
-                <version>${io.jsonwebtoken.jjwt.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.tomcat</groupId>
                 <artifactId>tomcat-catalina</artifactId>
                 <version>${org.apache.tomcat.version}</version>

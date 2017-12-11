@@ -14,6 +14,7 @@ import static java.util.Collections.emptyList;
 import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_GIT_OPERATION;
 import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
 import static org.eclipse.che.ide.util.ExceptionUtils.getAttributes;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
@@ -40,7 +41,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.util.ExceptionUtils;
 import org.eclipse.che.ide.util.StringUtils;
 
 /** Git backed implementation for {@link VcsService}. */
@@ -217,7 +217,7 @@ public class GitVcsService implements VcsService {
             true)
         .catchErrorPromise(
             error -> {
-              if (ExceptionUtils.getErrorCode(error.getCause()) == UNAUTHORIZED_GIT_OPERATION) {
+              if (getErrorCode(error.getCause()) == UNAUTHORIZED_GIT_OPERATION) {
                 Map<String, String> attributes = getAttributes(error.getCause());
                 String providerName = attributes.get(PROVIDER_NAME);
                 if (!StringUtils.isNullOrEmpty(providerName)) {

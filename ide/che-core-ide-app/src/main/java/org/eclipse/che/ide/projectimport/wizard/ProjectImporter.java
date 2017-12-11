@@ -96,15 +96,15 @@ public class ProjectImporter extends AbstractImporter {
 
     startImport(path, projectConfig.getSource())
         .then(
-            arg -> {
+            project -> {
               if (callback != null) {
                 callback.onCompleted();
               }
             })
         .catchError(
-            arg -> {
+            error -> {
               if (callback != null) {
-                callback.onFailure(arg.getCause());
+                callback.onFailure(error.getCause());
               }
             });
   }
@@ -225,15 +225,10 @@ public class ProjectImporter extends AbstractImporter {
                               unmarshallerFactory.newUnmarshaller(OAuthToken.class)) {
                             @Override
                             protected void onSuccess(OAuthToken result) {
-                              final SourceStorageImpl copySourceStorage =
-                                  new SourceStorageImpl(
-                                      sourceStorage.getType(),
-                                      sourceStorage.getLocation(),
-                                      sourceStorage.getParameters());
-                              copySourceStorage.getParameters().put("username", result.getToken());
-                              copySourceStorage.getParameters().put("password", result.getToken());
+                              sourceStorage.getParameters().put("username", result.getToken());
+                              sourceStorage.getParameters().put("password", result.getToken());
 
-                              doImport(path, copySourceStorage)
+                              doImport(path, sourceStorage)
                                   .then(
                                       project -> {
                                         callback.onSuccess(project);
