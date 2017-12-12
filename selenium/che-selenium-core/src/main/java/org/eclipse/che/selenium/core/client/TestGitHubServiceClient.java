@@ -11,9 +11,7 @@
 package org.eclipse.che.selenium.core.client;
 
 import static java.util.Optional.ofNullable;
-import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -29,13 +27,10 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.xml.bind.DatatypeConverter;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
-import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.dto.server.JsonStringMapImpl;
 import org.eclipse.che.plugin.github.shared.GitHubKey;
 import org.kohsuke.github.GHRepository;
@@ -236,19 +231,20 @@ public class TestGitHubServiceClient {
     return "Basic " + base64;
   }
 
-  public void addContentToRepository(
-      Path repoRoot, String commitMessage, GHRepository ghRepository) throws IOException {
-                Files.walk(repoRoot)
-                 .filter(Files::isRegularFile)
-                 .forEach(it -> {
-                   try {
-                     byte[] contentBytes = Files.readAllBytes(it);
-                     String relativePath = repoRoot.relativize(it).toString();
-                     ghRepository.createContent(contentBytes, commitMessage, relativePath);
-                   } catch (IOException e) {
- throw  new UncheckedIOException(e);
-                   }
-                 });
+  public void addContentToRepository(Path repoRoot, String commitMessage, GHRepository ghRepository)
+      throws IOException {
+    Files.walk(repoRoot)
+        .filter(Files::isRegularFile)
+        .forEach(
+            it -> {
+              try {
+                byte[] contentBytes = Files.readAllBytes(it);
+                String relativePath = repoRoot.relativize(it).toString();
+                ghRepository.createContent(contentBytes, commitMessage, relativePath);
+              } catch (IOException e) {
+                throw new UncheckedIOException(e);
+              }
+            });
   }
 
   private String filterPropertiesAndGetGithubPrimaryEmail(List<Map<String, String>> properties) {
