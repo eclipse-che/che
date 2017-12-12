@@ -1,5 +1,3 @@
-communication
-
 package org.eclipse.che.ide.js.api.workspace.event;
 
 import jsinterop.annotations.JsIgnore;
