@@ -33,7 +33,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.git.exception.GitCommitInProgressException;
-import org.eclipse.che.api.git.exception.NotAGitRepositoryException;
+import org.eclipse.che.api.git.exception.GitInvalidRepositoryException;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.project.server.ProjectManager;
@@ -194,7 +194,7 @@ public class GitChangesDetector {
                     .withEditedRegions(gitConnection.getEditedRegions(itemPath)))
             .sendAndSkipResult();
       } catch (NotFoundException | ServerException e) {
-        if (!(e instanceof NotAGitRepositoryException)
+        if (!(e instanceof GitInvalidRepositoryException)
             && !(e instanceof GitCommitInProgressException)) {
           LOG.error(e.getMessage());
         }

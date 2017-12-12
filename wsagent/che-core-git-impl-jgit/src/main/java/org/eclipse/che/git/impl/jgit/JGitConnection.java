@@ -97,7 +97,7 @@ import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.exception.GitInvalidRefNameException;
 import org.eclipse.che.api.git.exception.GitRefAlreadyExistsException;
 import org.eclipse.che.api.git.exception.GitRefNotFoundException;
-import org.eclipse.che.api.git.exception.NotAGitRepositoryException;
+import org.eclipse.che.api.git.exception.GitInvalidRepositoryException;
 import org.eclipse.che.api.git.params.AddParams;
 import org.eclipse.che.api.git.params.CheckoutParams;
 import org.eclipse.che.api.git.params.CloneParams;
@@ -1865,7 +1865,7 @@ class JGitConnection implements GitConnection {
   @Override
   public Status status(List<String> filter) throws GitException {
     if (!isInsideWorkTree()) {
-      throw new NotAGitRepositoryException(NOT_A_GIT_REPOSITORY_ERROR);
+      throw new GitInvalidRepositoryException(NOT_A_GIT_REPOSITORY_ERROR);
     }
     // Status can be not actual, if commit is in progress.
     if (COMMITTING_REPOSITORIES.contains(getRepository())) {
