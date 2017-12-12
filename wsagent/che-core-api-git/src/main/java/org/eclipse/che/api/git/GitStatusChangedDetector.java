@@ -177,11 +177,10 @@ public class GitStatusChangedDetector implements EventSubscriber<StatusChangedEv
                 .withModifiedFiles(modifiedFiles);
 
         transmit(statusChangeEventDto, id);
+      } catch (GitCommitInProgressException | GitInvalidRepositoryException e) {
+        // Silent ignore
       } catch (ServerException | NotFoundException e) {
-        if (!(e instanceof GitInvalidRepositoryException)
-            && !(e instanceof GitCommitInProgressException)) {
-          LOG.error(e.getMessage());
-        }
+        LOG.error(e.getMessage());
       }
     };
   }

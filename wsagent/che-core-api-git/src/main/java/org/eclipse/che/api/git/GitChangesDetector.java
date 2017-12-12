@@ -193,11 +193,10 @@ public class GitChangesDetector {
                     .withStatus(fileStatus)
                     .withEditedRegions(gitConnection.getEditedRegions(itemPath)))
             .sendAndSkipResult();
-      } catch (NotFoundException | ServerException e) {
-        if (!(e instanceof GitInvalidRepositoryException)
-            && !(e instanceof GitCommitInProgressException)) {
-          LOG.error(e.getMessage());
-        }
+      } catch (GitCommitInProgressException | GitInvalidRepositoryException e) {
+        // Silent ignore
+      } catch (ServerException | NotFoundException e) {
+        LOG.error(e.getMessage());
       }
     };
   }

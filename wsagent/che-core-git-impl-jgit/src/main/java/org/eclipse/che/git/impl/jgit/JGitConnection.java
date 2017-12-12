@@ -1868,7 +1868,7 @@ class JGitConnection implements GitConnection {
       throw new GitInvalidRepositoryException(NOT_A_GIT_REPOSITORY_ERROR);
     }
     // Status can be not actual, if commit is in progress.
-    if (COMMITTING_REPOSITORIES.contains(getRepository())) {
+    if (COMMITTING_REPOSITORIES.contains(getRepository().getDirectory().getPath())) {
       throw new GitCommitInProgressException(COMMIT_IN_PROGRESS_ERROR);
     }
     String branchName = getCurrentBranch();
