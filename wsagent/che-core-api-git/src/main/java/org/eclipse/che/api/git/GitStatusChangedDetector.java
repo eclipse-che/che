@@ -13,8 +13,6 @@ package org.eclipse.che.api.git;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.isDirectory;
 import static java.util.Collections.emptyList;
-import static org.eclipse.che.api.git.shared.Constants.COMMIT_IN_PROGRESS_ERROR;
-import static org.eclipse.che.api.git.shared.Constants.NOT_A_GIT_REPOSITORY_ERROR;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -34,6 +32,8 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.fs.server.PathTransformer;
+import org.eclipse.che.api.git.exception.GitCommitInProgressException;
+import org.eclipse.che.api.git.exception.NotAGitRepositoryException;
 import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
@@ -178,10 +178,9 @@ public class GitStatusChangedDetector implements EventSubscriber<StatusChangedEv
 
         transmit(statusChangeEventDto, id);
       } catch (ServerException | NotFoundException e) {
-        String errorMessage = e.getMessage();
-        if (!(COMMIT_IN_PROGRESS_ERROR.equals(errorMessage))
-            && !(NOT_A_GIT_REPOSITORY_ERROR.equals(errorMessage))) {
-          LOG.error(errorMessage);
+        if (!(e instanceof NotAGitRepositoryException)
+            && !(e instanceof GitCommitInProgressException)) {
+          LOG.error(e.getMessage());
         }
       }
     };

@@ -12,9 +12,7 @@ package org.eclipse.che.api.git;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
-import static org.eclipse.che.api.git.shared.Constants.COMMIT_IN_PROGRESS_ERROR;
 import static org.eclipse.che.api.git.shared.Constants.EVENT_GIT_FILE_CHANGED;
-import static org.eclipse.che.api.git.shared.Constants.NOT_A_GIT_REPOSITORY_ERROR;
 import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.ADDED;
 import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.MODIFIED;
 import static org.eclipse.che.api.git.shared.FileChangedEventDto.Status.NOT_MODIFIED;
@@ -34,6 +32,8 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.fs.server.PathTransformer;
+import org.eclipse.che.api.git.exception.GitCommitInProgressException;
+import org.eclipse.che.api.git.exception.NotAGitRepositoryException;
 import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.project.server.ProjectManager;
@@ -194,10 +194,9 @@ public class GitChangesDetector {
                     .withEditedRegions(gitConnection.getEditedRegions(itemPath)))
             .sendAndSkipResult();
       } catch (NotFoundException | ServerException e) {
-        String errorMessage = e.getMessage();
-        if (!(COMMIT_IN_PROGRESS_ERROR.equals(errorMessage))
-            && !(NOT_A_GIT_REPOSITORY_ERROR.equals(errorMessage))) {
-          LOG.error(errorMessage);
+        if (!(e instanceof NotAGitRepositoryException)
+            && !(e instanceof GitCommitInProgressException)) {
+          LOG.error(e.getMessage());
         }
       }
     };

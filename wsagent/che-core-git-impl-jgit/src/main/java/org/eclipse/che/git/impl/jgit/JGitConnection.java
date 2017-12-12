@@ -67,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -90,11 +91,13 @@ import org.eclipse.che.api.git.GitUrlUtils;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.git.LogPage;
 import org.eclipse.che.api.git.UserCredential;
+import org.eclipse.che.api.git.exception.GitCommitInProgressException;
 import org.eclipse.che.api.git.exception.GitConflictException;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.exception.GitInvalidRefNameException;
 import org.eclipse.che.api.git.exception.GitRefAlreadyExistsException;
 import org.eclipse.che.api.git.exception.GitRefNotFoundException;
+import org.eclipse.che.api.git.exception.NotAGitRepositoryException;
 import org.eclipse.che.api.git.params.AddParams;
 import org.eclipse.che.api.git.params.CheckoutParams;
 import org.eclipse.che.api.git.params.CloneParams;
@@ -300,6 +303,8 @@ class JGitConnection implements GitConnection {
 
   private static final Logger LOG = LoggerFactory.getLogger(JGitConnection.class);
 
+  private static final Set<String> COMMITTING_REPOSITORIES = new CopyOnWriteArraySet<>();
+
   private Git git;
   private JGitConfigImpl config;
   private LineConsumerFactory lineConsumerFactory;
@@ -309,8 +314,6 @@ class JGitConnection implements GitConnection {
   private final EventService eventService;
   private final GitUserResolver userResolver;
   private final Repository repository;
-
-  private static boolean commitInProgress;
 
   @Inject
   JGitConnection(
@@ -761,9 +764,10 @@ class JGitConnection implements GitConnection {
       boolean isGerritSupportConfigured =
           gerritSupportConfigValue != null ? Boolean.valueOf(gerritSupportConfigValue) : false;
       commitCommand.setInsertChangeId(isGerritSupportConfigured);
-      commitInProgress = true;
+      String repositoryPath = getRepository().getDirectory().getPath();
+      COMMITTING_REPOSITORIES.add(repositoryPath);
       RevCommit result = commitCommand.call();
-      commitInProgress = false;
+      COMMITTING_REPOSITORIES.remove(repositoryPath);
 
       status = status(emptyList());
       Map<String, List<EditedRegion>> modifiedFiles = new HashMap<>();
@@ -789,7 +793,7 @@ class JGitConnection implements GitConnection {
     } catch (GitAPIException exception) {
       throw new GitException(exception.getMessage(), exception);
     } finally {
-      commitInProgress = false;
+      COMMITTING_REPOSITORIES.remove(getRepository().getDirectory().getPath());
     }
   }
 
@@ -1861,11 +1865,11 @@ class JGitConnection implements GitConnection {
   @Override
   public Status status(List<String> filter) throws GitException {
     if (!isInsideWorkTree()) {
-      throw new GitException(NOT_A_GIT_REPOSITORY_ERROR);
+      throw new NotAGitRepositoryException(NOT_A_GIT_REPOSITORY_ERROR);
     }
     // Status can be not actual, if commit is in progress.
-    if (commitInProgress) {
-      throw new GitException(COMMIT_IN_PROGRESS_ERROR);
+    if (COMMITTING_REPOSITORIES.contains(getRepository())) {
+      throw new GitCommitInProgressException(COMMIT_IN_PROGRESS_ERROR);
     }
     String branchName = getCurrentBranch();
     StatusCommand statusCommand = getGit().status();
