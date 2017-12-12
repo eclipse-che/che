@@ -35,7 +35,8 @@ public class GitInvalidRepositoryException extends GitException {
     super(serviceError);
   }
 
-  public GitInvalidRepositoryException(String message, int errorCode, Map<String, String> attributes) {
+  public GitInvalidRepositoryException(
+      String message, int errorCode, Map<String, String> attributes) {
     super(message, errorCode, attributes);
   }
 }
