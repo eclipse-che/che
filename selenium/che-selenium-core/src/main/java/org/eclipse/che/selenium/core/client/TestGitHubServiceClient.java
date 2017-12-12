@@ -11,7 +11,9 @@
 package org.eclipse.che.selenium.core.client;
 
 import static java.util.Optional.ofNullable;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -20,12 +22,14 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.xml.bind.DatatypeConverter;
 import org.eclipse.che.api.core.ApiException;
@@ -233,17 +237,18 @@ public class TestGitHubServiceClient {
   }
 
   public void addContentToRepository(
-      Path pathToContent, String commitMess, GHRepository ghRepository) throws IOException {
-    List<Pair<Path, Path>> projectEntries =
-        Files.walk(pathToContent)
-            .filter(Files::isRegularFile)
-            .map(path -> Pair.of(path, pathToContent.relativize(path)))
-            .collect(Collectors.toList());
-
-    for (Pair<Path, Path> projectEntry : projectEntries) {
-      ghRepository.createContent(
-          Files.readAllBytes(projectEntry.first), commitMess, projectEntry.second.toString());
-    }
+      Path repoRoot, String commitMessage, GHRepository ghRepository) throws IOException {
+                Files.walk(repoRoot)
+                 .filter(Files::isRegularFile)
+                 .forEach(it -> {
+                   try {
+                     byte[] contentBytes = Files.readAllBytes(it);
+                     String relativePath = repoRoot.relativize(it).toString();
+                     ghRepository.createContent(contentBytes, commitMessage, relativePath);
+                   } catch (IOException e) {
+ throw  new UncheckedIOException(e);
+                   }
+                 });
   }
 
   private String filterPropertiesAndGetGithubPrimaryEmail(List<Map<String, String>> properties) {
