@@ -15,23 +15,19 @@ import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
-import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_GIT_OPERATION;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
 import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
-import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.resource.Path.valueOf;
-import static org.eclipse.che.ide.util.ExceptionUtils.getAttributes;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ErrorCodes;
@@ -48,6 +44,7 @@ import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
+import org.eclipse.che.ide.ext.git.client.GitUtil;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.selectablechangespanel.SelectableChangesPanelPresenter;
 import org.eclipse.che.ide.ext.git.client.compare.selectablechangespanel.SelectionCallBack;
@@ -56,7 +53,6 @@ import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
-import org.eclipse.che.ide.util.ExceptionUtils;
 import org.eclipse.che.ide.util.StringUtils;
 
 /**
@@ -249,15 +245,12 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
             })
         .catchError(
             error -> {
-              if (ExceptionUtils.getErrorCode(error.getCause()) == UNAUTHORIZED_GIT_OPERATION) {
-                Map<String, String> attributes = getAttributes(error.getCause());
-                String providerName = attributes.get(PROVIDER_NAME);
+                final String providerName = GitUtil.getProviderNameFromError(error);
                 if (!StringUtils.isNullOrEmpty(providerName)) {
                   pushAuthenticated(location, branch, remote, providerName);
                   return;
                 }
                 notificationManager.notify(constant.pushFail(), FAIL, FLOAT_MODE);
-              }
             });
   }
 

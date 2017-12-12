@@ -11,24 +11,20 @@
 package org.eclipse.che.ide.ext.git.client.push;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_GIT_OPERATION;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
-import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.ext.git.client.compare.branchlist.BranchListPresenter.BRANCH_LIST_COMMAND_NAME;
 import static org.eclipse.che.ide.ext.git.client.remote.RemotePresenter.REMOTE_REPO_COMMAND_NAME;
-import static org.eclipse.che.ide.util.ExceptionUtils.getAttributes;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.git.shared.Branch;
@@ -44,10 +40,10 @@ import org.eclipse.che.ide.ext.git.client.BranchFilterByRemote;
 import org.eclipse.che.ide.ext.git.client.BranchSearcher;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
+import org.eclipse.che.ide.ext.git.client.GitUtil;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
-import org.eclipse.che.ide.util.ExceptionUtils;
 import org.eclipse.che.ide.util.StringUtils;
 
 /**
@@ -316,13 +312,10 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
             })
         .catchError(
             error -> {
-              if (ExceptionUtils.getErrorCode(error.getCause()) == UNAUTHORIZED_GIT_OPERATION) {
-                Map<String, String> attributes = getAttributes(error.getCause());
-                String providerName = attributes.get(PROVIDER_NAME);
-                if (!StringUtils.isNullOrEmpty(providerName)) {
-                  pushAuthenticated(repository, providerName, console, notification);
-                  return;
-                }
+              final String providerName = GitUtil.getProviderNameFromError(error);
+              if (!StringUtils.isNullOrEmpty(providerName)) {
+                pushAuthenticated(repository, providerName, console, notification);
+                return;
               }
               handleError(error.getCause(), notification, console);
               processesPanelPresenter.addCommandOutput(console);
