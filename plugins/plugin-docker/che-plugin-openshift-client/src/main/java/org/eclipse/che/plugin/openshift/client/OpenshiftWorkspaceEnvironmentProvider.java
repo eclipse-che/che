@@ -30,6 +30,10 @@ public class OpenshiftWorkspaceEnvironmentProvider {
     this.openShiftCheProjectName = openShiftCheProjectName;
   }
 
+  public Config getDefaultOpenshiftConfig() {
+    return new OpenShiftConfigBuilder().build();
+  }
+
   public Config getWorkspacesOpenshiftConfig(Subject subject) throws OpenShiftException {
     return new OpenShiftConfigBuilder().build();
   }
