@@ -18,12 +18,10 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.DEFAULT_DOCKER_IMAGE;
 import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.DEFAULT_MEMORY_LIMIT_BYTES;
 import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.MACHINE_NAME;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-import org.eclipse.che.api.factory.server.FactoryMessageBodyAdapter;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
@@ -49,8 +47,6 @@ public class URLFactoryBuilderTest {
 
   /** Grab content of URLs */
   @Mock private URLFetcher urlFetcher;
-
-  @Mock private FactoryMessageBodyAdapter factoryAdapter;
 
   /** Tested instance. */
   @InjectMocks private URLFactoryBuilder urlFactoryBuilder;
@@ -159,8 +155,6 @@ public class URLFactoryBuilderTest {
   /** Check that with a custom factory.json we've this factory being built */
   @Test
   public void checkWithCustomFactoryJsonFile() throws Exception {
-
-    when(factoryAdapter.adapt(any())).thenAnswer(inv -> inv.getArguments()[0]);
 
     WorkspaceConfigDto workspaceConfigDto = newDto(WorkspaceConfigDto.class);
     FactoryDto templateFactory =
