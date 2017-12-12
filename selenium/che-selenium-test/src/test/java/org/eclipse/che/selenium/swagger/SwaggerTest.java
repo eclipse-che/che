@@ -43,7 +43,6 @@ public class SwaggerTest {
   @Test
   public void checkNameProjectTest() throws Exception {
     driver.navigate().to(swaggerUrl);
-
     assertTrue(swagger.getWsNamesFromWorkspacePage().contains(workspace.getName()));
   }
 }

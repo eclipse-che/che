@@ -15,7 +15,6 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.S
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Subversion.SVN_VIEW_DIFF;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.provider.TestSvnPasswordProvider;
@@ -31,7 +30,6 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.subversion.Subversion;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
@@ -132,13 +130,7 @@ public class DiffViewTest {
     subversion.clickSvnCommitDiffButton(FILE_NAME_1, FOLDER_NAME);
     loader.waitOnClosed();
     subversion.waitSvnCommitFormOpened();
-
-    try {
-      subversion.waitTextDiffView(DIFF_MESS_1);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("https://github.com/eclipse/che/issues/6452", ex);
-    }
+    subversion.waitTextDiffView(DIFF_MESS_1);
     subversion.clickSvnCommitClosedButtonDiffView();
 
     // Check the diff view 'document.html' in the svn commit form

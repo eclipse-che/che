@@ -10,18 +10,13 @@
  */
 package org.eclipse.che.selenium.mavenplugin;
 
-import static java.nio.file.Paths.get;
-import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.SIMPLE_FOLDER;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
-import java.net.URL;
+import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
-import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
@@ -32,15 +27,16 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class CheckMavenPluginTest {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 6);
+  private static final String CHECKOUT_COMMAND = "checkout";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -52,91 +48,103 @@ public class CheckMavenPluginTest {
   @Inject private Loader loader;
   @Inject private AskForValueDialog askDialog;
   @Inject private Git git;
-  @Inject private TestProjectServiceClient testProjectServiceClient;
+
+  @Inject
+  @Named("github.username")
+  private String gitHubUsername;
 
   @Inject private TestCommandServiceClient commandServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
-    URL resource = getClass().getResource("/projects/check-maven-plugin-test");
-    testProjectServiceClient.importProject(
-        workspace.getId(), get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
+    commandServiceClient.createCommand(
+        "cd /projects/" + PROJECT_NAME + " && git checkout contrib-12042015",
+        CHECKOUT_COMMAND,
+        TestCommandsConstants.CUSTOM,
+        workspace.getId());
+
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectItem(PROJECT_NAME);
   }
 
   @Test
+  public void mavenStatusBarShouldDisplayResolvingProjectMessage() {
+    git.importJavaAppAndCheckMavenPluginBar(
+        "https://github.com/" + gitHubUsername + "/pushChangesTest.git",
+        PROJECT_NAME,
+        Wizard.TypeProject.MAVEN,
+        "Resolving project: SpringDemo");
+    mavenPluginStatusBar.waitClosingInfoPanel(100);
+    projectExplorer.waitItem(PROJECT_NAME);
+  }
+
+  @Test(priority = 1)
+  public void shouldExecuteCommandAndWaitTextInConsole() throws Exception {
+    projectExplorer.invokeCommandWithContextMenu(
+        ProjectExplorer.CommandsGoal.COMMON, PROJECT_NAME, CHECKOUT_COMMAND);
+
+    console.waitExpectedTextIntoConsole("Switched to a new branch 'contrib-12042015'");
+  }
+
+  @Test(priority = 2)
   public void shouldAccessClassCreatedInAnotherModule() {
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.selectItem(PROJECT_NAME + "/my-lib/src/main/java/hello");
+    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + "/my-lib/src/main/java/hello");
     createNewFileFromMenuFile("TestClass", AskForValueDialog.JavaFiles.CLASS, ".java");
-    projectExplorer.openItemByPath(
-        PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
+
+    projectExplorer.clickCollapseAllButton();
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(
+        PROJECT_NAME + "/my-webapp/src/main/java/helloworld", "GreetingController.java");
     editor.waitActiveEditor();
-    editor.setCursorToLine(14);
+    editor.setCursorToLine(24);
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass = new TestClass();");
     editor.waitAllMarkersDisappear(ERROR_MARKER);
   }
 
-  @Test(priority = 1)
-  public void shouldExcludeModules() {
-    projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
+  @Test(priority = 3)
+  public void excludeIncludeModules() {
+    projectExplorer.clickCollapseAllButton();
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(PROJECT_NAME, "pom.xml");
     editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(25, 8);
+    editor.setCursorToDefinedLineAndChar(13, 8);
     editor.typeTextIntoEditor("!--");
-    editor.setCursorToDefinedLineAndChar(26, 32);
+    editor.setCursorToDefinedLineAndChar(13, 32);
     editor.typeTextIntoEditor("--");
-    try {
-      projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", SIMPLE_FOLDER);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7109");
-    }
 
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-webapp", SIMPLE_FOLDER);
+    projectExplorer.waitFolderDefinedTypeOfFolderByPath(
+        PROJECT_NAME + "/my-lib", ProjectExplorer.FolderTypes.SIMPLE_FOLDER);
+
+    editor.setCursorToDefinedLineAndChar(13, 32);
+    editor.typeTextIntoEditor(Keys.DELETE.toString());
+    editor.typeTextIntoEditor(Keys.DELETE.toString());
+    editor.setCursorToDefinedLineAndChar(13, 8);
+    editor.typeTextIntoEditor(Keys.DELETE.toString());
+    editor.typeTextIntoEditor(Keys.DELETE.toString());
+    editor.typeTextIntoEditor(Keys.DELETE.toString());
+
+    projectExplorer.waitFolderDefinedTypeOfFolderByPath(
+        PROJECT_NAME + "/my-lib", ProjectExplorer.FolderTypes.PROJECT_FOLDER);
+
+    editor.closeAllTabs();
   }
 
-  @Test(priority = 2)
+  @Test(priority = 4)
   public void shouldAccessClassCreatedInAnotherModuleAfterIncludingModule() {
-    projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
+    projectExplorer.clickCollapseAllButton();
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(
+        PROJECT_NAME + "/my-webapp/src/main/java/helloworld", "GreetingController.java");
     editor.waitActiveEditor();
-    includeModulesInTheParentPom();
-    projectExplorer.openItemByPath(
-        PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
-    editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(17, 1);
+    editor.setCursorToDefinedLineAndChar(27, 1);
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass2 = new TestClass();");
     editor.waitAllMarkersDisappear(ERROR_MARKER);
-  }
-
-  private void includeModulesInTheParentPom() {
-    editor.setCursorToDefinedLineAndChar(26, 32);
-    editor.typeTextIntoEditor(Keys.DELETE.toString());
-    editor.typeTextIntoEditor(Keys.DELETE.toString());
-    editor.setCursorToDefinedLineAndChar(25, 8);
-    editor.typeTextIntoEditor(Keys.DELETE.toString());
-    editor.typeTextIntoEditor(Keys.DELETE.toString());
-    editor.typeTextIntoEditor(Keys.DELETE.toString());
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", PROJECT_FOLDER);
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(
-        PROJECT_NAME + "/my-webapp", PROJECT_FOLDER);
-    editor.closeAllTabs();
   }
 
   /** check ability just created class in autocomplete container */
   private void enterClassNameViaAutocomplete() {
     editor.typeTextIntoEditor("Test");
     editor.launchAutocomplete();
-    try {
-      editor.enterAutocompleteProposal("TestClass");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7109");
-    }
+    editor.enterAutocompleteProposal("TestClass");
   }
 
   /**
