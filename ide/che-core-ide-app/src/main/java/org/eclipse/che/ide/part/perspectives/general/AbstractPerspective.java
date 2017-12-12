@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.part.perspectives.general;
 
+import static org.eclipse.che.ide.api.parts.PartStack.State.HIDDEN;
 import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 import static org.eclipse.che.ide.api.parts.PartStackType.INFORMATION;
 import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
@@ -33,6 +34,7 @@ import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.parts.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStack;
+import org.eclipse.che.ide.api.parts.PartStackStateChangedEvent;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.api.parts.Perspective;
@@ -54,6 +56,7 @@ public abstract class AbstractPerspective
     implements Presenter,
         Perspective,
         ActivePartChangedHandler,
+        PartStackStateChangedEvent.Handler,
         MaximizePartEvent.Handler,
         PerspectiveView.ActionDelegate,
         PartStack.ActionDelegate {
@@ -117,6 +120,7 @@ public abstract class AbstractPerspective
     partStacks.put(TOOLING, toolingPartStack);
 
     eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
+    eventBus.addHandler(PartStackStateChangedEvent.TYPE, this);
     eventBus.addHandler(MaximizePartEvent.TYPE, this);
   }
 
@@ -150,6 +154,16 @@ public abstract class AbstractPerspective
   @Override
   public void onActivePartChanged(ActivePartChangedEvent event) {
     activePart = event.getActivePart();
+  }
+
+  @Override
+  public void onPartStackStateChanged(PartStackStateChangedEvent event) {
+    PartStack changedPartStack = event.getPartStack();
+    if (HIDDEN == changedPartStack.getPartStackState()
+        && activePart != null
+        && activePart.getPartStack() == changedPartStack) {
+      activePart = null;
+    }
   }
 
   /** {@inheritDoc} */
@@ -308,6 +322,7 @@ public abstract class AbstractPerspective
   }
 
   @Override
+  @Nullable
   public PartPresenter getActivePart() {
     return activePart;
   }
@@ -316,7 +331,9 @@ public abstract class AbstractPerspective
   public JsonObject getState() {
     JsonObject state = Json.createObject();
     JsonObject partStacks = Json.createObject();
-    state.put("ACTIVE_PART", activePart.getClass().getName());
+    if (activePart != null) {
+      state.put("ACTIVE_PART", activePart.getClass().getName());
+    }
     state.put("PART_STACKS", partStacks);
 
     partStacks.put(
