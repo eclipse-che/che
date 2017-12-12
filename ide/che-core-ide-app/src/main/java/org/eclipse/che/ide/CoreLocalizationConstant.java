@@ -26,6 +26,12 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("extension.category")
   String extensionCategory();
 
+  @Key("action.revealResource.text")
+  String actionRevealResourceText();
+
+  @Key("action.revealResource.description")
+  String actionRevealResourceDescription();
+
   @Key("action.navigateToFile.text")
   String actionNavigateToFileText();
 
