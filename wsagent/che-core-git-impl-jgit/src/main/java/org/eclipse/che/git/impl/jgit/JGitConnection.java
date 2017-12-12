@@ -24,6 +24,8 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
+import static org.eclipse.che.api.git.shared.Constants.COMMIT_IN_PROGRESS_ERROR;
+import static org.eclipse.che.api.git.shared.Constants.NOT_A_GIT_REPOSITORY_ERROR;
 import static org.eclipse.che.api.git.shared.EditedRegionType.DELETION;
 import static org.eclipse.che.api.git.shared.EditedRegionType.INSERTION;
 import static org.eclipse.che.api.git.shared.EditedRegionType.MODIFICATION;
@@ -307,6 +309,8 @@ class JGitConnection implements GitConnection {
   private final EventService eventService;
   private final GitUserResolver userResolver;
   private final Repository repository;
+
+  private static boolean commitInProgress;
 
   @Inject
   JGitConnection(
@@ -757,8 +761,11 @@ class JGitConnection implements GitConnection {
       boolean isGerritSupportConfigured =
           gerritSupportConfigValue != null ? Boolean.valueOf(gerritSupportConfigValue) : false;
       commitCommand.setInsertChangeId(isGerritSupportConfigured);
+      commitInProgress = true;
       RevCommit result = commitCommand.call();
+      commitInProgress = false;
 
+      status = status(emptyList());
       Map<String, List<EditedRegion>> modifiedFiles = new HashMap<>();
       for (String file : status.getChanged()) {
         modifiedFiles.put(file, getEditedRegions(file));
@@ -767,7 +774,7 @@ class JGitConnection implements GitConnection {
       // commit operation completion.
       eventService.publish(
           newDto(StatusChangedEventDto.class)
-              .withStatus(status(emptyList()))
+              .withStatus(status)
               .withModifiedFiles(modifiedFiles)
               .withProjectName(repository.getWorkTree().getName()));
 
@@ -781,6 +788,8 @@ class JGitConnection implements GitConnection {
           .withCommitter(gitUser);
     } catch (GitAPIException exception) {
       throw new GitException(exception.getMessage(), exception);
+    } finally {
+      commitInProgress = false;
     }
   }
 
@@ -1851,8 +1860,12 @@ class JGitConnection implements GitConnection {
 
   @Override
   public Status status(List<String> filter) throws GitException {
-    if (!RepositoryCache.FileKey.isGitRepository(getRepository().getDirectory(), FS.DETECTED)) {
-      throw new GitException("Not a git repository");
+    if (!isInsideWorkTree()) {
+      throw new GitException(NOT_A_GIT_REPOSITORY_ERROR);
+    }
+    // Status can be not actual, if commit is in progress.
+    if (commitInProgress) {
+      throw new GitException(COMMIT_IN_PROGRESS_ERROR);
     }
     String branchName = getCurrentBranch();
     StatusCommand statusCommand = getGit().status();
