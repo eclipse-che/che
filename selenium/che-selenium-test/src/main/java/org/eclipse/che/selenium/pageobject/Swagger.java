@@ -10,10 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
@@ -30,25 +27,17 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.everrest.core.impl.provider.json.JsonValue;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** @author Andrey Chizhikov */
 @Singleton
 public class Swagger {
 
   private final SeleniumWebDriver seleniumWebDriver;
-  private static final Logger LOG = LoggerFactory.getLogger(SeleniumWebDriver.class);
 
   @Inject
   public Swagger(SeleniumWebDriver seleniumWebDriver) {
@@ -78,13 +67,9 @@ public class Swagger {
 
   /** expand 'workspace' item */
   private void expandWorkSpaceItem() {
-    Wait fluentWait =
-        new FluentWait(seleniumWebDriver)
-            .withTimeout(LOAD_PAGE_TIMEOUT_SEC, SECONDS)
-            .pollingEvery(MINIMUM_SEC, SECONDS)
-            .ignoring(StaleElementReferenceException.class, NoSuchElementException.class);
-    fluentWait.until((ExpectedCondition<Boolean>) input -> workSpaceLink.isEnabled());
-    workSpaceLink.click();
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(ExpectedConditions.elementToBeClickable(workSpaceLink))
+        .click();
   }
 
   /** collapse 'workspace' item */
@@ -127,27 +112,12 @@ public class Swagger {
     expandWorkSpaceItem();
     clickElementByXpath(Locators.GET_WORKSPACES);
     clickTryItOutByXpath(Locators.TRY_IT_OUT);
-    List<WorkspaceDto> workspaces = new ArrayList<WorkspaceDto>();
-    // Sometimes when we get text from swagger page the JSON may be in rendering state. In this case
-    // we get invalid data.
-    // In this loop we perform 2 attempts with 500 msec. delay for getting correct data after full
-    // rendering page.
-    for (int i = 0; i < 2; i++) {
-      try {
-        workspaces =
-            DtoFactory.getInstance()
-                .createListDtoFromJson(
-                    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-                        .until(
-                            ExpectedConditions.visibilityOfElementLocated(
-                                By.xpath(Locators.RESPONSE_BODY)))
-                        .getText(),
-                    WorkspaceDto.class);
-        break;
-      } catch (RuntimeException ex) {
-        WaitUtils.sleepQuietly(500, MILLISECONDS);
-      }
-    }
+    String json =
+        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+            .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.RESPONSE_BODY)))
+            .getText();
+    List<WorkspaceDto> workspaces =
+        DtoFactory.getInstance().createListDtoFromJson(json, WorkspaceDto.class);
     return workspaces
         .stream()
         .map(workspaceDto -> workspaceDto.getConfig().getName())

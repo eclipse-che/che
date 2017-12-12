@@ -152,7 +152,6 @@ public class NavigateToFile {
                 By.xpath(format(Locators.FILE_NAME_LIST_SELECT_WITH_PATH, pathName))))
         .click();
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
-    waitFormToClose();
   }
 
   /**

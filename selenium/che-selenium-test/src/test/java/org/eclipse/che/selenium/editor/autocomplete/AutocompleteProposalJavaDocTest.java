@@ -10,10 +10,13 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
+import static org.testng.Assert.assertTrue;
+
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.regex.Pattern;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -64,7 +67,6 @@ public class AutocompleteProposalJavaDocTest {
     ide.open(workspace);
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT);
-    projectExplorer.selectItem(PROJECT);
     notificationsPopupPanel.waitProgressPopupPanelClose();
 
     projectExplorer.quickExpandWithJavaScript();
@@ -90,7 +92,8 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("concat(String part1, String part2, char divider) : String");
 
     // then
-    editor.waitContextMenuJavaDocText(
+    verifyJavaDoc(
+        editor.getAutocompleteProposalJavaDocHtml(),
         ".*<p><b>Deprecated.</b> <i> As of version 1.0, use "
             + "<code><a href='.*/javadoc/get\\?.*projectpath=/multi-module-java-with-ext-libs/app&handle=%E2%98%82%3Dmulti-module-java-with-ext-libs.*org.apache.commons.lang.StringUtils%E2%98%82join%E2%98%82Object\\+%5B%5D%E2%98%82char'>org.apache.commons.lang.StringUtils.join\\(Object \\[\\], char\\)</a></code>"
             + "</i><p>Returns concatination of two strings into one divided by special symbol."
@@ -112,7 +115,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("App()");
 
     // then
-    editor.waitContextMenuJavaDocText(".*No documentation found.*");
+    verifyJavaDoc(editor.getAutocompleteProposalJavaDocHtml(), ".*No documentation found.*");
   }
 
   @Test
@@ -125,7 +128,8 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("isEquals(Object o) : boolean");
 
     // then
-    editor.waitContextMenuJavaDocText(
+    verifyJavaDoc(
+        editor.getAutocompleteProposalJavaDocHtml(),
         ".*Returns <code>true</code> if the argument is equal to instance. otherwise <code>false</code>"
             + "<dl><dt>Parameters:</dt>"
             + "<dd><b>o</b> an object.</dd>"
@@ -153,7 +157,9 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("BookImpl");
 
     // then
-    editor.waitContextMenuJavaDocText(".*UPDATE. Implementation of Book interface..*");
+    verifyJavaDoc(
+        editor.getAutocompleteProposalJavaDocHtml(),
+        ".*UPDATE. Implementation of Book interface..*");
   }
 
   @Test
@@ -166,7 +172,8 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("hashCode() : int");
 
     // then
-    editor.waitContextMenuJavaDocText(
+    verifyJavaDoc(
+        editor.getAutocompleteProposalJavaDocHtml(),
         ".*Returns a hash code value for the object. "
             + "This method is supported for the benefit of hash tables such as those provided by "
             + "<code><a href='.*/javadoc/get\\?.*projectpath=/multi-module-java-with-ext-libs/app&handle=%E2%98%82%3Dmulti-module-java-with-ext-libs%5C%2Fapp%2F%5C%2Fopt%5C%2Fjdk1.8.0_45%5C%2Fjre%5C%2Flib%5C%2Frt.jar%3Cjava.lang%28Object.class%E2%98%83Object%7EhashCode%E2%98%82java.util.HashMap'>java.util.HashMap</a></code>.*");
@@ -182,7 +189,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("info(String arg0) : void");
 
     // then
-    editor.waitContextMenuJavaDocText(".*No documentation found.*");
+    verifyJavaDoc(editor.getAutocompleteProposalJavaDocHtml(), ".*No documentation found.*");
 
     // when
     editor.closeAutocomplete();
@@ -200,10 +207,17 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectAutocompleteProposal("info(String msg) : void");
 
     // then
-    editor.waitContextMenuJavaDocText(
+    verifyJavaDoc(
+        editor.getAutocompleteProposalJavaDocHtml(),
         ".*Log a message at the .* level."
             + "<dl><dt>Parameters:</dt>"
             + "<dd><b>msg</b>"
             + "  the message string to be logged</dd></dl>.*");
+  }
+
+  private void verifyJavaDoc(String javaDocHtml, String regex) {
+    assertTrue(
+        Pattern.compile(regex, Pattern.DOTALL).matcher(javaDocHtml).matches(),
+        String.format("Actual Java Doc HTML was '%s'.", javaDocHtml));
   }
 }
