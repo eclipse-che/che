@@ -168,6 +168,7 @@ declare namespace che {
       OPENSHIFT: string;
       getValues(): Array<string>;
     }
+  }
 
   export namespace service {
 
