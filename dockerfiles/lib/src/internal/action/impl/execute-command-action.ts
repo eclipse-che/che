@@ -65,11 +65,9 @@ export class ExecuteCommandAction {
                 }
 
                 // get exec-agent URI
-                let execAgentServer = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers().get("4412/tcp");
+                let machines = workspaceDto.getRuntime().getMachines();
+                let execAgentServer = machines.get("dev-machine").getServers().get("exec-agent/ws");
                 let execAgentURI = execAgentServer.getUrl();
-                if (execAgentURI.includes("localhost")) {
-                    execAgentURI = execAgentServer.getProperties().getInternalUrl();
-                }
 
                 // now, execute command
                 let uuid : string = UUID.build();
