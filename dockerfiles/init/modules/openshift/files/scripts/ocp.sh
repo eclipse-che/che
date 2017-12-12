@@ -16,12 +16,12 @@ LOCAL_IP_ADDRESS=$(detectIP)
 if [[ "$OSTYPE" == "darwin"* ]]; then
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
-    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.6.0/openshift-origin-client-tools-v3.6.0-c4dd4cf-mac.zip"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-mac.zip"
     DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-osx-amd64"
 else
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
-    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.6.0/openshift-origin-client-tools-v3.6.0-c4dd4cf-linux-64bit.tar.gz"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-linux-64bit.tar.gz"
     DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"
 fi
 
@@ -76,6 +76,7 @@ get_tools() {
     TOOLS_DIR="/tmp"
     OC_BINARY="$TOOLS_DIR/oc"
     JQ_BINARY="$TOOLS_DIR/jq"
+    OC_VERSION=$(echo $DEFAULT_OC_BINARY_DOWNLOAD_URL | cut -d '/' -f 8)
     #OS specific extract archives
     if [[ "$OSTYPE" == "darwin"* ]]; then
         OC_PACKAGE="openshift-origin-client-tools.zip"
@@ -87,11 +88,20 @@ get_tools() {
         EXTRA_ARGS="-C $TOOLS_DIR"
     fi
 
-    if [ ! -f $OC_BINARY ]; then
-        echo "download oc client..."
+    download_oc() {
+        echo "download oc client $OC_VERSION"
         wget -q -O $TOOLS_DIR/$OC_PACKAGE $OC_BINARY_DOWNLOAD_URL
         eval "$ARCH" "$TOOLS_DIR"/"$OC_PACKAGE" "$EXTRA_ARGS" &>/dev/null
         rm -rf "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE "${TOOLS_DIR:-/tmp}"/"$OC_PACKAGE"
+    }
+
+    if [[ ! -f $OC_BINARY ]]; then
+        download_oc
+    else
+        if [[ $($OC_BINARY version 2> /dev/null | grep "oc v" | cut -d " " -f2 | cut -d '+' -f1 || true) != *"$OC_VERSION"* ]]; then
+            rm -rf "$OC_BINARY" "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE
+            download_oc
+        fi
     fi
 
     if [ ! -f $JQ_BINARY ]; then
@@ -134,8 +144,6 @@ wait_ocp() {
 run_ocp() {
     $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
     wait_ocp
-    $OC_BINARY login -u system:admin
-    $OC_BINARY create serviceaccount pv-recycler-controller -n openshift-infra
 }
 
 deploy_che_to_ocp() {
