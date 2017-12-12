@@ -169,19 +169,6 @@
             width: 100%;
         }
 
-        @external xterm-rows,terminal;
-
-        .xterm-rows {
-            width: 100%;
-            height: inherit;
-            overflow-y: hidden;
-            overflow-x: auto;
-        }
-
-        .terminal {
-            height: inherit;
-        }
-
     </ui:style>
 
     <g:DockLayoutPanel ui:field="consolePanel" unit="PX" width="100%" height="100%">

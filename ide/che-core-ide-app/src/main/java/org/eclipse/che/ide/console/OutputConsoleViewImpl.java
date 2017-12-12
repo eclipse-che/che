@@ -176,24 +176,17 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     resizeTimer.schedule(200);
   }
 
-  private int rows = 24;
-  private int cols;
-
   private void resize() {
     TerminalGeometryJso geometryJso = terminalJso.proposeGeometry();
-    rows = geometryJso.getRows();
+    int rows = geometryJso.getRows();
 
-    if (rows > 0 && cols > 0) {
-      terminalJso.resize(cols, rows);
+    if (rows > 0 && geometryJso.getCols() > 0) {
+      terminalJso.resize(geometryJso.getCols(), rows);
     }
   }
 
   @Override
   public void print(String text) {
-    if (text.length() > cols) {
-      cols = text.length();
-      terminalJso.resize(cols, rows);
-    }
     terminalJso.writeln(text);
   }
 
