@@ -89,7 +89,7 @@ public class KeyBindingsTest {
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.KEY_BINDINGS);
-    keyBindings.checkSearchResultKeyBinding("open", 5);
+    keyBindings.checkSearchResultKeyBinding("open", 6);
     keyBindings.clickOkButton();
   }
 
