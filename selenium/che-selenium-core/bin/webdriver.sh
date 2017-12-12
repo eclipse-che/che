@@ -187,7 +187,7 @@ applyCustomOptions() {
             if [[ "$rerunAttempts" =~ ^[0-9]+$ ]]; then
               RERUN_ATTEMPTS=$rerunAttempts
             else
-              RERUN_ATTEMPTS=2
+              RERUN_ATTEMPTS=1
             fi
 
         elif [[ "$var" == --debug ]]; then
@@ -397,9 +397,9 @@ Handle failing tests:
     --failed-tests                      Rerun failed tests that left after the previous try
     --regression-tests                  Rerun regression tests that left after the previous try
     --rerun [ATTEMPTS]                  Automatically rerun failing tests.
-                                        Default attempts number is 2.
+                                        Default attempts number is 1.
     --compare-with-ci [BUILD NUMBER]    Compare failed tests with results on CI server.
-                                        Default build is latest.
+                                        Default build is the latest.
 
 Other options:
     --debug                             Run tests in debug mode
@@ -702,7 +702,7 @@ rerunTests() {
     local total=$(echo ${regressions[@]} | wc -w)
 
     if [[ ! ${total} -eq 0 ]]; then
-        local rerun=$1 && shift
+        local rerunCounter=$1 && shift
 
         analyseTestsResults $@
         generateFailSafeReport
@@ -712,14 +712,14 @@ rerunTests() {
 
         echo -e "[TEST]"
         echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
-        echo -e "[TEST] ${YELLOW}RERUNNING FAILED TESTS IN ONE THREAD: ATTEMPT #${rerun}${NO_COLOUR}"
+        echo -e "[TEST] ${YELLOW}RERUNNING FAILED TESTS IN ONE THREAD: ATTEMPT #${rerunCounter}${NO_COLOUR}"
         echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
 
         defineTestsScope "--failed-tests"
         runTests
 
-        if [[ ${rerun} < ${RERUN_ATTEMPTS} ]]; then
-            rerunTests $(($rerun+1)) $@
+        if [[ ${rerunCounter} < ${RERUN_ATTEMPTS} ]]; then
+            rerunTests $(($rerunCounter+1)) $@
         fi
     fi
 }

@@ -100,9 +100,9 @@ Handle failing tests:
     --failed-tests                      Rerun failed tests that left after the previous try
     --regression-tests                  Rerun regression tests that left after the previous try
     --rerun [ATTEMPTS]                  Automatically rerun failing tests.
-                                        Default attempts number is 2.
+                                        Default attempts number is 1.
     --compare-with-ci [BUILD NUMBER]    Compare failed tests with results on CI server.
-                                        Default build is latest.
+                                        Default build is the latest.
 
 Other options:
     --debug                             Run tests in debug mode
