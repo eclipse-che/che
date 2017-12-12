@@ -66,6 +66,7 @@ public class OpenShiftClientFactory {
   }
 
   public CheKubernetesClient newKubeClient(Config config) {
+    config.setWebsocketPingInterval(0);
     OkHttpClient clientHttpClient =
         httpClient.newBuilder().authenticator(Authenticator.NONE).build();
     OkHttpClient.Builder builder = clientHttpClient.newBuilder();

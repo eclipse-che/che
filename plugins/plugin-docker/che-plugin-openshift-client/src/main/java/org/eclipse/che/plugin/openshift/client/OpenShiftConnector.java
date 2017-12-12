@@ -51,8 +51,8 @@ import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.ExecListener;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
-import io.fabric8.kubernetes.client.dsl.LogWatch;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.utils.InputStreamPumper;
 import io.fabric8.openshift.api.model.DeploymentConfig;
@@ -94,6 +94,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import okhttp3.Response;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceSubjectRegistry;
@@ -1196,64 +1197,7 @@ public class OpenShiftConnector extends DockerConnector {
   @Override
   public void getContainerLogs(
       final GetContainerLogsParams params, MessageProcessor<LogMessage> containerLogsProcessor)
-      throws IOException {
-    String container = params.getContainer(); // container ID
-    Subject subject = subjectForContainerId(container);
-
-    Pod pod = getChePodByContainerId(container);
-    if (pod != null) {
-      String podName = pod.getMetadata().getName();
-      boolean[] ret = new boolean[1];
-      ret[0] = false;
-      DefaultKubernetesClient kubeClient =
-          new DefaultKubernetesClient(
-              openshiftWorkspaceEnvironmentProvider.getWorkspacesOpenshiftConfig(subject));
-      try (LogWatch watchLog =
-          kubeClient
-              .pods()
-              .inNamespace(
-                  openshiftWorkspaceEnvironmentProvider.getWorkspacesOpenshiftNamespace(subject))
-              .withName(podName)
-              .watchLog()) {
-        Watcher<Pod> watcher =
-            new Watcher<Pod>() {
-
-              @Override
-              public void eventReceived(Action action, Pod resource) {
-                if (action == Action.DELETED) {
-                  ret[0] = true;
-                }
-              }
-
-              @Override
-              public void onClose(KubernetesClientException cause) {
-                ret[0] = true;
-              }
-            };
-        kubeClient
-            .pods()
-            .inNamespace(
-                openshiftWorkspaceEnvironmentProvider.getWorkspacesOpenshiftNamespace(subject))
-            .withName(podName)
-            .watch(watcher);
-        Thread.sleep(5000);
-        InputStream is = watchLog.getOutput();
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is));
-        while (!ret[0]) {
-          String line = bufferedReader.readLine();
-          containerLogsProcessor.process(new LogMessage(LogMessage.Type.DOCKER, line));
-        }
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-      } catch (IOException e) {
-        // The kubernetes client throws an exception (Pipe not connected) when pod doesn't contain
-        // any logs.
-        // We can ignore it.
-      } finally {
-        kubeClient.close();
-      }
-    }
-  }
+      throws IOException {}
 
   @Override
   public ContainerProcesses top(final TopParams params) throws IOException {
@@ -1273,10 +1217,10 @@ public class OpenShiftConnector extends DockerConnector {
       command[0] = PS_COMMAND;
     }
     ContainerProcesses processes = new ContainerProcesses();
-    try (DefaultKubernetesClient kubeClient =
-            new DefaultKubernetesClient(
-                openshiftWorkspaceEnvironmentProvider.getWorkspacesOpenshiftConfig(subject));
-        ExecWatch watch =
+    DefaultKubernetesClient kubeClient =
+        ocFactory.newKubeClient(
+            openshiftWorkspaceEnvironmentProvider.getWorkspacesOpenshiftConfig(subject));
+    try (ExecWatch watch =
             kubeClient
                 .pods()
                 .inNamespace(
@@ -1284,35 +1228,52 @@ public class OpenShiftConnector extends DockerConnector {
                 .withName(podName)
                 .redirectingOutput()
                 .redirectingError()
-                .exec(command)) {
-      BufferedReader reader = new BufferedReader(new InputStreamReader(watch.getOutput()));
+                .usingListener(
+                    new ExecListener() {
+                      @Override
+                      public void onOpen(Response response) {
+                        if (response != null && response.body() != null) {
+                          response.body().close();
+                        }
+                      }
+
+                      @Override
+                      public void onFailure(Throwable t, Response response) {
+                        if (response != null && response.body() != null) {
+                          response.body().close();
+                        }
+                      }
+
+                      @Override
+                      public void onClose(int code, String reason) {}
+                    })
+                .exec(command);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(watch.getOutput()))) {
       boolean first = true;
       int limit = 0;
-      try {
-        List<String[]> procList = new ArrayList<>();
-        while (reader.ready()) {
-          String line = reader.readLine();
-          if (line == null || line.isEmpty()) {
-            continue;
-          }
-          if (line.startsWith("rpc error")) {
-            throw new IOException(line);
-          }
-          line = line.trim();
-          if (first) {
-            String[] elements = line.split(TOP_REGEX_PATTERN);
-            limit = elements.length;
-            first = false;
-            processes.setTitles(elements);
-          } else {
-            String[] elements = line.split(TOP_REGEX_PATTERN, limit);
-            procList.add(elements);
-          }
+      List<String[]> procList = new ArrayList<>();
+      while (reader.ready()) {
+        String line = reader.readLine();
+        if (line == null || line.isEmpty()) {
+          continue;
         }
-        processes.setProcesses(procList.toArray(new String[0][0]));
-      } catch (IOException e) {
-        throw new OpenShiftException(e.getMessage());
+        if (line.startsWith("rpc error")) {
+          throw new IOException(line);
+        }
+        line = line.trim();
+        if (first) {
+          String[] elements = line.split(TOP_REGEX_PATTERN);
+          limit = elements.length;
+          first = false;
+          processes.setTitles(elements);
+        } else {
+          String[] elements = line.split(TOP_REGEX_PATTERN, limit);
+          procList.add(elements);
+        }
       }
+      processes.setProcesses(procList.toArray(new String[0][0]));
+    } catch (IOException e) {
+      throw new OpenShiftException(e.getMessage());
     } catch (KubernetesClientException e) {
       throw new OpenShiftException(e.getMessage());
     }
@@ -1353,10 +1314,12 @@ public class OpenShiftConnector extends DockerConnector {
       command[i] = URLEncoder.encode(command[i], "UTF-8");
     }
 
+    Config workspacesOpenshiftConfig =
+        openshiftWorkspaceEnvironmentProvider.getWorkspacesOpenshiftConfig(subject);
+    DefaultKubernetesClient kubeClient = ocFactory.newKubeClient(workspacesOpenshiftConfig);
+
     ExecutorService executor = Executors.newFixedThreadPool(2);
-    try (DefaultKubernetesClient kubeClient =
-        new DefaultKubernetesClient(
-            openshiftWorkspaceEnvironmentProvider.getWorkspacesOpenshiftConfig(subject))) {
+    try {
       try (ExecWatch watch =
               kubeClient
                   .pods()
@@ -1366,6 +1329,25 @@ public class OpenShiftConnector extends DockerConnector {
                   .withName(podName)
                   .redirectingOutput()
                   .redirectingError()
+                  .usingListener(
+                      new ExecListener() {
+                        @Override
+                        public void onOpen(Response response) {
+                          if (response != null && response.body() != null) {
+                            response.body().close();
+                          }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable t, Response response) {
+                          if (response != null && response.body() != null) {
+                            response.body().close();
+                          }
+                        }
+
+                        @Override
+                        public void onClose(int code, String reason) {}
+                      })
                   .exec(command);
           InputStreamPumper outputPump =
               new InputStreamPumper(
