@@ -112,8 +112,8 @@ class LsConfigurationExtractor {
       }
 
       String schema;
-      if (documentFilterJsonObject.has("schema")) {
-        schema = documentFilterJsonObject.get("schema").getAsString();
+      if (documentFilterJsonObject.has("scheme")) {
+        schema = documentFilterJsonObject.get("scheme").getAsString();
       } else {
         schema = null;
       }
