@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.local.projects;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -21,6 +24,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import org.apache.commons.io.FileUtils;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -28,6 +34,7 @@ import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.workspace.infrastructure.docker.WindowsHostUtils;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -52,6 +59,8 @@ public class LocalProjectsFolderPathProviderTest {
     WorkspaceConfigImpl workspaceConfig = mock(WorkspaceConfigImpl.class);
     when(workspaceDao.get(WS_ID)).thenReturn(workspace);
     when(workspaceDao.get(WS_NAME, WS_NAMESPACE)).thenReturn(workspace);
+    when(workspaceDao.getWorkspaces(eq(false), anyInt(), anyLong()))
+        .thenReturn(new Page<>(Collections.singletonList(workspace), 0, 1, 1));
     when(workspace.getConfig()).thenReturn(workspaceConfig);
     when(workspaceConfig.getName()).thenReturn(WS_NAME);
     when(workspace.getNamespace()).thenReturn(WS_NAMESPACE);
@@ -63,6 +72,11 @@ public class LocalProjectsFolderPathProviderTest {
     singleFolderForAllWorkspaces =
         Paths.get(workspacesRoot, "singleFolderForAllWorkspaces").toString();
     oldWorkspacesRoot = Paths.get(workspacesRoot, "oldWorkspacesRoot").toString();
+  }
+
+  @AfterMethod
+  public void tearDown() throws Exception {
+    FileUtils.deleteDirectory(workspacesRootFile);
   }
 
   @Test
@@ -249,5 +263,33 @@ public class LocalProjectsFolderPathProviderTest {
 
     provider.init();
     provider.getPathByName(WS_NAME, WS_NAMESPACE);
+  }
+
+  @Test
+  public void shouldPerformWorkspaceMigration() throws Exception {
+    Files.createDirectories(Paths.get(workspacesRoot).resolve(WS_NAME));
+    Files.createFile(Paths.get(workspacesRoot).resolve(WS_NAME).resolve("pom.xml"));
+
+    LocalProjectsFolderPathProvider provider =
+        new LocalProjectsFolderPathProvider(workspacesRoot, null, null, false, workspaceDao, false);
+
+    provider.init();
+
+    Path expectedNewWorkspacePath = Paths.get(workspacesRoot).resolve(WS_ID);
+    assertTrue(Files.exists(expectedNewWorkspacePath));
+  }
+
+  @Test
+  public void shouldPerformWorkspaceMigration2() throws Exception {
+    Files.createDirectories(Paths.get(workspacesRoot).resolve(WS_NAME));
+    Files.createFile(Paths.get(workspacesRoot).resolve(WS_NAME).resolve("pom.xml"));
+
+    LocalProjectsFolderPathProvider provider =
+        new LocalProjectsFolderPathProvider(workspacesRoot, null, null, false, workspaceDao, false);
+
+    provider.init();
+
+    Path expectedNewWorkspacePath = Paths.get(workspacesRoot).resolve(WS_ID);
+    assertTrue(Files.exists(expectedNewWorkspacePath));
   }
 }

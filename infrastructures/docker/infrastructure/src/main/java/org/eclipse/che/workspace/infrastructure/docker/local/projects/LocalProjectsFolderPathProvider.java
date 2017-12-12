@@ -11,6 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.docker.local.projects;
 
 import static java.lang.String.format;
+import static org.eclipse.che.api.core.Pages.iterate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -19,6 +20,10 @@ import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -26,8 +31,11 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.util.SystemInfo;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.workspace.infrastructure.docker.WindowsHostUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides path to workspace projects folder on host.
@@ -40,6 +48,10 @@ public class LocalProjectsFolderPathProvider {
   public static final String ALLOW_FOLDERS_CREATION_ENV_VARIABLE =
       "CHE_WORKSPACE_STORAGE_CREATE_FOLDERS";
   public static final String WORKSPACE_STORAGE_PATH_ENV_VARIABLE = "CHE_WORKSPACE_STORAGE";
+  public static final String WORKSPACE_STORAGE_MIGRATION_FLAG_ENV_VARIABLE =
+      "che.workspace.migrate_workspaces_stored_by_name";
+
+  private static final Logger LOG = LoggerFactory.getLogger(LocalProjectsFolderPathProvider.class);
 
   private final WorkspaceDao workspaceDao;
   private final boolean isWindows;
@@ -173,6 +185,8 @@ public class LocalProjectsFolderPathProvider {
     } else {
       ensureExist(hostProjectsFolder, "host.projects.root");
     }
+
+    performWorkspaceLocationMigration();
   }
 
   private void ensureExist(String path, String prop) throws IOException {
@@ -208,6 +222,57 @@ public class LocalProjectsFolderPathProvider {
               e);
         }
       }
+    }
+  }
+
+  /**
+   * Get all workspaces, and check if they are stored in workspacesMountPoint by their name, and
+   * migrate them, so they will be stored by id
+   */
+  private void performWorkspaceLocationMigration() {
+    if (!isWindows || hostProjectsFolder != null) {
+      Map<String, String> workspaceName2id = getId2NameWorkspaceMapping();
+      for (Entry<String, String> entry : workspaceName2id.entrySet()) {
+        Path workspaceStoredByNameLocation =
+            Paths.get(workspacesMountPoint).resolve(entry.getValue());
+        if (!Files.exists(workspaceStoredByNameLocation)) {
+          // migration is not needed for this workspace
+          continue;
+        }
+        LOG.info(
+            "Starting migration of workspace with id '{}' and name '{}'",
+            entry.getKey(),
+            entry.getValue());
+        Path workspaceStoredByIdLocation = Paths.get(workspacesMountPoint).resolve(entry.getKey());
+        try {
+          Files.move(
+              workspaceStoredByNameLocation,
+              workspaceStoredByIdLocation,
+              StandardCopyOption.ATOMIC_MOVE);
+          LOG.info(
+              "Successfully workspace with id '{}' and name '{}'",
+              entry.getKey(),
+              entry.getValue());
+        } catch (IOException e) {
+          LOG.error(
+              "Failed to workspace with id '{}' and name '{}'", entry.getKey(), entry.getValue());
+        }
+      }
+    }
+  }
+
+  private Map<String, String> getId2NameWorkspaceMapping() {
+    try {
+      Map<String, String> result = new HashMap<>();
+
+      for (WorkspaceImpl workspace :
+          iterate(
+              (maxItems, skipCount) -> workspaceDao.getWorkspaces(false, maxItems, skipCount))) {
+        result.put(workspace.getId(), workspace.getConfig().getName());
+      }
+      return result;
+    } catch (ServerException e) {
+      throw new RuntimeException(e);
     }
   }
 }

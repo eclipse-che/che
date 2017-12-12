@@ -10,9 +10,9 @@
  */
 package org.eclipse.che.api.workspace.server.spi;
 
-import java.util.List;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 
@@ -105,7 +105,8 @@ public interface WorkspaceDao {
    * @throws NullPointerException when {@code owner} is null
    * @throws ServerException when any other error occurs during workspaces fetching
    */
-  List<WorkspaceImpl> getByNamespace(String namespace) throws ServerException;
+  Page<WorkspaceImpl> getByNamespace(String namespace, int maxItems, long skipCount)
+      throws ServerException;
 
   /**
    * Gets list of workspaces which user can read
@@ -114,7 +115,8 @@ public interface WorkspaceDao {
    * @return list of workspaces which user can read
    * @throws ServerException when any other error occurs during workspaces fetching
    */
-  List<WorkspaceImpl> getWorkspaces(String userId) throws ServerException;
+  Page<WorkspaceImpl> getWorkspaces(String userId, int maxItems, long skipCount)
+      throws ServerException;
 
   /**
    * Gets workspaces by temporary attribute.
@@ -127,6 +129,6 @@ public interface WorkspaceDao {
    * @throws ServerException when any other error occurs during workspaces fetching
    * @throws IllegalArgumentException when {@code maxItems} or {@code skipCount} is negative
    */
-  List<WorkspaceImpl> getWorkspaces(boolean isTemporary, int skipCount, int maxItems)
+  Page<WorkspaceImpl> getWorkspaces(boolean isTemporary, int maxItems, long skipCount)
       throws ServerException;
 }

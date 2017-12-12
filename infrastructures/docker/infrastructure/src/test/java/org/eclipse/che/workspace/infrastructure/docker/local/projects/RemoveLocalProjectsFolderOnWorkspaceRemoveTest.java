@@ -74,14 +74,13 @@ public class RemoveLocalProjectsFolderOnWorkspaceRemoveTest {
 
   @Test
   public void hostInstanceDataFolderShouldBeCutAndProjectsFolderShouldBeCleaned() throws Exception {
-    when(projectsFolderPathProvider.getPathByName(anyString(), anyString()))
-        .thenReturn(HOST_PROJECTS_FOLDER);
+    when(projectsFolderPathProvider.getPath(anyString())).thenReturn(HOST_PROJECTS_FOLDER);
     when(removeLocalProjectsFolderOnWorkspaceRemove.getInstanceDataPath())
         .thenReturn(HOST_INSTANCE_DATA_FOLDER);
 
     removeLocalProjectsFolderOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
 
-    verify(projectsFolderPathProvider).getPathByName(WORKSPACE_NAME, WORKSPACE_NAMESPACE);
+    verify(projectsFolderPathProvider).getPath(WORKSPACE_ID);
     verify(removeLocalProjectsFolderOnWorkspaceRemove)
         .deleteRecursiveAsync(WORKSPACE_ID, CONTAINER_MOUNTED_PROJECTS_FOLDER);
   }
@@ -93,14 +92,13 @@ public class RemoveLocalProjectsFolderOnWorkspaceRemoveTest {
             new RemoveLocalProjectsFolderOnWorkspaceRemove(
                 HOST_PROJECTS_FOLDER, projectsFolderPathProvider));
 
-    when(projectsFolderPathProvider.getPathByName(anyString(), anyString()))
-        .thenReturn(HOST_PROJECTS_FOLDER);
+    when(projectsFolderPathProvider.getPath(anyString())).thenReturn(HOST_PROJECTS_FOLDER);
     when(removeLocalProjectsFolderOnWorkspaceRemove.getInstanceDataPath())
         .thenReturn(HOST_INSTANCE_DATA_FOLDER);
 
     removeLocalProjectsFolderOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
 
-    verify(projectsFolderPathProvider).getPathByName(WORKSPACE_NAME, WORKSPACE_NAMESPACE);
+    verify(projectsFolderPathProvider).getPath(WORKSPACE_ID);
     verify(removeLocalProjectsFolderOnWorkspaceRemove, never())
         .deleteRecursiveAsync(anyString(), anyString());
   }

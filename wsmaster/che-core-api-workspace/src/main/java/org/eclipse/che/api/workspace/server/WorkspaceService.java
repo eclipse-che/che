@@ -15,8 +15,10 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.eclipse.che.api.core.Pages.iterate;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -225,7 +227,12 @@ public class WorkspaceService extends Service {
     // TODO add maxItems & skipCount to manager
     return withLinks(
         workspaceManager
-            .getWorkspaces(EnvironmentContext.getCurrent().getSubject().getUserId(), false)
+            .getWorkspaces(
+                EnvironmentContext.getCurrent().getSubject().getUserId(),
+                false,
+                maxItems,
+                skipCount)
+            .getItems()
             .stream()
             .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
             .map(DtoConverter::asDto)
@@ -250,8 +257,11 @@ public class WorkspaceService extends Service {
       @ApiParam("The namespace") @PathParam("namespace") String namespace)
       throws ServerException, BadRequestException {
     return withLinks(
-        workspaceManager
-            .getByNamespace(namespace, false)
+        Lists.newArrayList(
+                iterate(
+                        (maxItems, skipCount) ->
+                            workspaceManager.getByNamespace(namespace, false, maxItems, skipCount))
+                    .iterator())
             .stream()
             .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
             .map(DtoConverter::asDto)

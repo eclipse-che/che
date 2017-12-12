@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.multiuser.resource.api.usage.tracker;
 
+import static org.eclipse.che.api.core.Pages.iterate;
+
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -48,7 +51,13 @@ public class WorkspaceResourceUsageTracker implements ResourceUsageTracker {
       throws NotFoundException, ServerException {
     final Account account = accountManager.getById(accountId);
     final List<WorkspaceImpl> accountWorkspaces =
-        workspaceManagerProvider.get().getByNamespace(account.getName(), false);
+        Lists.newArrayList(
+            iterate(
+                    (maxItems, skipCount) ->
+                        workspaceManagerProvider
+                            .get()
+                            .getByNamespace(account.getName(), false, maxItems, skipCount))
+                .iterator());
     if (!accountWorkspaces.isEmpty()) {
       return Optional.of(
           new ResourceImpl(

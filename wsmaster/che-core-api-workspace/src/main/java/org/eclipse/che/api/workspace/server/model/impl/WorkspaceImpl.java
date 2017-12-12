@@ -60,7 +60,16 @@ import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
   @NamedQuery(name = "Workspace.getAll", query = "SELECT w FROM Workspace w"),
   @NamedQuery(
     name = "Workspace.getByTemporary",
-    query = "SELECT w FROM Workspace w WHERE w.isTemporary = :temporary"
+    query = "SELECT w " + "FROM Workspace w " + "WHERE w.isTemporary = :temporary "
+  ),
+  @NamedQuery(name = "Workspace.getAllCount", query = "SELECT COUNT(w) FROM Workspace w"),
+  @NamedQuery(
+    name = "Workspace.getByNamespaceCount",
+    query = "SELECT COUNT(w) " + "FROM Workspace w " + "WHERE w.account.name = :namespace "
+  ),
+  @NamedQuery(
+    name = "Workspace.getByTemporaryCount",
+    query = "SELECT COUNT(w) " + "FROM Workspace w " + "WHERE w.isTemporary = :temporary "
   )
 })
 @EntityListeners(WorkspaceImpl.SyncNameOnUpdateAndPersistEventListener.class)

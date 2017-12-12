@@ -10,8 +10,10 @@
  */
 package org.eclipse.che.multiuser.resource.api.usage.tracker;
 
+import static org.eclipse.che.api.core.Pages.iterate;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -57,9 +59,13 @@ public class RamResourceUsageTracker implements ResourceUsageTracker {
       throws NotFoundException, ServerException {
     final Account account = accountManager.getById(accountId);
     List<WorkspaceImpl> activeWorkspaces =
-        workspaceManagerProvider
-            .get()
-            .getByNamespace(account.getName(), true)
+        Lists.newArrayList(
+                iterate(
+                        (maxItems, skipCount) ->
+                            workspaceManagerProvider
+                                .get()
+                                .getByNamespace(account.getName(), true, maxItems, skipCount))
+                    .iterator())
             .stream()
             .filter(ws -> STOPPED != ws.getStatus())
             .collect(Collectors.toList());

@@ -10,8 +10,10 @@
  */
 package org.eclipse.che.multiuser.resource.api.usage.tracker;
 
+import static org.eclipse.che.api.core.Pages.iterate;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 
+import com.google.common.collect.Lists;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -48,9 +50,13 @@ public class RuntimeResourceUsageTracker implements ResourceUsageTracker {
       throws NotFoundException, ServerException {
     final Account account = accountManager.getById(accountId);
     final long currentlyUsedRuntimes =
-        workspaceManagerProvider
-            .get()
-            .getByNamespace(account.getName(), false)
+        Lists.newArrayList(
+                iterate(
+                        (maxItems, skipCount) ->
+                            workspaceManagerProvider
+                                .get()
+                                .getByNamespace(account.getName(), false, maxItems, skipCount))
+                    .iterator())
             .stream()
             .filter(ws -> STOPPED != ws.getStatus())
             .count();
