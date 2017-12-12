@@ -64,7 +64,7 @@ export class EnvVariablesController {
    * @param selectedMachine {IEnvironmentManagerMachine}
    */
   buildVariablesList(selectedMachine: IEnvironmentManagerMachine): void {
-    if (!selectedMachine || angular.isUndefined(this.environmentManager)) {
+    if (!selectedMachine || !this.environmentManager) {
       return;
     }
     this.isEnvVarEditable = this.environmentManager.canEditEnvVariables(selectedMachine);
