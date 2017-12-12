@@ -10,18 +10,22 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
-import static org.testng.AssertJUnit.assertFalse;
+import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SIMPLE;
+import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
+import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestGitConstants;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -31,46 +35,22 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NavigateToFile;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
+import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
-import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /** Created by aleksandr shmaraev on 10.12.15 */
 public class NavigateToFileTest {
-  private static final String PROJECT_NAME = "NavigateFile";
-  private static final String PROJECT_NAME_2 = "NavigateFile_2";
-  private static final String PATH_TO_JAVA_FILE =
-      "(/NavigateFile/src/main/java/org/eclipse/qa/examples)";
-  private static final String PATH_TO_JSP_FILE = "(/NavigateFile/src/main/webapp)";
-  private static final String PATH_TO_README_FILE = "(/NavigateFile)";
-  private static final String PATH_2_TO_JAVA_FILE =
-      "(/NavigateFile_2/src/main/java/org/eclipse/qa/examples)";
-  private static final String PATH_2_TO_JSP_FILE = "(/NavigateFile_2/src/main/webapp)";
-  private static final String PATH_2_TO_README_FILE = "(/NavigateFile_2)";
-  private static final String FILE_JAVA = "AppController.java";
-  private static final String FILE_XML = "pom.xml";
-  private static final String FILE_README = "README.md";
-  private static final String FILE_JSP = "index.jsp";
-  private static final String FILE_CREATED_FROM_API = "createdFrom.api";
+  private static final String PROJECT_NAME = "project";
+  private static final String PROJECT_NAME_2 = "project_2";
   private static final String FILE_CREATED_FROM_CONSOLE = "createdFrom.con";
-
-  private static final List<String> FILES_A_SYMBOL =
-      Arrays.asList(
-          "AppController.java (/NavigateFile/src/main/java/org/eclipse/qa/examples)",
-          "AppController.java (/NavigateFile_2/src/main/java/org/eclipse/qa/examples)");
-  private static final List<String> FILES_P_SYMBOL =
-      Arrays.asList("pom.xml (/NavigateFile_2)", "pom.xml (/NavigateFile)");
-  private static final List<String> FILES_I_SYMBOL =
-      Arrays.asList(
-          "index.jsp (/NavigateFile/src/main/webapp)",
-          "index.jsp (/NavigateFile_2/src/main/webapp)");
-  private static final List<String> FILES_R_SYMBOL =
-      Arrays.asList("README.md (/NavigateFile)", "README.md (/NavigateFile_2)");
-  private static final List<String> FILES_C_SYMBOL =
-      Arrays.asList(
-          "classpath (/NavigateFile_2/.che)", "classpath (/NavigateFile/.che)",
-          "createdFrom.con (/NavigateFile_2)", "createdFrom.api (/NavigateFile)");
+  private static final String COMMAND_FOR_FILE_CREATION = "createFile";
+  private static final String HIDDEN_FOLDER_NAME = ".hiddenFolder";
+  private static final String HIDDEN_FILE_NAME = ".hiddenFile";
+  private static final String FILE_IN_HIDDEN_FOLDER = "innerFile.css";
+  private static final int MAX_TIMEOUT_FOR_UPDATING_INDEXES = 10;
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -83,182 +63,142 @@ public class NavigateToFileTest {
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Git git;
   @Inject private AskDialog askDialog;
+  @Inject private TestCommandServiceClient testCommandServiceClient;
+  @Inject private CommandsPalette commandsPalette;
 
   @BeforeClass
   public void setUp() throws Exception {
     URL resource = getClass().getResource("/projects/guess-project");
     testProjectServiceClient.importProject(
-        workspace.getId(),
-        Paths.get(resource.toURI()),
-        PROJECT_NAME,
-        ProjectTemplates.MAVEN_SIMPLE);
-
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SIMPLE);
     testProjectServiceClient.importProject(
-        workspace.getId(),
-        Paths.get(resource.toURI()),
-        PROJECT_NAME_2,
-        ProjectTemplates.MAVEN_SIMPLE);
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME_2, MAVEN_SIMPLE);
+    testCommandServiceClient.createCommand(
+        format("ls > /projects/%s/%s", PROJECT_NAME_2, FILE_CREATED_FROM_CONSOLE),
+        COMMAND_FOR_FILE_CREATION,
+        CUSTOM,
+        workspace.getId());
     ide.open(workspace);
-  }
-
-  @Test
-  public void checkNavigateToFileFunction() {
-    // Open the project one and check function 'Navigate To File'
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME);
-    selectFileFromNavigate("A", FILE_JAVA + PATH_TO_JAVA_FILE, FILES_A_SYMBOL);
-    editor.waitTabIsPresent("AppController");
-    editor.waitActiveEditor();
-    editor.closeFileByNameWithSaving("AppController");
-    editor.waitWhileFileIsClosed("AppController");
-    selectFileFromNavigate("p", FILE_XML + PATH_TO_README_FILE, FILES_P_SYMBOL);
-    editor.waitTabIsPresent("qa-spring-sample");
-    editor.waitActiveEditor();
-    editor.closeFileByNameWithSaving("qa-spring-sample");
-    editor.waitWhileFileIsClosed("qa-spring-sample");
-    selectFileFromNavigate("i", FILE_JSP + PATH_TO_JSP_FILE);
-    editor.waitTabIsPresent("index.jsp");
-    editor.waitActiveEditor();
-    editor.closeFileByNameWithSaving("index.jsp");
-    editor.waitWhileFileIsClosed("index.jsp");
-    selectFileFromNavigateLaunchByKeyboard("R", FILE_README + PATH_TO_README_FILE);
-    editor.waitTabIsPresent("README.md");
-    editor.waitActiveEditor();
-    editor.closeFileByNameWithSaving("README.md");
-    editor.waitWhileFileIsClosed("README.md");
-    loader.waitOnClosed();
-
-    // Open the project two and check function 'Navigate To File'
     projectExplorer.waitItem(PROJECT_NAME_2);
-    projectExplorer.openItemByPath(PROJECT_NAME_2);
-    selectFileFromNavigate("A", FILE_JAVA + PATH_2_TO_JAVA_FILE, FILES_A_SYMBOL);
-    editor.waitTabIsPresent("AppController");
-    editor.waitActiveEditor();
-    selectFileFromNavigate("p", FILE_XML + PATH_2_TO_README_FILE, FILES_P_SYMBOL);
-    editor.waitTabIsPresent("qa-spring-sample");
-    editor.waitActiveEditor();
-    selectFileFromNavigate("i", FILE_JSP + PATH_2_TO_JSP_FILE);
-    editor.waitTabIsPresent("index.jsp");
-    editor.waitActiveEditor();
-    selectFileFromNavigateLaunchByKeyboard("R", FILE_README + PATH_2_TO_README_FILE);
-    editor.waitTabIsPresent("README.md");
-    editor.waitActiveEditor();
-    editor.closeAllTabsByContextMenu();
-
-    // Check that form is closed by pressing ESC button
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
-    navigateToFile.waitFormToOpen();
-    navigateToFile.closeNavigateToFileForm();
-    navigateToFile.waitFormToClose();
   }
 
-  @Test
-  public void checkNavigateToFileFunctionWithJustCreatedFiles() throws Exception {
+  @Test(dataProvider = "dataForCheckingTheSameFileInDifferentProjects")
+  public void shouldNavigateToFileForFirstProject(
+      String inputValueForChecking, Map<Integer, String> expectedValues) {
+    // Open the project one and check function 'Navigate To File'
+    launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 1);
+  }
+
+  @Test(dataProvider = "dataForCheckingTheSameFileInDifferentProjects")
+  public void shouldDoNavigateToFileForSecondProject(
+      String inputValueForChecking, Map<Integer, String> expectedValues) {
+    launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 2);
+  }
+
+  @Test(dataProvider = "dataForCheckingFilesCreatedWithoutIDE")
+  public void shouldNavigateToFileWithJustCreatedFiles(
+      String inputValueForChecking, Map<Integer, String> expectedValues) throws Exception {
+
     String content = "NavigateToFileTest";
-
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME);
-    createFileFromAPI(PROJECT_NAME, FILE_CREATED_FROM_API, content);
-    terminal.waitTerminalTab();
-    terminal.selectTerminalTab();
-    createFileInTerminal(PROJECT_NAME_2, FILE_CREATED_FROM_CONSOLE);
-    WaitUtils.sleepQuietly(10);
-    selectFileFromNavigate("c", FILE_CREATED_FROM_API + PATH_TO_README_FILE, FILES_C_SYMBOL);
-    editor.waitTabIsPresent(FILE_CREATED_FROM_API);
-    editor.waitActiveEditor();
-    editor.closeFileByNameWithSaving(FILE_CREATED_FROM_API);
-    selectFileFromNavigate("c", FILE_CREATED_FROM_CONSOLE + PATH_2_TO_README_FILE, FILES_C_SYMBOL);
-    editor.waitTabIsPresent(FILE_CREATED_FROM_CONSOLE);
-    editor.waitActiveEditor();
-    editor.closeFileByNameWithSaving(FILE_CREATED_FROM_CONSOLE);
+    testProjectServiceClient.createFileInProject(
+        workspace.getId(), PROJECT_NAME, expectedValues.get(1).split(" ")[0], content);
+    commandsPalette.openCommandPalette();
+    commandsPalette.startCommandByDoubleClick(COMMAND_FOR_FILE_CREATION);
+    sleepQuietly(MAX_TIMEOUT_FOR_UPDATING_INDEXES);
+    int randomItemFromList = ThreadLocalRandom.current().nextInt(1, 2);
+    launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, randomItemFromList);
   }
 
   @Test
-  public void checkNavigateToFileFunctionWithFilesFromHiddenFolders() {
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectItem(PROJECT_NAME);
-    menu.runCommand(
-        TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
-    askDialog.acceptDialogWithText(
-        "Do you want to initialize the local repository " + PROJECT_NAME + "?");
-    loader.waitOnClosed();
-    git.waitGitStatusBarWithMess(TestGitConstants.GIT_INITIALIZED_SUCCESS);
-
-    // check that HEAD file from .git folder is not appear in list of found files
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
-    navigateToFile.waitFormToOpen();
-    navigateToFile.typeSymbolInFileNameField("H");
-    loader.waitOnClosed();
-    navigateToFile.waitFileNamePopUp();
-    assertFalse(navigateToFile.isFilenameSuggested("HEAD (/NavigateFile/.git)"));
+  public void shouldNotDisplayHiddenFilesAndFoldersInDropDown() throws Exception {
+    addHiddenFoldersAndFileThroughProjectService();
+    launchNavigateToFileFromUIAndTypeValue(FILE_IN_HIDDEN_FOLDER);
+    assertTrue(navigateToFile.getText().isEmpty());
     navigateToFile.closeNavigateToFileForm();
-    navigateToFile.waitFormToClose();
+    launchNavigateToFileFromUIAndTypeValue(HIDDEN_FILE_NAME);
+    assertTrue(navigateToFile.getText().isEmpty());
   }
 
-  private void selectFileFromNavigate(String symbol, String pathName, List<String> files) {
+  private void addHiddenFoldersAndFileThroughProjectService() throws Exception {
+    testProjectServiceClient.createFolder(
+        workspace.getId(), PROJECT_NAME + "/" + HIDDEN_FOLDER_NAME);
+    testProjectServiceClient.createFileInProject(
+        workspace.getId(),
+        PROJECT_NAME + "/" + HIDDEN_FOLDER_NAME,
+        FILE_IN_HIDDEN_FOLDER,
+        "contentFile1");
+    testProjectServiceClient.createFileInProject(
+        workspace.getId(), PROJECT_NAME_2 + "/", HIDDEN_FILE_NAME, "content-of-hidden-file");
+    sleepQuietly(MAX_TIMEOUT_FOR_UPDATING_INDEXES);
+  }
+
+  private void launchNavigateToFileAndCheckResults(
+      String navigatingValue,
+      Map<Integer, String> expectedItems,
+      final int numValueFromDropDawnList) {
+
+    // extract the path (without opened class)
+    String dropdownVerificationPath = expectedItems.get(numValueFromDropDawnList).split(" ")[1];
+    String openedFileWithExtension = expectedItems.get(numValueFromDropDawnList).split(" ")[0];
+
+    // extract the name of opened files that display in a tab (the ".java" extension are not shown
+    // in tabs)
+    String openedFileNameInTheTab = openedFileWithExtension.replace(".java", "");
+    launchNavigateToFileFromUIAndTypeValue(navigatingValue);
+    waitExpectedItemsInNavigateToFileDropdawn(expectedItems);
+    navigateToFile.selectFileByName(dropdownVerificationPath);
+    editor.waitActiveEditor();
+    editor.getAssociatedPathFromTheTab(openedFileNameInTheTab);
+    editor.closeFileByNameWithSaving(openedFileNameInTheTab);
+  }
+
+  private void launchNavigateToFileFromUIAndTypeValue(String navigatingValue) {
     loader.waitOnClosed();
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
+    menu.runCommand(ASSISTANT, NAVIGATE_TO_FILE);
     navigateToFile.waitFormToOpen();
     loader.waitOnClosed();
-    navigateToFile.typeSymbolInFileNameField(symbol);
+    navigateToFile.typeSymbolInFileNameField(navigatingValue);
     loader.waitOnClosed();
-    navigateToFile.waitFileNamePopUp();
-    for (String listFiles : files) {
-      navigateToFile.waitListOfFilesNames(listFiles);
-    }
-    navigateToFile.selectFileByFullName(pathName);
-    navigateToFile.waitFormToClose();
   }
 
-  private void selectFileFromNavigate(String symbol, String pathName) {
-    loader.waitOnClosed();
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
-    navigateToFile.waitFormToOpen();
-    loader.waitOnClosed();
-    navigateToFile.typeSymbolInFileNameField(symbol);
-    loader.waitOnClosed();
-    navigateToFile.waitFileNamePopUp();
-    for (String listFiles : FILES_I_SYMBOL) {
-      navigateToFile.waitListOfFilesNames(listFiles);
-    }
-    navigateToFile.selectFileByFullName(pathName);
-    navigateToFile.waitFormToClose();
+  private void waitExpectedItemsInNavigateToFileDropdawn(Map<Integer, String> expectedItems) {
+    expectedItems
+        .values()
+        .stream()
+        .map(it -> it.toString())
+        .forEach(it -> navigateToFile.waitListOfFilesNames(it));
   }
 
-  private void selectFileFromNavigateLaunchByKeyboard(String symbol, String pathName) {
-    loader.waitOnClosed();
-    navigateToFile.launchNavigateToFileByKeyboard();
-    navigateToFile.waitFormToOpen();
-    loader.waitOnClosed();
-    navigateToFile.typeSymbolInFileNameField(symbol);
-    loader.waitOnClosed();
-    navigateToFile.waitFileNamePopUp();
-    for (String listFiles : FILES_R_SYMBOL) {
-      navigateToFile.waitListOfFilesNames(listFiles);
-    }
-    navigateToFile.selectFileByFullName(pathName);
-    navigateToFile.waitFormToClose();
+  @DataProvider
+  private Object[][] dataForCheckingTheSameFileInDifferentProjects() {
+    return new Object[][] {
+      {
+        "A",
+        ImmutableMap.of(
+            1, "AppController.java (/project/src/main/java/org/eclipse/qa/examples)",
+            2, "AppController.java (/project_2/src/main/java/org/eclipse/qa/examples)")
+      },
+      {
+        "i",
+        ImmutableMap.of(
+            1, "index.jsp (/project/src/main/webapp)",
+            2, "index.jsp (/project_2/src/main/webapp)")
+      },
+      {
+        "R",
+        ImmutableMap.of(
+            1, "README.md (/project)",
+            2, "README.md (/project_2)")
+      }
+    };
   }
 
-  private void createFileFromAPI(String path, String fileName, String content) throws Exception {
-    testProjectServiceClient.createFileInProject(workspace.getId(), path, fileName, content);
-  }
-
-  private void createFileInTerminal(String projectName, String fileName) {
-    terminal.typeIntoTerminal("cd " + projectName + Keys.ENTER);
-    terminal.typeIntoTerminal("ls -als > " + fileName + Keys.ENTER);
-    terminal.typeIntoTerminal("cat " + fileName + Keys.ENTER);
-    terminal.typeIntoTerminal("ls" + Keys.ENTER);
-    terminal.waitExpectedTextIntoTerminal(fileName);
+  @DataProvider
+  private Object[][] dataForCheckingFilesCreatedWithoutIDE() {
+    return new Object[][] {
+      {"c", ImmutableMap.of(1, "createdFrom.api (/project)", 2, "createdFrom.con (/project_2)")}
+    };
   }
 }
