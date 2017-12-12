@@ -116,6 +116,7 @@ public class GitPullTest {
     checkPullAfterUpdatingContent(readmeTxtFileName, currentTimeInMillis);
     checkPullAfterUpdatingContent(htmlFileName, currentTimeInMillis);
     checkPullAfterUpdatingContent(readmeTxtFileName, currentTimeInMillis);
+
     for (GHContent ghContent : gitHubRepository.getDirectoryContent(folderWithPlainFilesPath)) {
       ghContent.delete("remove file " + ghContent.getName());
     }
