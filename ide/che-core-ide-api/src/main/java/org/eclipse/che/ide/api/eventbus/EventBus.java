@@ -9,10 +9,23 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
-package org.eclipse.che.ide.js.api.editor;
+package org.eclipse.che.ide.api.eventbus;
 
 import jsinterop.annotations.JsType;
+import org.eclipse.che.ide.api.Disposable;
 
 /** @author Yevhen Vydolob */
 @JsType
-public interface EditorManager {}
+public interface EventBus {
+
+  /**
+   * Fire a event.
+   *
+   * @param eventType the event type
+   * @param event the event
+   * @return a reference to this
+   */
+  <E> EventBus fire(EventType<E> eventType, E event);
+
+  <E> Disposable addHandler(EventType<E> eventType, Handler<E> handler);
+}

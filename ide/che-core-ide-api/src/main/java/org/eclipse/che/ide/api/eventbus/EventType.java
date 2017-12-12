@@ -9,10 +9,14 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
-package org.eclipse.che.ide.js.api.editor;
+package org.eclipse.che.ide.api.eventbus;
 
 import jsinterop.annotations.JsType;
 
-/** @author Yevhen Vydolob */
+/**
+ * @author Yevhen Vydolob
+ */
 @JsType
-public interface EditorManager {}
+public interface EventType<T> {
+  String type();
+}

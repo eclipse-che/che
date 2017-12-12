@@ -19,11 +19,11 @@ import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.eventbus.EventBus;
 import org.eclipse.che.ide.js.api.action.ActionManager;
 import org.eclipse.che.ide.js.api.editor.EditorManager;
 import org.eclipse.che.ide.js.api.parts.PartManager;
 import org.eclipse.che.ide.js.api.resources.ImageRegistry;
-import org.eclipse.che.ide.js.api.workspace.WorkspaceRuntime;
 
 /** */
 @Singleton
@@ -38,11 +38,11 @@ public class JsApi {
 
   @JsProperty private final PartManager partManager;
 
-  @JsProperty private final WorkspaceRuntime workspaceRuntime;
-
   @JsProperty private final EditorManager editorManager;
 
   @JsProperty private final AppContext appContext;
+
+  @JsProperty private final EventBus eventBus;
 
   @Inject
   @JsIgnore
@@ -50,15 +50,15 @@ public class JsApi {
       ActionManager actionManager,
       ImageRegistry imageRegistry,
       PartManager partManager,
-      WorkspaceRuntime workspaceRuntime,
       EditorManager editorManager,
-      AppContext appContext) {
+      AppContext appContext,
+      EventBus eventBus) {
     this.actionManager = actionManager;
     this.imageRegistry = imageRegistry;
     this.partManager = partManager;
-    this.workspaceRuntime = workspaceRuntime;
     this.editorManager = editorManager;
     this.appContext = appContext;
+    this.eventBus = eventBus;
     instance = this;
   }
 

@@ -14,11 +14,14 @@ package org.eclipse.che.ide.js.api.workspace.event;
 import jsinterop.annotations.JsIgnore;
 import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsType;
+import org.eclipse.che.ide.api.eventbus.EventType;
 import org.eclipse.che.ide.api.workspace.event.ServerRunningEvent;
 
 /** @author Yevhen Vydolob */
-@JsType
+@JsType(name = "ServerRunningEvent")
 public class JsServerRunningEvent {
+
+  public static final EventType<JsServerRunningEvent> TYPE = () -> "server.running";
 
   @JsIgnore private final ServerRunningEvent event;
 

@@ -13,6 +13,7 @@ package org.eclipse.che.ide.js.api.editor.event;
 
 import jsinterop.annotations.JsIgnore;
 import jsinterop.annotations.JsType;
+import org.eclipse.che.ide.api.eventbus.EventType;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.js.api.editor.EditorPartPresenter;
 
@@ -20,6 +21,7 @@ import org.eclipse.che.ide.js.api.editor.EditorPartPresenter;
 @JsType
 public class EditorOpenedEvent {
 
+  public static final EventType<EditorOpenedEvent> TYPE = () -> "editor.opened";
   @JsIgnore private final VirtualFile file;
   @JsIgnore private final EditorPartPresenter editor;
 

@@ -14,11 +14,14 @@ package org.eclipse.che.ide.js.api.workspace.event;
 import jsinterop.annotations.JsIgnore;
 import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsType;
+import org.eclipse.che.ide.api.eventbus.EventType;
 import org.eclipse.che.ide.api.workspace.event.WsAgentServerRunningEvent;
 
 /** @author Yevhen Vydolob */
-@JsType
+@JsType(name = "WsAgentServerRunningEvent")
 public class JsWsAgentServerRunningEvent {
+
+  public static final EventType<JsWsAgentServerRunningEvent> TYPE = () -> "ws.agent.server.running";
 
   @JsIgnore private final WsAgentServerRunningEvent event;
 

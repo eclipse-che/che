@@ -12,7 +12,7 @@
 package org.eclipse.che.ide.js.api.action;
 
 import jsinterop.annotations.JsType;
-import org.eclipse.che.ide.js.api.Disposable;
+import org.eclipse.che.ide.api.Disposable;
 
 /** A manager for actions. Used to register action handlers. */
 @JsType

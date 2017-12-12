@@ -9,18 +9,8 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
-package org.eclipse.che.ide.js.api;
+/** @author Yevhen Vydolob */
+@JsPackage(namespace = "che.ide.workspace.event")
+package org.eclipse.che.ide.js.api.workspace.event;
 
-import jsinterop.annotations.JsType;
-
-/**
- * Some type that can be dispose, like event listener, some resource, action
- *
- * @author Yevhen Vydolob
- */
-@JsType
-public interface Disposable {
-
-  /** Dispose this object */
-  void dispose();
-}
+import jsinterop.annotations.JsPackage;

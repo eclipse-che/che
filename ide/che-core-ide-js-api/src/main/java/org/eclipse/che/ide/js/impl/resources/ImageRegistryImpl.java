@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Singleton;
-import org.eclipse.che.ide.js.api.Disposable;
+import org.eclipse.che.ide.api.Disposable;
 import org.eclipse.che.ide.js.api.context.PluginContext;
 import org.eclipse.che.ide.js.api.resources.ImageElementFactory;
 import org.eclipse.che.ide.js.api.resources.ImageRegistry;

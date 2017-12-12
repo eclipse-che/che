@@ -9,10 +9,6 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
-package org.eclipse.che.ide.js.api.editor;
-
-import jsinterop.annotations.JsType;
-
 /** @author Yevhen Vydolob */
-@JsType
-public interface EditorManager {}
+@jsinterop.annotations.JsPackage(namespace = "che.ide.editor")
+package org.eclipse.che.ide.js.api.editor.event;

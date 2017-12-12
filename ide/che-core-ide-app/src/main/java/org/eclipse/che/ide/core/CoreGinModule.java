@@ -45,6 +45,7 @@ import org.eclipse.che.ide.debug.DebugApiModule;
 import org.eclipse.che.ide.dto.DtoModule;
 import org.eclipse.che.ide.editor.EditorApiModule;
 import org.eclipse.che.ide.editor.preferences.EditorPreferencesModule;
+import org.eclipse.che.ide.eventbus.EventBusImpl;
 import org.eclipse.che.ide.factory.FactoryGinModule;
 import org.eclipse.che.ide.filetypes.FileTypeApiModule;
 import org.eclipse.che.ide.js.impl.JsApiModule;
@@ -86,6 +87,10 @@ public class CoreGinModule extends AbstractGinModule {
 
   @Override
   protected void configure() {
+    bind(org.eclipse.che.ide.api.eventbus.EventBus.class)
+        .to(EventBusImpl.class)
+        .in(Singleton.class);
+
     install(new JsApiModule());
     install(new JsonRpcModule());
     install(new WebSocketModule());

@@ -13,7 +13,7 @@ package org.eclipse.che.ide.js.api.context;
 
 import elemental.js.util.JsArrayOf;
 import jsinterop.annotations.JsType;
-import org.eclipse.che.ide.js.api.Disposable;
+import org.eclipse.che.ide.api.Disposable;
 import org.eclipse.che.ide.js.api.JsApi;
 
 /**

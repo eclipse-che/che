@@ -13,7 +13,7 @@ package org.eclipse.che.ide.js.api.resources;
 
 import com.google.gwt.dom.client.Element;
 import jsinterop.annotations.JsType;
-import org.eclipse.che.ide.js.api.Disposable;
+import org.eclipse.che.ide.api.Disposable;
 
 /**
  * Holds and manages all IDE icon resources, each resource mapped to their id. We support 3 way to

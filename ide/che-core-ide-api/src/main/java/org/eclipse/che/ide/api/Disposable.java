@@ -9,10 +9,18 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
-package org.eclipse.che.ide.js.api.editor;
+package org.eclipse.che.ide.api;
 
 import jsinterop.annotations.JsType;
 
-/** @author Yevhen Vydolob */
+/**
+ * Some type that can be dispose, like event listener, some resource, action
+ *
+ * @author Yevhen Vydolob
+ */
 @JsType
-public interface EditorManager {}
+public interface Disposable {
+
+  /** Dispose this object */
+  void dispose();
+}
