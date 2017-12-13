@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.sql.DataSource;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
+import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
 import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
@@ -183,6 +184,9 @@ public class WsMasterModule extends AbstractModule {
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
     install(new org.eclipse.che.swagger.deploy.DocsModule());
     install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
+
+    final Multibinder<MessageBodyAdapter> adaptersMultibinder =
+        Multibinder.newSetBinder(binder(), MessageBodyAdapter.class);
 
     final MessageBodyAdapterInterceptor interceptor = new MessageBodyAdapterInterceptor();
     requestInjection(interceptor);
