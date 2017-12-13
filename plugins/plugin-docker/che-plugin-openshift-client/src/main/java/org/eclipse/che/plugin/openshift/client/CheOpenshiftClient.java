@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.plugin.openshift.client;
 
+import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.utils.URLUtils;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
@@ -20,14 +21,17 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-public class OpenShiftClientExtension extends DefaultOpenShiftClient {
-
+class CheOpenshiftClient extends DefaultOpenShiftClient {
   private static final String VERSION = "version";
 
-  public OpenShiftClientExtension(OkHttpClient httpClient, OpenShiftConfig config)
-      throws KubernetesClientException {
-    super(httpClient, config);
+  public CheOpenshiftClient(OkHttpClient httpClient, Config config) {
+    super(
+        httpClient,
+        config instanceof OpenShiftConfig ? (OpenShiftConfig) config : new OpenShiftConfig(config));
   }
+
+  @Override
+  public void close() {}
 
   public String getVersion() {
     try {

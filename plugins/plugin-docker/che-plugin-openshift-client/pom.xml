@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-docker-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.22.0-SNAPSHOT</version>
+        <version>5.23.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-openshift-client</artifactId>
     <packaging>jar</packaging>
@@ -54,6 +54,10 @@
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>openshift-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>

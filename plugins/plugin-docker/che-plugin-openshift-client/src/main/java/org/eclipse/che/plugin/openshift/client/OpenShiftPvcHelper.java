@@ -23,8 +23,7 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
-import io.fabric8.openshift.client.DefaultOpenShiftClient;
-import io.fabric8.openshift.client.OpenShiftClient;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -70,6 +69,7 @@ public class OpenShiftPvcHelper {
   private final String jobMemoryLimit;
 
   @Inject private OpenshiftWorkspaceEnvironmentProvider openshiftUserAccountProvider;
+  @Inject private OpenShiftClientFactory ocFactory;
 
   protected enum Command {
     REMOVE,
@@ -181,19 +181,20 @@ public class OpenShiftPvcHelper {
             .endSpec()
             .build();
 
-    try (OpenShiftClient openShiftClient =
-        new DefaultOpenShiftClient(openshiftUserAccountProvider.getWorkspacesOpenshiftConfig())) {
-      openShiftClient.pods().inNamespace(projectNamespace).create(podSpec);
+    try {
+      DefaultKubernetesClient kubeClient =
+          ocFactory.newKubeClient(openshiftUserAccountProvider.getWorkspacesOpenshiftConfig());
+      kubeClient.pods().inNamespace(projectNamespace).create(podSpec);
       boolean completed = false;
       while (!completed) {
-        Pod pod = openShiftClient.pods().inNamespace(projectNamespace).withName(podName).get();
+        Pod pod = kubeClient.pods().inNamespace(projectNamespace).withName(podName).get();
         String phase = pod.getStatus().getPhase();
         switch (phase) {
           case POD_PHASE_FAILED:
             LOG.info("Pod command {} failed", Arrays.toString(jobCommand));
             // fall through
           case POD_PHASE_SUCCEEDED:
-            openShiftClient.resource(pod).delete();
+            kubeClient.resource(pod).delete();
             updateCreatedDirs(command, phase, allDirsArray);
             return POD_PHASE_SUCCEEDED.equals(phase);
           default:

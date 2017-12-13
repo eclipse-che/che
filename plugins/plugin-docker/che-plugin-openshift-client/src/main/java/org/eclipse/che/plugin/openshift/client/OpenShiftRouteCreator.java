@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.openshift.client;
 import io.fabric8.openshift.api.model.DoneableRoute;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteFluent.SpecNested;
-import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -28,6 +27,7 @@ public class OpenShiftRouteCreator {
   private static final String REDIRECT_INSECURE_EDGE_TERMINATION_POLICY = "Redirect";
 
   @Inject private OpenshiftWorkspaceEnvironmentProvider openshiftUserAccountProvider;
+  @Inject private OpenShiftClientFactory ocFactory;
 
   public void createRoute(
       final String namespace,
@@ -45,42 +45,41 @@ public class OpenShiftRouteCreator {
           "Property che.docker.ip.external must be set when using openshift.");
     }
 
-    try (OpenShiftClient openShiftClient =
-        new DefaultOpenShiftClient(openshiftUserAccountProvider.getWorkspacesOpenshiftConfig())) {
-      String routeName = generateRouteName(routeId, serverRef);
+    OpenShiftClient openShiftClient =
+        ocFactory.newOcClient(openshiftUserAccountProvider.getWorkspacesOpenshiftConfig());
+    String routeName = generateRouteName(routeId, serverRef);
 
-      SpecNested<DoneableRoute> routeSpec =
-          openShiftClient
-              .routes()
-              .inNamespace(namespace)
-              .createNew()
-              .withNewMetadata()
-              .withName(routeName)
-              .addToLabels(OpenShiftConnector.OPENSHIFT_DEPLOYMENT_LABEL, deploymentName)
-              .endMetadata()
-              .withNewSpec()
-              .withNewTo()
-              .withKind("Service")
-              .withName(serviceName)
-              .endTo()
-              .withNewPort()
-              .withNewTargetPort()
-              .withStrVal(serverRef)
-              .endTargetPort()
-              .endPort();
+    SpecNested<DoneableRoute> routeSpec =
+        openShiftClient
+            .routes()
+            .inNamespace(namespace)
+            .createNew()
+            .withNewMetadata()
+            .withName(routeName)
+            .addToLabels(OpenShiftConnector.OPENSHIFT_DEPLOYMENT_LABEL, deploymentName)
+            .endMetadata()
+            .withNewSpec()
+            .withNewTo()
+            .withKind("Service")
+            .withName(serviceName)
+            .endTo()
+            .withNewPort()
+            .withNewTargetPort()
+            .withStrVal(serverRef)
+            .endTargetPort()
+            .endPort();
 
-      if (enableTls) {
-        routeSpec
-            .withNewTls()
-            .withTermination(TLS_TERMINATION_EDGE)
-            .withInsecureEdgeTerminationPolicy(REDIRECT_INSECURE_EDGE_TERMINATION_POLICY)
-            .endTls();
-      }
-
-      Route route = routeSpec.endSpec().done();
-
-      LOG.info("OpenShift route {} created", route.getMetadata().getName());
+    if (enableTls) {
+      routeSpec
+          .withNewTls()
+          .withTermination(TLS_TERMINATION_EDGE)
+          .withInsecureEdgeTerminationPolicy(REDIRECT_INSECURE_EDGE_TERMINATION_POLICY)
+          .endTls();
     }
+
+    Route route = routeSpec.endSpec().done();
+
+    LOG.info("OpenShift route {} created", route.getMetadata().getName());
   }
 
   private String generateRouteName(final String serviceName, final String serverRef) {
