@@ -75,8 +75,7 @@ public class CheckRecentFilesAndRevealResourceTest {
     editor.goToCursorPositionVisible(5, 1);
     projectExplorer.collapseProjectTreeByOptionsButton();
     projectExplorer.waitDisappearItemByPath(PATH_TO_FILE_FIRST_PROJECT);
-    menu.runCommand(
-        TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.REVEAL_RESOURCE);
+    projectExplorer.revealResourceByOptionsButton();
     projectExplorer.waitItem(PATH_TO_FILE_FIRST_PROJECT);
   }
 

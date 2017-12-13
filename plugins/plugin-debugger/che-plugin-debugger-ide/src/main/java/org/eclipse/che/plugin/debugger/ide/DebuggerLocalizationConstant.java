@@ -291,4 +291,10 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
 
   @Key("edit.expression.view.expression.field.title")
   String editExpressionViewExpressionFieldTitle();
+
+  @Key("action.switch.debugger.displaying.title")
+  String switchDebuggerDisplayingTitle();
+
+  @Key("action.switch.debugger.displaying.description")
+  String switchDebuggerDisplayingDescription();
 }

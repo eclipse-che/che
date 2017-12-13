@@ -37,6 +37,7 @@ import {SSHGenerator} from "../../spi/docker/ssh-generator";
 import {CheFileStructWorkspaceProject} from "./chefile-struct/che-file-struct";
 import {StringUtils} from "../../utils/string-utils";
 import {ExecAgentServiceClientImpl} from "../../api/exec-agent/exec-agent-service-client";
+import {JsonRpcBus} from "../../spi/websocket/json-rpc-bus";
 
 /**
  * Entrypoint for the Chefile handling in a directory.
@@ -480,12 +481,7 @@ export class CheDir {
         }
 
         // search IDE url link
-        let ideUrl : string = 'N/A';
-        workspaceDto.getLinks().forEach((link) => {
-          if ('ide url' === link.getRel()) {
-            ideUrl = link.getHref();
-          }
-        });
+        let ideUrl : string = workspaceDto.getLinks().get("ide");
         Log.getLogger().info(this.i18n.get('status.workspace.name', this.chefileStructWorkspace.name));
         Log.getLogger().info(this.i18n.get('status.workspace.url', ideUrl));
         Log.getLogger().info(this.i18n.get('status.instance.id', this.instanceId));
@@ -736,7 +732,10 @@ export class CheDir {
 
   rsyncProject(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto) : Promise<any> {
     var spawn = require('child_process').spawn;
-    let port: string = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers()["22/tcp"].getAddress().split(":")[1];
+
+    let machines = workspaceDto.getRuntime().getMachines();
+    let sshAgentServer = machines.get("dev-machine").getServers().get("ssh");
+    let port: string = sshAgentServer.getUrl().replace("/", "").split(":")[2];
     let username : string = "user@" + this.chefileStruct.server.ip;
 
 
@@ -779,13 +778,12 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
 
     // ok we have the public key, now storing it
     // get dev machine
-    let machineId : string = workspaceDto.getRuntime().getDevMachine().getId();
-
-
-    let execAgentServer = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers().get("4412/tcp");
+    let machines : Map<string,org.eclipse.che.api.workspace.shared.dto.MachineDto> = workspaceDto.getRuntime().getMachines();
+    let machine : org.eclipse.che.api.workspace.shared.dto.MachineDto = machines.get("dev-machine");
+    let execAgentServer : org.eclipse.che.api.workspace.shared.dto.ServerDto = machine.getServers().get("exec-agent/ws");
     let execAgentURI = execAgentServer.getUrl();
     if (execAgentURI.includes("localhost")) {
-      execAgentURI = execAgentServer.getProperties().getInternalUrl();
+        execAgentURI = execAgentURI.replace("localhost", RemoteIp.ip)
     }
 
     let execAgentServiceClient:ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, this.authData, execAgentURI);
@@ -836,7 +834,9 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
           return Promise.reject("The SSH agent (org.eclipse.che.ssh) has been disabled for this workspace.")
         }
 
-        let port: string = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers().get("22/tcp").getAddress().split(":")[1];
+        let machines = workspaceDto.getRuntime().getMachines();
+        let sshAgentServer = machines.get("dev-machine").getServers().get("ssh");
+        let port: string = sshAgentServer.getUrl().replace("/", "").split(":")[2];
         var spawn = require('child_process').spawn;
 
         let username : string = "user@" + this.chefileStruct.server.ip;
@@ -899,18 +899,16 @@ setupSSHKeys(workspaceDto: org.eclipse.che.api.workspace.shared.dto.WorkspaceDto
 
 
   executeCommandsFromCurrentWorkspace(workspaceDto : org.eclipse.che.api.workspace.shared.dto.WorkspaceDto) : Promise<any> {
-    // get dev machine
-    let machineId : string = workspaceDto.getRuntime().getDevMachine().getId();
-
 
     let promises : Array<Promise<any>> = new Array<Promise<any>>();
     let workspaceCommands : Array<any> = workspaceDto.getConfig().getCommands();
 
     // get exec-agent URI
-    let execAgentServer = workspaceDto.getRuntime().getDevMachine().getRuntime().getServers().get("4412/tcp");
+    let machines = workspaceDto.getRuntime().getMachines();
+    let execAgentServer = machines.get("dev-machine").getServers().get("exec-agent/ws");
     let execAgentURI = execAgentServer.getUrl();
     if (execAgentURI.includes("localhost")) {
-      execAgentURI = execAgentServer.getProperties().getInternalUrl();
+        execAgentURI = execAgentURI.replace("localhost", RemoteIp.ip)
     }
     let execAgentServiceClientImpl:ExecAgentServiceClientImpl = new ExecAgentServiceClientImpl(this.workspace, this.authData, execAgentURI);
 

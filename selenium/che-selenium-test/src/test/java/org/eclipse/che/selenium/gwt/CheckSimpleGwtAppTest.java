@@ -15,7 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SU
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.CODENVY_UBUNTU_JDK8;
+import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_JDK8;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.COMMON;
 
 import com.google.inject.Inject;
@@ -30,6 +30,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceImpl;
@@ -69,7 +70,7 @@ public class CheckSimpleGwtAppTest {
     projectName = NameGenerator.generate("project", 4);
 
     WorkspaceConfigDto workspace =
-        workspaceDtoDeserializer.deserializeWorkspaceTemplate(CODENVY_UBUNTU_JDK8);
+        workspaceDtoDeserializer.deserializeWorkspaceTemplate(UBUNTU_JDK8);
 
     workspace
         .getEnvironments()
@@ -133,6 +134,9 @@ public class CheckSimpleGwtAppTest {
             .getServerFromDevMachineBySymbolicName(testWorkspace.getId(), GWT_CODESERVER_NAME)
             .getUrl()
             .replace("tcp", "http");
+
+    // the timeout needs for che6-ocp platform
+    WaitUtils.sleepQuietly(10);
     seleniumWebDriver.get(url);
 
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)

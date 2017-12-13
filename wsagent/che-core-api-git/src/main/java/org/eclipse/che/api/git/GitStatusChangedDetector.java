@@ -32,6 +32,8 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.fs.server.PathTransformer;
+import org.eclipse.che.api.git.exception.GitCommitInProgressException;
+import org.eclipse.che.api.git.exception.GitInvalidRepositoryException;
 import org.eclipse.che.api.git.shared.EditedRegion;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
@@ -175,11 +177,10 @@ public class GitStatusChangedDetector implements EventSubscriber<StatusChangedEv
                 .withModifiedFiles(modifiedFiles);
 
         transmit(statusChangeEventDto, id);
+      } catch (GitCommitInProgressException | GitInvalidRepositoryException e) {
+        // Silent ignore
       } catch (ServerException | NotFoundException e) {
-        String errorMessage = e.getMessage();
-        if (!("Not a git repository".equals(errorMessage))) {
-          LOG.error(errorMessage);
-        }
+        LOG.error(e.getMessage());
       }
     };
   }

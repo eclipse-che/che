@@ -12,13 +12,9 @@ package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.BaseAction;
-import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.parts.ActivePartChangedHandler;
-import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
@@ -27,37 +23,25 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
  * @author Vlad Zhukovskiy
  */
 @Singleton
-public class CollapseAllAction extends BaseAction implements ActivePartChangedHandler {
-
+public class CollapseAllAction extends BaseAction {
   private ProjectExplorerPresenter projectExplorer;
-
-  private PartPresenter activePart;
 
   @Inject
   public CollapseAllAction(
-      ProjectExplorerPresenter projectExplorer,
-      EventBus eventBus,
-      CoreLocalizationConstant localizationConstant) {
+      ProjectExplorerPresenter projectExplorer, CoreLocalizationConstant localizationConstant) {
     super(
         localizationConstant.collapseAllActionTitle(),
         localizationConstant.collapseAllActionDescription());
     this.projectExplorer = projectExplorer;
-
-    eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
   }
 
   @Override
   public void update(ActionEvent e) {
-    e.getPresentation().setEnabledAndVisible(activePart instanceof ProjectExplorerPresenter);
+    e.getPresentation().setEnabledAndVisible(true);
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
     projectExplorer.collapseAll();
-  }
-
-  @Override
-  public void onActivePartChanged(ActivePartChangedEvent event) {
-    activePart = event.getActivePart();
   }
 }

@@ -12,7 +12,10 @@ package org.eclipse.che.plugin.debugger.ide;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_DEBUG_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RUN;
+import static org.eclipse.che.ide.api.action.IdeActions.TOOL_WINDOWS_GROUP;
+import static org.eclipse.che.ide.api.constraints.Anchor.AFTER;
 import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
+import static org.eclipse.che.ide.core.StandardComponentInitializer.COMMAND_EXPLORER_DISPLAYING_MODE;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -28,6 +31,7 @@ import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.plugin.debugger.ide.actions.AddWatchExpressionAction;
 import org.eclipse.che.plugin.debugger.ide.actions.DebugAction;
+import org.eclipse.che.plugin.debugger.ide.actions.DebuggerDisplayingModeAction;
 import org.eclipse.che.plugin.debugger.ide.actions.DeleteAllBreakpointsAction;
 import org.eclipse.che.plugin.debugger.ide.actions.DeleteBreakpointAction;
 import org.eclipse.che.plugin.debugger.ide.actions.DisableBreakpointAction;
@@ -82,6 +86,7 @@ public class DebuggerExtension {
   public static final String DISABLE_BREAKPOINT_ID = "disableBreakpoint";
   public static final String ENABLE_BREAKPOINT_ID = "enableBreakpoint";
   public static final String DELETE_BREAKPOINT_ID = "deleteBreakpoint";
+  public static final String DEBUGGER_DISPLAYING_MODE_ID = "debuggerDisplayingMode";
 
   public static final String BREAKPOINT = "breakpoint";
 
@@ -113,7 +118,8 @@ public class DebuggerExtension {
       BreakpointActionGroup breakpointActionGroup,
       EnableBreakpointAction enableBreakpointAction,
       DisableBreakpointAction disableBreakpointAction,
-      DeleteBreakpointAction deleteBreakpointAction) {
+      DeleteBreakpointAction deleteBreakpointAction,
+      DebuggerDisplayingModeAction debuggerDisplayingModeAction) {
     debuggerResources.getCss().ensureInjected();
     breakpointResources.getCss().ensureInjected();
 
@@ -138,6 +144,7 @@ public class DebuggerExtension {
     actionManager.registerAction(ENABLE_BREAKPOINT_ID, enableBreakpointAction);
     actionManager.registerAction(DISABLE_BREAKPOINT_ID, disableBreakpointAction);
     actionManager.registerAction(DELETE_BREAKPOINT_ID, deleteBreakpointAction);
+    actionManager.registerAction(DEBUGGER_DISPLAYING_MODE_ID, debuggerDisplayingModeAction);
 
     // create group for selecting (changing) debug configurations
     final DefaultActionGroup debugActionGroup =
@@ -196,6 +203,11 @@ public class DebuggerExtension {
     debugContextMenuGroup.add(debugAction);
     debugContextMenuGroup.addSeparator();
 
+    DefaultActionGroup toolWindowGroup =
+        (DefaultActionGroup) actionManager.getAction(TOOL_WINDOWS_GROUP);
+    toolWindowGroup.add(
+        debuggerDisplayingModeAction, new Constraints(AFTER, COMMAND_EXPLORER_DISPLAYING_MODE));
+
     // keys binding
     keyBinding
         .getGlobal()
@@ -223,6 +235,10 @@ public class DebuggerExtension {
     keyBinding
         .getGlobal()
         .addKey(new KeyBuilder().charCode(KeyCodeMap.F2).build(), EDIT_DEBUG_VARIABLE_ID);
+
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().action().alt().charCode('5').build(), DEBUGGER_DISPLAYING_MODE_ID);
 
     if (UserAgent.isMac()) {
       keyBinding
