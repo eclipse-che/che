@@ -14,11 +14,9 @@ import static org.eclipse.che.selenium.core.constant.TestStacksConstants.NODE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.BUILD;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.RUN;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -36,7 +34,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -94,17 +91,10 @@ public class WorkingWithNodeWsTest {
     projectExplorer.selectItem(PROJECT_NAME);
 
     // Perform run web nodeJs application
-    consoles.startCommandFromProcessesArea("dev-machine", BUILD, INSTALL_DEPENDENCIES_PROCESS);
+    projectExplorer.invokeCommandWithContextMenu(BUILD, PROJECT_NAME, INSTALL_DEPENDENCIES_PROCESS);
     consoles.waitTabNameProcessIsPresent(INSTALL_DEPENDENCIES_PROCESS);
-    try {
-      consoles.waitExpectedTextIntoConsole("> node install.js", WIDGET_TIMEOUT_SEC);
-    } catch (TimeoutException ex) {
-      // Remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/6483", ex);
-    }
     consoles.waitExpectedTextIntoConsole("bower_components/angular", APPLICATION_START_TIMEOUT_SEC);
-
-    consoles.startCommandFromProcessesArea("dev-machine", RUN, RUN_PROCESS);
+    projectExplorer.invokeCommandWithContextMenu(RUN, PROJECT_NAME, RUN_PROCESS);
     consoles.waitTabNameProcessIsPresent(RUN_PROCESS);
     consoles.waitExpectedTextIntoConsole("Started connect web server", PREPARING_WS_TIMEOUT_SEC);
 
