@@ -156,7 +156,7 @@ public class GitColorsTest {
       editor.waitYellowTab("newFile");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7792", ex);
+      fail("Known issue https://github.com/eclipse/che/issues/7856", ex);
     }
 
     // check that the file color is yellow
