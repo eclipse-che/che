@@ -72,7 +72,7 @@ public class MacrosCommandsEditorTest {
     commandsEditor.setCursorToLine(1);
     commandsEditor.typeTextIntoEditor(Keys.ENTER.toString());
     commandsEditor.typeTextIntoEditor(Keys.ARROW_UP.toString());
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.typeTextIntoEditor("echo ");
     commandsEditor.selectMacrosLinkInCommandsEditor(EDITOR_MACROS_LINK);
     commandsEditor.typeTextIntoSearchMacroField("rel");
@@ -93,7 +93,7 @@ public class MacrosCommandsEditorTest {
     consoles.waitExpectedTextIntoConsole("/" + PROJ_NAME + "/src/Main.java");
     commandsEditor.setCursorToLine(1);
     commandsEditor.selectLineAndDelete();
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.typeTextIntoEditor("echo ");
     commandsEditor.selectMacrosLinkInCommandsEditor(EDITOR_MACROS_LINK);
     commandsEditor.selectMacroCommand("${current.class.fqn}");
@@ -111,7 +111,7 @@ public class MacrosCommandsEditorTest {
     commandsEditor.cancelFormInEditorByEscape();
     commandsEditor.setFocusIntoTypeCommandsEditor(PREVIEW_URL_EDITOR);
     commandsEditor.setCursorToLine(1);
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.selectMacrosLinkInCommandsEditor(PREVIEW_MACROS_LINK);
     commandsEditor.typeTextIntoSearchMacroField("server.");
     commandsEditor.waitTextIntoSearchMacroField("server.");
@@ -136,7 +136,7 @@ public class MacrosCommandsEditorTest {
     commandsEditor.setFocusIntoTypeCommandsEditor(PREVIEW_URL_EDITOR);
     commandsEditor.setCursorToLine(1);
     commandsEditor.selectLineAndDelete();
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.selectMacrosLinkInCommandsEditor(PREVIEW_MACROS_LINK);
     commandsEditor.selectMacroCommand("${server.wsagent/http}");
     commandsEditor.typeTextIntoEditor(Keys.ARROW_UP.toString());

@@ -69,7 +69,7 @@ public class EditorValidationTest {
     mavenPluginStatusBar.waitClosingInfoPanel();
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     // validation warnings
     editor.waitAllMarkersDisappear(ERROR_MARKER);
     editor.setCursorToLine(28);
@@ -94,10 +94,10 @@ public class EditorValidationTest {
 
     // validation errors
     editor.setCursorToLine(30);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(TEXT_FOR_ERROR);
     editor.waitMarkerInPosition(ERROR_MARKER, 30);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitAnnotationCodeAssistIsClosed();
     editor.moveToMarkerAndWaitAssistContent(ERROR_MARKER);
     editor.waitTextIntoAnnotationAssist("Type mismatch: cannot convert from double to Integer");

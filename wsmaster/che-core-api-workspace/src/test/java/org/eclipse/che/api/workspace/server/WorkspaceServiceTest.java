@@ -31,6 +31,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -45,19 +46,28 @@ import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
+import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
+import org.eclipse.che.api.workspace.shared.dto.MachineDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
+import org.eclipse.che.api.workspace.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
@@ -306,6 +316,241 @@ public class WorkspaceServiceTest {
   @DataProvider
   public Object[][] validWorkspaceKeys() {
     return new Object[][] {{"workspaceId"}, {"namespace:name"}, {":name"}};
+  }
+
+  @Test
+  public void shouldGetWorkspaceWithExternalServersByDefault() throws Exception {
+    // given
+    WorkspaceImpl workspace = createWorkspace(createConfigDto());
+    String externalServerKey = "server2";
+    ServerImpl externalServer = createExternalServer();
+    Map<String, Server> servers =
+        ImmutableMap.of("server1", createInternalServer(), externalServerKey, externalServer);
+    Map<String, Machine> machines =
+        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers));
+    workspace.setRuntime(new RuntimeImpl("activeEnv", machines, "user123"));
+    when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+    Map<String, MachineDto> expected =
+        singletonMap(
+            "machine1",
+            newDto(MachineDto.class)
+                .withAttributes(singletonMap("key", "value"))
+                .withServers(
+                    singletonMap(
+                        externalServerKey,
+                        newDto(ServerDto.class)
+                            .withUrl(externalServer.getUrl())
+                            .withStatus(externalServer.getStatus())
+                            .withAttributes(externalServer.getAttributes()))));
+
+    // when
+    Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .when()
+            .get(SECURE_PATH + "/workspace/" + workspace.getId());
+
+    // then
+    assertEquals(response.getStatusCode(), 200);
+    RuntimeDto retrievedRuntime = unwrapDto(response, WorkspaceDto.class).getRuntime();
+    assertNotNull(retrievedRuntime);
+    assertEquals(expected, retrievedRuntime.getMachines());
+  }
+
+  @Test
+  public void shouldTreatServerWithInternalServerAttributeNotEqualToTrueExternal()
+      throws Exception {
+    // given
+    WorkspaceImpl workspace = createWorkspace(createConfigDto());
+    String externalServerKey = "server2";
+    ServerImpl externalServer =
+        createInternalServer()
+            .withAttributes(singletonMap(ServerConfig.INTERNAL_SERVER_ATTRIBUTE, ""));
+    Map<String, Server> servers =
+        ImmutableMap.of("server1", createInternalServer(), externalServerKey, externalServer);
+    Map<String, Machine> machines =
+        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers));
+    workspace.setRuntime(new RuntimeImpl("activeEnv", machines, "user123"));
+    when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+    Map<String, MachineDto> expected =
+        singletonMap(
+            "machine1",
+            newDto(MachineDto.class)
+                .withAttributes(singletonMap("key", "value"))
+                .withServers(
+                    singletonMap(
+                        externalServerKey,
+                        newDto(ServerDto.class)
+                            .withUrl(externalServer.getUrl())
+                            .withStatus(externalServer.getStatus())
+                            .withAttributes(externalServer.getAttributes()))));
+
+    // when
+    Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .when()
+            .get(SECURE_PATH + "/workspace/" + workspace.getId());
+
+    // then
+    assertEquals(response.getStatusCode(), 200);
+    RuntimeDto retrievedRuntime = unwrapDto(response, WorkspaceDto.class).getRuntime();
+    assertNotNull(retrievedRuntime);
+    assertEquals(expected, retrievedRuntime.getMachines());
+  }
+
+  @Test
+  public void shouldGetWorkspaceWithInternalServers() throws Exception {
+    // given
+    WorkspaceImpl workspace = createWorkspace(createConfigDto());
+    String externalServerKey = "server2";
+    String internalServerKey = "server1";
+    ServerImpl externalServer = createExternalServer();
+    ServerImpl internalServer = createInternalServer();
+    Map<String, Server> servers =
+        ImmutableMap.of(
+            internalServerKey, createInternalServer(), externalServerKey, externalServer);
+    Map<String, Machine> machines =
+        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers));
+    workspace.setRuntime(new RuntimeImpl("activeEnv", machines, "user123"));
+    when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+
+    Map<String, MachineDto> expected =
+        singletonMap(
+            "machine1",
+            newDto(MachineDto.class)
+                .withAttributes(singletonMap("key", "value"))
+                .withServers(
+                    ImmutableMap.of(
+                        externalServerKey,
+                        newDto(ServerDto.class)
+                            .withUrl(externalServer.getUrl())
+                            .withStatus(externalServer.getStatus())
+                            .withAttributes(externalServer.getAttributes()),
+                        internalServerKey,
+                        newDto(ServerDto.class)
+                            .withUrl(createInternalServer().getUrl())
+                            .withStatus(internalServer.getStatus())
+                            .withAttributes(internalServer.getAttributes()))));
+
+    // when
+    Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .queryParameter("includeInternalServers", Boolean.TRUE.toString())
+            .when()
+            .get(SECURE_PATH + "/workspace/" + workspace.getId());
+
+    // then
+    assertEquals(response.getStatusCode(), 200);
+    RuntimeDto retrievedRuntime = unwrapDto(response, WorkspaceDto.class).getRuntime();
+    assertNotNull(retrievedRuntime);
+    assertEquals(expected, retrievedRuntime.getMachines());
+  }
+
+  @Test
+  public void shouldGetWorkspaceWithInternalServersIfCorrespondingQueryParamHasEmptyValue()
+      throws Exception {
+    // given
+    WorkspaceImpl workspace = createWorkspace(createConfigDto());
+    String externalServerKey = "server2";
+    String internalServerKey = "server1";
+    ServerImpl externalServer = createExternalServer();
+    ServerImpl internalServer = createInternalServer();
+    Map<String, Server> servers =
+        ImmutableMap.of(
+            internalServerKey, createInternalServer(), externalServerKey, externalServer);
+    Map<String, Machine> machines =
+        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers));
+    workspace.setRuntime(new RuntimeImpl("activeEnv", machines, "user123"));
+    when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+
+    Map<String, MachineDto> expected =
+        singletonMap(
+            "machine1",
+            newDto(MachineDto.class)
+                .withAttributes(singletonMap("key", "value"))
+                .withServers(
+                    ImmutableMap.of(
+                        externalServerKey,
+                        newDto(ServerDto.class)
+                            .withUrl(externalServer.getUrl())
+                            .withStatus(externalServer.getStatus())
+                            .withAttributes(externalServer.getAttributes()),
+                        internalServerKey,
+                        newDto(ServerDto.class)
+                            .withUrl(createInternalServer().getUrl())
+                            .withStatus(internalServer.getStatus())
+                            .withAttributes(internalServer.getAttributes()))));
+
+    // when
+    Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .queryParameter("includeInternalServers", "")
+            .when()
+            .get(SECURE_PATH + "/workspace/" + workspace.getId());
+
+    // then
+    assertEquals(response.getStatusCode(), 200);
+    RuntimeDto retrievedRuntime = unwrapDto(response, WorkspaceDto.class).getRuntime();
+    assertNotNull(retrievedRuntime);
+    assertEquals(expected, retrievedRuntime.getMachines());
+  }
+
+  @Test
+  public void shouldGetWorkspaceWithInternalServersIfCorrespondingQueryParamHasNoValue()
+      throws Exception {
+    // given
+    WorkspaceImpl workspace = createWorkspace(createConfigDto());
+    String externalServerKey = "server2";
+    String internalServerKey = "server1";
+    ServerImpl externalServer = createExternalServer();
+    ServerImpl internalServer = createInternalServer();
+    Map<String, Server> servers =
+        ImmutableMap.of(
+            internalServerKey, createInternalServer(), externalServerKey, externalServer);
+    Map<String, Machine> machines =
+        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers));
+    workspace.setRuntime(new RuntimeImpl("activeEnv", machines, "user123"));
+    when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+
+    Map<String, MachineDto> expected =
+        singletonMap(
+            "machine1",
+            newDto(MachineDto.class)
+                .withAttributes(singletonMap("key", "value"))
+                .withServers(
+                    ImmutableMap.of(
+                        externalServerKey,
+                        newDto(ServerDto.class)
+                            .withUrl(externalServer.getUrl())
+                            .withStatus(externalServer.getStatus())
+                            .withAttributes(externalServer.getAttributes()),
+                        internalServerKey,
+                        newDto(ServerDto.class)
+                            .withUrl(createInternalServer().getUrl())
+                            .withStatus(internalServer.getStatus())
+                            .withAttributes(internalServer.getAttributes()))));
+
+    // when
+    Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .queryParameter("includeInternalServers")
+            .when()
+            .get(SECURE_PATH + "/workspace/" + workspace.getId());
+
+    // then
+    assertEquals(response.getStatusCode(), 200);
+    RuntimeDto retrievedRuntime = unwrapDto(response, WorkspaceDto.class).getRuntime();
+    assertNotNull(retrievedRuntime);
+    assertEquals(expected, retrievedRuntime.getMachines());
   }
 
   @Test
@@ -933,6 +1178,22 @@ public class WorkspaceServiceTest {
             .setProjects(singletonList(createProjectDto()))
             .build();
     return DtoConverter.asDto(config);
+  }
+
+  private ServerImpl createInternalServer() {
+    return new ServerImpl()
+        .withStatus(ServerStatus.UNKNOWN)
+        .withUrl("http://localhost:7070")
+        .withAttributes(
+            singletonMap(ServerConfig.INTERNAL_SERVER_ATTRIBUTE, Boolean.TRUE.toString()));
+  }
+
+  private ServerImpl createExternalServer() {
+    return new ServerImpl()
+        .withStatus(ServerStatus.UNKNOWN)
+        .withUrl("http://localhost:7070")
+        .withAttributes(
+            singletonMap(ServerConfig.INTERNAL_SERVER_ATTRIBUTE, Boolean.FALSE.toString()));
   }
 
   @Filter

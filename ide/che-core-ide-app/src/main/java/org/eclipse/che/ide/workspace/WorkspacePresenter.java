@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.parts.PartPresenter;
@@ -158,6 +159,7 @@ public class WorkspacePresenter
   }
 
   @Override
+  @Nullable
   public PartPresenter getActivePart() {
     return activePerspective.getActivePart();
   }

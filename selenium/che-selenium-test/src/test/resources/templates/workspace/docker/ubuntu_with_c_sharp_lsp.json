@@ -28,9 +28,8 @@
         }
       },
       "recipe": {
-        "content": "FROM eclipse/dotnet_core",
-        "contentType": "text/x-dockerfile",
-        "type": "dockerfile"
+        "content": "eclipse/dotnet_core",
+        "type": "dockerimage"
       }
     }
   },

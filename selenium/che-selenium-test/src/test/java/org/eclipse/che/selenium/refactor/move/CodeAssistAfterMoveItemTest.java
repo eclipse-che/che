@@ -61,7 +61,7 @@ public class CodeAssistAfterMoveItemTest {
     projectExplorer.openItemByPath(
         pathToPackageInChePrefix + "/org/eclipse/qa/examples/AppController.java");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(31);
     editor.typeTextIntoEditor(Keys.TAB.toString());
     loader.waitOnClosed();
@@ -95,7 +95,7 @@ public class CodeAssistAfterMoveItemTest {
     editor.deleteCurrentLine();
     loader.waitOnClosed();
     editor.waitMarkerInPosition(ERROR_MARKER, 32);
-    editor.setCursorToDefinedLineAndChar(32, 5);
+    editor.goToCursorPositionVisible(32, 5);
     editor.launchPropositionAssistPanel();
     loader.waitOnClosed();
     editor.waitTextIntoFixErrorProposition("Import 'A5' (p1)");

@@ -10,7 +10,15 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.Keys.ARROW_DOWN;
+import static org.openqa.selenium.Keys.CONTROL;
+import static org.openqa.selenium.Keys.ENTER;
+import static org.openqa.selenium.Keys.ESCAPE;
+import static org.openqa.selenium.Keys.F12;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -19,7 +27,6 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -64,8 +71,7 @@ public class FileStructure {
   public void waitFileStructureFormIsOpen(String fileName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.FILE_STRUCTURE_FORM, fileName))));
+            visibilityOfElementLocated(By.xpath(format(Locators.FILE_STRUCTURE_FORM, fileName))));
   }
 
   /** wait the 'file structure' form is closed */
@@ -80,22 +86,20 @@ public class FileStructure {
   public void launchFileStructureFormByKeyboard() {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(Keys.CONTROL).sendKeys(Keys.F12).keyUp(Keys.CONTROL).perform();
+    action.keyDown(CONTROL).sendKeys(F12).keyUp(CONTROL).perform();
     loader.waitOnClosed();
   }
 
   /** close the 'File Structure' form by the key 'Esc' */
   public void closeFileStructureFormByEscape() {
     Actions closeWindow = actionsFactory.createAction(seleniumWebDriver);
-    closeWindow.sendKeys(Keys.ESCAPE).perform();
+    closeWindow.sendKeys(ESCAPE).perform();
   }
 
   /** close the 'File Structure' form by click on the close icon */
   public void clickFileStructureCloseIcon() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(Locators.FILE_STRUCTURE_CLOSE_ICON)))
+        .until(visibilityOfElementLocated(By.xpath(Locators.FILE_STRUCTURE_CLOSE_ICON)))
         .click();
   }
 
@@ -150,8 +154,8 @@ public class FileStructure {
     WaitUtils.sleepQuietly(1);
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.FILE_STRUCTURE_ICON_NODE, nameNode))))
+            visibilityOfElementLocated(
+                By.xpath(format(Locators.FILE_STRUCTURE_ICON_NODE, nameNode))))
         .click();
   }
 
@@ -164,8 +168,8 @@ public class FileStructure {
     WebElement fileStructureItem =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(
-                ExpectedConditions.visibilityOfElementLocated(
-                    By.xpath(String.format(Locators.FILE_STRUCTURE_ITEM, item))));
+                visibilityOfElementLocated(By.xpath(format(Locators.FILE_STRUCTURE_ITEM, item))));
+    fileStructureItem.click();
     actionsFactory.createAction(seleniumWebDriver).doubleClick(fileStructureItem).perform();
   }
 
@@ -176,7 +180,7 @@ public class FileStructure {
    */
   public void selectItemInFileStructureByEnter(String item) {
     selectItemInFileStructure(item);
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ENTER).perform();
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(ENTER).perform();
   }
 
   /**
@@ -186,9 +190,7 @@ public class FileStructure {
    */
   public void selectItemInFileStructure(String item) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.FILE_STRUCTURE_ITEM, item))))
+        .until(visibilityOfElementLocated(By.xpath(format(Locators.FILE_STRUCTURE_ITEM, item))))
         .click();
   }
 
@@ -205,16 +207,16 @@ public class FileStructure {
     List<WebElement> items =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(
+                presenceOfAllElementsLocatedBy(
                     By.xpath(
                         "//div[@id='gwt-debug-file-structure-mainPanel']//div[@id[contains(.,'gwt-uid-')]]//div[text()]")));
     for (int i = 0; i < items.size(); i++) {
-      actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ARROW_DOWN).perform();
+      actionsFactory.createAction(seleniumWebDriver).sendKeys(ARROW_DOWN).perform();
       WaitUtils.sleepQuietly(1);
       items =
           new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
               .until(
-                  ExpectedConditions.presenceOfAllElementsLocatedBy(
+                  presenceOfAllElementsLocatedBy(
                       By.xpath(
                           "//div[@id='gwt-debug-file-structure-mainPanel']/div[3]/div/div[1]//div[text()]")));
       if (items.get(i).getText().contains(itemName)) {

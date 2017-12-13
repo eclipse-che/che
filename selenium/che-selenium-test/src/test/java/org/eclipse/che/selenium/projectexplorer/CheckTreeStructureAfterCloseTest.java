@@ -65,12 +65,12 @@ public class CheckTreeStructureAfterCloseTest {
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
     projectExplorer.openItemByPath(PATH_FOR_EXPAND + "/AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.openItemByPath(PATH_TO_WEB_APP + "/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.openItemByPath(PATH_TO_POM_XML_FILE);
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
 
     // close project explorer
     projectExplorer.openItemByPath(PROJECT_NAME);

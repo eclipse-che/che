@@ -81,6 +81,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProje
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftRoutes;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftServices;
 import org.eclipse.che.workspace.infrastructure.openshift.project.event.ContainerEvent;
+import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspaceVolumesStrategy;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -124,6 +125,7 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private OpenShiftRoutes routes;
   @Mock private OpenShiftPods pods;
   @Mock private OpenShiftBootstrapper bootstrapper;
+  @Mock private WorkspaceVolumesStrategy volumesStrategy;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
@@ -142,6 +144,7 @@ public class OpenShiftInternalRuntimeTest {
             eventService,
             bootstrapperFactory,
             serverCheckerFactory,
+            volumesStrategy,
             context,
             project,
             emptyList());

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.UNKNOWN;
@@ -48,7 +49,7 @@ public class ServerResolverTest {
     Container container = createContainer();
     Pod pod = createPod(ImmutableMap.of("kind", "web-app"));
     Service nonMatchedByPodService =
-        createService("nonMatched", CONTAINER_PORT, ImmutableMap.of("kind", "db"));
+        createService("nonMatched", CONTAINER_PORT, ImmutableMap.of("kind", "db"), null);
     Route route =
         createRoute(
             "nonMatched",
@@ -70,7 +71,7 @@ public class ServerResolverTest {
     Container container = createContainer();
     Pod pod = createPod(ImmutableMap.of("kind", "web-app"));
     Service nonMatchedByPodService =
-        createService("nonMatched", 7777, ImmutableMap.of("kind", "web-app"));
+        createService("nonMatched", 7777, ImmutableMap.of("kind", "web-app"), null);
     Route route =
         createRoute(
             "nonMatched",
@@ -90,7 +91,7 @@ public class ServerResolverTest {
     Container container = createContainer();
     Pod pod = createPod(ImmutableMap.of("kind", "web-app"));
     Service nonMatchedByPodService =
-        createService("matched", CONTAINER_PORT, ImmutableMap.of("kind", "web-app"));
+        createService("matched", CONTAINER_PORT, ImmutableMap.of("kind", "web-app"), null);
     Route route =
         createRoute(
             "matched",
@@ -125,7 +126,7 @@ public class ServerResolverTest {
     Container container = createContainer();
     Pod pod = createPod(singletonMap("kind", "web-app"));
     Service nonMatchedByPodService =
-        createService("matched", CONTAINER_PORT, singletonMap("kind", "web-app"));
+        createService("matched", CONTAINER_PORT, singletonMap("kind", "web-app"), null);
     Route route =
         createRoute(
             "matched",
@@ -151,7 +152,7 @@ public class ServerResolverTest {
     Container container = createContainer();
     Pod pod = createPod(singletonMap("kind", "web-app"));
     Service nonMatchedByPodService =
-        createService("matched", CONTAINER_PORT, singletonMap("kind", "web-app"));
+        createService("matched", CONTAINER_PORT, singletonMap("kind", "web-app"), null);
     Route route =
         createRoute(
             "matched",
@@ -176,7 +177,7 @@ public class ServerResolverTest {
     Container container = createContainer();
     Pod pod = createPod(singletonMap("kind", "web-app"));
     Service nonMatchedByPodService =
-        createService("matched", CONTAINER_PORT, singletonMap("kind", "web-app"));
+        createService("matched", CONTAINER_PORT, singletonMap("kind", "web-app"), null);
     Route route =
         createRoute(
             "matched",
@@ -197,6 +198,58 @@ public class ServerResolverTest {
             .withAttributes(ATTRIBUTES_MAP));
   }
 
+  @Test
+  public void testResolvingInternalServers() {
+    Container container = createContainer();
+    Pod pod = createPod(singletonMap("kind", "web-app"));
+    Service service =
+        createService(
+            "service11",
+            CONTAINER_PORT,
+            singletonMap("kind", "web-app"),
+            singletonMap(
+                "http-server", new ServerConfigImpl("3054", "http", "api", ATTRIBUTES_MAP)));
+    Route route = createRoute("matched", null);
+
+    ServerResolver serverResolver = ServerResolver.of(singletonList(service), singletonList(route));
+
+    Map<String, ServerImpl> resolved = serverResolver.resolve(pod, container);
+
+    assertEquals(resolved.size(), 1);
+    assertEquals(
+        resolved.get("http-server"),
+        new ServerImpl()
+            .withUrl("http://service11:3054/api")
+            .withStatus(UNKNOWN)
+            .withAttributes(ATTRIBUTES_MAP));
+  }
+
+  @Test
+  public void testResolvingInternalServersWithPortWithTransportProtocol() {
+    Container container = createContainer();
+    Pod pod = createPod(singletonMap("kind", "web-app"));
+    Service service =
+        createService(
+            "service11",
+            CONTAINER_PORT,
+            singletonMap("kind", "web-app"),
+            singletonMap(
+                "http-server", new ServerConfigImpl("3054/udp", "xxx", "api", ATTRIBUTES_MAP)));
+    Route route = createRoute("matched", null);
+
+    ServerResolver serverResolver = ServerResolver.of(singletonList(service), singletonList(route));
+
+    Map<String, ServerImpl> resolved = serverResolver.resolve(pod, container);
+
+    assertEquals(resolved.size(), 1);
+    assertEquals(
+        resolved.get("http-server"),
+        new ServerImpl()
+            .withUrl("xxx://service11:3054/api")
+            .withStatus(UNKNOWN)
+            .withAttributes(ATTRIBUTES_MAP));
+  }
+
   private Pod createPod(Map<String, String> labels) {
     return new PodBuilder().withNewMetadata().withLabels(labels).endMetadata().build();
   }
@@ -207,10 +260,19 @@ public class ServerResolverTest {
         .build();
   }
 
-  private Service createService(String name, Integer port, Map<String, String> selector) {
+  private Service createService(
+      String name,
+      Integer port,
+      Map<String, String> selector,
+      Map<String, ServerConfigImpl> servers) {
+    Map<String, String> annotations = emptyMap();
+    if (servers != null) {
+      annotations = Annotations.newSerializer().servers(servers).annotations();
+    }
     return new ServiceBuilder()
         .withNewMetadata()
         .withName(name)
+        .withAnnotations(annotations)
         .endMetadata()
         .withNewSpec()
         .withSelector(selector)
@@ -227,10 +289,14 @@ public class ServerResolverTest {
 
   // TODO Think about common builders
   private Route createRoute(String name, Map<String, ServerConfigImpl> servers) {
+    Map<String, String> annotations = emptyMap();
+    if (servers != null) {
+      annotations = Annotations.newSerializer().servers(servers).annotations();
+    }
     return new RouteBuilder()
         .withNewMetadata()
         .withName(name)
-        .withAnnotations(RoutesAnnotations.newSerializer().servers(servers).annotations())
+        .withAnnotations(annotations)
         .endMetadata()
         .withNewSpec()
         .withHost(ROUTE_HOST)

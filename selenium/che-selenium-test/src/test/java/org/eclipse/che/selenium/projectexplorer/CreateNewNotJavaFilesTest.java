@@ -153,7 +153,7 @@ public class CreateNewNotJavaFilesTest {
 
   private void checkDefaultTextInCodeMirrorEditorForFile(String defaultText, String fileName)
       throws InterruptedException {
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTabIsPresent(fileName);
     editor.waitTextIntoEditor(defaultText);
   }

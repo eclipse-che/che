@@ -24,6 +24,8 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
+import static org.eclipse.che.api.git.shared.Constants.COMMIT_IN_PROGRESS_ERROR;
+import static org.eclipse.che.api.git.shared.Constants.NOT_A_GIT_REPOSITORY_ERROR;
 import static org.eclipse.che.api.git.shared.EditedRegionType.DELETION;
 import static org.eclipse.che.api.git.shared.EditedRegionType.INSERTION;
 import static org.eclipse.che.api.git.shared.EditedRegionType.MODIFICATION;
@@ -65,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -88,9 +91,11 @@ import org.eclipse.che.api.git.GitUrlUtils;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.git.LogPage;
 import org.eclipse.che.api.git.UserCredential;
+import org.eclipse.che.api.git.exception.GitCommitInProgressException;
 import org.eclipse.che.api.git.exception.GitConflictException;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.exception.GitInvalidRefNameException;
+import org.eclipse.che.api.git.exception.GitInvalidRepositoryException;
 import org.eclipse.che.api.git.exception.GitRefAlreadyExistsException;
 import org.eclipse.che.api.git.exception.GitRefNotFoundException;
 import org.eclipse.che.api.git.params.AddParams;
@@ -297,6 +302,8 @@ class JGitConnection implements GitConnection {
       Pattern.compile("https?://[^:]+:[^@]+@.*");
 
   private static final Logger LOG = LoggerFactory.getLogger(JGitConnection.class);
+
+  private static final Set<String> COMMITTING_REPOSITORIES = new CopyOnWriteArraySet<>();
 
   private Git git;
   private JGitConfigImpl config;
@@ -757,8 +764,12 @@ class JGitConnection implements GitConnection {
       boolean isGerritSupportConfigured =
           gerritSupportConfigValue != null ? Boolean.valueOf(gerritSupportConfigValue) : false;
       commitCommand.setInsertChangeId(isGerritSupportConfigured);
+      String repositoryPath = getRepository().getDirectory().getPath();
+      COMMITTING_REPOSITORIES.add(repositoryPath);
       RevCommit result = commitCommand.call();
+      COMMITTING_REPOSITORIES.remove(repositoryPath);
 
+      status = status(emptyList());
       Map<String, List<EditedRegion>> modifiedFiles = new HashMap<>();
       for (String file : status.getChanged()) {
         modifiedFiles.put(file, getEditedRegions(file));
@@ -767,7 +778,7 @@ class JGitConnection implements GitConnection {
       // commit operation completion.
       eventService.publish(
           newDto(StatusChangedEventDto.class)
-              .withStatus(status(emptyList()))
+              .withStatus(status)
               .withModifiedFiles(modifiedFiles)
               .withProjectName(repository.getWorkTree().getName()));
 
@@ -781,6 +792,8 @@ class JGitConnection implements GitConnection {
           .withCommitter(gitUser);
     } catch (GitAPIException exception) {
       throw new GitException(exception.getMessage(), exception);
+    } finally {
+      COMMITTING_REPOSITORIES.remove(getRepository().getDirectory().getPath());
     }
   }
 
@@ -1851,8 +1864,12 @@ class JGitConnection implements GitConnection {
 
   @Override
   public Status status(List<String> filter) throws GitException {
-    if (!RepositoryCache.FileKey.isGitRepository(getRepository().getDirectory(), FS.DETECTED)) {
-      throw new GitException("Not a git repository");
+    if (!isInsideWorkTree()) {
+      throw new GitInvalidRepositoryException(NOT_A_GIT_REPOSITORY_ERROR);
+    }
+    // Status can be not actual, if commit is in progress.
+    if (COMMITTING_REPOSITORIES.contains(getRepository().getDirectory().getPath())) {
+      throw new GitCommitInProgressException(COMMIT_IN_PROGRESS_ERROR);
     }
     String branchName = getCurrentBranch();
     StatusCommand statusCommand = getGit().status();

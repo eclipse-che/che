@@ -174,7 +174,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
   }
 
   private void checkAutocompletion() {
-    editor.setCursorToDefinedLineAndChar(18, 6);
+    editor.goToCursorPositionVisible(18, 6);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("Greeting");
@@ -211,7 +211,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
             + "    }\n"
             + "}";
 
-    editor.setCursorToDefinedLineAndChar(15, 12);
+    editor.goToCursorPositionVisible(15, 12);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("Greeting");
     editor.waitTextIntoEditor(expectedTextBeforeDownloadSources);

@@ -14,6 +14,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.gwt.http.client.RequestBuilder.DELETE;
 import static com.google.gwt.http.client.RequestBuilder.PUT;
 import static com.google.gwt.http.client.URL.encodePathSegment;
+import static com.google.gwt.http.client.URL.encodeQueryString;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
@@ -181,10 +182,10 @@ public class ProjectServiceClient {
 
     StringBuilder queryParameters = new StringBuilder();
     if (expression.getName() != null && !expression.getName().isEmpty()) {
-      queryParameters.append("&name=").append(expression.getName());
+      queryParameters.append("&name=").append(encodeQueryString(expression.getName()));
     }
     if (expression.getText() != null && !expression.getText().isEmpty()) {
-      queryParameters.append("&text=").append(expression.getText());
+      queryParameters.append("&text=").append(encodeQueryString(expression.getText()));
     }
     if (expression.getMaxItems() == 0) {
       expression.setMaxItems(

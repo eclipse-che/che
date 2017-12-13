@@ -119,5 +119,6 @@ public interface Perspective extends StateComponent {
    *
    * @return the active part
    */
+  @Nullable
   PartPresenter getActivePart();
 }
