@@ -31,7 +31,6 @@ import org.eclipse.che.ide.search.presentation.FindResultPresenter;
 public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegate {
   public static final int SEARCH_RESULT_ITEMS = 30;
 
-  private static final String URL_ENCODED_BACKSLASH = "%5C";
   private static final String AND_OPERATOR = "AND";
 
   private final FullTextSearchView view;
@@ -93,7 +92,6 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
   private String prepareQuery(String text) {
     StringBuilder sb = new StringBuilder();
     for (char character : text.toCharArray()) {
-      // Escape those characters that QueryParser expects to be escaped
       if (character == '\\'
           || character == '+'
           || character == '-'
@@ -113,7 +111,7 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
           || character == '|'
           || character == '&'
           || character == '/') {
-        sb.append(URL_ENCODED_BACKSLASH);
+        sb.append("\\");
       }
       sb.append(character);
     }
