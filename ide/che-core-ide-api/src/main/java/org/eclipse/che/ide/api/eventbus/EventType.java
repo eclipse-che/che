@@ -13,9 +13,7 @@ package org.eclipse.che.ide.api.eventbus;
 
 import jsinterop.annotations.JsType;
 
-/**
- * @author Yevhen Vydolob
- */
+/** @author Yevhen Vydolob */
 @JsType
 public interface EventType<T> {
   String type();

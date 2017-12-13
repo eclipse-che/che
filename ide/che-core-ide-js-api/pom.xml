@@ -23,6 +23,10 @@
     <name>Che Core :: IDE :: JS :: API</name>
     <dependencies>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.gwt.inject</groupId>
             <artifactId>gin</artifactId>
         </dependency>
@@ -53,6 +57,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.vectomatic</groupId>
+            <artifactId>lib-gwt-svg</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>

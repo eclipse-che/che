@@ -38,6 +38,11 @@
             <artifactId>gwt-elemental</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.google.jsinterop</groupId>
+            <artifactId>jsinterop-annotations</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
         </dependency>

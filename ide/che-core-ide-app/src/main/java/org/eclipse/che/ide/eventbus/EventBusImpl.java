@@ -44,7 +44,6 @@ public class EventBusImpl implements EventBus {
     return this;
   }
 
-
   private <E> Disposable registerHandler(String address, Handler<E> handler) {
     handlers.computeIfAbsent(address, (s) -> ListenerManager.create());
     ListenerManager<Handler> listenerManager = handlers.get(address);
