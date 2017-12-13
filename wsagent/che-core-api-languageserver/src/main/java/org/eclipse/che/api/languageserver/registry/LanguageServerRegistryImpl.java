@@ -14,14 +14,7 @@ import static javax.ws.rs.core.UriBuilder.fromUri;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -30,7 +23,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
@@ -56,8 +48,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
   private static final Logger LOG = LoggerFactory.getLogger(LanguageServerRegistryImpl.class);
 
-  private static final String WORKSPACE_ID = System.getenv("CHE_WORKSPACE_ID");
-
+  private final String workspaceId;
   private final String apiEndpoint;
   private final HttpJsonRequestFactory httpJsonRequestFactory;
   private final Set<RemoteLsLauncherProvider> launcherProviders;
@@ -74,9 +65,11 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
   private final ServerInitializer initializer;
   private EventService eventService;
   private CheLanguageClientFactory clientFactory;
+  private Workspace workspace;
 
   @Inject
   public LanguageServerRegistryImpl(
+      @Named("env.CHE_WORKSPACE_ID") String workspaceId,
       @Named("che.api") String apiEndpoint,
       HttpJsonRequestFactory httpJsonRequestFactory,
       Set<RemoteLsLauncherProvider> launcherProviders,
@@ -86,6 +79,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       ServerInitializer initializer,
       EventService eventService,
       CheLanguageClientFactory clientFactory) {
+    this.workspaceId = workspaceId;
     this.apiEndpoint = apiEndpoint;
     this.httpJsonRequestFactory = httpJsonRequestFactory;
     this.launcherProviders = launcherProviders;
@@ -378,20 +372,22 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
   }
 
   private Workspace getWorkspaceConfiguration() {
-    UriBuilder builder =
+    if (workspace != null) {
+      return workspace;
+    }
+
+    String href =
         fromUri(apiEndpoint)
             .path(WorkspaceService.class)
             .path(WorkspaceService.class, "getByKey")
-            .queryParam("includeInternalServers", true);
-
-    String href = builder.build(WORKSPACE_ID).toString();
+            .queryParam("includeInternalServers", true)
+            .build(workspaceId)
+            .toString();
     try {
-      return httpJsonRequestFactory
-          .fromUrl(href)
-          .useGetMethod()
-          .request()
-          .asDto(WorkspaceDto.class);
+      return workspace =
+          httpJsonRequestFactory.fromUrl(href).useGetMethod().request().asDto(WorkspaceDto.class);
     } catch (IOException | ApiException e) {
+      LOG.error("Did not manage to get workspace configuration: {}", workspaceId, e);
       return null;
     }
   }

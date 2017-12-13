@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.languageserver.remote;
 
+import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableSet;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -25,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
@@ -56,8 +58,12 @@ class SocketLsLauncherProvider implements RemoteLsLauncherProvider {
 
   @Override
   public Set<LanguageServerLauncher> getAll(Workspace workspace) {
-    for (Map.Entry<String, ? extends Machine> machineEntry :
-        workspace.getRuntime().getMachines().entrySet()) {
+    Runtime runtime = workspace.getRuntime();
+    if (runtime == null) {
+      return emptySet();
+    }
+
+    for (Map.Entry<String, ? extends Machine> machineEntry : runtime.getMachines().entrySet()) {
       String machineName = machineEntry.getKey();
       Machine machine = machineEntry.getValue();
       Map<String, ? extends Server> servers = machine.getServers();
