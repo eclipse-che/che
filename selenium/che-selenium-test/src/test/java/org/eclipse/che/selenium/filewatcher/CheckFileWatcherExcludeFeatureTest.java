@@ -61,7 +61,7 @@ public class CheckFileWatcherExcludeFeatureTest {
     ide.open(testWorkspace);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    //We enable hidden files because in the test we use file Watcher Ignore, which is hidden.
+    // We enable hidden files because in the test we use file Watcher Ignore, which is hidden.
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.SHOW_HIDE_HIDDEN_FILES);
@@ -105,7 +105,8 @@ public class CheckFileWatcherExcludeFeatureTest {
 
     // Add the file to exclude and check that the file content in the Editor is not changed
     doFileWatcherExcludeOperation(pathToExcludedFile, ADD_TO_FILE_WATCHER_EXCLUDES);
-    testProjectServiceClient.updateFile(testWorkspace.getId(), pathToExcludedFile, currentTimeInMillis);
+    testProjectServiceClient.updateFile(
+        testWorkspace.getId(), pathToExcludedFile, currentTimeInMillis);
     editor.waitTextNotPresentIntoEditor(currentTimeInMillis);
 
     // Close file and open again and check that the file content is changed
