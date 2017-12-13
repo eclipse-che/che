@@ -253,9 +253,6 @@ export abstract class EnvironmentManager {
       if (!hasWsAgent) {
         machine.installers.push(WS_AGENT_NAME);
       }
-      if (machine.installers.indexOf(SSH_AGENT_NAME) < 0) {
-        machine.installers.push(SSH_AGENT_NAME);
-      }
       if (machine.installers.indexOf(TERMINAL_AGENT_NAME) < 0) {
         machine.installers.push(TERMINAL_AGENT_NAME);
       }

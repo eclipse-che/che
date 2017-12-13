@@ -334,6 +334,7 @@ declare namespace che {
     volumes?: {
       [volumeRef: string]: IEnvironmentMachineVolume
     };
+    env?: {[envName: string]: string};
   }
 
   export interface IEnvironmentMachineServer {
