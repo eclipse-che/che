@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -44,8 +45,12 @@ public class RevealResourceAction extends AbstractPerspectiveAction {
   private final EventBus eventBus;
 
   @Inject
-  public RevealResourceAction(AppContext appContext, EventBus eventBus) {
-    super(singletonList(PROJECT_PERSPECTIVE_ID), "Reveal Resource");
+  public RevealResourceAction(
+      AppContext appContext, EventBus eventBus, CoreLocalizationConstant localizedConstant) {
+    super(
+        singletonList(PROJECT_PERSPECTIVE_ID),
+        localizedConstant.actionRevealResourceText(),
+        localizedConstant.actionRevealResourceDescription());
     this.appContext = appContext;
     this.eventBus = eventBus;
   }
