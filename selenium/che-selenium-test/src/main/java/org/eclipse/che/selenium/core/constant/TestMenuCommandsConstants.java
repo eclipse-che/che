@@ -61,7 +61,6 @@ public interface TestMenuCommandsConstants {
     String RENAME = EDIT_MENU_PREFIX + "renameResource";
     String DELETE = EDIT_MENU_PREFIX + "deleteItem";
     String FIND = EDIT_MENU_PREFIX + "fullTextSearch";
-    String REVEAL_RESOURCE = EDIT_MENU_PREFIX + "scrollFromSource";
     String OPEN_RECENT_FILE = EDIT_MENU_PREFIX + "openRecentFiles";
 
     interface Recent {

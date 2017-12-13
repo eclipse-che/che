@@ -150,7 +150,7 @@ public class FindTextFeatureTest {
         "1:   Filesystem 1K-blocks Used Available Use% Mounted on");
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
     editor.waitActiveTabFileName(fileNameCreatedFromTerminal);
-    assertEquals(editor.getPositionOfLine(), 1);
+    assertEquals(editor.getPositionVisible(), 1);
 
     // Create a file from API
     createFileFromAPI(PROJECT_NAME, fileNameCreatedFromAPI, content);
@@ -172,7 +172,7 @@ public class FindTextFeatureTest {
         format("/%s/readme.api", PROJECT_NAME), "1:   FindTextFeatureTest");
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
     editor.waitActiveTabFileName(fileNameCreatedFromAPI);
-    assertEquals(editor.getPositionOfLine(), 1);
+    assertEquals(editor.getPositionVisible(), 1);
 
     editor.closeAllTabsByContextMenu();
   }
@@ -241,10 +241,10 @@ public class FindTextFeatureTest {
         pathToQuessNumFile,
         "25:    java.lang.String attempt = (java.lang.String)request.getAttribute(\"num\");");
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitActiveTabFileName("guess_num.jsp");
     editor.waitTextIntoEditor("String");
-    assertEquals(editor.getPositionOfLine(), 25);
+    assertEquals(editor.getPositionVisible(), 25);
 
     // Check that the Find Info panel state restored
     consoles.closeProcessesArea();
@@ -265,10 +265,10 @@ public class FindTextFeatureTest {
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
     findTextPage.selectItemInFindInfoPanelByDoubleClick(
         pathToSayHelloFile, "20:    public String sayHello(String name)");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitActiveTabFileName("SayHello");
     editor.waitTextIntoEditor("String");
-    assertEquals(editor.getPositionOfLine(), 20);
+    assertEquals(editor.getPositionVisible(), 20);
 
     editor.closeAllTabsByContextMenu();
   }
@@ -422,20 +422,6 @@ public class FindTextFeatureTest {
     SearchFileResult searchFileResult;
     int sumOfFoundOccurrences = 0;
     int sumOfFoundFiles = 0;
-    String path1 = "/web-java-petclinic/pom.xml";
-    String path2 = "/web-java-petclinic/src/main/resources/spring/mvc-view-config.xml";
-    String path3 =
-        "/web-java-petclinic/src/test/java/org/springframework/samples/petclinic/web/VisitsViewTests.java";
-    String expectedText1 = "62:    <webjars-bootstrap.version>2.3.0</webjars-bootstrap.version>";
-    String expectedText2 =
-        "36:    <!-- Simple strategy: only path extension is taken into account -->";
-    String expectedText3 = "19:   import static org.hamcrest.Matchers.containsString;";
-    String resultsOnFirstPage =
-        "125 occurrences found in 30 files (per page results) for 'Str'. Total file count - 63";
-    String resultsOnSecondPage =
-        "178 occurrences found in 30 files (per page results) for 'Str'. Total file count - 63";
-    String resultsOnThirdPage =
-        "10 occurrences found in 3 files (per page results) for 'Str'. Total file count - 63";
 
     // Import the web-java-petclinic project and find all occurrences of 'Str'
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
@@ -480,29 +466,6 @@ public class FindTextFeatureTest {
     // Checking that sums of found files and occurrences correct
     assertEquals(sumOfFoundFiles, findTextPage.getResults().getTotalNumberFoundFiles());
     assertEquals(sumOfFoundOccurrences, SUM_FOUND_OCCURRENCES);
-
-    // Check results on the third page
-    assertEquals(findTextPage.getFindInfoResults(), resultsOnThirdPage);
-    findTextPage.openFileNodeByDoubleClick(path3);
-    findTextPage.waitExpectedTextInFindInfoPanel(expectedText3);
-
-    // Check results on the second page
-    findTextPage.clickOnPreviousPageButton();
-    assertEquals(findTextPage.getFindInfoResults(), resultsOnSecondPage);
-    findTextPage.openFileNodeByDoubleClick(path2);
-    findTextPage.waitExpectedTextInFindInfoPanel(expectedText2);
-
-    // Check results on the first page. Open a file and check cursor position
-    findTextPage.clickOnPreviousPageButton();
-    assertEquals(findTextPage.getFindInfoResults(), resultsOnFirstPage);
-    findTextPage.openFileNodeByDoubleClick(path1);
-    findTextPage.waitExpectedTextInFindInfoPanel(expectedText1);
-    findTextPage.selectItemInFindInfoPanelByDoubleClick(path1, expectedText1);
-    editor.waitActiveEditor();
-    editor.waitActiveTabFileName("spring-petclinic");
-    assertEquals(editor.getPositionOfLine(), 62);
-
-    editor.closeAllTabsByContextMenu();
   }
 
   private void createFileFromAPI(String path, String fileName, String content) throws Exception {

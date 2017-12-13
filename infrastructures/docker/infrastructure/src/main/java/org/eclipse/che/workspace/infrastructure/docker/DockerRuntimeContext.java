@@ -81,13 +81,15 @@ public class DockerRuntimeContext extends RuntimeContext<DockerEnvironment> {
   public DockerInternalRuntime getRuntime() throws InfrastructureException {
     RuntimeIdentity identity = getIdentity();
     List<ContainerListEntry> runningContainers = containers.find(identity);
+    DockerEnvironment environment = getEnvironment();
     if (runningContainers.isEmpty()) {
-      return runtimeFactory.create(this);
+      return runtimeFactory.create(this, environment.getWarnings());
     }
 
-    DockerInternalRuntime runtime = runtimeFactory.create(this, runningContainers);
+    DockerInternalRuntime runtime =
+        runtimeFactory.create(this, runningContainers, environment.getWarnings());
     try {
-      consistencyChecker.check(getEnvironment(), runtime);
+      consistencyChecker.check(environment, runtime);
       runtime.checkServers();
     } catch (InfrastructureException | ValidationException x) {
       LOG.warn(

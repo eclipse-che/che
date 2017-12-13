@@ -101,13 +101,13 @@ public class CreateNewJavaFilesFromContextMenuTest {
 
     projectExplorer.waitItemInVisibleArea(name + ".java");
 
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
     editor.waitTabIsPresent(name);
   }
 
   private void checkDefaultTextInEditorForFile(String defaultText) {
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(defaultText);
   }
 }

@@ -83,9 +83,9 @@ public class AutocompleteProposalJavaDocTest {
       throws ForbiddenException, BadRequestException, IOException, ConflictException,
           NotFoundException, ServerException, UnauthorizedException {
     // when
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
-    editor.setCursorToDefinedLineAndChar(30, 30);
+    editor.goToCursorPositionVisible(30, 30);
     editor.launchAutocompleteAndWaitContainer();
     editor.selectAutocompleteProposal("concat(String part1, String part2, char divider) : String");
 
@@ -105,9 +105,9 @@ public class AutocompleteProposalJavaDocTest {
   @Test
   public void shouldWorkAroundAbsentJavaDocOfConstructor() throws IOException {
     // when
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
-    editor.setCursorToDefinedLineAndChar(19, 1);
+    editor.goToCursorPositionVisible(19, 1);
     editor.launchAutocompleteAndWaitContainer();
     editor.selectAutocompleteProposal("App()");
 
@@ -118,9 +118,9 @@ public class AutocompleteProposalJavaDocTest {
   @Test
   public void shouldDisplayAnotherModuleClassJavaDoc() throws IOException {
     // when
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
-    editor.setCursorToDefinedLineAndChar(24, 20);
+    editor.goToCursorPositionVisible(24, 20);
     editor.launchAutocompleteAndWaitContainer();
     editor.selectAutocompleteProposal("isEquals(Object o) : boolean");
 
@@ -140,15 +140,15 @@ public class AutocompleteProposalJavaDocTest {
   @Test
   public void shouldReflectChangesInJavaDoc() throws IOException {
     // when
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
     editor.selectTabByName(BOOK_IMPL_CLASS_NAME);
-    editor.setCursorToDefinedLineAndChar(14, 4);
+    editor.goToCursorPositionVisible(14, 4);
     editor.typeTextIntoEditor("UPDATE. ");
 
     editor.selectTabByName(APP_CLASS_NAME);
-    editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(21, 12);
+    editor.waitActive();
+    editor.goToCursorPositionVisible(21, 12);
     editor.launchAutocompleteAndWaitContainer();
     editor.selectAutocompleteProposal("BookImpl");
 
@@ -159,9 +159,9 @@ public class AutocompleteProposalJavaDocTest {
   @Test
   public void shouldDisplayJavaDocOfJreClass() throws IOException {
     // when
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
-    editor.setCursorToDefinedLineAndChar(24, 20);
+    editor.goToCursorPositionVisible(24, 20);
     editor.launchAutocompleteAndWaitContainer();
     editor.selectAutocompleteProposal("hashCode() : int");
 
@@ -175,9 +175,9 @@ public class AutocompleteProposalJavaDocTest {
   @Test
   public void shouldWorkAroundAbsentSourcesOfExternalLib() throws IOException {
     // when
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
-    editor.setCursorToDefinedLineAndChar(30, 23);
+    editor.goToCursorPositionVisible(30, 23);
     editor.launchAutocompleteAndWaitContainer();
     editor.selectAutocompleteProposal("info(String arg0) : void");
 
@@ -195,7 +195,7 @@ public class AutocompleteProposalJavaDocTest {
 
     editor.selectTabByName(APP_CLASS_NAME);
     loader.waitOnClosed();
-    editor.setCursorToDefinedLineAndChar(30, 23);
+    editor.goToCursorPositionVisible(30, 23);
     editor.launchAutocompleteAndWaitContainer();
     editor.selectAutocompleteProposal("info(String msg) : void");
 

@@ -89,18 +89,18 @@ public class UpdateFilesWithoutIDE {
     projectExplorer1.openItemByPath(PROJECT_NAME);
     projectExplorer2.openItemByPath(PROJECT_NAME);
     projectExplorer1.openItemByPath(PROJECT_NAME + "/" + nameFiletxt2);
-    editor1.waitActiveEditor();
+    editor1.waitActive();
     projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameFiletxt2);
-    editor1.waitActiveEditor();
+    editor1.waitActive();
 
     testProjectServiceClient.updateFile(
         ws.getId(), PROJECT_NAME + "/" + nameFiletxt2, Long.toString(System.currentTimeMillis()));
 
     events1.waitExpectedMessage(expectedMessage2, 10);
     projectExplorer1.openItemByPath(PROJECT_NAME + "/" + nameFiletxt3);
-    editor1.waitActiveEditor();
+    editor1.waitActive();
     projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameFiletxt3);
-    editor2.waitActiveEditor();
+    editor2.waitActive();
 
     String currentTimeInMs = Long.toString(System.currentTimeMillis());
     testProjectServiceClient.updateFile(

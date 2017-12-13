@@ -13,6 +13,8 @@ services:
   ########################
   che:
     image: <%= ENV["IMAGE_CHE"] %>
+    mem_limit: <%= scope.lookupvar('che::che_master_container_ram') %>
+    memswap_limit: 0
     env_file:
 <% if @compose_file_for_containers == true -%>
       - '<%= ENV["CHE_CONTAINER_ROOT"] %>/instance/config/che/che.env'

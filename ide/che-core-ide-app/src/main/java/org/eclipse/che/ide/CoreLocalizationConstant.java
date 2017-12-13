@@ -26,6 +26,12 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("extension.category")
   String extensionCategory();
 
+  @Key("action.revealResource.text")
+  String actionRevealResourceText();
+
+  @Key("action.revealResource.description")
+  String actionRevealResourceDescription();
+
   @Key("action.navigateToFile.text")
   String actionNavigateToFileText();
 
@@ -127,6 +133,42 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("mixedProjectDeleteMessage")
   String mixedProjectDeleteMessage();
+
+  @Key("action.switch.editor.displaying.title")
+  String switchEditorDisplayingTitle();
+
+  @Key("action.switch.editor.displaying.description")
+  String switchEditorDisplayingDescription();
+
+  @Key("action.switch.project.explorer.displaying.title")
+  String switchProjectExplorerDisplayingTitle();
+
+  @Key("action.switch.project.explorer.displaying.description")
+  String switchProjectExplorerDisplayingDescription();
+
+  @Key("action.switch.command.explorer.displaying.title")
+  String switchCommandExplorerDisplayingTitle();
+
+  @Key("action.switch.command.explorer.displaying.description")
+  String switchCommandExplorerDisplayingDescription();
+
+  @Key("action.switch.find.part.displaying.title")
+  String switchFindPartDisplayingTitle();
+
+  @Key("action.switch.find.part.displaying.description")
+  String switchFindPartDisplayingDescription();
+
+  @Key("action.switch.event.logs.displaying.title")
+  String switchEventLogsDisplayingTitle();
+
+  @Key("action.switch.event.logs.displaying.description")
+  String switchEventLogsDisplayingDescription();
+
+  @Key("action.switch.terminal.displaying.title")
+  String switchTerminalDisplayingTitle();
+
+  @Key("action.switch.terminal.displaying.description")
+  String switchTerminalDisplayingDescription();
 
   /* RenameItem */
   @Key("action.rename.text")
@@ -938,6 +980,9 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("macro.workspace.name.description")
   String macroWorkspaceNameDescription();
 
+  @Key("macro.workspace.namespace.description")
+  String macroWorkspaceNamespaceDescription();
+
   @Key("macro.explorer.current.file.name.description")
   String macroExplorerCurrentFileNameDescription();
 
@@ -1086,6 +1131,9 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("macro.current.project.path.description")
   String macroCurrentProjectPathDescription();
+
+  @Key("macro.current.project.eldest.parent.path.description")
+  String macroCurrentProjectEldestParentPathDescription();
 
   @Key("macro.current.project.relpath.description")
   String macroCurrentProjectRelpathDescription();

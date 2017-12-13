@@ -186,7 +186,7 @@ public class PlainJavaProjectConfigureClasspathTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company/Main.java");
-    codenvyEditor.waitActiveEditor();
+    codenvyEditor.waitActive();
     codenvyEditor.setCursorToLine(17);
     codenvyEditor.typeTextIntoEditor(Keys.ENTER.toString());
     loader.waitOnClosed();

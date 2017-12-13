@@ -52,6 +52,7 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
   ProcessTreeNode getNodeByIndex(@NotNull int index);
 
   /** Returns node by given ID */
+  @Nullable
   ProcessTreeNode getNodeById(@NotNull String nodeId);
 
   /** Add process node */

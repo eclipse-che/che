@@ -200,7 +200,7 @@ public class RenameMethodInInterfaceTest {
   private void prepareProjectForRefactor(int cursorPositionLine, int cursorPositionChar) {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(cursorPositionLine, cursorPositionChar);
+    editor.goToCursorPositionVisible(cursorPositionLine, cursorPositionChar);
   }
 
   private void setFieldsForTest(String nameCurrentTest) throws Exception {

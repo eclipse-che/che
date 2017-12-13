@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRIN
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.SIMPLE_FOLDER;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -33,6 +34,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -70,7 +72,7 @@ public class CheckMavenPluginTest {
     createNewFileFromMenuFile("TestClass", AskForValueDialog.JavaFiles.CLASS, ".java");
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(14);
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass = new TestClass();");
@@ -80,12 +82,18 @@ public class CheckMavenPluginTest {
   @Test(priority = 1)
   public void shouldExcludeModules() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
-    editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(25, 8);
+    editor.waitActive();
+    editor.goToCursorPositionVisible(25, 8);
     editor.typeTextIntoEditor("!--");
-    editor.setCursorToDefinedLineAndChar(26, 32);
+    editor.goToCursorPositionVisible(26, 32);
     editor.typeTextIntoEditor("--");
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", SIMPLE_FOLDER);
+    try {
+      projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", SIMPLE_FOLDER);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7109");
+    }
+
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-webapp", SIMPLE_FOLDER);
   }
 
@@ -94,18 +102,18 @@ public class CheckMavenPluginTest {
     includeModulesInTheParentPom();
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
-    editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(17, 1);
+    editor.waitActive();
+    editor.goToCursorPositionVisible(17, 1);
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass2 = new TestClass();");
     editor.waitAllMarkersDisappear(ERROR_MARKER);
   }
 
   private void includeModulesInTheParentPom() {
-    editor.setCursorToDefinedLineAndChar(26, 32);
+    editor.goToCursorPositionVisible(26, 32);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
-    editor.setCursorToDefinedLineAndChar(25, 8);
+    editor.goToCursorPositionVisible(25, 8);
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
@@ -119,7 +127,12 @@ public class CheckMavenPluginTest {
   private void enterClassNameViaAutocomplete() {
     editor.typeTextIntoEditor("Test");
     editor.launchAutocomplete();
-    editor.enterAutocompleteProposal("TestClass");
+    try {
+      editor.enterAutocompleteProposal("TestClass");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7109");
+    }
   }
 
   /**

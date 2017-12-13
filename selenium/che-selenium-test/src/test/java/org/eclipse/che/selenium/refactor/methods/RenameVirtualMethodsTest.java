@@ -89,7 +89,7 @@ public class RenameVirtualMethodsTest {
         try {
           refactor.clickCancelButtonRefactorForm();
         } catch (Exception ex) {
-          ex.printStackTrace();
+          LOG.warn(ex.getLocalizedMessage());
           seleniumWebDriver.navigate().refresh();
         }
       }
@@ -177,7 +177,7 @@ public class RenameVirtualMethodsTest {
     projectExplorer.waitItem(pathToPackageInChePrefix);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(cursorPositionLine, cursorPositionChar);
+    editor.goToCursorPositionVisible(cursorPositionLine, cursorPositionChar);
   }
 
   private void setFieldsForTest(String nameCurrentTest) throws Exception {

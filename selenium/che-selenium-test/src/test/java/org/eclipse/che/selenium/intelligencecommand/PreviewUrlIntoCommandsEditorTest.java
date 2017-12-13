@@ -73,7 +73,7 @@ public class PreviewUrlIntoCommandsEditorTest {
     createMavenCommand();
     commandsExplorer.waitCommandExplorerIsOpened();
     commandsExplorer.selectCommandByName(MAVEN_NAME);
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.typeTextIntoNameCommandField(NAME_COMM);
     commandsEditor.waitTextIntoNameCommandField(NAME_COMM);
     commandsEditor.setFocusIntoTypeCommandsEditor(PREVIEW_URL_EDITOR);

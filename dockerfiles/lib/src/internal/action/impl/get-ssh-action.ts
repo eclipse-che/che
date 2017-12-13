@@ -84,15 +84,14 @@ export class GetSshDataAction {
                 return ssh.getPair("workspace", foundWorkspaceDTO.getId());
             }).then((sshPairDto : org.eclipse.che.api.ssh.shared.dto.SshPairDto) => {
 
-                let runtime : org.eclipse.che.api.machine.shared.dto.MachineRuntimeInfoDto = foundWorkspaceDTO.getRuntime().getDevMachine().getRuntime();
-                let user : string = runtime.getProperties().get("config.user");
-                if (user === "") {
-                    // user is root if not defined
-                    user = "root";
-                }
-                let address: Array<string> = runtime.getServers().get("22/tcp").getProperties().getInternalAddress().split(":");
-                let ip:string = address[0];
-                let port:string = address[1];
+                let runtime : org.eclipse.che.api.workspace.shared.dto.RuntimeDto = foundWorkspaceDTO.getRuntime();
+                let user : string = "root";
+                let machines = foundWorkspaceDTO.getRuntime().getMachines();
+                let sshAgentServer = machines.get("dev-machine").getServers().get("ssh");
+
+                let address: Array<string> = sshAgentServer.getUrl().replace("/", "").split(":");
+                let ip:string = address[1];
+                let port:string = address[2];
 
                 Log.getLogger().direct("SSH_IP=" + ip);
                 Log.getLogger().direct("SSH_PORT=" + port);

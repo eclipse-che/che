@@ -109,7 +109,7 @@ public class EditorTabWidget extends Composite
     this.editorTabContextMenu = editorTabContextMenu;
     this.file = relatedEditorPart.getEditorInput().getFile();
     this.icon = relatedEditorPart.getTitleImage();
-    this.title.setText(relatedEditorPart.getTitle());
+    this.title.setText(file.getDisplayName());
     // add "path" attribute describing the full path of opened file, will be used full for testing
     this.title.getElement().setAttribute("path", file.getLocation().toString());
     this.id = title + UUID.uuid(4);
@@ -127,6 +127,14 @@ public class EditorTabWidget extends Composite
 
     closeButton.addDomHandler(
         event -> editorAgent.closeEditor(relatedEditorPart), ClickEvent.getType());
+
+    relatedEditorPart.addPropertyListener(
+        (source, propId) -> {
+          if (propId == EditorPartPresenter.PROP_INPUT) {
+            file = relatedEditorPart.getEditorInput().getFile();
+            title.setText(file.getDisplayName());
+          }
+        });
   }
 
   @Override
@@ -161,10 +169,8 @@ public class EditorTabWidget extends Composite
   /** {@inheritDoc} */
   @Override
   public void update(@NotNull PartPresenter part) {
-    title.setText(part.getTitle());
-
     if (part instanceof EditorPartPresenter) {
-      final EditorPartPresenter editorPartPresenter = (EditorPartPresenter) part;
+      EditorPartPresenter editorPartPresenter = (EditorPartPresenter) part;
       file = editorPartPresenter.getEditorInput().getFile();
       icon = editorPartPresenter.getTitleImage();
       iconPanel.setWidget(getIcon());

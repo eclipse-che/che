@@ -49,17 +49,8 @@ initVariables() {
     readonly TESTNG_FAILED_SUITE=${FAILSAFE_DIR}"/testng-failed.xml"
     readonly FAILSAFE_REPORT="target/site/failsafe-report.html"
 
-    readonly TEST_INCLUSION_STABLE="STABLE"
-    readonly TEST_INCLUSION_UNSTABLE="UNSTABLE"
-    readonly TEST_INCLUSION_STABLE_AND_UNSTABLE="STABLE_AND_UNSTABLE"
-    readonly TEST_INCLUSION_SINGLE_TEST="SINGLE_TEST"
-
-    readonly STABLE_MSG="stable tests"
-    readonly UNSTABLE_MSG="unstable tests"
-    readonly STABLE_AND_UNSTABLE_MSG="stable and unstable tests"
     readonly SINGLE_TEST_MSG="single test/package"
-
-    readonly MAX_RERUN=2
+    export CHE_MULTIUSER=${CHE_MULTIUSER:-false}
 
     # CALLER variable contains parent caller script name
     # CUR_DIR variable contains the current directory where CALLER is executed
@@ -67,12 +58,10 @@ initVariables() {
     [[ -z ${CUR_DIR+x} ]] && { CUR_DIR=$(cd "$(dirname "$0")"; pwd); }
 
     [[ -z ${API_SUFFIX+x} ]] && { API_SUFFIX="/api/"; }
-    [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/che-integration-tests-che6/"; }
 
     MODE="grid"
     GRID_OPTIONS="-Dgrid.mode=true"
-    RERUN=false
-
+    RERUN_ATTEMPTS=0
     BROWSER="GOOGLE_CHROME"
     WEBDRIVER_VERSION=$(curl -s http://chromedriver.storage.googleapis.com/LATEST_RELEASE)
     WEBDRIVER_PORT="9515"
@@ -87,7 +76,6 @@ initVariables() {
     PRODUCT_HOST=$(detectDockerInterfaceIp)
     PRODUCT_PORT=8080
 
-    unset TEST_INCLUSION
     unset DEBUG_OPTIONS
     unset MAVEN_OPTIONS
     unset TMP_SUITE_PATH
@@ -106,15 +94,20 @@ checkParameters() {
     for var in "$@"; do
         if [[ "$var" =~ --web-driver-version=.* ]]; then :
         elif [[ "$var" =~ --web-driver-port=[0-9]+$ ]]; then :
-        elif [[ "$var" == "--http" ]]; then :
-        elif [[ "$var" == "--https" ]]; then :
-        elif [[ "$var" == "--che" ]]; then :
+        elif [[ "$var" == --http ]]; then :
+        elif [[ "$var" == --https ]]; then :
+        elif [[ "$var" == --che ]]; then :
         elif [[ "$var" =~ --host=.* ]]; then :
         elif [[ "$var" =~ --port=.* ]]; then :
         elif [[ "$var" =~ --threads=[0-9]+$ ]]; then :
-        elif [[ "$var" == "--rerun" ]]; then :
-        elif [[ "$var" == "--debug" ]]; then :
-        elif [[ "$var" == "--all-tests" ]]; then :
+
+        elif [[ "$var" == --rerun ]]; then :
+        elif [[ "$var" =~ ^[0-9]+$ ]] && [[ $@ =~ --rerun[[:space:]]$var ]]; then :
+
+        elif [[ "$var" == --debug ]]; then :
+        elif [[ "$var" == --all-tests ]]; then
+            echo "[WARN] '--all-tests' parameter is outdated and is being ignored"
+
         elif [[ "$var" =~ --test=.* ]]; then
             local fileName=$(basename $(echo "$var" | sed -e "s/--test=//g"))
             find ${CUR_DIR} | grep "${fileName}.[class|java]" > /dev/null
@@ -137,17 +130,20 @@ checkParameters() {
                 exit 1;
             }
 
-        elif [[ "$var" == "--failed-tests" ]]; then :
-        elif [[ "$var" == "--regression-tests" ]]; then :
+        elif [[ "$var" == --failed-tests ]]; then :
+        elif [[ "$var" == --regression-tests ]]; then :
         elif [[ "$var" =~ -M.* ]]; then :
         elif [[ "$var" =~ -P.* ]]; then :
-        elif [[ "$var" == "--help" ]]; then :
-        elif [[ "$var" == "--compare-with-ci" ]]; then :
-        elif [[ "$var" =~ ^--workspace-pool-size=(auto|[0-9]+)$ ]]; then :
+        elif [[ "$var" == --help ]]; then :
+
+        elif [[ "$var" == --compare-with-ci ]]; then :
         elif [[ "$var" =~ ^[0-9]+$ ]] && [[ $@ =~ --compare-with-ci[[:space:]]$var ]]; then :
+
+        elif [[ "$var" =~ ^--workspace-pool-size=(auto|[0-9]+)$ ]]; then :
         elif [[ "$var" =~ ^-D.* ]]; then :
         elif [[ "$var" =~ ^-[[:alpha:]]$ ]]; then :
-        elif [[ "$var" == "--skip-sources-validation" ]]; then :
+        elif [[ "$var" == --skip-sources-validation ]]; then :
+        elif [[ "$var" == --multiuser ]]; then :
         else
             printHelp
             echo "[TEST] Unrecognized or misused parameter "${var}
@@ -168,10 +164,10 @@ applyCustomOptions() {
                 WEBDRIVER_PORT=$(echo "$var" | sed -e "s/--web-driver-port=//g")
             fi
 
-        elif [[ "$var" == "--http" ]]; then
+        elif [[ "$var" == --http ]]; then
             PRODUCT_PROTOCOL="http"
 
-        elif [[ "$var" == "--https" ]]; then
+        elif [[ "$var" == --https ]]; then
             PRODUCT_PROTOCOL="https"
 
         elif [[ "$var" =~ --host=.* ]]; then
@@ -186,18 +182,24 @@ applyCustomOptions() {
         elif [[ "$var" =~ --workspace-pool-size=.* ]]; then
             WORKSPACE_POOL_SIZE=$(echo "$var" | sed -e "s/--workspace-pool-size=//g")
 
-        elif [[ "$var" == "--rerun" ]]; then
-            RERUN=true
+        elif [[ "$var" =~ --rerun ]]; then
+            local rerunAttempts=$(echo $@ | sed 's/.*--rerun\W\+\([0-9]\+\).*/\1/')
+            if [[ "$rerunAttempts" =~ ^[0-9]+$ ]]; then
+              RERUN_ATTEMPTS=$rerunAttempts
+            else
+              RERUN_ATTEMPTS=1
+            fi
 
-        elif [[ "$var" == "--debug" ]]; then
+        elif [[ "$var" == --debug ]]; then
             DEBUG_OPTIONS="-Dmaven.failsafe.debug"
             NODE_CHROME_DEBUG_SUFFIX="-debug"
 
-        elif [[ "$var" == "--compare-with-ci" ]]; then
+        elif [[ "$var" == --compare-with-ci ]]; then
             COMPARE_WITH_CI=true
 
-        elif [[ "$var" == "--all-tests" ]]; then
-            TEST_INCLUSION=${TEST_INCLUSION_STABLE_AND_UNSTABLE}
+        elif [[ "$var" == --multiuser ]]; then
+            CHE_MULTIUSER=true
+
         fi
     done
 }
@@ -219,22 +221,18 @@ defineTestsScope() {
     for var in "$@"; do
         if [[ "$var" =~ --test=.* ]]; then
             TESTS_SCOPE="-Dit.test="$(echo "$var" | sed -e "s/--test=//g")
-            TEST_INCLUSION=${TEST_INCLUSION_SINGLE_TEST}
             THREADS=1
 
         elif [[ "$var" =~ --suite=.* ]]; then
             TESTS_SCOPE="-DrunSuite=src/test/resources/suites/"$(echo "$var" | sed -e "s/--suite=//g")
-            TEST_INCLUSION=${TEST_INCLUSION_STABLE}
 
-        elif [[ "$var" == "--failed-tests" ]]; then
+        elif [[ "$var" == --failed-tests ]]; then
             generateTestNgFailedReport $(fetchFailedTests)
             TESTS_SCOPE="-DrunSuite=${TESTNG_FAILED_SUITE}"
-            TEST_INCLUSION=${TEST_INCLUSION_STABLE_AND_UNSTABLE}
 
-        elif [[ "$var" == "--regression-tests" ]]; then
+        elif [[ "$var" == --regression-tests ]]; then
             generateTestNgFailedReport $(findRegressions)
             TESTS_SCOPE="-DrunSuite=${TESTNG_FAILED_SUITE}"
-            TEST_INCLUSION=${TEST_INCLUSION_STABLE_AND_UNSTABLE}
         fi
     done
 
@@ -359,31 +357,6 @@ prepareTestSuite() {
 
     # set number of threads directly in the suite
     sed -i -e "s#thread-count=\"[^\"]*\"#thread-count=\"${THREADS}\"#" "$TMP_SUITE_PATH"
-
-    if [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE_AND_UNSTABLE} ]]; then
-        # remove "<methods>" tags from temporary suite
-        methodsSectionNumber=$(grep -oe "<methods>" <<< echo "$TMP_SUITE_PATH" | wc -l);
-
-        for (( c=1; c<=$methodsSectionNumber; c++ )); do
-            sed -i -e '1h;2,$H;$!d;g' -e "s/\(<class.*\)<methods>.*<\/methods>\(.*<\/class>\)/\1\2/" "$TMP_SUITE_PATH"
-        done
-    elif [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_UNSTABLE} ]]; then
-        # replace "<exclude>"  on "<include>" tags in temporary suite
-        sed -i "s/<exclude/<include/" "$TMP_SUITE_PATH"
-
-        # remove "<class ... />" tags
-        sed -i "s/<class.*\/>//" "$TMP_SUITE_PATH"
-
-        # remove sub-suites in order to not having unstable tests there and get rid of stable/unstable model soon
-        sed -i -i -e '1h;2,$H;$!d;g' -e "s/<suite-files>.*<\/suite-files>//" "$TMP_SUITE_PATH"
-    fi
-}
-
-# returns 0 if suite does have "<exclude" section, or 1 otherwise
-suiteContainsUnstableTests() {
-    local suitePath=${ORIGIN_TESTS_SCOPE:11}
-    grep -oe "<exclude" ${suitePath}  > /dev/null
-    echo $?
 }
 
 printHelp() {
@@ -394,34 +367,28 @@ Options:
     --http                              Use 'http' protocol to connect to product
     --https                             Use 'https' protocol to connect to product
     --host=<PRODUCT_HOST>               Set host where product is deployed
-    --port=<PRODUCT_PORT>               Set port of the product
+    --port=<PRODUCT_PORT>               Set port of the product, default is 8080
+    --multiuser                         Run tests of Multi User Che
 
 Modes (defines environment to run tests):
-    local                               All tests will be run in a Web browser on the developer machine.
+    -Mlocal                             All tests will be run in a Web browser on the developer machine.
                                         Recommended if test visualization is needed and for debugging purpose.
 
-    Options that go with 'local' mode:
-    --web-driver-version=<VERSION>      To use the specific version of the WebDriver, be default the latest will be used: "${WEBDRIVER_VERSION}"
-    --web-driver-port=<PORT>            To run WebDriver on the specific port, by default: "${WEBDRIVER_PORT}"
-    --threads=<THREADS>                 Number of tests that will be run simultaneously. It also means the very same number of
+       Options that go with 'local' mode:
+       --web-driver-version=<VERSION>    To use the specific version of the WebDriver, be default the latest will be used: "${WEBDRIVER_VERSION}"
+       --web-driver-port=<PORT>          To run WebDriver on the specific port, by default: "${WEBDRIVER_PORT}"
+       --threads=<THREADS>               Number of tests that will be run simultaneously. It also means the very same number of
                                         Web browsers will be opened on the developer machine.
                                         Default value is in range [2,5] and depends on available RAM.
-    --workspace-pool-size=[<SIZE>|auto] Size of test workspace pool.
-                                        Default value is 0, that means that test workspaces are created on demand.
 
-
-    grid (default)                      All tests will be run in parallel on several docker containers.
+    -Mgrid (default)                    All tests will be run in parallel among several docker containers.
                                         One container per thread. Recommended to run test suite.
 
-    Options that go with 'grid' mode:
-    --threads=<THREADS>                 Number of tests that will be run simultaneously.
+        Options that go with 'grid' mode:
+        --threads=<THREADS>             Number of tests that will be run simultaneously.
                                         Default value is in range [2,5] and depends on available RAM.
-    --workspace-pool-size=[<SIZE>|auto] Size of test workspace pool.
-                                        Default value is 0, that means that test workspaces are created on demand.
-
 
 Define tests scope:
-    --all-tests                         Run all tests within the suite despite of <exclude>/<include> sections in the test suite.
     --test=<TEST_CLASS>                 Single test to run
     --suite=<SUITE>                     Test suite to run, found:
 "$(for x in $(ls -1 src/test/resources/suites); do echo "                                            * "$x; done)"
@@ -429,19 +396,26 @@ Define tests scope:
 Handle failing tests:
     --failed-tests                      Rerun failed tests that left after the previous try
     --regression-tests                  Rerun regression tests that left after the previous try
-    --rerun                             Automatically rerun failing tests
-    --compare-with-ci                   Compare failed tests with results on CI server
+    --rerun [ATTEMPTS]                  Automatically rerun failing tests.
+                                        Default attempts number is 1.
+    --compare-with-ci [BUILD NUMBER]    Compare failed tests with results on CI server.
+                                        Default build is the latest.
 
 Other options:
     --debug                             Run tests in debug mode
     --skip-sources-validation           Fast build. Skips source validation and enforce plugins
+    --workspace-pool-size=[<SIZE>|auto] Size of test workspace pool.
+                                        Default value is 0, that means that test workspaces are created on demand.
 
 HOW TO of usage:
-    Test Eclipse Che assembly:
+    Test Eclipse Che single user assembly:
         ${CALLER}
 
+    Test Eclipse Che multi user assembly:
+        ${CALLER} --multiuser
+
     Test Eclipse Che assembly and automatically rerun failing tests:
-        ${CALLER} --rerun
+        ${CALLER} --rerun [ATTEMPTS]
 
     Run single test or package of tests:
         ${CALLER} <...> --test=<TEST>
@@ -451,25 +425,23 @@ HOW TO of usage:
 
     Rerun failed tests:
         ${CALLER} <...> --failed-tests
-        ${CALLER} <...> --failed-tests --rerun
+        ${CALLER} <...> --failed-tests --rerun [ATTEMPTS]
 
     Debug selenium test:
         ${CALLER} -Mlocal --test=<TEST> --debug
 
     Analyse tests results:
-        ${CALLER} --compare-with-ci [CI job number]
+        ${CALLER} --compare-with-ci [BUILD NUMBER]
 "
 
     printf "%s" "${usage}"
 }
 
 printRunOptions() {
-    local TEST_INCLUSION_MSG=${TEST_INCLUSION}_MSG
-
+    echo "[TEST]"
     echo "[TEST] =========== RUN OPTIONS ==========================="
     echo "[TEST] Mode                : "${MODE}
-    echo "[TEST] Tests inclusion     : "${!TEST_INCLUSION_MSG}
-    echo "[TEST] Rerun failing tests : "${RERUN}
+    echo "[TEST] Rerun attempts      : "${RERUN_ATTEMPTS}
     echo "[TEST] ==================================================="
     echo "[TEST] Product Protocol    : "${PRODUCT_PROTOCOL}
     echo "[TEST] Product Host        : "${PRODUCT_HOST}
@@ -533,8 +505,8 @@ fetchFailedTestsNumber() {
 }
 
 detectLatestResultsUrl() {
-    local job=$(curl -s ${BASE_ACTUAL_RESULTS_URL} | tr '\n' ' ' | sed 's/.*Last build (#\([0-9]\+\)).*/\1/')
-    echo ${BASE_ACTUAL_RESULTS_URL}${job}"/testReport/"
+    local build=$(curl -s ${BASE_ACTUAL_RESULTS_URL} | tr '\n' ' ' | sed 's/.*Last build (#\([0-9]\+\)).*/\1/')
+    echo ${BASE_ACTUAL_RESULTS_URL}${build}"/testReport/"
 }
 
 # Fetches list of failed tests and failed configurations.
@@ -543,11 +515,20 @@ fetchActualResults() {
     unset ACTUAL_RESULTS
     unset ACTUAL_RESULTS_URL
 
-    local job=$(echo $@ | sed 's/.*--compare-with-ci\W\+\([0-9]\+\).*/\1/')
-    if [[ ! ${job} =~ ^[0-9]+$ ]]; then
+    # define the URL of CI job to compare result with result on it
+    if [[ ${CHE_MULTIUSER} == true ]]; then
+      local nameOfCIJob=che-multiuser-integration-tests-che6
+    else
+      local nameOfCIJob=che-integration-tests-che6
+    fi
+
+    [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/$nameOfCIJob/"; }
+
+    local build=$(echo $@ | sed 's/.*--compare-with-ci\W\+\([0-9]\+\).*/\1/')
+    if [[ ! ${build} =~ ^[0-9]+$ ]]; then
         ACTUAL_RESULTS_URL=$(detectLatestResultsUrl)
     else
-        ACTUAL_RESULTS_URL=${BASE_ACTUAL_RESULTS_URL}${job}"/testReport/"
+        ACTUAL_RESULTS_URL=${BASE_ACTUAL_RESULTS_URL}${build}"/testReport/"
     fi
 
     # get list of failed tests from CI server, remove duplicates from it and sort
@@ -575,14 +556,7 @@ findRegressions() {
 # Analyses tests results by comparing with the actual ones.
 analyseTestsResults() {
     echo "[TEST]"
-
-    if [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE} ]]; then
-        echo -e "[TEST] "${YELLOW}"STABLE TESTS EXECUTION RESULTS ANALYSE:"${NO_COLOUR}
-    elif [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE_AND_UNSTABLE} ]]; then
-        echo -e "[TEST] "${YELLOW}"STABLE/UNSTABLE TESTS EXECUTION RESULTS ANALYSE:"${NO_COLOUR}
-    else
-        echo -e "[TEST] "${YELLOW}"RESULTS ANALYSE:"${NO_COLOUR}
-    fi
+    echo -e "[TEST] "${YELLOW}"RESULTS ANALYSE:"${NO_COLOUR}
 
     echo "[TEST]"
     echo -e "[TEST] Command line: ${BLUE}${CUR_DIR}/${CALLER} $@${NO_COLOUR}"
@@ -652,9 +626,8 @@ analyseTestsResults() {
 
 printProposals() {
     echo -e "[TEST] "${YELLOW}"PROPOSALS:"${NO_COLOUR}
-    local cmd=$(echo $@ | sed -e "s/--rerun//g" | \
+    local cmd=$(echo $@ | sed -e "s/--rerun\W*[0-9]*//g" | \
                           sed -e "s/-M[^ ]*//g" | \
-                          sed -e "s/--all-tests//g" | \
                           sed -e "s/--failed-tests//g" | \
                           sed -e "s/--regression-tests//g" | \
                           sed -e "s/--suite=[^ ]*//g " | \
@@ -685,11 +658,11 @@ printProposals() {
     fi
 
     echo "[TEST]"
-    echo "[TEST] To compare tests results with the latest CI job"
+    echo "[TEST] To compare tests results with the latest results on CI job"
     echo -e "[TEST] \t${BLUE}${CUR_DIR}/${CALLER} ${cmd} --compare-with-ci${NO_COLOUR}"
     echo "[TEST]"
-    echo "[TEST] To compare tests results with results of the specific CI job"
-    echo -e "[TEST] \t${BLUE}${CUR_DIR}/${CALLER} ${cmd} --compare-with-ci CI_JOB_NUMBER${NO_COLOUR}"
+    echo "[TEST] To compare local tests results with certain build on CI job"
+    echo -e "[TEST] \t${BLUE}${CUR_DIR}/${CALLER} ${cmd} --compare-with-ci [BUILD NUMBER]${NO_COLOUR}"
     echo "[TEST]"
     echo "[TEST]"
 }
@@ -729,7 +702,7 @@ rerunTests() {
     local total=$(echo ${regressions[@]} | wc -w)
 
     if [[ ! ${total} -eq 0 ]]; then
-        local rerun=$1 && shift
+        local rerunCounter=$1 && shift
 
         analyseTestsResults $@
         generateFailSafeReport
@@ -737,15 +710,16 @@ rerunTests() {
         storeTestReport
         printElapsedTime
 
-        echo "[TEST]"
-        echo -e "[TEST] "${YELLOW}" Rerunning failed tests in one thread, attempt #"${rerun}${NO_COLOUR}
-        echo "[TEST]"
+        echo -e "[TEST]"
+        echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
+        echo -e "[TEST] ${YELLOW}RERUNNING FAILED TESTS IN ONE THREAD: ATTEMPT #${rerunCounter}${NO_COLOUR}"
+        echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
 
         defineTestsScope "--failed-tests"
         runTests
 
-        if [[ ${rerun} < ${MAX_RERUN} ]]; then
-            rerunTests $(($rerun+1)) $@
+        if [[ ${rerunCounter} < ${RERUN_ATTEMPTS} ]]; then
+            rerunTests $(($rerunCounter+1)) $@
         fi
     fi
 }
@@ -778,15 +752,7 @@ generateFailSafeReport () {
     mvn -q site -DgenerateReports=false ${MAVEN_OPTIONS}
 
     echo "[TEST]"
-
-    case ${TEST_INCLUSION} in
-        ${TEST_INCLUSION_STABLE} )
-            echo -e "[TEST] ${YELLOW}STABLE TESTS EXECUTION REPORT:${NO_COLOUR}" ;;
-        ${TEST_INCLUSION_UNSTABLE} )
-            echo -e "[TEST] ${YELLOW}UNSTABLE TESTS EXECUTION REPORT:${NO_COLOUR}" ;;
-        ${TEST_INCLUSION_STABLE_AND_UNSTABLE} | ${TEST_INCLUSION_SINGLE_TEST} )
-            echo -e "[TEST] ${YELLOW}REPORT:${NO_COLOUR}" ;;
-    esac
+    echo -e "[TEST] ${YELLOW}REPORT:${NO_COLOUR}"
 
     if [[ ! -f ${FAILSAFE_REPORT} ]]; then
         echo -e "[TEST] Failsafe report: ${BLUE}file://${CUR_DIR}/${FAILSAFE_REPORT}${NO_COLOUR} not found."
@@ -859,7 +825,7 @@ prepareToFirstRun() {
 testProduct() {
     runTests
 
-    if [[ ${RERUN} == true ]]; then
+    if [[ ${RERUN_ATTEMPTS} > 0 ]]; then
         MAVEN_OPTIONS="${MAVEN_OPTIONS} -o"
         rerunTests 1 $@
     fi
@@ -891,52 +857,14 @@ run() {
         fetchActualResults $@
     else
         prepareToFirstRun
-
-        if [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE} ]]; then
-            echo "[TEST]"
-            echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
-            echo -e "[TEST] ${YELLOW} RUN STABLE TESTS${NO_COLOUR}"
-            echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
-            echo "[TEST]"
-        fi
-
         testProduct $@
     fi
 
-analyseTestsResults $@
+    analyseTestsResults $@
 
-if [[ ${COMPARE_WITH_CI} == false ]]; then
-    generateFailSafeReport
-    printProposals $@
-    storeTestReport
-    printElapsedTime
-fi
-
-    if [[ ${TESTS_SCOPE} =~ -DrunSuite ]] \
-        && [[ $(fetchFailedTestsNumber) == 0 ]] \
-        && [[ ${COMPARE_WITH_CI} == false ]] \
-        && [[ ${TEST_INCLUSION} == ${TEST_INCLUSION_STABLE} ]]; then
-
-        if [[ $(suiteContainsUnstableTests) != 0 ]]; then
-            echo "[TEST]"
-            echo "[TEST] Test suite '${ORIGIN_TESTS_SCOPE:11}' doesn't have tests which are marked as unstable."
-            echo "[TEST] No more tests will be run."
-            echo "[TEST]"
-            exit
-        fi
-
-        TEST_INCLUSION=${TEST_INCLUSION_UNSTABLE}
-        START_TIME=$(date +%s)
-
-        echo "[TEST]"
-        echo "[TEST]"
-        echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
-        echo -e "[TEST] ${YELLOW} RUN UNSTABLE TESTS${NO_COLOUR}"
-        echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
-        echo "[TEST]"
-
-        testProduct $@
+    if [[ ${COMPARE_WITH_CI} == false ]]; then
         generateFailSafeReport
+        printProposals $@
         storeTestReport
         printElapsedTime
     fi

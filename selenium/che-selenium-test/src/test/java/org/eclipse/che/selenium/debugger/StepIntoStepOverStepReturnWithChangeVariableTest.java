@@ -175,6 +175,6 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
     projectExplorer.quickRevealToItemWithJavaScript(absPathToClass);
     projectExplorer.openItemByPath(absPathToClass);
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 }

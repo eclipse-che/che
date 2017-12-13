@@ -63,7 +63,7 @@ public class DebuggerUtils {
             while ((response = br.readLine()) != null) {
               responseData.append(response);
             }
-            System.out.println(responseData.toString());
+            LOG.debug(responseData.toString());
             br.close();
           } catch (Exception e) {
             LOG.error(e.getMessage(), e);

@@ -73,7 +73,7 @@ public class RenameNotPrivateFieldTest {
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     loader.waitOnClosed();
     editor.setCursorToLine(21);
@@ -92,7 +92,7 @@ public class RenameNotPrivateFieldTest {
     setFieldsForTest("test1");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     loader.waitOnClosed();
     editor.setCursorToLine(13);
@@ -111,9 +111,9 @@ public class RenameNotPrivateFieldTest {
     setFieldsForTest("test2");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(13, 9);
+    editor.goToCursorPositionVisible(13, 9);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("g");
     loader.waitOnClosed();
@@ -127,7 +127,7 @@ public class RenameNotPrivateFieldTest {
     setFieldsForTest("test3");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(19);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -148,7 +148,7 @@ public class RenameNotPrivateFieldTest {
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -169,7 +169,7 @@ public class RenameNotPrivateFieldTest {
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -190,7 +190,7 @@ public class RenameNotPrivateFieldTest {
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -212,7 +212,7 @@ public class RenameNotPrivateFieldTest {
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -237,7 +237,7 @@ public class RenameNotPrivateFieldTest {
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -262,7 +262,7 @@ public class RenameNotPrivateFieldTest {
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -280,7 +280,7 @@ public class RenameNotPrivateFieldTest {
     setFieldsForTest("test10");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -298,9 +298,9 @@ public class RenameNotPrivateFieldTest {
     setFieldsForTest("test24");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(14, 9);
+    editor.goToCursorPositionVisible(14, 9);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("ZORRO");
     loader.waitOnClosed();
@@ -315,9 +315,9 @@ public class RenameNotPrivateFieldTest {
     setFieldsForTest("test25");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(16, 14);
+    editor.goToCursorPositionVisible(16, 14);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("ZORRO");
     loader.waitOnClosed();
@@ -331,9 +331,9 @@ public class RenameNotPrivateFieldTest {
     setFieldsForTest("test26");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(13, 17);
+    editor.goToCursorPositionVisible(13, 17);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("test1");
     loader.waitOnClosed();
@@ -347,7 +347,7 @@ public class RenameNotPrivateFieldTest {
     setFieldsForTest("test28");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(15);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -368,7 +368,7 @@ public class RenameNotPrivateFieldTest {
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(15);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -389,7 +389,7 @@ public class RenameNotPrivateFieldTest {
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(14);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -410,7 +410,7 @@ public class RenameNotPrivateFieldTest {
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(14);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -431,7 +431,7 @@ public class RenameNotPrivateFieldTest {
     projectExplorer.waitVisibleItem(pathToCurrentPackage + "/A.java");
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(16);
     editor.typeTextIntoEditor(Keys.END.toString());

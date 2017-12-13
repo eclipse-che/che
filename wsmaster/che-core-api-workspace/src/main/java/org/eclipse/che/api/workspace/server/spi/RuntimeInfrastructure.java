@@ -46,7 +46,7 @@ public abstract class RuntimeInfrastructure {
   }
 
   /** Returns the name of this runtime infrastructure. */
-  public final String getName() {
+  public String getName() {
     return name;
   }
 
@@ -54,12 +54,12 @@ public abstract class RuntimeInfrastructure {
    * Returns the types of the recipes supported by this runtime infrastructure. The set is never
    * empty and contains at least one recipe type.
    */
-  public final Set<String> getRecipeTypes() {
+  public Set<String> getRecipeTypes() {
     return recipeTypes;
   }
 
   /** @return EventService */
-  public final EventService getEventService() {
+  public EventService getEventService() {
     return eventService;
   }
 

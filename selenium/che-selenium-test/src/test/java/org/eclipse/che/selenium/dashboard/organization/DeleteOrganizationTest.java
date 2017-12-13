@@ -10,24 +10,21 @@
  */
 package org.eclipse.che.selenium.dashboard.organization;
 
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.util.ArrayList;
-import java.util.List;
-import org.eclipse.che.multiuser.organization.shared.dto.OrganizationDto;
+import org.eclipse.che.selenium.core.annotation.Multiuser;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
+import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.ConfirmDialog;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -36,17 +33,21 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
+@Multiuser
 public class DeleteOrganizationTest {
-  private static final String PARENT_ORG_NAME = generate("parent-org", 5);
-  private static final String CHILD_ORG_NAME = generate("child-org", 5);
+  private int initialOrgNumber;
 
-  private List<OrganizationDto> organizations = new ArrayList<>();
-  private OrganizationDto parentOrganization;
-  private OrganizationDto childOrganization;
+  @InjectTestOrganization(prefix = "parentOrg")
+  private TestOrganization parentOrg;
+
+  @InjectTestOrganization(parentPrefix = "parentOrg")
+  private TestOrganization childOrg;
 
   @Inject
   @Named("admin")
-  private TestOrganizationServiceClient testOrganizationServiceClient;
+  private TestOrganizationServiceClient adminTestOrganizationServiceClient;
+
+  @Inject private TestOrganizationServiceClient userTestOrganizationServiceClient;
 
   @Inject private OrganizationListPage organizationListPage;
   @Inject private OrganizationPage organizationPage;
@@ -57,20 +58,11 @@ public class DeleteOrganizationTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    parentOrganization = testOrganizationServiceClient.create(PARENT_ORG_NAME);
-    childOrganization = testOrganizationServiceClient.create(CHILD_ORG_NAME);
-    testOrganizationServiceClient.addAdmin(parentOrganization.getId(), testUser.getId());
-    testOrganizationServiceClient.addAdmin(childOrganization.getId(), testUser.getId());
-    organizations.add(parentOrganization);
-    organizations.add(childOrganization);
+    parentOrg.addAdmin(testUser.getId());
+    childOrg.addAdmin(testUser.getId());
+    initialOrgNumber = userTestOrganizationServiceClient.getAll().size();
 
     dashboard.open(testUser.getName(), testUser.getPassword());
-  }
-
-  @AfterClass
-  public void tearDown() throws Exception {
-    testOrganizationServiceClient.deleteById(childOrganization.getId());
-    testOrganizationServiceClient.deleteById(parentOrganization.getId());
   }
 
   @Test
@@ -79,17 +71,17 @@ public class DeleteOrganizationTest {
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    organizationListPage.clickOnOrganization(childOrganization.getQualifiedName());
-    organizationPage.waitOrganizationName(childOrganization.getName());
+    organizationListPage.clickOnOrganization(childOrg.getQualifiedName());
+    organizationPage.waitOrganizationName(childOrg.getName());
 
     // Delete the sub-organization from the Settings tab by the Delete button
-    deleteOrganization(childOrganization.getName());
+    deleteOrganization(childOrg.getName());
 
     // Test that the organization deleted
     organizationListPage.waitForOrganizationsList();
-    organizationListPage.waitForOrganizationIsRemoved(childOrganization.getQualifiedName());
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= 1);
-    assertTrue(organizationListPage.getOrganizationListItemCount() >= 1);
+    organizationListPage.waitForOrganizationIsRemoved(childOrg.getQualifiedName());
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), initialOrgNumber - 1);
+    assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber - 1);
   }
 
   @Test(priority = 1)
@@ -98,14 +90,14 @@ public class DeleteOrganizationTest {
     navigationBar.clickOnMenu(ORGANIZATIONS);
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
-    organizationListPage.clickOnOrganization(parentOrganization.getName());
-    organizationPage.waitOrganizationName(parentOrganization.getName());
+    organizationListPage.clickOnOrganization(parentOrg.getName());
+    organizationPage.waitOrganizationName(parentOrg.getName());
 
     // Delete the parent organization from the Settings tab by the Delete button
-    deleteOrganization(parentOrganization.getName());
+    deleteOrganization(parentOrg.getName());
 
     // Test that the organization deleted
-    assertTrue(navigationBar.getMenuCounterValue(ORGANIZATIONS) >= 0);
+    assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), initialOrgNumber - 2);
   }
 
   private void deleteOrganization(String organizationName) {

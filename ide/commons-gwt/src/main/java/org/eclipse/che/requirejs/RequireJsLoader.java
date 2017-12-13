@@ -18,6 +18,7 @@ import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.core.client.ScriptInjector;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.requirejs.conf.RequirejsConfig;
 
@@ -26,6 +27,7 @@ import org.eclipse.che.requirejs.conf.RequirejsConfig;
  *
  * @author "Mickaël Leduque"
  */
+@Singleton
 public class RequireJsLoader {
 
   private static boolean requirejsLoaded = false;

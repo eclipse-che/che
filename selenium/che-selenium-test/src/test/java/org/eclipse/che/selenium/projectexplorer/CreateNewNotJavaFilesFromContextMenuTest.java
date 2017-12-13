@@ -130,6 +130,7 @@ public class CreateNewNotJavaFilesFromContextMenuTest {
     projectExplorer.openContextMenuByPathSelectedItem(PATH_TO_FILES);
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
     projectExplorer.clickOnItemInContextMenu(type);
+    askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(name);
     askForValueDialog.clickOkBtn();
     loader.waitOnClosed();
@@ -138,7 +139,7 @@ public class CreateNewNotJavaFilesFromContextMenuTest {
 
   public void checkDefaultTextInCodeMirrorEditorForFile(String defaultText, String fileName)
       throws InterruptedException {
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTabIsPresent(fileName);
     editor.waitTextIntoEditor(defaultText);
   }

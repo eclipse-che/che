@@ -100,7 +100,7 @@ public class AmendCommitTest {
     projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_FILE);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(12);
     editor.typeTextIntoEditor("//" + CHANGE_CONTENT);
     editor.waitTextIntoEditor("//" + CHANGE_CONTENT);
@@ -129,7 +129,7 @@ public class AmendCommitTest {
 
     // perform amend previous commit
     projectExplorer.openItemByPath(PATH_TO_FILE);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(12);
     editor.selectLineAndDelete();
     editor.typeTextIntoEditor("//" + AMEND_CONTENT);

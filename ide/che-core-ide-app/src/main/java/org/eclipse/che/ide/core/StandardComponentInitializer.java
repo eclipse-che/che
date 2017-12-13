@@ -37,10 +37,14 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_MAIN_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_TOOLBAR;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_TOOLBAR_CONTROLLER;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_WORKSPACE;
+import static org.eclipse.che.ide.api.action.IdeActions.TOOL_WINDOWS_GROUP;
+import static org.eclipse.che.ide.api.constraints.Anchor.AFTER;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
 import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
 import static org.eclipse.che.ide.part.editor.recent.RecentFileStore.RECENT_GROUP_ID;
 import static org.eclipse.che.ide.projecttype.BlankProjectWizardRegistrar.BLANK_CATEGORY;
+import static org.eclipse.che.ide.util.input.KeyCodeMap.ARROW_DOWN;
+import static org.eclipse.che.ide.util.input.KeyCodeMap.ARROW_UP;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.inject.Inject;
@@ -90,6 +94,12 @@ import org.eclipse.che.ide.actions.common.HidePartAction;
 import org.eclipse.che.ide.actions.common.MaximizePartAction;
 import org.eclipse.che.ide.actions.common.RestorePartAction;
 import org.eclipse.che.ide.actions.find.FindActionAction;
+import org.eclipse.che.ide.actions.switching.CommandsExplorerDisplayingModeAction;
+import org.eclipse.che.ide.actions.switching.EditorDisplayingModeAction;
+import org.eclipse.che.ide.actions.switching.EventLogsDisplayingModeAction;
+import org.eclipse.che.ide.actions.switching.FindResultDisplayingModeAction;
+import org.eclipse.che.ide.actions.switching.ProjectExplorerDisplayingModeAction;
+import org.eclipse.che.ide.actions.switching.TerminalDisplayingModeAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.BaseAction;
@@ -183,6 +193,14 @@ public class StandardComponentInitializer {
   public static final String SHOW_REFERENCE = "showReference";
   public static final String SHOW_COMMANDS_PALETTE = "showCommandsPalette";
   public static final String NEW_TERMINAL = "newTerminal";
+  public static final String PROJECT_EXPLORER_DISPLAYING_MODE = "projectExplorerDisplayingMode";
+  public static final String COMMAND_EXPLORER_DISPLAYING_MODE = "commandExplorerDisplayingMode";
+  public static final String FIND_RESULT_DISPLAYING_MODE = "findResultDisplayingMode";
+  public static final String EVENT_LOGS_DISPLAYING_MODE = "eventLogsDisplayingMode";
+  public static final String EDITOR_DISPLAYING_MODE = "editorDisplayingMode";
+  public static final String TERMINAL_DISPLAYING_MODE = "terminalDisplayingMode";
+  public static final String REVEAL_RESOURCE = "revealResourceInProjectTree";
+  public static final String COLLAPSE_ALL = "collapseAll";
 
   public interface ParserResource extends ClientBundle {
     @Source("org/eclipse/che/ide/blank.svg")
@@ -350,6 +368,18 @@ public class StandardComponentInitializer {
   @Inject private CollapseAllAction collapseAllAction;
 
   @Inject private PerspectiveManager perspectiveManager;
+
+  @Inject private CommandsExplorerDisplayingModeAction commandsExplorerDisplayingModeAction;
+
+  @Inject private ProjectExplorerDisplayingModeAction projectExplorerDisplayingModeAction;
+
+  @Inject private EventLogsDisplayingModeAction eventLogsDisplayingModeAction;
+
+  @Inject private FindResultDisplayingModeAction findResultDisplayingModeAction;
+
+  @Inject private EditorDisplayingModeAction editorDisplayingModeAction;
+
+  @Inject private TerminalDisplayingModeAction terminalDisplayingModeAction;
 
   @Inject
   @Named("XMLFileType")
@@ -582,9 +612,6 @@ public class StandardComponentInitializer {
     editGroup.add(switchPreviousEditorAction);
     editGroup.add(switchNextEditorAction);
 
-    editGroup.addSeparator();
-    editGroup.add(revealResourceAction);
-
     // Assistant (New Menu)
     DefaultActionGroup assistantGroup =
         (DefaultActionGroup) actionManager.getAction(GROUP_ASSISTANT);
@@ -598,6 +625,32 @@ public class StandardComponentInitializer {
     actionManager.registerAction("hotKeysList", hotKeysListAction);
     assistantGroup.add(hotKeysListAction);
 
+    assistantGroup.addSeparator();
+
+    // Switching of parts
+    DefaultActionGroup toolWindowsGroup =
+        new DefaultActionGroup("Tool Windows", true, actionManager);
+    actionManager.registerAction(TOOL_WINDOWS_GROUP, toolWindowsGroup);
+
+    actionManager.registerAction(
+        PROJECT_EXPLORER_DISPLAYING_MODE, projectExplorerDisplayingModeAction);
+    actionManager.registerAction(FIND_RESULT_DISPLAYING_MODE, findResultDisplayingModeAction);
+    actionManager.registerAction(EVENT_LOGS_DISPLAYING_MODE, eventLogsDisplayingModeAction);
+    actionManager.registerAction(
+        COMMAND_EXPLORER_DISPLAYING_MODE, commandsExplorerDisplayingModeAction);
+    actionManager.registerAction(EDITOR_DISPLAYING_MODE, editorDisplayingModeAction);
+    actionManager.registerAction(TERMINAL_DISPLAYING_MODE, terminalDisplayingModeAction);
+    toolWindowsGroup.add(projectExplorerDisplayingModeAction, FIRST);
+    toolWindowsGroup.add(
+        eventLogsDisplayingModeAction, new Constraints(AFTER, PROJECT_EXPLORER_DISPLAYING_MODE));
+    toolWindowsGroup.add(
+        findResultDisplayingModeAction, new Constraints(AFTER, EVENT_LOGS_DISPLAYING_MODE));
+    toolWindowsGroup.add(
+        commandsExplorerDisplayingModeAction, new Constraints(AFTER, FIND_RESULT_DISPLAYING_MODE));
+    toolWindowsGroup.add(editorDisplayingModeAction);
+    toolWindowsGroup.add(terminalDisplayingModeAction);
+
+    assistantGroup.add(toolWindowsGroup);
     assistantGroup.addSeparator();
 
     actionManager.registerAction("callCompletion", completeAction);
@@ -651,6 +704,7 @@ public class StandardComponentInitializer {
     resourceOperation.add(downloadResourceAction);
     resourceOperation.add(refreshPathAction);
     resourceOperation.add(linkWithEditorAction);
+    resourceOperation.add(collapseAllAction);
     resourceOperation.addSeparator();
     resourceOperation.add(convertFolderToProjectAction);
     resourceOperation.addSeparator();
@@ -661,7 +715,7 @@ public class StandardComponentInitializer {
 
     DefaultActionGroup mainContextMenuGroup =
         (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
-    mainContextMenuGroup.add(newGroup, Constraints.FIRST);
+    mainContextMenuGroup.add(newGroup, FIRST);
     mainContextMenuGroup.addSeparator();
     mainContextMenuGroup.add(resourceOperation);
 
@@ -671,6 +725,7 @@ public class StandardComponentInitializer {
     partMenuGroup.add(hidePartAction);
     partMenuGroup.add(restorePartAction);
     partMenuGroup.add(showConsoleTreeAction);
+    partMenuGroup.add(revealResourceAction);
     partMenuGroup.add(collapseAllAction);
     partMenuGroup.add(refreshPathAction);
     partMenuGroup.add(linkWithEditorAction);
@@ -691,12 +746,12 @@ public class StandardComponentInitializer {
     actionManager.registerAction("goInto", goIntoAction);
     actionManager.registerAction(SHOW_REFERENCE, showReferenceAction);
 
-    actionManager.registerAction("collapseAll", collapseAllAction);
+    actionManager.registerAction(REVEAL_RESOURCE, revealResourceAction);
+    actionManager.registerAction(COLLAPSE_ALL, collapseAllAction);
 
     actionManager.registerAction("openFile", openFileAction);
     actionManager.registerAction(SWITCH_LEFT_TAB, switchPreviousEditorAction);
     actionManager.registerAction(SWITCH_RIGHT_TAB, switchNextEditorAction);
-    actionManager.registerAction("scrollFromSource", revealResourceAction);
 
     changeResourceGroup.add(cutResourceAction);
     changeResourceGroup.add(copyResourceAction);
@@ -769,6 +824,9 @@ public class StandardComponentInitializer {
     editorContextMenuGroup.add(fullTextSearchAction);
     editorContextMenuGroup.add(closeActiveEditorAction);
 
+    editorContextMenuGroup.addSeparator();
+    editorContextMenuGroup.add(revealResourceAction);
+
     // Define hot-keys
     keyBinding
         .getGlobal()
@@ -814,6 +872,41 @@ public class StandardComponentInitializer {
 
     keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('z').build(), UNDO);
     keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('y').build(), REDO);
+
+    keyBinding
+        .getGlobal()
+        .addKey(
+            new KeyBuilder().action().alt().charCode('1').build(),
+            PROJECT_EXPLORER_DISPLAYING_MODE);
+
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().action().alt().charCode('2').build(), EVENT_LOGS_DISPLAYING_MODE);
+
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().action().alt().charCode('3').build(), FIND_RESULT_DISPLAYING_MODE);
+
+    keyBinding
+        .getGlobal()
+        .addKey(
+            new KeyBuilder().action().alt().charCode('4').build(),
+            COMMAND_EXPLORER_DISPLAYING_MODE);
+
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().alt().charCode('E').build(), EDITOR_DISPLAYING_MODE);
+
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().alt().charCode('T').build(), TERMINAL_DISPLAYING_MODE);
+
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().action().charCode(ARROW_DOWN).build(), REVEAL_RESOURCE);
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().action().charCode(ARROW_UP).build(), COLLAPSE_ALL);
 
     if (UserAgent.isMac()) {
       keyBinding

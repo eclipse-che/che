@@ -488,6 +488,16 @@ public class DarkTheme implements Theme {
   }
 
   @Override
+  public String getEditorLinkedGroupColor() {
+    return "inherit";
+  }
+
+  @Override
+  public String getEditorLinkedGroupBackground() {
+    return "#000099";
+  }
+
+  @Override
   public String getEditorInactiveSelectionColor() {
     return "#d4d4d4";
   }

@@ -144,6 +144,7 @@ public class CreateNewNotJavaFilesTest {
     projectExplorer.selectItem(pathFromItem);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.New.NEW, type);
+    askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(name);
     askForValueDialog.clickOkBtn();
     loader.waitOnClosed();
@@ -152,7 +153,7 @@ public class CreateNewNotJavaFilesTest {
 
   private void checkDefaultTextInCodeMirrorEditorForFile(String defaultText, String fileName)
       throws InterruptedException {
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTabIsPresent(fileName);
     editor.waitTextIntoEditor(defaultText);
   }

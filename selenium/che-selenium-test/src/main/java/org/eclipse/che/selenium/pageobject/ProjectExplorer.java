@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
@@ -56,6 +55,7 @@ public class ProjectExplorer {
   private final NavigateToFile navigateToFile;
   private final Menu menu;
   private final CodenvyEditor editor;
+  private final TestWebElementRenderChecker testWebElementRenderChecker;
   private WebDriverWait loadPageTimeout;
   private WebDriverWait redrawUiElementsWait;
 
@@ -66,13 +66,15 @@ public class ProjectExplorer {
       ActionsFactory actionsFactory,
       NavigateToFile navigateToFile,
       Menu menu,
-      CodenvyEditor editor) {
+      CodenvyEditor editor,
+      TestWebElementRenderChecker testWebElementRenderChecker) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
     this.navigateToFile = navigateToFile;
     this.menu = menu;
     this.editor = editor;
+    this.testWebElementRenderChecker = testWebElementRenderChecker;
     loadPageTimeout = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     redrawUiElementsWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
@@ -116,6 +118,7 @@ public class ProjectExplorer {
     String MAXIMIZE = "gwt-debug-contextMenu/Maximize";
     String HIDE = "gwt-debug-contextMenu/Hide";
     String COLLAPSE_ALL = "gwt-debug-contextMenu/collapseAll";
+    String REVEAL_RESOURCE = "gwt-debug-contextMenu/revealResourceInProjectTree";
     String REFRESH_MAIN = "gwt-debug-contextMenu/refreshPathAction";
     String LINK_WITH_EDITOR = "gwt-debug-contextMenu/linkWithEditor";
   }
@@ -289,7 +292,7 @@ public class ProjectExplorer {
   }
 
   public void waitYellowNode(String path) {
-    redrawUiElementsWait.until(
+    loadPageTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(
                 String.format(
@@ -298,7 +301,7 @@ public class ProjectExplorer {
   }
 
   public void waitGreenNode(String path) {
-    redrawUiElementsWait.until(
+    loadPageTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(
                 String.format(
@@ -307,7 +310,7 @@ public class ProjectExplorer {
   }
 
   public void waitBlueNode(String path) {
-    redrawUiElementsWait.until(
+    loadPageTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(
                 String.format(
@@ -316,7 +319,7 @@ public class ProjectExplorer {
   }
 
   public void waitDefaultColorNode(String path) {
-    redrawUiElementsWait.until(
+    loadPageTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(
                 String.format(
@@ -377,7 +380,7 @@ public class ProjectExplorer {
     // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
-      LOG.warn(ex.getLocalizedMessage(), ex);
+      LOG.debug(ex.getLocalizedMessage(), ex);
 
       waitProjectExplorer();
       clickOnRefreshTreeButton();
@@ -408,7 +411,7 @@ public class ProjectExplorer {
     // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
-      LOG.warn(ex.getLocalizedMessage(), ex);
+      LOG.debug(ex.getLocalizedMessage(), ex);
 
       waitProjectExplorer();
       clickOnRefreshTreeButton();
@@ -489,7 +492,7 @@ public class ProjectExplorer {
     // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
-      LOG.warn(ex.getLocalizedMessage(), ex);
+      LOG.debug(ex.getLocalizedMessage(), ex);
 
       clickOnRefreshTreeButton();
       waitItem(path);
@@ -590,6 +593,9 @@ public class ProjectExplorer {
 
   /** wait for context menu. */
   public void waitContextMenu() {
+    testWebElementRenderChecker.waitElementIsRendered(
+        "//tr[@id='gwt-debug-contextMenu/newGroup']/parent::tbody");
+
     new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.id(Locators.CONTEXT_MENU_ID)));
   }
@@ -631,6 +637,12 @@ public class ProjectExplorer {
     actions.keyDown(Keys.CONTROL).perform();
     selectItem(path);
     actions.keyUp(Keys.CONTROL).perform();
+  }
+
+  /** Click on the 'Reveal in project explorer' in 'Options'menu */
+  public void revealResourceByOptionsButton() {
+    clickOnProjectExplorerOptionsButton();
+    clickOnOptionsMenuItem(ProjectExplorerOptionsMenuItem.REVEAL_RESOURCE);
   }
 
   /** click on the 'collapse all' in the project explorer */
@@ -841,7 +853,7 @@ public class ProjectExplorer {
     String pathToFile = path.replace('.', '/') + '/' + fileName;
     waitItem(pathToFile);
     openItemByPath(pathToFile);
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 
   /**
@@ -858,7 +870,7 @@ public class ProjectExplorer {
     String pathToFile = path.replace('.', '/') + '/' + fileName;
     waitItem(pathToFile);
     openItemByPath(pathToFile);
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 
   /**
@@ -881,8 +893,7 @@ public class ProjectExplorer {
     navigateToFile.waitListOfFilesNames(file);
     navigateToFile.selectFileByName(file);
     navigateToFile.waitFormToClose();
-    menu.runCommand(
-        TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.REVEAL_RESOURCE);
+    revealResourceByOptionsButton();
     waitItem(pathToFile);
   }
 

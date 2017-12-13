@@ -12,6 +12,7 @@ package org.eclipse.che;
 
 import java.io.IOException;
 import java.util.regex.Pattern;
+import javax.inject.Singleton;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -26,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Max Shaposhnik
  */
+@Singleton
 public class DashboardRedirectionFilter implements Filter {
   private static Pattern projectPattern = Pattern.compile("^/(_app|[^/]+?)/.+");
 

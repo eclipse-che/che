@@ -382,7 +382,8 @@ public class WorkspaceLoadingTrackerImpl
       totalDownloaded += chunk.downloaded;
     }
 
-    int percents = Math.round(totalDownloaded * 100 / totalSize);
+    int percents =
+        totalDownloaded == 0 || totalSize == 0 ? 0 : Math.round(totalDownloaded * 100 / totalSize);
     view.onPullingProgress(machine.getMachineName(), percents);
   }
 
