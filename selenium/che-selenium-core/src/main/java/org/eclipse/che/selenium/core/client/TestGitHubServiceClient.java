@@ -26,7 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import javax.xml.bind.DatatypeConverter;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
@@ -245,20 +244,5 @@ public class TestGitHubServiceClient {
                 throw new UncheckedIOException(e);
               }
             });
-  }
-
-  private String filterPropertiesAndGetGithubPrimaryEmail(List<Map<String, String>> properties) {
-    List<Map<String, String>> primaryPublicGithubEmails =
-        properties
-            .stream()
-            .filter(
-                map -> map.get("primary").equals("true") && map.get("visibility").equals("public"))
-            .collect(toList());
-
-    if (primaryPublicGithubEmails.isEmpty()) {
-      throw new NoSuchElementException("The list with github primary, public emails is empty");
-    }
-
-    return primaryPublicGithubEmails.get(0).get("email");
   }
 }
