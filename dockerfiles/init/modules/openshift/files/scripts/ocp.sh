@@ -183,6 +183,7 @@ detectIP() {
 
 parse_args() {
     HELP="valid args: \\n
+    --help - this help menu\\n
     --run-ocp - run ocp cluster\\n
     --destroy - destroy ocp cluster \\n
     --deploy-che - deploy che to ocp \\n
@@ -230,8 +231,12 @@ parse_args() {
            --update)
                shift
            ;;
+           --help)
+               echo -e "$HELP"
+               exit 1
+           ;;
            *)
-               echo "You've passed wrong arg!"
+               echo "You've passed wrong arg."
                echo -e "$HELP"
                exit 1
            ;;
