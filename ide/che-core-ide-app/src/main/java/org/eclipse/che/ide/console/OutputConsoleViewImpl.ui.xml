@@ -159,14 +159,11 @@
             user-select: text;
         }
 
-        .console pre {
-            font-family: outputFontFamily;
-            font-size: consoleFontSize;
-            line-height: consoleLineHeight;
-        }
+        @external terminal;
 
-        .consoleLines {
-            width: 100%;
+        <!-- This style should be applied to the terminal Todo maybe move it to the che-lib -->
+        .terminal {
+            height: inherit;
         }
 
     </ui:style>
@@ -196,7 +193,7 @@
             </g:FlowPanel>
         </g:north>
         <g:center>
-            <g:FlowPanel height="100%" ui:field="consoleLines" debugId="commandConsoleLines" styleName="{style.xterm-rows}"/>
+            <g:FlowPanel height="100%" ui:field="consoleLines" debugId="commandConsoleLines" />
         </g:center>
     </g:DockLayoutPanel>
 </ui:UiBinder>

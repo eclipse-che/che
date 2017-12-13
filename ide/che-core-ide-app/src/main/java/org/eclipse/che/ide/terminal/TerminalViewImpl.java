@@ -106,6 +106,12 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
     TerminalGeometryJso geometryJso = terminal.proposeGeometry();
     int x = geometryJso.getCols();
     int y = geometryJso.getRows();
+
+    // hmm... we don't resize terminal if it was hidden, so this code will broke this stuff...
+    if (terminal.getCols() == x && terminal.getRows() == y) {
+      return;
+    }
+
     if (x <= 0 || y <= 0) {
       resizeTimer.cancel();
       resizeTimer.schedule(500);

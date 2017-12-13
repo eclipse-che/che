@@ -40,8 +40,20 @@ public class TerminalJso extends JavaScriptObject {
         return this.element;
     }-*/;
 
+//  public final native Element getParent() /*-{
+//        return this.parent;
+//    }-*/;
+
   public final native TerminalGeometryJso proposeGeometry() /*-{
         return this.proposeGeometry();
+    }-*/;
+
+    public final native int getRows() /*-{
+      return this.rows;
+    }-*/;
+
+  public final native int getCols() /*-{
+      return this.cols;
     }-*/;
 
   public final native void on(String event, Operation<String> operation) /*-{
@@ -72,5 +84,10 @@ public class TerminalJso extends JavaScriptObject {
 
   public final native boolean hasSelection() /*-{
       return this.hasSelection();
+    }-*/;
+
+  // todo rename verticalScrollWidth to getVerticalWidth
+  public final native int getVerticalWidth() /*-{
+      return this.verticalScrollWidth;
     }-*/;
 }

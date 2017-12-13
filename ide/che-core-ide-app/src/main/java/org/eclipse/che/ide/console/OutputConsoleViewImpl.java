@@ -36,6 +36,7 @@ import org.eclipse.che.ide.terminal.TerminalInitializePromiseHolder;
 import org.eclipse.che.ide.terminal.TerminalJso;
 import org.eclipse.che.ide.terminal.TerminalOptionsJso;
 import org.eclipse.che.ide.ui.Tooltip;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.requirejs.ModuleHolder;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
@@ -180,9 +181,20 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     TerminalGeometryJso geometryJso = terminalJso.proposeGeometry();
     int rows = geometryJso.getRows();
 
+    // don't resize in case if size was not changed.
+//    if (terminalJso.getCols() == x && terminalJso.getRows() == y) {
+//      return;
+//    }
+
     if (rows > 0 && geometryJso.getCols() > 0) {
-      terminalJso.resize(geometryJso.getCols(), rows);
+      Log.info(getClass(), " Get vertical width = " + terminalJso.getVerticalWidth());
+      Log.info(getClass(),"Resize rows: " + geometryJso.getRows() + " Resize cols: " + terminalJso.getVerticalWidth());
+      terminalJso.resize(terminalJso.getVerticalWidth(), evaluateHeight());
     }
+  }
+
+  private int  evaluateHeight() {
+    return (int)Math.floor((terminalJso.getElement().getClientHeight() - 19)/13);
   }
 
   @Override
