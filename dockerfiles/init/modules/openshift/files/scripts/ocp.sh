@@ -92,7 +92,7 @@ get_tools() {
         echo "download oc client $OC_VERSION"
         wget -q -O $TOOLS_DIR/$OC_PACKAGE $OC_BINARY_DOWNLOAD_URL
         eval "$ARCH" "$TOOLS_DIR"/"$OC_PACKAGE" "$EXTRA_ARGS" &>/dev/null
-        rm -rf "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE "${TOOLS_DIR:-/tmp}"/"$OC_PACKAGE"
+        rm -f "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE "${TOOLS_DIR:-/tmp}"/"$OC_PACKAGE"
     }
 
     if [[ ! -f $OC_BINARY ]]; then
