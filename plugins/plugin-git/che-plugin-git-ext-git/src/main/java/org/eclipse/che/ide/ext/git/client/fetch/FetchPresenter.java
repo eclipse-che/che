@@ -18,6 +18,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.util.StringUtils.isNullOrEmpty;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,7 +40,6 @@ import org.eclipse.che.ide.ext.git.client.GitUtil;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
-import org.eclipse.che.ide.util.StringUtils;
 
 /**
  * Presenter for fetching changes from remote repository.
@@ -179,7 +179,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
         .catchError(
             error -> {
               final String providerName = GitUtil.getProviderNameFromError(error);
-              if (!StringUtils.isNullOrEmpty(providerName)) {
+              if (!isNullOrEmpty(providerName)) {
                 fetchAuthenticated(providerName, remoteUrl, console, notification);
                 return;
               }
