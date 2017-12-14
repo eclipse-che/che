@@ -30,6 +30,7 @@ import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.auth.Credentials;
 import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -337,8 +338,8 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                     getRefs(),
                     repository,
                     view.isForcePushSelected(),
-                    token.getToken(),
-                    token.getToken()))
+                    new Credentials(token.getToken(),
+                        token.getToken())))
         .then(
             response -> {
               console.print(response.getCommandOutput());

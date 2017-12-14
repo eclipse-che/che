@@ -37,6 +37,7 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.auth.Credentials;
 import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -265,8 +266,8 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
                     singletonList(branch),
                     remote,
                     false,
-                    token.getToken(),
-                    token.getToken()))
+                    new Credentials(token.getToken(),
+                        token.getToken())))
         .catchError(
             (Function<PromiseError, StatusNotification>)
                 error -> notificationManager.notify(constant.pushFail(), FAIL, FLOAT_MODE));

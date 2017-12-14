@@ -33,6 +33,7 @@ import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.auth.Credentials;
 import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -199,8 +200,8 @@ public class PullPresenter implements PullView.ActionDelegate {
                     getRefs(),
                     view.getRepositoryName(),
                     view.getRebase(),
-                    token.getToken(),
-                    token.getToken()))
+                    new Credentials(token.getToken(),
+                        token.getToken())))
         .then(
             response -> {
               console.print(response.getCommandOutput(), GREEN_COLOR);

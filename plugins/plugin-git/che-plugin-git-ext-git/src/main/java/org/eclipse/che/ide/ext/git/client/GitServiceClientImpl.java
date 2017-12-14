@@ -52,6 +52,7 @@ import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.auth.Credentials;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequest;
@@ -232,15 +233,14 @@ public class GitServiceClientImpl implements GitServiceClient {
       List<String> refSpec,
       String remote,
       boolean force,
-      String username,
-      String password) {
+      Credentials credentials) {
     PushRequest pushRequest =
         dtoFactory
             .createDto(PushRequest.class)
             .withRemote(remote)
             .withRefSpec(refSpec)
-            .withUsername(username)
-            .withPassword(password)
+            .withUsername(credentials.getUsername())
+            .withPassword(credentials.getPassword())
             .withForce(force);
     String url = getWsAgentBaseUrl() + PUSH + "?projectPath=" + encodePath(project);
     return asyncRequestFactory
@@ -430,16 +430,15 @@ public class GitServiceClientImpl implements GitServiceClient {
       String remote,
       List<String> refspec,
       boolean removeDeletedRefs,
-      String username,
-      String password) {
+      Credentials credentials) {
     FetchRequest fetchRequest =
         dtoFactory
             .createDto(FetchRequest.class)
             .withRefSpec(refspec)
             .withRemote(remote)
             .withRemoveDeletedRefs(removeDeletedRefs)
-            .withUsername(username)
-            .withPassword(password);
+            .withUsername(credentials.getUsername())
+            .withPassword(credentials.getPassword());
     String url = getWsAgentBaseUrl() + FETCH + "?projectPath=" + encodePath(project);
     return asyncRequestFactory.createPostRequest(url, fetchRequest).send();
   }
@@ -464,16 +463,15 @@ public class GitServiceClientImpl implements GitServiceClient {
       String refSpec,
       String remote,
       boolean rebase,
-      String username,
-      String password) {
+      Credentials credentials) {
     PullRequest pullRequest =
         dtoFactory
             .createDto(PullRequest.class)
             .withRemote(remote)
             .withRefSpec(refSpec)
             .withRebase(rebase)
-            .withUsername(username)
-            .withPassword(password);
+            .withUsername(credentials.getUsername())
+            .withPassword(credentials.getPassword());
     String url = getWsAgentBaseUrl() + PULL + "?projectPath=" + encodePath(project);
     return asyncRequestFactory
         .createPostRequest(url, pullRequest)

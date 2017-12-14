@@ -31,6 +31,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.auth.Credentials;
 import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
@@ -237,8 +238,8 @@ public class GitVcsService implements VcsService {
                     Collections.singletonList(localBranchName),
                     remote,
                     true,
-                    token.getToken(),
-                    token.getToken()))
+                    new Credentials(token.getToken(),
+                        token.getToken())))
         .catchErrorPromise(
             error -> {
               if (BRANCH_UP_TO_DATE_ERROR_MESSAGE.equalsIgnoreCase(error.getMessage())) {
