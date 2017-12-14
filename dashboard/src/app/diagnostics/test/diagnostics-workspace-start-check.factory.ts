@@ -179,7 +179,7 @@ export class DiagnosticsWorkspaceStartCheck {
               }
             },
             'recipe': {
-              'content': 'FROM openjdk:8-jre-alpine\nRUN apk add --update bash\nCMD tail -f /dev/null\n',
+              'content': 'FROM openjdk:8-jre-alpine\nCMD tail -f /dev/null\n',
               'contentType': 'text/x-dockerfile',
               'type': 'dockerfile'
             }
