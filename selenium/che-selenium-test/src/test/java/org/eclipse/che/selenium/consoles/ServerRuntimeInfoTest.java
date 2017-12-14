@@ -53,6 +53,8 @@ public class ServerRuntimeInfoTest {
             "exec-agent/http",
             "wsagent-debug");
 
+
+
     for (int i = 0; i < expectedReferenceList.size(); i++) {
       String referenceId = "gwt-debug-runtime-info-reference-" + i;
       consoles.checkReferenceList(referenceId, expectedReferenceList.get(i));
