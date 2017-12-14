@@ -14,7 +14,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.S
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Subversion.SVN_UPDATE_TO_REVISION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -29,6 +29,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.subversion.Subversion;
+import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
@@ -91,6 +92,12 @@ public class UpdateToRevisionTest {
     subversion.typeSvnUpdateToRevisionName(REVISION);
     subversion.clickSvnUpdateToRevisionButtonUpdate();
     loader.waitOnClosed();
-    assertTrue(subversion.getAllMessageFromSvnStatusBar().contains(MESSAGE));
+
+    try {
+      subversion.waitSvnInfoPanelWithMessage(MESSAGE);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("https://github.com/eclipse/che/issues/6452", ex);
+    }
   }
 }
