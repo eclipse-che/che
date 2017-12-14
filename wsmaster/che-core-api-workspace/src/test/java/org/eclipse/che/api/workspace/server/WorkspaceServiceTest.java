@@ -34,6 +34,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.jayway.restassured.response.Response;
@@ -62,6 +63,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineDto;
@@ -1101,6 +1103,8 @@ public class WorkspaceServiceTest {
 
   @Test
   public void shouldBeAbleToGetSettings() throws Exception {
+    when(wsManager.getSupportedRecipes()).thenReturn(ImmutableSet.of("dockerimage", "dockerfile"));
+
     final Response response =
         given()
             .auth()
@@ -1111,7 +1115,8 @@ public class WorkspaceServiceTest {
     assertEquals(response.getStatusCode(), 200);
     final Map<String, String> settings =
         new Gson().fromJson(response.print(), new TypeToken<Map<String, String>>() {}.getType());
-    assertEquals(settings, emptyMap());
+    assertEquals(
+        settings, singletonMap(Constants.SUPPORTED_RECIPE_TYPES, "dockerimage,dockerfile"));
   }
 
   private static String unwrapError(Response response) {
