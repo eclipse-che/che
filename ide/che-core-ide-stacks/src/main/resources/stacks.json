@@ -1003,7 +1003,7 @@
         {
           "name": "start apache",
           "type": "custom",
-          "commandLine": "service apache2 start && sudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
+          "commandLine": "service apache2 start && tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
           "attributes": {
             "previewUrl": "${server.80/tcp}/${current.project.relpath}",
             "goal": "Run"

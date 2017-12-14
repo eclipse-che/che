@@ -846,7 +846,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "/home/uder/google_appengine/dev_appserver.py 2>&1 --php_executable_path=/usr/bin/php-cgi7.0 --skip_sdk_update_check true --host=0.0.0.0 --admin_host=0.0.0.0 ${current.project.path}",
+        "commandLine": "/home/user/google_appengine/dev_appserver.py 2>&1 --php_executable_path=/usr/bin/php-cgi7.0 --skip_sdk_update_check true --host=0.0.0.0 --admin_host=0.0.0.0 ${current.project.path}",
         "attributes": {
           "previewUrl": "${server.8080/tcp}",
           "goal": "Run"
