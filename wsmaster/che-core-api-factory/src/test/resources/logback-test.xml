@@ -12,6 +12,9 @@
 
 -->
 <configuration>
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
 
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -25,6 +28,10 @@
             <pattern>%-41(%date[%.15thread]) %-45([%-5level] [%.30logger{30} %L]) - %msg%n</pattern>
         </encoder>
     </appender>
+
+    <logger name="org.flywaydb.core.internal" level="OFF"/>
+    <logger name="org.eclipse.jetty" level="OFF"/>
+    <logger name="org.eclipse.che.core.db.schema.impl.flyway" level="OFF"/>
 
     <root level="INFO">
         <appender-ref ref="stdout"/>

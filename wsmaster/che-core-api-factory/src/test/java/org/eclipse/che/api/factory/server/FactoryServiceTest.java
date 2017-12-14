@@ -41,6 +41,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -249,8 +250,7 @@ public class FactoryServiceTest {
   @Test
   public void shouldReturnFactoryListByNameAttribute() throws Exception {
     final Factory factory = createFactory();
-    when(factoryManager.getByAttribute(
-            1, 0, ImmutableList.of(Pair.of("factory.name", factory.getName()))))
+    when(factoryManager.getByAttribute(1, 0, ImmutableList.of(Pair.of("name", factory.getName()))))
         .thenReturn(ImmutableList.of(factory));
 
     final Response response =
@@ -261,7 +261,7 @@ public class FactoryServiceTest {
             .when()
             .expect()
             .statusCode(200)
-            .get(SERVICE_PATH + "/find?maxItems=1&skipCount=0&factory.name=" + factory.getName());
+            .get(SERVICE_PATH + "/find?maxItems=1&skipCount=0&name=" + factory.getName());
 
     final List<FactoryDto> res = unwrapDtoList(response, FactoryDto.class);
     assertEquals(res.size(), 1);
@@ -269,11 +269,25 @@ public class FactoryServiceTest {
   }
 
   @Test
+  public void shouldFailToReturnFactoryListByWrongAttribute() {
+
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType(APPLICATION_JSON)
+            .when()
+            .expect()
+            .statusCode(400)
+            .get(SERVICE_PATH + "/find?maxItems=1&skipCount=0&strange=edrer");
+  }
+
+  @Test
   public void shouldReturnFactoryListByCreatorAttribute() throws Exception {
     final Factory factory1 = createNamedFactory("factory1");
     final Factory factory2 = createNamedFactory("factory2");
     when(factoryManager.getByAttribute(
-            2, 0, ImmutableList.of(Pair.of("factory.creator.name", user.getName()))))
+            2, 0, ImmutableList.of(Pair.of("creator.userId", user.getName()))))
         .thenReturn(ImmutableList.of(factory1, factory2));
 
     final Response response =
@@ -284,10 +298,7 @@ public class FactoryServiceTest {
             .when()
             .expect()
             .statusCode(200)
-            .get(
-                SERVICE_PATH
-                    + "/find?maxItems=2&skipCount=0&factory.creator.name="
-                    + user.getName());
+            .get(SERVICE_PATH + "/find?maxItems=2&skipCount=0&creator.userId=" + user.getName());
 
     final Set<FactoryDto> res =
         unwrapDtoList(response, FactoryDto.class)
@@ -539,7 +550,7 @@ public class FactoryServiceTest {
 
     // then check we have a not found
     assertEquals(response.getStatusCode(), BAD_REQUEST.getStatusCode());
-    assertTrue(response.getBody().prettyPrint().contains(invalidFactoryMessage));
+    assertTrue(response.getBody().asString().contains(invalidFactoryMessage));
 
     // check we call resolvers
     verify(dummyResolver).accept(anyMapOf(String.class, String.class));
@@ -603,9 +614,11 @@ public class FactoryServiceTest {
     return DTO.createDtoFromJson(response.getBody().asInputStream(), clazz);
   }
 
-  private static <T> List<T> unwrapDtoList(Response response, Class<T> dtoClass) {
+  private static <T> List<T> unwrapDtoList(Response response, Class<T> dtoClass)
+      throws IOException {
     return FluentIterable.from(
-            DtoFactory.getInstance().createListDtoFromJson(response.body().print(), dtoClass))
+            DtoFactory.getInstance()
+                .createListDtoFromJson(response.body().asInputStream(), dtoClass))
         .toList();
   }
 }
