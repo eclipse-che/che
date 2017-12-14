@@ -679,7 +679,7 @@ public class WorkspaceService extends Service {
   @ApiResponses({@ApiResponse(code = 200, message = "The response contains server settings")})
   public Map<String, String> getSettings() {
     return ImmutableMap.of(
-        Constants.SUPPORTED_ENVIRONMENTS,
+        Constants.SUPPORTED_RECIPE_TYPES,
         Joiner.on(",").join(workspaceManager.getSupportedRecipes()));
   }
 

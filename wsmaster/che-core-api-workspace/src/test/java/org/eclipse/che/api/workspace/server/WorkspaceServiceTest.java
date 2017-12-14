@@ -1116,7 +1116,7 @@ public class WorkspaceServiceTest {
     final Map<String, String> settings =
         new Gson().fromJson(response.print(), new TypeToken<Map<String, String>>() {}.getType());
     assertEquals(
-        settings, singletonMap(Constants.SUPPORTED_ENVIRONMENTS, "dockerimage,dockerfile"));
+        settings, singletonMap(Constants.SUPPORTED_RECIPE_TYPES, "dockerimage,dockerfile"));
   }
 
   private static String unwrapError(Response response) {
