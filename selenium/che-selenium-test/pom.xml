@@ -99,6 +99,10 @@
             <artifactId>everrest-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>github-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-api</artifactId>
         </dependency>
