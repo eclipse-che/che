@@ -3,14 +3,7 @@
     "replaced_name": {
       "machines": {
         "dev-machine": {
-          "installers": [
-            "org.eclipse.che.terminal",
-            "org.eclipse.che.ws-agent"
-          ],
-          "attributes": {
-            "memoryLimitBytes": "desired_memory_value"
-          },
-          "servers" : {
+          "servers": {
             "tomcat8" : {
               "port" : "8080",
               "protocol" : "http"
@@ -23,13 +16,20 @@
               "port" : "9876",
               "protocol" : "http"
             }
+          },
+          "installers": [
+            "org.eclipse.che.terminal",
+            "org.eclipse.che.ws-agent",
+            "org.eclipse.che.ls.csharp"
+          ],
+          "attributes": {
+            "memoryLimitBytes": "desired_memory_value"
           }
         }
       },
       "recipe": {
-        "content": "FROM codenvy/ubuntu_jdk8",
-        "contentType": "text/x-dockerfile",
-        "type": "dockerfile"
+        "content": "eclipse/dotnet_core",
+        "type": "dockerimage"
       }
     }
   },

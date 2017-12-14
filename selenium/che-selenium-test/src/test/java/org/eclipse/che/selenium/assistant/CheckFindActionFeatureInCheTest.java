@@ -53,7 +53,10 @@ public class CheckFindActionFeatureInCheTest {
           + "breakpointConfiguration ";
 
   private static final String SECOND_EXPECTED_ITEMS_WITH_ENABLED_NONE_MENU_ACTIONS_CHECKBOX =
-      "Commands \n" + "Commands \n" + "Commands Palette [Shift+F10]  Run";
+      "Commands \n"
+          + "Commands [Ctrl+Alt+4]  Tool Windows\n"
+          + "Commands \n"
+          + "Commands Palette [Shift+F10]  Run";
   private static final String THIRD_EXPECTED_ITEMS_WITH_ENABLED_NONE_MENU_ACTIONS_CHECKBOX =
       "Branches... [Ctrl+B]  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
 

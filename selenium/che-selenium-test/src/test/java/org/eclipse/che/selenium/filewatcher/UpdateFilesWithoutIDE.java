@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.selenium.filewatcher;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -96,7 +99,7 @@ public class UpdateFilesWithoutIDE {
     testProjectServiceClient.updateFile(
         ws.getId(), PROJECT_NAME + "/" + nameFiletxt2, Long.toString(System.currentTimeMillis()));
 
-    events1.waitExpectedMessage(expectedMessage2, 10);
+    events1.waitExpectedMessage(expectedMessage2, LOAD_PAGE_TIMEOUT_SEC);
     projectExplorer1.openItemByPath(PROJECT_NAME + "/" + nameFiletxt3);
     editor1.waitActive();
     projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameFiletxt3);
@@ -106,9 +109,9 @@ public class UpdateFilesWithoutIDE {
     testProjectServiceClient.updateFile(
         ws.getId(), PROJECT_NAME + "/" + nameFiletxt3, Long.toString(System.currentTimeMillis()));
 
-    editor1.waitTextIntoEditor(currentTimeInMs, 5);
-    editor2.waitTextIntoEditor(currentTimeInMs, 5);
-    events1.waitExpectedMessage(expectedMessage3, 10);
-    events2.waitExpectedMessage(expectedMessage3, 10);
+    editor1.waitTextIntoEditor(currentTimeInMs, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    editor2.waitTextIntoEditor(currentTimeInMs, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    events1.waitExpectedMessage(expectedMessage3, LOAD_PAGE_TIMEOUT_SEC);
+    events2.waitExpectedMessage(expectedMessage3, LOAD_PAGE_TIMEOUT_SEC);
   }
 }

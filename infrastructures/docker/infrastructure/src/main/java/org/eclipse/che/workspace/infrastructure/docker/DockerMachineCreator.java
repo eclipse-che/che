@@ -22,6 +22,7 @@ import org.eclipse.che.infrastructure.docker.client.DockerConnector;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerInfo;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerListEntry;
 import org.eclipse.che.infrastructure.docker.client.json.NetworkSettings;
+import org.eclipse.che.workspace.infrastructure.docker.Labels.Deserializer;
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
 import org.eclipse.che.workspace.infrastructure.docker.server.mapping.ServersMapper;
 
@@ -56,7 +57,7 @@ public class DockerMachineCreator {
   }
 
   /** Creates new docker machine instance from the full container description. */
-  public DockerMachine create(ContainerInfo container) {
+  public DockerMachine create(ContainerInfo container) throws InfrastructureException {
     NetworkSettings networkSettings = container.getNetworkSettings();
     String hostname;
     if (internalDockerIP != null) {
@@ -64,14 +65,15 @@ public class DockerMachineCreator {
     } else {
       hostname = networkSettings.getGateway();
     }
-    Map<String, ServerConfig> configs =
-        Labels.newDeserializer(container.getConfig().getLabels()).servers();
+    Deserializer deserializer = Labels.newDeserializer(container.getConfig().getLabels());
+    Map<String, ServerConfig> configs = deserializer.servers();
 
     return new DockerMachine(
         container.getId(),
         container.getConfig().getImage(),
         docker,
-        new ServersMapper(hostname).map(networkSettings.getPorts(), configs),
+        new ServersMapper(hostname, deserializer.machineName())
+            .map(networkSettings.getPorts(), configs),
         registry,
         dockerMachineStopDetector);
   }

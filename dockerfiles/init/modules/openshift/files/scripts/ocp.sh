@@ -182,15 +182,16 @@ detectIP() {
 }
 
 parse_args() {
-    HELP="valid args: \\n
-    --run-ocp - run ocp cluster\\n
-    --destroy - destroy ocp cluster \\n
-    --deploy-che - deploy che to ocp \\n
-    --multiuser - deploy che in multiuser mode \\n
-    =================================== \\n
-    ENV vars \\n
-    CHE_IMAGE_TAG - set CHE images tag, default: nightly \\n
-    CHE_MULTIUSER - set CHE multi user mode, default: false (single user) \\n
+    HELP="valid args:
+    --help - this help menu
+    --run-ocp - run ocp cluster
+    --destroy - destroy ocp cluster
+    --deploy-che - deploy che to ocp
+    --multiuser - deploy che in multiuser mode
+    ===================================
+    ENV vars
+    CHE_IMAGE_TAG - set CHE images tag, default: nightly
+    CHE_MULTIUSER - set CHE multi user mode, default: false (single user) 
 "
 
     DEPLOY_SCRIPT_ARGS=""
@@ -230,8 +231,12 @@ parse_args() {
            --update)
                shift
            ;;
+           --help)
+               echo -e "$HELP"
+               exit 1
+           ;;
            *)
-               echo "You've passed wrong arg!"
+               echo "You've passed wrong arg."
                echo -e "$HELP"
                exit 1
            ;;

@@ -39,7 +39,7 @@ import org.testng.annotations.Test;
 /** Tests {@link org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator}. */
 @Listeners(MockitoTestNGListener.class)
 public class WorkspaceLinksGeneratorTest {
-  private static final String URI_BASE = "http://localhost/api";
+  private static final String URI_BASE = "http://localhost/api/workspace";
 
   @Mock private ServiceContext serviceContextMock;
 
@@ -55,7 +55,7 @@ public class WorkspaceLinksGeneratorTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(workspace.getId()).thenReturn("my-workspace");
+    when(workspace.getId()).thenReturn("wside-123877234580");
     when(workspace.getNamespace()).thenReturn("my-namespace");
     when(workspace.getConfig()).thenReturn(mock(WorkspaceConfig.class));
     when(workspace.getConfig().getName()).thenReturn("my-name");
@@ -71,7 +71,7 @@ public class WorkspaceLinksGeneratorTest {
     linksGenerator = new WorkspaceLinksGenerator(runtimes, "ws://localhost");
 
     expectedStoppedLinks = new HashMap<>();
-    expectedStoppedLinks.put(LINK_REL_SELF, "http://localhost/api/workspace/my-workspace");
+    expectedStoppedLinks.put(LINK_REL_SELF, "http://localhost/api/workspace/wside-123877234580");
     expectedStoppedLinks.put(LINK_REL_IDE_URL, "http://localhost/my-namespace/my-name");
 
     expectedRunningLinks = new HashMap<>(expectedStoppedLinks);
@@ -98,7 +98,7 @@ public class WorkspaceLinksGeneratorTest {
   public void genOfDifferentUrl() throws Exception {
     // given
     UriBuilder uriBuilder = new UriBuilderImpl();
-    uriBuilder.uri("https://mydomain:7345/api");
+    uriBuilder.uri("https://mydomain:7345/api/workspace");
     when(serviceContextMock.getServiceUriBuilder()).thenReturn(uriBuilder);
     when(serviceContextMock.getBaseUriBuilder()).thenReturn(uriBuilder);
 
@@ -109,7 +109,7 @@ public class WorkspaceLinksGeneratorTest {
     expectedRunningLinks =
         ImmutableMap.of(
             LINK_REL_SELF,
-            "https://mydomain:7345/api/workspace/my-workspace",
+            "https://mydomain:7345/api/workspace/wside-123877234580",
             LINK_REL_IDE_URL,
             "https://mydomain:7345/my-namespace/my-name",
             LINK_REL_ENVIRONMENT_STATUS_CHANNEL,
