@@ -100,7 +100,7 @@ get_tools() {
     else
         # here we check is installed version is same version defined in script, if not we update version to one that defined in script.
         if [[ $($OC_BINARY version 2> /dev/null | grep "oc v" | cut -d " " -f2 | cut -d '+' -f1 || true) != *"$OC_VERSION"* ]]; then
-            rm -rf "$OC_BINARY" "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE
+            rm -f "$OC_BINARY" "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE
             download_oc
         fi
     fi
