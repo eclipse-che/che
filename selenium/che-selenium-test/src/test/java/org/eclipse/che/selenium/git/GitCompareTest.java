@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.git;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -32,8 +34,6 @@ import org.eclipse.che.selenium.pageobject.git.Git;
 import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.fail;
 
 /** @author Aleksandr Shmaraev */
 public class GitCompareTest {
@@ -261,7 +261,7 @@ public class GitCompareTest {
   }
 
   private void clickOnCompareBranchFormButton() {
-    try{
+    try {
       git.clickOnCompareBranchFormButton();
     } catch (WebDriverException ex) {
       // remove try-catch block after issue has been resolved
