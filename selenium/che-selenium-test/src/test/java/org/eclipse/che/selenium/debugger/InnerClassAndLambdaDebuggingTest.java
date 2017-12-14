@@ -140,7 +140,6 @@ public class InnerClassAndLambdaDebuggingTest {
 
     // then
     editor.waitActiveBreakpoint(53);
-    debugPanel.waitTextInVariablesPanel("methodValue=\"App method local inner test\"");
   }
 
   @Test(priority = 2)

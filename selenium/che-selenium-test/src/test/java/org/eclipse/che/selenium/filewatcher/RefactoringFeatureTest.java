@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.filewatcher;
 
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -28,6 +29,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -96,7 +98,14 @@ public class RefactoringFeatureTest {
     prepareFiles(editor2, projectExplorer2);
     editor1.setCursorToDefinedLineAndChar(21, 14);
     doRenameRefactor();
-    checkWatching(expectedMessAfterRename);
+
+    try {
+      checkWatching(expectedMessAfterRename);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("https://github.com/eclipse/che/issues/5183", ex);
+    }
+
     editor2.waitTabIsNotPresent(renamedClassName);
     doMoveRefactor();
     projectExplorer1.openItemByVisibleNameInExplorer(renamedClassName);
