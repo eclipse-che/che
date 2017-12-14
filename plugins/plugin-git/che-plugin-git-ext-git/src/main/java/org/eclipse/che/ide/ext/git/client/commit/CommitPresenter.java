@@ -23,6 +23,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.resource.Path.valueOf;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
+import static org.eclipse.che.ide.util.StringUtils.isNullOrEmpty;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -53,7 +54,6 @@ import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
-import org.eclipse.che.ide.util.StringUtils;
 
 /**
  * Presenter for commit changes on git.
@@ -246,7 +246,7 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
         .catchError(
             error -> {
                 final String providerName = GitUtil.getProviderNameFromError(error);
-                if (!StringUtils.isNullOrEmpty(providerName)) {
+                if (!isNullOrEmpty(providerName)) {
                   pushAuthenticated(location, branch, remote, providerName);
                   return;
                 }
