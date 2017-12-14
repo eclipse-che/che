@@ -14,7 +14,14 @@ import static javax.ws.rs.core.UriBuilder.fromUri;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
