@@ -123,7 +123,22 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
         }
       }
     }
-    return user.get();
+    return actualizeUser(user.get(), email);
+  }
+
+  private User actualizeUser(User actualUser, String email)
+      throws ServerException, ConflictException {
+    if (actualUser.getEmail().equals(email)) {
+      return actualUser;
+    }
+    UserImpl update = new UserImpl(actualUser);
+    update.setEmail(email);
+    try {
+      userManager.update(update);
+    } catch (NotFoundException e) {
+      throw new ServerException("Unable to actualize user email. User not found.", e);
+    }
+    return update;
   }
 
   private Optional<User> getUser(String id) throws ServerException {
