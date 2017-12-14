@@ -15,10 +15,8 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.eclipse.che.api.core.Pages.iterate;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -47,6 +45,7 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
@@ -224,7 +223,6 @@ public class WorkspaceService extends Service {
           Integer maxItems,
       @ApiParam("Workspace status") @QueryParam("status") String status)
       throws ServerException, BadRequestException {
-    // TODO add maxItems & skipCount to manager
     return withLinks(
         workspaceManager
             .getWorkspaces(
@@ -257,12 +255,9 @@ public class WorkspaceService extends Service {
       @ApiParam("The namespace") @PathParam("namespace") String namespace)
       throws ServerException, BadRequestException {
     return withLinks(
-        Lists.newArrayList(
-                iterate(
-                        (maxItems, skipCount) ->
-                            workspaceManager.getByNamespace(namespace, false, maxItems, skipCount))
-                    .iterator())
-            .stream()
+        Pages.stream(
+                (maxItems, skipCount) ->
+                    workspaceManager.getByNamespace(namespace, false, maxItems, skipCount))
             .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
             .map(DtoConverter::asDto)
             .collect(toList()));

@@ -10,10 +10,8 @@
  */
 package org.eclipse.che.multiuser.resource.api.usage.tracker;
 
-import static org.eclipse.che.api.core.Pages.iterate;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 
-import com.google.common.collect.Lists;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -21,6 +19,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.multiuser.resource.api.ResourceUsageTracker;
@@ -50,14 +49,11 @@ public class RuntimeResourceUsageTracker implements ResourceUsageTracker {
       throws NotFoundException, ServerException {
     final Account account = accountManager.getById(accountId);
     final long currentlyUsedRuntimes =
-        Lists.newArrayList(
-                iterate(
-                        (maxItems, skipCount) ->
-                            workspaceManagerProvider
-                                .get()
-                                .getByNamespace(account.getName(), false, maxItems, skipCount))
-                    .iterator())
-            .stream()
+        Pages.stream(
+                (maxItems, skipCount) ->
+                    workspaceManagerProvider
+                        .get()
+                        .getByNamespace(account.getName(), false, maxItems, skipCount))
             .filter(ws -> STOPPED != ws.getStatus())
             .count();
     if (currentlyUsedRuntimes > 0) {

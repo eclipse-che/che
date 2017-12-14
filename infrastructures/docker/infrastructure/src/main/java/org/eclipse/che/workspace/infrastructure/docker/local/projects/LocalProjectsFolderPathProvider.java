@@ -11,7 +11,6 @@
 package org.eclipse.che.workspace.infrastructure.docker.local.projects;
 
 import static java.lang.String.format;
-import static org.eclipse.che.api.core.Pages.iterate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -20,10 +19,6 @@ import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -31,7 +26,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.util.SystemInfo;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.workspace.infrastructure.docker.WindowsHostUtils;
 import org.slf4j.Logger;
@@ -55,6 +49,8 @@ public class LocalProjectsFolderPathProvider {
 
   private final WorkspaceDao workspaceDao;
   private final boolean isWindows;
+  private final boolean migrationOnStartup;
+  private final LocalProjectsMigrator localProjectsMigrator;
 
   /**
    * Value provide path to directory on host machine where will by all created and mount to the
@@ -90,27 +86,36 @@ public class LocalProjectsFolderPathProvider {
 
   @Inject
   public LocalProjectsFolderPathProvider(
-      @Named("che.workspace.storage") String workspacesMountPoint, WorkspaceDao workspaceDao)
+      @Named("che.workspace.storage") String workspacesMountPoint,
+      @Named("che.workspace.migrate_workspace_projects_on_startup") boolean migrationOnStartup,
+      WorkspaceDao workspaceDao,
+      LocalProjectsMigrator localProjectsMigrator)
       throws IOException {
     this.workspacesMountPoint = workspacesMountPoint;
+    this.migrationOnStartup = migrationOnStartup;
     this.workspaceDao = workspaceDao;
     this.isWindows = SystemInfo.isWindows();
+    this.localProjectsMigrator = localProjectsMigrator;
   }
 
   @VisibleForTesting
   protected LocalProjectsFolderPathProvider(
       String workspacesMountPoint,
       String oldWorkspacesMountPoint,
+      boolean migrationOnStartup,
       String projectsFolder,
       boolean createFolders,
       WorkspaceDao workspaceDao,
+      LocalProjectsMigrator localProjectsMigrator,
       boolean isWindows)
       throws IOException {
     this.workspaceDao = workspaceDao;
     this.workspacesMountPoint = workspacesMountPoint;
+    this.migrationOnStartup = migrationOnStartup;
     this.hostProjectsFolder = projectsFolder;
     this.createFolders = createFolders;
     this.oldWorkspacesMountPoint = oldWorkspacesMountPoint;
+    this.localProjectsMigrator = localProjectsMigrator;
     this.isWindows = isWindows;
   }
 
@@ -186,7 +191,9 @@ public class LocalProjectsFolderPathProvider {
       ensureExist(hostProjectsFolder, "host.projects.root");
     }
 
-    performWorkspaceLocationMigration();
+    if (migrationOnStartup && !isWindows && hostProjectsFolder == null) {
+      localProjectsMigrator.performMigration(workspacesMountPoint);
+    }
   }
 
   private void ensureExist(String path, String prop) throws IOException {
@@ -229,50 +236,4 @@ public class LocalProjectsFolderPathProvider {
    * Get all workspaces, and check if they are stored in workspacesMountPoint by their name, and
    * migrate them, so they will be stored by id
    */
-  private void performWorkspaceLocationMigration() {
-    if (!isWindows || hostProjectsFolder != null) {
-      Map<String, String> workspaceName2id = getId2NameWorkspaceMapping();
-      for (Entry<String, String> entry : workspaceName2id.entrySet()) {
-        Path workspaceStoredByNameLocation =
-            Paths.get(workspacesMountPoint).resolve(entry.getValue());
-        if (!Files.exists(workspaceStoredByNameLocation)) {
-          // migration is not needed for this workspace
-          continue;
-        }
-        LOG.info(
-            "Starting migration of workspace with id '{}' and name '{}'",
-            entry.getKey(),
-            entry.getValue());
-        Path workspaceStoredByIdLocation = Paths.get(workspacesMountPoint).resolve(entry.getKey());
-        try {
-          Files.move(
-              workspaceStoredByNameLocation,
-              workspaceStoredByIdLocation,
-              StandardCopyOption.ATOMIC_MOVE);
-          LOG.info(
-              "Successfully workspace with id '{}' and name '{}'",
-              entry.getKey(),
-              entry.getValue());
-        } catch (IOException e) {
-          LOG.error(
-              "Failed to workspace with id '{}' and name '{}'", entry.getKey(), entry.getValue());
-        }
-      }
-    }
-  }
-
-  private Map<String, String> getId2NameWorkspaceMapping() {
-    try {
-      Map<String, String> result = new HashMap<>();
-
-      for (WorkspaceImpl workspace :
-          iterate(
-              (maxItems, skipCount) -> workspaceDao.getWorkspaces(false, maxItems, skipCount))) {
-        result.put(workspace.getId(), workspace.getConfig().getName());
-      }
-      return result;
-    } catch (ServerException e) {
-      throw new RuntimeException(e);
-    }
-  }
 }

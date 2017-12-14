@@ -14,44 +14,41 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.intThat;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
 /** @author Max Shaposhnik (mshaposhnik@codenvy.com) */
 @Listeners(MockitoTestNGListener.class)
 public class TemporaryWorkspaceRemoverTest {
 
-  static final int COUNT_OF_WORKSPACES = 250;
+  static final int COUNT_OF_WORKSPACES = 100;
 
   @Mock private WorkspaceDao workspaceDao;
 
   @InjectMocks private TemporaryWorkspaceRemover remover;
 
-  //  @Test
+  @Test
   public void shouldRemoveTemporaryWorkspaces() throws Exception {
-    doNothing().when(workspaceDao).remove(anyString());
     when(workspaceDao.getWorkspaces(eq(true), anyInt(), anyLong()))
-        .thenReturn(new Page<>(createEntities(250), 0, 50, 250));
-    when(workspaceDao.getWorkspaces(
-            eq(true), intThat(integer -> integer.intValue() > 250), anyLong()))
-        .thenReturn(new Page<>(Collections.emptyList(), 250, 50, 250));
+        .thenReturn(
+            new Page<>(
+                createEntities(50), 0, 50, Pages.iterate(null, null)));
     remover.removeTemporaryWs();
 
-    verify(workspaceDao, times(250)).remove(anyString());
+    verify(workspaceDao, times(COUNT_OF_WORKSPACES)).remove(anyString());
   }
 
   private List<WorkspaceImpl> createEntities(int number) {
