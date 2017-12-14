@@ -218,7 +218,7 @@ public class FactoryService extends Service {
         throw new BadRequestException(
             String.format(
                 "Method factory.find is going to be removed or limited in scope in 6.0 GA."
-                    +" Search allowed only by creator.userId and name parameters."
+                    + " Search allowed only by creator.userId and name parameters."
                     + " Requested attributes %s, skipCount %s, maxItems %s",
                 query, skip, maxItems));
       }
