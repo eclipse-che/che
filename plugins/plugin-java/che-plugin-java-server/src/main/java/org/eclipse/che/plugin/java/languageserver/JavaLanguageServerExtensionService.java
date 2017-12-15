@@ -43,6 +43,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -562,7 +563,7 @@ public class JavaLanguageServerExtensionService {
       throw new JsonRpcException(-27000, e.getMessage());
     }
   }
-  
+
   private <T> void iterate(
       T root, Function<T, List<T>> childrenAccessor, Consumer<T> elementHandler) {
     elementHandler.accept(root);
