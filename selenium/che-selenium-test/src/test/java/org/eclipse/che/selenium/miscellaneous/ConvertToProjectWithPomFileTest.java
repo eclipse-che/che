@@ -20,6 +20,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -72,12 +73,14 @@ public class ConvertToProjectWithPomFileTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.openItemByPath(PROJECT_NAME);
   }
 
   @Test
   public void checkConvertToProjectWithPomFile() throws Exception {
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.openItemByPath(PROJECT_NAME);
 
     // create a folder and check message if the path is wrong
     createNewFolder(PROJECT_NAME, NEW_FOLDER_NAME);
@@ -102,14 +105,31 @@ public class ConvertToProjectWithPomFileTest {
     projectExplorer.waitItemInVisibleArea("pom.xml");
     projectExplorer.openItemByPath(PATH_TO_POM_FILE + "/pom.xml");
     editor.waitActive();
-    loader.waitOnClosed();
+    editor.waitTabIsPresent("pom.xml");
     editor.deleteAllContent();
     actionsFactory.createAction(seleniumWebDriver).sendKeys(EXPECTED_TEXT).perform();
     editor.waitTextIntoEditor(EXPECTED_TEXT);
+    WaitUtils.sleepQuietly(5);
+    editor.waitTabIsPresent("pom.xml");
+    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PATH_TO_POM_FILE, "simpleFolder");
+
     editor.closeAllTabs();
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(PATH_TO_POM_FILE, "simpleFolder");
+  }
+
+  @Test
+  public void checkChangingArtifactID() {
+    projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
+    editor.waitActive();
+    editor.waitTabIsPresent("qa-spring-sample");
+    editor.goToCursorPositionVisible(18, 17);
+    editor.typeTextIntoEditor("new-");
+    WaitUtils.sleepQuietly(5);
+    editor.waitTabIsPresent("new-qa-spring-sample");
+
+    editor.closeAllTabsByContextMenu();
   }
 
   private void createNewFolder(String path, String folderName) {
