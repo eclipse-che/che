@@ -292,7 +292,6 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     return false;
   }
 
-
   @Override
   public List<LanguageDescription> getSupportedLanguages() {
     return Collections.unmodifiableList(languages);

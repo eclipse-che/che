@@ -16,7 +16,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.SearchResult;
 public class ProjectNode extends AbstractTreeNode implements HasNewPresentation {
 
   private String name;
-  private List<Node> children;
+  private List<Node> packages;
   private PromiseProvider promiseProvider;
   private NodesResources nodeResources;
 
@@ -28,7 +28,7 @@ public class ProjectNode extends AbstractTreeNode implements HasNewPresentation 
       PromiseProvider promiseProvider,
       NodesResources nodeResources) {
     this.name = name;
-    this.children =
+    this.packages =
         children
             .stream()
             .map(child -> nodeFactory.createPackage(child))
@@ -44,7 +44,7 @@ public class ProjectNode extends AbstractTreeNode implements HasNewPresentation 
 
   @Override
   public boolean isLeaf() {
-    return children.isEmpty();
+    return packages.isEmpty();
   }
 
   @Override
@@ -57,6 +57,6 @@ public class ProjectNode extends AbstractTreeNode implements HasNewPresentation 
 
   @Override
   protected Promise<List<Node>> getChildrenImpl() {
-    return promiseProvider.resolve(children);
+    return promiseProvider.resolve(packages);
   }
 }

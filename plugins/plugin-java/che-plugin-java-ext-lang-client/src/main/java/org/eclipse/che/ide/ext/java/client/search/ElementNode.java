@@ -7,7 +7,6 @@ import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.promises.client.js.Executor;
-import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ui.smartTree.data.AbstractTreeNode;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasNewPresentation;
@@ -19,7 +18,6 @@ public class ElementNode extends AbstractTreeNode implements HasNewPresentation 
 
   private SearchResult element;
   private PromiseProvider promiseProvider;
-  private JavaResources resources;
   private NodeFactory nodeFactory;
   private FindUsagesPresenterJls presenter;
   private SymbolKindHelper symbolHelper;
@@ -28,13 +26,11 @@ public class ElementNode extends AbstractTreeNode implements HasNewPresentation 
   public ElementNode(
       @Assisted SearchResult pkg,
       PromiseProvider promiseProvider,
-      JavaResources resources,
       NodeFactory nodeFactory,
       FindUsagesPresenterJls presenter,
       SymbolKindHelper symbolHelper) {
     this.element = pkg;
     this.promiseProvider = promiseProvider;
-    this.resources = resources;
     this.nodeFactory = nodeFactory;
     this.presenter = presenter;
     this.symbolHelper = symbolHelper;
