@@ -63,6 +63,7 @@ public class CheckMavenPluginTest {
         workspace.getId(), get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
   }
 
   @Test
