@@ -150,14 +150,17 @@ public class PullPresenter extends GitAuthActionPresenter implements PullView.Ac
     GitOutputConsole console = gitOutputConsoleFactory.create(PULL_COMMAND_NAME);
 
     performOperationWithTokenRequestIfNeeded(
-        new RemoteGitOperation<PullResponse>() {
-          @Override
-          public Promise<PullResponse> perform(Credentials credentials) {
-            return service
-                .pull(project.getLocation(), getRefs(), view.getRepositoryName(), view.getRebase(),
+            new RemoteGitOperation<PullResponse>() {
+              @Override
+              public Promise<PullResponse> perform(Credentials credentials) {
+                return service.pull(
+                    project.getLocation(),
+                    getRefs(),
+                    view.getRepositoryName(),
+                    view.getRebase(),
                     credentials);
-          }
-        })
+              }
+            })
         .then(
             response -> {
               console.print(response.getCommandOutput(), GREEN_COLOR);

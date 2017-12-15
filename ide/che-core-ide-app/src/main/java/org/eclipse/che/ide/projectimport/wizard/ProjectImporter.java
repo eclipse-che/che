@@ -41,7 +41,6 @@ import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorUrlProvider;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.wizard.Wizard.CompleteCallback;
-import org.eclipse.che.ide.api.workspace.model.SourceStorageImpl;
 import org.eclipse.che.ide.projectimport.AbstractImporter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;

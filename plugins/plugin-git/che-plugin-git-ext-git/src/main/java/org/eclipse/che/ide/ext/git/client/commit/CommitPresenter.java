@@ -62,8 +62,8 @@ import org.eclipse.che.ide.ui.dialogs.DialogFactory;
  * @author Igor Vinokur
  */
 @Singleton
-public class CommitPresenter extends GitAuthActionPresenter implements CommitView.ActionDelegate,
-    SelectionCallBack {
+public class CommitPresenter extends GitAuthActionPresenter
+    implements CommitView.ActionDelegate, SelectionCallBack {
   private static final String COMMIT_COMMAND_NAME = "Git commit";
 
   private final SelectableChangesPanelPresenter selectableChangesPanelPresenter;
@@ -232,13 +232,12 @@ public class CommitPresenter extends GitAuthActionPresenter implements CommitVie
     String remote = remoteBranch.split("/")[0];
     String branch = remoteBranch.split("/")[1];
     performOperationWithTokenRequestIfNeeded(
-        new RemoteGitOperation<PushResponse>() {
-          @Override
-          public Promise<PushResponse> perform(Credentials credentials) {
-            return service
-                .push(location, singletonList(branch), remote, false, credentials);
-          }
-        })
+            new RemoteGitOperation<PushResponse>() {
+              @Override
+              public Promise<PushResponse> perform(Credentials credentials) {
+                return service.push(location, singletonList(branch), remote, false, credentials);
+              }
+            })
         .then(
             result -> {
               notificationManager.notify(locale.pushSuccess(remote), SUCCESS, FLOAT_MODE);

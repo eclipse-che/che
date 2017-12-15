@@ -48,7 +48,7 @@ import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class FetchPresenter extends GitAuthActionPresenter implements FetchView.ActionDelegate  {
+public class FetchPresenter extends GitAuthActionPresenter implements FetchView.ActionDelegate {
   public static final String FETCH_COMMAND_NAME = "Git fetch";
 
   private final DtoFactory dtoFactory;
@@ -160,18 +160,17 @@ public class FetchPresenter extends GitAuthActionPresenter implements FetchView.
     final GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
 
     performOperationWithTokenRequestIfNeeded(
-        new RemoteGitOperation<Void>() {
-          @Override
-          public Promise<Void> perform(Credentials credentials) {
-            return service
-                .fetch(
+            new RemoteGitOperation<Void>() {
+              @Override
+              public Promise<Void> perform(Credentials credentials) {
+                return service.fetch(
                     project.getLocation(),
                     view.getRepositoryName(),
                     getRefs(),
                     view.isRemoveDeletedRefs(),
                     credentials);
-          }
-        })
+              }
+            })
         .then(
             ignored -> {
               console.print(locale.fetchSuccess(remoteUrl));

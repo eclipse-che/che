@@ -223,11 +223,10 @@ public class GitVcsService implements VcsService {
                 return null;
               }
               Map<String, String> attributes = getAttributes(error.getCause());
-              String providerName =  attributes.get(PROVIDER_NAME);
+              String providerName = attributes.get(PROVIDER_NAME);
               if (!StringUtils.isNullOrEmpty(providerName)) {
                 return pushBranchAuthenticated(remote, localBranchName, providerName);
-              }
-              else if (BRANCH_UP_TO_DATE_ERROR_MESSAGE.equalsIgnoreCase(error.getMessage())) {
+              } else if (BRANCH_UP_TO_DATE_ERROR_MESSAGE.equalsIgnoreCase(error.getMessage())) {
                 return Promises.reject(
                     JsPromiseError.create(new BranchUpToDateException(localBranchName)));
               } else {
@@ -247,8 +246,7 @@ public class GitVcsService implements VcsService {
                     Collections.singletonList(localBranchName),
                     remote,
                     true,
-                    new Credentials(token.getToken(),
-                        token.getToken())))
+                    new Credentials(token.getToken(), token.getToken())))
         .catchErrorPromise(
             error -> {
               if (BRANCH_UP_TO_DATE_ERROR_MESSAGE.equalsIgnoreCase(error.getMessage())) {

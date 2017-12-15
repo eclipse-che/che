@@ -55,7 +55,8 @@ import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class PushToRemotePresenter extends GitAuthActionPresenter implements PushToRemoteView.ActionDelegate {
+public class PushToRemotePresenter extends GitAuthActionPresenter
+    implements PushToRemoteView.ActionDelegate {
   public static final String PUSH_COMMAND_NAME = "Git push";
   public static final String CONFIG_COMMAND_NAME = "Git config";
 
@@ -294,14 +295,17 @@ public class PushToRemotePresenter extends GitAuthActionPresenter implements Pus
     final GitOutputConsole console = gitOutputConsoleFactory.create(PUSH_COMMAND_NAME);
 
     performOperationWithTokenRequestIfNeeded(
-        new RemoteGitOperation<PushResponse>() {
-          @Override
-          public Promise<PushResponse> perform(Credentials credentials) {
-            return service
-                .push(project.getLocation(), getRefs(), repository, view.isForcePushSelected(),
+            new RemoteGitOperation<PushResponse>() {
+              @Override
+              public Promise<PushResponse> perform(Credentials credentials) {
+                return service.push(
+                    project.getLocation(),
+                    getRefs(),
+                    repository,
+                    view.isForcePushSelected(),
                     credentials);
-          }
-        })
+              }
+            })
         .then(
             response -> {
               console.print(response.getCommandOutput());
