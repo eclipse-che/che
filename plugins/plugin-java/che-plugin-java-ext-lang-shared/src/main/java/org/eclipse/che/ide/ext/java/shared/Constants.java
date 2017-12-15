@@ -40,6 +40,7 @@ public final class Constants {
   public static final String EXTERNAL_LIBRARY_ENTRY = "java/libraryEntry";
   public static final String EXTERNAL_NODE_CONTENT = "java/libraryNodeContentByPath";
   public static final String CLASS_PATH_TREE = "java/classpathTree";
+  public static final String ORGANIZE_IMPORTS = "java/organizeImports";
 
   private Constants() {
     throw new UnsupportedOperationException("Unused constructor.");
