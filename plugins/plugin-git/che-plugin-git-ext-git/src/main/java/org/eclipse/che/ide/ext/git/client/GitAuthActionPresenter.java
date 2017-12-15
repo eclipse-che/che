@@ -75,7 +75,7 @@ public class GitAuthActionPresenter {
             });
   }
 
-  /** Remote Subversion operation that can require credentials. */
+  /** Remote git operation that can require credentials. */
   protected interface RemoteGitOperation<Y> {
     Promise<Y> perform(Credentials credentials);
   }
