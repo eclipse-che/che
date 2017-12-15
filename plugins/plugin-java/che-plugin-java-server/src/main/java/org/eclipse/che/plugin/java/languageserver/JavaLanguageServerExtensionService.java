@@ -30,6 +30,7 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJE
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CREATE_SIMPLE_PROJECT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_IMPLEMENTORS_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_ENTRY_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_FOLDER_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_PROJECT_COMMAND;
@@ -92,12 +93,23 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocation;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
+<<<<<<< HEAD
 import org.eclipse.che.jdt.ls.extension.api.dto.UpdateClasspathParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.UpdateWorkspaceParameters;
+=======
+import org.eclipse.che.jdt.ls.extension.api.dto.navigation.FindImplementationsCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.navigation.ImplementationsDescriptor;
+>>>>>>> che-6736: Port implementors to jdt.ls extension
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSymbolInformationDto;
+import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ImplementationsDescriptorDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
 import org.eclipse.lsp4j.ExecuteCommandParams;
+<<<<<<< HEAD
 import org.eclipse.lsp4j.WorkspaceEdit;
+=======
+import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.SymbolInformation;
+>>>>>>> che-6736: Port implementors to jdt.ls extension
 import org.eclipse.lsp4j.jsonrpc.json.adapters.CollectionTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EitherTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EnumTypeAdapterFactory;
@@ -205,13 +217,18 @@ public class JavaLanguageServerExtensionService {
         .paramsAsString()
         .resultAsListOfDto(ClasspathEntry.class)
         .withFunction(this::getClasspathTree);
-
     requestHandler
         .newConfiguration()
         .methodName(ORGANIZE_IMPORTS)
         .paramsAsString()
         .resultAsDto(WorkspaceEdit.class)
         .withFunction(this::organizeImports);
+    requestHandler
+        .newConfiguration()
+        .methodName("java/navigation")
+        .paramsAsDto(FindImplementationsCommandParameters.class)
+        .resultAsDto(ImplementationsDescriptorDto.class)
+        .withFunction(this::findImplementations);
   }
 
   /**
@@ -431,6 +448,26 @@ public class JavaLanguageServerExtensionService {
               })
           .map(ExtendedSymbolInformationDto::new)
           .collect(Collectors.toList());
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  public ImplementationsDescriptorDto findImplementations(
+      FindImplementationsCommandParameters params) {
+    params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
+    CompletableFuture<Object> result =
+        executeCommand(FIND_IMPLEMENTORS_COMMAND, singletonList(params));
+
+    Type targetClassType = new TypeToken<ImplementationsDescriptor>() {}.getType();
+    try {
+      ImplementationsDescriptor implementationsDescriptor =
+          gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+      for (SymbolInformation symbolInformation : implementationsDescriptor.getImplementations()) {
+        Location location = symbolInformation.getLocation();
+        location.setUri(LanguageServiceUtils.removePrefixUri(location.getUri()));
+      }
+      return new ImplementationsDescriptorDto(implementationsDescriptor);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }

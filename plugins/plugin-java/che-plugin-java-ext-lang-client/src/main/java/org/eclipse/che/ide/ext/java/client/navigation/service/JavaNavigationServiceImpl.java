@@ -11,19 +11,23 @@
 package org.eclipse.che.ide.ext.java.client.navigation.service;
 
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 
+import com.google.gwt.jsonp.client.TimeoutException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.java.shared.Jar;
 import org.eclipse.che.ide.ext.java.shared.JarEntry;
 import org.eclipse.che.ide.ext.java.shared.OpenDeclarationDescriptor;
 import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
-import org.eclipse.che.ide.ext.java.shared.dto.ImplementationsDescriptorDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
 import org.eclipse.che.ide.ext.java.shared.dto.model.MethodParameters;
@@ -32,6 +36,9 @@ import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
+import org.eclipse.che.jdt.ls.extension.api.dto.navigation.FindImplementationsCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.navigation.ImplementationsDescriptor;
+import org.eclipse.che.plugin.languageserver.ide.service.ServiceUtil;
 
 /** @author Evgen Vidolob */
 @Singleton
@@ -41,17 +48,20 @@ public class JavaNavigationServiceImpl implements JavaNavigationService {
   private final LoaderFactory loaderFactory;
   private final AsyncRequestFactory requestFactory;
   private final DtoUnmarshallerFactory unmarshallerFactory;
+  private final RequestTransmitter requestTransmitter;
 
   @Inject
   public JavaNavigationServiceImpl(
       AppContext appContext,
       LoaderFactory loaderFactory,
       DtoUnmarshallerFactory unmarshallerFactory,
-      AsyncRequestFactory asyncRequestFactory) {
+      AsyncRequestFactory asyncRequestFactory,
+      RequestTransmitter requestTransmitter) {
     this.appContext = appContext;
     this.loaderFactory = loaderFactory;
     this.requestFactory = asyncRequestFactory;
     this.unmarshallerFactory = unmarshallerFactory;
+    this.requestTransmitter = requestTransmitter;
   }
 
   @Override
@@ -237,23 +247,39 @@ public class JavaNavigationServiceImpl implements JavaNavigationService {
   }
 
   @Override
-  public Promise<ImplementationsDescriptorDTO> getImplementations(
-      Path project, String fqn, int offset) {
-    final String url =
-        appContext.getWsAgentServerApiEndpoint()
-            + "/java/navigation/implementations"
-            + "?projectpath="
-            + project.toString()
-            + "&fqn="
-            + fqn
-            + "&offset="
-            + offset;
+  public Promise<ImplementationsDescriptor> findImplementations(
+      FindImplementationsCommandParameters params) {
+    return Promises.create(
+        (resolve, reject) -> {
+          requestTransmitter
+              .newRequest()
+              .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+              .methodName("java/navigation")
+              .paramsAsDto(params)
+              .sendAndReceiveResultAsDto(ImplementationsDescriptor.class, 10000)
+              .onSuccess(resolve::apply)
+              .onTimeout(
+                  () -> {
+                    reject.apply(
+                        new PromiseError() {
+                          TimeoutException t = new TimeoutException("Timeout");
 
-    return requestFactory
-        .createGetRequest(url)
-        .header(ACCEPT, APPLICATION_JSON)
-        .loader(loaderFactory.newLoader())
-        .send(unmarshallerFactory.newUnmarshaller(ImplementationsDescriptorDTO.class));
+                          @Override
+                          public String getMessage() {
+                            return t.getMessage();
+                          }
+
+                          @Override
+                          public Throwable getCause() {
+                            return t;
+                          }
+                        });
+                  })
+              .onFailure(
+                  error -> {
+                    reject.apply(ServiceUtil.getPromiseError(error));
+                  });
+        });
   }
 
   @Override

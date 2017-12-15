@@ -123,8 +123,9 @@ public class OpenImplementationPresenterTest {
     when(relatedProject.getLocation()).thenReturn(Path.valueOf("/a"));
     when(editor.getCursorOffset()).thenReturn(123);
     when(implementationsPromise.then(any(Operation.class))).thenReturn(implementationsPromise);
-    when(javaNavigationService.getImplementations(eq(Path.valueOf("/a")), eq("c.d.file"), eq(123)))
-        .thenReturn(implementationsPromise);
+    //    when(javaNavigationService.getImplementations(eq(Path.valueOf("/a")), eq("c.d.file"),
+    // eq(123)))
+    //        .thenReturn(implementationsPromise);
 
     when(implementationDescriptor.getImplementations())
         .thenReturn(Collections.singletonList(type1));
@@ -162,8 +163,9 @@ public class OpenImplementationPresenterTest {
     when(relatedProject.getLocation()).thenReturn(Path.valueOf("/a"));
     when(editor.getCursorOffset()).thenReturn(123);
     when(implementationsPromise.then(any(Operation.class))).thenReturn(implementationsPromise);
-    when(javaNavigationService.getImplementations(eq(Path.valueOf("/a")), eq("c.d.file"), eq(123)))
-        .thenReturn(implementationsPromise);
+    //    when(javaNavigationService.getImplementations(eq(Path.valueOf("/a")), eq("c.d.file"),
+    // eq(123)))
+    //        .thenReturn(implementationsPromise);
 
     when(implementationDescriptor.getImplementations()).thenReturn(Collections.emptyList());
     when(implementationDescriptor.getMemberName()).thenReturn("memberName");
