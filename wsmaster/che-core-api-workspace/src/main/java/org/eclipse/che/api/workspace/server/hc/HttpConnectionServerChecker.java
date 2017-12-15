@@ -24,6 +24,8 @@ import java.util.concurrent.TimeUnit;
  * @author Alexander Garagatyi
  */
 public class HttpConnectionServerChecker extends ServerChecker {
+  private static final String CONNECTION_HEADER = "Connection";
+  private static final String CONNECTION_CLOSE = "close";
   private final URL url;
 
   public HttpConnectionServerChecker(
@@ -46,6 +48,7 @@ public class HttpConnectionServerChecker extends ServerChecker {
       // TODO consider how much time we should use as a limit
       httpURLConnection.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(3));
       httpURLConnection.setReadTimeout((int) TimeUnit.SECONDS.toMillis(3));
+      httpURLConnection.setRequestProperty(CONNECTION_HEADER, CONNECTION_CLOSE);
       return isConnectionSuccessful(httpURLConnection);
     } catch (IOException e) {
       return false;
