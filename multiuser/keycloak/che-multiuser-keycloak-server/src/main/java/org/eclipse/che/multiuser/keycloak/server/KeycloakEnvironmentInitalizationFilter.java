@@ -125,9 +125,8 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
     }
     return actualizeUser(user.get(), email);
   }
-
-  private User actualizeUser(User actualUser, String email)
-      throws ServerException {
+  /** Performs check that emails in JWT and local DB are match, and synchronize them otherwise */
+  private User actualizeUser(User actualUser, String email) throws ServerException {
     if (actualUser.getEmail().equals(email)) {
       return actualUser;
     }
