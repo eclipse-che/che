@@ -103,10 +103,11 @@ public class DefaultHttpJsonRequestTest {
             anyString(),
             nullable(Object.class),
             nullable(List.class),
-            nullable(String.class));
+            nullable(String.class),
+            nullable(List.class));
     request.request();
 
-    verify(request).doRequest(0, DEFAULT_URL, "POST", null, null, null);
+    verify(request).doRequest(0, DEFAULT_URL, "POST", null, null, null, null);
   }
 
   @Test
@@ -119,6 +120,7 @@ public class DefaultHttpJsonRequestTest {
         .setTimeout(10_000_000)
         .addQueryParam("name", "value")
         .addQueryParam("name2", "value2")
+        .addHeader("Connection", "close")
         .request();
 
     verify(request)
@@ -128,7 +130,8 @@ public class DefaultHttpJsonRequestTest {
             "PUT",
             body,
             asList(Pair.of("name", "value"), Pair.of("name2", "value2")),
-            null);
+            null,
+            asList(Pair.of("Connection", "close")));
   }
 
   @Test
@@ -145,6 +148,7 @@ public class DefaultHttpJsonRequestTest {
             eq("http://localhost:8080"),
             eq("POST"),
             mapCaptor.capture(),
+            eq(null),
             eq(null),
             eq(null));
     assertTrue(mapCaptor.getValue() instanceof JsonStringMap);
@@ -164,6 +168,7 @@ public class DefaultHttpJsonRequestTest {
             eq("POST"),
             listCaptor.capture(),
             eq(null),
+            eq(null),
             eq(null));
     assertTrue(listCaptor.getValue() instanceof JsonArray);
     assertEquals(listCaptor.getValue(), body);
@@ -172,7 +177,7 @@ public class DefaultHttpJsonRequestTest {
   @Test
   public void defaultMethodIsGet() throws Exception {
     request.request();
-    verify(request).doRequest(0, DEFAULT_URL, HttpMethod.GET, null, null, null);
+    verify(request).doRequest(0, DEFAULT_URL, HttpMethod.GET, null, null, null, null);
   }
 
   @Test(expectedExceptions = NullPointerException.class)
@@ -214,6 +219,21 @@ public class DefaultHttpJsonRequestTest {
   @Test(expectedExceptions = NullPointerException.class)
   public void shouldThrowNullPointerExceptionWhenQueryParamsAreNull() throws Exception {
     new DefaultHttpJsonRequest("http://localhost:8080").addQueryParams(null);
+  }
+
+  @Test(expectedExceptions = NullPointerException.class)
+  public void shouldThrowNullPointerExceptionWhenHeaderNameIsNull() throws Exception {
+    new DefaultHttpJsonRequest("http://localhost:8080").addHeader(null, "close");
+  }
+
+  @Test(expectedExceptions = NullPointerException.class)
+  public void shouldThrowNullPointerExceptionWhenHeaderValueIsNull() throws Exception {
+    new DefaultHttpJsonRequest("http://localhost:8080").addHeader("Connection", null);
+  }
+
+  @Test(expectedExceptions = NullPointerException.class)
+  public void shouldThrowNullPointerExceptionWhenHeadersAreNull() throws Exception {
+    new DefaultHttpJsonRequest("http://localhost:8080").addHeaders(null);
   }
 
   @Test(expectedExceptions = NullPointerException.class)
@@ -375,6 +395,7 @@ public class DefaultHttpJsonRequestTest {
             anyString(),
             nullable(Object.class),
             nullable(List.class),
-            nullable(String.class));
+            nullable(String.class),
+            nullable(List.class));
   }
 }

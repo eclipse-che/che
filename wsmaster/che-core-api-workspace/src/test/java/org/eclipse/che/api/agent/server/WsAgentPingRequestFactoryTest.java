@@ -40,6 +40,8 @@ public class WsAgentPingRequestFactoryTest {
   private static final String WS_AGENT_SERVER_NOT_FOUND_ERROR =
       "Workspace agent server not found in dev machine.";
   private static final String WS_AGENT_SERVER_URL = "ws_agent";
+  private static final String CONNECTION_HEADER = "Connection";
+  private static final String CONNECTION_CLOSE = "close";
 
   @Mock private HttpJsonRequestFactory httpJsonRequestFactory;
   @Mock private HttpJsonRequest httpJsonRequest;
@@ -62,6 +64,10 @@ public class WsAgentPingRequestFactoryTest {
 
     when(httpJsonRequestFactory.fromUrl(anyString())).thenReturn(httpJsonRequest);
     when(httpJsonRequest.setMethod(HttpMethod.GET)).thenReturn(httpJsonRequest);
+    when(httpJsonRequest.setTimeout(WS_AGENT_PING_CONNECTION_TIMEOUT_MS))
+        .thenReturn(httpJsonRequest);
+    when(httpJsonRequest.addHeader(CONNECTION_HEADER, CONNECTION_CLOSE))
+        .thenReturn(httpJsonRequest);
     when(server.getProperties()).thenReturn(serverProperties);
     when(serverProperties.getInternalUrl()).thenReturn(WS_AGENT_SERVER_URL);
     when(devMachine.getRuntime()).thenReturn(machineRuntimeInfo);
@@ -105,5 +111,6 @@ public class WsAgentPingRequestFactoryTest {
     verify(httpJsonRequestFactory).fromUrl(WS_AGENT_SERVER_URL + '/');
     verify(httpJsonRequest).setMethod(javax.ws.rs.HttpMethod.GET);
     verify(httpJsonRequest).setTimeout(WS_AGENT_PING_CONNECTION_TIMEOUT_MS);
+    verify(httpJsonRequest).addHeader(CONNECTION_HEADER, CONNECTION_CLOSE);
   }
 }
