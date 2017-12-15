@@ -39,6 +39,8 @@ public class WsAgentPingRequestFactory {
       "Workspace agent server not found in dev machine.";
   private static final String WS_AGENT_URL_IS_NULL_OR_EMPTY_ERROR =
       "URL of Workspace Agent is null or empty.";
+  private static final String CONNECTION_HEADER = "Connection";
+  private static final String CONNECTION_CLOSE = "close";
 
   private final HttpJsonRequestFactory httpJsonRequestFactory;
   private final int wsAgentPingConnectionTimeoutMs;
@@ -80,9 +82,11 @@ public class WsAgentPingRequestFactory {
     if (!wsAgentPingUrl.endsWith("/")) {
       wsAgentPingUrl = wsAgentPingUrl.concat("/");
     }
+
     return httpJsonRequestFactory
         .fromUrl(wsAgentPingUrl)
         .setMethod(HttpMethod.GET)
-        .setTimeout(wsAgentPingConnectionTimeoutMs);
+        .setTimeout(wsAgentPingConnectionTimeoutMs)
+        .addHeader(CONNECTION_HEADER, CONNECTION_CLOSE);
   }
 }
