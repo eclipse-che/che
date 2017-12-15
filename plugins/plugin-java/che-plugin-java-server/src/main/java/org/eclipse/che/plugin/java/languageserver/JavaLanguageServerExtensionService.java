@@ -59,6 +59,8 @@ import com.google.inject.Inject;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
@@ -839,7 +841,7 @@ public class JavaLanguageServerExtensionService {
     Type type = new TypeToken<WorkspaceEdit>() {}.getType();
     return doGetOne("java.edit.organizeImports", singletonList(prefixURI(path)), type);
   }
-  
+
   private <T> void iterate(
       T root, Function<T, List<T>> childrenAccessor, Consumer<T> elementHandler) {
     elementHandler.accept(root);
