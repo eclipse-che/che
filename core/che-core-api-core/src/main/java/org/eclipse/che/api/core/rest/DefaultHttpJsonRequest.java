@@ -68,6 +68,7 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
   private String method;
   private Object body;
   private List<Pair<String, ?>> queryParams;
+  private List<Pair<String, String>> headers;
   private String authorizationHeaderValue;
 
   protected DefaultHttpJsonRequest(String url, String method) {
@@ -118,6 +119,16 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
     return this;
   }
 
+  public HttpJsonRequest addHeader(@NotNull String name, @NotNull String value) {
+    requireNonNull(name, "Required non-null header name");
+    requireNonNull(value, "Required non-null header value");
+    if (headers == null) {
+      headers = new ArrayList<>();
+    }
+    headers.add(Pair.of(name, value));
+    return this;
+  }
+
   @Override
   public HttpJsonRequest setAuthorizationHeader(@NotNull String value) {
     requireNonNull(value, "Required non-null header value");
@@ -149,7 +160,7 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
     if (method == null) {
       throw new IllegalStateException("Could not perform request, request method wasn't set");
     }
-    return doRequest(timeout, url, method, body, queryParams, authorizationHeaderValue);
+    return doRequest(timeout, url, method, body, queryParams, authorizationHeaderValue, headers);
   }
 
   /**
@@ -182,7 +193,8 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
       String method,
       Object body,
       List<Pair<String, ?>> parameters,
-      String authorizationHeaderValue)
+      String authorizationHeaderValue,
+      List<Pair<String, String>> headers)
       throws IOException, ServerException, ForbiddenException, NotFoundException,
           UnauthorizedException, ConflictException, BadRequestException {
     final String authToken = EnvironmentContext.getCurrent().getSubject().getToken();
@@ -202,6 +214,15 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
     final HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
     conn.setConnectTimeout(timeout > 0 ? timeout : 60000);
     conn.setReadTimeout(timeout > 0 ? timeout : 60000);
+
+    final boolean hasHeaders = headers != null && !headers.isEmpty();
+
+    if (hasHeaders) {
+      for (Pair<String, String> header : headers) {
+        conn.setRequestProperty(header.first, header.second);
+      }
+    }
+
     try {
       conn.setRequestMethod(method);
       // drop a hint for server side that we want to receive application/json
@@ -225,7 +246,6 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
           output.write(DtoFactory.getInstance().toJson(body).getBytes());
         }
       }
-
       final int responseCode = conn.getResponseCode();
       if ((responseCode / 100) != 2) {
         InputStream in = conn.getErrorStream();
