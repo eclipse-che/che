@@ -19,7 +19,7 @@ public class ElementNode extends AbstractTreeNode implements HasNewPresentation 
   private SearchResult element;
   private PromiseProvider promiseProvider;
   private NodeFactory nodeFactory;
-  private FindUsagesPresenterJls presenter;
+  private FindUsagesPresenter presenter;
   private SymbolKindHelper symbolHelper;
 
   @Inject
@@ -27,7 +27,7 @@ public class ElementNode extends AbstractTreeNode implements HasNewPresentation 
       @Assisted SearchResult pkg,
       PromiseProvider promiseProvider,
       NodeFactory nodeFactory,
-      FindUsagesPresenterJls presenter,
+      FindUsagesPresenter presenter,
       SymbolKindHelper symbolHelper) {
     this.element = pkg;
     this.promiseProvider = promiseProvider;
