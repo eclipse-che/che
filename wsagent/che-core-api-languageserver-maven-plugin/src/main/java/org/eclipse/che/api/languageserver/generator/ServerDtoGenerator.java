@@ -36,6 +36,7 @@ public class ServerDtoGenerator extends DtoGenerator {
             args[1],
             args[2].split(","),
             new String[] {},
+            new String[] {},
             new String[] {});
   }
 
@@ -73,9 +74,11 @@ public class ServerDtoGenerator extends DtoGenerator {
       String targetPackage,
       String[] sourcePackages,
       String[] classes,
+      String[] excludes,
       String[] imports)
       throws IOException {
-    super.generate(targetFolder, targetName, targetPackage, sourcePackages, classes, imports);
+    super.generate(
+        targetFolder, targetName, targetPackage, sourcePackages, classes, excludes, imports);
     // Create file in META-INF/services/
     File outServiceFile =
         new File(targetFolder, "META-INF/services/org.eclipse.che.dto.server.DtoFactoryVisitor");

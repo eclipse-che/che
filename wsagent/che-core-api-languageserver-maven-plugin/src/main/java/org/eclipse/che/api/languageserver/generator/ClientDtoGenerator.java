@@ -33,6 +33,7 @@ public class ClientDtoGenerator extends DtoGenerator {
             args[1],
             args[2].split(","),
             new String[] {},
+            new String[] {},
             new String[] {});
   }
 
