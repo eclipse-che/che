@@ -34,6 +34,16 @@ export JQ_BINARY_DOWNLOAD_URL=${JQ_BINARY_DOWNLOAD_URL:-${DEFAULT_JQ_BINARY_DOWN
 DEFAULT_CHE_MULTIUSER="false"
 export CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
 
+DEFAULT_CHE_DEPLOY=false
+export CHE_DEPLOY=${CHE_DEPLOY:-${DEFAULT_CHE_DEPLOY}}
+CHE_DEPLOYED=false
+
+DEFAULT_CHE_REMOVE_PROJECT=false
+export CHE_REMOVE_PROJECT=${CHE_REMOVE_PROJECT:-${DEFAULT_CHE_MULTIUSER}}
+
+DEFAULT_CHE_REPLACE_STACKS=false
+export CHE_REPLACE_STACKS=${CHE_REPLACE_STACKS:-${DEFAULT_CHE_REPLACE_STACKS}}
+
 DEFAULT_OPENSHIFT_USERNAME="developer"
 export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
 
@@ -148,15 +158,46 @@ run_ocp() {
 }
 
 deploy_che_to_ocp() {
-    #Repull init image only if IMAGE_PULL_POLICY is set to Always
-    if [ $IMAGE_PULL_POLICY == "Always" ]; then
-        docker pull "$IMAGE_INIT"
+    #Only generate scripts and config files if deploy_che.sh does not exist in same folder
+    if [ ! -f deploy_che.sh ]; then
+      #Repull init image only if IMAGE_PULL_POLICY is set to Always
+      if [ $IMAGE_PULL_POLICY == "Always" ]; then
+          docker pull "$IMAGE_INIT"
+      fi
+      docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} destroy --quiet --skip:pull --skip:nightly
+      docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} config --skip:pull --skip:nightly
+      cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
     fi
-    docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} destroy --quiet --skip:pull --skip:nightly
-    docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} config --skip:pull --skip:nightly
-    cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
+    if $CHE_REMOVE_PROJECT; then
+      remove_che_from_ocp
+    fi
     bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
     wait_until_server_is_booted
+    CHE_DEPLOYED=true
+    if $CHE_REPLACE_STACKS; then
+      replace_che_stacks_on_ocp
+    fi
+}
+
+replace_che_stacks_on_ocp() {
+  if ! $CHE_DEPLOY || $CHE_DEPLOYED; then
+    echo "[CHE] Checking if project \"${CHE_OPENSHIFT_PROJECT}\" exists before replacing stacks..."
+    if $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
+      echo "[CHE] Replacing Che Stacks."
+      if [ ! -f replace_stacks.sh ]; then
+        #Repull init image only if IMAGE_PULL_POLICY is set to Always
+        if [ $IMAGE_PULL_POLICY == "Always" ]; then
+            docker pull "$IMAGE_INIT"
+        fi
+        docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} destroy --quiet --skip:pull --skip:nightly
+        docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} config --skip:pull --skip:nightly
+        cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
+      fi
+      bash replace_stacks.sh
+    else
+      echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" does NOT exists."
+    fi
+  fi
 }
 
 server_is_booted() {
@@ -171,12 +212,14 @@ server_is_booted() {
 
 wait_until_server_is_booted() {
   SERVER_BOOT_TIMEOUT=300
-  echo "[CHE] wait CHE pod booting..."
+  echo -n "[CHE] wait CHE pod booting..."
   ELAPSED=0
   until server_is_booted || [ ${ELAPSED} -eq "${SERVER_BOOT_TIMEOUT}" ]; do
+    echo -n "."
     sleep 2
     ELAPSED=$((ELAPSED+1))
   done
+  echo "Done!"
 }
 
 destroy_ocp() {
@@ -184,6 +227,41 @@ destroy_ocp() {
     $OC_BINARY delete pvc --all
     $OC_BINARY delete all --all
     $OC_BINARY cluster down
+}
+
+remove_che_from_ocp() {
+  if $CHE_REMOVE_PROJECT; then
+    echo "[CHE] Checking if project \"${CHE_OPENSHIFT_PROJECT}\" exists before removing..."
+    WAIT_FOR_PROJECT_TO_DELETE=true
+    DELETE_OPENSHIFT_PROJECT_MESSAGE="[CHE] Removing Project \"${CHE_OPENSHIFT_PROJECT}\"."
+    if $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
+      echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" exists."
+      while $WAIT_FOR_PROJECT_TO_EXIT
+      do
+      { # try
+
+          if $CHE_REMOVE_PROJECT; then
+            echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
+            CHE_REMOVE_PROJECT=false
+            $OC_BINARY delete project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
+            DELETE_OPENSHIFT_PROJECT_MESSAGE="."
+          fi
+          if ! $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
+            WAIT_FOR_PROJECT_TO_EXIT=false
+            CHE_REMOVE_PROJECT=false
+          fi
+          echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
+      } || { # catch
+          echo "[CHE] Could not find project \"${CHE_OPENSHIFT_PROJECT}\" to delete."
+          WAIT_FOR_PROJECT_TO_EXIT=false
+      }
+      done
+      echo "Done!"
+    else
+      echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" does NOT exists."
+    fi
+    CHE_REMOVE_PROJECT=false
+  fi
 }
 
 detectIP() {
@@ -197,10 +275,16 @@ parse_args() {
     --destroy - destroy ocp cluster
     --deploy-che - deploy che to ocp
     --multiuser - deploy che in multiuser mode
+    --remove-che - remove existing che project
+    --replace-stacks - replace stacks of running che project
     ===================================
     ENV vars
     CHE_IMAGE_TAG - set CHE images tag, default: nightly
-    CHE_MULTIUSER - set CHE multi user mode, default: false (single user) 
+    CHE_MULTIUSER - set CHE multi user mode, default: false (single user)
+    OC_PUBLIC_HOSTNAME - set ocp hostname to admin console, default: host ip
+    OC_PUBLIC_IP - set ocp hostname for routing suffix, default: host ip
+    DNS_PROVIDER - set ocp DNS provider for routing suffix, default: nip.io
+    OPENSHIFT_TOKEN - set ocp token for authentication (eg $(oc whoami -t) )
 "
 
     DEPLOY_SCRIPT_ARGS=""
@@ -218,6 +302,27 @@ parse_args() {
     if [[ "$@" == *"--update"* ]]; then
       DEPLOY_SCRIPT_ARGS="-c rollupdate"
     fi
+
+    if [[ "$@" == *"--deploy-che"* ]]; then
+      CHE_DEPLOY=true
+    fi
+
+    if [[ "$@" == *"--remove-che"* ]]; then
+      CHE_REMOVE_PROJECT=true
+    fi
+
+    if [[ "$@" == *"--replace-stacks"* ]]; then
+      CHE_REPLACE_STACKS=true
+    fi
+    for i in "${@}"
+    do
+        case $i in
+           --help)
+               echo -e "$HELP"
+               exit 1
+           ;;
+        esac
+    done
 
     for i in "${@}"
     do
@@ -237,12 +342,16 @@ parse_args() {
            --multiuser)
                shift
            ;;
-           --update)
+           --remove-che)
+               remove_che_from_ocp
                shift
            ;;
-           --help)
-               echo -e "$HELP"
-               exit 1
+           --replace-stacks)
+               replace_che_stacks_on_ocp
+               shift
+           ;;
+           --update)
+               shift
            ;;
            *)
                echo "You've passed wrong arg."
