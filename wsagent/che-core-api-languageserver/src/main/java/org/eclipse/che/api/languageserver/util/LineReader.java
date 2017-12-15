@@ -5,8 +5,10 @@ import java.io.Reader;
 
 public class LineReader {
   private int nextLineStart;
+  private int currentLineStart = -1;
   private String currentLine = "";
   private Reader in;
+  private int currentLineIndex = -1;
 
   public LineReader(Reader in) throws IOException {
     this.in = in;
@@ -14,6 +16,7 @@ public class LineReader {
   }
 
   private boolean readLine() throws IOException {
+    currentLineStart = nextLineStart;
     StringBuilder buf = new StringBuilder();
     int ch = in.read();
     nextLineStart++;
@@ -25,6 +28,7 @@ public class LineReader {
       nextLineStart++;
     }
     currentLine = buf.toString();
+    currentLineIndex++;
     return ch == -1;
   }
 
@@ -40,5 +44,13 @@ public class LineReader {
 
   public String getCurrentLine() {
     return currentLine;
+  }
+
+  public int getCurrentLineIndex() {
+    return currentLineIndex;
+  }
+
+  public int getCurrentLineStartOffset() {
+    return currentLineStart;
   }
 }

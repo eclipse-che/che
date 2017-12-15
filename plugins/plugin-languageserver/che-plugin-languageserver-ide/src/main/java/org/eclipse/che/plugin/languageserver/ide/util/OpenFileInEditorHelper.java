@@ -124,7 +124,7 @@ public class OpenFileInEditorHelper {
     } else {
       openEditor.then(
           (editor) -> {
-            onEditorOpened.accept(editor);
+            fileOpened(editor, onEditorOpened);
           });
     }
   }

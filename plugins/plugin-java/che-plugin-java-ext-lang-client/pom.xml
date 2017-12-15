@@ -298,12 +298,12 @@
 				    <imports>
 				    	<import>static org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.*</import>
 				    </imports>
-				    <classes>
-				    	<classe>org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation</classe>
-				    	<classe>org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters</classe>
-				    	<classe>org.eclipse.che.jdt.ls.extension.api.dto.SearchResult</classe>
-				    	<classe>org.eclipse.che.jdt.ls.extension.api.dto.UsagesResponse</classe>
-				    </classes>
+				    <dtoPackages>
+				    	<dtoPackage>org.eclipse.che.jdt.ls.extension.api.dto</dtoPackage>
+				    </dtoPackages>
+				    <excludes>
+				    	<exclude>org.eclipse.che.jdt.ls.extension.api.dto.LinearRange</exclude>
+				    </excludes>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
                     <genClassName>org.eclipse.che.ide.ext.java.dto.DtoClientImpls</genClassName>
                     <impl>client</impl>

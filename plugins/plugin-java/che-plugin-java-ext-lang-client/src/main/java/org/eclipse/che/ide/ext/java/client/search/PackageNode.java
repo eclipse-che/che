@@ -9,6 +9,8 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.promises.client.js.Executor;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
+import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.rest.UrlBuilder;
 import org.eclipse.che.ide.ui.smartTree.data.AbstractTreeNode;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasNewPresentation;
@@ -47,9 +49,15 @@ public class PackageNode extends AbstractTreeNode implements HasNewPresentation 
 
   @Override
   public NewNodePresentation getPresentation() {
+    String container =
+        new Path(new UrlBuilder(pkg.getUri()).getPath())
+            .removeFirstSegments(1)
+            .makeRelative()
+            .toString();
     return new NewNodePresentation.Builder()
         .withIcon(resources.packageItem())
         .withNodeText(pkg.getName())
+        .withNodeInfoText("- " + container)
         .build();
   }
 

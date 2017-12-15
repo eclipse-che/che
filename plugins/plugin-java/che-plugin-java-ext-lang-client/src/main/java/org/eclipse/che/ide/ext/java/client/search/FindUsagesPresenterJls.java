@@ -63,7 +63,7 @@ public class FindUsagesPresenterJls extends BasePresenter implements BaseActionD
   private NotificationManager manager;
   private final Resources resources;
   private DtoBuildHelper dtoBuildHelper;
-  private Map<String, Map<LinearRange, String>> cache = new HashMap<>();
+  private Map<String, Map<LinearRange, SnippetResult>> cache = new HashMap<>();
   private PromiseProvider promiseProvider;
   private NodeFactory nodeFactory;
 
@@ -144,6 +144,7 @@ public class FindUsagesPresenterJls extends BasePresenter implements BaseActionD
   private void handleResponse(UsagesResponse response) {
     workspaceAgent.openPart(this, PartStackType.INFORMATION);
     workspaceAgent.setActivePart(this);
+    cache.clear();
     view.showUsages(response);
   }
 
@@ -162,25 +163,25 @@ public class FindUsagesPresenterJls extends BasePresenter implements BaseActionD
 
     return loadMatches(rootElement)
         .then(
-            (Function<Map<LinearRange, String>, List<Node>>)
+            (Function<Map<LinearRange, SnippetResult>, List<Node>>)
                 matches -> {
                   return filterMatches(elementNode.getElement(), matches);
                 });
   }
 
-  private List<Node> filterMatches(SearchResult sr, Map<LinearRange, String> matches) {
+  private List<Node> filterMatches(SearchResult sr, Map<LinearRange, SnippetResult> matches) {
     return sr.getMatches()
         .stream()
         .filter(
             range -> {
               return matches.containsKey(range);
             })
-        .map(range -> nodeFactory.createMatch(sr.getUri(), range, matches.get(range)))
+        .map(range -> nodeFactory.createMatch(sr.getUri(), matches.get(range)))
         .collect(Collectors.toList());
   }
 
-  private Promise<Map<LinearRange, String>> loadMatches(SearchResult element) {
-    Map<LinearRange, String> snippets = cache.get(element.getUri());
+  private Promise<Map<LinearRange, SnippetResult>> loadMatches(SearchResult element) {
+    Map<LinearRange, SnippetResult> snippets = cache.get(element.getUri());
     if (snippets != null) {
       return promiseProvider.resolve(snippets);
     }
@@ -195,11 +196,11 @@ public class FindUsagesPresenterJls extends BasePresenter implements BaseActionD
         .getSnippets(params)
         .then(
             (List<SnippetResult> results) -> {
-              Map<LinearRange, String> snippets2 = new HashMap<>();
+              Map<LinearRange, SnippetResult> snippets2 = new HashMap<>();
               cache.put(element.getUri(), snippets2);
               results.forEach(
                   result -> {
-                    snippets2.put(result.getLinearRange(), result.getSnippet());
+                    snippets2.put(result.getLinearRange(), result);
                   });
               return snippets2;
             });

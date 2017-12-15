@@ -7,6 +7,7 @@
  */
 package org.eclipse.che.api.languageserver.service;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.isStartWithProject;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixProject;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
@@ -37,10 +38,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
@@ -67,9 +70,6 @@ import org.eclipse.che.api.languageserver.shared.util.LinearRangeComparator;
 import org.eclipse.che.api.languageserver.util.LSOperation;
 import org.eclipse.che.api.languageserver.util.LineReader;
 import org.eclipse.che.api.languageserver.util.OperationUtil;
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.VirtualFileEntry;
-import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.jdt.ls.extension.api.dto.LinearRange;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -114,16 +114,16 @@ public class TextDocumentService {
 
   private final LanguageServerRegistry languageServerRegistry;
   private final RequestHandlerConfigurator requestHandler;
-  private ProjectManager projectManager;
+  private final FsManager fsManager;
 
   @Inject
   public TextDocumentService(
       LanguageServerRegistry languageServerRegistry,
       RequestHandlerConfigurator requestHandler,
-      ProjectManager projectManager) {
+      FsManager fsManager) {
     this.languageServerRegistry = languageServerRegistry;
     this.requestHandler = requestHandler;
-    this.projectManager = projectManager;
+    this.fsManager = fsManager;
   }
 
   @PostConstruct
@@ -983,11 +983,12 @@ public class TextDocumentService {
       Reader content = null;
 
       if (LanguageServiceUtils.isProjectUri(uri)) {
-        VirtualFileEntry child =
-            projectManager.getProjectsRoot().getChild(LanguageServiceUtils.removePrefixUri(uri));
-        if (child != null) {
-          VirtualFile vf = child.getVirtualFile();
-          content = new InputStreamReader(new BufferedInputStream(vf.getContent()));
+        String path = LanguageServiceUtils.removePrefixUri(uri);
+        String wsPath = absolutize(path);
+
+        if (fsManager.existsAsFile(wsPath)) {
+          List<TextEdit> undo = new ArrayList<>();
+          content = new InputStreamReader(new BufferedInputStream(fsManager.read(wsPath)));
         }
       } else {
         String fileContent = getFileContent(uri);
@@ -1003,7 +1004,15 @@ public class TextDocumentService {
           LineReader lineReader = new LineReader(content);
           for (LinearRange range : ranges) {
             lineReader.readTo(range.getOffset());
-            result.add(new SnippetResult(range, lineReader.getCurrentLine()));
+            LinearRange rangeInLine =
+                new LinearRange(
+                    range.getOffset() - lineReader.getCurrentLineStartOffset(), range.getLength());
+            result.add(
+                new SnippetResult(
+                    range,
+                    lineReader.getCurrentLine(),
+                    lineReader.getCurrentLineIndex(),
+                    rangeInLine));
           }
           return result;
         } finally {
@@ -1013,7 +1022,7 @@ public class TextDocumentService {
         LOG.error("did not find file " + params.getUri());
         throw new JsonRpcException(-27000, "File not found for edit: " + params.getUri());
       }
-    } catch (ServerException | ForbiddenException | IOException e) {
+    } catch (ServerException | NotFoundException | IOException | ConflictException e) {
       LOG.error("error editing file", e);
       throw new JsonRpcException(-27000, e.getMessage());
     }
