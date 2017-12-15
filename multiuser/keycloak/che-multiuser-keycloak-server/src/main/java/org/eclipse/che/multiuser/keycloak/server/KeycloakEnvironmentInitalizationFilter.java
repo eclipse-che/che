@@ -127,7 +127,7 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
   }
 
   private User actualizeUser(User actualUser, String email)
-      throws ServerException, ConflictException {
+      throws ServerException {
     if (actualUser.getEmail().equals(email)) {
       return actualUser;
     }
@@ -137,6 +137,9 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
       userManager.update(update);
     } catch (NotFoundException e) {
       throw new ServerException("Unable to actualize user email. User not found.", e);
+    } catch (ConflictException e) {
+      throw new ServerException(
+          "Unable to actualize user email. Another user with such email exists", e);
     }
     return update;
   }
