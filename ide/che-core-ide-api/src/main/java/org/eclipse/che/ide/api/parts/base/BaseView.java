@@ -54,6 +54,7 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite
   protected T delegate;
   protected ToolButton minimizeButton;
   protected Label titleLabel;
+  protected Label additionalInfoLabel;
   protected FocusWidget lastFocused;
 
   /** Indicates whether this view is focused */
@@ -104,6 +105,10 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite
     titleLabel = new Label();
     titleLabel.setStyleName(resources.partStackCss().ideBasePartTitleLabel());
     toolbarHeader.addWest(titleLabel, 200);
+
+    additionalInfoLabel = new Label();
+    additionalInfoLabel.setStyleName(resources.partStackCss().ideBasePartTitleLabel());
+    toolbarHeader.addWest(additionalInfoLabel, 400);
 
     addMaximizeButton();
     addMinimizeButton();
@@ -318,5 +323,9 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite
 
   protected void blurView() {
     getElement().blur();
+  }
+
+  protected void setAdditionalInfoLabel(String titleLabel) {
+    this.additionalInfoLabel.setText(titleLabel);
   }
 }

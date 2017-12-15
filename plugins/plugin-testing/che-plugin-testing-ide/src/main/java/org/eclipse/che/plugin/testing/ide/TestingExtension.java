@@ -10,18 +10,15 @@
  */
 package org.eclipse.che.plugin.testing.ide;
 
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RUN;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Set;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
-import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.plugin.testing.ide.action.DebugTestAction;
 import org.eclipse.che.plugin.testing.ide.action.RunTestAction;
@@ -34,7 +31,7 @@ import org.eclipse.che.plugin.testing.ide.action.TestAction;
  */
 @Singleton
 @Extension(title = "Testing Extension", version = "1.0.0")
-public class TestingExtension {
+public class TestingExtension extends TestingExtensionTemplate {
   public static final String RUN_TEST = "RunTest";
   public static final String DEBUG_TEST = "DebugTest";
 
@@ -45,20 +42,21 @@ public class TestingExtension {
       Set<TestAction> testActions,
       KeyBindingAgent keyBinding,
       DebugTestAction debugTestAction,
-      RunTestAction runTestAction) {
+      RunTestAction runTestAction,
+      PreferencesManager preferencesManager) {
+    super(
+        actionManager,
+        localization,
+        testActions,
+        keyBinding,
+        debugTestAction,
+        runTestAction,
+        "",
+        preferencesManager);
+  }
 
-    DefaultActionGroup runMenu = (DefaultActionGroup) actionManager.getAction(GROUP_RUN);
-    DefaultActionGroup testMainMenu =
-        new DefaultActionGroup(localization.actionGroupMenuName(), true, actionManager);
-    actionManager.registerAction("TestingMainGroup", testMainMenu);
-
-    for (TestAction testAction : testActions) {
-      testAction.addMainMenuItems(testMainMenu);
-      testMainMenu.addSeparator();
-    }
-    actionManager.registerAction(RUN_TEST, runTestAction);
-    actionManager.registerAction(DEBUG_TEST, debugTestAction);
-
+  @Override
+  protected void registerKeyBinding(KeyBindingAgent keyBinding) {
     if (UserAgent.isMac()) {
       keyBinding
           .getGlobal()
@@ -74,28 +72,10 @@ public class TestingExtension {
           .getGlobal()
           .addKey(new KeyBuilder().action().alt().charCode('z').build(), RUN_TEST);
     }
+  }
 
-    testMainMenu.add(runTestAction);
-    testMainMenu.add(debugTestAction);
-    runMenu.addSeparator();
-    runMenu.add(testMainMenu);
-    DefaultActionGroup explorerMenu =
-        (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
-    DefaultActionGroup testContextMenu =
-        new DefaultActionGroup(localization.contextActionGroupMenuName(), true, actionManager);
-    actionManager.registerAction("TestingContextGroup", testContextMenu);
-    for (TestAction testAction : testActions) {
-      testAction.addContextMenuItems(testContextMenu);
-      testContextMenu.addSeparator();
-    }
-
-    explorerMenu.addSeparator();
-    explorerMenu.add(testContextMenu);
-    explorerMenu.addSeparator();
-
-    DefaultActionGroup editorContextMenuGroup =
-        (DefaultActionGroup) actionManager.getAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU);
-    editorContextMenuGroup.addSeparator();
-    editorContextMenuGroup.add(testMainMenu);
+  protected DefaultActionGroup createTestMainMenuActionGroup(
+      String groupName, ActionManager actionManager, PreferencesManager preferencesManager) {
+    return new DefaultActionGroup(groupName, true, actionManager);
   }
 }

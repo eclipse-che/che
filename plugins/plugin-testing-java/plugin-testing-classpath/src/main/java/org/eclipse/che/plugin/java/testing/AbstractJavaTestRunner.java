@@ -10,14 +10,13 @@
  */
 package org.eclipse.che.plugin.java.testing;
 
-import static java.util.Collections.emptyList;
+import static org.eclipse.che.plugin.java.testing.CompilationUnitFinder.findCompilationUnitByPath;
 import static org.eclipse.jdt.internal.core.JavaProject.hasJavaNature;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import org.eclipse.che.api.testing.server.framework.TestRunner;
@@ -28,7 +27,6 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -48,14 +46,22 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractJavaTestRunner implements TestRunner {
   private static final Logger LOG = LoggerFactory.getLogger(AbstractJavaTestRunner.class);
   private static final String TEST_OUTPUT_FOLDER = "/test-output";
-
+  private final JavaTestFinderRegistry javaTestFinderRegistry;
   private int debugPort = -1;
   private String workspacePath;
-  private JavaTestFinder javaTestFinder;
 
-  public AbstractJavaTestRunner(String workspacePath, JavaTestFinder javaTestFinder) {
+  public AbstractJavaTestRunner(
+      String workspacePath, JavaTestFinderRegistry javaTestFinderRegistry) {
     this.workspacePath = workspacePath;
-    this.javaTestFinder = javaTestFinder;
+    this.javaTestFinderRegistry = javaTestFinderRegistry;
+  }
+
+  private static boolean isPortAvailable(int port) {
+    try (Socket ignored = new Socket("localhost", port)) {
+      return false;
+    } catch (IOException ignored) {
+      return true;
+    }
   }
 
   @Override
@@ -101,6 +107,18 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
     }
 
     return result;
+  }
+
+  protected List<String> findTests(
+      TestExecutionContext context,
+      IJavaProject javaProject,
+      String methodAnnotation,
+      String classAnnotation) {
+
+    JavaTestFinder javaTestFinder =
+        javaTestFinderRegistry.getJavaTestFinder(context.getTestFinderName());
+
+    return javaTestFinder.findTests(context, javaProject, methodAnnotation, classAnnotation);
   }
 
   private void addAllTestsMethod(List<TestPosition> result, ICompilationUnit compilationUnit)
@@ -169,73 +187,6 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
     return path;
   }
 
-  private ICompilationUnit findCompilationUnitByPath(IJavaProject javaProject, String filePath) {
-    try {
-      IClasspathEntry[] resolvedClasspath = javaProject.getResolvedClasspath(false);
-      IPath packageRootPath = null;
-      for (IClasspathEntry classpathEntry : resolvedClasspath) {
-        if (filePath.startsWith(classpathEntry.getPath().toOSString())) {
-          packageRootPath = classpathEntry.getPath();
-          break;
-        }
-      }
-
-      if (packageRootPath == null) {
-        throw getRuntimeException(filePath);
-      }
-
-      String packagePath = packageRootPath.toOSString();
-      if (!packagePath.endsWith("/")) {
-        packagePath += '/';
-      }
-
-      String pathToClass = filePath.substring(packagePath.length());
-      IJavaElement element = javaProject.findElement(new Path(pathToClass));
-      if (element != null && element.getElementType() == IJavaElement.COMPILATION_UNIT) {
-        return (ICompilationUnit) element;
-      } else {
-        throw getRuntimeException(filePath);
-      }
-    } catch (JavaModelException e) {
-      throw new RuntimeException("Can't find Compilation Unit.", e);
-    }
-  }
-
-  /**
-   * Finds tests which should be ran.
-   *
-   * @param context information about test runner
-   * @param javaProject current project
-   * @param methodAnnotation java annotation which describes test method in the test framework
-   * @param classAnnotation java annotation which describes test class in the test framework
-   * @return list of full qualified names of test classes. If it is the declaration of a test method
-   *     it should be: parent fqn + '#' + method name (a.b.c.ClassName#methodName)
-   */
-  protected List<String> findTests(
-      TestExecutionContext context,
-      IJavaProject javaProject,
-      String methodAnnotation,
-      String classAnnotation) {
-    switch (context.getContextType()) {
-      case FILE:
-        return javaTestFinder.findTestClassDeclaration(
-            findCompilationUnitByPath(javaProject, context.getFilePath()));
-      case FOLDER:
-        return javaTestFinder.findClassesInPackage(
-            javaProject, context.getFilePath(), methodAnnotation, classAnnotation);
-      case SET:
-        return convertClassesPathsToFqns(context.getListOfTestClasses(), javaProject);
-      case PROJECT:
-        return javaTestFinder.findClassesInProject(javaProject, methodAnnotation, classAnnotation);
-      case CURSOR_POSITION:
-        return javaTestFinder.findTestMethodDeclaration(
-            findCompilationUnitByPath(javaProject, context.getFilePath()),
-            context.getCursorOffset());
-    }
-
-    return emptyList();
-  }
-
   @Override
   public int getDebugPort() {
     return debugPort;
@@ -249,34 +200,5 @@ public abstract class AbstractJavaTestRunner implements TestRunner {
     } else {
       generateDebuggerPort();
     }
-  }
-
-  private static boolean isPortAvailable(int port) {
-    try (Socket ignored = new Socket("localhost", port)) {
-      return false;
-    } catch (IOException ignored) {
-      return true;
-    }
-  }
-
-  private RuntimeException getRuntimeException(String filePath) {
-    return new RuntimeException("Can't find IClasspathEntry for path " + filePath);
-  }
-
-  private List<String> convertClassesPathsToFqns(
-      List<String> testClasses, IJavaProject javaProject) {
-    if (testClasses == null) {
-      return emptyList();
-    }
-    List<String> result = new LinkedList<>();
-    for (String classPath : testClasses) {
-      ICompilationUnit compilationUnit = findCompilationUnitByPath(javaProject, classPath);
-      if (compilationUnit != null) {
-        IType primaryType = compilationUnit.findPrimaryType();
-        result.add(primaryType.getFullyQualifiedName());
-      }
-    }
-
-    return result;
   }
 }

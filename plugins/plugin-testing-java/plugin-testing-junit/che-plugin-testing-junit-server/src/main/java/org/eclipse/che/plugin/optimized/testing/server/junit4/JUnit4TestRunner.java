@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.testing.junit.server.junit4;
+package org.eclipse.che.plugin.optimized.testing.server.junit4;
 
 import com.google.inject.name.Named;
 import java.util.ArrayList;
@@ -21,16 +21,8 @@ import org.eclipse.che.commons.lang.execution.ExecutionException;
 import org.eclipse.che.commons.lang.execution.JavaParameters;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
 import org.eclipse.che.junit.junit4.CheJUnitCoreRunner;
-import org.eclipse.che.plugin.java.testing.AbstractJavaTestRunner;
-import org.eclipse.che.plugin.java.testing.ClasspathUtil;
-import org.eclipse.che.plugin.java.testing.JavaTestAnnotations;
-import org.eclipse.che.plugin.java.testing.JavaTestFinder;
-import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.che.plugin.java.testing.*;
+import org.eclipse.jdt.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,17 +34,15 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
   private static final String MAIN_CLASS_NAME = "org.eclipse.che.junit.junit4.CheJUnitLauncher";
 
   private String workspacePath;
-  private JavaTestFinder javaTestFinder;
   private ProjectClasspathProvider classpathProvider;
 
   @Inject
   public JUnit4TestRunner(
       @Named("che.user.workspaces.storage") String workspacePath,
-      JavaTestFinder javaTestFinder,
-      ProjectClasspathProvider classpathProvider) {
-    super(workspacePath, javaTestFinder);
+      ProjectClasspathProvider classpathProvider,
+      JavaTestFinderRegistry javaTestFinderRegistry) {
+    super(workspacePath, javaTestFinderRegistry);
     this.workspacePath = workspacePath;
-    this.javaTestFinder = javaTestFinder;
     this.classpathProvider = classpathProvider;
   }
 
@@ -86,7 +76,7 @@ public class JUnit4TestRunner extends AbstractJavaTestRunner {
               || Flags.isAbstract(flags)
               || Flags.isStatic(flags)
               || !"V".equals(method.getReturnType()))
-          && javaTestFinder.isTest(
+          && JavaTestHelper.isTest(
               method, compilationUnit, JavaTestAnnotations.JUNIT4X_TEST.getName());
 
     } catch (JavaModelException ignored) {

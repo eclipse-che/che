@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
@@ -85,5 +86,9 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
 
   public TestStateEventsListener getEventListener() {
     return view;
+  }
+
+  public void setTestExecutionContext(TestExecutionContext testExecutionContext) {
+    view.setTestExecutionContext(testExecutionContext);
   }
 }

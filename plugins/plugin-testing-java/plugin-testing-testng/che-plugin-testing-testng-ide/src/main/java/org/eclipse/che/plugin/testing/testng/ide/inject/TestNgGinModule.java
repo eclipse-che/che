@@ -13,8 +13,10 @@ package org.eclipse.che.plugin.testing.testng.ide.inject;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.plugin.optimized.testing.ide.OptimizedTestAction;
 import org.eclipse.che.plugin.testing.ide.action.TestAction;
 import org.eclipse.che.plugin.testing.ide.detector.TestFileExtension;
+import org.eclipse.che.plugin.testing.testng.ide.OptimizedTestNgTestAction;
 import org.eclipse.che.plugin.testing.testng.ide.TestNgTestAction;
 import org.eclipse.che.plugin.testing.testng.ide.TestNgTestFileExtension;
 
@@ -27,5 +29,8 @@ public class TestNgGinModule extends AbstractGinModule {
     GinMultibinder.newSetBinder(binder(), TestFileExtension.class)
         .addBinding()
         .to(TestNgTestFileExtension.class);
+    GinMultibinder.newSetBinder(binder(), OptimizedTestAction.class)
+        .addBinding()
+        .to(OptimizedTestNgTestAction.class);
   }
 }

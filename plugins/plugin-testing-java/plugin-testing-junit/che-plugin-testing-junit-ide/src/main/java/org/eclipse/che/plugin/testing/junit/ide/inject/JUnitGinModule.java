@@ -13,9 +13,11 @@ package org.eclipse.che.plugin.testing.junit.ide.inject;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.plugin.optimized.testing.ide.OptimizedTestAction;
 import org.eclipse.che.plugin.testing.ide.action.TestAction;
 import org.eclipse.che.plugin.testing.ide.detector.TestFileExtension;
 import org.eclipse.che.plugin.testing.junit.ide.JUnitTestFileExtension;
+import org.eclipse.che.plugin.testing.junit.ide.OptimizedJUnitTestAction;
 import org.eclipse.che.plugin.testing.junit.ide.action.JUnitTestActionGroup;
 
 /** Gin module for JUnit extension. */
@@ -29,5 +31,8 @@ public class JUnitGinModule extends AbstractGinModule {
     GinMultibinder.newSetBinder(binder(), TestFileExtension.class)
         .addBinding()
         .to(JUnitTestFileExtension.class);
+    GinMultibinder.newSetBinder(binder(), OptimizedTestAction.class)
+        .addBinding()
+        .to(OptimizedJUnitTestAction.class);
   }
 }

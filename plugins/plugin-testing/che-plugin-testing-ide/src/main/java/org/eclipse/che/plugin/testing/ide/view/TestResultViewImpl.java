@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -31,6 +32,7 @@ import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.plugin.testing.ide.TestLocalizationConstant;
 import org.eclipse.che.plugin.testing.ide.TestResources;
 import org.eclipse.che.plugin.testing.ide.model.TestRootState;
 import org.eclipse.che.plugin.testing.ide.model.TestState;
@@ -53,6 +55,7 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
   private final AppContext appContext;
   private final EditorAgent editorAgent;
   private final TestResultNodeFactory nodeFactory;
+  private final TestLocalizationConstant localizationConstant;
 
   @UiField(provided = true)
   SplitLayoutPanel splitLayoutPanel;
@@ -64,6 +67,7 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
 
   private TestRootState testRootState;
   private TestRootNode testRootNode;
+  private TestExecutionContext testExecutionContext;
 
   @Inject
   public TestResultViewImpl(
@@ -73,12 +77,14 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
       EditorAgent editorAgent,
       AppContext appContext,
       TestResultNodeFactory nodeFactory,
-      PrinterOutputConsole outputConsole) {
+      PrinterOutputConsole outputConsole,
+      TestLocalizationConstant localizationConstant) {
     super(resources);
     this.javaNavigationService = javaNavigationService;
     this.editorAgent = editorAgent;
     this.appContext = appContext;
     this.nodeFactory = nodeFactory;
+    this.localizationConstant = localizationConstant;
     splitLayoutPanel = new SplitLayoutPanel(1);
     setContentWidget(UI_BINDER.createAndBindUi(this));
     splitLayoutPanel.add(outputConsole);
@@ -109,9 +115,11 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
 
     resultTree.getElement().getStyle().setWidth(100, Style.Unit.PCT);
     resultTree.getElement().getStyle().setHeight(100, Style.Unit.PCT);
+
     navigationPanel.add(resultTree);
 
     testRootState = new TestRootState();
+    setTestTitle();
   }
 
   @Override
@@ -235,6 +243,19 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
   public TestRootState getRootState() {
     testRootState = new TestRootState();
     return testRootState;
+  }
+
+  @Override
+  public void setTestExecutionContext(TestExecutionContext testExecutionContext) {
+    this.testExecutionContext = testExecutionContext;
+  }
+
+  protected TestExecutionContext getTestExecutionContext() {
+    return testExecutionContext;
+  }
+
+  protected void setTestTitle() {
+    setTitle(localizationConstant.titleTestResultPresenter());
   }
 
   interface TestResultViewImplUiBinder extends UiBinder<Widget, TestResultViewImpl> {}

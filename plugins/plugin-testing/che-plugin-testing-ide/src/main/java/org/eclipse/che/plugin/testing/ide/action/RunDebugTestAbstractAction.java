@@ -18,6 +18,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PRO
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 import java.util.List;
+import java.util.function.Consumer;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcError;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
@@ -49,6 +50,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  * methods are exist.
  */
 public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveAction {
+  protected String selectedNodePath;
   private TestDetector testDetector;
   private TestResultPresenter testResultPresenter;
   private TestingHandler testingHandler;
@@ -57,8 +59,7 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
   private DtoFactory dtoFactory;
   private AppContext appContext;
   private NotificationManager notificationManager;
-
-  protected String selectedNodePath;
+  private Consumer<TestExecutionContext> contextModifier;
 
   public RunDebugTestAbstractAction(
       TestDetector testDetector,
@@ -157,10 +158,15 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
         createTestExecutionContext(
             frameworkAndTestName, testDetector.getContextType(), selectedNodePath);
     context.withDebugModeEnable(isDebugMode);
+    context.setTestFinderName("default");
+    if (contextModifier != null) {
+      contextModifier.accept(context);
+    }
 
     GeneralTestingEventsProcessor eventsProcessor =
         new GeneralTestingEventsProcessor(
             frameworkAndTestName.first, testResultPresenter.getRootState());
+    testResultPresenter.setTestExecutionContext(context);
     testingHandler.setProcessor(eventsProcessor);
     eventsProcessor.addListener(testResultPresenter.getEventListener());
 
@@ -171,6 +177,10 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
                 onTestRanSuccessfully(
                     result, eventsProcessor, notification, frameworkAndTestName.first, isDebugMode))
         .onFailure(exception -> onTestRanFailed(exception, notification));
+  }
+
+  public void modifyTestExecutionContext(Consumer<TestExecutionContext> contextModifier) {
+    this.contextModifier = contextModifier;
   }
 
   private void onTestRanSuccessfully(

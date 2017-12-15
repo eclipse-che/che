@@ -11,6 +11,8 @@
 package org.ecipse.che.plugin.testing.testng.server;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -27,7 +29,8 @@ import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.jdt.core.launching.JREContainerInitializer;
 import org.eclipse.che.jdt.core.resources.ResourceChangedEvent;
 import org.eclipse.che.plugin.java.testing.ClasspathUtil;
-import org.eclipse.che.plugin.java.testing.JavaTestFinder;
+import org.eclipse.che.plugin.java.testing.DefaultJavaTestFinder;
+import org.eclipse.che.plugin.java.testing.JavaTestFinderRegistry;
 import org.eclipse.che.plugin.java.testing.ProjectClasspathProvider;
 import org.eclipse.che.plugin.testing.testng.server.TestNGRunner;
 import org.eclipse.che.plugin.testing.testng.server.TestNGSuiteUtil;
@@ -44,7 +47,7 @@ public class TestNGRunnerTest extends BaseTest {
   private MethodNameConfigurator startMethodNameConfigurator;
   private ParamsConfigurator startParamsConfigurator;
   private SendConfiguratorFromOne startSendConfiguratorFromOne;
-  private JavaTestFinder testNGTestFinder;
+  private JavaTestFinderRegistry javaTestFinderRegistry;
   private RequestTransmitter transmitter;
 
   private TestNGRunner runner;
@@ -52,7 +55,8 @@ public class TestNGRunnerTest extends BaseTest {
   @BeforeMethod
   public void setUp() throws Exception {
     startEndpointIdConfigurator = mock(EndpointIdConfigurator.class);
-    testNGTestFinder = mock(JavaTestFinder.class);
+    javaTestFinderRegistry = mock(JavaTestFinderRegistry.class);
+    when(javaTestFinderRegistry.getJavaTestFinder(any())).thenReturn(new DefaultJavaTestFinder());
     startMethodNameConfigurator = mock(MethodNameConfigurator.class);
     startParamsConfigurator = mock(ParamsConfigurator.class);
     startSendConfiguratorFromOne = mock(SendConfiguratorFromOne.class);
@@ -60,7 +64,7 @@ public class TestNGRunnerTest extends BaseTest {
 
     runner =
         new TestNGRunner(
-            "", testNGTestFinder, new ProjectClasspathProvider(""), new TestNGSuiteUtil());
+            "", new ProjectClasspathProvider(""), new TestNGSuiteUtil(), javaTestFinderRegistry);
   }
 
   @Test()
