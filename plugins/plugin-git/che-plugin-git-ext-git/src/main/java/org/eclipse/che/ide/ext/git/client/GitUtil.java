@@ -11,16 +11,11 @@
 package org.eclipse.che.ide.ext.git.client;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_GIT_OPERATION;
-import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
 import static org.eclipse.che.api.project.shared.Constants.VCS_PROVIDER_NAME;
-import static org.eclipse.che.ide.util.ExceptionUtils.getAttributes;
-import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
@@ -59,13 +54,5 @@ public class GitUtil {
     }
 
     return project;
-  }
-
-  public static String getProviderNameFromError(PromiseError error) {
-    if (getErrorCode(error.getCause()) != UNAUTHORIZED_GIT_OPERATION) {
-      return null;
-    }
-    Map<String, String> attributes = getAttributes(error.getCause());
-    return attributes.get(PROVIDER_NAME);
   }
 }

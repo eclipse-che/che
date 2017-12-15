@@ -214,34 +214,17 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<PushResponse> push(
-      Path project, List<String> refSpec, String remote, boolean force) {
+      Path project, List<String> refSpec, String remote, boolean force, Credentials credentials) {
     PushRequest pushRequest =
         dtoFactory
             .createDto(PushRequest.class)
             .withRemote(remote)
             .withRefSpec(refSpec)
             .withForce(force);
-    String url = getWsAgentBaseUrl() + PUSH + "?projectPath=" + encodePath(project);
-    return asyncRequestFactory
-        .createPostRequest(url, pushRequest)
-        .send(dtoUnmarshallerFactory.newUnmarshaller(PushResponse.class));
-  }
-
-  @Override
-  public Promise<PushResponse> push(
-      Path project,
-      List<String> refSpec,
-      String remote,
-      boolean force,
-      Credentials credentials) {
-    PushRequest pushRequest =
-        dtoFactory
-            .createDto(PushRequest.class)
-            .withRemote(remote)
-            .withRefSpec(refSpec)
-            .withUsername(credentials.getUsername())
-            .withPassword(credentials.getPassword())
-            .withForce(force);
+    if (credentials != null) {
+      pushRequest.setUsername(credentials.getUsername());
+      pushRequest.setPassword(credentials.getPassword());
+    }
     String url = getWsAgentBaseUrl() + PUSH + "?projectPath=" + encodePath(project);
     return asyncRequestFactory
         .createPostRequest(url, pushRequest)
@@ -413,19 +396,6 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<Void> fetch(
-      Path project, String remote, List<String> refspec, boolean removeDeletedRefs) {
-    FetchRequest fetchRequest =
-        dtoFactory
-            .createDto(FetchRequest.class)
-            .withRefSpec(refspec)
-            .withRemote(remote)
-            .withRemoveDeletedRefs(removeDeletedRefs);
-    String url = getWsAgentBaseUrl() + FETCH + "?projectPath=" + encodePath(project);
-    return asyncRequestFactory.createPostRequest(url, fetchRequest).send();
-  }
-
-  @Override
-  public Promise<Void> fetch(
       Path project,
       String remote,
       List<String> refspec,
@@ -436,42 +406,28 @@ public class GitServiceClientImpl implements GitServiceClient {
             .createDto(FetchRequest.class)
             .withRefSpec(refspec)
             .withRemote(remote)
-            .withRemoveDeletedRefs(removeDeletedRefs)
-            .withUsername(credentials.getUsername())
-            .withPassword(credentials.getPassword());
+            .withRemoveDeletedRefs(removeDeletedRefs);
+    if (credentials != null) {
+      fetchRequest.setUsername(credentials.getUsername());
+      fetchRequest.setPassword(credentials.getPassword());
+    }
     String url = getWsAgentBaseUrl() + FETCH + "?projectPath=" + encodePath(project);
     return asyncRequestFactory.createPostRequest(url, fetchRequest).send();
   }
 
   @Override
-  public Promise<PullResponse> pull(Path project, String refSpec, String remote, boolean rebase) {
+  public Promise<PullResponse> pull(
+      Path project, String refSpec, String remote, boolean rebase, Credentials credentials) {
     PullRequest pullRequest =
         dtoFactory
             .createDto(PullRequest.class)
             .withRemote(remote)
             .withRefSpec(refSpec)
             .withRebase(rebase);
-    String url = getWsAgentBaseUrl() + PULL + "?projectPath=" + encodePath(project);
-    return asyncRequestFactory
-        .createPostRequest(url, pullRequest)
-        .send(dtoUnmarshallerFactory.newUnmarshaller(PullResponse.class));
-  }
-
-  @Override
-  public Promise<PullResponse> pull(
-      Path project,
-      String refSpec,
-      String remote,
-      boolean rebase,
-      Credentials credentials) {
-    PullRequest pullRequest =
-        dtoFactory
-            .createDto(PullRequest.class)
-            .withRemote(remote)
-            .withRefSpec(refSpec)
-            .withRebase(rebase)
-            .withUsername(credentials.getUsername())
-            .withPassword(credentials.getPassword());
+    if (credentials != null) {
+      pullRequest.setUsername(credentials.getUsername());
+      pullRequest.setPassword(credentials.getPassword());
+    }
     String url = getWsAgentBaseUrl() + PULL + "?projectPath=" + encodePath(project);
     return asyncRequestFactory
         .createPostRequest(url, pullRequest)

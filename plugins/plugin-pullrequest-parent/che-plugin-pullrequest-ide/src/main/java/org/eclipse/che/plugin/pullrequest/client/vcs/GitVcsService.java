@@ -11,12 +11,17 @@
 package org.eclipse.che.plugin.pullrequest.client.vcs;
 
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_GIT_OPERATION;
+import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
+import static org.eclipse.che.ide.util.ExceptionUtils.getAttributes;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
@@ -35,7 +40,6 @@ import org.eclipse.che.ide.api.auth.Credentials;
 import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
-import org.eclipse.che.ide.ext.git.client.GitUtil;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.util.StringUtils;
@@ -211,10 +215,15 @@ public class GitVcsService implements VcsService {
             appContext.getRootProject().getLocation(),
             Collections.singletonList(localBranchName),
             remote,
-            true)
+            true,
+            null)
         .catchErrorPromise(
             error -> {
-              final String providerName = GitUtil.getProviderNameFromError(error);
+              if (getErrorCode(error.getCause()) != UNAUTHORIZED_GIT_OPERATION) {
+                return null;
+              }
+              Map<String, String> attributes = getAttributes(error.getCause());
+              String providerName =  attributes.get(PROVIDER_NAME);
               if (!StringUtils.isNullOrEmpty(providerName)) {
                 return pushBranchAuthenticated(remote, localBranchName, providerName);
               }

@@ -119,7 +119,7 @@ public class CommitPresenterTest extends BaseTest {
         .thenReturn(stringPromise);
     when(service.branchList(any(Path.class), any(BranchListMode.class)))
         .thenReturn(branchListPromise);
-    when(service.push(any(Path.class), anyList(), anyString(), anyBoolean()))
+    when(service.push(any(Path.class), anyList(), anyString(), anyBoolean(), null))
         .thenReturn(pushPromise);
     when(service.log(any(Path.class), eq(null), anyInt(), anyInt(), anyBoolean()))
         .thenReturn(logPromise);

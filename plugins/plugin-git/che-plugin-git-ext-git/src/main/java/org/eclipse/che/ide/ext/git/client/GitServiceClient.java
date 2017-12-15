@@ -66,23 +66,6 @@ public interface GitServiceClient {
    *     </ul>
    *
    * @param removeDeletedRefs if <code>true</code> then delete removed refs from local repository
-   */
-  Promise<Void> fetch(Path project, String remote, List<String> refspec, boolean removeDeletedRefs);
-
-  /**
-   * Fetch changes from remote repository to local one (sends request over WebSocket).
-   *
-   * @param project project root of GIT repository
-   * @param remote remote repository's name
-   * @param refspec list of refspec to fetch.
-   *     <p>Expected form is:
-   *     <ul>
-   *       <li>refs/heads/featured:refs/remotes/origin/featured - branch 'featured' from remote
-   *           repository will be fetched to 'refs/remotes/origin/featured'.
-   *       <li>featured - remote branch name.
-   *     </ul>
-   *
-   * @param removeDeletedRefs if <code>true</code> then delete removed refs from local repository
    * @param credentials credentials to perform vcs authorization
    */
   Promise<Void> fetch(
@@ -215,44 +198,10 @@ public interface GitServiceClient {
    *
    * @param remote remote remote repository's name
    * @param rebase use rebase instead of merge
-   */
-  Promise<PullResponse> pull(Path project, String refSpec, String remote, boolean rebase);
-
-  /**
-   * Pull (fetch and merge) changes from remote repository to local one (sends request over
-   * WebSocket).
-   *
-   * @param project project (root of GIT repository)
-   * @param refSpec list of refspec to fetch.
-   *     <p>Expected form is:
-   *     <ul>
-   *       <li>refs/heads/featured:refs/remotes/origin/featured - branch 'featured' from remote
-   *           repository will be fetched to 'refs/remotes/origin/featured'.
-   *       <li>featured - remote branch name.
-   *     </ul>
-   *
-   * @param remote remote remote repository's name
-   * @param rebase use rebase instead of merge
    * @param credentials credentials to perform vcs authorization
    */
   Promise<PullResponse> pull(
-      Path project,
-      String refSpec,
-      String remote,
-      boolean rebase,
-      Credentials credentials);
-
-  /**
-   * Push changes from local repository to remote one (sends request over WebSocket).
-   *
-   * @param project project
-   * @param refSpec list of refspec to push
-   * @param remote remote repository name or url
-   * @param force push refuses to update a remote ref that is not an ancestor of the local ref used
-   *     to overwrite it. If <code>true</code> disables the check. This can cause the remote
-   *     repository to lose commits
-   */
-  Promise<PushResponse> push(Path project, List<String> refSpec, String remote, boolean force);
+      Path project, String refSpec, String remote, boolean rebase, Credentials credentials);
 
   /**
    * Push changes from local repository to remote one (sends request over WebSocket).
@@ -266,11 +215,7 @@ public interface GitServiceClient {
    * @param credentials credentials to perform vcs authorization
    */
   Promise<PushResponse> push(
-      Path project,
-      List<String> refSpec,
-      String remote,
-      boolean force,
-      Credentials credentials);
+      Path project, List<String> refSpec, String remote, boolean force, Credentials credentials);
 
   /**
    * Clones one remote repository to local one (over WebSocket).

@@ -57,7 +57,6 @@ public class FetchPresenterTest extends BaseTest {
             dtoFactory,
             view,
             service,
-            appContext,
             constant,
             notificationManager,
             branchSearcher,
