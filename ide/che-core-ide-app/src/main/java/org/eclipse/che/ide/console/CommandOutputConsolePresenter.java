@@ -20,23 +20,21 @@ import com.google.web.bindery.event.shared.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.ProcessSubscribeResponseDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessDiedEventDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStartedEventDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdErrEventDto;
-import org.eclipse.che.api.machine.shared.dto.execagent.event.ProcessStdOutEventDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.exec.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.command.exec.ProcessFinishedEvent;
+import org.eclipse.che.ide.api.command.exec.ProcessStartedEvent;
+import org.eclipse.che.ide.api.command.exec.dto.ProcessSubscribeResponseDto;
+import org.eclipse.che.ide.api.command.exec.dto.event.ProcessDiedEventDto;
+import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStartedEventDto;
+import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStdErrEventDto;
+import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStdOutEventDto;
 import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
-import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -53,7 +51,7 @@ public class CommandOutputConsolePresenter
   private final MachineResources resources;
   private final CommandImpl command;
   private final EventBus eventBus;
-  private final Machine machine;
+  private final String machineName;
   private final CommandExecutor commandExecutor;
   private final ExecAgentCommandManager execAgentCommandManager;
 
@@ -79,14 +77,14 @@ public class CommandOutputConsolePresenter
       EventBus eventBus,
       ExecAgentCommandManager execAgentCommandManager,
       @Assisted CommandImpl command,
-      @Assisted Machine machine,
+      @Assisted String machineName,
       AppContext appContext,
       EditorAgent editorAgent) {
     this.view = view;
     this.resources = resources;
     this.execAgentCommandManager = execAgentCommandManager;
     this.command = command;
-    this.machine = machine;
+    this.machineName = machineName;
     this.eventBus = eventBus;
     this.commandExecutor = commandExecutor;
 
@@ -146,9 +144,6 @@ public class CommandOutputConsolePresenter
   public void listenToOutput(String wsChannel) {}
 
   @Override
-  public void attachToProcess(MachineProcessDto process) {}
-
-  @Override
   public Consumer<ProcessStdErrEventDto> getStdErrConsumer() {
     return event -> {
       String text = event.getText();
@@ -184,7 +179,7 @@ public class CommandOutputConsolePresenter
 
       pid = event.getPid();
 
-      eventBus.fireEvent(new ProcessStartedEvent(pid, machine));
+      eventBus.fireEvent(new ProcessStartedEvent(pid, machineName));
     };
   }
 
@@ -195,7 +190,7 @@ public class CommandOutputConsolePresenter
       view.enableStopButton(false);
       view.toggleScrollToEndButton(false);
 
-      eventBus.fireEvent(new ProcessFinishedEvent(pid, machine));
+      eventBus.fireEvent(new ProcessFinishedEvent(pid, machineName));
     };
   }
 
@@ -216,7 +211,7 @@ public class CommandOutputConsolePresenter
 
   @Override
   public void stop() {
-    execAgentCommandManager.killProcess(machine.getId(), pid);
+    execAgentCommandManager.killProcess(machineName, pid);
   }
 
   @Override
@@ -232,11 +227,11 @@ public class CommandOutputConsolePresenter
   @Override
   public void reRunProcessButtonClicked() {
     if (isFinished()) {
-      commandExecutor.executeCommand(command, machine);
+      commandExecutor.executeCommand(command, machineName);
     } else {
       execAgentCommandManager
-          .killProcess(machine.getId(), pid)
-          .onSuccess(() -> commandExecutor.executeCommand(command, machine));
+          .killProcess(machineName, pid)
+          .onSuccess(() -> commandExecutor.executeCommand(command, machineName));
     }
   }
 

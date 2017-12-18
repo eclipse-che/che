@@ -10,16 +10,20 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_PETCLINIC;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.RUNNING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPED;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.AGENTS;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.ENV_VARIABLES;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.INSTALLERS;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.MACHINES;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.OVERVIEW;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.PROJECTS;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.SERVERS;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.util.HashMap;
@@ -27,8 +31,6 @@ import java.util.Map;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.constant.TestStacksConstants;
-import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -39,13 +41,14 @@ import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceAgents;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceEnvVariables;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceInstallers;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceMachines;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceServers;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -56,7 +59,7 @@ public class WorkspaceDetailsTest {
   private static final String WORKSPACE = NameGenerator.generate("java-mysql", 4);
   private static final String PROJECT_NAME = "web-java-petclinic";
 
-  private Map<String, Boolean> agents = new HashMap<>();
+  private Map<String, Boolean> installers = new HashMap<>();
   private Map<String, String> variables = new HashMap<>();
 
   @Inject private TestUser testUser;
@@ -75,8 +78,9 @@ public class WorkspaceDetailsTest {
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private WorkspaceMachines workspaceMachines;
   @Inject private WorkspaceServers workspaceServers;
-  @Inject private WorkspaceAgents workspaceAgents;
+  @Inject private WorkspaceInstallers workspaceInstallers;
   @Inject private WorkspaceEnvVariables workspaceEnvVariables;
+  @Inject private MachineTerminal terminal;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -100,15 +104,15 @@ public class WorkspaceDetailsTest {
     workspaceEnvVariables.addNewEnvironmentVariable("logi", "admin");
     workspaceDetails.clickOnAddButtonInDialogWindow();
     clickOnSaveButton();
-    Assert.assertTrue(workspaceEnvVariables.checkEnvVariableExists("logi"));
+    assertTrue(workspaceEnvVariables.checkEnvVariableExists("logi"));
 
     // rename the variable, save changes and check it is renamed
-    Assert.assertTrue(workspaceEnvVariables.checkValueExists("logi", "admin"));
+    assertTrue(workspaceEnvVariables.checkValueExists("logi", "admin"));
     workspaceEnvVariables.clickOnEditEnvVariableButton("logi");
     workspaceEnvVariables.enterEnvVariableName("login");
     workspaceDetails.clickOnUpdateButtonInDialogWindow();
     clickOnSaveButton();
-    Assert.assertTrue(workspaceEnvVariables.checkValueExists("login", "admin"));
+    assertTrue(workspaceEnvVariables.checkValueExists("login", "admin"));
 
     // delete the variable, save changes and check it is not exists
     workspaceEnvVariables.clickOnEnvVariableCheckbox("login");
@@ -117,8 +121,21 @@ public class WorkspaceDetailsTest {
     clickOnSaveButton();
     workspaceEnvVariables.checkValueIsNotExists("login", "admin");
 
-    // delete all variable from db machine, check they don't exist and save changes
     workspaceMachines.selectMachine("Environment variables", "db");
+    // add variables to 'db' machine, check they exist and save changes
+    variables.forEach(
+        (name, value) -> {
+          loader.waitOnClosed();
+          workspaceEnvVariables.clickOnAddEnvVariableButton();
+          workspaceEnvVariables.checkAddNewEnvVarialbleDialogIsOpen();
+          workspaceEnvVariables.addNewEnvironmentVariable(name, value);
+          workspaceDetails.clickOnAddButtonInDialogWindow();
+          assertTrue(workspaceEnvVariables.checkEnvVariableExists(name));
+          assertTrue(workspaceEnvVariables.checkValueExists(name, value));
+        });
+    clickOnSaveButton();
+
+    // delete all variables from the 'db' machine, check they don't exist and save changes
     variables.forEach(
         (name, value) -> {
           workspaceEnvVariables.clickOnDeleteEnvVariableButton(name);
@@ -127,52 +144,45 @@ public class WorkspaceDetailsTest {
         });
 
     clickOnSaveButton();
-
-    // restore variables to db machine, check they exist and save changes
-    variables.forEach(
-        (name, value) -> {
-          loader.waitOnClosed();
-          workspaceEnvVariables.clickOnAddEnvVariableButton();
-          workspaceEnvVariables.checkAddNewEnvVarialbleDialogIsOpen();
-          workspaceEnvVariables.addNewEnvironmentVariable(name, value);
-          workspaceDetails.clickOnAddButtonInDialogWindow();
-          Assert.assertTrue(workspaceEnvVariables.checkEnvVariableExists(name));
-          Assert.assertTrue(workspaceEnvVariables.checkValueExists(name, value));
-        });
-    clickOnSaveButton();
   }
 
   @Test
-  public void workingWithAgents() {
-    workspaceDetails.selectTabInWorkspaceMenu(AGENTS);
+  public void workingWithInstallers() {
+    workspaceDetails.selectTabInWorkspaceMenu(INSTALLERS);
 
-    // check all needed agents in dev-machine exist
-    workspaceMachines.selectMachine("Workspace Agents", "dev-machine");
-    agents.forEach(
+    // check both versions of the 'Workspace API' installer
+    assertTrue(workspaceInstallers.isInstallerStateTurnedOn("Workspace API", "1.0.1"));
+    assertFalse(workspaceInstallers.isInstallerStateTurnedOn("Workspace API", "1.0.0"));
+    assertTrue(workspaceInstallers.isInstallerStateNotChangeable("Workspace API", "1.0.1"));
+    assertTrue(workspaceInstallers.isInstallerStateNotChangeable("Workspace API", "1.0.0"));
+
+    // check all needed installers in dev-machine exist
+    workspaceMachines.selectMachine("Workspace Installers", "dev-machine");
+    installers.forEach(
         (name, value) -> {
-          workspaceAgents.checkAgentExists(name);
+          workspaceInstallers.checkInstallerExists(name);
         });
 
-    // switch all agents and save changes
-    agents.forEach(
+    // switch all installers and save changes
+    installers.forEach(
         (name, value) -> {
-          Assert.assertEquals(workspaceAgents.getAgentState(name), value);
-          workspaceAgents.switchAgentState(name);
+          Assert.assertEquals(workspaceInstallers.isInstallerStateTurnedOn(name), value);
+          workspaceInstallers.switchInstallerState(name);
           WaitUtils.sleepQuietly(1);
         });
     clickOnSaveButton();
 
-    // switch all agents, save changes and check its states are as previous(by default for the
+    // switch all installers, save changes and check its states are as previous(by default for the
     // Java-MySql stack)
-    agents.forEach(
+    installers.forEach(
         (name, value) -> {
-          workspaceAgents.switchAgentState(name);
+          workspaceInstallers.switchInstallerState(name);
           loader.waitOnClosed();
         });
     clickOnSaveButton();
-    agents.forEach(
+    installers.forEach(
         (name, value) -> {
-          Assert.assertEquals(workspaceAgents.getAgentState(name), value);
+          Assert.assertEquals(workspaceInstallers.isInstallerStateTurnedOn(name), value);
         });
   }
 
@@ -260,18 +270,18 @@ public class WorkspaceDetailsTest {
   }
 
   private void createMaps() {
-    agents.put("C# language server", false);
-    agents.put("Exec", true);
-    agents.put("File sync", false);
-    agents.put("Git credentials", false);
-    agents.put("JSON language server", false);
-    agents.put("PHP language server", false);
-    agents.put("Python language server", false);
-    agents.put("SSH", true);
-    agents.put("Terminal", true);
-    agents.put("TypeScript language server", false);
-    agents.put("Workspace API", true);
-    agents.put("Yaml language server", false);
+    installers.put("C# language server", false);
+    installers.put("Exec", true);
+    installers.put("File sync", false);
+    installers.put("Git credentials", false);
+    installers.put("JSON language server", false);
+    installers.put("PHP language server", false);
+    installers.put("Python language server", false);
+    installers.put("Simple Test language server", false);
+    installers.put("SSH", false);
+    installers.put("Terminal", true);
+    installers.put("TypeScript language server", false);
+    installers.put("Yaml language server", false);
 
     variables.put("MYSQL_DATABASE", "petclinic");
     variables.put("MYSQL_PASSWORD", "password");
@@ -294,15 +304,14 @@ public class WorkspaceDetailsTest {
     workspaces.clickOnNewWorkspaceBtn();
     createWorkspace.waitToolbar();
     loader.waitOnClosed();
-    createWorkspace.selectStack(TestStacksConstants.JAVA_MYSQL.getId());
+    createWorkspace.selectStack(JAVA_MYSQL.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
     createWorkspace.clickOnCreateWorkspaceButton();
 
     seleniumWebDriver.switchFromDashboardIframeToIde(60);
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
-        TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
+    terminal.waitTerminalTab(LOADER_TIMEOUT_SEC);
 
     dashboard.open();
     dashboard.waitDashboardToolbarTitle();

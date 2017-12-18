@@ -19,6 +19,7 @@ import {IEnvironmentManagerMachine, IEnvironmentManagerMachineServer} from './en
 const WS_AGENT_NAME: string = 'org.eclipse.che.ws-agent';
 const TERMINAL_AGENT_NAME: string = 'org.eclipse.che.terminal';
 const SSH_AGENT_NAME: string = 'org.eclipse.che.ssh';
+const DEFAULT_MEMORY_LIMIT: number = 2 * 1073741824;
 
 export abstract class EnvironmentManager {
   $log: ng.ILogService;
@@ -35,6 +36,10 @@ export abstract class EnvironmentManager {
     return TERMINAL_AGENT_NAME;
   }
 
+  get DEFAULT_MEMORY_LIMIT(): number {
+    return DEFAULT_MEMORY_LIMIT;
+  }
+
   get type(): string {
     return '';
   }
@@ -43,18 +48,95 @@ export abstract class EnvironmentManager {
     return '';
   }
 
-  abstract getSource(machine: IEnvironmentManagerMachine): {[sourceType: string]: string};
+  parseMachineRecipe(content: string): any {
+    return this.parseRecipe(content);
+  };
 
-  abstract setEnvVariables(machine: IEnvironmentManagerMachine, envVariables: any): void;
+  abstract parseRecipe(content: string): any;
+
+  abstract stringifyRecipe(recipe: any): string;
+
+  abstract getSource(machine: IEnvironmentManagerMachine): {[sourceType: string]: string};
 
   abstract setSource(machine: IEnvironmentManagerMachine, image: string): void;
 
-  abstract createNewDefaultMachine(environment: che.IWorkspaceEnvironment): IEnvironmentManagerMachine
+  abstract createNewDefaultMachine(environment: che.IWorkspaceEnvironment, image?: string): IEnvironmentManagerMachine;
 
   abstract addMachine(environment: che.IWorkspaceEnvironment, machine: IEnvironmentManagerMachine): che.IWorkspaceEnvironment
 
+
+  /**
+   * Returns true if environment recipe content is present.
+   *
+   * @param {IEnvironmentManagerMachine} machine
+   * @returns {boolean}
+   */
   canEditEnvVariables(machine: IEnvironmentManagerMachine): boolean {
-    return false;
+    return angular.isDefined(machine);
+  }
+
+  /**
+   * Returns object with environment variables.
+   *
+   * @param {IEnvironmentManagerMachine} machine
+   * @returns {any}
+   */
+  getEnvVariables(machine: IEnvironmentManagerMachine): any {
+    return machine && machine.env ? machine.env : {};
+  }
+
+  /**
+   * Sets env variables.
+   * @param {IEnvironmentManagerMachine} machine
+   * @param {any} envVariables
+   */
+  setEnvVariables(machine: IEnvironmentManagerMachine, envVariables: any): void {
+    if (!machine || !envVariables) {
+      return;
+    }
+    machine.env = envVariables;
+  };
+
+  /**
+   * Returns object with volumes.
+   *
+   * @param {IEnvironmentManagerMachine} machine
+   * @returns {any}
+   */
+  getMachineVolumes(machine: IEnvironmentManagerMachine): any {
+    return machine && machine.volumes ? machine.volumes : {};
+  }
+
+  /**
+   * Sets volumes.
+   * @param {IEnvironmentManagerMachine} machine
+   * @param {any} volumes
+   */
+  setMachineVolumes(machine: IEnvironmentManagerMachine, volumes: any): any {
+    if (!machine || !volumes) {
+      return;
+    }
+    machine.volumes = volumes;
+  }
+
+  /**
+   * Gets unique name for new machine based on prefix.
+   *
+   * @param environment
+   * @param namePrefix
+   * @returns {string}
+   */
+  getUniqueMachineName(environment: che.IWorkspaceEnvironment, namePrefix?: string): string {
+    let newMachineName =  namePrefix ? namePrefix : 'new-machine';
+    const usedMachinesNames: Array<string> = environment && environment.machines ? Object.keys(environment.machines) : [];
+    for (let pos: number = 1; pos < 1000; pos++) {
+      if (usedMachinesNames.indexOf(newMachineName + pos.toString()) === -1) {
+        newMachineName += pos.toString();
+        break;
+      }
+    }
+
+    return newMachineName;
   }
 
   /**
@@ -70,18 +152,23 @@ export abstract class EnvironmentManager {
     }
 
     let machines: IEnvironmentManagerMachine[] = [];
-    runtime.machines.forEach((runtimeMachine: any) => {
-      let name = runtimeMachine.config.name,
-          machine: any = {name: name};
-      if (runtimeMachine.runtime && runtimeMachine.runtime.servers) {
+
+    Object.keys(runtime.machines).forEach((machineName: string) => {
+      let runtimeMachine = runtime.machines[machineName];
+      let machine: any = {name: machineName, servers: {}};
+      if (runtimeMachine && runtimeMachine.servers) {
         machine.runtime = {
-          servers: runtimeMachine.runtime.servers
+          servers: runtimeMachine.servers
         };
       }
       machines.push(machine);
     });
 
     return machines;
+  }
+
+  getMachineName(machine: IEnvironmentManagerMachine): string {
+    return machine && machine.name ? angular.copy(machine.name) : '';
   }
 
   /**
@@ -133,9 +220,11 @@ export abstract class EnvironmentManager {
       if (angular.isUndefined(newEnvironment.machines[machineName])) {
         newEnvironment.machines[machineName] = {attributes: {}};
       }
-      newEnvironment.machines[machineName].attributes.memoryLimitBytes = machine.attributes ? machine.attributes.memoryLimitBytes : '1073741824';
-      newEnvironment.machines[machineName].agents = angular.copy(machine.agents);
+      newEnvironment.machines[machineName].attributes.memoryLimitBytes = machine.attributes ? machine.attributes.memoryLimitBytes : DEFAULT_MEMORY_LIMIT;
+      newEnvironment.machines[machineName].installers = angular.copy(machine.installers);
       newEnvironment.machines[machineName].servers = angular.copy(machine.servers);
+      newEnvironment.machines[machineName].volumes = angular.copy(machine.volumes);
+      newEnvironment.machines[machineName].env = angular.copy(machine.env);
     });
 
     return newEnvironment;
@@ -148,7 +237,7 @@ export abstract class EnvironmentManager {
    * @returns {boolean}
    */
   isDev(machine: IEnvironmentManagerMachine): boolean {
-    return machine.agents && machine.agents.indexOf(WS_AGENT_NAME) >= 0;
+    return machine.installers && machine.installers.indexOf(WS_AGENT_NAME) >= 0;
   }
 
   /**
@@ -160,21 +249,18 @@ export abstract class EnvironmentManager {
   setDev(machine: IEnvironmentManagerMachine, isDev: boolean): void {
     let hasWsAgent = this.isDev(machine);
     if (isDev) {
-      machine.agents = machine.agents ? machine.agents : [];
+      machine.installers = machine.installers ? machine.installers : [];
       if (!hasWsAgent) {
-        machine.agents.push(WS_AGENT_NAME);
+        machine.installers.push(WS_AGENT_NAME);
       }
-      if (machine.agents.indexOf(SSH_AGENT_NAME) < 0) {
-        machine.agents.push(SSH_AGENT_NAME);
-      }
-      if (machine.agents.indexOf(TERMINAL_AGENT_NAME) < 0) {
-        machine.agents.push(TERMINAL_AGENT_NAME);
+      if (machine.installers.indexOf(TERMINAL_AGENT_NAME) < 0) {
+        machine.installers.push(TERMINAL_AGENT_NAME);
       }
       return;
     }
 
     if (!isDev && hasWsAgent) {
-      machine.agents.splice(machine.agents.indexOf(WS_AGENT_NAME), 1);
+      machine.installers.splice(machine.installers.indexOf(WS_AGENT_NAME), 1);
     }
   }
 
@@ -192,25 +278,20 @@ export abstract class EnvironmentManager {
     if (!machine.runtime) {
       return servers;
     }
-
     Object.keys(machine.runtime.servers).forEach((runtimeServerName: string) => {
-      let runtimeServer: che.IWorkspaceRuntimeMachineServer = machine.runtime.servers[runtimeServerName],
-          runtimeServerReference = runtimeServer.ref;
+      const runtimeServer: che.IWorkspaceRuntimeMachineServer = machine.runtime.servers[runtimeServerName],
+        [protocol] = runtimeServer.url ? runtimeServer.url.split('://') : '-',
+        port = runtimeServer.port ? runtimeServer.port : protocol.includes('http') ? '80' : '-';
 
-      if (servers[runtimeServerReference]) {
-        servers[runtimeServerReference].runtime = runtimeServer;
+      if (servers[runtimeServerName]) {
+        servers[runtimeServerName].runtime = runtimeServer;
       } else {
-        let port;
-        if (runtimeServer.port) {
-          port = runtimeServer.port;
-        } else {
-          [port, ] = runtimeServerName.split('/');
-        }
-        servers[runtimeServerReference] = {
+        servers[runtimeServerName] = {
           userScope: false,
-          port: port,
-          protocol: runtimeServer.protocol,
-          runtime: runtimeServer
+          path: runtimeServer.url,
+          runtime: runtimeServer,
+          protocol: protocol,
+          port: port
         };
       }
     });
@@ -238,11 +319,11 @@ export abstract class EnvironmentManager {
   }
 
   getAgents(machine: IEnvironmentManagerMachine): string[] {
-    return machine.agents || [];
+    return machine.installers || [];
   }
 
   setAgents(machine: IEnvironmentManagerMachine, agents: string[]): void {
-    machine.agents = angular.copy(agents);
+    machine.installers = angular.copy(agents);
   }
 
   /**
@@ -272,11 +353,7 @@ export abstract class EnvironmentManager {
   setMemoryLimit(machine: IEnvironmentManagerMachine, limit: number): void {
     machine.attributes = machine.attributes ? machine.attributes : {};
     if (limit) {
-      machine.attributes.memoryLimitBytes = limit.toString();
+      machine.attributes.memoryLimitBytes = limit;
     }
-  }
-
-  getEnvVariables(machine: IEnvironmentManagerMachine): any {
-    return null;
   }
 }

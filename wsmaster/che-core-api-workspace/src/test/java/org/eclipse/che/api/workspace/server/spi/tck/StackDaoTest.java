@@ -30,7 +30,6 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.workspace.server.event.BeforeStackRemovedEvent;
 import org.eclipse.che.api.workspace.server.event.StackPersistedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -50,7 +49,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Tests {@link SnapshotDao} contract.
+ * Tests {@link StackDao} contract.
  *
  * @author Yevhenii Voevodin
  */

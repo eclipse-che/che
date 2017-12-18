@@ -18,6 +18,7 @@ import {CheNotification} from '../../../components/notification/che-notification
  * @author Florent Benoit
  */
 export class CreateFactoryCtrl {
+  private gitLocation: string;
   private $location: ng.ILocationService;
   private $log: ng.ILogService;
   private cheAPI: CheAPI;
@@ -53,33 +54,34 @@ export class CreateFactoryCtrl {
 
     this.isLoading = false;
     this.isImporting = false;
-
     this.stackRecipeMode = 'current-recipe';
-
     this.factoryContent = null;
 
-    $scope.$watch('createFactoryCtrl.factoryObject', () => {
+    const factoryObjectWatcher = $scope.$watch(() => {
+      return this.factoryObject;
+    }, () => {
       this.name = this.factoryObject && this.factoryObject.name ? this.factoryObject.name : '';
       this.factoryContent = this.$filter('json')(angular.fromJson(this.factoryObject));
     }, true);
-
-    $scope.$watch('createFactoryCtrl.gitLocation', (newValue: string) => {
+    const gitLocationWatcher = $scope.$watch(() => {
+      return this.gitLocation;
+    }, (newValue: string) => {
       // update underlying model
       // updating first project item
       if (!this.factoryObject) {
         let templateName = 'git';
-        let promise = this.cheAPI.getFactoryTemplate().fetchFactoryTemplate(templateName);
-
-        promise.then(() => {
-          let factoryContent = this.cheAPI.getFactoryTemplate().getFactoryTemplate(templateName);
-          this.factoryObject = angular.fromJson(factoryContent);
-          this.updateGitProjectLocation(newValue);
-        });
+        let factoryContent = this.cheAPI.getFactoryTemplate().getFactoryTemplate(templateName);
+        this.factoryObject = angular.fromJson(factoryContent);
+        this.updateGitProjectLocation(newValue);
       } else {
         this.updateGitProjectLocation(newValue);
       }
 
     }, true);
+    $scope.$on('$destroy', () => {
+      factoryObjectWatcher();
+      gitLocationWatcher();
+    });
   }
 
   /**
@@ -102,6 +104,9 @@ export class CreateFactoryCtrl {
    * @param location the new location
    */
   updateGitProjectLocation(location: string): void {
+    if (!this.factoryObject) {
+      return;
+    }
     let project = this.factoryObject.workspace.projects[0];
     project.source.type = 'git';
     project.source.location = location;

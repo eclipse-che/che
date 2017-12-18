@@ -18,7 +18,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.Event;
 import elemental.svg.SVGSVGElement;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /** @author Vlad Zhukovskiy */
 public class TreeView {

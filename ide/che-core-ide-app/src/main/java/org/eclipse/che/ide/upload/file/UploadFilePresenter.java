@@ -74,9 +74,7 @@ public class UploadFilePresenter implements UploadFileView.ActionDelegate {
     this.container = container;
     view.showDialog();
     view.setAction(
-        appContext.getDevMachine().getWsAgentBaseUrl()
-            + "/project/uploadfile"
-            + container.getLocation());
+        appContext.getWsAgentServerApiEndpoint() + "/project/uploadfile" + container.getLocation());
   }
 
   /** {@inheritDoc} */

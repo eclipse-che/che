@@ -23,10 +23,10 @@ import java.util.Iterator;
 import java.util.Map;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
-import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
-import org.eclipse.che.ide.api.event.EditorDirtyStateChangedEvent;
-import org.eclipse.che.ide.api.event.EditorDirtyStateChangedHandler;
+import org.eclipse.che.ide.api.editor.events.EditorDirtyStateChangedEvent;
+import org.eclipse.che.ide.api.editor.events.EditorDirtyStateChangedHandler;
+import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.parts.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
@@ -102,7 +102,7 @@ public class EditorContentSynchronizerImpl
   public void onEditorDirtyStateChanged(EditorDirtyStateChangedEvent event) {
     EditorPartPresenter changedEditor = event.getEditor();
     if (changedEditor == null || changedEditor.isDirty()) {
-      // we sync 'dirty' state of editors only for case when content of an active editor HAS SAVED
+      // we sync 'dirty' state of editors only for case when content of an active editor IS SAVED
       return;
     }
 

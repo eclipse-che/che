@@ -17,8 +17,12 @@ import {DockerImageEnvironmentManager} from '../environment/docker-image-environ
 import {CheEnvironmentRegistry} from '../environment/che-environment-registry.factory';
 import {CheJsonRpcMasterApi} from '../json-rpc/che-json-rpc-master-api';
 import {CheJsonRpcApi} from '../json-rpc/che-json-rpc-api.factory';
-import {IObservableCallbackFn, Observable} from './../../utils/observable';
+import {IObservableCallbackFn, Observable} from '../../utils/observable';
 import {CheBranding} from '../../branding/che-branding.factory';
+import {OpenshiftEnvironmentManager} from '../environment/openshift-environment-manager';
+
+const WS_AGENT_HTTP_LINK: string = 'wsagent/http';
+const WS_AGENT_WS_LINK: string = 'wsagent/ws';
 
 interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
   create: any;
@@ -40,7 +44,6 @@ export enum WorkspaceStatus {
   PAUSED,
   STARTING,
   STOPPING,
-  SNAPSHOTTING,
   ERROR
 }
 
@@ -54,9 +57,10 @@ export class CheWorkspace {
   private $http: ng.IHttpService;
   private $q: ng.IQService;
   private $log: ng.ILogService;
-  private $websocket: ng.websocket.IWebSocketProvider;
+  private $websocket: any;
   private cheJsonRpcMasterApi: CheJsonRpcMasterApi;
   private listeners: Array<any>;
+  private workspaceStatuses: Array<string>;
   private workspaces: Array<che.IWorkspace>;
   private subscribedWorkspacesIds: Array<string>;
   private workspaceAgents: Map<string, CheWorkspaceAgent>;
@@ -82,8 +86,9 @@ export class CheWorkspace {
    * @ngInject for Dependency injection
    */
   constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService, $q: ng.IQService, cheJsonRpcApi: CheJsonRpcApi,
-              $websocket: ng.websocket.IWebSocketProvider, $location: ng.ILocationService, proxySettings : string, userDashboardConfig: any,
+              $websocket: any, $location: ng.ILocationService, proxySettings : string, userDashboardConfig: any,
               lodash: any, cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService, cheBranding: CheBranding, keycloakAuth: any) {
+    this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR'];
     // keep resource
     this.$q = $q;
     this.$resource = $resource;
@@ -120,7 +125,7 @@ export class CheWorkspace {
         updateWorkspace: {method: 'PUT', url: '/api/workspace/:workspaceId'},
         addProject: {method: 'POST', url: '/api/workspace/:workspaceId/project'},
         deleteProject: {method: 'DELETE', url: '/api/workspace/:workspaceId/project/:path'},
-        stopWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId/runtime?create-snapshot=:createSnapshot'},
+        stopWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId/runtime'},
         startWorkspace: {method: 'POST', url: '/api/workspace/:workspaceId/runtime?environment=:envName'},
         startTemporaryWorkspace: {method: 'POST', url: '/api/workspace/runtime?temporary=true'},
         addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'},
@@ -131,6 +136,7 @@ export class CheWorkspace {
     cheEnvironmentRegistry.addEnvironmentManager('compose', new ComposeEnvironmentManager($log));
     cheEnvironmentRegistry.addEnvironmentManager('dockerfile', new DockerFileEnvironmentManager($log));
     cheEnvironmentRegistry.addEnvironmentManager('dockerimage', new DockerImageEnvironmentManager($log));
+    cheEnvironmentRegistry.addEnvironmentManager('openshift', new OpenshiftEnvironmentManager($log));
 
     this.fetchWorkspaceSettings();
 
@@ -189,24 +195,20 @@ export class CheWorkspace {
 
     let runtimeConfig = this.getWorkspaceById(workspaceId).runtime;
     if (runtimeConfig) {
-      let wsAgentLink = this.lodash.find(runtimeConfig.links, (link: any) => {
-        return link.rel === 'wsagent';
+      let machines = runtimeConfig.machines;
+      let wsAgentLink: any;
+      let wsAgentWebocketLink: any;
+      Object.keys(machines).forEach((key: string) => {
+        let machine = machines[key];
+        if (machine.servers[WS_AGENT_HTTP_LINK]) {
+          wsAgentLink = machine.servers[WS_AGENT_HTTP_LINK];
+        }
+        if (machine.servers[WS_AGENT_WS_LINK]) {
+          wsAgentWebocketLink = machine.servers[WS_AGENT_WS_LINK];
+        }
       });
 
-      if (!wsAgentLink) {
-        return null;
-      }
-
-      let wsAgentWebocketLink;
-      if (runtimeConfig.devMachine) {
-        let websocketLink = this.lodash.find(runtimeConfig.devMachine.links, (link: any) => {
-          return link.rel === 'wsagent.websocket';
-        });
-        wsAgentWebocketLink = websocketLink ? websocketLink.href : '';
-        wsAgentWebocketLink = wsAgentWebocketLink.replace('/api/ws', '');
-      }
-
-      let workspaceAgentData = {path: wsAgentLink.href, websocket: wsAgentWebocketLink, clientId: this.cheJsonRpcMasterApi.getClientId()};
+      let workspaceAgentData = {path: wsAgentLink.url, websocket: wsAgentWebocketLink.url, clientId: this.cheJsonRpcMasterApi.getClientId()};
       let wsagent: CheWorkspaceAgent = new CheWorkspaceAgent(this.$resource, this.$q, this.$websocket, workspaceAgentData);
       this.workspaceAgents.set(workspaceId, wsagent);
       return wsagent;
@@ -312,7 +314,7 @@ export class CheWorkspace {
       });
       return this.workspaces;
     }, (error: any) => {
-      if (error.status === 304) {
+      if (error && error.status === 304) {
         return this.workspaces;
       }
       return this.$q.reject(error);
@@ -354,7 +356,7 @@ export class CheWorkspace {
       this.updateWorkspacesList(workspace);
       defer.resolve();
     }, (error: any) => {
-      if (error.status === 304) {
+      if (error && error.status === 304) {
         defer.resolve();
         return;
       }
@@ -416,7 +418,7 @@ export class CheWorkspace {
         'machines': {
           'dev-machine': {
             'attributes': {'memoryLimitBytes': ram},
-            'agents': ['org.eclipse.che.ws-agentItem', 'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
           }
         }
       };
@@ -440,7 +442,7 @@ export class CheWorkspace {
     }
 
     let devMachine = this.lodash.find(defaultEnvironment.machines, (machine: any) => {
-      return machine.agents.indexOf('org.eclipse.che.ws-agentItem') >= 0;
+      return machine.installers.indexOf('org.eclipse.che.ws-agent') >= 0;
     });
 
     // check dev machine is provided and add if there is no:
@@ -449,7 +451,7 @@ export class CheWorkspace {
         'name': 'ws-machine',
         'attributes': {'memoryLimitBytes': ram},
         'type': 'docker',
-        'agents': ['org.eclipse.che.ws-agentItem', 'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+        'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
       };
       defaultEnvironment.machines[devMachine.name] = devMachine;
     } else {
@@ -526,11 +528,9 @@ export class CheWorkspace {
    * @param workspaceId {string}
    * @returns {ng.IPromise<any>} promise
    */
-  stopWorkspace(workspaceId: string, createSnapshot: boolean): ng.IPromise<any> {
-    createSnapshot = createSnapshot === undefined ? this.getAutoSnapshotSettings() : createSnapshot;
+  stopWorkspace(workspaceId: string): ng.IPromise<any> {
     return this.remoteWorkspaceAPI.stopWorkspace({
-      workspaceId: workspaceId,
-      createSnapshot: createSnapshot
+      workspaceId: workspaceId
     }, {}).$promise;
   }
 
@@ -642,25 +642,19 @@ export class CheWorkspace {
     if (this.subscribedWorkspacesIds.indexOf(workspaceId) < 0) {
       this.subscribedWorkspacesIds.push(workspaceId);
       this.cheJsonRpcMasterApi.subscribeWorkspaceStatus(workspaceId, (message: any) => {
-        // filter workspace events, which really indicate the status change:
-        if (WorkspaceStatus[<string>message.eventType] >= 0) {
-          this.getWorkspaceById(workspaceId).status = message.eventType;
-        } else if (message.eventType === 'SNAPSHOT_CREATING') {
-          this.getWorkspaceById(workspaceId).status = WorkspaceStatus[WorkspaceStatus.SNAPSHOTTING];
-        } else if (message.eventType === 'SNAPSHOT_CREATED') {
-          // snapshot can be created for RUNNING workspace only.
-          this.getWorkspaceById(workspaceId).status = WorkspaceStatus[WorkspaceStatus.RUNNING];
+        if (this.workspaceStatuses.indexOf(message.status) >= 0) {
+          this.getWorkspaceById(workspaceId).status = message.status;
         }
 
-        if (!this.statusDefers[workspaceId] || !this.statusDefers[workspaceId][message.eventType]) {
+        if (!this.statusDefers[workspaceId] || !this.statusDefers[workspaceId][message.status]) {
           return;
         }
 
-        this.statusDefers[workspaceId][message.eventType].forEach((defer: any) => {
+        this.statusDefers[workspaceId][message.status].forEach((defer: any) => {
           defer.resolve(message);
         });
 
-        this.statusDefers[workspaceId][message.eventType].length = 0;
+        this.statusDefers[workspaceId][message.status].length = 0;
       });
     }
   }
@@ -692,39 +686,35 @@ export class CheWorkspace {
     return this.workspaceSettings;
   }
 
-  /**
-   * Returns the value of autosnapshot system property.
-   *
-   * @returns {boolean} 'che.workspace.auto_snapshot' property value
-   */
-  getAutoSnapshotSettings(): boolean {
-    return this.workspaceSettings ? this.workspaceSettings['che.workspace.auto_snapshot'] === 'true' : true;
-  }
-
   getJsonRpcApiLocation(): string {
     return this.jsonRpcApiLocation;
   }
 
   private updateWorkspacesList(workspace: che.IWorkspace): void {
-    // add workspace if not temporary
-    if (!workspace.temporary) {
-      this.lodash.remove(this.workspaces, (_workspace: che.IWorkspace) => {
-        return _workspace.id === workspace.id;
-      });
-      this.workspaces.push(workspace);
-      // publish change
-      if (this.observables.has(workspace.id)) {
-        this.observables.get(workspace.id).publish(workspace);
-      }
+    if (workspace.temporary) {
+      this.workspacesById.set(workspace.id, workspace);
+      return;
     }
 
     const workspaceDetails = this.getWorkspaceById(workspace.id);
+
+    if (!workspaceDetails) {
+      this.workspacesById.set(workspace.id, workspace);
+    }
     if (workspaceDetails && WorkspaceStatus[workspaceDetails.status] === WorkspaceStatus.RUNNING && workspaceDetails.runtime && !workspace.runtime) {
-      const runtime = angular.copy(workspaceDetails.runtime);
-      this.workspacesById.set(workspace.id, workspace);
-      this.getWorkspaceById(workspace.id).runtime = runtime;
-    } else {
-      this.workspacesById.set(workspace.id, workspace);
+      workspace.runtime = angular.copy(workspaceDetails.runtime);
+    }
+    this.lodash.remove(this.workspaces, (_workspace: che.IWorkspace) => {
+      return _workspace.id === workspace.id;
+    });
+    this.workspaces.push(workspace);
+    // publish change
+    if (this.observables.has(workspace.id)) {
+      this.observables.get(workspace.id).publish(workspace);
+    }
+    if (!angular.equals(workspaceDetails, workspace)) {
+      this.fetchWorkspaceDetails(workspace.id);
+      return;
     }
 
     this.startUpdateWorkspaceStatus(workspace.id);

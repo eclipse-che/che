@@ -10,34 +10,29 @@
  */
 package org.eclipse.che.plugin.languageserver.ide.service;
 
-import com.google.web.bindery.event.shared.EventBus;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.plugin.languageserver.ide.editor.PublishDiagnosticsProcessor;
 
 /** Subscribes and receives JSON-RPC messages related to 'textDocument/publishDiagnostics' events */
 @Singleton
 public class PublishDiagnosticsReceiver {
 
-  @Inject
-  public PublishDiagnosticsReceiver(RequestTransmitter transmitter, EventBus eventBus) {
-    eventBus.addHandler(
-        WsAgentStateEvent.TYPE,
-        new WsAgentStateHandler() {
-          @Override
-          public void onWsAgentStarted(WsAgentStateEvent event) {
-            subscribe(transmitter);
-          }
+  private final RequestTransmitter transmitter;
 
-          @Override
-          public void onWsAgentStopped(WsAgentStateEvent event) {}
-        });
+  @Inject
+  public PublishDiagnosticsReceiver(RequestTransmitter transmitter) {
+    this.transmitter = transmitter;
+  }
+
+  public void subscribe() {
+    subscribe(transmitter);
   }
 
   @Inject
@@ -54,7 +49,7 @@ public class PublishDiagnosticsReceiver {
   private void subscribe(RequestTransmitter transmitter) {
     transmitter
         .newRequest()
-        .endpointId("ws-agent")
+        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
         .methodName("textDocument/publishDiagnostics/subscribe")
         .noParams()
         .sendAndSkipResult();

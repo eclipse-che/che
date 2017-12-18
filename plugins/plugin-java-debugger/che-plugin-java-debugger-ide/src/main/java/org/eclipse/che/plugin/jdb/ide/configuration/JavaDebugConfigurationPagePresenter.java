@@ -17,11 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.core.model.machine.Server;
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.util.Pair;
 
 /**
@@ -35,7 +35,7 @@ public class JavaDebugConfigurationPagePresenter
         DebugConfigurationPage<DebugConfiguration> {
 
   private final JavaDebugConfigurationPageView view;
-  private final AppContext appContext;
+  private final WsAgentServerUtil wsAgentServerUtil;
 
   private DebugConfiguration editedConfiguration;
   private String originHost;
@@ -44,9 +44,9 @@ public class JavaDebugConfigurationPagePresenter
 
   @Inject
   public JavaDebugConfigurationPagePresenter(
-      JavaDebugConfigurationPageView view, AppContext appContext) {
+      JavaDebugConfigurationPageView view, WsAgentServerUtil wsAgentServerUtil) {
     this.view = view;
-    this.appContext = appContext;
+    this.wsAgentServerUtil = wsAgentServerUtil;
 
     view.setDelegate(this);
   }
@@ -73,23 +73,24 @@ public class JavaDebugConfigurationPagePresenter
   }
 
   private void setPortsList() {
-    List<Pair<String, String>> ports = extractPortsList(appContext.getDevMachine());
-    view.setPortsList(ports);
+    wsAgentServerUtil
+        .getWsAgentServerMachine()
+        .ifPresent(machine -> view.setPortsList(extractPortsList(machine)));
   }
 
   /** Extracts list of ports available for connecting to the remote debugger. */
-  private List<Pair<String, String>> extractPortsList(final MachineEntity machine) {
+  private List<Pair<String, String>> extractPortsList(final MachineImpl machine) {
     List<Pair<String, String>> ports = new ArrayList<>();
-    if (machine == null || machine.getRuntime() == null) {
+    if (machine == null) {
       return ports;
     }
 
-    Map<String, ? extends Server> servers = machine.getRuntime().getServers();
+    Map<String, ? extends Server> servers = machine.getServers();
     for (Map.Entry<String, ? extends Server> entry : servers.entrySet()) {
       String port = entry.getKey();
       if (port.endsWith("/tcp")) {
         String portWithoutTcp = port.substring(0, port.length() - 4);
-        String description = portWithoutTcp + " (" + entry.getValue().getRef() + ")";
+        String description = portWithoutTcp + " (" + entry.getValue().getUrl() + ")";
         Pair<String, String> pair = new Pair<>(description, portWithoutTcp);
 
         ports.add(pair);

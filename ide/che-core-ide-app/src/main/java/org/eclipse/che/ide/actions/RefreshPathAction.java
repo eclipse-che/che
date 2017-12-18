@@ -11,16 +11,22 @@
 package org.eclipse.che.ide.actions;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.parts.ActivePartChangedHandler;
+import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Refresh current selected container.
@@ -28,18 +34,32 @@ import org.eclipse.che.ide.api.resources.Resource;
  * @author Vlad Zhukovskiy
  */
 @Singleton
-public class RefreshPathAction extends AbstractPerspectiveAction {
+public class RefreshPathAction extends AbstractPerspectiveAction
+    implements ActivePartChangedHandler {
 
   private final AppContext appContext;
 
+  private PartPresenter activePart;
+
   @Inject
-  public RefreshPathAction(AppContext appContext) {
-    super(singletonList(PROJECT_PERSPECTIVE_ID), "Refresh", "Refresh path", null, null);
+  public RefreshPathAction(
+      AppContext appContext, CoreLocalizationConstant localizationConstant, EventBus eventBus) {
+    super(
+        singletonList(PROJECT_PERSPECTIVE_ID),
+        localizationConstant.refreshActionTitle(),
+        localizationConstant.refreshActionDescription());
     this.appContext = appContext;
+
+    eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
   }
 
   @Override
   public void updateInPerspective(@NotNull ActionEvent event) {
+    if (!(activePart instanceof ProjectExplorerPresenter)) {
+      event.getPresentation().setEnabledAndVisible(false);
+      return;
+    }
+
     event.getPresentation().setText("Refresh");
     event.getPresentation().setVisible(true);
 
@@ -87,5 +107,10 @@ public class RefreshPathAction extends AbstractPerspectiveAction {
         parent.synchronize();
       }
     }
+  }
+
+  @Override
+  public void onActivePartChanged(ActivePartChangedEvent event) {
+    this.activePart = event.getActivePart();
   }
 }

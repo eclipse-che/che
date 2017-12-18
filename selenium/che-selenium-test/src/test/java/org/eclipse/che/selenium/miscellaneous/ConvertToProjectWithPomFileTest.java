@@ -101,7 +101,7 @@ public class ConvertToProjectWithPomFileTest {
         "pom", PATH_TO_POM_FILE, TestProjectExplorerContextMenuConstants.SubMenuNew.XML_FILE);
     projectExplorer.waitItemInVisibleArea("pom.xml");
     projectExplorer.openItemByPath(PATH_TO_POM_FILE + "/pom.xml");
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
     editor.deleteAllContent();
     actionsFactory.createAction(seleniumWebDriver).sendKeys(EXPECTED_TEXT).perform();
@@ -131,6 +131,7 @@ public class ConvertToProjectWithPomFileTest {
     projectExplorer.openContextMenuByPathSelectedItem(pathToFile);
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
     projectExplorer.clickOnItemInContextMenu(type);
+    askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(name);
     askForValueDialog.clickOkBtn();
   }

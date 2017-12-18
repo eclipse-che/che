@@ -12,27 +12,27 @@ package org.eclipse.che.selenium.core.provider;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.net.MalformedURLException;
 import java.net.URL;
 import javax.inject.Named;
+import org.eclipse.che.selenium.core.UrlUtil;
 
 /** @author Anatolii Bazko */
 @Singleton
 public class CheTestApiEndpointUrlProvider implements TestApiEndpointUrlProvider {
   @Inject
-  @Named("sys.protocol")
+  @Named("che.protocol")
   private String protocol;
 
   @Inject
-  @Named("sys.host")
+  @Named("che.host")
   private String host;
+
+  @Inject
+  @Named("che.port")
+  private int port;
 
   @Override
   public URL get() {
-    try {
-      return new URL(protocol, host, 8080, "/wsmaster/api/");
-    } catch (MalformedURLException e) {
-      throw new RuntimeException(e.getMessage(), e);
-    }
+    return UrlUtil.url(protocol, host, port, "/api/");
   }
 }

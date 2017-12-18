@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug.breakpoint;
 
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 import static org.eclipse.che.plugin.debugger.ide.DebuggerExtension.BREAKPOINT;
 
 import com.google.inject.Inject;

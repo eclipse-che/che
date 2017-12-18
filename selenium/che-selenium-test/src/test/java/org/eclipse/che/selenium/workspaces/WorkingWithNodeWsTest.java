@@ -14,7 +14,6 @@ import static org.eclipse.che.selenium.core.constant.TestStacksConstants.NODE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.BUILD;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.RUN;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
@@ -73,7 +72,7 @@ public class WorkingWithNodeWsTest {
   public void checkNodeJsWsAndRunApp() {
     String currentWindow;
 
-    // create a workspace from the Node stack with the web-nodejs-simple project
+    // Create a workspace from the Node stack with the web-nodejs-simple project
     dashboard.open();
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
@@ -96,12 +95,6 @@ public class WorkingWithNodeWsTest {
     // Perform run web nodeJs application
     consoles.startCommandFromProcessesArea("dev-machine", BUILD, INSTALL_DEPENDENCIES_PROCESS);
     consoles.waitTabNameProcessIsPresent(INSTALL_DEPENDENCIES_PROCESS);
-    try {
-      consoles.waitExpectedTextIntoConsole("> node install.js", WIDGET_TIMEOUT_SEC);
-    } catch (TimeoutException ex) {
-      // Remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/6483", ex);
-    }
     consoles.waitExpectedTextIntoConsole("bower_components/angular", APPLICATION_START_TIMEOUT_SEC);
 
     consoles.startCommandFromProcessesArea("dev-machine", RUN, RUN_PROCESS);
@@ -112,7 +105,12 @@ public class WorkingWithNodeWsTest {
     consoles.waitPreviewUrlIsPresent();
     seleniumWebDriver.navigate().refresh();
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    consoles.waitPreviewUrlIsPresent();
+    try {
+      consoles.waitPreviewUrlIsPresent();
+    } catch (TimeoutException ex) {
+      // Remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7072");
+    }
 
     // Run the application
     projectExplorer.selectItem(PROJECT_NAME);

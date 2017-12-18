@@ -113,7 +113,7 @@ public class AddFilesToIndexTest {
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_INITIALIZED_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_INITIALIZED_SUCCESS);
 
     // perform init commit
@@ -127,12 +127,12 @@ public class AddFilesToIndexTest {
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_NOTHING_TO_ADD);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_NOTHING_TO_ADD);
 
     // Edit index.jsp
     projectExplorer.openItemByVisibleNameInExplorer("index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.PAGE_DOWN.toString());
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -143,7 +143,7 @@ public class AddFilesToIndexTest {
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
 
     // Check status
@@ -154,7 +154,7 @@ public class AddFilesToIndexTest {
     // Edit GreetingController.java
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(16);
     editor.typeTextIntoEditor("//Testing add to index");
     loader.waitOnClosed();
@@ -176,7 +176,7 @@ public class AddFilesToIndexTest {
     git.waitAddToIndexFileName("Add content of folder " + PROJECT_NAME + " to index?");
     git.confirmAddToIndexForm();
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
 
     // Check status
@@ -185,7 +185,7 @@ public class AddFilesToIndexTest {
 
     // Edit GreetingController.java
     editor.selectTabByName("AppController");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.DOWN.toString());
     editor.typeTextIntoEditor(Keys.DOWN.toString());
     editor.typeTextIntoEditor(Keys.DOWN.toString());
@@ -194,7 +194,7 @@ public class AddFilesToIndexTest {
 
     // Edit index.jsp
     editor.selectTabByName("index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.PAGE_DOWN.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("<!-- Testing add to index-->");
@@ -202,7 +202,7 @@ public class AddFilesToIndexTest {
 
     // Edit new.css
     editor.selectTabByName("new.css");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.PAGE_DOWN.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("/* Testing add to index */");

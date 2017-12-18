@@ -17,7 +17,6 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
 import java.util.Set;
-import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.console.CommandConsoleFactory;
@@ -117,25 +116,17 @@ public class MavenMessagesHandler {
     List<String> updatedProjects = dto.getUpdatedProjects();
     Set<String> projectToRefresh = computeUniqueHiLevelProjects(updatedProjects);
 
-    // Temporary delay synchronization, because maven server sends update events in the same time,
-    // when other synchronization call may be performed, such as rename project.
-    // Will be reworked in nearest future, temporary solution.
-    new DelayedTask() {
-      @Override
-      public void onExecute() {
-        for (final String path : projectToRefresh) {
-          appContext
-              .getWorkspaceRoot()
-              .getContainer(path)
-              .then(
-                  container -> {
-                    if (container.isPresent()) {
-                      container.get().synchronize();
-                    }
-                  });
-        }
-      }
-    }.delay(3000);
+    for (final String path : projectToRefresh) {
+      appContext
+          .getWorkspaceRoot()
+          .getContainer(path)
+          .then(
+              container -> {
+                if (container.isPresent()) {
+                  container.get().synchronize();
+                }
+              });
+    }
 
     pomEditorReconciler.reconcilePoms(updatedProjects);
   }
@@ -144,7 +135,7 @@ public class MavenMessagesHandler {
     String message = output.getOutput();
     switch (output.getState()) {
       case START:
-        processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), outputConsole);
+        processesPanelPresenter.addCommandOutput(outputConsole);
         outputConsole.clearOutputsButtonClicked();
         outputConsole.printText(message, "green");
         break;

@@ -20,7 +20,6 @@ import static org.eclipse.che.commons.xml.XMLTreeLocation.beforeAnyOf;
 import static org.eclipse.che.commons.xml.XMLTreeLocation.inTheBegin;
 import static org.eclipse.che.commons.xml.XMLTreeLocation.inTheEnd;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,9 +30,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.commons.xml.Element;
 import org.eclipse.che.commons.xml.ElementMapper;
 import org.eclipse.che.commons.xml.NewElement;
@@ -125,18 +121,6 @@ public final class Model {
    */
   public static Model readFrom(Path path) throws IOException {
     return readFrom(requireNonNull(path.toFile(), "Required not null model"));
-  }
-
-  /**
-   * Reads model from given virtual file.
-   *
-   * @param file virtual file to read model from
-   * @return fetched model
-   */
-  public static Model readFrom(VirtualFile file)
-      throws ServerException, ForbiddenException, IOException {
-    requireNonNull(file, "Required not null virtual file");
-    return fetchModel(XMLTree.from(file.getContent()));
   }
 
   /**
@@ -898,15 +882,6 @@ public final class Model {
    */
   public void writeTo(File file) throws IOException {
     tree.writeTo(file);
-  }
-
-  /**
-   * Updates virtual file content
-   *
-   * @param file virtual file which content should be updated
-   */
-  public void writeTo(VirtualFile file) throws ServerException, ForbiddenException {
-    file.updateContent(new ByteArrayInputStream(tree.getBytes()), null);
   }
 
   /**

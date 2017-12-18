@@ -18,6 +18,7 @@ import {ListComponents} from './stack-details/list-components/list-components.di
 import {ListComponentsController} from './stack-details/list-components/list-components.controller';
 import {EditComponentDialogController} from './stack-details/list-components/edit-component-dialog/edit-component-dialog.controller';
 import {SelectTemplateController} from './stack-details/select-template/select-template.controller';
+import {SamplesTagFilter} from './stack-details/select-template/samples-tag.filter';
 import {ImportStackController} from './list-stacks/import-stack/import-stack.controller';
 import {ImportStackService} from './stack-details/import-stack.service';
 import {StackValidationService} from './stack-details/stack-validation.service';
@@ -42,6 +43,7 @@ export class StacksConfig {
     register.controller('StackController', StackController);
     register.controller('EditComponentDialogController', EditComponentDialogController);
     register.controller('SelectTemplateController', SelectTemplateController);
+    register.filter('samplesTagFilter', SamplesTagFilter.filter);
     register.controller('ImportStackController', ImportStackController);
     register.service('importStackService', ImportStackService);
     register.service('stackValidationService', StackValidationService);

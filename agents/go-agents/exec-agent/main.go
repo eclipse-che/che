@@ -25,6 +25,7 @@ import (
 	"github.com/eclipse/che/agents/go-agents/core/process"
 	"github.com/eclipse/che/agents/go-agents/core/rest"
 	"github.com/eclipse/che/agents/go-agents/exec-agent/exec"
+	"strconv"
 )
 
 var (
@@ -32,7 +33,7 @@ var (
 )
 
 func init() {
-	config.registerFlags()
+	config.init()
 }
 
 func main() {
@@ -74,7 +75,6 @@ func main() {
 							return err
 						}
 						tunnel := jsonrpc.NewManagedTunnel(conn)
-						tunnel.Go()
 						tunnel.SayHello()
 						return nil
 					},
@@ -146,7 +146,7 @@ type execAgentConfig struct {
 	processCleanupPeriodInMinutes    int
 }
 
-func (cfg *execAgentConfig) registerFlags() {
+func (cfg *execAgentConfig) init() {
 	// server configuration
 	flag.StringVar(
 		&cfg.serverAddress,
@@ -176,11 +176,18 @@ func (cfg *execAgentConfig) registerFlags() {
 	)
 
 	// auth configuration
+	defaultAuthEnabled := false
+	authEnabledEnv := os.Getenv("CHE_AUTH_ENABLED")
+	b, e := strconv.ParseBool(authEnabledEnv)
+	if e == nil {
+		defaultAuthEnabled = b
+	}
 	flag.BoolVar(
 		&cfg.authEnabled,
 		"enable-auth",
-		false,
-		"whether authenicate requests on workspace master before allowing them to proceed",
+		defaultAuthEnabled,
+		"whether authenticate requests on workspace master before allowing them to proceed."+
+			"By default the value from 'CHE_AUTH_ENABLED' environment variable is used or `false` if it is missing",
 	)
 	flag.UintVar(
 		&cfg.tokensExpirationTimeoutInMinutes,

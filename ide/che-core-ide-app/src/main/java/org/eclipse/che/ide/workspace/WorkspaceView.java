@@ -20,6 +20,7 @@ import org.eclipse.che.ide.api.mvp.View;
  * @author Dmitry Shnurenko
  */
 public interface WorkspaceView extends View<WorkspaceView.ActionDelegate> {
+
   /** Required for delegating functions in the view. */
   interface ActionDelegate {}
 
@@ -38,4 +39,10 @@ public interface WorkspaceView extends View<WorkspaceView.ActionDelegate> {
    * @return status panel
    */
   AcceptsOneWidget getStatusPanel();
+
+  /** Sets visibility of toolbar. */
+  void showToolbar(boolean show);
+
+  /** Determines whether toolbar is visible. */
+  boolean isToolbarVisible();
 }

@@ -200,7 +200,7 @@ public interface GitLocalizationConstant extends Messages {
   String remoteListFailed();
 
   @Key("messages.remove_files_success")
-  String removeFilesSuccessfull();
+  String removeFilesSuccessful();
 
   @Key("messages.remove_files_failed")
   String removeFilesFailed();
@@ -360,11 +360,14 @@ public interface GitLocalizationConstant extends Messages {
   @Key("view.branch.delete_ask")
   String branchDeleteAsk(String name);
 
-  @Key("view.branch.filter.label")
-  String branchFilterLabel();
+  @Key("view.branch.local_remote_filter.label")
+  String branchLocalRemoteFilterLabel();
 
   @Key("view.branch.title")
   String branchTitle();
+
+  @Key("view.branch.search_filter.label")
+  String branchSearchFilterLabel();
 
   // Commit
   @Key("view.commit.commit_message")
@@ -642,7 +645,7 @@ public interface GitLocalizationConstant extends Messages {
   @Key("merged.conflicts")
   String mergedConflicts();
 
-  /* Checkout reference */
+  // Checkout reference
   @Key("checkout.reference.title")
   String checkoutReferenceTitle();
 
@@ -651,6 +654,16 @@ public interface GitLocalizationConstant extends Messages {
 
   @Key("checkout.reference.message")
   String checkoutReferenceMessage();
+
+  /* Panel */
+  @Key("panel.title")
+  String panelTitle();
+
+  @Key("panel.title.tooltip")
+  String panelTitleToolTip();
+
+  @Key("panel.repositories")
+  String repositories();
 
   /* Controls */
   @Key("control.branches.title")

@@ -74,6 +74,10 @@ type rpcProcessEventConsumer struct {
 	tunnel *jsonrpc.Tunnel
 }
 
+// TODO rework process to use events.Bus
 func (rpcConsumer *rpcProcessEventConsumer) Accept(e process.Event) {
-	rpcConsumer.tunnel.Notify(e.Type(), e)
+	if err := rpcConsumer.tunnel.Notify(e.Type(), e); err != nil {
+		// process lib will remove each subscriber which panics
+		panic(err)
+	}
 }

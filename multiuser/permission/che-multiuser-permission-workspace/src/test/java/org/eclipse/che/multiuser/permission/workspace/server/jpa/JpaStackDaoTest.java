@@ -21,7 +21,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.commons.test.db.H2TestHelper;
+import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.MultiuserJpaStackDao;
 import org.eclipse.che.multiuser.permission.workspace.server.stack.StackPermissionsImpl;
 import org.testng.annotations.AfterClass;
@@ -33,6 +33,7 @@ import org.testng.annotations.Test;
 /** @author Max Shaposhnik (mshaposhnik@codenvy.com) */
 public class JpaStackDaoTest {
 
+  private TckResourcesCleaner tckResourcesCleaner;
   private EntityManager manager;
   private MultiuserJpaStackDao dao;
 
@@ -88,6 +89,7 @@ public class JpaStackDaoTest {
     Injector injector = Guice.createInjector(new WorkspaceTckModule());
     manager = injector.getInstance(EntityManager.class);
     dao = injector.getInstance(MultiuserJpaStackDao.class);
+    tckResourcesCleaner = injector.getInstance(TckResourcesCleaner.class);
   }
 
   @BeforeMethod
@@ -131,8 +133,7 @@ public class JpaStackDaoTest {
 
   @AfterClass
   public void shutdown() throws Exception {
-    manager.getEntityManagerFactory().close();
-    H2TestHelper.shutdownDefault();
+    tckResourcesCleaner.clean();
   }
 
   @Test

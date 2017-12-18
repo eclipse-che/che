@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.plugin.languageserver.ide.service;
 
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.TimeoutException;
@@ -36,7 +38,7 @@ public class LanguageServerRegistryJsonRpcClient {
         (resolve, reject) ->
             requestTransmitter
                 .newRequest()
-                .endpointId("ws-agent")
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName("languageServer/initialize")
                 .paramsAsString(path)
                 .sendAndReceiveResultAsDto(ServerCapabilities.class, 30000)

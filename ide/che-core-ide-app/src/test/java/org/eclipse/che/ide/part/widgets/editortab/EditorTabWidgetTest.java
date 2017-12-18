@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.ide.part.widgets.editortab;
 
-import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.BELOW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mock;
@@ -32,6 +31,7 @@ import org.eclipse.che.ide.api.parts.EditorTab.ActionDelegate;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.part.editor.EditorTabContextMenuFactory;
+import org.eclipse.che.ide.resource.Path;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -75,6 +75,9 @@ public class EditorTabWidgetTest {
     when(event.getNativeButton()).thenReturn(NativeEvent.BUTTON_LEFT);
     when(editorPartPresenter.getEditorInput()).thenReturn(editorInput);
     when(editorPartPresenter.getTitleImage()).thenReturn(icon);
+    when(editorInput.getFile()).thenReturn(file);
+    when(file.getDisplayName()).thenReturn("displayName");
+    when(file.getLocation()).thenReturn(Path.valueOf("/path"));
 
     tab =
         new EditorTabWidget(
@@ -92,11 +95,6 @@ public class EditorTabWidgetTest {
     tab.getTitle();
 
     verify(tab.title).getText();
-  }
-
-  @Test(expected = UnsupportedOperationException.class)
-  public void exceptionShouldBeThrownWhenTrySetTabPosition() {
-    tab.setTabPosition(BELOW);
   }
 
   @Test

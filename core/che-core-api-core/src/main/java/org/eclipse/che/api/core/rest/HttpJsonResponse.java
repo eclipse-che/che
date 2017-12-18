@@ -113,4 +113,11 @@ public interface HttpJsonResponse {
    * @throws IOException when response body is not valid json
    */
   <T> T as(@NotNull Class<T> clazz, @Nullable Type genericType) throws IOException;
+
+  /**
+   * Returns an unmodifiable Map of the header fields. The Map keys are Strings that represent the
+   * response-header field names. Each Map value is an unmodifiable List of Strings that represents
+   * the corresponding field values.
+   */
+  Map<String, List<String>> getHeaders();
 }

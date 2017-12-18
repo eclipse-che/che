@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ext.java.client.tree;
 
 import com.google.common.annotations.Beta;
-import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.ext.java.client.tree.library.JarFileNode;
 import org.eclipse.che.ide.ext.java.client.tree.library.JarFolderNode;
@@ -21,6 +20,7 @@ import org.eclipse.che.ide.ext.java.shared.Jar;
 import org.eclipse.che.ide.ext.java.shared.JarEntry;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.tree.ResourceNode.NodeFactory;
+import org.eclipse.che.ide.ui.smartTree.data.settings.NodeSettings;
 
 /** @author Vlad Zhukovskiy */
 @Beta

@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.ide.FontAwesome;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
@@ -41,6 +40,7 @@ import org.eclipse.che.ide.ui.smartTree.SelectionModel;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.smartTree.compare.NameComparator;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
 import org.eclipse.che.ide.ui.smartTree.presentation.PresentationRenderer;
 
@@ -115,7 +115,7 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
               file ->
                   nodeStorage.add(
                       new ChangedFileNode(
-                          file, files.getStatusByFilePath(file), nodesResources, delegate, false)));
+                          file, files.getStatusByFilePath(file), res, delegate, false)));
     }
   }
 
@@ -146,8 +146,17 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
   }
 
   @Override
-  public void setTextToChangeViewModeButton(String text) {
-    changeViewModeButton.setText(text);
+  public void updateChangeViewModeButton(ViewMode viewMode) {
+    switch (viewMode) {
+      case TREE:
+        changeViewModeButton.getElement().setInnerHTML(FontAwesome.LIST_UL);
+        changeViewModeButton.setTitle(locale.changeListRowListViewButtonText());
+        break;
+      case LIST:
+        changeViewModeButton.getElement().setInnerHTML(FontAwesome.FOLDER);
+        changeViewModeButton.setTitle(locale.changeListGroupByDirectoryButtonText());
+        break;
+    }
   }
 
   @Override
@@ -209,7 +218,7 @@ public class ChangesPanelViewImpl extends Composite implements ChangesPanelView 
         if (pathName.segmentCount() != i) {
           continue;
         }
-        Node fileNode = new ChangedFileNode(file, items.get(file), nodesResources, delegate, true);
+        Node fileNode = new ChangedFileNode(file, items.get(file), res, delegate, true);
         String filePath = pathName.removeLastSegments(1).toString();
         if (currentChildNodes.keySet().contains(filePath)) {
           currentChildNodes.get(filePath).add(fileNode);

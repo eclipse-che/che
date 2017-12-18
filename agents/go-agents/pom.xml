@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-agents-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.22.0-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
     </parent>
     <artifactId>go-agents</artifactId>
     <name>Agent :: Golang agents</name>
@@ -27,7 +27,8 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
                     <includes>
-                        <include>**/**</include>
+                        <include>**/*.go</include>
+                        <include>pom.xml</include>
                     </includes>
                     <excludes>
                         <exclude>docs/**</exclude>

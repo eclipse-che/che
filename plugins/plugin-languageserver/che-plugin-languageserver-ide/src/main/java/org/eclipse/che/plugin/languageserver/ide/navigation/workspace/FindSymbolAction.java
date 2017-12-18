@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.languageserver.ide.navigation.workspace;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
@@ -85,9 +85,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.findSymbolActionTitle(),
-        localization.findSymbolActionTitle(),
-        null,
-        null);
+        localization.findSymbolActionTitle());
     this.editorHelper = editorHelper;
     this.presenter = presenter;
     this.workspaceServiceClient = workspaceServiceClient;

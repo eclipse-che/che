@@ -11,6 +11,7 @@
 package org.eclipse.che.api.workspace.server.stack;
 
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -30,15 +31,15 @@ import java.util.Map;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
+import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
-import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
+import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
-import org.eclipse.che.api.workspace.shared.dto.ServerConf2Dto;
+import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
+import org.eclipse.che.api.workspace.shared.dto.ServerConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackComponentDto;
@@ -92,13 +93,36 @@ public class StackLoaderTest {
   }
 
   @Test
-  public void predefinedStackWithValidJsonShouldBeCreated2() throws Exception {
+  public void doNotThrowExceptionWhenUpdateFailed() throws Exception {
     doThrow(new ServerException("Internal server error")).when(stackDao).update(any());
 
     stackLoader.start();
 
     verify(stackDao, times(5)).update(any());
+    verify(stackDao, never()).create(any());
+  }
+
+  @Test
+  public void doNotThrowExceptionWhenCreationFailed() throws Exception {
+    doThrow(new NotFoundException("Not found")).when(stackDao).update(any());
+    doThrow(new ServerException("Internal server error")).when(stackDao).create(any());
+
+    stackLoader.start();
+
+    verify(stackDao, times(5)).update(any());
     verify(stackDao, times(5)).create(any());
+  }
+
+  @Test
+  public void testOverrideStacksWithoutImages() throws Exception {
+    final Map<String, String> map = new HashMap<>();
+    map.put("stacks.json", null);
+    stackLoader = new StackLoader(true, map, stackDao, dbInitializer);
+
+    stackLoader.start();
+
+    verify(stackDao, times(5)).update(any());
+    verify(stackDao, never()).create(any());
   }
 
   @Test
@@ -156,26 +180,26 @@ public class StackLoaderTest {
             .withProblems(Collections.singletonList(projectProblem))
             .withSource(sourceStorageDto);
 
-    EnvironmentRecipeDto environmentRecipe =
-        newDto(EnvironmentRecipeDto.class)
+    RecipeDto environmentRecipe =
+        newDto(RecipeDto.class)
             .withContent("some content")
             .withContentType("some content type")
             .withType("someType");
 
-    Map<String, ServerConf2Dto> servers = new HashMap<>();
+    Map<String, ServerConfigDto> servers = new HashMap<>();
     servers.put(
         "server1Ref",
-        newDto(ServerConf2Dto.class)
+        newDto(ServerConfigDto.class)
             .withPort("8080/tcp")
             .withProtocol("http")
-            .withProperties(singletonMap("key", "value")));
-    Map<String, ExtendedMachineDto> machines = new HashMap<>();
+            .withAttributes(singletonMap("key", "value")));
+    Map<String, MachineConfigDto> machines = new HashMap<>();
     machines.put(
         "someMachineName",
-        newDto(ExtendedMachineDto.class)
-            .withAgents(Arrays.asList("agent1", "agent2"))
+        newDto(MachineConfigDto.class)
+            .withInstallers(Arrays.asList("agent1", "agent2"))
             .withServers(servers)
-            .withAttributes(singletonMap("memoryLimitBytes", "" + 512L * 1024L * 1024L)));
+            .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, "" + 512L * 1024L * 1024L)));
 
     EnvironmentDto environmentDto =
         newDto(EnvironmentDto.class).withRecipe(environmentRecipe).withMachines(machines);

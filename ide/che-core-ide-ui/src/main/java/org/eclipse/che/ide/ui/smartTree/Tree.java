@@ -36,9 +36,9 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.DelayedTask;
-import org.eclipse.che.ide.api.data.tree.HasAction;
-import org.eclipse.che.ide.api.data.tree.MutableNode;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.HasAction;
+import org.eclipse.che.ide.ui.smartTree.data.MutableNode;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.event.BeforeCollapseNodeEvent;
 import org.eclipse.che.ide.ui.smartTree.event.BeforeCollapseNodeEvent.HasBeforeCollapseItemHandlers;
 import org.eclipse.che.ide.ui.smartTree.event.BeforeExpandNodeEvent;
@@ -68,6 +68,7 @@ import org.eclipse.che.ide.ui.smartTree.event.StoreUpdateEvent.StoreUpdateHandle
 import org.eclipse.che.ide.ui.smartTree.event.internal.NativeTreeEvent;
 import org.eclipse.che.ide.ui.smartTree.handler.GroupingHandlerRegistration;
 import org.eclipse.che.ide.ui.smartTree.presentation.DefaultPresentationRenderer;
+import org.eclipse.che.ide.ui.smartTree.presentation.HasNewPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.PresentationRenderer;
 import org.eclipse.che.ide.ui.status.ComponentWithEmptyStatus;
@@ -852,11 +853,11 @@ public class Tree extends FocusWidget
       return;
     }
 
-    if (!(node instanceof HasPresentation)) {
-      return;
+    if (node instanceof HasPresentation) {
+      ((HasPresentation) node).getPresentation(true); // update presentation
+    } else if (node instanceof HasNewPresentation) {
+      ((HasNewPresentation) node).getPresentation(); // update presentation
     }
-
-    ((HasPresentation) node).getPresentation(true); // update presentation
     Element el =
         getPresentationRenderer()
             .render(

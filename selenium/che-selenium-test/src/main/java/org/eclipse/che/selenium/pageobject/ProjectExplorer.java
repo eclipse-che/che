@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTIPLE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.REFRESH_MAIN;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -25,7 +26,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
@@ -102,15 +102,25 @@ public class ProjectExplorer {
     String GO_BACK_BUTTON = "gwt-debug-goBackButton";
     String COLLAPSE_ALL_BUTTON = "gwt-debug-collapseAllButton";
     String ALL_PROJECTS_XPATH = "//div[@path=@project]";
-    String REFRESH_BUTTON_ID = "gwt-debug-refreshSelectedPath";
+    String MENU_BUTTON_PART_STACK_ID = "gwt-debug-menuButton";
+    String REFRESH_CONTEXT_MENU_ID = "gwt-debug-contextMenu/refreshPathAction";
     String PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL =
-        "//div[@id='gwt-debug-leftPanel']//div[text()='Projects']";
+        "//div[@id='gwt-debug-navPanel']//div[@id='gwt-debug-partButton-Projects']";
   }
 
   public interface FolderTypes {
     String SIMPLE_FOLDER = "simpleFolder";
     String PROJECT_FOLDER = "projectFolder";
     String JAVA_SOURCE_FOLDER = "javaSourceFolder";
+  }
+
+  public interface ProjectExplorerOptionsMenuItem {
+    String MAXIMIZE = "gwt-debug-contextMenu/Maximize";
+    String HIDE = "gwt-debug-contextMenu/Hide";
+    String COLLAPSE_ALL = "gwt-debug-contextMenu/collapseAll";
+    String REVEAL_RESOURCE = "gwt-debug-contextMenu/revealResourceInProjectTree";
+    String REFRESH_MAIN = "gwt-debug-contextMenu/refreshPathAction";
+    String LINK_WITH_EDITOR = "gwt-debug-contextMenu/linkWithEditor";
   }
 
   @FindBy(id = Locators.PROJECT_EXPLORER_TREE_ITEMS)
@@ -128,8 +138,11 @@ public class ProjectExplorer {
   @FindBy(xpath = Locators.ALL_PROJECTS_XPATH)
   WebElement allProjects;
 
-  @FindBy(id = Locators.REFRESH_BUTTON_ID)
-  WebElement refreshProjectButton;
+  @FindBy(id = Locators.MENU_BUTTON_PART_STACK_ID)
+  WebElement refreshButtonPartStack;
+
+  @FindBy(id = Locators.REFRESH_CONTEXT_MENU_ID)
+  WebElement refreshContextMenuItem;
 
   @FindBy(xpath = Locators.PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL)
   WebElement projectExplorerTabInTheLeftPanel;
@@ -142,6 +155,29 @@ public class ProjectExplorer {
     return redrawUiElementsWait.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(String.format("//div[@path='/%s']/div", path))));
+  }
+
+  public void clickOnProjectExplorerOptionsButton() {
+    redrawUiElementsWait
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(
+                    "//div[@id='gwt-debug-navPanel']//div[@name='workBenchIconPartStackOptions']")))
+        .click();
+  }
+
+  public void clickOnOptionsMenuItem(String menuID) {
+    redrawUiElementsWait
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(String.format("//tr[@id='%s']", menuID))))
+        .click();
+  }
+
+  /** Clicks on project explorer tab and waits its appearance. */
+  public void openPanel() {
+    clickOnProjectExplorerTabInTheLeftPanel();
+    waitProjectExplorer();
   }
 
   /** wait appearance of the IDE Project Explorer */
@@ -256,7 +292,7 @@ public class ProjectExplorer {
   }
 
   public void waitYellowNode(String path) {
-    redrawUiElementsWait.until(
+    loadPageTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(
                 String.format(
@@ -265,7 +301,7 @@ public class ProjectExplorer {
   }
 
   public void waitGreenNode(String path) {
-    redrawUiElementsWait.until(
+    loadPageTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(
                 String.format(
@@ -274,7 +310,7 @@ public class ProjectExplorer {
   }
 
   public void waitBlueNode(String path) {
-    redrawUiElementsWait.until(
+    loadPageTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(
                 String.format(
@@ -283,7 +319,7 @@ public class ProjectExplorer {
   }
 
   public void waitDefaultColorNode(String path) {
-    redrawUiElementsWait.until(
+    loadPageTimeout.until(
         ExpectedConditions.visibilityOfElementLocated(
             By.xpath(
                 String.format(
@@ -344,7 +380,7 @@ public class ProjectExplorer {
     // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
-      LOG.warn(ex.getLocalizedMessage(), ex);
+      LOG.debug(ex.getLocalizedMessage(), ex);
 
       waitProjectExplorer();
       clickOnRefreshTreeButton();
@@ -375,7 +411,7 @@ public class ProjectExplorer {
     // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
-      LOG.warn(ex.getLocalizedMessage(), ex);
+      LOG.debug(ex.getLocalizedMessage(), ex);
 
       waitProjectExplorer();
       clickOnRefreshTreeButton();
@@ -427,7 +463,7 @@ public class ProjectExplorer {
    *
    * @param path
    */
-  public void scrollAndselectItem(String path) {
+  public void scrollAndSelectItem(String path) {
     waitItem(path);
     actionsFactory
         .createAction(seleniumWebDriver)
@@ -456,7 +492,7 @@ public class ProjectExplorer {
     // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
     catch (StaleElementReferenceException ex) {
-      LOG.warn(ex.getLocalizedMessage(), ex);
+      LOG.debug(ex.getLocalizedMessage(), ex);
 
       clickOnRefreshTreeButton();
       waitItem(path);
@@ -603,11 +639,16 @@ public class ProjectExplorer {
     actions.keyUp(Keys.CONTROL).perform();
   }
 
+  /** Click on the 'Reveal in project explorer' in 'Options'menu */
+  public void revealResourceByOptionsButton() {
+    clickOnProjectExplorerOptionsButton();
+    clickOnOptionsMenuItem(ProjectExplorerOptionsMenuItem.REVEAL_RESOURCE);
+  }
+
   /** click on the 'collapse all' in the project explorer */
-  public void clickCollapseAllButton() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(collapseAllBtn));
-    collapseAllBtn.click();
+  public void collapseProjectTreeByOptionsButton() {
+    clickOnProjectExplorerOptionsButton();
+    clickOnOptionsMenuItem(ProjectExplorerOptionsMenuItem.COLLAPSE_ALL);
   }
 
   /** click on the 'go back' in the project explorer */
@@ -682,9 +723,8 @@ public class ProjectExplorer {
 
   /** wait refresh button and click this one */
   public void clickOnRefreshTreeButton() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(refreshProjectButton))
-        .click();
+    clickOnProjectExplorerOptionsButton();
+    clickOnOptionsMenuItem(REFRESH_MAIN);
   }
 
   public void clickOnImportProjectLink(int userTimeout) {
@@ -813,7 +853,7 @@ public class ProjectExplorer {
     String pathToFile = path.replace('.', '/') + '/' + fileName;
     waitItem(pathToFile);
     openItemByPath(pathToFile);
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 
   /**
@@ -830,7 +870,7 @@ public class ProjectExplorer {
     String pathToFile = path.replace('.', '/') + '/' + fileName;
     waitItem(pathToFile);
     openItemByPath(pathToFile);
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 
   /**
@@ -853,8 +893,7 @@ public class ProjectExplorer {
     navigateToFile.waitListOfFilesNames(file);
     navigateToFile.selectFileByName(file);
     navigateToFile.waitFormToClose();
-    menu.runCommand(
-        TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.REVEAL_RESOURCE);
+    revealResourceByOptionsButton();
     waitItem(pathToFile);
   }
 

@@ -69,7 +69,7 @@ public class SeleniumWebDriver
       @Named("sys.browser") TestBrowser browser,
       @Named("sys.driver.port") String webDriverPort,
       @Named("sys.grid.mode") boolean gridMode,
-      @Named("sys.driver.port") String webDriverVersion) {
+      @Named("sys.driver.version") String webDriverVersion) {
     this.browser = browser;
     this.gridMode = gridMode;
     this.webDriverVersion = webDriverVersion;

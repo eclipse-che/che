@@ -22,7 +22,7 @@ import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.commons.test.db.H2TestHelper;
+import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.MultiuserJpaWorkspaceDao;
 import org.testng.annotations.AfterClass;
@@ -33,6 +33,7 @@ import org.testng.annotations.Test;
 
 /** @author Max Shaposhnik */
 public class MultiuserJpaWorkspaceDaoTest {
+  private TckResourcesCleaner tckResourcesCleaner;
   private EntityManager manager;
   private MultiuserJpaWorkspaceDao dao;
 
@@ -71,6 +72,7 @@ public class MultiuserJpaWorkspaceDaoTest {
     Injector injector = Guice.createInjector(new WorkspaceTckModule());
     manager = injector.getInstance(EntityManager.class);
     dao = injector.getInstance(MultiuserJpaWorkspaceDao.class);
+    tckResourcesCleaner = injector.getInstance(TckResourcesCleaner.class);
   }
 
   @BeforeMethod
@@ -121,8 +123,7 @@ public class MultiuserJpaWorkspaceDaoTest {
 
   @AfterClass
   public void shutdown() throws Exception {
-    manager.getEntityManagerFactory().close();
-    H2TestHelper.shutdownDefault();
+    tckResourcesCleaner.clean();
   }
 
   @Test

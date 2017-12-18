@@ -72,7 +72,7 @@ public class MacrosCommandsEditorTest {
     commandsEditor.setCursorToLine(1);
     commandsEditor.typeTextIntoEditor(Keys.ENTER.toString());
     commandsEditor.typeTextIntoEditor(Keys.ARROW_UP.toString());
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.typeTextIntoEditor("echo ");
     commandsEditor.selectMacrosLinkInCommandsEditor(EDITOR_MACROS_LINK);
     commandsEditor.typeTextIntoSearchMacroField("rel");
@@ -93,7 +93,7 @@ public class MacrosCommandsEditorTest {
     consoles.waitExpectedTextIntoConsole("/" + PROJ_NAME + "/src/Main.java");
     commandsEditor.setCursorToLine(1);
     commandsEditor.selectLineAndDelete();
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.typeTextIntoEditor("echo ");
     commandsEditor.selectMacrosLinkInCommandsEditor(EDITOR_MACROS_LINK);
     commandsEditor.selectMacroCommand("${current.class.fqn}");
@@ -111,40 +111,41 @@ public class MacrosCommandsEditorTest {
     commandsEditor.cancelFormInEditorByEscape();
     commandsEditor.setFocusIntoTypeCommandsEditor(PREVIEW_URL_EDITOR);
     commandsEditor.setCursorToLine(1);
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.selectMacrosLinkInCommandsEditor(PREVIEW_MACROS_LINK);
-    commandsEditor.typeTextIntoSearchMacroField("server.22/");
-    commandsEditor.waitTextIntoSearchMacroField("server.22/");
+    commandsEditor.typeTextIntoSearchMacroField("server.");
+    commandsEditor.waitTextIntoSearchMacroField("server.");
     String[] macrosItems = {
-      "${server.22/tcp.hostname}",
-      "${server.22/tcp.port}",
-      "${server.22/tcp.protocol}",
-      "${server.22/tcp}",
-      "Returns hostname of a server registered by name",
-      "Returns port of a server registered by name",
-      "Returns protocol of a server registered by name",
-      "Returns protocol, hostname and port of an internal server"
+      "${server.codeserver}",
+      "${server.exec-agent/http}",
+      "${server.exec-agent/ws}",
+      "${server.terminal}",
+      "${server.tomcat8-debug}",
+      "${server.tomcat8}",
+      "${server.wsagent-debug}",
+      "${server.wsagent/http}",
+      "${server.wsagent/ws}"
     };
     for (String macrosItem : macrosItems) {
       commandsEditor.waitTextIntoMacrosContainer(macrosItem);
     }
-    commandsEditor.enterMacroCommandByEnter("${server.22/tcp.hostname}");
-    commandsEditor.waitTextIntoEditor("${server.22/tcp.hostname}");
+    commandsEditor.enterMacroCommandByEnter("${server.wsagent/http}");
+    commandsEditor.waitTextIntoEditor("${server.wsagent/http");
     commandsEditor.clickOnRunButton();
-    consoles.waitExpectedTextIntoPreviewUrl("ssh");
+    consoles.waitExpectedTextIntoPreviewUrl("http");
     commandsEditor.setFocusIntoTypeCommandsEditor(PREVIEW_URL_EDITOR);
     commandsEditor.setCursorToLine(1);
     commandsEditor.selectLineAndDelete();
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.selectMacrosLinkInCommandsEditor(PREVIEW_MACROS_LINK);
-    commandsEditor.selectMacroCommand("${server.22/tcp}");
+    commandsEditor.selectMacroCommand("${server.wsagent/http}");
     commandsEditor.typeTextIntoEditor(Keys.ARROW_UP.toString());
     commandsEditor.typeTextIntoEditor(Keys.SPACE.toString());
-    commandsEditor.waitMacroCommandIsSelected("${server.22/tcp.protocol}");
-    commandsEditor.enterMacroCommandByDoubleClick("${server.22/tcp.protocol}");
-    commandsEditor.waitTextIntoEditor("${server.22/tcp.protocol}");
+    commandsEditor.waitMacroCommandIsSelected("${server.wsagent/http}");
+    commandsEditor.enterMacroCommandByDoubleClick("${server.wsagent/http}");
+    commandsEditor.waitTextIntoEditor("${server.wsagent/http}");
     commandsEditor.clickOnRunButton();
-    consoles.waitExpectedTextIntoPreviewUrl("ssh");
+    consoles.waitExpectedTextIntoPreviewUrl("http");
   }
 
   private void createNewJavaCommand() {

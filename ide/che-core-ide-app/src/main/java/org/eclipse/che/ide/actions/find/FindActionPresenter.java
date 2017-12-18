@@ -15,7 +15,6 @@ import static java.util.Collections.unmodifiableList;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -35,7 +34,6 @@ import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.action.Separator;
 import org.eclipse.che.ide.api.mvp.Presenter;
-import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 import org.eclipse.che.ide.util.StringUtils;
 import org.eclipse.che.ide.util.UnicodeUtils;
@@ -51,7 +49,6 @@ public class FindActionPresenter implements Presenter, FindActionView.ActionDele
   private final PresentationFactory presentationFactory;
   private final FindActionView view;
   private final ActionManager actionManager;
-  private final Provider<PerspectiveManager> perspectiveManager;
   private final Map<Action, String> actionsMap;
   private final Comparator<Action> actionComparator =
       new Comparator<Action>() {
@@ -74,16 +71,20 @@ public class FindActionPresenter implements Presenter, FindActionView.ActionDele
       };
 
   @Inject
-  public FindActionPresenter(
-      FindActionView view,
-      ActionManager actionManager,
-      Provider<PerspectiveManager> perspectiveManager) {
+  public FindActionPresenter(FindActionView view, ActionManager actionManager) {
     this.view = view;
     this.actionManager = actionManager;
-    this.perspectiveManager = perspectiveManager;
     view.setDelegate(this);
     presentationFactory = new PresentationFactory();
     actionsMap = new TreeMap<>(actionComparator);
+  }
+
+  private static boolean containsOnlyUppercaseLetters(String s) {
+    for (int i = 0; i < s.length(); i++) {
+      char c = s.charAt(i);
+      if (c != '*' && c != ' ' && !Character.isUpperCase(c)) return false;
+    }
+    return true;
   }
 
   @Override
@@ -196,9 +197,7 @@ public class FindActionPresenter implements Presenter, FindActionView.ActionDele
 
   @Override
   public void onActionSelected(Action action) {
-    ActionEvent e =
-        new ActionEvent(
-            presentationFactory.getPresentation(action), actionManager, perspectiveManager.get());
+    ActionEvent e = new ActionEvent(presentationFactory.getPresentation(action), actionManager);
     action.update(e);
     if (e.getPresentation().isEnabled() && e.getPresentation().isVisible()) {
       view.hide();
@@ -275,14 +274,6 @@ public class FindActionPresenter implements Presenter, FindActionView.ActionDele
     }
 
     return buffer.toString();
-  }
-
-  private static boolean containsOnlyUppercaseLetters(String s) {
-    for (int i = 0; i < s.length(); i++) {
-      char c = s.charAt(i);
-      if (c != '*' && c != ' ' && !Character.isUpperCase(c)) return false;
-    }
-    return true;
   }
 
   private List<String> getExcludedActionIds(ActionManager actionManager) {

@@ -12,25 +12,23 @@
 
 export class CheNumberRoundFilter {
 
-  constructor(register: che.IRegisterService) {
-    register.filter('numberRound', () => {
-      return (number: number, precision: number) => {
-        number = parseFloat(number);
-        precision = parseInt(precision, 10);
+  static filter(): Function {
+    return (numberStr: string, precisionStr: string) => {
+      const number = parseFloat(numberStr);
+      let precision = parseInt(precisionStr, 10);
 
-        if (isNaN(number)) {
-          return 'NaN';
-        }
-        if (isNaN(precision)) {
-          precision = 0;
-        }
+      if (isNaN(number)) {
+        return 'NaN';
+      }
+      if (isNaN(precision)) {
+        precision = 0;
+      }
 
-        const factor = Math.pow(10, precision);
-        const tempNumber = number * factor;
-        const roundedTempNumber = Math.round(tempNumber);
-        return (roundedTempNumber / factor).toString();
-      };
-    });
+      const factor = Math.pow(10, precision);
+      const tempNumber = number * factor;
+      const roundedTempNumber = Math.round(tempNumber);
+      return (roundedTempNumber / factor).toString();
+    };
   }
 }
 

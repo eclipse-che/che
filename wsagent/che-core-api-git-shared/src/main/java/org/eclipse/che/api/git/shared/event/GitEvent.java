@@ -10,4 +10,7 @@
  */
 package org.eclipse.che.api.git.shared.event;
 
-public interface GitEvent {}
+public interface GitEvent {
+  /** Returns name of project in which the event was fired. */
+  String getProjectName();
+}

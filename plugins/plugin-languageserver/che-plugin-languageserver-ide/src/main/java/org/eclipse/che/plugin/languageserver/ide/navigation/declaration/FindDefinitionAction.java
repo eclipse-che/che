@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.languageserver.ide.navigation.declaration;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -48,7 +48,7 @@ public class FindDefinitionAction extends AbstractPerspectiveAction {
       OpenLocationPresenterFactory presenterFactory,
       TextDocumentServiceClient client,
       DtoBuildHelper dtoBuildHelper) {
-    super(singletonList(PROJECT_PERSPECTIVE_ID), "Find Definition", "Find Definition", null, null);
+    super(singletonList(PROJECT_PERSPECTIVE_ID), "Find Definition", "Find Definition");
     this.editorAgent = editorAgent;
     this.client = client;
     this.dtoBuildHelper = dtoBuildHelper;

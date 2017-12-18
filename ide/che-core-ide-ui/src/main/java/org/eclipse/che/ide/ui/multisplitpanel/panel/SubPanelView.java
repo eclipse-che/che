@@ -68,5 +68,8 @@ public interface SubPanelView extends View<SubPanelView.ActionDelegate> {
 
     /** Called when the {@code widget} is going to be removed from the panel. */
     void onWidgetRemoving(IsWidget widget, SubPanel.RemoveCallback removeCallback);
+
+    /** Called when the `Add Tab` button has been clicked. */
+    void onAddTabButtonClicked(int mouseX, int mouseY);
   }
 }

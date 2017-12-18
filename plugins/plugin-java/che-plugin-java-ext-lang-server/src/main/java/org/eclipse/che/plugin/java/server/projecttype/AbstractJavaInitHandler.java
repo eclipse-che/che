@@ -10,13 +10,14 @@
  */
 package org.eclipse.che.plugin.java.server.projecttype;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+
 import com.google.inject.Inject;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -31,12 +32,12 @@ import org.eclipse.jdt.core.JavaCore;
  * #initializeClasspath(IJavaProject)} Sample of classpath configuration: <br>
  *
  * <pre>
- *     IClasspathEntry jreContainer = JavaCore.newContainerEntry(new Path(JREContainerInitializer.JRE_CONTAINER));
+ *     IClasspathEntry jreContainer = JavaCore.newContainerEntry(new
+ * Path(JREContainerInitializer.JRE_CONTAINER));
  *     javaProject.setRawClasspath(new IClasspathEntry[]{jreContainer}, null);
  * </pre>
  *
- * This configuration just add classpath container for JRE(rt.jar). For more details see {@link
- * PlainJavaInitHandler}
+ * This configuration just add classpath container for JRE(rt.jar).
  *
  * @author Evgen Vidolob
  */
@@ -44,16 +45,18 @@ public abstract class AbstractJavaInitHandler implements ProjectInitHandler {
 
   private ResourcesPlugin plugin;
 
+  private PathTransformer pathTransformer;
+
   @Inject
-  void init(ResourcesPlugin plugin) {
+  void init(ResourcesPlugin plugin, PathTransformer pathTransformer) {
     this.plugin = plugin;
+    this.pathTransformer = pathTransformer;
   }
 
   @Override
-  public final void onProjectInitialized(ProjectRegistry registry, FolderEntry projectFolder)
+  public final void onProjectInitialized(String wsPath)
       throws ServerException, ForbiddenException, ConflictException, NotFoundException {
-    IProject project =
-        ResourcesPlugin.getWorkspace().getRoot().getProject(projectFolder.getPath().toString());
+    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(absolutize(wsPath));
     IJavaProject javaProject = JavaCore.create(project);
     initializeClasspath(javaProject);
   }

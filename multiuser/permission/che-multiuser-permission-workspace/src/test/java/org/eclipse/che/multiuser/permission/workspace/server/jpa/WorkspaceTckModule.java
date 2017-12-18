@@ -13,18 +13,17 @@ package org.eclipse.che.multiuser.permission.workspace.server.jpa;
 import com.google.inject.TypeLiteral;
 import java.util.Collection;
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
+import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
+import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -44,7 +43,6 @@ import org.eclipse.che.core.db.schema.SchemaInitializer;
 import org.eclipse.che.core.db.schema.impl.flyway.FlywaySchemaInitializer;
 import org.eclipse.che.multiuser.api.permission.server.AbstractPermissionsDomain;
 import org.eclipse.che.multiuser.api.permission.server.spi.PermissionsDao;
-import org.eclipse.che.multiuser.permission.machine.recipe.RecipePermissionsImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.WorkerDao;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.JpaStackPermissionsDao;
@@ -71,17 +69,15 @@ public class WorkspaceTckModule extends TckModule {
                 WorkspaceConfigImpl.class,
                 ProjectConfigImpl.class,
                 EnvironmentImpl.class,
-                EnvironmentRecipeImpl.class,
-                RecipePermissionsImpl.class,
                 StackPermissionsImpl.class,
                 WorkerImpl.class,
-                ExtendedMachineImpl.class,
+                MachineConfigImpl.class,
                 SourceStorageImpl.class,
-                ServerConf2Impl.class,
+                ServerConfigImpl.class,
                 StackImpl.class,
                 CommandImpl.class,
-                SnapshotImpl.class,
-                RecipeImpl.class)
+                RecipeImpl.class,
+                VolumeImpl.class)
             .addEntityClass(
                 "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
             .setExceptionHandler(H2ExceptionHandler.class)
@@ -99,8 +95,6 @@ public class WorkspaceTckModule extends TckModule {
         .toInstance(new JpaTckRepository<>(UserImpl.class));
     bind(new TypeLiteral<TckRepository<WorkerImpl>>() {})
         .toInstance(new JpaTckRepository<>(WorkerImpl.class));
-    bind(new TypeLiteral<TckRepository<RecipePermissionsImpl>>() {})
-        .toInstance(new JpaTckRepository<>(RecipePermissionsImpl.class));
     bind(new TypeLiteral<TckRepository<StackPermissionsImpl>>() {})
         .toInstance(new JpaTckRepository<>(StackPermissionsImpl.class));
 

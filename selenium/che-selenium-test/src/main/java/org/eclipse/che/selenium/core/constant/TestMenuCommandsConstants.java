@@ -61,7 +61,6 @@ public interface TestMenuCommandsConstants {
     String RENAME = EDIT_MENU_PREFIX + "renameResource";
     String DELETE = EDIT_MENU_PREFIX + "deleteItem";
     String FIND = EDIT_MENU_PREFIX + "fullTextSearch";
-    String REVEAL_RESOURCE = EDIT_MENU_PREFIX + "scrollFromSource";
     String OPEN_RECENT_FILE = EDIT_MENU_PREFIX + "openRecentFiles";
 
     interface Recent {
@@ -145,29 +144,6 @@ public interface TestMenuCommandsConstants {
       String COMPARE_WITH_BRANCH = "gwt-debug-topmenu/Git/Compare/gitCompareWithBranch";
       String COMPARE_WITH_REVISION = "gwt-debug-topmenu/Git/Compare/gitCompareWithRevision";
     }
-  }
-
-  interface Subversion {
-    String SUBVERSION_MENU_PREFIX = "topmenu/Subversion/";
-    String SUBVERSION = "gwt-debug-MenuItem/Subversion-true";
-    String SVN_STATUS = SUBVERSION_MENU_PREFIX + "Status";
-    String SVN_VIEW_LOG = SUBVERSION_MENU_PREFIX + "View Log";
-    String SVN_VIEW_DIFF = SUBVERSION_MENU_PREFIX + "View Diff";
-    String SVN_UPDATE = SUBVERSION_MENU_PREFIX + "Update";
-    String SVN_UPDATE_TO_REVISION = SUBVERSION_MENU_PREFIX + "Update to Revision...";
-    String SVN_COMMIT = SUBVERSION_MENU_PREFIX + "Commit...";
-    String SVN_RESOLVE = SUBVERSION_MENU_PREFIX + "Resolve...";
-    String SVN_COPY = SUBVERSION_MENU_PREFIX + "Copy...";
-    String SVN_MOVE = SUBVERSION_MENU_PREFIX + "Move...";
-    String SVN_MERGE = SUBVERSION_MENU_PREFIX + "Merge...";
-    String SVN_EXPORT = SUBVERSION_MENU_PREFIX + "Export...";
-    String SVN_ADD = SUBVERSION_MENU_PREFIX + "Add";
-    String SVN_DELETE = SUBVERSION_MENU_PREFIX + "Delete";
-    String SVN_REVERT = SUBVERSION_MENU_PREFIX + "Revert...";
-    String SVN_GET_LOCK = SUBVERSION_MENU_PREFIX + "Get Lock";
-    String SVN_RELEASE_LOCK = SUBVERSION_MENU_PREFIX + "Release Lock";
-    String SVN_CLEAN_UP = SUBVERSION_MENU_PREFIX + "Clean Up";
-    String SVN_PROPERTIES = SUBVERSION_MENU_PREFIX + "Properties";
   }
 
   interface Help {

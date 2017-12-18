@@ -11,6 +11,7 @@
 package org.eclipse.che.git.impl;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.git.impl.GitTestUtil.CONTENT;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
@@ -127,5 +128,32 @@ public class AddTest {
     List<String> stagedDeletedFiles = connection.status(emptyList()).getRemoved();
     assertEquals(stagedDeletedFiles.size(), 1);
     assertEquals(stagedDeletedFiles.get(0), "CHANGELOG.txt");
+  }
+
+  @Test(
+    dataProvider = "GitConnectionFactory",
+    dataProviderClass = GitConnectionFactoryProvider.class
+  )
+  public void shouldAddToIndexOnlySpecifiedFile(GitConnectionFactory connectionFactory)
+      throws GitException, IOException {
+    // given
+    GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
+    addFile(connection, "README.txt", CONTENT);
+    connection.add(AddParams.create(ImmutableList.of("README.txt", "CHANGELOG.txt")));
+    connection.commit(CommitParams.create("Initial add"));
+
+    // when
+    deleteFile(connection, "README.txt");
+    addFile(connection, "CHANGELOG.txt", "WE'VE FIXED ALL BUGS");
+    connection.add(AddParams.create(singletonList("CHANGELOG.txt")));
+
+    // then
+    List<String> notStagedDeletedFiles = connection.status(emptyList()).getMissing();
+    assertEquals(notStagedDeletedFiles.size(), 1);
+    assertEquals(notStagedDeletedFiles.get(0), "README.txt");
+
+    List<String> stagedFiles = connection.status(emptyList()).getAdded();
+    assertEquals(stagedFiles.size(), 1);
+    assertEquals(stagedFiles.get(0), "CHANGELOG.txt");
   }
 }

@@ -12,17 +12,11 @@ package org.eclipse.che.ide.resources;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.api.component.WsAgentComponent;
-import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
-import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
-import org.eclipse.che.ide.api.data.tree.settings.impl.DummySettingsProvider;
 import org.eclipse.che.ide.api.resources.RenamingSupport;
 import org.eclipse.che.ide.api.resources.ResourceInterceptor;
 import org.eclipse.che.ide.api.resources.modification.ClipboardManager;
-import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.part.explorer.project.DefaultNodeInterceptor;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
 import org.eclipse.che.ide.project.node.icon.DockerfileIconProvider;
@@ -31,12 +25,11 @@ import org.eclipse.che.ide.project.node.icon.NodeIconProvider;
 import org.eclipse.che.ide.resources.impl.ClipboardManagerImpl;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
+import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
+import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
+import org.eclipse.che.ide.ui.smartTree.data.settings.impl.DummySettingsProvider;
 
-/**
- * GIN module for configuring Resource API components.
- *
- * @author Artem Zatsarynnyi
- */
+/** GIN module for configuring Resource API components. */
 public class ResourceApiModule extends AbstractGinModule {
 
   @Override
@@ -64,10 +57,6 @@ public class ResourceApiModule extends AbstractGinModule {
 
     bind(ClipboardManager.class).to(ClipboardManagerImpl.class);
 
-    bind(ResourceManagerInitializer.class).to(AppContextImpl.class).in(Singleton.class);
-    GinMapBinder<String, WsAgentComponent> mapBinder =
-        GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class);
-    mapBinder.addBinding("Resource Manager").to(ResourceManagerComponent.class);
     GinMultibinder.newSetBinder(binder(), RenamingSupport.class);
   }
 }

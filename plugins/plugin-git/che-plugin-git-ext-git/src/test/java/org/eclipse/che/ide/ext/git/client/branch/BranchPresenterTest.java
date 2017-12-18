@@ -33,14 +33,14 @@ import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.InputCallback;
-import org.eclipse.che.ide.api.dialogs.InputDialog;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialog;
+import org.eclipse.che.ide.ui.dialogs.input.InputCallback;
+import org.eclipse.che.ide.ui.dialogs.input.InputDialog;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -57,10 +57,10 @@ public class BranchPresenterTest extends BaseTest {
   @Captor private ArgumentCaptor<InputCallback> inputCallbackCaptor;
   @Captor private ArgumentCaptor<ConfirmCallback> confirmCallbackCaptor;
 
-  public static final String BRANCH_NAME = "branchName";
-  public static final String REMOTE_BRANCH_NAME = "origin/branchName";
-  public static final boolean IS_REMOTE = true;
-  public static final boolean IS_ACTIVE = true;
+  private static final String BRANCH_NAME = "branchName";
+  private static final String REMOTE_BRANCH_NAME = "origin/branchName";
+  private static final boolean IS_REMOTE = true;
+  private static final boolean IS_ACTIVE = true;
   @Mock private BranchView view;
   @Mock private Branch selectedBranch;
   @Mock private DialogFactory dialogFactory;
@@ -79,7 +79,6 @@ public class BranchPresenterTest extends BaseTest {
             dtoFactory,
             service,
             constant,
-            appContext,
             notificationManager,
             gitOutputConsoleFactory,
             processesPanelPresenter,
@@ -164,7 +163,7 @@ public class BranchPresenterTest extends BaseTest {
 
   @Test
   public void testOnCloseClicked() throws Exception {
-    presenter.onCloseClicked();
+    presenter.onClose();
 
     verify(view).close();
   }

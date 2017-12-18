@@ -14,15 +14,13 @@ import com.google.common.annotations.Beta;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.eclipse.che.api.core.model.factory.Factory;
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-import org.eclipse.che.ide.api.machine.ActiveRuntime;
-import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.factory.model.FactoryImpl;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceConfigImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.resource.Path;
 
 /**
@@ -112,18 +110,10 @@ public interface AppContext {
    * @return the workspace name
    * @see WorkspaceConfigDto#getName()
    * @since 4.3.0
+   * @deprecated use {@link WorkspaceConfigImpl#getName()}
    */
-  @Beta
+  @Deprecated
   String getWorkspaceName();
-
-  /**
-   * Returns instance of the developer machine (where workspace is bound).
-   *
-   * @return the object which describes developer machine
-   * @see DevMachine
-   * @since 4.2.0
-   */
-  DevMachine getDevMachine();
 
   /**
    * Returns the path where projects are stored on file system.
@@ -142,7 +132,7 @@ public interface AppContext {
   List<StartUpAction> getStartAppActions();
 
   /**
-   * Returns current user.
+   * Returns the current user.
    *
    * @return current user
    */
@@ -170,42 +160,28 @@ public interface AppContext {
   void removeProjectFromImporting(String pathToProject);
 
   /**
-   * List of action with params that comes from startup URL. Can be processed after IDE
-   * initialization as usual after starting ws-agent.
-   */
-  void setStartUpActions(List<StartUpAction> startUpActions);
-
-  /**
-   * Returns {@link Factory} instance which id was set on startup, or {@code null} if no factory was
-   * specified.
+   * Returns {@link FactoryImpl} instance which id was set on startup, or {@code null} if no factory
+   * was specified.
    *
    * @return loaded factory or {@code null}
    */
-  FactoryDto getFactory();
-
-  void setFactory(FactoryDto factory);
+  FactoryImpl getFactory();
 
   String getWorkspaceId();
 
-  /**
-   * Returns {@link Workspace} instance of current workspace.
-   *
-   * @return current workspace
-   */
-  Workspace getWorkspace();
+  /** Returns the current workspace. */
+  WorkspaceImpl getWorkspace();
+
+  /** Returns URL of Che Master API endpoint. */
+  String getMasterApiEndpoint();
 
   /**
-   * Sets current workspace.
+   * Returns URL of ws-agent server API endpoint.
    *
-   * @param workspace current workspace or {@code null}
+   * @throws RuntimeException if ws-agent server doesn't exist. Normally it may happen when
+   *     workspace is stopped.
    */
-  void setWorkspace(Workspace workspace);
-
-  ActiveRuntime getActiveRuntime();
-
-  String getMasterEndpoint();
-
-  String getDevAgentEndpoint();
+  String getWsAgentServerApiEndpoint();
 
   /**
    * Returns web application identifier. Most obvious use - to distinguish web applications on
@@ -213,7 +189,7 @@ public interface AppContext {
    *
    * @return identifier
    */
-  Optional<String> getApplicationWebsocketId();
+  Optional<String> getApplicationId();
 
   /**
    * Sets web application identifier. Most obvious use - to distinguish web applications on server

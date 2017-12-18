@@ -18,8 +18,7 @@ public interface Breakpoint {
   /** Indicates if it is enabled or not. */
   boolean isEnabled();
 
-  /** The condition. */
-  String getCondition();
+  void setEnabled(boolean enabled);
 
-  void setCondition(String condition);
+  BreakpointConfiguration getBreakpointConfiguration();
 }

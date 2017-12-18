@@ -10,18 +10,27 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug.breakpoint;
 
+import static com.google.common.base.Strings.nullToEmpty;
+import static java.lang.String.valueOf;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointConfigurationImpl;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
@@ -36,10 +45,14 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
   private static BreakpointConfigurationViewImpl.BreakpointConfigurationViewImplUiBinder uiBinder =
       GWT.create(BreakpointConfigurationViewImpl.BreakpointConfigurationViewImplUiBinder.class);
 
-  @UiField Label breakpointLocation;
-  @UiField TextArea breakpointCondition;
-
-  private final Button applyButton;
+  @UiField CheckBox enabled;
+  @UiField CheckBox breakpointConditionEnabled;
+  @UiField TextBox breakpointCondition;
+  @UiField CheckBox hitCountEnabled;
+  @UiField TextBox hitCount;
+  @UiField RadioButton breakpointSuspendNone;
+  @UiField RadioButton breakpointSuspendThread;
+  @UiField RadioButton breakpointSuspendAll;
 
   private ActionDelegate delegate;
 
@@ -49,14 +62,20 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
 
     this.setWidget(widget);
     this.setTitle(locale.breakpointConfigurationTitle());
+    ensureDebugId("breakpoint-configuration-window");
 
-    applyButton =
+    Button closeButton =
+        createButton(
+            locale.evaluateExpressionViewCloseButtonTitle(),
+            UIObject.DEBUG_ID_PREFIX + "close-btn",
+            clickEvent -> delegate.onCloseClicked());
+    addButtonToFooter(closeButton);
+
+    Button applyButton =
         createButton(
             locale.viewBreakpointConfigurationApplyButton(),
             UIObject.DEBUG_ID_PREFIX + "apply-btn",
             clickEvent -> delegate.onApplyClicked());
-
-    ensureDebugId("breakpoint-configuration-window");
     addButtonToFooter(applyButton);
   }
 
@@ -85,17 +104,66 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
         .append(Path.valueOf(location.getTarget()).lastSegment())
         .append(":")
         .append(location.getLineNumber());
-    breakpointLocation.setText(labelText.toString());
+    setTitle(labelText.toString());
 
-    if (breakpoint.getCondition() != null) {
-      breakpointCondition.setText(breakpoint.getCondition());
-    } else {
-      breakpointCondition.setText("");
+    enabled.setValue(breakpoint.isEnabled());
+
+    BreakpointConfiguration conf = breakpoint.getBreakpointConfiguration();
+    breakpointConditionEnabled.setValue(conf.isConditionEnabled());
+    breakpointCondition.setEnabled(conf.isConditionEnabled());
+    breakpointCondition.setText(nullToEmpty(conf.getCondition()));
+
+    hitCountEnabled.setValue(conf.isHitCountEnabled());
+    hitCount.setEnabled(conf.isHitCountEnabled());
+    hitCount.setText(conf.getHitCount() <= 0 ? "" : valueOf(conf.getHitCount()));
+
+    switch (conf.getSuspendPolicy()) {
+      case NONE:
+        breakpointSuspendNone.setValue(true);
+        break;
+      case THREAD:
+        breakpointSuspendThread.setValue(true);
+        break;
+      default:
+        breakpointSuspendAll.setValue(true);
+        break;
     }
   }
 
   @Override
-  public String getBreakpointCondition() {
-    return breakpointCondition.getText();
+  public BreakpointConfiguration getBreakpointConfiguration() {
+    int hit;
+    try {
+      hit = Integer.parseInt(hitCount.getValue());
+    } catch (NumberFormatException e) {
+      hit = 0;
+    }
+
+    SuspendPolicy suspendPolicy =
+        breakpointSuspendNone.getValue()
+            ? SuspendPolicy.NONE
+            : (breakpointSuspendThread.getValue() ? SuspendPolicy.THREAD : SuspendPolicy.ALL);
+
+    return new BreakpointConfigurationImpl(
+        breakpointConditionEnabled.getValue(),
+        breakpointCondition.getText(),
+        hitCountEnabled.getValue(),
+        hit,
+        suspendPolicy);
+  }
+
+  @Override
+  public boolean isBreakpointEnabled() {
+    return enabled.getValue();
+  }
+
+  @UiHandler("breakpointConditionEnabled")
+  public void onBreakpointConditionEnabledChanged(ValueChangeEvent<Boolean> valueChangeEvent) {
+    breakpointCondition.setEnabled(valueChangeEvent.getValue());
+  }
+
+  @UiHandler("hitCountEnabled")
+  public void onBreakpointHitCountEnabledChanged(ValueChangeEvent<Boolean> valueChangeEvent) {
+    hitCount.setEnabled(valueChangeEvent.getValue());
   }
 }

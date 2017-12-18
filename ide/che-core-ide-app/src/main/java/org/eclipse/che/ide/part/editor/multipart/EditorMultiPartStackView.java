@@ -55,4 +55,11 @@ public interface EditorMultiPartStackView extends IsWidget {
 
   /** @return the editor multi part stack state */
   EditorMultiPartStackState getState();
+
+  /**
+   * Shows placeholder instead editor area while the workspace is loading.
+   *
+   * @param placeholder <b>true</b> to show placeholder
+   */
+  void showPlaceholder(boolean placeholder);
 }

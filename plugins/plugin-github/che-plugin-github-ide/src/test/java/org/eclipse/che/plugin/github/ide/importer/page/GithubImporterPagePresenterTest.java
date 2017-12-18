@@ -40,14 +40,12 @@ import java.util.Set;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.user.shared.dto.ProfileDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
-import org.eclipse.che.ide.api.user.UserServiceClient;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -86,7 +84,6 @@ public class GithubImporterPagePresenterTest {
   @Mock private Wizard.UpdateDelegate updateDelegate;
   @Mock private DtoFactory dtoFactory;
   @Mock private GithubImporterPageView view;
-  @Mock private UserServiceClient userServiceClient;
   @Mock private GitHubClientService gitHubClientService;
   @Mock private DtoUnmarshallerFactory dtoUnmarshallerFactory;
   @Mock private NotificationManager notificationManager;
@@ -495,11 +492,9 @@ public class GithubImporterPagePresenterTest {
   public void onLoadRepoClickedWhenAuthorizeIsFailed() throws Exception {
     String userId = "userId";
     CurrentUser user = mock(CurrentUser.class);
-    ProfileDto profile = mock(ProfileDto.class);
 
     when(appContext.getCurrentUser()).thenReturn(user);
-    when(user.getProfile()).thenReturn(profile);
-    when(profile.getUserId()).thenReturn(userId);
+    when(user.getId()).thenReturn(userId);
 
     final Throwable exception = mock(UnauthorizedException.class);
     doAnswer(
@@ -556,12 +551,10 @@ public class GithubImporterPagePresenterTest {
     final Throwable exception = mock(UnauthorizedException.class);
     String userId = "userId";
     CurrentUser user = mock(CurrentUser.class);
-    ProfileDto profile = mock(ProfileDto.class);
     doReturn(exception).when(promiseError).getCause();
 
     when(appContext.getCurrentUser()).thenReturn(user);
-    when(user.getProfile()).thenReturn(profile);
-    when(profile.getUserId()).thenReturn(userId);
+    when(user.getId()).thenReturn(userId);
 
     presenter.onLoadRepoClicked();
 

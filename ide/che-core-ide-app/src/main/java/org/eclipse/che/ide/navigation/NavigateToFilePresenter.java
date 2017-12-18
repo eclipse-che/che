@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.navigation;
 
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 import com.google.common.base.Optional;
 import com.google.gwt.http.client.URL;
@@ -98,7 +99,7 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
 
     requestTransmitter
         .newRequest()
-        .endpointId("ws-agent")
+        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
         .methodName("project/search")
         .paramsAsDto(requestParams)
         .sendAndReceiveResultAsDto(ProjectSearchResponseDto.class, 20_000)

@@ -26,14 +26,14 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.InputCallback;
-import org.eclipse.che.ide.api.dialogs.InputValidator;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
+import org.eclipse.che.ide.ui.dialogs.CancelCallback;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
+import org.eclipse.che.ide.ui.dialogs.input.InputCallback;
+import org.eclipse.che.ide.ui.dialogs.input.InputValidator;
 import org.eclipse.che.plugin.ssh.key.client.SshKeyLocalizationConstant;
 import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
 import org.eclipse.che.plugin.ssh.key.client.SshKeyUploaderRegistry;
@@ -200,7 +200,7 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter
     final SshKeyUploader githubUploader = registry.getUploaders().get(GITHUB_HOST);
     if (user != null && githubUploader != null) {
       githubUploader.uploadKey(
-          user.getProfile().getUserId(),
+          user.getId(),
           new AsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {

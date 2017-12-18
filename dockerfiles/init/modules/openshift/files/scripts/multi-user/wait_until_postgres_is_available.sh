@@ -16,10 +16,10 @@ command -v jq >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool jq 
 available=$(oc get dc postgres -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
 progressing=$(oc get dc postgres -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
 
-DEPLOYMENT_TIMEOUT_SEC=120
+DEPLOYMENT_TIMEOUT_SEC=1200
 POLLING_INTERVAL_SEC=5
 end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
-while [ "${available}" != "\"True\"" ] && [ ${SECONDS} -lt ${end} ]; do
+while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
   available=$(oc get dc postgres -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
   progressing=$(oc get dc postgres -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
   timeout_in=$((end-SECONDS))
@@ -32,7 +32,7 @@ if [ "${progressing}" == "\"True\"" ]; then
 elif [ "${progressing}" == "False" ]; then
   echo "[CHE] [ERROR] Postgres deployment failed. Aborting. Run command 'oc rollout status postgres' to get more details."
   exit 1
-elif [ ${SECONDS} -lt ${end} ]; then
+elif [ ${SECONDS} -ge ${end} ]; then
   echo "[CHE] [ERROR] Deployment timeout. Aborting."
   exit 1
 fi

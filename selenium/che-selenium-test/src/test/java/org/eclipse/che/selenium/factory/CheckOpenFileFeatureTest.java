@@ -81,8 +81,6 @@ public class CheckOpenFileFeatureTest {
     dashboardFactory.selectAction(OPEN_FILE);
     dashboardFactory.enterParamValue(OPEN_FILE_URL);
     dashboardFactory.clickAddOnAddAction();
-    dashboard.waitNotificationIsOpen();
-    dashboard.waitNotificationIsClosed();
     dashboardFactory.clickOnOpenFactory();
     String currentWin = seleniumWebDriver.getWindowHandle();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWin);

@@ -21,7 +21,7 @@ import org.eclipse.che.ide.util.Pair;
  * easily fetch action by id and id by action.
  *
  * @author Evgen Vidolob
- * @see Action
+ * @see BaseAction
  */
 @SDK(title = "ide.api.ui.action")
 public interface ActionManager {

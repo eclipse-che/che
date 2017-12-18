@@ -20,6 +20,8 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.nio.file.Paths;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointConfigurationImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
@@ -90,7 +92,7 @@ public class ThreadDumpTest {
   }
 
   @Test
-  public void shouldShowAndNavigateByThreadDump() {
+  public void shouldShowAndNavigateByAllThread() {
     assertTrue(debugPanel.getSelectedThread().contains("\"main\"@"));
 
     String[] frames = debugPanel.getFrames();
@@ -116,12 +118,27 @@ public class ThreadDumpTest {
     assertTrue(debugPanel.getVariables().contains("args=instance of java.lang.String[0]"));
 
     debugPanel.selectThread("Finalizer");
-    editor.waitActiveTabFileName("Object");
     assertTrue(debugPanel.getVariables().isEmpty());
 
     debugPanel.selectThread("main");
-    editor.waitActiveTabFileName("BookImpl");
     assertTrue(debugPanel.getVariables().contains("title=\"java\""));
+  }
+
+  @Test(priority = 1)
+  public void shouldShowAndNavigateBySuspendedThread() {
+    editor.setBreakpoint(20);
+    debugPanel.configureBreakpoint(
+        "App.java", 20, new BreakpointConfigurationImpl(SuspendPolicy.THREAD));
+    debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RESUME_BTN_ID);
+
+    debugPanel.selectThread("Finalizer");
+
+    debugPanel.waitThreadNotSuspendedHolderVisible();
+    assertTrue(debugPanel.getVariables().isEmpty());
+
+    debugPanel.selectThread("main");
+    assertTrue(debugPanel.getVariables().contains("args=instance of java.lang.String[0]"));
+    debugPanel.waitThreadNotSuspendedHolderHidden();
   }
 
   private void startDebuggingApp() {

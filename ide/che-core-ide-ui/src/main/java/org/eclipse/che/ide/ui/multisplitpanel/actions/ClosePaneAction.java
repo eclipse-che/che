@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.ide.ui.multisplitpanel.actions;
 
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
 
@@ -20,12 +20,12 @@ import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
  *
  * @author Artem Zatsarynnyi
  */
-public class ClosePaneAction extends Action {
+public class ClosePaneAction extends BaseAction {
 
   private final SubPanel subPanel;
 
   public ClosePaneAction(SubPanel subPanel) {
-    super("Close Pane", "Close Pane", null, null);
+    super("Close Pane", "Close Pane");
     this.subPanel = subPanel;
   }
 

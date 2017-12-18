@@ -15,8 +15,9 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Singleton;
 import org.apache.catalina.filters.CorsFilter;
-import org.eclipse.che.commons.logback.filter.RequestIdLoggerFilter;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakServletModule;
+import org.eclipse.che.multiuser.machine.authentication.server.MachineLoginFilter;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 
 /** @author andrew00x */
@@ -44,9 +45,24 @@ public class WsMasterServletModule extends ServletModule {
     bind(CorsFilter.class).in(Singleton.class);
 
     filter("/*").through(CorsFilter.class, corsFilterParams);
-    filter("/*").through(RequestIdLoggerFilter.class);
 
-    serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
+    serveRegex("^/(?!ws$|ws/|websocket.?)(.*)").with(GuiceEverrestServlet.class);
     install(new org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule());
+
+    if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {
+      configureMultiUserMode();
+    } else {
+      configureSingleUserMode();
+    }
+  }
+
+  private void configureSingleUserMode() {
+    filter("/*").through(org.eclipse.che.api.local.filters.EnvironmentInitializationFilter.class);
+  }
+
+  private void configureMultiUserMode() {
+    // Not contains '/websocket/' and not ends with '/ws' or '/eventbus'
+    filterRegex("^(?!.*/websocket/)(?!.*(/ws|/eventbus)$).*").through(MachineLoginFilter.class);
+    install(new KeycloakServletModule());
   }
 }

@@ -46,7 +46,7 @@ public class UploadSshKeyPresenter implements UploadSshKeyView.ActionDelegate {
     this.view = view;
     this.view.setDelegate(this);
     this.constant = constant;
-    this.restContext = appContext.getMasterEndpoint();
+    this.restContext = appContext.getMasterApiEndpoint();
     this.notificationManager = notificationManager;
     this.appContext = appContext;
   }
@@ -84,7 +84,7 @@ public class UploadSshKeyPresenter implements UploadSshKeyView.ActionDelegate {
       queryParametersBuilder.append("&X-CSRF-Token=").append(csrfToken);
     }
 
-    String machineToken = appContext.getProperties().get("machineToken");
+    String machineToken = appContext.getWorkspace().getRuntime().getMachineToken();
     if (!isNullOrEmpty(machineToken)) {
       queryParametersBuilder.append("&token=").append(machineToken);
     }

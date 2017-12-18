@@ -24,8 +24,7 @@ func TestChannelSaysHello(t *testing.T) {
 	beforeConnected := time.Now()
 
 	// initialization routine
-	tunnel, connRecorder, reqRecorder := newTestTunnel()
-	tunnel.Go()
+	tunnel, connRecorder, reqRecorder := jsonrpctest.NewTmpTunnel(2*time.Second)
 	defer tunnel.Close()
 	defer reqRecorder.Close()
 
@@ -55,8 +54,7 @@ func TestChannelSaysHello(t *testing.T) {
 
 // X Notification -> X'
 func TestSendingNotification(t *testing.T) {
-	tunnel, connRecorder, reqRecorder := newTestTunnel()
-	tunnel.Go()
+	tunnel, connRecorder, reqRecorder := jsonrpctest.NewTmpTunnel(2*time.Second)
 	defer tunnel.Close()
 	defer reqRecorder.Close()
 
@@ -89,8 +87,7 @@ func TestSendingNotification(t *testing.T) {
 
 // X Request -> X'
 func TestSendingRequest(t *testing.T) {
-	tunnel, connRecorder, _ := newTestTunnel()
-	tunnel.Go()
+	tunnel, connRecorder, _ := jsonrpctest.NewTmpTunnel(2*time.Second)
 	defer tunnel.Close()
 
 	method := "domain.doSomething"
@@ -124,8 +121,7 @@ func TestSendingRequest(t *testing.T) {
 
 // X' Request -> X
 func TestReceivingRequest(t *testing.T) {
-	tunnel, connRecorder, reqRecorder := newTestTunnel()
-	tunnel.Go()
+	tunnel, connRecorder, reqRecorder := jsonrpctest.NewTmpTunnel(2*time.Second)
 	defer tunnel.Close()
 	defer reqRecorder.Close()
 
@@ -155,8 +151,7 @@ func TestReceivingRequest(t *testing.T) {
 // X' Request  -> X
 // X' <- Response X
 func TestSendingResponseBack(t *testing.T) {
-	tunnel, connRecorder, reqRecorder := newTestTunnel()
-	tunnel.Go()
+	tunnel, connRecorder, reqRecorder := jsonrpctest.NewTmpTunnel(2*time.Second)
 	defer tunnel.Close()
 	defer reqRecorder.Close()
 
@@ -211,8 +206,7 @@ func TestSendingResponseBack(t *testing.T) {
 // X Request  -> X'
 // X <- Response X'
 func TestRequestResponseHandling(t *testing.T) {
-	tunnel, connRecorder, reqRecorder := newTestTunnel()
-	tunnel.Go()
+	tunnel, connRecorder, reqRecorder := jsonrpctest.NewTmpTunnel(2*time.Second)
 	defer tunnel.Close()
 	defer reqRecorder.Close()
 
@@ -255,8 +249,7 @@ func TestRequestResponseHandling(t *testing.T) {
 }
 
 func TestSendingBrokenData(t *testing.T) {
-	tunnel, connRecorder, reqRecorder := newTestTunnel()
-	tunnel.Go()
+	tunnel, connRecorder, reqRecorder := jsonrpctest.NewTmpTunnel(2*time.Second)
 	defer tunnel.Close()
 	defer reqRecorder.Close()
 
@@ -290,13 +283,4 @@ func TestSendingBrokenData(t *testing.T) {
 
 type testStruct struct {
 	Data string `json:"data"`
-}
-
-func newTestTunnel() (*jsonrpc.Tunnel, *jsonrpctest.ConnRecorder, *jsonrpctest.ReqRecorder) {
-	connRecorder := jsonrpctest.NewConnRecorder()
-	reqRecorder := jsonrpctest.NewReqRecorder()
-	tunnel := jsonrpc.NewTunnel(connRecorder, reqRecorder)
-	connRecorder.CloseAfter(2 * time.Second)
-	reqRecorder.CloseAfter(2 * time.Second)
-	return tunnel, connRecorder, reqRecorder
 }

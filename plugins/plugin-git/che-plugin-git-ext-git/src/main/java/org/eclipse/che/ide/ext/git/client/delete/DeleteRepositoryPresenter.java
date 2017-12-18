@@ -16,10 +16,10 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
@@ -66,7 +66,7 @@ public class DeleteRepositoryPresenter {
         .then(
             ignored -> {
               console.print(constant.deleteGitRepositorySuccess());
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.deleteGitRepositorySuccess());
 
               appContext.getRootProject().synchronize();
@@ -74,7 +74,7 @@ public class DeleteRepositoryPresenter {
         .catchError(
             error -> {
               console.printError(error.getMessage());
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.failedToDeleteRepository(), FAIL, FLOAT_MODE);
             });
   }

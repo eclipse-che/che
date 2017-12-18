@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.ide.ext.java.client.refactoring.rename;
 
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.CLOSE;
+import static org.eclipse.che.ide.api.editor.events.FileEvent.FileOperation.CLOSE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring.RenameType.JAVA_ELEMENT;
@@ -31,9 +31,10 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
 import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.events.FileEvent;
+import org.eclipse.che.ide.api.editor.events.FileEvent.FileEventHandler;
 import org.eclipse.che.ide.api.editor.link.HasLinkedMode;
 import org.eclipse.che.ide.api.editor.link.LinkedMode;
 import org.eclipse.che.ide.api.editor.link.LinkedModel;
@@ -42,9 +43,7 @@ import org.eclipse.che.ide.api.editor.link.LinkedModelGroup;
 import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
-import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.event.FileEvent.FileEventHandler;
-import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
+import org.eclipse.che.ide.api.filewatcher.ClientServerEventService;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -64,6 +63,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactori
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.LinkedRenameRefactoringApply;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringResult;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RenameRefactoringSession;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Class for rename refactoring java classes

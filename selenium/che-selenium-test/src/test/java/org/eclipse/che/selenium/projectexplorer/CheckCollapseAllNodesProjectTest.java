@@ -71,7 +71,7 @@ public class CheckCollapseAllNodesProjectTest {
     editor.waitTabIsPresent("AppControlleTest");
 
     // Perform the 'collapse all'
-    projectExplorer.clickCollapseAllButton();
+    projectExplorer.collapseProjectTreeByOptionsButton();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME + "/src");
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME + "/pom.xml");

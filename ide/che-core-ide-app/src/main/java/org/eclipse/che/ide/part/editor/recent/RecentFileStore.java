@@ -12,7 +12,7 @@ package org.eclipse.che.ide.part.editor.recent;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
+import static org.eclipse.che.ide.api.editor.events.FileEvent.FileOperation.OPEN;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 
 import com.google.inject.Inject;
@@ -24,7 +24,7 @@ import java.util.List;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.editor.events.FileEvent;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;

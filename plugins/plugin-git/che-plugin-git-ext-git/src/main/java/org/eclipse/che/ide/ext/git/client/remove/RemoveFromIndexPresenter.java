@@ -18,12 +18,12 @@ import static org.eclipse.che.ide.util.Arrays.isNullOrEmpty;
 import com.google.inject.Inject;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
@@ -99,16 +99,16 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
         .remove(project.getLocation(), toRelativePaths(resources), view.isRemoved())
         .then(
             ignored -> {
-              console.print(constant.removeFilesSuccessfull());
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-              notificationManager.notify(constant.removeFilesSuccessfull());
+              console.print(constant.removeFilesSuccessful());
+              consolesPanelPresenter.addCommandOutput(console);
+              notificationManager.notify(constant.removeFilesSuccessful());
 
               project.synchronize();
             })
         .catchError(
             error -> {
               handleError(error.getCause(), console);
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
             });
 
     view.close();
@@ -140,7 +140,7 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
             ? e.getMessage()
             : constant.removeFilesFailed();
     console.printError(errorMessage);
-    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+    consolesPanelPresenter.addCommandOutput(console);
     notificationManager.notify(constant.removeFilesFailed(), FAIL, FLOAT_MODE);
   }
 

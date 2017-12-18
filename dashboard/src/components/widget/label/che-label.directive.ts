@@ -14,23 +14,16 @@
  * Defines a directive for creating label container.
  * @author Oleksii Orel
  */
-export class CheLabel {
+export class CheLabel implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
-    this.replace = true;
-    this.transclude = false;
-    this.templateUrl = 'components/widget/label/che-label.html';
+  restrict = 'E';
+  replace = true;
+  transclude = false;
+  templateUrl = 'components/widget/label/che-label.html';
 
-    // scope values
-    this.scope = {
-      labelText:'@cheLabelText'
-    };
-
-  }
+  // scope values
+  scope = {
+    labelText: '@cheLabelText'
+  };
 
 }

@@ -26,6 +26,7 @@ import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.SuspendEvent;
 import org.eclipse.che.api.debug.shared.model.impl.action.StartActionImpl;
+import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgSettings;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -37,14 +38,12 @@ import org.testng.annotations.BeforeMethod;
  */
 public abstract class AbstractZendDbgSessionTest {
 
+  protected static final String DEFAULT_HOST = "127.0.0.1";
+  protected static final int DEFAULT_PORT = 10137;
   private static final String QUERY_SSL =
       "QUERY_STRING=start_debug=1&debug_host=127.0.0.1&debug_port=10137&use_ssl=1";
   private static final String QUERY_NO_SSL =
       "QUERY_STRING=start_debug=1&debug_host=127.0.0.1&debug_port=10137";
-
-  protected static final String DEFAULT_HOST = "127.0.0.1";
-  protected static final int DEFAULT_PORT = 10137;
-
   protected ZendDebugger debugger;
   protected BlockingQueue<DebuggerEvent> dbgEvents;
   private Process dbgEngineProcess;
@@ -87,18 +86,22 @@ public abstract class AbstractZendDbgSessionTest {
     assertEquals(bpActivatedEvent.getBreakpoint(), breakpoint);
   }
 
-  protected void triggerSession(String dbgFile, ZendDbgSettings dbgSettings) throws Exception {
-    triggerSession(dbgFile, dbgSettings, Collections.emptyList());
+  protected void triggerSession(String dbgFile, ZendDbgSettings dbgSettings, FsManager fsManager)
+      throws Exception {
+    triggerSession(dbgFile, dbgSettings, Collections.emptyList(), fsManager);
   }
 
   protected void triggerSession(
-      String dbgFile, ZendDbgSettings dbgSettings, List<Breakpoint> dbgBreakpoints)
+      String dbgFile,
+      ZendDbgSettings dbgSettings,
+      List<Breakpoint> dbgBreakpoints,
+      FsManager fsManager)
       throws Exception {
     ZendDbgLocationHandler dbgLocationMapper = mock(ZendDbgLocationHandler.class);
     // No need to convert between VFS and DBG for test purposes
     when(dbgLocationMapper.convertToVFS(anyObject())).then(returnsFirstArg());
     when(dbgLocationMapper.convertToDBG(anyObject())).then(returnsFirstArg());
-    debugger = new ZendDebugger(dbgSettings, dbgLocationMapper, dbgEvents::add);
+    debugger = new ZendDebugger(dbgSettings, dbgLocationMapper, dbgEvents::add, fsManager);
     debugger.start(new StartActionImpl(dbgBreakpoints));
     dbgEngineProcess =
         Runtime.getRuntime()

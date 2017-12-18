@@ -34,7 +34,7 @@ public class CompareWithBranchAction extends GitAction {
   @Inject
   public CompareWithBranchAction(
       BranchListPresenter presenter, AppContext appContext, GitLocalizationConstant locale) {
-    super(locale.compareWithBranchTitle(), locale.compareWithBranchTitle(), null, appContext);
+    super(locale.compareWithBranchTitle(), locale.compareWithBranchTitle(), appContext);
     this.presenter = presenter;
   }
 

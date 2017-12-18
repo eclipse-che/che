@@ -25,9 +25,7 @@ import javax.inject.Inject;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedTextDocumentEdit;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceEdit;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.autocomplete.AutoCompleteResources;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
+import org.eclipse.che.ide.api.editor.codeassist.AutoCompleteResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.ui.SplitterFancyUtil;
@@ -38,6 +36,7 @@ import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
 import org.eclipse.che.plugin.languageserver.ide.rename.RenameView.ActionDelegate;
@@ -64,13 +63,11 @@ public class RenameViewImpl extends BaseView<ActionDelegate> implements RenameVi
 
   @Inject
   public RenameViewImpl(
-      PartStackUIResources resources,
       SplitterFancyUtil splitterFancyUtil,
       Resources coreRes,
       AutoCompleteResources autoCompleteResources,
       RenameNodeFactory nodeFactory,
       LanguageServerLocalization localization) {
-    super(resources);
     this.nodeFactory = nodeFactory;
     splitLayoutPanel = new SplitLayoutPanel(1);
     splitLayoutPanel.setSize("100%", "100%");

@@ -69,7 +69,7 @@ export class WorkspaceStatusController {
     }
 
     this.isLoading = true;
-    let promise = this.cheWorkspace.stopWorkspace(this.workspace.id, false);
+    let promise = this.cheWorkspace.stopWorkspace(this.workspace.id);
 
     promise.then(() => {
       this.isLoading = false;
@@ -95,7 +95,7 @@ export class WorkspaceStatusController {
    */
   isShowRun(): boolean {
     let status = this.getWorkspaceStatus();
-    return status !== 'RUNNING' && status !== 'STOPPING' && status !== 'SNAPSHOTTING' && status !== 'STARTING';
+    return status !== 'RUNNING' && status !== 'STOPPING' && status !== 'STARTING';
   }
 
   /**
@@ -105,7 +105,7 @@ export class WorkspaceStatusController {
    */
   isStopDisabled(): boolean {
     let status = this.getWorkspaceStatus();
-    return status === 'STOPPING' || status === 'SNAPSHOTTING'
+    return status === 'STOPPING';
   }
 
   /**

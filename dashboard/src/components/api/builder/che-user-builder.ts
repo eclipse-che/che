@@ -34,7 +34,7 @@ export class CheUserBuilder {
   /**
    * Sets the email of the user
    * @param {string} email the email to use
-   * @returns {CodenvyUserBuilder}
+   * @returns {CheUserBuilder}
    */
   withEmail(email: string): CheUserBuilder {
     this.user.email = email;
@@ -44,7 +44,7 @@ export class CheUserBuilder {
   /**
    * Sets the id of the user
    * @param {string} id the id to use
-   * @returns {CodenvyUserBuilder}
+   * @returns {CheUserBuilder}
    */
   withId(id: string): CheUserBuilder {
     this.user.id = id;
@@ -54,7 +54,7 @@ export class CheUserBuilder {
   /**
    * Sets the aliases of the user
    * @param {any[]} aliases the aliases to use
-   * @returns {CodenvyUserBuilder}
+   * @returns {CheUserBuilder}
    */
   withAliases(aliases: any[]): CheUserBuilder {
     this.user.aliases = aliases;

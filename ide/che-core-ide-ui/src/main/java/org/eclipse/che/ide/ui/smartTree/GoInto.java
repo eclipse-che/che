@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.ide.ui.smartTree;
 
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.event.GoIntoStateEvent.HasGoIntoStateHandlers;
 
 /**

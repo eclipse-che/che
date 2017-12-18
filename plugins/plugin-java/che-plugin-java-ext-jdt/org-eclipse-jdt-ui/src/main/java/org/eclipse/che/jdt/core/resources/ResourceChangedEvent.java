@@ -10,7 +10,7 @@
 package org.eclipse.che.jdt.core.resources;
 
 import java.io.File;
-import org.eclipse.che.api.project.server.ProjectCreatedEvent;
+import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IResource;

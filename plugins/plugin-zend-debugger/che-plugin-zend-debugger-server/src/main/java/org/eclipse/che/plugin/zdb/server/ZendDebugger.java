@@ -9,6 +9,7 @@
  */
 package org.eclipse.che.plugin.zdb.server;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_READY;
 import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_SESSION_STARTED;
 import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_SRIPT_ENDED;
@@ -29,6 +30,7 @@ import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
@@ -43,7 +45,7 @@ import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEven
 import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
 import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-import org.eclipse.che.api.project.server.VirtualFileEntry;
+import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgClientMessages.AddBreakpointRequest;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgClientMessages.AddFilesRequest;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgClientMessages.CloseSessionNotification;
@@ -75,7 +77,6 @@ import org.eclipse.che.plugin.zdb.server.expressions.IDbgExpression;
 import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpression;
 import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpressionEvaluator;
 import org.eclipse.che.plugin.zdb.server.utils.ZendDbgConnectionUtils;
-import org.eclipse.che.plugin.zdb.server.utils.ZendDbgFileUtils;
 import org.eclipse.che.plugin.zdb.server.utils.ZendDbgVariableUtils;
 import org.eclipse.che.plugin.zdb.server.variables.IDbgVariable;
 import org.eclipse.che.plugin.zdb.server.variables.ZendDbgVariable;
@@ -90,82 +91,13 @@ import org.slf4j.LoggerFactory;
  */
 public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
-  private static final class VariablesStorage {
-
-    private static final String GLOBALS_VARIABLE = "$GLOBALS";
-
-    private final List<IDbgVariable> variables;
-
-    public VariablesStorage(List<IDbgVariable> variables) {
-      this.variables = variables;
-    }
-
-    List<IDbgVariable> getVariables() {
-      return variables;
-    }
-
-    IDbgVariable findVariable(VariablePath variablePath) {
-      List<IDbgVariable> currentVariables = variables;
-      IDbgVariable matchingVariable = null;
-      Iterator<String> pathIterator = variablePath.getPath().iterator();
-      while (pathIterator.hasNext()) {
-        String pathElement = pathIterator.next();
-        for (IDbgVariable currentVariable : currentVariables) {
-          List<String> currentVariablePath = currentVariable.getVariablePath().getPath();
-          String currentVariablePathElement =
-              currentVariablePath.get(currentVariablePath.size() - 1);
-          if (currentVariablePathElement.equals(pathElement)) {
-            matchingVariable = currentVariable;
-            if (pathIterator.hasNext()) {
-              currentVariables =
-                  currentVariable
-                      .getValue()
-                      .getVariables()
-                      .stream()
-                      .map(v -> (IDbgVariable) v)
-                      .collect(Collectors.toList());
-            }
-            break;
-          }
-        }
-      }
-      return matchingVariable;
-    }
-  }
-
-  private static final class ZendDbgBreakpoint {
-
-    public static ZendDbgBreakpoint create(
-        Breakpoint vfsBreakpoint, ZendDbgLocationHandler debugLocationHandler) {
-      Location dbgLocation = debugLocationHandler.convertToDBG(vfsBreakpoint.getLocation());
-      return new ZendDbgBreakpoint(dbgLocation, vfsBreakpoint);
-    }
-
-    private Location dbgLocation;
-    private Breakpoint vfsBreakpoint;
-
-    private ZendDbgBreakpoint(Location dbgLocation, Breakpoint vfsBreakpoint) {
-      this.dbgLocation = dbgLocation;
-      this.vfsBreakpoint = vfsBreakpoint;
-    }
-
-    public Location getLocation() {
-      return dbgLocation;
-    }
-
-    public Breakpoint getVfsBreakpoint() {
-      return vfsBreakpoint;
-    }
-  }
-
   public static final Logger LOG = LoggerFactory.getLogger(ZendDebugger.class);
   private static final int SUPPORTED_PROTOCOL_ID = 2012121702;
-
   private final DebuggerCallback debugCallback;
   private final ZendDbgSettings debugSettings;
   private final ZendDbgLocationHandler debugLocationHandler;
   private final ZendDbgConnection debugConnection;
-
+  private final FsManager fsManager;
   private final ZendDbgExpressionEvaluator debugExpressionEvaluator;
   private VariablesStorage debugVariableStorage;
   private String debugStartFile;
@@ -176,12 +108,14 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
   public ZendDebugger(
       ZendDbgSettings debugSettings,
       ZendDbgLocationHandler debugLocationHandler,
-      DebuggerCallback debugCallback)
+      DebuggerCallback debugCallback,
+      FsManager fsManager)
       throws DebuggerException {
     this.debugCallback = debugCallback;
     this.debugSettings = debugSettings;
     this.debugLocationHandler = debugLocationHandler;
     this.debugConnection = new ZendDbgConnection(this, debugSettings);
+    this.fsManager = fsManager;
     this.debugExpressionEvaluator = new ZendDbgExpressionEvaluator(debugConnection);
     this.debugVariableStorage = new VariablesStorage(Collections.emptyList());
   }
@@ -386,7 +320,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     // Convert DBG location from engine to VFS location
     Location vfsLocation = debugLocationHandler.convertToVFS(dbgLocation);
     // Send suspend event
-    debugCallback.onEvent(new SuspendEventImpl(vfsLocation));
+    debugCallback.onEvent(new SuspendEventImpl(vfsLocation, SuspendPolicy.ALL));
   }
 
   private void handleScriptEnded(ScriptEndedNotification notification) {
@@ -396,14 +330,15 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
   private GetLocalFileContentResponse handleGetLocalFileContent(
       GetLocalFileContentRequest request) {
     String remoteFilePath = request.getFileName();
-    VirtualFileEntry localFileEntry = ZendDbgFileUtils.findVirtualFileEntry(remoteFilePath);
-    if (localFileEntry == null) {
+
+    String wsPath = absolutize(remoteFilePath);
+    if (!fsManager.exists(wsPath)) {
       LOG.error("Could not found corresponding local file for: " + remoteFilePath);
       return new GetLocalFileContentResponse(
           request.getID(), GetLocalFileContentResponse.STATUS_FAILURE, null);
     }
     try {
-      byte[] localFileContent = localFileEntry.getVirtualFile().getContentAsBytes();
+      byte[] localFileContent = fsManager.readAsString(wsPath).getBytes();
       // Check if remote content is equal to corresponding local one
       if (ZendDbgConnectionUtils.isRemoteContentEqual(
           request.getSize(), request.getCheckSum(), localFileContent)) {
@@ -445,7 +380,9 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     int variableId = 0;
     for (IDbgExpression zendVariableExpression : zendVariablesExpression.getChildren()) {
       if (VariablesStorage.GLOBALS_VARIABLE.equalsIgnoreCase(
-          zendVariableExpression.getExpression())) continue;
+          zendVariableExpression.getExpression())) {
+        continue;
+      }
       IDbgVariable variable =
           new ZendDbgVariable(
               new VariablePathImpl(String.valueOf(variableId++)), zendVariableExpression);
@@ -532,5 +469,73 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
   private boolean isOK(IDbgEngineResponse response) {
     return response != null && response.getStatus() == 0;
+  }
+
+  private static final class VariablesStorage {
+
+    private static final String GLOBALS_VARIABLE = "$GLOBALS";
+
+    private final List<IDbgVariable> variables;
+
+    public VariablesStorage(List<IDbgVariable> variables) {
+      this.variables = variables;
+    }
+
+    List<IDbgVariable> getVariables() {
+      return variables;
+    }
+
+    IDbgVariable findVariable(VariablePath variablePath) {
+      List<IDbgVariable> currentVariables = variables;
+      IDbgVariable matchingVariable = null;
+      Iterator<String> pathIterator = variablePath.getPath().iterator();
+      while (pathIterator.hasNext()) {
+        String pathElement = pathIterator.next();
+        for (IDbgVariable currentVariable : currentVariables) {
+          List<String> currentVariablePath = currentVariable.getVariablePath().getPath();
+          String currentVariablePathElement =
+              currentVariablePath.get(currentVariablePath.size() - 1);
+          if (currentVariablePathElement.equals(pathElement)) {
+            matchingVariable = currentVariable;
+            if (pathIterator.hasNext()) {
+              currentVariables =
+                  currentVariable
+                      .getValue()
+                      .getVariables()
+                      .stream()
+                      .map(v -> (IDbgVariable) v)
+                      .collect(Collectors.toList());
+            }
+            break;
+          }
+        }
+      }
+      return matchingVariable;
+    }
+  }
+
+  private static final class ZendDbgBreakpoint {
+
+    private Location dbgLocation;
+    private Breakpoint vfsBreakpoint;
+
+    private ZendDbgBreakpoint(Location dbgLocation, Breakpoint vfsBreakpoint) {
+      this.dbgLocation = dbgLocation;
+      this.vfsBreakpoint = vfsBreakpoint;
+    }
+
+    public static ZendDbgBreakpoint create(
+        Breakpoint vfsBreakpoint, ZendDbgLocationHandler debugLocationHandler) {
+      Location dbgLocation = debugLocationHandler.convertToDBG(vfsBreakpoint.getLocation());
+      return new ZendDbgBreakpoint(dbgLocation, vfsBreakpoint);
+    }
+
+    public Location getLocation() {
+      return dbgLocation;
+    }
+
+    public Breakpoint getVfsBreakpoint() {
+      return vfsBreakpoint;
+    }
   }
 }

@@ -82,7 +82,7 @@ public class CheckoutReferenceTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     loader.waitOnClosed();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
     git.waitBranchInTheListWithCoState(DEFAULT_BRANCH);

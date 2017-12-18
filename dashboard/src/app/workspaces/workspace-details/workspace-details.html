@@ -3,10 +3,11 @@
   link-href="#/workspaces" link-title="Workspaces" class="workspace-details-toolbar">
   <div layout="row" layout-align="start center" class="toolbar-info">
     <workspace-status che-status="workspaceDetailsController.getWorkspaceStatus()"></workspace-status>
+    <workspace-warnings workspace="workspaceDetailsController.workspaceDetails"></workspace-warnings>
   </div>
   <div flex layout="row" layout-align="end center">
     <workspace-status-button workspace-status="workspaceDetailsController.getWorkspaceStatus()"
-                             on-stop-workspace="workspaceDetailsController.stopWorkspace(isCreateSnapshot)"
+                             on-stop-workspace="workspaceDetailsController.stopWorkspace()"
                              on-run-workspace="workspaceDetailsController.runWorkspace()"></workspace-status-button>
     <che-button-default ng-if="workspaceDetailsController.editMode === false"
                         id="open-in-ide-button"
@@ -67,10 +68,10 @@
     <!-- Agents -->
     <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Agents);">
       <md-tab-label>
-        <span class="che-tab-label-title">Agents</span>
+        <span class="che-tab-label-title">Installers</span>
       </md-tab-label>
       <md-tab-body>
-        <che-machine-selector content-title="Workspace Agents"
+        <che-machine-selector content-title="Workspace Installers"
                               workspace-details="workspaceDetailsController.workspaceDetails"
                               on-change="workspaceDetailsController.checkEditMode()">
           <che-machine-agents environment-manager="environmentManager"
@@ -104,10 +105,26 @@
       <md-tab-body>
         <che-machine-selector content-title="Environment variables"
                               workspace-details="workspaceDetailsController.workspaceDetails"
-                              on-change="workspaceDetailsController.checkEditMode()">
+                              on-change="workspaceDetailsController.checkEditMode({environment: environment})">
           <che-env-variables environment-manager="environmentManager"
                              selected-machine="machine"
                              on-change="onChange()"></che-env-variables>
+        </che-machine-selector>
+      </md-tab-body>
+    </md-tab>
+
+    <!-- Machine Volumes -->
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Volumes);">
+      <md-tab-label>
+        <span class="che-tab-label-title">Volumes</span>
+      </md-tab-label>
+      <md-tab-body>
+        <che-machine-selector content-title="Volumes"
+                              workspace-details="workspaceDetailsController.workspaceDetails"
+                              on-change="workspaceDetailsController.checkEditMode({environment: environment})">
+          <che-machine-volumes environment-manager="environmentManager"
+                             selected-machine="machine"
+                             on-change="onChange()"></che-machine-volumes>
         </che-machine-selector>
       </md-tab-body>
     </md-tab>

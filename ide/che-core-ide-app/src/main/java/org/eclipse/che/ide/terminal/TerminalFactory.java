@@ -11,8 +11,7 @@
 package org.eclipse.che.ide.terminal;
 
 import com.google.inject.assistedinject.Assisted;
-import javax.validation.constraints.NotNull;
-import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
 /**
  * Special factory for creating {@link TerminalPresenter} instances.
@@ -29,6 +28,5 @@ public interface TerminalFactory {
    * @param options options for new terminal
    * @return an instance of {@link TerminalPresenter}
    */
-  TerminalPresenter create(
-      @NotNull @Assisted MachineEntity machine, @Assisted TerminalOptionsJso options);
+  TerminalPresenter create(@Assisted MachineImpl machine, @Assisted TerminalOptionsJso options);
 }

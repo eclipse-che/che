@@ -148,11 +148,6 @@ set_environment_variables () {
     return 1
   fi
 
-  # Che configuration directory - where che.properties lives
-  if [ -z "${CHE_LOCAL_CONF_DIR}" ]; then
-    export CHE_LOCAL_CONF_DIR="${CHE_HOME}/conf/"
-  fi
-
   # Sets the location of the application server and its executables
   # Internal property - should generally not be overridden
   export CATALINA_HOME="${CHE_HOME}/tomcat"

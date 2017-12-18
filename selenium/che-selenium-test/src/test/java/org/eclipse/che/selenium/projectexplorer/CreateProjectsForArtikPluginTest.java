@@ -148,6 +148,7 @@ public class CreateProjectsForArtikPluginTest {
     projectExplorer.openContextMenuByPathSelectedItem(projectName);
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
     projectExplorer.clickOnItemInContextMenu(type);
+    askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(fileName);
     askForValueDialog.clickOkBtn();
     loader.waitOnClosed();
@@ -157,7 +158,7 @@ public class CreateProjectsForArtikPluginTest {
 
   private void checkTextInEditorForFile(String defaultText, String fileName)
       throws InterruptedException {
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTabIsPresent(fileName);
     editor.waitTextIntoEditor(defaultText);
   }

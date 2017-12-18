@@ -216,7 +216,7 @@ public class DtoTemplate {
       builder.append("import com.google.gwt.json.client.*;\n");
       builder.append("import com.google.inject.Singleton;\n");
     }
-    builder.append("\n\n@SuppressWarnings({\"unchecked\", \"cast\"})\n");
+    builder.append("\n\n@SuppressWarnings({\"unchecked\", \"cast\", \"MissingOverride\"})\n");
     if ("client".equals(implType)) {
       builder.append("@Singleton\n");
       builder.append("@ClientDtoFactoryVisitor\n");

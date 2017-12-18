@@ -37,7 +37,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class AddMember {
 
   private interface Locators {
-
     String ADD_MEMBER_TITLE_XPATH =
         "//div[contains(@class, 'che-popup')]//div[text() = 'Invite member to collaborate']";
     String ADD_MEMBER_WIDGET_XPATH = ADD_MEMBER_TITLE_XPATH + "/ancestor::che-popup";

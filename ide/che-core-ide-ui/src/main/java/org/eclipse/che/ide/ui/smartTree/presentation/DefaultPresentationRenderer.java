@@ -17,9 +17,9 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /** @author Vlad Zhukovskiy */
 public class DefaultPresentationRenderer<N extends Node> extends AbstractPresentationRenderer<N> {

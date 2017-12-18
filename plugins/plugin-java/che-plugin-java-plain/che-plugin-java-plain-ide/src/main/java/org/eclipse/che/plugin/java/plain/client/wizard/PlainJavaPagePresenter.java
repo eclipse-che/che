@@ -25,12 +25,12 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.plugin.java.plain.client.wizard.selector.SelectNodePresenter;
 import org.eclipse.che.plugin.java.plain.client.wizard.selector.SelectionDelegate;
 

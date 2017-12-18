@@ -10,25 +10,39 @@
  */
 package org.eclipse.che.ide.part;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DeckLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.ResizeComposite;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.PartStackView;
+import org.eclipse.che.ide.api.parts.base.ToolButton;
+import org.eclipse.che.ide.ui.Tooltip;
+import org.eclipse.che.ide.ui.menu.PositionController;
+import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
  * PartStack view class. Implements UI that manages Parts organized in a Tab-like widget.
@@ -37,37 +51,52 @@ import org.eclipse.che.ide.api.parts.PartStackView;
  * @author Dmitry Shnurenko
  * @author Valeriy Svydenko
  */
-public class PartStackViewImpl extends ResizeComposite
-    implements PartStackView, MouseDownHandler, ContextMenuHandler {
+public class PartStackViewImpl extends Composite
+    implements RequiresResize, PartStackView, MouseDownHandler, ContextMenuHandler {
+
+  interface PartStackViewImplUiBinder extends UiBinder<Widget, PartStackViewImpl> {}
+
+  private static final PartStackViewImplUiBinder UI_BINDER =
+      GWT.create(PartStackViewImplUiBinder.class);
+
   private final Map<PartPresenter, TabItem> tabs;
+
   private final AcceptsOneWidget partViewContainer;
-  private final DeckLayoutPanel contentPanel;
-  private final FlowPanel tabsPanel;
-  private final TabPosition tabPosition;
+
+  private final PartStackUIResources resources;
+  private final CoreLocalizationConstant localizationConstant;
+
+  @UiField FlowPanel partButtons;
+
+  @UiField FlowPanel partStackActions;
+
+  @UiField FlowPanel maximizeButton;
+
+  @UiField FlowPanel hideButton;
+
+  @UiField FlowPanel menuButton;
+
+  @UiField DeckLayoutPanel partStackContent;
 
   private ActionDelegate delegate;
   private Widget focusedWidget;
 
   @Inject
   public PartStackViewImpl(
-      PartStackUIResources resources,
-      final DeckLayoutPanel contentPanel,
-      @Assisted @NotNull TabPosition tabPosition,
-      @Assisted @NotNull FlowPanel tabsPanel) {
-    this.tabsPanel = tabsPanel;
-    this.tabPosition = tabPosition;
+      PartStackUIResources resources, CoreLocalizationConstant localizationConstant) {
+    this.resources = resources;
+    this.localizationConstant = localizationConstant;
+    initWidget(UI_BINDER.createAndBindUi(this));
 
-    this.contentPanel = contentPanel;
-    this.contentPanel.setStyleName(resources.partStackCss().idePartStackContent());
-    initWidget(contentPanel);
+    partStackContent.getElement().getStyle().setPosition(Style.Position.ABSOLUTE);
 
-    this.tabs = new HashMap<>();
+    tabs = new HashMap<>();
 
     partViewContainer =
         new AcceptsOneWidget() {
           @Override
           public void setWidget(IsWidget widget) {
-            contentPanel.add(widget);
+            partStackContent.add(widget);
           }
         };
 
@@ -75,7 +104,106 @@ public class PartStackViewImpl extends ResizeComposite
     addDomHandler(this, ContextMenuEvent.getType());
 
     setMaximized(false);
+
+    addMaximizeButton();
+    addHideButton();
+    addMenuButton();
   }
+
+  /** Adds button to maximize part stack. */
+  private void addMaximizeButton() {
+    SVGImage maximize = new SVGImage(resources.maximizePart());
+    maximize.getElement().setAttribute("name", "workBenchIconMaximize");
+    ToolButton maximizeToolButton = new ToolButton(maximize);
+    maximizeButton.add(maximizeToolButton);
+
+    maximizeToolButton.addClickHandler(
+        new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            delegate.onToggleMaximize();
+          }
+        });
+
+    if (maximizeButton.getElement() instanceof elemental.dom.Element) {
+      Tooltip.create(
+          (elemental.dom.Element) maximizeButton.getElement(),
+          PositionController.VerticalAlign.BOTTOM,
+          PositionController.HorizontalAlign.MIDDLE,
+          localizationConstant.maximizePartStackTitle());
+    }
+  }
+
+  /** Adds button to hide part stack. */
+  private void addHideButton() {
+    ToolButton hideToolButton = new ToolButton(FontAwesome.CARET_SQUARE_O_LEFT);
+    hideToolButton.getElement().setAttribute("name", "workBenchIconMinimize");
+    hideButton.add(hideToolButton);
+
+    hideToolButton.addClickHandler(
+        new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            delegate.onHide();
+          }
+        });
+
+    if (hideButton.getElement() instanceof elemental.dom.Element) {
+      Tooltip.create(
+          (elemental.dom.Element) hideButton.getElement(),
+          PositionController.VerticalAlign.BOTTOM,
+          PositionController.HorizontalAlign.MIDDLE,
+          localizationConstant.minimizePartStackTitle());
+    }
+  }
+
+  /** Adds part stack options button. */
+  private void addMenuButton() {
+    final ToolButton menuToolButton = new ToolButton(FontAwesome.COG);
+    menuToolButton.getElement().setAttribute("name", "workBenchIconPartStackOptions");
+    menuButton.add(menuToolButton);
+    menuToolButton.addClickHandler(
+        new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            Scheduler.get()
+                .scheduleDeferred(
+                    () -> {
+                      int left = getAbsoluteLeft(menuToolButton.getElement());
+                      int top = getAbsoluteTop(menuToolButton.getElement());
+                      delegate.onPartStackMenu(left + 10, top + 21 - 8);
+                    });
+          }
+        });
+
+    if (menuButton.getElement() instanceof elemental.dom.Element) {
+      Tooltip.create(
+          (elemental.dom.Element) menuButton.getElement(),
+          PositionController.VerticalAlign.BOTTOM,
+          PositionController.HorizontalAlign.MIDDLE,
+          localizationConstant.partStackOptionsTitle());
+    }
+  }
+
+  /**
+   * Returns absolute left position of the element.
+   *
+   * @param element element
+   * @return element left position
+   */
+  private native int getAbsoluteLeft(JavaScriptObject element) /*-{
+        return element.getBoundingClientRect().left;
+    }-*/;
+
+  /**
+   * Returns absolute top position of the element.
+   *
+   * @param element element
+   * @return element top position
+   */
+  private native int getAbsoluteTop(JavaScriptObject element) /*-{
+        return element.getBoundingClientRect().top;
+    }-*/;
 
   /** {@inheritDoc} */
   @Override
@@ -98,21 +226,17 @@ public class PartStackViewImpl extends ResizeComposite
   /** {@inheritDoc} */
   @Override
   public void addTab(@NotNull TabItem tabItem, @NotNull PartPresenter presenter) {
-    tabsPanel.add(tabItem.getView());
+    partButtons.add(tabItem.getView());
     presenter.go(partViewContainer);
-
     tabs.put(presenter, tabItem);
-    tabItem.setTabPosition(tabPosition);
   }
 
   /** {@inheritDoc} */
   @Override
   public void removeTab(@NotNull PartPresenter presenter) {
     TabItem tab = tabs.get(presenter);
-
-    tabsPanel.remove(tab.getView());
-    contentPanel.remove(presenter.getView());
-
+    partButtons.remove(tab.getView());
+    partStackContent.remove(presenter.getView());
     tabs.remove(presenter);
   }
 
@@ -121,10 +245,8 @@ public class PartStackViewImpl extends ResizeComposite
   public void setTabPositions(List<PartPresenter> presenters) {
     for (PartPresenter partPresenter : presenters) {
       int tabIndex = presenters.indexOf(partPresenter);
-
       TabItem tabItem = tabs.get(partPresenter);
-
-      tabsPanel.insert(tabItem.getView(), tabIndex);
+      partButtons.insert(tabItem.getView(), tabIndex);
     }
   }
 
@@ -132,21 +254,26 @@ public class PartStackViewImpl extends ResizeComposite
   @Override
   public void selectTab(@NotNull PartPresenter partPresenter) {
     IsWidget view = partPresenter.getView();
-    int viewIndex = contentPanel.getWidgetIndex(view);
+    int viewIndex = partStackContent.getWidgetIndex(view);
 
     boolean isWidgetExist = viewIndex != -1;
 
     if (!isWidgetExist) {
       partPresenter.go(partViewContainer);
 
-      viewIndex = contentPanel.getWidgetIndex(view);
+      viewIndex = partStackContent.getWidgetIndex(view);
     }
 
-    contentPanel.showWidget(viewIndex);
+    partStackContent.showWidget(viewIndex);
 
     setActiveTab(partPresenter);
   }
 
+  /**
+   * Displays and sets part tab active.
+   *
+   * @param part
+   */
   private void setActiveTab(@NotNull PartPresenter part) {
     for (TabItem tab : tabs.values()) {
       tab.unSelect();
@@ -164,7 +291,7 @@ public class PartStackViewImpl extends ResizeComposite
       focusedWidget.getElement().removeAttribute("focused");
     }
 
-    focusedWidget = contentPanel.getVisibleWidget();
+    focusedWidget = partStackContent.getVisibleWidget();
 
     if (focused && focusedWidget != null) {
       focusedWidget.getElement().setAttribute("focused", "");
@@ -182,5 +309,11 @@ public class PartStackViewImpl extends ResizeComposite
   @Override
   public void setMaximized(boolean maximized) {
     getElement().setAttribute("maximized", "" + maximized);
+  }
+
+  public void onResize() {
+    if (partStackContent instanceof RequiresResize) {
+      ((RequiresResize) partStackContent).onResize();
+    }
   }
 }

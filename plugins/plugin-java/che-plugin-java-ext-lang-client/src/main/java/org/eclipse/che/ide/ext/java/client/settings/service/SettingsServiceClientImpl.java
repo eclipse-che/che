@@ -39,7 +39,7 @@ public class SettingsServiceClientImpl implements SettingsServiceClient {
   /** {@inheritDoc} */
   @Override
   public Promise<Void> applyCompileParameters(@NotNull final Map<String, String> parameters) {
-    String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/java/compiler-settings/set";
+    String url = appContext.getWsAgentServerApiEndpoint() + "/java/compiler-settings/set";
 
     JsonSerializable data =
         new JsonSerializable() {
@@ -59,7 +59,7 @@ public class SettingsServiceClientImpl implements SettingsServiceClient {
   /** {@inheritDoc} */
   @Override
   public Promise<Map<String, String>> getCompileParameters() {
-    String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/java/compiler-settings/all";
+    String url = appContext.getWsAgentServerApiEndpoint() + "/java/compiler-settings/all";
 
     return asyncRequestFactory
         .createGetRequest(url)

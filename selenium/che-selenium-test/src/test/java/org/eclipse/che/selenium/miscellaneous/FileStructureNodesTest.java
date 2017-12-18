@@ -10,15 +10,16 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FILE_STRUCTURE;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SIMPLE;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.FileStructure;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -26,9 +27,12 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/** @author Aleksandr Shmaraev on 12.12.15 */
+/**
+ * @author Aleksandr Shmaraev
+ * @author Serhii Skoryk
+ */
 public class FileStructureNodesTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("FileStructureNodes", 4);
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
   private static final String JAVA_FILE_NAME = "Company";
   private static final String INNER_CLASS_NAME = "CompanyHelper";
   private static final String INTERFACE_NAME = "Inter";
@@ -98,7 +102,6 @@ public class FileStructureNodesTest {
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private CodenvyEditor editor;
   @Inject private Menu menu;
   @Inject private FileStructure fileStructure;
   @Inject private TestProjectServiceClient testProjectServiceClient;
@@ -107,10 +110,7 @@ public class FileStructureNodesTest {
   public void setUp() throws Exception {
     URL resource = getClass().getResource("/projects/prOutline");
     testProjectServiceClient.importProject(
-        workspace.getId(),
-        Paths.get(resource.toURI()),
-        PROJECT_NAME,
-        ProjectTemplates.MAVEN_SIMPLE);
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SIMPLE);
     ide.open(workspace);
   }
 
@@ -122,9 +122,7 @@ public class FileStructureNodesTest {
     projectExplorer.openItemByVisibleNameInExplorer("Company.java");
 
     // check work nodes in the 'file structure' by double click
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.FILE_STRUCTURE);
+    menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
@@ -141,14 +139,7 @@ public class FileStructureNodesTest {
     fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
     fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
-    // try-catch was added because test fails while trying to open node by double click action
-    // issue: https://github.com/eclipse/che/issues/6499
-    try {
-      fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
-    } catch (org.openqa.selenium.TimeoutException ex) {
-      fileStructure.selectItemInFileStructureByDoubleClick(JAVA_FILE_NAME);
-      fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
-    }
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
 
     // check work nodes in the 'file structure' by click on the icon
     fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
@@ -165,19 +156,14 @@ public class FileStructureNodesTest {
     fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
     fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
+    fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
-    // try-catch was added because test fails while trying to open node by click action
-    // issue: https://github.com/eclipse/che/issues/6499
-    try {
-      fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
-    } catch (org.openqa.selenium.TimeoutException ex) {
-      fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
-      fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
-      fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
-      fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
-    }
+    fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
     fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+
+    fileStructure.closeFileStructureFormByEscape();
+    fileStructure.waitFileStructureFormIsClosed();
   }
 }

@@ -90,7 +90,7 @@ teardown() {
   check_che_state
   #create a workspace
 
-  ws_create=$(curl 'http://'${ip_address}':8080/api/workspace?namespace=che&attribute=stackId:java-default' -H 'Content-Type: application/json;charset=UTF-8' -H 'Accept: application/json, text/plain, */*' --data-binary '{"defaultEnv":"wksp-1p0b","environments":{"wksp-1p0b":{"recipe":{"location":"eclipse/ubuntu_jdk8","type":"dockerimage"},"machines":{"dev-machine":{"servers":{},"agents":["org.eclipse.che.exec","org.eclipse.che.terminal","org.eclipse.che.ws-agent","org.eclipse.che.ssh"],"attributes":{"memoryLimitBytes":"2147483648"}}}}},"projects":[],"commands":[{"commandLine":"mvn clean install -f ${current.project.path}","name":"build","type":"mvn","attributes":{"goal":"Build","previewUrl":""}}],"name":"backup-restore","links":[]}' --compressed)
+  ws_create=$(curl 'http://'${ip_address}':8080/api/workspace?namespace=che&attribute=stackId:java-default' -H 'Content-Type: application/json;charset=UTF-8' -H 'Accept: application/json, text/plain, */*' --data-binary '{"defaultEnv":"wksp-1p0b","environments":{"wksp-1p0b":{"recipe":{"location":"eclipse/ubuntu_jdk8","type":"dockerimage"},"machines":{"dev-machine":{"servers":{},"installers":["org.eclipse.che.exec","org.eclipse.che.terminal","org.eclipse.che.ws-agent","org.eclipse.che.ssh"],"attributes":{"memoryLimitBytes":"2147483648"}}}}},"projects":[],"commands":[{"commandLine":"mvn clean install -f ${current.project.path}","name":"build","type":"mvn","attributes":{"goal":"Build","previewUrl":""}}],"name":"backup-restore","links":[]}' --compressed)
   [[ "$ws_create" == *"created"* ]]
   [[ "$ws_create" == *"STOPPED"* ]]
   #stop che

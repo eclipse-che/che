@@ -23,17 +23,17 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorAgent.OpenEditorCallback;
 import org.eclipse.che.ide.api.editor.EditorInput;
-import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.event.FileEvent.FileEventHandler;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
+import org.eclipse.che.ide.api.editor.events.FileEvent;
+import org.eclipse.che.ide.api.editor.events.FileEvent.FileEventHandler;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.dialogs.CancelCallback;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -47,7 +47,7 @@ public class ImageViewer extends AbstractEditorPresenter implements FileEventHan
   private CoreLocalizationConstant constant;
   private DialogFactory dialogFactory;
   private WorkspaceAgent workspaceAgent;
-  private WsAgentURLModifier urlModifier;
+  private AgentURLModifier urlModifier;
   private ScrollPanel editorView;
 
   @Inject
@@ -57,7 +57,7 @@ public class ImageViewer extends AbstractEditorPresenter implements FileEventHan
       DialogFactory dialogFactory,
       EventBus eventBus,
       WorkspaceAgent workspaceAgent,
-      WsAgentURLModifier urlModifier) {
+      AgentURLModifier urlModifier) {
     this.resources = resources;
     this.constant = constant;
     this.dialogFactory = dialogFactory;

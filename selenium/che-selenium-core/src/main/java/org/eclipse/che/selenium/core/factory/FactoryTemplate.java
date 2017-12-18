@@ -17,7 +17,6 @@ package org.eclipse.che.selenium.core.factory;
  */
 public class FactoryTemplate {
   public static final String MINIMAL = "minimal.json";
-  public static final String SVN = "svn.json";
 
   private FactoryTemplate() {}
 }

@@ -105,8 +105,8 @@ export class WorkspaceDetailsSshCtrl {
     let machines : any = this.workspace.config.environments[defaultEnv].machines;
     let machineNames : Array<string> = Object.keys(machines);
     this.machineSshAgents.length = 0;
-    machineNames.forEach((machineName) => {
-      let enabled : boolean = machines[machineName].agents.indexOf('org.eclipse.che.ssh') >= 0;
+    machineNames.forEach((machineName: string) => {
+      let enabled : boolean = machines[machineName].installers.indexOf('org.eclipse.che.ssh') >= 0;
       let machineAgent = {agentEnabled : enabled, name: machineName};
       this.machineSshAgents.push(machineAgent);
       if (enabled) {

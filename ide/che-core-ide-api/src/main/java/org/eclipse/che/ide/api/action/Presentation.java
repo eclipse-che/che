@@ -10,13 +10,12 @@
  */
 package org.eclipse.che.ide.api.action;
 
-import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.dom.client.Element;
 import java.util.HashMap;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.util.ListenerManager;
-import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * The presentation of an action in a specific place in the user interface.
@@ -26,35 +25,23 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 public final class Presentation {
 
-  private Map<String, Object> userMap = new HashMap<>();
-
   /** Defines tool tip for button at tool bar or text for element at menu value: String */
   public static final String PROP_TEXT = "text";
-
   /** value: String */
   public static final String PROP_DESCRIPTION = "description";
-
   /** value: Icon */
   public static final String PROP_ICON = "icon";
-
   /** value: Boolean */
   public static final String PROP_VISIBLE = "visible";
-
   /** The actual value is a Boolean. */
   public static final String PROP_ENABLED = "enabled";
 
+  private Map<String, Object> userMap = new HashMap<>();
   private ListenerManager<PropertyChangeListener> myChangeSupport;
   private String text;
   private String myDescription;
 
-  /**
-   * Presentation Icon
-   *
-   * <p>Can be set using ImageResource, SVG Resource or directly HTML code.
-   */
-  private ImageResource imageResource;
-
-  private SVGResource svgResource;
+  private Element imageElement;
   private String htmlResource;
 
   private boolean visible;
@@ -100,21 +87,23 @@ public final class Presentation {
   }
 
   /**
-   * Returns icon image resource.
-   *
-   * @return image resource
-   */
-  public ImageResource getImageResource() {
-    return imageResource;
-  }
-
-  /**
    * Returns SVG image resource.
    *
    * @return svg image resource
    */
-  public SVGResource getSVGResource() {
-    return svgResource;
+  public Element getImageElement() {
+    return imageElement == null ? null : (Element) imageElement.cloneNode(true);
+  }
+
+  /**
+   * Sets icon image element.
+   *
+   * @param imageElement icon image element
+   */
+  public void setImageElement(Element imageElement) {
+    Element oldElement = this.imageElement;
+    this.imageElement = imageElement;
+    firePropertyChange(PROP_ICON, oldElement, imageElement);
   }
 
   /**
@@ -127,36 +116,14 @@ public final class Presentation {
   }
 
   /**
-   * Sets icon image resource.
-   *
-   * @param imageResource image resource
-   */
-  public void setImageResource(ImageResource imageResource) {
-    ImageResource oldImaheResource = imageResource;
-    this.imageResource = imageResource;
-    firePropertyChange(PROP_ICON, oldImaheResource, imageResource);
-  }
-
-  /**
-   * Sets icon SVG resource.
-   *
-   * @param svgResource icon SVG resource
-   */
-  public void setSVGResource(SVGResource svgResource) {
-    SVGResource oldSVGResource = svgResource;
-    this.svgResource = svgResource;
-    firePropertyChange(PROP_ICON, oldSVGResource, svgResource);
-  }
-
-  /**
    * Sets icon HTML resource.
    *
    * @param htmlResource html resource
    */
   public void setHTMLResource(String htmlResource) {
-    String oldHTMLRersource = htmlResource;
+    String oldHTMLResource = htmlResource;
     this.htmlResource = htmlResource;
-    firePropertyChange(PROP_ICON, oldHTMLRersource, htmlResource);
+    firePropertyChange(PROP_ICON, oldHTMLResource, htmlResource);
   }
 
   public boolean isVisible() {
@@ -215,13 +182,7 @@ public final class Presentation {
   public void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
     final PropertyChangeEvent event =
         new PropertyChangeEvent(this, propertyName, oldValue, newValue);
-    myChangeSupport.dispatch(
-        new ListenerManager.Dispatcher<PropertyChangeListener>() {
-          @Override
-          public void dispatch(PropertyChangeListener listener) {
-            listener.onPropertyChange(event);
-          }
-        });
+    myChangeSupport.dispatch(listener -> listener.onPropertyChange(event));
   }
 
   public Presentation clone() {
@@ -229,8 +190,10 @@ public final class Presentation {
     presentation.myDescription = myDescription;
     presentation.enabled = enabled;
     presentation.visible = visible;
-    presentation.imageResource = imageResource;
-    presentation.svgResource = svgResource;
+    presentation.imageElement = imageElement;
+    if (imageElement != null) {
+      presentation.imageElement = imageElement.cloneNode(true).cast();
+    }
     presentation.htmlResource = htmlResource;
     return presentation;
   }

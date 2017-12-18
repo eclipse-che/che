@@ -9,12 +9,17 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheJsonRpcApiClient, IChannel} from './che-json-rpc-api-service';
+import {CheJsonRpcApiClient} from './che-json-rpc-api-service';
 import {ICommunicationClient} from './json-rpc-client';
 
 enum MasterChannels {
-  ENVIRONMENT_OUTPUT, ENVIRONMENT_STATUS, WS_AGENT_OUTPUT, WORKSPACE_STATUS
+  ENVIRONMENT_OUTPUT = <any>'machine/log',
+  ENVIRONMENT_STATUS = <any>'machine/statusChanged',
+  WS_AGENT_OUTPUT = <any>'installer/log',
+  WORKSPACE_STATUS = <any>'workspace/statusChanged'
 }
+const SUBSCRIBE: string = 'subscribe';
+const UNSUBSCRIBE: string = 'unsubscribe';
 
 /**
  * Client API for workspace master interactions.
@@ -23,37 +28,10 @@ enum MasterChannels {
  */
 export class CheJsonRpcMasterApi {
   private cheJsonRpcApi: CheJsonRpcApiClient;
-  private channels: Map<MasterChannels, IChannel>;
   private clientId: string;
 
   constructor (client: ICommunicationClient, entrypoint: string) {
     this.cheJsonRpcApi = new CheJsonRpcApiClient(client);
-
-    this.channels = new Map<MasterChannels, IChannel>();
-    this.channels.set(MasterChannels.ENVIRONMENT_OUTPUT, {
-      subscription: 'event:environment-output:subscribe-by-machine-name',
-      unsubscription: 'event:environment-output:un-subscribe-by-machine-name',
-      notification: 'event:environment-output:message'
-    });
-
-    this.channels.set(MasterChannels.ENVIRONMENT_STATUS, {
-      subscription: 'event:environment-status:subscribe',
-      unsubscription: 'event:environment-status:un-subscribe',
-      notification: 'event:environment-status:changed'
-    });
-
-    this.channels.set(MasterChannels.WS_AGENT_OUTPUT, {
-      subscription: 'event:ws-agent-output:subscribe',
-      unsubscription: 'event:ws-agent-output:un-subscribe',
-      notification: 'event:ws-agent-output:message'
-    });
-
-    this.channels.set(MasterChannels.WORKSPACE_STATUS, {
-      subscription: 'event:workspace-status:subscribe',
-      unsubscription: 'event:workspace-status:un-subscribe',
-      notification: 'event:workspace-status:changed'
-    });
-
     this.connect(entrypoint);
   }
 
@@ -76,10 +54,8 @@ export class CheJsonRpcMasterApi {
    * @param machineName machine's name
    * @param callback callback to process event
    */
-  subscribeEnvironmentOutput(workspaceId: string, machineName: string, callback: Function): void {
-    let channel = this.channels.get(MasterChannels.ENVIRONMENT_OUTPUT);
-    let params = [workspaceId + '::' + machineName];
-    this.cheJsonRpcApi.subscribe(channel.subscription, channel.notification, callback, params);
+  subscribeEnvironmentOutput(workspaceId: string, callback: Function): void {
+    this.subscribe(MasterChannels.ENVIRONMENT_OUTPUT, workspaceId, callback);
   }
 
   /**
@@ -89,10 +65,8 @@ export class CheJsonRpcMasterApi {
    * @param machineName machine's name
    * @param callback callback to process event
    */
-  unSubscribeEnvironmentOutput(workspaceId: string, machineName: string, callback: Function): void {
-    let channel = this.channels.get(MasterChannels.ENVIRONMENT_OUTPUT);
-    let params = [workspaceId + '::' + machineName];
-    this.cheJsonRpcApi.unsubscribe(channel.unsubscription, channel.notification, callback, params);
+  unSubscribeEnvironmentOutput(workspaceId: string, callback: Function): void {
+    this.unsubscribe(MasterChannels.ENVIRONMENT_OUTPUT, workspaceId, callback);
   }
 
   /**
@@ -102,9 +76,7 @@ export class CheJsonRpcMasterApi {
    * @param callback callback to process event
    */
   subscribeEnvironmentStatus(workspaceId: string, callback: Function): void {
-    let channel = this.channels.get(MasterChannels.ENVIRONMENT_STATUS);
-    let params = [workspaceId];
-    this.cheJsonRpcApi.subscribe(channel.subscription, channel.notification, callback, params);
+    this.subscribe(MasterChannels.ENVIRONMENT_STATUS, workspaceId, callback);
   }
 
   /**
@@ -114,9 +86,7 @@ export class CheJsonRpcMasterApi {
    * @param callback callback to process event
    */
   unSubscribeEnvironmentStatus(workspaceId: string, callback: Function): void {
-    let channel = this.channels.get(MasterChannels.ENVIRONMENT_STATUS);
-    let params = [workspaceId];
-    this.cheJsonRpcApi.unsubscribe(channel.unsubscription, channel.notification, callback, params);
+    this.unsubscribe(MasterChannels.ENVIRONMENT_STATUS, workspaceId, callback);
   }
 
   /**
@@ -126,9 +96,7 @@ export class CheJsonRpcMasterApi {
    * @param callback callback to process event
    */
   subscribeWsAgentOutput(workspaceId: string, callback: Function): void {
-    let channel = this.channels.get(MasterChannels.WS_AGENT_OUTPUT);
-    let params = [workspaceId];
-    this.cheJsonRpcApi.subscribe(channel.subscription, channel.notification, callback, params);
+    this.subscribe(MasterChannels.WS_AGENT_OUTPUT, workspaceId, callback);
   }
 
   /**
@@ -138,9 +106,7 @@ export class CheJsonRpcMasterApi {
    * @param callback callback to process event
    */
   unSubscribeWsAgentOutput(workspaceId: string, callback: Function): void {
-    let channel = this.channels.get(MasterChannels.WS_AGENT_OUTPUT);
-    let params = [workspaceId];
-    this.cheJsonRpcApi.unsubscribe(channel.unsubscription, channel.notification, callback, params);
+    this.unsubscribe(MasterChannels.WS_AGENT_OUTPUT, workspaceId, callback);
   }
 
   /**
@@ -150,14 +116,12 @@ export class CheJsonRpcMasterApi {
    * @param callback callback to process event
    */
   subscribeWorkspaceStatus(workspaceId: string, callback: Function): void {
-    let channel = this.channels.get(MasterChannels.WORKSPACE_STATUS);
-    let params = [workspaceId];
     let statusHandler = (message: any) => {
       if (workspaceId === message.workspaceId) {
         callback(message);
       }
     };
-    this.cheJsonRpcApi.subscribe(channel.subscription, channel.notification, statusHandler, params);
+    this.subscribe(MasterChannels.WORKSPACE_STATUS, workspaceId, statusHandler);
   }
 
   /**
@@ -167,9 +131,7 @@ export class CheJsonRpcMasterApi {
    * @param callback
    */
   unSubscribeWorkspaceStatus(workspaceId: string, callback: Function): void {
-    let channel = this.channels.get(MasterChannels.WORKSPACE_STATUS);
-    let params = [workspaceId];
-    this.cheJsonRpcApi.unsubscribe(channel.unsubscription, channel.notification, callback, params);
+    this.unsubscribe(MasterChannels.WORKSPACE_STATUS, workspaceId, callback);
   }
 
   /**
@@ -190,5 +152,31 @@ export class CheJsonRpcMasterApi {
    */
   getClientId(): string {
     return this.clientId;
+  }
+
+  /**
+   * Performs subscribe to the pointed channel for pointed workspace's ID and callback.
+   *
+   * @param channel channel to un-subscribe
+   * @param workspaceId workspace's id
+   * @param callback callback
+   */
+  private subscribe(channel: MasterChannels, workspaceId: string, callback: Function): void {
+    let method: string = channel.toString();
+    let params = {method: method, scope: {workspaceId: workspaceId}};
+    this.cheJsonRpcApi.subscribe(SUBSCRIBE, method, callback, params);
+  }
+
+  /**
+   * Performs un-subscribe of the pointed channel by pointed workspace's ID and callback.
+   *
+   * @param channel channel to un-subscribe
+   * @param workspaceId workspace's id
+   * @param callback callback
+   */
+  private unsubscribe(channel: MasterChannels, workspaceId: string, callback: Function): void {
+    let method: string = channel.toString();
+    let params = {method: method, scope: {workspaceId: workspaceId}};
+    this.cheJsonRpcApi.unsubscribe(UNSUBSCRIBE, method, callback, params);
   }
 }

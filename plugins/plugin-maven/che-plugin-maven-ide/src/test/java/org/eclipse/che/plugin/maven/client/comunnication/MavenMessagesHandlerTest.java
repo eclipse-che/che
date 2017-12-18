@@ -74,7 +74,6 @@ public class MavenMessagesHandlerTest {
             "/che/core",
             "/project",
             "/che/core/che-core-db-vendor-postgresql",
-            "/che/plugins/plugin-svn",
             "/che/samples/sample-plugin-json",
             "/che/wsmaster/che-core-api-auth",
             "/project/api",

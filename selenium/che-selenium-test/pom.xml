@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-selenium-parent</artifactId>
         <groupId>org.eclipse.che.selenium</groupId>
-        <version>5.22.0-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
     </parent>
     <artifactId>che-selenium-test</artifactId>
     <packaging>jar</packaging>
@@ -24,9 +24,6 @@
     <properties>
         <docker.showLogs>true</docker.showLogs>
         <runSuite>${project.build.testOutputDirectory}/suites/CheSuite.xml</runSuite>
-        <svn.server.image.name>svn-server</svn.server.image.name>
-        <svn.server.repository.qa-1>qa</svn.server.repository.qa-1>
-        <svn.server.repository.qa-2>qa2</svn.server.repository.qa-2>
     </properties>
     <dependencies>
         <dependency>
@@ -60,6 +57,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-debug-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -98,12 +99,22 @@
             <artifactId>everrest-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>github-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-remote-driver</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
@@ -135,6 +146,21 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -220,6 +246,12 @@
                                     <value>org.eclipse.che.selenium.core.CheSeleniumTestHandler</value>
                                 </property>
                             </properties>
+                            <systemProperties>
+                                <property>
+                                    <name>java.util.logging.config.file</name>
+                                    <value>${project.build.testOutputDirectory}/logging.properties</value>
+                                </property>
+                            </systemProperties>
                         </configuration>
                     </execution>
                 </executions>
@@ -283,20 +315,6 @@
                             </target>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>unpack svn repos</id>
-                        <phase>process-test-resources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <!-- unpack dumps of the svn repositories -->
-                                <unzip dest="${project.build.directory}/.svn" src="${project.build.testOutputDirectory}/svn/repositories/${svn.server.repository.qa-1}.zip" />
-                                <unzip dest="${project.build.directory}/.svn" src="${project.build.testOutputDirectory}/svn/repositories/${svn.server.repository.qa-2}.zip" />
-                            </target>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -340,71 +358,6 @@
                             <suiteXmlFiles>
                                 <suiteXmlFile>${runSuite}</suiteXmlFile>
                             </suiteXmlFiles>
-                            <systemPropertyVariables>
-                                <svn.server.port>${svn.server.port}</svn.server.port>
-                            </systemPropertyVariables>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>io.fabric8</groupId>
-                        <artifactId>docker-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>build</id>
-                                <phase>process-test-resources</phase>
-                                <goals>
-                                    <goal>build</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>start</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>stop</goal>
-                                    <goal>start</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>stop</id>
-                                <phase>post-integration-test</phase>
-                                <goals>
-                                    <goal>stop</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <images>
-                                <image>
-                                    <alias>svn-server</alias>
-                                    <name>${svn.server.image.name}</name>
-                                    <build>
-                                        <from>krisdavison/svn-server:v2.0</from>
-                                    </build>
-                                    <run>
-                                        <volumes>
-                                            <bind>
-                                                <volume>${project.build.directory}/.svn:/home/svn</volume>
-                                            </bind>
-                                        </volumes>
-                                        <ports>
-                                            <port>svn.server.port:80</port>
-                                        </ports>
-                                        <restartPolicy>
-                                            <name>always</name>
-                                        </restartPolicy>
-                                        <cmd>
-                                            <shell>/startup.sh</shell>
-                                        </cmd>
-                                        <wait>
-                                            <exec>
-                                                <!-- clean up 'db/locks' directories-->
-                                                <preStop>rm -rf /home/svn/${svn.server.repository.qa-1}
-                                                    /home/svn/${svn.server.repository.qa-2}</preStop>
-                                            </exec>
-                                        </wait>
-                                    </run>
-                                </image>
-                            </images>
                         </configuration>
                     </plugin>
                 </plugins>

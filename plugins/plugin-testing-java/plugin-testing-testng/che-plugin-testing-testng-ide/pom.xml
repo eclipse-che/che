@@ -16,9 +16,10 @@
     <parent>
         <artifactId>che-plugin-testing-testng</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.22.0-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-testing-testng-ide</artifactId>
+    <packaging>gwt-lib</packaging>
     <name>Che Plugin :: Java Testing :: TestNG IDE</name>
     <dependencies>
         <dependency>
@@ -73,16 +74,15 @@
         </dependency>
     </dependencies>
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-                <includes>
-                    <include>**/*.java</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-        </resources>
+        <plugins>
+            <plugin>
+                <groupId>net.ltgt.gwt.maven</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <moduleName>org.eclipse.che.plugin.testing.testng.TestNG</moduleName>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>

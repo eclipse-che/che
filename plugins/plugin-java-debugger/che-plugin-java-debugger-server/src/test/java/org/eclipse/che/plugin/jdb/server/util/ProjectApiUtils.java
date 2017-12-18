@@ -10,41 +10,44 @@
  */
 package org.eclipse.che.plugin.jdb.server.util;
 
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertTrue;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.name.Names;
 import java.io.File;
-import java.nio.file.PathMatcher;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
-import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
+import org.eclipse.che.api.core.jsonrpc.commons.transmission.EndpointIdConfigurator;
+import org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule;
+import org.eclipse.che.api.core.websocket.commons.WebSocketMessageTransmitter;
+import org.eclipse.che.api.editor.server.EditorApiModule;
+import org.eclipse.che.api.fs.server.FsApiModule;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.PathTransformer;
+import org.eclipse.che.api.project.server.ProjectApiModule;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.WorkspaceProjectsSyncer;
-import org.eclipse.che.api.project.server.WorkspaceSyncCommunication;
-import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
-import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
-import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
-import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
-import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
-import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.plugin.java.server.projecttype.JavaProjectType;
-import org.eclipse.che.plugin.java.server.projecttype.JavaValueProviderFactory;
+import org.eclipse.che.api.project.server.impl.ProjectServiceApi;
+import org.eclipse.che.api.project.server.impl.ProjectServiceApiFactory;
+import org.eclipse.che.api.project.server.impl.ProjectServiceVcsStatusInjector;
+import org.eclipse.che.api.project.server.impl.WorkspaceProjectSynchronizer;
+import org.eclipse.che.api.search.server.SearchApiModule;
+import org.eclipse.che.api.watcher.server.FileWatcherApiModule;
+import org.eclipse.che.plugin.java.server.inject.JavaModule;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** @author Anatolii Bazko */
 public class ProjectApiUtils {
 
+  private static final Logger LOG = LoggerFactory.getLogger(ProjectApiUtils.class);
   private static final AtomicBoolean initialized = new AtomicBoolean();
 
   /** Ensures that project api has been initialized only once. */
@@ -52,7 +55,11 @@ public class ProjectApiUtils {
     if (!initialized.get()) {
       synchronized (initialized) {
         if (!initialized.get()) {
-          init();
+          try {
+            init();
+          } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+          }
           initialized.set(true);
         }
       }
@@ -61,86 +68,89 @@ public class ProjectApiUtils {
 
   /** Initialize project API for tests. */
   private static void init() throws Exception {
-    TestWorkspaceHolder workspaceHolder = new TestWorkspaceHolder(new ArrayList<>());
     File root = new File("target/test-classes/workspace");
-    assertTrue(root.exists());
+    File indexDir = new File("target/test-classes/workspace/index");
 
-    File indexDir = new File("target/fs_index");
-    assertTrue(indexDir.mkdirs());
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(File.class)
+                    .annotatedWith(Names.named("che.user.workspaces.storage"))
+                    .toInstance(root);
+                bind(File.class)
+                    .annotatedWith(Names.named("vfs.local.fs_index_root_dir"))
+                    .toInstance(indexDir);
+                bind(String.class).annotatedWith(Names.named("che.api")).toInstance("api-endpoint");
+                bind(String.class)
+                    .annotatedWith(Names.named("project.importer.default_importer_id"))
+                    .toInstance("git");
 
-    Set<PathMatcher> filters = new HashSet<>();
-    filters.add(path -> true);
-    FSLuceneSearcherProvider sProvider = new FSLuceneSearcherProvider(indexDir, filters);
+                install(
+                    new FactoryModuleBuilder()
+                        .implement(ProjectServiceApi.class, ProjectServiceApi.class)
+                        .build(ProjectServiceApiFactory.class));
 
-    EventService eventService = new EventService();
-    LocalVirtualFileSystemProvider vfsProvider =
-        new LocalVirtualFileSystemProvider(root, sProvider);
-    ProjectTypeRegistry projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
-    projectTypeRegistry.registerProjectType(new JavaProjectType(new JavaValueProviderFactory()));
-    ProjectHandlerRegistry projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
-    ProjectRegistry projectRegistry =
-        new ProjectRegistry(
-            workspaceHolder,
-            vfsProvider,
-            projectTypeRegistry,
-            projectHandlerRegistry,
-            eventService);
-    projectRegistry.initProjects();
+                bind(ProjectServiceVcsStatusInjector.class)
+                    .toInstance(
+                        mock(
+                            ProjectServiceVcsStatusInjector.class,
+                            Mockito.withSettings().defaultAnswer(RETURNS_DEEP_STUBS)));
+                bind(RequestHandlerManager.class)
+                    .toInstance(
+                        mock(
+                            RequestHandlerManager.class,
+                            Mockito.withSettings().defaultAnswer(RETURNS_DEEP_STUBS)));
 
-    ProjectImporterRegistry importerRegistry = new ProjectImporterRegistry(new HashSet<>());
-    FileWatcherNotificationHandler fileWatcherNotificationHandler =
-        new DefaultFileWatcherNotificationHandler(vfsProvider);
-    ProjectManager projectManager =
-        new ProjectManager(
-            vfsProvider,
-            projectTypeRegistry,
-            mock(WorkspaceSyncCommunication.class),
-            projectRegistry,
-            projectHandlerRegistry,
-            importerRegistry,
-            fileWatcherNotificationHandler,
-            workspaceHolder,
-            mock(FileWatcherManager.class));
+                bind(EndpointIdConfigurator.class)
+                    .toInstance(
+                        mock(
+                            EndpointIdConfigurator.class,
+                            Mockito.withSettings().defaultAnswer(RETURNS_DEEP_STUBS)));
+
+                bind(WebSocketMessageTransmitter.class)
+                    .toInstance(
+                        mock(
+                            WebSocketMessageTransmitter.class,
+                            Mockito.withSettings().defaultAnswer(RETURNS_DEEP_STUBS)));
+
+                bind(WorkspaceProjectSynchronizer.class)
+                    .toInstance(
+                        mock(
+                            WorkspaceProjectSynchronizer.class,
+                            Mockito.withSettings().defaultAnswer(RETURNS_DEEP_STUBS)));
+
+                install(new ProjectApiModule());
+                install(new FsApiModule());
+                install(new SearchApiModule());
+                install(new EditorApiModule());
+                install(new FileWatcherApiModule());
+                install(new JsonRpcModule());
+                install(new JavaModule());
+                install(new SearchApiModule());
+              }
+            });
+
+    ProjectManager projectManager = injector.getInstance(ProjectManager.class);
+    FsManager fsManager = injector.getInstance(FsManager.class);
+    PathTransformer pathTransformer = injector.getInstance(PathTransformer.class);
+
+    projectManager.setType("/test", "java", false);
 
     ResourcesPlugin resourcesPlugin =
         new ResourcesPlugin(
-            "target/index", root.getAbsolutePath(), () -> projectRegistry, () -> projectManager);
+            indexDir.getAbsolutePath(),
+            root.getAbsolutePath(),
+            () -> projectManager,
+            () -> pathTransformer,
+            () -> fsManager);
     resourcesPlugin.start();
 
     JavaPlugin javaPlugin =
-        new JavaPlugin(root.getAbsolutePath() + "/.settings", resourcesPlugin, projectRegistry);
+        new JavaPlugin(root.getAbsolutePath() + "/.settings", resourcesPlugin, projectManager);
     javaPlugin.start();
 
-    projectRegistry.setProjectType("test", "java", false);
-
     JavaModelManager.getDeltaState().initializeRoots(true);
-  }
-
-  private static class TestWorkspaceHolder extends WorkspaceProjectsSyncer {
-
-    private List<ProjectConfigDto> projects;
-
-    TestWorkspaceHolder(List<ProjectConfigDto> projects) {
-      this.projects = projects;
-    }
-
-    @Override
-    public List<? extends ProjectConfig> getProjects() {
-      return projects;
-    }
-
-    @Override
-    public String getWorkspaceId() {
-      return "id";
-    }
-
-    @Override
-    protected void addProject(ProjectConfig project) throws ServerException {}
-
-    @Override
-    protected void updateProject(ProjectConfig project) throws ServerException {}
-
-    @Override
-    protected void removeProject(ProjectConfig project) throws ServerException {}
   }
 }

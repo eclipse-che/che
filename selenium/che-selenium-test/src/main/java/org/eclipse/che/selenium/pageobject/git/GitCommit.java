@@ -45,7 +45,7 @@ public class GitCommit {
     String BRANCHES_DROPDOWN =
         "//span[@id='gwt-debug-push-after-commit-check-box']/following-sibling::select";
     String TREE_ITEM_CHECK_BOX =
-        "//div[@id='gwt-debug-git-compare-changed_files']"
+        "//div[@id='gwt-debug-git-commit-changed-files']"
             + "//div[text()='%s']/ancestor::div[1]/preceding-sibling::span";
   }
 
@@ -137,6 +137,24 @@ public class GitCommit {
         .until(
             ExpectedConditions.elementToBeSelected(
                 (By.xpath(String.format(Locators.TREE_ITEM_CHECK_BOX + "//input", itemName)))));
+  }
+
+  /**
+   * Wait for item check-box in the 'Git changed files tree panel' to be indeterminate.
+   *
+   * @param itemName name of the item
+   */
+  public void waitItemCheckBoxToBeIndeterminate(String itemName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver ->
+                    seleniumWebDriver
+                        .findElement(
+                            By.xpath(
+                                String.format(Locators.TREE_ITEM_CHECK_BOX + "//input", itemName)))
+                        .getAttribute("id")
+                        .endsWith("indeterminate"));
   }
 
   /**

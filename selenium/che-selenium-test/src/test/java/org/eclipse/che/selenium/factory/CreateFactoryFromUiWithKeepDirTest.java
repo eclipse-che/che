@@ -18,6 +18,7 @@ import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextM
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.io.IOException;
@@ -40,6 +41,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -115,7 +117,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
       projectExplorer.openItemByPath(PROJECT_NAME + "/" + KEEPED_DIR);
     }
 
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     createFactoryAndSwitchToWs();
   }
 
@@ -136,9 +138,15 @@ public class CreateFactoryFromUiWithKeepDirTest {
       seleniumWebDriver.switchTo().defaultContent();
       projectExplorer.waitProjectExplorer(50);
     }
-    events.clickProjectEventsTab();
-    events.waitExpectedMessage(CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE);
-    events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
+    events.clickEventLogBtn();
+    try {
+      events.waitExpectedMessage(CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE);
+      events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7253");
+    }
+
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         PROJECT_NAME + "/" + KEEPED_DIR + "/src" + "/main" + "/java/hello",
         "GreetingController.java");
@@ -166,7 +174,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
   }
 
   private void checkAutocompletion() {
-    editor.setCursorToDefinedLineAndChar(18, 6);
+    editor.goToCursorPositionVisible(18, 6);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("Greeting");
@@ -203,7 +211,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
             + "    }\n"
             + "}";
 
-    editor.setCursorToDefinedLineAndChar(15, 12);
+    editor.goToCursorPositionVisible(15, 12);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("Greeting");
     editor.waitTextIntoEditor(expectedTextBeforeDownloadSources);

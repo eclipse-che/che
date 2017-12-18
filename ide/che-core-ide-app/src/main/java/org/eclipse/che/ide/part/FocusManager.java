@@ -10,15 +10,18 @@
  */
 package org.eclipse.che.ide.part;
 
+import static org.eclipse.che.ide.api.parts.PartStack.State.HIDDEN;
+
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.parts.Focusable;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStack;
+import org.eclipse.che.ide.api.parts.PartStackStateChangedEvent;
 import org.eclipse.che.ide.part.PartStackPresenter.PartStackEventHandler;
 
 /**
@@ -29,7 +32,7 @@ import org.eclipse.che.ide.part.PartStackPresenter.PartStackEventHandler;
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class FocusManager {
+public class FocusManager implements PartStackStateChangedEvent.Handler {
 
   private final PartStackEventHandler partStackHandler;
 
@@ -48,6 +51,7 @@ public class FocusManager {
 
   @Inject
   public FocusManager(final EventBus eventBus) {
+    eventBus.addHandler(PartStackStateChangedEvent.TYPE, this);
 
     this.partStackHandler =
         new PartStackEventHandler() {
@@ -103,5 +107,14 @@ public class FocusManager {
                     });
           }
         };
+  }
+
+  @Override
+  public void onPartStackStateChanged(PartStackStateChangedEvent event) {
+    PartStack changedPartStack = event.getPartStack();
+    if (HIDDEN == changedPartStack.getPartStackState() && activePartStack == changedPartStack) {
+      activePartStack = null;
+      activePart = null;
+    }
   }
 }

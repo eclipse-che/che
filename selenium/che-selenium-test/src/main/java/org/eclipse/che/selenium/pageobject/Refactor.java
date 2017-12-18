@@ -89,7 +89,7 @@ public class Refactor {
     String ERROR_CONTAINER_OF_COMPILATION_FORM =
         "//div[@style[contains(.,'color: rgb(195, 77, 77)')]]";
     String TEXT_MESSAGE_MOVE_FORM =
-        "(//div[@style[contains(.,'color: rgb(255, 255, 255)')]])[position()=2]";
+        "//div[text()='Move item']/parent::div/parent::div/parent::div//div[text()='%s']";
     String ITEM_CHANGES_TO_BE_PERFORMED =
         "//div[contains(text(),'Rename')]/ancestor::div[3]//div[contains(text(),'%s')]";
     String EXPAND_ITEM_ICON =
@@ -249,7 +249,7 @@ public class Refactor {
 
   /** wait the 'Move item' form is closed */
   public void waitMoveItemFormIsClosed() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(Locators.MOVE_ITEM_FORM)));
   }
 
@@ -301,6 +301,9 @@ public class Refactor {
 
   /** click on the 'OK' button */
   public void clickOkButtonRefactorForm() {
+    String someFailMessage = "//div[@style='color: rgb(195, 77, 77);' and contains(text(), ' ')]";
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(someFailMessage)));
     String activeStateLocator = "//button[@id='move-accept-button' and not(@disabled)]";
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(activeStateLocator)))
@@ -596,8 +599,8 @@ public class Refactor {
   public void waitTextInMoveForm(String mess) {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.textToBePresentInElementLocated(
-                By.xpath(Locators.TEXT_MESSAGE_MOVE_FORM), mess));
+            ExpectedConditions.presenceOfElementLocated(
+                By.xpath(String.format(Locators.TEXT_MESSAGE_MOVE_FORM, mess))));
   }
 
   /**

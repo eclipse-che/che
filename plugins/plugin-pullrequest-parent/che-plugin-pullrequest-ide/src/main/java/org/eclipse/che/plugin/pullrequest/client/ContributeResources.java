@@ -22,6 +22,9 @@ public interface ContributeResources extends ClientBundle {
   @Source("images/refresh.svg")
   SVGResource refreshIcon();
 
+  @Source("images/icon.svg")
+  SVGResource titleIcon();
+
   interface ContributeCss extends CssResource {
     String blueButton();
 

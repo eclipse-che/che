@@ -67,7 +67,7 @@ public class DirectUrlFactoryWithSpecificBranch {
     testFactoryWithSpecificBranch.authenticateAndOpen();
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitProgressPopupPanelClose();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
 
     events.waitExpectedMessage("Project gitPullTest imported", UPDATING_PROJECT_TIMEOUT_SEC);
     events.waitExpectedMessage(

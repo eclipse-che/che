@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -28,7 +30,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.TimeoutException;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -68,6 +69,7 @@ public class DeleteProjectsTest {
     }
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
+    waitAllProjectsInProjectExplorer();
     loader.waitOnClosed();
     consoles.selectProcessByTabName("dev-machine");
   }
@@ -91,14 +93,6 @@ public class DeleteProjectsTest {
   }
 
   @Test(priority = 2)
-  public void shouldDeleteProjectByDeleteIcon() {
-    projectExplorer.waitItem(PROJECT_NAMES.get(2));
-    deleteFromDeleteIcon(PROJECT_NAMES.get(2));
-    acceptDeletion(PROJECT_NAMES.get(2));
-    checkErrorMessageNotPresentInConsole();
-  }
-
-  @Test(priority = 3)
   public void shouldDeleteOpenedProjectByMenuFile() {
     projectExplorer.waitItem(PROJECT_NAMES.get(3));
     projectExplorer.openItemByPath(PROJECT_NAMES.get(3));
@@ -111,7 +105,7 @@ public class DeleteProjectsTest {
     checkErrorMessageNotPresentInConsole();
   }
 
-  @Test(priority = 4)
+  @Test(priority = 3)
   public void shouldDeleteOpenedProjectFromContextMenu() {
     projectExplorer.waitItem(PROJECT_NAMES.get(4));
     projectExplorer.openItemByPath(PROJECT_NAMES.get(4));
@@ -143,8 +137,12 @@ public class DeleteProjectsTest {
   private void checkErrorMessageNotPresentInConsole() {
     try {
       consoles.waitExpectedTextIntoConsole("[ERROR]", 7);
-      Assert.fail("Error message is present in console");
+      fail("Error message is present in console");
     } catch (TimeoutException ex) {
     }
+  }
+
+  private void waitAllProjectsInProjectExplorer() {
+    PROJECT_NAMES.forEach((String projectName) -> projectExplorer.waitItem(projectName));
   }
 }

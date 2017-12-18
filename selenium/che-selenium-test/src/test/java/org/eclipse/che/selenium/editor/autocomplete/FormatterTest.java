@@ -25,7 +25,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -111,7 +110,8 @@ public class FormatterTest {
 
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.FORMAT);
 
-    Assert.assertEquals(editor.getVisibleTextFromEditor(), FORMATTED_TEXT);
+    editor.waitActive();
+    editor.waitTextIntoEditor(FORMATTED_TEXT);
     loader.waitOnClosed();
   }
 }

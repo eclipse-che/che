@@ -11,12 +11,22 @@
 package org.eclipse.che.plugin.java.server.projecttype;
 
 import static java.lang.String.valueOf;
+import static java.nio.file.FileVisitResult.CONTINUE;
+import static java.nio.file.FileVisitResult.TERMINATE;
+import static java.nio.file.Files.walkFileTree;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.ext.java.shared.Constants.CONTAINS_JAVA_FILES;
 
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FolderEntry;
+import java.util.concurrent.atomic.AtomicBoolean;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
@@ -30,45 +40,60 @@ import org.eclipse.che.ide.ext.java.shared.Constants;
  * @author gazarenkov
  * @author Florent Benoit
  */
+@Singleton
 public class JavaValueProviderFactory implements ValueProviderFactory {
 
-  @Override
-  public ValueProvider newInstance(FolderEntry projectFolder) {
-    return new JavaValueProvider(projectFolder);
+  private final PathTransformer pathTransformer;
+
+  @Inject
+  public JavaValueProviderFactory(PathTransformer pathTransformer) {
+    this.pathTransformer = pathTransformer;
   }
 
-  static class JavaValueProvider extends ReadonlyValueProvider {
+  @Override
+  public ValueProvider newInstance(String wsPath) {
+    return new JavaValueProvider(pathTransformer.transform(wsPath));
+  }
 
+  private static class JavaValueProvider extends ReadonlyValueProvider {
+
+    /** The root folder of this project. */
+    private final Path projectFsPath;
     /** If true, it means that there are some java files in this folder or in its children. */
     private boolean containsJavaFiles;
-
     /** Try to perform the check on java files only once with lazy check. */
     private boolean initialized = false;
 
-    /** The root folder of this project. */
-    private final FolderEntry rootFolder;
-
-    public JavaValueProvider(final FolderEntry projectFolder) {
-      this.rootFolder = projectFolder;
+    JavaValueProvider(Path projectFsPath) {
+      this.projectFsPath = projectFsPath;
       this.initialized = false;
     }
 
     /**
      * Check recursively if the given folder contains java files or any of its children
      *
-     * @param folderEntry the initial folder to check
      * @return true if the folder or a subfolder contains java files
      */
-    protected boolean hasJavaFilesInFolder(final FolderEntry folderEntry) {
+    private boolean hasJavaFilesInFolder() {
       try {
-        return folderEntry.getChildFolders().stream().anyMatch(this::hasJavaFilesInFolder)
-            || folderEntry
-                .getChildFiles()
-                .stream()
-                .anyMatch(fileEntry -> fileEntry.getName().endsWith(".java"));
-      } catch (ServerException e) {
-        throw new IllegalStateException(
-            String.format("Unable to get files from ''%s''", folderEntry.getName()), e);
+        AtomicBoolean detectedJavaFiles = new AtomicBoolean();
+        walkFileTree(
+            projectFsPath,
+            new SimpleFileVisitor<Path>() {
+              @Override
+              public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                  throws IOException {
+                if (file.toFile().getName().endsWith(".java")) {
+                  detectedJavaFiles.getAndSet(true);
+                  return TERMINATE;
+                } else {
+                  return CONTINUE;
+                }
+              }
+            });
+        return detectedJavaFiles.get();
+      } catch (IOException e) {
+        throw new IllegalStateException("Unable to get files from from: " + projectFsPath, e);
       }
     }
 
@@ -77,13 +102,13 @@ public class JavaValueProviderFactory implements ValueProviderFactory {
      *
      * @throws ValueStorageException if there is an error when checking
      */
-    protected void init() throws ValueStorageException {
+    private void init() throws ValueStorageException {
       try {
-        this.containsJavaFiles = hasJavaFilesInFolder(rootFolder);
+        this.containsJavaFiles = hasJavaFilesInFolder();
       } catch (IllegalStateException e) {
         throw new ValueStorageException(
-            String.format("Unable to get files from ''%s''", rootFolder.getName())
-                + e.getMessage());
+            String.format(
+                "Unable to get files from ''%s'' because of %s", projectFsPath, e.getMessage()));
       }
       this.initialized = true;
     }

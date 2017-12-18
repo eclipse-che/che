@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.git;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.GO_BACK;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.GO_INTO;
 
 import com.google.inject.Inject;
@@ -120,7 +121,7 @@ public class KeepDirectoryGitImportTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/my-lib/src/test/java/hello");
     projectExplorer.openItemByPath(PROJECT_NAME + "/my-lib/src/test/java/hello/SayHelloTest.java");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/my-lib/src/main");
     projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/my-webapp");
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/my-lib/src/test");
@@ -130,7 +131,8 @@ public class KeepDirectoryGitImportTest {
     projectExplorer.waitItemInVisibleArea("java");
     projectExplorer.waitItemInVisibleArea("hello");
     projectExplorer.waitItemInVisibleArea("SayHelloTest.java");
-    projectExplorer.clickGoBackButton();
+    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/my-lib/src/test");
+    projectExplorer.clickOnItemInContextMenu(GO_BACK);
     projectExplorer.waitItem(PROJECT_NAME + "/my-lib/src");
   }
 
@@ -176,7 +178,8 @@ public class KeepDirectoryGitImportTest {
     loader.waitOnClosed();
     projectExplorer.waitItemInVisibleArea("my-webapp");
     projectExplorer.waitItemIsDisappeared(PROJECT_NAME);
-    projectExplorer.clickGoBackButton();
+    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/my-webapp");
+    projectExplorer.clickOnItemInContextMenu(GO_BACK);
     projectExplorer.waitItem(PROJECT_NAME);
   }
 
@@ -212,9 +215,9 @@ public class KeepDirectoryGitImportTest {
     projectExplorer.openItemByPath(projectName + "/my-lib/src/test/java/hello");
     projectExplorer.openItemByPath(projectName + "/my-lib/src/main/java/hello/SayHello.java");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.openItemByPath(projectName + "/my-lib/src/test/java/hello/SayHelloTest.java");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 }

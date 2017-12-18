@@ -12,8 +12,8 @@ package org.eclipse.che.ide.ext.java.client.search.node;
 
 import java.util.Comparator;
 import java.util.List;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.java.shared.dto.search.Match;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * Comparator for nodes that has MatchNode as child. Compares nodes according to match line number.

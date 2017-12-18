@@ -11,6 +11,8 @@
 package org.eclipse.che.ide.editor.orion.client;
 
 import static java.lang.Boolean.parseBoolean;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.project.shared.Constants.VCS_PROVIDER_NAME;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -52,10 +54,8 @@ import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer;
 import org.eclipse.che.ide.api.debug.BreakpointRendererFactory;
 import org.eclipse.che.ide.api.debug.HasBreakpointRenderer;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
+import org.eclipse.che.ide.api.editor.DeletedFilesController;
 import org.eclipse.che.ide.api.editor.EditorAgent.OpenEditorCallback;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorLocalizationConstants;
@@ -79,6 +79,7 @@ import org.eclipse.che.ide.api.editor.editorconfig.EditorUpdateAction;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.events.CompletionRequestEvent;
 import org.eclipse.che.ide.api.editor.events.DocumentReadyEvent;
+import org.eclipse.che.ide.api.editor.events.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.editor.events.GutterClickEvent;
 import org.eclipse.che.ide.api.editor.events.GutterClickHandler;
 import org.eclipse.che.ide.api.editor.filetype.FileTypeIdentifier;
@@ -86,6 +87,8 @@ import org.eclipse.che.ide.api.editor.formatter.ContentFormatter;
 import org.eclipse.che.ide.api.editor.gutter.Gutter;
 import org.eclipse.che.ide.api.editor.gutter.Gutters;
 import org.eclipse.che.ide.api.editor.gutter.HasGutter;
+import org.eclipse.che.ide.api.editor.hotkeys.HasHotKeyItems;
+import org.eclipse.che.ide.api.editor.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.editor.keymap.KeyBinding;
 import org.eclipse.che.ide.api.editor.keymap.KeyBindingAction;
 import org.eclipse.che.ide.api.editor.link.HasLinkedMode;
@@ -116,18 +119,14 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorOperations;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
-import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
-import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
-import org.eclipse.che.ide.api.event.ng.DeletedFilesController;
-import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationOperation;
-import org.eclipse.che.ide.api.hotkeys.HasHotKeyItems;
-import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
+import org.eclipse.che.ide.api.filewatcher.ClientServerEventService;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -138,6 +137,7 @@ import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.vcs.HasVcsChangeMarkerRender;
 import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRender;
 import org.eclipse.che.ide.api.vcs.VcsChangeMarkerRenderFactory;
+import org.eclipse.che.ide.editor.EditorFileStatusNotificationOperation;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionExtRulerOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelDataOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
@@ -148,6 +148,9 @@ import org.eclipse.che.ide.editor.orion.client.menu.EditorContextMenu;
 import org.eclipse.che.ide.editor.orion.client.signature.SignatureHelpView;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.dialogs.CancelCallback;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -655,7 +658,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
   @Override
   public void doSave(final AsyncCallback<EditorInput> callback) {
     // If the workspace is stopped we shouldn't try to save a file
-    if (isReadOnly() || appContext.getDevMachine() == null) {
+    if (isReadOnly() || appContext.getWorkspace().getStatus() != RUNNING) {
       return;
     }
 
@@ -1220,8 +1223,12 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                     resolve.apply(null);
                     return;
                   }
-
-                  String vcsName = project.getAttribute("vcs.provider.name");
+                  Container parent = getRoot(project);
+                  if (!(parent instanceof Project)) {
+                    resolve.apply(null);
+                    return;
+                  }
+                  String vcsName = ((Project) parent).getAttribute(VCS_PROVIDER_NAME);
                   VcsChangeMarkerRenderFactory vcsChangeMarkerRenderFactory =
                       vcsChangeMarkerRenderFactoryMap.get(vcsName);
                   if (vcsChangeMarkerRenderFactory != null) {
@@ -1230,6 +1237,14 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                   }
                   resolve.apply(null);
                 }));
+  }
+
+  private Container getRoot(Container container) {
+    Container root = container;
+    while (root.getParent() != null) {
+      root = root.getParent();
+    }
+    return root;
   }
 
   @Override

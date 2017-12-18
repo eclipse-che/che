@@ -103,9 +103,6 @@ export class NavbarRecentWorkspacesController {
    * Forms the dropdown items template, based of workspace settings.
    */
   prepareDropdownItemsTemplate(): void {
-    let autoSnapshot = this.cheWorkspace.getAutoSnapshotSettings();
-    let oppositeStopTitle = autoSnapshot ? 'Stop without snapshot' : 'Stop with snapshot';
-
     this.dropdownItemTempl = [
       // running
       {
@@ -113,15 +110,7 @@ export class NavbarRecentWorkspacesController {
         scope: 'RUNNING',
         icon: 'fa fa-stop',
         _onclick: (workspaceId: string) => {
-          this.stopRecentWorkspace(workspaceId, autoSnapshot);
-        }
-      },
-      {
-        name: oppositeStopTitle,
-        scope: 'RUNNING',
-        icon: 'fa fa-stop',
-        _onclick: (workspaceId: string) => {
-          this.stopRecentWorkspace(workspaceId, !autoSnapshot);
+          this.stopRecentWorkspace(workspaceId);
         }
       },
       // stopped
@@ -251,8 +240,8 @@ export class NavbarRecentWorkspacesController {
     }
 
     let workspace = this.cheWorkspace.getWorkspaceById(workspaceId),
-      disabled = workspace && (workspace.status === 'STOPPING' || workspace.status === 'SNAPSHOTTING'),
-      visibleScope = (workspace && (workspace.status === 'RUNNING' || workspace.status === 'STOPPING' || workspace.status === 'SNAPSHOTTING' || workspace.status === 'STARTING')) ? 'RUNNING' : 'STOPPED';
+      disabled = workspace && (workspace.status === 'STOPPING'),
+      visibleScope = (workspace && (workspace.status === 'RUNNING' || workspace.status === 'STOPPING' || workspace.status === 'STARTING')) ? 'RUNNING' : 'STOPPED';
 
     if (!this.dropdownItems[workspaceId]) {
       this.dropdownItems[workspaceId] = [];
@@ -274,8 +263,8 @@ export class NavbarRecentWorkspacesController {
    * Stops specified workspace
    * @param workspaceId {String} workspace id
    */
-  stopRecentWorkspace(workspaceId: string, createSnapshot: boolean): void {
-    this.cheWorkspace.stopWorkspace(workspaceId, createSnapshot).then(() => {
+  stopRecentWorkspace(workspaceId: string): void {
+    this.cheWorkspace.stopWorkspace(workspaceId).then(() => {
       angular.noop();
     }, (error: any) => {
       this.$log.error(error);

@@ -84,7 +84,7 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
       AppContext appContext,
       GitHubLocalizationConstant locale) {
     this.view = view;
-    this.baseUrl = appContext.getMasterEndpoint();
+    this.baseUrl = appContext.getMasterApiEndpoint();
     this.appContext = appContext;
     this.gitHubAuthenticator = gitHubAuthenticatorRegistry.getAuthenticator("github");
     this.gitHubClientService = gitHubClientService;
@@ -318,7 +318,7 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
         OAuth2AuthenticatorUrlProvider.get(
             baseUrl,
             "github",
-            appContext.getCurrentUser().getProfile().getUserId(),
+            appContext.getCurrentUser().getId(),
             Lists.asList("user", new String[] {"repo", "write:public_key"})),
         new AsyncCallback<OAuthStatus>() {
           @Override

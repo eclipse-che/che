@@ -10,8 +10,8 @@
 package org.eclipse.che.plugin.testing.phpunit.ide.action;
 
 import com.google.inject.Inject;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.plugin.testing.ide.action.TestAction;
 
@@ -22,7 +22,7 @@ import org.eclipse.che.plugin.testing.ide.action.TestAction;
  */
 public class PHPUnitTestActionGroup implements TestAction {
 
-  private final Action runScriptTestAction;
+  private final BaseAction runScriptTestAction;
 
   @Inject
   public PHPUnitTestActionGroup(

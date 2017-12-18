@@ -14,7 +14,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
@@ -25,26 +25,26 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.InputCallback;
-import org.eclipse.che.ide.api.dialogs.InputDialog;
-import org.eclipse.che.ide.api.dialogs.InputValidator;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.input.InputCallback;
+import org.eclipse.che.ide.ui.dialogs.input.InputDialog;
+import org.eclipse.che.ide.ui.dialogs.input.InputValidator;
 import org.eclipse.che.ide.util.NameUtils;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
- * Implementation of an {@link Action} that provides an ability to create new resource (e.g. file,
- * folder). After performing this action, it asks user for the resource's name and then creates
- * resource in the selected folder.
+ * Implementation of an {@link BaseAction} that provides an ability to create new resource (e.g.
+ * file, folder). After performing this action, it asks user for the resource's name and then
+ * creates resource in the selected folder.
  *
  * @author Artem Zatsarynnyi
  * @author Dmitry Shnurenko
@@ -72,7 +72,7 @@ public abstract class AbstractNewResourceAction extends AbstractPerspectiveActio
       AppContext appContext,
       NotificationManager notificationManager,
       Provider<EditorAgent> editorAgentProvider) {
-    super(singletonList(PROJECT_PERSPECTIVE_ID), title, description, null, svgIcon);
+    super(singletonList(PROJECT_PERSPECTIVE_ID), title, description, svgIcon);
     this.dialogFactory = dialogFactory;
     this.coreLocalizationConstant = coreLocalizationConstant;
     this.eventBus = eventBus;

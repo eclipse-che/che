@@ -10,9 +10,9 @@
  */
 package org.eclipse.che.ide.command.toolbar.commands.button;
 
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.ui.menubutton.MenuItem;
 
 /** Factory for {@link MenuItem}s for {@link ExecuteCommandButton}. */
@@ -22,7 +22,7 @@ public interface MenuItemsFactory {
 
   CommandItem newCommandItem(CommandImpl command);
 
-  MachineItem newMachineItem(CommandImpl command, Machine machine);
+  MachineItem newMachineItem(CommandImpl command, MachineImpl machine);
 
   MachineItem newMachineItem(MachineItem item);
 }

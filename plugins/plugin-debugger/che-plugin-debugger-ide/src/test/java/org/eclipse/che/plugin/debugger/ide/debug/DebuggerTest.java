@@ -11,16 +11,16 @@
 package org.eclipse.che.plugin.debugger.ide.debug;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -37,8 +37,6 @@ import java.util.Map;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.core.jsonrpc.commons.reception.ConsumerConfiguratorOneToNone;
-import org.eclipse.che.api.core.jsonrpc.commons.reception.ResultConfiguratorFromOne;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
@@ -47,10 +45,10 @@ import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
 import org.eclipse.che.api.debug.shared.dto.VariableDto;
 import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
 import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
-import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
 import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
+import org.eclipse.che.api.debug.shared.dto.event.SuspendEventDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
@@ -60,18 +58,20 @@ import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.filetypes.FileType;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.debug.DebuggerObserver;
@@ -80,6 +80,7 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.BaseTest;
+import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -109,7 +110,6 @@ public class DebuggerTest extends BaseTest {
   private static final long THREAD_ID = 1;
   private static final int FRAME_INDEX = 0;
 
-  public static final int LINE_NUMBER = 20;
   public static final String PATH = "test/src/main/java/Test.java";
 
   @Mock private DebuggerServiceClient service;
@@ -120,6 +120,7 @@ public class DebuggerTest extends BaseTest {
   @Mock private DebuggerManager debuggerManager;
   @Mock private NotificationManager notificationManager;
   @Mock private BreakpointManager breakpointManager;
+  @Mock private AppContext appContext;
 
   @Mock(answer = RETURNS_DEEP_STUBS)
   private RequestTransmitter transmitter;
@@ -137,8 +138,12 @@ public class DebuggerTest extends BaseTest {
   @Mock private LocationDto locationDto;
   @Mock private BreakpointDto breakpointDto;
   @Mock private Optional<Project> optional;
+  @Mock private WorkspaceImpl workspace;
+  @Mock private DebuggerLocalizationConstant constant;
+  @Mock private PromiseProvider promiseProvider;
+  @Mock private SuspendEventDto suspendEventDto;
 
-  @Captor private ArgumentCaptor<WsAgentStateHandler> extServerStateHandlerCaptor;
+  @Captor private ArgumentCaptor<WorkspaceRunningEvent.Handler> workspaceRunningHandlerCaptor;
   @Captor private ArgumentCaptor<Operation<PromiseError>> operationPromiseErrorCaptor;
   @Captor private ArgumentCaptor<Operation<Void>> operationVoidCaptor;
   @Captor private ArgumentCaptor<Breakpoint> breakpointCaptor;
@@ -146,8 +151,6 @@ public class DebuggerTest extends BaseTest {
   @Captor
   private ArgumentCaptor<Function<DebugSessionDto, Void>>
       argumentCaptorFunctionJavaDebugSessionVoid;
-
-  @Captor private ArgumentCaptor<Operation<DebuggerInfo>> argumentCaptorOperationJavaDebuggerInfo;
 
   public DebuggerDescriptor debuggerDescriptor;
 
@@ -160,6 +163,9 @@ public class DebuggerTest extends BaseTest {
     super.setUp();
 
     debuggerDescriptor = new DebuggerDescriptor(NAME + " " + VERSION, HOST + ":" + PORT);
+
+    doReturn(STOPPED).when(workspace).getStatus();
+    doReturn(workspace).when(appContext).getWorkspace();
 
     doReturn(locationDto).when(dtoFactory).createDto(LocationDto.class);
     doReturn(breakpointDto).when(dtoFactory).createDto(BreakpointDto.class);
@@ -186,15 +192,20 @@ public class DebuggerTest extends BaseTest {
                 eventBus,
                 debuggerManager,
                 notificationManager,
+                appContext,
+                constant,
                 "id",
-                debuggerLocationHandlerManager));
+                debuggerLocationHandlerManager,
+                promiseProvider));
     doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
     doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
+    when(notificationManager.notify(
+            any(), any(StatusNotification.Status.class), any(StatusNotification.DisplayMode.class)))
+        .thenReturn(mock(StatusNotification.class));
 
-    verify(eventBus).addHandler(eq(WsAgentStateEvent.TYPE), extServerStateHandlerCaptor.capture());
-    extServerStateHandlerCaptor
-        .getValue()
-        .onWsAgentStarted(WsAgentStateEvent.createWsAgentStartedEvent());
+    verify(eventBus)
+        .addHandler(eq(WorkspaceRunningEvent.TYPE), workspaceRunningHandlerCaptor.capture());
+    workspaceRunningHandlerCaptor.getValue().onWorkspaceRunning(new WorkspaceRunningEvent());
 
     debugger.addObserver(observer);
 
@@ -204,50 +215,28 @@ public class DebuggerTest extends BaseTest {
 
   @Test
   public void testAttachDebugger() throws Exception {
+    doNothing().when(debugger).subscribeToDebuggerEvents();
+    doNothing().when(debugger).startCheckingEvents();
+    doNothing().when(debugger).startDebugger(any(DebugSessionDto.class));
     debugger.setDebugSession(null);
 
     final String debugSessionJson = "debugSession";
     doReturn(debugSessionJson).when(dtoFactory).toJson(debugSessionDto);
-    doReturn(mock(StartActionDto.class)).when(dtoFactory).createDto(StartActionDto.class);
-
     Map<String, String> connectionProperties = mock(Map.class);
     Promise<DebugSessionDto> promiseDebuggerInfo = mock(Promise.class);
-
-    org.eclipse.che.api.core.jsonrpc.commons.reception.MethodNameConfigurator
-        methodNameConfigurator =
-            mock(org.eclipse.che.api.core.jsonrpc.commons.reception.MethodNameConfigurator.class);
-    org.eclipse.che.api.core.jsonrpc.commons.reception.ParamsConfigurator paramsConfigurator =
-        mock(org.eclipse.che.api.core.jsonrpc.commons.reception.ParamsConfigurator.class);
-
-    ResultConfiguratorFromOne resultConfiguratorFromOne = mock(ResultConfiguratorFromOne.class);
-    ConsumerConfiguratorOneToNone operationConfiguratorOneToNone =
-        mock(ConsumerConfiguratorOneToNone.class);
-
-    doReturn(methodNameConfigurator).when(configurator).newConfiguration();
-    doReturn(paramsConfigurator).when(methodNameConfigurator).methodName(anyString());
-    doReturn(resultConfiguratorFromOne).when(paramsConfigurator).paramsAsDto(anyObject());
-    doReturn(operationConfiguratorOneToNone).when(resultConfiguratorFromOne).noResult();
 
     doReturn(promiseDebuggerInfo).when(service).connect("id", connectionProperties);
     doReturn(promiseVoid).when(promiseDebuggerInfo).then((Function<DebugSessionDto, Void>) any());
     doReturn(promiseVoid).when(promiseVoid).catchError((Operation<PromiseError>) any());
 
     Promise<Void> result = debugger.connect(connectionProperties);
+
     assertEquals(promiseVoid, result);
 
     verify(promiseDebuggerInfo).then(argumentCaptorFunctionJavaDebugSessionVoid.capture());
     argumentCaptorFunctionJavaDebugSessionVoid.getValue().apply(debugSessionDto);
 
-    verify(promiseVoid).catchError(operationPromiseErrorCaptor.capture());
-    try {
-      operationPromiseErrorCaptor.getValue().apply(promiseError);
-      fail("Operation Exception expected");
-    } catch (OperationException e) {
-      verify(promiseError).getMessage();
-      verify(promiseError).getCause();
-    }
-
-    verify(observer).onDebuggerAttached(debuggerDescriptor, promiseVoid);
+    verify(observer).onDebuggerAttached(debuggerDescriptor);
 
     assertTrue(debugger.isConnected());
     verify(localStorage)
@@ -319,9 +308,9 @@ public class DebuggerTest extends BaseTest {
   @Test
   public void testStepInto() throws Exception {
     StepIntoActionDto stepIntoAction = mock(StepIntoActionDto.class);
-
     doReturn(promiseVoid).when(service).stepInto(SESSION_ID, stepIntoAction);
     doReturn(stepIntoAction).when(dtoFactory).createDto(StepIntoActionDto.class);
+    debugger.setSuspendEvent(suspendEventDto);
 
     debugger.stepInto();
 
@@ -344,9 +333,9 @@ public class DebuggerTest extends BaseTest {
   @Test
   public void testStepOver() throws Exception {
     StepOverActionDto stepOverAction = mock(StepOverActionDto.class);
-
     doReturn(promiseVoid).when(service).stepOver(SESSION_ID, stepOverAction);
     doReturn(stepOverAction).when(dtoFactory).createDto(StepOverActionDto.class);
+    debugger.setSuspendEvent(suspendEventDto);
 
     debugger.stepOver();
 
@@ -369,16 +358,14 @@ public class DebuggerTest extends BaseTest {
   @Test
   public void testStepOut() throws Exception {
     StepOutActionDto stepOutAction = mock(StepOutActionDto.class);
-
     doReturn(promiseVoid).when(service).stepOut(SESSION_ID, stepOutAction);
     doReturn(stepOutAction).when(dtoFactory).createDto(StepOutActionDto.class);
+    debugger.setSuspendEvent(suspendEventDto);
 
     debugger.stepOut();
 
     verify(observer).onPreStepOut();
-
     assertTrue(debugger.isConnected());
-
     verify(promiseVoid).catchError(operationPromiseErrorCaptor.capture());
     operationPromiseErrorCaptor.getValue().apply(promiseError);
     verify(promiseError).getCause();
@@ -603,8 +590,11 @@ public class DebuggerTest extends BaseTest {
         EventBus eventBus,
         DebuggerManager debuggerManager,
         NotificationManager notificationManager,
+        AppContext appContext,
+        DebuggerLocalizationConstant constant,
         String id,
-        DebuggerLocationHandlerManager debuggerLocationHandlerManager) {
+        DebuggerLocationHandlerManager debuggerLocationHandlerManager,
+        PromiseProvider promiseProvider) {
       super(
           service,
           transmitter,
@@ -614,9 +604,12 @@ public class DebuggerTest extends BaseTest {
           eventBus,
           debuggerManager,
           notificationManager,
+          appContext,
           breakpointManager,
+          constant,
           requestHandlerManager,
           debuggerLocationHandlerManager,
+          promiseProvider,
           id);
     }
 

@@ -19,6 +19,8 @@ import java.util.Map;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -26,6 +28,7 @@ import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
+import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerLocationHandlerManager;
 
@@ -49,8 +52,11 @@ public class JavaDebugger extends AbstractDebugger {
       DebuggerManager debuggerManager,
       NotificationManager notificationManager,
       BreakpointManager breakpointManager,
+      AppContext appContext,
+      DebuggerLocalizationConstant constant,
       RequestHandlerManager requestHandlerManager,
-      DebuggerLocationHandlerManager debuggerLocationHandlerManager) {
+      DebuggerLocationHandlerManager debuggerLocationHandlerManager,
+      PromiseProvider promiseProvider) {
     super(
         service,
         transmitter,
@@ -60,9 +66,12 @@ public class JavaDebugger extends AbstractDebugger {
         eventBus,
         debuggerManager,
         notificationManager,
+        appContext,
         breakpointManager,
+        constant,
         requestHandlerManager,
         debuggerLocationHandlerManager,
+        promiseProvider,
         ID);
   }
 

@@ -10,55 +10,12 @@
  */
 package org.eclipse.che.ide.api.app;
 
-import com.google.inject.Singleton;
 import java.util.Map;
-import org.eclipse.che.api.user.shared.dto.ProfileDto;
 
-/**
- * Describes current state of user.
- *
- * @author Vitaly Parfonov
- */
-@Singleton
-public class CurrentUser {
+/** Describes the current user. */
+public interface CurrentUser {
 
-  private ProfileDto profileDescriptor;
-  private Map<String, String> preferences;
+  String getId();
 
-  public CurrentUser() {}
-
-  public CurrentUser(ProfileDto profileDescriptor) {
-    this(profileDescriptor, null);
-  }
-
-  public CurrentUser(ProfileDto profileDescriptor, Map<String, String> preferences) {
-    this.profileDescriptor = profileDescriptor;
-    this.preferences = preferences;
-  }
-
-  /**
-   * Return current ProfileDescriptor
-   *
-   * @return
-   */
-  public ProfileDto getProfile() {
-    return profileDescriptor;
-  }
-
-  public void setProfile(ProfileDto profileDescriptor) {
-    this.profileDescriptor = profileDescriptor;
-  }
-
-  /**
-   * Return current preferences
-   *
-   * @return
-   */
-  public Map<String, String> getPreferences() {
-    return preferences;
-  }
-
-  public void setPreferences(Map<String, String> preferences) {
-    this.preferences = preferences;
-  }
+  Map<String, String> getPreferences();
 }

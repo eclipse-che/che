@@ -18,7 +18,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.pullrequest.client.events.ContextPropertyChangeEvent;
 import org.eclipse.che.plugin.pullrequest.client.vcs.VcsService;

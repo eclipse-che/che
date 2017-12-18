@@ -13,9 +13,9 @@ package org.eclipse.che.multiuser.resource.api.usage.tracker;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.environment.server.EnvironmentParser;
-import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
+//import org.eclipse.che.api.environment.server.EnvironmentParser;
+//import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.eclipse.che.commons.lang.Size;
 
 /**
@@ -26,14 +26,14 @@ import org.eclipse.che.commons.lang.Size;
 public class EnvironmentRamCalculator {
   private static final long BYTES_TO_MEGABYTES_DIVIDER = 1024L * 1024L;
 
-  private final EnvironmentParser environmentParser;
+//  private final EnvironmentParser environmentParser;
   private final long defaultMachineMemorySizeBytes;
 
   @Inject
   public EnvironmentRamCalculator(
-      EnvironmentParser environmentParser,
+//      EnvironmentParser environmentParser,
       @Named("che.workspace.default_memory_mb") int defaultMachineMemorySizeMB) {
-    this.environmentParser = environmentParser;
+//    this.environmentParser = environmentParser;
     this.defaultMachineMemorySizeBytes = Size.parseSize(defaultMachineMemorySizeMB + "MB");
   }
 
@@ -42,6 +42,7 @@ public class EnvironmentRamCalculator {
    * environment in megabytes.
    */
   public long calculate(Environment environment) throws ServerException {
+    /*
     CheServicesEnvironmentImpl composeEnv = environmentParser.parse(environment);
 
     long sumBytes =
@@ -59,5 +60,7 @@ public class EnvironmentRamCalculator {
                 })
             .sum();
     return sumBytes / BYTES_TO_MEGABYTES_DIVIDER;
+    */
+    return 0L;
   }
 }

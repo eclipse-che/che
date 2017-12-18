@@ -30,6 +30,8 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
   @UiField FlowPanel rootPanel;
   @UiField SimplePanel commandsPanel;
   @UiField SimplePanel processesListPanel;
+  @UiField SimplePanel panelSelectorPanel;
+  @UiField SimplePanel toolbarControllerPanel;
   @UiField SimplePanel buttonsPanel;
   @UiField SimplePanel previewUrlListPanel;
 
@@ -63,6 +65,16 @@ public class CommandToolbarViewImpl implements CommandToolbarView {
   @Override
   public AcceptsOneWidget getPreviewUrlsListContainer() {
     return previewUrlListPanel;
+  }
+
+  @Override
+  public AcceptsOneWidget getPanelSelectorContainer() {
+    return panelSelectorPanel;
+  }
+
+  @Override
+  public AcceptsOneWidget getToolbarControllerContainer() {
+    return toolbarControllerPanel;
   }
 
   @Override

@@ -52,6 +52,7 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
   ProcessTreeNode getNodeByIndex(@NotNull int index);
 
   /** Returns node by given ID */
+  @Nullable
   ProcessTreeNode getNodeById(@NotNull String nodeId);
 
   /** Add process node */
@@ -122,6 +123,13 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
     void onPreviewSsh(String machineId);
 
     /**
+     * Opens a dedicate tab with bound servers to given machine.
+     *
+     * @param machineId id of the machine in which servers bound
+     */
+    void onPreviewServers(String machineId);
+
+    /**
      * Perform actions when tree node is selected.
      *
      * @param node selected tree node
@@ -142,10 +150,16 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
      */
     void onCloseCommandOutputClick(ProcessTreeNode node);
 
+    /**
+     * Will be called when user is going to close command tab.
+     *
+     * @param node node of process to stop with closing output
+     * @param removeCallback remove callback
+     */
     void onCommandTabClosing(ProcessTreeNode node, SubPanel.RemoveCallback removeCallback);
 
     /**
-     * Is called when user has clicked right mouse button.
+     * Will be called when click right mouse button.
      *
      * @param mouseX mouse x coordinate
      * @param mouseY mouse y coordinate
@@ -153,7 +167,15 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
      */
     void onContextMenu(int mouseX, int mouseY, ProcessTreeNode node);
 
-    /** Is called when user has double clicked on console tab to maximize/restore the console. */
+    /** Will be called when double click on console tab to maximize/restore the console. */
     void onToggleMaximizeConsole();
+
+    /**
+     * Will be called when click on Add tab button.
+     *
+     * @param mouseX absolute mouse left position
+     * @param mouseY absolute mouse top position
+     */
+    void onAddTabButtonClicked(int mouseX, int mouseY);
   }
 }

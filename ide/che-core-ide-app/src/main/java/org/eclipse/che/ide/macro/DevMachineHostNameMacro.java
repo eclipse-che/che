@@ -12,15 +12,14 @@ package org.eclipse.che.ide.macro;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
+import java.util.Optional;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.macro.Macro;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
 /**
  * Provides dev-machine's host name.
@@ -28,22 +27,18 @@ import org.eclipse.che.ide.api.macro.Macro;
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class DevMachineHostNameMacro implements Macro, WsAgentStateHandler {
+public class DevMachineHostNameMacro implements Macro {
 
   private static final String KEY = "${machine.dev.hostname}";
 
-  private final AppContext appContext;
   private final CoreLocalizationConstant localizationConstants;
-
-  private String value;
+  private final WsAgentServerUtil wsAgentServerUtil;
 
   @Inject
   public DevMachineHostNameMacro(
-      EventBus eventBus, AppContext appContext, CoreLocalizationConstant localizationConstants) {
-    this.appContext = appContext;
+      CoreLocalizationConstant localizationConstants, WsAgentServerUtil wsAgentServerUtil) {
     this.localizationConstants = localizationConstants;
-    this.value = "";
-    eventBus.addHandler(WsAgentStateEvent.TYPE, this);
+    this.wsAgentServerUtil = wsAgentServerUtil;
   }
 
   @NotNull
@@ -60,19 +55,18 @@ public class DevMachineHostNameMacro implements Macro, WsAgentStateHandler {
   @NotNull
   @Override
   public Promise<String> expand() {
-    return Promises.resolve(value);
-  }
+    String value = "";
 
-  @Override
-  public void onWsAgentStarted(WsAgentStateEvent event) {
-    String hostName = appContext.getDevMachine().getProperties().get("config.hostname");
-    if (hostName != null) {
-      value = hostName;
+    Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
+
+    if (devMachine.isPresent()) {
+      String hostName = devMachine.get().getAttributes().get("config.hostname");
+
+      if (hostName != null) {
+        value = hostName;
+      }
     }
-  }
 
-  @Override
-  public void onWsAgentStopped(WsAgentStateEvent event) {
-    value = "";
+    return Promises.resolve(value);
   }
 }

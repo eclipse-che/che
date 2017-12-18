@@ -85,7 +85,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
 
     // go to dashboard and rename ws
     dashboard.open();
@@ -103,20 +103,22 @@ public class ProjectStateAfterRenameWorkspaceTest {
     workspaceDetails.clickOpenInIdeWsBtn();
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
+
     projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
     try {
-      projectExplorer.waitItem(PROJECT_NAME);
+      projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/3574");
     }
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
+
     projectExplorer.waitItem(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(RUNNING_WORKSPACE_MESS);
     editor.waitTabIsPresent("index.jsp");
     editor.waitTabIsPresent("AppController");
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 }

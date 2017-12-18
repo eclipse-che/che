@@ -59,10 +59,6 @@ public class LocationImpl implements Location {
     this(target, lineNumber, false, 0, null, null, -1);
   }
 
-  public LocationImpl(String target) {
-    this(target, 0, false, 0, null, null, -1);
-  }
-
   @Override
   public String getTarget() {
     return target;

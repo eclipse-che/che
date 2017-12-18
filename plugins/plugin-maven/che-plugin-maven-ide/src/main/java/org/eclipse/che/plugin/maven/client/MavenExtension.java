@@ -35,6 +35,7 @@ import org.eclipse.che.plugin.maven.client.editor.ClassFileSourcesDownloader;
 import org.eclipse.che.plugin.maven.client.project.MavenModelImporter;
 import org.eclipse.che.plugin.maven.client.project.ResolvingMavenProjectStateHolder;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
+import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
  * Maven extension entry point.
@@ -92,7 +93,9 @@ public class MavenExtension {
     DefaultActionGroup mavenContextMenuGroup =
         new DefaultActionGroup(MAVEN_GROUP_CONTEXT_MENU_NAME, true, actionManager);
     actionManager.registerAction(MAVEN_GROUP_CONTEXT_MENU_ID, mavenContextMenuGroup);
-    mavenContextMenuGroup.getTemplatePresentation().setSVGResource(resources.maven());
+    mavenContextMenuGroup
+        .getTemplatePresentation()
+        .setImageElement(new SVGImage(resources.maven()).getElement());
 
     // add maven context menu to main context menu
     DefaultActionGroup mainContextMenuGroup =

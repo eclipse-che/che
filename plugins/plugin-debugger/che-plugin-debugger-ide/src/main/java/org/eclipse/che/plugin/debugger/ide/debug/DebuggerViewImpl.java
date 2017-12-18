@@ -18,6 +18,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -31,7 +32,6 @@ import elemental.html.TableElement;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.ThreadState;
@@ -39,14 +39,14 @@ import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.WatchExpression;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
+import org.eclipse.che.ide.debug.BreakpointResources;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.status.StatusText;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
@@ -91,28 +91,29 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
 
   @UiField ListBox threads;
   @UiField ScrollPanel framesPanel;
+  @UiField FlowPanel threadNotSuspendedPlaceHolder;
 
-  private final SimpleList<Breakpoint> breakpoints;
+  private final SimpleList<ActiveBreakpointWrapper> breakpoints;
   private final SimpleList<StackFrameDump> frames;
-  private final DebuggerResources debuggerResources;
+  private final BreakpointResources breakpointResources;
 
   private final DebuggerNodeFactory nodeFactory;
   private final DebugNodeUniqueKeyProvider nodeKeyProvider;
 
   @Inject
   protected DebuggerViewImpl(
-      PartStackUIResources partStackUIResources,
       DebuggerResources resources,
       DebuggerLocalizationConstant locale,
       Resources coreRes,
       DebuggerViewImplUiBinder uiBinder,
+      BreakpointResources breakpointResources,
       DebuggerNodeFactory nodeFactory,
       DebugNodeUniqueKeyProvider nodeKeyProvider) {
-    super(partStackUIResources);
+    super();
 
     this.locale = locale;
-    this.debuggerResources = resources;
     this.coreRes = coreRes;
+    this.breakpointResources = breakpointResources;
     this.nodeKeyProvider = nodeKeyProvider;
 
     StatusText<Tree> emptyTreeStatus = new StatusText<>();
@@ -145,8 +146,6 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
     tree.getNodeStorage()
         .addSortInfo(new NodeStorage.StoreSortInfo(new VariableNodeComparator(), ASC));
 
-    minimizeButton.ensureDebugId("debugger-minimizeBut");
-
     watchExpressionPanel.addStyleName(resources.getCss().watchExpressionsPanel());
   }
 
@@ -155,11 +154,9 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
     StringBuilder labelText = new StringBuilder();
     if (location != null) {
       labelText
-          .append("{")
           .append(Path.valueOf(location.getTarget()).lastSegment())
           .append(":")
-          .append(location.getLineNumber())
-          .append("} ");
+          .append(location.getLineNumber());
     }
     executionPoint.getElement().addClassName(coreRes.coreCss().defaultFont());
     executionPoint.setText(labelText.toString());
@@ -244,7 +241,7 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
   }
 
   @Override
-  public void setBreakpoints(@NotNull List<Breakpoint> breakpoints) {
+  public void setBreakpoints(@NotNull List<ActiveBreakpointWrapper> breakpoints) {
     this.breakpoints.render(breakpoints);
   }
 
@@ -331,36 +328,42 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
     return frames.getSelectionModel().getSelectedIndex();
   }
 
+  public void setThreadNotSuspendPlaceHolderVisible(boolean visible) {
+    threadNotSuspendedPlaceHolder.setVisible(visible);
+  }
+
   @UiHandler({"threads"})
   void onThreadChanged(ChangeEvent event) {
     delegate.onSelectedThread(Integer.parseInt(threads.getSelectedValue()));
   }
 
-  private SimpleList<Breakpoint> createBreakpointList() {
+  private SimpleList<ActiveBreakpointWrapper> createBreakpointList() {
     TableElement breakPointsElement = Elements.createTableElement();
     breakPointsElement.setAttribute("style", "width: 100%");
 
-    SimpleList.ListEventDelegate<Breakpoint> breakpointListEventDelegate =
-        new SimpleList.ListEventDelegate<Breakpoint>() {
-          public void onListItemClicked(Element itemElement, Breakpoint itemData) {
+    SimpleList.ListEventDelegate<ActiveBreakpointWrapper> breakpointListEventDelegate =
+        new SimpleList.ListEventDelegate<ActiveBreakpointWrapper>() {
+          public void onListItemClicked(Element itemElement, ActiveBreakpointWrapper itemData) {
             breakpoints.getSelectionModel().setSelectedItem(itemData);
           }
 
           @Override
-          public void onListItemContextMenu(int clientX, int clientY, Breakpoint itemData) {
-            delegate.onBreakpointContextMenu(clientX, clientY, itemData);
+          public void onListItemContextMenu(
+              int clientX, int clientY, ActiveBreakpointWrapper itemData) {
+            delegate.onBreakpointContextMenu(clientX, clientY, itemData.getBreakpoint());
           }
 
           @Override
-          public void onListItemDoubleClicked(Element listItemBase, Breakpoint itemData) {
-            delegate.onBreakpointDoubleClick(itemData);
+          public void onListItemDoubleClicked(
+              Element listItemBase, ActiveBreakpointWrapper itemData) {
+            delegate.onBreakpointDoubleClick(itemData.getBreakpoint());
           }
         };
 
     return SimpleList.create(
         (SimpleList.View) breakPointsElement,
         coreRes.defaultSimpleListCss(),
-        new BreakpointItemRender(debuggerResources),
+        new BreakpointItemRender(breakpointResources),
         breakpointListEventDelegate);
   }
 

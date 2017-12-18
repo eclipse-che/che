@@ -12,25 +12,32 @@ package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.action.ProjectAction;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
-/** @author Vlad Zhukovskiy */
+/**
+ * Action to collapse all opened nodes in Project Explorer.
+ *
+ * @author Vlad Zhukovskiy
+ */
 @Singleton
-public class CollapseAllAction extends ProjectAction {
-
+public class CollapseAllAction extends BaseAction {
   private ProjectExplorerPresenter projectExplorer;
 
   @Inject
-  public CollapseAllAction(ProjectExplorerPresenter projectExplorer) {
-    super("Collapse All");
+  public CollapseAllAction(
+      ProjectExplorerPresenter projectExplorer, CoreLocalizationConstant localizationConstant) {
+    super(
+        localizationConstant.collapseAllActionTitle(),
+        localizationConstant.collapseAllActionDescription());
     this.projectExplorer = projectExplorer;
   }
 
   @Override
-  protected void updateProjectAction(ActionEvent e) {
-    // stub
+  public void update(ActionEvent e) {
+    e.getPresentation().setEnabledAndVisible(true);
   }
 
   @Override

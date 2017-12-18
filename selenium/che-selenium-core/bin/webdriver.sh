@@ -10,11 +10,6 @@
 #   Red Hat, Inc. - initial API and implementation
 #
 
-# we need to have at least 2 threads for tests which start several WebDriver instances at once, for example, tests of File Watcher
-readonly MIN_THREAD_COUNT=2
-# having more than 5 threads doesn't impact on performance significantly
-readonly MAX_THREAD_COUNT=5
-
 getRecommendedThreadCount() {
     local threadCount=$MIN_THREAD_COUNT
 
@@ -44,48 +39,49 @@ detectDockerInterfaceIp() {
     docker run --rm --net host eclipse/che-ip:nightly
 }
 
-####################################################################################
+initVariables() {
+    # we need to have at least 2 threads for tests which start several WebDriver instances at once, for example, tests of File Watcher
+    readonly MIN_THREAD_COUNT=2
+    # having more than 5 threads doesn't impact on performance significantly
+    readonly MAX_THREAD_COUNT=5
 
-trap cleanUpEnvironment EXIT
+    readonly FAILSAFE_DIR="target/failsafe-reports"
+    readonly TESTNG_FAILED_SUITE=${FAILSAFE_DIR}"/testng-failed.xml"
+    readonly FAILSAFE_REPORT="target/site/failsafe-report.html"
 
-############################
-### Default variables
-############################
-unset TMP_DIR
+    readonly SINGLE_TEST_MSG="single test/package"
+    export CHE_MULTIUSER=${CHE_MULTIUSER:-false}
 
-readonly FAILSAFE_DIR="target/failsafe-reports"
-readonly TESTNG_FAILED_SUITE=${FAILSAFE_DIR}"/testng-failed.xml"
-readonly FAILSAFE_REPORT="target/site/failsafe-report.html"
+    # CALLER variable contains parent caller script name
+    # CUR_DIR variable contains the current directory where CALLER is executed
+    [[ -z ${CALLER+x} ]] && { CALLER=$(basename $0); }
+    [[ -z ${CUR_DIR+x} ]] && { CUR_DIR=$(cd "$(dirname "$0")"; pwd); }
 
-# CALLER variable contains parent caller script name
-# CUR_DIR variable contains the current directory where CALLER is executed
-[[ -z ${CALLER+x} ]] && { CALLER=$(basename $0); }
-[[ -z ${CUR_DIR+x} ]] && { CUR_DIR=$(cd "$(dirname "$0")"; pwd); }
+    [[ -z ${API_SUFFIX+x} ]] && { API_SUFFIX="/api/"; }
 
-[[ -z ${API_SUFFIX+x} ]] && { API_SUFFIX=":8080/api/"; }
-[[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/che-integration-tests/"; }
+    MODE="grid"
+    GRID_OPTIONS="-Dgrid.mode=true"
+    RERUN_ATTEMPTS=0
+    BROWSER="GOOGLE_CHROME"
+    WEBDRIVER_VERSION=$(curl -s http://chromedriver.storage.googleapis.com/LATEST_RELEASE)
+    WEBDRIVER_PORT="9515"
+    NODE_CHROME_DEBUG_SUFFIX=
+    THREADS=$(getRecommendedThreadCount)
+    WORKSPACE_POOL_SIZE=0
 
-MODE="grid"
-GRID_OPTIONS="-Dgrid.mode=true"
-RERUN=false
-readonly MAX_RERUN=2
-BROWSER="GOOGLE_CHROME"
-WEBDRIVER_VERSION=$(curl -s http://chromedriver.storage.googleapis.com/LATEST_RELEASE)
-WEBDRIVER_PORT="9515"
-NODE_CHROME_DEBUG_SUFFIX=
-THREADS=$(getRecommendedThreadCount)
-WORKSPACE_POOL_SIZE=0
+    ACTUAL_RESULTS=()
+    COMPARE_WITH_CI=false
 
-ACTUAL_RESULTS=()
-COMPARE_WITH_CI=false
+    PRODUCT_PROTOCOL="http"
+    PRODUCT_HOST=$(detectDockerInterfaceIp)
+    PRODUCT_PORT=8080
 
-PRODUCT_PROTOCOL="http"
-PRODUCT_HOST=$(detectDockerInterfaceIp)
-
-unset DEBUG_OPTIONS
-unset MAVEN_OPTIONS
-unset TMP_SUITE_PATH
-unset ORIGIN_TESTS_SCOPE
+    unset DEBUG_OPTIONS
+    unset MAVEN_OPTIONS
+    unset TMP_SUITE_PATH
+    unset ORIGIN_TESTS_SCOPE
+    unset TMP_DIR
+}
 
 cleanUpEnvironment() {
     if [[ ${MODE} == "grid" ]]; then
@@ -98,14 +94,18 @@ checkParameters() {
     for var in "$@"; do
         if [[ "$var" =~ --web-driver-version=.* ]]; then :
         elif [[ "$var" =~ --web-driver-port=[0-9]+$ ]]; then :
-        elif [[ "$var" == "--http" ]]; then :
-        elif [[ "$var" == "--https" ]]; then  :
-        elif [[ "$var" == "--che" ]]; then :
+        elif [[ "$var" == --http ]]; then :
+        elif [[ "$var" == --https ]]; then :
+        elif [[ "$var" == --che ]]; then :
         elif [[ "$var" =~ --host=.* ]]; then :
+        elif [[ "$var" =~ --port=.* ]]; then :
         elif [[ "$var" =~ --threads=[0-9]+$ ]]; then :
-        elif [[ "$var" == "--rerun" ]]; then :
-        elif [[ "$var" == "--debug" ]]; then :
-        elif [[ "$var" == "--all-tests" ]]; then
+
+        elif [[ "$var" == --rerun ]]; then :
+        elif [[ "$var" =~ ^[0-9]+$ ]] && [[ $@ =~ --rerun[[:space:]]$var ]]; then :
+
+        elif [[ "$var" == --debug ]]; then :
+        elif [[ "$var" == --all-tests ]]; then
             echo "[WARN] '--all-tests' parameter is outdated and is being ignored"
 
         elif [[ "$var" =~ --test=.* ]]; then
@@ -130,17 +130,20 @@ checkParameters() {
                 exit 1;
             }
 
-        elif [[ "$var" == "--failed-tests" ]]; then :
-        elif [[ "$var" == "--regression-tests" ]]; then :
+        elif [[ "$var" == --failed-tests ]]; then :
+        elif [[ "$var" == --regression-tests ]]; then :
         elif [[ "$var" =~ -M.* ]]; then :
         elif [[ "$var" =~ -P.* ]]; then :
-        elif [[ "$var" == "--help" ]]; then :
-        elif [[ "$var" == "--compare-with-ci" ]]; then :
-        elif [[ "$var" =~ ^--workspace-pool-size=(auto|[0-9]+)$ ]]; then :
+        elif [[ "$var" == --help ]]; then :
+
+        elif [[ "$var" == --compare-with-ci ]]; then :
         elif [[ "$var" =~ ^[0-9]+$ ]] && [[ $@ =~ --compare-with-ci[[:space:]]$var ]]; then :
+
+        elif [[ "$var" =~ ^--workspace-pool-size=(auto|[0-9]+)$ ]]; then :
         elif [[ "$var" =~ ^-D.* ]]; then :
         elif [[ "$var" =~ ^-[[:alpha:]]$ ]]; then :
-        elif [[ "$var" == "--skip-sources-validation" ]]; then :
+        elif [[ "$var" == --skip-sources-validation ]]; then :
+        elif [[ "$var" == --multiuser ]]; then :
         else
             printHelp
             echo "[TEST] Unrecognized or misused parameter "${var}
@@ -161,14 +164,17 @@ applyCustomOptions() {
                 WEBDRIVER_PORT=$(echo "$var" | sed -e "s/--web-driver-port=//g")
             fi
 
-        elif [[ "$var" == "--http" ]]; then
+        elif [[ "$var" == --http ]]; then
             PRODUCT_PROTOCOL="http"
 
-        elif [[ "$var" == "--https" ]]; then
+        elif [[ "$var" == --https ]]; then
             PRODUCT_PROTOCOL="https"
 
         elif [[ "$var" =~ --host=.* ]]; then
             PRODUCT_HOST=$(echo "$var" | sed -e "s/--host=//g")
+
+        elif [[ "$var" =~ --port=.* ]]; then
+            PRODUCT_PORT=$(echo "$var" | sed -e "s/--port=//g")
 
         elif [[ "$var" =~ --threads=.* ]]; then
             THREADS=$(echo "$var" | sed -e "s/--threads=//g")
@@ -176,15 +182,23 @@ applyCustomOptions() {
         elif [[ "$var" =~ --workspace-pool-size=.* ]]; then
             WORKSPACE_POOL_SIZE=$(echo "$var" | sed -e "s/--workspace-pool-size=//g")
 
-        elif [[ "$var" == "--rerun" ]]; then
-            RERUN=true
+        elif [[ "$var" =~ --rerun ]]; then
+            local rerunAttempts=$(echo $@ | sed 's/.*--rerun\W\+\([0-9]\+\).*/\1/')
+            if [[ "$rerunAttempts" =~ ^[0-9]+$ ]]; then
+              RERUN_ATTEMPTS=$rerunAttempts
+            else
+              RERUN_ATTEMPTS=1
+            fi
 
-        elif [[ "$var" == "--debug" ]]; then
+        elif [[ "$var" == --debug ]]; then
             DEBUG_OPTIONS="-Dmaven.failsafe.debug"
             NODE_CHROME_DEBUG_SUFFIX="-debug"
 
-        elif [[ "$var" == "--compare-with-ci" ]]; then
+        elif [[ "$var" == --compare-with-ci ]]; then
             COMPARE_WITH_CI=true
+
+        elif [[ "$var" == --multiuser ]]; then
+            CHE_MULTIUSER=true
 
         fi
     done
@@ -212,11 +226,11 @@ defineTestsScope() {
         elif [[ "$var" =~ --suite=.* ]]; then
             TESTS_SCOPE="-DrunSuite=src/test/resources/suites/"$(echo "$var" | sed -e "s/--suite=//g")
 
-        elif [[ "$var" == "--failed-tests" ]]; then
+        elif [[ "$var" == --failed-tests ]]; then
             generateTestNgFailedReport $(fetchFailedTests)
             TESTS_SCOPE="-DrunSuite=${TESTNG_FAILED_SUITE}"
 
-        elif [[ "$var" == "--regression-tests" ]]; then
+        elif [[ "$var" == --regression-tests ]]; then
             generateTestNgFailedReport $(findRegressions)
             TESTS_SCOPE="-DrunSuite=${TESTNG_FAILED_SUITE}"
         fi
@@ -324,7 +338,7 @@ checkDockerComposeRequirements() {
 }
 
 checkIfProductIsRun() {
-    local url=${PRODUCT_PROTOCOL}"://"${PRODUCT_HOST}${API_SUFFIX};
+    local url=${PRODUCT_PROTOCOL}"://"${PRODUCT_HOST}:${PRODUCT_PORT}${API_SUFFIX};
 
     curl -s -X OPTIONS ${url} > /dev/null
     if [[ $? != 0 ]]; then
@@ -353,6 +367,7 @@ Options:
     --http                              Use 'http' protocol to connect to product
     --https                             Use 'https' protocol to connect to product
     --host=<PRODUCT_HOST>               Set host where product is deployed
+    --port=<PRODUCT_PORT>               Set port of the product, default is 8080
     --multiuser                         Run tests of Multi User Che
 
 Modes (defines environment to run tests):
@@ -366,7 +381,7 @@ Modes (defines environment to run tests):
                                         Web browsers will be opened on the developer machine.
                                         Default value is in range [2,5] and depends on available RAM.
 
-    -Mgrid (default)                    All tests will be run in parallel on several docker containers.
+    -Mgrid (default)                    All tests will be run in parallel among several docker containers.
                                         One container per thread. Recommended to run test suite.
 
         Options that go with 'grid' mode:
@@ -381,8 +396,10 @@ Define tests scope:
 Handle failing tests:
     --failed-tests                      Rerun failed tests that left after the previous try
     --regression-tests                  Rerun regression tests that left after the previous try
-    --rerun                             Automatically rerun failing tests
-    --compare-with-ci                   Compare failed tests with results on CI server
+    --rerun [ATTEMPTS]                  Automatically rerun failing tests.
+                                        Default attempts number is 1.
+    --compare-with-ci [BUILD NUMBER]    Compare failed tests with results on CI server.
+                                        Default build is the latest.
 
 Other options:
     --debug                             Run tests in debug mode
@@ -398,7 +415,7 @@ HOW TO of usage:
         ${CALLER} --multiuser
 
     Test Eclipse Che assembly and automatically rerun failing tests:
-        ${CALLER} --rerun
+        ${CALLER} --rerun [ATTEMPTS]
 
     Run single test or package of tests:
         ${CALLER} <...> --test=<TEST>
@@ -408,13 +425,13 @@ HOW TO of usage:
 
     Rerun failed tests:
         ${CALLER} <...> --failed-tests
-        ${CALLER} <...> --failed-tests --rerun
+        ${CALLER} <...> --failed-tests --rerun [ATTEMPTS]
 
     Debug selenium test:
         ${CALLER} -Mlocal --test=<TEST> --debug
 
     Analyse tests results:
-        ${CALLER} --compare-with-ci [CI job number]
+        ${CALLER} --compare-with-ci [BUILD NUMBER]
 "
 
     printf "%s" "${usage}"
@@ -424,10 +441,11 @@ printRunOptions() {
     echo "[TEST]"
     echo "[TEST] =========== RUN OPTIONS ==========================="
     echo "[TEST] Mode                : "${MODE}
-    echo "[TEST] Rerun failing tests : "${RERUN}
+    echo "[TEST] Rerun attempts      : "${RERUN_ATTEMPTS}
     echo "[TEST] ==================================================="
     echo "[TEST] Product Protocol    : "${PRODUCT_PROTOCOL}
     echo "[TEST] Product Host        : "${PRODUCT_HOST}
+    echo "[TEST] Product Port        : "${PRODUCT_PORT}
     echo "[TEST] Tests               : "${TESTS_SCOPE}
     echo "[TEST] Threads             : "${THREADS}
     echo "[TEST] Workspace pool size : "${WORKSPACE_POOL_SIZE}
@@ -487,8 +505,8 @@ fetchFailedTestsNumber() {
 }
 
 detectLatestResultsUrl() {
-    local job=$(curl -s ${BASE_ACTUAL_RESULTS_URL} | tr '\n' ' ' | sed 's/.*Last build (#\([0-9]\+\)).*/\1/')
-    echo ${BASE_ACTUAL_RESULTS_URL}${job}"/testReport/"
+    local build=$(curl -s ${BASE_ACTUAL_RESULTS_URL} | tr '\n' ' ' | sed 's/.*Last build (#\([0-9]\+\)).*/\1/')
+    echo ${BASE_ACTUAL_RESULTS_URL}${build}"/testReport/"
 }
 
 # Fetches list of failed tests and failed configurations.
@@ -497,11 +515,20 @@ fetchActualResults() {
     unset ACTUAL_RESULTS
     unset ACTUAL_RESULTS_URL
 
-    local job=$(echo $@ | sed 's/.*--compare-with-ci\W\+\([0-9]\+\).*/\1/')
-    if [[ ! ${job} =~ ^[0-9]+$ ]]; then
+    # define the URL of CI job to compare result with result on it
+    if [[ ${CHE_MULTIUSER} == true ]]; then
+      local nameOfCIJob=che-multiuser-integration-tests-che6
+    else
+      local nameOfCIJob=che-integration-tests-che6
+    fi
+
+    [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/$nameOfCIJob/"; }
+
+    local build=$(echo $@ | sed 's/.*--compare-with-ci\W\+\([0-9]\+\).*/\1/')
+    if [[ ! ${build} =~ ^[0-9]+$ ]]; then
         ACTUAL_RESULTS_URL=$(detectLatestResultsUrl)
     else
-        ACTUAL_RESULTS_URL=${BASE_ACTUAL_RESULTS_URL}${job}"/testReport/"
+        ACTUAL_RESULTS_URL=${BASE_ACTUAL_RESULTS_URL}${build}"/testReport/"
     fi
 
     # get list of failed tests from CI server, remove duplicates from it and sort
@@ -599,7 +626,7 @@ analyseTestsResults() {
 
 printProposals() {
     echo -e "[TEST] "${YELLOW}"PROPOSALS:"${NO_COLOUR}
-    local cmd=$(echo $@ | sed -e "s/--rerun//g" | \
+    local cmd=$(echo $@ | sed -e "s/--rerun\W*[0-9]*//g" | \
                           sed -e "s/-M[^ ]*//g" | \
                           sed -e "s/--failed-tests//g" | \
                           sed -e "s/--regression-tests//g" | \
@@ -631,11 +658,11 @@ printProposals() {
     fi
 
     echo "[TEST]"
-    echo "[TEST] To compare tests results with the latest CI job"
+    echo "[TEST] To compare tests results with the latest results on CI job"
     echo -e "[TEST] \t${BLUE}${CUR_DIR}/${CALLER} ${cmd} --compare-with-ci${NO_COLOUR}"
     echo "[TEST]"
-    echo "[TEST] To compare tests results with results of the specific CI job"
-    echo -e "[TEST] \t${BLUE}${CUR_DIR}/${CALLER} ${cmd} --compare-with-ci CI_JOB_NUMBER${NO_COLOUR}"
+    echo "[TEST] To compare local tests results with certain build on CI job"
+    echo -e "[TEST] \t${BLUE}${CUR_DIR}/${CALLER} ${cmd} --compare-with-ci [BUILD NUMBER]${NO_COLOUR}"
     echo "[TEST]"
     echo "[TEST]"
 }
@@ -655,14 +682,15 @@ runTests() {
 
     mvn clean verify -Pselenium-test \
                 ${TESTS_SCOPE} \
-                -Dhost=${PRODUCT_HOST} \
-                -Dprotocol=${PRODUCT_PROTOCOL} \
+                -Dche.host=${PRODUCT_HOST} \
+                -Dche.port=${PRODUCT_PORT} \
+                -Dche.protocol=${PRODUCT_PROTOCOL} \
                 -Ddocker.interface.ip=$(detectDockerInterfaceIp) \
                 -Ddriver.port=${WEBDRIVER_PORT} \
                 -Ddriver.version=${WEBDRIVER_VERSION} \
                 -Dbrowser=${BROWSER} \
-                -Dthreads=${THREADS} \
-                -Dworkspace_pool_size=${WORKSPACE_POOL_SIZE} \
+                -Dche.threads=${THREADS} \
+                -Dche.workspace_pool_size=${WORKSPACE_POOL_SIZE} \
                 ${DEBUG_OPTIONS} \
                 ${GRID_OPTIONS} \
                 ${MAVEN_OPTIONS}
@@ -674,7 +702,7 @@ rerunTests() {
     local total=$(echo ${regressions[@]} | wc -w)
 
     if [[ ! ${total} -eq 0 ]]; then
-        local rerun=$1 && shift
+        local rerunCounter=$1 && shift
 
         analyseTestsResults $@
         generateFailSafeReport
@@ -684,14 +712,14 @@ rerunTests() {
 
         echo -e "[TEST]"
         echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
-        echo -e "[TEST] ${YELLOW}RERUNNING FAILED TESTS IN ONE THREAD: ATTEMPT #${rerun}${NO_COLOUR}"
+        echo -e "[TEST] ${YELLOW}RERUNNING FAILED TESTS IN ONE THREAD: ATTEMPT #${rerunCounter}${NO_COLOUR}"
         echo -e "[TEST] ${YELLOW}---------------------------------------------------${NO_COLOUR}"
 
         defineTestsScope "--failed-tests"
         runTests
 
-        if [[ ${rerun} < ${MAX_RERUN} ]]; then
-            rerunTests $(($rerun+1)) $@
+        if [[ ${rerunCounter} < ${RERUN_ATTEMPTS} ]]; then
+            rerunTests $(($rerunCounter+1)) $@
         fi
     fi
 }
@@ -797,40 +825,49 @@ prepareToFirstRun() {
 testProduct() {
     runTests
 
-    if [[ ${RERUN} == true ]]; then
+    if [[ ${RERUN_ATTEMPTS} > 0 ]]; then
         MAVEN_OPTIONS="${MAVEN_OPTIONS} -o"
         rerunTests 1 $@
     fi
 }
 
-if [[ $@ =~ --help ]]; then
-    printHelp
-    exit
-fi
+run() {
+    if [[ $@ =~ --help ]]; then
+        printHelp
+        exit
+    fi
 
-START_TIME=$(date +%s)
-init
-checkBuild
+    START_TIME=$(date +%s)
 
-checkParameters $@
-defineOperationSystemSpecificVariables
-defineRunMode $@
+    trap cleanUpEnvironment EXIT
 
-defineTestsScope $@
-applyCustomOptions $@
+    initVariables
+    init
+    extractMavenOptions $@
+    checkBuild
 
-if [[ ${COMPARE_WITH_CI} == true ]]; then
-    fetchActualResults $@
-else
-    prepareToFirstRun
-    testProduct $@
-fi
+    checkParameters $@
+    defineOperationSystemSpecificVariables
+    defineRunMode $@
 
-analyseTestsResults $@
+    defineTestsScope $@
+    applyCustomOptions $@
 
-if [[ ${COMPARE_WITH_CI} == false ]]; then
-    generateFailSafeReport
-    printProposals $@
-    storeTestReport
-    printElapsedTime
-fi
+    if [[ ${COMPARE_WITH_CI} == true ]]; then
+        fetchActualResults $@
+    else
+        prepareToFirstRun
+        testProduct $@
+    fi
+
+    analyseTestsResults $@
+
+    if [[ ${COMPARE_WITH_CI} == false ]]; then
+        generateFailSafeReport
+        printProposals $@
+        storeTestReport
+        printElapsedTime
+    fi
+}
+
+run "$@"

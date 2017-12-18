@@ -11,7 +11,11 @@
 package org.eclipse.che.util;
 
 import java.io.File;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.stream.Collectors;
+import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 
 /**
@@ -28,6 +32,11 @@ public final class IgnoreUnExistedResourcesReflectionConfigurationBuilder {
 
   static {
     configurationBuilder = ConfigurationBuilder.build();
+    Collection<URL> classpath = new ArrayList<>();
+    classpath.addAll(ClasspathHelper.forClassLoader());
+    classpath.addAll(ClasspathHelper.forJavaClassPath());
+    configurationBuilder.setUrls(classpath);
+
     configurationBuilder.setUrls(
         configurationBuilder
             .getUrls()

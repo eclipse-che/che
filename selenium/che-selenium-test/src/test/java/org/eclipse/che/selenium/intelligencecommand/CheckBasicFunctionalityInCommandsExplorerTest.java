@@ -103,7 +103,7 @@ public class CheckBasicFunctionalityInCommandsExplorerTest {
     commandsExplorer.waitCommandExplorerIsOpened();
     commandsExplorer.clickAddCommandButton(goalName);
     commandsExplorer.chooseCommandTypeInContextMenu(commandType);
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.clickOnCancelCommandEditorButton();
   }
 

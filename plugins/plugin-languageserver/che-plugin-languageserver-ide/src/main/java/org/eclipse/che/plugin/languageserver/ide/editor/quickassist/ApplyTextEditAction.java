@@ -15,8 +15,8 @@ import com.google.inject.Singleton;
 import java.util.Comparator;
 import java.util.List;
 import org.eclipse.che.api.languageserver.shared.util.RangeComparator;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
@@ -32,7 +32,7 @@ import org.eclipse.lsp4j.TextEdit;
  * @author Thomas Mäder
  */
 @Singleton
-public class ApplyTextEditAction extends Action {
+public class ApplyTextEditAction extends BaseAction {
   private static final Comparator<TextEdit> COMPARATOR =
       RangeComparator.transform(new RangeComparator().reversed(), TextEdit::getRange);
 

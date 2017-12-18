@@ -14,8 +14,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.ui.dialogs.BaseTest;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

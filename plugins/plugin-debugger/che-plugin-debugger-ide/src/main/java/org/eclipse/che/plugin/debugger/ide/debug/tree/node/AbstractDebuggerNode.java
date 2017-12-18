@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug.tree.node;
 
-import org.eclipse.che.ide.api.data.HasDataObject;
-import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
+import org.eclipse.che.ide.ui.smartTree.data.AbstractTreeNode;
+import org.eclipse.che.ide.ui.smartTree.data.HasDataObject;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 

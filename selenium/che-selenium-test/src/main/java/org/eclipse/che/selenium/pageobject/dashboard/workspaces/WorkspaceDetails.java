@@ -47,7 +47,7 @@ public class WorkspaceDetails {
     String PROJECTS = "Projects";
     String MACHINES = "Machines";
     String SERVERS = "Servers";
-    String AGENTS = "Agents";
+    String INSTALLERS = "Installers";
     String ENV_VARIABLES = "Env Variables";
     String CONFIG = "Config";
     String SSH = "Ssh";
@@ -57,7 +57,7 @@ public class WorkspaceDetails {
   private interface Locators {
     String WORKSPACE_STATE = "workspace-status";
     String RUN_WORKSPACE_BTN = "run-workspace-button";
-    String STOP_WORKSPACE_BTN = "//che-button-default[@id='split-button']/button";
+    String STOP_WORKSPACE_BTN = "stop-workspace-button";
     String OPEN_IN_IDE_WS_BTN = "open-in-ide-button";
     String TAB_NAMES_IN_WS = "//md-pagination-wrapper//span[text()='%s']";
     String SAVE_CHANGED_BUTTON = "//che-button-save-flat//span[text()='Save']";
@@ -97,7 +97,7 @@ public class WorkspaceDetails {
   @FindBy(id = Locators.RUN_WORKSPACE_BTN)
   WebElement runWorkspaceBtn;
 
-  @FindBy(xpath = Locators.STOP_WORKSPACE_BTN)
+  @FindBy(id = Locators.STOP_WORKSPACE_BTN)
   WebElement stopWorkspaceBtn;
 
   @FindBy(id = Locators.OPEN_IN_IDE_WS_BTN)

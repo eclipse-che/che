@@ -10,11 +10,10 @@
  */
 package org.eclipse.che.ide.api.action;
 
-import com.google.gwt.resources.client.ImageResource;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /** @author Evgen Vidolob */
-public abstract class ActionGroup extends Action {
+public abstract class ActionGroup extends BaseAction {
 
   private boolean popup;
 
@@ -37,8 +36,8 @@ public abstract class ActionGroup extends Action {
     setPopup(popup);
   }
 
-  public ActionGroup(String text, String description, ImageResource icon, SVGResource svgIcon) {
-    super(text, description, icon, svgIcon);
+  public ActionGroup(String text, String description, SVGResource svgIcon) {
+    super(text, description, svgIcon);
   }
 
   /** This method can be called in popup menus if {@link #canBePerformed()} is true */

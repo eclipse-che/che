@@ -33,20 +33,7 @@ public abstract class BasePresenter extends AbstractPartPresenter implements Bas
 
   /** {@inheritDoc} */
   @Override
-  public void onMinimize() {
-    if (partStack != null) {
-      partStack.minimize();
-    }
-  }
-
-  /** {@inheritDoc} */
-  @Override
   public void onActivate() {
     partStack.setActivePart(this);
-  }
-
-  @Override
-  public void onPartMenu(int mouseX, int mouseY) {
-    partStack.showPartMenu(mouseX, mouseY);
   }
 }

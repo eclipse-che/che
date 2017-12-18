@@ -13,7 +13,9 @@ package org.eclipse.che.api.workspace.server.stack;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.WorkspaceValidator;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 
@@ -33,7 +35,7 @@ public class StackValidator {
    * @param stack stack to validate
    * @throws BadRequestException if stack is not valid
    */
-  public void check(Stack stack) throws BadRequestException, ServerException {
+  public void check(Stack stack) throws BadRequestException, ServerException, NotFoundException {
     if (stack == null) {
       throw new BadRequestException("Required non-null stack");
     }
@@ -51,6 +53,10 @@ public class StackValidator {
     if (stack.getWorkspaceConfig() == null) {
       throw new BadRequestException("Workspace config required");
     }
-    wsValidator.validateConfig(stack.getWorkspaceConfig());
+    try {
+      wsValidator.validateConfig(stack.getWorkspaceConfig());
+    } catch (ValidationException x) {
+      throw new BadRequestException(x.getMessage());
+    }
   }
 }

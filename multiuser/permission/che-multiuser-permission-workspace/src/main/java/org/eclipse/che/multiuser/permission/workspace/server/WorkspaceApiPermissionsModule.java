@@ -19,12 +19,7 @@ import org.eclipse.che.multiuser.api.permission.server.SuperPrivilegesChecker;
 import org.eclipse.che.multiuser.api.permission.server.filter.check.RemovePermissionsChecker;
 import org.eclipse.che.multiuser.api.permission.server.filter.check.SetPermissionsChecker;
 import org.eclipse.che.multiuser.api.permission.shared.model.PermissionsDomain;
-import org.eclipse.che.multiuser.permission.machine.filters.RecipePermissionsFilter;
-import org.eclipse.che.multiuser.permission.machine.recipe.RecipeCreatorPermissionsProvider;
-import org.eclipse.che.multiuser.permission.machine.recipe.RecipeDomain;
 import org.eclipse.che.multiuser.permission.workspace.server.filters.PublicPermissionsRemoveChecker;
-import org.eclipse.che.multiuser.permission.workspace.server.filters.RecipeDomainSetPermissionsChecker;
-import org.eclipse.che.multiuser.permission.workspace.server.filters.RecipeScriptDownloadPermissionFilter;
 import org.eclipse.che.multiuser.permission.workspace.server.filters.StackDomainSetPermissionsChecker;
 import org.eclipse.che.multiuser.permission.workspace.server.filters.StackPermissionsFilter;
 import org.eclipse.che.multiuser.permission.workspace.server.filters.WorkspacePermissionsFilter;
@@ -37,13 +32,10 @@ public class WorkspaceApiPermissionsModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(WorkspacePermissionsFilter.class);
-    bind(RecipePermissionsFilter.class);
     bind(StackPermissionsFilter.class);
-    bind(RecipeScriptDownloadPermissionFilter.class);
 
     bind(WorkspaceCreatorPermissionsProvider.class).asEagerSingleton();
     bind(StackCreatorPermissionsProvider.class).asEagerSingleton();
-    bind(RecipeCreatorPermissionsProvider.class).asEagerSingleton();
     bind(StackLoader.class).to(MultiuserStackLoader.class);
 
     Multibinder.newSetBinder(
@@ -56,15 +48,9 @@ public class WorkspaceApiPermissionsModule extends AbstractModule {
     MapBinder.newMapBinder(binder(), String.class, SetPermissionsChecker.class)
         .addBinding(StackDomain.DOMAIN_ID)
         .to(StackDomainSetPermissionsChecker.class);
-    MapBinder.newMapBinder(binder(), String.class, SetPermissionsChecker.class)
-        .addBinding(RecipeDomain.DOMAIN_ID)
-        .to(RecipeDomainSetPermissionsChecker.class);
 
     MapBinder.newMapBinder(binder(), String.class, RemovePermissionsChecker.class)
         .addBinding(StackDomain.DOMAIN_ID)
-        .to(PublicPermissionsRemoveChecker.class);
-    MapBinder.newMapBinder(binder(), String.class, RemovePermissionsChecker.class)
-        .addBinding(RecipeDomain.DOMAIN_ID)
         .to(PublicPermissionsRemoveChecker.class);
   }
 }

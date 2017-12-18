@@ -10,8 +10,12 @@
  */
 'use strict';
 
-enum TEAM_EVENTS {MEMBER_ADDED, MEMBER_REMOVED, ORGANIZATION_REMOVED, ORGANIZATION_RENAMED}
-
+enum TEAM_EVENTS {
+  MEMBER_ADDED,
+  MEMBER_REMOVED,
+  ORGANIZATION_REMOVED,
+  ORGANIZATION_RENAMED
+}
 
 /**
  * This class is handling the notifications per each team.
@@ -59,11 +63,11 @@ export class CheTeamEventsManager implements che.api.ICheTeamEventsManager {
     let bus = this.cheWebsocket.getBus();
     bus.subscribe(this.TEAM_CHANNEL + teamId, (message: any) => {
       // todo
-      switch (TEAM_EVENTS[message.type]) {
-        case TEAM_EVENTS.ORGANIZATION_RENAMED:
+      switch (message.type) {
+        case TEAM_EVENTS[TEAM_EVENTS.ORGANIZATION_RENAMED]:
           this.processRenameTeam(message);
           break;
-        case TEAM_EVENTS.ORGANIZATION_REMOVED:
+        case TEAM_EVENTS[TEAM_EVENTS.ORGANIZATION_REMOVED]:
           this.processDeleteTeam(message);
           break;
         default:
@@ -89,11 +93,11 @@ export class CheTeamEventsManager implements che.api.ICheTeamEventsManager {
     let id = this.cheUser.getUser().id;
     let bus = this.cheWebsocket.getBus();
     bus.subscribe(this.TEAM_MEMBER_CHANNEL + id, (message: any) => {
-      switch (TEAM_EVENTS[message.type]) {
-        case TEAM_EVENTS.MEMBER_ADDED:
+      switch (message.type) {
+        case TEAM_EVENTS[TEAM_EVENTS.MEMBER_ADDED]:
           this.processAddedToTeam(message);
           break;
-        case TEAM_EVENTS.MEMBER_REMOVED:
+        case TEAM_EVENTS[TEAM_EVENTS.MEMBER_REMOVED]:
           this.processDeleteMember(message);
           break;
         default:

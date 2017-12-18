@@ -21,6 +21,7 @@ public interface IdeActions {
   String GROUP_PROJECT = "projectGroup";
   String GROUP_EDIT = "editGroup";
   String GROUP_ASSISTANT = "assistantGroup";
+  String TOOL_WINDOWS_GROUP = "toolWindows";
   String GROUP_RUN = "runGroup";
   String GROUP_PROFILE = "profileGroup";
   String GROUP_FILE_NEW = "newGroup";
@@ -41,6 +42,7 @@ public interface IdeActions {
   String GROUP_EDITOR_CONTEXT_MENU = "editorContextMenu";
 
   String GROUP_PART_MENU = "partMenu";
+  String GROUP_TOOLBAR_CONTROLLER = "toolbarController";
 
   String GROUP_OTHER_MENU = "otherMenu";
   String GROUP_LEFT_MAIN_MENU = "leftMainMenu";

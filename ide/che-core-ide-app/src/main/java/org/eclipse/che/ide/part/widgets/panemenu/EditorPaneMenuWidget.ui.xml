@@ -77,7 +77,7 @@
 
     </ui:style>
 
-    <g:FlowPanel styleName="{style.listButton}">
+    <g:FlowPanel styleName="{style.listButton}" debugId="editorMenu">
         <g:FlowPanel styleName="{style.main}">
             <svg:SVGImage ui:field="closeIcon" resource="{resources.multiFileIcon}"></svg:SVGImage>
         </g:FlowPanel>

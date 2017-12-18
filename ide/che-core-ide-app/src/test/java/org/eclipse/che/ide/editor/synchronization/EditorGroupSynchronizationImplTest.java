@@ -38,9 +38,9 @@ import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import org.eclipse.che.ide.api.editor.document.DocumentStorage;
 import org.eclipse.che.ide.api.editor.document.DocumentStorage.DocumentCallback;
 import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
+import org.eclipse.che.ide.api.editor.events.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.editor.texteditor.EditorWidget;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.File;
@@ -197,7 +197,7 @@ public class EditorGroupSynchronizationImplTest {
 
     editorGroupSynchronization.onEditorDirtyStateChanged(openedEditor1);
 
-    // we sync 'dirty' state of editors when content of an ACTIVE editor was saved
+    // we sync 'dirty' state of editors when content of an ACTIVE editor is saved
     verify(editor_1_Widget, never()).markClean();
     verify(editor_2_Widget, never()).markClean();
     verify(activeEditorWidget, never()).markClean();

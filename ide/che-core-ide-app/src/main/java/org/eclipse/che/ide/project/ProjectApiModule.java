@@ -12,70 +12,67 @@ package org.eclipse.che.ide.project;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-import com.google.gwt.inject.client.multibindings.GinMapBinder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.api.component.Component;
-import org.eclipse.che.ide.api.component.WsAgentComponent;
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
-import org.eclipse.che.ide.api.project.ProjectServiceClientImpl;
-import org.eclipse.che.ide.api.project.ProjectTemplateServiceClient;
-import org.eclipse.che.ide.api.project.ProjectTemplateServiceClientImpl;
-import org.eclipse.che.ide.api.project.ProjectTypeServiceClient;
-import org.eclipse.che.ide.api.project.ProjectTypeServiceClientImpl;
 import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
-import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistry;
+import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
+import org.eclipse.che.ide.projectimport.InitialProjectImporter;
+import org.eclipse.che.ide.projectimport.wizard.ImportProjectNotificationSubscriberFactory;
+import org.eclipse.che.ide.projectimport.wizard.ImportWizardFactory;
+import org.eclipse.che.ide.projectimport.wizard.ProjectImportOutputJsonRpcNotifier;
+import org.eclipse.che.ide.projectimport.wizard.ProjectNotificationSubscriber;
+import org.eclipse.che.ide.projectimport.zip.ZipImportWizardRegistrar;
 import org.eclipse.che.ide.projecttype.BlankProjectWizardRegistrar;
 import org.eclipse.che.ide.projecttype.ProjectTemplateRegistryImpl;
-import org.eclipse.che.ide.projecttype.ProjectTemplatesComponent;
-import org.eclipse.che.ide.projecttype.ProjectTypeComponent;
 import org.eclipse.che.ide.projecttype.ProjectTypeRegistryImpl;
 import org.eclipse.che.ide.projecttype.wizard.PreSelectedProjectTypeManagerImpl;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizardFactory;
-import org.eclipse.che.ide.projecttype.wizard.ProjectWizardRegistryImpl;
+import org.eclipse.che.ide.resources.ProjectTreeStateNotificationOperation;
 
-/**
- * GIN module for configuring Project API and project wizard related components.
- *
- * @author Artem Zatsarynnyi
- */
+/** GIN module for configuring Project API and project wizard related components. */
 public class ProjectApiModule extends AbstractGinModule {
 
   @Override
   protected void configure() {
-    GinMapBinder.newMapBinder(binder(), String.class, Component.class)
-        .addBinding("Project templates")
-        .to(ProjectTemplatesComponent.class);
-    GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class)
-        .addBinding("Project types")
-        .to(ProjectTypeComponent.class);
+    bind(ProjectTreeNotificationsSubscriber.class).asEagerSingleton();
+    bind(ProjectTreeStateNotificationOperation.class).asEagerSingleton();
 
-    // clients for the REST services
-    bind(ProjectTypeServiceClient.class).to(ProjectTypeServiceClientImpl.class).in(Singleton.class);
-    bind(ProjectTemplateServiceClient.class)
-        .to(ProjectTemplateServiceClientImpl.class)
-        .in(Singleton.class);
-    bind(ProjectServiceClient.class).to(ProjectServiceClientImpl.class).in(Singleton.class);
-
-    // registries
     bind(ProjectTypeRegistry.class).to(ProjectTypeRegistryImpl.class).in(Singleton.class);
+    bind(ProjectTypeRegistryImpl.class).asEagerSingleton();
+
     bind(ProjectTemplateRegistry.class).to(ProjectTemplateRegistryImpl.class).in(Singleton.class);
+    bind(ProjectTemplateRegistryImpl.class).asEagerSingleton();
 
     // project wizard
     GinMultibinder.newSetBinder(binder(), ProjectWizardRegistrar.class)
         .addBinding()
         .to(BlankProjectWizardRegistrar.class);
 
-    bind(ProjectWizardRegistry.class).to(ProjectWizardRegistryImpl.class).in(Singleton.class);
-
     install(new GinFactoryModuleBuilder().build(ProjectWizardFactory.class));
 
     bind(PreSelectedProjectTypeManager.class)
         .to(PreSelectedProjectTypeManagerImpl.class)
         .in(Singleton.class);
+
+    bind(ResolvingProjectStateHolderRegistry.class)
+        .to(ResolvingProjectStateHolderRegistryImpl.class);
+
+    // project import
+    bind(InitialProjectImporter.class).asEagerSingleton();
+    GinMultibinder.newSetBinder(binder(), ImportWizardRegistrar.class)
+        .addBinding()
+        .to(ZipImportWizardRegistrar.class);
+
+    install(new GinFactoryModuleBuilder().build(ImportWizardFactory.class));
+
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(
+                ProjectNotificationSubscriber.class, ProjectImportOutputJsonRpcNotifier.class)
+            .build(ImportProjectNotificationSubscriberFactory.class));
 
     bind(WorkspaceProjectsSyncer.class).asEagerSingleton();
   }

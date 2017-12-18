@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.pageobject.machineperspective;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
@@ -70,19 +71,31 @@ public class MachineTerminal {
   @FindBy(xpath = Locators.TERMINAL_CONSOLE_CONTAINER_XPATH)
   WebElement defaultTermContainer;
 
-  /** wait default terminal tab */
+  /** waits default terminal tab */
   public void waitTerminalTab() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOf(defaultTermTab));
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC).until(visibilityOf(defaultTermTab));
   }
 
-  /** wait default terminal tab */
-  public void waitTerminalTab(int termNumber) {
+  /**
+   * waits default terminal tab
+   *
+   * @param timeWait time of waiting terminal container in seconds
+   */
+  public void waitTerminalTab(int timeWait) {
+    new WebDriverWait(seleniumWebDriver, timeWait).until(visibilityOf(defaultTermTab));
+  }
+
+  /**
+   * waits terminal tab with number
+   *
+   * @param termNumber number of terminal
+   */
+  public void waitNumberTerminalTab(int termNumber) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(getTerminalTabXPath(termNumber))));
   }
 
-  /** wait appearance the main terminal container */
+  /** waits appearance the main terminal container */
   public void waitTerminalConsole() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOf(defaultTermContainer));
@@ -98,7 +111,7 @@ public class MachineTerminal {
   }
 
   /**
-   * wait appearance the main terminal container
+   * waits appearance the main terminal container
    *
    * @param timeWait time of waiting terminal container in seconds
    */
@@ -106,7 +119,7 @@ public class MachineTerminal {
     new WebDriverWait(seleniumWebDriver, timeWait).until(visibilityOf(defaultTermContainer));
   }
 
-  /** wait appearance the main terminal container */
+  /** gets visible text from terminal container */
   public String getVisibleTextFromTerminal() {
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOf(defaultTermContainer))
@@ -114,7 +127,7 @@ public class MachineTerminal {
   }
 
   /**
-   * wait text into the terminal
+   * waits text into the terminal
    *
    * @param expectedText expected text into terminal
    */
@@ -124,7 +137,7 @@ public class MachineTerminal {
   }
 
   /**
-   * wait expected text is not present in the terminal
+   * waits expected text is not present in the terminal
    *
    * @param expectedText expected text
    */
@@ -136,7 +149,7 @@ public class MachineTerminal {
   }
 
   /**
-   * wait text into the terminal
+   * waits text into the terminal
    *
    * @param expectedText expected text into terminal
    * @param definedTimeout timeout in seconds defined with user
@@ -170,6 +183,19 @@ public class MachineTerminal {
     loader.waitOnClosed();
   }
 
+  /**
+   * Types and executes given command in terminal.
+   *
+   * @param command text to run in terminal
+   */
+  public void sendCommandIntoTerminal(String command) {
+    selectFocusToActiveTerminal();
+    defaultTermContainer
+        .findElement(By.tagName("textarea"))
+        .sendKeys(command + Keys.ENTER.toString());
+    loader.waitOnClosed();
+  }
+
   /** select default terminal tab */
   public void selectTerminalTab() {
     waitTerminalTab();
@@ -185,9 +211,58 @@ public class MachineTerminal {
    */
   public void moveDownListTerminal(String item) {
     loader.waitOnClosed();
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.END.toString()).perform();
+    typeIntoTerminal(Keys.END.toString());
     WaitUtils.sleepQuietly(2);
 
+    WebElement element =
+        seleniumWebDriver.findElement(
+            By.xpath(format("(//span[contains(text(), '%s')])[position()=1]", item)));
+
+    if (!element.getCssValue("background-color").equals(LINE_HIGHLIGHTED_GREEN)) {
+      typeIntoTerminal(Keys.ARROW_UP.toString());
+      element =
+          seleniumWebDriver.findElement(
+              By.xpath(format("(//span[contains(text(), '%s')])[position()=1]", item)));
+      WaitUtils.sleepQuietly(2);
+    }
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(element));
+    WebElement finalElement = element;
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            (WebDriver input) ->
+                finalElement.getCssValue("background-color").equals(LINE_HIGHLIGHTED_GREEN));
+  }
+
+  /**
+   * scroll terminal by pressing key 'PageDown'
+   *
+   * @param item is the name of the highlighted item
+   */
+  public void movePageDownListTerminal(String item) {
+    loader.waitOnClosed();
+    typeIntoTerminal(Keys.PAGE_DOWN.toString());
+    WaitUtils.sleepQuietly(2);
+    WebElement element =
+        seleniumWebDriver.findElement(
+            By.xpath(format("(//span[contains(text(), '%s')])[position()=1]", item)));
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(element));
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            (WebDriver input) ->
+                element.getCssValue("background-color").equals(LINE_HIGHLIGHTED_GREEN));
+  }
+
+  /**
+   * scroll terminal by pressing key 'PageUp'
+   *
+   * @param item is the name of the highlighted item
+   */
+  public void movePageUpListTerminal(String item) {
+    loader.waitOnClosed();
+    typeIntoTerminal(Keys.PAGE_UP.toString());
+    WaitUtils.sleepQuietly(2);
     WebElement element =
         seleniumWebDriver.findElement(
             By.xpath(format("(//span[contains(text(), '%s')])[position()=1]", item)));
@@ -206,7 +281,7 @@ public class MachineTerminal {
    */
   public void moveUpListTerminal(String item) {
     loader.waitOnClosed();
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.HOME.toString()).perform();
+    typeIntoTerminal(Keys.HOME.toString());
     WaitUtils.sleepQuietly(2);
     WebElement element =
         seleniumWebDriver.findElement(

@@ -78,28 +78,32 @@ public interface SubPanel {
    */
   void setDoubleClickListener(DoubleClickListener listener);
 
-  interface WidgetRemovingListener {
+  /** Set the listener to be notified when Add Tab button has been clicked. */
+  void setAddTabButtonClickListener(AddTabButtonClickListener listener);
 
+  interface WidgetRemovingListener {
     /** Invoked when a widget is going to be removed. */
     void onWidgetRemoving(RemoveCallback removeCallback);
   }
 
   /** Callback that may be used for actual removing widget. */
   interface RemoveCallback {
-
     /** Tells panel to remove widget. */
     void remove();
   }
 
   interface FocusListener {
-
     /** Invoked when a {@code widget} on a {@code panel} gains the focus. */
     void focusGained(SubPanel panel, IsWidget widget);
   }
 
   interface DoubleClickListener {
-
     /** Invoked when a {@code widget} on a {@code panel} has been double clicked. */
     void onDoubleClicked(SubPanel panel, IsWidget widget);
+  }
+
+  interface AddTabButtonClickListener {
+    /** Invoked when `Add Tab` button has been clicked. */
+    void onAddTabButtonClicked(int mouseX, int mouseY);
   }
 }

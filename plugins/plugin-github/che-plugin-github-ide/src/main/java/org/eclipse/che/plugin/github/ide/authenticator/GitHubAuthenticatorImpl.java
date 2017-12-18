@@ -25,11 +25,11 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorUrlProvider;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
 import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
@@ -75,7 +75,7 @@ public class GitHubAuthenticatorImpl
     this.securityTokenPærovider = securityTokenPærovider;
     this.view.setDelegate(this);
     this.locale = locale;
-    this.baseUrl = appContext.getMasterEndpoint();
+    this.baseUrl = appContext.getMasterApiEndpoint();
     this.dialogFactory = dialogFactory;
     this.notificationManager = notificationManager;
     this.appContext = appContext;
@@ -142,14 +142,14 @@ public class GitHubAuthenticatorImpl
     return OAuth2AuthenticatorUrlProvider.get(
         baseUrl,
         "github",
-        appContext.getCurrentUser().getProfile().getUserId(),
+        appContext.getCurrentUser().getId(),
         Lists.asList("user", new String[] {"repo", "write:public_key"}));
   }
 
   private void generateSshKeys(final OAuthStatus authStatus) {
     final SshKeyUploader githubKeyUploader = registry.getUploader(GITHUB_HOST);
     if (githubKeyUploader != null) {
-      String userId = appContext.getCurrentUser().getProfile().getUserId();
+      String userId = appContext.getCurrentUser().getId();
       githubKeyUploader.uploadKey(
           userId,
           new AsyncCallback<Void>() {

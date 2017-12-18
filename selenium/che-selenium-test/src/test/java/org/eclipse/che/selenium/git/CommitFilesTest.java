@@ -103,19 +103,28 @@ public class CommitFilesTest {
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.clickItemCheckBoxInCommitWindow("webapp");
+    git.waitItemCheckBoxToBeIndeterminateInCommitWindow("src/main");
     git.waitItemCheckBoxToBeUnSelectedInCommitWindow(
         "webapp", "WEB-INF", "jsp", "guess_num.jsp", "web.xml", "spring-servlet.xml", "index.jsp");
 
     // select folder and check that all child nodes are also selected
     git.clickItemCheckBoxInCommitWindow("webapp");
     git.waitItemCheckBoxToBeSelectedInCommitWindow(
-        "webapp", "WEB-INF", "jsp", "guess_num.jsp", "web.xml", "spring-servlet.xml", "index.jsp");
+        "src/main",
+        "webapp",
+        "WEB-INF",
+        "jsp",
+        "guess_num.jsp",
+        "web.xml",
+        "spring-servlet.xml",
+        "index.jsp");
 
     // unselect folder, select nested file, check that all parent folders of the file are also
     // selected
     git.clickItemCheckBoxInCommitWindow("webapp");
     git.clickItemCheckBoxInCommitWindow("guess_num.jsp");
-    git.waitItemCheckBoxToBeSelectedInCommitWindow("webapp", "WEB-INF", "jsp", "guess_num.jsp");
+    git.waitItemCheckBoxToBeIndeterminateInCommitWindow("src/main", "webapp", "WEB-INF");
+    git.waitItemCheckBoxToBeSelectedInCommitWindow("jsp", "guess_num.jsp");
     git.waitItemCheckBoxToBeUnSelectedInCommitWindow("web.xml", "spring-servlet.xml", "index.jsp");
 
     // unselect nested file, check that all parent folders of the file are also unselected
@@ -127,7 +136,7 @@ public class CommitFilesTest {
     // unselected file and his folder
     git.clickItemCheckBoxInCommitWindow("webapp");
     git.clickItemCheckBoxInCommitWindow("guess_num.jsp");
-    git.waitItemCheckBoxToBeSelectedInCommitWindow("webapp", "WEB-INF");
+    git.waitItemCheckBoxToBeIndeterminateInCommitWindow("webapp", "WEB-INF");
     git.waitItemCheckBoxToBeUnSelectedInCommitWindow("jsp", "guess_num.jsp");
     git.waitItemCheckBoxToBeSelectedInCommitWindow("web.xml", "spring-servlet.xml", "index.jsp");
 
@@ -148,7 +157,9 @@ public class CommitFilesTest {
     loader.waitOnClosed();
     refactor.typeAndWaitNewName("org.eclipse.de");
     refactor.sendKeysIntoField("v.exam");
-    refactor.sendKeysIntoField("ples");
+    refactor.sendKeysIntoField("pl");
+    refactor.sendKeysIntoField("es");
+    refactor.sendKeysIntoField("");
     refactor.waitTextIntoNewNameField(NEW_NAME_PACKAGE);
     refactor.clickOkButtonRefactorForm();
     projectExplorer.selectItem(PROJECT_NAME);
@@ -201,7 +212,7 @@ public class CommitFilesTest {
     // change content in AppController.java
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/org/eclipse/dev/examples");
     projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(12);
     editor.typeTextIntoEditor("//" + MESSAGE_FOR_CHANGE_CONTENT);
     editor.waitTextIntoEditor("//" + MESSAGE_FOR_CHANGE_CONTENT);
@@ -212,7 +223,7 @@ public class CommitFilesTest {
     // change content in index.jsp
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_JSP_FILE);
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.PAGE_UP.toString());
@@ -257,7 +268,7 @@ public class CommitFilesTest {
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit(COMMIT_MESSAGE);
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
     git.waitGitStatusBarWithMess(NOTHING_TO_COMMIT_MESSAGE);

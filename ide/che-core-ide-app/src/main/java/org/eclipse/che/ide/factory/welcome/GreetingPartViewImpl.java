@@ -13,9 +13,7 @@ package org.eclipse.che.ide.factory.welcome;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Frame;
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 
 /** @author Vitaliy Guliy */
@@ -25,10 +23,7 @@ public class GreetingPartViewImpl extends BaseView<GreetingPartView.ActionDelega
 
   private Frame frame;
 
-  @Inject
-  public GreetingPartViewImpl(PartStackUIResources resources) {
-    super(resources);
-
+  public GreetingPartViewImpl() {
     frame = new Frame();
     frame.setWidth("100%");
     frame.setHeight("100%");

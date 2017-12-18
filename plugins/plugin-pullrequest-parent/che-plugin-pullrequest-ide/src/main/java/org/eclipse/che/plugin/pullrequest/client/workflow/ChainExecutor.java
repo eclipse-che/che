@@ -43,7 +43,7 @@ public final class ChainExecutor {
   public void execute(final WorkflowExecutor workflow, final Context context) {
     if (chainIt.hasNext()) {
       currentStep = chainIt.next();
-      Log.info(
+      Log.debug(
           getClass(),
           "Executing :: " + context.getProject().getName() + " ::  =>  " + currentStep.getClass());
       currentStep.execute(workflow, context);

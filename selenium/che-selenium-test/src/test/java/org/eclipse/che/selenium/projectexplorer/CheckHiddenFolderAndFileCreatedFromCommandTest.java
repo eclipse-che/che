@@ -99,7 +99,7 @@ public class CheckHiddenFolderAndFileCreatedFromCommandTest {
     loader.waitOnClosed();
     projectExplorer.waitItem(PATH_TO_FILE);
     projectExplorer.openItemByPath(PATH_TO_FILE); // the created hidden file is visible
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(FILE_CONTENT);
 
     menu.runCommand(

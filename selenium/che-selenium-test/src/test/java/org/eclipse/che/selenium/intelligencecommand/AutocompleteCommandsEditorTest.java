@@ -72,7 +72,7 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.typeTextIntoEditor(MAVEN_COMMAND);
     commandsEditor.waitTextIntoEditor(MAVEN_COMMAND);
     commandsEditor.typeTextIntoEditor(Keys.ENTER.toString());
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.typeTextIntoEditor("echo ");
     commandsEditor.typeTextIntoEditor("type");
     commandsEditor.launchAutocompleteAndWaitContainer();
@@ -87,7 +87,7 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.waitAutocompleteContainerIsClosed();
     commandsEditor.waitTextIntoEditor("${editor.current.project.type");
     commandsEditor.typeTextIntoEditor(Keys.ENTER.toString());
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.typeTextIntoEditor("echo ");
     commandsEditor.typeTextIntoEditor("na");
     commandsEditor.launchAutocompleteAndWaitContainer();
@@ -106,35 +106,33 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.setFocusIntoTypeCommandsEditor(PREVIEW_URL_EDITOR);
     commandsEditor.setCursorToLine(1);
     commandsEditor.deleteAllContent();
-    commandsEditor.typeTextIntoEditor("port.80");
+    commandsEditor.typeTextIntoEditor("server.t");
     commandsEditor.launchAutocompleteAndWaitContainer();
     String[] autocompleteItems = {
-      "${server.port.8000/tcp}",
-      "${server.port.8000}",
-      "${server.port.8080/tcp}",
-      "${server.port.8080}"
+      "${server.terminal}", "${server.tomcat8-debug}", "${server.tomcat8}"
     };
     for (String autocompleteItem : autocompleteItems) {
       commandsEditor.waitTextIntoAutocompleteContainer(autocompleteItem);
     }
-    commandsEditor.selectAutocompleteProposal("80/tcp}");
-    commandsEditor.waitTextIntoDescriptionMacrosForm(
-        "Returns external address of the server running on port 8080/tcp");
+    commandsEditor.selectAutocompleteProposal("omcat8}");
+    commandsEditor.waitTextIntoDescriptionMacrosForm("Returns address of the tomcat8 server");
     commandsEditor.closeAutocomplete();
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.deleteAllContent();
-    commandsEditor.typeTextIntoEditor("80.host");
+    commandsEditor.typeTextIntoEditor("omcat8");
     commandsEditor.launchAutocompleteAndWaitContainer();
-    commandsEditor.selectItemIntoAutocompleteAndPasteByDoubleClick("${server.80");
-    commandsEditor.waitTextIntoEditor("${server.8080.hostname}");
+    commandsEditor.selectItemIntoAutocompleteAndPasteByDoubleClick("-debug}");
+    commandsEditor.waitTextIntoEditor("${server.tomcat8-debug}");
     commandsEditor.typeTextIntoEditor(Keys.ENTER.toString());
-    commandsEditor.waitActiveEditor();
-    commandsEditor.typeTextIntoEditor("8080.pro");
+    commandsEditor.waitActive();
+    commandsEditor.typeTextIntoEditor("wsagent");
     commandsEditor.launchAutocomplete();
-    commandsEditor.waitTextIntoEditor("${server.8080.protocol}");
+    commandsEditor.waitTextIntoAutocompleteContainer("${server.wsagent/ws}");
+    commandsEditor.selectItemIntoAutocompleteAndPasteByDoubleClick("/ws}");
+    commandsEditor.waitTextIntoEditor("${server.wsagent/ws}");
     commandsEditor.clickOnRunButton();
     consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS);
-    consoles.waitExpectedTextIntoPreviewUrl("tomcat8 http");
+    consoles.waitExpectedTextIntoPreviewUrl("ws:");
   }
 
   @Test(priority = 3)
@@ -145,7 +143,7 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.setFocusIntoTypeCommandsEditor(COMMAND_LINE_EDITOR);
     commandsEditor.setCursorToLine(2);
     commandsEditor.selectLineAndDelete();
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.launchAutocompleteAndWaitContainer();
     commandsEditor.selectItemIntoAutocompleteAndPasteByDoubleClick("${current.class.fqn}");
     commandsEditor.waitAutocompleteContainerIsClosed();

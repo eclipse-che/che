@@ -61,23 +61,16 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 public class EmptyEditorsPanel extends Composite
     implements ResourceChangedEvent.ResourceChangedHandler {
 
-  interface EmptyEditorsPanelUiBinder extends UiBinder<Widget, EmptyEditorsPanel> {}
-
   private static EmptyEditorsPanelUiBinder uiBinder = GWT.create(EmptyEditorsPanelUiBinder.class);
-
   protected final AppContext appContext;
   private final ActionManager actionManager;
   private final Provider<PerspectiveManager> perspectiveManagerProvider;
   private final KeyBindingAgent keyBindingAgent;
   private final PresentationFactory presentationFactory;
   private final CoreLocalizationConstant localizationConstant;
-
   private final Map<String, Action> noFiles = new HashMap<>();
-
   private final Map<String, Action> noProjects = new HashMap<>();
-
   private final Map<String, Action> factoryActions = new HashMap<>();
-
   @UiField protected DivElement title;
   @UiField protected DivElement root;
   @UiField protected DivElement container;
@@ -224,8 +217,7 @@ public class EmptyEditorsPanel extends Composite
         new EventListener() {
           @Override
           public void handleEvent(Event evt) {
-            ActionEvent event =
-                new ActionEvent(presentation, actionManager, perspectiveManagerProvider.get());
+            ActionEvent event = new ActionEvent(presentation, actionManager);
             action.actionPerformed(event);
           }
         },
@@ -248,6 +240,8 @@ public class EmptyEditorsPanel extends Composite
     divElement.appendChild(hotKeyElement);
     return divElement;
   }
+
+  interface EmptyEditorsPanelUiBinder extends UiBinder<Widget, EmptyEditorsPanel> {}
 
   interface Css extends CssResource {
     String list();

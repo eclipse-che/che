@@ -12,7 +12,7 @@ package org.eclipse.che.ide.command.execute;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;

@@ -10,12 +10,10 @@
  */
 package org.eclipse.che.ide.ext.git.client.compare.changeslist;
 
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
 import org.eclipse.che.ide.ui.window.Window;
@@ -25,9 +23,7 @@ import org.eclipse.che.ide.ui.window.Window;
  *
  * @author Igor Vinokur
  */
-@Singleton
 public class ChangesListViewImpl extends Window implements ChangesListView {
-
   private final GitLocalizationConstant locale;
 
   private ActionDelegate delegate;
@@ -39,22 +35,6 @@ public class ChangesListViewImpl extends Window implements ChangesListView {
     this.setTitle(locale.changeListTitle());
 
     createButtons();
-
-    SafeHtmlBuilder shb = new SafeHtmlBuilder();
-
-    shb.appendHtmlConstant("<table height =\"20\">");
-    shb.appendHtmlConstant("<tr height =\"3\"></tr><tr>");
-    shb.appendHtmlConstant("<td width =\"20\" bgcolor =\"dodgerBlue\"></td>");
-    shb.appendHtmlConstant("<td>modified</td>");
-    shb.appendHtmlConstant("<td width =\"20\" bgcolor =\"red\"></td>");
-    shb.appendHtmlConstant("<td>deleted</td>");
-    shb.appendHtmlConstant("<td width =\"20\" bgcolor =\"green\"></td>");
-    shb.appendHtmlConstant("<td>added</td>");
-    shb.appendHtmlConstant("<td width =\"20\" bgcolor =\"purple\"></td>");
-    shb.appendHtmlConstant("<td>copied</td>");
-    shb.appendHtmlConstant("</tr></table>");
-
-    getFooter().add(new HTML(shb.toSafeHtml()));
   }
 
   @Override
@@ -79,7 +59,12 @@ public class ChangesListViewImpl extends Window implements ChangesListView {
 
   @Override
   public void setChangesPanelView(ChangesPanelView changesPanelView) {
-    this.setWidget((Widget) changesPanelView);
+    FlowPanel flowPanel = new FlowPanel();
+    flowPanel.ensureDebugId("git-compare-window-changed-files");
+    flowPanel.setWidth("600px");
+    flowPanel.setHeight("345px");
+    flowPanel.add((Widget) changesPanelView);
+    this.setWidget(flowPanel);
   }
 
   private void createButtons() {

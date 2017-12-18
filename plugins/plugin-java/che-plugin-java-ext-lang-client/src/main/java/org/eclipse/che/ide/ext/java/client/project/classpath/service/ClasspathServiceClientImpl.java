@@ -55,7 +55,7 @@ public class ClasspathServiceClientImpl implements ClasspathServiceClient {
   @Override
   public Promise<List<ClasspathEntryDto>> getClasspath(String projectPath) {
     final String url =
-        appContext.getDevMachine().getWsAgentBaseUrl()
+        appContext.getWsAgentServerApiEndpoint()
             + pathToService
             + "?projectpath="
             + encodePath(valueOf(projectPath));

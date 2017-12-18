@@ -6,7 +6,7 @@
   "favicon": "favicon.ico",
   "loader": "loader.svg",
   "ideResources": "/_app/",
-  "websocketContext": "/wsmaster/websocket",
+  "websocketContext": "/api/websocket",
   "helpPath": "https://www.eclipse.org/che/",
   "helpTitle": "Community",
   "supportEmail": "wish@codenvy.com",

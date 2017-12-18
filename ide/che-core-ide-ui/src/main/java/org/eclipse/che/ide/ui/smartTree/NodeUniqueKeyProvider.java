@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.ui.smartTree;
 
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * Current ID provider is responsible for providing a unique identification for a specified node.

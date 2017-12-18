@@ -84,7 +84,7 @@ public class PushChangeNotUpdatedRepoTest {
     projectExplorer.waitProjectExplorer();
     String cloneUri = "git@github.com:" + gitHubUsername + "/testRepository.git";
     cloneProject(PROJECT_1, cloneUri);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(IMPORT_SUCCESS_1);
     cloneProject(PROJECT_2, cloneUri);
     events.waitExpectedMessage(IMPORT_SUCCESS_2);
@@ -97,7 +97,7 @@ public class PushChangeNotUpdatedRepoTest {
     loader.waitOnClosed();
     editor.selectLineAndDelete();
     editor.waitEditorIsEmpty();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(MESSAGE_FOR_CHANGE);
     editor.waitTabFileWithSavedStatus(FILE_FOR_CHANGED_1);
     editor.closeFileByNameWithSaving(FILE_FOR_CHANGED_1);
@@ -116,7 +116,7 @@ public class PushChangeNotUpdatedRepoTest {
     consoles.waitProcessInProcessConsoleTree("Git push");
     git.waitGitStatusBarWithMess("Successfully pushed");
     git.waitGitStatusBarWithMess("to git@github.com:" + gitHubUsername + "/testRepository.git");
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(PUSH_MSG);
     loader.waitOnClosed();
 
@@ -127,10 +127,10 @@ public class PushChangeNotUpdatedRepoTest {
     // change one file in second project
     projectExplorer.openItemByPath(PROJECT_2 + "/" + FILE_FOR_CHANGED_2);
     projectExplorer.waitItem(PROJECT_2 + "/" + FILE_FOR_CHANGED_2);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.selectLineAndDelete();
     editor.waitEditorIsEmpty();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(MESSAGE_FOR_CHANGE);
     editor.waitTabFileWithSavedStatus(FILE_FOR_CHANGED_2);
     editor.closeFileByNameWithSaving(FILE_FOR_CHANGED_2);
@@ -152,7 +152,7 @@ public class PushChangeNotUpdatedRepoTest {
             + gitHubUsername
             + "/testRepository.git'."
             + " Try to merge remote changes using pull, and then push again.");
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage("Pushed to origin");
 
     // step 4 valid pull
@@ -168,7 +168,7 @@ public class PushChangeNotUpdatedRepoTest {
     git.waitGitStatusBarWithMess("Successfully pulled");
     git.waitGitStatusBarWithMess("from git@github.com:" + gitHubUsername + "/testRepository.git");
 
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(
         "Pulled from git@github.com:" + gitHubUsername + "/testRepository.git");
     events.clearAllMessages();
@@ -186,7 +186,7 @@ public class PushChangeNotUpdatedRepoTest {
     git.waitGitStatusBarWithMess("Successfully pushed");
     git.waitGitStatusBarWithMess("to git@github.com:" + gitHubUsername + "/testRepository.git");
 
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(PUSH_MSG);
   }
 
@@ -212,7 +212,7 @@ public class PushChangeNotUpdatedRepoTest {
     projectExplorer.selectItem(project);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     projectExplorer.selectItem(project);
 
@@ -220,7 +220,7 @@ public class PushChangeNotUpdatedRepoTest {
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit(commitMessage);
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
   }
 }

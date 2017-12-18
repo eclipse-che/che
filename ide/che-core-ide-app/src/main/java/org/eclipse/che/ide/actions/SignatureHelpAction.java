@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.actions;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,9 +39,7 @@ public class SignatureHelpAction extends AbstractPerspectiveAction {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         constant.signatureName(),
-        constant.signatureDescription(),
-        null,
-        null);
+        constant.signatureDescription());
     this.editorAgent = editorAgent;
   }
 

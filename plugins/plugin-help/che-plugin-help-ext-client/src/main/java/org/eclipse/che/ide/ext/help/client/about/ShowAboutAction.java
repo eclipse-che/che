@@ -12,8 +12,8 @@ package org.eclipse.che.ide.ext.help.client.about;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.ext.help.client.AboutResources;
 
 /**
@@ -22,14 +22,14 @@ import org.eclipse.che.ide.ext.help.client.AboutResources;
  * @author Ann Shumilova
  */
 @Singleton
-public class ShowAboutAction extends Action {
+public class ShowAboutAction extends BaseAction {
 
   private final AboutPresenter presenter;
 
   @Inject
   public ShowAboutAction(
       AboutPresenter presenter, AboutLocalizationConstant locale, AboutResources resources) {
-    super(locale.aboutControlTitle(), "Show about application", null, resources.about());
+    super(locale.aboutControlTitle(), "Show about application", resources.about());
     this.presenter = presenter;
   }
 

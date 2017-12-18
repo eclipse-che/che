@@ -22,7 +22,6 @@ import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Image;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionGroup;
@@ -31,10 +30,9 @@ import org.eclipse.che.ide.api.action.CustomComponentAction;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.action.PropertyChangeEvent;
 import org.eclipse.che.ide.api.action.PropertyChangeListener;
-import org.eclipse.che.ide.api.parts.PerspectiveManager;
+import org.eclipse.che.ide.ui.ElementWidget;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.menu.PositionController;
-import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
  * Toolbar image button.
@@ -45,7 +43,6 @@ public class ActionButton extends Composite
     implements MouseOverHandler, MouseOutHandler, MouseDownHandler, MouseUpHandler, ClickHandler {
 
   private final Presentation presentation;
-  private final PerspectiveManager perspectiveManager;
 
   /** Command which will be executed when button was pressed. */
   protected Action action;
@@ -69,10 +66,8 @@ public class ActionButton extends Composite
       Action action,
       ActionManager actionManager,
       Presentation presentation,
-      PerspectiveManager perspectiveManager,
       ToolbarResources toolbarResources) {
     this.actionManager = actionManager;
-    this.perspectiveManager = perspectiveManager;
     this.toolbarResources = toolbarResources;
     panel = new FlowPanel();
 
@@ -127,13 +122,8 @@ public class ActionButton extends Composite
   private void renderImage() {
     panel.clear();
 
-    if (presentation.getImageResource() != null) {
-      Image img = new Image(presentation.getImageResource());
-      img.setStyleName(toolbarResources.toolbar().iconButtonIcon());
-      panel.add(img);
-
-    } else if (presentation.getSVGResource() != null) {
-      SVGImage image = new SVGImage(presentation.getSVGResource());
+    if (presentation.getImageElement() != null) {
+      ElementWidget image = new ElementWidget(presentation.getImageElement());
       image.getElement().setAttribute("class", toolbarResources.toolbar().iconButtonIcon());
       panel.add(image);
 
@@ -219,7 +209,7 @@ public class ActionButton extends Composite
     }
 
     // todo handle popup group
-    ActionEvent e = new ActionEvent(presentation, actionManager, perspectiveManager);
+    ActionEvent e = new ActionEvent(presentation, actionManager);
     if (action instanceof ActionGroup
         && !(action instanceof CustomComponentAction)
         && ((ActionGroup) action).isPopup()) {

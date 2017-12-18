@@ -45,7 +45,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import org.eclipse.che.api.agent.server.filters.AddExecAgentInEnvironmentUtil;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -53,8 +52,8 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.factory.Factory;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.factory.server.builder.FactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.AuthorDto;
@@ -136,11 +135,11 @@ public class FactoryService extends Service {
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public FactoryDto saveFactory(FactoryDto factory)
-      throws BadRequestException, ServerException, ForbiddenException, ConflictException {
+      throws BadRequestException, ServerException, ForbiddenException, ConflictException,
+          NotFoundException {
     requiredNotNull(factory, "Factory configuration");
     factoryBuilder.checkValid(factory);
     processDefaults(factory);
-    AddExecAgentInEnvironmentUtil.addExecAgent(factory.getWorkspace());
     createValidator.validateOnCreate(factory);
     return injectLinks(asDto(factoryManager.saveFactory(factory)));
   }
@@ -183,7 +182,10 @@ public class FactoryService extends Service {
     value =
         "Get factory by attribute, "
             + "the attribute must match one of the Factory model fields with type 'String', "
-            + "e.g. (factory.name, factory.creator.name)",
+            + "e.g. (factory.name, factory.creator.name)"
+            + " This method is going to be deprecated or limited in scope in 6.0 GA "
+            + "since it's not optimized on backend performance. "
+            + "Expected parameters creator.userId=? or name=?.",
     notes =
         "If specify more than one value for a single query parameter then will be taken the first one"
   )
@@ -195,6 +197,7 @@ public class FactoryService extends Service {
     ),
     @ApiResponse(code = 500, message = "Internal server error")
   })
+  @Deprecated
   public List<FactoryDto> getFactoryByAttribute(
       @DefaultValue("0") @QueryParam("skipCount") Integer skipCount,
       @DefaultValue("30") @QueryParam("maxItems") Integer maxItems,
@@ -209,6 +212,18 @@ public class FactoryService extends Service {
             .map(entry -> Pair.of(entry.getKey(), entry.getValue().iterator().next()))
             .collect(toList());
     checkArgument(!query.isEmpty(), "Query must contain at least one attribute");
+
+    for (Pair<String, String> pair : query) {
+      if (!pair.first.equals("creator.userId") && !pair.first.equals("name")) {
+        throw new BadRequestException(
+            String.format(
+                "Method factory.find is going to be removed or limited in scope in 6.0 GA."
+                    + " Search allowed only by creator.userId and name parameters."
+                    + " Requested attributes %s, skipCount %s, maxItems %s",
+                query, skip, maxItems));
+      }
+    }
+
     final List<FactoryDto> factories = new ArrayList<>();
     for (Factory factory : factoryManager.getByAttribute(maxItems, skipCount, query)) {
       factories.add(injectLinks(asDto(factory)));

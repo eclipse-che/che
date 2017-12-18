@@ -12,6 +12,7 @@ package org.eclipse.che.ide.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import org.eclipse.che.ide.bootstrap.IdeBootstrap;
 import org.eclipse.che.ide.client.inject.IDEInjector;
 
 /** The EntryPoint of the IDE application */
@@ -21,6 +22,6 @@ public class IDE implements EntryPoint {
   public void onModuleLoad() {
     IDEInjector injector = GWT.create(IDEInjector.class);
     @SuppressWarnings("unused")
-    BootstrapController bootstrap = injector.getBootstrapController();
+    IdeBootstrap bootstrap = injector.getIdeBootstrap();
   }
 }

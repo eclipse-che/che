@@ -15,28 +15,30 @@
  * @author Florent Benoit
  */
 export class CheRemoteRecipe {
+  $resource: ng.resource.IResourceService;
+  authData: any;
+  remoteRecipesAPI: any;
 
   /**
    * Default constructor that is using resource
    */
-  constructor($resource, authData) {
+  constructor($resource: ng.resource.IResourceService,
+              authData: any) {
     this.$resource = $resource;
     this.authData = authData;
 
-
     // remote call
-    this.remoteRecipesAPI = this.$resource('',{}, {
-      create: {method: 'POST', url: authData.url + '/api/recipe?token=' + authData.token},
+    this.remoteRecipesAPI = this.$resource('', {}, {
+      create: {method: 'POST', url: authData.url + '/api/recipe?token=' + authData.token}
     });
-
   }
 
   /**
    * Create a recipe
-   * @param recipe the recipe to create
-   * @returns {*}
+   * @param {any} recipe the recipe to create
+   * @returns {ng.IPromise<any>}
    */
-  create(recipe) {
+  create(recipe: any): ng.IPromise<any> {
     return this.remoteRecipesAPI.create(recipe).$promise;
   }
 

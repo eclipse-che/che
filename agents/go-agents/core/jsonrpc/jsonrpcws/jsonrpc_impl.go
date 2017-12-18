@@ -14,7 +14,7 @@
 // The example:
 //
 // Client:
-//	conn, err := jsonrpcws.Dial("ws://host:port/path")
+//	conn, err := jsonrpcws.Dial("ws://host:port/path", token123456798)
 //	if err != nil {
 //      	panic(err)
 //      }
@@ -50,8 +50,15 @@ var (
 )
 
 // Dial establishes a new client WebSocket connection.
-func Dial(url string) (*NativeConnAdapter, error) {
-	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
+// If argument 'token' is empty authentication won't be used,
+// otherwise authorization token will be added.
+func Dial(url string, token string) (*NativeConnAdapter, error) {
+	var headers http.Header
+	if token != "" {
+		headers = make(map[string][]string)
+		headers.Add("Authorization", token)
+	}
+	conn, _, err := websocket.DefaultDialer.Dial(url, headers)
 	if err != nil {
 		return nil, err
 	}

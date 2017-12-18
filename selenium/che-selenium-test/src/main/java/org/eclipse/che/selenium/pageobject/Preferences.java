@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.pageobject;
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -271,8 +272,9 @@ public class Preferences {
     return sshKeysTable.getText().contains(host);
   }
 
+  // timeout is changed to 40 sec, is related to running tests on che6-ocp platform
   public void waitSshKeyIsPresent(final String host) {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
         .until((ExpectedCondition<Boolean>) driver -> sshKeysTable.getText().contains(host));
   }
 
@@ -547,7 +549,7 @@ public class Preferences {
     // regenerate key and upload it on the gitHub
     clickOnGenerateAndUploadToGitHub();
 
-    askDialog.waitFormToOpen();
+    askDialog.waitFormToOpen(25);
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
     seleniumWebDriver.switchToNoneCurrentWindow(ideWin);

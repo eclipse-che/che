@@ -10,8 +10,10 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -57,12 +59,16 @@ public class AskDialog {
   WebElement warning_Text;
 
   public void clickOkBtn() {
-    okBtn.click();
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(okBtn))
+        .click();
   }
 
   public void clickCancelBtn() {
     waitFormToOpen();
-    cancelBtn.click();
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(cancelBtn))
+        .click();
   }
 
   /** wait opening the confirmation form */
@@ -92,8 +98,9 @@ public class AskDialog {
    * @param expectedText expected text in widget
    */
   public void containsText(final String expectedText) {
-    new WebDriverWait(seleniumWebDriver, 3).until(ExpectedConditions.visibilityOf(warning_Text));
-    new WebDriverWait(seleniumWebDriver, 7)
+    new WebDriverWait(seleniumWebDriver, ATTACHING_ELEM_TO_DOM_SEC)
+        .until(ExpectedConditions.visibilityOf(warning_Text));
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver -> warning_Text.getText().contains(expectedText));

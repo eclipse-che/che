@@ -12,7 +12,7 @@ package org.eclipse.che.ide.actions;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -21,8 +21,8 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.download.DownloadContainer;
 
 /**
@@ -37,20 +37,18 @@ public class DownloadResourceAction extends AbstractPerspectiveAction {
 
   private final AppContext appContext;
   private final DownloadContainer downloadContainer;
-  private final WsAgentURLModifier urlModifier;
+  private final AgentURLModifier urlModifier;
 
   @Inject
   public DownloadResourceAction(
       AppContext appContext,
       CoreLocalizationConstant locale,
       DownloadContainer downloadContainer,
-      WsAgentURLModifier urlModifier) {
+      AgentURLModifier urlModifier) {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.downloadItemName(),
-        locale.downloadItemDescription(),
-        null,
-        null);
+        locale.downloadItemDescription());
     this.appContext = appContext;
     this.downloadContainer = downloadContainer;
     this.urlModifier = urlModifier;

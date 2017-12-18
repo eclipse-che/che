@@ -18,10 +18,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import org.eclipse.che.ide.api.app.AppContext;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -38,8 +42,8 @@ public class JavaDebugConfigurationPagePresenterTest {
   private static final int PORT = 8000;
 
   @Mock private JavaDebugConfigurationPageView pageView;
-  @Mock private AppContext appContext;
-  @Mock private DevMachine devMachine;
+  @Mock private WsAgentServerUtil wsAgentServerUtil;
+  @Mock private MachineImpl devMachine;
 
   @Mock private DebugConfiguration configuration;
 
@@ -49,8 +53,15 @@ public class JavaDebugConfigurationPagePresenterTest {
   public void setUp() {
     when(configuration.getHost()).thenReturn(HOST);
     when(configuration.getPort()).thenReturn(PORT);
-    when(appContext.getDevMachine()).thenReturn(devMachine);
-    when(devMachine.getId()).thenReturn("devMachine");
+
+    ServerImpl server = mock(ServerImpl.class);
+    when(server.getUrl()).thenReturn("http://preview.com");
+    Map<String, ServerImpl> servers = new HashMap<>();
+    servers.put("8000/tcp", server);
+    when(devMachine.getServers()).thenReturn(servers);
+
+    when(wsAgentServerUtil.getWsAgentServerMachine()).thenReturn(Optional.of(devMachine));
+    when(devMachine.getName()).thenReturn("devMachine");
 
     pagePresenter.resetFrom(configuration);
   }

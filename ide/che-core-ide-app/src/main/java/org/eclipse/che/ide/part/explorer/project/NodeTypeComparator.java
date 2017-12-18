@@ -15,9 +15,9 @@ import static org.eclipse.che.ide.api.resources.Resource.FOLDER;
 import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
 
 import java.util.Comparator;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * Compares node by their type. By design folders should be on top, then files and finally synthetic

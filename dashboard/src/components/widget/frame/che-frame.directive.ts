@@ -12,21 +12,16 @@
 
 export class CheFrame {
 
-  /**
-   * Default constructor.
-   */
-  constructor () {
-    this.restrict = 'E';
-    this.transclude = true;
+  restrict = 'E';
+  transclude = true;
 
-    // scope values
-    this.scope = {
-      frameText : '@cheFrameText',
-      frameClass:'@cheFrameClass'
-    };
-  }
+  // scope values
+  scope = {
+    frameText: '@cheFrameText',
+    frameClass: '@cheFrameClass'
+  };
 
-  template() {
+  template (): string {
     return `
       <div layout="row" layout-align="center center" layout-fill>
         <div flex="5" hide-sm hide-md hide-lg>&nbsp;</div>

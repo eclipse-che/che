@@ -50,7 +50,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
   @Override
   public Promise<String> getEffectivePom(String projectPath) {
     final String url =
-        appContext.getDevMachine().getWsAgentBaseUrl()
+        appContext.getWsAgentServerApiEndpoint()
             + servicePath
             + "effective/pom?projectpath="
             + encodePath(valueOf(projectPath));
@@ -64,7 +64,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
   @Override
   public Promise<Boolean> downloadSources(String projectPath, String fqn) {
     final String url =
-        appContext.getDevMachine().getWsAgentBaseUrl()
+        appContext.getWsAgentServerApiEndpoint()
             + servicePath
             + "download/sources?projectpath="
             + encodePath(valueOf(projectPath))
@@ -96,7 +96,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
       queryParameters.append("&projectPath=").append(encodePath(valueOf(path)));
     }
     final String url =
-        appContext.getDevMachine().getWsAgentBaseUrl()
+        appContext.getWsAgentServerApiEndpoint()
             + servicePath
             + "reimport"
             + queryParameters.toString().replaceFirst("&", "?");
@@ -107,7 +107,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
   @Override
   public Promise<Void> reconcilePom(String pomPath) {
     final String url =
-        appContext.getDevMachine().getWsAgentBaseUrl()
+        appContext.getWsAgentServerApiEndpoint()
             + servicePath
             + "pom/reconcile?pompath="
             + encodePath(valueOf(pomPath));

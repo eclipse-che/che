@@ -16,48 +16,49 @@
  */
 export class CheProjectTemplateBuilder {
 
-  constructor() {
-    this.template = {};
-    this.template.source = {};
-    this.template.config = {};
+  template: che.IProjectTemplate;
 
+  constructor() {
+    this.template = {} as che.IProjectTemplate;
+    this.template.source = {} as che.IProjectSource;
   }
-  withDescription(desc) {
+
+  withDescription(desc: string): CheProjectTemplateBuilder {
     this.template.description = desc;
     return this;
   }
 
-  withSourceParameters(parameters) {
+  withSourceParameters(parameters: {[paramName: string]: string}): CheProjectTemplateBuilder {
     this.template.source.parameters = parameters;
     return this;
   }
 
-  withSourceType(type) {
+  withSourceType(type: string): CheProjectTemplateBuilder {
     this.template.source.type = type;
     return this;
   }
 
-  withSourceLocation(location) {
+  withSourceLocation(location: string): CheProjectTemplateBuilder {
     this.template.source.location = location;
     return this;
   }
 
-  withDisplayname(name) {
+  withDisplayname(name: string): CheProjectTemplateBuilder {
   this.template.displayName = name;
     return this;
   }
 
-  withCategory(category) {
+  withCategory(category: string): CheProjectTemplateBuilder {
     this.template.category = category;
     return this;
   }
 
-  withProjectType(projectType) {
+  withProjectType(projectType: string): CheProjectTemplateBuilder {
     this.template.projectType = projectType;
     return this;
   }
 
-  build() {
+  build(): che.IProjectTemplate {
     return this.template;
   }
 

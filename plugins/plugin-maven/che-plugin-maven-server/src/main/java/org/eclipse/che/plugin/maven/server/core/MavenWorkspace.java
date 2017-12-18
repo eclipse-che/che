@@ -13,9 +13,6 @@ package org.eclipse.che.plugin.maven.server.core;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,15 +20,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.project.server.ProjectDeletedEvent;
-import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.RegisteredProject;
+import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.project.server.notification.ProjectDeletedEvent;
 import org.eclipse.che.ide.ext.java.shared.Constants;
 import org.eclipse.che.jdt.core.launching.JREContainerInitializer;
 import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathHelper;
@@ -61,7 +62,7 @@ public class MavenWorkspace {
   private static final Logger LOG = LoggerFactory.getLogger(MavenWorkspace.class);
 
   private final MavenProjectManager manager;
-  private final Provider<ProjectRegistry> projectRegistryProvider;
+  private final Provider<ProjectManager> projectManagerProvider;
   private final ClasspathManager classpathManager;
 
   private MavenTaskExecutor resolveExecutor;
@@ -74,11 +75,11 @@ public class MavenWorkspace {
       MavenProjectManager manager,
       MavenProgressNotifier notifier,
       MavenExecutorService executorService,
-      Provider<ProjectRegistry> projectRegistryProvider,
+      Provider<ProjectManager> projectManagerProvider,
       ClasspathManager classpathManager,
       EventService eventService,
       EclipseWorkspaceProvider workspaceProvider) {
-    this.projectRegistryProvider = projectRegistryProvider;
+    this.projectManagerProvider = projectManagerProvider;
     this.classpathManager = classpathManager;
     this.manager = manager;
     resolveExecutor = new MavenTaskExecutor(executorService, notifier);
@@ -141,17 +142,19 @@ public class MavenWorkspace {
   }
 
   private void createNewProjects(Set<MavenProject> mavenProjects) {
-    mavenProjects
-        .stream()
-        .forEach(
-            project -> {
-              try {
-                String path = project.getProject().getFullPath().toOSString();
-                projectRegistryProvider.get().setProjectType(path, MAVEN_ID, false);
-              } catch (ConflictException | ServerException | NotFoundException e) {
-                LOG.error("Can't add new project: " + project.getProject().getFullPath(), e);
-              }
-            });
+    mavenProjects.forEach(
+        project -> {
+          try {
+            String path = project.getProject().getFullPath().toOSString();
+            projectManagerProvider.get().setType(path, MAVEN_ID, false);
+          } catch (ConflictException
+              | ServerException
+              | NotFoundException
+              | BadRequestException
+              | ForbiddenException e) {
+            LOG.error("Can't add new project: " + project.getProject().getFullPath(), e);
+          }
+        });
     mavenProjects.forEach(this::updateJavaProject);
   }
 
@@ -159,10 +162,14 @@ public class MavenWorkspace {
     removed.forEach(
         project -> {
           try {
-            projectRegistryProvider
+            projectManagerProvider
                 .get()
-                .removeProjectType(project.getProject().getFullPath().toOSString(), MAVEN_ID);
-          } catch (ServerException | ForbiddenException | ConflictException | NotFoundException e) {
+                .removeType(project.getProject().getFullPath().toOSString(), MAVEN_ID);
+          } catch (ServerException
+              | ForbiddenException
+              | ConflictException
+              | NotFoundException
+              | BadRequestException e) {
             LOG.error(e.getMessage(), e);
           }
         });
@@ -234,14 +241,15 @@ public class MavenWorkspace {
 
       IPath projectPath = project.getProject().getFullPath();
       RegisteredProject registeredProject =
-          projectRegistryProvider.get().getProject(projectPath.toOSString());
-
-      if (registeredProject == null) {
-        throw new JavaModelException(
-            new JavaModelStatus(
-                IJavaModelStatusConstants.CORE_EXCEPTION,
-                "Project " + projectPath.toOSString() + " doesn't exist"));
-      }
+          projectManagerProvider
+              .get()
+              .get(projectPath.toOSString())
+              .orElseThrow(
+                  () ->
+                      new JavaModelException(
+                          new JavaModelStatus(
+                              IJavaModelStatusConstants.CORE_EXCEPTION,
+                              "Project " + projectPath.toOSString() + " doesn't exist")));
 
       List<String> sourceFolders = registeredProject.getAttributes().get(Constants.SOURCE_FOLDER);
       List<String> testSourceFolders =

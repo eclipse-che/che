@@ -10,92 +10,99 @@
  */
 package org.eclipse.che.ide.macro;
 
-import com.google.common.collect.Sets;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.Server;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.macro.BaseMacro;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 
 /**
- * For every server in WsAgent's machine registers a {@link Macro} that returns server's external
- * address in form <b>hostname:port</b>.
+ * For every server in dev-machine registers a {@link Macro} that returns server's URL.
+ *
+ * <p>Macro name: <code>${server.server_reference}</code>.
  *
  * @author Vlad Zhukovskiy
  */
 @Singleton
-public class ServerAddressMacroRegistrar implements WsAgentStateHandler {
+public class ServerAddressMacroRegistrar {
 
-  public static final String MACRO_NAME_TEMPLATE = "${server.port.%}";
+  private static final String MACRO_NAME_TEMPLATE = "${server.%}";
 
-  private final MacroRegistry macroRegistry;
+  private final Provider<MacroRegistry> macroRegistryProvider;
   private final AppContext appContext;
+  private final WsAgentServerUtil wsAgentServerUtil;
 
   private Set<Macro> macros;
 
   @Inject
   public ServerAddressMacroRegistrar(
-      EventBus eventBus, MacroRegistry macroRegistry, AppContext appContext) {
-    this.macroRegistry = macroRegistry;
+      EventBus eventBus,
+      Provider<MacroRegistry> macroRegistryProvider,
+      AppContext appContext,
+      WsAgentServerUtil wsAgentServerUtil) {
+    this.macroRegistryProvider = macroRegistryProvider;
     this.appContext = appContext;
+    this.wsAgentServerUtil = wsAgentServerUtil;
 
-    eventBus.addHandler(WsAgentStateEvent.TYPE, this);
+    eventBus.addHandler(
+        BasicIDEInitializedEvent.TYPE,
+        e -> {
+          if (appContext.getWorkspace().getStatus() == RUNNING) {
+            registerMacros();
+          }
+        });
 
-    registerMacros();
+    eventBus.addHandler(WorkspaceRunningEvent.TYPE, e -> registerMacros());
+
+    eventBus.addHandler(
+        WorkspaceStoppedEvent.TYPE,
+        e -> {
+          macros.forEach(macro -> macroRegistryProvider.get().unregister(macro));
+          macros.clear();
+        });
   }
 
   private void registerMacros() {
-    Machine devMachine = appContext.getDevMachine();
-    if (devMachine != null) {
-      macros = getMacros(devMachine);
-      macroRegistry.register(macros);
+    final Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
+
+    if (devMachine.isPresent()) {
+      macros = getMacros(devMachine.get());
+      macroRegistryProvider.get().register(macros);
     }
   }
 
   private Set<Macro> getMacros(Machine machine) {
-    Set<Macro> macros = Sets.newHashSet();
-    for (Map.Entry<String, ? extends Server> entry : machine.getRuntime().getServers().entrySet()) {
-      macros.add(new ServerAddressMacro(entry.getKey(), entry.getValue().getAddress()));
+    Set<Macro> macros = new HashSet<>();
 
-      if (entry.getKey().endsWith("/tcp")) {
-        macros.add(
-            new ServerAddressMacro(
-                entry.getKey().substring(0, entry.getKey().length() - 4),
-                entry.getValue().getAddress()));
-      }
+    for (Map.Entry<String, ? extends Server> entry : machine.getServers().entrySet()) {
+      macros.add(new ServerAddressMacro(entry.getKey(), entry.getValue().getUrl()));
     }
 
     return macros;
   }
 
-  @Override
-  public void onWsAgentStarted(WsAgentStateEvent event) {
-    registerMacros();
-  }
-
-  @Override
-  public void onWsAgentStopped(WsAgentStateEvent event) {
-    for (Macro provider : macros) {
-      macroRegistry.unregister(provider);
-    }
-
-    macros.clear();
-  }
-
   private class ServerAddressMacro extends BaseMacro {
-    ServerAddressMacro(String internalPort, String externalAddress) {
+    ServerAddressMacro(String reference, String url) {
       super(
-          MACRO_NAME_TEMPLATE.replaceAll("%", internalPort),
-          externalAddress,
-          "Returns external address of the server running on port " + internalPort);
+          MACRO_NAME_TEMPLATE.replaceAll("%", reference),
+          url,
+          "Returns address of the " + reference + " server");
     }
   }
 }

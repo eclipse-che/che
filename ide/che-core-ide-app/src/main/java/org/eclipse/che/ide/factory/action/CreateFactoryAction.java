@@ -30,10 +30,7 @@ public class CreateFactoryAction extends AbstractPerspectiveAction {
       CreateFactoryPresenter presenter, CoreLocalizationConstant localizationConstant) {
     super(
         Collections.singletonList("Project Perspective"),
-        localizationConstant.createFactoryActionTitle(),
-        null,
-        null,
-        null);
+        localizationConstant.createFactoryActionTitle());
     this.presenter = presenter;
   }
 

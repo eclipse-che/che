@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.plugin.debugger.ide.actions;
 
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -40,7 +40,6 @@ public class EditConfigurationsAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         localizationConstant.editDebugConfigurationsActionTitle(),
         localizationConstant.editDebugConfigurationsActionDescription(),
-        null,
         resources.editCommands());
     this.editCommandsPresenter = editDebugConfigurationsPresenter;
   }

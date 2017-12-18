@@ -10,10 +10,13 @@
  */
 package org.eclipse.che.plugin.debugger.ide.debug;
 
+import static java.util.Collections.emptyList;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doNothing;
@@ -23,6 +26,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
 import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
 import org.eclipse.che.api.debug.shared.model.Location;
@@ -30,6 +34,7 @@ import org.eclipse.che.api.debug.shared.model.MutableVariable;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.ThreadState;
 import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.WatchExpression;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -37,6 +42,7 @@ import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
@@ -89,6 +95,7 @@ public class DebuggerPresenterTest extends BaseTest {
   @Mock private Promise<List<ThreadState>> promiseThreadDump;
   @Mock private Promise<StackFrameDump> promiseStackFrame;
   @Mock private Promise<Void> promiseVoid;
+  @Mock private EventBus eventBus;
 
   @Captor private ArgumentCaptor<Operation<Void>> operationVoidCaptor;
   @Captor private ArgumentCaptor<Operation<List<ThreadState>>> operationThreadDumpCaptor;
@@ -115,7 +122,8 @@ public class DebuggerPresenterTest extends BaseTest {
                 debuggerManager,
                 workspaceAgent,
                 debuggerLocationHandlerManager,
-                breakpointContextMenuFactory));
+                breakpointContextMenuFactory,
+                eventBus));
 
     Mockito.reset(view);
     when(view.getSelectedThreadId()).thenReturn(THREAD_ID);
@@ -141,22 +149,20 @@ public class DebuggerPresenterTest extends BaseTest {
 
   @Test
   public void shouldUpdateStackFrameDumpAndVariablesOnNewSelectedThread() throws Exception {
-    doNothing().when(presenter).updateStackFrameDump(THREAD_ID);
-    doNothing().when(presenter).updateVariables(THREAD_ID, 0);
+    doNothing().when(presenter).refreshVariables(THREAD_ID, 0);
 
     presenter.onSelectedThread(THREAD_ID);
 
-    verify(presenter).updateStackFrameDump(THREAD_ID);
-    verify(presenter).updateVariables(THREAD_ID, 0);
+    verify(presenter).refreshView(THREAD_ID);
   }
 
   @Test
   public void shouldUpdateVariablesOnSelectedFrame() throws Exception {
-    doNothing().when(presenter).updateVariables(THREAD_ID, FRAME_INDEX);
+    doNothing().when(presenter).refreshVariables(THREAD_ID, FRAME_INDEX);
 
     presenter.onSelectedFrame(FRAME_INDEX);
 
-    verify(presenter).updateVariables(THREAD_ID, FRAME_INDEX);
+    verify(presenter).refreshVariables(THREAD_ID, FRAME_INDEX);
   }
 
   @Test
@@ -165,15 +171,12 @@ public class DebuggerPresenterTest extends BaseTest {
     doReturn(THREAD_ID).when(executionPoint).getThreadId();
     doReturn(promiseThreadDump).when(debugger).getThreadDump();
     doReturn(promiseThreadDump).when(promiseThreadDump).then((Operation<List<ThreadState>>) any());
-    doNothing().when(presenter).updateStackFrameDump(THREAD_ID);
-    doNothing().when(presenter).updateVariables(THREAD_ID, 0);
 
     presenter.onBreakpointStopped(null, executionPoint);
 
     verify(promiseThreadDump).then(operationThreadDumpCaptor.capture());
     operationThreadDumpCaptor.getValue().apply(threadDump);
-    verify(presenter).updateStackFrameDump(THREAD_ID);
-    verify(presenter).updateVariables(THREAD_ID, 0);
+    verify(presenter).refreshView();
     verify(view).setThreadDump(eq(threadDump), anyLong());
   }
 
@@ -182,7 +185,7 @@ public class DebuggerPresenterTest extends BaseTest {
     doReturn(promiseStackFrame).when(debugger).getStackFrameDump(THREAD_ID, FRAME_INDEX);
     doReturn(promiseStackFrame).when(promiseStackFrame).then((Operation<StackFrameDump>) any());
 
-    presenter.updateVariables(THREAD_ID, FRAME_INDEX);
+    presenter.refreshVariables(THREAD_ID, FRAME_INDEX);
 
     verify(promiseStackFrame).then(operationStackFrameCaptor.capture());
     operationStackFrameCaptor.getValue().apply(stackFrame);
@@ -202,10 +205,8 @@ public class DebuggerPresenterTest extends BaseTest {
             nullable(StatusNotification.DisplayMode.class)))
         .thenReturn(mock(StatusNotification.class));
 
-    presenter.onDebuggerAttached(debuggerDescriptor, promiseVoid);
+    presenter.onDebuggerAttached(debuggerDescriptor);
 
-    verify(promiseVoid).then(operationVoidCaptor.capture());
-    operationVoidCaptor.getValue().apply(null);
     verify(presenter).showDebuggerPanel();
     verify(view).setVMName("info");
   }
@@ -236,5 +237,25 @@ public class DebuggerPresenterTest extends BaseTest {
     operationValueCaptor.getValue().apply(valueDto);
     verify(debugger).getValue(eq(selectedVariable), eq(THREAD_ID), eq(FRAME_INDEX));
     verify(view).updateVariable(any(Variable.class));
+  }
+
+  @Test
+  public void shouldClearPanelOnWorkspaceStopped() throws Exception {
+    Promise promise = mock(Promise.class);
+    when(promise.then(any(Operation.class))).thenReturn(promise);
+    when(debugger.evaluate(anyString(), anyLong(), anyInt())).thenReturn(promise);
+    WatchExpression watchExpression = mock(WatchExpression.class);
+    when(watchExpression.getExpression()).thenReturn("expresion");
+
+    presenter.onAddExpressionBtnClicked(watchExpression);
+    presenter.onWorkspaceStopped(mock(WorkspaceStoppedEvent.class));
+
+    verify(view).setVMName(eq(""));
+    verify(view).setExecutionPoint(eq(null));
+    verify(view).setThreadDump(eq(emptyList()), eq(-1L));
+    verify(view).setFrames(eq(emptyList()));
+    verify(view).removeAllVariables();
+    verify(watchExpression).setResult(eq(""));
+    verify(view).updateExpression(eq(watchExpression));
   }
 }

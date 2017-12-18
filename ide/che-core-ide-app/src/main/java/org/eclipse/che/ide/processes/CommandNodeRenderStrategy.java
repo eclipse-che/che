@@ -63,7 +63,6 @@ public class CommandNodeRenderStrategy
 
   private SpanElement createCommandElement(ProcessTreeNode node) {
     SpanElement root = Elements.createSpanElement(resources.getCss().commandTreeNode());
-    root.setAttribute("running", "" + node.isRunning());
 
     root.appendChild(createCloseElement(node));
     root.appendChild(createStopProcessElement(node));

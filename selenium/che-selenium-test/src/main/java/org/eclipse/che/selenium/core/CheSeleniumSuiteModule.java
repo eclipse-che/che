@@ -23,24 +23,19 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
-import org.eclipse.che.selenium.core.client.*;
+import org.eclipse.che.selenium.core.client.CheTestUserServiceClient;
+import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
+import org.eclipse.che.selenium.core.client.TestUserServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
 import org.eclipse.che.selenium.core.configuration.TestConfiguration;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.provider.CheTestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestIdeUrlProvider;
-import org.eclipse.che.selenium.core.provider.CheTestSvnPasswordProvider;
-import org.eclipse.che.selenium.core.provider.CheTestSvnRepo1Provider;
-import org.eclipse.che.selenium.core.provider.CheTestSvnRepo2Provider;
-import org.eclipse.che.selenium.core.provider.CheTestSvnUsernameProvider;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
-import org.eclipse.che.selenium.core.provider.TestSvnPasswordProvider;
-import org.eclipse.che.selenium.core.provider.TestSvnRepo1Provider;
-import org.eclipse.che.selenium.core.provider.TestSvnRepo2Provider;
-import org.eclipse.che.selenium.core.provider.TestSvnUsernameProvider;
 import org.eclipse.che.selenium.core.requestfactory.CheTestDefaultUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestCheAdminHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
@@ -72,11 +67,6 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     config
         .getMap()
         .forEach((key, value) -> bindConstant().annotatedWith(Names.named(key)).to(value));
-
-    bind(TestSvnPasswordProvider.class).to(CheTestSvnPasswordProvider.class);
-    bind(TestSvnUsernameProvider.class).to(CheTestSvnUsernameProvider.class);
-    bind(TestSvnRepo1Provider.class).to(CheTestSvnRepo1Provider.class);
-    bind(TestSvnRepo2Provider.class).to(CheTestSvnRepo2Provider.class);
 
     bind(TestUser.class).to(CheDefaultTestUser.class);
 

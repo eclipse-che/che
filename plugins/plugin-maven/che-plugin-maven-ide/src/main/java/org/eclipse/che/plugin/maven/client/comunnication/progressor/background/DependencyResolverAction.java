@@ -13,8 +13,8 @@ package org.eclipse.che.plugin.maven.client.comunnication.progressor.background;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.action.CustomComponentAction;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
@@ -25,7 +25,7 @@ import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
  * @author Valeriy Svydenko
  */
 @Singleton
-public class DependencyResolverAction extends Action implements CustomComponentAction {
+public class DependencyResolverAction extends BaseAction implements CustomComponentAction {
   private final BackgroundLoaderPresenter dependencyResolver;
 
   @Inject

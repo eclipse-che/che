@@ -41,7 +41,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>tomcat/webapps</outputDirectory>
-            <outputFileNameMapping>wsmaster.war</outputFileNameMapping>
+            <outputFileNameMapping>api.war</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che:assembly-wsmaster-war</include>
             </includes>
@@ -84,38 +84,19 @@
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
+            <unpack>true</unpack>
+            <outputDirectory>lib/linux_amd64</outputDirectory>
+            <includes>
+                <include>org.eclipse.che:bootstrapper:zip:linux_amd64</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>lib/linux_amd64/exec</outputDirectory>
             <outputFileNameMapping>exec-agent-linux_amd64.tar.gz</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che:exec-agent:tar.gz:linux_amd64</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>sdk</outputDirectory>
-            <outputFileNameMapping>che-plugin-sdk-tools.jar</outputFileNameMapping>
-            <includes>
-                <include>org.eclipse.che.plugin:che-plugin-sdk-tools</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>sdk</outputDirectory>
-            <outputFileNameMapping>che-plugin-sdk-logger.jar</outputFileNameMapping>
-            <includes>
-                <include>ch.qos.logback:logback-classic</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>sdk</outputDirectory>
-            <outputFileNameMapping>che-plugin-sdk-logger-core.jar</outputFileNameMapping>
-            <includes>
-                <include>ch.qos.logback:logback-core</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -131,15 +112,16 @@
                 </excludes>
             </unpackOptions>
         </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>org.postgresql:postgresql</include>
+            </includes>
+        </dependencySet>
     </dependencySets>
     <fileSets>
-        <fileSet>
-            <directory>${project.build.directory}/stacks/</directory>
-            <outputDirectory>stacks/</outputDirectory>
-            <excludes>
-                <exclude>META-INF/**</exclude>
-            </excludes>
-        </fileSet>
         <fileSet>
             <directory>${project.build.directory}/dependency/</directory>
             <outputDirectory>tomcat/</outputDirectory>
@@ -147,23 +129,7 @@
                 <exclude>bin/*.bat</exclude>
             </excludes>
        </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/src/assembly/bin</directory>
-            <outputDirectory>bin</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/src/assembly/plugins</directory>
-            <outputDirectory>plugins</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/src/assembly/webapps</directory>
-            <outputDirectory>tomcat/webapps</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${project.parent.basedir}/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/codenvy</directory>
-            <outputDirectory>conf</outputDirectory>
-        </fileSet>
-        <fileSet>
+       <fileSet>
             <directory>${project.basedir}/src/assembly</directory>
             <outputDirectory></outputDirectory>
             <includes>
@@ -171,48 +137,8 @@
               <include>README</include>
            </includes>
         </fileSet>
-        <fileSet>
-            <directory>${project.parent.basedir}/assembly-wsagent-war</directory>
-            <outputDirectory>sdk/assembly-wsagent-war</outputDirectory>
-            <excludes>
-            <exclude>**/target/**</exclude>
-            </excludes>
-        </fileSet>
-        <fileSet>
-            <directory>${project.parent.basedir}/assembly-wsagent-server</directory>
-            <outputDirectory>sdk/assembly-wsagent-server</outputDirectory>
-            <excludes>
-            <exclude>**/target/**</exclude>
-            </excludes>
-        </fileSet>
-        <fileSet>
-            <directory>${project.parent.basedir}/assembly-ide-war</directory>
-            <outputDirectory>sdk/assembly-ide-war</outputDirectory>
-            <excludes>
-            <exclude>**/target/**</exclude>
-            </excludes>
-        </fileSet>
-        <fileSet>
-            <directory>${project.parent.basedir}/assembly-main</directory>
-            <outputDirectory>sdk/assembly-main</outputDirectory>
-            <excludes>
-            <exclude>**/target/**</exclude>
-            </excludes>
-        </fileSet>
     </fileSets>
       <files>
-        <file>
-            <source>${project.basedir}/src/assembly/bin/che-install-plugin.sh</source>
-            <outputDirectory>bin</outputDirectory>
-            <destName>che-install-plugin.sh</destName>
-            <fileMode>755</fileMode>
-        </file>
-        <file>
-            <source>${project.basedir}/src/assembly/bin/che-install-plugin.bat</source>
-            <outputDirectory>bin</outputDirectory>
-            <destName>che-install-plugin.bat</destName>
-            <fileMode>755</fileMode>
-        </file>
         <file>
             <source>${project.basedir}/src/assembly/tomcat/conf/server.xml</source>
             <outputDirectory>tomcat/conf</outputDirectory>

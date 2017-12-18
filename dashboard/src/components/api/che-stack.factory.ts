@@ -51,7 +51,7 @@ export class CheStack {
 
     // remote call
     this.remoteStackAPI = <IRemoteStackAPI<any>>this.$resource('/api/stack', {}, {
-      getStacks: {method: 'GET', url: '/api/stack?maxItems=50', isArray: true}, //TODO 50 items is temp solution while paging is not added
+      getStacks: {method: 'GET', url: '/api/stack?maxItems=50', isArray: true}, // todo: 50 items is temp solution while paging is not added
       getStack: {method: 'GET', url: '/api/stack/:stackId'},
       updateStack: {method: 'PUT', url: '/api/stack/:stackId'},
       createStack: {method: 'POST', url: '/api/stack'},
@@ -64,7 +64,7 @@ export class CheStack {
    * @returns {che.IStack}
    */
   getStackTemplate(): che.IStack {
-    let stack = {
+    const stack = <che.IStack>{
       'name': 'New Stack',
       'description': 'New Java Stack',
       'scope': 'general',
@@ -78,7 +78,7 @@ export class CheStack {
           'default': {
             'machines': {
               'dev-machine': {
-                'agents': [
+                'installers': [
                   'org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh'
                 ],
                 'servers': {},
@@ -96,7 +96,6 @@ export class CheStack {
         },
         'name': 'default',
         'defaultEnv': 'default',
-        'description': null,
         'commands': []
       }
     };
@@ -132,9 +131,9 @@ export class CheStack {
     let updatedPromise = promise.then((stacks: Array<che.IStack>) => {
       // reset global stacks list
       this.stacks.length = 0;
-      for (let member: string in this.stacksById) {
-        delete this.stacksById[member];
-      }
+      Object.keys(this.stacksById).forEach((stacksId: string) => {
+        delete this.stacksById[stacksId];
+      });
       // reset global stack names list
       this.usedStackNames.length = 0;
       stacks.forEach((stack: che.IStack) => {
@@ -159,9 +158,9 @@ export class CheStack {
   /**
    * The stacks per id
    * @param id {string}
-   * @returns {stack: che.IStack}
+   * @returns {che.IStack}
    */
-  getStackById(id: string): { stack: che.IStack } {
+  getStackById(id: string): che.IStack {
     return this.stacksById[id];
   }
 
@@ -202,5 +201,3 @@ export class CheStack {
     return this.remoteStackAPI.deleteStack({stackId: stackId}).$promise;
   }
 }
-
-

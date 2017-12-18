@@ -31,7 +31,6 @@ import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandRemovedEvent;
 import org.eclipse.che.ide.api.command.CommandRemovedEvent.CommandRemovedHandler;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
@@ -48,6 +47,7 @@ import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
 import org.eclipse.che.ide.command.editor.page.project.ProjectsPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
 import org.eclipse.che.ide.command.node.NodeFactory;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -231,6 +231,7 @@ public class CommandEditor extends AbstractEditorPresenter
               if (!initialCommandName.equals(editedCommand.getName())) {
                 input.setFile(nodeFactory.newCommandFileNode(editedCommand));
                 initialCommandName = editedCommand.getName();
+                firePropertyChange(PROP_INPUT);
               }
 
               updateDirtyState(false);

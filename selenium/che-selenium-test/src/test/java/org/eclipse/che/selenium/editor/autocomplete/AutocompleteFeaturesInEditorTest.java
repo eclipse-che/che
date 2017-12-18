@@ -150,6 +150,7 @@ public class AutocompleteFeaturesInEditorTest {
     notificationsPopupPanel.waitProgressPopupPanelClose();
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
+    editor.waitActive();
     loader.waitOnClosed();
     reparseEditorCode();
     editor.setCursorToLine(37);

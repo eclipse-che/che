@@ -18,6 +18,9 @@ public interface BreakpointManagerObserver {
   /** Event happens when breakpoint added. */
   void onBreakpointAdded(Breakpoint breakpoint);
 
+  /** Event happens when breakpoint updated. */
+  void onBreakpointUpdated(Breakpoint breakpoint);
+
   /** Event happens when breakpoint deleted. */
   void onBreakpointDeleted(Breakpoint breakpoint);
 

@@ -14,7 +14,6 @@ import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.L
 import static org.eclipse.che.ide.ext.git.client.compare.changespanel.ViewMode.TREE;
 
 import com.google.inject.Inject;
-import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
@@ -29,7 +28,6 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
 
   private static final String REVISION = "HEAD";
   private final ChangesPanelView view;
-  private final GitLocalizationConstant locale;
 
   private AlteredFiles changedFiles;
   private ViewMode viewMode;
@@ -37,10 +35,7 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
   private FileNodeDoubleClickHandler fileNodeDoubleClickHandler;
 
   @Inject
-  public ChangesPanelPresenter(
-      GitLocalizationConstant locale, ChangesPanelView view, ComparePresenter comparePresenter) {
-
-    this.locale = locale;
+  public ChangesPanelPresenter(ChangesPanelView view, ComparePresenter comparePresenter) {
     this.view = view;
     this.view.setDelegate(this);
     this.viewMode = TREE;
@@ -53,12 +48,12 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
    * Show panel with changed files. If empty map with changed files is received, all buttons would
    * be disabled.
    *
-   * @param changedFiles Map with files and their status
+   * @param changedFiles altered files to show
    */
   public void show(AlteredFiles changedFiles) {
     this.changedFiles = changedFiles;
     if (changedFiles.isEmpty()) {
-      view.setTextToChangeViewModeButton(locale.changeListRowListViewButtonText());
+      view.updateChangeViewModeButton(viewMode);
       view.setEnabledChangeViewModeButton(false);
       view.setEnableExpandCollapseButtons(false);
       view.resetPanelState();
@@ -97,10 +92,7 @@ public class ChangesPanelPresenter implements ChangesPanelView.ActionDelegate {
 
   private void viewChangedFiles() {
     view.viewChangedFiles(changedFiles, viewMode);
-    view.setTextToChangeViewModeButton(
-        viewMode == TREE
-            ? locale.changeListRowListViewButtonText()
-            : locale.changeListGroupByDirectoryButtonText());
+    view.updateChangeViewModeButton(viewMode);
   }
 
   public void setFileNodeDoubleClickHandler(FileNodeDoubleClickHandler fileNodeDoubleClickHandler) {

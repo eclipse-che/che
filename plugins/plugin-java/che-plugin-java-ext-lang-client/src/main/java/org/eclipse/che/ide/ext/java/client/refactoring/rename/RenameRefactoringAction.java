@@ -23,13 +23,12 @@ import java.util.List;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.parts.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
@@ -41,6 +40,7 @@ import org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.RenamePresenter;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
@@ -193,7 +193,7 @@ public class RenameRefactoringAction extends AbstractPerspectiveAction
     } else {
       final Resource[] resources = appContext.getResources();
 
-      if (resources == null || resources.length > 1) {
+      if (resources == null || resources.length != 1) {
         event.getPresentation().setEnabledAndVisible(false);
         return;
       }
@@ -226,6 +226,10 @@ public class RenameRefactoringAction extends AbstractPerspectiveAction
 
   protected boolean isJavaFile(VirtualFile file) {
     String fileExtension = fileTypeRegistry.getFileTypeByFile(file).getExtension();
+
+    if (fileExtension == null) {
+      return false;
+    }
 
     return fileExtension.equals("java") || fileExtension.equals("class");
   }

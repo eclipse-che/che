@@ -27,7 +27,6 @@ Variables:
     CHE_SERVER_ACTION                   Another way to set the [COMMAND] to [run | start | stop]
     CHE_PORT                            The port the Che server will listen on
     CHE_IP                              The IP address of the host - must be set if remote clients connecting
-    CHE_LOCAL_CONF_DIR                  If set, will load che.properties from folder
     CHE_BLOCKING_ENTROPY                Starts Tomcat with blocking entropy: -Djava.security.egd=file:/dev/./urandom
     CHE_LAUNCH_DOCKER_REGISTRY          If true, uses Docker registry to save ws snapshots instead of disk
     CHE_REGISTRY_HOST                   Hostname of Docker registry to launch, otherwise 'localhost'
@@ -97,11 +96,6 @@ set_environment_variables () {
   # Convert Che environment variables to POSIX format.
   if [[ "${CHE_HOME}" == *":"* ]]; then
     CHE_HOME=$(echo /"${CHE_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
-  fi
-
-  # Che configuration directory - where che.properties lives
-  if [ -z "${CHE_LOCAL_CONF_DIR}" ]; then
-    export CHE_LOCAL_CONF_DIR="${CHE_HOME}/conf/"
   fi
 
   # Sets the location of the application server and its executables
@@ -209,21 +203,12 @@ init() {
   ### Any variables with export is a value that native Tomcat che.sh startup script requires
   export CHE_IP=${CHE_IP}
 
-  if [ -f "/assembly/conf/che.properties" ]; then
+  if [ -f "/assembly/tomcat/bin/catalina.sh" ]; then
     echo "Found custom assembly..."
     export CHE_HOME="/assembly"
   else
     echo "Using embedded assembly..."
     export CHE_HOME=$(echo /home/user/eclipse-che/)
-  fi
-
-  ### Are we using the included assembly or did user provide their own?
-  if [ ! -f $CHE_HOME/conf/che.properties ]; then
-    echo "!!!"
-    echo "!!! Error: Could not find $CHE_HOME/conf/che.properties."
-    echo "!!! Error: Did you use CHE_ASSEMBLY with a typo?"
-    echo "!!!"
-    exit 1
   fi
 
   ### We need to discover the host mount provided by the user for `/data`
@@ -244,52 +229,15 @@ init() {
     sudo chown -R ${CHE_USER} ${CHE_HOME}
     sudo chown -R ${CHE_USER} ${CHE_LOGS_DIR}
   fi
-  ### Are we going to use the embedded che.properties or one provided by user?`
-  ### CHE_LOCAL_CONF_DIR is internal Che variable that sets where to load
-  # check if we have permissions to create /conf folder.
-  if [ -w / ]; then
-    export CHE_LOCAL_CONF_DIR="/conf"
-    if [ -f "/conf/che.properties" ]; then
-      echo "Found custom che.properties..."
-      if [ "$CHE_USER" != "root" ]; then
-        sudo chown -R ${CHE_USER} ${CHE_LOCAL_CONF_DIR}
-      fi
-    else
-      if [ ! -d ${CHE_LOCAL_CONF_DIR} ]; then
-          mkdir -p ${CHE_LOCAL_CONF_DIR}
-      fi
-      if [ -w ${CHE_LOCAL_CONF_DIR} ];then
-        echo "ERROR: user ${CHE_USER} does OK have write permissions to ${CHE_LOCAL_CONF_DIR}"
-        echo "Using embedded che.properties... Copying template to ${CHE_LOCAL_CONF_DIR}/che.properties"
-        cp -rf "${CHE_HOME}/conf/che.properties" ${CHE_LOCAL_CONF_DIR}/che.properties
-      else
-        echo "ERROR: user ${CHE_USER} does not have write permissions to ${CHE_LOCAL_CONF_DIR}"
-        exit 1
-      fi
-    fi
-  else
-    echo "WARN: parent dir is not writeable, CHE_LOCAL_CONF_DIR will be set to ${CHE_DATA}/conf"
-    export CHE_LOCAL_CONF_DIR="${CHE_DATA}/conf"
-    if [ ! -d ${CHE_LOCAL_CONF_DIR} ]; then
-        mkdir -p ${CHE_LOCAL_CONF_DIR}
-    fi
-    if [ -w ${CHE_LOCAL_CONF_DIR} ];then
-      echo "Using embedded che.properties... Copying template to ${CHE_LOCAL_CONF_DIR}/che.properties"
-      cp -rf "${CHE_HOME}/conf/che.properties" ${CHE_LOCAL_CONF_DIR}/che.properties
-    else
-      echo "ERROR: user ${CHE_USER} does not have write permissions to ${CHE_LOCAL_CONF_DIR}"
-      exit 1
-    fi
-  fi
 
-  # Update the provided che.properties with the location of the /data mounts
-  sed -i "/che.workspace.storage=/c\che.workspace.storage=/data/workspaces" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/che.database=/c\che.database=/data/storage" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/che.template.storage=/c\che.template.storage=/data/templates" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/che.workspace.agent.dev=/c\che.workspace.agent.dev=${CHE_DATA_HOST}/lib/ws-agent.tar.gz" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/che.workspace.terminal_linux_amd64=/c\che.workspace.terminal_linux_amd64=${CHE_DATA_HOST}/lib/linux_amd64/terminal" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/che.workspace.terminal_linux_arm7=/c\che.workspace.terminal_linux_arm7=${CHE_DATA_HOST}/lib/linux_arm7/terminal" $CHE_LOCAL_CONF_DIR/che.properties
-  sed -i "/che.workspace.exec_linux_amd64=/c\che.workspace.exec_linux_amd64=${CHE_DATA_HOST}/lib/linux_amd64/exec" $CHE_LOCAL_CONF_DIR/che.properties
+
+  export CHE_WORKSPACE_STORAGE=/data/workspaces
+  export CHE_DATABASE=/data/storage
+  export CHE_TEMPLATE_STORAGE=/data/templates
+  export CHE_WORKSPACE_AGENT_DEV=${CHE_DATA_HOST}/lib/ws-agent.tar.gz
+  export CHE_WORKSPACE_TERMINAL__LINUX__AMD64=${CHE_DATA_HOST}/lib/linux_amd64/terminal
+  export CHE_WORKSPACE_TERMINAL__LINUX__ARM7=${CHE_DATA_HOST}/lib/linux_arm7/terminal
+  export CHE_WORKSPACE_EXEC__LINUX__AMD64=${CHE_DATA_HOST}/lib/linux_amd64/exec
 
   # CHE_DOCKER_IP_EXTERNAL must be set if you are in a VM.
   HOSTNAME=${CHE_DOCKER_IP_EXTERNAL:-$(get_docker_external_hostname)}

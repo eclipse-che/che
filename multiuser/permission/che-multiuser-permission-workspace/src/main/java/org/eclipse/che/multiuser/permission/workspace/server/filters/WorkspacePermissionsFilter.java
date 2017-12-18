@@ -118,14 +118,8 @@ public class WorkspacePermissionsFilter extends CheMethodInvokerFilter {
         }
         // fall through
       case "startById":
-      case "createSnapshot":
         key = ((String) arguments[0]);
         action = RUN;
-        break;
-
-      case "getSnapshot":
-        key = ((String) arguments[0]);
-        action = READ;
         break;
 
       case "getByKey":

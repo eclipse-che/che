@@ -47,7 +47,6 @@ public class StatusCommandPresenterTest extends BaseTest {
     presenter =
         new StatusCommandPresenter(
             service,
-            appContext,
             gitOutputConsoleFactory,
             processesPanelPresenter,
             constant,
@@ -68,7 +67,7 @@ public class StatusCommandPresenterTest extends BaseTest {
     stringCaptor.getValue().apply("");
 
     verify(console, times(2)).print(anyString());
-    verify(processesPanelPresenter).addCommandOutput(anyString(), anyObject());
+    verify(processesPanelPresenter).addCommandOutput(anyObject());
   }
 
   @Test

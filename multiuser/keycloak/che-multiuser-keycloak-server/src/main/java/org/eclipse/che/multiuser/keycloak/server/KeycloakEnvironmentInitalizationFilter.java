@@ -33,7 +33,6 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.api.workspace.server.WorkspaceSubjectRegistry;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -52,18 +51,15 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
   private final UserManager userManager;
   private final RequestTokenExtractor tokenExtractor;
   private final PermissionChecker permissionChecker;
-  private final WorkspaceSubjectRegistry workspaceSubjectRegistry;
 
   @Inject
   public KeycloakEnvironmentInitalizationFilter(
       UserManager userManager,
       RequestTokenExtractor tokenExtractor,
-      PermissionChecker permissionChecker,
-      WorkspaceSubjectRegistry workspaceSubjectRegistry) {
+      PermissionChecker permissionChecker) {
     this.userManager = userManager;
     this.tokenExtractor = tokenExtractor;
     this.permissionChecker = permissionChecker;
-    this.workspaceSubjectRegistry = workspaceSubjectRegistry;
   }
 
   @Override
@@ -95,7 +91,6 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
         subject =
             new AuthorizedSubject(
                 new SubjectImpl(user.getName(), user.getId(), token, false), permissionChecker);
-        workspaceSubjectRegistry.updateSubject(subject);
         session.setAttribute("che_subject", subject);
       } catch (ServerException | ConflictException e) {
         throw new ServletException(
@@ -128,7 +123,24 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
         }
       }
     }
-    return user.get();
+    return actualizeUser(user.get(), email);
+  }
+  /** Performs check that emails in JWT and local DB are match, and synchronize them otherwise */
+  private User actualizeUser(User actualUser, String email) throws ServerException {
+    if (actualUser.getEmail().equals(email)) {
+      return actualUser;
+    }
+    UserImpl update = new UserImpl(actualUser);
+    update.setEmail(email);
+    try {
+      userManager.update(update);
+    } catch (NotFoundException e) {
+      throw new ServerException("Unable to actualize user email. User not found.", e);
+    } catch (ConflictException e) {
+      throw new ServerException(
+          "Unable to actualize user email. Another user with such email exists", e);
+    }
+    return update;
   }
 
   private Optional<User> getUser(String id) throws ServerException {

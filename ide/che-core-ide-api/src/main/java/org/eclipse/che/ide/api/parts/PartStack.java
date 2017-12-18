@@ -27,25 +27,25 @@ public interface PartStack extends Presenter {
   enum State {
 
     /**
-     * The default state when the part stack is visible. Part stack can be minimized, maximized or
-     * collapsed.
+     * The default state when the part stack is visible. Part stack can be maximized, collapsed or
+     * hidden.
      */
     NORMAL,
 
     /**
-     * Part stack is minimized by minimize button. Having this state part stack can not be maximized
-     * or collapsed but only can be restored by clicking the tab button.
+     * Hidden part stack can not be maximized or collapsed. It only can be displayed using show()
+     * methd.
      */
-    MINIMIZED,
+    HIDDEN,
 
-    /** Part stack is maximized. In this state it can be restored or minimized. */
+    /** Part stack is maximized. In this state it can be restored or become hidden. */
     MAXIMIZED,
 
     /**
-     * Part stack is collapsed while one is maximized. The state will be changed on NORMAL after
-     * restoring the perspective.
+     * Part stack is minimized while another one is maximized. The state will be changed to NORMAL
+     * after restoring the perspective.
      */
-    COLLAPSED
+    MINIMIZED
   }
 
   /**
@@ -101,23 +101,23 @@ public interface PartStack extends Presenter {
    */
   State getPartStackState();
 
+  /** Shows the part stack. */
+  void show();
+
+  /** Hides the part stack. */
+  void hide();
+
   /** Maximizes the part stack. */
   void maximize();
 
-  /** Collapses the part stack. The part state will be restored when restoring the perspective. */
-  void collapse();
-
   /**
-   * Minimizes / hides the part stack. The part state will not be retored when restoring the
-   * perspective state.
+   * Minimizes the part stack. The part state can be restored to NORMAL state when restoring the
+   * perspective.
    */
   void minimize();
 
   /** Restores the part stack and the perspective to the default state. */
   void restore();
-
-  /** Displays part menu. */
-  void showPartMenu(int mouseX, int mouseY);
 
   /**
    * Remove given part from PartStack.
@@ -138,6 +138,11 @@ public interface PartStack extends Presenter {
    */
   List<? extends PartPresenter> getParts();
 
+  /**
+   * Sets action delegate.
+   *
+   * @param delegate action delegate
+   */
   void setDelegate(ActionDelegate delegate);
 
   interface ActionDelegate {

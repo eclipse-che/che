@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ext.git.client;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.web.bindery.event.shared.EventBus;
@@ -28,9 +27,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.git.GitServiceClient;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Folder;
@@ -42,6 +38,7 @@ import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -79,7 +76,6 @@ public abstract class BaseTest {
   public static final String WS_ID = "id";
   @Mock protected Project project;
   @Mock protected AppContext appContext;
-  @Mock protected DevMachine devMachine;
   @Mock protected GitServiceClient service;
   @Mock protected GitLocalizationConstant constant;
   @Mock protected GitOutputConsole console;
@@ -154,9 +150,5 @@ public abstract class BaseTest {
     when(throwable.getMessage()).thenReturn("error");
 
     when(project.synchronize()).thenReturn(synchronizePromise);
-
-    DevMachine devMachine = mock(DevMachine.class);
-    when(devMachine.getId()).thenReturn("id");
-    when(appContext.getDevMachine()).thenReturn(devMachine);
   }
 }

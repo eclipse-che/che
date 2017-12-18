@@ -14,20 +14,14 @@
  * Defines a directive for displaying steps of creating project or loading workspace
  * @author Oleksii Kurinnyi
  */
-export class CheStepsContainer {
+export class CheStepsContainer implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor () {
-    this.restrict='E';
-    this.templateUrl = 'components/steps-container/steps-container.html';
+  restrict = 'E';
+  templateUrl = 'components/steps-container/steps-container.html';
 
-    this.scope = {
-      allSteps: '=cheAllSteps',
-      currentStep: '=cheCurrentStep'
-    }
-  }
+  scope = {
+    allSteps: '=cheAllSteps',
+    currentStep: '=cheCurrentStep'
+  };
 
 }

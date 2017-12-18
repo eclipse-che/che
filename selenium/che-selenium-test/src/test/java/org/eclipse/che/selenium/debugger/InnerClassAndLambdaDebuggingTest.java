@@ -100,7 +100,7 @@ public class InnerClassAndLambdaDebuggingTest {
     commandsPalette.startCommandByDoubleClick(BUILD_AND_DEBUG_COMMAND_NAME);
     consoles.waitExpectedTextIntoConsole(TestBuildConstants.LISTENING_AT_ADDRESS_8000);
     // set breakpoints
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(41);
     editor.setInactiveBreakpoint(41);
     menu.runCommandByXpath(
@@ -140,7 +140,6 @@ public class InnerClassAndLambdaDebuggingTest {
 
     // then
     editor.waitActiveBreakpoint(53);
-    debugPanel.waitTextInVariablesPanel("methodValue=\"App method local inner test\"");
   }
 
   @Test(priority = 2)

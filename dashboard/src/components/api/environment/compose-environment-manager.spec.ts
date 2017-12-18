@@ -32,16 +32,25 @@ describe('ComposeEnvironmentManager', () => {
           'another-machine': {
             'attributes': {'memoryLimitBytes': '2147483648'},
             'servers': {},
-            'agents': []
+            'volumes': {},
+            'installers': []
           },
-          'db': {'attributes': {}, 'servers': {}, 'agents': []},
+          'db': {
+            'attributes': {},
+            'servers': {},
+            'volumes': {},
+            'installers': []
+          },
           'dev-machine': {
             'attributes': {'memoryLimitBytes': '5368709120'},
             'servers': {
-              '1024/tcp': {'port': '1024', 'properties': {}, 'protocol': 'http'},
-              '1025/tcp': {'port': '1025', 'properties': {}, 'protocol': 'http'}
+              '1024/tcp': {'port': '1024', 'properties': {}, 'protocol': 'http', 'path': ''},
+              '1025/tcp': {'port': '1025', 'properties': {}, 'protocol': 'http', 'path': ''}
             },
-            'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+            'volumes': {
+              'volume1': {'path': '/some/path'},
+            },
+            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
           }
         },
         'recipe': {
@@ -90,16 +99,21 @@ describe('ComposeEnvironmentManager', () => {
           'another-machine': {
             'attributes': {'memoryLimitBytes': '2147483648'},
             'servers': {},
-            'agents': []
+            'volumes': {},
+            'installers': []
           },
-          'db': {'attributes': {}, 'servers': {}, 'agents': []},
+          'db': {'attributes': {}, 'servers': {}, 'volumes': {}, 'installers': []},
           'dev-machine': {
             'attributes': {'memoryLimitBytes': '5368709120'},
             'servers': {
-              '1024/tcp': {'port': '1024', 'properties': {}, 'protocol': 'http'},
-              '1025/tcp': {'port': '1025', 'properties': {}, 'protocol': 'http'}
+              '1024/tcp': {'port': '1024', 'properties': {}, 'protocol': 'http', 'path': ''},
+              '1025/tcp': {'port': '1025', 'properties': {}, 'protocol': 'http', 'path': ''}
             },
-            'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+            'volumes': {
+              'vol1': {'path': '/some/path'},
+              'm22': {'path': '/home/user/.m2/repository'}
+            },
+            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
           }
         },
         'recipe': {
@@ -181,7 +195,8 @@ describe('ComposeEnvironmentManager', () => {
         'machines': {
           'dev-machine': {
             'servers': {},
-            'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh'],
+            'volumes': {},
+            'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh'],
             'attributes': {'memoryLimitBytes': '2147483648'}
           }
         },

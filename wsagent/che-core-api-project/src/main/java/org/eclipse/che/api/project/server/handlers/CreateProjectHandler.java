@@ -13,14 +13,14 @@ package org.eclipse.che.api.project.server.handlers;
 import java.util.Map;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.type.AttributeValue;
-import org.eclipse.che.api.vfs.Path;
 
 /** @author gazarenkov */
 public interface CreateProjectHandler extends ProjectHandler {
 
   void onCreateProject(
-      Path projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
-      throws ForbiddenException, ConflictException, ServerException;
+      String projectWsPath, Map<String, AttributeValue> attributes, Map<String, String> options)
+      throws ForbiddenException, ConflictException, ServerException, NotFoundException;
 }

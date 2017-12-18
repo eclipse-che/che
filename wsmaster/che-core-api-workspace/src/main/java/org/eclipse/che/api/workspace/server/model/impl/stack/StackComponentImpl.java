@@ -16,7 +16,7 @@ import javax.persistence.Embeddable;
 import org.eclipse.che.api.workspace.shared.stack.StackComponent;
 
 /**
- * Server implementation of {@link StackComponent}
+ * OldServer implementation of {@link StackComponent}
  *
  * @author Alexander Andrienko
  */

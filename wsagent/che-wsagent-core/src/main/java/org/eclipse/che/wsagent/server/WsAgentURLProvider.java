@@ -11,16 +11,16 @@
 package org.eclipse.che.wsagent.server;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 
 import java.io.IOException;
-import java.util.Collection;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.machine.shared.dto.ServerDto;
+import org.eclipse.che.api.workspace.shared.dto.MachineDto;
+import org.eclipse.che.api.workspace.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,12 +60,10 @@ public class WsAgentURLProvider implements Provider<String> {
                 .request()
                 .asDto(WorkspaceDto.class);
         if (workspace.getRuntime() != null) {
-          final Collection<ServerDto> servers =
-              workspace.getRuntime().getDevMachine().getRuntime().getServers().values();
-          for (ServerDto server : servers) {
-            if (WSAGENT_REFERENCE.equals(server.getRef())) {
-              cachedAgentUrl = server.getUrl();
-              return cachedAgentUrl;
+          for (MachineDto machine : workspace.getRuntime().getMachines().values()) {
+            ServerDto wsAgent = machine.getServers().get(SERVER_WS_AGENT_HTTP_REFERENCE);
+            if (wsAgent != null) {
+              cachedAgentUrl = wsAgent.getUrl();
             }
           }
         }

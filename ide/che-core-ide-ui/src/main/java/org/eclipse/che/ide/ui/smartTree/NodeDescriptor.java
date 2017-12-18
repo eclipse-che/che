@@ -14,8 +14,8 @@ import com.google.gwt.dom.client.Element;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.eclipse.che.ide.api.data.tree.MutableNode;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.ui.smartTree.data.MutableNode;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * Node descriptor. Uses internally in the tree.

@@ -21,13 +21,6 @@ import javax.validation.constraints.NotNull;
 public interface ThemeAgent {
 
   /**
-   * Add new Theme
-   *
-   * @param theme the theme
-   */
-  void addTheme(@NotNull Theme theme);
-
-  /**
    * @param themeId the id of the theme
    * @return theme with theme id or default theme if theme not found
    */
@@ -42,7 +35,4 @@ public interface ThemeAgent {
 
   /** @return current theme */
   String getCurrentThemeId();
-
-  /** @param id */
-  void setCurrentThemeId(String id);
 }

@@ -100,12 +100,6 @@ public class Git {
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
-  /** click on git-info panel tab, wait while info panel will open */
-  public void openGitInfoPanel() {
-    gitStatusBar.clickOnGitStatusBarTab();
-    gitStatusBar.waitGitStatusBarInfoPanel();
-  }
-
   /** click on git-info panel tab, wait while info panel will close */
   public void closeGitInfoPanel() {
     gitStatusBar.clickOnStatusBarMinimizeBtn();
@@ -160,6 +154,25 @@ public class Git {
     gitBranchesForm.waitBranchesForm();
     gitBranchesForm.waitBranchWithNameCheckoutState(nameOfTheBranch);
     loader.waitOnClosed();
+  }
+
+  /**
+   * wait for the branch search filter label to be with given text.
+   *
+   * @param text text to check
+   */
+  public void waitBranchSearchFilerWithText(String text) {
+    gitBranchesForm.waitBranchesForm();
+    gitBranchesForm.waitSearchFilerWithText(text);
+  }
+
+  /**
+   * Type text to the branch search filter.
+   *
+   * @param text typed text
+   */
+  public void typeToBranchSearchFilter(String text) {
+    gitBranchesForm.typeSearchFilter(text);
   }
 
   /** click on Close button and wait while form will be closed */
@@ -799,6 +812,16 @@ public class Git {
     stream(itemName).forEach(gitCommit::waitItemCheckBoxToBeUnSelected);
   }
 
+  /**
+   * Wait for item check-box in the 'Git changed files tree panel' in 'Commit' window to be
+   * indeterminate.
+   *
+   * @param itemName name of the item
+   */
+  public void waitItemCheckBoxToBeIndeterminateInCommitWindow(String... itemName) {
+    stream(itemName).forEach(gitCommit::waitItemCheckBoxToBeIndeterminate);
+  }
+
   /** Wait 'Reset to commit' window is open */
   public void waitResetWindowOpen() {
     gitReset.waitOpen();
@@ -929,7 +952,22 @@ public class Git {
     projectWizard.selectTypeProject(typeProject);
     loader.waitOnClosed();
     projectWizard.clickSaveButton();
-    mavenPluginStatusBar.waitExpectedTextInInfoPanel(expectedMessage);
+    loader.waitOnClosed();
+    projectWizard.waitCreateProjectWizardFormIsClosed();
+    projectExplorer.waitItem(nameApp);
+    loader.waitOnClosed();
+  }
+
+  public void importJavaAppAndCheckMavenPluginBar(String url, String nameApp, String typeProject) {
+    loader.waitOnClosed();
+    menu.runCommand(
+        TestMenuCommandsConstants.Workspace.WORKSPACE,
+        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
+    importProject.waitAndTypeImporterAsGitInfo(url, nameApp);
+    projectWizard.waitCreateProjectWizardForm();
+    projectWizard.selectTypeProject(typeProject);
+    loader.waitOnClosed();
+    projectWizard.clickSaveButton();
     loader.waitOnClosed();
     projectWizard.waitCreateProjectWizardFormIsClosed();
     projectExplorer.waitItem(nameApp);

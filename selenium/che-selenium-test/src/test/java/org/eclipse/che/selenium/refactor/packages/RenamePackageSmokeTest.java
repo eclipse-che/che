@@ -69,7 +69,7 @@ public class RenamePackageSmokeTest {
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test0/r/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextNotPresentIntoEditor(TEST0_P1_OUT);
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test0/r");
     menu.runCommand(

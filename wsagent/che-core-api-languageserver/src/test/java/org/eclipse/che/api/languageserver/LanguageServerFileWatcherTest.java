@@ -25,7 +25,7 @@ import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
 import org.eclipse.che.api.languageserver.registry.LanguageServerFileWatcher;
 import org.eclipse.che.api.languageserver.registry.ServerInitializer;
 import org.eclipse.che.api.languageserver.registry.ServerInitializerObserver;
-import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
+import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.WorkspaceService;
 import org.mockito.ArgumentCaptor;

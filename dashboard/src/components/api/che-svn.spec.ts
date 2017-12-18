@@ -9,6 +9,9 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheWorkspace} from './workspace/che-workspace.factory';
+import {CheAPIBuilder} from './builder/che-api-builder.factory';
+import {CheHttpBackend} from './test/che-http-backend';
 
 /**
  * Test of the CheSvn
@@ -16,26 +19,21 @@
 describe('CheSvn', function () {
 
   /**
-   * User Factory for the test
-   */
-  var factory;
-
-  /**
    * API builder.
    */
-  var apiBuilder;
+  let apiBuilder;
 
-  var workspace;
+  let workspace;
 
   /**
    * Backend for handling http operations
    */
-  var httpBackend;
+  let httpBackend;
 
   /**
    * Che backend
    */
-  var cheBackend;
+  let cheBackend;
 
   /**
    *  setup module
@@ -45,7 +43,9 @@ describe('CheSvn', function () {
   /**
    * Inject factory and http backend
    */
-  beforeEach(inject(function (cheWorkspace, cheAPIBuilder, cheHttpBackend) {
+  beforeEach(inject(function (cheWorkspace: CheWorkspace,
+                              cheAPIBuilder: CheAPIBuilder,
+                              cheHttpBackend: CheHttpBackend) {
     workspace = cheWorkspace;
     apiBuilder = cheAPIBuilder;
     cheBackend = cheHttpBackend;
@@ -64,52 +64,59 @@ describe('CheSvn', function () {
   /**
    * Check that we're able to fetch remote svn url
    */
-  it('Fetch remote svn url', function () {
-      // setup tests objects
-      let agentUrl = 'localhost:3232/wsagent/ext';
-      let workspaceId = 'workspace456test';
-      let projectPath = '/testSvnProject';
-      let remoteSvnUrl = 'https://svn.apache.org' + projectPath;
-      let agentWsUrl = 'ws://localhost:3232/wsagent/ws';
-      let devMachine = {'links': [{'href': agentWsUrl, 'rel': 'wsagent.websocket'}]};
-      let runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}], 'devMachine': devMachine};
-      let workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
+  it('Fetch remote svn url', () => {
+    // setup tests objects
+    const workspaceId = 'workspace456test';
+    const projectPath = '/testSvnProject';
+    const remoteSvnUrl = 'https://svn.apache.org' + projectPath;
+    const agentUrl = 'http://172.17.0.1:33441/api';
+    const agentWsUrl = 'ws://172.17.0.1:33441/wsagent';
+    const runtime = {
+      'links': [{'rel': 'wsagent', 'href': agentUrl}],
+      'machines': {
+        'dev-machine': {
+          'servers': {
+            'wsagent/ws': {'url': agentWsUrl},
+            'wsagent/http': {'url': agentUrl}
+          }
+        }
+      }
+    };
 
-      cheBackend.addWorkspaces([workspace1]);
+    cheBackend.addWorkspaces([apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build()]);
 
-      // providing request
-      // add test remote svn url on http backend
-      cheBackend.addRemoteSvnUrl(workspaceId, encodeURIComponent(projectPath), remoteSvnUrl);
+    // providing request
+    // add test remote svn url on http backend
+    cheBackend.addRemoteSvnUrl(workspaceId, encodeURIComponent(projectPath), remoteSvnUrl);
 
-      // setup backend
-      cheBackend.setup();
+    // setup backend
+    cheBackend.setup();
 
-      workspace.fetchWorkspaceDetails(workspaceId);
-      httpBackend.expectGET('/api/workspace/' + workspaceId);
+    workspace.fetchWorkspaceDetails(workspaceId);
+    httpBackend.expectGET('/api/workspace/' + workspaceId);
 
-      // flush command
-      httpBackend.flush();
+    // flush command
+    httpBackend.flush();
 
-      var factory = workspace.getWorkspaceAgent(workspaceId).getSvn();
+    const factory = workspace.getWorkspaceAgent(workspaceId).getSvn();
 
-      cheBackend.getRemoteSvnUrl(workspaceId, encodeURIComponent(projectPath));
+    cheBackend.getRemoteSvnUrl(workspaceId, encodeURIComponent(projectPath));
 
-      // fetch remote url
-      factory.fetchRemoteUrl(workspaceId, projectPath);
+    // fetch remote url
+    factory.fetchRemoteUrl(workspaceId, projectPath);
 
-      // expecting POST
-      httpBackend.expectPOST(agentUrl + '/svn/info?workspaceId='+workspaceId);
+    // expecting POST
+    httpBackend.expectPOST(agentUrl + '/svn/info?workspaceId=' + workspaceId);
 
-      // flush command
-      httpBackend.flush();
+    // flush command
+    httpBackend.flush();
 
-      // now, check
-      var repo = factory.getRemoteUrlByKey(workspaceId, projectPath);
+    // now, check
+    const repo = factory.getRemoteUrlByKey(workspaceId, projectPath);
 
-      // check local url
-      expect(remoteSvnUrl).toEqual(repo.url);
-    }
-  );
+    // check local url
+    expect(remoteSvnUrl).toEqual(repo.url);
+  });
 
 
 });

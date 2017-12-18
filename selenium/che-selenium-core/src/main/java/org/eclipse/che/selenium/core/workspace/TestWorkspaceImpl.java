@@ -13,12 +13,12 @@ package org.eclipse.che.selenium.core.workspace;
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.workspace.MemoryMeasure.GB;
 
-import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.slf4j.Logger;
@@ -38,8 +38,11 @@ public class TestWorkspaceImpl implements TestWorkspace {
       String name,
       TestUser owner,
       int memoryInGB,
-      String template,
+      WorkspaceConfigDto template,
       TestWorkspaceServiceClient testWorkspaceServiceClient) {
+    if (template == null) {
+      throw new IllegalStateException("Workspace template cannot be null");
+    }
     this.name = name;
     this.owner = owner;
     this.id = new AtomicReference<>();
@@ -48,20 +51,17 @@ public class TestWorkspaceImpl implements TestWorkspace {
     this.future =
         CompletableFuture.runAsync(
             () -> {
-              URL resource =
-                  TestWorkspaceImpl.class.getResource("/templates/workspace/" + template);
-              if (resource == null) {
-                throw new IllegalStateException(
-                    format("Workspace template '%s' not found", template));
-              }
-
               try {
-                final Workspace ws =
-                    workspaceServiceClient.createWorkspace(
-                        name, memoryInGB, GB, resource.getPath());
 
+                final Workspace ws =
+                    workspaceServiceClient.createWorkspace(name, memoryInGB, GB, template);
+                long start = System.currentTimeMillis();
                 workspaceServiceClient.start(id.updateAndGet((s) -> ws.getId()), name, owner);
-                LOG.info("Workspace name='{}' id='{}' started.", name, ws.getId());
+                LOG.info(
+                    "Workspace name='{}' id='{}' started in {} sec.",
+                    name,
+                    ws.getId(),
+                    (System.currentTimeMillis() - start) / 1000);
               } catch (Exception e) {
                 String errorMessage = format("Workspace name='%s' start failed.", name);
                 LOG.error(errorMessage, e);

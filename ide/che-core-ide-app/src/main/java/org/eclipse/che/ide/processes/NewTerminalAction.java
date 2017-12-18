@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.ide.processes;
 
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -46,7 +46,6 @@ public class NewTerminalAction extends AbstractPerspectiveAction
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         locale.newTerminal(),
         locale.newTerminalDescription(),
-        null,
         machineResources.addTerminalIcon());
 
     this.processesPanelPresenter = processesPanelPresenter;
@@ -71,7 +70,7 @@ public class NewTerminalAction extends AbstractPerspectiveAction
     }
 
     if (ProcessTreeNode.ProcessNodeType.MACHINE_NODE == node.getType()) {
-      event.getPresentation().setEnabled(node.hasTerminalAgent());
+      event.getPresentation().setEnabled(node.isTerminalServerRunning());
       return;
     }
 

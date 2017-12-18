@@ -10,31 +10,22 @@
  */
 package org.eclipse.che.api.project.server;
 
-import static org.eclipse.che.api.project.server.DtoConverter.asDto;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_BATCH_PROJECTS;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_PROJECT;
 import static org.eclipse.che.api.project.shared.Constants.LINK_REL_GET_PROJECTS;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -46,57 +37,33 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.apache.commons.fileupload.FileItem;
-import org.apache.tika.Tika;
-import org.eclipse.che.WorkspaceIdProvider;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
-import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.core.model.project.type.Value;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.rest.Service;
+import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.core.rest.annotations.Description;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
-import org.eclipse.che.api.core.util.CompositeLineConsumer;
-import org.eclipse.che.api.project.server.importer.ProjectImportOutputJsonRpcLineConsumer;
-import org.eclipse.che.api.project.server.importer.ProjectImportOutputJsonRpcRegistrar;
-import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
-import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
-import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
+import org.eclipse.che.api.project.server.impl.ProjectServiceApi;
+import org.eclipse.che.api.project.server.impl.ProjectServiceApiFactory;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
-import org.eclipse.che.api.project.shared.dto.ProjectSearchRequestDto;
+import org.eclipse.che.api.project.shared.dto.NewProjectConfigDto;
 import org.eclipse.che.api.project.shared.dto.ProjectSearchResponseDto;
-import org.eclipse.che.api.project.shared.dto.SearchOccurrenceDto;
-import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
-import org.eclipse.che.api.vfs.VirtualFile;
-import org.eclipse.che.api.vfs.search.QueryExpression;
-import org.eclipse.che.api.vfs.search.SearchResult;
-import org.eclipse.che.api.vfs.search.SearchResultEntry;
-import org.eclipse.che.api.vfs.search.Searcher;
-import org.eclipse.che.api.vfs.search.impl.LuceneSearcher;
-import org.eclipse.che.api.workspace.shared.dto.NewProjectConfigDto;
+import org.eclipse.che.api.search.server.SearchResult;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
-import org.eclipse.che.dto.server.DtoFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Project API.
@@ -110,33 +77,38 @@ import org.slf4j.LoggerFactory;
 @Api(value = "/project", description = "Project REST API")
 @Path("/project")
 @Singleton
-public class ProjectService extends Service {
-  private static final Logger LOG = LoggerFactory.getLogger(ProjectService.class);
-  private static Tika TIKA;
+public class ProjectService {
 
-  private final ProjectManager projectManager;
-  private final EventService eventService;
-  private final ProjectServiceLinksInjector projectServiceLinksInjector;
-  private final ProjectServiceVcsStatusInjector vcsStatusInjector;
-  private final RequestTransmitter transmitter;
-  private final ProjectImportOutputJsonRpcRegistrar projectImportHandlerRegistrar;
-  private final String workspace;
+  @Context protected UriInfo uriInfo;
+
+  private final ProjectServiceApiFactory projectServiceApiFactory;
+  private ProjectServiceApi projectServiceApi;
 
   @Inject
-  public ProjectService(
-      ProjectManager projectManager,
-      EventService eventService,
-      ProjectServiceLinksInjector projectServiceLinksInjector,
-      ProjectServiceVcsStatusInjector vcsStatusInjector,
-      RequestTransmitter transmitter,
-      ProjectImportOutputJsonRpcRegistrar projectImportHandlerRegistrar) {
-    this.projectManager = projectManager;
-    this.eventService = eventService;
-    this.projectServiceLinksInjector = projectServiceLinksInjector;
-    this.vcsStatusInjector = vcsStatusInjector;
-    this.transmitter = transmitter;
-    this.projectImportHandlerRegistrar = projectImportHandlerRegistrar;
-    this.workspace = WorkspaceIdProvider.getWorkspaceId();
+  public ProjectService(ProjectServiceApiFactory projectServiceApiFactory) {
+    this.projectServiceApiFactory = projectServiceApiFactory;
+  }
+
+  private ProjectServiceApi getProjectServiceApi() {
+    if (projectServiceApi == null) {
+      UriBuilder baseUriBuilder = uriInfo.getBaseUriBuilder();
+
+      projectServiceApi =
+          projectServiceApiFactory.create(
+              new ServiceContext() {
+                @Override
+                public UriBuilder getServiceUriBuilder() {
+                  return baseUriBuilder.clone().path(getClass());
+                }
+
+                @Override
+                public UriBuilder getBaseUriBuilder() {
+                  return uriInfo.getBaseUriBuilder().clone();
+                }
+              });
+    }
+
+    return projectServiceApi;
   }
 
   @GET
@@ -153,11 +125,8 @@ public class ProjectService extends Service {
   @GenerateLink(rel = LINK_REL_GET_PROJECTS)
   public List<ProjectConfigDto> getProjects()
       throws IOException, ServerException, ConflictException, ForbiddenException {
-    return projectManager
-        .getProjects()
-        .stream()
-        .map(p -> injectProjectLinks(asDto(p)))
-        .collect(Collectors.toList());
+
+    return getProjectServiceApi().getProjects();
   }
 
   @GET
@@ -175,9 +144,10 @@ public class ProjectService extends Service {
   })
   public ProjectConfigDto getProject(
       @ApiParam(value = "Path to requested project", required = true) @PathParam("path")
-          String path)
+          String wsPath)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
-    return injectProjectLinks(asDto(projectManager.getProject(path)));
+
+    return getProjectServiceApi().getProject(wsPath);
   }
 
   @POST
@@ -191,36 +161,13 @@ public class ProjectService extends Service {
     @ApiResponse(code = 500, message = "Server error")
   })
   @GenerateLink(rel = LINK_REL_CREATE_PROJECT)
-  /** NOTE: parentPath is added to make a module */
   public ProjectConfigDto createProject(
-      @ApiParam(value = "Add to this project as module", required = false) @Context UriInfo uriInfo,
+      @ApiParam(value = "Add to this project as module") @Context UriInfo uriInfo,
       @Description("descriptor of project") ProjectConfigDto projectConfig)
-      throws ConflictException, ForbiddenException, ServerException, NotFoundException {
-    Map<String, String> options = new HashMap<>();
-    MultivaluedMap<String, String> map = uriInfo.getQueryParameters();
-    for (String key : map.keySet()) {
-      options.put(key, map.get(key).get(0));
-    }
-    String pathToProject = projectConfig.getPath();
-    String pathToParent = pathToProject.substring(0, pathToProject.lastIndexOf("/"));
+      throws ConflictException, ForbiddenException, ServerException, NotFoundException,
+          BadRequestException {
 
-    if (!pathToParent.equals("/")) {
-      VirtualFileEntry parentFileEntry = projectManager.getProjectsRoot().getChild(pathToParent);
-      if (parentFileEntry == null) {
-        throw new NotFoundException(
-            "The parent folder with path " + pathToParent + " does not exist.");
-      }
-    }
-
-    final RegisteredProject project = projectManager.createProject(projectConfig, options);
-    final ProjectConfigDto configDto = asDto(project);
-
-    eventService.publish(new ProjectCreatedEvent(workspace, project.getPath()));
-
-    // TODO this throws NPE
-    // logProjectCreatedEvent(configDto.getName(), configDto.getProjectType());
-
-    return injectProjectLinks(configDto);
+    return getProjectServiceApi().createProject(uriInfo, projectConfig);
   }
 
   @POST
@@ -243,27 +190,15 @@ public class ProjectService extends Service {
   })
   @GenerateLink(rel = LINK_REL_CREATE_BATCH_PROJECTS)
   public List<ProjectConfigDto> createBatchProjects(
-      @Description("list of descriptors for projects") List<NewProjectConfigDto> projectConfigList,
+      @Description("list of descriptors for projects") List<NewProjectConfigDto> projectConfigs,
       @ApiParam(value = "Force rewrite existing project", allowableValues = "true,false")
           @QueryParam("force")
-          boolean rewrite)
+          boolean rewrite,
+      @QueryParam("clientId") String clientId)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException, IOException,
           UnauthorizedException, BadRequestException {
 
-    List<ProjectConfigDto> result = new ArrayList<>(projectConfigList.size());
-    final ProjectOutputLineConsumerFactory outputOutputConsumerFactory =
-        new ProjectOutputLineConsumerFactory(workspace, 300);
-
-    for (RegisteredProject registeredProject :
-        projectManager.createBatchProjects(
-            projectConfigList, rewrite, outputOutputConsumerFactory)) {
-
-      ProjectConfigDto projectConfig = injectProjectLinks(asDto(registeredProject));
-      result.add(projectConfig);
-
-      eventService.publish(new ProjectCreatedEvent(workspace, registeredProject.getPath()));
-    }
-    return result;
+    return getProjectServiceApi().createBatchProjects(projectConfigs, rewrite, clientId);
   }
 
   @PUT
@@ -279,15 +214,13 @@ public class ProjectService extends Service {
     @ApiResponse(code = 500, message = "Server error")
   })
   public ProjectConfigDto updateProject(
-      @ApiParam(value = "Path to updated project", required = true) @PathParam("path") String path,
+      @ApiParam(value = "Path to updated project", required = true) @PathParam("path")
+          String wsPath,
       ProjectConfigDto projectConfigDto)
-      throws NotFoundException, ConflictException, ForbiddenException, ServerException,
-          IOException {
-    if (path != null) {
-      projectConfigDto.setPath(path);
-    }
+      throws NotFoundException, ConflictException, ForbiddenException, ServerException, IOException,
+          BadRequestException {
 
-    return asDto(projectManager.updateProject(projectConfigDto));
+    return getProjectServiceApi().updateProject(wsPath, projectConfigDto);
   }
 
   @DELETE
@@ -304,9 +237,10 @@ public class ProjectService extends Service {
     @ApiResponse(code = 404, message = "Not found"),
     @ApiResponse(code = 500, message = "Internal Server Error")
   })
-  public void delete(@ApiParam("Path to a resource to be deleted") @PathParam("path") String path)
+  public void delete(@ApiParam("Path to a resource to be deleted") @PathParam("path") String wsPath)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
-    projectManager.delete(path);
+
+    getProjectServiceApi().delete(wsPath);
   }
 
   @GET
@@ -324,22 +258,12 @@ public class ProjectService extends Service {
   })
   public SourceEstimation estimateProject(
       @ApiParam(value = "Path to requested project", required = true) @PathParam("path")
-          String path,
+          String wsPath,
       @ApiParam(value = "Project Type ID to estimate against", required = true) @QueryParam("type")
           String projectType)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
-    final ProjectTypeResolution resolution = projectManager.estimateProject(path, projectType);
 
-    final HashMap<String, List<String>> attributes = new HashMap<>();
-    for (Map.Entry<String, Value> attr : resolution.getProvidedAttributes().entrySet()) {
-      attributes.put(attr.getKey(), attr.getValue().getList());
-    }
-
-    return DtoFactory.newDto(SourceEstimation.class)
-        .withType(projectType)
-        .withMatched(resolution.matched())
-        .withResolution(resolution.getResolution())
-        .withAttributes(attributes);
+    return getProjectServiceApi().estimateProject(wsPath, projectType);
   }
 
   @GET
@@ -347,24 +271,10 @@ public class ProjectService extends Service {
   @Produces(MediaType.APPLICATION_JSON)
   public List<SourceEstimation> resolveSources(
       @ApiParam(value = "Path to requested project", required = true) @PathParam("path")
-          String path)
+          String wsPath)
       throws NotFoundException, ForbiddenException, ServerException, ConflictException {
-    List<SourceEstimation> estimations = new ArrayList<>();
-    for (ProjectTypeResolution resolution : projectManager.resolveSources(path, false)) {
-      if (resolution.matched()) {
-        final HashMap<String, List<String>> attributes = new HashMap<>();
-        for (Map.Entry<String, Value> attr : resolution.getProvidedAttributes().entrySet()) {
-          attributes.put(attr.getKey(), attr.getValue().getList());
-        }
-        estimations.add(
-            DtoFactory.newDto(SourceEstimation.class)
-                .withType(resolution.getType())
-                .withMatched(resolution.matched())
-                .withAttributes(attributes));
-      }
-    }
 
-    return estimations;
+    return getProjectServiceApi().resolveSources(wsPath);
   }
 
   @POST
@@ -385,28 +295,16 @@ public class ProjectService extends Service {
     @ApiResponse(code = 500, message = "Unsupported source type")
   })
   public void importProject(
-      @ApiParam(value = "Path in the project", required = true) @PathParam("path") String path,
+      @ApiParam(value = "Path in the project", required = true) @PathParam("path") String wsPath,
       @ApiParam(value = "Force rewrite existing project", allowableValues = "true,false")
           @QueryParam("force")
           boolean force,
+      @QueryParam("clientId") String clientId,
       SourceStorageDto sourceStorage)
       throws ConflictException, ForbiddenException, UnauthorizedException, IOException,
           ServerException, NotFoundException, BadRequestException {
 
-    final int delayBetweenMessages = 300;
-
-    final ProjectImportOutputWSLineConsumer wsLineConsumer =
-        new ProjectImportOutputWSLineConsumer(path, delayBetweenMessages);
-
-    final ProjectImportOutputJsonRpcLineConsumer rpcLineConsumer =
-        new ProjectImportOutputJsonRpcLineConsumer(
-            path, transmitter, projectImportHandlerRegistrar, delayBetweenMessages);
-
-    projectManager.importProject(
-        path,
-        sourceStorage,
-        force,
-        () -> new CompositeLineConsumer(wsLineConsumer, rpcLineConsumer));
+    getProjectServiceApi().importProject(wsPath, force, clientId, sourceStorage);
   }
 
   @POST
@@ -427,35 +325,12 @@ public class ProjectService extends Service {
   })
   public Response createFile(
       @ApiParam(value = "Path to a target directory", required = true) @PathParam("parent")
-          String parentPath,
+          String parentWsPath,
       @ApiParam(value = "New file name", required = true) @QueryParam("name") String fileName,
       InputStream content)
       throws NotFoundException, ConflictException, ForbiddenException, ServerException {
-    final FolderEntry parent = projectManager.asFolder(parentPath);
 
-    if (parent == null) {
-      throw new NotFoundException("Parent not found for " + parentPath);
-    }
-
-    final FileEntry newFile = parent.createFile(fileName, content);
-
-    eventService.publish(
-        new ProjectItemModifiedEvent(
-            ProjectItemModifiedEvent.EventType.CREATED,
-            workspace,
-            newFile.getProject(),
-            newFile.getPath().toString(),
-            false));
-
-    final URI location =
-        getServiceContext()
-            .getServiceUriBuilder()
-            .clone()
-            .path(getClass(), "getFile")
-            .build(new String[] {newFile.getPath().toString().substring(1)}, false);
-    return Response.created(location)
-        .entity(injectFileLinks(vcsStatusInjector.injectVcsStatus(asDto(newFile))))
-        .build();
+    return getProjectServiceApi().createFile(parentWsPath, fileName, content);
   }
 
   @POST
@@ -471,25 +346,10 @@ public class ProjectService extends Service {
   })
   public Response createFolder(
       @ApiParam(value = "Path to a new folder destination", required = true) @PathParam("path")
-          String path)
+          String wsPath)
       throws ConflictException, ForbiddenException, ServerException, NotFoundException {
-    final FolderEntry newFolder = projectManager.getProjectsRoot().createFolder(path);
-    final URI location =
-        getServiceContext()
-            .getServiceUriBuilder()
-            .clone()
-            .path(getClass(), "getChildren")
-            .build(new String[] {newFolder.getPath().toString().substring(1)}, false);
 
-    eventService.publish(
-        new ProjectItemModifiedEvent(
-            ProjectItemModifiedEvent.EventType.CREATED,
-            workspace,
-            newFolder.getProject(),
-            newFolder.getPath().toString(),
-            true));
-
-    return Response.created(location).entity(injectFolderLinks(asDto(newFolder))).build();
+    return getProjectServiceApi().createFolder(wsPath);
   }
 
   @POST
@@ -505,16 +365,12 @@ public class ProjectService extends Service {
     @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public Response uploadFile(
-      @ApiParam(value = "Destination path", required = true) @PathParam("parent") String parentPath,
+      @ApiParam(value = "Destination path", required = true) @PathParam("parent")
+          String parentWsPath,
       Iterator<FileItem> formData)
       throws NotFoundException, ConflictException, ForbiddenException, ServerException {
-    final FolderEntry parent = projectManager.asFolder(parentPath);
 
-    if (parent == null) {
-      throw new NotFoundException("Parent not found for " + parentPath);
-    }
-
-    return uploadFile(parent.getVirtualFile(), formData);
+    return getProjectServiceApi().uploadFile(parentWsPath, formData);
   }
 
   @POST
@@ -535,16 +391,11 @@ public class ProjectService extends Service {
     @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public Response uploadFolderFromZip(
-      @ApiParam(value = "Path in the project", required = true) @PathParam("path") String path,
+      @ApiParam(value = "Path in the project", required = true) @PathParam("path") String wsPath,
       Iterator<FileItem> formData)
       throws ServerException, ConflictException, ForbiddenException, NotFoundException {
-    final FolderEntry parent = projectManager.asFolder(path);
 
-    if (parent == null) {
-      throw new NotFoundException("Parent not found for " + path);
-    }
-
-    return uploadZip(parent.getVirtualFile(), formData);
+    return getProjectServiceApi().uploadFolderFromZip(wsPath, formData);
   }
 
   @ApiOperation(value = "Get file content", notes = "Get file content by its name")
@@ -557,16 +408,11 @@ public class ProjectService extends Service {
   @GET
   @Path("/file/{path:.*}")
   public Response getFile(
-      @ApiParam(value = "Path to a file", required = true) @PathParam("path") String path)
-      throws IOException, NotFoundException, ForbiddenException, ServerException {
-    final FileEntry file = projectManager.asFile(path);
-    if (file == null) {
-      throw new NotFoundException("File not found for " + path);
-    }
-    return Response.ok()
-        .entity(file.getInputStream())
-        .type(getTIKA().detect(file.getName()))
-        .build();
+      @ApiParam(value = "Path to a file", required = true) @PathParam("path") String wsPath)
+      throws IOException, NotFoundException, ForbiddenException, ServerException,
+          ConflictException {
+
+    return getProjectServiceApi().getFile(wsPath);
   }
 
   @PUT
@@ -580,26 +426,11 @@ public class ProjectService extends Service {
     @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public Response updateFile(
-      @ApiParam(value = "Full path to a file", required = true) @PathParam("path") String path,
+      @ApiParam(value = "Full path to a file", required = true) @PathParam("path") String wsPath,
       InputStream content)
-      throws NotFoundException, ForbiddenException, ServerException {
-    final FileEntry file = projectManager.asFile(path);
+      throws NotFoundException, ForbiddenException, ServerException, ConflictException {
 
-    if (file == null) {
-      throw new NotFoundException("File not found for " + path);
-    }
-
-    file.updateContent(content);
-
-    eventService.publish(
-        new ProjectItemModifiedEvent(
-            ProjectItemModifiedEvent.EventType.UPDATED,
-            workspace,
-            file.getProject(),
-            file.getPath().toString(),
-            false));
-
-    return Response.ok().build();
+    return getProjectServiceApi().updateFile(wsPath, content);
   }
 
   @POST
@@ -617,45 +448,13 @@ public class ProjectService extends Service {
     @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public Response copy(
-      @ApiParam("Path to a resource") @PathParam("path") String path,
+      @ApiParam("Path to a resource") @PathParam("path") String wsPath,
       @ApiParam(value = "Path to a new location", required = true) @QueryParam("to")
-          String newParent,
+          String newParentWsPath,
       CopyOptions copyOptions)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
-    final VirtualFileEntry entry = projectManager.asVirtualFileEntry(path);
 
-    // used to indicate over write of destination
-    boolean isOverWrite = false;
-    // used to hold new name set in request body
-    String newName = entry.getName();
-    if (copyOptions != null) {
-      if (copyOptions.getOverWrite() != null) {
-        isOverWrite = copyOptions.getOverWrite();
-      }
-      if (copyOptions.getName() != null) {
-        newName = copyOptions.getName();
-      }
-    }
-
-    final VirtualFileEntry copy = projectManager.copyTo(path, newParent, newName, isOverWrite);
-
-    final URI location =
-        getServiceContext()
-            .getServiceUriBuilder()
-            .path(getClass(), copy.isFile() ? "getFile" : "getChildren")
-            .build(new String[] {copy.getPath().toString().substring(1)}, false);
-
-    if (copy.isFolder()) {
-      try {
-        final RegisteredProject project = projectManager.getProject(copy.getPath().toString());
-        final String name = project.getName();
-        final String projectType = project.getProjectType().getId();
-        logProjectCreatedEvent(name, projectType);
-      } catch (NotFoundException ignore) {
-      }
-    }
-
-    return Response.created(location).build();
+    return getProjectServiceApi().copy(wsPath, newParentWsPath, copyOptions);
   }
 
   @POST
@@ -673,34 +472,12 @@ public class ProjectService extends Service {
     @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public Response move(
-      @ApiParam("Path to a resource to be moved") @PathParam("path") String path,
-      @ApiParam("Path to a new location") @QueryParam("to") String newParent,
+      @ApiParam("Path to a resource to be moved") @PathParam("path") String wsPath,
+      @ApiParam("Path to a new location") @QueryParam("to") String newParentWsPath,
       MoveOptions moveOptions)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
-    final VirtualFileEntry entry = projectManager.asVirtualFileEntry(path);
 
-    // used to indicate over write of destination
-    boolean isOverWrite = false;
-    // used to hold new name set in request body
-    String newName = entry.getName();
-    if (moveOptions != null) {
-      if (moveOptions.getOverWrite() != null) {
-        isOverWrite = moveOptions.getOverWrite();
-      }
-      if (moveOptions.getName() != null) {
-        newName = moveOptions.getName();
-      }
-    }
-
-    final VirtualFileEntry move = projectManager.moveTo(path, newParent, newName, isOverWrite);
-
-    final URI location =
-        getServiceContext()
-            .getServiceUriBuilder()
-            .path(getClass(), move.isFile() ? "getFile" : "getChildren")
-            .build(new String[] {move.getPath().toString().substring(1)}, false);
-
-    return Response.created(location).build();
+    return getProjectServiceApi().move(wsPath, newParentWsPath, moveOptions);
   }
 
   @POST
@@ -720,55 +497,15 @@ public class ProjectService extends Service {
     @ApiResponse(code = 500, message = "Unsupported source type")
   })
   public List<SourceEstimation> uploadProjectFromZip(
-      @ApiParam(value = "Path in the project", required = true) @PathParam("path") String path,
+      @ApiParam(value = "Path in the project", required = true) @PathParam("path") String wsPath,
       @ApiParam(value = "Force rewrite existing project", allowableValues = "true,false")
           @QueryParam("force")
           boolean force,
       Iterator<FileItem> formData)
-      throws ServerException, IOException, ConflictException, ForbiddenException, NotFoundException,
+      throws ServerException, ConflictException, ForbiddenException, NotFoundException,
           BadRequestException {
-    // Not all importers uses virtual file system API. In this case virtual file system API doesn't
-    // get events and isn't able to set
-    final FolderEntry baseProjectFolder = (FolderEntry) getVirtualFile(path, force);
 
-    int stripNumber = 0;
-    String projectName = "";
-    String projectDescription = "";
-    FileItem contentItem = null;
-
-    while (formData.hasNext()) {
-      FileItem item = formData.next();
-      if (!item.isFormField()) {
-        if (contentItem == null) {
-          contentItem = item;
-        } else {
-          throw new ServerException(
-              "More then one upload file is found but only one is expected. ");
-        }
-      } else {
-        switch (item.getFieldName()) {
-          case ("name"):
-            projectName = item.getString().trim();
-            break;
-          case ("description"):
-            projectDescription = item.getString().trim();
-            break;
-          case ("skipFirstLevel"):
-            stripNumber = Boolean.parseBoolean(item.getString().trim()) ? 1 : 0;
-            break;
-        }
-      }
-    }
-
-    if (contentItem == null) {
-      throw new ServerException("Cannot find zip file for upload.");
-    }
-
-    try (InputStream zip = contentItem.getInputStream()) {
-      baseProjectFolder.getVirtualFile().unzip(zip, true, stripNumber);
-    }
-
-    return resolveSources(path);
+    return getProjectServiceApi().uploadProjectFromZip(wsPath, force, formData);
   }
 
   @POST
@@ -783,32 +520,12 @@ public class ProjectService extends Service {
     @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public Response importZip(
-      @ApiParam(value = "Path to a location (where import to?)") @PathParam("path") String path,
+      @ApiParam(value = "Path to a location (where import to?)") @PathParam("path") String wsPath,
       InputStream zip,
       @DefaultValue("false") @QueryParam("skipFirstLevel") Boolean skipFirstLevel)
       throws NotFoundException, ConflictException, ForbiddenException, ServerException {
-    final FolderEntry parent = projectManager.asFolder(path);
 
-    if (parent == null) {
-      throw new NotFoundException("Parent not found for " + path);
-    }
-
-    importZip(parent.getVirtualFile(), zip, true, skipFirstLevel);
-
-    try {
-      final RegisteredProject project = projectManager.getProject(path);
-      eventService.publish(new ProjectCreatedEvent(workspace, project.getPath()));
-      final String projectType = project.getProjectType().getId();
-      logProjectCreatedEvent(path, projectType);
-    } catch (NotFoundException ignore) {
-    }
-
-    return Response.created(
-            getServiceContext()
-                .getServiceUriBuilder()
-                .path(getClass(), "getChildren")
-                .build(new String[] {parent.getPath().toString().substring(1)}, false))
-        .build();
+    return getProjectServiceApi().importZip(wsPath, zip, skipFirstLevel);
   }
 
   @GET
@@ -825,40 +542,20 @@ public class ProjectService extends Service {
     @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public InputStream exportZip(
-      @ApiParam(value = "Path to resource to be exported") @PathParam("path") String path)
-      throws NotFoundException, ForbiddenException, ServerException {
+      @ApiParam(value = "Path to resource to be exported") @PathParam("path") String wsPath)
+      throws NotFoundException, ForbiddenException, ServerException, ConflictException {
 
-    final FolderEntry folder = projectManager.asFolder(path);
-
-    if (folder == null) {
-      throw new NotFoundException("Folder not found " + path);
-    }
-
-    return folder.getVirtualFile().zip();
+    return getProjectServiceApi().exportZip(wsPath);
   }
 
   @GET
   @Path("/export/file/{path:.*}")
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
   public Response exportFile(
-      @ApiParam(value = "Path to resource to be imported") @PathParam("path") String path)
-      throws NotFoundException, ForbiddenException, ServerException {
+      @ApiParam(value = "Path to resource to be imported") @PathParam("path") String wsPath)
+      throws NotFoundException, ForbiddenException, ServerException, ConflictException {
 
-    final FileEntry file = projectManager.asFile(path);
-
-    if (file == null) {
-      throw new NotFoundException("File not found " + path);
-    }
-
-    final VirtualFile virtualFile = file.getVirtualFile();
-
-    return Response.ok(virtualFile.getContent(), getTIKA().detect(virtualFile.getName()))
-        .lastModified(new Date(virtualFile.getLastModificationDate()))
-        .header(HttpHeaders.CONTENT_LENGTH, Long.toString(virtualFile.getLength()))
-        .header(
-            HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=\"" + virtualFile.getName() + '"')
-        .build();
+    return getProjectServiceApi().exportFile(wsPath);
   }
 
   @GET
@@ -877,25 +574,10 @@ public class ProjectService extends Service {
     @ApiResponse(code = 500, message = "Internal Server Error")
   })
   public List<ItemReference> getChildren(
-      @ApiParam(value = "Path to a project", required = true) @PathParam("parent") String path)
-      throws NotFoundException, ForbiddenException, ServerException {
-    final FolderEntry folder = projectManager.asFolder(path);
+      @ApiParam(value = "Path to a project", required = true) @PathParam("parent") String wsPath)
+      throws NotFoundException, ForbiddenException, ServerException, IOException {
 
-    if (folder == null) {
-      throw new NotFoundException("Parent not found for " + path);
-    }
-
-    final List<VirtualFileEntry> children = folder.getChildren();
-    final ArrayList<ItemReference> result = new ArrayList<>(children.size());
-    for (VirtualFileEntry child : children) {
-      if (child.isFile()) {
-        result.add(injectFileLinks(asDto((FileEntry) child)));
-      } else {
-        result.add(injectFolderLinks(asDto((FolderEntry) child)));
-      }
-    }
-
-    return vcsStatusInjector.injectVcsStatus(result);
+    return getProjectServiceApi().getChildren(wsPath);
   }
 
   @GET
@@ -915,7 +597,7 @@ public class ProjectService extends Service {
   public TreeElement getTree(
       @ApiParam(value = "Path to resource. Can be project or its folders", required = true)
           @PathParam("parent")
-          String path,
+          String wsPath,
       @ApiParam(
             value =
                 "Tree depth. This parameter can be dropped. If not specified ?depth=1 is used by default"
@@ -932,15 +614,8 @@ public class ProjectService extends Service {
           @QueryParam("includeFiles")
           boolean includeFiles)
       throws NotFoundException, ForbiddenException, ServerException {
-    final FolderEntry folder = projectManager.asFolder(path);
 
-    if (folder == null) {
-      throw new NotFoundException("Folder " + path + " was not found");
-    }
-
-    return newDto(TreeElement.class)
-        .withNode(injectFolderLinks(asDto(folder)))
-        .withChildren(getTree(folder, depth, includeFiles));
+    return getProjectServiceApi().getTree(wsPath, depth, includeFiles);
   }
 
   @GET
@@ -956,19 +631,10 @@ public class ProjectService extends Service {
   public ItemReference getItem(
       @ApiParam(value = "Path to resource. Can be project or its folders", required = true)
           @PathParam("path")
-          String path)
+          String wsPath)
       throws NotFoundException, ForbiddenException, ServerException {
-    final VirtualFileEntry entry = projectManager.getProjectsRoot().getChild(path);
 
-    if (entry == null) {
-      throw new NotFoundException("Project " + path + " was not found");
-    }
-
-    if (entry.isFile()) {
-      return injectFileLinks(vcsStatusInjector.injectVcsStatus(asDto((FileEntry) entry)));
-    } else {
-      return injectFolderLinks(asDto((FolderEntry) entry));
-    }
+    return getProjectServiceApi().getItem(wsPath);
   }
 
   @GET
@@ -990,7 +656,7 @@ public class ProjectService extends Service {
   public ProjectSearchResponseDto search(
       @ApiParam(value = "Path to resource, i.e. where to search?", required = true)
           @PathParam("path")
-          String path,
+          String wsPath,
       @ApiParam(value = "Resource name") @QueryParam("name") String name,
       @ApiParam(value = "Search keywords") @QueryParam("text") String text,
       @ApiParam(
@@ -1001,274 +667,7 @@ public class ProjectService extends Service {
           int maxItems,
       @ApiParam(value = "Skip count") @QueryParam("skipCount") int skipCount)
       throws NotFoundException, ForbiddenException, ConflictException, ServerException {
-    final Searcher searcher;
-    try {
-      searcher = projectManager.getSearcher();
-    } catch (NotFoundException e) {
-      LOG.warn(e.getLocalizedMessage());
-      return DtoFactory.newDto(ProjectSearchResponseDto.class);
-    }
 
-    if (skipCount < 0) {
-      throw new ConflictException(String.format("Invalid 'skipCount' parameter: %d.", skipCount));
-    }
-
-    final QueryExpression expr =
-        new QueryExpression()
-            .setPath(path.startsWith("/") ? path : ('/' + path))
-            .setName(name)
-            .setText(text)
-            .setMaxItems(maxItems)
-            .setSkipCount(skipCount)
-            .setIncludePositions(true);
-
-    final SearchResult result = searcher.search(expr);
-    final List<SearchResultEntry> searchResultEntries = result.getResults();
-    return DtoFactory.newDto(ProjectSearchResponseDto.class)
-        .withTotalHits(result.getTotalHits())
-        .withItemReferences(prepareResults(searchResultEntries));
-  }
-
-  /**
-   * Prepare result for client, add additional information like line number and line content where
-   * found given text
-   *
-   * @throws ServerException
-   */
-  private List<SearchResultDto> prepareResults(List<SearchResultEntry> searchResultEntries)
-      throws ServerException {
-    List<SearchResultDto> results = new ArrayList<>(searchResultEntries.size());
-    FolderEntry root = projectManager.getProjectsRoot();
-
-    for (SearchResultEntry searchResultEntry : searchResultEntries) {
-      VirtualFileEntry child = root.getChild(searchResultEntry.getFilePath());
-      if (child != null && child.isFile()) {
-        ItemReference itemReference = injectFileLinks(asDto((FileEntry) child));
-        File file = child.getVirtualFile().toIoFile();
-        List<LuceneSearcher.OffsetData> datas = searchResultEntry.getData();
-        List<SearchOccurrenceDto> searchOccurrences = new ArrayList<>(datas.size());
-        for (LuceneSearcher.OffsetData data : datas) {
-          SearchOccurrenceDto searchOccurrenceDto =
-              DtoFactory.getInstance()
-                  .createDto(SearchOccurrenceDto.class)
-                  .withPhrase(data.phrase)
-                  .withScore(data.score)
-                  .withStartOffset(data.startOffset)
-                  .withEndOffset(data.endOffset)
-                  .withLineNumber(data.lineNum)
-                  .withLineContent(data.line);
-          searchOccurrences.add(searchOccurrenceDto);
-        }
-        SearchResultDto searchResultDto = DtoFactory.getInstance().createDto(SearchResultDto.class);
-        results.add(
-            searchResultDto
-                .withItemReference(itemReference)
-                .withSearchOccurrences(searchOccurrences));
-      }
-    }
-    return results;
-  }
-
-  @Inject
-  private void configureProjectSearchRequestHandler(
-      RequestHandlerConfigurator requestHandlerConfigurator) {
-    requestHandlerConfigurator
-        .newConfiguration()
-        .methodName("project/search")
-        .paramsAsDto(ProjectSearchRequestDto.class)
-        .resultAsDto(ProjectSearchResponseDto.class)
-        .withFunction(this::search);
-  }
-
-  public ProjectSearchResponseDto search(ProjectSearchRequestDto request) {
-    String path = request.getPath();
-    String name = request.getName();
-    String text = request.getText();
-    int maxItems = request.getMaxItems();
-    int skipCount = request.getSkipCount();
-
-    try {
-      return search(path, name, text, maxItems, skipCount);
-    } catch (ServerException | ConflictException | NotFoundException | ForbiddenException e) {
-      throw new JsonRpcException(-27000, e.getMessage());
-    }
-  }
-
-  private void logProjectCreatedEvent(@NotNull String projectName, @NotNull String projectType) {
-    LOG.info(
-        "EVENT#project-created# PROJECT#{}# TYPE#{}# WS#{}# USER#{}# PAAS#default#",
-        projectName,
-        projectType,
-        workspace,
-        EnvironmentContext.getCurrent().getSubject().getUserId());
-  }
-
-  private VirtualFileEntry getVirtualFile(String path, boolean force)
-      throws ServerException, ForbiddenException, ConflictException, NotFoundException {
-    final VirtualFileEntry virtualFile = projectManager.getProjectsRoot().getChild(path);
-    if (virtualFile != null && virtualFile.isFile()) {
-      // File with same name exist already exists.
-      throw new ConflictException(String.format("File with the name '%s' already exists.", path));
-    } else {
-      if (virtualFile == null) {
-        return projectManager.getProjectsRoot().createFolder(path);
-      } else if (!force) {
-        // Project already exists.
-        throw new ConflictException(
-            String.format("Project with the name '%s' already exists.", path));
-      }
-    }
-
-    return virtualFile;
-  }
-
-  private List<TreeElement> getTree(FolderEntry folder, int depth, boolean includeFiles)
-      throws ServerException, NotFoundException {
-    if (depth == 0) {
-      return null;
-    }
-
-    final List<? extends VirtualFileEntry> children;
-
-    if (includeFiles) {
-      children = folder.getChildFoldersFiles();
-    } else {
-      children = folder.getChildFolders();
-    }
-
-    final List<TreeElement> nodes = new ArrayList<>(children.size());
-    for (VirtualFileEntry child : children) {
-      if (child.isFolder()) {
-        nodes.add(
-            newDto(TreeElement.class)
-                .withNode(injectFolderLinks(asDto((FolderEntry) child)))
-                .withChildren(getTree((FolderEntry) child, depth - 1, includeFiles)));
-      } else {
-        nodes.add(newDto(TreeElement.class).withNode(injectFileLinks(asDto((FileEntry) child))));
-      }
-    }
-
-    return vcsStatusInjector.injectVcsStatusTreeElements(nodes);
-  }
-
-  /* --------------------------------------------------------------------------- */
-  /* TODO check "upload" methods below, they were copied from old VFS as is      */
-  /* --------------------------------------------------------------------------- */
-
-  private static Response uploadFile(VirtualFile parent, Iterator<FileItem> formData)
-      throws ForbiddenException, ConflictException, ServerException {
-    try {
-      FileItem contentItem = null;
-      String name = null;
-      boolean overwrite = false;
-
-      while (formData.hasNext()) {
-        FileItem item = formData.next();
-        if (!item.isFormField()) {
-          if (contentItem == null) {
-            contentItem = item;
-          } else {
-            throw new ServerException(
-                "More then one upload file is found but only one should be. ");
-          }
-        } else if ("name".equals(item.getFieldName())) {
-          name = item.getString().trim();
-        } else if ("overwrite".equals(item.getFieldName())) {
-          overwrite = Boolean.parseBoolean(item.getString().trim());
-        }
-      }
-
-      if (contentItem == null) {
-        throw new ServerException("Cannot find file for upload. ");
-      }
-      if (name == null || name.isEmpty()) {
-        name = contentItem.getName();
-      }
-
-      try {
-        try {
-          parent.createFile(name, contentItem.getInputStream());
-        } catch (ConflictException e) {
-          if (!overwrite) {
-            throw new ConflictException("Unable upload file. Item with the same name exists. ");
-          }
-          parent
-              .getChild(org.eclipse.che.api.vfs.Path.of(name))
-              .updateContent(contentItem.getInputStream(), null);
-        }
-      } catch (IOException ioe) {
-        throw new ServerException(ioe.getMessage(), ioe);
-      }
-
-      return Response.ok("", MediaType.TEXT_HTML).build();
-    } catch (ForbiddenException | ConflictException | ServerException e) {
-      HtmlErrorFormatter.sendErrorAsHTML(e);
-      // never thrown
-      throw e;
-    }
-  }
-
-  private static Response uploadZip(VirtualFile parent, Iterator<FileItem> formData)
-      throws ForbiddenException, ConflictException, ServerException {
-    try {
-      FileItem contentItem = null;
-      boolean overwrite = false;
-      boolean skipFirstLevel = false;
-      while (formData.hasNext()) {
-        FileItem item = formData.next();
-        if (!item.isFormField()) {
-          if (contentItem == null) {
-            contentItem = item;
-          } else {
-            throw new ServerException(
-                "More then one upload file is found but only one should be. ");
-          }
-        } else if ("overwrite".equals(item.getFieldName())) {
-          overwrite = Boolean.parseBoolean(item.getString().trim());
-        } else if ("skipFirstLevel".equals(item.getFieldName())) {
-          skipFirstLevel = Boolean.parseBoolean(item.getString().trim());
-        }
-      }
-      if (contentItem == null) {
-        throw new ServerException("Cannot find file for upload. ");
-      }
-      try {
-        importZip(parent, contentItem.getInputStream(), overwrite, skipFirstLevel);
-      } catch (IOException ioe) {
-        throw new ServerException(ioe.getMessage(), ioe);
-      }
-      return Response.ok("", MediaType.TEXT_HTML).build();
-    } catch (ForbiddenException | ConflictException | ServerException e) {
-      HtmlErrorFormatter.sendErrorAsHTML(e);
-      // never thrown
-      throw e;
-    }
-  }
-
-  private static void importZip(
-      VirtualFile parent, InputStream in, boolean overwrite, boolean skipFirstLevel)
-      throws ForbiddenException, ConflictException, ServerException {
-    int stripNum = skipFirstLevel ? 1 : 0;
-    parent.unzip(in, overwrite, stripNum);
-  }
-
-  private ItemReference injectFileLinks(ItemReference itemReference) {
-    return projectServiceLinksInjector.injectFileLinks(itemReference, getServiceContext());
-  }
-
-  private ItemReference injectFolderLinks(ItemReference itemReference) {
-    return projectServiceLinksInjector.injectFolderLinks(itemReference, getServiceContext());
-  }
-
-  private ProjectConfigDto injectProjectLinks(ProjectConfigDto projectConfig) {
-    return projectServiceLinksInjector.injectProjectLinks(projectConfig, getServiceContext());
-  }
-
-  /** Lazy init of Tika. */
-  private synchronized Tika getTIKA() {
-    if (TIKA == null) {
-      TIKA = new Tika();
-    }
-    return TIKA;
+    return getProjectServiceApi().search(wsPath, name, text, maxItems, skipCount);
   }
 }

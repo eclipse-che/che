@@ -17,7 +17,7 @@ import static org.eclipse.che.api.factory.server.FactoryConstants.PARAMETRIZED_I
 import java.util.Map;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.core.model.project.SourceStorage;
+import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.factory.server.FactoryParameterValidator;
 
 /**

@@ -172,6 +172,7 @@ public class WorkingWithSplitPanelTest {
   @Test(priority = 3)
   public void checkSwitchingTabsAndPanels() {
     // switch tabs and panels
+    consoles.clickOnMaximizePanelIcon();
     multiSplitPanel.selectSplitPanel(1);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
     multiSplitPanel.waitTabProcessIsPresent(1, "Git status");
@@ -216,7 +217,7 @@ public class WorkingWithSplitPanelTest {
     loader.waitOnClosed();
     commandsExplorer.chooseCommandTypeInContextMenu(commandType);
     loader.waitOnClosed();
-    commandsEditor.waitActiveEditor();
+    commandsEditor.waitActive();
     commandsEditor.clickOnCancelCommandEditorButton();
     loader.waitOnClosed();
     projectExplorer.clickOnProjectExplorerTabInTheLeftPanel();

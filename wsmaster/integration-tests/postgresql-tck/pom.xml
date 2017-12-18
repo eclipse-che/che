@@ -16,7 +16,7 @@
     <parent>
         <artifactId>integration-tests-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.22.0-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
     </parent>
     <artifactId>postgresql-tck</artifactId>
     <packaging>jar</packaging>
@@ -77,13 +77,13 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-machine</artifactId>
+            <artifactId>che-core-api-installer</artifactId>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-machine</artifactId>
+            <artifactId>che-core-api-installer</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -230,8 +230,8 @@
                                     <includeArtifactIds>che-core-api-account,
                                         che-core-api-user,
                                         che-core-api-ssh,
-                                        che-core-api-machine,
-                                        che-core-api-workspace</includeArtifactIds>
+                                        che-core-api-workspace,
+                                        che-core-api-installer</includeArtifactIds>
                                     <includeScope>test</includeScope>
                                     <includeClassifiers>tests</includeClassifiers>
                                 </configuration>

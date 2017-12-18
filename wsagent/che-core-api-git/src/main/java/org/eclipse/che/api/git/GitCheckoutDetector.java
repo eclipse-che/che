@@ -13,9 +13,9 @@ package org.eclipse.che.api.git;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.isDirectory;
 import static java.util.regex.Pattern.compile;
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type.BRANCH;
 import static org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type.REVISION;
-import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -26,21 +26,22 @@ import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto;
 import org.eclipse.che.api.project.shared.dto.event.GitCheckoutEventDto.Type;
-import org.eclipse.che.api.vfs.Path;
-import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
+import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.slf4j.Logger;
 
 public class GitCheckoutDetector {
+
   private static final Logger LOG = getLogger(GitCheckoutDetector.class);
 
   private static final String GIT_DIR = ".git";
@@ -49,10 +50,10 @@ public class GitCheckoutDetector {
   private static final String INCOMING_METHOD = "track/git-checkout";
   private static final String OUTGOING_METHOD = "event/git-checkout";
 
-  private final VirtualFileSystemProvider vfsProvider;
   private final RequestTransmitter transmitter;
   private final FileWatcherManager manager;
-  private final ProjectRegistry projectRegistry;
+  private final FsManager fsManager;
+  private final ProjectManager projectManager;
 
   private final Set<String> endpointIds = newConcurrentHashSet();
 
@@ -60,14 +61,14 @@ public class GitCheckoutDetector {
 
   @Inject
   public GitCheckoutDetector(
-      VirtualFileSystemProvider vfsProvider,
       RequestTransmitter transmitter,
       FileWatcherManager manager,
-      ProjectRegistry projectRegistry) {
-    this.vfsProvider = vfsProvider;
+      FsManager fsManager,
+      ProjectManager projectManager) {
     this.transmitter = transmitter;
     this.manager = manager;
-    this.projectRegistry = projectRegistry;
+    this.fsManager = fsManager;
+    this.projectManager = projectManager;
   }
 
   @Inject
@@ -106,37 +107,43 @@ public class GitCheckoutDetector {
   }
 
   private Consumer<String> deleteConsumer() {
-    return EMPTY_CONSUMER;
+    return it -> {};
   }
 
   private Consumer<String> fsEventConsumer() {
     return it -> {
       try {
-        String content =
-            vfsProvider.getVirtualFileSystem().getRoot().getChild(Path.of(it)).getContentAsString();
+        String content = fsManager.readAsString(it);
         Type type = content.contains("ref:") ? BRANCH : REVISION;
         String name = type == REVISION ? content : PATTERN.split(content)[1];
+        String project = it.substring(1, it.indexOf('/', 1));
 
         // Update project attributes with new git values
-        projectRegistry.setProjectType(it.split("/")[1], GitProjectType.TYPE_ID, true);
 
-        endpointIds.forEach(transmitConsumer(type, name));
+        String wsPath = absolutize(it.split("/")[1]);
+        projectManager.setType(wsPath, GitProjectType.TYPE_ID, true);
+
+        endpointIds.forEach(transmitConsumer(type, name, project));
 
       } catch (ServerException | ForbiddenException e) {
         LOG.error("Error trying to read {} file and broadcast it", it, e);
-      } catch (NotFoundException | ConflictException e) {
+      } catch (NotFoundException | ConflictException | BadRequestException e) {
         LOG.error("Error trying to update project attributes", it, e);
       }
     };
   }
 
-  private Consumer<String> transmitConsumer(Type type, String name) {
+  private Consumer<String> transmitConsumer(Type type, String name, String project) {
     return id ->
         transmitter
             .newRequest()
             .endpointId(id)
             .methodName(OUTGOING_METHOD)
-            .paramsAsDto(newDto(GitCheckoutEventDto.class).withName(name).withType(type))
+            .paramsAsDto(
+                newDto(GitCheckoutEventDto.class)
+                    .withName(name)
+                    .withType(type)
+                    .withProjectName(project))
             .sendAndSkipResult();
   }
 }
