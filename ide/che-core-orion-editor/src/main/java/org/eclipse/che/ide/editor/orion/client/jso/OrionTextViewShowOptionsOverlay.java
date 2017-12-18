@@ -14,7 +14,21 @@ import com.google.gwt.core.client.JavaScriptObject;
 
 public class OrionTextViewShowOptionsOverlay extends JavaScriptObject {
 
-  public static final String CENTER_VIEW_ANCHOR = "center";
+  public enum ViewAnchorValue {
+    TOP("top"),
+    BOTTOM("bottom"),
+    CENTER("center");
+
+    private final String value;
+
+    ViewAnchorValue(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return value;
+    }
+  }
 
   protected OrionTextViewShowOptionsOverlay() {}
 

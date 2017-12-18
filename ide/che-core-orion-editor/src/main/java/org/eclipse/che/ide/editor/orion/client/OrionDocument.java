@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.ide.editor.orion.client;
 
-import static org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewShowOptionsOverlay.CENTER_VIEW_ANCHOR;
+import static org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewShowOptionsOverlay.ViewAnchorValue.CENTER;
 
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import org.eclipse.che.ide.api.editor.document.AbstractDocument;
@@ -164,7 +164,7 @@ public class OrionDocument extends AbstractDocument {
   @Override
   public void setCursorPosition(final TextPosition position) {
     OrionTextViewShowOptionsOverlay showOptionsOverlay = OrionTextViewShowOptionsOverlay.create();
-    showOptionsOverlay.setViewAnchor(CENTER_VIEW_ANCHOR);
+    showOptionsOverlay.setViewAnchor(CENTER.getValue());
     this.editorOverlay.setCaretOffset(getIndexFromPosition(position), showOptionsOverlay);
   }
 
