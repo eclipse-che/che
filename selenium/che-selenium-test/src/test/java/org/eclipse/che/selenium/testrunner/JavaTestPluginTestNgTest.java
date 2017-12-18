@@ -143,11 +143,10 @@ public class JavaTestPluginTestNgTest {
     editor.goToCursorPositionVisible(30, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     try {
-
       pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7338");
+      fail("Known issue https://github.com/eclipse/che/issues/7338", ex);
     }
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
     String testErrorMessage = pluginConsole.getTestErrorMessage();

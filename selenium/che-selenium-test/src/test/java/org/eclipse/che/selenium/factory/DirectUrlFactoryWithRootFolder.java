@@ -88,7 +88,7 @@ public class DirectUrlFactoryWithRootFolder {
       testFactoryWithRootFolder.authenticateAndOpen();
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7555");
+      fail("Known issue https://github.com/eclipse/che/issues/7555", ex);
     }
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(EXPECTED_PROJECT);
