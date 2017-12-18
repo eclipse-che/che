@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
@@ -100,6 +101,21 @@ public class KubernetesMachine implements Machine {
           "Server with provided reference " + serverRef + " is missed");
     }
     server.setStatus(status);
+  }
+
+  /**
+   * Executes command in this machine.
+   *
+   * @param outputConsumer command output consumer that accepts stream and output message
+   * @param command command to execute
+   * @throws InfrastructureException when exec timeout is reached
+   * @throws InfrastructureException when {@link Thread} is interrupted while command executing
+   * @throws InfrastructureException when command error stream is not empty
+   * @throws InfrastructureException when any other exception occurs
+   */
+  public void exec(BiConsumer<String, String> outputConsumer, String... command)
+      throws InfrastructureException {
+    namespace.pods().exec(podName, containerName, EXEC_TIMEOUT_MIN, command, outputConsumer);
   }
 
   public void exec(String... command) throws InfrastructureException {
