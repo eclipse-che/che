@@ -152,6 +152,7 @@ public class WorkspaceDetailsComposeTest {
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
 
+    terminal.waitTerminalTab(LOADER_TIMEOUT_SEC);
     consoles.waitProcessInProcessConsoleTree("machine");
     consoles.waitTabNameProcessIsPresent("machine");
   }
