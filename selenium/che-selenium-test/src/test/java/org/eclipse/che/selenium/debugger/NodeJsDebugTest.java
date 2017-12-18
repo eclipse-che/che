@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.debugger;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -33,6 +34,7 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
 import org.eclipse.che.selenium.pageobject.debug.NodeJsDebugConfig;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
@@ -127,7 +129,12 @@ public class NodeJsDebugTest {
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.EVALUATE_EXPRESSIONS);
     debugPanel.typeEvaluateExpression("c.length");
     debugPanel.clickEvaluateBtn();
-    debugPanel.waitExpectedResultInEvaluateExpression("19");
+    try {
+      debugPanel.waitExpectedResultInEvaluateExpression("19");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/4720", ex);
+    }
     debugPanel.clickCloseEvaluateBtn();
   }
 }
