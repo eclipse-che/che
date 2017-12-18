@@ -20,7 +20,7 @@ public class WorkspaceTemplate {
   public static final String UBUNTU_LSP = "ubuntu_with_c_sharp_lsp.json";
   public static final String ECLIPSE_NODEJS = "eclipse_nodejs.json";
   public static final String ECLIPSE_PHP = "eclipse_php.json";
-  public static final String CODENVY_UBUNTU_JDK8 = "codenvy_ubuntu_jdk8.json";
+  public static final String UBUNTU_JDK8 = "ubuntu_jdk8.json";
   public static final String UBUNTU = "ubuntu.json";
   public static final String DEFAULT = "default.json";
 

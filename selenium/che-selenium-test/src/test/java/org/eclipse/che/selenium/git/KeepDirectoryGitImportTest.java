@@ -121,7 +121,7 @@ public class KeepDirectoryGitImportTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/my-lib/src/test/java/hello");
     projectExplorer.openItemByPath(PROJECT_NAME + "/my-lib/src/test/java/hello/SayHelloTest.java");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/my-lib/src/main");
     projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/my-webapp");
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/my-lib/src/test");
@@ -215,9 +215,9 @@ public class KeepDirectoryGitImportTest {
     projectExplorer.openItemByPath(projectName + "/my-lib/src/test/java/hello");
     projectExplorer.openItemByPath(projectName + "/my-lib/src/main/java/hello/SayHello.java");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.openItemByPath(projectName + "/my-lib/src/test/java/hello/SayHelloTest.java");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 }

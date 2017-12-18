@@ -177,7 +177,7 @@ public class RenameVirtualMethodsTest {
     projectExplorer.waitItem(pathToPackageInChePrefix);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(cursorPositionLine, cursorPositionChar);
+    editor.goToCursorPositionVisible(cursorPositionLine, cursorPositionChar);
   }
 
   private void setFieldsForTest(String nameCurrentTest) throws Exception {

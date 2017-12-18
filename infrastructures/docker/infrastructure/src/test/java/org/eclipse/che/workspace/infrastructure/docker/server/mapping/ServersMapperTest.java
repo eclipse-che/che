@@ -13,10 +13,10 @@ package org.eclipse.che.workspace.infrastructure.docker.server.mapping;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.toMap;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
@@ -31,15 +31,19 @@ public class ServersMapperTest {
   static final Map<String, String> ONE_ATTRIBUTE_MAP = singletonMap("testAttr", "testValue");
   static final Map<String, String> ATTRIBUTES_MAP =
       ImmutableMap.of("testAttr", "testValue", "anotherTestAttr", "secondValue");
+  static final Map<String, String> INTERNAL_SERVER_ATTRIBUTE_MAP =
+      singletonMap(ServerConfig.INTERNAL_SERVER_ATTRIBUTE, Boolean.TRUE.toString());
 
   private final String hostname = "localhost";
-  private final ServersMapper mapper = new ServersMapper(hostname);
+  private final String machine = "app";
+  private final ServersMapper mapper = new ServersMapper(hostname, machine);
 
   @Test(dataProvider = "servers")
   public void mapsServers(
       Map<String, String> dockerBindings,
       Map<String, ServerConfig> configs,
-      Map<String, ServerImpl> expected) {
+      Map<String, ServerImpl> expected)
+      throws Exception {
     Map<String, List<PortBinding>> bindings = createBindings(dockerBindings);
 
     Map<String, ServerImpl> result = mapper.map(bindings, configs);
@@ -138,8 +142,30 @@ public class ServersMapperTest {
                     .withAttributes(ATTRIBUTES_MAP),
             "8000/tcp", new ServerImpl().withUrl("tcp://" + hostname + ":32000"),
             "2288/udp", new ServerImpl().withUrl("udp://" + hostname + ":32288"))
+      },
+      // mapping of internal servers
+      {
+        mapOf(
+            "2288/udp", null,
+            "4401/tcp", null),
+        ImmutableMap.of(
+            "ls-api", new ServerConfigImpl("4401", "tcp", null, INTERNAL_SERVER_ATTRIBUTE_MAP)),
+        ImmutableMap.of(
+            "ls-api",
+            new ServerImpl()
+                .withUrl("tcp://" + machine + ":4401")
+                .withAttributes(INTERNAL_SERVER_ATTRIBUTE_MAP),
+            "2288/udp",
+            new ServerImpl().withUrl("udp://" + machine + ":2288"))
       }
     };
+  }
+
+  private Map<String, String> mapOf(String key, String value, String key2, String value2) {
+    HashMap<String, String> result = new HashMap<>();
+    result.put(key, value);
+    result.put(key2, value2);
+    return result;
   }
 
   private static Map<String, List<PortBinding>> createBindings(Map<String, String> bindings) {
@@ -147,12 +173,16 @@ public class ServersMapperTest {
         .entrySet()
         .stream()
         .collect(
-            toMap(
-                Map.Entry::getKey,
-                entry -> {
-                  String[] split = entry.getValue().split(":");
-                  PortBinding pb = new PortBinding(split[0], split[1]);
-                  return singletonList(pb);
-                }));
+            HashMap::new,
+            (hashMap, entry) -> {
+              if (entry.getValue() == null) {
+                hashMap.put(entry.getKey(), null);
+              } else {
+                String[] split = entry.getValue().split(":");
+                PortBinding pb = new PortBinding(split[0], split[1]);
+                hashMap.put(entry.getKey(), singletonList(pb));
+              }
+            },
+            HashMap::putAll);
   }
 }

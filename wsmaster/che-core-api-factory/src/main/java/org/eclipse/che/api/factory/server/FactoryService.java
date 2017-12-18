@@ -45,7 +45,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import org.eclipse.che.api.agent.server.filters.AddExecInstallerInEnvironmentUtil;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -141,7 +140,6 @@ public class FactoryService extends Service {
     requiredNotNull(factory, "Factory configuration");
     factoryBuilder.checkValid(factory);
     processDefaults(factory);
-    AddExecInstallerInEnvironmentUtil.addExecInstaller(factory.getWorkspace());
     createValidator.validateOnCreate(factory);
     return injectLinks(asDto(factoryManager.saveFactory(factory)));
   }
@@ -217,13 +215,12 @@ public class FactoryService extends Service {
 
     for (Pair<String, String> pair : query) {
       if (!pair.first.equals("creator.userId") && !pair.first.equals("name")) {
-        LOG.warn(
-            "Method factory.find is going to be removed or limited in scope in 6.0 GA."
-                + " Requested attributes {}, skipCount {}, maxItems {}",
-            query,
-            skip,
-            maxItems);
-        break;
+        throw new BadRequestException(
+            String.format(
+                "Method factory.find is going to be removed or limited in scope in 6.0 GA."
+                    + " Search allowed only by creator.userId and name parameters."
+                    + " Requested attributes %s, skipCount %s, maxItems %s",
+                query, skip, maxItems));
       }
     }
 

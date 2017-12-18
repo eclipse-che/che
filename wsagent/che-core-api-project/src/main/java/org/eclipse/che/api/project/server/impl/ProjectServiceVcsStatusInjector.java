@@ -11,6 +11,7 @@
 package org.eclipse.che.api.project.server.impl;
 
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+import static org.eclipse.che.api.project.shared.Constants.VCS_PROVIDER_NAME;
 
 import java.util.HashMap;
 import java.util.List;
@@ -165,7 +166,7 @@ public class ProjectServiceVcsStatusInjector {
             .get(projectWsPath)
             .orElseThrow(() -> new NotFoundException("Can't find project"))
             .getAttributes()
-            .get("vcs.provider.name");
+            .get(VCS_PROVIDER_NAME);
     return vcsStatusProviders
         .stream()
         .filter(

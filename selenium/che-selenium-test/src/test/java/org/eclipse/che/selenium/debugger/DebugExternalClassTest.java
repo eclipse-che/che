@@ -109,7 +109,7 @@ public class DebugExternalClassTest {
     commandsPalette.startCommandByDoubleClick(BUILD_AND_DEBUG_COMMAND_NAME);
     consoles.waitExpectedTextIntoConsole(TestBuildConstants.LISTENING_AT_ADDRESS_8000);
 
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 
   @AfterMethod

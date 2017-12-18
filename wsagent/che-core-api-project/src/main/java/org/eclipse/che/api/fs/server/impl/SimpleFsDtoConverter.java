@@ -24,6 +24,8 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.fs.server.FsDtoConverter;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.ProjectDtoConverter;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 
 @Singleton
@@ -53,15 +55,14 @@ public class SimpleFsDtoConverter implements FsDtoConverter {
       length = null;
     }
 
-    String project;
+    RegisteredProject project;
     if (isRoot(wsPath)) {
       project = null;
     } else {
       project =
           projectManager
               .getClosest(wsPath)
-              .orElseThrow(() -> new NotFoundException("Can't find project for item " + wsPath))
-              .getPath();
+              .orElseThrow(() -> new NotFoundException("Can't find project for item " + wsPath));
     }
 
     String type;
@@ -77,7 +78,10 @@ public class SimpleFsDtoConverter implements FsDtoConverter {
         newDto(ItemReference.class).withName(name).withPath(wsPath).withType(type);
 
     if (project != null) {
-      itemReference.withProject(project);
+      itemReference.withProject(project.getPath());
+      if (wsPath.equals(project.getPath())) {
+        itemReference.setProjectConfig(ProjectDtoConverter.asDto(project));
+      }
     }
 
     if (length != null) {

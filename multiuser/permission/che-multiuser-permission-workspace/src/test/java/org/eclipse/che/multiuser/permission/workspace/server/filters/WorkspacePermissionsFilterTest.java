@@ -306,7 +306,7 @@ public class WorkspacePermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(superPrivilegesChecker).hasSuperPrivileges();
-    verify(workspaceService).getByKey(eq("workspace123"));
+    verify(workspaceService).getByKey(eq("workspace123"), eq("false"));
     verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("read"));
   }
 
@@ -327,7 +327,7 @@ public class WorkspacePermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(superPrivilegesChecker).hasSuperPrivileges();
-    verify(workspaceService).getByKey(eq("workspace123"));
+    verify(workspaceService).getByKey(eq("workspace123"), eq("false"));
     verify(subject, never()).hasPermission(eq("workspace"), eq("workspace123"), eq("read"));
   }
 
@@ -351,7 +351,7 @@ public class WorkspacePermissionsFilterTest {
             .get(SECURE_PATH + "/workspace/{key}");
 
     assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).getByKey(eq("userok:myWorkspace"));
+    verify(workspaceService).getByKey(eq("userok:myWorkspace"), eq("false"));
     verify(subject).hasPermission(eq("workspace"), eq("workspace123"), eq("read"));
   }
 

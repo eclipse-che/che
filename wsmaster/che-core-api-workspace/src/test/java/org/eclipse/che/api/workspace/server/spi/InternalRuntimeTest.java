@@ -39,6 +39,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
@@ -316,6 +317,36 @@ public class InternalRuntimeTest {
   }
 
   @Test
+  public void shouldNotRewriteURLsOfInternalServers() throws Exception {
+    // given
+    ServerImpl internalServer =
+        createServer(singletonMap(ServerConfig.INTERNAL_SERVER_ATTRIBUTE, "true"));
+    ServerImpl regularServer = createServer(RUNNING);
+    MachineImpl machineWithInternalServer =
+        new MachineImpl(
+            createAttributes(),
+            ImmutableMap.of("server1", regularServer, "server2", internalServer));
+    ImmutableMap<String, MachineImpl> internalMachines =
+        ImmutableMap.of("m1", createMachine(), "m2", machineWithInternalServer);
+    ImmutableMap<String, MachineImpl> expected =
+        ImmutableMap.of(
+            "m1",
+            rewriteURLs(createMachine()),
+            "m2",
+            new MachineImpl(
+                createAttributes(),
+                ImmutableMap.of("server1", rewriteURL(regularServer), "server2", internalServer)));
+    setRunningRuntime();
+    doReturn(internalMachines).when(internalRuntime).getInternalMachines();
+
+    // when
+    Map<String, ? extends Machine> actual = internalRuntime.getMachines();
+
+    // then
+    assertEquals(actual, expected);
+  }
+
+  @Test
   public void
       getMachinesResultShouldNotBeAffectedByFollowingModificationOfResultOfGetInternalMachines()
           throws Exception {
@@ -399,7 +430,7 @@ public class InternalRuntimeTest {
     assertEquals(actualMachines.size(), expectedMachinesAmount);
     assertTrue(actualMachines.containsKey(expectedMachineName));
     Machine actualMachine = actualMachines.get(expectedMachineName);
-    assertEquals(actualMachine.getProperties().size(), expectedMachinePropsSize);
+    assertEquals(actualMachine.getAttributes().size(), expectedMachinePropsSize);
     assertEquals(actualMachine.getServers().size(), expectedMachineServersSize);
     assertTrue(actualMachine.getServers().containsKey(expectedServerName));
     assertEquals(
@@ -419,7 +450,7 @@ public class InternalRuntimeTest {
     originInternalMachines.put("newM", createMachine());
     MachineImpl originMachine = originInternalMachines.get(machineToModify);
     // change properties of origin server
-    originMachine.getProperties().put("new_prop", "new_value");
+    originMachine.getAttributes().put("new_prop", "new_value");
     // add new server in origin machine
     originMachine.getServers().put("newS", createServer(RUNNING));
     ServerImpl originServer = originMachine.getServers().get(serverToModify);
@@ -445,7 +476,7 @@ public class InternalRuntimeTest {
     machine1.getServers().put(badServerName, failingRewritingServer);
     internalMachines.put("m1", machine1);
     internalMachines.put("m2", machine2);
-    expectedMachines.put("m1", new MachineImpl(machine1.getProperties(), expectedServers));
+    expectedMachines.put("m1", new MachineImpl(machine1.getAttributes(), expectedServers));
     expectedMachines.put("m2", machine2);
     List<WarningImpl> expectedWarnings = new ArrayList<>();
     expectedWarnings.add(
@@ -466,10 +497,10 @@ public class InternalRuntimeTest {
   }
 
   private static MachineImpl createMachine() throws Exception {
-    return new MachineImpl(createProperties(), createServers());
+    return new MachineImpl(createAttributes(), createServers());
   }
 
-  private static Map<String, String> createProperties() {
+  private static Map<String, String> createAttributes() {
     return ImmutableMap.of(
         "prop1", "prop1Value",
         "prop2", "prop2Value",
@@ -491,13 +522,25 @@ public class InternalRuntimeTest {
     return new ServerImpl().withUrl(url).withStatus(RUNNING);
   }
 
+  private static ServerImpl createServer(Map<String, String> attributes) throws Exception {
+    return new ServerImpl()
+        .withUrl("http://internal-dns:8080/")
+        .withStatus(RUNNING)
+        .withAttributes(attributes);
+  }
+
   private static MachineImpl rewriteURLs(MachineImpl machine) throws InfrastructureException {
     for (Map.Entry<String, ServerImpl> serverEntry : machine.getServers().entrySet()) {
-      serverEntry
-          .getValue()
-          .setUrl(TEST_URL_REWRITER.rewriteURL(null, null, serverEntry.getValue().getUrl()));
+      serverEntry.setValue(rewriteURL(serverEntry.getValue()));
     }
     return machine;
+  }
+
+  private static ServerImpl rewriteURL(ServerImpl server) throws InfrastructureException {
+    return new ServerImpl()
+        .withStatus(server.getStatus())
+        .withAttributes(server.getAttributes())
+        .withUrl(TEST_URL_REWRITER.rewriteURL(null, null, server.getUrl()));
   }
 
   /**

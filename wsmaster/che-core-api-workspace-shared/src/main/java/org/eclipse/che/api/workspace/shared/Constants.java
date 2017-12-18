@@ -61,5 +61,7 @@ public final class Constants {
 
   public static final String WS_MACHINE_NAME = "default";
 
+  public static final String SUPPORTED_RECIPE_TYPES = "supportedRecipeTypes";
+
   private Constants() {}
 }

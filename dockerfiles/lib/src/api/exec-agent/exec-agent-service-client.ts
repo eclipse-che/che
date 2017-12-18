@@ -38,28 +38,17 @@ export class ExecAgentServiceClientImpl {
     /**
      * Location of exec agent server
      */
-    serverLocation: ServerLocation;
+    serverURL: string;
 
     constructor(workspace : Workspace, authData : AuthData, serverURL : string) {
         this.workspace = workspace;
         this.authData = authData;
-        this.serverLocation = ServerLocation.parse(serverURL);
+        this.serverURL = serverURL;
         this.websocket = new Websocket();
     }
 
     getJsonRpcBus(): Promise<JsonRpcBus> {
-        let protocol: string;
-        if (this.serverLocation.isSecure()) {
-            protocol = 'wss';
-        } else {
-            protocol = 'ws';
-        }
-
-
-        // get links for Websocket
-        let link: string = protocol + '://' + this.serverLocation.getHostname() + ":" + this.serverLocation.getPort() + '/connect';
-
-        return this.websocket.getJsonRpcBus(link + '?token=' + this.authData.getToken());
+        return this.websocket.getJsonRpcBus(this.serverURL + '?token=' + this.authData.getToken());
     }
 
     /**

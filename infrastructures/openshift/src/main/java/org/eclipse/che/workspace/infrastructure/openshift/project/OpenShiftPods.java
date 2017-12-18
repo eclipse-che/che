@@ -324,6 +324,8 @@ public class OpenShiftPods {
             .inNamespace(namespace)
             .withName(podName)
             .inContainer(containerName)
+            // redirecting error output to exec watch out stream
+            .redirectingError()
             .usingListener(watchdog)
             .exec(encode(command))) {
       try {

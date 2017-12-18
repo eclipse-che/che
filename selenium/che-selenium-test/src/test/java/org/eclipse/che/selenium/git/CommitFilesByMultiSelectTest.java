@@ -156,13 +156,13 @@ public class CommitFilesByMultiSelectTest {
 
     // Edit several files in the first module
     projectExplorer.openItemByPath(PROJECT_NAME + "/my-lib/src/test/java/hello/file.css");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.PAGE_UP.toString());
     editor.typeTextIntoEditor(CHANGE_CONTENT);
     editor.waitTextIntoEditor(CHANGE_CONTENT);
     projectExplorer.openItemByPath(PROJECT_NAME + "/my-lib/src/test/java/hello/file.html");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.PAGE_UP.toString());
     editor.typeTextIntoEditor("<!" + CHANGE_CONTENT + ">");
@@ -222,13 +222,13 @@ public class CommitFilesByMultiSelectTest {
     // Edit several files in the second module
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByPath(PROJECT_NAME + "/my-webapp/src/file.xml");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.PAGE_UP.toString());
     editor.typeTextIntoEditor("<!" + CHANGE_CONTENT + ">");
     editor.waitTextIntoEditor("<!" + CHANGE_CONTENT + ">");
     projectExplorer.openItemByPath(PROJECT_NAME + "/my-webapp/src/file.js");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(CHANGE_CONTENT);
     editor.waitTextIntoEditor(CHANGE_CONTENT);
 

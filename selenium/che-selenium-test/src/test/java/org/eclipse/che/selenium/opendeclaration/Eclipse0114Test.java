@@ -56,12 +56,12 @@ public class Eclipse0114Test {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT_NAME + PATH_TO_PACKAGE_PREFIX + "Test2.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitAllMarkersDisappear(ERROR_MARKER);
-    editor.setCursorToDefinedLineAndChar(14, 12);
+    editor.goToCursorPositionVisible(14, 12);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("Test");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitSpecifiedValueForLineAndChar(14, 9);
   }
 }

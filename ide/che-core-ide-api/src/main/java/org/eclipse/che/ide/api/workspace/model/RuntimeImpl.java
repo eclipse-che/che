@@ -50,7 +50,7 @@ public class RuntimeImpl implements Runtime {
                       entry ->
                           new MachineImpl(
                               entry.getKey(),
-                              entry.getValue().getProperties(),
+                              entry.getValue().getAttributes(),
                               entry.getValue().getServers())));
     }
     this.owner = owner;

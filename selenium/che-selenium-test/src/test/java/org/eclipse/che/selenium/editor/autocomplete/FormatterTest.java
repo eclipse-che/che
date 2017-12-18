@@ -110,7 +110,7 @@ public class FormatterTest {
 
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.FORMAT);
 
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(FORMATTED_TEXT);
     loader.waitOnClosed();
   }

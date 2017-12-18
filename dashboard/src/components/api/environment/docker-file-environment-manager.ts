@@ -56,12 +56,11 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
 
   /**
    * Create a new default machine.
-   *
    * @param {che.IWorkspaceEnvironment} environment
-   *
+   * @param {string} image
    * @return {IEnvironmentManagerMachine}
    */
-  createNewDefaultMachine(environment: che.IWorkspaceEnvironment): IEnvironmentManagerMachine {
+  createNewDefaultMachine(environment: che.IWorkspaceEnvironment, image?: string): IEnvironmentManagerMachine {
     this.$log.error('EnvironmentManager: cannot create a new machine.');
     return null;
   }
@@ -86,7 +85,7 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
    * @returns {Array} a list of instructions and arguments
    * @private
    */
-  _parseRecipe(content: string): any[] {
+  parseRecipe(content: string): any[] {
     let recipe: any[] = null;
     try {
       recipe = this.parser.parse(content);
@@ -103,7 +102,7 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
    * @returns {string} dockerfile
    * @private
    */
-  _stringifyRecipe(instructions: any[]): string {
+  stringifyRecipe(instructions: any[]): string {
     let content = '';
 
     try {
@@ -128,7 +127,7 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
     // machines should contain one machine only
     if (machines && machines[0] && machines[0].recipe) {
       try {
-        newEnvironment.recipe.content = this._stringifyRecipe(machines[0].recipe);
+        newEnvironment.recipe.content = this.stringifyRecipe(machines[0].recipe);
       } catch (e) {
         this.$log.error('Cannot retrieve environment\'s recipe, error: ', e);
       }
@@ -146,10 +145,10 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
    */
   getMachines(environment: che.IWorkspaceEnvironment, runtime?: any): IEnvironmentManagerMachine[] {
     let recipe = null,
-        machines: IEnvironmentManagerMachine[] = super.getMachines(environment, runtime);
+      machines: IEnvironmentManagerMachine[] = super.getMachines(environment, runtime);
 
     if (environment.recipe.content) {
-      recipe = this._parseRecipe(environment.recipe.content);
+      recipe = this.parseRecipe(environment.recipe.content);
     }
 
     Object.keys(environment.machines).forEach((machineName: string) => {
@@ -209,72 +208,6 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
       argument: image
     };
     newRecipe.splice(0, 0, from);
-
-    machine.recipe = newRecipe;
-  }
-
-  /**
-   * Returns true if environment recipe content is present.
-   *
-   * @param {IEnvironmentManagerMachine} machine
-   * @returns {boolean}
-   */
-  canEditEnvVariables(machine: IEnvironmentManagerMachine): boolean {
-    return !!machine.recipe;
-  }
-
-  /**
-   * Returns environment variables from recipe
-   *
-   * @param {IEnvironmentManagerMachine} machine
-   * @returns {*}
-   */
-  getEnvVariables(machine: IEnvironmentManagerMachine): any {
-    if (!machine.recipe) {
-      return null;
-    }
-
-    let envVariables = {};
-
-    let envList = machine.recipe.filter((line: any) => {
-      return line.instruction === ENV_INSTRUCTION;
-    }) || [];
-
-    envList.forEach((line: any) => {
-      envVariables[line.argument[0]] = line.argument[1];
-    });
-
-    return envVariables;
-  }
-
-  /**
-   * Updates machine with new environment variables.
-   *
-   * @param {IEnvironmentManagerMachine} machine
-   * @param {any} envVariables
-   */
-  setEnvVariables(machine: IEnvironmentManagerMachine, envVariables: any): void {
-    if (!machine.recipe) {
-      return;
-    }
-
-    let newRecipe = [];
-
-    // new recipe without any 'ENV' instruction
-    newRecipe = machine.recipe.filter((line: any) => {
-      return line.instruction !== ENV_INSTRUCTION;
-    });
-
-    // add environments if any
-    if (Object.keys(envVariables).length) {
-      Object.keys(envVariables).forEach((name: string) => {
-        let line = {
-          instruction: ENV_INSTRUCTION,
-          argument: [name, envVariables[name]]
-        };
-        newRecipe.splice(1, 0, line);
-      });
-    }
 
     machine.recipe = newRecipe;
   }

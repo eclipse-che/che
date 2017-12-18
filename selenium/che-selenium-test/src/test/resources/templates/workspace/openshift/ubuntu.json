@@ -1,0 +1,24 @@
+{
+  "environments": {
+    "replaced_name": {
+      "machines": {
+        "dev-machine": {
+          "servers": {},
+          "installers": [
+            "org.eclipse.che.terminal",
+            "org.eclipse.che.ws-agent"
+          ],
+          "attributes": {
+            "memoryLimitBytes": "desired_memory_value"
+          }
+        }
+      },
+      "recipe": {
+        "content": "ubuntu",
+        "type": "dockerimage"
+      }
+    }
+  },
+  "defaultEnv": "replaced_name",
+  "name": "replaced_name"
+}

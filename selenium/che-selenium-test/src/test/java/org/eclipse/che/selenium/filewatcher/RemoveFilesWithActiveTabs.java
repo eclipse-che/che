@@ -112,7 +112,7 @@ public class RemoveFilesWithActiveTabs {
     projectExplorer1.selectVisibleItem(deletedClass);
     menu1.runCommand(EDIT, DELETE);
     projectExplorer2.openItemByVisibleNameInExplorer(deletedClass);
-    editor2.waitActiveEditor();
+    editor2.waitActive();
 
     confirmDeletion();
 

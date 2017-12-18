@@ -65,7 +65,7 @@ public class RenamePrivateFieldSmokeTest {
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());

@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -136,6 +135,7 @@ public class ProjectExplorer {
     String MAXIMIZE = "gwt-debug-contextMenu/Maximize";
     String HIDE = "gwt-debug-contextMenu/Hide";
     String COLLAPSE_ALL = "gwt-debug-contextMenu/collapseAll";
+    String REVEAL_RESOURCE = "gwt-debug-contextMenu/revealResourceInProjectTree";
     String REFRESH_MAIN = "gwt-debug-contextMenu/refreshPathAction";
     String LINK_WITH_EDITOR = "gwt-debug-contextMenu/linkWithEditor";
   }
@@ -657,6 +657,12 @@ public class ProjectExplorer {
     actions.keyUp(Keys.CONTROL).perform();
   }
 
+  /** Click on the 'Reveal in project explorer' in 'Options'menu */
+  public void revealResourceByOptionsButton() {
+    clickOnProjectExplorerOptionsButton();
+    clickOnOptionsMenuItem(ProjectExplorerOptionsMenuItem.REVEAL_RESOURCE);
+  }
+
   /**
    * perform the multi-select by Shift key
    *
@@ -905,7 +911,7 @@ public class ProjectExplorer {
     String pathToFile = path.replace('.', '/') + '/' + fileName;
     waitItem(pathToFile);
     openItemByPath(pathToFile);
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 
   /**
@@ -922,7 +928,7 @@ public class ProjectExplorer {
     String pathToFile = path.replace('.', '/') + '/' + fileName;
     waitItem(pathToFile);
     openItemByPath(pathToFile);
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 
   /**
@@ -945,8 +951,7 @@ public class ProjectExplorer {
     navigateToFile.waitListOfFilesNames(file);
     navigateToFile.selectFileByName(file);
     navigateToFile.waitFormToClose();
-    menu.runCommand(
-        TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.REVEAL_RESOURCE);
+    revealResourceByOptionsButton();
     waitItem(pathToFile);
   }
 

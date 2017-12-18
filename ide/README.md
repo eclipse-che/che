@@ -6,6 +6,7 @@
   * [Consuming the shared libraries](#consuming-the-shared-libraries)
 - [Including an IDE plugin to the IDE GWT app](#including-an-ide-plugin-to-the-ide-gwt-app)
 - [GWT Super DevMode](#gwt-super-devmode)
+- [Extending IDE GWT app](#extending-ide-gwt-app)
 
 ## Making a GWT library for the IDE GWT app
 GWT library it's a JAR that contains compiled classes, project's (re-)sources, GWT module descriptor (*.gwt.xml) and possibly other GWT-specific files.
@@ -67,3 +68,56 @@ There are two options available to launch GWT Super DevMode, depending on the st
 The second one requires *more time* to launch GWT CodeServer since the second one it executes `process-classes` build phase for each maven module. So using the first command is preferable.
 
 **Note**, both commands have to be performed in the root folder of the Che project.
+
+## Extending IDE GWT app
+There're two GWT libraries provided which allows you to easily extend IDE GWT app: Basic IDE and Full IDE.
+
+Basic IDE represents IDE without any plugins. It allows you to compile IDE GWT app with your own IDE plugins only, e.g.:
+  ```xml
+  <dependencies>
+     <dependency>
+        <groupId>org.eclipse.che.core</groupId>
+        <artifactId>che-ide-core</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>my.ide.plugin</groupId>
+        <artifactId>my-ide-plugin</artifactId>
+    </dependency>
+  </dependencies>
+  ```
+Full IDE represents IDE with full set of the standard plugins. It allows you to compile IDE GWT app excluding some of the standard plugins and/or including your own IDE plugins, e.g.:
+  ```xml
+  <dependencies>
+     <dependency>
+        <groupId>org.eclipse.che.core</groupId>
+        <artifactId>che-ide-full</artifactId>
+        <exclusions>
+           <exclusion>
+              <artifactId>che-plugin-product-info</artifactId>
+              <groupId>org.eclipse.che.plugin</groupId>
+           </exclusion>
+        </exclusions>
+    </dependency>
+    <dependency>
+        <groupId>my.ide.plugin</groupId>
+        <artifactId>my-ide-plugin</artifactId>
+    </dependency>
+  </dependencies>
+  <build>
+     <plugins>
+        <plugin>
+           <groupId>org.eclipse.che.core</groupId>
+           <artifactId>che-core-gwt-maven-plugin</artifactId>
+           <version>${project.version}</version>
+           <executions>
+              <execution>
+                 <goals>
+                    <goal>process-excludes</goal>
+                 </goals>
+              </execution>
+           </executions>
+        </plugin>
+     </plugins>
+  </build>
+  ```
+Note that `che-core-gwt-maven-plugin` have to be added in order to correctly process the IDE plugins exclusions.

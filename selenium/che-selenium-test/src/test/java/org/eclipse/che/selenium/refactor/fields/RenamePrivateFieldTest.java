@@ -72,7 +72,7 @@ public class RenamePrivateFieldTest {
     setFieldsForTest("test0");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -94,7 +94,7 @@ public class RenamePrivateFieldTest {
     setFieldsForTest("test1");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -116,7 +116,7 @@ public class RenamePrivateFieldTest {
     setFieldsForTest("test2");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(14);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -138,7 +138,7 @@ public class RenamePrivateFieldTest {
     setFieldsForTest("test3");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -165,7 +165,7 @@ public class RenamePrivateFieldTest {
     setFieldsForTest("test4");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(18);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -193,7 +193,7 @@ public class RenamePrivateFieldTest {
     setFieldsForTest("test5");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -220,7 +220,7 @@ public class RenamePrivateFieldTest {
     setFieldsForTest("test6");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -247,7 +247,7 @@ public class RenamePrivateFieldTest {
     setFieldsForTest("test7");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -274,7 +274,7 @@ public class RenamePrivateFieldTest {
     setFieldsForTest("test8");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -296,7 +296,7 @@ public class RenamePrivateFieldTest {
     setFieldsForTest("test9");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -321,7 +321,7 @@ public class RenamePrivateFieldTest {
     setFieldsForTest("test10");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(19);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -350,7 +350,7 @@ public class RenamePrivateFieldTest {
     projectExplorer.openItemByPath(pathToCurrentPackage);
     consoles.closeProcessesArea();
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(21);
     editor.typeTextIntoEditor(Keys.END.toString());
@@ -378,7 +378,7 @@ public class RenamePrivateFieldTest {
     setFieldsForTest("test12");
     projectExplorer.openItemByPath(pathToCurrentPackage);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.setCursorToLine(14);
     editor.typeTextIntoEditor(Keys.END.toString());
