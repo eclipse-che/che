@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.plugin.github.ide.importer.page;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.JsArrayMixed;
@@ -27,6 +30,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.auth.OAuthServiceClient;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorUrlProvider;
@@ -70,6 +74,7 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
   private final AppContext appContext;
   private OAuth2Authenticator gitHubAuthenticator;
   private final OAuthServiceClient oAuthServiceClient;
+  private final NotificationManager notificationManager;
 
   private boolean ignoreChanges;
 
@@ -81,7 +86,8 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
       DtoFactory dtoFactory,
       AppContext appContext,
       GitHubLocalizationConstant locale,
-      OAuthServiceClient oAuthServiceClient) {
+      OAuthServiceClient oAuthServiceClient,
+      NotificationManager notificationManager) {
     this.view = view;
     this.baseUrl = appContext.getMasterApiEndpoint();
     this.appContext = appContext;
@@ -89,6 +95,7 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
     this.gitHubClientService = gitHubClientService;
     this.dtoFactory = dtoFactory;
     this.oAuthServiceClient = oAuthServiceClient;
+    this.notificationManager = notificationManager;
     this.view.setDelegate(this);
     this.locale = locale;
   }
@@ -292,6 +299,8 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
     showProcessing(false);
     if (arg.getCause() instanceof UnauthorizedException) {
       authorize();
+    } else {
+      notificationManager.notify(locale.authorizationFailed(), FAIL, FLOAT_MODE);
     }
   }
 

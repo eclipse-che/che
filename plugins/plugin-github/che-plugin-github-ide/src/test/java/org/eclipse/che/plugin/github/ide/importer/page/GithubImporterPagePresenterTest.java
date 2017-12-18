@@ -37,6 +37,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.auth.OAuthServiceClient;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
@@ -79,6 +80,7 @@ public class GithubImporterPagePresenterTest {
   @Mock private OAuth2AuthenticatorRegistry gitHubAuthenticatorRegistry;
   @Mock private AppContext appContext;
   @Mock private OAuthServiceClient oAuthServiceClient;
+  @Mock private NotificationManager notificationManager;
 
   private GithubImporterPagePresenter presenter;
 
@@ -99,7 +101,8 @@ public class GithubImporterPagePresenterTest {
                 dtoFactory,
                 appContext,
                 locale,
-                oAuthServiceClient));
+                oAuthServiceClient,
+                notificationManager));
     doReturn(Collections.singletonList(gitHubUser))
         .when(presenter)
         .toOrgList(nullable(JsArrayMixed.class));
