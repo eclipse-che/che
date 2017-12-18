@@ -26,6 +26,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -77,10 +78,7 @@ public class WorkspaceDetailsComposeTest {
 
     // create a new variable, save changes and check it exists
     workspaceMachines.selectMachine("Environment variables", "dev-machine");
-    workspaceEnvVariables.clickOnAddEnvVariableButton();
-    workspaceEnvVariables.checkAddNewEnvVarialbleDialogIsOpen();
-    workspaceEnvVariables.addNewEnvironmentVariable("logi", "admin");
-    workspaceDetails.clickOnAddButtonInDialogWindow();
+    createVariable("logi", "admin");
     clickOnSaveButton();
     assertTrue(workspaceEnvVariables.checkEnvVariableExists("logi"));
 
@@ -90,12 +88,11 @@ public class WorkspaceDetailsComposeTest {
     workspaceEnvVariables.enterEnvVariableName("login");
     workspaceDetails.clickOnUpdateButtonInDialogWindow();
     clickOnSaveButton();
+    assertTrue(workspaceEnvVariables.checkEnvVariableExists("login"));
     assertTrue(workspaceEnvVariables.checkValueExists("login", "admin"));
 
     // delete the variable, save changes and check it is not exists
-    workspaceEnvVariables.clickOnEnvVariableCheckbox("login");
-    workspaceEnvVariables.clickOnDeleteEnvVariableButton("login");
-    workspaceDetails.clickOnDeleteButtonInDialogWindow();
+    deleteVariable("login", "admin");
     clickOnSaveButton();
     workspaceEnvVariables.checkValueIsNotExists("login", "admin");
 
@@ -103,11 +100,8 @@ public class WorkspaceDetailsComposeTest {
     // add variables to 'db' machine, check they exist and save changes
     variables.forEach(
         (name, value) -> {
-          loader.waitOnClosed();
-          workspaceEnvVariables.clickOnAddEnvVariableButton();
-          workspaceEnvVariables.checkAddNewEnvVarialbleDialogIsOpen();
-          workspaceEnvVariables.addNewEnvironmentVariable(name, value);
-          workspaceDetails.clickOnAddButtonInDialogWindow();
+          WaitUtils.sleepQuietly(1);
+          createVariable(name, value);
           assertTrue(workspaceEnvVariables.checkEnvVariableExists(name));
           assertTrue(workspaceEnvVariables.checkValueExists(name, value));
         });
@@ -116,9 +110,7 @@ public class WorkspaceDetailsComposeTest {
     // delete all variables from the 'db' machine, check they don't exist and save changes
     variables.forEach(
         (name, value) -> {
-          workspaceEnvVariables.clickOnDeleteEnvVariableButton(name);
-          workspaceDetails.clickOnDeleteButtonInDialogWindow();
-          workspaceEnvVariables.checkValueIsNotExists(name, value);
+          deleteVariable(name, value);
         });
 
     clickOnSaveButton();
@@ -137,7 +129,7 @@ public class WorkspaceDetailsComposeTest {
     createMachine(machineName);
     workspaceMachines.clickOnDeleteMachineButton(machineName);
     workspaceDetails.clickOnCloseButtonInDialogWindow();
-    loader.waitOnClosed();
+    WaitUtils.sleepQuietly(1);
     workspaceMachines.clickOnDeleteMachineButton(machineName);
     workspaceDetails.clickOnDeleteButtonInDialogWindow();
     workspaceMachines.checkMachineIsNotExists(machineName);
@@ -150,10 +142,11 @@ public class WorkspaceDetailsComposeTest {
     workspaceMachines.clickOnEditNameDialogButton();
     workspaceMachines.checkMachineExists("machine");
     clickOnSaveButton();
+    workspaceMachines.checkMachineExists("machine");
   }
 
   @Test(priority = 1)
-  public void workingWithProjects() {
+  public void startWorkspaceAndCheckChanges() {
     // check that created machine exists in the Process Console tree
     workspaceDetails.clickOpenInIdeWsBtn();
     seleniumWebDriver.switchFromDashboardIframeToIde();
@@ -212,5 +205,18 @@ public class WorkspaceDetailsComposeTest {
     workspaceMachines.setMachineNameInDialog(machineName);
     workspaceDetails.clickOnAddButtonInDialogWindow();
     workspaceMachines.checkMachineExists(machineName);
+  }
+
+  private void createVariable(String varName, String varValue) {
+    workspaceEnvVariables.clickOnAddEnvVariableButton();
+    workspaceEnvVariables.checkAddNewEnvVarialbleDialogIsOpen();
+    workspaceEnvVariables.addNewEnvironmentVariable(varName, varValue);
+    workspaceDetails.clickOnAddButtonInDialogWindow();
+  }
+
+  private void deleteVariable(String varName, String varValue) {
+    workspaceEnvVariables.clickOnDeleteEnvVariableButton(varName);
+    workspaceDetails.clickOnDeleteButtonInDialogWindow();
+    workspaceEnvVariables.checkValueIsNotExists(varName, varValue);
   }
 }
