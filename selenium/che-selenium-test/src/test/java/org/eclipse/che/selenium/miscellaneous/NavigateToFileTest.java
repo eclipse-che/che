@@ -155,7 +155,7 @@ public class NavigateToFileTest {
     launchNavigateToFileFromUIAndTypeValue(navigatingValue);
     waitExpectedItemsInNavigateToFileDropdawn(expectedItems);
     navigateToFile.selectFileByName(dropdownVerificationPath);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.getAssociatedPathFromTheTab(openedFileNameInTheTab);
     editor.closeFileByNameWithSaving(openedFileNameInTheTab);
   }

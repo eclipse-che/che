@@ -79,8 +79,8 @@ describe('WorkspaceStatusButton >', () => {
 
     beforeEach(() => {
       const jqElement = getCompiledElement(WorkspaceStatus.STOPPED);
-      jqRunButton = jqElement.find('#runButton button');
-      jqStopButton = jqElement.find('#stopButton button');
+      jqRunButton = jqElement.find('#run-workspace-button button');
+      jqStopButton = jqElement.find('#stop-workspace-button button');
     });
 
     it('should have "Run" button enabled', () => {
@@ -113,8 +113,8 @@ describe('WorkspaceStatusButton >', () => {
 
     beforeEach(() => {
       const jqElement = getCompiledElement(WorkspaceStatus.STOPPING);
-      jqRunButton = jqElement.find('#runButton button');
-      jqStopButton = jqElement.find('#stopButton button');
+      jqRunButton = jqElement.find('#run-workspace-button button');
+      jqStopButton = jqElement.find('#stop-workspace-button button');
     });
 
     it('should have "Stop" button disabled', () => {
@@ -134,8 +134,8 @@ describe('WorkspaceStatusButton >', () => {
 
     beforeEach(() => {
       const jqElement = getCompiledElement(WorkspaceStatus.STARTING);
-      jqRunButton = jqElement.find('#runButton button');
-      jqStopButton = jqElement.find('#stopButton button');
+      jqRunButton = jqElement.find('#run-workspace-button button');
+      jqStopButton = jqElement.find('#stop-workspace-button button');
     });
 
     it('should have "Stop" button enabled', () => {
@@ -168,8 +168,8 @@ describe('WorkspaceStatusButton >', () => {
 
     beforeEach(() => {
       const jqElement = getCompiledElement(WorkspaceStatus.RUNNING);
-      jqRunButton = jqElement.find('#runButton button');
-      jqStopButton = jqElement.find('#stopButton button');
+      jqRunButton = jqElement.find('#run-workspace-button button');
+      jqStopButton = jqElement.find('#stop-workspace-button button');
     });
 
     it('should have "Stop" button enabled', () => {

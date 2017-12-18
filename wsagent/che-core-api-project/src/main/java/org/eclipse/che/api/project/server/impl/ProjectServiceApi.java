@@ -176,9 +176,14 @@ public class ProjectServiceApi {
       throws ConflictException, ForbiddenException, ServerException, NotFoundException, IOException,
           UnauthorizedException, BadRequestException {
 
-    Set<RegisteredProject> registeredProjects =
-        projectManager.doImport(
-            new HashSet<>(projectConfigs), rewrite, jsonRpcImportConsumer(clientId));
+    projectManager.doImport(
+        new HashSet<>(projectConfigs), rewrite, jsonRpcImportConsumer(clientId));
+
+    Set<RegisteredProject> registeredProjects = new HashSet<>(projectConfigs.size());
+
+    for (NewProjectConfigDto projectConfig : projectConfigs) {
+      registeredProjects.add(projectManager.update(projectConfig));
+    }
 
     Set<ProjectConfigDto> result =
         registeredProjects
@@ -566,7 +571,10 @@ public class ProjectServiceApi {
     wsPath = absolutize(wsPath);
 
     ItemReference asDto = fsDtoConverter.asDto(wsPath);
-    ItemReference asLinkedDto = injectFolderLinks(asDto);
+    ItemReference asLinkedDto =
+        fsManager.isFile(wsPath)
+            ? injectFileLinks(vcsStatusInjector.injectVcsStatus(asDto))
+            : injectFolderLinks(asDto);
     return newDto(TreeElement.class)
         .withNode(asLinkedDto)
         .withChildren(getTreeRecursively(wsPath, depth, includeFiles));

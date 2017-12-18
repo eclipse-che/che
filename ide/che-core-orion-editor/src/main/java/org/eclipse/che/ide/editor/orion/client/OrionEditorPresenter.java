@@ -12,6 +12,7 @@ package org.eclipse.che.ide.editor.orion.client;
 
 import static java.lang.Boolean.parseBoolean;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.project.shared.Constants.VCS_PROVIDER_NAME;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -125,6 +126,7 @@ import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -1221,8 +1223,12 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                     resolve.apply(null);
                     return;
                   }
-
-                  String vcsName = project.getAttribute("vcs.provider.name");
+                  Container parent = getRoot(project);
+                  if (!(parent instanceof Project)) {
+                    resolve.apply(null);
+                    return;
+                  }
+                  String vcsName = ((Project) parent).getAttribute(VCS_PROVIDER_NAME);
                   VcsChangeMarkerRenderFactory vcsChangeMarkerRenderFactory =
                       vcsChangeMarkerRenderFactoryMap.get(vcsName);
                   if (vcsChangeMarkerRenderFactory != null) {
@@ -1231,6 +1237,14 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
                   }
                   resolve.apply(null);
                 }));
+  }
+
+  private Container getRoot(Container container) {
+    Container root = container;
+    while (root.getParent() != null) {
+      root = root.getParent();
+    }
+    return root;
   }
 
   @Override

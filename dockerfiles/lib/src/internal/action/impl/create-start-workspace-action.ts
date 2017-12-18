@@ -58,13 +58,8 @@ export class CreateStartWorkspaceAction {
                     Log.getLogger().info('Starting workspace runtime');
                     return this.workspace.startWorkspace(workspaceDto.getId(), !this.isQuiet);
                 }).then((workspaceDto) => {
-                    let ideUrl: string;
-                    workspaceDto.getLinks().forEach((link) => {
-                        if ('ide url' === link.getRel()) {
-                            ideUrl = link.getHref();
-                            Log.getLogger().info(ideUrl);
-                        }
-                    });
+                    let ideUrl: string = workspaceDto.getLinks().get("ide");
+                    Log.getLogger().info(ideUrl);
                 });
 
         });

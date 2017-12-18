@@ -267,7 +267,7 @@ public class RenamePackageTest {
   public void checkTest0() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test0/r");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test0/r/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextNotPresentIntoEditor(TEST0_P1_OUT);
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test0/r");
     menu.runCommand(
@@ -298,7 +298,7 @@ public class RenamePackageTest {
   public void checkTest1() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test1/r");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test1/r/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextNotPresentIntoEditor(TEST1_P1_OUT);
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test1/r");
     projectExplorer.launchRefactorByKeyboard();
@@ -324,7 +324,7 @@ public class RenamePackageTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test2");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test2/fred");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test2/fred/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextNotPresentIntoEditor(TEST2_FRED_OUT);
     editor.closeFileByNameWithSaving("A");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test2/r");
@@ -358,7 +358,7 @@ public class RenamePackageTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test3");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test3/fred");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test3/fred/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextNotPresentIntoEditor(TEST3_R_OUT);
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test3/fred");
     projectExplorer.launchRefactorByKeyboard();
@@ -436,7 +436,7 @@ public class RenamePackageTest {
   public void checkTest5() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test5/r");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test5/r/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextNotPresentIntoEditor(TEST5_P1_OUT);
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test5/r");
     menu.runCommand(
@@ -466,7 +466,7 @@ public class RenamePackageTest {
   public void checkTest6() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test6/r");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test6/r/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextNotPresentIntoEditor(TEST6_P1_OUT);
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test6/r");
     projectExplorer.launchRefactorByKeyboard();
@@ -492,11 +492,11 @@ public class RenamePackageTest {
   public void checkTest7() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test7/r");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test7/r/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(TEST7_R_IN);
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test7/r/s");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test7/r/s/B.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(TEST7_R_S_IN);
     editor.closeFileByNameWithSaving("A");
     editor.closeFileByNameWithSaving("B");
@@ -535,7 +535,7 @@ public class RenamePackageTest {
   public void checkTest8() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/java/lang/reflect");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/java/lang/reflect/Klass.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(TEST8_IN);
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/java/lang/reflect");
     projectExplorer.launchRefactorByKeyboard();
@@ -558,7 +558,7 @@ public class RenamePackageTest {
     refactor.waitRenamePackageFormIsClosed();
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/nonjava");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/nonjava/Klass.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(TEST8_OUT);
     editor.closeFileByNameWithSaving("Klass");
   }
@@ -567,7 +567,7 @@ public class RenamePackageTest {
   public void checkTestHierarchical9_1() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/my");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/my/MyA.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(TEST9_HIERAR_IN);
     editor.closeFileByNameWithSaving("MyA");
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/my");
@@ -599,7 +599,7 @@ public class RenamePackageTest {
   public void checkTestHierarchical10() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/m_y/pack");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/m_y/pack/C.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(TEST10_HIERAR_IN);
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/m_y/pack");
     projectExplorer.launchRefactorByKeyboard();
@@ -628,7 +628,7 @@ public class RenamePackageTest {
   public void checkTestDisableImport11() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/my_/pack");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/my_/pack/C.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(TEST11_DISABLED_IMPORT_IN);
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/my_/pack");
     menu.runCommand(
@@ -659,7 +659,7 @@ public class RenamePackageTest {
   public void checkTestPackageRenameWithResource12() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/mine/pack");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/mine/pack/Textfile.txt");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(TEST12_RENAME_WITH_RESOURCE_IN);
     editor.closeFileByNameWithSaving("Textfile.txt");
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/mine/pack");

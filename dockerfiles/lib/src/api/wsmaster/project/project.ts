@@ -16,6 +16,7 @@ import {DefaultHttpJsonRequest} from "../../../spi/http/default-http-json-reques
 import {HttpJsonResponse} from "../../../spi/http/default-http-json-request";
 import {Url} from "url";
 import {ServerLocation} from "../../../utils/server-location";
+import {RemoteIp} from "../../../spi/docker/remoteip";
 
 /**
  * Project class allowing to manage a project like updating project-type.
@@ -48,18 +49,21 @@ export class Project {
         this.authData = authData;
 
         // search the workspace agent link
-        let servers : Map<string, org.eclipse.che.api.workspace.shared.dto.ServerDto> = this.workspaceDTO.getRuntime().getDevMachine().getRuntime().getServers();
+        let machines : Map<string, org.eclipse.che.api.workspace.shared.dto.MachineDto> = this.workspaceDTO.getRuntime().getMachines();
 
         var hrefWsAgent : string;
-        for (let server of servers.values()) {
-            if (server.getRef() === 'wsagent') {
-                hrefWsAgent = server.getProperties().getInternalUrl();
-            }
+        for (let machine of machines.values()) {
+                hrefWsAgent = machine.getServers().get("wsagent/http").getUrl();
         }
 
         if (!hrefWsAgent) {
             throw new Error('unable to find the workspace agent link from workspace :' + workspaceDTO.getConfig().getName() + " with JSON " + workspaceDTO.toJson());
         }
+
+        if (hrefWsAgent.includes("localhost")) {
+            hrefWsAgent = hrefWsAgent.replace("localhost", RemoteIp.ip)
+        }
+
         this.wsAgentServer = ServerLocation.parse(hrefWsAgent);
 
         this.wsAgentPath = require('url').parse(hrefWsAgent).path;

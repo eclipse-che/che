@@ -65,11 +65,11 @@ public class DeletePackageWithOpenedFilesTabTest {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     openFile("LessFile.less");
     openFile("sqlFile.sql");
     openFile("another");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.selectTabByName("AppController");
 
     projectExplorer.selectItem(PATH_TO_PACKAGE1);
@@ -82,12 +82,12 @@ public class DeletePackageWithOpenedFilesTabTest {
 
     // active tab is middle tab
     projectExplorer.openItemByPath(PATH_TO_WEB_APP + "/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     openFile("spring-servlet.xml");
     openFile("web.xml");
     openFile("guess_num.jsp");
     openFile("htmlFile.html");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.selectTabByName("web.xml");
 
     projectExplorer.selectItem(PATH_TO_PACKAGE2);
@@ -126,12 +126,12 @@ public class DeletePackageWithOpenedFilesTabTest {
   private void openFile(String fileName) {
     projectExplorer.openItemByVisibleNameInExplorer(fileName);
     editor.waitTabIsPresent(fileName);
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 
   private void openJavaFile(String path, String fileName) {
     projectExplorer.openItemByPath(path);
     editor.waitTabIsPresent(fileName);
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 }

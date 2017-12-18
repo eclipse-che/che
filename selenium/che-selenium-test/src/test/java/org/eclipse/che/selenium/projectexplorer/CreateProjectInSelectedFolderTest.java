@@ -98,7 +98,7 @@ public class CreateProjectInSelectedFolderTest {
     projectExplorer.quickExpandWithJavaScript();
     explorer.openItemByPath(
         PROJECT_NAME + "/" + FOLDER_NAME + "/" + INNER_PROJECT_NAME + "/README");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(EXPECTED_TEXT);
   }
 }

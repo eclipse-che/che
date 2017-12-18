@@ -66,7 +66,7 @@ public class ResolveDependencyAfterRecreateProjectTest {
     notificationsPopupPanel.waitProgressPopupPanelClose();
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(NAME_OF_THE_PROJECT_1 + PATH_FOR_EXPAND);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitAllMarkersDisappear(ERROR_MARKER);
     removeProjectFromUI();
     createProjectFromUI(NAME_OF_THE_PROJECT_2);
@@ -74,7 +74,7 @@ public class ResolveDependencyAfterRecreateProjectTest {
     projectExplorer.selectVisibleItem(NAME_OF_THE_PROJECT_2);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(NAME_OF_THE_PROJECT_2 + PATH_FOR_EXPAND);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitAllMarkersDisappear(ERROR_MARKER);
   }
 

@@ -60,7 +60,6 @@ public class WorkspaceLinksGenerator {
         LINK_REL_SELF,
         uriBuilder
             .clone()
-            .path(WorkspaceService.class)
             .path(WorkspaceService.class, "getByKey")
             .build(workspace.getId())
             .toString());

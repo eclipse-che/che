@@ -10,12 +10,15 @@
  */
 package org.eclipse.che.api.languageserver.registry;
 
+import static javax.ws.rs.core.UriBuilder.fromUri;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,15 +27,22 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
+import org.eclipse.che.api.languageserver.remote.RemoteLsLauncherProvider;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.workspace.server.WorkspaceService;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -44,6 +54,11 @@ import org.slf4j.LoggerFactory;
 public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
   private static final Logger LOG = LoggerFactory.getLogger(LanguageServerRegistryImpl.class);
+
+  private final String workspaceId;
+  private final String apiEndpoint;
+  private final HttpJsonRequestFactory httpJsonRequestFactory;
+  private final Set<RemoteLsLauncherProvider> launcherProviders;
   private final List<LanguageDescription> languages;
   private final List<LanguageServerLauncher> launchers;
   private final AtomicInteger serverId = new AtomicInteger();
@@ -57,15 +72,24 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
   private final ServerInitializer initializer;
   private EventService eventService;
   private CheLanguageClientFactory clientFactory;
+  private Workspace workspace;
 
   @Inject
   public LanguageServerRegistryImpl(
+      @Named("env.CHE_WORKSPACE_ID") String workspaceId,
+      @Named("che.api") String apiEndpoint,
+      HttpJsonRequestFactory httpJsonRequestFactory,
+      Set<RemoteLsLauncherProvider> launcherProviders,
       Set<LanguageServerLauncher> languageServerLaunchers,
       Set<LanguageDescription> languages,
       Provider<ProjectManager> projectManagerProvider,
       ServerInitializer initializer,
       EventService eventService,
       CheLanguageClientFactory clientFactory) {
+    this.workspaceId = workspaceId;
+    this.apiEndpoint = apiEndpoint;
+    this.httpJsonRequestFactory = httpJsonRequestFactory;
+    this.launcherProviders = launcherProviders;
     this.languages = new ArrayList<>(languages);
     this.launchers = new ArrayList<>(languageServerLaunchers);
     this.projectManagerProvider = projectManagerProvider;
@@ -189,8 +213,16 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     if (language == null) {
       return Collections.emptyList();
     }
+    List<LanguageServerLauncher> combinedLaunchers = new LinkedList<>(launchers);
+    Workspace workspace = getWorkspaceConfiguration();
+    if (workspace != null) {
+      for (RemoteLsLauncherProvider launcherProvider : launcherProviders) {
+        combinedLaunchers.addAll(launcherProvider.getAll(workspace));
+      }
+    }
+
     List<LanguageServerLauncher> result = new ArrayList<>();
-    for (LanguageServerLauncher launcher : launchers) {
+    for (LanguageServerLauncher launcher : combinedLaunchers) {
       if (launcher.isAbleToLaunch()) {
         int score = matchScore(launcher.getDescription(), fileUri, language.getLanguageId());
         if (score > 0) {
@@ -344,5 +376,26 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       }
     }
     return null;
+  }
+
+  private Workspace getWorkspaceConfiguration() {
+    if (workspace != null) {
+      return workspace;
+    }
+
+    String href =
+        fromUri(apiEndpoint)
+            .path(WorkspaceService.class)
+            .path(WorkspaceService.class, "getByKey")
+            .queryParam("includeInternalServers", true)
+            .build(workspaceId)
+            .toString();
+    try {
+      return workspace =
+          httpJsonRequestFactory.fromUrl(href).useGetMethod().request().asDto(WorkspaceDto.class);
+    } catch (IOException | ApiException e) {
+      LOG.error("Did not manage to get workspace configuration: {}", workspaceId, e);
+      return null;
+    }
   }
 }

@@ -132,7 +132,7 @@ public class AddFilesToIndexTest {
 
     // Edit index.jsp
     projectExplorer.openItemByVisibleNameInExplorer("index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.PAGE_DOWN.toString());
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -154,7 +154,7 @@ public class AddFilesToIndexTest {
     // Edit GreetingController.java
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(16);
     editor.typeTextIntoEditor("//Testing add to index");
     loader.waitOnClosed();
@@ -185,7 +185,7 @@ public class AddFilesToIndexTest {
 
     // Edit GreetingController.java
     editor.selectTabByName("AppController");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.DOWN.toString());
     editor.typeTextIntoEditor(Keys.DOWN.toString());
     editor.typeTextIntoEditor(Keys.DOWN.toString());
@@ -194,7 +194,7 @@ public class AddFilesToIndexTest {
 
     // Edit index.jsp
     editor.selectTabByName("index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.PAGE_DOWN.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("<!-- Testing add to index-->");
@@ -202,7 +202,7 @@ public class AddFilesToIndexTest {
 
     // Edit new.css
     editor.selectTabByName("new.css");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.PAGE_DOWN.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("/* Testing add to index */");

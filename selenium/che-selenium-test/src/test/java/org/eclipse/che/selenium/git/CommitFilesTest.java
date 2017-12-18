@@ -212,7 +212,7 @@ public class CommitFilesTest {
     // change content in AppController.java
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/org/eclipse/dev/examples");
     projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(12);
     editor.typeTextIntoEditor("//" + MESSAGE_FOR_CHANGE_CONTENT);
     editor.waitTextIntoEditor("//" + MESSAGE_FOR_CHANGE_CONTENT);
@@ -223,7 +223,7 @@ public class CommitFilesTest {
     // change content in index.jsp
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_JSP_FILE);
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.PAGE_UP.toString());

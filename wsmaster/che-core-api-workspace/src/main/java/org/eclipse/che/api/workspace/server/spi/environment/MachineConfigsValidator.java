@@ -11,16 +11,12 @@
 package org.eclipse.che.api.workspace.server.spi.environment;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 
-import com.google.common.base.Joiner;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 
 /** @author Sergii Leshchenko */
 public class MachineConfigsValidator {
@@ -44,23 +40,6 @@ public class MachineConfigsValidator {
     for (Entry<String, InternalMachineConfig> machineConfigEntry : machines.entrySet()) {
       validateMachine(machineConfigEntry.getKey(), machineConfigEntry.getValue());
     }
-
-    List<String> machinesWithWsagentServer =
-        machines
-            .entrySet()
-            .stream()
-            .filter(
-                entry ->
-                    WsAgentMachineFinderUtil.containsWsAgentServerOrInstaller(entry.getValue()))
-            .map(Map.Entry::getKey)
-            .collect(toList());
-
-    checkArgument(
-        machinesWithWsagentServer.size() == 1,
-        "Environment should contain exactly 1 machine with wsagent, but contains '%s'. "
-            + "All machines with this agent: %s",
-        machinesWithWsagentServer.size(),
-        Joiner.on(", ").join(machinesWithWsagentServer));
   }
 
   private void validateMachine(String machineName, InternalMachineConfig machineConfig)

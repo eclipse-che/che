@@ -335,7 +335,7 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
 
     return {
       name: uniqueMachineName,
-      installers: [this.SSH_AGENT_NAME, this.TERMINAL_AGENT_NAME],
+      installers: [this.TERMINAL_AGENT_NAME],
       attributes: {
         memoryLimitBytes: this.DEFAULT_MEMORY_LIMIT
       },

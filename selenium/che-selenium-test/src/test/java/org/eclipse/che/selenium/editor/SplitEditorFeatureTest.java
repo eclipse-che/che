@@ -69,7 +69,7 @@ public class SplitEditorFeatureTest {
 
   @Test
   public void checkSplitEditorWindow() {
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.openContextMenuForTabByName(NAME_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(TabAction.SPIT_HORISONTALLY);
 
@@ -80,7 +80,7 @@ public class SplitEditorFeatureTest {
     editor.waitCountTabsWithProvidedName(3, NAME_JAVA_CLASS);
 
     editor.selectTabByIndexEditorWindow(1, NAME_JAVA_CLASS);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.UP.toString());
     editor.typeTextIntoEditor(TEXT);
@@ -102,7 +102,7 @@ public class SplitEditorFeatureTest {
   @Test(priority = 2)
   public void checkRefactoring() {
     editor.selectTabByIndexEditorWindow(2, NAME_JAVA_CLASS);
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.selectItem(PATH_JAVA_FILE);
 
     projectExplorer.launchRefactorByKeyboard();
@@ -110,13 +110,13 @@ public class SplitEditorFeatureTest {
     refactor.sendKeysIntoField(Keys.SPACE.toString());
     refactor.sendKeysIntoField(Keys.BACK_SPACE.toString());
     refactor.clickOkButtonRefactorForm();
-    editor.waitActiveEditor();
+    editor.waitActive();
 
     editor.selectTabByIndexEditorWindow(1, NEW_NAME);
-    editor.waitActiveEditor();
+    editor.waitActive();
 
     editor.selectTabByIndexEditorWindow(0, NEW_NAME);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(2);
     editor.typeTextIntoEditor("//" + TEXT);
     editor.waitTextIntoEditor("//" + TEXT);
@@ -130,13 +130,13 @@ public class SplitEditorFeatureTest {
   public void checkContentAfterRenameFile() {
     editor.selectTabByIndexEditorWindow(0, NEW_NAME);
     projectExplorer.openItemByPath(PATH_TEXT_FILE);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.selectTabByIndexEditorWindow(2, NEW_NAME);
     projectExplorer.openItemByPath(PATH_TEXT_FILE);
-    editor.waitActiveEditor();
+    editor.waitActive();
     renameFile(PATH_TEXT_FILE);
     editor.selectTabByIndexEditorWindow(0, NEW_NAME_TXT_FILE);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(3);
     editor.typeTextIntoEditor("***" + TEXT);
     editor.waitTextIntoEditor("***" + TEXT);
@@ -177,13 +177,13 @@ public class SplitEditorFeatureTest {
   private void selectSplittedTabAndWaitExpectedText(
       int tabIndex, String tabName, String expectedText) {
     editor.selectTabByIndexEditorWindow(tabIndex, tabName);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextInDefinedSplitEditor(tabIndex + 1, LOAD_PAGE_TIMEOUT_SEC, expectedText);
   }
 
   private void selectSplittedTabAndWaitTextIsNotPresent(int tabIndex, String tabName, String text) {
     editor.selectTabByIndexEditorWindow(tabIndex, tabName);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIsNotPresentInDefinedSplitEditor(tabIndex + 1, LOAD_PAGE_TIMEOUT_SEC, text);
   }
 }

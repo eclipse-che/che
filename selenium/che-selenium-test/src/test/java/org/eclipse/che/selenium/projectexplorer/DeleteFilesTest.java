@@ -89,9 +89,9 @@ public class DeleteFilesTest {
     notificationsPopupPanel.waitProgressPopupPanelClose();
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_FOR_EXPAND + "/AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.openItemByPath(PATH_TO_WEB_APP + "/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
 
     // delete jsp file
     deleteFromMenuFile(DELETE_TEXT_FOR_JSP, PATH_TO_JSP);

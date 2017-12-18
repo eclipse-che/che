@@ -11,6 +11,7 @@
 package org.eclipse.che.api.workspace.server.spi;
 
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.INTERNAL_SERVER_ATTRIBUTE;
 
 import java.util.HashMap;
 import java.util.List;
@@ -182,13 +183,17 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
     for (Map.Entry<String, ? extends Server> entry : incoming.entrySet()) {
       String name = entry.getKey();
       Server incomingServer = entry.getValue();
-      try {
-        ServerImpl server =
-            new ServerImpl(incomingServer)
-                .withUrl(urlRewriter.rewriteURL(identity, name, incomingServer.getUrl()));
-        outgoing.put(name, server);
-      } catch (InfrastructureException e) {
-        warnings.add(new WarningImpl(101, "Malformed URL for " + name + " : " + e.getMessage()));
+      if (Boolean.parseBoolean(incomingServer.getAttributes().get(INTERNAL_SERVER_ATTRIBUTE))) {
+        outgoing.put(name, incomingServer);
+      } else {
+        try {
+          ServerImpl server =
+              new ServerImpl(incomingServer)
+                  .withUrl(urlRewriter.rewriteURL(identity, name, incomingServer.getUrl()));
+          outgoing.put(name, server);
+        } catch (InfrastructureException e) {
+          warnings.add(new WarningImpl(101, "Malformed URL for " + name + " : " + e.getMessage()));
+        }
       }
     }
 

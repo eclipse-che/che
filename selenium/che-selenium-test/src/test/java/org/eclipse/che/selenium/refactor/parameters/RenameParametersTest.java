@@ -69,9 +69,9 @@ public class RenameParametersTest {
   public void checkRenameParameters0() throws Exception {
     setFieldsForTest("test0");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(14, 17);
+    editor.goToCursorPositionVisible(14, 17);
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameParametersFormIsOpen();
@@ -86,14 +86,14 @@ public class RenameParametersTest {
   public void checkRenameParameters3() throws Exception {
     setFieldsForTest("test3");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(14, 15);
+    editor.goToCursorPositionVisible(14, 15);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     loader.waitOnClosed();
-    editor.setCursorToDefinedLineAndChar(14, 23);
+    editor.goToCursorPositionVisible(14, 23);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("j1");
     loader.waitOnClosed();
@@ -106,9 +106,9 @@ public class RenameParametersTest {
   public void checkRenameParameters6() throws Exception {
     setFieldsForTest("test6");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(14, 17);
+    editor.goToCursorPositionVisible(14, 17);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("k");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -120,9 +120,9 @@ public class RenameParametersTest {
   public void checkRenameParameters9() throws Exception {
     setFieldsForTest("test9");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(14, 17);
+    editor.goToCursorPositionVisible(14, 17);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -134,9 +134,9 @@ public class RenameParametersTest {
   public void checkRenameParameters12() throws Exception {
     setFieldsForTest("test12");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(14, 23);
+    editor.goToCursorPositionVisible(14, 23);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -148,9 +148,9 @@ public class RenameParametersTest {
   public void checkRenameParameters15() throws Exception {
     setFieldsForTest("test15");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(14, 15);
+    editor.goToCursorPositionVisible(14, 15);
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameParametersFormIsOpen();
@@ -160,8 +160,8 @@ public class RenameParametersTest {
     askDialog.acceptDialogWithText("Duplicate parameter j");
     loader.waitOnClosed();
     refactor.waitRenameParametersFormIsClosed();
-    editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(14, 23);
+    editor.waitActive();
+    editor.goToCursorPositionVisible(14, 23);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("i");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -174,9 +174,9 @@ public class RenameParametersTest {
   public void checkRenameParameters18() throws Exception {
     setFieldsForTest("test18");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(14, 20);
+    editor.goToCursorPositionVisible(14, 20);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -188,9 +188,9 @@ public class RenameParametersTest {
   public void checkRenameParameters21() throws Exception {
     setFieldsForTest("test21");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(14, 17);
+    editor.goToCursorPositionVisible(14, 17);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -202,9 +202,9 @@ public class RenameParametersTest {
   public void checkRenameParameters25() throws Exception {
     setFieldsForTest("test25");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(15, 16);
+    editor.goToCursorPositionVisible(15, 16);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -216,9 +216,9 @@ public class RenameParametersTest {
   public void checkRenameParameters28() throws Exception {
     setFieldsForTest("test28");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(14, 18);
+    editor.goToCursorPositionVisible(14, 18);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
@@ -233,9 +233,9 @@ public class RenameParametersTest {
   public void checkRenameParameters31() throws Exception {
     setFieldsForTest("test31");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(14, 30);
+    editor.goToCursorPositionVisible(14, 30);
     editor.launchRefactorFormFromEditor();
     editor.typeTextIntoEditor("kk");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -247,9 +247,9 @@ public class RenameParametersTest {
   public void checkRenameParameters33() throws Exception {
     setFieldsForTest("test33");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(15, 12);
+    editor.goToCursorPositionVisible(15, 12);
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameParametersFormIsOpen();

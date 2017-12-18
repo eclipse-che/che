@@ -96,8 +96,8 @@ public class ImplementationBaseOperationsTest {
 
     // check the 'implementation' for abstract class
     projectExplorer.openItemByVisibleNameInExplorer(ABSTRACT_CLASS_NAME + ".java");
-    editor.setCursorToDefinedLineAndChar(15, 25);
-    editor.waitActiveEditor();
+    editor.goToCursorPositionVisible(15, 25);
+    editor.waitActive();
     editor.waitTextElementsActiveLine("Empl");
     editor.launchImplementationFormByKeyboard();
     editor.waitActiveTabFileName("EmployeeFixedSalary");
@@ -117,7 +117,7 @@ public class ImplementationBaseOperationsTest {
 
     // check the 'implementations' for interface
     projectExplorer.openItemByVisibleNameInExplorer(INTERFACE_NAME + ".java");
-    editor.setCursorToDefinedLineAndChar(15, 20);
+    editor.goToCursorPositionVisible(15, 20);
     editor.waitTextElementsActiveLine("Employee");
     editor.launchImplementationFormByKeyboard();
     editor.waitActiveTabFileName("EmployeeHourlyWages");
@@ -179,6 +179,6 @@ public class ImplementationBaseOperationsTest {
         PROJECT_NAME + "/src" + "/main" + "/java" + "/com/codenvy/qa/" + fileName + ".java");
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src" + "/main" + "/java" + "/com/codenvy/qa/" + fileName + ".java");
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 }

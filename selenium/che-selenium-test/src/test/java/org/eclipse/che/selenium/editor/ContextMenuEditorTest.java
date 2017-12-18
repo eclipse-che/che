@@ -144,7 +144,7 @@ public class ContextMenuEditorTest {
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     loader.waitOnClosed();
     editor.openContextMenuInEditor();
     editor.clickOnItemInContextMenu(FORMAT);
@@ -155,21 +155,21 @@ public class ContextMenuEditorTest {
   @Test(priority = 1)
   public void checkUndoRedo() {
     projectExplorer.waitItem(PROJECT_NAME);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(2);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(CHECK_TEXT);
     editor.waitTextIntoEditor(CHECK_TEXT);
     loader.waitOnClosed();
     editor.openContextMenuInEditor();
     editor.clickOnItemInContextMenu(UNDO);
     editor.setCursorToLine(2);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextNotPresentIntoEditor(CHECK_TEXT);
     editor.openContextMenuInEditor();
     editor.clickOnItemInContextMenu(REDO);
     editor.setCursorToLine(2);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(CHECK_TEXT);
     editor.waitContextMenuIsNotPresent();
   }
@@ -178,7 +178,7 @@ public class ContextMenuEditorTest {
   public void checkClose() {
     projectExplorer.waitItem(PROJECT_NAME);
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.openContextMenuInEditor();
     loader.waitOnClosed();
     editor.clickOnItemInContextMenu(CLOSE);
@@ -191,8 +191,8 @@ public class ContextMenuEditorTest {
     projectExplorer.waitItem(PROJECT_NAME_2);
     projectExplorer.openItemByPath(
         PROJECT_NAME_2 + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(25, 105);
+    editor.waitActive();
+    editor.goToCursorPositionVisible(25, 105);
     loader.waitOnClosed();
     editor.openContextMenuOnElementInEditor("Exception");
     editor.clickOnItemInContextMenu(QUICK_DOC);
@@ -208,7 +208,7 @@ public class ContextMenuEditorTest {
     projectExplorer.waitItem(PROJECT_NAME_2);
     projectExplorer.openItemByPath(
         PROJECT_NAME_2 + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(28);
     editor.typeTextIntoEditor("String s = 5;");
     editor.waitTextIntoEditor("String s = 5;");
@@ -227,7 +227,7 @@ public class ContextMenuEditorTest {
   @Test(priority = 5)
   public void checkOpenDeclaration() {
     projectExplorer.waitItem(PROJECT_NAME_2);
-    editor.setCursorToDefinedLineAndChar(25, 13);
+    editor.goToCursorPositionVisible(25, 13);
     editor.openContextMenuOnElementInEditor(" ModelAndView");
     editor.clickOnItemInContextMenu(OPEN_DECLARATION);
     editor.waitContextMenuIsNotPresent();
@@ -240,7 +240,7 @@ public class ContextMenuEditorTest {
   public void checkRefactoring() {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/com/example/Test1.java");
-    editor.setCursorToDefinedLineAndChar(13, 15);
+    editor.goToCursorPositionVisible(13, 15);
     editor.openContextMenuOnElementInEditor("Test1");
     editor.clickOnItemInContextMenu(REFACTORING);
     editor.clickOnItemInContextMenu(REFACTORING_MOVE);
@@ -255,7 +255,7 @@ public class ContextMenuEditorTest {
     refactor.waitMoveItemFormIsClosed();
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/Test1.java");
-    editor.setCursorToDefinedLineAndChar(13, 15);
+    editor.goToCursorPositionVisible(13, 15);
     editor.openContextMenuOnElementInEditor("Test1");
     editor.clickOnItemInContextMenu(REFACTORING);
     editor.clickOnItemInContextMenu(REFACTORING_RENAME);

@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.api.git;
 
+import static org.eclipse.che.api.project.shared.Constants.VCS_PROVIDER_NAME;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.project.server.type.TransientMixin;
@@ -20,7 +22,6 @@ public class GitProjectType extends TransientMixin {
 
   public static final String TYPE_ID = "git";
   public static final String DISPLAY_NAME = "git";
-  public static final String VCS_PROVIDER_NAME = "vcs.provider.name";
   public static final String GIT_CURRENT_HEAD_NAME = "git.current.head.name";
   public static final String GIT_REPOSITORY_REMOTES = "git.repository.remotes";
 

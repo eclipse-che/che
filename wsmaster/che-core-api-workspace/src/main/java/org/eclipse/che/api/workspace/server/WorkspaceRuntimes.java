@@ -553,6 +553,10 @@ public class WorkspaceRuntimes {
     return Optional.of(state.runtime.getContext());
   }
 
+  public Set<String> getSupportedRecipes() {
+    return environmentFactories.keySet();
+  }
+
   private InternalEnvironment createInternalEnvironment(Environment environment)
       throws InfrastructureException, ValidationException, NotFoundException {
     String recipeType = environment.getRecipe().getType();
