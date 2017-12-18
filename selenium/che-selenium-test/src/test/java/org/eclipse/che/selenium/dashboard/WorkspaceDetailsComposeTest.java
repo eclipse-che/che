@@ -12,17 +12,11 @@ package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
-import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_PETCLINIC;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.RUNNING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPED;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.ENV_VARIABLES;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.INSTALLERS;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.MACHINES;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.OVERVIEW;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.PROJECTS;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.SERVERS;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
@@ -32,24 +26,16 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Loader;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
-import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceEnvVariables;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceInstallers;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceMachines;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceServers;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -57,34 +43,26 @@ import org.testng.annotations.Test;
 /** @author Skoryk Serhii */
 public class WorkspaceDetailsComposeTest {
   private static final String WORKSPACE = NameGenerator.generate("java-mysql", 4);
-  private static final String PROJECT_NAME = "web-java-petclinic";
 
-  private Map<String, Boolean> installers = new HashMap<>();
   private Map<String, String> variables = new HashMap<>();
 
   @Inject private TestUser testUser;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
-  @Inject private NavigationBar navigationBar;
   @Inject private CreateWorkspace createWorkspace;
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
-  @Inject private WorkspaceProjects workspaceProjects;
   @Inject private Consoles consoles;
   @Inject private Workspaces workspaces;
-  @Inject private ProjectSourcePage projectSourcePage;
   @Inject private WorkspaceMachines workspaceMachines;
-  @Inject private WorkspaceServers workspaceServers;
-  @Inject private WorkspaceInstallers workspaceInstallers;
   @Inject private WorkspaceEnvVariables workspaceEnvVariables;
   @Inject private MachineTerminal terminal;
 
   @BeforeClass
   public void setUp() throws Exception {
-    createMaps();
+    createMap();
     createWsFromJavaMySqlStack();
   }
 
@@ -147,76 +125,6 @@ public class WorkspaceDetailsComposeTest {
   }
 
   @Test
-  public void workingWithInstallers() {
-    workspaceDetails.selectTabInWorkspaceMenu(INSTALLERS);
-
-    // check both versions of the 'Workspace API' installer
-    assertTrue(workspaceInstallers.isInstallerStateTurnedOn("Workspace API", "1.0.1"));
-    assertFalse(workspaceInstallers.isInstallerStateTurnedOn("Workspace API", "1.0.0"));
-    assertTrue(workspaceInstallers.isInstallerStateNotChangeable("Workspace API", "1.0.1"));
-    assertTrue(workspaceInstallers.isInstallerStateNotChangeable("Workspace API", "1.0.0"));
-
-    // check all needed installers in dev-machine exist
-    workspaceMachines.selectMachine("Workspace Installers", "dev-machine");
-    installers.forEach(
-        (name, value) -> {
-          workspaceInstallers.checkInstallerExists(name);
-        });
-
-    // switch all installers and save changes
-    installers.forEach(
-        (name, value) -> {
-          Assert.assertEquals(workspaceInstallers.isInstallerStateTurnedOn(name), value);
-          workspaceInstallers.switchInstallerState(name);
-          WaitUtils.sleepQuietly(1);
-        });
-    clickOnSaveButton();
-
-    // switch all installers, save changes and check its states are as previous(by default for the
-    // Java-MySql stack)
-    installers.forEach(
-        (name, value) -> {
-          workspaceInstallers.switchInstallerState(name);
-          loader.waitOnClosed();
-        });
-    clickOnSaveButton();
-    installers.forEach(
-        (name, value) -> {
-          Assert.assertEquals(workspaceInstallers.isInstallerStateTurnedOn(name), value);
-        });
-  }
-
-  @Test
-  public void workingWithServers() {
-    workspaceDetails.selectTabInWorkspaceMenu(SERVERS);
-
-    // add a new server to db machine, save changes and check it exists
-    workspaceMachines.selectMachine("Servers", "db");
-    workspaceServers.clickOnAddServerButton();
-    workspaceServers.waitAddServerDialogIsOpen();
-    workspaceServers.enterReference("agen");
-    workspaceServers.enterPort("8080");
-    workspaceServers.enterProtocol("https");
-    workspaceDetails.clickOnAddButtonInDialogWindow();
-    clickOnSaveButton();
-    workspaceServers.checkServerExists("agen", "8080");
-
-    // edit the server and check it exists
-    workspaceServers.clickOnEditServerButton("agen");
-    workspaceServers.enterReference("agent");
-    workspaceServers.enterPort("80");
-    workspaceServers.enterProtocol("http");
-    workspaceDetails.clickOnUpdateButtonInDialogWindow();
-    workspaceServers.checkServerExists("agent", "80");
-
-    // delete the server and check it is not exist
-    workspaceServers.clickOnDeleteServerButton("agent");
-    workspaceDetails.clickOnDeleteButtonInDialogWindow();
-    clickOnSaveButton();
-    workspaceServers.checkServerIsNotExists("agent", "80");
-  }
-
-  @Test
   public void workingWithMachines() {
     String machineName = "new_machine";
 
@@ -246,43 +154,16 @@ public class WorkspaceDetailsComposeTest {
 
   @Test(priority = 1)
   public void workingWithProjects() {
-    workspaceDetails.selectTabInWorkspaceMenu(PROJECTS);
-
-    // create a new project and save changes
-    workspaceProjects.clickOnAddNewProjectButton();
-    projectSourcePage.selectSample(PROJECT_NAME);
-    projectSourcePage.clickOnAddProjectButton();
-    clickOnSaveButton();
-
-    // check that project exists(workspace will restart)
-    workspaceProjects.waitProjectIsPresent(WEB_JAVA_PETCLINIC);
-
-    // start the workspace and check that the new project exists
+    // check that created machine exists in the Process Console tree
     workspaceDetails.clickOpenInIdeWsBtn();
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(WEB_JAVA_PETCLINIC, PROJECT_FOLDER);
 
-    // check that created machine exists in the Process Console tree
     consoles.waitProcessInProcessConsoleTree("machine");
     consoles.waitTabNameProcessIsPresent("machine");
   }
 
-  private void createMaps() {
-    installers.put("C# language server", false);
-    installers.put("Exec", true);
-    installers.put("File sync", false);
-    installers.put("Git credentials", false);
-    installers.put("JSON language server", false);
-    installers.put("PHP language server", false);
-    installers.put("Python language server", false);
-    installers.put("Simple Test language server", false);
-    installers.put("SSH", false);
-    installers.put("Terminal", true);
-    installers.put("TypeScript language server", false);
-    installers.put("Yaml language server", false);
-
+  private void createMap() {
     variables.put("MYSQL_DATABASE", "petclinic");
     variables.put("MYSQL_PASSWORD", "password");
     variables.put("MYSQL_ROOT_PASSWORD", "password");
@@ -309,7 +190,6 @@ public class WorkspaceDetailsComposeTest {
     createWorkspace.clickOnCreateWorkspaceButton();
 
     seleniumWebDriver.switchFromDashboardIframeToIde(60);
-    loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
     terminal.waitTerminalTab(LOADER_TIMEOUT_SEC);
 
