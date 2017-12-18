@@ -36,13 +36,9 @@ export CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
 
 DEFAULT_CHE_DEPLOY=false
 export CHE_DEPLOY=${CHE_DEPLOY:-${DEFAULT_CHE_DEPLOY}}
-CHE_DEPLOYED=false
 
 DEFAULT_CHE_REMOVE_PROJECT=false
-export CHE_REMOVE_PROJECT=${CHE_REMOVE_PROJECT:-${DEFAULT_CHE_MULTIUSER}}
-
-DEFAULT_CHE_REPLACE_STACKS=false
-export CHE_REPLACE_STACKS=${CHE_REPLACE_STACKS:-${DEFAULT_CHE_REPLACE_STACKS}}
+export CHE_REMOVE_PROJECT=${CHE_REMOVE_PROJECT:-${DEFAULT_CHE_REMOVE_PROJECT}}
 
 DEFAULT_OPENSHIFT_USERNAME="developer"
 export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
@@ -61,6 +57,7 @@ export OPENSHIFT_FLAVOR="ocp"
 
 DEFAULT_OPENSHIFT_ENDPOINT="https://${OC_PUBLIC_HOSTNAME}:8443"
 export OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
+export CHE_INFRA_OPENSHIFT_MASTER__URL=${OPENSHIFT_ENDPOINT}
 
 DEFAULT_ENABLE_SSL="false"
 export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
@@ -173,31 +170,6 @@ deploy_che_to_ocp() {
     fi
     bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
     wait_until_server_is_booted
-    CHE_DEPLOYED=true
-    if $CHE_REPLACE_STACKS; then
-      replace_che_stacks_on_ocp
-    fi
-}
-
-replace_che_stacks_on_ocp() {
-  if ! $CHE_DEPLOY || $CHE_DEPLOYED; then
-    echo "[CHE] Checking if project \"${CHE_OPENSHIFT_PROJECT}\" exists before replacing stacks..."
-    if $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
-      echo "[CHE] Replacing Che Stacks."
-      if [ ! -f replace_stacks.sh ]; then
-        #Repull init image only if IMAGE_PULL_POLICY is set to Always
-        if [ $IMAGE_PULL_POLICY == "Always" ]; then
-            docker pull "$IMAGE_INIT"
-        fi
-        docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} destroy --quiet --skip:pull --skip:nightly
-        docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} config --skip:pull --skip:nightly
-        cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
-      fi
-      bash replace_stacks.sh
-    else
-      echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" does NOT exists."
-    fi
-  fi
 }
 
 server_is_booted() {
@@ -311,19 +283,6 @@ parse_args() {
       CHE_REMOVE_PROJECT=true
     fi
 
-    if [[ "$@" == *"--replace-stacks"* ]]; then
-      CHE_REPLACE_STACKS=true
-    fi
-    for i in "${@}"
-    do
-        case $i in
-           --help)
-               echo -e "$HELP"
-               exit 1
-           ;;
-        esac
-    done
-
     for i in "${@}"
     do
         case $i in
@@ -346,12 +305,12 @@ parse_args() {
                remove_che_from_ocp
                shift
            ;;
-           --replace-stacks)
-               replace_che_stacks_on_ocp
-               shift
-           ;;
            --update)
                shift
+           ;;
+           --help)
+               echo -e "$HELP"
+               exit 1
            ;;
            *)
                echo "You've passed wrong arg."
