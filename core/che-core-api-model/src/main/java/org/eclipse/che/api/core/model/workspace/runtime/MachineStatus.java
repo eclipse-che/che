@@ -26,5 +26,5 @@ public enum MachineStatus {
   STOPPED,
 
   /** Machine failed */
-  FAILED;
+  FAILED
 }

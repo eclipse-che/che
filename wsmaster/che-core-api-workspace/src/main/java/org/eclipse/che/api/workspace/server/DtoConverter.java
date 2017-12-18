@@ -279,7 +279,10 @@ public final class DtoConverter {
 
   /** Converts {@link Machine} to {@link MachineDto}. */
   public static MachineDto asDto(Machine machine) {
-    MachineDto machineDto = newDto(MachineDto.class).withAttributes(machine.getAttributes());
+    MachineDto machineDto =
+        newDto(MachineDto.class)
+            .withAttributes(machine.getAttributes())
+            .withStatus(machine.getStatus());
     if (machine.getServers() != null) {
       machineDto.withServers(
           machine
