@@ -769,7 +769,7 @@ public class JavaLanguageServerExtensionService {
               .getWorkspaceService()
               .executeCommand(
                   new ExecuteCommandParams(
-                      Commands.REFERENCES_COMMAND, Collections.singletonList(parameters)));
+                      Commands.USAGES_COMMAND, Collections.singletonList(parameters)));
       Type targetClassType = new TypeToken<ArrayList<UsagesResponse>>() {}.getType();
       List<UsagesResponse> results =
           gson.fromJson(gson.toJson(responses.get(10, TimeUnit.SECONDS)), targetClassType);
