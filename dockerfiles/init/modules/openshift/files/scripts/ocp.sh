@@ -257,6 +257,7 @@ parse_args() {
     OC_PUBLIC_IP - set ocp hostname for routing suffix, default: host ip
     DNS_PROVIDER - set ocp DNS provider for routing suffix, default: nip.io
     OPENSHIFT_TOKEN - set ocp token for authentication (eg $(oc whoami -t) )
+    CHE_INFRA_ENABLED - set if CHE_INFRA_OPENSHIFT_USERNAME/PASSWORD , default: true
 "
 
     DEPLOY_SCRIPT_ARGS=""
