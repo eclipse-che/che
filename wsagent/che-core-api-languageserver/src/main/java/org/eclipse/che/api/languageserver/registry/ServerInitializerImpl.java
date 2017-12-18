@@ -92,7 +92,7 @@ public class ServerInitializerImpl implements ServerInitializer {
   public CompletableFuture<Pair<LanguageServer, InitializeResult>> initialize(
       LanguageServerLauncher launcher, LanguageClient client, String projectPath)
       throws LanguageServerException {
-    InitializeParams initializeParams = prepareInitializeParams(projectPath);
+    InitializeParams initializeParams = prepareInitializeParams(launcher, projectPath);
     String launcherId = launcher.getDescription().getId();
     CompletableFuture<Pair<LanguageServer, InitializeResult>> result =
         new CompletableFuture<Pair<LanguageServer, InitializeResult>>();
@@ -142,9 +142,16 @@ public class ServerInitializerImpl implements ServerInitializer {
     }
   }
 
-  private InitializeParams prepareInitializeParams(String projectPath) {
+  private InitializeParams prepareInitializeParams(
+      LanguageServerLauncher launcher, String projectPath) {
     InitializeParams initializeParams = new InitializeParams();
-    initializeParams.setProcessId(PROCESS_ID);
+
+    if (launcher.isLocal()) {
+      initializeParams.setProcessId(PROCESS_ID);
+    } else {
+      initializeParams.setProcessId(null);
+    }
+
     initializeParams.setRootPath(LanguageServiceUtils.removeUriScheme(projectPath));
     initializeParams.setRootUri(projectPath);
 
