@@ -20,8 +20,8 @@ public class TestCheAdminHttpJsonRequestFactory extends TestUserHttpJsonRequestF
   @Inject
   public TestCheAdminHttpJsonRequestFactory(
       TestAuthServiceClient authServiceClient,
-      @Named("che.admin_user.email") String adminEmail,
-      @Named("che.admin_user.password") String adminPassword) {
+      @Named("che.admin.email") String adminEmail,
+      @Named("che.admin.password") String adminPassword) {
     super(authServiceClient, adminEmail, adminPassword);
   }
 }
