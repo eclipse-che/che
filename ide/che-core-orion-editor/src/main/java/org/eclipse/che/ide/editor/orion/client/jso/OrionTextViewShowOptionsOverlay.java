@@ -14,6 +14,8 @@ import com.google.gwt.core.client.JavaScriptObject;
 
 public class OrionTextViewShowOptionsOverlay extends JavaScriptObject {
 
+  public static final String CENTER_VIEW_ANCHOR = "center";
+
   protected OrionTextViewShowOptionsOverlay() {}
 
   public final native String getScrollPolicy() /*-{
@@ -46,5 +48,9 @@ public class OrionTextViewShowOptionsOverlay extends JavaScriptObject {
 
   public final native void setViewAnchorOffset(final String newValue) /*-{
         this.viewAnchorOffset = newValue;
+    }-*/;
+
+  public static native OrionTextViewShowOptionsOverlay create() /*-{
+        return {};
     }-*/;
 }
