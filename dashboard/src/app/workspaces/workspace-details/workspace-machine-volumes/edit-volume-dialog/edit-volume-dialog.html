@@ -24,7 +24,7 @@
                         che-name="path"
                         che-place-holder="Path in the machine *"
                         ng-model="editMachineVolumeDialogController.path"
-                        ng-pattern="/^(?:\/\.?[-\w]{1,})$/"
+                        ng-pattern="/^(?:\/\.?[-\w]+)*$/"
                         ng-minlength="2"
                         ng-maxlength="255"
                         required>
