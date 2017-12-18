@@ -16,11 +16,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>6.0.0-M3-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>6.0.0-M3-SNAPSHOT</version>
+    <version>6.0.0-M4-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -46,9 +46,9 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
-        <che.docs.version>6.0.0-M3-SNAPSHOT</che.docs.version>
-        <che.lib.version>6.0.0-M3-SNAPSHOT</che.lib.version>
-        <che.version>6.0.0-M3-SNAPSHOT</che.version>
+        <che.docs.version>6.0.0-M4-SNAPSHOT</che.docs.version>
+        <che.lib.version>6.0.0-M4-SNAPSHOT</che.lib.version>
+        <che.version>6.0.0-M4-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
