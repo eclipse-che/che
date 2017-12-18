@@ -49,6 +49,7 @@
         <che.docs.version>6.0.0-M4-SNAPSHOT</che.docs.version>
         <che.lib.version>6.0.0-M4-SNAPSHOT</che.lib.version>
         <che.version>6.0.0-M4-SNAPSHOT</che.version>
+        <com.google.gwt.gwtmockito>1.1.8</com.google.gwt.gwtmockito>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
