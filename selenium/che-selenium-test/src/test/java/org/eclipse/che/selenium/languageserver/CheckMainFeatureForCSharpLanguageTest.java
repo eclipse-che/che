@@ -119,9 +119,9 @@ public class CheckMainFeatureForCSharpLanguageTest {
                     By.xpath(xpathLocatorForEventMessages)));
     StringBuilder allMessagesBuilder = new StringBuilder();
     textMessages.forEach(message -> allMessagesBuilder.append(message.getAttribute("textContent")));
-    String agrigatedMessages = allMessagesBuilder.toString();
-    return (isNullOrEmpty(agrigatedMessages))
+    String aggregatedMessages = allMessagesBuilder.toString();
+    return (isNullOrEmpty(aggregatedMessages))
         ? false
-        : (agrigatedMessages.contains("Timeout initializing error"));
+        : (aggregatedMessages.contains("Timeout initializing error"));
   }
 }
