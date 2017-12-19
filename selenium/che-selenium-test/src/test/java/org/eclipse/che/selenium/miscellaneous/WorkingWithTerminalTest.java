@@ -59,7 +59,7 @@ public class WorkingWithTerminalTest {
   private static final String MC_HELP_DIALOG =
       "This is the main help screen for GNU Midnight Commander.";
   private static final String MC_USER_MENU_DIALOG = "User menu";
-  private static final String[] VIEW_BIN_FOLDER = {"bash", "bunzip2", "bzcat"};
+  private static final String[] VIEW_BIN_FOLDER = {"bash", "chmod", "date"};
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -342,6 +342,7 @@ public class WorkingWithTerminalTest {
 
   @Test(priority = 12)
   public void closeTerminalByExitCommand() {
+    terminal.waitTerminalConsole();
     terminal.typeIntoTerminal("exit" + Keys.ENTER);
     terminal.waitTerminalIsNotPresent(1);
   }
