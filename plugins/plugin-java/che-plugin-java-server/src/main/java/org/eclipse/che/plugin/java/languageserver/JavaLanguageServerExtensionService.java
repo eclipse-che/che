@@ -535,13 +535,7 @@ public class JavaLanguageServerExtensionService {
    * @param path the path to the file or to the directory
    */
   public WorkspaceEdit organizeImports(String path) {
-    CompletableFuture<Object> result =
-        executeCommand("java.edit.organizeImports", ImmutableList.of(prefixURI(path)));
-
-    try {
-      return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), WorkspaceEdit.class);
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
-      throw new JsonRpcException(-27000, e.getMessage());
-    }
+    Type type = new TypeToken<WorkspaceEdit>() {}.getType();
+    return doGetOne("java.edit.organizeImports", prefixURI(path), type);
   }
 }
