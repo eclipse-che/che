@@ -76,7 +76,7 @@ public class ConvertToProjectWithPomFileTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.selectItem(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME);
+    projectExplorer.quickExpandWithJavaScript();
   }
 
   @Test
@@ -100,13 +100,13 @@ public class ConvertToProjectWithPomFileTest {
     // create a folder with pom file
     createNewFolder(PROJECT_NAME, NEW_MODULE_NAME);
     createNewFile("pom", PATH_TO_POM_FILE, XML_FILE);
-    projectExplorer.waitItemInVisibleArea("pom.xml");
-    projectExplorer.openItemByPath(PATH_TO_POM_FILE + "/pom.xml");
     editor.waitActive();
     editor.waitTabIsPresent("pom.xml");
     editor.deleteAllContent();
     actionsFactory.createAction(seleniumWebDriver).sendKeys(EXPECTED_TEXT).perform();
     editor.waitTextIntoEditor(EXPECTED_TEXT);
+
+    // this timeout need for waiting that the Editor tab name of 'pom.xml' file is changed
     WaitUtils.sleepQuietly(5);
     editor.waitTabIsPresent("pom.xml");
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(PATH_TO_POM_FILE, "simpleFolder");
@@ -124,6 +124,8 @@ public class ConvertToProjectWithPomFileTest {
     editor.waitTabIsPresent("qa-spring-sample");
     editor.goToCursorPositionVisible(18, 17);
     editor.typeTextIntoEditor("new-");
+
+    // this timeout need for waiting that the Editor tab name of 'pom.xml' file is changed
     WaitUtils.sleepQuietly(5);
     editor.waitTabIsPresent("new-qa-spring-sample");
 
