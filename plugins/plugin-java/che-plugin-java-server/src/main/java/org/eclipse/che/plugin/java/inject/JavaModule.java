@@ -19,6 +19,7 @@ import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerLauncher;
+import org.eclipse.che.plugin.java.languageserver.ProjectListener;
 
 /** @author Anatolii Bazko */
 @DynaModule
@@ -29,6 +30,7 @@ public class JavaModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(JavaLanguageServerExtensionService.class).asEagerSingleton();
+    bind(ProjectListener.class).asEagerSingleton();
     Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
         .addBinding()
         .toInstance(new JavaLanguageServerLauncher());

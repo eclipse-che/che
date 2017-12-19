@@ -56,6 +56,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
@@ -69,10 +70,12 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
+import org.eclipse.che.jdt.ls.extension.api.dto.JobResult;
 import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocation;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.UpdateWorkspaceParameters;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSymbolInformationDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
 import org.eclipse.lsp4j.ExecuteCommandParams;
@@ -518,5 +521,10 @@ public class JavaLanguageServerExtensionService {
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
+  }
+
+  public JobResult updateWorkspace(UpdateWorkspaceParameters updateWorkspaceParameters) {
+    Type type = new TypeToken<JobResult>() {}.getType();
+    return doGetOne(Commands.UPDATE_WORKSPACE, updateWorkspaceParameters, type);
   }
 }
