@@ -210,25 +210,6 @@ public class LocalProjectsFolderPathProviderTest {
     assertEquals(providerPath, singleFolderForAllWorkspaces);
   }
 
-  @Test
-  public void useOlderFolderIfConfigured() throws Exception {
-    LocalProjectsFolderPathProvider provider =
-        new LocalProjectsFolderPathProvider(
-            workspacesRoot,
-            oldWorkspacesRoot,
-            false,
-            null,
-            false,
-            workspaceDao,
-            localProjectsMigrator,
-            false);
-
-    provider.init();
-    String providerPath = provider.getPath(WS_ID);
-
-    assertEquals(providerPath, Paths.get(oldWorkspacesRoot, WS_ID).toString());
-  }
-
   @Test(
     expectedExceptions = IOException.class,
     expectedExceptionsMessageRegExp = "Workspace folder '.*' is not directory"

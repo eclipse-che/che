@@ -27,9 +27,8 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.docker.WindowsHostUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Provides path to workspace projects folder on host.
@@ -39,18 +38,18 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class LocalProjectsFolderPathProvider {
 
-  public static final String ALLOW_FOLDERS_CREATION_ENV_VARIABLE =
-      "CHE_WORKSPACE_STORAGE_CREATE_FOLDERS";
-  public static final String WORKSPACE_STORAGE_PATH_ENV_VARIABLE = "CHE_WORKSPACE_STORAGE";
-  public static final String WORKSPACE_STORAGE_MIGRATION_FLAG_ENV_VARIABLE =
-      "che.workspace.migrate_workspaces_stored_by_name";
+  static final String ALLOW_FOLDERS_CREATION_PROPERTY = "che.workspace.storage.create.folders";
+  static final String WORKSPACE_STORAGE_MIGRATION_FLAG_PROPERTY =
+      "che.workspace.migrate_workspace_projects_on_startup";
+  static final String WORKSPACE_PROJECTS_MOUNT_POINT_PROPERTY = "che.workspace.storage";
+  static final String CHE_MASTER_SPECIFIC_WORKSPACE_PROJECTS_MOUNT_POINT_PROPERTY =
+      "che.workspace.storage_master_path";
+  static final String SINGLE_MOUNTPOINT_FOR_ALL_WORKSPACES_PROPERTY = "host.projects.root";
 
-  private static final Logger LOG = LoggerFactory.getLogger(LocalProjectsFolderPathProvider.class);
-
-  private final WorkspaceDao workspaceDao;
   private final boolean isWindows;
   private final boolean migrationOnStartup;
   private final LocalProjectsMigrator localProjectsMigrator;
+  private final WorkspaceDao workspaceDao;
 
   /**
    * Value provide path to directory on host machine where will by all created and mount to the
@@ -58,77 +57,100 @@ public class LocalProjectsFolderPathProvider {
    * point to the directory described by {@literal che.workspace.projects.storage}.
    *
    * <p>For example: if you set {@literal che.workspaces.storage} to the /home/user/che/workspaces
-   * after creating new workspace will be created new folder
-   * /home/user/che/workspaces/{workspaceName} and it will be mount to the dev-machine to {@literal
+   * after creating new workspace will be created new folder /home/user/che/workspaces/{workspaceId}
+   * and it will be mount to the machine with projects volume to {@literal
    * che.workspace.projects.storage}
    */
-  private String workspacesMountPoint;
+  private final String workspacesMountPoint;
+
   /**
-   * this value provide path to projects on local host if this value will be set all workspace will
+   * This value provide path to projects on local host if this value will be set all workspace will
    * manage same projects from your host
    */
   @Inject(optional = true)
-  @Named("host.projects.root")
-  private String hostProjectsFolder;
+  @Named(SINGLE_MOUNTPOINT_FOR_ALL_WORKSPACES_PROPERTY)
+  private String singleMountPointForAllWorkspaces;
 
-  /**
-   * If environment variable with name {@link #ALLOW_FOLDERS_CREATION_ENV_VARIABLE} is equal
-   * (ignoring case) to {@literal false} then this field is set to false. Otherwise it is set to
-   * true. It is also possible to overwrite with named constant.
-   */
   @Inject(optional = true)
-  @Named("che.workspace.storage.create_folders")
+  @Named(CHE_MASTER_SPECIFIC_WORKSPACE_PROJECTS_MOUNT_POINT_PROPERTY)
+  private String workspacesMountPointForCheMaster;
+
+  @Inject(optional = true)
+  @Named(ALLOW_FOLDERS_CREATION_PROPERTY)
   private boolean createFolders = true;
-
-  @Inject(optional = true)
-  @Named("che.user.workspaces.storage")
-  private String oldWorkspacesMountPoint;
 
   @Inject
   public LocalProjectsFolderPathProvider(
-      @Named("che.workspace.storage") String workspacesMountPoint,
-      @Named("che.workspace.migrate_workspace_projects_on_startup") boolean migrationOnStartup,
+      @Named(WORKSPACE_PROJECTS_MOUNT_POINT_PROPERTY) String workspacesMountPoint,
+      @Named(WORKSPACE_STORAGE_MIGRATION_FLAG_PROPERTY) boolean migrationOnStartup,
       WorkspaceDao workspaceDao,
       LocalProjectsMigrator localProjectsMigrator)
       throws IOException {
-    this.workspacesMountPoint = workspacesMountPoint;
-    this.migrationOnStartup = migrationOnStartup;
-    this.workspaceDao = workspaceDao;
-    this.isWindows = SystemInfo.isWindows();
-    this.localProjectsMigrator = localProjectsMigrator;
+    this(
+        workspacesMountPoint,
+        null,
+        migrationOnStartup,
+        null,
+        null,
+        workspaceDao,
+        localProjectsMigrator,
+        SystemInfo.isWindows());
   }
 
   @VisibleForTesting
   protected LocalProjectsFolderPathProvider(
       String workspacesMountPoint,
-      String oldWorkspacesMountPoint,
+      @Nullable String workspacesMountPointForCheMaster,
       boolean migrationOnStartup,
-      String projectsFolder,
-      boolean createFolders,
+      @Nullable String singleMountPointForAllWorkspaces,
+      @Nullable Boolean createFolders,
       WorkspaceDao workspaceDao,
       LocalProjectsMigrator localProjectsMigrator,
       boolean isWindows)
       throws IOException {
     this.workspaceDao = workspaceDao;
-    this.workspacesMountPoint = workspacesMountPoint;
     this.migrationOnStartup = migrationOnStartup;
-    this.hostProjectsFolder = projectsFolder;
-    this.createFolders = createFolders;
-    this.oldWorkspacesMountPoint = oldWorkspacesMountPoint;
-    this.localProjectsMigrator = localProjectsMigrator;
     this.isWindows = isWindows;
+    this.localProjectsMigrator = localProjectsMigrator;
+
+    if (createFolders != null) {
+      this.createFolders = createFolders;
+    }
+    if (singleMountPointForAllWorkspaces != null) {
+      this.singleMountPointForAllWorkspaces = singleMountPointForAllWorkspaces;
+    }
+    // In case workspace mount path specific for che master is not defined we treat it equal to
+    // regular workspace mount point
+    if (workspacesMountPointForCheMaster != null) {
+      this.workspacesMountPointForCheMaster = workspacesMountPointForCheMaster;
+    } else {
+      this.workspacesMountPointForCheMaster = workspacesMountPoint;
+    }
+    // Priority of workspace storage path sources:
+    // If Che is running on Windows
+    //     che-home-location/vfs
+    // Otherwise
+    //     use value from property injected into constructor
+    // find root directory for projects in workspaces
+    if (isWindows) {
+      final Path vfs = WindowsHostUtils.getCheHome().resolve("vfs");
+      this.workspacesMountPoint = vfs.toString();
+    } else {
+      this.workspacesMountPoint = workspacesMountPoint;
+    }
   }
 
   public String getPath(String workspaceId) throws IOException {
-    if (!isWindows && hostProjectsFolder != null) {
-      return hostProjectsFolder;
+    if (!isWindows && singleMountPointForAllWorkspaces != null) {
+      return singleMountPointForAllWorkspaces;
     }
     return doGetPathById(workspaceId);
   }
 
-  public String getPathByName(String workspaceName, String workspaceNamespace) throws IOException {
-    if (!isWindows && hostProjectsFolder != null) {
-      return hostProjectsFolder;
+  @Deprecated
+  String getPathByName(String workspaceName, String workspaceNamespace) throws IOException {
+    if (!isWindows && singleMountPointForAllWorkspaces != null) {
+      return singleMountPointForAllWorkspaces;
     }
 
     try {
@@ -141,58 +163,33 @@ public class LocalProjectsFolderPathProvider {
 
   private String doGetPathById(String workspaceId) throws IOException {
 
-    final String workspaceFolderPath =
-        Paths.get(workspacesMountPoint).resolve(workspaceId).toString();
-    ensureExist(workspaceFolderPath, null);
+    String workspaceFolderPath = Paths.get(workspacesMountPoint).resolve(workspaceId).toString();
+    // Since Che may be running inside of container and workspaces are mounted not in the same way
+    // they will be mounted from host to workspace's containers we use Che master specific paths.
+    // In cases when Che master specific path is not defined it will be equal to the workspace's
+    // containers one.
+    String workspaceFolderPathForCheMaster =
+        Paths.get(workspacesMountPointForCheMaster).resolve(workspaceId).toString();
+    ensureExist(workspaceFolderPathForCheMaster, null);
     return workspaceFolderPath;
   }
 
   @VisibleForTesting
   @PostConstruct
   void init() throws IOException {
-    // check folders creation flag from environment variable
-    String allowFoldersCreationEnvVar = System.getenv(ALLOW_FOLDERS_CREATION_ENV_VARIABLE);
-    if ("false".equalsIgnoreCase(allowFoldersCreationEnvVar)) {
-      createFolders = false;
-    }
-
-    // Priority of workspace storage path sources:
-    // If Che is running on Windows
-    //     che-home-location/vfs
-    // Otherwise
-    //     If environment variable for storage location is set
-    //         use value of that variable
-    //     Otherwise
-    //         If old property of workspace storage is set
-    //             use value of that property for backward compatibility
-    //         Otherwise
-    //             use up-to-date property
-    // find root directory for projects in workspaces
-    if (isWindows) {
-      final Path vfs = WindowsHostUtils.getCheHome().resolve("vfs");
-      workspacesMountPoint = vfs.toString();
-    } else {
-      String workspaceStorageFromEnv = System.getenv(WORKSPACE_STORAGE_PATH_ENV_VARIABLE);
-      if (workspaceStorageFromEnv != null) {
-        workspacesMountPoint = workspaceStorageFromEnv;
-      } else if (oldWorkspacesMountPoint != null) {
-        workspacesMountPoint = oldWorkspacesMountPoint;
-      }
-    }
-
     // create directories if needed
-    if (hostProjectsFolder == null) {
-      ensureExist(
-          workspacesMountPoint,
-          oldWorkspacesMountPoint == null
-              ? "che.workspace.storage"
-              : "che.user.workspaces.storage");
+    if (singleMountPointForAllWorkspaces != null) {
+      ensureExist(singleMountPointForAllWorkspaces, SINGLE_MOUNTPOINT_FOR_ALL_WORKSPACES_PROPERTY);
     } else {
-      ensureExist(hostProjectsFolder, "host.projects.root");
-    }
+      ensureExist(workspacesMountPoint, WORKSPACE_PROJECTS_MOUNT_POINT_PROPERTY);
 
-    if (migrationOnStartup && !isWindows && hostProjectsFolder == null) {
-      localProjectsMigrator.performMigration(workspacesMountPoint);
+      ensureExist(
+          workspacesMountPointForCheMaster,
+          CHE_MASTER_SPECIFIC_WORKSPACE_PROJECTS_MOUNT_POINT_PROPERTY);
+
+      if (migrationOnStartup && !isWindows) {
+        localProjectsMigrator.performMigration(workspacesMountPointForCheMaster);
+      }
     }
   }
 
@@ -231,9 +228,4 @@ public class LocalProjectsFolderPathProvider {
       }
     }
   }
-
-  /**
-   * Get all workspaces, and check if they are stored in workspacesMountPoint by their name, and
-   * migrate them, so they will be stored by id
-   */
 }
