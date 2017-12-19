@@ -536,11 +536,7 @@ public class JavaLanguageServerExtensionService {
    */
   public WorkspaceEdit organizeImports(String path) {
     CompletableFuture<Object> result =
-        getLanguageServer()
-            .getWorkspaceService()
-            .executeCommand(
-                new ExecuteCommandParams(
-                    Commands.ORGANIZE_IMPORTS_COMMAND, ImmutableList.of(prefixURI(path))));
+        executeCommand("java.edit.organizeImports", ImmutableList.of(prefixURI(path)));
 
     try {
       return gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), WorkspaceEdit.class);
