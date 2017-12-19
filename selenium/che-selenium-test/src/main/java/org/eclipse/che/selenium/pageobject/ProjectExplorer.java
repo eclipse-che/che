@@ -356,8 +356,8 @@ public class ProjectExplorer {
    *
    * @param item
    */
-  public WebElement waitItemInVisibleArea(String item) {
-    return waitItemInVisibleArea(item, LOAD_PAGE_TIMEOUT_SEC);
+  public void waitItemInVisibleArea(String item) {
+    waitItemInVisibleArea(item, LOAD_PAGE_TIMEOUT_SEC);
   }
 
   /**
@@ -367,9 +367,23 @@ public class ProjectExplorer {
    *
    * @param item
    */
-  public WebElement waitItemInVisibleArea(String item, final int timeOut) {
+  public void waitItemInVisibleArea(String item, final int timeOut) {
     loader.waitOnClosed();
-    return new WebDriverWait(seleniumWebDriver, timeOut)
+    new WebDriverWait(seleniumWebDriver, timeOut)
+        .until(
+            visibilityOfElementLocated(
+                By.xpath(
+                    String.format("//div[@id='gwt-debug-projectTree']//div[text()='%s']", item))));
+  }
+
+  /**
+   * get web element by his visible name
+   *
+   * @param item visible name
+   * @return found WebElement
+   */
+  private WebElement getVisibleElement(String item) {
+    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             visibilityOfElementLocated(
                 By.xpath(
@@ -381,7 +395,7 @@ public class ProjectExplorer {
    * project can be some folder. Into each folder can be a file with same name. This method will be
    * track only first item.)
    *
-   * @param item
+   * @param item visible name
    */
   public void waitItemIsNotPresentVisibleArea(String item) {
     loadPageTimeout.until(invisibilityOfElementLocated(By.name(item)));
@@ -430,7 +444,7 @@ public class ProjectExplorer {
    * @param item
    */
   public void selectVisibleItem(String item) {
-    waitItemInVisibleArea(item, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).click();
+    getVisibleElement(item).click();
   }
 
   /** wait external maven Libraries relative module */
@@ -507,10 +521,10 @@ public class ProjectExplorer {
    * @param visibleItem
    */
   public void openItemByVisibleNameInExplorer(String visibleItem) {
-    waitItemInVisibleArea(visibleItem).click();
+    getVisibleElement(visibleItem).click();
     actionsFactory
         .createAction(seleniumWebDriver)
-        .doubleClick(waitItemInVisibleArea(visibleItem))
+        .doubleClick(getVisibleElement(visibleItem))
         .perform();
     loader.waitOnClosed();
   }
@@ -523,7 +537,7 @@ public class ProjectExplorer {
   public void openVisiblePackage(String packageName) {
     actionsFactory
         .createAction(seleniumWebDriver)
-        .doubleClick(waitItemInVisibleArea(packageName))
+        .doubleClick(getVisibleElement(packageName))
         .perform();
   }
 
