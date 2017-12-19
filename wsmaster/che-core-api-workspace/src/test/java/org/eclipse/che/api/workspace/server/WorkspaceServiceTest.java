@@ -19,6 +19,7 @@ import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
@@ -329,7 +330,7 @@ public class WorkspaceServiceTest {
     Map<String, Server> servers =
         ImmutableMap.of("server1", createInternalServer(), externalServerKey, externalServer);
     Map<String, Machine> machines =
-        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers));
+        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers, RUNNING));
     workspace.setRuntime(new RuntimeImpl("activeEnv", machines, "user123"));
     when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
     Map<String, MachineDto> expected =
@@ -337,6 +338,7 @@ public class WorkspaceServiceTest {
             "machine1",
             newDto(MachineDto.class)
                 .withAttributes(singletonMap("key", "value"))
+                .withStatus(RUNNING)
                 .withServers(
                     singletonMap(
                         externalServerKey,
@@ -372,7 +374,7 @@ public class WorkspaceServiceTest {
     Map<String, Server> servers =
         ImmutableMap.of("server1", createInternalServer(), externalServerKey, externalServer);
     Map<String, Machine> machines =
-        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers));
+        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers, RUNNING));
     workspace.setRuntime(new RuntimeImpl("activeEnv", machines, "user123"));
     when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
     Map<String, MachineDto> expected =
@@ -380,6 +382,7 @@ public class WorkspaceServiceTest {
             "machine1",
             newDto(MachineDto.class)
                 .withAttributes(singletonMap("key", "value"))
+                .withStatus(RUNNING)
                 .withServers(
                     singletonMap(
                         externalServerKey,
@@ -415,7 +418,7 @@ public class WorkspaceServiceTest {
         ImmutableMap.of(
             internalServerKey, createInternalServer(), externalServerKey, externalServer);
     Map<String, Machine> machines =
-        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers));
+        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers, RUNNING));
     workspace.setRuntime(new RuntimeImpl("activeEnv", machines, "user123"));
     when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
 
@@ -424,6 +427,7 @@ public class WorkspaceServiceTest {
             "machine1",
             newDto(MachineDto.class)
                 .withAttributes(singletonMap("key", "value"))
+                .withStatus(RUNNING)
                 .withServers(
                     ImmutableMap.of(
                         externalServerKey,
@@ -466,7 +470,7 @@ public class WorkspaceServiceTest {
         ImmutableMap.of(
             internalServerKey, createInternalServer(), externalServerKey, externalServer);
     Map<String, Machine> machines =
-        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers));
+        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers, RUNNING));
     workspace.setRuntime(new RuntimeImpl("activeEnv", machines, "user123"));
     when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
 
@@ -475,6 +479,7 @@ public class WorkspaceServiceTest {
             "machine1",
             newDto(MachineDto.class)
                 .withAttributes(singletonMap("key", "value"))
+                .withStatus(RUNNING)
                 .withServers(
                     ImmutableMap.of(
                         externalServerKey,
@@ -517,7 +522,7 @@ public class WorkspaceServiceTest {
         ImmutableMap.of(
             internalServerKey, createInternalServer(), externalServerKey, externalServer);
     Map<String, Machine> machines =
-        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers));
+        singletonMap("machine1", new MachineImpl(singletonMap("key", "value"), servers, RUNNING));
     workspace.setRuntime(new RuntimeImpl("activeEnv", machines, "user123"));
     when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
 
@@ -526,6 +531,7 @@ public class WorkspaceServiceTest {
             "machine1",
             newDto(MachineDto.class)
                 .withAttributes(singletonMap("key", "value"))
+                .withStatus(RUNNING)
                 .withServers(
                     ImmutableMap.of(
                         externalServerKey,

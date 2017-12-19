@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -54,6 +55,8 @@ public class DockerMachine implements Machine {
   private final String registry;
   private final Map<String, ServerImpl> servers;
 
+  private MachineStatus status;
+
   public DockerMachine(
       String containerId,
       String image,
@@ -67,6 +70,7 @@ public class DockerMachine implements Machine {
     this.registry = registry;
     this.dockerMachineStopDetector = dockerMachineStopDetector;
     this.servers = servers;
+    this.status = MachineStatus.STARTING;
   }
 
   @Override
@@ -77,6 +81,15 @@ public class DockerMachine implements Machine {
   @Override
   public Map<String, ServerImpl> getServers() {
     return servers;
+  }
+
+  @Override
+  public MachineStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(MachineStatus status) {
+    this.status = status;
   }
 
   void setServerStatus(String serverRef, ServerStatus status) {

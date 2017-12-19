@@ -41,6 +41,7 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.URLRewriter;
@@ -325,7 +326,8 @@ public class InternalRuntimeTest {
     MachineImpl machineWithInternalServer =
         new MachineImpl(
             createAttributes(),
-            ImmutableMap.of("server1", regularServer, "server2", internalServer));
+            ImmutableMap.of("server1", regularServer, "server2", internalServer),
+            MachineStatus.RUNNING);
     ImmutableMap<String, MachineImpl> internalMachines =
         ImmutableMap.of("m1", createMachine(), "m2", machineWithInternalServer);
     ImmutableMap<String, MachineImpl> expected =
@@ -335,7 +337,8 @@ public class InternalRuntimeTest {
             "m2",
             new MachineImpl(
                 createAttributes(),
-                ImmutableMap.of("server1", rewriteURL(regularServer), "server2", internalServer)));
+                ImmutableMap.of("server1", rewriteURL(regularServer), "server2", internalServer),
+                MachineStatus.RUNNING));
     setRunningRuntime();
     doReturn(internalMachines).when(internalRuntime).getInternalMachines();
 
@@ -410,7 +413,8 @@ public class InternalRuntimeTest {
             expectedProps,
             singletonMap(
                 expectedServerName,
-                new ServerImpl().withUrl(expectedServerUrl).withStatus(expectedServerStatus)));
+                new ServerImpl().withUrl(expectedServerUrl).withStatus(expectedServerStatus)),
+            MachineStatus.RUNNING);
     HashMap<String, MachineImpl> result = new HashMap<>();
     result.put("m1", createMachine());
     result.put("m2", createMachine());
@@ -476,7 +480,8 @@ public class InternalRuntimeTest {
     machine1.getServers().put(badServerName, failingRewritingServer);
     internalMachines.put("m1", machine1);
     internalMachines.put("m2", machine2);
-    expectedMachines.put("m1", new MachineImpl(machine1.getAttributes(), expectedServers));
+    expectedMachines.put(
+        "m1", new MachineImpl(machine1.getAttributes(), expectedServers, machine1.getStatus()));
     expectedMachines.put("m2", machine2);
     List<WarningImpl> expectedWarnings = new ArrayList<>();
     expectedWarnings.add(
@@ -497,7 +502,7 @@ public class InternalRuntimeTest {
   }
 
   private static MachineImpl createMachine() throws Exception {
-    return new MachineImpl(createAttributes(), createServers());
+    return new MachineImpl(createAttributes(), createServers(), MachineStatus.RUNNING);
   }
 
   private static Map<String, String> createAttributes() {

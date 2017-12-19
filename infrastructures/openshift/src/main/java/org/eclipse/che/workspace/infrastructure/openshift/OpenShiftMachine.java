@@ -15,6 +15,7 @@ import static java.util.Collections.emptyMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
@@ -33,6 +34,8 @@ public class OpenShiftMachine implements Machine {
   private final Map<String, ServerImpl> ref2Server;
   private final OpenShiftProject project;
 
+  private MachineStatus status;
+
   public OpenShiftMachine(
       String machineName,
       String podName,
@@ -47,6 +50,7 @@ public class OpenShiftMachine implements Machine {
       this.ref2Server.putAll(ref2Server);
     }
     this.project = project;
+    this.status = MachineStatus.STARTING;
   }
 
   public String getName() {
@@ -71,7 +75,16 @@ public class OpenShiftMachine implements Machine {
     return ref2Server;
   }
 
-  void setStatus(String serverRef, ServerStatus status) {
+  @Override
+  public MachineStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(MachineStatus status) {
+    this.status = status;
+  }
+
+  void setServerStatus(String serverRef, ServerStatus status) {
     ServerImpl server = ref2Server.get(serverRef);
     if (server == null) {
       throw new IllegalArgumentException(
