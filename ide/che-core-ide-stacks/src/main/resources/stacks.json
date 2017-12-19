@@ -873,7 +873,7 @@
         {
           "name": "start apache",
           "type": "custom",
-          "commandLine": "sudo service apache2 start && sudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
+          "commandLine": "service apache2 start && tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
           "attributes": {
             "previewUrl": "${server.80/tcp}/${current.project.relpath}",
             "goal": "Run"
@@ -882,7 +882,7 @@
         {
           "name": "stop apache",
           "type": "custom",
-          "commandLine": "sudo service apache2 stop",
+          "commandLine": "service apache2 stop",
           "attributes": {
             "previewUrl": "",
             "goal": "Run"
@@ -891,7 +891,7 @@
         {
           "name": "restart apache",
           "type": "custom",
-          "commandLine": "sudo service apache2 restart",
+          "commandLine": "service apache2 restart",
           "attributes": {
             "previewUrl": "${server.80/tcp}/${current.project.relpath}",
             "goal": "Run"
@@ -1003,7 +1003,7 @@
         {
           "name": "start apache",
           "type": "custom",
-          "commandLine": "sudo service apache2 start && sudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
+          "commandLine": "service apache2 start && tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
           "attributes": {
             "previewUrl": "${server.80/tcp}/${current.project.relpath}",
             "goal": "Run"
@@ -1012,7 +1012,7 @@
         {
           "name": "stop apache",
           "type": "custom",
-          "commandLine": "sudo service apache2 stop",
+          "commandLine": "service apache2 stop",
           "attributes": {
             "previewUrl": "",
             "goal": "Run"
@@ -1021,7 +1021,7 @@
         {
           "name": "restart apache",
           "type": "custom",
-          "commandLine": "sudo service apache2 restart",
+          "commandLine": "service apache2 restart",
           "attributes": {
             "previewUrl": "${server.80/tcp}/${current.project.relpath}",
             "goal": "Run"
@@ -1524,7 +1524,7 @@
         {
           "name": "run",
           "type": "custom",
-          "commandLine": "cd ${GAE} && ./dev_appserver.py 2>&1 --php_executable_path=/usr/bin/php5-cgi --skip_sdk_update_check true --host=0.0.0.0 --admin_host=0.0.0.0 ${current.project.path}",
+          "commandLine": "cd /home/user/google_appengine/dev_appserver.py 2>&1 --php_executable_path=/usr/bin/php-cgi7.0 --skip_sdk_update_check true --host=0.0.0.0 --admin_host=0.0.0.0 ${current.project.path}",
           "attributes": {
             "previewUrl": "${server.8080/tcp}",
             "goal": "Run"

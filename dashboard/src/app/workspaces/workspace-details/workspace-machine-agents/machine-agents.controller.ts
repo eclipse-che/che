@@ -106,7 +106,7 @@ export class MachineAgentsController {
   checkEnabled(agentItem: IAgentItem): void {
     for (let i = 0; i < this.agents.length; i++) {
       let agent = this.agents[i];
-      // Try to extract agent's version in format id:version:
+      // try to extract agent's version in format id:version:
       let groups = agent.match(/[^:]+(:(.+)){0,1}/);
       let id;
       let version = null;
@@ -117,7 +117,7 @@ export class MachineAgentsController {
         id = agent;
       }
 
-      // Compare by id and version, if no version - consider as latest:
+      // compare by id and version, if no version - consider as latest:
       if (agentItem.id === id && agentItem.version === version) {
         agentItem.isEnabled = true;
         return;
@@ -130,7 +130,7 @@ export class MachineAgentsController {
           this.fetchAgentLatestVersion(agentItem);
         }
       }
-    };
+    }
 
     agentItem.isEnabled = false;
   }

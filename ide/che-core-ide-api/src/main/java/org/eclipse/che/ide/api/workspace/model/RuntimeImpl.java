@@ -47,11 +47,7 @@ public class RuntimeImpl implements Runtime {
               .collect(
                   toMap(
                       Map.Entry::getKey,
-                      entry ->
-                          new MachineImpl(
-                              entry.getKey(),
-                              entry.getValue().getAttributes(),
-                              entry.getValue().getServers())));
+                      entry -> new MachineImpl(entry.getKey(), entry.getValue())));
     }
     this.owner = owner;
     this.machineToken = machineToken;

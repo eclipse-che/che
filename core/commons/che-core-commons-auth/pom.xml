@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-commons-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>6.0.0-M3-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-commons-auth</artifactId>
     <packaging>jar</packaging>

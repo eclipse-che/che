@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-selenium-parent</artifactId>
         <groupId>org.eclipse.che.selenium</groupId>
-        <version>6.0.0-M3-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
     </parent>
     <artifactId>che-selenium-test</artifactId>
     <packaging>jar</packaging>
@@ -97,6 +97,10 @@
         <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>github-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>

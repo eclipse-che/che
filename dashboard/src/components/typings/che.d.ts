@@ -168,6 +168,7 @@ declare namespace che {
       OPENSHIFT: string;
       getValues(): Array<string>;
     }
+  }
 
   export namespace service {
 
@@ -333,6 +334,7 @@ declare namespace che {
     volumes?: {
       [volumeRef: string]: IEnvironmentMachineVolume
     };
+    env?: {[envName: string]: string};
   }
 
   export interface IEnvironmentMachineServer {
