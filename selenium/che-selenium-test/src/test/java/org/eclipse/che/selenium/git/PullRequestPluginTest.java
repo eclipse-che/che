@@ -107,8 +107,7 @@ public class PullRequestPluginTest {
         TestMenuCommandsConstants.Profile.PROFILE_MENU,
         TestMenuCommandsConstants.Profile.PREFERENCES);
     preferences.waitPreferencesForm();
-    gitHubClientService.deleteAllGrants(gitHubUsername, gitHubPassword);
-    preferences.regenerateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);
+    preferences.generateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);
   }
 
   @AfterClass
