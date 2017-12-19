@@ -164,7 +164,7 @@ public class WorkingWithTerminalTest {
 
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7592", ex);
+      fail("Known issue https://github.com/eclipse/che-lib/issues/57", ex);
     }
 
     terminal.moveDownListTerminal(".dockerenv");
@@ -185,7 +185,7 @@ public class WorkingWithTerminalTest {
       }
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7592", ex);
+      fail("Known issue https://github.com/eclipse/che-lib/issues/57", ex);
     }
 
     terminal.waitExpectedTextNotPresentTerminal(".dockerenv");
@@ -226,7 +226,7 @@ public class WorkingWithTerminalTest {
       }
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7592", ex);
+      fail("Known issue https://github.com/eclipse/che-lib/issues/57", ex);
     }
 
     terminal.typeIntoTerminal(Keys.F10.toString());
