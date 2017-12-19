@@ -10,21 +10,32 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 
 import com.google.inject.Inject;
+import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
+import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -32,6 +43,7 @@ import org.testng.annotations.Test;
 public class CheckMainFeatureForCSharpLanguageTest {
 
   private final String PROJECT_NAME = NameGenerator.generate("AspProject", 4);
+  private final String COMMAND_NAME_FOR_RESTORE_LS = PROJECT_NAME + ": update dependencies";
 
   @InjectTestWorkspace(template = WorkspaceTemplate.UBUNTU_LSP)
   private TestWorkspace workspace;
@@ -42,6 +54,11 @@ public class CheckMainFeatureForCSharpLanguageTest {
   @Inject private CodenvyEditor editor;
   @Inject private Menu menu;
   @Inject private Wizard wizard;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private TestCommandServiceClient testCommandServiceClient;
+  @Inject private CommandsPalette commandsPalette;
+
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -49,7 +66,7 @@ public class CheckMainFeatureForCSharpLanguageTest {
   }
 
   @Test
-  public void checkLaunchingCodeserver() throws Exception {
+  public void checkLaunchingCodeserver() {
     projectExplorer.waitProjectExplorer();
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
@@ -62,6 +79,7 @@ public class CheckMainFeatureForCSharpLanguageTest {
     projectExplorer.waitItem(PROJECT_NAME + "/Program.cs", 240);
     projectExplorer.openItemByPath(PROJECT_NAME + "/Program.cs");
     loader.waitOnClosed();
+    checkInitStateAndLaunchLanguageServer();
     editor.goToCursorPositionVisible(24, 12);
     for (int i = 0; i < 9; i++) {
       editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
@@ -74,5 +92,36 @@ public class CheckMainFeatureForCSharpLanguageTest {
     editor.enterAutocompleteProposal("Build() ");
     editor.typeTextIntoEditor(";");
     editor.waitAllMarkersDisappear(ERROR_MARKER);
+  }
+
+  private void checkInitStateAndLaunchLanguageServer() {
+    if (isInitLanguageServerFail()) {
+      reInitLanguageServer();
+    }
+  }
+
+  private void reInitLanguageServer() {
+    commandsPalette.openCommandPalette();
+    commandsPalette.startCommandByDoubleClick(COMMAND_NAME_FOR_RESTORE_LS);
+    consoles.waitExpectedTextIntoConsole("Restore completed");
+    editor.closeAllTabs();
+    projectExplorer.openItemByPath(PROJECT_NAME + "/Program.cs");
+    loader.waitOnClosed();
+  }
+
+  private boolean isInitLanguageServerFail() {
+    String xpathLocatorForEventMessages =
+        "//div[contains(@id,'gwt-debug-notification-wrappergwt-uid')]";
+    List<WebElement> textMessages =
+        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.MINIMUM_SEC)
+            .until(
+                ExpectedConditions.presenceOfAllElementsLocatedBy(
+                    By.xpath(xpathLocatorForEventMessages)));
+    StringBuilder allMessagesBuilder = new StringBuilder();
+    textMessages.forEach(message -> allMessagesBuilder.append(message.getAttribute("textContent")));
+    String agrigatedMessages = allMessagesBuilder.toString();
+    return (isNullOrEmpty(agrigatedMessages))
+        ? false
+        : (agrigatedMessages.contains("Timeout initializing error"));
   }
 }
