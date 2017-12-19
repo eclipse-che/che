@@ -342,9 +342,9 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
             String encoded = SafeHtmlUtils.htmlEscape(text);
             if (delegate != null) {
-              if (delegate.getCustomizer() != null) {
-                if (delegate.getCustomizer().canCustomize(encoded)) {
-                  encoded = delegate.getCustomizer().customize(encoded);
+              if (delegate.getRenderer() != null) {
+                if (delegate.getRenderer().canRender(encoded)) {
+                  encoded = delegate.getRenderer().render(encoded);
                 }
               }
             }

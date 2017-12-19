@@ -273,6 +273,21 @@ public class DarkTheme implements Theme {
   }
 
   @Override
+  public String getCommandEditorRenderersTableHeaderColor() {
+    return "#2E353B";
+  }
+
+  @Override
+  public String getCommandEditorRenderersTableRowColor() {
+    return "#3D4650";
+  }
+
+  @Override
+  public String getCommandEditorRendererSwitcherBorder() {
+    return "none";
+  }
+
+  @Override
   public String getDialogContentBackground() {
     return "#656565";
   }

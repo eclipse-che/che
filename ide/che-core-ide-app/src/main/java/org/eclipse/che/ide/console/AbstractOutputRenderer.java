@@ -1,11 +1,12 @@
-/**
- * ***************************************************************************** Copyright (c) 2017
- * Red Hat, Inc. All rights reserved. This program and the accompanying materials are made available
- * under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is
- * available at http://www.eclipse.org/legal/epl-v10.html
+/*
+ * Copyright (c) 2017 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- * <p>Contributors: Red Hat, Inc. - initial API and implementation
- * *****************************************************************************
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.ide.console;
 
@@ -20,6 +21,7 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.console.OutputConsoleRenderer;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
@@ -33,40 +35,35 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.resource.Path;
 
 /**
- * Default customizer adds an anchor link to the lines that match a stack trace line pattern and
+ * Default renderer adds an anchor link to the lines that match a stack trace line pattern and
  * installs a handler function for the link. The handler parses the stack trace line, searches for
  * the candidate Java files to navigate to, opens the first file (of the found candidates) in editor
  * and reveals it to the required line according to the stack trace line information
  *
  * @author Victor Rubezhny
  */
-public abstract class AbstractOutputCustomizer implements OutputCustomizer {
+public abstract class AbstractOutputRenderer implements OutputConsoleRenderer {
 
+  protected String name;
   protected AppContext appContext;
   protected EditorAgent editorAgent;
 
-  public AbstractOutputCustomizer(AppContext appContext, EditorAgent editorAgent) {
+  public AbstractOutputRenderer(String name, AppContext appContext, EditorAgent editorAgent) {
+    this.name = name;
     this.appContext = appContext;
     this.editorAgent = editorAgent;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.eclipse.che.ide.extension.machine.client.outputspanel.console.
-   * OutputCustomizer#canCustomize(java.lang.String)
-   */
   @Override
-  public abstract boolean canCustomize(String text);
+  public String getName() {
+    return name;
+  }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.eclipse.che.ide.extension.machine.client.outputspanel.console.
-   * OutputCustomizer#customize(java.lang.String)
-   */
   @Override
-  public abstract String customize(String text);
+  public abstract boolean canRender(String text);
+
+  @Override
+  public abstract String render(String text);
 
   /*
    * Returns the list of workspace files filtered by a relative path

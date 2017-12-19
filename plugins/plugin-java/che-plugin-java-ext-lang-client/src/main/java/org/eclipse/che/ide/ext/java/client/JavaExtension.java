@@ -19,8 +19,11 @@ import com.google.inject.name.Named;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.console.OutputConsoleRendererRegistry;
 import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
@@ -42,6 +45,7 @@ import org.eclipse.che.ide.ext.java.client.action.ProjectClasspathAction;
 import org.eclipse.che.ide.ext.java.client.action.QuickDocumentationAction;
 import org.eclipse.che.ide.ext.java.client.action.QuickFixAction;
 import org.eclipse.che.ide.ext.java.client.action.UnmarkDirAsSourceAction;
+import org.eclipse.che.ide.ext.java.client.console.JavaOutputRenderer;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.CutJavaSourceAction;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.MoveAction;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.RenameRefactoringAction;
@@ -52,6 +56,8 @@ import org.eclipse.che.ide.util.input.KeyCodeMap;
 /** @author Evgen Vidolob */
 @Extension(title = "Java", version = "3.0.0")
 public class JavaExtension {
+  public static String JAVA_CATEGORY = Constants.JAVA_CATEGORY;
+  public static String JAVASCRIPT_CATEGORY = "JavaScript";
 
   public static final String OPEN_IMPLEMENTATION = "openImplementation";
   public static final String SHOW_QUICK_DOC = "showQuickDoc";
@@ -71,12 +77,20 @@ public class JavaExtension {
       FileTypeRegistry fileTypeRegistry,
       @Named("JavaFileType") FileType javaFile,
       @Named("JavaClassFileType") FileType classFile,
-      @Named("JspFileType") FileType jspFile) {
+      @Named("JspFileType") FileType jspFile,
+      OutputConsoleRendererRegistry rendererRegistry,
+      AppContext appContext,
+      EditorAgent editorAgent) {
     JavaResources.INSTANCE.css().ensureInjected();
 
     fileTypeRegistry.registerFileType(javaFile);
     fileTypeRegistry.registerFileType(jspFile);
     fileTypeRegistry.registerFileType(classFile);
+
+    rendererRegistry.register(
+        JAVA_CATEGORY, new JavaOutputRenderer(JAVA_CATEGORY, appContext, editorAgent));
+    rendererRegistry.register(
+        JAVASCRIPT_CATEGORY, new JavaOutputRenderer(JAVASCRIPT_CATEGORY, appContext, editorAgent));
   }
 
   @Inject

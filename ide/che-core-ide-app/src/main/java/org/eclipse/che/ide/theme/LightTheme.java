@@ -250,6 +250,21 @@ public class LightTheme implements Theme {
   }
 
   @Override
+  public String getCommandEditorRenderersTableHeaderColor() {
+    return "#ddd";
+  }
+
+  @Override
+  public String getCommandEditorRenderersTableRowColor() {
+    return "#ffffff";
+  }
+
+  @Override
+  public String getCommandEditorRendererSwitcherBorder() {
+    return "solid 1px #979797";
+  }
+
+  @Override
   public String getDialogContentBackground() {
     return "#FFFFFF";
   }

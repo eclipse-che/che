@@ -45,6 +45,7 @@ import org.eclipse.che.ide.command.editor.page.goal.GoalPage;
 import org.eclipse.che.ide.command.editor.page.name.NamePage;
 import org.eclipse.che.ide.command.editor.page.previewurl.PreviewUrlPage;
 import org.eclipse.che.ide.command.editor.page.project.ProjectsPage;
+import org.eclipse.che.ide.command.editor.page.renderer.RenderersPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
 import org.eclipse.che.ide.command.node.NodeFactory;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
@@ -85,6 +86,7 @@ public class CommandEditor extends AbstractEditorPresenter
       CommandManager commandManager,
       NamePage namePage,
       ProjectsPage projectsPage,
+      RenderersPage renderersPage,
       CommandLinePage commandLinePage,
       GoalPage goalPage,
       PreviewUrlPage previewUrlPage,
@@ -111,6 +113,7 @@ public class CommandEditor extends AbstractEditorPresenter
 
     pages = new LinkedList<>();
     pages.add(previewUrlPage);
+    pages.add(renderersPage);
     pages.add(projectsPage);
     pages.add(goalPage);
     pages.add(commandLinePage);

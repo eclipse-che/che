@@ -18,8 +18,10 @@ import com.google.gwt.json.client.JSONValue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /** @author <a href="mailto:vparfonov@codenvy.com">Vitaly Parfonov</a> */
 public class JsonHelper {
@@ -74,6 +76,37 @@ public class JsonHelper {
     }
 
     return map;
+  }
+
+  public static String toJson(Set<String> set) {
+    String json = "";
+
+    if (set != null && !set.isEmpty()) {
+      JSONArray jsonArr = new JSONArray();
+
+      set.forEach(e -> jsonArr.set(jsonArr.size(), new JSONString(e)));
+      json = jsonArr.toString();
+    }
+
+    return json;
+  }
+
+  public static Set<String> toSet(String jsonStr) {
+    Set<String> set = new HashSet<String>();
+
+    JSONValue parsed = JSONParser.parseStrict(jsonStr);
+    JSONArray jsonArr = parsed.isArray();
+    if (jsonArr != null) {
+      for (int index = 0; index < jsonArr.size(); index++) {
+        JSONValue jsonValue = jsonArr.get(index);
+        JSONString jsonString = jsonValue.isString();
+        if (jsonString != null) {
+          set.add(jsonString.stringValue());
+        }
+      }
+    }
+
+    return set;
   }
 
   // TODO: find a way to avoid those util methods here.

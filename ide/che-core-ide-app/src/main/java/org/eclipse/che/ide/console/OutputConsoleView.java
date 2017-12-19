@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.console;
 
+import org.eclipse.che.ide.api.console.OutputConsoleRenderer;
 import org.eclipse.che.ide.api.mvp.View;
 
 /**
@@ -137,7 +138,7 @@ public interface OutputConsoleView extends View<OutputConsoleView.ActionDelegate
     /** Handle scrolling the output. */
     void onOutputScrolled(boolean bottomReached);
 
-    /** Returns the customizer for the console output */
-    OutputCustomizer getCustomizer();
+    /** Returns the output renderer for the console output */
+    OutputConsoleRenderer getRenderer();
   }
 }
