@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.languageserver;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 
 import com.google.inject.Inject;
@@ -19,7 +20,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
@@ -113,7 +113,7 @@ public class CheckMainFeatureForCSharpLanguageTest {
     String xpathLocatorForEventMessages =
         "//div[contains(@id,'gwt-debug-notification-wrappergwt-uid')]";
     List<WebElement> textMessages =
-        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.MINIMUM_SEC)
+        new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
             .until(
                 ExpectedConditions.presenceOfAllElementsLocatedBy(
                     By.xpath(xpathLocatorForEventMessages)));
