@@ -37,4 +37,6 @@ public interface Machine {
    * </pre>
    */
   Map<String, ? extends Server> getServers();
+
+  MachineStatus getStatus();
 }

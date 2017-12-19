@@ -79,7 +79,8 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
                 e ->
                     new MachineImpl(
                         e.getValue().getAttributes(),
-                        rewriteExternalServers(e.getValue().getServers()))));
+                        rewriteExternalServers(e.getValue().getServers()),
+                        e.getValue().getStatus())));
   }
 
   /**

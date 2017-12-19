@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.T
 import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.FAILED;
 import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.PASSED;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -38,6 +39,7 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -105,7 +107,7 @@ public class JavaTestPluginTestNgTest {
   }
 
   @Test
-  public void shouldExecuteTestClassSuccessfully() throws InterruptedException {
+  public void shouldExecuteTestClassSuccessfully() {
     // given
     projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_ANOTHER_TEST_CLASS);
     projectExplorer.openItemByPath(PATH_TO_TEST_CLASS);
@@ -127,7 +129,7 @@ public class JavaTestPluginTestNgTest {
   }
 
   @Test(priority = 1)
-  public void shouldExecuteTestMethodsSuccessfully() throws InterruptedException {
+  public void shouldExecuteTestMethodsSuccessfully() {
     // given
     projectExplorer.openItemByPath(PATH_TO_ANOTHER_TEST_CLASS);
 
@@ -140,7 +142,12 @@ public class JavaTestPluginTestNgTest {
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
     editor.goToCursorPositionVisible(30, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
-    pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
+    try {
+      pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7338", ex);
+    }
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
     String testErrorMessage = pluginConsole.getTestErrorMessage();
     assertTrue(
@@ -151,7 +158,7 @@ public class JavaTestPluginTestNgTest {
   }
 
   @Test(priority = 2)
-  public void shouldExecuteAlltests() throws InterruptedException {
+  public void shouldExecuteAlltests() {
     // given
     projectExplorer.openItemByPath(PATH_TO_ANOTHER_TEST_CLASS);
 
