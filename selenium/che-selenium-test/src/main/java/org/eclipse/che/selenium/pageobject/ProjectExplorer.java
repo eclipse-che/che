@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.COMMANDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
@@ -18,13 +19,17 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.ALL_PROJECTS_XPATH;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.CONTEXT_MENU_ID;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.EXPLORER_RIGHT_TAB_ID;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.PROJECT_EXPLORER_TREE_ITEMS;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.COLLAPSE_ALL;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.REFRESH_MAIN;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.REVEAL_RESOURCE;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
+import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.F6;
 import static org.openqa.selenium.Keys.LEFT;
@@ -32,6 +37,8 @@ import static org.openqa.selenium.Keys.RIGHT;
 import static org.openqa.selenium.Keys.SHIFT;
 import static org.openqa.selenium.Keys.UP;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.not;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
@@ -40,10 +47,8 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -53,7 +58,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -558,8 +562,8 @@ public class ProjectExplorer {
    */
   public void waitRemoveItemsByPath(String pathToItem) {
     loadPageTimeout.until(
-        ExpectedConditions.not(
-            ExpectedConditions.presenceOfAllElementsLocatedBy(
+        not(
+            presenceOfAllElementsLocatedBy(
                 By.xpath(String.format("//div[@path='/%s']/div", pathToItem)))));
   }
 
@@ -627,16 +631,16 @@ public class ProjectExplorer {
    */
   public void selectMultiFilesByCtrlKeys(String path) {
     Actions actions = actionsFactory.createAction(seleniumWebDriver);
-    actions.keyDown(Keys.CONTROL).perform();
+    actions.keyDown(CONTROL).perform();
     selectItem(path);
     waitItemIsSelected(path);
-    actions.keyUp(Keys.CONTROL).perform();
+    actions.keyUp(CONTROL).perform();
   }
 
   /** Click on the 'Reveal in project explorer' in 'Options'menu */
   public void revealResourceByOptionsButton() {
     clickOnProjectExplorerOptionsButton();
-    clickOnOptionsMenuItem(ProjectExplorerOptionsMenuItem.REVEAL_RESOURCE);
+    clickOnOptionsMenuItem(REVEAL_RESOURCE);
   }
 
   /**
@@ -646,7 +650,7 @@ public class ProjectExplorer {
    */
   public void selectMultiFilesByShiftKey(String path) {
     Actions actions = actionsFactory.createAction(seleniumWebDriver);
-    actions.keyDown(Keys.SHIFT).perform();
+    actions.keyDown(SHIFT).perform();
     selectItem(path);
     waitItemIsSelected(path);
     actions.keyUp(Keys.SHIFT).perform();
@@ -661,16 +665,16 @@ public class ProjectExplorer {
   public void selectMultiFilesByShiftKeyWithCheckMultiselection(
       String clickItemPath, List<String> selectedItemsPaths) {
     Actions actions = actionsFactory.createAction(seleniumWebDriver);
-    actions.keyDown(Keys.SHIFT).perform();
+    actions.keyDown(SHIFT).perform();
     selectItem(clickItemPath);
     waitAllItemsIsSelected(selectedItemsPaths);
-    actions.keyUp(Keys.SHIFT).perform();
+    actions.keyUp(SHIFT).perform();
   }
 
   /** click on the 'collapse all' in the project explorer */
   public void collapseProjectTreeByOptionsButton() {
     clickOnProjectExplorerOptionsButton();
-    clickOnOptionsMenuItem(ProjectExplorerOptionsMenuItem.COLLAPSE_ALL);
+    clickOnOptionsMenuItem(COLLAPSE_ALL);
   }
 
   /** click on the 'go back' in the project explorer */
@@ -705,7 +709,7 @@ public class ProjectExplorer {
         .until(visibilityOfAllElementsLocatedBy(By.xpath(ALL_PROJECTS_XPATH)))
         .stream()
         .map((webElement) -> webElement.getAttribute("name"))
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 
   /**
@@ -922,7 +926,7 @@ public class ProjectExplorer {
     try {
       navigateToFile.waitFileNamePopUp();
     } catch (StaleElementReferenceException ex) {
-      WaitUtils.sleepQuietly(1);
+      sleepQuietly(1);
     }
     navigateToFile.waitListOfFilesNames(file);
     navigateToFile.selectFileByName(file);
