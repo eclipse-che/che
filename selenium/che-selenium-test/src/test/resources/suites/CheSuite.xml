@@ -28,6 +28,7 @@
           <class name="org.eclipse.che.selenium.dashboard.ImportMavenProjectFromGitHubTest"/>
           <class name="org.eclipse.che.selenium.dashboard.ImportProjectFromZipTest"/>
           <class name="org.eclipse.che.selenium.dashboard.RenameWorkspaceTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.WorkspaceDetailsSingleMachineTest"/>
           <class name="org.eclipse.che.selenium.dashboard.WorkspaceDetailsComposeTest"/>
           <class name="org.eclipse.che.selenium.debugger.ChangeVariableWithEvaluatingTest"/>
           <class name="org.eclipse.che.selenium.debugger.CheckBreakPointStateTest"/>
