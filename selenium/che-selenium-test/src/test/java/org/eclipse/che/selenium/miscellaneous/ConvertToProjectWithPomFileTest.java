@@ -106,7 +106,7 @@ public class ConvertToProjectWithPomFileTest {
     actionsFactory.createAction(seleniumWebDriver).sendKeys(EXPECTED_TEXT).perform();
     editor.waitTextIntoEditor(EXPECTED_TEXT);
 
-    // this timeout need for waiting that the Editor tab name of 'pom.xml' file is changed
+    // this timeout is needed for waiting that the Editor tab name of 'pom.xml' file is changed
     WaitUtils.sleepQuietly(5);
     editor.waitTabIsPresent("pom.xml");
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(PATH_TO_POM_FILE, "simpleFolder");
@@ -125,7 +125,7 @@ public class ConvertToProjectWithPomFileTest {
     editor.goToCursorPositionVisible(18, 17);
     editor.typeTextIntoEditor("new-");
 
-    // this timeout need for waiting that the Editor tab name of 'pom.xml' file is changed
+    // this timeout is needed for waiting that the Editor tab name of 'pom.xml' file is changed
     WaitUtils.sleepQuietly(5);
     editor.waitTabIsPresent("new-qa-spring-sample");
 
