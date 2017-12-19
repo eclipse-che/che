@@ -157,6 +157,9 @@ deploy_che_to_ocp() {
     cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
     bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
     wait_until_server_is_booted
+    if [ $CHE_MULTIUSER == true ]; then
+        wait_until_kc_is_booted
+    fi
 }
 
 server_is_booted() {
@@ -177,6 +180,32 @@ wait_until_server_is_booted() {
     sleep 2
     ELAPSED=$((ELAPSED+1))
   done
+}
+
+wait_until_kc_is_booted() {
+  echo "[CHE] wait Keycloak pod booting..."
+  available=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
+  progressing=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
+
+  DEPLOYMENT_TIMEOUT_SEC=1200
+  POLLING_INTERVAL_SEC=5
+  end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
+  while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
+    available=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
+    progressing=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
+    timeout_in=$((end-SECONDS))
+    echo "[CHE] Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, Timeout in ${timeout_in}s)"
+    sleep ${POLLING_INTERVAL_SEC}
+  done
+
+if [ "${progressing}" == "\"True\"" ]; then
+  echo "[CHE] Keycloak deployed successfully"
+elif [ "${progressing}" == "False" ]; then
+  echo "[CHE] [ERROR] Keycloak deployment failed. Aborting. Run command 'oc rollout status keycloak' to get more details."
+elif [ ${SECONDS} -ge ${end} ]; then
+  echo "[CHE] [ERROR] Deployment timeout. Aborting."
+  exit 1
+fi
 }
 
 destroy_ocp() {
