@@ -179,11 +179,12 @@ public class Consoles {
     redrawDriverWait.until(invisibilityOfElementLocated(By.id(referenceId)));
   }
 
-  public Boolean checkThatServerExists(String serverName) {
+  public boolean checkThatServerExists(String serverName) {
     List<WebElement> webElements =
         loadPageDriverWait.until(
             visibilityOfAllElementsLocatedBy(
                 By.xpath("//div[contains(@id, 'runtime-info-reference-')]")));
+
     for (WebElement we : webElements) {
       if (we.getText().equals(serverName)) {
         return true;

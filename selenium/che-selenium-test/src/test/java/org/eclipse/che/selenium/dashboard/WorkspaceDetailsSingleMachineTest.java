@@ -24,10 +24,10 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -56,9 +56,23 @@ import org.testng.annotations.Test;
 /** @author Skoryk Serhii */
 public class WorkspaceDetailsSingleMachineTest {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
+  private static final Map<String, Boolean> EXPECTED_INSTALLERS =
+      ImmutableMap.<String, Boolean>builder()
+          .put("C# language server", false)
+          .put("Exec", false)
+          .put("File sync", false)
+          .put("Git credentials", false)
+          .put("JSON language server", false)
+          .put("PHP language server", false)
+          .put("Python language server", false)
+          .put("Simple Test language server", false)
+          .put("SSH", false)
+          .put("Terminal", true)
+          .put("TypeScript language server", false)
+          .put("Yaml language server", false)
+          .build();
 
   private String workspaceName;
-  private Map<String, Boolean> installers = new HashMap<>();
 
   @Inject private TestUser testUser;
   @Inject private ProjectExplorer projectExplorer;
@@ -82,7 +96,6 @@ public class WorkspaceDetailsSingleMachineTest {
   @BeforeClass
   public void setUp() throws Exception {
     workspaceName = testWorkspace.getName();
-    createMap();
     URL resource =
         WorkspaceDetailsSingleMachineTest.this.getClass().getResource("/projects/guess-project");
     testProjectServiceClient.importProject(
@@ -128,13 +141,13 @@ public class WorkspaceDetailsSingleMachineTest {
 
     // check all needed installers in dev-machine exist
     workspaceMachines.selectMachine("Workspace Installers", "dev-machine");
-    installers.forEach(
+    EXPECTED_INSTALLERS.forEach(
         (name, value) -> {
           workspaceInstallers.checkInstallerExists(name);
         });
 
     // switch all installers and save changes
-    installers.forEach(
+    EXPECTED_INSTALLERS.forEach(
         (name, value) -> {
           assertEquals(workspaceInstallers.isInstallerStateTurnedOn(name), value);
           workspaceInstallers.switchInstallerState(name);
@@ -144,13 +157,13 @@ public class WorkspaceDetailsSingleMachineTest {
 
     // switch all installers, save changes and check its states are as previous(by default for the
     // Java stack)
-    installers.forEach(
+    EXPECTED_INSTALLERS.forEach(
         (name, value) -> {
           workspaceInstallers.switchInstallerState(name);
           loader.waitOnClosed();
         });
     clickOnSaveButton();
-    installers.forEach(
+    EXPECTED_INSTALLERS.forEach(
         (name, value) -> {
           assertEquals(workspaceInstallers.isInstallerStateTurnedOn(name), value);
         });
@@ -222,21 +235,6 @@ public class WorkspaceDetailsSingleMachineTest {
     projectSourcePage.selectSample(projectName);
     projectSourcePage.clickOnAddProjectButton();
     workspaceProjects.waitProjectIsPresent(projectName);
-  }
-
-  private void createMap() {
-    installers.put("C# language server", false);
-    installers.put("Exec", false);
-    installers.put("File sync", false);
-    installers.put("Git credentials", false);
-    installers.put("JSON language server", false);
-    installers.put("PHP language server", false);
-    installers.put("Python language server", false);
-    installers.put("Simple Test language server", false);
-    installers.put("SSH", false);
-    installers.put("Terminal", true);
-    installers.put("TypeScript language server", false);
-    installers.put("Yaml language server", false);
   }
 
   private void clickOnSaveButton() {

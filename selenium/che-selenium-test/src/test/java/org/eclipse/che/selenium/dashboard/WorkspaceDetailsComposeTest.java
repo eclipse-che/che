@@ -19,8 +19,8 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.OVERVIEW;
 import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -44,8 +44,12 @@ import org.testng.annotations.Test;
 /** @author Skoryk Serhii */
 public class WorkspaceDetailsComposeTest {
   private static final String WORKSPACE = NameGenerator.generate("java-mysql", 4);
-
-  private Map<String, String> variables = new HashMap<>();
+  private static final Map<String, String> EXPECTED_VARIABLES =
+      ImmutableMap.of(
+          "MYSQL_DATABASE", "petclinic",
+          "MYSQL_PASSWORD", "password",
+          "MYSQL_ROOT_PASSWORD", "password",
+          "MYSQL_USER", "petclinic");
 
   @Inject private TestUser testUser;
   @Inject private ProjectExplorer projectExplorer;
@@ -63,7 +67,6 @@ public class WorkspaceDetailsComposeTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    createMap();
     createWsFromJavaMySqlStack();
   }
 
@@ -98,7 +101,7 @@ public class WorkspaceDetailsComposeTest {
 
     workspaceMachines.selectMachine("Environment variables", "db");
     // add variables to 'db' machine, check they exist and save changes
-    variables.forEach(
+    EXPECTED_VARIABLES.forEach(
         (name, value) -> {
           WaitUtils.sleepQuietly(1);
           createVariable(name, value);
@@ -108,7 +111,7 @@ public class WorkspaceDetailsComposeTest {
     clickOnSaveButton();
 
     // delete all variables from the 'db' machine, check they don't exist and save changes
-    variables.forEach(
+    EXPECTED_VARIABLES.forEach(
         (name, value) -> {
           deleteVariable(name, value);
         });
@@ -155,13 +158,6 @@ public class WorkspaceDetailsComposeTest {
     terminal.waitTerminalTab(LOADER_TIMEOUT_SEC);
     consoles.waitProcessInProcessConsoleTree("machine");
     consoles.waitTabNameProcessIsPresent("machine");
-  }
-
-  private void createMap() {
-    variables.put("MYSQL_DATABASE", "petclinic");
-    variables.put("MYSQL_PASSWORD", "password");
-    variables.put("MYSQL_ROOT_PASSWORD", "password");
-    variables.put("MYSQL_USER", "petclinic");
   }
 
   private void clickOnSaveButton() {
