@@ -63,13 +63,15 @@ public class DiffTest {
     // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     makeCommitInMaster(connection);
+    addFile(connection, "Untracked", "Content\n");
 
     // when
     List<String> diff =
         readDiff(DiffParams.create().withType(DiffType.NAME_STATUS).withRenameLimit(0), connection);
     // then
-    assertEquals(diff.size(), 1);
+    assertEquals(diff.size(), 2);
     assertTrue(diff.contains("M\taaa"));
+    assertTrue(diff.contains("U\tUntracked"));
   }
 
   @Test(
