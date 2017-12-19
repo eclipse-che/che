@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.api.resources;
 
 import com.google.common.annotations.Beta;
+import jsinterop.annotations.JsType;
 import org.eclipse.che.ide.api.resources.Project.ProjectRequest;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.NameUtils;
@@ -28,6 +29,7 @@ import org.eclipse.che.ide.util.NameUtils;
  * @since 4.4.0
  */
 @Beta
+@JsType
 public interface Folder extends Container {
 
   /**

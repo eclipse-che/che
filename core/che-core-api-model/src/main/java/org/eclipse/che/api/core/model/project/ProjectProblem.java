@@ -10,7 +10,10 @@
  */
 package org.eclipse.che.api.core.model.project;
 
+import jsinterop.annotations.JsType;
+
 /** @author Vitalii Parfonov */
+@JsType(namespace = "che.ide.resource")
 public interface ProjectProblem {
 
   int getCode();

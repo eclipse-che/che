@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.api.resources;
 
 import com.google.common.annotations.Beta;
+import jsinterop.annotations.JsType;
 import org.eclipse.che.ide.resource.Path;
 
 /**
@@ -21,6 +22,7 @@ import org.eclipse.che.ide.resource.Path;
  * @see ExternalResourceDelta
  */
 @Beta
+@JsType
 public interface ResourceDelta {
 
   /* -- Delta kind -- */

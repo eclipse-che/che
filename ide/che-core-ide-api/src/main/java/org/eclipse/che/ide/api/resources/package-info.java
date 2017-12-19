@@ -8,18 +8,9 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.core.model.workspace.config;
 
-import java.util.Map;
-import jsinterop.annotations.JsType;
+/** @author Yevhen Vydolob */
+@JsPackage(namespace = "che.ide.resource")
+package org.eclipse.che.ide.api.resources;
 
-/** @author gazarenkov */
-@JsType(namespace = "che.ide.workspace")
-public interface SourceStorage {
-
-  String getType();
-
-  String getLocation();
-
-  Map<String, String> getParameters();
-}
+import jsinterop.annotations.JsPackage;

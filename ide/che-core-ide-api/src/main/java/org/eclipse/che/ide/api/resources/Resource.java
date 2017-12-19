@@ -14,6 +14,8 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
+import jsinterop.annotations.JsIgnore;
+import jsinterop.annotations.JsType;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -60,6 +62,7 @@ import org.eclipse.che.ide.resource.Path;
  * @since 4.4.0
  */
 @Beta
+@JsType
 public interface Resource extends Comparable<Resource> {
   /**
    * Type constant that describes {@code File} resource.
@@ -250,6 +253,7 @@ public interface Resource extends Comparable<Resource> {
    * @see Resource
    * @since 4.4.0
    */
+  @JsIgnore
   Promise<Resource> copy(Path destination);
 
   /**
@@ -356,6 +360,7 @@ public interface Resource extends Comparable<Resource> {
    * @see Resource
    * @since 4.4.0
    */
+  @JsIgnore
   Promise<Resource> move(Path destination);
 
   /**
@@ -489,6 +494,7 @@ public interface Resource extends Comparable<Resource> {
    * @deprecated use {@link #getProject()}
    */
   @Deprecated
+  @JsIgnore
   Optional<Project> getRelatedProject();
 
   /**
@@ -553,6 +559,7 @@ public interface Resource extends Comparable<Resource> {
    * @see #getMarkers()
    * @since 4.4.0
    */
+  @JsIgnore
   Optional<Marker> getMarker(String type);
 
   /**
@@ -625,6 +632,7 @@ public interface Resource extends Comparable<Resource> {
    *
    * @since 4.4.0
    */
+  @JsIgnore
   Optional<Resource> getParentWithMarker(String type);
 
   /** {@inheritDoc} */
@@ -644,6 +652,7 @@ public interface Resource extends Comparable<Resource> {
    * @since 4.4.0
    */
   @Beta
+  @JsType
   interface Request<R extends Resource, O> {
 
     /**

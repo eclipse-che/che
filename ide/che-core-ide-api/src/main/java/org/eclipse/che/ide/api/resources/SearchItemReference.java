@@ -12,12 +12,15 @@ package org.eclipse.che.ide.api.resources;
 
 import java.util.ArrayList;
 import java.util.List;
+import jsinterop.annotations.JsIgnore;
+import jsinterop.annotations.JsType;
 import org.eclipse.che.api.project.shared.Constants;
 import org.eclipse.che.api.project.shared.SearchOccurrence;
 import org.eclipse.che.api.project.shared.dto.SearchOccurrenceDto;
 import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 
 /** @author Vitalii Parfonov */
+@JsType
 public class SearchItemReference {
 
   private String name;
@@ -26,6 +29,7 @@ public class SearchItemReference {
   private String contentUrl;
   private List<SearchOccurrence> occurrences;
 
+  @JsIgnore
   public SearchItemReference(SearchResultDto searchResultDto) {
     name = searchResultDto.getItemReference().getName();
     path = searchResultDto.getItemReference().getPath();

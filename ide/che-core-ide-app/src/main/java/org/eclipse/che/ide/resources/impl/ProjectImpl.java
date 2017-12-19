@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import jsinterop.annotations.JsIgnore;
 import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
@@ -174,6 +175,7 @@ class ProjectImpl extends ContainerImpl implements Project {
 
   /** {@inheritDoc} */
   @Override
+  @JsIgnore
   public String getAttribute(String key) {
     final Map<String, List<String>> attributes = getAttributes();
 

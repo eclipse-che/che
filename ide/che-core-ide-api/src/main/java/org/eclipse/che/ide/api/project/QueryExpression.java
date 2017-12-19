@@ -10,7 +10,10 @@
  */
 package org.eclipse.che.ide.api.project;
 
+import jsinterop.annotations.JsType;
+
 /** @author Artem Zatsarynnyi */
+@JsType(namespace = "che.ide.resource")
 public class QueryExpression {
   private String name;
   private String path;

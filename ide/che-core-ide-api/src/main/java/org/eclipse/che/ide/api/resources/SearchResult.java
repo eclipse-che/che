@@ -11,8 +11,10 @@
 package org.eclipse.che.ide.api.resources;
 
 import java.util.List;
+import jsinterop.annotations.JsType;
 
 /** Class contains an information about result of the text search operation. */
+@JsType
 public class SearchResult {
   private List<SearchItemReference> itemReferences;
   private long totalHits;

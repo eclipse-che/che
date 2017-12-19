@@ -12,12 +12,14 @@ package org.eclipse.che.api.core.model.workspace.config;
 
 import java.util.List;
 import java.util.Map;
+import jsinterop.annotations.JsType;
 import org.eclipse.che.api.core.model.project.ProjectProblem;
 
 /**
  * @author gazarenkov
  * @author Dmitry Shnurenko
  */
+@JsType(namespace = "che.ide.workspace")
 public interface ProjectConfig {
   String getName();
 

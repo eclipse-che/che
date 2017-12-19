@@ -10,12 +10,15 @@
  */
 package org.eclipse.che.api.project.shared;
 
+import jsinterop.annotations.JsType;
+
 /**
  * Contain information about occurrence of found phrase like: - start and send offsets in the file
  * for found phrase; - number and content of line where given phrase found; - found phrase itself;
  *
  * @author Vitalii Parfonov
  */
+@JsType(namespace = "che.ide.resource")
 public interface SearchOccurrence {
   /** @return */
   float getScore();

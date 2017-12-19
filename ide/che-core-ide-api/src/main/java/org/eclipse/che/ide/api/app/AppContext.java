@@ -43,7 +43,6 @@ public interface AppContext {
    * @since 4.4.0
    */
   @Beta
-  @JsIgnore
   Container getWorkspaceRoot();
 
   /**
@@ -55,7 +54,6 @@ public interface AppContext {
    * @since 4.4.0
    */
   @Beta
-  @JsIgnore
   Project[] getProjects();
 
   /**
@@ -74,7 +72,6 @@ public interface AppContext {
    * @since 4.4.0
    */
   @Beta
-  @JsIgnore
   Resource getResource();
 
   /**
@@ -93,7 +90,6 @@ public interface AppContext {
    * @since 4.4.0
    */
   @Beta
-  @JsIgnore
   Resource[] getResources();
 
   /**
@@ -129,7 +125,6 @@ public interface AppContext {
    * @return the path to projects root.
    * @since 4.2.0
    */
-  @JsIgnore
   Path getProjectsRoot();
 
   /**

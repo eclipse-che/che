@@ -12,6 +12,9 @@ package org.eclipse.che.ide.api.resources;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
+import jsinterop.annotations.JsIgnore;
+import jsinterop.annotations.JsMethod;
+import jsinterop.annotations.JsType;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Promise;
@@ -39,6 +42,7 @@ import org.eclipse.che.ide.util.NameUtils;
  * @since 4.4.0
  */
 @Beta
+@JsType
 public interface Container extends Resource {
 
   /**
@@ -60,6 +64,7 @@ public interface Container extends Resource {
    * @see #getContainer(Path)
    * @since 4.4.0
    */
+  @JsIgnore
   Promise<Optional<File>> getFile(Path relativePath);
 
   /**
@@ -81,6 +86,7 @@ public interface Container extends Resource {
    * @see #getContainer(Path)
    * @since 4.4.0
    */
+  @JsIgnore
   Promise<Optional<File>> getFile(String relativePath);
 
   /**
@@ -102,6 +108,7 @@ public interface Container extends Resource {
    * @see #getFile(Path)
    * @since 4.4.0
    */
+  @JsIgnore
   Promise<Optional<Container>> getContainer(Path relativePath);
 
   /**
@@ -123,6 +130,7 @@ public interface Container extends Resource {
    * @see #getFile(Path)
    * @since 4.4.0
    */
+  @JsIgnore
   Promise<Optional<Container>> getContainer(String relativePath);
 
   /**
@@ -151,6 +159,7 @@ public interface Container extends Resource {
    * @see #getChildren()
    * @since 4.4.0
    */
+  @JsIgnore
   Promise<Resource[]> getChildren();
 
   /**
@@ -430,6 +439,7 @@ public interface Container extends Resource {
    * @see ResourceDelta
    * @since 4.4.0
    */
+  @JsMethod(name = "synchronizeDeltas")
   Promise<ResourceDelta[]> synchronize(ResourceDelta... deltas);
 
   /**
@@ -459,6 +469,7 @@ public interface Container extends Resource {
    * @param queryExpression the search query expression includes search parameters
    * @return the {@link Promise} with array of found results
    */
+  @JsMethod(name = "searchByQuery")
   Promise<SearchResult> search(QueryExpression queryExpression);
 
   /**
@@ -525,5 +536,6 @@ public interface Container extends Resource {
    * @see ProjectType#getId()
    * @since 4.4.0
    */
+  @JsIgnore
   Promise<SourceEstimation> estimate(String projectType);
 }

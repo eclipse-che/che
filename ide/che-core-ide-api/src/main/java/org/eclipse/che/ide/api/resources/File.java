@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.api.resources;
 
 import com.google.common.annotations.Beta;
+import jsinterop.annotations.JsType;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.debug.HasLocation;
 import org.eclipse.che.ide.api.vcs.HasVcsStatus;
@@ -33,6 +34,7 @@ import org.eclipse.che.ide.resource.Path;
  * @since 4.4.0
  */
 @Beta
+@JsType
 public interface File
     extends Resource, VirtualFile, ModificationTracker, HasVcsStatus, HasLocation {
 

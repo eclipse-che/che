@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import jsinterop.annotations.JsIgnore;
+import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsType;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
@@ -77,7 +78,6 @@ public interface Project extends Container, ProjectConfig {
    * @see ProjectRequest#send()
    * @since 4.4.0
    */
-  @JsIgnore
   ProjectRequest update();
 
   /**
@@ -145,6 +145,7 @@ public interface Project extends Container, ProjectConfig {
    * @return first value for the given {@code key} or null if such attribute doesn't exist
    * @since 4.4.0
    */
+  @JsMethod(name = "getAttributeByKey")
   String getAttribute(String key);
 
   /**
@@ -155,6 +156,7 @@ public interface Project extends Container, ProjectConfig {
    * @return the list with values for the given {@code key} or null if such attribute doesn't exist
    * @since 4.4.0
    */
+  @JsMethod(name = "getAttributesByKey")
   List<String> getAttributes(String key);
 
   /**
@@ -197,8 +199,10 @@ public interface Project extends Container, ProjectConfig {
    * @since 4.4.0
    */
   @Beta
+  @JsType
   interface ProjectRequest extends Resource.Request<Project, ProjectConfig> {
     @Override
+    @JsIgnore
     Request<Project, ProjectConfig> withBody(ProjectConfig object);
 
     @Override

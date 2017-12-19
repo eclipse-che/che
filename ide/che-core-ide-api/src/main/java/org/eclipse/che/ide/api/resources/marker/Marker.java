@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.api.resources.marker;
 
 import com.google.common.annotations.Beta;
+import jsinterop.annotations.JsType;
 import org.eclipse.che.ide.api.resources.Project.ProblemProjectMarker;
 import org.eclipse.che.ide.api.resources.Resource;
 
@@ -30,6 +31,7 @@ import org.eclipse.che.ide.api.resources.Resource;
  * @since 4.4.0
  */
 @Beta
+@JsType(namespace = "che.ide.resource")
 public interface Marker {
 
   /**
