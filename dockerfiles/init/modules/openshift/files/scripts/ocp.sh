@@ -198,14 +198,14 @@ wait_until_kc_is_booted() {
     sleep ${POLLING_INTERVAL_SEC}
   done
 
-if [ "${progressing}" == "\"True\"" ]; then
-  echo "[CHE] Keycloak deployed successfully"
-elif [ "${progressing}" == "False" ]; then
-  echo "[CHE] [ERROR] Keycloak deployment failed. Aborting. Run command 'oc rollout status keycloak' to get more details."
-elif [ ${SECONDS} -ge ${end} ]; then
-  echo "[CHE] [ERROR] Deployment timeout. Aborting."
-  exit 1
-fi
+  if [ "${progressing}" == "\"True\"" ]; then
+    echo "[CHE] Keycloak deployed successfully"
+  elif [ "${progressing}" == "False" ]; then
+    echo "[CHE] [ERROR] Keycloak deployment failed. Aborting. Run command 'oc rollout status keycloak' to get more details."
+  elif [ ${SECONDS} -ge ${end} ]; then
+    echo "[CHE] [ERROR] Deployment timeout. Aborting."
+    exit 1
+  fi
 }
 
 destroy_ocp() {
