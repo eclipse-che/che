@@ -151,7 +151,7 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
       SpanElement element = Document.get().createSpanElement();
       element.getStyle().setFontSize(11., Style.Unit.PT);
       element.getStyle().setMarginTop(2., Style.Unit.PT);
-      element.setInnerHTML((String)icon);
+      element.setInnerHTML((String) icon);
       return element;
     }
 
