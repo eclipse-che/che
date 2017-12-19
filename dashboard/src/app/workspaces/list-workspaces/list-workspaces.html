@@ -13,8 +13,8 @@
 <che-toolbar che-title="Workspaces" border-none></che-toolbar>
 <che-description che-link-title="Learn more." che-link="{{branding.docs.workspace}}">A workspace is where your projects live and run. Create workspaces from stacks that define projects, runtimes, and commands.</che-description>
 <md-content md-scroll-y flex layout="column" md-theme="maincontent-theme">
-  <md-progress-linear md-mode="indeterminate" class="workspaces-list-progress"
-                      ng-show="listWorkspacesCtrl.isInfoLoading"></md-progress-linear>
+  <md-progress-linear md-mode="indeterminate" class="progress-line"
+                      ng-show="listWorkspacesCtrl.isInfoLoading || listWorkspacesCtrl.isRequestPending"></md-progress-linear>
   <md-content flex class="workspace-list-content" ng-hide="listWorkspacesCtrl.isInfoLoading">
     <che-list-header che-input-placeholder="Search"
                      che-search-model="listWorkspacesCtrl.workspaceFilter.config.name"
@@ -70,6 +70,7 @@
       <che-workspace-item
               ng-repeat="workspace in listWorkspacesCtrl.cheListHelper.getVisibleItems() | orderBy:[listWorkspacesCtrl.workspaceOrderBy, 'config.name']"
               ng-model="listWorkspacesCtrl.cheListHelper.itemsSelectionStatus[workspace.id]"
+              is-request-pending="listWorkspacesCtrl.isRequestPending"
               che-selectable="true"
               che-display-labels="false"
               che-on-checkbox-click="listWorkspacesCtrl.cheListHelper.updateBulkSelectionStatus()"
