@@ -31,7 +31,7 @@ public final class Constants {
   // LS requests timeout constants
   public static final int REQUEST_TIMEOUT = 10_000;
   public static final int EFFECTIVE_POM_REQUEST_TIMEOUT = 30_000;
-  public static final int REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT = 300_000;
+  public static final int REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT = 60_000;
 
   // JSON RPC methods
   public static final String FILE_STRUCTURE = "java/filestructure";
