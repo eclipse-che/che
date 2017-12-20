@@ -519,9 +519,9 @@ fetchActualResults() {
 
     # define the URL of CI job to compare result with result on it
     if [[ ${CHE_MULTIUSER} == true ]]; then
-      local nameOfCIJob=che-multiuser-integration-tests-che6
+      local nameOfCIJob=che-multiuser-integration-tests
     else
-      local nameOfCIJob=che-integration-tests-che6
+      local nameOfCIJob=che-integration-tests
     fi
 
     [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/$nameOfCIJob/"; }
