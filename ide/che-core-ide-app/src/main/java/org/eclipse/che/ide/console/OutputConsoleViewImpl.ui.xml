@@ -193,7 +193,7 @@
             </g:FlowPanel>
         </g:north>
         <g:center>
-            <g:FlowPanel height="100%" ui:field="consoleLines" debugId="commandConsoleLines" />
+            <g:FlowPanel height="100%" width="100%" ui:field="consoleLines" debugId="commandConsoleLines" />
         </g:center>
     </g:DockLayoutPanel>
 </ui:UiBinder>

@@ -31,7 +31,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.machine.MachineResources;
-import org.eclipse.che.ide.terminal.TerminalGeometryJso;
 import org.eclipse.che.ide.terminal.TerminalInitializePromiseHolder;
 import org.eclipse.che.ide.terminal.TerminalJso;
 import org.eclipse.che.ide.terminal.TerminalOptionsJso;
@@ -159,8 +158,12 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
               this.terminalJso = TerminalJso.create(terminalSource, termOps);
               terminalJso.open(consoleLines.asWidget().getElement());
-              TerminalGeometryJso geometryJso = terminalJso.proposeGeometry();
-              terminalJso.resize(geometryJso.getCols(), geometryJso.getRows());
+//              Log.info(getClass(),  "Constructor !!!! "
+//                                    + " " + consoleLines.getElement().getClientHeight()
+//                                    + " " + consoleLines.getElement().getClientWidth()
+//                                    + " " + consoleLines.isVisible()
+//                                    + " " + consoleLines.isAttached()
+//                                    + " " + hashCode());
             });
   }
 
@@ -174,28 +177,45 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
   @Override
   public void onResize() {
+//    Log.info(getClass(),  "!!!! "
+//                          + " " + consoleLines.getElement().getClientHeight()
+//                          + " " + consoleLines.getElement().getClientWidth()
+//                          + " " + consoleLines.isVisible()
+//                          + " " + consoleLines.isAttached()
+//                          + " " + hashCode());
     resizeTimer.schedule(200);
   }
 
   private void resize() {
-    TerminalGeometryJso geometryJso = terminalJso.proposeGeometry();
-    int rows = geometryJso.getRows();
+    if (terminalJso == null) {
+      return;
+    }
+    int visibleCols = evaluateVisibleCols();
+    int visibleRows = evaluateVisibleRows();
 
-    // don't resize in case if size was not changed.
-//    if (terminalJso.getCols() == x && terminalJso.getRows() == y) {
-//      return;
-//    }
+    if (visibleRows > 0 && visibleCols > 0) {
 
-    if (rows > 0 && geometryJso.getCols() > 0) {
-      Log.info(getClass(), " Get vertical width = " + terminalJso.getVerticalWidth());
-      Log.info(getClass(),"Resize rows: " + geometryJso.getRows() + " Resize cols: " + terminalJso.getVerticalWidth());
-      terminalJso.resize(terminalJso.getVerticalWidth(), evaluateHeight());
+      Log.info(getClass(), "Client height "+ terminalJso.getElement().getClientHeight() + " width " + terminalJso.getElement().getClientWidth());
+      Log.info(getClass(), "char measure element: height= " + terminalJso.getCharMeasure().getHeight() + " width= " + terminalJso.getCharMeasure().getWidth());
+
+      int maxLineLength = terminalJso.maxLineLength();
+
+      int cols = Math.max(maxLineLength, visibleCols);
+
+      Log.info(getClass(), "size: rows " + visibleRows + " cols " + cols);
+
+      terminalJso.resize(cols, visibleRows);
     }
   }
 
-  private int  evaluateHeight() {
-    return (int)Math.floor((terminalJso.getElement().getClientHeight() - 19)/13);
+  private int evaluateVisibleRows() {
+    return Math.round((terminalJso.getElement().getClientHeight() - terminalJso.getScrollBarMeasure().getVerticalWidth()) / terminalJso.getCharMeasure().getHeight());
   }
+
+  private int evaluateVisibleCols() {
+    return Math.round((terminalJso.getElement().getClientWidth() - terminalJso.getScrollBarMeasure().getHorizontalWidth()) / terminalJso.getCharMeasure().getWidth());
+  }
+
 
   @Override
   public void print(String text) {

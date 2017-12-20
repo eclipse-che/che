@@ -40,12 +40,24 @@ public class TerminalJso extends JavaScriptObject {
         return this.element;
     }-*/;
 
+  public final native void fit() /*-{
+        return this.fit();
+    }-*/;
+
 //  public final native Element getParent() /*-{
 //        return this.parent;
 //    }-*/;
 
   public final native TerminalGeometryJso proposeGeometry() /*-{
         return this.proposeGeometry();
+    }-*/;
+
+  public final native ScrollBarMeasureJso getScrollBarMeasure() /*-{
+        return this.scrollBarMeasure;
+    }-*/;
+
+  public final native CharMeasureJso getCharMeasure() /*-{
+        return this.charMeasure;
     }-*/;
 
     public final native int getRows() /*-{
@@ -86,8 +98,7 @@ public class TerminalJso extends JavaScriptObject {
       return this.hasSelection();
     }-*/;
 
-  // todo rename verticalScrollWidth to getVerticalWidth
-  public final native int getVerticalWidth() /*-{
-      return this.verticalScrollWidth;
+  public final native int maxLineLength() /*-{
+      return this.maxLineLength();
     }-*/;
 }
