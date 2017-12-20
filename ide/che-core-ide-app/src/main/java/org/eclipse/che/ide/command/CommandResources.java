@@ -73,7 +73,13 @@ public interface CommandResources extends ClientBundle {
 
     String processesListExecLabel();
 
-    String processesListLoadLabel();
+    String processesListLoader();
+
+    String processesListLoaderRect1();
+
+    String processesListLoaderRect2();
+
+    String processesListLoaderRect3();
 
     String processWidgetText();
 

@@ -40,7 +40,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
   private ActionDelegate delegate;
 
   private final Label execLabel;
-  private final Label loadLabel;
+  private final FlowPanel loadAnimation;
 
   private FlowPanel loadInfo;
   private FlowPanel loadingLabel;
@@ -58,8 +58,20 @@ public class ProcessesListViewImpl implements ProcessesListView {
     execLabel = new Label("EXEC");
     execLabel.addStyleName(resources.commandToolbarCss().processesListExecLabel());
 
-    loadLabel = new Label("LOAD");
-    loadLabel.addStyleName(resources.commandToolbarCss().processesListLoadLabel());
+    loadAnimation = new FlowPanel();
+    loadAnimation.addStyleName(resources.commandToolbarCss().processesListLoader());
+
+    FlowPanel rect1 = new FlowPanel();
+    rect1.addStyleName(resources.commandToolbarCss().processesListLoaderRect1());
+    loadAnimation.add(rect1);
+
+    FlowPanel rect2 = new FlowPanel();
+    rect2.addStyleName(resources.commandToolbarCss().processesListLoaderRect2());
+    loadAnimation.add(rect2);
+
+    FlowPanel rect3 = new FlowPanel();
+    rect3.addStyleName(resources.commandToolbarCss().processesListLoaderRect3());
+    loadAnimation.add(rect3);
 
     dropdownList = new DropdownList(emptyListWidget, true);
     dropdownList.setWidth("100%");
@@ -79,7 +91,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
 
     rootPanel = new FlowPanel();
     rootPanel.add(execLabel);
-    rootPanel.add(loadLabel);
+    rootPanel.add(loadAnimation);
     rootPanel.add(dropdownList);
 
     createCommandItem = new CreateCommandItem();
@@ -104,7 +116,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
     execLabel.getElement().getStyle().setDisplay(Style.Display.NONE);
     dropdownList.getElement().getStyle().setDisplay(Style.Display.NONE);
 
-    loadLabel.getElement().getStyle().setDisplay(Style.Display.BLOCK);
+    loadAnimation.getElement().getStyle().setDisplay(Style.Display.BLOCK);
     loadInfo.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
   }
 
@@ -113,7 +125,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
     execLabel.getElement().getStyle().clearDisplay();
     dropdownList.getElement().getStyle().clearDisplay();
 
-    loadLabel.getElement().getStyle().clearDisplay();
+    loadAnimation.getElement().getStyle().clearDisplay();
     loadInfo.getElement().getStyle().clearDisplay();
   }
 

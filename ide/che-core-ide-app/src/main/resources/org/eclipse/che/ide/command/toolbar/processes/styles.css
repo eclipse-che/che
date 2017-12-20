@@ -8,14 +8,16 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
+
+@eval dropdownListBackground org.eclipse.che.ide.api.theme.Style.getDropdownListBackground();
+
 .toolbarButton {
     float: left;
     line-height: 20px;
     margin-left: 15px;
 }
 
-.processesListExecLabel,
-.processesListLoadLabel {
+.processesListExecLabel {
     float: left;
     border-left: commandsToolbarProcessesLabelBorder;
     border-top: commandsToolbarProcessesLabelBorder;
@@ -35,10 +37,53 @@
     cursor: default;
 }
 
-.processesListLoadLabel {
+.processesListLoader {
+    float: left;
+    border-left: commandsToolbarProcessesLabelBorder;
+    border-top: commandsToolbarProcessesLabelBorder;
+    border-bottom: commandsToolbarProcessesLabelBorder;
+    border-right: 0;
+    width: 44px;
+    height: 22px;
+    cursor: default;
     display: none;
-    background-color: #191d28;
-    font-size: 11px;
+    background: commandsToolbarProcessesLabelBackground;
+}
+
+.processesListLoaderRect1,
+.processesListLoaderRect2,
+.processesListLoaderRect3 {
+    background-color: #4a90e2;
+    width: 2px;
+    height: literal("calc(100% - 4px)");
+    display: inline-block;
+    margin-left: 2px;
+    margin-top: 2px;
+    animation: stretchAnimation 1.2s infinite ease-in-out;
+}
+
+.processesListLoaderRect1 {
+    margin-left: 16px;
+}
+
+.processesListLoaderRect2 {
+    animation-delay: 0.1s;
+}
+
+.processesListLoaderRect3 {
+    animation-delay: 0.2s;
+}
+
+@keyframes stretchAnimation {
+    0%, 40%, 100% {
+        -webkit-transform: scaleY(0.4);
+        transform: scaleY(0.4);
+    }
+
+    20% {
+        -webkit-transform: scaleY(1.0);
+        transform: scaleY(1.0);
+    }
 }
 
 .processWidgetText {
@@ -90,7 +135,7 @@
     top: 0px;
     width: 100%;
     height: 22px;
-    background-color: #242a3a;
+    background-color: dropdownListBackground;
     border: solid 1px #2b3242;
     overflow: hidden;
 }

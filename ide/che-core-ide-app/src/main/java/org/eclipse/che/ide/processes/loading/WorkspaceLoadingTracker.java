@@ -15,4 +15,7 @@ public interface WorkspaceLoadingTracker {
 
   /** Starts tracking of workspace loading. */
   void startTracking();
+
+  /** Shows workspace status panel. */
+  void showPanel();
 }

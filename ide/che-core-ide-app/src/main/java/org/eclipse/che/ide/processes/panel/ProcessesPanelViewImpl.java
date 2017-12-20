@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.parts.base.BaseView;
@@ -196,7 +197,20 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
       final String title,
       final SVGResource icon,
       final IsWidget widget,
-      final boolean machineConsole) {
+      final boolean removable) {
+
+    Optional<WidgetToShow> existedWidget =
+        focusedSubPanel
+            .getAllWidgets()
+            .stream()
+            .filter(widgetToShow -> widgetToShow.getWidget().equals(widget))
+            .findFirst();
+
+    if (existedWidget.isPresent()) {
+      focusedSubPanel.activateWidget(existedWidget.get());
+      return;
+    }
+
     final WidgetToShow widgetToShow =
         new WidgetToShow() {
           @Override
@@ -219,13 +233,14 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
     focusedSubPanel.addWidget(
         widgetToShow,
-        !machineConsole,
+        removable,
         new SubPanel.WidgetRemovingListener() {
           @Override
           public void onWidgetRemoving(SubPanel.RemoveCallback removeCallback) {
             final ProcessTreeNode treeNode = widget2TreeNodes.get(widgetToShow.getWidget());
 
             if (treeNode == null) {
+              removeCallback.remove();
               return;
             }
 
@@ -241,6 +256,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
                 removeCallback.remove();
                 break;
               default:
+                removeCallback.remove();
             }
           }
         });
@@ -368,6 +384,10 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     onResize();
 
     final WidgetToShow widgetToShow = processWidgets.get(processId);
+    if (!focusedSubPanel.getAllWidgets().contains(widgetToShow)) {
+      return;
+    }
+
     final SubPanel subPanel = widget2Panels.get(widgetToShow);
     if (subPanel != null) {
       subPanel.activateWidget(widgetToShow);
