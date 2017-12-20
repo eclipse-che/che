@@ -17,13 +17,6 @@ newly created [OAuth application](https://github.com/settings/developers).
 Set `CHE_LOCAL_CONF_DIR` environment variable and point to the folder where selenium tests configuration will be stored.
 Create file `selenium.properties` in that folder with the following content:
 ```
-# Credentials of Eclipse Che multiuser assemblies
-che.admin_user.email=<CHE_ADMIN_EMAIL>
-che.admin_user.password=<CHE_ADMIN_PASSWORD>
-
-che.test_user.email=<CHE_USER_EMAIL>
-che.test_user.password=<CHE_USER_PASSWORD>
-
 # GitHub account credentials
 github.username=<MAIN_GITHUB_USERNAME>
 github.password=<MAIN_GITHUB_PASSWORD>
@@ -34,6 +27,15 @@ github.auxiliary.password=<AUXILIARY_GITHUB_PASSWORD>
 google.user=<GOOGLE_USER>
 google.password=<GOOGLE_PASSWORD>
 ```
+
+In case of running of tests for Eclipse Che in Multi User mode you can set your own credentials of test user or admin instead of default ones
+export CHE_ADMIN_NAME=<che_admin_name>
+export CHE_ADMIN_EMAIL=<che_admin_email>
+export CHE_ADMIN_PASSWORD=<che_admin_password>
+
+export CHE_TESTUSER_NAME=<che_test_user_name>
+export CHE_TESTUSER_EMAIL=<che_test_user_email>
+export CHE_TESTUSER_PASSWORD=<che_test_user_password>
 
 #### 3. Prepare repository 
 Fork all repositories from [https://github.com/idexmai?tab=repositories](https://github.com/idexmai?tab=repositories) into the main GitHub account.
@@ -48,15 +50,9 @@ Follow the guide: [https://github.com/eclipse/che](https://github.com/eclipse/ch
 Simply launch `./selenium-tests.sh`
 
 ### How to run tests on OpenShift
-#### Che in container case
-##### 1. Set workspace runtime infrastructure implementation
-export CHE_SELENIUM_INFRASTRUCTURE=openshift
-##### 2. Run tests in the default way
-Simply launch `./selenium-tests.sh`
-#### Che inside of OpenShift case
-##### 1. Set workspace runtime infrastructure implementation
-export CHE_SELENIUM_INFRASTRUCTURE=openshift
-##### 2. Run tests and specify host and port of Che deployed to OpenShift
+#### 1. Set workspace runtime infrastructure implementation
+export CHE_INFRASTRUCTURE=openshift
+#### 2. Run tests and specify host and port of Che deployed to OpenShift
 Launch `./selenium-tests.sh --host=<Che host on openshift> --port=80`
 
 Example: `./selenium-tests.sh --host=che-spi.192.168.99.100.nip.io --port=80`
