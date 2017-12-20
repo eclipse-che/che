@@ -78,8 +78,9 @@
            class="workspace-item-actions">
         <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
         <span class="che-list-actions">
-          <che-workspace-status che-workspace-item="workspaceItemCtrl.workspace"></che-workspace-status>
-          <a ng-href="#/workspace/{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspace.config.name}}?tab=Config"
+          <che-workspace-status workspace-id="workspaceItemCtrl.workspace.id"
+                                is-request-pending="workspaceItemCtrl.isRequestPending"></che-workspace-status>
+          <a href="#/workspace/{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspace.config.name}}?tab=Config"
              uib-tooltip="Configure workspace">
             <span class="fa fa-cog"></span>
           </a>

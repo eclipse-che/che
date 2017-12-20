@@ -20,10 +20,12 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfEl
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -175,6 +177,21 @@ public class Consoles {
 
   public void waitReferenceIsNotPresent(String referenceId) {
     redrawDriverWait.until(invisibilityOfElementLocated(By.id(referenceId)));
+  }
+
+  public boolean checkThatServerExists(String serverName) {
+    List<WebElement> webElements =
+        loadPageDriverWait.until(
+            visibilityOfAllElementsLocatedBy(
+                By.xpath("//div[contains(@id, 'runtime-info-reference-')]")));
+
+    for (WebElement we : webElements) {
+      if (we.getText().equals(serverName)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public void waitExpectedTextIntoPreviewUrl(String expectedText) {

@@ -111,6 +111,16 @@ public interface HttpJsonRequest {
   HttpJsonRequest addQueryParam(@NotNull String name, @NotNull Object value);
 
   /**
+   * Adds header to the request.
+   *
+   * @param name header name
+   * @param value header value
+   * @return this request instance
+   * @throws NullPointerException when either header name or value is null
+   */
+  HttpJsonRequest addHeader(@NotNull String name, @NotNull String value);
+
+  /**
    * Adds authorization header to the request.
    *
    * @param value authorization header value
@@ -204,6 +214,18 @@ public interface HttpJsonRequest {
   default HttpJsonRequest addQueryParams(@NotNull Map<String, ?> params) {
     Objects.requireNonNull(params, "Required non-null query parameters");
     params.forEach(this::addQueryParam);
+    return this;
+  }
+
+  /**
+   * Adds set of headers to this request.
+   *
+   * @param headers map with headers
+   * @return this request instance
+   */
+  default HttpJsonRequest addHeaders(@NotNull Map<String, String> headers) {
+    Objects.requireNonNull(headers, "Required non-null headers");
+    headers.forEach(this::addHeader);
     return this;
   }
 }
