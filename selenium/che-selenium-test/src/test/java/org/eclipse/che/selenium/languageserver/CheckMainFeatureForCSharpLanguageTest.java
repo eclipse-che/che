@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 
@@ -79,7 +78,7 @@ public class CheckMainFeatureForCSharpLanguageTest {
     projectExplorer.waitItem(PROJECT_NAME + "/Program.cs", 240);
     projectExplorer.openItemByPath(PROJECT_NAME + "/Program.cs");
     loader.waitOnClosed();
-    checkInitStateAndLaunchLanguageServer();
+    checkLanguageServerInitStateAndLaunch();
     editor.goToCursorPositionVisible(24, 12);
     for (int i = 0; i < 9; i++) {
       editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
@@ -94,8 +93,8 @@ public class CheckMainFeatureForCSharpLanguageTest {
     editor.waitAllMarkersDisappear(ERROR_MARKER);
   }
 
-  private void checkInitStateAndLaunchLanguageServer() {
-    if (isInitLanguageServerFail()) {
+  private void checkLanguageServerInitStateAndLaunch() {
+    if (isLanguageServerInitFailed()) {
       reInitLanguageServer();
     }
   }
@@ -109,7 +108,7 @@ public class CheckMainFeatureForCSharpLanguageTest {
     loader.waitOnClosed();
   }
 
-  private boolean isInitLanguageServerFail() {
+  private boolean isLanguageServerInitFailed() {
     String xpathLocatorForEventMessages =
         "//div[contains(@id,'gwt-debug-notification-wrappergwt-uid')]";
     List<WebElement> textMessages =
@@ -117,11 +116,9 @@ public class CheckMainFeatureForCSharpLanguageTest {
             .until(
                 ExpectedConditions.presenceOfAllElementsLocatedBy(
                     By.xpath(xpathLocatorForEventMessages)));
-    StringBuilder allMessagesBuilder = new StringBuilder();
-    textMessages.forEach(message -> allMessagesBuilder.append(message.getAttribute("textContent")));
-    String aggregatedMessages = allMessagesBuilder.toString();
-    return (isNullOrEmpty(aggregatedMessages))
-        ? false
-        : (aggregatedMessages.contains("Timeout initializing error"));
+    return textMessages
+        .stream()
+        .anyMatch(
+            message -> message.getAttribute("textContent").contains("Timeout initializing error"));
   }
 }
