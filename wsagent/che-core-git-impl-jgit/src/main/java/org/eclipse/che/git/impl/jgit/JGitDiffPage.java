@@ -352,17 +352,11 @@ class JGitDiffPage extends DiffPage {
     for (DiffEntry de : diff) {
       switch (de.getChangeType()) {
         case ADD:
-          if (status.getUntracked().contains(de.getNewPath())) {
-            writer.print(
-                "U\t"
-                    + de.getNewPath()
-                    + (diffSize != diff.indexOf(de) + 1 ? lineSeparator() : ""));
-          } else {
-            writer.print(
-                "A\t"
-                    + de.getNewPath()
-                    + (diffSize != diff.indexOf(de) + 1 ? lineSeparator() : ""));
-          }
+          writer.print(
+              (status.getUntracked().contains(de.getNewPath()) ? "U" : "A")
+                  + "\t"
+                  + de.getNewPath()
+                  + (diffSize != diff.indexOf(de) + 1 ? lineSeparator() : ""));
           break;
         case DELETE:
           writer.print(
