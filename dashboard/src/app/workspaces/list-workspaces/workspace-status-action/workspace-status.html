@@ -10,15 +10,10 @@
       Red Hat, Inc. - initial API and implementation
 
 -->
-<div class="workspaces-status">
-  <span class="fa fa-play"
-        ng-click="workspaceStatusController.startWorkspace()"
-        ng-show="workspaceStatusController.isShowRun()"
-        ng-class="{'disabled' : workspaceStatusController.getWorkspaceStatus() === 'STARTING'}"
-        uib-tooltip="Run workspace"></span>
-  <span class="fa fa-stop"
-        ng-click="workspaceStatusController.stopWorkspace()"
-        ng-show="!workspaceStatusController.isShowRun()"
-        ng-class="{'disabled' : workspaceStatusController.isStopDisabled()}"
-        uib-tooltip="Stop workspace"></span>
+<div class="workspace-status"
+     ng-click="workspaceStatusController.changeWorkspaceStatus()"
+     uib-tooltip="{{workspaceStatusController.isShowRun() ? 'Run' : 'Stop'}} workspace"
+     ng-class="{'disabled' : workspaceStatusController.isButtonDisabled()}">
+  <span class="fa"
+        ng-class="{'fa-play' : workspaceStatusController.isShowRun(), 'fa-stop': !workspaceStatusController.isShowRun()}"></span>
 </div>

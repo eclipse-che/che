@@ -78,7 +78,7 @@ export class CheWorkspace {
   /**
    * Map with promises.
    */
-  private workspaceDetailsByKeyPromise: Map<string, ng.IHttpPromise<any>> = new Map();
+  private workspacePromises: Map<string, ng.IHttpPromise<any>> = new Map();
 
 
   /**
@@ -86,7 +86,7 @@ export class CheWorkspace {
    * @ngInject for Dependency injection
    */
   constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService, $q: ng.IQService, cheJsonRpcApi: CheJsonRpcApi,
-              $websocket: any, $location: ng.ILocationService, proxySettings : string, userDashboardConfig: any,
+              $websocket: any, $location: ng.ILocationService, proxySettings: string, userDashboardConfig: any,
               lodash: any, cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService, cheBranding: CheBranding, keycloakAuth: any) {
     this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR'];
     // keep resource
@@ -208,7 +208,11 @@ export class CheWorkspace {
         }
       });
 
-      let workspaceAgentData = {path: wsAgentLink.url, websocket: wsAgentWebocketLink.url, clientId: this.cheJsonRpcMasterApi.getClientId()};
+      let workspaceAgentData = {
+        path: wsAgentLink.url,
+        websocket: wsAgentWebocketLink.url,
+        clientId: this.cheJsonRpcMasterApi.getClientId()
+      };
       let wsagent: CheWorkspaceAgent = new CheWorkspaceAgent(this.$resource, this.$q, this.$websocket, workspaceAgentData);
       this.workspaceAgents.set(workspaceId, wsagent);
       return wsagent;
@@ -343,12 +347,13 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>}
    */
   fetchWorkspaceDetails(workspaceKey: string): ng.IPromise<any> {
-    if (this.workspaceDetailsByKeyPromise.has(workspaceKey)) {
-      return this.workspaceDetailsByKeyPromise.get(workspaceKey);
+    const workspacePromisesKey = 'fetchWorkspaceDetails' + workspaceKey;
+    if (this.workspacePromises.has(workspacePromisesKey)) {
+      return this.workspacePromises.get(workspacePromisesKey);
     }
     const defer = this.$q.defer();
     const promise: ng.IHttpPromise<any> = this.$http.get('/api/workspace/' + workspaceKey);
-    this.workspaceDetailsByKeyPromise.set(workspaceKey, promise);
+    this.workspacePromises.set(workspacePromisesKey, promise);
 
     promise.then((response: ng.IHttpPromiseCallbackArg<che.IWorkspace>) => {
       const workspace = response.data;
@@ -362,7 +367,7 @@ export class CheWorkspace {
       }
       defer.reject(error);
     }).finally(() => {
-      this.workspaceDetailsByKeyPromise.delete(workspaceKey);
+      this.workspacePromises.delete(workspacePromisesKey);
     });
 
     return defer.promise;
@@ -511,7 +516,18 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>} promise
    */
   startWorkspace(workspaceId: string, envName: string): ng.IPromise<any> {
-    return this.remoteWorkspaceAPI.startWorkspace({workspaceId: workspaceId, envName: envName}, {}).$promise;
+    const workspacePromisesKey = 'startWorkspace' + workspaceId;
+    if (this.workspacePromises.has(workspacePromisesKey)) {
+      return this.workspacePromises.get(workspacePromisesKey);
+    }
+
+    const promise = this.remoteWorkspaceAPI.startWorkspace({workspaceId: workspaceId, envName: envName}, {}).$promise;
+    this.workspacePromises.set(workspacePromisesKey, promise);
+    promise.finally(() => {
+      this.workspacePromises.delete(workspacePromisesKey);
+    });
+
+    return promise;
   }
 
   /**
@@ -529,9 +545,19 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>} promise
    */
   stopWorkspace(workspaceId: string): ng.IPromise<any> {
-    return this.remoteWorkspaceAPI.stopWorkspace({
+    const workspacePromisesKey = 'stopWorkspace' + workspaceId;
+    if (this.workspacePromises.has(workspacePromisesKey)) {
+      return this.workspacePromises.get(workspacePromisesKey);
+    }
+    const promise = this.remoteWorkspaceAPI.stopWorkspace({
       workspaceId: workspaceId
     }, {}).$promise;
+    this.workspacePromises.set(workspacePromisesKey, promise);
+    promise.finally(() => {
+      this.workspacePromises.delete(workspacePromisesKey);
+    });
+
+    return promise;
   }
 
   /**
