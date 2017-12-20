@@ -39,6 +39,7 @@ import org.eclipse.che.plugin.maven.shared.MavenAttributes;
  * Action for reimport maven dependencies.
  *
  * @author Roman Nikitenko
+ * @author Mykola Morhun
  */
 @Singleton
 public class ReimportMavenDependenciesAction extends AbstractPerspectiveAction {
@@ -94,7 +95,7 @@ public class ReimportMavenDependenciesAction extends AbstractPerspectiveAction {
                           }
                         });
               }
-              // TODO update error markers in poms
+              // TODO update error markers in poms if needed
             })
         .catchError(
             error -> {

@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.java.client.service;
 import static org.eclipse.che.api.promises.client.js.JsPromiseError.create;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.ext.java.shared.Constants.CLASS_PATH_TREE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES_CHILDREN;
@@ -20,6 +21,7 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHI
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_NODE_CONTENT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REQUEST_TIMEOUT;
 
@@ -77,7 +79,7 @@ public class JavaLanguageExtensionServiceClient {
             requestTransmitter
                 .newRequest()
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-                .methodName("java/effective-pom")
+                .methodName(EFFECTIVE_POM)
                 .paramsAsString(pathToProject)
                 .sendAndReceiveResultAsString(EFFECTIVE_POM_REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
@@ -101,7 +103,7 @@ public class JavaLanguageExtensionServiceClient {
             requestTransmitter
                 .newRequest()
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-                .methodName("java/reimport-maven-projects")
+                .methodName(REIMPORT_MAVEN_PROJECTS)
                 .paramsAsDto(params)
                 .sendAndReceiveResultAsListOfString(REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)

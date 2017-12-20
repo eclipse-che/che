@@ -15,6 +15,7 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.ide.ext.java.shared.Constants.CLASS_PATH_TREE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES_CHILDREN;
@@ -22,6 +23,7 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHI
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_NODE_CONTENT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_ENTRY_COMMAND;
@@ -128,14 +130,14 @@ public class JavaLanguageServerExtensionService {
 
     requestHandler
         .newConfiguration()
-        .methodName("java/effective-pom")
+        .methodName(EFFECTIVE_POM)
         .paramsAsString()
         .resultAsString()
         .withFunction(this::getEffectivePom);
 
     requestHandler
         .newConfiguration()
-        .methodName("java/reimport-maven-projects")
+        .methodName(REIMPORT_MAVEN_PROJECTS)
         .paramsAsDto(ReImportMavenProjectsCommandParameters.class)
         .resultAsListOfString()
         .withFunction(this::reImportMavenProjects);
