@@ -64,7 +64,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
     commandsToolbar.clickWithHoldAndLaunchCommandFromList(PROJECT_NAME + ": build and run");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
 
-    // it needs when the test is running on the che6-ocp platform
+    // it needs when the test is running on the ocp platform
     String previewUrl = consoles.getPreviewUrl();
     if (previewUrl.contains("route")) {
       WaitUtils.sleepQuietly(10);
@@ -87,7 +87,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
     String currentWindow = seleniumWebDriver.getWindowHandle();
     commandsToolbar.clickExecStopBtn();
 
-    // it needs when the test is running on the che6-ocp platform
+    // it needs when the test is running on the ocp platform
     String previewUrl = consoles.getPreviewUrl();
     String expectedText =
         previewUrl.contains("route")
@@ -103,7 +103,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
     Assert.assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
     Assert.assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#2"));
 
-    // it needs when the test is running on the che6-ocp platform
+    // it needs when the test is running on the ocp platform
     if (previewUrl.contains("route")) {
       WaitUtils.sleepQuietly(10);
     }
