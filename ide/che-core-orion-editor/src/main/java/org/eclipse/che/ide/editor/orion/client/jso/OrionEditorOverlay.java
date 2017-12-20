@@ -60,6 +60,10 @@ public class OrionEditorOverlay extends JavaScriptObject {
         this.setCaretOffset(offset, true);
     }-*/;
 
+  public final native void setCaretOffset(int offset, OrionTextViewShowOptionsOverlay show) /*-{
+        this.setCaretOffset(offset, show);
+    }-*/;
+
   public final native int getCaretOffset() /*-{
         return this.getCaretOffset();
     }-*/;

@@ -14,49 +14,52 @@ package org.eclipse.che.selenium.core.constant;
 public final class TestProjectExplorerContextMenuConstants {
 
   /** First level context menu items */
-  public static final String NEW = "contextMenu/New";
+  public static final String NEW = "gwt-debug-contextMenu/newGroup";
 
-  public static final String COMMANDS = "contextMenu/Commands";
-  public static final String PREVIEW = "contextMenu/Preview";
-  public static final String SHOW_REFERENCES = "contextMenu/Show References";
+  public static final String COMMANDS = "gwt-debug-contextMenu/commandsActionGroup";
+  public static final String PREVIEW = "gwt-debug-contextMenu/previewHTML";
+  public static final String SHOW_REFERENCES = "gwt-debug-contextMenu/showReference";
   public static final String GO_INTO = "gwt-debug-contextMenu/goInto";
-  public static final String GO_BACK = "contextMenu/Go Back";
-  public static final String CUT = "contextMenu/Cut";
-  public static final String PASTE = "contextMenu/Paste";
-  public static final String RENAME = "contextMenu/Rename...";
-  public static final String DELETE = "contextMenu/Delete...";
-  public static final String DOWNLOAD = "contextMenu/Download...";
-  public static final String CONVERT_TO_PROJECT = "contextMenu/Convert To Project";
-  public static final String BUILD_PATH = "contextMenu/Build Path";
-  public static final String EDIT = "contextMenu/Edit file";
-  public static final String MAVEN = "contextMenu/Maven";
+  public static final String GO_BACK = "gwt-debug-contextMenu/goInto";
+  public static final String CUT = "gwt-debug-contextMenu/cut";
+  public static final String PASTE = "gwt-debug-contextMenu/paste";
+  public static final String RENAME = "gwt-debug-contextMenu/renameResource";
+  public static final String DELETE = "gwt-debug-contextMenu/deleteItem";
+  public static final String DOWNLOAD = "gwt-debug-contextMenu/downloadItemAction";
+  public static final String CONVERT_TO_PROJECT = "gwt-debug-contextMenu/convertFolderToProject";
+  public static final String BUILD_PATH = "gwt-debug-contextMenu/markDirectoryAsSourceGroup";
+  public static final String EDIT = "gwt-debug-contextMenu/editFile";
+  public static final String MAVEN = "gwt-debug-contextMenu/mavenGroupContextMenu";
   public static final String REFRESH = "gwt-debug-contextMenu/refreshPathAction";
-  public static final String REIMPORT = "contextMenu/Maven/Reimport";
+  public static final String REIMPORT =
+      "gwt-debug-contextMenu/Maven/reimportMavenDependenciesAction";
   public static final String TEST = "gwt-debug-contextMenu/TestingContextGroup";
 
   /** Submenu for new items */
   public static final class SubMenuNew {
-    public static final String JAVA_CLASS = "contextMenu/New/Java Class";
-    public static final String JAVA_PACKAGE = "contextMenu/New/Java Package";
-    public static final String FILE = "contextMenu/New/File";
-    public static final String FOLDER = "contextMenu/New/Folder";
-    public static final String XML_FILE = "contextMenu/New/XML File";
-    public static final String CSS_FILE = "contextMenu/New/CSS File";
-    public static final String LESS_FILE = "contextMenu/New/Less File";
-    public static final String HTML_FILE = "contextMenu/New/HTML File";
-    public static final String JAVASCRIPT_FILE = "contextMenu/New/JavaScript File";
-    public static final String PYTHON_FILE = "contextMenu/New/Python File";
-    public static final String C_FILE = "contextMenu/New/New C File";
-    public static final String C_PLUS_PLUS_FILE = "contextMenu/New/New C++ File";
-    public static final String H_FILE = "contextMenu/New/New H File";
+    public static final String JAVA_CLASS = "gwt-debug-contextMenu/New/newJavaClass";
+    public static final String JAVA_PACKAGE = "gwt-debug-contextMenu/New/newJavaPackage";
+    public static final String FILE = "gwt-debug-contextMenu/New/newFile";
+    public static final String FOLDER = "gwt-debug-contextMenu/New/newFolder";
+    public static final String XML_FILE = "gwt-debug-contextMenu/New/newXmlFile";
+    public static final String CSS_FILE = "gwt-debug-contextMenu/New/newCssFile";
+    public static final String LESS_FILE = "gwt-debug-contextMenu/New/newLessFile";
+    public static final String HTML_FILE = "gwt-debug-contextMenu/New/newHtmlFile";
+    public static final String JAVASCRIPT_FILE = "gwt-debug-contextMenu/New/newJavaScriptFile";
+    public static final String PYTHON_FILE = "gwt-debug-contextMenu/New/pythonFile";
+    public static final String C_FILE = "gwt-debug-contextMenu/New/newCFile";
+    public static final String C_PLUS_PLUS_FILE = "gwt-debug-contextMenu/New/newCppFile";
+    public static final String H_FILE = "gwt-debug-contextMenu/New/newHFile";
   }
 
   /** Submenu for Build Path Configuration (use for Java project only) */
   public static final class SubMenuBuildPath {
-    public static final String USE_AS_SOURCE_FOLDER = "contextMenu/Build Path/Use as Source Folder";
+    public static final String USE_AS_SOURCE_FOLDER =
+        "gwt-debug-contextMenu/Build Path/markDirectoryAsSource";
     public static final String UNMARK_AS_SOURCE_FOLDER =
-        "contextMenu/Build Path/Unmark as Source Folder";
-    public static final String CONFIGURE_CLASSPATH = "contextMenu/Build Path/Configure Classpath";
+        "gwt-debug-contextMenu/Build Path/unmarkDirectoryAsSource";
+    public static final String CONFIGURE_CLASSPATH =
+        "gwt-debug-contextMenu/Build Path/projectProperties";
   }
 
   /** Submenu for Test Runner */
