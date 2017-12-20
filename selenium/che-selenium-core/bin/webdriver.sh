@@ -52,6 +52,7 @@ initVariables() {
     readonly SINGLE_TEST_MSG="single test/package"
 
     export CHE_MULTIUSER=${CHE_MULTIUSER:-false}
+    export CHE_INFRASTRUCTURE=${CHE_INFRASTRUCTURE:-docker}
 
     # CALLER variable contains parent caller script name
     # CUR_DIR variable contains the current directory where CALLER is executed
@@ -847,13 +848,15 @@ prepareTestUserForMultiuserChe() {
     fi
 
     # create test user by executing kcadm.sh commands inside keycloak docker container if there are no its credentials among environment variables
-    if [[ "${PRODUCT_HOST}" == "$(detectDockerInterfaceIp)" ]] || [[ "${CHE_SELENIUM_INFRASTRUCTURE}" == "openshift" ]]; then
+    if [[ "${PRODUCT_HOST}" == "$(detectDockerInterfaceIp)" ]] || [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
+
+        echo "[TEST] Creating test user..."
         local time=$(date +%s)
         export CHE_TESTUSER_NAME=${CHE_TESTUSER_NAME:-user${time}}
         export CHE_TESTUSER_EMAIL=${CHE_TESTUSER_EMAIL:-${CHE_TESTUSER_NAME}@1.com}
         export CHE_TESTUSER_PASSWORD=${CHE_TESTUSER_PASSWORD:-${time}}
 
-        if [[ "${CHE_SELENIUM_INFRASTRUCTURE}" == "openshift" ]]; then
+        if [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
             local kc_container_id=$(docker ps | grep keycloak_keycloak-1 | cut -d ' ' -f1)
         else
             local kc_container_id=$(docker ps | grep che_keycloak_1 | cut -d ' ' -f1)

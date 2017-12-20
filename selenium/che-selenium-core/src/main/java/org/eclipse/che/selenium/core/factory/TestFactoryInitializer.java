@@ -57,7 +57,7 @@ public class TestFactoryInitializer {
   @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @Inject
-  @Named("che.selenium.infrastructure")
+  @Named("che.infrastructure")
   private String infrastructure;
 
   /**

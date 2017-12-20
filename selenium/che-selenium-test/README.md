@@ -50,15 +50,9 @@ Follow the guide: [https://github.com/eclipse/che](https://github.com/eclipse/ch
 Simply launch `./selenium-tests.sh`
 
 ### How to run tests on OpenShift
-#### Che in container case
-##### 1. Set workspace runtime infrastructure implementation
-export CHE_SELENIUM_INFRASTRUCTURE=openshift
-##### 2. Run tests in the default way
-Simply launch `./selenium-tests.sh`
-#### Che inside of OpenShift case
-##### 1. Set workspace runtime infrastructure implementation
-export CHE_SELENIUM_INFRASTRUCTURE=openshift
-##### 2. Run tests and specify host and port of Che deployed to OpenShift
+#### 1. Set workspace runtime infrastructure implementation
+export CHE_INFRASTRUCTURE=openshift
+#### 2. Run tests and specify host and port of Che deployed to OpenShift
 Launch `./selenium-tests.sh --host=<Che host on openshift> --port=80`
 
 Example: `./selenium-tests.sh --host=che-spi.192.168.99.100.nip.io --port=80`
