@@ -18,7 +18,7 @@ public final class Constants {
   // project categories
   public static final String JAVA_CATEGORY = "Java";
   public static final String JAVA_ID = "java";
-  // project attribute names
+  // project attribute names2
   public static final String LANGUAGE = "language";
   public static final String LANGUAGE_VERSION = "languageVersion";
   public static final String FRAMEWORK = "framework";

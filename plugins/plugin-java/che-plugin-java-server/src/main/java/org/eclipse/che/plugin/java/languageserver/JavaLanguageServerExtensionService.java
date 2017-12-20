@@ -48,6 +48,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -58,6 +59,8 @@ import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
+import org.eclipse.che.api.languageserver.exception.LanguageServerException;
+import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -373,38 +376,39 @@ public class JavaLanguageServerExtensionService {
   private List<Jar> getProjectExternalLibraries(ExternalLibrariesParameters params) {
     params.setProjectUri(prefixURI(params.getProjectUri()));
     Type type = new TypeToken<ArrayList<Jar>>() {}.getType();
-    return doGetList(GET_EXTERNAL_LIBRARIES_COMMAND, params, type);
+    return doGetList(GET_EXTERNAL_LIBRARIES_COMMAND, singletonList(params), type);
   }
 
   private List<JarEntry> getExternalLibrariesChildren(ExternalLibrariesParameters params) {
     params.setProjectUri(prefixURI(params.getProjectUri()));
     Type type = new TypeToken<ArrayList<JarEntry>>() {}.getType();
-    return doGetList(GET_EXTERNAL_LIBRARIES_CHILDREN_COMMAND, params, type);
+    return doGetList(GET_EXTERNAL_LIBRARIES_CHILDREN_COMMAND, singletonList(params), type);
   }
 
   private List<JarEntry> getLibraryChildren(ExternalLibrariesParameters params) {
     params.setProjectUri(prefixURI(params.getProjectUri()));
     Type type = new TypeToken<ArrayList<JarEntry>>() {}.getType();
-    return doGetList(GET_LIBRARY_CHILDREN_COMMAND, params, type);
+    return doGetList(GET_LIBRARY_CHILDREN_COMMAND, singletonList(params), type);
   }
 
   private List<ClasspathEntryDto> getClasspathTree(String projectPath) {
     String projectUri = prefixURI(projectPath);
     Type type = new TypeToken<ArrayList<ClasspathEntry>>() {}.getType();
-    List<ClasspathEntry> entries = doGetList(GET_CLASS_PATH_TREE_COMMAND, projectUri, type);
+    List<ClasspathEntry> entries =
+        doGetList(GET_CLASS_PATH_TREE_COMMAND, singletonList(projectUri), type);
     return convertToClasspathEntryDto(entries);
   }
 
   private JarEntry getLibraryEntry(ExternalLibrariesParameters params) {
     params.setProjectUri(prefixURI(params.getProjectUri()));
     Type type = new TypeToken<JarEntry>() {}.getType();
-    return doGetOne(GET_LIBRARY_ENTRY_COMMAND, params, type);
+    return doGetOne(GET_LIBRARY_ENTRY_COMMAND, singletonList(params), type);
   }
 
   private String getLibraryNodeContentByPath(ExternalLibrariesParameters params) {
     params.setProjectUri(prefixURI(params.getProjectUri()));
     Type type = new TypeToken<String>() {}.getType();
-    return doGetOne(GET_LIBRARY_NODE_CONTENT_BY_PATH_COMMAND, params, type);
+    return doGetOne(GET_LIBRARY_NODE_CONTENT_BY_PATH_COMMAND, singletonList(params), type);
   }
 
   private List<String> executeFindTestsCommand(
@@ -417,11 +421,11 @@ public class JavaLanguageServerExtensionService {
     TestFindParameters parameters =
         new TestFindParameters(fileUri, methodAnnotation, projectAnnotation, offset, classes);
     Type type = new TypeToken<ArrayList<String>>() {}.getType();
-    return doGetList(commandId, parameters, type);
+    return doGetList(commandId, singletonList(parameters), type);
   }
 
-  private <T, P> List<T> doGetList(String command, P params, Type type) {
-    CompletableFuture<Object> result = executeCommand(command, singletonList(params));
+  private <T> List<T> doGetList(String command, List<Object> params, Type type) {
+    CompletableFuture<Object> result = executeCommand(command, params);
     try {
       return gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), type);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
@@ -429,25 +433,50 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
-  private <T, P> T doGetOne(String command, P params, Type type) {
-    CompletableFuture<Object> result = executeCommand(command, singletonList(params));
+  private <T> T doGetOne(String command, List<Object> params, Type type) {
+    return doGetOne(command, params, type, TIMEOUT);
+  }
+
+  private <T> T doGetOne(String command, List<Object> params, Type type, long timeoutInSeconds) {
+    CompletableFuture<Object> result = executeCommand(command, params);
     try {
-      return gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), type);
+      return gson.fromJson(gson.toJson(result.get(timeoutInSeconds, TimeUnit.SECONDS)), type);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
-  }
-
-  private LanguageServer getLanguageServer() {
-    return registry
-        .findServer(server -> (server.getLauncher() instanceof JavaLanguageServerLauncher))
-        .get()
-        .getServer();
   }
 
   private CompletableFuture<Object> executeCommand(String commandId, List<Object> parameters) {
     ExecuteCommandParams params = new ExecuteCommandParams(commandId, parameters);
-    return getLanguageServer().getWorkspaceService().executeCommand(params);
+
+    try {
+      return getOrInitLanguageServer().getWorkspaceService().executeCommand(params);
+    } catch (LanguageServerException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  private LanguageServer getOrInitLanguageServer() throws LanguageServerException {
+    Optional<InitializedLanguageServer> languageServer = findInitializedLanguageServer();
+    if (languageServer.isPresent()) {
+      return languageServer.get().getServer();
+    }
+
+    // fake class is used, it is required to find and init language server by its extension
+    registry.initialize(prefixURI("init.java"));
+
+    languageServer = findInitializedLanguageServer();
+    return languageServer
+        .orElseThrow(
+            () ->
+                new LanguageServerException(
+                    "Unexpected error. Language server not found after initialization."))
+        .getServer();
+  }
+
+  private Optional<InitializedLanguageServer> findInitializedLanguageServer() {
+    return registry.findServer(
+        server -> (server.getLauncher() instanceof JavaLanguageServerLauncher));
   }
 
   private void fixLocation(ExtendedSymbolInformation symbol) {
@@ -479,51 +508,42 @@ public class JavaLanguageServerExtensionService {
   }
 
   public String identifyFqnInResource(String filePath, int lineNumber) {
-    CompletableFuture<Object> result =
-        getLanguageServer()
-            .getWorkspaceService()
-            .executeCommand(
-                new ExecuteCommandParams(
-                    Commands.IDENTIFY_FQN_IN_RESOURCE,
-                    ImmutableList.of(prefixURI(filePath), String.valueOf(lineNumber))));
-
-    try {
-      return (String) result.get(10, TimeUnit.SECONDS);
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
-      throw new JsonRpcException(-27000, e.getMessage());
-    }
+    Type type = new TypeToken<String>() {}.getType();
+    return doGetOne(
+        Commands.IDENTIFY_FQN_IN_RESOURCE,
+        ImmutableList.of(prefixURI(filePath), String.valueOf(lineNumber)),
+        type);
   }
 
   public Location findResourcesByFqn(String fqn, int lineNumber) {
-    CompletableFuture<Object> result =
-        getLanguageServer()
-            .getWorkspaceService()
-            .executeCommand(
-                new ExecuteCommandParams(
-                    Commands.FIND_RESOURCES_BY_FQN,
-                    ImmutableList.of(fqn, String.valueOf(lineNumber))));
+    Type type = new TypeToken<List<Either<String, ResourceLocation>>>() {}.getType();
+    List<Either<String, ResourceLocation>> location =
+        doGetList(
+            Commands.FIND_RESOURCES_BY_FQN,
+            ImmutableList.of(fqn, String.valueOf(lineNumber)),
+            type);
 
-    try {
-      List<Either<String, ResourceLocation>> location =
-          gson.fromJson(
-              gson.toJson(result.get(10, TimeUnit.SECONDS)),
-              new com.google.common.reflect.TypeToken<
-                  List<Either<String, ResourceLocation>>>() {}.getType());
-      Either<String, ResourceLocation> l = location.get(0);
+    Either<String, ResourceLocation> l = location.get(0);
 
-      if (l.isLeft()) {
-        return new LocationImpl(l.getLeft(), lineNumber, null);
-      } else {
-        return new LocationImpl(
-            l.getRight().getFqn(), lineNumber, true, l.getRight().getLibId(), null);
-      }
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
-      throw new JsonRpcException(-27000, e.getMessage());
+    if (l.isLeft()) {
+      return new LocationImpl(l.getLeft(), lineNumber, null);
+    } else {
+      return new LocationImpl(
+          l.getRight().getFqn(), lineNumber, true, l.getRight().getLibId(), null);
     }
   }
 
   public JobResult updateWorkspace(UpdateWorkspaceParameters updateWorkspaceParameters) {
+    if (updateWorkspaceParameters.getAddedProjectsUri().isEmpty()) {
+      if (!findInitializedLanguageServer().isPresent()) {
+        JobResult jobResult = new JobResult();
+        jobResult.setMessage(
+            "Skipped. Language server not initialized. Workspace updating is not required.");
+        return jobResult;
+      }
+    }
+
     Type type = new TypeToken<JobResult>() {}.getType();
-    return doGetOne(Commands.UPDATE_WORKSPACE, updateWorkspaceParameters, type);
+    return doGetOne(Commands.UPDATE_WORKSPACE, singletonList(updateWorkspaceParameters), type, 60);
   }
 }
