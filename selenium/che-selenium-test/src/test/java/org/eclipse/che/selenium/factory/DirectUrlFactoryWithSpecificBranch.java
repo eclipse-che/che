@@ -72,6 +72,7 @@ public class DirectUrlFactoryWithSpecificBranch {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7555", ex);
     }
+
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitProgressPopupPanelClose();
     events.clickEventLogBtn();
@@ -83,7 +84,14 @@ public class DirectUrlFactoryWithSpecificBranch {
     events.waitExpectedMessage(
         "Project: gitPullTest | cloned from: gitPullTest | remote branch: refs/remotes/origin/contrib-12092015 | local branch: contrib-12092015",
         UPDATING_PROJECT_TIMEOUT_SEC);
-    projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");
+
+    try {
+      projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7959", ex);
+    }
+
     projectExplorer.waitItem("gitPullTest/my-lib/pom.xml");
 
     String wsId =

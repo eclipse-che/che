@@ -147,9 +147,15 @@ public class CreateFactoryFromUiWithKeepDirTest {
       fail("Known issue https://github.com/eclipse/che/issues/7253");
     }
 
-    projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        PROJECT_NAME + "/" + KEEPED_DIR + "/src" + "/main" + "/java/hello",
-        "GreetingController.java");
+    try {
+      projectExplorer.expandPathInProjectExplorerAndOpenFile(
+          PROJECT_NAME + "/" + KEEPED_DIR + "/src" + "/main" + "/java/hello",
+          "GreetingController.java");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7959");
+    }
+
     mavenPluginStatusBar.waitClosingInfoPanel(UPDATING_PROJECT_TIMEOUT_SEC);
     editor.waitAllMarkersDisappear(ERROR_MARKER);
   }
