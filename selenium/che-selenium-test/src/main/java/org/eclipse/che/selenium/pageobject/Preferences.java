@@ -290,6 +290,9 @@ public class Preferences {
           .until(ExpectedConditions.visibilityOf(element))
           .click();
     }
+
+    askDialog.clickOkBtn();
+    askDialog.waitFormToClose();
   }
 
   /**
@@ -540,16 +543,17 @@ public class Preferences {
 
     loader.waitOnClosed();
 
+    // delete github keu if it exists
     if (isSshKeyIsPresent(GITHUB_COM)) {
-      clickOnCloseBtn();
-      waitPreferencesFormIsClosed();
-      return;
+      deleteSshKeyByHost(GITHUB_COM);
     }
 
     String ideWin = seleniumWebDriver.getWindowHandle();
 
     // regenerate key and upload it on the gitHub
     clickOnGenerateAndUploadToGitHub();
+
+    loader.waitOnClosed();
 
     // check if github key has been uploaded without authorization on github.com
     if (isSshKeyIsPresent(GITHUB_COM)) {
@@ -558,7 +562,7 @@ public class Preferences {
       return;
     }
 
-    // authorize on github.com
+    // login to github
     askDialog.waitFormToOpen(25);
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
@@ -571,6 +575,7 @@ public class Preferences {
 
     loader.waitOnClosed();
 
+    // authorize on github.com
     if (seleniumWebDriver.getWindowHandles().size() > 1) {
       loader.waitOnClosed();
       gitHub.waitAuthorizeBtn();
