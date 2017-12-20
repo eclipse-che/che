@@ -43,7 +43,6 @@ RUN mkdir $HOME/.m2 && \
 
 USER user
 
-
 ENV LD_LIBRARY_PATH=/opt/rh/rh-nodejs6/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} \
  PYTHONPATH=/opt/rh/rh-nodejs6/root/usr/lib/python2.7/site-packages${PYTHONPATH:+:${PYTHONPATH}} \
  MANPATH=/opt/rh/rh-nodejs6/root/usr/share/man:$MANPATH \
@@ -57,17 +56,18 @@ ENV LD_LIBRARY_PATH=/opt/rh/rh-nodejs6/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LI
 
 ENV PATH=$HOME/node_modules/.bin/:$HOME/.npm-global/bin/:$GOPATH/bin:$M2_HOME/bin:/opt/rh/rh-nodejs6/root/usr/bin:/usr/local/go/bin:$PATH
 
-
 RUN mkdir /home/user/traefik ;\
     wget -O /home/user/traefik/traefik "https://github.com/containous/traefik/releases/download/v1.4.3/traefik_linux-amd64"; \
     chmod +x /home/user/traefik/traefik
 COPY traefik.toml /home/user/traefik/
-
-
-RUN sudo mkdir /var/run/sshd
-RUN sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' && \
+ADD entrypoint.sh /home/user/entrypoint.sh
+RUN sudo chgrp -R 0 ~/traefik && \
+    sudo chmod -R g+rwX ~/traefik && \
+    sudo mkdir /var/run/sshd && \
+    sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' && \
     sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_ecdsa_key -N '' && \
     sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_ed25519_key -N '' && \
     npm install -g typescript@2.5.3 typescript-language-server@0.1.4
-
 WORKDIR /projects
+ENTRYPOINT ["/home/user/entrypoint.sh"]
+CMD tail -f /dev/null
