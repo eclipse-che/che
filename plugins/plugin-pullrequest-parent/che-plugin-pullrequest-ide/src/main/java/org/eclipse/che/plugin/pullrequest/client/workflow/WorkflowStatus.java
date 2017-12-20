@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.plugin.pullrequest.client.workflow;
 
-import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 
 /**
  * Defines workflow status contract.

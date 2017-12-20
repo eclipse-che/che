@@ -11,15 +11,14 @@
 package org.eclipse.che.selenium.workspaces;
 
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Loader;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -45,7 +44,6 @@ public class CreateWorkspaceOnDashboardTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Workspaces workspaces;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
 
   @AfterClass
   public void tearDown() throws Exception {
@@ -68,10 +66,8 @@ public class CreateWorkspaceOnDashboardTest {
     createWorkspace.clickOnCreateWorkspaceButton();
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
-        TestWorkspaceConstants.RUNNING_WORKSPACE_MESS, 240);
+
     projectExplorer.waitProjectExplorer();
-    loader.waitOnClosed();
-    terminal.waitTerminalConsole(20);
+    terminal.waitTerminalTab(LOADER_TIMEOUT_SEC);
   }
 }

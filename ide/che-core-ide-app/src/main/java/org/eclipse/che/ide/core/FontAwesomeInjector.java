@@ -10,29 +10,24 @@
  */
 package org.eclipse.che.ide.core;
 
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.LinkElement;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.api.component.Component;
 
 /**
- * Font awesome style injector component.
+ * Injects Font Awesome icons.
  *
  * @author Vitaliy Guliy
  */
 @Singleton
-public class FontAwesomeInjector implements Component {
+public class FontAwesomeInjector {
 
-  @Override
-  public void start(Callback<Component, Exception> callback) {
+  public FontAwesomeInjector() {
     LinkElement link = Document.get().createLinkElement();
     link.setRel("stylesheet");
     link.setHref(GWT.getModuleBaseForStaticFiles() + "font-awesome-4.5.0/css/font-awesome.min.css");
 
     Document.get().getHead().appendChild(link);
-
-    callback.onSuccess(this);
   }
 }

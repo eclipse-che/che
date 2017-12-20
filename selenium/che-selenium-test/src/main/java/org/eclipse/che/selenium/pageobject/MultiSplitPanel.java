@@ -45,10 +45,8 @@ public class MultiSplitPanel {
 
   private interface Locators {
     String TABS_PANEL_ID = "gwt-debug-multiSplitPanel-tabsPanel";
-    String SPLIT_PANEL_AREA =
-        "(//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//following::div[contains(@style,'position')][1])[position()=%s]";
-    String SPLIT_PANE_MENU_ICON =
-        "(//div[@id='gwt-debug-multiSplitPanel-tabsPanel']/div[1])[position()=%s]";
+    String SPLIT_PANEL_AREA = "(//div[@id='gwt-debug-process-output-panel-holder'])[position()=%s]";
+    String SPLIT_PANE_MENU_ICON = "(//div[@id='gwt-debug-menuSplitPanel'])[position()=%s]";
     String SPLIT_PANE_MENU = "//div[@class='popupContent']";
     String SPLIT_PANE_COMMAND = "//div[@class='popupContent']//following::div[text()='%s']";
     String PROCESS_IN_MENU_CLOSE_ICON =

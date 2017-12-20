@@ -29,7 +29,8 @@ describe('If recipe has content', () => {
         'dev-machine': {
           'attributes': {'memoryLimitBytes': '2147483648'},
           'servers': {},
-          'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+          'volumes': {},
+          'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
         }
       },
       'recipe': {
@@ -106,7 +107,8 @@ describe('If recipe has location', () => {
       'machines': {
         'dev-machine': {
           'servers': {},
-          'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh'],
+          'volumes': {},
+          'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh'],
           'attributes': {'memoryLimitBytes': '2147483648'}
         }
       },
@@ -122,10 +124,10 @@ describe('If recipe has location', () => {
 
   describe('DockerFileEnvironmentManager', () => {
 
-    it('cannot edit environment variables', () => {
+    it('can edit environment variables always true', () => {
       let canEditEnvVariables = envManager.canEditEnvVariables(machines[0]);
 
-      expect(canEditEnvVariables).toBe(false);
+      expect(canEditEnvVariables).toBe(true);
     });
 
     it('should return servers', () => {

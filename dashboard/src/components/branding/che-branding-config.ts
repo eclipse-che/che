@@ -14,8 +14,8 @@ import {CheBranding} from './che-branding.factory';
 
 export class CheBrandingConfig {
 
-  constructor(register) {
-    // Register this factory
+  constructor(register: che.IRegisterService) {
+    // register this factory
     register.factory('cheBranding', CheBranding);
 
   }

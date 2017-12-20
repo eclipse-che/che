@@ -11,6 +11,8 @@
 package org.eclipse.che.selenium.debugger;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -32,7 +34,7 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
 import org.eclipse.che.selenium.pageobject.debug.NodeJsDebugConfig;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
@@ -82,7 +84,7 @@ public class NodeJsDebugTest {
         TestMenuCommandsConstants.Run.DEBUG + "/" + nameOfDebugCommand);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
     editorPageObj.waitTabFileWithSavedStatus(APP_FILE);
-    editorPageObj.waitActiveEditor();
+    editorPageObj.waitActive();
     debugPanel.waitDebugHighlightedText("var greetings = require(\"./greetings.js\");");
     checkDebugStepsFeatures();
     checkEvaluationFeatures();
@@ -105,9 +107,8 @@ public class NodeJsDebugTest {
 
   /** @return 'Che-debug-configurations' values from browser storage */
   private String getDataAboutDebugSessionFromStorage() {
-    JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
     String injectedJsScript = "return window.localStorage.getItem('che-debug-configurations');";
-    return js.executeScript(injectedJsScript).toString();
+    return seleniumWebDriver.executeScript(injectedJsScript).toString();
   }
 
   /** Check step into, step over and step out feature */
@@ -115,15 +116,12 @@ public class NodeJsDebugTest {
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OVER);
     debugPanel.waitDebugHighlightedText("var b = greetings.sayHelloInEnglish();");
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_INTO);
-    editorPageObj.waitActiveEditor();
+    editorPageObj.waitActive();
     editorPageObj.waitTabIsPresent("greetings.js");
     debugPanel.waitDebugHighlightedText("return \"HELLO\";");
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OUT);
     debugPanel.waitDebugHighlightedText("var c=\"some add value\" + b;");
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//div[text()='{app.js:13} ']")));
+    assertEquals(debugPanel.getExecutionPoint(), "app.js:13");
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.STEP_OVER);
   }
 
@@ -131,7 +129,12 @@ public class NodeJsDebugTest {
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.EVALUATE_EXPRESSIONS);
     debugPanel.typeEvaluateExpression("c.length");
     debugPanel.clickEvaluateBtn();
-    debugPanel.waitExpectedResultInEvaluateExpression("19");
+    try {
+      debugPanel.waitExpectedResultInEvaluateExpression("19");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/4720", ex);
+    }
     debugPanel.clickCloseEvaluateBtn();
   }
 }

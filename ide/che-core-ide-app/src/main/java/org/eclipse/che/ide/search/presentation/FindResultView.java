@@ -12,11 +12,11 @@ package org.eclipse.che.ide.search.presentation;
 
 import com.google.inject.ImplementedBy;
 import java.util.List;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * View for the result of search.

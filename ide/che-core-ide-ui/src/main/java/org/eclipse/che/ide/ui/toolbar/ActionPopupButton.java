@@ -14,7 +14,6 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.inject.Provider;
 import org.eclipse.che.ide.api.action.Action;
@@ -26,9 +25,9 @@ import org.eclipse.che.ide.api.action.PropertyChangeEvent;
 import org.eclipse.che.ide.api.action.PropertyChangeListener;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
+import org.eclipse.che.ide.ui.ElementWidget;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.menu.PositionController;
-import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
  * @author Evgen Vidolob
@@ -105,13 +104,8 @@ public class ActionPopupButton extends Composite
   private void renderImage() {
     panel.clear();
 
-    if (presentation.getImageResource() != null) {
-      Image image = new Image(presentationFactory.getPresentation(action).getImageResource());
-      image.setStyleName(toolbarResources.toolbar().popupButtonIcon());
-      panel.add(image);
-
-    } else if (presentation.getSVGResource() != null) {
-      SVGImage image = new SVGImage(presentation.getSVGResource());
+    if (presentation.getImageElement() != null) {
+      ElementWidget image = new ElementWidget(presentation.getImageElement());
       image.getElement().setAttribute("class", toolbarResources.toolbar().popupButtonIcon());
       panel.add(image);
 

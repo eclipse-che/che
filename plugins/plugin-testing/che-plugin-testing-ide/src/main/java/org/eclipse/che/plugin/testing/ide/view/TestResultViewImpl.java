@@ -21,17 +21,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
-import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
-import org.eclipse.che.plugin.testing.ide.TestResources;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.plugin.testing.ide.model.TestRootState;
 import org.eclipse.che.plugin.testing.ide.model.TestState;
 import org.eclipse.che.plugin.testing.ide.view.navigation.factory.TestResultNodeFactory;
@@ -49,9 +44,6 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
 
   private static final TestResultViewImplUiBinder UI_BINDER =
       GWT.create(TestResultViewImplUiBinder.class);
-  private final JavaNavigationService javaNavigationService;
-  private final AppContext appContext;
-  private final EditorAgent editorAgent;
   private final TestResultNodeFactory nodeFactory;
 
   @UiField(provided = true)
@@ -59,25 +51,12 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
 
   @UiField FlowPanel navigationPanel;
   private Tree resultTree;
-  private int lastWentLine = 0;
-  private boolean showFailuresOnly = false;
 
   private TestRootState testRootState;
   private TestRootNode testRootNode;
 
   @Inject
-  public TestResultViewImpl(
-      TestResources testResources,
-      PartStackUIResources resources,
-      JavaNavigationService javaNavigationService,
-      EditorAgent editorAgent,
-      AppContext appContext,
-      TestResultNodeFactory nodeFactory,
-      PrinterOutputConsole outputConsole) {
-    super(resources);
-    this.javaNavigationService = javaNavigationService;
-    this.editorAgent = editorAgent;
-    this.appContext = appContext;
+  public TestResultViewImpl(TestResultNodeFactory nodeFactory, PrinterOutputConsole outputConsole) {
     this.nodeFactory = nodeFactory;
     splitLayoutPanel = new SplitLayoutPanel(1);
     setContentWidget(UI_BINDER.createAndBindUi(this));

@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.imageviewer;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -23,9 +23,9 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.filetypes.FileType;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.util.browser.BrowserUtils;
 
 /**
@@ -36,14 +36,14 @@ import org.eclipse.che.ide.util.browser.BrowserUtils;
 @Singleton
 public class PreviewImageAction extends AbstractPerspectiveAction {
 
-  private final WsAgentURLModifier wsAgentURLModifier;
+  private final AgentURLModifier agentURLModifier;
   private final AppContext appContext;
 
   private final List<String> extensions = new ArrayList<>();
 
   @Inject
   public PreviewImageAction(
-      WsAgentURLModifier wsAgentURLModifier,
+      AgentURLModifier agentURLModifier,
       AppContext appContext,
       CoreLocalizationConstant constant,
       @Named("PNGFileType") FileType pngFile,
@@ -57,10 +57,8 @@ public class PreviewImageAction extends AbstractPerspectiveAction {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         constant.actionPreviewImageTitle(),
-        constant.actionPreviewImageDescription(),
-        null,
-        null);
-    this.wsAgentURLModifier = wsAgentURLModifier;
+        constant.actionPreviewImageDescription());
+    this.agentURLModifier = agentURLModifier;
     this.appContext = appContext;
 
     extensions.add(pngFile.getExtension());
@@ -93,7 +91,7 @@ public class PreviewImageAction extends AbstractPerspectiveAction {
     final Resource selectedResource = appContext.getResource();
     if (Resource.FILE == selectedResource.getResourceType()) {
       final String contentUrl = ((File) selectedResource).getContentUrl();
-      BrowserUtils.openInNewTab(wsAgentURLModifier.modify(contentUrl));
+      BrowserUtils.openInNewTab(agentURLModifier.modify(contentUrl));
     }
   }
 }

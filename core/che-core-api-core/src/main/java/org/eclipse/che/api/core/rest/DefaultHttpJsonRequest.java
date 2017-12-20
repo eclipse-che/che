@@ -294,7 +294,8 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
       }
 
       try (Reader reader = new InputStreamReader(conn.getInputStream())) {
-        return new DefaultHttpJsonResponse(CharStreams.toString(reader), responseCode);
+        return new DefaultHttpJsonResponse(
+            CharStreams.toString(reader), responseCode, conn.getHeaderFields());
       }
     } finally {
       conn.disconnect();

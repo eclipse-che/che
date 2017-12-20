@@ -26,6 +26,12 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("extension.category")
   String extensionCategory();
 
+  @Key("action.revealResource.text")
+  String actionRevealResourceText();
+
+  @Key("action.revealResource.description")
+  String actionRevealResourceDescription();
+
   @Key("action.navigateToFile.text")
   String actionNavigateToFileText();
 
@@ -70,6 +76,12 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("action.delete.description")
   String deleteItemActionDescription();
+
+  @Key("action.goInto.text")
+  String goIntoActionText();
+
+  @Key("action.goBack.text")
+  String goBackActionText();
 
   /* Cut */
   @Key("action.cut.text")
@@ -122,12 +134,60 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("mixedProjectDeleteMessage")
   String mixedProjectDeleteMessage();
 
+  @Key("action.switch.editor.displaying.title")
+  String switchEditorDisplayingTitle();
+
+  @Key("action.switch.editor.displaying.description")
+  String switchEditorDisplayingDescription();
+
+  @Key("action.switch.project.explorer.displaying.title")
+  String switchProjectExplorerDisplayingTitle();
+
+  @Key("action.switch.project.explorer.displaying.description")
+  String switchProjectExplorerDisplayingDescription();
+
+  @Key("action.switch.command.explorer.displaying.title")
+  String switchCommandExplorerDisplayingTitle();
+
+  @Key("action.switch.command.explorer.displaying.description")
+  String switchCommandExplorerDisplayingDescription();
+
+  @Key("action.switch.find.part.displaying.title")
+  String switchFindPartDisplayingTitle();
+
+  @Key("action.switch.find.part.displaying.description")
+  String switchFindPartDisplayingDescription();
+
+  @Key("action.switch.event.logs.displaying.title")
+  String switchEventLogsDisplayingTitle();
+
+  @Key("action.switch.event.logs.displaying.description")
+  String switchEventLogsDisplayingDescription();
+
+  @Key("action.switch.terminal.displaying.title")
+  String switchTerminalDisplayingTitle();
+
+  @Key("action.switch.terminal.displaying.description")
+  String switchTerminalDisplayingDescription();
+
   /* RenameItem */
   @Key("action.rename.text")
   String renameItemActionText();
 
   @Key("action.rename.description")
   String renameItemActionDescription();
+
+  @Key("action.collapseAll.title")
+  String collapseAllActionTitle();
+
+  @Key("action.collapseAll.description")
+  String collapseAllActionDescription();
+
+  @Key("action.refresh.title")
+  String refreshActionTitle();
+
+  @Key("action.refresh.description")
+  String refreshActionDescription();
 
   @Key("renameNodeDialogTitle")
   String renameNodeDialogTitle();
@@ -365,6 +425,9 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("action.link.with.editor")
   String actionLinkWithEditor();
 
+  @Key("action.show.toolbar")
+  String actionShowToolbar();
+
   @Key("action.projectConfiguration.description")
   String actionProjectConfigurationDescription();
 
@@ -401,11 +464,23 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("action.restorePart.description")
   String actionRestorePartDescription();
 
-  @Key("action.minimizePart.title")
-  String actionMinimizePartTitle();
+  @Key("action.hidePart.title")
+  String actionHidePartTitle();
 
-  @Key("action.minimizePart.description")
-  String actionMinimizePartDescription();
+  @Key("action.hidePart.description")
+  String actionHidePartDescription();
+
+  @Key("maximizePartStack.title")
+  String maximizePartStackTitle();
+
+  @Key("restorePartStack.title")
+  String restorePartStackTitle();
+
+  @Key("minimizePartStack.title")
+  String minimizePartStackTitle();
+
+  @Key("partStackOptions.title")
+  String partStackOptionsTitle();
 
   /* NewResource */
   @Key("newResource.title")
@@ -573,9 +648,6 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("start.ws.title")
   String startWsTitle();
 
-  @Key("start.ws.select.to.start")
-  String startWsSelectToStart();
-
   @Key("stop.ws.title")
   String stopWsTitle();
 
@@ -585,21 +657,6 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("started.ws")
   String startedWs();
 
-  @Key("create.snapshot.title")
-  String createSnapshotTitle();
-
-  @Key("create.snapshot.description")
-  String createSnapshotDescription();
-
-  @Key("create.snapshot.progress")
-  String createSnapshotProgress();
-
-  @Key("create.snapshot.success")
-  String createSnapshotSuccess();
-
-  @Key("create.snapshot.failed")
-  String createSnapshotFailed();
-
   @Key("ext.server.started")
   String extServerStarted();
 
@@ -608,12 +665,6 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("workspace.recovering.dialog.title")
   String workspaceRecoveringDialogTitle();
-
-  @Key("workspace.recovering.dialog.text")
-  String workspaceRecoveringDialogText();
-
-  @Key("workspace.restore.snapshot")
-  String restoreWorkspaceFromSnapshot();
 
   @Key("workspace.subscribe.on.events.failed")
   String workspaceSubscribeOnEventsFailed();
@@ -929,6 +980,9 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("macro.workspace.name.description")
   String macroWorkspaceNameDescription();
 
+  @Key("macro.workspace.namespace.description")
+  String macroWorkspaceNamespaceDescription();
+
   @Key("macro.explorer.current.file.name.description")
   String macroExplorerCurrentFileNameDescription();
 
@@ -1075,14 +1129,11 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("export.config.dialog.not.under.vcs.text")
   String exportConfigDialogNotUnderVcsText();
 
-  @Key("messages.server.failure")
-  String messagesServerFailure();
-
-  @Key("connection.closed.dialog.title")
-  String connectionClosedDialogTitle();
-
   @Key("macro.current.project.path.description")
   String macroCurrentProjectPathDescription();
+
+  @Key("macro.current.project.eldest.parent.path.description")
+  String macroCurrentProjectEldestParentPathDescription();
 
   @Key("macro.current.project.relpath.description")
   String macroCurrentProjectRelpathDescription();
@@ -1213,4 +1264,34 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("failed.to.find.machine")
   String failedToFindMachine(String machineId);
+
+  @Key("menu.loader.machineStarting")
+  String menuLoaderMachineStarting(String machine);
+
+  @Key("menu.loader.machineRunning")
+  String menuLoaderMachineRunning(String machine);
+
+  @Key("menu.loader.workspaceStarted")
+  String menuLoaderWorkspaceStarted();
+
+  @Key("menu.loader.waitingWorkspace")
+  String menuLoaderWaitingWorkspace();
+
+  @Key("menu.loader.pullingImage")
+  String menuLoaderPullingImage(String image);
+
+  @Key("gwt_recompile.action.setup.title")
+  String gwtDevModeSetUpActionTitle();
+
+  @Key("gwt_recompile.action.off.title")
+  String gwtDevModeOffActionTitle();
+
+  @Key("gwt_recompile.dialog.title")
+  String gwtRecompileDialogTitle();
+
+  @Key("gwt_recompile.dialog.message.recompiling")
+  String gwtRecompileDialogRecompilingMessage(String host);
+
+  @Key("gwt_recompile.dialog.message.no_server")
+  String gwtRecompileDialogNoServerMessage();
 }

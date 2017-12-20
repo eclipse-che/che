@@ -40,9 +40,14 @@ public class KeycloakProvider {
   public KeycloakProvider(AppContext appContext, PromiseProvider promiseProvider) {
     this.appContext = appContext;
     String keycloakSettings =
-        getKeycloakSettings(KeycloakConstants.getEndpoint(appContext.getMasterEndpoint()));
-    Map<String, String> settings = JsonHelper.toMap(keycloakSettings);
-    Log.info(getClass(), "Keycloak settings: ", settings);
+        getKeycloakSettings(KeycloakConstants.getEndpoint(appContext.getMasterApiEndpoint()));
+    Map<String, String> settings;
+    try {
+      settings = JsonHelper.toMap(keycloakSettings);
+    } catch (Exception e) {
+      keycloakDisabled = true;
+      return;
+    }
 
     keycloak =
         CallbackPromiseHelper.createFromCallback(
@@ -73,7 +78,7 @@ public class KeycloakProvider {
                         settings.get(AUTH_SERVER_URL_SETTING),
                         settings.get(REALM_SETTING),
                         settings.get(CLIENT_ID_SETTING)));
-    Log.info(getClass(), "Keycloak init complete: ", this);
+    Log.debug(getClass(), "Keycloak init complete: ", this);
   }
 
   public static native String getKeycloakSettings(String keycloakSettingsEndpoint) /*-{
@@ -121,5 +126,9 @@ public class KeycloakProvider {
             }
           }
         });
+  }
+
+  public boolean isKeycloakDisabled() {
+    return keycloakDisabled;
   }
 }

@@ -11,7 +11,7 @@
 'use strict';
 
 /**
- * todo
+ * Fetches images using the $http service.
  *
  * @author Oleksii Kurinnyi
  */
@@ -25,7 +25,7 @@ export class ImgSrc implements ng.IDirective {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($http: ng.IHttpService, userDashboardConfig) {
+  constructor($http: ng.IHttpService, userDashboardConfig: any) {
     this.$http = $http;
     this.isDev = userDashboardConfig.developmentMode;
   }
@@ -43,7 +43,7 @@ export class ImgSrc implements ng.IDirective {
       };
       this.$http(requestConfig).then((response: any) => {
         const blob = new Blob([response.data], {type: response.headers('Content-Type')});
-        $attrs.$set('src', (window.URL || window.webkitURL).createObjectURL(blob))
+        $attrs.$set('src', (window.URL || (window as any).webkitURL).createObjectURL(blob));
       });
     });
   }

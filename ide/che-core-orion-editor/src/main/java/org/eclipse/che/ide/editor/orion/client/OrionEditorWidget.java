@@ -43,7 +43,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModelEvent;
 import org.eclipse.che.ide.api.editor.codeassist.AdditionalInfoCallback;
@@ -58,6 +57,7 @@ import org.eclipse.che.ide.api.editor.events.HasCursorActivityHandlers;
 import org.eclipse.che.ide.api.editor.gutter.Gutter;
 import org.eclipse.che.ide.api.editor.gutter.Gutters;
 import org.eclipse.che.ide.api.editor.gutter.HasGutter;
+import org.eclipse.che.ide.api.editor.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.editor.keymap.KeyBinding;
 import org.eclipse.che.ide.api.editor.keymap.Keymap;
 import org.eclipse.che.ide.api.editor.keymap.KeymapChangeEvent;
@@ -73,10 +73,9 @@ import org.eclipse.che.ide.api.editor.texteditor.ContentInitializedHandler;
 import org.eclipse.che.ide.api.editor.texteditor.EditorWidget;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
 import org.eclipse.che.ide.api.editor.texteditor.LineStyler;
-import org.eclipse.che.ide.api.event.SelectionChangedEvent;
-import org.eclipse.che.ide.api.event.SelectionChangedHandler;
-import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.api.selection.SelectionChangedEvent;
+import org.eclipse.che.ide.api.selection.SelectionChangedHandler;
 import org.eclipse.che.ide.editor.EditorAgentImpl;
 import org.eclipse.che.ide.editor.orion.client.events.HasScrollHandlers;
 import org.eclipse.che.ide.editor.orion.client.events.ScrollEvent;
@@ -105,6 +104,7 @@ import org.eclipse.che.ide.editor.orion.client.jso.StatusMessageReporterOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.UiUtilsOverlay;
 import org.eclipse.che.ide.editor.preferences.keymaps.KeyMapsPreferencePresenter;
 import org.eclipse.che.ide.status.message.StatusMessageReporter;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.requirejs.ModuleHolder;
@@ -921,7 +921,7 @@ public class OrionEditorWidget extends Composite
     }-*/;
 
   /** Custom callback to pass given value to native javascript function. */
-  private class InputCallback implements org.eclipse.che.ide.api.dialogs.InputCallback {
+  private class InputCallback implements org.eclipse.che.ide.ui.dialogs.input.InputCallback {
 
     private JavaScriptObject callback;
 

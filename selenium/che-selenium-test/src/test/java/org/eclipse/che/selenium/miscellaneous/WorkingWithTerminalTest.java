@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.valueOf;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -28,6 +28,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
@@ -43,8 +44,8 @@ public class WorkingWithTerminalTest {
   private static final Logger LOG = LoggerFactory.getLogger(WorkingWithTerminalTest.class);
 
   private static final String[] CHECK_MC_OPENING = {
-    "Left", "File", "Command", "Options", "Right", "Name", "/bin", "/boot", "/dev", "/etc", "/home",
-    "/lib", "/lib64", "/bin", "1Help", "2Menu", "3View", "4Edit", "5Copy", "6RenMov", "7Mkdir",
+    "Left", "File", "Command", "Options", "Right", "Name", "bin", "dev", "etc", "home",
+    "lib", "lib64", "bin", "1Help", "2Menu", "3View", "4Edit", "5Copy", "6RenMov", "7Mkdir",
     "8Delete", "9PullDn", "10Quit"
   };
 
@@ -58,7 +59,7 @@ public class WorkingWithTerminalTest {
   private static final String MC_HELP_DIALOG =
       "This is the main help screen for GNU Midnight Commander.";
   private static final String MC_USER_MENU_DIALOG = "User menu";
-  private static final String[] VIEW_BIN_FOLDER = {"bash", "bunzip2", "bzcat"};
+  private static final String[] VIEW_BIN_FOLDER = {"bash", "chmod", "date"};
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -157,28 +158,50 @@ public class WorkingWithTerminalTest {
   public void shouldScrollIntoTerminal() throws InterruptedException {
     openMC("/");
 
-    // check scrolling of the terminal
+    try {
+      // check scrolling of the terminal
+      terminal.movePageDownListTerminal("opt");
+
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che-lib/issues/57", ex);
+    }
+
     terminal.moveDownListTerminal(".dockerenv");
     terminal.waitExpectedTextIntoTerminal(".dockerenv");
-    terminal.moveUpListTerminal("/bin");
-    terminal.waitExpectedTextIntoTerminal("/bin");
+    terminal.movePageUpListTerminal("projects");
+    terminal.moveUpListTerminal("bin");
+    terminal.waitExpectedTextIntoTerminal("bin");
   }
 
   @Test(priority = 3)
   public void shouldResizeTerminal() {
     openMC("/");
 
-    // check the root content of the midnight commander
-    for (String partOfContent : CHECK_MC_OPENING) {
-      terminal.waitExpectedTextIntoTerminal(partOfContent);
+    try {
+      // check the root content of the midnight commander
+      for (String partOfContent : CHECK_MC_OPENING) {
+        terminal.waitExpectedTextIntoTerminal(partOfContent);
+      }
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che-lib/issues/57", ex);
     }
-    // check resize of the terminal
+
     terminal.waitExpectedTextNotPresentTerminal(".dockerenv");
     consoles.clickOnMaximizePanelIcon();
     loader.waitOnClosed();
+
+    // check resize of the terminal
+    for (String partOfContent : CHECK_MC_OPENING) {
+      terminal.waitExpectedTextIntoTerminal(partOfContent);
+    }
     terminal.waitExpectedTextIntoTerminal(".dockerenv");
     consoles.clickOnMaximizePanelIcon();
     loader.waitOnClosed();
+    for (String partOfContent : CHECK_MC_OPENING) {
+      terminal.waitExpectedTextIntoTerminal(partOfContent);
+    }
     terminal.waitExpectedTextNotPresentTerminal(".dockerenv");
   }
 
@@ -196,10 +219,16 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoTerminal(Keys.ARROW_DOWN.toString());
     terminal.typeIntoTerminal(Keys.ENTER.toString());
 
-    // check the home content of the midnight commander
-    for (String partOfContent : CHECK_MC_OPENING) {
-      terminal.waitExpectedTextIntoTerminal(partOfContent);
+    try {
+      // check the home content of the midnight commander
+      for (String partOfContent : CHECK_MC_OPENING) {
+        terminal.waitExpectedTextIntoTerminal(partOfContent);
+      }
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che-lib/issues/57", ex);
     }
+
     terminal.typeIntoTerminal(Keys.F10.toString());
   }
 
@@ -208,11 +237,11 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoTerminal("cd ~" + Keys.ENTER);
     terminal.typeIntoTerminal("ls" + Keys.ENTER);
     terminal.waitTerminalIsNotEmpty();
-    terminal.waitExpectedTextIntoTerminal("apache-maven-3.3.9");
+    terminal.waitExpectedTextIntoTerminal("che");
     terminal.typeIntoTerminal("touch testfile0.txt" + Keys.ENTER);
 
     terminal.typeIntoTerminal("ls" + Keys.ENTER);
-    terminal.waitExpectedTextIntoTerminal("apache-maven-3.3.9");
+    terminal.waitExpectedTextIntoTerminal("che");
     terminal.waitExpectedTextIntoTerminal("che");
     terminal.waitExpectedTextIntoTerminal("testfile0.txt");
     terminal.waitExpectedTextIntoTerminal("tomcat8");
@@ -243,8 +272,7 @@ public class WorkingWithTerminalTest {
     terminal.waitExpectedTextNotPresentTerminal("clear");
 
     terminal.waitTerminalIsNotEmpty();
-    String terminalContent = terminal.getVisibleTextFromTerminal().trim();
-    assertTrue(terminalContent.matches("^(user@)[a-z0-9]{12}(:/\\$)$"));
+    terminal.waitExpectedTextIntoTerminal("user@");
   }
 
   @Test(priority = 8)
@@ -256,8 +284,7 @@ public class WorkingWithTerminalTest {
     terminal.waitExpectedTextNotPresentTerminal("reset");
 
     terminal.waitTerminalIsNotEmpty();
-    String terminalContent = terminal.getVisibleTextFromTerminal().trim();
-    assertTrue(terminalContent.matches("^(user@)[a-z0-9]{12}(:/\\$)$"));
+    terminal.waitExpectedTextIntoTerminal("user@");
   }
 
   @Test(priority = 9)
@@ -298,20 +325,24 @@ public class WorkingWithTerminalTest {
 
   @Test(priority = 11)
   public void shouldViewFolderIntoMC() {
+    terminal.waitTerminalTab();
+    consoles.clickOnMaximizePanelIcon();
     openMC("/");
 
     // select bin folder and view this folder by "F3" key
-    terminal.waitExpectedTextIntoTerminal("/bin");
+    terminal.waitExpectedTextIntoTerminal("bin");
     terminal.typeIntoTerminal(Keys.HOME.toString() + Keys.F3.toString());
     for (String partOfContent : VIEW_BIN_FOLDER) {
       terminal.waitExpectedTextIntoTerminal(partOfContent);
     }
     terminal.typeIntoTerminal("cd ~" + Keys.ENTER);
     terminal.waitExpectedTextIntoTerminal(".cache");
+    consoles.clickOnMaximizePanelIcon();
   }
 
   @Test(priority = 12)
   public void closeTerminalByExitCommand() {
+    terminal.waitTerminalConsole();
     terminal.typeIntoTerminal("exit" + Keys.ENTER);
     terminal.waitTerminalIsNotPresent(1);
   }
@@ -325,8 +356,7 @@ public class WorkingWithTerminalTest {
     // select editor
     terminal.typeIntoTerminal(valueOf(1) + Keys.ENTER);
 
-    terminal.waitExpectedTextIntoTerminal(
-        "README.md          " + "[----]  0 L:[  1+ 0   1/  1] *(0   /  21b) 0035 0x023");
+    terminal.waitExpectedTextIntoTerminal("README.md");
     terminal.typeIntoTerminal("<!-some comment->");
     terminal.typeIntoTerminal(
         "" + Keys.HOME + Keys.ARROW_RIGHT + Keys.ARROW_RIGHT + Keys.ARROW_RIGHT + Keys.DELETE);

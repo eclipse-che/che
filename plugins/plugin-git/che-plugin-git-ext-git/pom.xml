@@ -16,10 +16,10 @@
     <parent>
         <artifactId>che-plugin-git-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.23.0-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-git-ext-git</artifactId>
-    <packaging>jar</packaging>
+    <packaging>gwt-lib</packaging>
     <name>Che Plugin :: Git :: Extension</name>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
@@ -59,11 +59,26 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-git-shared</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-model</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-model</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-project-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-project-shared</artifactId>
+            <classifier>sources</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -115,6 +130,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-workspace-shared</artifactId>
+            <classifier>sources</classifier>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.vectomatic</groupId>
             <artifactId>lib-gwt-svg</artifactId>
             <scope>provided</scope>
@@ -156,13 +177,7 @@
         </dependency>
     </dependencies>
     <build>
-        <sourceDirectory>src/main/java</sourceDirectory>
-        <testSourceDirectory>src/test/java</testSourceDirectory>
-        <outputDirectory>target/classes</outputDirectory>
         <resources>
-            <resource>
-                <directory>src/main/java</directory>
-            </resource>
             <resource>
                 <directory>src/main/resources</directory>
             </resource>
@@ -170,15 +185,15 @@
                 <directory>${project.build.directory}/generated-sources/dto/</directory>
             </resource>
         </resources>
-        <testResources>
-            <testResource>
-                <directory>src/test/java</directory>
-            </testResource>
-            <testResource>
-                <directory>src/test/resources</directory>
-            </testResource>
-        </testResources>
         <plugins>
+            <plugin>
+                <groupId>net.ltgt.gwt.maven</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <moduleName>org.eclipse.che.ide.ext.git.Git</moduleName>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -268,6 +283,24 @@
                         <version>${project.version}</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <ignoredUnusedDeclaredDependencies>
+                                <!-- Ignore *-sources.jar analysis due to the fact that analyzer works at bytecode level
+                                     but *-sources.jar is required for including to the GWT source path. -->
+                                <dep>org.eclipse.che.core:che-core-api-project-shared</dep>
+                                <dep>org.eclipse.che.core:che-core-api-model</dep>
+                                <dep>org.eclipse.che.core:che-core-api-git-shared</dep>
+                            </ignoredUnusedDeclaredDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

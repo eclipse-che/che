@@ -20,14 +20,16 @@ import org.eclipse.che.api.factory.server.model.impl.OnAppClosedImpl;
 import org.eclipse.che.api.factory.server.model.impl.OnAppLoadedImpl;
 import org.eclipse.che.api.factory.server.model.impl.OnProjectsLoadedImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
-import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
+import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
+import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
@@ -69,14 +71,17 @@ public class FactoryTckModule extends TckModule {
                 WorkspaceConfigImpl.class,
                 ProjectConfigImpl.class,
                 EnvironmentImpl.class,
-                EnvironmentRecipeImpl.class,
-                ExtendedMachineImpl.class,
+                RecipeImpl.class,
+                MachineImpl.class,
+                MachineConfigImpl.class,
                 SourceStorageImpl.class,
-                ServerConf2Impl.class,
-                CommandImpl.class)
+                ServerConfigImpl.class,
+                CommandImpl.class,
+                VolumeImpl.class)
             .addEntityClass(
                 "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
             .setExceptionHandler(H2ExceptionHandler.class)
+            .setProperty("eclipselink.logging.level", "OFF")
             .build());
     bind(DBInitializer.class).asEagerSingleton();
     bind(SchemaInitializer.class)

@@ -10,7 +10,6 @@
  */
 'use strict';
 
-
 /**
  * This class is handling the all services API retrieval.
  * @author Ann Shumilova

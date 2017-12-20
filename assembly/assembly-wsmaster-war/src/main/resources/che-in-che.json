@@ -3,21 +3,16 @@
     "id": "che-in-che",
     "creator": "ide",
     "name": "Eclipse Che",
-    "description": "Utilities to build Che in Che with Docker, JDK 8, and Maven.",
+    "description": "Utilities to build Che in Che with JDK 8 and Maven.",
     "scope": "general",
     "tags": [
-      "Docker",
       "Java",
       "JDK",
       "Maven",
-      "Alpine",
-      "Git"
+      "Git",
+      "SDK"
     ],
     "components": [
-      {
-        "name": "Docker",
-        "version": "1.12.0"
-      },
       {
         "name": "JDK",
         "version": "1.8.0_92"
@@ -29,27 +24,51 @@
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/alpine_jdk8"
+      "origin": "eclipse/che-dev:che6"
     },
     "workspaceConfig": {
       "environments": {
         "default": {
           "machines": {
             "dev-machine": {
-              "agents": [
+              "volumes": {
+                "m2": {
+                  "path": "/home/user/.m2/"
+                }
+              },
+              "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
-                "org.eclipse.che.ssh"
+                "org.eclipse.che.ls.js-ts"
               ],
-              "servers": {},
+              "servers": {
+                "dev-wsagent/wsagent": {
+                  "path": "wsagent",
+                  "protocol": "ws",
+                  "port": "8087"
+                },
+                "GWT-CodeServer": {
+                  "protocol": "http",
+                  "port": "9876"
+                },
+                "IDE-agent-server": {
+                  "protocol": "http",
+                  "port": "8085"
+                },
+                "dev-wsagent/http": {
+                  "path": "api",
+                  "protocol": "http",
+                  "port": "8087"
+                }
+              },
               "attributes": {
-                "memoryLimitBytes": "2147483648"
+                "memoryLimitBytes": "7516192768"
               }
             }
           },
           "recipe": {
-            "location": "codenvy/alpine_jdk8",
+            "location": "eclipse/che-dev:che6",
             "type": "dockerimage"
           }
         }
@@ -59,32 +78,67 @@
       "description": null,
       "commands": [
         {
-          "commandLine": "sudo docker rename che-server che-host;sudo apk update; sudo apk add curl;export HOST_IP=$(curl -s https://4.ifcfg.me/)",
-          "name": "1. Setup Che in Che",
-          "type": "custom"
-        },
-        {
-          "commandLine": "mvn clean install -f /projects/che/assembly/assembly-main",
-          "name": "2. Build Che in Che",
-          "type": "custom"
-        },
-        {
-          "commandLine": "export CHE_BIN_PATH=$(ls -d /projects/che/assembly/assembly-main/target/eclipse-che-*/eclipse-che-*); sudo docker run -t -v /var/run/docker.sock:/var/run/docker.sock --env CHE_ASSEMBLY=${CHE_BIN_PATH//projects/'home/user/che/workspaces/che'} --env CHE_HOST_IP=$HOST_IP --env CHE_PORT=54321 eclipse/che-launcher start",
-          "name": "3. Run Che in Che",
+          "commandLine": "cd ${current.project.path} && mvn clean install",
+          "name": "Build project",
           "type": "custom",
           "attributes": {
-            "previewUrl": "http://<host.ip>:54321/"
+            "goal": "Run",
+            "previewUrl": ""
           }
         },
         {
-          "commandLine": "sudo docker run -t -v /var/run/docker.sock:/var/run/docker.sock eclipse/che-launcher stop",
-          "name": "4. Stop Che in Che",
-          "type": "custom"
+          "commandLine": "cd ${current.project.eldest.parent.path}\n mvn gwt:codeserver -pl :assembly-ide-war -am -Psdm-in-che -Dskip-enforce -Dskip-validate-sources -Dche.dto.skip -Dmaven.main.skip -Dmaven.resources.skip -Dmaven.buildNumber.skip",
+          "name": "GWT SDM",
+          "type": "gwt_sdm_che",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": "${server.GWT-CodeServer}"
+          }
         },
         {
-          "commandLine": "sudo docker rm -f che-server",
-          "name": "** Kill Che in Che **",
-          "type": "custom"
+          "commandLine": "cd /home/user/tomcat8/bin\n export SERVER_PORT=8080\n export JPDA_ADDRESS=9000\n ./catalina.sh jpda run",
+          "name": "Tomcat8-IDE Start",
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": ""
+          }
+        },
+        {
+          "commandLine": "cd /home/user/traefik && ./traefik",
+          "name": "Traefik Start",
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": ""
+          }
+        },
+        {
+          "commandLine": "cd ${current.project.eldest.parent.path}\n mvn clean install -pl :assembly-wsagent-war -am\n cp ${current.project.eldest.parent.path}/assembly/assembly-wsagent-war/target/*.war /home/user/tomcat8/webapps/ROOT.war",
+          "name": "Deploy Workspace Agent",
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": "${server.IDE-agent-server}/${workspace.namespace}/${workspace.name}?wsagent-ref-prefix=dev-"
+          }
+        },
+        {
+          "commandLine": "cd ${current.project.eldest.parent.path}\n mvn clean install -pl :assembly-ide-war -am\n cp ${current.project.eldest.parent.path}/assembly/assembly-ide-war/target/*.war /home/user/tomcat8/webapps/ide.war",
+          "name": "Deploy IDE",
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": "${server.IDE-agent-server}/${workspace.namespace}/${workspace.name}?wsagent-ref-prefix=dev-"
+          }
+        },
+        {
+          "commandLine": "cp ${current.project.path}/target/*.jar /home/user/tomcat8/webapps/ROOT/WEB-INF/lib/\n echo \"Artifact copied. It takes a few seconds for Tomcat to hot deploy it.\"",
+          "name": "Hot Deploy Workspace Agent",
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": ""
+          }
         }
       ]
     },

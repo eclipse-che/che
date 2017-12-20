@@ -11,10 +11,11 @@
 package org.eclipse.che.ide.ext.git.client;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.eclipse.che.api.project.shared.Constants.VCS_PROVIDER_NAME;
 
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
@@ -26,8 +27,6 @@ import org.eclipse.che.ide.api.resources.Project;
  */
 public class GitUtil {
 
-  public static final String VCS_ATTRIBUTE = "vcs.provider.name";
-
   public static boolean isUnderGit(Project project) {
     return isUnderGit((ProjectConfig) project);
   }
@@ -36,7 +35,7 @@ public class GitUtil {
     checkArgument(project != null, "Null project occurred");
 
     final Map<String, List<String>> attributes = project.getAttributes();
-    final List<String> values = attributes.get(VCS_ATTRIBUTE);
+    final List<String> values = attributes.get(VCS_PROVIDER_NAME);
 
     return values != null && values.contains("git");
   }

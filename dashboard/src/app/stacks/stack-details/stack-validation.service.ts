@@ -9,13 +9,8 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {ComposeParser} from '../../../components/api/environment/compose-parser';
-import {DockerfileParser} from '../../../components/api/environment/docker-file-parser';
+import {CheRecipeTypes} from '../../../components/api/recipe/che-recipe-types';
 
-
-const COMPOSE = 'compose';
-const DOCKERFILE = 'dockerfile';
-const DOCKERIMAGE = 'dockerimage';
 
 /**
  * This class is handling the data for stack validation
@@ -23,26 +18,6 @@ const DOCKERIMAGE = 'dockerimage';
  * @author Oleksii Orel
  */
 export class StackValidationService {
-
-  composeParser: ComposeParser;
-  dockerfileParser: DockerfileParser;
-
-  constructor() {
-    this.composeParser = new ComposeParser();
-    this.dockerfileParser = new DockerfileParser();
-  }
-
-  get COMPOSE(): string {
-    return COMPOSE;
-  }
-
-  get DOCKERFILE(): string {
-    return DOCKERFILE;
-  }
-
-  get DOCKERIMAGE(): string {
-    return DOCKERIMAGE;
-  }
 
   /**
    * Return result of recipe validation.
@@ -169,7 +144,7 @@ export class StackValidationService {
     let devMachines: string[] = [];
     keys.forEach((key: string) => {
       let machine: che.IEnvironmentMachine = environment.machines[key];
-      if (machine.agents && machine.agents.indexOf(wsAgent) > -1) {
+      if (machine.installers && machine.installers.indexOf(wsAgent) > -1) {
         devMachines.push(key);
       }
     });
@@ -198,7 +173,7 @@ export class StackValidationService {
    */
   getMachineValidation(machine: che.IEnvironmentMachine): che.IValidation {
     let mandatoryKeys: Array<string> = ['attributes'];
-    let additionalKeys: Array<string> = ['agents', 'servers', 'source'];
+    let additionalKeys: Array<string> = ['installers', 'servers', 'volumes', 'source', 'env'];
     let validKeys: Array<string> = mandatoryKeys.concat(additionalKeys);
     let errors: Array<string> = [];
     let isValid: boolean = true;
@@ -261,49 +236,23 @@ export class StackValidationService {
       errors.push('The recipe should have one of \'location\' or \'content\'.');
     }
 
-    if (DOCKERFILE === recipe.type) {
+    if (CheRecipeTypes.DOCKERFILE === recipe.type) {
       if (angular.isDefined(recipe.location) && !recipe.location) {
         isValid = false;
         errors.push('Unknown recipe location.');
       }
-      if (angular.isDefined(recipe.content)) {
-        if (!recipe.content) {
-          isValid = false;
-          errors.push('Unknown recipe content.');
-        } else {
-          try {
-            this.dockerfileParser.parse(recipe.content);
-          } catch (e) {
-            isValid = false;
-            errors.push(e.message);
-          }
-        }
-      }
       if (!recipe.contentType) {
         errors.push('Unknown recipe contentType.');
       }
-    } else if (COMPOSE === recipe.type) {
+    } else if (CheRecipeTypes.COMPOSE === recipe.type) {
       if (angular.isDefined(recipe.location) && !recipe.location) {
         isValid = false;
         errors.push('Unknown recipe location.');
       }
-      if (angular.isDefined(recipe.content)) {
-        if (!recipe.content) {
-          isValid = false;
-          errors.push('Unknown recipe content.');
-        } else {
-          try {
-            this.composeParser.parse(recipe.content);
-          } catch (e) {
-            isValid = false;
-            errors.push(e.message);
-          }
-        }
-      }
       if (!recipe.contentType) {
         errors.push('Unknown recipe contentType.');
       }
-    } else if (DOCKERIMAGE === recipe.type) {
+    } else if (CheRecipeTypes.DOCKERIMAGE === recipe.type) {
       if (!recipe.location) {
         isValid = false;
         errors.push('Unknown recipe location.');
@@ -311,9 +260,24 @@ export class StackValidationService {
         isValid = false;
         errors.push('Location length is invalid.');
       }
+    } else if (CheRecipeTypes.OPENSHIFT === recipe.type) {
+      if (angular.isDefined(recipe.location) && !recipe.location) {
+        isValid = false;
+        errors.push('Unknown recipe location.');
+      }
+      if (!recipe.contentType) {
+        errors.push('Unknown recipe contentType.');
+      }
     } else {
       isValid = false;
       errors.push('Unknown recipe type.');
+    }
+
+    if (angular.isDefined(recipe.content)) {
+      if (!recipe.content) {
+        isValid = false;
+        errors.push('Unknown recipe content.');
+      }
     }
 
     return {isValid: isValid, errors: errors};

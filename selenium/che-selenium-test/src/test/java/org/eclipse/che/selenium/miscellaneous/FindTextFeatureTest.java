@@ -42,6 +42,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
+import org.eclipse.che.selenium.pageobject.PanelSelector;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
@@ -65,6 +66,7 @@ public class FindTextFeatureTest {
   @Inject private FindText findTextPage;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Consoles consoles;
+  @Inject private PanelSelector panelSelector;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private Wizard wizard;
 
@@ -122,8 +124,9 @@ public class FindTextFeatureTest {
 
     //  Check that the Processes tab is opened
     if (!consoles.processesMainAreaIsOpen()) {
-      consoles.clickOnProcessesTab();
+      panelSelector.selectPanelTypeFromPanelSelector(PanelSelector.PanelTypes.LEFT_BOTTOM);
     }
+    consoles.clickOnProcessesButton();
 
     // Create a file from terminal
     terminal.waitTerminalTab();
@@ -147,7 +150,7 @@ public class FindTextFeatureTest {
         "1:   Filesystem 1K-blocks Used Available Use% Mounted on");
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
     editor.waitActiveTabFileName(fileNameCreatedFromTerminal);
-    assertEquals(editor.getPositionOfLine(), 1);
+    assertEquals(editor.getPositionVisible(), 1);
 
     // Create a file from API
     createFileFromAPI(PROJECT_NAME, fileNameCreatedFromAPI, content);
@@ -169,7 +172,7 @@ public class FindTextFeatureTest {
         format("/%s/readme.api", PROJECT_NAME), "1:   FindTextFeatureTest");
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
     editor.waitActiveTabFileName(fileNameCreatedFromAPI);
-    assertEquals(editor.getPositionOfLine(), 1);
+    assertEquals(editor.getPositionVisible(), 1);
 
     editor.closeAllTabsByContextMenu();
   }
@@ -207,9 +210,14 @@ public class FindTextFeatureTest {
     findTextPage.clickOnSearchButtonMainForm();
     findTextPage.waitFindInfoPanelIsOpen();
     findTextPage.waitExpectedTextInFindInfoPanel(findNothing);
-    findTextPage.clickHideBtnFindInfoPanel();
-    findTextPage.clickFindTab();
+
+    // check find info panel when switch to processes panel
+    consoles.clickOnProcessesButton();
+    findTextPage.waitFindInfoPanelIsClosed();
+    findTextPage.clickFindTextButton();
     findTextPage.waitFindInfoPanelIsOpen();
+    consoles.closeProcessesArea();
+    findTextPage.waitFindInfoPanelIsClosed();
 
     // Find files with 'String' text. Open 'guess_num.jsp' file and check cursor position
     projectExplorer.selectItem(PROJECT_NAME);
@@ -233,14 +241,15 @@ public class FindTextFeatureTest {
         pathToQuessNumFile,
         "25:    java.lang.String attempt = (java.lang.String)request.getAttribute(\"num\");");
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ENTER.toString());
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitActiveTabFileName("guess_num.jsp");
     editor.waitTextIntoEditor("String");
-    assertEquals(editor.getPositionOfLine(), 25);
+    assertEquals(editor.getPositionVisible(), 25);
 
     // Check that the Find Info panel state restored
-    findTextPage.clickHideBtnFindInfoPanel();
-    findTextPage.clickFindTab();
+    consoles.closeProcessesArea();
+    findTextPage.waitFindInfoPanelIsClosed();
+    panelSelector.selectPanelTypeFromPanelSelector(PanelSelector.PanelTypes.LEFT_BOTTOM);
     findTextPage.waitFindInfoPanelIsOpen();
 
     // Open 'SayHello.java' file and check cursor position
@@ -256,10 +265,10 @@ public class FindTextFeatureTest {
     findTextPage.sendCommandByKeyboardInFindInfoPanel(ARROW_DOWN.toString());
     findTextPage.selectItemInFindInfoPanelByDoubleClick(
         pathToSayHelloFile, "20:    public String sayHello(String name)");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitActiveTabFileName("SayHello");
     editor.waitTextIntoEditor("String");
-    assertEquals(editor.getPositionOfLine(), 20);
+    assertEquals(editor.getPositionVisible(), 20);
 
     editor.closeAllTabsByContextMenu();
   }

@@ -24,6 +24,8 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
+import static org.eclipse.che.api.git.shared.Constants.COMMIT_IN_PROGRESS_ERROR;
+import static org.eclipse.che.api.git.shared.Constants.NOT_A_GIT_REPOSITORY_ERROR;
 import static org.eclipse.che.api.git.shared.EditedRegionType.DELETION;
 import static org.eclipse.che.api.git.shared.EditedRegionType.INSERTION;
 import static org.eclipse.che.api.git.shared.EditedRegionType.MODIFICATION;
@@ -65,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -88,9 +91,11 @@ import org.eclipse.che.api.git.GitUrlUtils;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.git.LogPage;
 import org.eclipse.che.api.git.UserCredential;
+import org.eclipse.che.api.git.exception.GitCommitInProgressException;
 import org.eclipse.che.api.git.exception.GitConflictException;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.exception.GitInvalidRefNameException;
+import org.eclipse.che.api.git.exception.GitInvalidRepositoryException;
 import org.eclipse.che.api.git.exception.GitRefAlreadyExistsException;
 import org.eclipse.che.api.git.exception.GitRefNotFoundException;
 import org.eclipse.che.api.git.params.AddParams;
@@ -127,8 +132,8 @@ import org.eclipse.che.api.git.shared.RevertResult;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
+import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.git.shared.Tag;
-import org.eclipse.che.api.git.shared.event.GitCommitEvent;
 import org.eclipse.che.api.git.shared.event.GitRepositoryInitializedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.proxy.ProxyAuthenticator;
@@ -261,6 +266,8 @@ class JGitConnection implements GitConnection {
 
   private static final String ERROR_CHECKOUT_BRANCH_NAME_EXISTS =
       "A branch named '%s' already exists.";
+  private static final String ERROR_CHECKOUT_BRANCH_NAME_EXISTS_IN_SEVERAL_REMOTES =
+      "A branch named '%s' exists in more than one remote repos";
   private static final String ERROR_CHECKOUT_CONFLICT =
       "Checkout operation failed, the following files would be " + "overwritten by merge:";
 
@@ -295,6 +302,8 @@ class JGitConnection implements GitConnection {
       Pattern.compile("https?://[^:]+:[^@]+@.*");
 
   private static final Logger LOG = LoggerFactory.getLogger(JGitConnection.class);
+
+  private static final Set<String> COMMITTING_REPOSITORIES = new CopyOnWriteArraySet<>();
 
   private Git git;
   private JGitConfigImpl config;
@@ -333,27 +342,25 @@ class JGitConnection implements GitConnection {
     try {
       addCommand.call();
 
-      addDeletedFilesToIndex(filePatterns);
+      addDeletedFilesToIndexIfNeeded(filePatterns);
     } catch (GitAPIException exception) {
       throw new GitException(exception.getMessage(), exception);
     }
   }
 
   /** To add deleted files in index it is required to perform git rm on them */
-  private void addDeletedFilesToIndex(List<String> filePatterns) throws GitAPIException {
+  private void addDeletedFilesToIndexIfNeeded(List<String> filePatterns) throws GitAPIException {
     Set<String> deletedFiles = getGit().status().call().getMissing();
+    if (deletedFiles.isEmpty()) {
+      return;
+    }
+    if (!filePatterns.isEmpty() && !filePatterns.contains(".")) {
+      deletedFiles =
+          deletedFiles.stream().filter(filePatterns::contains).collect(Collectors.toSet());
+    }
     if (!deletedFiles.isEmpty()) {
       RmCommand rmCommand = getGit().rm();
-      if (filePatterns.contains(".")) {
-        deletedFiles.forEach(rmCommand::addFilepattern);
-      } else {
-        filePatterns.forEach(
-            filePattern ->
-                deletedFiles
-                    .stream()
-                    .filter(deletedFile -> deletedFile.startsWith(filePattern))
-                    .forEach(rmCommand::addFilepattern));
-      }
+      deletedFiles.forEach(rmCommand::addFilepattern);
       rmCommand.call();
     }
   }
@@ -396,14 +403,21 @@ class JGitConnection implements GitConnection {
                 .map(Branch::getDisplayName)
                 .collect(Collectors.toList());
         if (!localBranches.contains(name)) {
-          Optional<Branch> remoteBranch =
+          List<Branch> remoteBranchesWithGivenName =
               branchList(LIST_REMOTE)
                   .stream()
-                  .filter(branch -> branch.getName().contains(name))
-                  .findFirst();
-          if (remoteBranch.isPresent()) {
+                  .filter(
+                      branch -> {
+                        String branchName = branch.getName();
+                        return name.equals(branchName.substring(branchName.lastIndexOf("/") + 1));
+                      })
+                  .collect(Collectors.toList());
+          if (remoteBranchesWithGivenName.size() > 1) {
+            throw new GitException(
+                String.format(ERROR_CHECKOUT_BRANCH_NAME_EXISTS_IN_SEVERAL_REMOTES, name));
+          } else if (remoteBranchesWithGivenName.size() == 1) {
             checkoutCommand.setCreateBranch(true);
-            checkoutCommand.setStartPoint(remoteBranch.get().getName());
+            checkoutCommand.setStartPoint(remoteBranchesWithGivenName.get(0).getName());
           }
         }
       }
@@ -748,15 +762,23 @@ class JGitConnection implements GitConnection {
       boolean isGerritSupportConfigured =
           gerritSupportConfigValue != null ? Boolean.valueOf(gerritSupportConfigValue) : false;
       commitCommand.setInsertChangeId(isGerritSupportConfigured);
+      String repositoryPath = getRepository().getDirectory().getPath();
+      COMMITTING_REPOSITORIES.add(repositoryPath);
       RevCommit result = commitCommand.call();
+      COMMITTING_REPOSITORIES.remove(repositoryPath);
+
+      status = status(emptyList());
       Map<String, List<EditedRegion>> modifiedFiles = new HashMap<>();
       for (String file : status.getChanged()) {
         modifiedFiles.put(file, getEditedRegions(file));
       }
+      // Need to fire this event because with the help of the file watchers we can not detect JGit's
+      // commit operation completion.
       eventService.publish(
-          newDto(GitCommitEvent.class)
-              .withStatus(status(emptyList()))
-              .withModifiedFiles(modifiedFiles));
+          newDto(StatusChangedEventDto.class)
+              .withStatus(status)
+              .withModifiedFiles(modifiedFiles)
+              .withProjectName(repository.getWorkTree().getName()));
 
       GitUser gitUser = newDto(GitUser.class).withName(committerName).withEmail(committerEmail);
 
@@ -768,6 +790,8 @@ class JGitConnection implements GitConnection {
           .withCommitter(gitUser);
     } catch (GitAPIException exception) {
       throw new GitException(exception.getMessage(), exception);
+    } finally {
+      COMMITTING_REPOSITORIES.remove(getRepository().getDirectory().getPath());
     }
   }
 
@@ -953,7 +977,8 @@ class JGitConnection implements GitConnection {
     try {
       repository.create(isBare);
       eventService.publish(
-          newDto(GitRepositoryInitializedEvent.class).withStatus(status(emptyList())));
+          newDto(GitRepositoryInitializedEvent.class)
+              .withProjectName(repository.getWorkTree().getName()));
     } catch (IOException exception) {
       if (removeIfFailed) {
         deleteRepositoryFolder();
@@ -1837,8 +1862,12 @@ class JGitConnection implements GitConnection {
 
   @Override
   public Status status(List<String> filter) throws GitException {
-    if (!RepositoryCache.FileKey.isGitRepository(getRepository().getDirectory(), FS.DETECTED)) {
-      throw new GitException("Not a git repository");
+    if (!isInsideWorkTree()) {
+      throw new GitInvalidRepositoryException(NOT_A_GIT_REPOSITORY_ERROR);
+    }
+    // Status can be not actual, if commit is in progress.
+    if (COMMITTING_REPOSITORIES.contains(getRepository().getDirectory().getPath())) {
+      throw new GitCommitInProgressException(COMMIT_IN_PROGRESS_ERROR);
     }
     String branchName = getCurrentBranch();
     StatusCommand statusCommand = getGit().status();

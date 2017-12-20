@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.actions;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -21,8 +21,8 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.core.AgentURLModifier;
 import org.eclipse.che.ide.download.DownloadContainer;
 
 /**
@@ -34,13 +34,13 @@ import org.eclipse.che.ide.download.DownloadContainer;
 public class DownloadWsAction extends AbstractPerspectiveAction {
 
   private final AppContext appContext;
-  private final WsAgentURLModifier wsAgentURLModifier;
+  private final AgentURLModifier agentURLModifier;
   private final DownloadContainer downloadContainer;
 
   @Inject
   public DownloadWsAction(
       AppContext appContext,
-      WsAgentURLModifier wsAgentURLModifier,
+      AgentURLModifier agentURLModifier,
       CoreLocalizationConstant locale,
       Resources resources,
       DownloadContainer downloadContainer) {
@@ -48,10 +48,9 @@ public class DownloadWsAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         locale.downloadProjectAsZipName(),
         locale.downloadProjectAsZipDescription(),
-        null,
         resources.downloadZip());
     this.appContext = appContext;
-    this.wsAgentURLModifier = wsAgentURLModifier;
+    this.agentURLModifier = agentURLModifier;
     this.downloadContainer = downloadContainer;
   }
 
@@ -59,8 +58,7 @@ public class DownloadWsAction extends AbstractPerspectiveAction {
   @Override
   public void actionPerformed(ActionEvent e) {
     downloadContainer.setUrl(
-        wsAgentURLModifier.modify(
-            appContext.getDevMachine().getWsAgentBaseUrl() + "/project/export/"));
+        agentURLModifier.modify(appContext.getWsAgentServerApiEndpoint() + "/project/export/"));
   }
 
   /** {@inheritDoc} */

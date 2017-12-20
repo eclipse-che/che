@@ -21,7 +21,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
@@ -64,7 +63,6 @@ public class AddToIndexPresenterTest extends BaseTest {
             notificationManager);
 
     when(appContext.getResources()).thenReturn(new Resource[] {});
-    when(appContext.getDevMachine()).thenReturn(mock(DevMachine.class));
     when(appContext.getRootProject()).thenReturn(mock(Project.class));
     when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
     when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);

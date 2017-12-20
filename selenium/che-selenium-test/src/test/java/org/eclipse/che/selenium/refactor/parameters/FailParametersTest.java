@@ -27,7 +27,9 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 23.11.15 */
@@ -60,138 +62,47 @@ public class FailParametersTest {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
-  }
-
-  @Test
-  public void testFail2() throws Exception {
     consoles.closeProcessesArea();
     projectExplorer.scrollToItemByPath(PROJECT_NAME + "/src/main/webapp");
-    setFieldsForTest("testfail2");
-    projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
-    editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(14, 23);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
-    refactor.waitRenameParametersFormIsOpen();
-    refactor.waitUpdateReferencesIsSelected();
-    refactor.typeAndWaitNewName("i");
-    refactor.clickOkButtonRefactorForm();
-    askDialog.acceptDialogWithText("Duplicate parameter i");
-    refactor.waitRenameParametersFormIsClosed();
-    editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(priority = 1)
-  public void testFail3() throws Exception {
-    setFieldsForTest("testfail3");
-    projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
-    editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(14, 15);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
-    refactor.waitRenameParametersFormIsOpen();
-    refactor.waitUpdateReferencesIsSelected();
-    refactor.typeAndWaitNewName("9");
-    refactor.waitTextInErrorMessage("'9' is not a valid Java identifier");
-    refactor.clickCancelButtonRefactorForm();
-    refactor.waitRenameParametersFormIsClosed();
-    editor.closeFileByNameWithSaving("A");
+  @AfterMethod
+  public void closeCurrentTab() {
+    if (refactor.isWidgetOpened()) {
+      refactor.clickCancelButtonRefactorForm();
+    }
+    editor.closeAllTabs();
   }
 
-  @Test(priority = 2)
-  public void testFail7() throws Exception {
-    setFieldsForTest("testfail7");
-    projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
-    editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(17, 16);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
-    refactor.waitRenameParametersFormIsOpen();
-    refactor.waitUpdateReferencesIsSelected();
-    refactor.typeAndWaitNewName("j");
-    refactor.clickOkButtonRefactorForm();
-    askDialog.acceptDialogWithText("Name collision with name 'j'");
-    refactor.waitRenameParametersFormIsClosed();
-    editor.closeFileByNameWithSaving("A");
+  @Test(dataProvider = "checkRefactoringDataWthConfirmBtnClick")
+  public void testFail2(TestParams params) throws Exception {
+    checkRefactoring(params);
   }
 
-  @Test(priority = 3)
-  public void testFail11() throws Exception {
-    setFieldsForTest("testfail11");
-    projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
+  private void checkRefactoring(TestParams testParamObj) throws Exception {
+    setFieldsForTest(testParamObj.getNameTest());
+    projectExplorer.openItemByPath(pathToCurrentPackage);
+    editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(14, 16);
+    editor.goToCursorPositionVisible(
+        testParamObj.getStrCursorPosition(), testParamObj.getLineCursorPosition());
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameParametersFormIsOpen();
     refactor.waitUpdateReferencesIsSelected();
-    refactor.typeAndWaitNewName("j");
-    refactor.clickOkButtonRefactorForm();
-    askDialog.acceptDialogWithText("Duplicate parameter j");
+    refactor.typeAndWaitNewName(testParamObj.getRefactorValue());
+    if (testParamObj.isHandleRefactorWithConfirming()) {
+      refactor.clickOkButtonRefactorForm();
+      askDialog.acceptDialogWithText(testParamObj.getExpectedDialogTextInRefactorWidget());
+    } else {
+      refactor.waitTextInErrorMessage(testParamObj.getExpectedDialogTextInRefactorWidget());
+      refactor.clickCancelButtonRefactorForm();
+    }
     refactor.waitRenameParametersFormIsClosed();
-    editor.closeFileByNameWithSaving("A");
-  }
-
-  @Test(priority = 4)
-  public void testFail14() throws Exception {
-    setFieldsForTest("testfail14");
-    projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
-    editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(18, 15);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
-    refactor.waitRenameParametersFormIsOpen();
-    refactor.waitUpdateReferencesIsSelected();
-    refactor.typeAndWaitNewName("j");
-    refactor.clickOkButtonRefactorForm();
-    askDialog.acceptDialogWithText("Name collision with name 'j'");
-    refactor.waitRenameParametersFormIsClosed();
-    editor.closeFileByNameWithSaving("A");
-  }
-
-  @Test(priority = 5)
-  public void testFail17() throws Exception {
-    setFieldsForTest("testfail17");
-    projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
-    editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(14, 17);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
-    refactor.waitRenameParametersFormIsOpen();
-    refactor.waitUpdateReferencesIsSelected();
-    refactor.typeAndWaitNewName("j");
-    refactor.clickOkButtonRefactorForm();
-    askDialog.acceptDialogWithText("Duplicate parameter j");
-    refactor.waitRenameParametersFormIsClosed();
-    editor.closeFileByNameWithSaving("A");
-  }
-
-  @Test(priority = 6)
-  public void testFail20() throws Exception {
-    setFieldsForTest("testfail20");
-    projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
-    editor.waitActiveEditor();
-    editor.waitTextIntoEditor(contentFromInA);
-    editor.setCursorToDefinedLineAndChar(17, 17);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
-    refactor.waitRenameParametersFormIsOpen();
-    refactor.waitUpdateReferencesIsSelected();
-    refactor.typeAndWaitNewName("j");
-    refactor.clickOkButtonRefactorForm();
-    askDialog.acceptDialogWithText("Name collision with name 'j'");
-    refactor.waitRenameParametersFormIsClosed();
-    editor.closeFileByNameWithSaving("A");
   }
 
   private void setFieldsForTest(String nameCurrentTest) throws Exception {
-    pathToCurrentPackage = pathToPackageInChePrefix + "/" + nameCurrentTest;
+    pathToCurrentPackage = pathToPackageInChePrefix + "/" + nameCurrentTest + "/A.java";
     URL resourcesIn =
         getClass()
             .getResource(
@@ -208,5 +119,68 @@ public class FailParametersTest {
     }
 
     return result;
+  }
+
+  private static class TestParams {
+    private String nameTest;
+    private int strCursorPosition;
+    private int lineCursorPosition;
+
+    private boolean handleRefactorWithConfirming;
+
+    private String refactorValue;
+    private String expectedDialogTextInRefactorWidget;
+
+    public TestParams(
+        String nameTest,
+        int strCursorPosition,
+        int lineCursorPosition,
+        String refactorValue,
+        String expectedDialogTextInRefactorWidget,
+        boolean handleRefactorWithConfirming) {
+      this.nameTest = nameTest;
+      this.strCursorPosition = strCursorPosition;
+      this.lineCursorPosition = lineCursorPosition;
+      this.refactorValue = refactorValue;
+      this.expectedDialogTextInRefactorWidget = expectedDialogTextInRefactorWidget;
+      this.handleRefactorWithConfirming = handleRefactorWithConfirming;
+    }
+
+    public String getNameTest() {
+      return nameTest;
+    }
+
+    public boolean isHandleRefactorWithConfirming() {
+      return handleRefactorWithConfirming;
+    }
+
+    public int getStrCursorPosition() {
+      return strCursorPosition;
+    }
+
+    public int getLineCursorPosition() {
+      return lineCursorPosition;
+    }
+
+    public String getRefactorValue() {
+      return refactorValue;
+    }
+
+    public String getExpectedDialogTextInRefactorWidget() {
+      return expectedDialogTextInRefactorWidget;
+    }
+  }
+
+  @DataProvider(name = "checkRefactoringDataWthConfirmBtnClick")
+  private Object[][] refactorParameters() {
+    return new Object[][] {
+      {new TestParams("testfail2", 14, 23, "i", "Duplicate parameter i", true)},
+      {new TestParams("testfail3", 14, 15, "9", "'9' is not a valid Java identifier", false)},
+      {new TestParams("testfail7", 17, 16, "j", "Name collision with name 'j'", true)},
+      {new TestParams("testfail11", 14, 16, "j", "Duplicate parameter j", true)},
+      {new TestParams("testfail14", 18, 15, "j", "Name collision with name 'j'", true)},
+      {new TestParams("testfail17", 14, 17, "j", "Duplicate parameter j", true)},
+      {new TestParams("testfail20", 17, 17, "j", "Name collision with name 'j'", true)}
+    };
   }
 }

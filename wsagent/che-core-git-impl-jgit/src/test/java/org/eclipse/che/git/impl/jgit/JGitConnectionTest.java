@@ -73,6 +73,7 @@ public class JGitConnectionTest {
   @Mock private TransportCommand transportCommand;
   @Mock private GitUserResolver userResolver;
   @Mock private EventService eventService;
+  @Mock private File directory;
 
   private JGitConnection jGitConnection;
 
@@ -91,6 +92,8 @@ public class JGitConnectionTest {
     when(gitUser.getName()).thenReturn("username");
     when(gitUser.getEmail()).thenReturn("email");
     when(userResolver.getUser()).thenReturn(gitUser);
+    when(repository.getDirectory()).thenReturn(directory);
+    when(directory.getPath()).thenReturn("path");
   }
 
   @DataProvider(name = "gitUrlsWithCredentialsProvider")

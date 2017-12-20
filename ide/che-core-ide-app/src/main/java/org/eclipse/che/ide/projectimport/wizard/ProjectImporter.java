@@ -25,7 +25,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Map;
-import org.eclipse.che.api.core.model.project.SourceStorage;
+import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
@@ -35,18 +35,16 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.RequestCall;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.importer.AbstractImporter;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorUrlProvider;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
-import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
-import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.user.AskCredentialsDialog;
-import org.eclipse.che.ide.api.user.Credentials;
 import org.eclipse.che.ide.api.wizard.Wizard.CompleteCallback;
+import org.eclipse.che.ide.projectimport.AbstractImporter;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.dialogs.askcredentials.AskCredentialsDialog;
+import org.eclipse.che.ide.ui.dialogs.askcredentials.Credentials;
 import org.eclipse.che.ide.util.ExceptionUtils;
 import org.eclipse.che.security.oauth.OAuthStatus;
 
@@ -221,7 +219,8 @@ public class ProjectImporter extends AbstractImporter {
             }
 
             authenticator.authenticate(
-                OAuth2AuthenticatorUrlProvider.get(appContext.getMasterEndpoint(), authenticateUrl),
+                OAuth2AuthenticatorUrlProvider.get(
+                    appContext.getMasterApiEndpoint(), authenticateUrl),
                 new AsyncCallback<OAuthStatus>() {
                   @Override
                   public void onFailure(Throwable caught) {

@@ -13,14 +13,12 @@ package org.eclipse.che.ide.context;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.addAll;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 
-import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -32,22 +30,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.app.StartUpAction;
-import org.eclipse.che.ide.api.data.HasDataObject;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.event.SelectionChangedEvent;
-import org.eclipse.che.ide.api.event.SelectionChangedHandler;
-import org.eclipse.che.ide.api.event.WindowActionEvent;
-import org.eclipse.che.ide.api.event.WindowActionHandler;
-import org.eclipse.che.ide.api.machine.ActiveRuntime;
-import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.factory.model.FactoryImpl;
+import org.eclipse.che.ide.api.project.type.ProjectTypesLoadedEvent;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -57,17 +48,21 @@ import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.ResourcePathComparator;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.selection.SelectionChangedEvent;
+import org.eclipse.che.ide.api.selection.SelectionChangedHandler;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStatusChangedEvent;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
+import org.eclipse.che.ide.api.workspace.model.ServerImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.resources.ResourceManagerInitializer;
-import org.eclipse.che.ide.resources.impl.ResourceDeltaImpl;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
+import org.eclipse.che.ide.ui.smartTree.data.HasDataObject;
 import org.eclipse.che.ide.util.dom.Elements;
+import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * Implementation of {@link AppContext}.
@@ -77,64 +72,61 @@ import org.eclipse.che.ide.util.dom.Elements;
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class AppContextImpl
-    implements AppContext,
-        SelectionChangedHandler,
-        ResourceChangedHandler,
-        ResourceManagerInitializer {
-  private final QueryParameters queryParameters;
+public class AppContextImpl implements AppContext, SelectionChangedHandler, ResourceChangedHandler {
+
   private final List<String> projectsInImport;
   private final EventBus eventBus;
   private final ResourceManager.ResourceManagerFactory resourceManagerFactory;
   private final Provider<EditorAgent> editorAgentProvider;
   private final Provider<AppStateManager> appStateManager;
+  private final Provider<WsAgentServerUtil> wsAgentServerUtilProvider;
 
   private final List<Project> rootProjects = newArrayList();
   private final List<Resource> selectedResources = newArrayList();
-
-  private String applicationWebsocketId = null;
-
-  private Workspace userWorkspace;
-  private CurrentUser currentUser;
-  private FactoryDto factory;
-  private Path projectsRoot;
-  private ActiveRuntime runtime;
-  private ResourceManager resourceManager;
-  private Map<String, String> properties;
-
-  private EventRemover appStateEventRemover;
 
   /**
    * List of actions with parameters which comes from startup URL. Can be processed after IDE
    * initialization as usual after starting ws-agent.
    */
-  private List<StartUpAction> startAppActions;
+  private final List<StartUpAction> startAppActions;
+
+  private String applicationWebsocketId;
+  private CurrentUser currentUser;
+  private WorkspaceImpl workspace;
+  private FactoryImpl factory;
+  private Path projectsRoot;
+  private ResourceManager resourceManager;
+  private Map<String, String> properties;
+
+  private EventRemover appStateEventRemover;
 
   @Inject
   public AppContextImpl(
       EventBus eventBus,
-      QueryParameters queryParameters,
       ResourceManager.ResourceManagerFactory resourceManagerFactory,
       Provider<EditorAgent> editorAgentProvider,
-      Provider<AppStateManager> appStateManager) {
+      Provider<AppStateManager> appStateManager,
+      Provider<WsAgentServerUtil> wsAgentServerUtilProvider) {
     this.eventBus = eventBus;
-    this.queryParameters = queryParameters;
     this.resourceManagerFactory = resourceManagerFactory;
     this.editorAgentProvider = editorAgentProvider;
     this.appStateManager = appStateManager;
+    this.wsAgentServerUtilProvider = wsAgentServerUtilProvider;
+    this.startAppActions = new ArrayList<>();
 
     projectsInImport = new ArrayList<>();
+
+    eventBus.addHandler(ProjectTypesLoadedEvent.TYPE, e -> initResourceManager());
 
     WorkspaceStateHandler workspaceStateHandler = new WorkspaceStateHandler();
 
     eventBus.addHandler(SelectionChangedEvent.TYPE, this);
     eventBus.addHandler(ResourceChangedEvent.getType(), this);
-    eventBus.addHandler(WindowActionEvent.TYPE, workspaceStateHandler);
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, workspaceStateHandler);
-    eventBus.addHandler(WorkspaceStatusChangedEvent.TYPE, workspaceStateHandler);
+    eventBus.addHandler(WorkspaceStoppingEvent.TYPE, workspaceStateHandler);
   }
 
-  private static native String masterFromIDEConfig() /*-{
+  private static native String getMasterApiPathFromIDEConfig() /*-{
         if ($wnd.IDE && $wnd.IDE.config) {
             return $wnd.IDE.config.restContext;
         } else {
@@ -143,51 +135,44 @@ public class AppContextImpl
     }-*/;
 
   @Override
-  public Workspace getWorkspace() {
-    return userWorkspace;
+  public WorkspaceImpl getWorkspace() {
+    return workspace;
   }
 
-  @Override
-  public void setWorkspace(Workspace workspace) {
+  /** Sets the current workspace. */
+  public void setWorkspace(WorkspaceImpl workspace) {
+    this.workspace = new WorkspaceImpl(workspace);
+
     if (appStateEventRemover != null) {
       appStateEventRemover.remove();
     }
 
-    if (workspace != null) {
-      userWorkspace = workspace;
-      if (workspace.getRuntime() != null) {
-        runtime = new ActiveRuntime(workspace.getRuntime());
-      }
-
-      // in some cases IDE doesn't save preferences on window close
-      // so try to save if window lost focus
-      appStateEventRemover =
-          Elements.getWindow()
-              .addEventListener(
-                  Event.BLUR,
-                  evt -> appStateManager.get().persistWorkspaceState(workspace.getId()));
-    } else {
-      userWorkspace = null;
-      runtime = null;
-    }
+    // in some cases IDE doesn't save preferences on window close
+    // so try to save if window lost focus
+    appStateEventRemover =
+        Elements.getWindow()
+            .addEventListener(Event.BLUR, evt -> appStateManager.get().persistWorkspaceState());
   }
 
   @Override
   public String getWorkspaceId() {
-    if (userWorkspace == null) {
+    if (workspace == null) {
       throw new IllegalArgumentException(getClass() + " Workspace can not be null.");
     }
 
-    return userWorkspace.getId();
+    return workspace.getId();
   }
 
   @Override
   public CurrentUser getCurrentUser() {
+    if (currentUser == null) {
+      throw new IllegalStateException(getClass() + " Current Workspace can not be null.");
+    }
     return currentUser;
   }
 
-  public void setCurrentUser(CurrentUser currentUser) {
-    this.currentUser = currentUser;
+  public void setCurrentUser(CurrentUser user) {
+    this.currentUser = user;
   }
 
   @Override
@@ -210,36 +195,23 @@ public class AppContextImpl
     return startAppActions;
   }
 
-  @Override
-  public void setStartUpActions(List<StartUpAction> startUpActions) {
-    this.startAppActions = startUpActions;
+  public void setStartAppActions(List<StartUpAction> startAppActions) {
+    this.startAppActions.addAll(startAppActions);
   }
 
   @Override
-  public FactoryDto getFactory() {
+  public FactoryImpl getFactory() {
     return factory;
   }
 
-  @Override
-  public void setFactory(FactoryDto factory) {
-    this.factory = factory;
+  public void setFactory(Factory factory) {
+    this.factory = new FactoryImpl(factory);
   }
 
-  @Override
-  public DevMachine getDevMachine() {
-    return runtime.getDevMachine();
-  }
-
-  @Override
-  public void initResourceManager(final Callback<ResourceManager, Exception> callback) {
-    if (runtime.getDevMachine() == null) {
-      // should never happened, but anyway
-      callback.onFailure(new NullPointerException("Dev machine is not initialized"));
-    }
-
+  private void initResourceManager() {
     clearProjects();
 
-    resourceManager = resourceManagerFactory.newResourceManager(runtime.getDevMachine());
+    resourceManager = resourceManagerFactory.newResourceManager();
     resourceManager
         .getWorkspaceProjects()
         .then(
@@ -247,18 +219,18 @@ public class AppContextImpl
               rootProjects.clear();
               addAll(rootProjects, projects);
               rootProjects.sort(ResourcePathComparator.getInstance());
-              callback.onSuccess(resourceManager);
               eventBus.fireEvent(new WorkspaceReadyEvent(projects));
             })
         .catchError(
             error -> {
-              callback.onFailure((Exception) error.getCause());
+              Log.error(AppContextImpl.class, error.getCause());
             });
   }
 
+  @Deprecated
   @Override
   public String getWorkspaceName() {
-    return userWorkspace.getConfig().getName();
+    return workspace.getConfig().getName();
   }
 
   /** {@inheritDoc} */
@@ -341,16 +313,21 @@ public class AppContextImpl
       return;
     }
 
-    selectedResources.clear();
+    List<Resource> tempSelectedResources = newArrayList();
 
     if (selection != null) {
       for (Object o : selection.getAllElements()) {
         if (o instanceof HasDataObject && ((HasDataObject) o).getData() instanceof Resource) {
-          selectedResources.add((Resource) ((HasDataObject) o).getData());
+          tempSelectedResources.add((Resource) ((HasDataObject) o).getData());
         } else if (o instanceof Resource) {
-          selectedResources.add((Resource) o);
+          tempSelectedResources.add((Resource) o);
         }
       }
+    }
+
+    if (!tempSelectedResources.isEmpty()) {
+      selectedResources.clear();
+      selectedResources.addAll(tempSelectedResources);
     }
   }
 
@@ -429,47 +406,36 @@ public class AppContextImpl
     }
   }
 
-  private void clearRuntime() {
-    runtime = null;
+  @Override
+  public String getMasterApiEndpoint() {
+    return getMasterApiPathFromIDEConfig();
   }
 
   private void clearProjects() {
     if (!rootProjects.isEmpty()) {
-      rootProjects.forEach(
-          project ->
-              eventBus.fireEvent(
-                  new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED))));
       rootProjects.clear();
     }
   }
 
   @Override
-  public String getMasterEndpoint() {
-    String fromUrl = queryParameters.getByName("master");
-    if (fromUrl == null || fromUrl.isEmpty()) return masterFromIDEConfig();
-    else return fromUrl;
+  public String getWsAgentServerApiEndpoint() {
+    Optional<ServerImpl> server = wsAgentServerUtilProvider.get().getWsAgentHttpServer();
+
+    if (server.isPresent()) {
+      return server.get().getUrl();
+    }
+
+    throw new RuntimeException("wsagent server doesn't exist");
   }
 
   @Override
-  public String getDevAgentEndpoint() {
-    String fromUrl = queryParameters.getByName("agent");
-    if (fromUrl == null || fromUrl.isEmpty()) return runtime.getDevMachine().getWsAgentBaseUrl();
-    else return fromUrl;
-  }
-
-  @Override
-  public Optional<String> getApplicationWebsocketId() {
+  public Optional<String> getApplicationId() {
     return Optional.ofNullable(applicationWebsocketId);
   }
 
   @Override
   public void setApplicationWebsocketId(String id) {
     this.applicationWebsocketId = id;
-  }
-
-  @Override
-  public ActiveRuntime getActiveRuntime() {
-    return runtime;
   }
 
   @Override
@@ -481,55 +447,26 @@ public class AppContextImpl
   }
 
   private class WorkspaceStateHandler
-      implements WindowActionHandler,
-          WorkspaceStartedEvent.Handler,
-          WorkspaceStoppedEvent.Handler,
-          WorkspaceStatusChangedEvent.Handler {
+      implements WorkspaceStoppedEvent.Handler, WorkspaceStoppingEvent.Handler {
 
     Promise<Void> persistWorkspaceStatePromise;
 
     @Override
-    public void onWindowClosing(WindowActionEvent event) {
-      Workspace workspace = getWorkspace();
-      if (workspace != null) {
-        appStateManager.get().persistWorkspaceState(workspace.getId());
-      }
-    }
-
-    @Override
-    public void onWindowClosed(WindowActionEvent event) {}
-
-    @Override
-    public void onWorkspaceStarted(WorkspaceStartedEvent event) {
-      setWorkspace(event.getWorkspace());
-    }
-
-    @Override
-    public void onWorkspaceStatusChangedEvent(WorkspaceStatusChangedEvent event) {
-      WorkspaceStatus workspaceStatus = event.getWorkspaceStatusEvent().getStatus();
-      if (STOPPING == workspaceStatus) {
-        Workspace workspace = getWorkspace();
-        if (workspace != null) {
-          persistWorkspaceStatePromise =
-              appStateManager.get().persistWorkspaceState(workspace.getId());
-        }
-      }
+    public void onWorkspaceStopping(WorkspaceStoppingEvent event) {
+      persistWorkspaceStatePromise = appStateManager.get().persistWorkspaceState();
     }
 
     @Override
     public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-      setWorkspace(null);
       if (persistWorkspaceStatePromise != null) {
         persistWorkspaceStatePromise.then(
             arg -> {
               clearProjects();
               resourceManager = null;
-              clearRuntime();
             });
       } else {
         clearProjects();
         resourceManager = null;
-        clearRuntime();
       }
     }
   }

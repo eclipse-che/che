@@ -25,15 +25,15 @@ import org.eclipse.che.api.git.shared.RevertResult;
 import org.eclipse.che.api.git.shared.RevertResult.RevertStatus;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.ext.git.client.revert.RevertCommitView.ActionDelegate;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Presenter for reverting commits
@@ -138,7 +138,7 @@ public class RevertCommitPresenter implements ActionDelegate {
               GitOutputConsole console =
                   gitOutputConsoleFactory.create(constant.consoleLogCommandName());
               console.printError(errorMessage);
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.logFailed(), FAIL, FLOAT_MODE);
             });
   }
@@ -157,7 +157,7 @@ public class RevertCommitPresenter implements ActionDelegate {
                 console.printError(conflictsMessage);
               }
 
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.revertCommitSuccessfully());
 
               project.synchronize();
@@ -167,7 +167,7 @@ public class RevertCommitPresenter implements ActionDelegate {
               String errorMessage =
                   (error.getMessage() != null) ? error.getMessage() : constant.revertCommitFailed();
               console.printError(errorMessage);
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.revertCommitFailed(), FAIL, FLOAT_MODE);
             });
   }

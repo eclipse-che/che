@@ -96,26 +96,6 @@ public class MachineTokenRegistry {
   }
 
   /**
-   * Gets workspaceId by machine token
-   *
-   * @return workspace identifier
-   * @throws NotFoundException when no such machine token exists
-   */
-  public String getWorkspaceId(String token) throws NotFoundException {
-    lock.readLock().lock();
-    try {
-      for (Table.Cell<String, String, String> tokenCell : tokens.cellSet()) {
-        if (tokenCell.getValue().equals(token)) {
-          return tokenCell.getRowKey();
-        }
-      }
-      throw new NotFoundException("Workspace not found for token " + token);
-    } finally {
-      lock.readLock().unlock();
-    }
-  }
-
-  /**
    * Invalidates machine security tokens for all users of given workspace.
    *
    * @param workspaceId workspace to invalidate tokens

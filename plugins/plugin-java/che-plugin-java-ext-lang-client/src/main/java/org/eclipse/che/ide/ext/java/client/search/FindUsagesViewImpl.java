@@ -16,9 +16,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.search.node.NodeFactory;
@@ -27,6 +24,8 @@ import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
 
 /**
  * Implementation for FindUsages view. Uses tree for presenting search results.
@@ -41,10 +40,7 @@ class FindUsagesViewImpl extends BaseView<FindUsagesView.ActionDelegate> impleme
 
   @Inject
   public FindUsagesViewImpl(
-      PartStackUIResources resources,
-      NodeFactory nodeFactory,
-      JavaLocalizationConstant localizationConstant) {
-    super(resources);
+      NodeFactory nodeFactory, JavaLocalizationConstant localizationConstant) {
     this.nodeFactory = nodeFactory;
     setTitle(localizationConstant.findUsagesPartTitle());
     DockLayoutPanel panel = new DockLayoutPanel(Style.Unit.PX);

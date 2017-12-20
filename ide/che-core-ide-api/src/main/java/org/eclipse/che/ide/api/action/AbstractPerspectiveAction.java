@@ -10,9 +10,9 @@
  */
 package org.eclipse.che.ide.api.action;
 
-import com.google.gwt.resources.client.ImageResource;
 import com.google.inject.Inject;
 import java.util.List;
+import javax.inject.Provider;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -28,15 +28,16 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  *
  * @author Dmitry Shnurenko
  */
-public abstract class AbstractPerspectiveAction extends Action {
-
-  @Inject private AppContext appContext;
+public abstract class AbstractPerspectiveAction extends BaseAction {
 
   /**
    * A list of perspectives in which the action is enabled. Null or empty list means the action is
    * enabled everywhere.
    */
   private final List<String> perspectives;
+
+  @Inject protected Provider<AppContext> appContext;
+  @Inject protected Provider<PerspectiveManager> perspectiveManager;
 
   /**
    * Creates a new action with the specified text.
@@ -46,8 +47,7 @@ public abstract class AbstractPerspectiveAction extends Action {
    *     when the presentation is a menu item.
    */
   public AbstractPerspectiveAction(@Nullable List<String> perspectives, @NotNull String text) {
-    super(text);
-    this.perspectives = perspectives;
+    this(perspectives, text, null, null, null);
   }
 
   /**
@@ -61,42 +61,45 @@ public abstract class AbstractPerspectiveAction extends Action {
    */
   public AbstractPerspectiveAction(
       @Nullable List<String> perspectives, @NotNull String text, @NotNull String description) {
-    super(text, description, null, null);
-    this.perspectives = perspectives;
+    this(perspectives, text, description, null, null);
   }
 
   public AbstractPerspectiveAction(
       @Nullable List<String> perspectives,
       @NotNull String text,
       @NotNull String description,
-      @Nullable ImageResource imageResource,
+      @Nullable String htmlResource) {
+    this(perspectives, text, description, null, htmlResource);
+  }
+
+  public AbstractPerspectiveAction(
+      @Nullable List<String> perspectives,
+      @NotNull String text,
+      @NotNull String description,
       @Nullable SVGResource svgResource) {
-    super(text, description, imageResource, svgResource);
-    this.perspectives = perspectives;
+    this(perspectives, text, description, svgResource, null);
   }
 
   public AbstractPerspectiveAction(
       @Nullable List<String> perspectives,
       @NotNull String text,
       @NotNull String description,
-      @Nullable ImageResource imageResource,
       @Nullable SVGResource svgResource,
       @Nullable String htmlResource) {
-    super(text, description, imageResource, svgResource, htmlResource);
+    super(text, description, svgResource, htmlResource);
     this.perspectives = perspectives;
   }
 
   /** {@inheritDoc} */
   @Override
   public final void update(@NotNull ActionEvent event) {
-    PerspectiveManager manager = event.getPerspectiveManager();
 
     Presentation presentation = event.getPresentation();
 
     boolean isWorkspaceRunning = false;
 
-    if (appContext != null) {
-      Workspace workspace = appContext.getWorkspace();
+    if (appContext.get() != null) {
+      Workspace workspace = appContext.get().getWorkspace();
       isWorkspaceRunning =
           workspace != null && WorkspaceStatus.RUNNING.equals(workspace.getStatus());
     }
@@ -104,7 +107,7 @@ public abstract class AbstractPerspectiveAction extends Action {
     boolean inPerspective =
         perspectives == null || perspectives.isEmpty()
             ? true
-            : perspectives.contains(manager.getPerspectiveId());
+            : perspectives.contains(perspectiveManager.get().getPerspectiveId());
 
     presentation.setEnabledAndVisible(inPerspective && isWorkspaceRunning);
 

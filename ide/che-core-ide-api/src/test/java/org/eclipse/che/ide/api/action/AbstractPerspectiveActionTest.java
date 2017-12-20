@@ -13,6 +13,7 @@ package org.eclipse.che.ide.api.action;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import java.util.Arrays;
 import java.util.List;
 import javax.validation.constraints.NotNull;
@@ -22,36 +23,32 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /** @author Dmitry Shnurenko */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(GwtMockitoTestRunner.class)
 public class AbstractPerspectiveActionTest {
 
   private static final String SOME_TEXT = "someText";
 
   @Mock private PerspectiveManager manager;
-  @Mock private SVGResource icon;
   @Mock private ActionEvent event;
 
   private DummyAction dummyAction;
 
   @Before
   public void setUp() {
-    dummyAction = new DummyAction(Arrays.asList(SOME_TEXT), SOME_TEXT, SOME_TEXT, icon);
+    dummyAction = new DummyAction(Arrays.asList(SOME_TEXT), SOME_TEXT, SOME_TEXT, null);
   }
 
   @Test
   public void actionShouldBePerformed() {
     Presentation presentation = new Presentation();
-    when(event.getPerspectiveManager()).thenReturn(manager);
     when(event.getPresentation()).thenReturn(presentation);
     when(manager.getPerspectiveId()).thenReturn("123");
 
     dummyAction.update(event);
 
-    verify(event).getPerspectiveManager();
     verify(event).getPresentation();
     verify(manager).getPerspectiveId();
   }
@@ -63,7 +60,9 @@ public class AbstractPerspectiveActionTest {
         @NotNull String tooltip,
         @NotNull String description,
         @NotNull SVGResource icon) {
-      super(activePerspectives, tooltip, description, null, icon);
+      super(activePerspectives, tooltip, description, icon);
+      perspectiveManager = () -> AbstractPerspectiveActionTest.this.manager;
+      appContext = () -> null;
     }
 
     @Override

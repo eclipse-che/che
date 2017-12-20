@@ -11,24 +11,27 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Aleksandr Shmaraev */
@@ -40,8 +43,7 @@ public class Consoles {
   private final WebDriverWait updateProjDriverWait;
 
   public static final String PROCESS_NAME_XPATH = "//span[text()='%s']";
-  public static final String PROCESSES_MAIN_AREA =
-      "//div[@role='toolbar-header']//div[text()='Processes']";
+  public static final String PROCESSES_MAIN_AREA = "gwt-debug-consolesPanel";
   public static final String CLOSE_PROCESS_ICON =
       "//div[@id='gwt-debug-consolesPanel']//ul//span[text()='%s']/parent::span/span";
   public static final String TAB_PROCESS_NAME =
@@ -53,15 +55,19 @@ public class Consoles {
   public static final String OPEN_NEW_TERMINAL = "//div[@id='gwt-debug-process-tree']//span/span";
   public static final String CLOSE_TERMINAL_CONSOLES_ICON =
       "//span[text()='Terminal']/preceding::span[2]";
-  public static final String PROCESSES_TAB = "gwt-debug-partButton-Processes";
+  public static final String PROCESSES_BUTTON = "gwt-debug-partButton-Processes";
   public static final String MAXIMIZE_PANEL_ICON =
-      "//div[@id='gwt-debug-infoPanel']//div[text()='Processes']/parent::div/following-sibling::div//*[local-name() = 'svg' and @name='workBenchIconMaximize']";
+      "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-maximizeButton']";
   public static final String HIDE_CONSOLES_ICON =
-      "//div[@id='gwt-debug-infoPanel']//div[text()='Processes']/parent::div/following-sibling::div//*[local-name() = 'svg' and @name='workBenchIconMinimize']";
+      "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-hideButton']";
   public static final String PREVIEW_URL = "//div[@active]//a[@href]";
   public static final String COMMAND_CONSOLE_ID =
       "//div[@active]//div[@id='gwt-debug-commandConsoleLines']";
-  private static final String CONSOLE_PANEL_DRUGGER_CSS = "div.gwt-SplitLayoutPanel-VDragger";
+  public static final String PLUS_ICON = "gwt-debug-plusPanel";
+  public static final String SERVER_MENU_ITEM = "contextMenu/Servers";
+  public static final String SERVER_INFO_TABLE_CAPTION = "gwt-debug-runtimeInfoCellTableCaption";
+  public static final String SERVER_INFO_HIDE_INTERNAL_CHECK_BOX =
+      "gwt-debug-runtimeInfoHideServersCheckBox";
   public static final String MACHINE_NAME =
       "//div[@id='gwt-debug-process-tree']//span[text()= '%s']";
   public static final String CONTEXT_MENU = "gwt-debug-contextMenu/commandsActionGroup";
@@ -75,6 +81,7 @@ public class Consoles {
 
   protected final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
+  private static final String CONSOLE_PANEL_DRUGGER_CSS = "div.gwt-SplitLayoutPanel-VDragger";
 
   @Inject
   public Consoles(SeleniumWebDriver seleniumWebDriver, Loader loader) {
@@ -89,8 +96,8 @@ public class Consoles {
   @FindBy(css = CONSOLE_PANEL_DRUGGER_CSS)
   WebElement consolesPanelDrag;
 
-  @FindBy(id = PROCESSES_TAB)
-  WebElement processesTab;
+  @FindBy(id = PROCESSES_BUTTON)
+  WebElement processesBtn;
 
   @FindBy(id = DEBUG_TAB)
   WebElement debugTab;
@@ -113,15 +120,29 @@ public class Consoles {
   @FindBy(xpath = PREVIEW_URL)
   WebElement previewUrl;
 
-  @FindBy(xpath = PROCESSES_MAIN_AREA)
+  @FindBy(id = PROCESSES_MAIN_AREA)
   WebElement processesMainArea;
+
+  @FindBy(id = PLUS_ICON)
+  WebElement plusMenuBtn;
+
+  @FindBy(id = SERVER_MENU_ITEM)
+  WebElement serverMenuItem;
+
+  @FindBy(id = SERVER_INFO_TABLE_CAPTION)
+  WebElement serverInfoTableCaption;
+
+  @FindBy(id = SERVER_INFO_HIDE_INTERNAL_CHECK_BOX)
+  WebElement serverInfoHideInternalCheckBox;
 
   @FindBy(id = CONTEXT_MENU)
   WebElement contextMenu;
 
-  /** click on consoles tab in bottom and wait opening console area (terminal on other console ) */
-  public void clickOnProcessesTab() {
-    redrawDriverWait.until(visibilityOf(processesTab)).click();
+  /**
+   * click on consoles icon in side line and wait opening console area (terminal on other console )
+   */
+  public void clickOnProcessesButton() {
+    redrawDriverWait.until(visibilityOf(processesBtn)).click();
   }
 
   /** click on consoles tab in bottom and wait opening console area (terminal on other console ) */
@@ -132,6 +153,45 @@ public class Consoles {
   /** click on preview url link */
   public void clickOnPreviewUrl() {
     loadPageDriverWait.until(visibilityOf(previewUrl)).click();
+  }
+
+  public void clickOnServerItemInContextMenu() {
+    redrawDriverWait.until(visibilityOf(serverMenuItem)).click();
+  }
+
+  public void clickOnPlusMenuButton() {
+    redrawDriverWait.until(visibilityOf(plusMenuBtn)).click();
+  }
+
+  public void clickOnHideInternalServers() {
+    redrawDriverWait.until(visibilityOf(serverInfoHideInternalCheckBox)).click();
+  }
+
+  public void waitExpectedTextIntoServerTableCation(String expectedText) {
+    updateProjDriverWait.until(textToBePresentInElement(serverInfoTableCaption, expectedText));
+  }
+
+  public void checkReferenceList(String id, String expectedText) {
+    redrawDriverWait.until(textToBePresentInElementLocated(By.id(id), expectedText));
+  }
+
+  public void waitReferenceIsNotPresent(String referenceId) {
+    redrawDriverWait.until(invisibilityOfElementLocated(By.id(referenceId)));
+  }
+
+  public boolean checkThatServerExists(String serverName) {
+    List<WebElement> webElements =
+        loadPageDriverWait.until(
+            visibilityOfAllElementsLocatedBy(
+                By.xpath("//div[contains(@id, 'runtime-info-reference-')]")));
+
+    for (WebElement we : webElements) {
+      if (we.getText().equals(serverName)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public void waitExpectedTextIntoPreviewUrl(String expectedText) {
@@ -252,7 +312,7 @@ public class Consoles {
 
   /** click on the 'Hide' icon of the 'Processes' */
   public void closeProcessesArea() {
-    redrawDriverWait.until(visibilityOf(hideConsolesIcon)).click();
+    loadPageDriverWait.until(visibilityOf(hideConsolesIcon)).click();
   }
 
   /** click on open ssh terminal button in the consoles widget and wait opening terminal */
@@ -272,8 +332,7 @@ public class Consoles {
    * @param definedTimeout timeout in seconds defined with user
    */
   public void waitIsCommandConsoleOpened(int definedTimeout) {
-    new WebDriverWait(seleniumWebDriver, definedTimeout)
-        .until(ExpectedConditions.visibilityOf(consoleContainer));
+    new WebDriverWait(seleniumWebDriver, definedTimeout).until(visibilityOf(consoleContainer));
   }
 
   /** wait expected text into 'Command console' */
@@ -299,7 +358,7 @@ public class Consoles {
 
   /** wait a preview url into 'Consoles' */
   public void waitPreviewUrlIsPresent() {
-    redrawDriverWait.until(visibilityOf(previewUrl));
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC).until(visibilityOf(previewUrl));
   }
 
   /** wait a preview url is not present into 'Consoles' */
@@ -318,7 +377,7 @@ public class Consoles {
   }
 
   public void dragConsolesInDefinePosition(int verticalShiftInPixels) {
-    WebElement drag = redrawDriverWait.until(ExpectedConditions.visibilityOf(consolesPanelDrag));
+    WebElement drag = redrawDriverWait.until(visibilityOf(consolesPanelDrag));
     new Actions(seleniumWebDriver)
         .dragAndDropBy(drag, verticalShiftInPixels, verticalShiftInPixels)
         .perform();

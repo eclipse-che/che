@@ -16,11 +16,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.delete.DeleteRepositoryPresenter;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /** @author Andrey Plotnikov */
 @Singleton

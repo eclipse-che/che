@@ -19,7 +19,7 @@ public interface ProjectSearchResponseDto {
 
   ProjectSearchResponseDto withItemReferences(List<SearchResultDto> itemReferences);
 
-  int getTotalHits();
+  long getTotalHits();
 
-  ProjectSearchResponseDto withTotalHits(int totalHits);
+  ProjectSearchResponseDto withTotalHits(long totalHits);
 }

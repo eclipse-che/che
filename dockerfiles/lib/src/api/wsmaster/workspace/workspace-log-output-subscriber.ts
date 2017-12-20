@@ -18,10 +18,9 @@ import {Log} from "../../../spi/log/log";
  */
 export class WorkspaceDisplayOutputMessageBusSubscriber implements MessageBusSubscriber {
 
-    handleMessage(message: string) {
+    handleMessage(message: any) {
         try {
-            let stringify = JSON.stringify(message);
-            Log.getLogger().info(stringify);
+            Log.getLogger().info(message.params.text);
         } catch (error) {
             // maybe parse data to add colors
             Log.getLogger().info(message);

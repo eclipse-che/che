@@ -34,6 +34,10 @@
 [ -z "${CLASSPATH}" ]  && CLASSPATH="${CATALINA_HOME}/conf/:${JAVA_HOME}/lib/tools.jar"
 
 
+# On java9 runtime, enable activation and JAXB API
+JAVA_VERSION=$(java -version 2>&1 | head -n 1 | cut -d'"' -f2 | cut -d'.' -f1 | sed 's/[^0-9]*//g')
+[ "$JAVA_VERSION" -ge 9 ] && JAVA_OPTS="$JAVA_OPTS --add-modules java.activation --add-modules java.xml.bind"
+
 export JAVA_OPTS="$JAVA_OPTS  -Dche.logs.dir=${CHE_LOGS_DIR} -Dche.logs.level=${CHE_LOGS_LEVEL} -Djuli-logback.configurationFile=file:$CATALINA_HOME/conf/tomcat-logger.xml"
 
 [ -z "${SERVER_PORT}" ]  && SERVER_PORT=8080

@@ -20,11 +20,13 @@ assembly/** @riuvshin @skabashnyuk
 # core
 core/** @skabashnyuk
 
+# workspace runtime infrastructure implementations
+infrastructures/** @garagatyi
+
 # plugins
 plugins/plugin*debugger/** @tolusha
 plugins/plugin-gdb/** @tolusha
 plugins/plugin-docker/** @garagatyi
-plugins/plugin-docker/che-plugin-openshift-client/** @l0rd
 plugins/plugin-java/** @evidolob
 plugins/plugin-languageserver/** @evidolob @dkuleshov
 plugins/plugin-maven/** @evidolob

@@ -26,14 +26,14 @@ import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.Environment;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
-import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
+import org.eclipse.che.api.workspace.server.WorkspaceValidator;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -74,24 +74,13 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
       WorkspaceRuntimes runtimes,
       EventService eventService,
       AccountManager accountManager,
-      @Named("che.workspace.auto_snapshot") boolean defaultAutoSnapshot,
-      @Named("che.workspace.auto_restore") boolean defaultAutoRestore,
-      SnapshotDao snapshotDao,
-      WorkspaceSharedPool sharedPool,
+      WorkspaceValidator workspaceValidator,
       // own injects
       @Named("che.limits.workspace.env.ram") String maxRamPerEnv,
       EnvironmentRamCalculator environmentRamCalculator,
       ResourceUsageManager resourceUsageManager,
       ResourcesLocks resourcesLocks) {
-    super(
-        workspaceDao,
-        runtimes,
-        eventService,
-        accountManager,
-        defaultAutoSnapshot,
-        defaultAutoRestore,
-        snapshotDao,
-        sharedPool);
+    super(workspaceDao, runtimes, eventService, accountManager, workspaceValidator);
     this.environmentRamCalculator = environmentRamCalculator;
     this.maxRamPerEnvMB = "-1".equals(maxRamPerEnv) ? -1 : Size.parseSizeToMegabytes(maxRamPerEnv);
     this.resourceUsageManager = resourceUsageManager;
@@ -100,22 +89,9 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
   }
 
   @Override
-  public WorkspaceImpl createWorkspace(WorkspaceConfig config, String namespace)
-      throws ServerException, ConflictException, NotFoundException {
-    checkMaxEnvironmentRam(config);
-    String accountId = accountManager.getByName(namespace).getId();
-    try (@SuppressWarnings("unused")
-        Unlocker u = resourcesLocks.lock(accountId)) {
-      checkWorkspaceResourceAvailability(accountId);
-
-      return super.createWorkspace(config, namespace);
-    }
-  }
-
-  @Override
   public WorkspaceImpl createWorkspace(
-      WorkspaceConfig config, String namespace, Map<String, String> attributes)
-      throws ServerException, NotFoundException, ConflictException {
+      WorkspaceConfig config, String namespace, @Nullable Map<String, String> attributes)
+      throws ServerException, ConflictException, NotFoundException, ValidationException {
     checkMaxEnvironmentRam(config);
     String accountId = accountManager.getByName(namespace).getId();
     try (@SuppressWarnings("unused")
@@ -128,7 +104,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
 
   @Override
   public WorkspaceImpl startWorkspace(
-      String workspaceId, @Nullable String envName, @Nullable Boolean restore)
+      String workspaceId, @Nullable String envName, @Nullable Map<String, String> options)
       throws NotFoundException, ServerException, ConflictException {
     WorkspaceImpl workspace = this.getWorkspace(workspaceId);
     String accountId = workspace.getAccount().getId();
@@ -139,13 +115,14 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
       checkRamResourcesAvailability(
           accountId, workspace.getNamespace(), workspace.getConfig(), envName);
 
-      return super.startWorkspace(workspaceId, envName, restore);
+      return super.startWorkspace(workspaceId, envName, options);
     }
   }
 
   @Override
-  public WorkspaceImpl startWorkspace(WorkspaceConfig config, String namespace, boolean isTemporary)
-      throws ServerException, NotFoundException, ConflictException {
+  public WorkspaceImpl startWorkspace(
+      WorkspaceConfig config, String namespace, boolean isTemporary, Map<String, String> options)
+      throws ServerException, NotFoundException, ConflictException, ValidationException {
     checkMaxEnvironmentRam(config);
 
     String accountId = accountManager.getByName(namespace).getId();
@@ -155,13 +132,13 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
       checkRuntimeResourceAvailability(accountId);
       checkRamResourcesAvailability(accountId, namespace, config, null);
 
-      return super.startWorkspace(config, namespace, isTemporary);
+      return super.startWorkspace(config, namespace, isTemporary, options);
     }
   }
 
   @Override
   public WorkspaceImpl updateWorkspace(String id, Workspace update)
-      throws ConflictException, ServerException, NotFoundException {
+      throws ConflictException, ServerException, NotFoundException, ValidationException {
     checkMaxEnvironmentRam(update.getConfig());
 
     WorkspaceImpl workspace = this.getWorkspace(id);
@@ -172,16 +149,6 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         Unlocker u = resourcesLocks.lock(accountId)) {
       return super.updateWorkspace(id, update);
     }
-  }
-
-  /**
-   * Defines callback which should be called when all necessary checks are performed. Helps to
-   * propagate actions to the super class.
-   */
-  @FunctionalInterface
-  @VisibleForTesting
-  interface WorkspaceCallback<T extends WorkspaceImpl> {
-    T call() throws ConflictException, NotFoundException, ServerException;
   }
 
   @VisibleForTesting

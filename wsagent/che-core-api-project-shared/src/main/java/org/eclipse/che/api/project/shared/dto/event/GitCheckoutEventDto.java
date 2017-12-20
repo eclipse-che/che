@@ -26,9 +26,13 @@ public interface GitCheckoutEventDto {
 
   String getName();
 
+  String getProjectName();
+
   GitCheckoutEventDto withType(Type type);
 
   GitCheckoutEventDto withName(String name);
+
+  GitCheckoutEventDto withProjectName(String projectName);
 
   enum Type {
     BRANCH,

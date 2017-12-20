@@ -14,14 +14,17 @@ import static com.google.gwt.user.client.Event.ONCLICK;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Event;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.command.CommandResources;
 import org.eclipse.che.ide.command.explorer.CommandsExplorerView.ActionDelegate;
 import org.eclipse.che.ide.command.node.CommandFileNode;
 import org.eclipse.che.ide.command.node.CommandGoalNode;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.presentation.DefaultPresentationRenderer;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -81,7 +84,7 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
   private void renderCommandNode(CommandFileNode node, Element nodeContainerElement) {
     nodeContainerElement.addClassName(resources.commandsExplorerCss().commandNode());
 
-    final Element removeCommandButton = createButton(resources.removeCommand());
+    final Element removeCommandButton = createButton(FontAwesome.TRASH);
     Event.setEventListener(
         removeCommandButton,
         event -> {
@@ -132,12 +135,26 @@ class CommandsTreeRenderer extends DefaultPresentationRenderer<Node> {
     addCommandButton.setId("commands_tree-button-add");
   }
 
-  private Element createButton(SVGResource icon) {
+  private Element createButton(Object icon) {
     final Element button = Document.get().createSpanElement();
-    button.appendChild(icon.getSvg().getElement());
+    button.appendChild(getIconElement(icon));
 
     Event.sinkEvents(button, ONCLICK);
 
     return button;
+  }
+
+  private Element getIconElement(Object icon) {
+    if (icon instanceof SVGResource) {
+      return ((SVGResource) icon).getSvg().getElement();
+    } else if (icon instanceof String) {
+      SpanElement element = Document.get().createSpanElement();
+      element.getStyle().setFontSize(11., Style.Unit.PT);
+      element.getStyle().setMarginTop(2., Style.Unit.PT);
+      element.setInnerHTML((String) icon);
+      return element;
+    }
+
+    throw new IllegalArgumentException("Icon type is undefined");
   }
 }

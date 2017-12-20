@@ -16,36 +16,10 @@
     <parent>
         <artifactId>che-agents-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.23.0-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
     </parent>
     <artifactId>terminal-agent</artifactId>
     <name>Agent :: Terminal</name>
-    <dependencies>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-agent</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-agent-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-machine</artifactId>
-        </dependency>
-    </dependencies>
     <build>
         <plugins>
             <plugin>

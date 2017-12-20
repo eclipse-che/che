@@ -70,6 +70,7 @@ public class InheritClassTest {
     projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
     loader.waitOnClosed();
+    projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
     projectExplorer.openItemByPath(COMMON_PACKAGE + "/AppController.java");
@@ -95,7 +96,7 @@ public class InheritClassTest {
     editor.waitTabIsPresent("CodenvyTestInherite");
     loader.waitOnClosed();
 
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(3);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
@@ -112,10 +113,10 @@ public class InheritClassTest {
     editor.waitAutocompleteContainerIsClosed();
     editor.waitTextIntoEditor("CodenvyTestInherite extends CodenvyTest");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
 
     editor.selectTabByName("AppController");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.setCursorToLine(32);
     editor.typeTextIntoEditor("Code");
     editor.launchAutocompleteAndWaitContainer();

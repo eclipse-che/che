@@ -126,13 +126,13 @@ public class CheckoutToRemoteBranchTest {
     makePullSecondRemoteBranch();
     notifications.waitProgressPopupPanelClose();
     git.waitGitStatusBarWithMess(PULL_MSG);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(PULL_MSG);
 
     // Make some change in java file
     uniqueValue2 = String.valueOf(System.currentTimeMillis());
     projectExplorer.openItemByVisibleNameInExplorer("GreetingController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.selectLineAndDelete(2);
     editor.typeTextIntoEditor("//" + uniqueValue);
     editor.waitTextIntoEditor(uniqueValue);
@@ -145,7 +145,7 @@ public class CheckoutToRemoteBranchTest {
     // Make some change in jsp file
     projectExplorer.openItemByVisibleNameInExplorer("index.jsp");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.selectLineAndDelete(1);
     editor.typeTextIntoEditor("<!" + uniqueValue2 + ">");
     editor.waitTextIntoEditor(uniqueValue2);
@@ -158,13 +158,13 @@ public class CheckoutToRemoteBranchTest {
     projectExplorer.selectItem(PROJECT_NAME + "/src/main");
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     COMMIT_MESS = COMMIT_MESS + new Date().toString();
     git.waitAndRunCommit(COMMIT_MESS);
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
 
     // Make push
@@ -183,7 +183,7 @@ public class CheckoutToRemoteBranchTest {
             + "/springProjectWithSeveralBranches.git";
     git.waitGitStatusBarWithMess(pushedMessage);
 
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage(PUSH_MSG);
 
     // import from hosted git repository the second project
@@ -230,6 +230,7 @@ public class CheckoutToRemoteBranchTest {
     git.waitGroupGitCompareIsOpen();
     git.selectFileInChangedFilesTreePanel("GreetingController.java");
     checkChangesIntoCompareForm(uniqueValue);
+    seleniumWebDriver.switchTo().parentFrame();
     git.closeGitCompareForm();
     git.waitGroupGitCompareIsOpen();
     git.selectFileInChangedFilesTreePanel("index.jsp");

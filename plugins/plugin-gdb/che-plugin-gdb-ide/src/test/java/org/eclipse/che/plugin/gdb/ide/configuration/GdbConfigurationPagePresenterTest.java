@@ -23,7 +23,6 @@ import java.util.Map;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.macro.CurrentProjectPathMacro;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +44,6 @@ public class GdbConfigurationPagePresenterTest {
   @Mock private DebugConfiguration configuration;
   @Mock private CurrentProjectPathMacro currentProjectPathMacro;
   @Mock private AppContext appContext;
-  @Mock private RecipeServiceClient recipeServiceClient;
 
   @InjectMocks private GdbConfigurationPagePresenter pagePresenter;
 

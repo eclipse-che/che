@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.filewatcher;
 
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -29,7 +28,6 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -85,8 +83,8 @@ public class RefactoringFeatureTest {
         ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING);
     ide1.open(ws);
     ide2.open(ws);
-    events1.clickProjectEventsTab();
-    events2.clickProjectEventsTab();
+    events1.clickEventLogBtn();
+    events2.clickEventLogBtn();
   }
 
   @Test
@@ -96,27 +94,13 @@ public class RefactoringFeatureTest {
     projectExplorer1.waitItem(PROJECT_NAME);
     prepareFiles(editor1, projectExplorer1);
     prepareFiles(editor2, projectExplorer2);
-    editor1.setCursorToDefinedLineAndChar(21, 14);
+    editor1.goToCursorPositionVisible(21, 14);
     doRenameRefactor();
-
-    try {
-      checkWatching(expectedMessAfterRename);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("https://github.com/eclipse/che/issues/5183", ex);
-    }
-
+    checkWatching(expectedMessAfterRename);
     editor2.waitTabIsNotPresent(renamedClassName);
     doMoveRefactor();
     projectExplorer1.openItemByVisibleNameInExplorer(renamedClassName);
     events1.waitExpectedMessage(expectedMessAfterMove);
-    menu1.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
-    projectExplorer1.expandToFileWithRevealResource(
-        renamedClassName, PATH_TO_GREETING_FILE.replace(originClassName, renamedClassName));
-    editor1.waitTabIsPresent(renamedClassName.replace(".java", ""));
-    editor1.waitActiveEditor();
   }
 
   private void checkWatching(String expectedMessAfterRename) {
@@ -129,7 +113,7 @@ public class RefactoringFeatureTest {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_GREETING_FILE);
     editor.waitTabIsPresent(originClassName.replace(".java", ""));
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 
   private void doRenameRefactor() {
@@ -144,6 +128,10 @@ public class RefactoringFeatureTest {
   }
 
   private void doMoveRefactor() {
+    String pathToRenamedItem =
+        String.format(
+            PROJECT_NAME + "%s%s", "/src/main/java/org/eclipse/qa/examples/", renamedClassName);
+    projectExplorer2.selectItem(pathToRenamedItem);
     menu2.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
@@ -151,7 +139,7 @@ public class RefactoringFeatureTest {
     refactorPanel2.waitMoveItemFormIsOpen();
     refactorPanel2.clickOnExpandIconTree(PROJECT_NAME);
     refactorPanel2.clickOnExpandIconTree("/src/main/java");
-    refactorPanel2.chooseDestinationForItem("com.codenvy.example.replace");
+    refactorPanel2.chooseDestinationForItem("com.move");
     refactorPanel2.clickOkButtonRefactorForm();
     refactorPanel2.waitMoveItemFormIsClosed();
   }

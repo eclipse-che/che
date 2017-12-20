@@ -14,7 +14,6 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_GOAL_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.COMMAND_PREVIEW_URL_ATTRIBUTE_NAME;
 
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
@@ -42,16 +41,17 @@ import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
 import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
-import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
+import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.util.loging.Log;
 
 /** Implementation of {@link CommandManager}. */
 @Singleton
-public class CommandManagerImpl implements CommandManager, WsAgentComponent {
+public class CommandManagerImpl implements CommandManager {
 
   private final AppContext appContext;
   private final PromiseProvider promiseProvider;
@@ -86,17 +86,20 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
 
     commands = new HashMap<>();
     registerNative();
+
+    eventBus.addHandler(WorkspaceReadyEvent.getType(), e -> fetchCommands());
+    eventBus.addHandler(
+        WorkspaceStoppedEvent.TYPE,
+        e -> {
+          commands.clear();
+          notifyCommandsLoaded();
+        });
   }
 
-  @Override
-  public void start(Callback<WsAgentComponent, Exception> callback) {
-    fetchCommands(callback);
-  }
-
-  private void fetchCommands(Callback<WsAgentComponent, Exception> callback) {
+  private void fetchCommands() {
     // get all commands related to the workspace
     workspaceCommandManager
-        .getCommands(appContext.getWorkspaceId())
+        .fetchCommands()
         .then(
             workspaceCommands -> {
               workspaceCommands.forEach(
@@ -105,58 +108,38 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
                           workspaceCommand.getName(),
                           new CommandImpl(workspaceCommand, new ApplicableContext())));
 
-              addCommands();
+              Arrays.stream(appContext.getProjects())
+                  .forEach(
+                      project ->
+                          projectCommandManager
+                              .getCommands(project)
+                              .forEach(
+                                  projectCommand -> {
+                                    final CommandImpl existedCommand =
+                                        this.commands.get(projectCommand.getName());
 
-              callback.onSuccess(this);
+                                    if (existedCommand == null) {
+                                      this.commands.put(
+                                          projectCommand.getName(),
+                                          new CommandImpl(
+                                              projectCommand,
+                                              new ApplicableContext(project.getPath())));
+                                    } else {
+                                      if (projectCommand.equalsIgnoreContext(existedCommand)) {
+                                        existedCommand
+                                            .getApplicableContext()
+                                            .addProject(project.getPath());
+                                      } else {
+                                        // normally, should never happen
+                                        Log.error(
+                                            CommandManagerImpl.this.getClass(),
+                                            "Different commands with the same names found");
+                                      }
+                                    }
+                                  }));
 
               notifyCommandsLoaded();
             });
-  }
-
-  public void fetchCommands() {
-    workspaceCommandManager
-        .getCommands(appContext.getWorkspaceId())
-        .then(
-            workspaceCommands -> {
-              workspaceCommands.forEach(
-                  workspaceCommand ->
-                      commands.put(
-                          workspaceCommand.getName(),
-                          new CommandImpl(workspaceCommand, new ApplicableContext())));
-
-              addCommands();
-
-              notifyCommandsLoaded();
-            });
-  }
-
-  private void addCommands() {
-    // get all commands related to the projects
-    Arrays.stream(appContext.getProjects())
-        .forEach(
-            project ->
-                projectCommandManager
-                    .getCommands(project)
-                    .forEach(
-                        projectCommand -> {
-                          final CommandImpl existedCommand = commands.get(projectCommand.getName());
-
-                          if (existedCommand == null) {
-                            commands.put(
-                                projectCommand.getName(),
-                                new CommandImpl(
-                                    projectCommand, new ApplicableContext(project.getPath())));
-                          } else {
-                            if (projectCommand.equalsIgnoreContext(existedCommand)) {
-                              existedCommand.getApplicableContext().addProject(project.getPath());
-                            } else {
-                              // normally, should never happen
-                              Log.error(
-                                  CommandManagerImpl.this.getClass(),
-                                  "Different commands with the same names found");
-                            }
-                          }
-                        }));
   }
 
   @Override
@@ -244,20 +227,23 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
       @Nullable String commandLine,
       Map<String, String> attributes,
       ApplicableContext context) {
-    final Optional<CommandType> commandType = commandTypeRegistry.getCommandTypeById(typeId);
-
-    if (!commandType.isPresent()) {
-      return promiseProvider.reject(new Exception("Unknown command type: '" + typeId + "'"));
-    }
 
     final Map<String, String> attr = new HashMap<>(attributes);
-    attr.put(COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, commandType.get().getPreviewUrlTemplate());
     attr.put(COMMAND_GOAL_ATTRIBUTE_NAME, goalId);
+
+    final Optional<CommandType> commandType = commandTypeRegistry.getCommandTypeById(typeId);
+    commandType.ifPresent(
+        type ->
+            attr.put(
+                COMMAND_PREVIEW_URL_ATTRIBUTE_NAME, commandType.get().getPreviewUrlTemplate()));
+
+    final String commandLineTemplate =
+        commandType.map(CommandType::getCommandLineTemplate).orElse("");
 
     return createCommand(
         new CommandImpl(
             commandNameGenerator.generate(typeId, name),
-            commandLine != null ? commandLine : commandType.get().getCommandLineTemplate(),
+            commandLine != null ? commandLine : commandLineTemplate,
             typeId,
             attr,
             context));
@@ -285,13 +271,6 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
           new Exception("Command has to be applicable to the workspace or at least one project"));
     }
 
-    final Optional<CommandType> commandType =
-        commandTypeRegistry.getCommandTypeById(command.getType());
-    if (!commandType.isPresent()) {
-      return promiseProvider.reject(
-          new Exception("Unknown command type: '" + command.getType() + "'"));
-    }
-
     final CommandImpl newCommand = new CommandImpl(command);
     newCommand.setName(commandNameGenerator.generate(command.getType(), command.getName()));
 
@@ -302,8 +281,8 @@ public class CommandManagerImpl implements CommandManager, WsAgentComponent {
           workspaceCommandManager
               .createCommand(newCommand)
               .then(
-                  (Function<CommandImpl, CommandImpl>)
-                      arg -> {
+                  (Function<Void, CommandImpl>)
+                      aVoid -> {
                         newCommand.getApplicableContext().setWorkspaceApplicable(true);
                         return newCommand;
                       });

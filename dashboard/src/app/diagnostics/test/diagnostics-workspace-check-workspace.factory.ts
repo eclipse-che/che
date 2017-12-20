@@ -121,17 +121,9 @@ export class DiagnosticsRunningWorkspaceCheck {
    * @returns {ng.IPromise<any>} when test is finished
    */
   checkWebSocketWsAgent(diagnosticCallback: DiagnosticCallback): ng.IPromise<any> {
-    let workspace: che.IWorkspace = diagnosticCallback.getShared('workspace');
     let machineToken: string = diagnosticCallback.getShared('machineToken');
 
-    let wsAgentSocketWebLink = this.lodash.find(workspace.runtime.links, (link: any) => {
-      return link.rel === 'wsagent.websocket';
-    });
-    if (!wsAgentSocketWebLink) {
-      wsAgentSocketWebLink = this.getWsAgentURL(diagnosticCallback).replace('http', 'ws') + '/ws';
-    } else {
-      wsAgentSocketWebLink = wsAgentSocketWebLink.href;
-    }
+    let wsAgentSocketWebLink = this.getWsAgentURL(diagnosticCallback).replace('http', 'ws') + '/ws';
     if (machineToken) {
       wsAgentSocketWebLink += '?token=' + machineToken;
     }
@@ -217,21 +209,21 @@ export class DiagnosticsRunningWorkspaceCheck {
       diagnosticCallback.error(errMessage);
       throw errMessage;
     }
-    let devMachine = runtime.devMachine;
+
+    const devMachine = Object.keys(runtime.machines).map((machineName: string) => {
+      return runtime.machines[machineName];
+    }).find((machine: any) => {
+      return Object.keys(machine.servers).some((serverName: string) => {
+        return serverName === 'wsagent/http';
+      });
+    });
+
     if (!devMachine) {
       diagnosticCallback.error(errMessage);
       throw errMessage;
     }
-    let servers: any = devMachine.runtime.servers;
-    if (!servers) {
-      diagnosticCallback.error(errMessage);
-      throw errMessage;
-    }
-    let wsAgentServer = this.lodash.find(servers, (server: any) => {
-      return server.ref === 'wsagent';
-    });
 
-    return wsAgentServer.url;
+    return devMachine.servers['wsagent/http'].url;
   }
 
 }

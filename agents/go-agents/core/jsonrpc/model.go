@@ -80,7 +80,7 @@ type Request struct {
 	// identified by itself.
 	//
 	// If id is set then the object is Request otherwise it's Notification.
-	ID interface{} `json:"id"`
+	ID interface{} `json:"id,omitempty"`
 
 	// Params parameters which are needed for operation execution.
 	// Params are either json array or json object, for json objects
@@ -113,7 +113,7 @@ type Response struct {
 
 	// The operation call identifier, will be set only
 	// if the operation contains it.
-	ID interface{} `json:"id"`
+	ID interface{} `json:"id,omitempty"`
 
 	// Result is the result of the method call.
 	// Result can be anything determined by the operation(method).

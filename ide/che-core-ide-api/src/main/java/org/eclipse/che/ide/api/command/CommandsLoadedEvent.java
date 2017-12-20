@@ -13,11 +13,7 @@ package org.eclipse.che.ide.api.command;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-/**
- * Event fired when all commands are loaded.
- *
- * <p><b>Note:</b> this event is not intended to be fired by clients.
- */
+/** Event fired when all commands are loaded. */
 public class CommandsLoadedEvent extends GwtEvent<CommandsLoadedEvent.CommandsLoadedHandler> {
 
   /** Handler type. */

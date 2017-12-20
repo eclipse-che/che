@@ -20,18 +20,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.eclipse.che.api.debug.shared.dto.BreakpointConfigurationDto;
 import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.dto.LocationDto;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.BreakpointConfiguration;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointStorage;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
+import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 
 /**
  * Breakpoints storage based on local storage.
@@ -162,7 +165,11 @@ public class BreakpointStorageImpl implements BreakpointStorage {
       return emptyList();
     }
 
-    return dtoFactory.createListDtoFromJson(json, BreakpointDto.class);
+    return dtoFactory
+        .createListDtoFromJson(json, BreakpointDto.class)
+        .stream()
+        .map(BreakpointImpl::new)
+        .collect(Collectors.toList());
   }
 
   /**
@@ -177,7 +184,7 @@ public class BreakpointStorageImpl implements BreakpointStorage {
       if (key != null && key.startsWith(LOCAL_STORAGE_BREAKPOINTS_KEY_PREFIX)) {
         String wsId = key.substring(LOCAL_STORAGE_BREAKPOINTS_KEY_PREFIX.length());
 
-        Promise<WorkspaceDto> workspace = workspaceServiceClient.getWorkspace(wsId);
+        Promise<WorkspaceImpl> workspace = workspaceServiceClient.getWorkspace(wsId);
         workspace.catchError(
             arg -> {
               storage.removeItem(key);
@@ -187,8 +194,19 @@ public class BreakpointStorageImpl implements BreakpointStorage {
   }
 
   private BreakpointDto toDto(Breakpoint breakpoint) {
-    Location location = breakpoint.getLocation();
+    BreakpointConfiguration breakpointConfiguration = breakpoint.getBreakpointConfiguration();
+    BreakpointConfigurationDto breakpointConfigurationDto =
+        breakpointConfiguration == null
+            ? null
+            : dtoFactory
+                .createDto(BreakpointConfigurationDto.class)
+                .withSuspendPolicy(breakpointConfiguration.getSuspendPolicy())
+                .withHitCount(breakpointConfiguration.getHitCount())
+                .withCondition(breakpointConfiguration.getCondition())
+                .withConditionEnabled(breakpointConfiguration.isConditionEnabled())
+                .withHitCountEnabled(breakpointConfiguration.isHitCountEnabled());
 
+    Location location = breakpoint.getLocation();
     LocationDto locationDto =
         dtoFactory
             .createDto(LocationDto.class)
@@ -201,6 +219,7 @@ public class BreakpointStorageImpl implements BreakpointStorage {
     return dtoFactory
         .createDto(BreakpointDto.class)
         .withLocation(locationDto)
-        .withCondition(breakpoint.getCondition());
+        .withEnabled(breakpoint.isEnabled())
+        .withBreakpointConfiguration(breakpointConfigurationDto);
   }
 }

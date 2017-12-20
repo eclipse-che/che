@@ -5,9 +5,9 @@ How to run Selenium tests
 
 Go to [OAuth application page](https://github.com/settings/applications/new) and register a new application:
 * `Application name` : `Che`
-* `Homepage URL` : `http://<YOUR_IP_ADDRESS>:8080`
+* `Homepage URL` : `http://<YOUR_IP_ADDRESS><:YOUR_CHE_PORT>`
 * `Application description` : `Che`
-* `Authorization callback URL` : `http://<YOUR_IP_ADDRESS>:8080/api/oauth/callback`
+* `Authorization callback URL` : `http://<YOUR_IP_ADDRESS><:YOUR_CHE_PORT>/api/oauth/callback`
 
 Substitute `CHE_OAUTH_GITHUB_CLIENTID` and `CHE_OAUTH_GITHUB_CLIENTSECRET` properties in `che.env` with `Client ID` and `Client Secret` taken from 
 newly created [OAuth application](https://github.com/settings/developers).
@@ -47,6 +47,20 @@ Follow the guide: [https://github.com/eclipse/che](https://github.com/eclipse/ch
 
 Simply launch `./selenium-tests.sh`
 
+### How to run tests on OpenShift
+#### Che in container case
+##### 1. Set workspace runtime infrastructure implementation
+export CHE_SELENIUM_INFRASTRUCTURE=openshift
+##### 2. Run tests in the default way
+Simply launch `./selenium-tests.sh`
+#### Che inside of OpenShift case
+##### 1. Set workspace runtime infrastructure implementation
+export CHE_SELENIUM_INFRASTRUCTURE=openshift
+##### 2. Run tests and specify host and port of Che deployed to OpenShift
+Launch `./selenium-tests.sh --host=<Che host on openshift> --port=80`
+
+Example: `./selenium-tests.sh --host=che-spi.192.168.99.100.nip.io --port=80`
+
 Run tests configuration properties
 --------------------------------------
 ```
@@ -56,6 +70,7 @@ Options:
     --http                              Use 'http' protocol to connect to product
     --https                             Use 'https' protocol to connect to product
     --host=<PRODUCT_HOST>               Set host where product is deployed
+    --port=<PRODUCT_PORT>               Set port of the product, default is 8080
     --multiuser                         Run tests of Multi User Che
 
 Modes (defines environment to run tests):

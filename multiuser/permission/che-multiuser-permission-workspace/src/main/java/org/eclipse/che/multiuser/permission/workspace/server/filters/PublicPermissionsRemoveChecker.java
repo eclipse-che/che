@@ -23,7 +23,6 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.multiuser.api.permission.server.PermissionsManager;
 import org.eclipse.che.multiuser.api.permission.server.filter.check.DefaultRemovePermissionsChecker;
 import org.eclipse.che.multiuser.api.permission.server.filter.check.RemovePermissionsChecker;
-import org.eclipse.che.multiuser.permission.machine.recipe.RecipeDomain;
 import org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain;
 
 /**
@@ -60,7 +59,7 @@ public class PublicPermissionsRemoveChecker implements RemovePermissionsChecker 
     }
 
     // perform default check if no search action found or its not admin user
-    if (!actions.contains(StackDomain.SEARCH) && !actions.contains(RecipeDomain.SEARCH)) {
+    if (!actions.contains(StackDomain.SEARCH)) {
       defaultChecker.check(user, domain, instance);
     }
   }

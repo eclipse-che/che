@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.ext.git.client;
 
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_LEFT_STATUS_PANEL;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_PROFILE;
 import static org.eclipse.che.ide.api.constraints.Anchor.BEFORE;
@@ -44,6 +45,9 @@ import org.eclipse.che.ide.ext.git.client.action.ShowBranchesAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowMergeAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowRemoteAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowStatusAction;
+import org.eclipse.che.ide.ext.git.client.action.StatusBarBranchPointer;
+import org.eclipse.che.ide.ext.git.client.action.ToggleGitPanelAction;
+import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
  * Extension add Git support to the IDE Application.
@@ -66,6 +70,8 @@ public class GitExtension {
 
   public static final String NEXT_DIFF_ACTION_ID = "nextDiff";
   public static final String PREV_DIFF_ACTION_ID = "prevDiff";
+
+  public static final String GIT_PANEL_ACTION_ID = "gitPanel";
 
   @Inject
   public GitExtension(
@@ -94,9 +100,14 @@ public class GitExtension {
       CompareWithRevisionAction compareWithRevisionAction,
       NextDiffAction nextDiffAction,
       PreviousDiffAction previousDiffAction,
-      KeyBindingAgent keyBinding) {
+      KeyBindingAgent keyBinding,
+      ToggleGitPanelAction gitPanelAction,
+      GitNotificationsSubscriber gitNotificationsSubscriber,
+      StatusBarBranchPointer statusBarBranchPointer) {
+    gitNotificationsSubscriber.subscribe();
 
     resources.gitCSS().ensureInjected();
+    resources.gitPanelCss().ensureInjected();
 
     DefaultActionGroup mainMenu = (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_MENU);
 
@@ -147,7 +158,9 @@ public class GitExtension {
     commandGroup.add(showMergeAction);
     DefaultActionGroup remoteGroup =
         new DefaultActionGroup(constant.remotesControlTitle(), true, actionManager);
-    remoteGroup.getTemplatePresentation().setSVGResource(resources.remote());
+    remoteGroup
+        .getTemplatePresentation()
+        .setImageElement(new SVGImage(resources.remote()).getElement());
     actionManager.registerAction("gitRemoteGroup", remoteGroup);
     commandGroup.add(remoteGroup);
     actionManager.registerAction("gitResetFiles", resetFilesAction);
@@ -197,6 +210,8 @@ public class GitExtension {
     actionManager.registerAction(NEXT_DIFF_ACTION_ID, nextDiffAction);
     actionManager.registerAction(PREV_DIFF_ACTION_ID, previousDiffAction);
 
+    actionManager.registerAction(GIT_PANEL_ACTION_ID, gitPanelAction);
+
     keyBinding
         .getGlobal()
         .addKey(new KeyBuilder().action().alt().charCode('d').build(), GIT_COMPARE_WITH_LATEST);
@@ -219,5 +234,13 @@ public class GitExtension {
     keyBinding
         .getGlobal()
         .addKey(new KeyBuilder().alt().charCode(',').build(), PREV_DIFF_ACTION_ID);
+
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().alt().charCode('g').build(), GIT_PANEL_ACTION_ID);
+
+    DefaultActionGroup rightStatusPanelGroup =
+        (DefaultActionGroup) actionManager.getAction(GROUP_LEFT_STATUS_PANEL);
+    rightStatusPanelGroup.add(statusBarBranchPointer);
   }
 }

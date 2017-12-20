@@ -12,7 +12,6 @@ package org.eclipse.che.multiuser.keycloak.server.deploy;
 
 import com.google.inject.servlet.ServletModule;
 import javax.inject.Singleton;
-import org.eclipse.che.commons.logback.filter.IdentityIdLoggerFilter;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakAuthenticationFilter;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakEnvironmentInitalizationFilter;
 
@@ -21,13 +20,11 @@ public class KeycloakServletModule extends ServletModule {
   protected void configureServlets() {
     bind(KeycloakAuthenticationFilter.class).in(Singleton.class);
 
-    // Not contains /docs/ (for swagger) and not ends with '/api/oauth/callback/' or
-    // '/keycloak/settings/'
-    filterRegex("^(?!.*(/docs/))(?!.*(/keycloak/settings/?|/api/oauth/callback/?)$).*")
+    // Not contains /docs/ (for swagger) and not ends with '/oauth/callback/' or
+    // '/keycloak/settings/' or '/system/state'
+    filterRegex("^(?!.*(/docs/))(?!.*(/keycloak/settings/?|/oauth/callback/?|/system/state/?)$).*")
         .through(KeycloakAuthenticationFilter.class);
-    filterRegex("^(?!.*(/docs/))(?!.*(/keycloak/settings/?|/api/oauth/callback/?)$).*")
+    filterRegex("^(?!.*(/docs/))(?!.*(/keycloak/settings/?|/oauth/callback/?|/system/state/?)$).*")
         .through(KeycloakEnvironmentInitalizationFilter.class);
-    filterRegex("^(?!.*(/docs/))(?!.*(/keycloak/settings/?|/api/oauth/callback/?)$).*")
-        .through(IdentityIdLoggerFilter.class);
   }
 }

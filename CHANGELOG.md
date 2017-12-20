@@ -1,53 +1,5 @@
 # Change Log
 
-## [6.0.0-M3](https://github.com/eclipse/che/tree/6.0.0-M3) (2017-12-14)
-[Full Changelog](https://github.com/eclipse/che/compare/5.22.0...6.0.0-M3)
-
-**Merged pull requests:**
-
-- Selenium: apply changes for selenium tests from Che6 branch to master [\#7870](https://github.com/eclipse/che/pull/7870) ([SkorikSergey](https://github.com/SkorikSergey))
-- CHE-7407: Remove redundant file watcher initialization [\#7867](https://github.com/eclipse/che/pull/7867) ([vinokurig](https://github.com/vinokurig))
-
-## [5.22.0](https://github.com/eclipse/che/tree/5.22.0) (2017-12-13)
-[Full Changelog](https://github.com/eclipse/che/compare/5.21.1...5.22.0)
-
-**Merged pull requests:**
-
-- RELEASE: Set next development version [\#7848](https://github.com/eclipse/che/pull/7848) ([riuvshin](https://github.com/riuvshin))
-- Adapt webdriver.sh to Multiuser Che; add ability to set rerun attempts [\#7847](https://github.com/eclipse/che/pull/7847) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Revert "Selenium: apply changes for selenium tests from Che6 branch to master" [\#7843](https://github.com/eclipse/che/pull/7843) ([SkorikSergey](https://github.com/SkorikSergey))
-- Selenium: apply changes for selenium tests from Che6 branch to master [\#7830](https://github.com/eclipse/che/pull/7830) ([SkorikSergey](https://github.com/SkorikSergey))
-- Fix the OpenshiftClient connection leaks [\#7793](https://github.com/eclipse/che/pull/7793) ([davidfestal](https://github.com/davidfestal))
-- Introduce wsagent ping success threshold [\#7766](https://github.com/eclipse/che/pull/7766) ([l0rd](https://github.com/l0rd))
-- Give focus for widget when activate this one [\#7760](https://github.com/eclipse/che/pull/7760) ([RomanNikitenko](https://github.com/RomanNikitenko))
-- Rework selenium page objects for Dashboard [\#7757](https://github.com/eclipse/che/pull/7757) ([SkorikSergey](https://github.com/SkorikSergey))
-- Remove separation of selenium tests on stable/unstable/failed [\#7749](https://github.com/eclipse/che/pull/7749) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Move clean up to the end of selenium test execution [\#7731](https://github.com/eclipse/che/pull/7731) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Set screen size in the selenium chrome node to 1920x1080 [\#7717](https://github.com/eclipse/che/pull/7717) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Test commands starting from the Processes area [\#7690](https://github.com/eclipse/che/pull/7690) ([SkorikSergey](https://github.com/SkorikSergey))
-- Fixed location of centos blank stack which was previously invalid [\#7666](https://github.com/eclipse/che/pull/7666) ([JPinkney](https://github.com/JPinkney))
-- Add ability to wait until selenium web element animation is ended [\#7659](https://github.com/eclipse/che/pull/7659) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Fix for part of redhat-developer/rh-che\#431 [\#7639](https://github.com/eclipse/che/pull/7639) ([JPinkney](https://github.com/JPinkney))
-- Selenium: Add changes to the 'RenamePackageTest' [\#7628](https://github.com/eclipse/che/pull/7628) ([artaleks9](https://github.com/artaleks9))
-- CHE-7407: Rework Git file change event detection to be depend on open… [\#7613](https://github.com/eclipse/che/pull/7613) ([vinokurig](https://github.com/vinokurig))
-- Fix small UI bugs [\#7608](https://github.com/eclipse/che/pull/7608) ([olexii4](https://github.com/olexii4))
-- RELEASE: Update CHANGELOG [\#7570](https://github.com/eclipse/che/pull/7570) ([riuvshin](https://github.com/riuvshin))
-- Change testing of the Find Text feature presentation [\#7568](https://github.com/eclipse/che/pull/7568) ([SkorikSergey](https://github.com/SkorikSergey))
-- Port from che6 Added missing lib to be able to configure LogstashEncoder on wsagent [\#7566](https://github.com/eclipse/che/pull/7566) ([skabashnyuk](https://github.com/skabashnyuk))
-- Add machine token for 'Upload SSH key' request [\#7540](https://github.com/eclipse/che/pull/7540) ([RomanNikitenko](https://github.com/RomanNikitenko))
-- RELEASE: Set next development version [\#7503](https://github.com/eclipse/che/pull/7503) ([riuvshin](https://github.com/riuvshin))
-- Add the ability to configure logback \(MDC\) to show `identity\_id` and `X-Request-ID` in logs files when available. [\#7461](https://github.com/eclipse/che/pull/7461) ([sunix](https://github.com/sunix))
-- Prevent NPE after applying the refactoring session [\#7458](https://github.com/eclipse/che/pull/7458) ([vzhukovskii](https://github.com/vzhukovskii))
-- Include Organization tests into acceptance tests execution on the Multiuser Che [\#7447](https://github.com/eclipse/che/pull/7447) ([dmytro-ndp](https://github.com/dmytro-ndp))
-- Do not index files from File Index excludes [\#7096](https://github.com/eclipse/che/pull/7096) ([RomanNikitenko](https://github.com/RomanNikitenko))
-
-## [5.21.1](https://github.com/eclipse/che/tree/5.21.1) (2017-12-07)
-[Full Changelog](https://github.com/eclipse/che/compare/6.0.0-M2...5.21.1)
-
-## [6.0.0-M2](https://github.com/eclipse/che/tree/6.0.0-M2) (2017-11-23)
-[Full Changelog](https://github.com/eclipse/che/compare/5.21.0...6.0.0-M2)
-
-
 ## [6.0.0-M2](https://github.com/eclipse/che/tree/6.0.0-M2) (2017-11-23)
 [Full Changelog](https://github.com/eclipse/che/compare/5.21.0...6.0.0-M2)
 

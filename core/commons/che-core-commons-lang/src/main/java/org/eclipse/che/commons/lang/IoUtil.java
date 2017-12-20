@@ -21,24 +21,31 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
+import java.nio.file.ProviderNotFoundException;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 import javax.ws.rs.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,6 +139,34 @@ public class IoUtil {
       throw new IOException(String.format("Not found resource: %s", resource));
     }
     return is;
+  }
+
+  /**
+   * Lists all children resources.
+   *
+   * @param parent the root path represented in {@link URI} format
+   * @param consumer consumer for children resources
+   * @throws java.io.IOException if any i/o error occur
+   * @throws ProviderNotFoundException if a provider supporting the URI scheme is not installed
+   */
+  public static void listResources(URI parent, Consumer<Path> consumer) throws IOException {
+    FileSystem fileSystem = null;
+    try {
+      if (!"file".equals(parent.getScheme())) {
+        try {
+          fileSystem = FileSystems.newFileSystem(parent, Collections.emptyMap());
+        } catch (FileSystemAlreadyExistsException ignore) {
+        }
+      }
+
+      Path root = Paths.get(parent);
+      Files.list(root).forEach(consumer);
+    } finally {
+      // close FS only if only it has been initialized here
+      if (fileSystem != null) {
+        fileSystem.close();
+      }
+    }
   }
 
   /** Remove directory and all its sub-resources with specified path */

@@ -11,25 +11,23 @@
 package org.eclipse.che.plugin.java.plain.server.generator;
 
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_LIBRARY_FOLDER_VALUE;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_OUTPUT_FOLDER_VALUE;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_SOURCE_FOLDER_VALUE;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.type.AttributeValue;
-import org.eclipse.che.api.vfs.Path;
-import org.eclipse.che.api.vfs.VirtualFileSystem;
-import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.plugin.java.plain.server.projecttype.ClasspathBuilder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -42,26 +40,23 @@ import org.eclipse.jdt.core.JavaCore;
  * @author Valeriy Svydenko
  */
 public class PlainJavaProjectGenerator implements CreateProjectHandler {
+
   private static final String FILE_NAME = "Main.java";
 
-  @Inject private ClasspathBuilder classpathBuilder;
-
-  @Inject private VirtualFileSystemProvider virtualFileSystemProvider;
+  private final ClasspathBuilder classpathBuilder;
+  private final FsManager fsManager;
 
   @Inject
-  public PlainJavaProjectGenerator() {}
-
-  @VisibleForTesting
-  protected PlainJavaProjectGenerator(
-      VirtualFileSystemProvider virtualFileSystemProvider, ClasspathBuilder classpathBuilder) {
-    this.virtualFileSystemProvider = virtualFileSystemProvider;
+  protected PlainJavaProjectGenerator(ClasspathBuilder classpathBuilder, FsManager fsManager) {
     this.classpathBuilder = classpathBuilder;
+    this.fsManager = fsManager;
   }
 
   @Override
   public void onCreateProject(
-      Path projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
-      throws ForbiddenException, ConflictException, ServerException {
+      String projectWsPath, Map<String, AttributeValue> attributes, Map<String, String> options)
+      throws ForbiddenException, ConflictException, ServerException, NotFoundException {
+
     List<String> sourceFolders;
     if (attributes.containsKey(SOURCE_FOLDER) && !attributes.get(SOURCE_FOLDER).isEmpty()) {
       sourceFolders = attributes.get(SOURCE_FOLDER).getList();
@@ -69,16 +64,20 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
       sourceFolders = singletonList(DEFAULT_SOURCE_FOLDER_VALUE);
     }
 
-    VirtualFileSystem vfs = virtualFileSystemProvider.getVirtualFileSystem();
-    FolderEntry baseFolder = new FolderEntry(vfs.getRoot().createFolder(projectPath.toString()));
-    baseFolder.createFolder(DEFAULT_OUTPUT_FOLDER_VALUE);
-    FolderEntry sourceFolder = baseFolder.createFolder(sourceFolders.get(0));
+    fsManager.createDir(projectWsPath);
 
-    sourceFolder.createFile(
-        FILE_NAME, getClass().getClassLoader().getResourceAsStream("files/main_class_content"));
+    String outputDirWsPath = resolve(projectWsPath, DEFAULT_OUTPUT_FOLDER_VALUE);
+    fsManager.createDir(outputDirWsPath);
 
-    IProject project =
-        ResourcesPlugin.getWorkspace().getRoot().getProject(baseFolder.getPath().toString());
+    String sourceDirWsPath = resolve(projectWsPath, sourceFolders.get(0));
+    fsManager.createDir(sourceDirWsPath);
+
+    String mainJavaWsPath = resolve(sourceDirWsPath, FILE_NAME);
+    fsManager.createFile(
+        mainJavaWsPath,
+        getClass().getClassLoader().getResourceAsStream("files/main_class_content"));
+
+    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectWsPath);
     IJavaProject javaProject = JavaCore.create(project);
 
     classpathBuilder.generateClasspath(

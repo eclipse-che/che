@@ -33,6 +33,12 @@ type EventConsumer interface {
 	Accept(event Event)
 }
 
+// EventConsumerFunc is a function which is also consumer,
+// allows to use anonymous functions as process event consumers.
+type EventConsumerFunc func(event Event)
+
+func (f EventConsumerFunc) Accept(event Event) { f(event) }
+
 // StartedEvent published once when process is started.
 type StartedEvent struct {
 	Time        time.Time `json:"time"`

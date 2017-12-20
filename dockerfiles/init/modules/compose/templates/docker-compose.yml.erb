@@ -12,11 +12,9 @@ services:
   # CHE
   ########################
   che:
-<% if scope.lookupvar('che::che_multiuser') == 'true' -%>
-    image: <%= ENV["IMAGE_CHE_MULTIUSER"] %>
-<% else -%>
     image: <%= ENV["IMAGE_CHE"] %>
-<% end -%>
+    mem_limit: <%= scope.lookupvar('che::che_master_container_ram') %>
+    memswap_limit: 0
     env_file:
 <% if @compose_file_for_containers == true -%>
       - '<%= ENV["CHE_CONTAINER_ROOT"] %>/instance/config/che/che.env'

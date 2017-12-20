@@ -30,6 +30,9 @@ public interface BreakpointResources extends ClientBundle {
     /** Returns the CSS class name for condition breakpoint mark */
     String condition();
 
+    /** Returns the CSS class name for disabled breakpoint mark */
+    String disabled();
+
     String breakpoint();
   }
 }

@@ -369,7 +369,7 @@ final class PreviewViewImpl extends Window implements PreviewView {
    * </code> if no entry matches.
    *
    * @param severity the severity to search for. Must be one of <code>FATAL
-   *         </code>, <code>ERROR</code>, <code>WARNING</code> or <code>INFO</code>
+   *         </code>, <code>FAILED</code>, <code>WARNING</code> or <code>INFO</code>
    * @param entries list of the refactoring status entries
    * @return the entry that matches the search criteria
    */

@@ -13,7 +13,7 @@ package org.eclipse.che.api.core.model.workspace;
 /**
  * Defines the contract between workspace and its active environment.
  *
- * <p>Workspace is rather part of the {@link Workspace} than {@link WorkspaceRuntime} or {@link
+ * <p>Workspace is rather part of the {@link Workspace} than {@link Runtime} or {@link
  * WorkspaceConfig}, as it shows the state of <b>certain</b> user's workspace and exists
  * <b>earlier</b> than runtime workspace instance e.g. UsersWorkspace may be considered as
  * 'STARTING' before it becomes runtime('RUNNING').
@@ -47,18 +47,6 @@ public enum WorkspaceStatus {
    * </pre>
    */
   RUNNING,
-
-  /**
-   * Workspace is in SNAPSHOTTING status if and only if the workspace is currently creating
-   * snapshots of it's machines.
-   *
-   * <p>Workspace is in SNAPSHOTTING status after it was {@link #RUNNING}. The status map:
-   *
-   * <pre>
-   *     RUNNING -> <b>SNAPSHOTTING</b> -> RUNNING (normal behaviour/error while snapshotting)
-   * </pre>
-   */
-  SNAPSHOTTING,
 
   /**
    * Workspace considered as stopping if and only if its active environment is shutting down.

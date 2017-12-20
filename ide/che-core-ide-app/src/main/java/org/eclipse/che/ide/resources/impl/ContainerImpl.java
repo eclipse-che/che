@@ -16,7 +16,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;

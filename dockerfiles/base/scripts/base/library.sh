@@ -26,7 +26,7 @@ convert_posix_to_windows() {
 }
 
 get_boot_url() {
-  echo "$CHE_HOST:$CHE_PORT/api/"
+  echo "$CHE_HOST:$CHE_PORT/api/system/state"
 }
 
 get_display_url() {
@@ -66,7 +66,7 @@ server_is_booted() {
   PING_URL=$(get_boot_url)
   HTTP_STATUS_CODE=$(curl -I -k ${PING_URL} -s -o /dev/null --write-out '%{http_code}')
   log "${HTTP_STATUS_CODE}"
-  if [[ "${HTTP_STATUS_CODE}" = "200" ]] || [[ "${HTTP_STATUS_CODE}" = "302" ]] || [[ "${HTTP_STATUS_CODE}" = "403" ]]; then
+  if [[ "${HTTP_STATUS_CODE}" = "200" ]] || [[ "${HTTP_STATUS_CODE}" = "302" ]]; then
     return 0
   else
     return 1

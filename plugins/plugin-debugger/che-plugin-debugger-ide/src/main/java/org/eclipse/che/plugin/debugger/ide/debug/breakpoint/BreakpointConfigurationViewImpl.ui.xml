@@ -16,20 +16,58 @@
     <ui:with field='locale' type='org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant'/>
     <ui:with field='coreRes' type='org.eclipse.che.ide.Resources'/>
     <ui:style>
-        .location {
-            font-weight: bold;
+        .condition {
+            margin-left: 5px;
+            width: 310px;
+        }
+
+        .hitCount {
+            margin-left: 6px;
+            width: 70px;
+        }
+
+        .suspendLabel {
+            position: absolute;
+            display: inline-block;
+        }
+
+        .suspendRadio {
+            margin-right: 5px;
+        }
+
+        .suspendRadioFirst {
+            margin-left: 55px;
         }
     </ui:style>
-    <g:DockLayoutPanel unit="PX" width="400PX" height="150PX" debugId="breakpoint-configuration-panel">
-        <g:north size="20">
+    <g:DockLayoutPanel unit="PX" width="400PX" height="105PX" debugId="breakpoint-configuration-panel">
+        <g:north size="25">
             <g:FlowPanel>
-                <g:Label ui:field="breakpointLocation" width="100%" debugId="breakpoint-location-label" addStyleNames="{style.location}"/>
+                <g:CheckBox ui:field="enabled" text="{locale.viewBreakpointConfigurationEnabled}" debugId="breakpoint-enabled"/>
+            </g:FlowPanel>
+        </g:north>
+        <g:north size="25">
+            <g:FlowPanel>
+                <g:Label text="{locale.viewBreakpointConfigurationSuspend}" addStyleNames="{style.suspendLabel}"/>
+                <g:RadioButton name="suspend" ui:field="breakpointSuspendNone" text="{locale.viewBreakpointConfigurationSuspendNone}"
+                               debugId="breakpoint-suspend-none" addStyleNames="{style.suspendRadio} {style.suspendRadioFirst}"/>
+                <g:RadioButton name="suspend" ui:field="breakpointSuspendThread" text="{locale.viewBreakpointConfigurationSuspendThread}"
+                               debugId="breakpoint-suspend-thread" addStyleNames="{style.suspendRadio}"/>
+                <g:RadioButton name="suspend" ui:field="breakpointSuspendAll" text="{locale.viewBreakpointConfigurationSuspendAll}"
+                               debugId="breakpoint-suspend-all" addStyleNames="{style.suspendRadio}"/>
+            </g:FlowPanel>
+        </g:north>
+        <g:north size="30">
+            <g:FlowPanel>
+                <g:CheckBox ui:field="breakpointConditionEnabled" text="{locale.viewBreakpointConfigurationCondition}"
+                            debugId="breakpoint-condition-enabled"/>
+                <g:TextBox ui:field="breakpointCondition" debugId="breakpoint-condition-text" addStyleNames="{style.condition}"/>
             </g:FlowPanel>
         </g:north>
         <g:center>
             <g:FlowPanel>
-                <g:Label text="{locale.viewBreakpointConfigurationCondition}"/>
-                <g:TextArea ui:field="breakpointCondition" width="100%" height="100%" debugId="breakpoint-condition-text"/>
+                <g:CheckBox ui:field="hitCountEnabled" text="{locale.viewBreakpointConfigurationHitCount}"
+                            debugId="breakpoint-hitcount-enabled"/>
+                <g:TextBox ui:field="hitCount" debugId="breakpoint-hitcount" addStyleNames="{style.hitCount}"/>
             </g:FlowPanel>
         </g:center>
     </g:DockLayoutPanel>

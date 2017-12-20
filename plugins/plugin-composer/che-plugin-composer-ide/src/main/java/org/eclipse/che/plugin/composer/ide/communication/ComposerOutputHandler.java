@@ -11,7 +11,6 @@ package org.eclipse.che.plugin.composer.ide.communication;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.console.CommandConsoleFactory;
 import org.eclipse.che.ide.console.DefaultOutputConsole;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
@@ -27,7 +26,6 @@ import org.eclipse.che.plugin.composer.shared.dto.ComposerOutput;
 public class ComposerOutputHandler {
 
   private final ProcessesPanelPresenter processesPanelPresenter;
-  private final AppContext appContext;
 
   private DefaultOutputConsole outputConsole;
 
@@ -35,10 +33,8 @@ public class ComposerOutputHandler {
   public ComposerOutputHandler(
       ComposerJsonRpcHandler composerJsonRpcHandler,
       ProcessesPanelPresenter processesPanelPresenter,
-      CommandConsoleFactory commandConsoleFactory,
-      AppContext appContext) {
+      CommandConsoleFactory commandConsoleFactory) {
     this.processesPanelPresenter = processesPanelPresenter;
-    this.appContext = appContext;
 
     composerJsonRpcHandler.addComposerOutputHandler(this::onComposerOutput);
 
@@ -49,7 +45,7 @@ public class ComposerOutputHandler {
     String message = output.getOutput();
     switch (output.getState()) {
       case START:
-        processesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), outputConsole);
+        processesPanelPresenter.addCommandOutput(outputConsole);
         outputConsole.clearOutputsButtonClicked();
         outputConsole.printText(message, "green");
         break;

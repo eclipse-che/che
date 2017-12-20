@@ -14,8 +14,8 @@ import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
+import org.eclipse.che.api.project.server.ProjectImporter;
 import org.eclipse.che.api.project.server.VcsStatusProvider;
-import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 
@@ -53,7 +53,6 @@ public class GitModule extends AbstractModule {
     bind(RemoteListWriter.class);
     bind(StatusPageWriter.class);
     bind(TagListWriter.class);
-    bind(GitWebSocketMessenger.class);
     bind(GitJsonRpcMessenger.class);
 
     Multibinder.newSetBinder(binder(), CredentialsProvider.class)

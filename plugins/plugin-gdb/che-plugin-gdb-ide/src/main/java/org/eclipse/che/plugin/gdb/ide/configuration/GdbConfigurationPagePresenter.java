@@ -19,13 +19,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.api.machine.MachineEntityImpl;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.macro.CurrentProjectPathMacro;
 
 /**
@@ -102,42 +100,35 @@ public class GdbConfigurationPagePresenter
     view.setPortEnableState(!devHost);
     view.setHostEnableState(!devHost);
 
-    List<Machine> machines = getMachines();
+    List<MachineImpl> machines = getMachines();
     if (!machines.isEmpty()) {
       setHosts(machines);
     }
   }
 
-  private void setHosts(List<Machine> machines) {
+  private void setHosts(List<MachineImpl> machines) {
     Map<String, String> hosts = new HashMap<>();
-    for (Machine machine : machines) {
-      String host = machine.getRuntime().getProperties().get("network.ipAddress");
+    for (MachineImpl machine : machines) {
+      // TODO this attribute is not provided anymore
+      String host = machine.getAttributes().get("network.ipAddress");
       if (host == null) {
         continue;
       }
 
-      String description = host + " (" + machine.getConfig().getName() + ")";
+      String description = host + " (" + machine.getName() + ")";
       hosts.put(host, description);
     }
 
     view.setHostsList(hosts);
   }
 
-  private List<Machine> getMachines() {
-    Workspace workspace = appContext.getWorkspace();
+  private List<MachineImpl> getMachines() {
+    WorkspaceImpl workspace = appContext.getWorkspace();
     if (workspace == null || workspace.getRuntime() == null) {
       return emptyList();
     }
 
-    List<? extends Machine> runtimeMachines = workspace.getRuntime().getMachines();
-    List<Machine> machines = new ArrayList<>(runtimeMachines.size());
-    for (Machine currentMachine : runtimeMachines) {
-      if (currentMachine instanceof MachineDto) {
-        Machine machine = new MachineEntityImpl(currentMachine);
-        machines.add(machine);
-      }
-    }
-    return machines;
+    return new ArrayList<>(workspace.getRuntime().getMachines().values());
   }
 
   @Override

@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointConfigurationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.plugin.nodejsdbg.server.NodeJsOutput;
@@ -76,7 +77,9 @@ public class NodeJsBreakpointsParser
           }
 
           Location location = new LocationImpl(targetType + ":" + target, lineNumber + 1);
-          Breakpoint breakpoint = new BreakpointImpl(location, isEnabled, condition);
+          Breakpoint breakpoint =
+              new BreakpointImpl(location, isEnabled, new BreakpointConfigurationImpl(condition));
+
           breakpoints.add(breakpoint);
         } catch (Exception e) {
           LOG.error("Failed to parse breakpoint: " + item.toString(), e);

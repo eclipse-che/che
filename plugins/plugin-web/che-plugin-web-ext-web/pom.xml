@@ -16,10 +16,10 @@
     <parent>
         <artifactId>che-plugin-web-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.23.0-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-web-ext-web</artifactId>
-    <packaging>jar</packaging>
+    <packaging>gwt-lib</packaging>
     <name>Che Plugin :: Web :: File Types</name>
     <properties>
         <findbugs.failonerror>false</findbugs.failonerror>
@@ -38,8 +38,17 @@
             <artifactId>che-core-ide-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-ide-ui</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-web-ext-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-web-ext-shared</artifactId>
+            <classifier>sources</classifier>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
@@ -73,20 +82,31 @@
         </dependency>
     </dependencies>
     <build>
-        <sourceDirectory>src/main/java</sourceDirectory>
-        <outputDirectory>target/classes</outputDirectory>
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-        </resources>
-        <testResources>
-            <testResource>
-                <directory>src/test/resources</directory>
-            </testResource>
-        </testResources>
+        <plugins>
+            <plugin>
+                <groupId>net.ltgt.gwt.maven</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <moduleName>org.eclipse.che.plugin.web.Web</moduleName>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <ignoredUnusedDeclaredDependencies>
+                                <!-- Ignore *-sources.jar analysis due to the fact that analyzer works at bytecode level
+                                     but *-sources.jar is required for including to the GWT source path. -->
+                                <dep>org.eclipse.che.plugin:che-plugin-web-ext-shared</dep>
+                            </ignoredUnusedDeclaredDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 </project>

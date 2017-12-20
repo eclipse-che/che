@@ -98,7 +98,7 @@ public class FileStructureCodeEditorTest {
 
     // check new elements in the 'file structure' form
     editor.setCursorToLine(19);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(NEW_CONTENT);
     editor.waitTextIntoEditor(EXPECTED_TEXT);
@@ -121,6 +121,6 @@ public class FileStructureCodeEditorTest {
         PROJECT_NAME + "/src" + "/main" + "/java" + "/com/codenvy/qa/" + fileName + ".java");
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src" + "/main" + "/java" + "/com/codenvy/qa/" + fileName + ".java");
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 }

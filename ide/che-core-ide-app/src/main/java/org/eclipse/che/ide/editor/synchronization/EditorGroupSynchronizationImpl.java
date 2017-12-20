@@ -32,10 +32,10 @@ import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import org.eclipse.che.ide.api.editor.document.DocumentStorage;
 import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.events.DocumentChangedHandler;
+import org.eclipse.che.ide.api.editor.events.FileContentUpdateEvent;
+import org.eclipse.che.ide.api.editor.events.FileContentUpdateHandler;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
-import org.eclipse.che.ide.api.event.FileContentUpdateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -99,7 +99,7 @@ public class EditorGroupSynchronizationImpl
   public void onEditorDirtyStateChanged(EditorPartPresenter changedEditor) {
     boolean hasEditorsToSync = synchronizedEditors.keySet().size() > 1;
     if (!hasEditorsToSync || groupLeaderEditor == null || groupLeaderEditor != changedEditor) {
-      // we sync 'dirty' state of editors when content of an ACTIVE editor has saved
+      // we sync 'dirty' state of editors when content of an ACTIVE editor is saved
       return;
     }
 

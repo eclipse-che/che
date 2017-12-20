@@ -12,29 +12,24 @@ package org.eclipse.che.multiuser.machine.authentication.ide;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.base.Strings.nullToEmpty;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.Response;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
-import javax.annotation.PostConstruct;
-import org.eclipse.che.api.promises.client.Function;
+import java.util.Optional;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.commons.exception.UnmarshallerException;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequest;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
-import org.eclipse.che.multiuser.machine.authentication.shared.dto.MachineTokenDto;
 
 /**
  * Looks at the request and substitutes an appropriate implementation.
@@ -42,79 +37,33 @@ import org.eclipse.che.multiuser.machine.authentication.shared.dto.MachineTokenD
  * @author Anton Korneta
  */
 @Singleton
-public class MachineAsyncRequestFactory extends AsyncRequestFactory
-    implements WorkspaceStoppedEvent.Handler, WorkspaceStartedEvent.Handler {
+public class MachineAsyncRequestFactory extends AsyncRequestFactory {
   private static final String CSRF_TOKEN_HEADER_NAME = "X-CSRF-Token";
 
-  private final Provider<MachineTokenServiceClient> machineTokenServiceProvider;
-  private final AppContext appContext;
-
-  private String machineToken;
-  private String wsAgentBaseUrl;
+  private AppContext appContext;
+  private WsAgentServerUtil wsAgentServerUtil;
   private String csrfToken;
 
   @Inject
   public MachineAsyncRequestFactory(
-      DtoFactory dtoFactory,
-      Provider<MachineTokenServiceClient> machineTokenServiceProvider,
-      AppContext appContext,
-      EventBus eventBus) {
+      DtoFactory dtoFactory, AppContext appContext, WsAgentServerUtil wsAgentServerUtil) {
     super(dtoFactory);
-    this.machineTokenServiceProvider = machineTokenServiceProvider;
     this.appContext = appContext;
-    eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
-    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
-  }
-
-  @PostConstruct
-  private void init() {
-    requestCsrfToken();
+    this.wsAgentServerUtil = wsAgentServerUtil;
   }
 
   @Override
   protected AsyncRequest newAsyncRequest(RequestBuilder.Method method, String url, boolean async) {
     if (isWsAgentRequest(url)) {
-      return new MachineAsyncRequest(method, url, async, getMachineToken());
+      final String machineToken = appContext.getWorkspace().getRuntime().getMachineToken();
+      if (!isNullOrEmpty(machineToken)) {
+        return new MachineAsyncRequest(method, url, false, machineToken);
+      }
     }
     if (isModifyingMethod(method)) {
       return new CsrfPreventingAsyncModifyingRequest(method, url, async);
     }
     return super.newAsyncRequest(method, url, async);
-  }
-
-  private Promise<String> getMachineToken() {
-    if (!isNullOrEmpty(machineToken)) {
-      return Promises.resolve(machineToken);
-    } else {
-      return machineTokenServiceProvider
-          .get()
-          .getMachineToken()
-          .then(
-              (Function<MachineTokenDto, String>)
-                  tokenDto -> {
-                    machineToken = tokenDto.getMachineToken();
-                    return machineToken;
-                  });
-    }
-  }
-
-  @Override
-  public void onWorkspaceStarted(WorkspaceStartedEvent event) {
-    getMachineToken()
-        .then(
-            machineToken -> {
-              if (!isNullOrEmpty(machineToken)) {
-                appContext.getProperties().put("machineToken", machineToken);
-              }
-            });
-  }
-
-  // since the machine token lives with the workspace runtime,
-  // we need to invalidate it on stopping workspace.
-  @Override
-  public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-    machineToken = null;
-    wsAgentBaseUrl = null;
   }
 
   /**
@@ -124,26 +73,24 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
    * @return
    */
   protected boolean isWsAgentRequest(String url) {
-    if (appContext.getWorkspace() == null
-        || !RUNNING.equals(appContext.getWorkspace().getStatus())) {
+    WorkspaceImpl currentWorkspace = appContext.getWorkspace();
+    if (currentWorkspace == null || !isWsAgentStarted()) {
       return false; // ws-agent not started
     }
-    if (isNullOrEmpty(wsAgentBaseUrl)) {
-      final DevMachine devMachine = appContext.getDevMachine();
-      if (devMachine != null) {
-        wsAgentBaseUrl = devMachine.getWsAgentBaseUrl();
-      } else {
-        return false;
-      }
-    }
-    return url.contains(nullToEmpty(wsAgentBaseUrl));
+    return url.contains(nullToEmpty(appContext.getWsAgentServerApiEndpoint()));
+  }
+
+  private boolean isWsAgentStarted() {
+    Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
+
+    return devMachine.isPresent();
   }
 
   private Promise<String> requestCsrfToken() {
     if (csrfToken != null) {
       return Promises.resolve(csrfToken);
     }
-    return createGetRequest(appContext.getMasterEndpoint() + "/profile")
+    return createGetRequest(appContext.getMasterApiEndpoint() + "/profile")
         .header(CSRF_TOKEN_HEADER_NAME, "Fetch")
         .send(
             new Unmarshallable<String>() {
@@ -160,6 +107,12 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
                 return csrfToken;
               }
             });
+  }
+
+  private boolean isModifyingMethod(RequestBuilder.Method method) {
+    return method == RequestBuilder.POST
+        || method == RequestBuilder.PUT
+        || method == RequestBuilder.DELETE;
   }
 
   private class CsrfPreventingAsyncModifyingRequest extends AsyncRequest {
@@ -182,11 +135,5 @@ public class MachineAsyncRequestFactory extends AsyncRequestFactory
                 super.send(callback);
               });
     }
-  }
-
-  private boolean isModifyingMethod(RequestBuilder.Method method) {
-    return method == RequestBuilder.POST
-        || method == RequestBuilder.PUT
-        || method == RequestBuilder.DELETE;
   }
 }

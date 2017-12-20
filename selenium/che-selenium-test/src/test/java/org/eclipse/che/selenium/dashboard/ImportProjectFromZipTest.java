@@ -86,11 +86,14 @@ public class ImportProjectFromZipTest {
     explorer.clickOnItemInContextMenu(ProjectExplorerContextMenuConstants.MAVEN);
     explorer.clickOnItemInContextMenu(ProjectExplorer.PROJECT_EXPLORER_CONTEXT_MENU_MAVEN.REIMPORT);
     loader.waitOnClosed();
+
     explorer.openItemByPath(PROJECT_NAME);
+
     explorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/my-lib");
     explorer.clickOnItemInContextMenu(ProjectExplorerContextMenuConstants.MAVEN);
     explorer.clickOnItemInContextMenu(ProjectExplorer.PROJECT_EXPLORER_CONTEXT_MENU_MAVEN.REIMPORT);
     loader.waitOnClosed();
+
     explorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/my-webapp");
     explorer.clickOnItemInContextMenu(ProjectExplorerContextMenuConstants.MAVEN);
     explorer.clickOnItemInContextMenu(ProjectExplorer.PROJECT_EXPLORER_CONTEXT_MENU_MAVEN.REIMPORT);*/

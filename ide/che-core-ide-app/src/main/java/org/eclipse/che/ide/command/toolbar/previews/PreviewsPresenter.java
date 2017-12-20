@@ -15,21 +15,20 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
-import org.eclipse.che.api.machine.shared.dto.execagent.GetProcessesResponseDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandManager;
-import org.eclipse.che.ide.api.machine.ExecAgentCommandManager;
-import org.eclipse.che.ide.api.machine.events.ProcessFinishedEvent;
-import org.eclipse.che.ide.api.machine.events.ProcessStartedEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
+import org.eclipse.che.ide.api.command.exec.ExecAgentCommandManager;
+import org.eclipse.che.ide.api.command.exec.ProcessFinishedEvent;
+import org.eclipse.che.ide.api.command.exec.ProcessStartedEvent;
+import org.eclipse.che.ide.api.command.exec.dto.GetProcessesResponseDto;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.mvp.Presenter;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;
 import org.eclipse.che.ide.command.toolbar.ToolbarMessages;
 import org.eclipse.che.ide.util.browser.BrowserUtils;
 
@@ -65,29 +64,17 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
 
     view.setDelegate(this);
 
-    eventBus.addHandler(
-        WsAgentStateEvent.TYPE,
-        new WsAgentStateHandler() {
-          @Override
-          public void onWsAgentStarted(WsAgentStateEvent event) {
-            updateView();
-          }
-
-          @Override
-          public void onWsAgentStopped(WsAgentStateEvent event) {
-            view.removeAllURLs();
-          }
-        });
-
     eventBus.addHandler(ProcessStartedEvent.TYPE, event -> updateView());
     eventBus.addHandler(ProcessFinishedEvent.TYPE, event -> updateView());
+    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, e -> updateView());
+    eventBus.addHandler(CommandsLoadedEvent.getType(), e -> updateView());
   }
 
   /** Updates view with the preview URLs of running processes. */
   private void updateView() {
     view.removeAllURLs();
 
-    final WorkspaceRuntime runtime = appContext.getActiveRuntime();
+    final RuntimeImpl runtime = appContext.getWorkspace().getRuntime();
 
     if (runtime == null) {
       return;
@@ -95,9 +82,9 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
 
     runtime
         .getMachines()
+        .keySet()
         .stream()
-        .map(Machine::getId)
-        .map(id -> execAgentClient.getProcesses(id, false))
+        .map(machineName -> execAgentClient.getProcesses(machineName, false))
         .forEach(
             promise ->
                 promise.onSuccess(

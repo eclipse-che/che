@@ -37,7 +37,6 @@ import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
 import org.eclipse.che.selenium.pageobject.debug.JavaDebugConfig;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -105,11 +104,6 @@ public class ChangeVariableWithEvaluatingTest {
     ide.open(ws);
   }
 
-  @AfterMethod
-  public void shutDownTomCatAndCleanWebApp() throws Exception {
-    debugPanel.stopDebuggerWithUiAndCleanUpTomcat(CLEAN_TOMCAT_COMMAND_NAME);
-  }
-
   @Test
   public void changeVariableTest() throws Exception {
     buildProjectAndOpenMainClass();
@@ -127,9 +121,10 @@ public class ChangeVariableWithEvaluatingTest {
         TestMenuCommandsConstants.Run.DEBUG,
         TestMenuCommandsConstants.Run.DEBUG + "/" + PROJECT_NAME_CHANGE_VARIABLE);
     String appUrl =
-        "http"
-            + "://"
-            + workspaceServiceClient.getServerAddressByPort(ws.getId(), 8080)
+        workspaceServiceClient
+                .getServerFromDevMachineBySymbolicName(ws.getId(), "tomcat8")
+                .getUrl()
+                .replace("tcp", "http")
             + "/spring/guess";
     String requestMess = "numGuess=11&submit=Ok";
     editor.waitActiveBreakpoint(34);
@@ -164,7 +159,7 @@ public class ChangeVariableWithEvaluatingTest {
     commandsPalette.startCommandByDoubleClick(BUILD_COMMAND_NAME);
     consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 
   private String getValueOfSecretNumFromVarWidget() {

@@ -29,7 +29,7 @@ public class HotKeysListAction extends AbstractPerspectiveAction {
   @Inject
   public HotKeysListAction(
       HotKeysDialogPresenter hotKeysDialogPresenter, CoreLocalizationConstant locale) {
-    super(null, locale.keyBindingsActionName(), locale.keyBindingsActionDescription(), null, null);
+    super(null, locale.keyBindingsActionName(), locale.keyBindingsActionDescription());
     this.hotKeysDialogPresenter = hotKeysDialogPresenter;
   }
 

@@ -108,7 +108,7 @@ public class JpaFactoryDao implements FactoryDao {
   public List<FactoryImpl> getByAttribute(
       int maxItems, int skipCount, List<Pair<String, String>> attributes) throws ServerException {
     try {
-      LOG.info(
+      LOG.debug(
           "FactoryDao#getByAttributes #maxItems: {} #skipCount: {}, #attributes: {}",
           maxItems,
           skipCount,

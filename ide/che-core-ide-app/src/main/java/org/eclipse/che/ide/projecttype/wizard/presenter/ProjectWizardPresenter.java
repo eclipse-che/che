@@ -20,24 +20,25 @@ import com.google.inject.Singleton;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.core.model.project.NewProjectConfig;
+import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.api.project.shared.dto.AttributeDto;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.NewProjectConfigImpl;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
-import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistry;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.api.wizard.WizardPage;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizard;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizardFactory;
+import org.eclipse.che.ide.projecttype.wizard.ProjectWizardRegistry;
 import org.eclipse.che.ide.projecttype.wizard.categoriespage.CategoriesPagePresenter;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Presenter for project wizard.
@@ -233,16 +234,16 @@ public class ProjectWizardPresenter
       return wizardsCache.get(projectType);
     }
 
-    final ProjectWizardRegistrar wizardRegistrar =
+    final Optional<ProjectWizardRegistrar> wizardRegistrar =
         wizardRegistry.getWizardRegistrar(projectType.getId());
-    if (wizardRegistrar == null) {
+    if (!wizardRegistrar.isPresent()) {
       // should never occur
       throw new IllegalStateException(
           "WizardRegistrar for the project type " + projectType.getId() + " isn't registered.");
     }
 
     List<Provider<? extends WizardPage<MutableProjectConfig>>> pageProviders =
-        wizardRegistrar.getWizardPages();
+        wizardRegistrar.get().getWizardPages();
     final ProjectWizard projectWizard = createDefaultWizard(configDto, wizardMode);
     for (Provider<? extends WizardPage<MutableProjectConfig>> provider : pageProviders) {
       projectWizard.addPage(provider.get(), 1, false);

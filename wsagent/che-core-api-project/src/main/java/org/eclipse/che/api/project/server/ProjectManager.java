@@ -10,775 +10,349 @@
  */
 package org.eclipse.che.api.project.server;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
-import static org.eclipse.che.api.core.ErrorCodes.NOT_UPDATED_PROJECT;
-import static org.eclipse.che.api.vfs.watcher.FileWatcherManager.EMPTY_CONSUMER;
-
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import java.io.IOException;
-import java.nio.file.PathMatcher;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiConsumer;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
-import org.eclipse.che.api.core.model.project.NewProjectConfig;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
-import org.eclipse.che.api.core.model.project.ProjectProblem;
-import org.eclipse.che.api.core.model.project.SourceStorage;
-import org.eclipse.che.api.core.model.project.type.ProjectType;
-import org.eclipse.che.api.core.util.LineConsumerFactory;
-import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
-import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
-import org.eclipse.che.api.project.server.importer.ProjectImporter;
-import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
-import org.eclipse.che.api.project.server.type.AttributeValue;
-import org.eclipse.che.api.project.server.type.BaseProjectType;
-import org.eclipse.che.api.project.server.type.ProjectTypeDef;
-import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
-import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
-import org.eclipse.che.api.vfs.Path;
-import org.eclipse.che.api.vfs.VirtualFile;
-import org.eclipse.che.api.vfs.VirtualFileSystem;
-import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
-import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationListener;
-import org.eclipse.che.api.vfs.search.Searcher;
-import org.eclipse.che.api.vfs.search.SearcherProvider;
-import org.eclipse.che.api.vfs.watcher.FileWatcherManager;
-import org.eclipse.che.api.workspace.shared.ProjectProblemImpl;
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.che.api.project.shared.NewProjectConfig;
 
-/**
- * Facade for all project related operations.
- *
- * @author gazarenkov
- */
-@Singleton
-public class ProjectManager {
-  private static final Logger LOG = LoggerFactory.getLogger(ProjectManager.class);
-
-  private final VirtualFileSystem vfs;
-  private final ProjectTypeRegistry projectTypeRegistry;
-  private final WorkspaceSyncCommunication workspaceSyncCommunication;
-  private final ProjectRegistry projectRegistry;
-  private final ProjectHandlerRegistry handlers;
-  private final ProjectImporterRegistry importers;
-  private final FileWatcherNotificationHandler fileWatchNotifier;
-  private final ExecutorService executor;
-  private final WorkspaceProjectsSyncer workspaceProjectsHolder;
-  private final FileWatcherManager fileWatcherManager;
-
-  private int rootProjcetOperationSetId;
-
-  @Inject
-  public ProjectManager(
-      VirtualFileSystemProvider vfsProvider,
-      ProjectTypeRegistry projectTypeRegistry,
-      WorkspaceSyncCommunication workspaceSyncCommunication,
-      ProjectRegistry projectRegistry,
-      ProjectHandlerRegistry handlers,
-      ProjectImporterRegistry importers,
-      FileWatcherNotificationHandler fileWatcherNotificationHandler,
-      WorkspaceProjectsSyncer workspaceProjectsHolder,
-      FileWatcherManager fileWatcherManager)
-      throws ServerException {
-    this.vfs = vfsProvider.getVirtualFileSystem();
-    this.projectTypeRegistry = projectTypeRegistry;
-    this.workspaceSyncCommunication = workspaceSyncCommunication;
-    this.projectRegistry = projectRegistry;
-    this.handlers = handlers;
-    this.importers = importers;
-    this.fileWatchNotifier = fileWatcherNotificationHandler;
-    this.workspaceProjectsHolder = workspaceProjectsHolder;
-    this.fileWatcherManager = fileWatcherManager;
-
-    executor =
-        Executors.newFixedThreadPool(
-            1 + Runtime.getRuntime().availableProcessors(),
-            new ThreadFactoryBuilder()
-                .setNameFormat("ProjectService-IndexingThread-")
-                .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
-                .setDaemon(true)
-                .build());
-  }
-
-  @PostConstruct
-  private void postConstruct() {
-    String rootPath = vfs.getRoot().getPath().toString();
-    rootProjcetOperationSetId =
-        fileWatcherManager.registerByPath(
-            rootPath,
-            EMPTY_CONSUMER,
-            EMPTY_CONSUMER,
-            projectPath -> {
-              try {
-                projectRegistry.removeProjects(projectPath);
-                workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
-              } catch (ServerException e) {
-                LOG.error("Could not remove or synchronize  project: {}", projectPath);
-              }
-            });
-  }
-
-  @PreDestroy
-  private void preDestroy() {
-    fileWatcherManager.unRegisterByPath(rootProjcetOperationSetId);
-  }
-
-  void initWatcher() throws IOException {
-    FileWatcherNotificationListener defaultListener =
-        new FileWatcherNotificationListener(
-            file ->
-                !(file.getPath().toString().contains(".che")
-                    || file.getPath().toString().contains(".#"))) {
-          @Override
-          public void onFileWatcherEvent(VirtualFile virtualFile, FileWatcherEventType eventType) {
-            LOG.debug(
-                "FS event detected: "
-                    + eventType
-                    + " "
-                    + virtualFile.getPath().toString()
-                    + " "
-                    + virtualFile.isFile());
-          }
-        };
-    fileWatchNotifier.addNotificationListener(defaultListener);
-  }
-
-  @PreDestroy
-  void stop() {
-    executor.shutdownNow();
-  }
-
-  public FolderEntry getProjectsRoot() throws ServerException {
-    return new FolderEntry(vfs.getRoot(), projectRegistry);
-  }
-
-  public Searcher getSearcher() throws NotFoundException, ServerException {
-    final SearcherProvider provider = vfs.getSearcherProvider();
-    if (provider == null) {
-      throw new NotFoundException("SearcherProvider is not defined in VFS");
-    }
-
-    return provider.getSearcher(vfs);
-  }
-
-  public void addWatchListener(FileWatcherNotificationListener listener) {
-    fileWatchNotifier.addNotificationListener(listener);
-  }
-
-  public void removeWatchListener(FileWatcherNotificationListener listener) {
-    fileWatchNotifier.removeNotificationListener(listener);
-  }
-
-  public void addWatchExcludeMatcher(PathMatcher matcher) {}
-
-  public void removeWatchExcludeMatcher(PathMatcher matcher) {}
+/** Facade for project related operations */
+public interface ProjectManager {
 
   /**
-   * @return all the projects
-   * @throws ServerException if projects are not initialized yet
+   * Show if project configuration is contained in the project config registry
+   *
+   * @param wsPath absolute workspace path of a project
+   * @return
    */
-  public List<RegisteredProject> getProjects() throws ServerException {
-    return projectRegistry.getProjects();
-  }
+  boolean isRegistered(String wsPath);
 
   /**
-   * @param projectPath
-   * @return project
-   * @throws ServerException if projects are not initialized yet
-   * @throws ServerException if project not found
+   * Get an optional containing either project (if it exist) or nothing (if it does not exist)
+   *
+   * @param wsPath absolute workspace path of a project
+   * @return
    */
-  public RegisteredProject getProject(String projectPath)
-      throws ServerException, NotFoundException {
-    final RegisteredProject project = projectRegistry.getProject(projectPath);
-    if (project == null) {
-      throw new NotFoundException(format("Project '%s' doesn't exist.", projectPath));
-    }
-
-    return project;
-  }
+  Optional<RegisteredProject> get(String wsPath);
 
   /**
-   * Create project: - take project config
+   * Get optional with closest project that contains specified file system item
+   *
+   * @param wsPath absolute workspace path of a file system item
+   * @return
+   */
+  Optional<RegisteredProject> getClosest(String wsPath);
+
+  /**
+   * Get either project (if it exist) or null (if it does not exist)
+   *
+   * @param wsPath absolute workspace path of a project
+   * @return
+   */
+  RegisteredProject getOrNull(String wsPath);
+
+  /**
+   * Get closest project that contains specified file system item or null
+   *
+   * @param wsPath absolute workspace path of a file system item
+   * @return
+   */
+  RegisteredProject getClosestOrNull(String wsPath);
+
+  /**
+   * Get all registered projects
+   *
+   * @return
+   */
+  Set<RegisteredProject> getAll();
+
+  /**
+   * Get all sub-projects of a project denoted by workspace path. If a project is not registered or
+   * has no sub-projects - returns empty list.
+   *
+   * @param wsPath absolute workspace path of a project
+   * @return
+   */
+  Set<RegisteredProject> getAll(String wsPath);
+
+  /**
+   * Create project with specified configuration and creation options
+   *
+   * @param projectConfig configuration of a project that is going to be created
+   * @param options options of a project creation process
+   * @return
+   * @throws ConflictException is thrown if project is already registered, or project type is not
+   *     defined
+   * @throws ForbiddenException is thrown if operation is forbidden
+   * @throws ServerException is thrown if an error happened during operation execution
+   * @throws NotFoundException is thrown if parent location does not exist
+   * @throws BadRequestException is thrown if project path is not defined
+   */
+  RegisteredProject create(ProjectConfig projectConfig, Map<String, String> options)
+      throws ConflictException, ForbiddenException, ServerException, NotFoundException,
+          BadRequestException;
+
+  /**
+   * Create all projects defined by specified configuration map
+   *
+   * @param projectConfigs map of project configurations and options
+   * @return
+   * @throws ConflictException is thrown if project is already registered, or project type is not
+   *     defined
+   * @throws ForbiddenException is thrown if an operation is forbidden
+   * @throws ServerException is thrown if an error happened during operation execution
+   * @throws NotFoundException is thrown if parent location does not exist
+   * @throws BadRequestException is thrown if project path is not defined
+   */
+  Set<RegisteredProject> createAll(Map<ProjectConfig, Map<String, String>> projectConfigs)
+      throws ConflictException, ForbiddenException, ServerException, NotFoundException,
+          BadRequestException;
+
+  /**
+   * Update a project with a new configuration
    *
    * @param projectConfig project configuration
-   * @param options options for generator
-   * @return new project
+   * @return
+   * @throws ForbiddenException is thrown if an operation is forbidden
+   * @throws ServerException is thrown if an error happened during operation execution
+   * @throws NotFoundException is thrown if a project directory does not exist
+   * @throws ConflictException is thrown if a project does not exist
+   * @throws BadRequestException is thrown if project path is not defined
+   */
+  RegisteredProject update(ProjectConfig projectConfig)
+      throws ForbiddenException, ServerException, NotFoundException, ConflictException,
+          BadRequestException;
+
+  /**
+   * Update all projects with new configurations
+   *
+   * @param projectConfigs project configuration set
+   * @return
+   * @throws ForbiddenException is thrown if an operation is forbidden
+   * @throws ServerException is thrown if an error happened during operation execution
+   * @throws NotFoundException is thrown if a project directory does not exist
+   * @throws ConflictException is thrown if a project does not exist
+   * @throws BadRequestException is thrown if project path is not defined
+   */
+  Set<RegisteredProject> updateAll(Set<ProjectConfig> projectConfigs)
+      throws ForbiddenException, ServerException, NotFoundException, ConflictException,
+          BadRequestException;
+
+  /**
+   * Delete the project denoted by the path
+   *
+   * @param wsPath absolute workspace path of a project
+   * @return
+   * @throws ServerException is thrown if an error happened during operation execution
+   * @throws ForbiddenException is thrown if an operation is forbidden
+   * @throws NotFoundException is thrown if a project directory does not exist
+   * @throws ConflictException is thrown if the item that the path denotes is not a project
+   */
+  Optional<RegisteredProject> delete(String wsPath)
+      throws ServerException, ForbiddenException, NotFoundException, ConflictException;
+
+  /**
+   * Delete all projects denoted by the paths
+   *
+   * @param wsPaths set of absolute workspace paths
+   * @return
+   * @throws ServerException is thrown if an error happened during operation execution
+   * @throws ForbiddenException is thrown if an operation is forbidden
+   * @throws NotFoundException is thrown if a project directory does not exist
+   * @throws ConflictException is thrown if the item that the path denotes is not a project
+   */
+  Set<RegisteredProject> deleteAll(Set<String> wsPaths)
+      throws ServerException, ForbiddenException, ConflictException, NotFoundException;
+
+  /**
+   * Delete all projects
+   *
+   * @return
+   * @throws ServerException is thrown if an error happened during operation execution
+   * @throws ForbiddenException is thrown if an operation is forbidden
+   * @throws ConflictException is thrown if the item that the path denotes is not a project
+   */
+  Set<RegisteredProject> deleteAll() throws ServerException, ForbiddenException, ConflictException;
+
+  /**
+   * Copy project to a new destination
+   *
+   * @param src absolute workspace path of project source
+   * @param dst absolute workspace path of project destination
+   * @param overwrite overwrite on copy marker
+   * @return
+   * @throws ServerException is thrown if an error happened during operation execution
+   * @throws NotFoundException is thrown if either project source directory does not exist or
+   *     destination parent directory does not exist
+   * @throws ConflictException is thrown if project at destination location already exist and
+   *     overwrite is disabled
+   * @throws ForbiddenException is thrown if an operation is forbidden
+   */
+  RegisteredProject copy(String src, String dst, boolean overwrite)
+      throws ServerException, NotFoundException, ConflictException, ForbiddenException;
+
+  /**
+   * Move project to a new destination
+   *
+   * @param src absolute workspace path of project source
+   * @param dst absolute workspace path of project destination
+   * @param overwrite overwrite on move marker
+   * @return
+   * @throws ServerException is thrown if an error happened during operation execution
+   * @throws NotFoundException is thrown if either project source directory does not exist or
+   *     destination parent directory does not exist
+   * @throws ConflictException is thrown if project at destination location already exist and
+   *     overwrite is disabled
+   * @throws ForbiddenException is thrown if an operation is forbidden
+   */
+  RegisteredProject move(String src, String dst, boolean overwrite)
+      throws ServerException, NotFoundException, ConflictException, ForbiddenException;
+
+  /**
+   * Set type to a project
+   *
+   * @param wsPath absolute workspace path of a project
+   * @param type project type
+   * @param asMixin type mix-in marker
+   * @return
    * @throws ConflictException
-   * @throws ForbiddenException
-   * @throws ServerException
    * @throws NotFoundException
+   * @throws ServerException
+   * @throws BadRequestException
+   * @throws ForbiddenException
    */
-  public RegisteredProject createProject(ProjectConfig projectConfig, Map<String, String> options)
-      throws ConflictException, ForbiddenException, ServerException, NotFoundException {
-    fileWatcherManager.suspend();
-    try {
-      // path and primary type is mandatory
-      if (projectConfig.getPath() == null) {
-        throw new ConflictException("Path for new project should be defined ");
-      }
-
-      if (projectConfig.getType() == null) {
-        throw new ConflictException("Project Type is not defined " + projectConfig.getPath());
-      }
-
-      final String path = ProjectRegistry.absolutizePath(projectConfig.getPath());
-      if (projectRegistry.getProject(path) != null) {
-        throw new ConflictException("Project config already exists for " + path);
-      }
-
-      return doCreateProject(projectConfig, options);
-    } finally {
-      fileWatcherManager.resume();
-    }
-  }
+  RegisteredProject setType(String wsPath, String type, boolean asMixin)
+      throws ConflictException, NotFoundException, ServerException, BadRequestException,
+          ForbiddenException;
 
   /**
-   * Note: Use {@link FileWatcherManager#suspend()} and {@link FileWatcherManager#resume()} while
-   * creating a project
+   * Remote type from a project
+   *
+   * @param wsPath absolute workspace path of a project
+   * @param type project type
+   * @return
+   * @throws ConflictException
+   * @throws NotFoundException
+   * @throws ServerException
+   * @throws BadRequestException
+   * @throws ForbiddenException
    */
-  private RegisteredProject doCreateProject(
-      ProjectConfig projectConfig, Map<String, String> options)
-      throws ConflictException, ForbiddenException, ServerException, NotFoundException {
-    final String path = ProjectRegistry.absolutizePath(projectConfig.getPath());
-    final CreateProjectHandler generator =
-        handlers.getCreateProjectHandler(projectConfig.getType());
-    FolderEntry projectFolder;
-    if (generator != null) {
-      Map<String, AttributeValue> valueMap = new HashMap<>();
-      Map<String, List<String>> attributes = projectConfig.getAttributes();
-      if (attributes != null) {
-        for (Map.Entry<String, List<String>> entry : attributes.entrySet()) {
-          valueMap.put(entry.getKey(), new AttributeValue(entry.getValue()));
-        }
-      }
-      if (options == null) {
-        options = new HashMap<>();
-      }
-      Path projectPath = Path.of(path);
-      generator.onCreateProject(projectPath, valueMap, options);
-      projectFolder = new FolderEntry(vfs.getRoot().getChild(projectPath), projectRegistry);
-    } else {
-      projectFolder = new FolderEntry(vfs.getRoot().createFolder(path), projectRegistry);
-    }
-
-    final RegisteredProject project =
-        projectRegistry.putProject(projectConfig, projectFolder, true, false);
-    workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
-    projectRegistry.fireInitHandlers(project);
-
-    return project;
-  }
+  RegisteredProject removeType(String wsPath, String type)
+      throws ConflictException, NotFoundException, ServerException, BadRequestException,
+          ForbiddenException;
 
   /**
-   * Create batch of projects according to their configurations.
+   * Import the project with specified configuration
    *
-   * <p>Notes: - a project will be created by importing when project configuration contains {@link
-   * SourceStorage} object, otherwise this one will be created corresponding its {@link
-   * NewProjectConfig}:
-   * <li>- {@link NewProjectConfig} object contains only one mandatory {@link
-   *     NewProjectConfig#setPath(String)} field. In this case Project will be created as project of
-   *     {@link BaseProjectType} type
-   * <li>- a project will be created as project of {@link BaseProjectType} type with {@link
-   *     ProjectProblem#getCode()} code} = 12 when declared primary project type is not registered,
-   * <li>- a project will be created with {@link ProjectProblem#getCode()} code} = 12 and without
-   *     mixin project type when declared mixin project type is not registered
-   * <li>- for creating a project by generator {@link NewProjectConfig#getOptions()} should be
-   *     specified.
-   *
-   * @param projectConfigList the list of configurations to create projects
-   * @param rewrite whether rewrite or not (throw exception otherwise) if such a project exists
-   * @return the list of new projects
-   * @throws BadRequestException when {@link NewProjectConfig} object not contains mandatory {@link
-   *     NewProjectConfig#setPath(String)} field.
-   * @throws ConflictException when the same path project exists and {@code rewrite} is {@code
-   *     false}
-   * @throws ForbiddenException when trying to overwrite the project and this one contains at least
-   *     one locked file
-   * @throws NotFoundException when parent folder does not exist
-   * @throws UnauthorizedException if user isn't authorized to access to location at importing
-   *     source code
-   * @throws ServerException if other error occurs
+   * @param projectConfig project configuration
+   * @param rewrite rewrite on import project marker
+   * @param consumer json rpc message transmitter
+   * @return
+   * @throws ServerException
+   * @throws ForbiddenException
+   * @throws UnauthorizedException
+   * @throws ConflictException
+   * @throws NotFoundException
+   * @throws BadRequestException
    */
-  public List<RegisteredProject> createBatchProjects(
-      List<? extends NewProjectConfig> projectConfigList,
+  RegisteredProject doImport(
+      NewProjectConfig projectConfig, boolean rewrite, BiConsumer<String, String> consumer)
+      throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
+          NotFoundException, BadRequestException;
+
+  /**
+   * Import all projects with specified configurations
+   *
+   * @param projectConfigs project configurations
+   * @param rewrite rewrite on import project marker
+   * @param consumer json rpc message transmitter
+   * @return
+   * @throws ServerException
+   * @throws ForbiddenException
+   * @throws UnauthorizedException
+   * @throws ConflictException
+   * @throws NotFoundException
+   * @throws BadRequestException
+   */
+  Set<RegisteredProject> doImport(
+      Set<? extends NewProjectConfig> projectConfigs,
       boolean rewrite,
-      ProjectOutputLineConsumerFactory lineConsumerFactory)
-      throws BadRequestException, ConflictException, ForbiddenException, NotFoundException,
-          ServerException, UnauthorizedException, IOException {
-    fileWatcherManager.suspend();
-    try {
-      final List<RegisteredProject> projects = new ArrayList<>(projectConfigList.size());
-      validateProjectConfigurations(projectConfigList, rewrite);
-
-      final List<NewProjectConfig> sortedConfigList =
-          projectConfigList
-              .stream()
-              .sorted((config1, config2) -> config1.getPath().compareTo(config2.getPath()))
-              .collect(Collectors.toList());
-
-      for (NewProjectConfig projectConfig : sortedConfigList) {
-        RegisteredProject registeredProject;
-        final String pathToProject = projectConfig.getPath();
-
-        // creating project(by config or by importing source code)
-        try {
-          final SourceStorage sourceStorage = projectConfig.getSource();
-          if (sourceStorage != null && !isNullOrEmpty(sourceStorage.getLocation())) {
-            doImportProject(
-                pathToProject,
-                sourceStorage,
-                rewrite,
-                lineConsumerFactory.setProjectName(projectConfig.getPath()));
-          } else if (!isVirtualFileExist(pathToProject)) {
-            registeredProject = doCreateProject(projectConfig, projectConfig.getOptions());
-            projects.add(registeredProject);
-            continue;
-          }
-        } catch (Exception e) {
-          if (!isVirtualFileExist(pathToProject)) { // project folder is absent
-            rollbackCreatingBatchProjects(projects);
-            throw e;
-          }
-        }
-
-        // update project
-        if (isVirtualFileExist(pathToProject)) {
-          try {
-            registeredProject = updateProject(projectConfig);
-          } catch (Exception e) {
-            registeredProject =
-                projectRegistry.putProject(projectConfig, asFolder(pathToProject), true, false);
-            final ProjectProblem problem =
-                new ProjectProblemImpl(
-                    NOT_UPDATED_PROJECT,
-                    "The project is not updated, caused by " + e.getLocalizedMessage());
-            registeredProject.getProblems().add(problem);
-          }
-        } else {
-          registeredProject = projectRegistry.putProject(projectConfig, null, true, false);
-        }
-
-        projects.add(registeredProject);
-      }
-
-      return projects;
-
-    } finally {
-      fileWatcherManager.resume();
-    }
-  }
-
-  private void rollbackCreatingBatchProjects(List<RegisteredProject> projects) {
-    for (RegisteredProject project : projects) {
-      try {
-        final FolderEntry projectFolder = project.getBaseFolder();
-        if (projectFolder != null) {
-          projectFolder.getVirtualFile().delete();
-        }
-        projectRegistry.removeProjects(project.getPath());
-      } catch (Exception e) {
-        LOG.warn(e.getLocalizedMessage());
-      }
-    }
-  }
-
-  private void validateProjectConfigurations(
-      List<? extends NewProjectConfig> projectConfigList, boolean rewrite)
-      throws NotFoundException, ServerException, ConflictException, ForbiddenException,
-          BadRequestException {
-
-    for (NewProjectConfig projectConfig : projectConfigList) {
-      final String pathToProject = projectConfig.getPath();
-      if (isNullOrEmpty(pathToProject)) {
-        throw new BadRequestException("Path for new project should be defined");
-      }
-
-      final String path = ProjectRegistry.absolutizePath(pathToProject);
-      final RegisteredProject registeredProject = projectRegistry.getProject(path);
-      if (registeredProject != null && rewrite) {
-        delete(path);
-      } else if (registeredProject != null) {
-        throw new ConflictException(format("Project config already exists for %s", path));
-      }
-
-      final String projectTypeId = projectConfig.getType();
-      if (isNullOrEmpty(projectTypeId)) {
-        projectConfig.setType(BaseProjectType.ID);
-      }
-    }
-  }
+      BiConsumer<String, String> consumer)
+      throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
+          NotFoundException, BadRequestException;
 
   /**
-   * Updating project means: - getting the project (should exist) - updating name and description -
-   * changing project types and provided attributes - refreshing provided (transient) project types
-   * and attributes
+   * Import the project with specified locations
    *
-   * @param newConfig new config
-   * @return updated config
-   * @throws ForbiddenException
+   * @param projectLocations project locations
+   * @param rewrite rewrite on import project marker
+   * @param consumer json rpc message transmitter
+   * @return
    * @throws ServerException
-   * @throws NotFoundException
-   * @throws ConflictException
-   */
-  public RegisteredProject updateProject(ProjectConfig newConfig)
-      throws ForbiddenException, ServerException, NotFoundException, ConflictException {
-    final String path = newConfig.getPath();
-    if (path == null) {
-      throw new ConflictException("Project path is not defined");
-    }
-
-    final FolderEntry baseFolder = asFolder(path);
-    if (baseFolder == null) {
-      throw new NotFoundException(format("Folder '%s' doesn't exist.", path));
-    }
-
-    final RegisteredProject project =
-        projectRegistry.putProject(newConfig, baseFolder, true, false);
-    workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
-
-    projectRegistry.fireInitHandlers(project);
-
-    return project;
-  }
-
-  /**
-   * Import source code as a Basic type of Project
-   *
-   * @param path where to import
-   * @param sourceStorage where sources live
-   * @param rewrite whether rewrite or not (throw exception othervise) if such a project exists
-   * @return Project
-   * @throws ServerException
-   * @throws IOException
    * @throws ForbiddenException
    * @throws UnauthorizedException
    * @throws ConflictException
    * @throws NotFoundException
    */
-  public RegisteredProject importProject(
-      String path,
+  Set<RegisteredProject> doImport(
+      Map<String, SourceStorage> projectLocations,
+      boolean rewrite,
+      BiConsumer<String, String> consumer)
+      throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
+          NotFoundException;
+
+  /**
+   * Import the project with specified location
+   *
+   * @param wsPath absolute workspace path of a project
+   * @param sourceStorage project source storage
+   * @param rewrite rewrite on import project marker
+   * @param consumer json rpc message transmitter
+   * @return
+   * @throws ServerException
+   * @throws ForbiddenException
+   * @throws UnauthorizedException
+   * @throws ConflictException
+   * @throws NotFoundException
+   */
+  RegisteredProject doImport(
+      String wsPath,
       SourceStorage sourceStorage,
       boolean rewrite,
-      LineConsumerFactory lineConsumerFactory)
-      throws ServerException, IOException, ForbiddenException, UnauthorizedException,
-          ConflictException, NotFoundException {
-    fileWatcherManager.suspend();
-    try {
-      return doImportProject(path, sourceStorage, rewrite, lineConsumerFactory);
-    } finally {
-      fileWatcherManager.resume();
-    }
-  }
+      BiConsumer<String, String> consumer)
+      throws ServerException, ForbiddenException, UnauthorizedException, ConflictException,
+          NotFoundException;
 
   /**
-   * Note: Use {@link FileWatcherManager#suspend()} and {@link FileWatcherManager#resume()} while
-   * importing source code
-   */
-  private RegisteredProject doImportProject(
-      String path,
-      SourceStorage sourceStorage,
-      boolean rewrite,
-      LineConsumerFactory lineConsumerFactory)
-      throws ServerException, IOException, ForbiddenException, UnauthorizedException,
-          ConflictException, NotFoundException {
-    final ProjectImporter importer = importers.getImporter(sourceStorage.getType());
-    if (importer == null) {
-      throw new NotFoundException(
-          format(
-              "Unable import sources project from '%s'. Sources type '%s' is not supported.",
-              sourceStorage.getLocation(), sourceStorage.getType()));
-    }
-
-    String normalizePath = (path.startsWith("/")) ? path : "/".concat(path);
-    FolderEntry folder = asFolder(normalizePath);
-    if (folder != null && !rewrite) {
-      throw new ConflictException(format("Project %s already exists ", path));
-    }
-
-    if (folder == null) {
-      folder = getProjectsRoot().createFolder(normalizePath);
-    }
-
-    try {
-      importer.importSources(folder, sourceStorage, lineConsumerFactory);
-    } catch (final Exception e) {
-      folder.remove();
-      throw e;
-    }
-
-    final String name = folder.getPath().getName();
-    for (ProjectConfig project : workspaceProjectsHolder.getProjects()) {
-      if (normalizePath.equals(project.getPath())) {
-        // TODO Needed for factory project importing with keepDir. It needs to find more appropriate
-        // solution
-        List<String> innerProjects = projectRegistry.getProjects(normalizePath);
-        for (String innerProject : innerProjects) {
-          RegisteredProject registeredProject = projectRegistry.getProject(innerProject);
-          projectRegistry.putProject(
-              registeredProject, asFolder(registeredProject.getPath()), true, false);
-        }
-        RegisteredProject rp = projectRegistry.putProject(project, folder, true, false);
-        workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
-        return rp;
-      }
-    }
-
-    RegisteredProject rp =
-        projectRegistry.putProject(
-            new NewProjectConfigImpl(normalizePath, name, BaseProjectType.ID, sourceStorage),
-            folder,
-            true,
-            false);
-    workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
-    return rp;
-  }
-
-  /**
-   * Estimates if the folder can be treated as a project of particular type
+   * Verify project regarding its type
    *
-   * @param path to the folder
-   * @param projectTypeId project type to estimate
-   * @return resolution object
-   * @throws ServerException
-   * @throws NotFoundException
+   * @param wsPath absolute workspace path of a project
+   * @param projectTypeId project type
+   * @return
+   * @throws ServerException is thrown if an error happend during operation execution
+   * @throws NotFoundException is thrown if there is no project located at specified path
    */
-  public ProjectTypeResolution estimateProject(String path, String projectTypeId)
-      throws ServerException, NotFoundException {
-    final ProjectTypeDef projectType = projectTypeRegistry.getProjectType(projectTypeId);
-    if (projectType == null) {
-      throw new NotFoundException("Project Type to estimate needed.");
-    }
-
-    final FolderEntry baseFolder = asFolder(path);
-
-    if (baseFolder == null) {
-      throw new NotFoundException("Folder not found: " + path);
-    }
-
-    return projectType.resolveSources(baseFolder);
-  }
+  ProjectTypeResolution verify(String wsPath, String projectTypeId)
+      throws ServerException, NotFoundException;
 
   /**
-   * Estimates to which project types the folder can be converted to
+   * Recognize a project
    *
-   * @param path to the folder
-   * @param transientOnly whether it can be estimated to the transient types of Project only
-   * @return list of resolutions
-   * @throws ServerException
-   * @throws NotFoundException
+   * @param wsPath absolute workspace path of a project
+   * @return
+   * @throws ServerException is thrown if an error happend during operation execution
+   * @throws NotFoundException is thrown if there is no project located at specified path
    */
-  public List<ProjectTypeResolution> resolveSources(String path, boolean transientOnly)
-      throws ServerException, NotFoundException {
-    final List<ProjectTypeResolution> resolutions = new ArrayList<>();
-
-    for (ProjectType type :
-        projectTypeRegistry.getProjectTypes(ProjectTypeRegistry.CHILD_TO_PARENT_COMPARATOR)) {
-      if (transientOnly && type.isPersisted()) {
-        continue;
-      }
-
-      final ProjectTypeResolution resolution = estimateProject(path, type.getId());
-      if (resolution.matched()) {
-        resolutions.add(resolution);
-      }
-    }
-
-    return resolutions;
-  }
-
-  /**
-   * deletes item including project
-   *
-   * @param path
-   * @throws ServerException
-   * @throws ForbiddenException
-   * @throws NotFoundException
-   * @throws ConflictException
-   */
-  public void delete(String path)
-      throws ServerException, ForbiddenException, NotFoundException, ConflictException {
-    final String apath = ProjectRegistry.absolutizePath(path);
-
-    // delete item
-    final VirtualFile item = vfs.getRoot().getChild(Path.of(apath));
-    if (item != null) {
-      item.delete();
-    }
-
-    // delete child projects
-    projectRegistry.removeProjects(apath);
-
-    workspaceProjectsHolder.sync(projectRegistry, workspaceSyncCommunication);
-  }
-
-  /**
-   * Copies item to new path with
-   *
-   * @param itemPath path to item to copy
-   * @param newParentPath path where the item should be copied to
-   * @param newName new item name
-   * @param overwrite whether existed (if any) item should be overwritten
-   * @return new item
-   * @throws ServerException
-   * @throws NotFoundException
-   * @throws ConflictException
-   * @throws ForbiddenException
-   */
-  public VirtualFileEntry copyTo(
-      String itemPath, String newParentPath, String newName, boolean overwrite)
-      throws ServerException, NotFoundException, ConflictException, ForbiddenException {
-    VirtualFile oldItem = vfs.getRoot().getChild(Path.of(itemPath));
-    if (oldItem == null) {
-      throw new NotFoundException("Item not found " + itemPath);
-    }
-
-    VirtualFile newParent = vfs.getRoot().getChild(Path.of(newParentPath));
-    if (newParent == null) {
-      throw new NotFoundException("New parent not found " + newParentPath);
-    }
-
-    final VirtualFile newItem = oldItem.copyTo(newParent, newName, overwrite);
-    final RegisteredProject owner = projectRegistry.getParentProject(newItem.getPath().toString());
-    if (owner == null) {
-      throw new NotFoundException("Parent project not found " + newItem.getPath().toString());
-    }
-
-    final VirtualFileEntry copy;
-    if (newItem.isFile()) {
-      copy = new FileEntry(newItem, projectRegistry);
-    } else {
-      copy = new FolderEntry(newItem, projectRegistry);
-    }
-
-    if (copy.isProject()) {
-      projectRegistry.getProject(copy.getProject()).getTypes();
-      // fire event
-    }
-
-    return copy;
-  }
-
-  /**
-   * Moves item to the new path
-   *
-   * @param itemPath path to the item
-   * @param newParentPath path of new parent
-   * @param newName new item's name
-   * @param overwrite whether existed (if any) item should be overwritten
-   * @return new item
-   * @throws ServerException
-   * @throws NotFoundException
-   * @throws ConflictException
-   * @throws ForbiddenException
-   */
-  public VirtualFileEntry moveTo(
-      String itemPath, String newParentPath, String newName, boolean overwrite)
-      throws ServerException, NotFoundException, ConflictException, ForbiddenException {
-    final VirtualFile oldItem = vfs.getRoot().getChild(Path.of(itemPath));
-    if (oldItem == null) {
-      throw new NotFoundException("Item not found " + itemPath);
-    }
-
-    final VirtualFile newParent;
-    if (newParentPath == null) {
-      // rename only
-      newParent = oldItem.getParent();
-    } else {
-      newParent = vfs.getRoot().getChild(Path.of(newParentPath));
-    }
-
-    if (newParent == null) {
-      throw new NotFoundException("New parent not found " + newParentPath);
-    }
-
-    // TODO lock token ?
-    final VirtualFile newItem = oldItem.moveTo(newParent, newName, overwrite, null);
-    final RegisteredProject owner = projectRegistry.getParentProject(newItem.getPath().toString());
-    if (owner == null) {
-      throw new NotFoundException("Parent project not found " + newItem.getPath().toString());
-    }
-
-    final VirtualFileEntry move;
-    if (newItem.isFile()) {
-      move = new FileEntry(newItem, projectRegistry);
-    } else {
-      move = new FolderEntry(newItem, projectRegistry);
-    }
-
-    if (move.isProject()) {
-      final RegisteredProject project = projectRegistry.getProject(itemPath);
-      NewProjectConfig projectConfig =
-          new NewProjectConfigImpl(
-              newItem.getPath().toString(),
-              project.getType(),
-              project.getMixins(),
-              newName,
-              project.getDescription(),
-              project.getAttributes(),
-              null,
-              project.getSource());
-
-      if (move instanceof FolderEntry) {
-        projectRegistry.removeProjects(project.getPath());
-        updateProject(projectConfig);
-      }
-    }
-
-    return move;
-  }
-
-  boolean isVirtualFileExist(String path) throws ServerException {
-    return asVirtualFileEntry(path) != null;
-  }
-
-  FolderEntry asFolder(String path) throws NotFoundException, ServerException {
-    final VirtualFileEntry entry = asVirtualFileEntry(path);
-    if (entry == null) {
-      return null;
-    }
-
-    if (!entry.isFolder()) {
-      throw new NotFoundException(format("Item '%s' isn't a folder. ", path));
-    }
-
-    return (FolderEntry) entry;
-  }
-
-  VirtualFileEntry asVirtualFileEntry(String path) throws ServerException {
-    final String apath = ProjectRegistry.absolutizePath(path);
-    final FolderEntry root = getProjectsRoot();
-    return root.getChild(apath);
-  }
-
-  FileEntry asFile(String path) throws NotFoundException, ServerException {
-    final VirtualFileEntry entry = asVirtualFileEntry(path);
-    if (entry == null) {
-      return null;
-    }
-
-    if (!entry.isFile()) {
-      throw new NotFoundException(format("Item '%s' isn't a file. ", path));
-    }
-
-    return (FileEntry) entry;
-  }
+  List<ProjectTypeResolution> recognize(String wsPath) throws ServerException, NotFoundException;
 }

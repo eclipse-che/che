@@ -11,12 +11,10 @@
 package org.eclipse.che.ide.ext.git.client.commit;
 
 import java.util.List;
-import java.util.Set;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelView;
-import org.eclipse.che.ide.resource.Path;
 
 /**
  * The view of {@link CommitPresenter}.
@@ -39,29 +37,13 @@ public interface CommitView extends View<CommitView.ActionDelegate> {
     /** Performs any actions appropriate in response to the user having changed something. */
     void onValueChanged();
 
-    /**
-     * Performs any actions appropriate in response to the user having clicked on changed file
-     * check-box.
-     */
-    void onFileNodeCheckBoxValueChanged(Path path, boolean newCheckBoxValue);
-
     /** Set the commit message for an amend commit. */
     void setAmendCommitMessage();
-
-    /** Get list of changed files paths. */
-    List<String> getChangedFiles();
   }
 
-  /** @return entered message */
+  /** Returns entered commit message */
   @NotNull
-  String getMessage();
-
-  /**
-   * Mark check-boxes of given paths as checked.
-   *
-   * @param paths pats of nodes
-   */
-  void setMarkedCheckBoxes(Set<Path> paths);
+  String getCommitMessage();
 
   /** Returns selected remote branch from branches drop-down list. */
   String getRemoteBranch();

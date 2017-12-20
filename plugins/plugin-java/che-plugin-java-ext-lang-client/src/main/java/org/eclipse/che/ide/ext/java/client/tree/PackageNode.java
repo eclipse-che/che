@@ -21,8 +21,6 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -32,6 +30,8 @@ import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.tree.ContainerNode;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.data.settings.NodeSettings;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 
 /** @author Vlad Zhukovskiy */

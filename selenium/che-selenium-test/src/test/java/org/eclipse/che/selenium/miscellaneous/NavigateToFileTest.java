@@ -10,11 +10,6 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
-import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE;
-import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SIMPLE;
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.testng.Assert.assertTrue;
 
@@ -26,6 +21,9 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -43,8 +41,8 @@ import org.testng.annotations.Test;
 
 /** Created by aleksandr shmaraev on 10.12.15 */
 public class NavigateToFileTest {
-  private static final String PROJECT_NAME = "project";
-  private static final String PROJECT_NAME_2 = "project_2";
+  private static final String PROJECT_NAME = "NavigateFile";
+  private static final String PROJECT_NAME_2 = "NavigateFile_2";
   private static final String FILE_CREATED_FROM_CONSOLE = "createdFrom.con";
   private static final String COMMAND_FOR_FILE_CREATION = "createFile";
   private static final String HIDDEN_FOLDER_NAME = ".hiddenFolder";
@@ -70,13 +68,20 @@ public class NavigateToFileTest {
   public void setUp() throws Exception {
     URL resource = getClass().getResource("/projects/guess-project");
     testProjectServiceClient.importProject(
-        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SIMPLE);
+        workspace.getId(),
+        Paths.get(resource.toURI()),
+        PROJECT_NAME,
+        ProjectTemplates.MAVEN_SIMPLE);
+
     testProjectServiceClient.importProject(
-        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME_2, MAVEN_SIMPLE);
+        workspace.getId(),
+        Paths.get(resource.toURI()),
+        PROJECT_NAME_2,
+        ProjectTemplates.MAVEN_SIMPLE);
     testCommandServiceClient.createCommand(
-        format("ls > /projects/%s/%s", PROJECT_NAME_2, FILE_CREATED_FROM_CONSOLE),
+        String.format("touch /projects/%s/%s", PROJECT_NAME_2, FILE_CREATED_FROM_CONSOLE),
         COMMAND_FOR_FILE_CREATION,
-        CUSTOM,
+        TestCommandsConstants.CUSTOM,
         workspace.getId());
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
@@ -141,6 +146,7 @@ public class NavigateToFileTest {
 
     // extract the path (without opened class)
     String dropdownVerificationPath = expectedItems.get(numValueFromDropDawnList).split(" ")[1];
+
     String openedFileWithExtension = expectedItems.get(numValueFromDropDawnList).split(" ")[0];
 
     // extract the name of opened files that display in a tab (the ".java" extension are not shown
@@ -149,14 +155,16 @@ public class NavigateToFileTest {
     launchNavigateToFileFromUIAndTypeValue(navigatingValue);
     waitExpectedItemsInNavigateToFileDropdawn(expectedItems);
     navigateToFile.selectFileByName(dropdownVerificationPath);
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.getAssociatedPathFromTheTab(openedFileNameInTheTab);
     editor.closeFileByNameWithSaving(openedFileNameInTheTab);
   }
 
   private void launchNavigateToFileFromUIAndTypeValue(String navigatingValue) {
     loader.waitOnClosed();
-    menu.runCommand(ASSISTANT, NAVIGATE_TO_FILE);
+    menu.runCommand(
+        TestMenuCommandsConstants.Assistant.ASSISTANT,
+        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
     navigateToFile.waitFormToOpen();
     loader.waitOnClosed();
     navigateToFile.typeSymbolInFileNameField(navigatingValue);
@@ -177,20 +185,20 @@ public class NavigateToFileTest {
       {
         "A",
         ImmutableMap.of(
-            1, "AppController.java (/project/src/main/java/org/eclipse/qa/examples)",
-            2, "AppController.java (/project_2/src/main/java/org/eclipse/qa/examples)")
+            1, "AppController.java (/NavigateFile/src/main/java/org/eclipse/qa/examples)",
+            2, "AppController.java (/NavigateFile_2/src/main/java/org/eclipse/qa/examples)")
       },
       {
         "i",
         ImmutableMap.of(
-            1, "index.jsp (/project/src/main/webapp)",
-            2, "index.jsp (/project_2/src/main/webapp)")
+            1, "index.jsp (/NavigateFile/src/main/webapp)",
+            2, "index.jsp (/NavigateFile_2/src/main/webapp)")
       },
       {
         "R",
         ImmutableMap.of(
-            1, "README.md (/project)",
-            2, "README.md (/project_2)")
+            1, "README.md (/NavigateFile)",
+            2, "README.md (/NavigateFile_2)")
       }
     };
   }
@@ -198,7 +206,11 @@ public class NavigateToFileTest {
   @DataProvider
   private Object[][] dataForCheckingFilesCreatedWithoutIDE() {
     return new Object[][] {
-      {"c", ImmutableMap.of(1, "createdFrom.api (/project)", 2, "createdFrom.con (/project_2)")}
+      {
+        "c",
+        ImmutableMap.of(
+            1, "createdFrom.api (/NavigateFile)", 2, "createdFrom.con (/NavigateFile_2)")
+      }
     };
   }
 }

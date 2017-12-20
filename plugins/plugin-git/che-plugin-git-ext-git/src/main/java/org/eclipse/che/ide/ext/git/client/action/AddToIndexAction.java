@@ -22,10 +22,10 @@ import java.util.stream.Collectors;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.add.AddToIndexPresenter;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
@@ -57,7 +57,11 @@ public class AddToIndexAction extends GitAction {
       ProcessesPanelPresenter consolesPanelPresenter,
       GitServiceClient service,
       NotificationManager notificationManager) {
-    super(constant.addToIndexTitle(), constant.addToIndexTitle(), FontAwesome.PLUS, appContext);
+    super(
+        constant.addToIndexTitle(),
+        constant.addToIndexTitle(),
+        FontAwesome.PLUS_CIRCLE,
+        appContext);
     this.presenter = presenter;
     this.constant = constant;
     this.gitOutputConsoleFactory = gitOutputConsoleFactory;
@@ -73,7 +77,7 @@ public class AddToIndexAction extends GitAction {
     checkState(resources != null);
     final GitOutputConsole console =
         gitOutputConsoleFactory.create(constant.addToIndexCommandName());
-    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+    consolesPanelPresenter.addCommandOutput(console);
     List<String> selected =
         Arrays.stream(appContext.getResources())
             .map(path -> path.getLocation().removeFirstSegments(1).toString())

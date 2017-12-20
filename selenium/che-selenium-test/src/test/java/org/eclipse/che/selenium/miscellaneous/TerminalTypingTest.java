@@ -16,7 +16,7 @@ import java.util.List;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
+import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
@@ -80,12 +80,13 @@ public class TerminalTypingTest {
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
   @Inject private MachineTerminal terminal;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
+  @Inject private ProjectExplorer projectExplorer;
 
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(workspace);
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Workspace is running");
+    projectExplorer.waitProjectExplorer();
+    terminal.waitTerminalTab();
   }
 
   @Test
@@ -97,7 +98,7 @@ public class TerminalTypingTest {
 
     for (Pair<String, String> pair : keyPairs) {
       terminal.typeIntoTerminal(pair.first());
-      terminal.waitExpectedTextIntoTerminal("/projects$ " + pair.first());
+      terminal.waitExpectedTextIntoTerminal("$ " + pair.first());
       terminal.typeIntoTerminal(Keys.BACK_SPACE.toString());
     }
   }
@@ -111,7 +112,7 @@ public class TerminalTypingTest {
 
     for (Pair<String, String> pair : keyPairs) {
       terminal.typeIntoTerminal(Keys.SHIFT + pair.first());
-      terminal.waitExpectedTextIntoTerminal("/projects$ " + pair.second());
+      terminal.waitExpectedTextIntoTerminal("$ " + pair.second());
       terminal.typeIntoTerminal(Keys.BACK_SPACE.toString());
     }
   }

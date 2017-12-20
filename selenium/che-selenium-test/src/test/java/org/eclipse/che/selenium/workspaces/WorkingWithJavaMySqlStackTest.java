@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
@@ -17,8 +18,9 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.Consoles.CommandsGoal.COMMON;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.COMMON;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.RUN;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
@@ -55,7 +57,7 @@ public class WorkingWithJavaMySqlStackTest {
   private static final List<String> infoDataBases =
       Arrays.asList("Database", "information_schema", "petclinic", "mysql");
   private static final String MSG_CLOSE_PROCESS =
-      String.format(
+      format(
           "The process %s:build and deploy will be terminated after closing console. Do you want to continue?",
           PROJECT_NAME);
 
@@ -83,7 +85,7 @@ public class WorkingWithJavaMySqlStackTest {
   public void checkJavaMySqlAndRunApp() {
     String currentWindow;
 
-    // create a workspace from the Java-MySql stack with the web-java-petclinic project
+    // Create a workspace from the Java-MySql stack with the web-java-petclinic project
     dashboard.open();
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
@@ -101,20 +103,19 @@ public class WorkingWithJavaMySqlStackTest {
     currentWindow = seleniumWebDriver.getWindowHandle();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME, APPLICATION_START_TIMEOUT_SEC);
+    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME, PROJECT_FOLDER);
     loader.waitOnClosed();
     projectExplorer.selectItem(PROJECT_NAME);
 
     // Select the db machine and perform 'show databases'
     projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, "show databases", "db");
-    consoles.waitTabNameProcessIsPresent("db");
+    consoles.waitTabNameProcessIsPresent("show databases");
     for (String text : infoDataBases) {
       consoles.waitExpectedTextIntoConsole(text);
     }
 
     // Build and deploy the web application
-    projectExplorer.selectItem(PROJECT_NAME);
-    projectExplorer.invokeCommandWithContextMenu(
-        RUN, PROJECT_NAME, "build and deploy", "dev-machine");
+    consoles.startCommandFromProcessesArea("dev-machine", RUN, BUILD_AND_DEPLOY_PROCESS);
     consoles.waitTabNameProcessIsPresent(BUILD_AND_DEPLOY_PROCESS);
     consoles.waitProcessInProcessConsoleTree(BUILD_AND_DEPLOY_PROCESS);
     consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS, UPDATING_PROJECT_TIMEOUT_SEC);
@@ -145,7 +146,7 @@ public class WorkingWithJavaMySqlStackTest {
     terminal.waitExpectedTextNotPresentTerminal("catalina.startup.Bootstrap start");
   }
 
-  /** check main elements of the web-java-petclinic */
+  // Check main elements of the web-java-petclinic
   private void checkWebJavaPetclinicAppl() {
     new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath("//h2[text()='Welcome']")));

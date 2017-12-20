@@ -22,18 +22,18 @@ import com.google.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.changeslist.ChangesListPresenter;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Presenter for displaying list of branches for comparing selected with local changes.
@@ -98,8 +98,10 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
   }
 
   @Override
-  public void onCloseClicked() {
+  public void onClose() {
     view.close();
+    view.updateSearchFilterLabel("");
+    view.clearSearchFilter();
   }
 
   @Override
@@ -155,6 +157,11 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
   }
 
   @Override
+  public void onSearchFilterChanged(String filter) {
+    view.updateSearchFilterLabel(filter);
+  }
+
+  @Override
   public void onBranchSelected(@NotNull Branch branch) {
     selectedBranch = branch;
 
@@ -176,7 +183,7 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
                   (error.getMessage() != null) ? error.getMessage() : locale.branchesListFailed();
               GitOutputConsole console = gitOutputConsoleFactory.create(BRANCH_LIST_COMMAND_NAME);
               console.printError(errorMessage);
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(locale.branchesListFailed(), FAIL, NOT_EMERGE_MODE);
             });
   }

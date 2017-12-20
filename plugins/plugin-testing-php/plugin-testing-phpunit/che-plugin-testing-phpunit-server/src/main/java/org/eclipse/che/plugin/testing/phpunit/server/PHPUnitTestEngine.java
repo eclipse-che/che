@@ -19,12 +19,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.che.api.core.util.CommandLine;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
-import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -35,13 +35,12 @@ import org.eclipse.core.resources.ResourcesPlugin;
  */
 public class PHPUnitTestEngine {
 
-  private java.nio.file.Path projectsRoot;
-
   private static final String PRINTER_NAME = "ZendPHPUnitLogger";
   private static final String PRINTER_DIRECTORY = "phpunit-printer";
   private static final String PHPUNIT_GLOBAL = "phpunit";
   private static final String PHPUNIT_COMPOSER = "/vendor/bin/phpunit";
   private static final int PRINTER_PORT = 7478;
+  private java.nio.file.Path projectsRoot;
 
   public PHPUnitTestEngine(File projectsRoot) {
     this.projectsRoot = projectsRoot.toPath().normalize().toAbsolutePath();
@@ -109,13 +108,11 @@ public class PHPUnitTestEngine {
   }
 
   private File getTestTargetFile(String testTargetRelativePath, String projectAbsolutePath) {
-    if (Path.of(testTargetRelativePath).length() > 1) {
-      return new File(
-          Path.of(projectAbsolutePath)
-              .newPath(Path.of(testTargetRelativePath).subPath(1))
-              .toString());
+    String[] segments = testTargetRelativePath.split("/");
+    if (segments.length > 1) {
+      return Paths.get(projectAbsolutePath, segments[1]).toFile();
     }
-    return new File(Path.of(projectAbsolutePath).toString());
+    return new File(projectAbsolutePath);
   }
 
   private String getTestTarget(File testTargetFile) {

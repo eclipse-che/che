@@ -116,7 +116,6 @@ public class GitHubDTOFactory {
     dtoRepository.setGitUrl(ghRepository.getGitTransportUrl());
     dtoRepository.setHasWiki(ghRepository.hasWiki());
     dtoRepository.setCloneUrl(String.valueOf(ghRepository.getUrl()));
-    dtoRepository.setSvnUrl(ghRepository.getSvnUrl());
     dtoRepository.setOpenedIssues(ghRepository.getOpenIssueCount());
     dtoRepository.setCreatedAt(String.valueOf(ghRepository.getCreatedAt()));
     dtoRepository.setPushedAt(String.valueOf(ghRepository.getPushedAt()));

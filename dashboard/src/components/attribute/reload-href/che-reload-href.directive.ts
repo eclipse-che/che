@@ -10,6 +10,10 @@
  */
 'use strict';
 
+interface ICheReloadHrefAttributes extends ng.IAttributes {
+  href: string;
+}
+
 /**
  * @ngdoc directive
  * @name components.directive:cheReloadHref
@@ -25,32 +29,37 @@
  *
  * @author Florent Benoit
  */
-export class CheReloadHref {
+export class CheReloadHref implements ng.IDirective {
+  restrict = 'A';
 
-    /**
-     * Default constructor that is using resource
-     * @ngInject for Dependency injection
-     */
-    constructor($location, $route) {
-        this.restrict = 'A';
-        this.$location = $location;
-        this.$route = $route;
-    }
+  $location: ng.ILocationService;
+  $route: ng.route.IRouteService;
 
-    /**
-     * Keep reference to the model controller
-     */
-    link($scope, element, attr) {
-        if (attr.href) {
-            element.bind('click', () => {
-                $scope.$apply(() => {
-                    if (this.$location.path() === attr.href || ('#' + this.$location.path()) === attr.href) {
-                        console.log('reloading the route...');
-                        this.$route.reload();
-                    }
-                });
-            });
-        }
+  /**
+   * Default constructor that is using resource
+   * @ngInject for Dependency injection
+   */
+  constructor($location: ng.ILocationService,
+              $route: ng.route.IRouteService) {
+    this.restrict = 'A';
+    this.$location = $location;
+    this.$route = $route;
+  }
+
+  /**
+   * Keep reference to the model controller
+   */
+  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attrs: ICheReloadHrefAttributes) {
+    if ($attrs.href) {
+      $element.bind('click', () => {
+        $scope.$apply(() => {
+          if (this.$location.path() === $attrs.href || ('#' + this.$location.path()) === $attrs.href) {
+            console.log('reloading the route...');
+            this.$route.reload();
+          }
+        });
+      });
     }
+  }
 
 }

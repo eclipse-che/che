@@ -66,9 +66,11 @@ public class DirectUrlFactoryWithKeepDirectory {
     testFactoryWithKeepDir.authenticateAndOpen();
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitProgressPopupPanelClose();
-    events.clickProjectEventsTab();
+    events.clickEventLogBtn();
     events.waitExpectedMessage("Project gitPullTest imported", UPDATING_PROJECT_TIMEOUT_SEC);
-    projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");
+
+    projectExplorer.waitItem("gitPullTest");
+    projectExplorer.quickExpandWithJavaScript();
     projectExplorer.waitItem("gitPullTest/my-lib/pom.xml");
 
     String wsId =

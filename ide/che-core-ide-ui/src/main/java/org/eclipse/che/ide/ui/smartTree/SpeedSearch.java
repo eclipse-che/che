@@ -20,9 +20,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import java.util.List;
 import org.eclipse.che.ide.DelayedTask;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ui.smartTree.converter.NodeConverter;
 import org.eclipse.che.ide.ui.smartTree.converter.impl.NodeNameConverter;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /** @author Vlad Zhukovskiy */
 public class SpeedSearch {

@@ -20,6 +20,8 @@ declare namespace che {
     wantTokeepLoader: boolean;
     waitingLoaded: boolean;
     currentPage: string;
+    productVersion: string;
+    branding: any;
   }
 
   export namespace api {
@@ -159,6 +161,13 @@ declare namespace che {
       getValues(): any[];
     }
 
+    export interface ICheRecipeTypes {
+      DOCKERFILE: string;
+      DOCKERIMAGE: string;
+      COMPOSE: string;
+      OPENSHIFT: string;
+      getValues(): Array<string>;
+    }
   }
 
   export namespace service {
@@ -269,7 +278,10 @@ declare namespace che {
   export interface IWorkspace {
     id?: string;
     projects?: any;
-    links?: Array<any>;
+    links?: {
+      ide?: string
+      [rel: string]: string;
+    };
     temporary?: boolean;
     status?: string;
     namespace?: string;
@@ -303,6 +315,7 @@ declare namespace che {
   }
 
   export interface IRecipe {
+    id?: string;
     content?: string;
     location?: string;
     contentType?: string;
@@ -310,7 +323,7 @@ declare namespace che {
   }
 
   export interface IEnvironmentMachine {
-    agents?: string[];
+    installers?: string[];
     attributes?: {
       memoryLimitBytes?: string|number;
       [attrName: string]: string|number;
@@ -318,46 +331,61 @@ declare namespace che {
     servers?: {
       [serverRef: string]: IEnvironmentMachineServer
     };
+    volumes?: {
+      [volumeRef: string]: IEnvironmentMachineVolume
+    };
+    env?: {[envName: string]: string};
   }
 
   export interface IEnvironmentMachineServer {
     port: string|number;
     protocol: string;
-    properties?: {
-      [propName: string]: string
-    };
+    path?: string;
+    properties?: any;
+  }
+
+  export interface IEnvironmentMachineVolume {
+    path: string;
   }
 
   export interface IWorkspaceRuntime {
     activeEnv: string;
-    devMachine: IWorkspaceRuntimeMachine;
     links: any[];
-    machines: IWorkspaceRuntimeMachine[];
-    rootFolder: string;
+    machines: {
+      [machineName: string]: IWorkspaceRuntimeMachine
+    };
+    owner: string;
+    warnings: IWorkspaceWarning[];
+  }
+
+  export interface IWorkspaceWarning {
+    code: number;
+    message: string;
   }
 
   export interface IWorkspaceRuntimeMachine {
-    config: any;
-    envName: string;
-    id: string;
-    links: any[];
-    owner: string;
-    runtime: {
-      envVariables: { [envVarName: string]: string };
-      properties: { [propName: string]: string };
-      servers: { [serverName: string]: IWorkspaceRuntimeMachineServer };
-    };
-    status: string;
-    workspaceId: string;
+    attributes: { [propName: string]: string };
+    servers: { [serverName: string]: IWorkspaceRuntimeMachineServer };
   }
 
   export interface IWorkspaceRuntimeMachineServer {
-    address: string;
-    properties: { [propName: string]: string; };
-    protocol: string;
+    status: string;
     port: string;
-    ref: string;
     url: string;
+    ref: string;
+    protocol: string;
+    path: string;
+  }
+
+  export interface IAgent {
+    id: string;
+    name: string;
+    version: string;
+    description: string;
+    properties: any;
+    script: string;
+    servers: { [serverName: string]: IEnvironmentMachineServer };
+    dependencies: string[];
   }
 
   export interface IProjectSource {
@@ -375,9 +403,9 @@ declare namespace che {
     source: IProjectSource;
     path?: string;
     commands?: Array<IWorkspaceCommand>;
-    mixins: Array<any>;
-    modules: Array<any>;
-    problems: Array<any>;
+    mixins?: Array<any>;
+    modules?: Array<any>;
+    problems?: Array<any>;
     projectType?: string;
     type?: string;
     tags?: Array<string>;
@@ -424,12 +452,11 @@ declare namespace che {
       [propName: string]: string | number;
   }
 
-  export interface IProfile extends ng.resource.IResourceClass<any> {
+  export interface IProfile extends ng.resource.IResource<any> {
     attributes?: IProfileAttributes;
     email: string;
     links?: Array<any>;
     userId: string;
-    $promise?: any;
   }
 
   export interface INamespace {
@@ -459,7 +486,7 @@ declare namespace che {
     ide?: any;
     button?: any;
     policies?: any;
-    links: string[];
+    links?: string[];
   }
 
   export interface IRegistry {

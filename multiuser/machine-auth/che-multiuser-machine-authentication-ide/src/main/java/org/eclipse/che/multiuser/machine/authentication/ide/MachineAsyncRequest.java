@@ -14,15 +14,8 @@ import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.http.client.RequestBuilder;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper;
-import org.eclipse.che.api.promises.client.js.Executor;
-import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.api.promises.client.js.RejectFunction;
-import org.eclipse.che.api.promises.client.js.ResolveFunction;
 import org.eclipse.che.ide.rest.AsyncRequest;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.Unmarshallable;
@@ -34,56 +27,19 @@ import org.eclipse.che.ide.rest.Unmarshallable;
  */
 public class MachineAsyncRequest extends AsyncRequest {
 
-  private final Promise<String> tokenPromise;
+  private final String token;
 
   protected MachineAsyncRequest(
-      RequestBuilder.Method method, String url, boolean async, Promise<String> tokenPromise) {
+      RequestBuilder.Method method, String url, boolean async, String token) {
     super(method, url, async);
-    this.tokenPromise = tokenPromise;
+    this.token = token;
   }
 
   @Override
   public Promise<Void> send() {
     requestBuilder.setIncludeCredentials(true);
-    final Executor.ExecutorBody<Void> body =
-        new Executor.ExecutorBody<Void>() {
-          @Override
-          public void apply(final ResolveFunction<Void> resolve, final RejectFunction reject) {
-            tokenPromise
-                .then(
-                    new Operation<String>() {
-                      @Override
-                      public void apply(String machine) throws OperationException {
-                        MachineAsyncRequest.this.header(AUTHORIZATION, machine);
-                        MachineAsyncRequest.super
-                            .send()
-                            .then(
-                                new Operation<Void>() {
-                                  @Override
-                                  public void apply(Void arg) throws OperationException {
-                                    resolve.apply(null);
-                                  }
-                                })
-                            .catchError(
-                                new Operation<PromiseError>() {
-                                  @Override
-                                  public void apply(PromiseError arg) throws OperationException {
-                                    reject.apply(arg);
-                                  }
-                                });
-                      }
-                    })
-                .catchError(
-                    new Operation<PromiseError>() {
-                      @Override
-                      public void apply(PromiseError promiseError) throws OperationException {
-                        reject.apply(promiseError);
-                      }
-                    });
-          }
-        };
-    final Executor<Void> executor = Executor.create(body);
-    return Promises.create(executor);
+    header(AUTHORIZATION, token);
+    return super.send();
   }
 
   @Override
@@ -111,21 +67,7 @@ public class MachineAsyncRequest extends AsyncRequest {
   @Override
   public void send(final AsyncRequestCallback<?> callback) {
     requestBuilder.setIncludeCredentials(true);
-    tokenPromise
-        .then(
-            new Operation<String>() {
-              @Override
-              public void apply(String machineToken) throws OperationException {
-                MachineAsyncRequest.this.header(AUTHORIZATION, machineToken);
-                MachineAsyncRequest.super.send(callback);
-              }
-            })
-        .catchError(
-            new Operation<PromiseError>() {
-              @Override
-              public void apply(PromiseError arg) throws OperationException {
-                callback.onError(null, arg.getCause());
-              }
-            });
+    header(AUTHORIZATION, token);
+    super.send(callback);
   }
 }

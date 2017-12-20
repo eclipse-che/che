@@ -317,6 +317,15 @@ public interface Theme {
   /** Border of the MenuButton widget. */
   String getMenuButtonBorder();
 
+  /** Background color of Toolbar controller menu button. */
+  String toolbarControllerBackground();
+
+  /** Left border color of Toolbar controller menu button. */
+  String toolbarControllerLeftColor();
+
+  /** Top border color of Toolbar controller menu button. */
+  String toolbarControllerTopColor();
+
   /**
    * Background color of default button.
    *
@@ -499,6 +508,13 @@ public interface Theme {
    */
   String editorPanelBackgroundColor();
 
+  /**
+   * Background color for editor tabs panel.
+   *
+   * @return the color
+   */
+  String editorTabsBackgroundColor();
+
   /** @return border color for editor panel */
   String editorPanelBorderColor();
 
@@ -529,6 +545,20 @@ public interface Theme {
    * @return the color
    */
   String getEditorSelectionColor();
+
+  /**
+   * Editor linked group color.
+   *
+   * @return the color
+   */
+  String getEditorLinkedGroupColor();
+
+  /**
+   * Editor linked group background color.
+   *
+   * @return the color
+   */
+  String getEditorLinkedGroupBackground();
 
   /**
    * Editor inactive selection color(if focus not in browser)
@@ -865,6 +895,13 @@ public interface Theme {
    * @return the color
    */
   String getMainMenuBkgColor();
+
+  /**
+   * Delimiter background color of main menu
+   *
+   * @return the color
+   */
+  String mainMenuDelimiterBackground();
 
   /**
    * Background color of selected menu items
@@ -1353,6 +1390,8 @@ public interface Theme {
    */
   String checkBoxIconColor();
 
+  String checkBoxIndeterminateIconColor();
+
   String checkBoxFontColor();
 
   String checkBoxBorderColor();
@@ -1558,6 +1597,10 @@ public interface Theme {
 
   String editorPreferenceCategoryBackgroundColor();
 
+  String gitPanelRepositoryChangesLabelColor();
+
+  String gitPanelRepositoryChangesLabelBackgroundColor();
+
   /**
    * ******************************************************************************************
    *
@@ -1583,4 +1626,28 @@ public interface Theme {
   String popupLoaderTitleColor();
 
   String popupLoaderTextColor();
+
+  /** Cell table */
+  String cellTableHrefColor();
+
+  String cellTableHeaderColor();
+
+  String cellTableHeaderBackground();
+
+  String cellTableOddRowBackground();
+
+  String cellTableEvenRowBackground();
+
+  String cellTableCellColor();
+
+  /**
+   * ******************************************************************************************
+   *
+   * <p>Find results bottom panel
+   *
+   * <p>******************************************************************************************
+   */
+  String findResultsBackground();
+
+  String findResultsTextColor();
 }

@@ -26,6 +26,6 @@ public class ZendDbgModule extends AbstractModule {
   @Override
   protected void configure() {
     Multibinder.newSetBinder(binder(), DebuggerFactory.class).addBinding().to(ZendDbgFactory.class);
-    bind(ZendDbgFileUtils.class);
+    bind(ZendDbgFileUtils.class).asEagerSingleton();
   }
 }

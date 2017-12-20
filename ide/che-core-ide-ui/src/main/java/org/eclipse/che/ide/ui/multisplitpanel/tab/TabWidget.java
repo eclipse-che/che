@@ -13,9 +13,11 @@ package org.eclipse.che.ide.ui.multisplitpanel.tab;
 import static com.google.gwt.dom.client.NativeEvent.BUTTON_LEFT;
 import static com.google.gwt.dom.client.NativeEvent.BUTTON_MIDDLE;
 
+import com.google.common.base.MoreObjects;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -27,6 +29,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
+import org.vectomatic.dom.svg.OMSVGSVGElement;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -61,7 +64,7 @@ public class TabWidget extends Composite implements Tab {
       @Assisted boolean closable) {
     this.resources = resources;
     this.title = title;
-    this.icon = icon;
+    this.icon = MoreObjects.firstNonNull(icon, emptySVGResource());
 
     initWidget(UI_BINDER.createAndBindUi(this));
 
@@ -120,4 +123,28 @@ public class TabWidget extends Composite implements Tab {
   }
 
   interface TabItemWidgetUiBinder extends UiBinder<Widget, TabWidget> {}
+
+  private static SVGResource emptySVGResource() {
+    return new SVGResource() {
+      @Override
+      public OMSVGSVGElement getSvg() {
+        return new OMSVGSVGElement();
+      }
+
+      @Override
+      public SafeUri getSafeUri() {
+        return null;
+      }
+
+      @Override
+      public String getUrl() {
+        return null;
+      }
+
+      @Override
+      public String getName() {
+        return null;
+      }
+    };
+  }
 }

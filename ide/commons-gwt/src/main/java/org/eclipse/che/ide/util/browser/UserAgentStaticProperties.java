@@ -54,12 +54,7 @@ public abstract class UserAgentStaticProperties {
   }
 
   final boolean isWebkit() {
-    return isSafari() || isMobileWebkit();
-  }
-
-  /** @return true iff the user agent uses mobile webkit */
-  final boolean isMobileWebkit() {
-    return isAndroid() || isIPhone();
+    return isSafari();
   }
 
   // Default instance methods: most return false, since they are intended to be overriden.
@@ -72,14 +67,6 @@ public abstract class UserAgentStaticProperties {
   }
 
   boolean isIE() {
-    return false;
-  }
-
-  boolean isAndroid() {
-    return false;
-  }
-
-  boolean isIPhone() {
     return false;
   }
 
@@ -103,22 +90,6 @@ public abstract class UserAgentStaticProperties {
   public static class IEImpl extends UserAgentStaticProperties {
     @Override
     protected boolean isIE() {
-      return true;
-    }
-  }
-
-  // NOTE(user): Created via deferred binding
-  public static class AndroidImpl extends UserAgentStaticProperties {
-    @Override
-    protected boolean isAndroid() {
-      return true;
-    }
-  }
-
-  // NOTE(user): Created via deferred binding
-  public static class IPhoneImpl extends UserAgentStaticProperties {
-    @Override
-    protected boolean isIPhone() {
       return true;
     }
   }

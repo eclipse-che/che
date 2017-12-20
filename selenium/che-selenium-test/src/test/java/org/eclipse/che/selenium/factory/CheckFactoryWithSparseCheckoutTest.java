@@ -65,8 +65,12 @@ public class CheckFactoryWithSparseCheckoutTest {
   public void acceptFactoryWithSparseCheckout() throws Exception {
     testFactory.authenticateAndOpen();
     projectExplorer.waitProjectExplorer();
-    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed(
-        "Project " + PROJECT_NAME + " imported");
+    projectExplorer.waitItem(PROJECT_NAME);
+
+    events.clickEventLogBtn();
+    events.waitOpened();
+    events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
+
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME + "/my-lib");

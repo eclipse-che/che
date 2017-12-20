@@ -88,7 +88,9 @@ public class CheckOnValidAndInvalidClassNameTest {
 
   private void createJavaClassByPath(String classPath, String className) {
     projectExplorer.openContextMenuByPathSelectedItem(classPath);
+    projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
+    projectExplorer.waitContextMenu();
     projectExplorer.clickOnNewContextMenuItem(
         TestProjectExplorerContextMenuConstants.SubMenuNew.JAVA_CLASS);
     askForValueDialog.waitNewJavaClassOpen();
@@ -99,7 +101,9 @@ public class CheckOnValidAndInvalidClassNameTest {
 
   private void tryToCreateJavaClassWithNotValidNameByPath(String elementPath, String className) {
     projectExplorer.openContextMenuByPathSelectedItem(elementPath);
+    projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
+    projectExplorer.waitContextMenu();
     projectExplorer.clickOnNewContextMenuItem(
         TestProjectExplorerContextMenuConstants.SubMenuNew.JAVA_CLASS);
     askForValueDialog.waitNewJavaClassOpen();

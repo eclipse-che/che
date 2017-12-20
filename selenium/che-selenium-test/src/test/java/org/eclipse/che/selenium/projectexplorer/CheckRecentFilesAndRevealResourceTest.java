@@ -71,12 +71,11 @@ public class CheckRecentFilesAndRevealResourceTest {
     projectExplorer.quickRevealToItemWithJavaScript(PATH_FOR_EXPAND_FIRST_PROJECT);
     projectExplorer.openItemByPath(PATH_TO_FILE_FIRST_PROJECT);
     loader.waitOnClosed();
-    editor.waitActiveEditor();
-    editor.setCursorToDefinedLineAndChar(5, 1);
-    projectExplorer.clickCollapseAllButton();
+    editor.waitActive();
+    editor.goToCursorPositionVisible(5, 1);
+    projectExplorer.collapseProjectTreeByOptionsButton();
     projectExplorer.waitDisappearItemByPath(PATH_TO_FILE_FIRST_PROJECT);
-    menu.runCommand(
-        TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.REVEAL_RESOURCE);
+    projectExplorer.revealResourceByOptionsButton();
     projectExplorer.waitItem(PATH_TO_FILE_FIRST_PROJECT);
   }
 

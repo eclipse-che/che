@@ -29,11 +29,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
-import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.api.core.model.workspace.config.Command;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**

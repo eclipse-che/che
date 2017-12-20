@@ -82,7 +82,7 @@ export class WorkspaceMachineConfigController {
       isDev: this.environmentManager.isDev(this.machine),
       memoryLimitBytes: this.environmentManager.getMemoryLimit(this.machine),
       servers: this.environmentManager.getServers(this.machine),
-      agents: this.environmentManager.getAgents(this.machine),
+      installers: this.environmentManager.getAgents(this.machine),
       canEditEnvVariables: this.environmentManager.canEditEnvVariables(this.machine),
       envVariables: this.environmentManager.getEnvVariables(this.machine)
     };
@@ -145,7 +145,7 @@ export class WorkspaceMachineConfigController {
    * @returns {Promise}
    */
   updateAgents(): ng.IPromise<any> {
-    this.environmentManager.setAgents(this.machine, this.machineConfig.agents);
+    this.environmentManager.setAgents(this.machine, this.machineConfig.installers);
     return this.doUpdateConfig();
   }
 

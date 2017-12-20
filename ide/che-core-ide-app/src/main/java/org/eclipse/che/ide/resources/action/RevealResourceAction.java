@@ -12,8 +12,8 @@ package org.eclipse.che.ide.resources.action;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 import static org.eclipse.che.ide.resource.Path.valueOf;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.common.annotations.Beta;
 import com.google.inject.Inject;
@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -44,8 +45,12 @@ public class RevealResourceAction extends AbstractPerspectiveAction {
   private final EventBus eventBus;
 
   @Inject
-  public RevealResourceAction(AppContext appContext, EventBus eventBus) {
-    super(singletonList(PROJECT_PERSPECTIVE_ID), "Reveal Resource", null, null, null);
+  public RevealResourceAction(
+      AppContext appContext, EventBus eventBus, CoreLocalizationConstant localizedConstant) {
+    super(
+        singletonList(PROJECT_PERSPECTIVE_ID),
+        localizedConstant.actionRevealResourceText(),
+        localizedConstant.actionRevealResourceDescription());
     this.appContext = appContext;
     this.eventBus = eventBus;
   }

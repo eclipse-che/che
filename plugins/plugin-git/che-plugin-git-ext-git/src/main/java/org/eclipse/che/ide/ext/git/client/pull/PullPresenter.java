@@ -28,17 +28,17 @@ import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchListMode;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.BranchSearcher;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Presenter pulling changes from remote repository.
@@ -153,7 +153,7 @@ public class PullPresenter implements PullView.ActionDelegate {
             response -> {
               GitOutputConsole console = gitOutputConsoleFactory.create(PULL_COMMAND_NAME);
               console.print(response.getCommandOutput(), GREEN_COLOR);
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notification.setStatus(SUCCESS);
               if (response.getCommandOutput().contains("Already up-to-date")) {
                 notification.setTitle(constant.pullUpToDate());
@@ -232,7 +232,7 @@ public class PullPresenter implements PullView.ActionDelegate {
 
     GitOutputConsole console = gitOutputConsoleFactory.create(commandName);
     console.printError(errorMessage);
-    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+    consolesPanelPresenter.addCommandOutput(console);
     if (notification != null) {
       notification.setTitle(errorMessage);
     } else {

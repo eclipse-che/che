@@ -34,7 +34,6 @@ import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
 import org.eclipse.che.ide.api.icon.Icon;
-import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.plugin.languageserver.ide.editor.DiagnosticAnnotation;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.lsp4j.CodeActionContext;
@@ -54,62 +53,12 @@ public class LanguageServerQuickAssistProcessor implements QuickAssistProcessor 
 
   private TextDocumentServiceClient textDocumentService;
   private ActionManager actionManager;
-  private PerspectiveManager perspectiveManager;
-
-  private final class ActionCompletionProposal implements CompletionProposal {
-    private final Command command;
-    private final Action action;
-
-    private ActionCompletionProposal(Command command, Action action) {
-      this.command = command;
-      this.action = action;
-    }
-
-    @Override
-    public void getAdditionalProposalInfo(AsyncCallback<Widget> callback) {}
-
-    @Override
-    public String getDisplayString() {
-      return command.getTitle();
-    }
-
-    @Override
-    public Icon getIcon() {
-      return null;
-    }
-
-    @Override
-    public void getCompletion(CompletionCallback callback) {
-      callback.onCompletion(
-          new Completion() {
-
-            @Override
-            public LinearRange getSelection(Document document) {
-              return null;
-            }
-
-            @Override
-            public void apply(Document document) {
-              QuickassistActionEvent evt =
-                  new QuickassistActionEvent(
-                      new Presentation(),
-                      actionManager,
-                      perspectiveManager,
-                      command.getArguments());
-              action.actionPerformed(evt);
-            }
-          });
-    }
-  }
 
   @Inject
   public LanguageServerQuickAssistProcessor(
-      TextDocumentServiceClient textDocumentService,
-      ActionManager actionManager,
-      PerspectiveManager perspectiveManager) {
+      TextDocumentServiceClient textDocumentService, ActionManager actionManager) {
     this.textDocumentService = textDocumentService;
     this.actionManager = actionManager;
-    this.perspectiveManager = perspectiveManager;
   }
 
   @Override
@@ -174,5 +123,48 @@ public class LanguageServerQuickAssistProcessor implements QuickAssistProcessor 
             .withCallback(annotationCallback)
             .build();
     document.getDocumentHandle().getDocEventBus().fireEvent(event);
+  }
+
+  private final class ActionCompletionProposal implements CompletionProposal {
+    private final Command command;
+    private final Action action;
+
+    private ActionCompletionProposal(Command command, Action action) {
+      this.command = command;
+      this.action = action;
+    }
+
+    @Override
+    public void getAdditionalProposalInfo(AsyncCallback<Widget> callback) {}
+
+    @Override
+    public String getDisplayString() {
+      return command.getTitle();
+    }
+
+    @Override
+    public Icon getIcon() {
+      return null;
+    }
+
+    @Override
+    public void getCompletion(CompletionCallback callback) {
+      callback.onCompletion(
+          new Completion() {
+
+            @Override
+            public LinearRange getSelection(Document document) {
+              return null;
+            }
+
+            @Override
+            public void apply(Document document) {
+              QuickassistActionEvent evt =
+                  new QuickassistActionEvent(
+                      new Presentation(), actionManager, command.getArguments());
+              action.actionPerformed(evt);
+            }
+          });
+    }
   }
 }

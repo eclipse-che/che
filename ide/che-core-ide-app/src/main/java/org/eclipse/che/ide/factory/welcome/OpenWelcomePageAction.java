@@ -11,12 +11,12 @@
 package org.eclipse.che.ide.factory.welcome;
 
 import javax.inject.Inject;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.util.loging.Log;
 
 /** @author Sergii Leschenko */
-public class OpenWelcomePageAction extends Action {
+public class OpenWelcomePageAction extends BaseAction {
   private final GreetingPartPresenter greetingPart;
 
   @Inject

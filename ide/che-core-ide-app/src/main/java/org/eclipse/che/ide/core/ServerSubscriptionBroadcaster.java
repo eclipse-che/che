@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.core;
 
 import static org.eclipse.che.api.core.jsonrpc.commons.ClientSubscriptionHandler.CLIENT_SUBSCRIBE_METHOD_NAME;
-import static org.eclipse.che.ide.projectimport.ProjectImportNotificationSubscriber.WS_AGENT_ENDPOINT;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -30,7 +30,7 @@ public class ServerSubscriptionBroadcaster {
 
     requestTransmitter
         .newRequest()
-        .endpointId(WS_AGENT_ENDPOINT)
+        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
         .methodName(CLIENT_SUBSCRIBE_METHOD_NAME)
         .noParams()
         .sendAndSkipResult();

@@ -17,12 +17,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
@@ -38,7 +37,6 @@ public class StatusCommandPresenter {
   public static final String STATUS_COMMAND_NAME = "Git status";
 
   private final GitServiceClient service;
-  private final AppContext appContext;
   private final GitOutputConsoleFactory gitOutputConsoleFactory;
   private final ProcessesPanelPresenter consolesPanelPresenter;
   private final GitLocalizationConstant constant;
@@ -48,13 +46,11 @@ public class StatusCommandPresenter {
   @Inject
   public StatusCommandPresenter(
       GitServiceClient service,
-      AppContext appContext,
       GitOutputConsoleFactory gitOutputConsoleFactory,
       ProcessesPanelPresenter processesPanelPresenter,
       GitLocalizationConstant constant,
       NotificationManager notificationManager) {
     this.service = service;
-    this.appContext = appContext;
     this.gitOutputConsoleFactory = gitOutputConsoleFactory;
     this.consolesPanelPresenter = processesPanelPresenter;
     this.constant = constant;
@@ -104,6 +100,6 @@ public class StatusCommandPresenter {
       console.print(line);
     }
 
-    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+    consolesPanelPresenter.addCommandOutput(console);
   }
 }

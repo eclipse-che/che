@@ -111,8 +111,8 @@ public class EditFilesWithTabsTest {
   private void prepareFiles() {
     expandFoldersToClass(projectExplorer1, editor1);
     expandFoldersToClass(projectExplorer2, editor2);
-    eventsTab1.clickProjectEventsTab();
-    eventsTab2.clickProjectEventsTab();
+    eventsTab1.clickEventLogBtn();
+    eventsTab2.clickEventLogBtn();
   }
 
   /** Expands project for a defined browser instance ('user') */
@@ -123,7 +123,7 @@ public class EditFilesWithTabsTest {
     String path_for_expand = projectName + "/src/main/java/org.eclipse.qa.examples";
     projectExplorer.openItemByPath(path_for_expand.replace(".", "/") + "/AppController.java");
 
-    editor.waitActiveEditor();
+    editor.waitActive();
   }
 
   /** Performs checking that notifications do not appear for inactive tabs */

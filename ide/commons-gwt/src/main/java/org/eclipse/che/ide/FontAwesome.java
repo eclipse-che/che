@@ -35,6 +35,10 @@ public class FontAwesome {
   /** http://fortawesome.github.io/Font-Awesome/icon/cog/ */
   public static final String COG = "<i class=\"fa fa-cog\"></i>";
 
+  /** http://fontawesome.io/icon/caret-square-o-left/ */
+  public static final String CARET_SQUARE_O_LEFT =
+      "<i class=\"fa fa-caret-square-o-left\" aria-hidden=\"true\"></i>";
+
   /** http://fortawesome.github.io/Font-Awesome/icon/compress/ */
   public static final String COMPRESS = "<i class=\"fa fa-compress\"></i>";
 
@@ -50,6 +54,9 @@ public class FontAwesome {
   /** http://fortawesome.github.io/Font-Awesome/icon/expand/ */
   public static final String EXPAND = "<i class=\"fa fa-expand\"></i>";
 
+  /** http://fortawesome.github.io/Font-Awesome/icon/folder/ */
+  public static final String FOLDER = "<i class=\"fa fa-folder\"></i>";
+
   /** http://fortawesome.github.io/Font-Awesome/icon/history/ */
   public static final String HISTORY = "<i class=\"fa fa-history\"></i>";
 
@@ -60,10 +67,16 @@ public class FontAwesome {
   public static final String MINUS = "<i class=\"fa fa-minus-circle\"></i>";
 
   /** http://fortawesome.github.io/Font-Awesome/icon/plus-circle/ */
-  public static final String PLUS = "<i class=\"fa fa-plus-circle\"></i>";
+  public static final String PLUS_CIRCLE = "<i class=\"fa fa-plus-circle\"></i>";
+
+  /** http://fortawesome.github.io/Font-Awesome/icon/plus/ */
+  public static final String PLUS = "<i class=\"fa fa-plus\"></i>";
 
   /** http://fortawesome.github.io/Font-Awesome/icon/refresh/ */
   public static final String REFRESH = "<i class=\"fa fa-refresh\"></i>";
+
+  /** http://fortawesome.github.io/Font-Awesome/icon/retweet/ */
+  public static final String RETWEET = "<i class=\"fa fa-retweet\" aria-hidden=\"true\"></i>";
 
   /** http://fortawesome.github.io/Font-Awesome/icon/exchange/ */
   public static final String EXCHANGE = "<i class=\"fa fa-exchange\"></i>";
@@ -113,9 +126,15 @@ public class FontAwesome {
   /** http://fontawesome.io/icon/list/ */
   public static final String LIST = "<i class=\"fa fa-list\"></i>";
 
+  /** http://fontawesome.io/icon/list-ul/ */
+  public static final String LIST_UL = "<i class=\"fa fa-list-ul\"></i>";
+
   /** http://fontawesome.io/icon/arrow-up/ */
   public static final String ARROW_UP = "<i class=\"fa fa-arrow-up\"></i>";
 
   /** http://fontawesome.io/icon/arrow-down/ */
   public static final String ARROW_DOWN = "<i class=\"fa fa-arrow-down\"></i>";
+
+  /** http://fontawesome.io/icon/file-text/ */
+  public static final String FILE_TEXT = "<i class=\"fa fa-file-text\"></i>";
 }

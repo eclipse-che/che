@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPA
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.BUILD;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.RUN;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -34,6 +35,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -70,7 +72,7 @@ public class WorkingWithNodeWsTest {
   public void checkNodeJsWsAndRunApp() {
     String currentWindow;
 
-    // create a workspace from the Node stack with the web-nodejs-simple project
+    // Create a workspace from the Node stack with the web-nodejs-simple project
     dashboard.open();
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
@@ -91,10 +93,11 @@ public class WorkingWithNodeWsTest {
     projectExplorer.selectItem(PROJECT_NAME);
 
     // Perform run web nodeJs application
-    projectExplorer.invokeCommandWithContextMenu(BUILD, PROJECT_NAME, INSTALL_DEPENDENCIES_PROCESS);
+    consoles.startCommandFromProcessesArea("dev-machine", BUILD, INSTALL_DEPENDENCIES_PROCESS);
     consoles.waitTabNameProcessIsPresent(INSTALL_DEPENDENCIES_PROCESS);
     consoles.waitExpectedTextIntoConsole("bower_components/angular", APPLICATION_START_TIMEOUT_SEC);
-    projectExplorer.invokeCommandWithContextMenu(RUN, PROJECT_NAME, RUN_PROCESS);
+
+    consoles.startCommandFromProcessesArea("dev-machine", RUN, RUN_PROCESS);
     consoles.waitTabNameProcessIsPresent(RUN_PROCESS);
     consoles.waitExpectedTextIntoConsole("Started connect web server", PREPARING_WS_TIMEOUT_SEC);
 
@@ -102,7 +105,12 @@ public class WorkingWithNodeWsTest {
     consoles.waitPreviewUrlIsPresent();
     seleniumWebDriver.navigate().refresh();
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    consoles.waitPreviewUrlIsPresent();
+    try {
+      consoles.waitPreviewUrlIsPresent();
+    } catch (TimeoutException ex) {
+      // Remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7072");
+    }
 
     // Run the application
     projectExplorer.selectItem(PROJECT_NAME);

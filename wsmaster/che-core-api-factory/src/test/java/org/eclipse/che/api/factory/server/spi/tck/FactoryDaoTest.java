@@ -42,13 +42,13 @@ import org.eclipse.che.api.factory.server.model.impl.OnAppLoadedImpl;
 import org.eclipse.che.api.factory.server.model.impl.OnProjectsLoadedImpl;
 import org.eclipse.che.api.factory.server.model.impl.PoliciesImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
-import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
+import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.lang.Pair;
@@ -287,7 +287,7 @@ public class FactoryDaoTest {
     return factory;
   }
 
-  public static WorkspaceConfigImpl createWorkspaceConfig(int index) {
+  private static WorkspaceConfigImpl createWorkspaceConfig(int index) {
     // Project Sources configuration
     final SourceStorageImpl source1 = new SourceStorageImpl();
     source1.setType("type1");
@@ -325,33 +325,36 @@ public class FactoryDaoTest {
     final List<CommandImpl> commands = new ArrayList<>(asList(cmd1, cmd2));
 
     // Machine configs
-    final ExtendedMachineImpl exMachine1 = new ExtendedMachineImpl();
-    final ServerConf2Impl serverConf1 =
-        new ServerConf2Impl("2265", "http", singletonMap("prop1", "val"));
-    final ServerConf2Impl serverConf2 =
-        new ServerConf2Impl("2266", "ftp", singletonMap("prop1", "val"));
+    final MachineConfigImpl exMachine1 = new MachineConfigImpl();
+    final ServerConfigImpl serverConf1 =
+        new ServerConfigImpl("2265", "http", "/path1", singletonMap("key", "value"));
+    final ServerConfigImpl serverConf2 =
+        new ServerConfigImpl("2266", "ftp", "/path2", singletonMap("key", "value"));
     exMachine1.setServers(ImmutableMap.of("ref1", serverConf1, "ref2", serverConf2));
-    exMachine1.setAgents(ImmutableList.of("agent5", "agent4"));
+    exMachine1.setInstallers(ImmutableList.of("agent5", "agent4"));
     exMachine1.setAttributes(singletonMap("att1", "val"));
+    exMachine1.setEnv(singletonMap("CHE_ENV", "value"));
 
-    final ExtendedMachineImpl exMachine2 = new ExtendedMachineImpl();
-    final ServerConf2Impl serverConf3 =
-        new ServerConf2Impl("2333", "https", singletonMap("prop2", "val"));
-    final ServerConf2Impl serverConf4 =
-        new ServerConf2Impl("2334", "wss", singletonMap("prop2", "val"));
+    final MachineConfigImpl exMachine2 = new MachineConfigImpl();
+    final ServerConfigImpl serverConf3 =
+        new ServerConfigImpl("2333", "https", "/path1", singletonMap("key", "value"));
+    final ServerConfigImpl serverConf4 =
+        new ServerConfigImpl("2334", "wss", "/path2", singletonMap("key", "value"));
     exMachine2.setServers(ImmutableMap.of("ref1", serverConf3, "ref2", serverConf4));
-    exMachine2.setAgents(ImmutableList.of("agent2", "agent1"));
+    exMachine2.setInstallers(ImmutableList.of("agent2", "agent1"));
     exMachine2.setAttributes(singletonMap("att1", "val"));
+    exMachine2.setEnv(singletonMap("CHE_ENV2", "value"));
 
-    final ExtendedMachineImpl exMachine3 = new ExtendedMachineImpl();
-    final ServerConf2Impl serverConf5 =
-        new ServerConf2Impl("2333", "https", singletonMap("prop2", "val"));
+    final MachineConfigImpl exMachine3 = new MachineConfigImpl();
+    final ServerConfigImpl serverConf5 =
+        new ServerConfigImpl("2333", "https", "/path3", singletonMap("key", "value"));
     exMachine3.setServers(singletonMap("ref1", serverConf5));
-    exMachine3.setAgents(ImmutableList.of("agent6", "agent2"));
+    exMachine3.setInstallers(ImmutableList.of("agent6", "agent2"));
     exMachine3.setAttributes(singletonMap("att1", "val"));
+    exMachine3.setEnv(singletonMap("CHE_ENV3", "value"));
 
     // Environments
-    final EnvironmentRecipeImpl recipe1 = new EnvironmentRecipeImpl();
+    final RecipeImpl recipe1 = new RecipeImpl();
     recipe1.setLocation("https://eclipse.che/Dockerfile");
     recipe1.setType("dockerfile");
     recipe1.setContentType("text/x-dockerfile");
@@ -365,7 +368,7 @@ public class FactoryDaoTest {
                 "machine3", exMachine3)));
     env1.setRecipe(recipe1);
 
-    final EnvironmentRecipeImpl recipe2 = new EnvironmentRecipeImpl();
+    final RecipeImpl recipe2 = new RecipeImpl();
     recipe2.setLocation("https://eclipse.che/Dockerfile");
     recipe2.setType("dockerfile");
     recipe2.setContentType("text/x-dockerfile");

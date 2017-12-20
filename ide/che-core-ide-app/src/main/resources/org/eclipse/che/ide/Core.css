@@ -101,6 +101,13 @@ input::selection {
     color: checkBoxIconColor;
 }
 
+.gwt-CheckBox input:indeterminate + label::before {
+    content: "\2714";
+    font-size: 14px;
+    font-weight: normal;
+    color: checkBoxIndeterminateIconColor;
+}
+
 .gwt-CheckBox input[disabled] + label {
     color: checkBoxDisabledFontColor;
 }
@@ -750,10 +757,6 @@ div[name="linkWithEditor"][activated="true"]  i {
     border-radius: 3px;
 }
 
-.tagsPanel {
-    width: 393px;
-}
-
 /********************************************************************************************
  *
  * Styled scroll bars
@@ -817,10 +820,10 @@ div[name="linkWithEditor"][activated="true"]  i {
 }
 
 .search-match {
-    background: linear-gradient(to bottom, #c1be9e 6%, #B89C07 64%);
+    background: findResultsBackground;
     border-radius: 2px;
     padding-right: 2px;
     padding-left: 2px;
+    color: findResultsTextColor;
+    text-shadow: none;
 }
-
-

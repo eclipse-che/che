@@ -20,7 +20,6 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import org.eclipse.che.ide.api.command.CommandType;
-import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.macro.Macro;
@@ -66,6 +65,7 @@ import org.eclipse.che.ide.ext.java.client.tree.LibraryNodeProvider;
 import org.eclipse.che.ide.ext.java.client.tree.SourceFolderDecorator;
 import org.eclipse.che.ide.ext.java.client.tree.TestFolderDecorator;
 import org.eclipse.che.ide.project.node.icon.NodeIconProvider;
+import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
 
 /**
  * @author Evgen Vidolob

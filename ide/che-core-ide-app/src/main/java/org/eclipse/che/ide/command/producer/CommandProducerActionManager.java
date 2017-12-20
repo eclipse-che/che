@@ -15,30 +15,20 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_TOOLBAR;
 import static org.eclipse.che.ide.api.constraints.Anchor.AFTER;
 
-import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandProducer;
-import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.constraints.Constraints;
-import org.eclipse.che.ide.api.machine.ActiveRuntime;
-import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
+import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
  * Manages actions for the commands.
@@ -46,63 +36,49 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
  * <p>Manager gets all registered {@link CommandProducer}s and creates related actions in context
  * menus.
  *
- * <p>Manager listens all machines's state (running/destroyed) in order to create/remove actions for
- * the related {@link CommandProducer}s in case they are applicable only for the certain machine
- * types.
- *
- * @author Artem Zatsarynnyi
  * @see CommandProducer
  */
 @Singleton
-public class CommandProducerActionManager
-    implements MachineStateEvent.Handler, WsAgentStateHandler, Component {
+public class CommandProducerActionManager {
 
   private final ActionManager actionManager;
   private final CommandProducerActionFactory commandProducerActionFactory;
-  private final AppContext appContext;
   private final Resources resources;
   private final ProducerMessages messages;
 
-  private final List<Machine> machines;
   private final Set<CommandProducer> commandProducers;
-  private final Map<Action, DefaultActionGroup> actionsToActionGroups;
-  private final Map<Machine, List<Action>> actionsByMachines;
-  private final Map<CommandProducer, DefaultActionGroup> producersToActionGroups;
 
   private DefaultActionGroup commandActionsPopUpGroup;
 
   @Inject
   public CommandProducerActionManager(
+      Set<CommandProducer> commandProducers,
       EventBus eventBus,
       ActionManager actionManager,
       CommandProducerActionFactory commandProducerActionFactory,
-      AppContext appContext,
       Resources resources,
       ProducerMessages messages) {
     this.actionManager = actionManager;
     this.commandProducerActionFactory = commandProducerActionFactory;
-    this.appContext = appContext;
     this.resources = resources;
     this.messages = messages;
 
-    machines = new ArrayList<>();
-    commandProducers = new HashSet<>();
-    actionsToActionGroups = new HashMap<>();
-    actionsByMachines = new HashMap<>();
-    producersToActionGroups = new HashMap<>();
+    this.commandProducers = new HashSet<>();
 
-    eventBus.addHandler(MachineStateEvent.TYPE, this);
-    eventBus.addHandler(WsAgentStateEvent.TYPE, this);
+    if (commandProducers != null) {
+      this.commandProducers.addAll(commandProducers);
+    }
+
+    eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> init());
   }
 
-  @Inject(optional = true)
-  private void start(Set<CommandProducer> commandProducers) {
-    this.commandProducers.addAll(commandProducers);
-
+  private void init() {
     commandActionsPopUpGroup =
         new DefaultActionGroup(messages.actionCommandsTitle(), true, actionManager);
     actionManager.registerAction("commandActionsPopUpGroup", commandActionsPopUpGroup);
-    commandActionsPopUpGroup.getTemplatePresentation().setSVGResource(resources.compile());
+    commandActionsPopUpGroup
+        .getTemplatePresentation()
+        .setImageElement(new SVGImage(resources.compile()).getElement());
     commandActionsPopUpGroup
         .getTemplatePresentation()
         .setDescription(messages.actionCommandsDescription());
@@ -121,111 +97,17 @@ public class CommandProducerActionManager
     DefaultActionGroup mainToolbarGroup =
         (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_TOOLBAR);
     mainToolbarGroup.add(commandActionsToolbarGroup, new Constraints(AFTER, "changeResourceGroup"));
+
+    commandProducers.forEach(this::createActionsForProducer);
   }
-
-  @Override
-  public void start(final Callback<Component, Exception> callback) {
-    ActiveRuntime activeRuntime = appContext.getActiveRuntime();
-    if (activeRuntime != null) {
-      machines.addAll(activeRuntime.getMachines());
-    }
-
-    callback.onSuccess(this);
-  }
-
-  @Override
-  public void onMachineCreating(MachineStateEvent event) {}
-
-  @Override
-  public void onMachineRunning(MachineStateEvent event) {
-    machines.add(event.getMachine());
-
-    createActionsForMachine(event.getMachine());
-  }
-
-  @Override
-  public void onMachineDestroyed(MachineStateEvent event) {
-    machines.remove(event.getMachine());
-
-    removeActionsForMachine(event.getMachine());
-  }
-
-  @Override
-  public void onWsAgentStarted(WsAgentStateEvent event) {
-    for (CommandProducer commandProducer : commandProducers) {
-      createActionsForProducer(commandProducer);
-    }
-  }
-
-  @Override
-  public void onWsAgentStopped(WsAgentStateEvent event) {}
 
   /** Creates actions for the given {@link CommandProducer}. */
   private void createActionsForProducer(CommandProducer producer) {
-    Action action;
+    BaseAction action = commandProducerActionFactory.create(producer.getName(), producer);
 
-    if (producer.getMachineTypes().isEmpty()) {
-      action =
-          commandProducerActionFactory.create(
-              producer.getName(), producer, appContext.getDevMachine().getDescriptor());
-
-      actionManager.registerAction(producer.getName(), action);
-    } else {
-      action = new DefaultActionGroup(producer.getName(), true, actionManager);
-
-      producersToActionGroups.put(producer, (DefaultActionGroup) action);
-
-      actionManager.registerAction(producer.getName(), action);
-
-      for (Machine machine : machines) {
-        createActionsForMachine(machine);
-      }
-    }
+    actionManager.registerAction(producer.getName(), action);
 
     commandActionsPopUpGroup.add(action);
-  }
-
-  /**
-   * Creates actions for that {@link CommandProducer}s which are applicable for the given machine's
-   * type.
-   */
-  private void createActionsForMachine(Machine machine) {
-    for (CommandProducer commandProducer : commandProducers) {
-      if (commandProducer.getMachineTypes().contains(machine.getConfig().getType())) {
-        CommandProducerAction machineAction =
-            commandProducerActionFactory.create(
-                machine.getConfig().getName(), commandProducer, machine);
-        final List<Action> actionList =
-            actionsByMachines.computeIfAbsent(machine, key -> new ArrayList<>());
-        actionList.add(machineAction);
-
-        actionManager.registerAction(machine.getConfig().getName(), machineAction);
-
-        DefaultActionGroup actionGroup = producersToActionGroups.get(commandProducer);
-        if (actionGroup != null) {
-          actionGroup.add(machineAction);
-
-          actionsToActionGroups.put(machineAction, actionGroup);
-        }
-      }
-    }
-  }
-
-  private void removeActionsForMachine(Machine machine) {
-    List<Action> actions = actionsByMachines.remove(machine);
-    if (actions != null) {
-      for (Action action : actions) {
-        DefaultActionGroup actionGroup = actionsToActionGroups.remove(action);
-        if (actionGroup != null) {
-          actionGroup.remove(action);
-
-          String id = actionManager.getId(action);
-          if (id != null) {
-            actionManager.unregisterAction(id);
-          }
-        }
-      }
-    }
   }
 
   /**

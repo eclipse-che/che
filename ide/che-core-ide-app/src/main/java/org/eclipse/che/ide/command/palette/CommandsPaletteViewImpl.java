@@ -38,13 +38,13 @@ import java.util.Map.Entry;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.command.node.CommandGoalNode;
 import org.eclipse.che.ide.command.node.ExecutableCommandNode;
 import org.eclipse.che.ide.command.node.NodeFactory;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.window.Window;
 
 /** Implementation of {@link CommandsPaletteView}. */

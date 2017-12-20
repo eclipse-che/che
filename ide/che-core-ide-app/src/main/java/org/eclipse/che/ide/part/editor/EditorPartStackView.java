@@ -11,16 +11,18 @@
 package org.eclipse.che.ide.part.editor;
 
 import static com.google.gwt.dom.client.Style.Display.BLOCK;
-import static com.google.gwt.dom.client.Style.Display.NONE;
 import static com.google.gwt.dom.client.Style.Unit.PCT;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.DeckLayoutPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -33,6 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackView;
@@ -48,27 +51,62 @@ public class EditorPartStackView extends ResizeComposite
 
   interface PartStackUiBinder extends UiBinder<Widget, EditorPartStackView> {}
 
+  /** Listener to handle clicking on Add tab button. */
+  interface AddTabButtonClickListener {
+
+    /**
+     * Called when clicking on Add tab button.
+     *
+     * @param mouseX absolute mouse left
+     * @param mouseY absolute mouse top
+     */
+    void onAddTabButtonClicked(int mouseX, int mouseY);
+  }
+
   private static final PartStackUiBinder UI_BINDER = GWT.create(PartStackUiBinder.class);
+
+  private static final int POPUP_OFFSET = 15;
 
   @UiField DockLayoutPanel parent;
 
   @UiField FlowPanel tabsPanel;
 
+  @UiField FlowPanel plusPanel;
+
   @UiField DeckLayoutPanel contentPanel;
+
+  @UiField FlowPanel menuPanel;
 
   private final Map<PartPresenter, TabItem> tabs;
   private final AcceptsOneWidget partViewContainer;
   private final LinkedList<PartPresenter> contents;
 
+  private int tabsPanelWidth = 0;
+
   private ActionDelegate delegate;
   private EditorPaneMenu editorPaneMenu;
   private TabItem activeTab;
+  private AddTabButtonClickListener addTabButtonClickListener;
 
   public EditorPartStackView() {
     this.tabs = new HashMap<>();
     this.contents = new LinkedList<>();
 
     initWidget(UI_BINDER.createAndBindUi(this));
+
+    plusPanel.getElement().setInnerHTML(FontAwesome.PLUS);
+    plusPanel.addDomHandler(
+        new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent clickEvent) {
+            if (addTabButtonClickListener != null) {
+              addTabButtonClickListener.onAddTabButtonClicked(
+                  getAbsoluteLeft(plusPanel.getElement()) + POPUP_OFFSET,
+                  getAbsoluteTop(plusPanel.getElement()) + POPUP_OFFSET);
+            }
+          }
+        },
+        ClickEvent.getType());
 
     partViewContainer =
         new AcceptsOneWidget() {
@@ -81,6 +119,30 @@ public class EditorPartStackView extends ResizeComposite
     addDomHandler(this, MouseDownEvent.getType());
 
     setMaximized(false);
+  }
+
+  /**
+   * Returns absolute left position of the element.
+   *
+   * @param element element
+   * @return element left position
+   */
+  private native int getAbsoluteLeft(JavaScriptObject element) /*-{
+      return element.getBoundingClientRect().left;
+  }-*/;
+
+  /**
+   * Returns absolute top position of the element.
+   *
+   * @param element element
+   * @return element top position
+   */
+  private native int getAbsoluteTop(JavaScriptObject element) /*-{
+      return element.getBoundingClientRect().top;
+  }-*/;
+
+  public void setAddTabButtonClickListener(AddTabButtonClickListener listener) {
+    addTabButtonClickListener = listener;
   }
 
   /** {@inheritDoc} */
@@ -100,7 +162,7 @@ public class EditorPartStackView extends ResizeComposite
    */
   public void addPaneMenuButton(@NotNull EditorPaneMenu editorPaneMenu) {
     this.editorPaneMenu = editorPaneMenu;
-    tabsPanel.add(editorPaneMenu);
+    menuPanel.add(editorPaneMenu);
   }
 
   /** {@inheritDoc} */
@@ -124,7 +186,7 @@ public class EditorPartStackView extends ResizeComposite
     }
 
     /** Add editor tab to tab panel */
-    tabsPanel.add(tabItem.getView());
+    tabsPanel.insert(tabItem.getView(), tabsPanel.getWidgetIndex(plusPanel));
 
     /** Process added editor tab */
     tabs.put(partPresenter, tabItem);
@@ -132,29 +194,105 @@ public class EditorPartStackView extends ResizeComposite
     partPresenter.go(partViewContainer);
   }
 
-  /** Makes active tab visible. */
+  /** Ensures active tab and plus button are visible. */
   private void ensureActiveTabVisible() {
+    // do nothing if selected tab is null
     if (activeTab == null) {
       return;
     }
 
-    for (int i = 0; i < tabsPanel.getWidgetCount(); i++) {
-      if (editorPaneMenu != null && editorPaneMenu != tabsPanel.getWidget(i)) {
-        tabsPanel.getWidget(i).setVisible(true);
-      }
+    // do nothing if selected tab is visible and plus button is visible
+    if (getAbsoluteTop(activeTab.getView().asWidget().getElement())
+            == getAbsoluteTop(tabsPanel.getElement())
+        && getAbsoluteTop(plusPanel.getElement()) == getAbsoluteTop(tabsPanel.getElement())
+        && tabsPanelWidth == tabsPanel.getOffsetWidth()) {
+      return;
     }
 
+    tabsPanelWidth = tabsPanel.getOffsetWidth();
+
+    // determine whether all widgets are visible
+    boolean allWidgetVisible = true;
     for (int i = 0; i < tabsPanel.getWidgetCount(); i++) {
-      Widget currentWidget = tabsPanel.getWidget(i);
-      Widget activeTabWidget = activeTab.getView().asWidget();
-      if (editorPaneMenu != null && editorPaneMenu == currentWidget) {
+      Widget w = tabsPanel.getWidget(i);
+      if (plusPanel == w) {
         continue;
       }
 
-      if (activeTabWidget.getAbsoluteTop() > tabsPanel.getAbsoluteTop()
-          && activeTabWidget != currentWidget) {
-        currentWidget.setVisible(false);
+      if (!w.isVisible()) {
+        allWidgetVisible = false;
+        break;
       }
+    }
+
+    // do nothing if all widgets are visible and sum of children width less then panel width
+    if (allWidgetVisible) {
+      int childrenWidth = 0;
+      for (int i = 0; i < tabsPanel.getWidgetCount(); i++) {
+        Widget w = tabsPanel.getWidget(i);
+        childrenWidth += w.getOffsetWidth();
+      }
+
+      if (childrenWidth < tabsPanelWidth) {
+        return;
+      }
+    }
+
+    // hide all widgets except plus button
+    for (int i = 0; i < tabsPanel.getWidgetCount(); i++) {
+      Widget w = tabsPanel.getWidget(i);
+      if (plusPanel == w) {
+        continue;
+      }
+
+      w.setVisible(false);
+    }
+
+    // determine selected tab index
+    int selectedTabIndex = tabsPanel.getWidgetIndex(activeTab.getView().asWidget());
+
+    // show all possible tabs before selected tab
+    for (int i = selectedTabIndex; i >= 0; i--) {
+      Widget w = tabsPanel.getWidget(i);
+
+      // skip for plus button
+      if (plusPanel == w) {
+        continue;
+      }
+
+      // set tab visible
+      w.setVisible(true);
+
+      // continue cycle if plus button visible
+      if (getAbsoluteTop(plusPanel.getElement()) == getAbsoluteTop(tabsPanel.getElement())) {
+        continue;
+      }
+
+      // otherwise hide tab and break
+      w.setVisible(false);
+      break;
+    }
+
+    // show all possible tabs after selected tab
+    for (int i = selectedTabIndex + 1; i < tabsPanel.getWidgetCount(); i++) {
+      Widget w = tabsPanel.getWidget(i);
+
+      // skip for plus button
+      if (plusPanel == w) {
+        continue;
+      }
+
+      // set tab visible
+      w.setVisible(true);
+
+      // continue cycle if plus button visible
+      if (getAbsoluteTop(plusPanel.getElement()) == getAbsoluteTop(tabsPanel.getElement())) {
+        continue;
+      }
+
+      // otherwise hide tab and break
+      w.setVisible(false);
+      break;
     }
   }
 
@@ -171,11 +309,6 @@ public class EditorPartStackView extends ResizeComposite
     if (!contents.isEmpty()) {
       selectTab(contents.getLast());
     }
-
-    // this hack need to force redraw dom element to apply correct styles
-    tabsPanel.getElement().getStyle().setDisplay(NONE);
-    tabsPanel.getElement().getOffsetHeight();
-    tabsPanel.getElement().getStyle().setDisplay(BLOCK);
   }
 
   /** {@inheritDoc} */
@@ -221,7 +354,9 @@ public class EditorPartStackView extends ResizeComposite
 
     delegate.onRequestFocus();
 
-    Scheduler.get().scheduleDeferred(this::ensureActiveTabVisible);
+    // reset timer and schedule it again
+    ensureActiveTabVisibleTimer.cancel();
+    ensureActiveTabVisibleTimer.schedule(200);
   }
 
   /** {@inheritDoc} */
@@ -260,13 +395,21 @@ public class EditorPartStackView extends ResizeComposite
   @Override
   public void onResize() {
     super.onResize();
-    Scheduler.get()
-        .scheduleDeferred(
-            new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                ensureActiveTabVisible();
-              }
-            });
+
+    // reset timer and schedule it again
+    ensureActiveTabVisibleTimer.cancel();
+    ensureActiveTabVisibleTimer.schedule(200);
   }
+
+  /**
+   * Timer to prevent updating tabs visibility while resizing. It needs to update tabs once when
+   * resizing has stopped.
+   */
+  private Timer ensureActiveTabVisibleTimer =
+      new Timer() {
+        @Override
+        public void run() {
+          ensureActiveTabVisible();
+        }
+      };
 }

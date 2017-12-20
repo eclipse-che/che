@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-multiuser-integration-tests</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>5.23.0-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-cascade-removal</artifactId>
     <packaging>jar</packaging>
@@ -49,10 +49,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-machine</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -92,15 +88,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
-            <artifactId>che-multiuser-permission-machine</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-permission-workspace</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>javax.persistence</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.inject.extensions</groupId>
@@ -160,11 +148,6 @@
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-sql-schema</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-machine-ext-server</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

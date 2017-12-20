@@ -194,7 +194,7 @@ public class MainMenuViewImpl extends Composite
     final Action[] children = mainActionGroup.getChildren(null);
     for (final Action action : children) {
       final Presentation presentation = presentationFactory.getPresentation(action);
-      final ActionEvent e = new ActionEvent(presentation, actionManager, managerProvider.get());
+      final ActionEvent e = new ActionEvent(presentation, actionManager);
       action.update(e);
       if (presentation.isVisible()) { // add only visible items
         newVisibleActions.add(action);

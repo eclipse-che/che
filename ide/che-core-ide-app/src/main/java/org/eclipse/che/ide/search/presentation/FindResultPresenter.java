@@ -21,11 +21,9 @@ import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.ide.api.project.QueryExpression;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
@@ -33,8 +31,10 @@ import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.SearchItemReference;
 import org.eclipse.che.ide.api.resources.SearchResult;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.project.ProjectServiceClient;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**

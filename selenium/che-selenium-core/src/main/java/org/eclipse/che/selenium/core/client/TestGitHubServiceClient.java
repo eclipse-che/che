@@ -20,16 +20,19 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import javax.xml.bind.DatatypeConverter;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.dto.server.JsonStringMapImpl;
 import org.eclipse.che.plugin.github.shared.GitHubKey;
+import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
 
 /** @author Mihail Kuznyetsov. */
@@ -227,38 +230,19 @@ public class TestGitHubServiceClient {
     return "Basic " + base64;
   }
 
-  public String getUserPublicPrimaryEmail(String username, String password) throws Exception {
-    String url = "https://api.github.com/user/public_emails";
-    HttpJsonResponse response =
-        requestFactory
-            .fromUrl(url)
-            .useGetMethod()
-            .setAuthorizationHeader(createBasicAuthHeader(username, password))
-            .request();
-
-    @SuppressWarnings("unchecked")
-    List<Map<String, String>> properties =
-        response.as(List.class, new TypeToken<List<Map<String, String>>>() {}.getType());
-
-    if (properties.isEmpty()) {
-      throw new NoSuchElementException("The list with github emails is empty");
-    }
-
-    return filterPropertiesAndGetGithubPrimaryEmail(properties);
-  }
-
-  private String filterPropertiesAndGetGithubPrimaryEmail(List<Map<String, String>> properties) {
-    List<Map<String, String>> primaryPublicGithubEmails =
-        properties
-            .stream()
-            .filter(
-                map -> map.get("primary").equals("true") && map.get("visibility").equals("public"))
-            .collect(toList());
-
-    if (primaryPublicGithubEmails.isEmpty()) {
-      throw new NoSuchElementException("The list with github primary, public emails is empty");
-    }
-
-    return primaryPublicGithubEmails.get(0).get("email");
+  public void addContentToRepository(Path repoRoot, String commitMessage, GHRepository ghRepository)
+      throws IOException {
+    Files.walk(repoRoot)
+        .filter(Files::isRegularFile)
+        .forEach(
+            it -> {
+              try {
+                byte[] contentBytes = Files.readAllBytes(it);
+                String relativePath = repoRoot.relativize(it).toString();
+                ghRepository.createContent(contentBytes, commitMessage, relativePath);
+              } catch (IOException e) {
+                throw new UncheckedIOException(e);
+              }
+            });
   }
 }

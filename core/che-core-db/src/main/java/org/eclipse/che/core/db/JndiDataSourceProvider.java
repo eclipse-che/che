@@ -25,7 +25,7 @@ import javax.sql.DataSource;
 public class JndiDataSourceProvider implements Provider<DataSource> {
 
   @Inject
-  @Named("db.jndi.datasource.name")
+  @Named("jndi.datasource.name")
   private String name;
 
   @Override

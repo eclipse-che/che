@@ -12,9 +12,9 @@ package org.eclipse.che.ide.actions.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.data.tree.TreeExpander;
+import org.eclipse.che.ide.api.action.BaseAction;
+import org.eclipse.che.ide.ui.smartTree.data.TreeExpander;
 
 /**
  * Base tree collapse action which consumes instance of {@link TreeExpander}.
@@ -23,7 +23,7 @@ import org.eclipse.che.ide.api.data.tree.TreeExpander;
  * @see TreeExpander
  * @since 5.0.0
  */
-public abstract class CollapseTreeAction extends Action {
+public abstract class CollapseTreeAction extends BaseAction {
 
   public abstract TreeExpander getTreeExpander();
 

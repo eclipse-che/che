@@ -10,18 +10,11 @@
  */
 package org.eclipse.che.ide.api.command;
 
-import java.util.Set;
-import org.eclipse.che.api.core.model.machine.Machine;
-
 /**
  * Defines the requirements for a component which can produce the commands from the current context.
  *
  * <p>For every registered {@link CommandProducer} an appropriate action will be added in context
  * menus (e.g., explorer, editor tab).
- *
- * <p>Implementor can restrict machine types where command may be executed with {@link
- * #getMachineTypes()}. In that case, sub menu will be created with separate sub actions which are
- * correspond to each machine.
  *
  * <p>Implementations of this interface have to be registered with a GIN multibinder in order to be
  * picked-up on application's start-up.
@@ -39,15 +32,6 @@ public interface CommandProducer {
    */
   boolean isApplicable();
 
-  /**
-   * Creates a command from the current context. Target for command execution will be provided
-   * through {@code machine} parameter. Called when user performs corresponded action.
-   */
-  CommandImpl createCommand(Machine machine);
-
-  /**
-   * Returns machine types for restricting machines where command may be executed. If returns empty
-   * set then ws-agent will be used for executing a command.
-   */
-  Set<String> getMachineTypes();
+  /** Creates a command from the current context. Called when user performs corresponded action. */
+  CommandImpl createCommand();
 }

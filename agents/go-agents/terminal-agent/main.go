@@ -32,6 +32,7 @@ import (
 	"github.com/eclipse/che/agents/go-agents/core/auth"
 	"github.com/eclipse/che/agents/go-agents/core/rest"
 	"github.com/eclipse/che/agents/go-agents/terminal-agent/term"
+	"strconv"
 )
 
 var (
@@ -39,7 +40,7 @@ var (
 )
 
 func init() {
-	config.registerFlags()
+	config.init()
 }
 
 func main() {
@@ -104,7 +105,7 @@ type terminalAgentConfig struct {
 	tokensExpirationTimeoutInMinutes uint
 }
 
-func (cfg *terminalAgentConfig) registerFlags() {
+func (cfg *terminalAgentConfig) init() {
 	// server configuration
 	flag.StringVar(
 		&cfg.serverAddress,
@@ -148,11 +149,18 @@ func (cfg *terminalAgentConfig) registerFlags() {
 	)
 
 	// auth configuration
+	defaultAuthEnabled := false
+	authEnabledEnv := os.Getenv("CHE_AUTH_ENABLED")
+	b, e := strconv.ParseBool(authEnabledEnv)
+	if e == nil {
+		defaultAuthEnabled = b
+	}
 	flag.BoolVar(
 		&cfg.authEnabled,
 		"enable-auth",
-		false,
-		"whether authenicate requests on workspace master before allowing them to proceed",
+		defaultAuthEnabled,
+		"whether authenticate requests on workspace master before allowing them to proceed."+
+			"By default the value from 'CHE_AUTH_ENABLED' environment variable is used or `false` if it is missing",
 	)
 	flag.UintVar(
 		&cfg.tokensExpirationTimeoutInMinutes,

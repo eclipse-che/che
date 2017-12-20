@@ -18,10 +18,10 @@ import java.util.List;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
 
 /**
  * Presenter for choosing source directory.

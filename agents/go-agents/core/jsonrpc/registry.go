@@ -78,8 +78,8 @@ func (reg *TunnelRegistry) GetTunnels() []*Tunnel {
 
 // Get returns tunnel with a given id.
 func (reg *TunnelRegistry) Get(id string) (*Tunnel, bool) {
-	reg.Lock()
-	defer reg.Unlock()
+	reg.RLock()
+	defer reg.RUnlock()
 	tun, ok := reg.tunnels[id]
 	return tun, ok
 }

@@ -42,7 +42,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
@@ -585,6 +585,7 @@ public class StackServiceTest {
 
   @Filter
   public static class EnvironmentFilter implements RequestFilter {
+    @Override
     public void doFilter(GenericContainerRequest request) {
       EnvironmentContext.getCurrent().setSubject(new SubjectImpl("user", USER_ID, "token", false));
     }

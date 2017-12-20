@@ -10,11 +10,10 @@
  */
 package org.eclipse.che.multiuser.resource.spi.tck.jpa;
 
-import static org.eclipse.che.commons.test.db.H2TestHelper.inMemoryDefault;
-
 import com.google.inject.TypeLiteral;
 import com.google.inject.persist.jpa.JpaPersistModule;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.tck.TckModule;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
@@ -33,10 +32,11 @@ public class ResourceTckModule extends TckModule {
   @Override
   protected void configure() {
     install(new JpaPersistModule("main"));
+    H2DBTestServer server = H2DBTestServer.startDefault();
     bind(SchemaInitializer.class)
-        .toInstance(new FlywaySchemaInitializer(inMemoryDefault(), "che-schema"));
+        .toInstance(new FlywaySchemaInitializer(server.getDataSource(), "che-schema"));
     bind(DBInitializer.class).asEagerSingleton();
-    bind(TckResourcesCleaner.class).to(H2JpaCleaner.class);
+    bind(TckResourcesCleaner.class).toInstance(new H2JpaCleaner(server));
 
     bind(new TypeLiteral<TckRepository<FreeResourcesLimitImpl>>() {})
         .toInstance(new JpaTckRepository<>(FreeResourcesLimitImpl.class));

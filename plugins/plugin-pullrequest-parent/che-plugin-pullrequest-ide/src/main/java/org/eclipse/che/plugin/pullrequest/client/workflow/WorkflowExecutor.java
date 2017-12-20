@@ -23,7 +23,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;

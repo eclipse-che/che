@@ -33,10 +33,10 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
-import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 
@@ -252,28 +252,6 @@ public class JpaWorkspaceDao implements WorkspaceDao {
           workspaceManager.getByNamespace(event.getAccount().getName(), false)) {
         workspaceManager.removeWorkspace(workspace.getId());
       }
-    }
-  }
-
-  @Singleton
-  public static class RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber
-      extends CascadeEventSubscriber<BeforeWorkspaceRemovedEvent> {
-    @Inject private EventService eventService;
-    @Inject private WorkspaceManager workspaceManager;
-
-    @PostConstruct
-    public void subscribe() {
-      eventService.subscribe(this, BeforeWorkspaceRemovedEvent.class);
-    }
-
-    @PreDestroy
-    public void unsubscribe() {
-      eventService.unsubscribe(this, BeforeWorkspaceRemovedEvent.class);
-    }
-
-    @Override
-    public void onCascadeEvent(BeforeWorkspaceRemovedEvent event) throws Exception {
-      workspaceManager.removeSnapshots(event.getWorkspace().getId());
     }
   }
 }

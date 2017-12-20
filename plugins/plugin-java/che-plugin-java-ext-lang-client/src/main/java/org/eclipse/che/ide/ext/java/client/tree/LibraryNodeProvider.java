@@ -20,12 +20,12 @@ import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
-import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
+import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
 
 /** @author Vlad Zhukovskiy */
 @Beta

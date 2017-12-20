@@ -19,7 +19,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.EditorInput;
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.editor.events.FileEvent;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.util.loging.Log;
 

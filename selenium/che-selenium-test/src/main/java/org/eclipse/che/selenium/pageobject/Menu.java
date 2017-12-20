@@ -54,6 +54,11 @@ public class Menu {
 
   private static String ENABLED_CSS_VALUE = "rgba(255, 255, 255, 1)";
 
+  private interface Locators {
+    String DISABLED_ITEM = "//tr[@id='%s' and @item-enabled='false']";
+    String ENABLED_ITEM = "//tr[@id='%s' and @item-enabled='true']";
+  }
+
   /**
    * Run command from toolbar
    *
@@ -112,7 +117,7 @@ public class Menu {
           .click();
 
     } catch (WebDriverException ex) {
-      LOG.error(ex.getLocalizedMessage(), ex);
+      LOG.warn(ex.getLocalizedMessage());
       WaitUtils.sleepQuietly(REDRAW_UI_ELEMENTS_TIMEOUT_SEC, TimeUnit.MILLISECONDS);
       redrawMenuItemsWait
           .until(ExpectedConditions.visibilityOfElementLocated(By.id(idTopMenuCommand)))
@@ -230,13 +235,15 @@ public class Menu {
   }
 
   /**
-   * Run command from toolbar using Web elements with xpath
+   * Run command from menu using Web elements with xpath
    *
-   * @param xpathCommand
+   * @param command is name of command
    */
-  public void runCommandByXpath(String xpathCommand) {
+  public void runCommandByXpath(String command) {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(By.xpath(xpathCommand)))
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(String.format(Locators.ENABLED_ITEM, command))))
         .click();
   }
 
@@ -244,5 +251,17 @@ public class Menu {
   public void waitCommandIsNotPresentInMenu(String menuCommand) {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.id(menuCommand)));
+  }
+
+  /**
+   * wait a command is disabled in the menu
+   *
+   * @param idCommand is name of command in the menu
+   */
+  public void waitCommandIsDisabledInMenu(String idCommand) {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(String.format(Locators.DISABLED_ITEM, idCommand))));
   }
 }

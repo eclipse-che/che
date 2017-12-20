@@ -22,10 +22,10 @@ import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.command.CommandImpl.ApplicableContext;
@@ -80,9 +80,14 @@ public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
           .then(onComplete(callback))
           .catchError(onFailure(callback));
     } else if (mode == UPDATE) {
+      String path =
+          dataObject.getPath().startsWith("/")
+              ? dataObject.getPath().substring(1)
+              : dataObject.getPath();
+
       appContext
           .getWorkspaceRoot()
-          .getContainer(Path.valueOf(dataObject.getPath()))
+          .getContainer(Path.valueOf(path))
           .then(
               optContainer -> {
                 checkState(optContainer.isPresent(), "Failed to update non existed path");

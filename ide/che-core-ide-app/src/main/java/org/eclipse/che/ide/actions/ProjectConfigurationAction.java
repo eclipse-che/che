@@ -13,7 +13,7 @@ package org.eclipse.che.ide.actions;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -52,7 +52,6 @@ public class ProjectConfigurationAction extends AbstractPerspectiveAction {
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.actionProjectConfigurationTitle(),
         localization.actionProjectConfigurationDescription(),
-        null,
         resources.projectConfiguration());
     this.appContext = appContext;
     this.projectWizard = projectWizard;

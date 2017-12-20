@@ -19,6 +19,7 @@ import static org.mockito.Mockito.mock;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.ide.api.keybinding.Scheme;
+import org.eclipse.che.ide.api.keybinding.SchemeImpl;
 import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +34,7 @@ public class KeyBindingManagerTest {
 
   @Before
   public void setUp() {
-    keyManager = new KeyBindingManager(null, null);
+    keyManager = new KeyBindingManager(null);
     testScheme = new SchemeImpl("org.eclipse.che.test.scheme", "Sample Description");
   }
 

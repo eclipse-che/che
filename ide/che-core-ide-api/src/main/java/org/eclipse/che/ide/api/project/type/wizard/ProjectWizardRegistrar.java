@@ -37,7 +37,6 @@ public interface ProjectWizardRegistrar {
   String PROJECT_NAME_KEY = "ProjectWizard:CurrentProjectName";
 
   /** Returns ID of the project type that should be registered in project wizard. */
-  @NotNull
   String getProjectTypeId();
 
   /** Returns project type category for the project wizard. */
@@ -45,6 +44,5 @@ public interface ProjectWizardRegistrar {
   String getCategory();
 
   /** Returns pages that should be used in project wizard. */
-  @NotNull
   List<Provider<? extends WizardPage<MutableProjectConfig>>> getWizardPages();
 }

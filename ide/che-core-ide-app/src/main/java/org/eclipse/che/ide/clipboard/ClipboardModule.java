@@ -14,11 +14,7 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import org.eclipse.che.ide.ui.zeroclipboard.ClipboardButtonBuilder;
 import org.eclipse.che.ide.ui.zeroclipboard.ClipboardButtonBuilderImpl;
 
-/**
- * GIN module for configuring components related to clipboard support.
- *
- * @author Artem Zatsarynnyi
- */
+/** GIN module for configuring components related to clipboard support. */
 public class ClipboardModule extends AbstractGinModule {
 
   @Override

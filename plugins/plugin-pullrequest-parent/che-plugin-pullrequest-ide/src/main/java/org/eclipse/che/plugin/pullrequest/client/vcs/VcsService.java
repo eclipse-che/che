@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.pullrequest.client.vcs;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import java.util.List;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.PushResponse;
 import org.eclipse.che.api.git.shared.Remote;

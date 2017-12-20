@@ -36,7 +36,8 @@ public class ProjectClasspathProviderTest {
   private static final String PROJECTS_PATH = "/projects";
 
   private static ResourcesPlugin RESOURCE_PLUGIN =
-      new ResourcesPlugin("target/test-classes/index", PROJECTS_PATH, () -> null, () -> null);
+      new ResourcesPlugin(
+          "target/test-classes/index", PROJECTS_PATH, () -> null, () -> null, () -> null);
 
   @Mock private IJavaProject javaProject;
 

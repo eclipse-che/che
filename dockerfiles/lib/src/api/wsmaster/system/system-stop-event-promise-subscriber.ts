@@ -11,8 +11,8 @@
 
 import {org} from "../../../api/dto/che-dto"
 import {MessageBusSubscriber} from "../../../spi/websocket/messagebus-subscriber";
-import {MessageBus} from "../../../spi/websocket/messagebus";
 import {Log} from "../../../spi/log/log";
+import {JsonRpcBus} from "../../../spi/websocket/json-rpc-bus";
 /**
  * Handle a promise that will be resolved when system is stopped.
  * If system has error, promise will be rejected
@@ -23,7 +23,7 @@ export class SystemStopEventPromiseMessageBusSubscriber implements MessageBusSub
     /**
      * Bus used to collect events
      */
-    messageBus : MessageBus;
+    messageBus : JsonRpcBus;
 
     /**
      * Resolve method to call when we're ready to shutdown the system.
@@ -40,7 +40,7 @@ export class SystemStopEventPromiseMessageBusSubscriber implements MessageBusSub
      */
     promise: Promise<string>;
 
-    constructor(messageBus : MessageBus) {
+    constructor(messageBus : JsonRpcBus) {
         this.messageBus = messageBus;
         this.promise = new Promise<string>((resolve, reject) => {
             this.resolve = resolve;

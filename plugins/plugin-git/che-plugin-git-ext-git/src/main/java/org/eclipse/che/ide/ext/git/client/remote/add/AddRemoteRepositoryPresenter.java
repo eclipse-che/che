@@ -15,8 +15,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 
 /**
  * Presenter for adding remote repository.

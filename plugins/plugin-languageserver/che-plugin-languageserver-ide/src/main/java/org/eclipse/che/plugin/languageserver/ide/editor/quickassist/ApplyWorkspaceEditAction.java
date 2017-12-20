@@ -28,8 +28,8 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.promises.client.js.Executor;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.api.promises.client.js.ResolveFunction;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
@@ -52,7 +52,7 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
 
 @Singleton
-public class ApplyWorkspaceEditAction extends Action {
+public class ApplyWorkspaceEditAction extends BaseAction {
   private static final Comparator<TextEdit> COMPARATOR =
       RangeComparator.transform(new RangeComparator().reversed(), TextEdit::getRange);
 

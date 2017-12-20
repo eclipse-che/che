@@ -20,6 +20,7 @@ import static org.testng.Assert.assertTrue;
 import java.util.List;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.event.BreakpointActivatedEvent;
 import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent;
 import org.eclipse.che.api.debug.shared.model.event.DisconnectEvent;
@@ -107,7 +108,7 @@ public class NodeJsDebuggerTest {
 
   @Test
   public void testOver() throws Exception {
-    debugger.stepOver(new StepOverActionImpl());
+    debugger.stepOver(new StepOverActionImpl(SuspendPolicy.ALL));
 
     ArgumentCaptor<SuspendEvent> suspendEventCaptor = ArgumentCaptor.forClass(SuspendEvent.class);
     verify(callback, timeout(1000)).onEvent(suspendEventCaptor.capture());
@@ -120,7 +121,7 @@ public class NodeJsDebuggerTest {
   public void testIntoAndOut() throws Exception {
     ArgumentCaptor<SuspendEvent> suspendEventCaptor = ArgumentCaptor.forClass(SuspendEvent.class);
 
-    debugger.stepInto(new StepIntoActionImpl());
+    debugger.stepInto(new StepIntoActionImpl(SuspendPolicy.ALL));
 
     verify(callback).onEvent(suspendEventCaptor.capture());
     SuspendEvent suspendEvent = suspendEventCaptor.getValue();
@@ -128,7 +129,7 @@ public class NodeJsDebuggerTest {
     assertTrue(suspendEvent.getLocation().getTarget().endsWith("app.js"));
 
     Mockito.reset(callback);
-    debugger.stepInto(new StepIntoActionImpl());
+    debugger.stepInto(new StepIntoActionImpl(SuspendPolicy.ALL));
 
     verify(callback, timeout(1000)).onEvent(suspendEventCaptor.capture());
     suspendEvent = suspendEventCaptor.getValue();
@@ -136,7 +137,7 @@ public class NodeJsDebuggerTest {
     assertTrue(suspendEvent.getLocation().getTarget().endsWith("app.js"));
 
     Mockito.reset(callback);
-    debugger.stepOut(new StepOutActionImpl());
+    debugger.stepOut(new StepOutActionImpl(SuspendPolicy.ALL));
 
     verify(callback, timeout(1000)).onEvent(suspendEventCaptor.capture());
     suspendEvent = suspendEventCaptor.getValue();

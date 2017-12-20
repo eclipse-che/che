@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.processes.ProcessDataAdapter;
@@ -57,6 +56,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     implements ProcessesPanelView,
         SubPanel.FocusListener,
         SubPanel.DoubleClickListener,
+        SubPanel.AddTabButtonClickListener,
         RequiresResize {
 
   @UiField(provided = true)
@@ -86,7 +86,6 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
   @Inject
   public ProcessesPanelViewImpl(
-      PartStackUIResources partStackUIResources,
       org.eclipse.che.ide.Resources resources,
       MachineResources machineResources,
       ProcessTreeRenderer renderer,
@@ -95,7 +94,6 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
       SubPanelFactory subPanelFactory,
       CoreLocalizationConstant localizationConstants,
       SplitterFancyUtil splitterFancyUtil) {
-    super(partStackUIResources);
     setTitle(localizationConstants.viewProcessesTitle());
     this.machineResources = machineResources;
 
@@ -183,6 +181,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     final SubPanel subPanel = subPanelFactory.newPanel();
     subPanel.setFocusListener(this);
     subPanel.setDoubleClickListener(this);
+    subPanel.setAddTabButtonClickListener(this);
     splitLayoutPanel.add(subPanel.getView());
     focusedSubPanel = subPanel;
 
@@ -249,8 +248,6 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     processWidgets.put(processId, widgetToShow);
 
     widget2TreeNodes.put(widgetToShow.getWidget(), processTreeNodes.get(processId));
-
-    showProcessOutput(processId);
   }
 
   @Override
@@ -458,12 +455,23 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         ((RequiresResize) widget).onResize();
       }
     }
+
+    for (SubPanel panel : widget2Panels.values()) {
+      if (panel.getView() instanceof RequiresResize) {
+        ((RequiresResize) panel.getView()).onResize();
+      }
+    }
   }
 
   @Override
   public void setProcessesTreeVisible(boolean visible) {
     splitLayoutPanel.setWidgetHidden(navigationPanel, !visible);
     navigationPanelVisible = visible;
+  }
+
+  @Override
+  public void onAddTabButtonClicked(int mouseX, int mouseY) {
+    delegate.onAddTabButtonClicked(mouseX, mouseY);
   }
 
   @Override

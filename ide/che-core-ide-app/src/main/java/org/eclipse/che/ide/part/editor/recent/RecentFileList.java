@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.ide.part.editor.recent;
 
-import org.eclipse.che.ide.api.recent.RecentList;
 import org.eclipse.che.ide.api.resources.File;
 
 /**

@@ -35,11 +35,16 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_PROJECT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RECENT_FILES;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_MAIN_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_TOOLBAR;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_TOOLBAR_CONTROLLER;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_WORKSPACE;
+import static org.eclipse.che.ide.api.action.IdeActions.TOOL_WINDOWS_GROUP;
+import static org.eclipse.che.ide.api.constraints.Anchor.AFTER;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
 import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
 import static org.eclipse.che.ide.part.editor.recent.RecentFileStore.RECENT_GROUP_ID;
 import static org.eclipse.che.ide.projecttype.BlankProjectWizardRegistrar.BLANK_CATEGORY;
+import static org.eclipse.che.ide.util.input.KeyCodeMap.ARROW_DOWN;
+import static org.eclipse.che.ide.util.input.KeyCodeMap.ARROW_UP;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.inject.Inject;
@@ -79,19 +84,25 @@ import org.eclipse.che.ide.actions.ShowConsoleTreeAction;
 import org.eclipse.che.ide.actions.ShowHiddenFilesAction;
 import org.eclipse.che.ide.actions.ShowPreferencesAction;
 import org.eclipse.che.ide.actions.ShowReferenceAction;
+import org.eclipse.che.ide.actions.ShowToolbarAction;
 import org.eclipse.che.ide.actions.SignatureHelpAction;
 import org.eclipse.che.ide.actions.SoftWrapAction;
-import org.eclipse.che.ide.actions.StopWorkspaceAction;
 import org.eclipse.che.ide.actions.UndoAction;
 import org.eclipse.che.ide.actions.UploadFileAction;
 import org.eclipse.che.ide.actions.UploadFolderAction;
+import org.eclipse.che.ide.actions.common.HidePartAction;
 import org.eclipse.che.ide.actions.common.MaximizePartAction;
-import org.eclipse.che.ide.actions.common.MinimizePartAction;
 import org.eclipse.che.ide.actions.common.RestorePartAction;
 import org.eclipse.che.ide.actions.find.FindActionAction;
-import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.actions.switching.CommandsExplorerDisplayingModeAction;
+import org.eclipse.che.ide.actions.switching.EditorDisplayingModeAction;
+import org.eclipse.che.ide.actions.switching.EventLogsDisplayingModeAction;
+import org.eclipse.che.ide.actions.switching.FindResultDisplayingModeAction;
+import org.eclipse.che.ide.actions.switching.ProjectExplorerDisplayingModeAction;
+import org.eclipse.che.ide.actions.switching.TerminalDisplayingModeAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.constraints.Constraints;
@@ -107,13 +118,11 @@ import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.command.editor.CommandEditorProvider;
 import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
+import org.eclipse.che.ide.devmode.DevModeOffAction;
+import org.eclipse.che.ide.devmode.DevModeSetUpAction;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.imageviewer.PreviewImageAction;
 import org.eclipse.che.ide.machine.MachineResources;
-import org.eclipse.che.ide.macro.ServerHostNameMacro;
-import org.eclipse.che.ide.macro.ServerMacro;
-import org.eclipse.che.ide.macro.ServerPortMacro;
-import org.eclipse.che.ide.macro.ServerProtocolMacro;
 import org.eclipse.che.ide.newresource.NewFileAction;
 import org.eclipse.che.ide.newresource.NewFolderAction;
 import org.eclipse.che.ide.part.editor.actions.CloseAction;
@@ -145,7 +154,9 @@ import org.eclipse.che.ide.ui.toolbar.MainToolbar;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
+import org.eclipse.che.ide.workspace.StopWorkspaceAction;
 import org.eclipse.che.ide.xml.NewXmlFileAction;
+import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -182,6 +193,14 @@ public class StandardComponentInitializer {
   public static final String SHOW_REFERENCE = "showReference";
   public static final String SHOW_COMMANDS_PALETTE = "showCommandsPalette";
   public static final String NEW_TERMINAL = "newTerminal";
+  public static final String PROJECT_EXPLORER_DISPLAYING_MODE = "projectExplorerDisplayingMode";
+  public static final String COMMAND_EXPLORER_DISPLAYING_MODE = "commandExplorerDisplayingMode";
+  public static final String FIND_RESULT_DISPLAYING_MODE = "findResultDisplayingMode";
+  public static final String EVENT_LOGS_DISPLAYING_MODE = "eventLogsDisplayingMode";
+  public static final String EDITOR_DISPLAYING_MODE = "editorDisplayingMode";
+  public static final String TERMINAL_DISPLAYING_MODE = "terminalDisplayingMode";
+  public static final String REVEAL_RESOURCE = "revealResourceInProjectTree";
+  public static final String COLLAPSE_ALL = "collapseAll";
 
   public interface ParserResource extends ClientBundle {
     @Source("org/eclipse/che/ide/blank.svg")
@@ -221,8 +240,6 @@ public class StandardComponentInitializer {
   @Inject private DeleteResourceAction deleteResourceAction;
 
   @Inject private RenameItemAction renameItemAction;
-
-  @Inject private CollapseAllAction collapseAllAction;
 
   @Inject private SplitVerticallyAction splitVerticallyAction;
 
@@ -312,11 +329,13 @@ public class StandardComponentInitializer {
 
   @Inject private LinkWithEditorAction linkWithEditorAction;
 
+  @Inject private ShowToolbarAction showToolbarAction;
+
   @Inject private SignatureHelpAction signatureHelpAction;
 
   @Inject private MaximizePartAction maximizePartAction;
 
-  @Inject private MinimizePartAction minimizePartAction;
+  @Inject private HidePartAction hidePartAction;
 
   @Inject private RestorePartAction restorePartAction;
 
@@ -342,7 +361,25 @@ public class StandardComponentInitializer {
 
   @Inject private RemoveFromFileWatcherExcludesAction removeFromFileWatcherExcludesAction;
 
+  @Inject private DevModeSetUpAction devModeSetUpAction;
+
+  @Inject private DevModeOffAction devModeOffAction;
+
+  @Inject private CollapseAllAction collapseAllAction;
+
   @Inject private PerspectiveManager perspectiveManager;
+
+  @Inject private CommandsExplorerDisplayingModeAction commandsExplorerDisplayingModeAction;
+
+  @Inject private ProjectExplorerDisplayingModeAction projectExplorerDisplayingModeAction;
+
+  @Inject private EventLogsDisplayingModeAction eventLogsDisplayingModeAction;
+
+  @Inject private FindResultDisplayingModeAction findResultDisplayingModeAction;
+
+  @Inject private EditorDisplayingModeAction editorDisplayingModeAction;
+
+  @Inject private TerminalDisplayingModeAction terminalDisplayingModeAction;
 
   @Inject
   @Named("XMLFileType")
@@ -401,15 +438,6 @@ public class StandardComponentInitializer {
   @Inject private ProjectConfigSynchronized projectConfigSynchronized;
 
   @Inject private TreeResourceRevealer treeResourceRevealer; // just to work with it
-
-  // do not remove the injections below
-  @Inject private ServerMacro serverMacro;
-
-  @Inject private ServerProtocolMacro serverProtocolMacro;
-
-  @Inject private ServerHostNameMacro serverHostNameMacro;
-
-  @Inject private ServerPortMacro serverPortMacro;
 
   @Inject private TerminalInitializer terminalInitializer;
 
@@ -486,7 +514,9 @@ public class StandardComponentInitializer {
 
     DefaultActionGroup newGroup = new DefaultActionGroup("New", true, actionManager);
     newGroup.getTemplatePresentation().setDescription("Create...");
-    newGroup.getTemplatePresentation().setSVGResource(resources.newResource());
+    newGroup
+        .getTemplatePresentation()
+        .setImageElement(new SVGImage(resources.newResource()).getElement());
     actionManager.registerAction(GROUP_FILE_NEW, newGroup);
     projectGroup.add(newGroup);
 
@@ -501,7 +531,9 @@ public class StandardComponentInitializer {
     newGroup.addSeparator();
 
     actionManager.registerAction("newXmlFile", newXmlFileAction);
-    newXmlFileAction.getTemplatePresentation().setSVGResource(xmlFile.getImage());
+    newXmlFileAction
+        .getTemplatePresentation()
+        .setImageElement(new SVGImage(xmlFile.getImage()).getElement());
     newGroup.addAction(newXmlFileAction);
 
     actionManager.registerAction("uploadFile", uploadFileAction);
@@ -580,9 +612,6 @@ public class StandardComponentInitializer {
     editGroup.add(switchPreviousEditorAction);
     editGroup.add(switchNextEditorAction);
 
-    editGroup.addSeparator();
-    editGroup.add(revealResourceAction);
-
     // Assistant (New Menu)
     DefaultActionGroup assistantGroup =
         (DefaultActionGroup) actionManager.getAction(GROUP_ASSISTANT);
@@ -598,12 +627,44 @@ public class StandardComponentInitializer {
 
     assistantGroup.addSeparator();
 
+    // Switching of parts
+    DefaultActionGroup toolWindowsGroup =
+        new DefaultActionGroup("Tool Windows", true, actionManager);
+    actionManager.registerAction(TOOL_WINDOWS_GROUP, toolWindowsGroup);
+
+    actionManager.registerAction(
+        PROJECT_EXPLORER_DISPLAYING_MODE, projectExplorerDisplayingModeAction);
+    actionManager.registerAction(FIND_RESULT_DISPLAYING_MODE, findResultDisplayingModeAction);
+    actionManager.registerAction(EVENT_LOGS_DISPLAYING_MODE, eventLogsDisplayingModeAction);
+    actionManager.registerAction(
+        COMMAND_EXPLORER_DISPLAYING_MODE, commandsExplorerDisplayingModeAction);
+    actionManager.registerAction(EDITOR_DISPLAYING_MODE, editorDisplayingModeAction);
+    actionManager.registerAction(TERMINAL_DISPLAYING_MODE, terminalDisplayingModeAction);
+    toolWindowsGroup.add(projectExplorerDisplayingModeAction, FIRST);
+    toolWindowsGroup.add(
+        eventLogsDisplayingModeAction, new Constraints(AFTER, PROJECT_EXPLORER_DISPLAYING_MODE));
+    toolWindowsGroup.add(
+        findResultDisplayingModeAction, new Constraints(AFTER, EVENT_LOGS_DISPLAYING_MODE));
+    toolWindowsGroup.add(
+        commandsExplorerDisplayingModeAction, new Constraints(AFTER, FIND_RESULT_DISPLAYING_MODE));
+    toolWindowsGroup.add(editorDisplayingModeAction);
+    toolWindowsGroup.add(terminalDisplayingModeAction);
+
+    assistantGroup.add(toolWindowsGroup);
+    assistantGroup.addSeparator();
+
     actionManager.registerAction("callCompletion", completeAction);
     assistantGroup.add(completeAction);
 
     actionManager.registerAction("downloadItemAction", downloadResourceAction);
     actionManager.registerAction(NAVIGATE_TO_FILE, navigateToFileAction);
     assistantGroup.add(navigateToFileAction);
+
+    assistantGroup.addSeparator();
+    actionManager.registerAction("devModeSetUpAction", devModeSetUpAction);
+    actionManager.registerAction("devModeOffAction", devModeOffAction);
+    assistantGroup.add(devModeSetUpAction);
+    assistantGroup.add(devModeOffAction);
 
     // Compose Profile menu
     DefaultActionGroup profileGroup = (DefaultActionGroup) actionManager.getAction(GROUP_PROFILE);
@@ -625,6 +686,8 @@ public class StandardComponentInitializer {
     actionManager.registerAction("resourceOperation", resourceOperation);
     actionManager.registerAction("refreshPathAction", refreshPathAction);
     actionManager.registerAction("linkWithEditor", linkWithEditorAction);
+    actionManager.registerAction("showToolbar", showToolbarAction);
+
     resourceOperation.addSeparator();
     resourceOperation.add(previewImageAction);
     resourceOperation.add(showReferenceAction);
@@ -641,6 +704,7 @@ public class StandardComponentInitializer {
     resourceOperation.add(downloadResourceAction);
     resourceOperation.add(refreshPathAction);
     resourceOperation.add(linkWithEditorAction);
+    resourceOperation.add(collapseAllAction);
     resourceOperation.addSeparator();
     resourceOperation.add(convertFolderToProjectAction);
     resourceOperation.addSeparator();
@@ -651,16 +715,24 @@ public class StandardComponentInitializer {
 
     DefaultActionGroup mainContextMenuGroup =
         (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
-    mainContextMenuGroup.add(newGroup, Constraints.FIRST);
+    mainContextMenuGroup.add(newGroup, FIRST);
     mainContextMenuGroup.addSeparator();
     mainContextMenuGroup.add(resourceOperation);
 
     DefaultActionGroup partMenuGroup =
         (DefaultActionGroup) actionManager.getAction(GROUP_PART_MENU);
     partMenuGroup.add(maximizePartAction);
-    partMenuGroup.add(minimizePartAction);
+    partMenuGroup.add(hidePartAction);
     partMenuGroup.add(restorePartAction);
     partMenuGroup.add(showConsoleTreeAction);
+    partMenuGroup.add(revealResourceAction);
+    partMenuGroup.add(collapseAllAction);
+    partMenuGroup.add(refreshPathAction);
+    partMenuGroup.add(linkWithEditorAction);
+
+    DefaultActionGroup toolbarControllerGroup =
+        (DefaultActionGroup) actionManager.getAction(GROUP_TOOLBAR_CONTROLLER);
+    toolbarControllerGroup.add(showToolbarAction);
 
     actionManager.registerAction("expandEditor", expandEditorAction);
     DefaultActionGroup rightMenuGroup =
@@ -674,12 +746,12 @@ public class StandardComponentInitializer {
     actionManager.registerAction("goInto", goIntoAction);
     actionManager.registerAction(SHOW_REFERENCE, showReferenceAction);
 
-    actionManager.registerAction("collapseAll", collapseAllAction);
+    actionManager.registerAction(REVEAL_RESOURCE, revealResourceAction);
+    actionManager.registerAction(COLLAPSE_ALL, collapseAllAction);
 
     actionManager.registerAction("openFile", openFileAction);
     actionManager.registerAction(SWITCH_LEFT_TAB, switchPreviousEditorAction);
     actionManager.registerAction(SWITCH_RIGHT_TAB, switchNextEditorAction);
-    actionManager.registerAction("scrollFromSource", revealResourceAction);
 
     changeResourceGroup.add(cutResourceAction);
     changeResourceGroup.add(copyResourceAction);
@@ -752,6 +824,9 @@ public class StandardComponentInitializer {
     editorContextMenuGroup.add(fullTextSearchAction);
     editorContextMenuGroup.add(closeActiveEditorAction);
 
+    editorContextMenuGroup.addSeparator();
+    editorContextMenuGroup.add(revealResourceAction);
+
     // Define hot-keys
     keyBinding
         .getGlobal()
@@ -798,6 +873,41 @@ public class StandardComponentInitializer {
     keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('z').build(), UNDO);
     keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('y').build(), REDO);
 
+    keyBinding
+        .getGlobal()
+        .addKey(
+            new KeyBuilder().action().alt().charCode('1').build(),
+            PROJECT_EXPLORER_DISPLAYING_MODE);
+
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().action().alt().charCode('2').build(), EVENT_LOGS_DISPLAYING_MODE);
+
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().action().alt().charCode('3').build(), FIND_RESULT_DISPLAYING_MODE);
+
+    keyBinding
+        .getGlobal()
+        .addKey(
+            new KeyBuilder().action().alt().charCode('4').build(),
+            COMMAND_EXPLORER_DISPLAYING_MODE);
+
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().alt().charCode('E').build(), EDITOR_DISPLAYING_MODE);
+
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().alt().charCode('T').build(), TERMINAL_DISPLAYING_MODE);
+
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().action().charCode(ARROW_DOWN).build(), REVEAL_RESOURCE);
+    keyBinding
+        .getGlobal()
+        .addKey(new KeyBuilder().action().charCode(ARROW_UP).build(), COLLAPSE_ALL);
+
     if (UserAgent.isMac()) {
       keyBinding
           .getGlobal()
@@ -824,8 +934,8 @@ public class StandardComponentInitializer {
           (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_MENU);
       mainMenu.add(windowMenu);
       for (Perspective perspective : perspectives.values()) {
-        final Action action =
-            new Action(perspective.getPerspectiveName()) {
+        final BaseAction action =
+            new BaseAction(perspective.getPerspectiveName()) {
               @Override
               public void actionPerformed(ActionEvent e) {
                 perspectiveManager.setPerspectiveId(perspective.getPerspectiveId());

@@ -10,6 +10,11 @@
  */
 package org.eclipse.che.selenium.filewatcher;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.DELETE;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.EDIT;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -28,6 +33,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -38,7 +44,6 @@ import org.testng.annotations.Test;
  */
 public class RemoveFilesWithActiveTabs {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 6);
-
   @Inject private TestWorkspace ws;
 
   @InjectPageObject(driverId = 1)
@@ -105,13 +110,13 @@ public class RemoveFilesWithActiveTabs {
     String deletedClass = "AppController.java";
     String expectedMessage = "File '" + deletedClass + "' is removed";
     projectExplorer1.selectVisibleItem(deletedClass);
-    ideMainDockPanel1.clickDeleteIcon();
+    menu1.runCommand(EDIT, DELETE);
     projectExplorer2.openItemByVisibleNameInExplorer(deletedClass);
-    editor2.waitActiveEditor();
+    editor2.waitActive();
 
     confirmDeletion();
 
-    events2.waitExpectedMessage(expectedMessage, 10);
+    waitExpectedMessageInEventPanel(events2, expectedMessage);
     editor2.waitTabIsNotPresent(deletedClass.replace(".java", ""));
     projectExplorer2.waitItemIsNotPresentVisibleArea(deletedClass);
   }
@@ -128,12 +133,12 @@ public class RemoveFilesWithActiveTabs {
     projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameFiletxt1);
     projectExplorer1.selectItem(PROJECT_NAME + "/" + nameReadmeFile);
     projectExplorer1.selectMultiFilesByCtrlKeys(PROJECT_NAME + "/" + nameFiletxt1);
-    ideMainDockPanel1.clickDeleteIcon();
+    menu1.runCommand(EDIT, DELETE);
 
     confirmDeletion();
 
-    events2.waitExpectedMessage(expectedMessage1, 10);
-    events2.waitExpectedMessage(expectedMessage2, 10);
+    waitExpectedMessageInEventPanel(events2, expectedMessage1);
+    waitExpectedMessageInEventPanel(events2, expectedMessage2);
     projectExplorer1.waitItemIsNotPresentVisibleArea(nameReadmeFile);
     projectExplorer1.waitItemIsNotPresentVisibleArea(nameFiletxt1);
     projectExplorer2.waitItemIsNotPresentVisibleArea(nameReadmeFile);
@@ -151,7 +156,7 @@ public class RemoveFilesWithActiveTabs {
 
     testProjectServiceClient.deleteResource(ws.getId(), PROJECT_NAME + "/" + nameFiletxt2);
 
-    events1.waitExpectedMessage(expectedMessage1, 10);
+    waitExpectedMessageInEventPanel(events1, expectedMessage1);
     editor1.waitTabIsNotPresent(nameFiletxt2);
     projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameFiletxt3);
     editor2.waitTabIsPresent(nameFiletxt3);
@@ -159,7 +164,7 @@ public class RemoveFilesWithActiveTabs {
     testProjectServiceClient.deleteResource(ws.getId(), PROJECT_NAME + "/" + nameFiletxt3);
 
     editor2.waitTabIsNotPresent(nameFiletxt2);
-    events2.waitExpectedMessage(expectedMessage2, 10);
+    waitExpectedMessageInEventPanel(events2, expectedMessage2);
   }
 
   /** Handles the IDE deletion dialog */
@@ -178,7 +183,16 @@ public class RemoveFilesWithActiveTabs {
     projectExplorer2.waitItem(PROJECT_NAME);
     projectExplorer2.quickExpandWithJavaScript();
 
-    events1.clickProjectEventsTab();
-    events2.clickProjectEventsTab();
+    events1.clickEventLogBtn();
+    events2.clickEventLogBtn();
+  }
+
+  private void waitExpectedMessageInEventPanel(Events event, String expectedMessage) {
+    try {
+      event.waitExpectedMessage(expectedMessage, LOAD_PAGE_TIMEOUT_SEC);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7339");
+    }
   }
 }

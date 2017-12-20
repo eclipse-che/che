@@ -10,6 +10,14 @@
  */
 'use strict';
 
+interface ICheLongTouchScope extends ng.IScope {
+  longTouch: boolean;
+}
+
+interface ICheOnLongTouchAttributes extends ng.IAttributes {
+  cheOnLongTouch: any;
+}
+
 /**
  * @ngdoc directive
  * @name components.directive:cheOnLongTouch
@@ -26,37 +34,38 @@
  * @author Oleksii Kurinnyi
  */
 export class CheOnLongTouch {
+  restrict = 'A';
+
+  $timeout: ng.ITimeoutService;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($timeout) {
+  constructor($timeout: ng.ITimeoutService) {
     this.$timeout = $timeout;
-
-    this.restrict = 'A';
   }
 
   /**
    * Keep reference to the model controller
    */
-  link($scope, element, attrs) {
+  link($scope: ICheLongTouchScope, $element: ng.IAugmentedJQuery, $attrs: ICheOnLongTouchAttributes) {
     $scope.longTouch = false;
-    element.on('touchstart mousedown', (event) => {
+    $element.on('touchstart mousedown', (event: JQueryEventObject) => {
       $scope.longTouch = true;
 
       this.$timeout(() => {
         if ($scope.longTouch && event.which !== 3) {
-          element.mouseup();
+          $element.mouseup();
 
           $scope.$apply(() => {
-            $scope.$eval(attrs.cheOnLongTouch);
+            $scope.$eval($attrs.cheOnLongTouch);
             $scope.longTouch = false;
           });
         }
       }, 500);
     });
-    element.on('touchend mouseup', () => {
+    $element.on('touchend mouseup', () => {
       $scope.longTouch = false;
     });
   }

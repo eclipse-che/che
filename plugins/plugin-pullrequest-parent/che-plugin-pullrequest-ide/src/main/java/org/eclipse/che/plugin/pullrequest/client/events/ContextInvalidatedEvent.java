@@ -11,7 +11,6 @@
 package org.eclipse.che.plugin.pullrequest.client.events;
 
 import com.google.gwt.event.shared.GwtEvent;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.plugin.pullrequest.client.workflow.Context;
 import org.eclipse.che.plugin.pullrequest.client.workflow.WorkflowExecutor;
 

@@ -12,11 +12,11 @@ package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.api.command.CommandExecutor;
 import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
@@ -24,13 +24,13 @@ import org.eclipse.che.ide.util.loging.Log;
  *
  * @author Max Shaposhnik
  */
-public class RunCommandAction extends Action {
+public class RunCommandAction extends BaseAction {
 
   public static final String NAME_PARAM_ID = "name";
 
   private final CommandManager commandManager;
   private final CommandExecutor commandExecutor;
-  private final AppContext appContext;
+  private final WsAgentServerUtil wsAgentServerUtil;
   private final CoreLocalizationConstant localizationConstant;
 
   @Inject
@@ -38,11 +38,11 @@ public class RunCommandAction extends Action {
       CommandManager commandManager,
       CoreLocalizationConstant localizationConstant,
       CommandExecutor commandExecutor,
-      AppContext appContext) {
+      WsAgentServerUtil wsAgentServerUtil) {
     this.commandManager = commandManager;
     this.localizationConstant = localizationConstant;
     this.commandExecutor = commandExecutor;
-    this.appContext = appContext;
+    this.wsAgentServerUtil = wsAgentServerUtil;
   }
 
   @Override
@@ -58,11 +58,12 @@ public class RunCommandAction extends Action {
       return;
     }
 
-    commandManager
-        .getCommand(name)
+    wsAgentServerUtil
+        .getWsAgentServerMachine()
         .ifPresent(
-            command ->
-                commandExecutor.executeCommand(
-                    command, appContext.getDevMachine().getDescriptor()));
+            m ->
+                commandManager
+                    .getCommand(name)
+                    .ifPresent(command -> commandExecutor.executeCommand(command, m.getName())));
   }
 }

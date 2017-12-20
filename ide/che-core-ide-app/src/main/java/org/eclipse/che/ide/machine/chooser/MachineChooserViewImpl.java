@@ -21,7 +21,7 @@ import com.google.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 
 /**
  * Implementation of {@link MachineChooserView} which pops up list of the machines. User can select
@@ -35,7 +35,7 @@ public class MachineChooserViewImpl extends PopupPanel implements MachineChooser
       GWT.create(MachineChooserViewImplUiBinder.class);
 
   /** Map that contains all shown machines. */
-  private final Map<String, Machine> machinesById;
+  private final Map<String, MachineImpl> machinesById;
 
   @UiField ListBox machinesList;
 
@@ -70,7 +70,7 @@ public class MachineChooserViewImpl extends PopupPanel implements MachineChooser
           final String selectedMachineId = machinesList.getSelectedValue();
 
           if (selectedMachineId != null) {
-            final Machine selectedMachine = machinesById.get(selectedMachineId);
+            final MachineImpl selectedMachine = machinesById.get(selectedMachineId);
 
             if (selectedMachine != null) {
               delegate.onMachineSelected(selectedMachine);
@@ -86,7 +86,7 @@ public class MachineChooserViewImpl extends PopupPanel implements MachineChooser
             final String selectedMachineId = machinesList.getSelectedValue();
 
             if (selectedMachineId != null) {
-              final Machine selectedMachine = machinesById.get(selectedMachineId);
+              final MachineImpl selectedMachine = machinesById.get(selectedMachineId);
 
               if (selectedMachine != null) {
                 delegate.onMachineSelected(selectedMachine);
@@ -122,14 +122,14 @@ public class MachineChooserViewImpl extends PopupPanel implements MachineChooser
   }
 
   @Override
-  public void setMachines(List<? extends Machine> machines) {
+  public void setMachines(List<? extends MachineImpl> machines) {
     machinesList.clear();
     machinesById.clear();
 
     machines.forEach(
         machine -> {
-          machinesById.put(machine.getId(), machine);
-          machinesList.addItem(machine.getConfig().getName(), machine.getId());
+          machinesById.put(machine.getName(), machine);
+          machinesList.addItem(machine.getName());
         });
 
     machinesList.setVisibleItemCount(machines.size());

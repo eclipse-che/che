@@ -84,7 +84,9 @@ public class EditorPartStackPresenter extends PartStackPresenter
     implements EditorPartStack,
         EditorTab.ActionDelegate,
         CloseNonPinnedEditorsHandler,
-        ResourceChangedHandler {
+        ResourceChangedHandler,
+        EditorPartStackView.AddTabButtonClickListener {
+
   private final PresentationFactory presentationFactory;
   private final AppContext appContext;
   private final EditorPaneMenuItemFactory editorPaneMenuItemFactory;
@@ -95,6 +97,7 @@ public class EditorPartStackPresenter extends PartStackPresenter
   private final CloseAllTabsPaneAction closeAllTabsPaneAction;
   private final EditorAgent editorAgent;
   private final Map<EditorPaneMenuItem, TabItem> items;
+  private final AddEditorTabMenuFactory addEditorTabMenuFactory;
 
   // this list need to save order of added parts
   private final LinkedList<EditorPartPresenter> partsOrder;
@@ -121,7 +124,8 @@ public class EditorPartStackPresenter extends PartStackPresenter
       ActionManager actionManager,
       ClosePaneAction closePaneAction,
       CloseAllTabsPaneAction closeAllTabsPaneAction,
-      EditorAgent editorAgent) {
+      EditorAgent editorAgent,
+      AddEditorTabMenuFactory addEditorTabMenuFactory) {
     super(eventBus, partMenu, partStackEventHandler, tabItemFactory, partsComparator, view, null);
     this.appContext = appContext;
     this.editorPaneMenuItemFactory = editorPaneMenuItemFactory;
@@ -136,7 +140,9 @@ public class EditorPartStackPresenter extends PartStackPresenter
     this.items = new HashMap<>();
     this.partsOrder = new LinkedList<>();
     this.closedParts = new LinkedList<>();
+    this.addEditorTabMenuFactory = addEditorTabMenuFactory;
 
+    view.setAddTabButtonClickListener(this);
     initializePaneMenu();
     view.addPaneMenuButton(editorPaneMenu);
   }
@@ -320,6 +326,18 @@ public class EditorPartStackPresenter extends PartStackPresenter
   @Override
   public void onTabDoubleClicked(@NotNull TabItem tab) {
     eventBus.fireEvent(new MaximizePartEvent(parts.get(tab)));
+  }
+
+  @Override
+  public void onAddTabButtonClicked(final int mouseX, final int mouseY) {
+    Scheduler.get()
+        .scheduleDeferred(
+            new Scheduler.ScheduledCommand() {
+              @Override
+              public void execute() {
+                addEditorTabMenuFactory.newAddEditorTabMenu().show(mouseX, mouseY);
+              }
+            });
   }
 
   /** {@inheritDoc} */

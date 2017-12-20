@@ -34,7 +34,7 @@ public class ShowPreferencesAction extends AbstractPerspectiveAction {
   @Inject
   public ShowPreferencesAction(
       Resources resources, PreferencesPresenter presenter, AppContext appContext) {
-    super(null, "Preferences", "Preferences", null, resources.preferences());
+    super(null, "Preferences", "Preferences", resources.preferences());
     this.presenter = presenter;
     this.appContext = appContext;
   }

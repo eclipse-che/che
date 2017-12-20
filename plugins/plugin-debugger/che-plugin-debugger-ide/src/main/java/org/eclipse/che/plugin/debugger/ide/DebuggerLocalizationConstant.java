@@ -72,6 +72,15 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
   @Key("breakpointConfiguration")
   String breakpointConfiguration();
 
+  @Key("enableBreakpoint")
+  String enableBreakpoint();
+
+  @Key("disableBreakpoint")
+  String disableBreakpoint();
+
+  @Key("deleteBreakpoint")
+  String deleteBreakpoint();
+
   /* actions descriptions */
   @Key("editDebugConfigurationsActionDescription")
   String editDebugConfigurationsActionDescription();
@@ -112,8 +121,14 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
   @Key("showHideDebuggerPanelDescription")
   String showHideDebuggerPanelDescription();
 
-  @Key("breakpointConfigurationDescription")
-  String breakpointConfigurationDescription();
+  @Key("enableBreakpointDescription")
+  String enableBreakpointDescription();
+
+  @Key("disableBreakpointDescription")
+  String disableBreakpointDescription();
+
+  @Key("deleteBreakpointDescription")
+  String deleteBreakpointDescription();
 
   /* messages */
   @Key("debugger.connecting.title")
@@ -136,9 +151,6 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
 
   @Key("failed.to.connect.to.remote.debugger.description")
   String failedToConnectToRemoteDebuggerDescription(String address, String cause);
-
-  @Key("failed.to.get.variable.value.title")
-  String failedToGetVariableValueTitle();
 
   /* ChangeValueView */
   @Key("view.breakpoint.configuration.title")
@@ -219,15 +231,33 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
   @Key("debugger.frames.title")
   String debuggerFramesTitle();
 
+  @Key("debugger.threadNotSuspend")
+  String debuggerThreadNotSuspend();
+
   /* Breakpoint Configuration */
   @Key("view.breakpointConfiguration.condition")
   String viewBreakpointConfigurationCondition();
+
+  @Key("view.breakpointConfiguration.enabled")
+  String viewBreakpointConfigurationEnabled();
 
   @Key("view.breakpointConfiguration.hitCount")
   String viewBreakpointConfigurationHitCount();
 
   @Key("view.breakpointConfiguration.applyButton")
   String viewBreakpointConfigurationApplyButton();
+
+  @Key("view.breakpointConfiguration.suspend")
+  String viewBreakpointConfigurationSuspend();
+
+  @Key("view.breakpointConfiguration.suspend.all")
+  String viewBreakpointConfigurationSuspendAll();
+
+  @Key("view.breakpointConfiguration.suspend.thread")
+  String viewBreakpointConfigurationSuspendThread();
+
+  @Key("view.breakpointConfiguration.suspend.none")
+  String viewBreakpointConfigurationSuspendNone();
 
   @Key("add.watch.expression")
   String addWatchExpression();
@@ -261,4 +291,10 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
 
   @Key("edit.expression.view.expression.field.title")
   String editExpressionViewExpressionFieldTitle();
+
+  @Key("action.switch.debugger.displaying.title")
+  String switchDebuggerDisplayingTitle();
+
+  @Key("action.switch.debugger.displaying.description")
+  String switchDebuggerDisplayingDescription();
 }

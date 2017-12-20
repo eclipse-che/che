@@ -53,19 +53,4 @@ public class MachineTokenRegistryTest {
       return false;
     }
   }
-
-  @Test
-  public void shouldreturnWorkspaceId() throws Exception {
-    final MachineTokenRegistry registry = new MachineTokenRegistry();
-
-    String token11 = registry.generateToken("user1", "workspace1");
-    String token12 = registry.generateToken("user1", "workspace2");
-    String token21 = registry.generateToken("user2", "workspace1");
-    String token22 = registry.generateToken("user2", "workspace2");
-
-    assertEquals(registry.getWorkspaceId(token11), "workspace1");
-    assertEquals(registry.getWorkspaceId(token12), "workspace2");
-    assertEquals(registry.getWorkspaceId(token21), "workspace1");
-    assertEquals(registry.getWorkspaceId(token22), "workspace2");
-  }
 }

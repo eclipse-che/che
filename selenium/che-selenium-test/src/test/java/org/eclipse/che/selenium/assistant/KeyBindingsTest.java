@@ -57,14 +57,14 @@ public class KeyBindingsTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    ide.open(testWorkspace);
-
     URL resource = KeyBindings.class.getResource("/projects/default-spring-project");
     projectServiceClient.importProject(
         testWorkspace.getId(),
         Paths.get(resource.toURI()),
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
+
+    ide.open(testWorkspace);
   }
 
   @Test
@@ -89,7 +89,7 @@ public class KeyBindingsTest {
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.KEY_BINDINGS);
-    keyBindings.checkSearchResultKeyBinding("open", 5);
+    keyBindings.checkSearchResultKeyBinding("open", 6);
     keyBindings.clickOkButton();
   }
 
@@ -101,7 +101,7 @@ public class KeyBindingsTest {
     projectExplorer.quickExpandWithJavaScript();
 
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.KEY_BINDINGS);

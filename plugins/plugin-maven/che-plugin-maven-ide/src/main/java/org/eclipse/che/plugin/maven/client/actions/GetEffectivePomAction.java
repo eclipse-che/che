@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.maven.client.actions;
 import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
 import com.google.common.base.Optional;
@@ -61,7 +61,6 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         constant.actionGetEffectivePomTitle(),
         constant.actionGetEffectivePomDescription(),
-        null,
         mavenResources.maven());
     this.editorAgent = editorAgent;
     this.notificationManager = notificationManager;

@@ -24,10 +24,10 @@ import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
 import org.eclipse.che.ide.api.editor.events.HasCursorActivityHandlers;
 import org.eclipse.che.ide.api.editor.events.HasGutterClickHandlers;
+import org.eclipse.che.ide.api.editor.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.editor.keymap.Keymap;
 import org.eclipse.che.ide.api.editor.position.PositionConverter;
 import org.eclipse.che.ide.api.editor.text.Region;
-import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 
 /** An interface for editor widget implementations. */
 public interface EditorWidget

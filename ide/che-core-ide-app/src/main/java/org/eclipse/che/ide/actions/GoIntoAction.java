@@ -13,10 +13,11 @@ package org.eclipse.che.ide.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ProjectAction;
-import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
 
 /**
  * Sets "Go Into" mode on node which is supports that mode.
@@ -28,16 +29,28 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 public class GoIntoAction extends ProjectAction {
 
   private final ProjectExplorerPresenter projectExplorer;
+  private final CoreLocalizationConstant localizationConstant;
 
   @Inject
-  public GoIntoAction(ProjectExplorerPresenter projectExplorer) {
-    super("Go into");
+  public GoIntoAction(
+      ProjectExplorerPresenter projectExplorer, CoreLocalizationConstant localizationConstant) {
+    super(localizationConstant.goIntoActionText());
+
     this.projectExplorer = projectExplorer;
+    this.localizationConstant = localizationConstant;
   }
 
   /** {@inheritDoc} */
   @Override
   protected void updateProjectAction(ActionEvent e) {
+    if (projectExplorer.isGoIntoActivated()) {
+      e.getPresentation().setText(localizationConstant.goBackActionText());
+      e.getPresentation().setEnabledAndVisible(true);
+      return;
+    }
+
+    e.getPresentation().setText(localizationConstant.goIntoActionText());
+
     List<?> selection = projectExplorer.getSelection().getAllElements();
 
     e.getPresentation()
@@ -50,6 +63,11 @@ public class GoIntoAction extends ProjectAction {
   /** {@inheritDoc} */
   @Override
   public void actionPerformed(ActionEvent e) {
+    if (projectExplorer.isGoIntoActivated()) {
+      projectExplorer.goBack();
+      return;
+    }
+
     List<?> selection = projectExplorer.getSelection().getAllElements();
 
     if (selection.isEmpty() || selection.size() > 1) {

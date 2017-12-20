@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
@@ -37,10 +38,10 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.FontAwesome;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.ui.buttonLoader.ButtonLoaderResources;
 import org.eclipse.che.ide.ui.listbox.CustomListBox;
+import org.eclipse.che.ide.ui.status.StatusText;
 import org.eclipse.che.plugin.pullrequest.client.ContributeMessages;
 import org.eclipse.che.plugin.pullrequest.client.ContributeResources;
 import org.eclipse.che.plugin.pullrequest.client.dialogs.paste.PasteEvent;
@@ -52,6 +53,11 @@ public class ContributePartViewImpl extends BaseView<ContributePartView.ActionDe
 
   /** The status component. */
   private final StatusSteps statusSteps;
+
+  private final StatusText statusText;
+
+  @UiField ScrollPanel contributePanel;
+  @UiField FlowPanel stubPanel;
 
   /** The contribute button. */
   @UiField Button contributeButton;
@@ -105,18 +111,20 @@ public class ContributePartViewImpl extends BaseView<ContributePartView.ActionDe
 
   @Inject
   public ContributePartViewImpl(
-      @NotNull final PartStackUIResources partStackUIResources,
       @NotNull final ContributeMessages messages,
       @NotNull final ContributeResources resources,
       @NotNull final ButtonLoaderResources buttonLoaderResources,
-      @NotNull final ContributePartViewUiBinder uiBinder) {
-    super(partStackUIResources);
-
+      @NotNull final ContributePartViewUiBinder uiBinder,
+      StatusText<FlowPanel> statusText) {
     this.messages = messages;
     this.resources = resources;
     this.statusSteps = new StatusSteps();
 
+    this.statusText = statusText;
+
     setContentWidget(uiBinder.createAndBindUi(this));
+
+    statusText.init(stubPanel, input -> true);
 
     setTitle(messages.contributePartTitle());
 
@@ -335,6 +343,21 @@ public class ContributePartViewImpl extends BaseView<ContributePartView.ActionDe
         messages.contributePartNewContributionSectionButtonOpenPullRequestOnVcsHostText(
             vcsHostName));
     newContributionSection.setVisible(true);
+  }
+
+  @Override
+  public void showStub(String content) {
+    contributePanel.setVisible(false);
+    stubPanel.setVisible(true);
+
+    statusText.setText(content);
+    statusText.paint();
+  }
+
+  @Override
+  public void showContent() {
+    contributePanel.setVisible(true);
+    stubPanel.setVisible(false);
   }
 
   @Override

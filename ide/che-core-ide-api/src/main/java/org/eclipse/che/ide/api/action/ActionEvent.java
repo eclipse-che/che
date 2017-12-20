@@ -13,10 +13,9 @@ package org.eclipse.che.ide.api.action;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.parts.PerspectiveManager;
 
 /**
- * Container for the information necessary to execute or update an {@link Action}.
+ * Container for the information necessary to execute or update an {@link BaseAction}.
  *
  * @author Evgen Vidolob
  * @author Dmitry Shnurenko
@@ -24,7 +23,6 @@ import org.eclipse.che.ide.api.parts.PerspectiveManager;
 public class ActionEvent {
   private final ActionManager actionManager;
   private final Presentation presentation;
-  private final PerspectiveManager perspectiveManager;
   private final Map<String, String> parameters;
 
   /**
@@ -33,14 +31,9 @@ public class ActionEvent {
    * @param presentation the presentation which represents the action in the place from where it is
    *     invoked or updated
    * @param actionManager the manager for actions
-   * @param perspectiveManager perspective manager which contains information about current
-   *     perspective
    */
-  public ActionEvent(
-      @NotNull Presentation presentation,
-      @NotNull ActionManager actionManager,
-      @NotNull PerspectiveManager perspectiveManager) {
-    this(presentation, actionManager, perspectiveManager, null);
+  public ActionEvent(@NotNull Presentation presentation, @NotNull ActionManager actionManager) {
+    this(presentation, actionManager, null);
   }
 
   /**
@@ -49,18 +42,14 @@ public class ActionEvent {
    * @param presentation the presentation which represents the action in the place from where it is
    *     invoked or updated
    * @param actionManager the manager for actions
-   * @param perspectiveManager perspective manager which contains information about current
-   *     perspective
    * @param parameters the parameters with which the action is invoked or updated
    */
   public ActionEvent(
       @NotNull Presentation presentation,
       @NotNull ActionManager actionManager,
-      @NotNull PerspectiveManager perspectiveManager,
       @Nullable Map<String, String> parameters) {
     this.actionManager = actionManager;
     this.presentation = presentation;
-    this.perspectiveManager = perspectiveManager;
     this.parameters = parameters;
   }
 
@@ -72,10 +61,6 @@ public class ActionEvent {
    */
   public Presentation getPresentation() {
     return presentation;
-  }
-
-  public PerspectiveManager getPerspectiveManager() {
-    return perspectiveManager;
   }
 
   /**

@@ -15,26 +15,19 @@
  * It will change upon width of the screen
  * @author Oleksii Orel
  */
-export class CheEmptyState {
+export class CheEmptyState implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
+  restrict = 'E';
 
-    this.replace = true;
-    this.transclude = false;
-    this.templateUrl = 'components/widget/empty-state/che-empty-state.html';
+  replace = true;
+  transclude = false;
+  templateUrl = 'components/widget/empty-state/che-empty-state.html';
 
-    // scope values
-    this.scope = {
-      value: '@cheValue',
-      prompt: '@?chePrompt',
-      iconClass: '@cheIconClass'
-    };
-
-  }
+  // scope values
+  scope = {
+    value: '@cheValue',
+    prompt: '@?chePrompt',
+    iconClass: '@cheIconClass'
+  };
 
 }

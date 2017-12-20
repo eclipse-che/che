@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.plugin.languageserver.ide.service;
 
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.plugin.languageserver.ide.service.ServiceUtil.getPromiseError;
 
 import com.google.inject.Inject;
@@ -45,7 +46,7 @@ public class WorkspaceServiceClient {
         (resolve, reject) ->
             requestTransmitter
                 .newRequest()
-                .endpointId("ws-agent")
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName("workspace/symbol")
                 .paramsAsDto(params)
                 .sendAndReceiveResultAsListOfDto(SymbolInformation.class)
@@ -58,7 +59,7 @@ public class WorkspaceServiceClient {
         (resolve, reject) ->
             requestTransmitter
                 .newRequest()
-                .endpointId("ws-agent")
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName("workspace/editFile")
                 .paramsAsDto(params)
                 .sendAndReceiveResultAsListOfDto(TextEdit.class)

@@ -73,7 +73,7 @@ public class IDEInjectorGenerator {
     builder.append("package org.eclipse.che.ide.client.inject;\n\n");
 
     // declare imports
-    builder.append("import org.eclipse.che.ide.client.BootstrapController;\n");
+    builder.append("import org.eclipse.che.ide.bootstrap.IdeBootstrap;\n");
     builder.append("import com.google.gwt.inject.client.GinModules;\n");
     builder.append("import com.google.gwt.inject.client.Ginjector;\n");
     builder.append("\n");
@@ -99,9 +99,9 @@ public class IDEInjectorGenerator {
     builder.append("\n");
     // define method
     builder.append(GeneratorUtils.TAB).append("/**\n");
-    builder.append(GeneratorUtils.TAB).append(" * @return the instance of BootstrapController\n");
+    builder.append(GeneratorUtils.TAB).append(" * @return the instance of IdeBootstrap\n");
     builder.append(GeneratorUtils.TAB).append(" */\n");
-    builder.append(GeneratorUtils.TAB).append("BootstrapController getBootstrapController();\n");
+    builder.append(GeneratorUtils.TAB).append("IdeBootstrap getIdeBootstrap();\n");
     // close class definition
     builder.append("\n");
     builder.append("}\n");

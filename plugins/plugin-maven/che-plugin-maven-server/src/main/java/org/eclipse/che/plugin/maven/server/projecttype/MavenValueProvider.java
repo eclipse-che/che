@@ -11,6 +11,8 @@
 package org.eclipse.che.plugin.maven.server.projecttype;
 
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
 import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARTIFACT_ID;
@@ -35,8 +37,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FileEntry;
-import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.commons.xml.XMLTreeException;
@@ -49,12 +50,15 @@ import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
 /** @author Vitalii Parfonov */
 public class MavenValueProvider extends ReadonlyValueProvider {
 
+  private final String projectWsPath;
+  private final FsManager fsManager;
   private MavenProjectManager mavenProjectManager;
-  private FolderEntry projectFolder;
 
-  protected MavenValueProvider(MavenProjectManager mavenProjectManager, FolderEntry projectFolder) {
+  protected MavenValueProvider(
+      MavenProjectManager mavenProjectManager, String projectWsPath, FsManager fsManager) {
     this.mavenProjectManager = mavenProjectManager;
-    this.projectFolder = projectFolder;
+    this.projectWsPath = absolutize(projectWsPath);
+    this.fsManager = fsManager;
   }
 
   @Override
@@ -64,8 +68,7 @@ public class MavenValueProvider extends ReadonlyValueProvider {
         return readFromPom(attributeName);
       }
 
-      final MavenProject mavenProject =
-          mavenProjectManager.getMavenProject(projectFolder.getPath().toString());
+      final MavenProject mavenProject = mavenProjectManager.getMavenProject(projectWsPath);
       if (mavenProject != null) {
         return getFromMavenProject(mavenProject, attributeName);
       } else {
@@ -132,7 +135,7 @@ public class MavenValueProvider extends ReadonlyValueProvider {
   private List<String> readFromPom(String attributeName)
       throws ServerException, ForbiddenException, IOException, XMLTreeException,
           ValueStorageException {
-    final Model model = readModel(projectFolder);
+    final Model model = readModel(projectWsPath);
     switch (attributeName) {
       case ARTIFACT_ID:
         return singletonList(model.getArtifactId());
@@ -183,13 +186,15 @@ public class MavenValueProvider extends ReadonlyValueProvider {
     }
   }
 
-  protected Model readModel(FolderEntry projectFolder)
+  protected Model readModel(String wsPath)
       throws ValueStorageException, ServerException, ForbiddenException, IOException {
-    FileEntry pomFile = (FileEntry) projectFolder.getChild("pom.xml");
-    if (pomFile == null) {
+    String pomXmlWsPath = resolve(wsPath, "pom.xml");
+
+    if (!fsManager.exists(pomXmlWsPath)) {
       throw new ValueStorageException("pom.xml does not exist.");
     }
-    return Model.readFrom(pomFile.getInputStream());
+
+    return Model.readFrom(fsManager.toIoFile(pomXmlWsPath));
   }
 
   protected void throwReadException(Exception e) throws ValueStorageException {

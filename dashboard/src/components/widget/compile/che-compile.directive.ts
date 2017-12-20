@@ -15,21 +15,24 @@
  *
  * @author Ann Shumilova
  */
-export class CheCompile {
+export class CheCompile implements ng.IDirective {
+
+  restrict = 'A';
+
+  $compile: ng.ICompileService;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($compile) {
-    this.restrict='A';
-
+  constructor ($compile: ng.ICompileService) {
     this.$compile = $compile;
   }
 
-  link($scope, element, attrs) {
-    $scope.$watch(attrs.cheCompile, (value) => {
-      element.html(value);
-      this.$compile(element.contents())($scope);
+  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attrs: ng.IAttributes) {
+    $scope.$watch(($attrs as any).cheCompile, (value: string) => {
+      $element.html(value);
+      this.$compile($element.contents())($scope);
     });
 
   }

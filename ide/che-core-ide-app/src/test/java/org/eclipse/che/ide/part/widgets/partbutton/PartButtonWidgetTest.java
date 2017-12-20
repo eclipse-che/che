@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.ide.part.widgets.partbutton;
 
-import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.BELOW;
-import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.LEFT;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -48,13 +46,8 @@ public class PartButtonWidgetTest {
 
   @Before
   public void setUp() {
-    partButton = new PartButtonWidget(resources, SOME_TEXT);
+    partButton = new PartButtonWidget(SOME_TEXT);
     partButton.setDelegate(delegate);
-  }
-
-  @Test
-  public void constructorShouldBeVerified() {
-    verify(partButton.tabName).setText(SOME_TEXT);
   }
 
   @Test
@@ -64,53 +57,5 @@ public class PartButtonWidgetTest {
     partButton.onClick(event);
 
     verify(delegate).onTabClicked(partButton);
-  }
-
-  @Test
-  public void partShouldBeSelectedInNotBelowPosition() {
-    partButton.select();
-
-    verify(resources.partStackCss()).selectedRightOrLeftTab();
-  }
-
-  @Test
-  public void partShouldBeSelectedInBelowPosition() {
-    partButton.setTabPosition(BELOW);
-
-    partButton.select();
-
-    verify(resources.partStackCss()).selectedBottomTab();
-  }
-
-  @Test
-  public void partShouldNotBeSelectedInNotBelowPosition() {
-    partButton.setTabPosition(LEFT);
-
-    partButton.unSelect();
-
-    verify(resources.partStackCss()).selectedRightOrLeftTab();
-  }
-
-  @Test
-  public void partShouldNotBeSelectedInBelowPosition() {
-    partButton.setTabPosition(BELOW);
-
-    partButton.unSelect();
-
-    verify(resources.partStackCss()).selectedBottomTab();
-  }
-
-  @Test
-  public void tabPositionShouldBeSetWhenPositionIsLeft() {
-    partButton.setTabPosition(LEFT);
-
-    verify(resources.partStackCss()).leftTabs();
-  }
-
-  @Test
-  public void tabPositionShouldBeSetWhenPositionIsNotLeft() {
-    partButton.setTabPosition(BELOW);
-
-    verify(resources.partStackCss()).bottomTabs();
   }
 }

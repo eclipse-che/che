@@ -16,12 +16,12 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.23.0-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.core</groupId>
     <artifactId>che-ide-core</artifactId>
-    <packaging>jar</packaging>
+    <packaging>gwt-lib</packaging>
     <name>Che Core  IDE :: Basic IDE</name>
     <dependencies>
         <dependency>
@@ -62,11 +62,13 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-testing</artifactId>
+            <artifactId>che-core-commons-gwt</artifactId>
         </dependency>
+        <!-- to be able to use source root as-is in GWT Super DevMode -->
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-gwt</artifactId>
+            <classifier>sources</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -74,31 +76,35 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-j2ee</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-gwt-logger</artifactId>
+            <type>gwt-lib</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-api</artifactId>
+            <type>gwt-lib</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-app</artifactId>
+            <type>gwt-lib</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-orion-editor</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.lib</groupId>
-            <artifactId>che-orion-editor</artifactId>
+            <type>gwt-lib</type>
         </dependency>
     </dependencies>
     <build>
         <plugins>
+            <plugin>
+                <groupId>net.ltgt.gwt.maven</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <moduleName>org.eclipse.che.ide.Basic</moduleName>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>

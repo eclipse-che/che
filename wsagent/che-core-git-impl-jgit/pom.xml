@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-agent-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.23.0-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-git-impl-jgit</artifactId>
     <packaging>jar</packaging>
@@ -114,10 +114,6 @@
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.everrest</groupId>
-            <artifactId>everrest-websockets</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

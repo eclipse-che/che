@@ -14,22 +14,22 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:style>
         .innerPanel {
-        width: 12px;
-        height: 12px;
-        float: left;
-        cursor: pointer;
-        margin-top: 3px;
+            width: 12px;
+            height: 12px;
+            float: left;
+            cursor: pointer;
+            margin-top: 3px;
         }
 
         .innerPanel:active {
-        opacity: 0.4;
+            opacity: 0.4;
         }
 
         .outerPanel {
-        position: relative;
-        width: 18px;
-        height: 18px;
-        margin: 6px 0 6px 3px;
+            position: relative;
+            width: 18px;
+            height: 18px;
+            margin: 6px 0 6px 3px;
         }
     </ui:style>
 

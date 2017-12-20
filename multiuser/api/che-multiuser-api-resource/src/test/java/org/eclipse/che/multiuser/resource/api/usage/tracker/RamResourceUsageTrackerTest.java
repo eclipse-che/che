@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.multiuser.resource.api.usage.tracker;
 
+/*
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -39,10 +40,12 @@ import org.eclipse.che.multiuser.resource.api.type.RamResourceType;
 import org.eclipse.che.multiuser.resource.model.Resource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+*/
+
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.Listeners;
 
 /**
  * Tests for {@link org.eclipse.che.multiuser.resource.api.usage.tracker.RamResourceUsageTracker}
@@ -51,6 +54,7 @@ import org.testng.annotations.Test;
  */
 @Listeners(MockitoTestNGListener.class)
 public class RamResourceUsageTrackerTest {
+  /*
   @Mock private Account account;
   @Mock private Provider<WorkspaceManager> workspaceManagerProvider;
   @Mock private WorkspaceManager workspaceManager;
@@ -123,6 +127,7 @@ public class RamResourceUsageTrackerTest {
   }
 
   /** Creates users workspace object based on the status and machines RAM. */
+  /*
   public static WorkspaceImpl createWorkspace(WorkspaceStatus status, Integer... machineRams) {
     final List<MachineImpl> machines = new ArrayList<>(machineRams.length - 1);
     for (Integer machineRam : machineRams) {
@@ -139,4 +144,5 @@ public class RamResourceUsageTrackerTest {
         .setConfig(MachineConfigImpl.builder().setLimits(new MachineLimitsImpl(memoryMb)).build())
         .build();
   }
+  */
 }

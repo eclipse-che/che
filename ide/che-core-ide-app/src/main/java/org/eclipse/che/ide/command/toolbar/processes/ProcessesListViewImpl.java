@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.command.toolbar.processes;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -38,6 +39,13 @@ public class ProcessesListViewImpl implements ProcessesListView {
 
   private ActionDelegate delegate;
 
+  private final Label execLabel;
+  private final Label loadLabel;
+
+  private FlowPanel loadInfo;
+  private FlowPanel loadingLabel;
+  private FlowPanel loadingProgress;
+
   @Inject
   public ProcessesListViewImpl(
       CommandResources resources, EmptyListWidget emptyListWidget, ToolbarMessages messages) {
@@ -47,8 +55,11 @@ public class ProcessesListViewImpl implements ProcessesListView {
     listItems = new HashMap<>();
     renderers = new HashMap<>();
 
-    final Label label = new Label("EXEC");
-    label.addStyleName(resources.commandToolbarCss().processesListLabel());
+    execLabel = new Label("EXEC");
+    execLabel.addStyleName(resources.commandToolbarCss().processesListExecLabel());
+
+    loadLabel = new Label("LOAD");
+    loadLabel.addStyleName(resources.commandToolbarCss().processesListLoadLabel());
 
     dropdownList = new DropdownList(emptyListWidget, true);
     dropdownList.setWidth("100%");
@@ -67,12 +78,53 @@ public class ProcessesListViewImpl implements ProcessesListView {
         });
 
     rootPanel = new FlowPanel();
-    rootPanel.add(label);
+    rootPanel.add(execLabel);
+    rootPanel.add(loadLabel);
     rootPanel.add(dropdownList);
 
     createCommandItem = new CreateCommandItem();
     createCommandItemRenderer = new CreateCommandItemRenderer();
     checkCreateCommandItem();
+
+    loadInfo = new FlowPanel();
+    loadInfo.setStyleName(resources.commandToolbarCss().loaderPanel());
+    rootPanel.add(loadInfo);
+
+    loadingLabel = new FlowPanel();
+    loadingLabel.setStyleName(resources.commandToolbarCss().loaderPanelLabel());
+    loadInfo.add(loadingLabel);
+
+    loadingProgress = new FlowPanel();
+    loadingProgress.setStyleName(resources.commandToolbarCss().loaderPanelProgressBar());
+    loadInfo.add(loadingProgress);
+  }
+
+  @Override
+  public void setLoadMode() {
+    execLabel.getElement().getStyle().setDisplay(Style.Display.NONE);
+    dropdownList.getElement().getStyle().setDisplay(Style.Display.NONE);
+
+    loadLabel.getElement().getStyle().setDisplay(Style.Display.BLOCK);
+    loadInfo.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+  }
+
+  @Override
+  public void setExecMode() {
+    execLabel.getElement().getStyle().clearDisplay();
+    dropdownList.getElement().getStyle().clearDisplay();
+
+    loadLabel.getElement().getStyle().clearDisplay();
+    loadInfo.getElement().getStyle().clearDisplay();
+  }
+
+  @Override
+  public void setLoadingProgress(int percents) {
+    loadingProgress.getElement().getStyle().setWidth(percents, Style.Unit.PCT);
+  }
+
+  @Override
+  public void setLoadingMessage(String message) {
+    loadingLabel.getElement().setInnerHTML(message);
   }
 
   /**

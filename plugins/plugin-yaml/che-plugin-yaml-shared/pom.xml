@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-yaml-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.23.0-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-yaml-shared</artifactId>
     <packaging>jar</packaging>
@@ -49,17 +49,6 @@
         </dependency>
     </dependencies>
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>${dto-generator-out-directory}</directory>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

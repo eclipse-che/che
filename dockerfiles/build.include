@@ -38,6 +38,7 @@ init() {
   NAME="che"
   ARGS=""
   OPTIONS=""
+  DOCKERFILE=""
 
   while [ $# -gt 0 ]; do
     case $1 in
@@ -65,6 +66,9 @@ init() {
       --skip-tests)
         SKIP_TESTS=true
         shift ;;
+      --dockerfile:*)
+        DOCKERFILE="${1#*:}"
+        shift ;;
       --*)
         printf "${RED}Unknown parameter: $1${NC}\n"; exit 2 ;;
       *)
@@ -76,12 +80,42 @@ init() {
 }
 
 build() {
+
+  # Compute directory
   if [ -z $DIR ]; then
       DIR=$(cd "$(dirname "$0")"; pwd)
   fi
+
+  # If Dockerfile is empty, build all Dockerfiles
+  if [ -z ${DOCKERFILE} ]; then
+    DOCKERFILES_TO_BUILD="$(ls ${DIR}/Dockerfile*)"
+    ORIGINAL_TAG=${TAG}
+    # Build image for each Dockerfile
+    for dockerfile in ${DOCKERFILES_TO_BUILD}; do
+       dockerfile=$(basename $dockerfile)
+       # extract TAG from Dockerfile
+       if [ ${dockerfile} != "Dockerfile" ]; then
+         TAG=${ORIGINAL_TAG}-$(echo ${dockerfile} | sed -e "s/^Dockerfile.//")
+       fi
+       IMAGE_NAME="$ORGANIZATION/$PREFIX-$NAME:$TAG"
+       DOCKERFILE=${dockerfile}
+       build_image
+    done
+
+    # restore variables
+    TAG=${ORIGINAL_TAG}
+    IMAGE_NAME="$ORGANIZATION/$PREFIX-$NAME:$TAG"
+  else
+    # else if specified, build only the one specified
+    build_image
+  fi
+
+}
+
+build_image() {
   printf "${BOLD}Building Docker Image ${IMAGE_NAME} from $DIR directory with tag $TAG${NC}\n"
   # Replace macros in Dockerfiles
-  cat ${DIR}/Dockerfile | sed s/\$\{BUILD_ORGANIZATION\}/${ORGANIZATION}/ | sed s/\$\{BUILD_PREFIX\}/${PREFIX}/ | sed s/\$\{BUILD_TAG\}/${TAG}/ > ${DIR}/.Dockerfile
+  cat ${DIR}/${DOCKERFILE} | sed s/\$\{BUILD_ORGANIZATION\}/${ORGANIZATION}/ | sed s/\$\{BUILD_PREFIX\}/${PREFIX}/ | sed s/\$\{BUILD_TAG\}/${TAG}/ > ${DIR}/.Dockerfile
   cd "${DIR}" && docker build -f ${DIR}/.Dockerfile -t ${IMAGE_NAME} .
   rm ${DIR}/.Dockerfile
   if [ $? -eq 0 ]; then

@@ -30,6 +30,7 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class WorkspaceViewImpl extends LayoutPanel implements WorkspaceView {
+
   interface WorkspaceViewUiBinder extends UiBinder<Widget, WorkspaceViewImpl> {}
 
   private static WorkspaceViewUiBinder uiBinder = GWT.create(WorkspaceViewUiBinder.class);
@@ -43,18 +44,31 @@ public class WorkspaceViewImpl extends LayoutPanel implements WorkspaceView {
   @UiField SimplePanel menuPanel;
 
   @UiField SimplePanel toolbarPanel, noToolbarPanel;
-  @UiField SimplePanel actionsPanel, statusPanel;
+
+  @UiField SimplePanel statusPanel;
 
   ActionDelegate delegate;
+
+  private boolean toolbar = true;
 
   /** Create view. */
   @Inject
   protected WorkspaceViewImpl() {
     add(uiBinder.createAndBindUi(this));
     getElement().setId("codenvyIdeWorkspaceViewImpl");
-    ideMainDockPanel.setWidgetHidden(noToolbarPanel, true);
-    ideMainDockPanel.setWidgetHidden(actionsPanel, true);
-    ideMainDockPanel.setWidgetHidden(statusPanel, false);
+  }
+
+  @Override
+  public void showToolbar(boolean show) {
+    toolbar = show;
+
+    ideMainDockPanel.setWidgetHidden(toolbarPanel, !show);
+    ideMainDockPanel.setWidgetHidden(noToolbarPanel, show);
+  }
+
+  @Override
+  public boolean isToolbarVisible() {
+    return toolbar;
   }
 
   /** {@inheritDoc} */

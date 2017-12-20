@@ -45,14 +45,15 @@ public class PlainJavaProjectConfigureClasspathTest {
 
   private static final List<String> listJar =
       Arrays.asList(
-          "rt.jar - /opt/jdk1.8.0_45/jre/lib", "cldrdata.jar - /opt/jdk1.8.0_45/jre/lib/ext",
-          "dnsns.jar - /opt/jdk1.8.0_45/jre/lib/ext", "jfxrt.jar - /opt/jdk1.8.0_45/jre/lib/ext",
-          "localedata.jar - /opt/jdk1.8.0_45/jre/lib/ext",
-              "nashorn.jar - /opt/jdk1.8.0_45/jre/lib/ext",
-          "sunec.jar - /opt/jdk1.8.0_45/jre/lib/ext",
-              "sunjce_provider.jar - /opt/jdk1.8.0_45/jre/lib/ext",
-          "sunpkcs11.jar - /opt/jdk1.8.0_45/jre/lib/ext ",
-              "zipfs.jar - /opt/jdk1.8.0_45/jre/lib/ext");
+          "rt.jar",
+          "cldrdata.jar",
+          "dnsns.jar",
+          "localedata.jar",
+          "nashorn.jar",
+          "sunec.jar",
+          "sunjce_provider.jar",
+          "sunpkcs11.jar",
+          "zipfs.jar");
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
@@ -185,7 +186,7 @@ public class PlainJavaProjectConfigureClasspathTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company/Main.java");
-    codenvyEditor.waitActiveEditor();
+    codenvyEditor.waitActive();
     codenvyEditor.setCursorToLine(17);
     codenvyEditor.typeTextIntoEditor(Keys.ENTER.toString());
     loader.waitOnClosed();

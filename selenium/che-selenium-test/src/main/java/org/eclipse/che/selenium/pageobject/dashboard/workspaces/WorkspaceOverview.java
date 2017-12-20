@@ -12,7 +12,6 @@ package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementValue;
@@ -22,11 +21,9 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class WorkspaceOverview {
@@ -49,7 +46,6 @@ public class WorkspaceOverview {
     String HIDE_JSON_WS_BTN = "//span[text()='Close']";
     String WORKSPACE_JSON_CONTENT = "//div[@class='CodeMirror-code']";
     String WS_NAME_ERROR_MESSAGES = "//che-error-messages";
-    String WS_TIMEOUT_MESSAGE = "//div[@che-label-name='Idle timeout']//div[@ng-transclude]";
   }
 
   @FindBy(xpath = Locators.NAME_WORKSPACE_INPUT)
@@ -75,9 +71,6 @@ public class WorkspaceOverview {
 
   @FindBy(xpath = Locators.WS_NAME_ERROR_MESSAGES)
   WebElement errorMessages;
-
-  @FindBy(xpath = Locators.WS_TIMEOUT_MESSAGE)
-  WebElement wsTimeotMessage;
 
   /**
    * Check name of workspace in 'Overview' tab
@@ -118,6 +111,11 @@ public class WorkspaceOverview {
         .click();
   }
 
+  public void isDeleteWorkspaceButtonExists() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(deleteWorkspaceBtn));
+  }
+
   public void waitDownloadWorkspaceJsonFileBtn() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(elementToBeClickable(downloadWsJsonBtn));
@@ -138,19 +136,5 @@ public class WorkspaceOverview {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOf(workspaceJsonContent))
         .click();
-  }
-
-  public String getWsTimeoutMessage() {
-    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(wsTimeotMessage))
-        .getText();
-  }
-
-  public void waitWsTimeoutMessage(String expectedMessage) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            (WebDriver webdriver) -> webdriver.findElement(By.xpath(Locators.WS_TIMEOUT_MESSAGE)))
-        .getText()
-        .contains(expectedMessage);
   }
 }

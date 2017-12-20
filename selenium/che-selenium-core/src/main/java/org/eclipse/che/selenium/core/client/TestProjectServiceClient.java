@@ -12,6 +12,8 @@ package org.eclipse.che.selenium.core.client;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.dto.server.DtoFactory.getInstance;
 
 import com.google.inject.Inject;
@@ -23,8 +25,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
+import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -93,7 +97,7 @@ public class TestProjectServiceClient {
   public void importZipProject(
       String workspaceId, Path zipFile, String projectName, String template) throws Exception {
     String url = getWsAgentUrl(workspaceId) + "/import/" + projectName;
-    createFolder(workspaceId, projectName);
+    //    createFolder(workspaceId, projectName);
 
     HttpURLConnection httpConnection = null;
     try {
@@ -170,7 +174,7 @@ public class TestProjectServiceClient {
     }
   }
 
-  public ProjectConfig getFirstProject(String workspaceId) throws Exception {
+  public ProjectConfigDto getFirstProject(String workspaceId) throws Exception {
     String apiUrl = getWsAgentUrl(workspaceId);
     return requestFactory
         .fromUrl(apiUrl)
@@ -213,14 +217,18 @@ public class TestProjectServiceClient {
     Workspace workspace = workspaceServiceClient.getById(workspaceId);
     workspaceServiceClient.ensureRunningStatus(workspace);
 
-    return workspace
-            .getRuntime()
-            .getMachines()
-            .get(0)
-            .getRuntime()
-            .getServers()
-            .get(String.valueOf(WS_AGENT_PORT) + "/tcp")
-            .getUrl()
-        + "/project";
+    Map<String, ? extends Machine> machines =
+        workspaceServiceClient.getById(workspaceId).getRuntime().getMachines();
+    for (Machine machine : machines.values()) {
+      if (containsWsAgentServer(machine)) {
+        Server wsAgentServer = machine.getServers().get(SERVER_WS_AGENT_HTTP_REFERENCE);
+        if (wsAgentServer != null) {
+          return wsAgentServer.getUrl() + "/project";
+        } else {
+          throw new RuntimeException("Workspace agent server is null");
+        }
+      }
+    }
+    throw new RuntimeException("Cannot find dev machine on workspace");
   }
 }

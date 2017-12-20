@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.23.0-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-main</artifactId>
     <packaging>pom</packaging>
@@ -36,6 +36,12 @@
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-wsmaster-war</artifactId>
             <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>bootstrapper</artifactId>
+            <type>zip</type>
+            <classifier>linux_amd64</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
@@ -84,6 +90,10 @@
             <artifactId>che-plugin-sdk-tools</artifactId>
             <type>jar</type>
             <classifier>jar-with-dependencies</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
         </dependency>
     </dependencies>
     <build>

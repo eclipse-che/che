@@ -11,7 +11,6 @@
 'use strict';
 
 import {CheTeamRoles} from './che-team-roles';
-import {CheResourceLimits} from './che-resource-limits';
 import {CheTeamEventsManager} from './che-team-events-manager.factory';
 
 interface ITeamsResource<T> extends ng.resource.IResourceClass<T> {
@@ -71,12 +70,16 @@ export class CheTeam implements che.api.ICheTeam {
    */
   private cheResourcesDistribution: che.api.ICheResourcesDistribution;
 
+  private resourceLimits: che.resource.ICheResourceLimits;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, lodash: any, cheNamespaceRegistry: any, cheUser: any,
-              cheOrganization: che.api.ICheOrganization, cheTeamEventsManager: CheTeamEventsManager, cheResourcesDistribution: che.api.ICheResourcesDistribution) {
+  constructor($resource: ng.resource.IResourceService,
+              $q: ng.IQService, lodash: any, cheNamespaceRegistry: any, cheUser: any,
+              cheOrganization: che.api.ICheOrganization, cheTeamEventsManager: CheTeamEventsManager, cheResourcesDistribution: che.api.ICheResourcesDistribution,
+              resourcesService: che.service.IResourcesService) {
     this.$resource = $resource;
     this.$q = $q;
     this.lodash = lodash;
@@ -85,6 +88,7 @@ export class CheTeam implements che.api.ICheTeam {
     this.teamEventsManager = cheTeamEventsManager;
     this.cheOrganization = cheOrganization;
     this.cheResourcesDistribution = cheResourcesDistribution;
+    this.resourceLimits = resourcesService.getResourceLimits();
 
     this.remoteTeamAPI = <ITeamsResource<any>>$resource('/api/organization', {}, {
       findTeam: {method: 'GET', url: '/api/organization/find?name=:teamName'}
@@ -200,7 +204,7 @@ export class CheTeam implements che.api.ICheTeam {
       }
 
       return this.cheResourcesDistribution.fetchAvailableOrganizationResources(organization.id).then(() => {
-        let resource = this.cheResourcesDistribution.getOrganizationAvailableResourceByType(organization.id, CheResourceLimits.RAM);
+        let resource = this.cheResourcesDistribution.getOrganizationAvailableResourceByType(organization.id, this.resourceLimits.RAM);
         return resource ? 'Available RAM: ' + (resource.amount / 1024) + 'GB' : null;
       });
     });

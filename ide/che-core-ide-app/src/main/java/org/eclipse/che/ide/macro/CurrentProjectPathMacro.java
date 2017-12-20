@@ -13,14 +13,11 @@ package org.eclipse.che.ide.macro;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -33,7 +30,7 @@ import org.eclipse.che.ide.api.resources.Resource;
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class CurrentProjectPathMacro implements Macro, WsAgentStateHandler {
+public class CurrentProjectPathMacro implements Macro {
 
   private static final String KEY = "${current.project.path}";
 
@@ -41,20 +38,14 @@ public class CurrentProjectPathMacro implements Macro, WsAgentStateHandler {
   private final PromiseProvider promises;
   private final CoreLocalizationConstant localizationConstants;
 
-  private String value;
-
   @Inject
   public CurrentProjectPathMacro(
-      EventBus eventBus,
       AppContext appContext,
       PromiseProvider promises,
       CoreLocalizationConstant localizationConstants) {
     this.appContext = appContext;
     this.promises = promises;
     this.localizationConstants = localizationConstants;
-    value = "";
-
-    eventBus.addHandler(WsAgentStateEvent.TYPE, this);
   }
 
   @NotNull
@@ -71,34 +62,18 @@ public class CurrentProjectPathMacro implements Macro, WsAgentStateHandler {
   @NotNull
   @Override
   public Promise<String> expand() {
-    updateValue();
+    String value = "";
 
-    return promises.resolve(value);
-  }
-
-  private void updateValue() {
-    final Resource[] resources = appContext.getResources();
+    Resource[] resources = appContext.getResources();
 
     if (resources != null && resources.length == 1) {
-      final Optional<Project> project = appContext.getResource().getRelatedProject();
+      Optional<Project> project = appContext.getResource().getRelatedProject();
 
       if (project.isPresent()) {
         value = appContext.getProjectsRoot().append(project.get().getLocation()).toString();
-      } else {
-        value = "";
       }
-    } else {
-      value = "";
     }
-  }
 
-  @Override
-  public void onWsAgentStarted(WsAgentStateEvent event) {
-    updateValue();
-  }
-
-  @Override
-  public void onWsAgentStopped(WsAgentStateEvent event) {
-    value = "";
+    return promises.resolve(value);
   }
 }

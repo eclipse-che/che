@@ -15,8 +15,8 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CONSOLES_TREE_CONT
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
 
-import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.HashMap;
@@ -31,22 +31,20 @@ import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.command.CommandRemovedEvent;
 import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
 import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
-import org.eclipse.che.ide.api.component.WsAgentComponent;
-import org.eclipse.che.ide.api.machine.events.AbstractWsAgentStateHandler;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.workspace.event.WsAgentServerStoppedEvent;
 
 /**
  * Manager listens for creating/removing commands and adds/removes related {@link
  * ExecuteCommandAction}s in the context menus.
  */
 @Singleton
-public class ExecuteCommandActionManager implements WsAgentComponent {
+public class ExecuteCommandActionManager {
 
   private static final String COMMANDS_ACTION_GROUP_ID_PREFIX = "commandsActionGroup";
   private static final String COMMAND_ACTION_ID_PREFIX = "command_";
   private static final String GOAL_ACTION_GROUP_ID_PREFIX = "goal_";
 
-  private final CommandManager commandManager;
+  private final Provider<CommandManager> commandManagerProvider;
   private final ActionManager actionManager;
   private final CommandsActionGroup commandsActionGroup;
   private final GoalPopUpGroupFactory goalPopUpGroupFactory;
@@ -60,14 +58,14 @@ public class ExecuteCommandActionManager implements WsAgentComponent {
 
   @Inject
   public ExecuteCommandActionManager(
-      CommandManager commandManager,
+      Provider<CommandManager> commandManagerProvider,
       ActionManager actionManager,
       CommandsActionGroup commandsActionGroup,
       GoalPopUpGroupFactory goalPopUpGroupFactory,
       ExecuteCommandActionFactory commandActionFactory,
       CommandGoalRegistry goalRegistry,
       EventBus eventBus) {
-    this.commandManager = commandManager;
+    this.commandManagerProvider = commandManagerProvider;
     this.actionManager = actionManager;
     this.commandsActionGroup = commandsActionGroup;
     this.goalPopUpGroupFactory = goalPopUpGroupFactory;
@@ -77,9 +75,10 @@ public class ExecuteCommandActionManager implements WsAgentComponent {
     commandActions = new HashMap<>();
     goalPopUpGroups = new HashMap<>();
 
+    initialize();
+
     eventBus.addHandler(CommandAddedEvent.getType(), e -> addAction(e.getCommand()));
     eventBus.addHandler(CommandRemovedEvent.getType(), e -> removeAction(e.getCommand()));
-
     eventBus.addHandler(
         CommandUpdatedEvent.getType(),
         e -> {
@@ -87,14 +86,7 @@ public class ExecuteCommandActionManager implements WsAgentComponent {
           addAction(e.getUpdatedCommand());
         });
 
-    eventBus.addHandler(
-        WsAgentStateEvent.TYPE,
-        new AbstractWsAgentStateHandler() {
-          @Override
-          public void onWsAgentStopped(WsAgentStateEvent event) {
-            disposeActions();
-          }
-        });
+    eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, e -> disposeActions());
 
     eventBus.addHandler(
         CommandsLoadedEvent.getType(),
@@ -102,7 +94,9 @@ public class ExecuteCommandActionManager implements WsAgentComponent {
           disposeActions();
           registerActions();
         });
+  }
 
+  private void initialize() {
     actionManager.registerAction(COMMANDS_ACTION_GROUP_ID_PREFIX, commandsActionGroup);
 
     // inject 'Commands' menu into context menus
@@ -114,17 +108,12 @@ public class ExecuteCommandActionManager implements WsAgentComponent {
         .add(commandsActionGroup);
   }
 
-  @Override
-  public void start(Callback<WsAgentComponent, Exception> callback) {
-    callback.onSuccess(this);
-  }
-
   /**
    * Fetch registered action from command manager and constructs actions which should be registered
    * in action manager and context menus.
    */
   private void registerActions() {
-    commandManager.getCommands().forEach(ExecuteCommandActionManager.this::addAction);
+    commandManagerProvider.get().getCommands().forEach(ExecuteCommandActionManager.this::addAction);
   }
 
   /**

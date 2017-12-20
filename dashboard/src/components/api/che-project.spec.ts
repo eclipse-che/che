@@ -9,34 +9,30 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheAPIBuilder} from './builder/che-api-builder.factory';
+import {CheWorkspace} from './workspace/che-workspace.factory';
+import {CheHttpBackend} from './test/che-http-backend';
 
 describe('CheProject', function () {
-
-  /**
-   * Project Factory for the test
-   */
-  var factory;
-
   /**
    * Workspace for the test
    */
-  var workspace;
+  let workspace;
 
   /**
    * Backend for handling http operations
    */
-  var httpBackend;
+  let httpBackend;
 
   /**
    * Che backend
    */
-  var cheBackend;
+  let cheBackend;
 
   /**
    * API builder.
    */
-  var apiBuilder;
-
+  let apiBuilder;
 
   /**
    *  setup module
@@ -46,7 +42,9 @@ describe('CheProject', function () {
   /**
    * Inject factory and http backend
    */
-  beforeEach(inject(function (cheAPIBuilder, cheWorkspace, cheHttpBackend) {
+  beforeEach(inject(function (cheAPIBuilder: CheAPIBuilder,
+                              cheWorkspace: CheWorkspace,
+                              cheHttpBackend: CheHttpBackend) {
     apiBuilder = cheAPIBuilder;
     cheBackend = cheHttpBackend;
     workspace = cheWorkspace;
@@ -64,21 +62,28 @@ describe('CheProject', function () {
   /**
    * Check that we're able to fetch project details
    */
-  it('Fetch project details', function () {
+  it('Fetch project details', () => {
       // setup tests objects
-      var testProjectDetails = {
+      const testProjectDetails = {
         name: 'project-tst',
         description: 'test description',
         workspaceName: 'qwerty',
         workspaceId: 'workspace12345'
       };
-      let agentUrl = 'localhost:3232/wsagent/ext';
-      var agentWsUrl = 'ws://localhost:3232/wsagent/ws';
-      var devMachine = {'links': [{'href': agentWsUrl, 'rel': 'wsagent.websocket'}]};
-      var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}], 'devMachine': devMachine};
-      var workspace1 = apiBuilder.getWorkspaceBuilder().withId(testProjectDetails.workspaceId).withRuntime(runtime).build();
-
-      cheBackend.addWorkspaces([workspace1]);
+      const agentUrl = 'http://172.17.0.1:33441/api';
+      const agentWsUrl = 'ws://172.17.0.1:33441/wsagent';
+      const runtime = {
+        'links': [{'rel': 'wsagent', 'href': agentUrl}],
+        'machines': {
+          'dev-machine': {
+            'servers': {
+              'wsagent/ws': {'url': agentWsUrl},
+              'wsagent/http': {'url': agentUrl}
+            }
+          }
+        }
+      };
+      cheBackend.addWorkspaces([apiBuilder.getWorkspaceBuilder().withId(testProjectDetails.workspaceId).withRuntime(runtime).build()]);
 
       // providing request
       // add project details on http backend
@@ -87,14 +92,14 @@ describe('CheProject', function () {
       // setup backend
       cheBackend.setup();
 
-      //fetch runtime
+      // fetch runtime
       workspace.fetchWorkspaceDetails(testProjectDetails.workspaceId);
       httpBackend.expectGET('/api/workspace/' + testProjectDetails.workspaceId);
 
       // flush command
       httpBackend.flush();
 
-      var factory = workspace.getWorkspaceAgent(testProjectDetails.workspaceId).getProject();
+      const factory = workspace.getWorkspaceAgent(testProjectDetails.workspaceId).getProject();
 
       // fetch remote url
       factory.fetchProjectDetails(testProjectDetails.workspaceId, '/' + testProjectDetails.name);
@@ -106,7 +111,7 @@ describe('CheProject', function () {
       httpBackend.flush();
 
       // now, check
-      var projectDetails = factory.getProjectDetailsByKey('/' + testProjectDetails.name);
+      const projectDetails = factory.getProjectDetailsByKey('/' + testProjectDetails.name);
 
       // check project details
       expect(projectDetails.name).toEqual(testProjectDetails.name);

@@ -21,6 +21,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.resource.Path.valueOf;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 import com.google.inject.Inject;
@@ -33,19 +34,20 @@ import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
-import org.eclipse.che.ide.ext.git.client.compare.changespanel.ChangesPanelPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.selectablechangespanel.SelectableChangesPanelPresenter;
+import org.eclipse.che.ide.ext.git.client.compare.selectablechangespanel.SelectionCallBack;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Presenter for commit changes on git.
@@ -55,10 +57,10 @@ import org.eclipse.che.ide.resource.Path;
  * @author Igor Vinokur
  */
 @Singleton
-public class CommitPresenter implements CommitView.ActionDelegate {
+public class CommitPresenter implements CommitView.ActionDelegate, SelectionCallBack {
   private static final String COMMIT_COMMAND_NAME = "Git commit";
 
-  private final ChangesPanelPresenter changesPanelPresenter;
+  private final SelectableChangesPanelPresenter selectableChangesPanelPresenter;
   private final DialogFactory dialogFactory;
   private final AppContext appContext;
   private final CommitView view;
@@ -70,14 +72,12 @@ public class CommitPresenter implements CommitView.ActionDelegate {
   private final ProcessesPanelPresenter consolesPanelPresenter;
 
   private Project project;
-  private List<String> allFiles;
-  private List<String> filesToCommit;
 
   @Inject
   public CommitPresenter(
       CommitView view,
       GitServiceClient service,
-      ChangesPanelPresenter changesPanelPresenter,
+      SelectableChangesPanelPresenter selectableChangesPanelPresenter,
       GitLocalizationConstant constant,
       NotificationManager notificationManager,
       DialogFactory dialogFactory,
@@ -86,7 +86,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
       GitOutputConsoleFactory gitOutputConsoleFactory,
       ProcessesPanelPresenter processesPanelPresenter) {
     this.view = view;
-    this.changesPanelPresenter = changesPanelPresenter;
+    this.selectableChangesPanelPresenter = selectableChangesPanelPresenter;
     this.dialogFactory = dialogFactory;
     this.appContext = appContext;
     this.dateTimeFormatter = dateTimeFormatter;
@@ -97,8 +97,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     this.constant = constant;
     this.notificationManager = notificationManager;
 
-    this.filesToCommit = new ArrayList<>();
-    this.view.setChangesPanelView(changesPanelPresenter.getView());
+    this.view.setChangesPanelView(selectableChangesPanelPresenter.getView());
   }
 
   public void showDialog(Project project) {
@@ -174,14 +173,12 @@ public class CommitPresenter implements CommitView.ActionDelegate {
 
   private void show(@Nullable String diff) {
     AlteredFiles alteredFiles = new AlteredFiles(project, diff);
-    filesToCommit.clear();
-    allFiles = alteredFiles.getAlteredFilesList();
 
-    view.setEnableCommitButton(!view.getMessage().isEmpty());
+    view.setEnableCommitButton(!view.getCommitMessage().isEmpty());
     view.focusInMessageField();
     view.showDialog();
-    changesPanelPresenter.show(alteredFiles);
-    view.setMarkedCheckBoxes(
+    selectableChangesPanelPresenter.show(alteredFiles, this);
+    selectableChangesPanelPresenter.setMarkedCheckBoxes(
         stream(appContext.getResources())
             .map(resource -> resource.getLocation().removeFirstSegments(1))
             .collect(Collectors.toSet()));
@@ -190,14 +187,14 @@ public class CommitPresenter implements CommitView.ActionDelegate {
   @Override
   public void onCommitClicked() {
     Path location = project.getLocation();
-    Path[] filesToCommitArray = getFilesToCommitArray();
+    Path[] filesToCommitArray = getFilesToCommit();
 
     service
         .add(location, false, filesToCommitArray)
         .then(
             arg -> {
               service
-                  .commit(location, view.getMessage(), view.isAmend(), filesToCommitArray)
+                  .commit(location, view.getCommitMessage(), view.isAmend(), filesToCommitArray)
                   .then(
                       revision -> {
                         onCommitSuccess(revision);
@@ -217,12 +214,14 @@ public class CommitPresenter implements CommitView.ActionDelegate {
             });
   }
 
-  private Path[] getFilesToCommitArray() {
-    Path[] filesToCommitArray = new Path[filesToCommit.size()];
-    filesToCommit.forEach(
-        file -> filesToCommitArray[filesToCommit.indexOf(file)] = Path.valueOf(file));
-
-    return filesToCommitArray;
+  private Path[] getFilesToCommit() {
+    List<String> selectedFiles = selectableChangesPanelPresenter.getSelectedFiles();
+    int selectedFilesSize = selectedFiles.size();
+    Path[] filesToCommit = new Path[selectedFilesSize];
+    for (int i = 0; i < selectedFilesSize; i++) {
+      filesToCommit[i] = valueOf(selectedFiles.get(i));
+    }
+    return filesToCommit;
   }
 
   private void push(Path location) {
@@ -249,7 +248,13 @@ public class CommitPresenter implements CommitView.ActionDelegate {
   @Override
   public void onValueChanged() {
     view.setEnableCommitButton(
-        !view.getMessage().isEmpty() && (!filesToCommit.isEmpty() || view.isAmend()));
+        !view.getCommitMessage().isEmpty()
+            && (!selectableChangesPanelPresenter.getSelectedFiles().isEmpty() || view.isAmend()));
+  }
+
+  @Override
+  public void onSelectionChanged(Path path, boolean isChecked) {
+    onValueChanged();
   }
 
   @Override
@@ -280,20 +285,6 @@ public class CommitPresenter implements CommitView.ActionDelegate {
             });
   }
 
-  @Override
-  public void onFileNodeCheckBoxValueChanged(Path path, boolean newCheckBoxValue) {
-    if (newCheckBoxValue) {
-      filesToCommit.add(path.toString());
-    } else {
-      filesToCommit.remove(path.toString());
-    }
-  }
-
-  @Override
-  public List<String> getChangedFiles() {
-    return allFiles;
-  }
-
   private void onCommitSuccess(@NotNull final Revision revision) {
     String date = dateTimeFormatter.getFormattedDate(revision.getCommitTime());
     String message = constant.commitMessage(revision.getId(), date);
@@ -305,7 +296,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     }
     GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
     console.print(message);
-    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+    consolesPanelPresenter.addCommandOutput(console);
     notificationManager.notify(message);
     view.setMessage("");
   }
@@ -326,7 +317,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
             : constant.commitFailed();
     GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
     console.printError(errorMessage);
-    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+    consolesPanelPresenter.addCommandOutput(console);
     notificationManager.notify(constant.commitFailed(), errorMessage, FAIL, FLOAT_MODE);
   }
 }

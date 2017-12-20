@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.ext.java.client.action;
 
 import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
@@ -45,9 +45,7 @@ public class ProjectClasspathAction extends AbstractPerspectiveAction {
     super(
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
         localization.projectClasspathTitle(),
-        localization.projectClasspathDescriptions(),
-        null,
-        null);
+        localization.projectClasspathDescriptions());
     this.projectClasspathPresenter = projectClasspathPresenter;
     this.appContext = appContext;
   }

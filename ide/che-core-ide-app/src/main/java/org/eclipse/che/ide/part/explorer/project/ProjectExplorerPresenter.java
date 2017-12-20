@@ -10,11 +10,9 @@
  */
 package org.eclipse.che.ide.part.explorer.project;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.Boolean.parseBoolean;
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.START;
 import static org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto.Type.STOP;
-import static org.eclipse.che.ide.actions.LinkWithEditorAction.LINK_WITH_EDITOR;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -28,32 +26,23 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.HashSet;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeTrackingOperationDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.actions.LinkWithEditorAction;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.TreeExpander;
-import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
-import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
 import org.eclipse.che.ide.api.extension.ExtensionsInitializedEvent;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.PartStack;
-import org.eclipse.che.ide.api.parts.PartStackType;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
-import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
@@ -62,7 +51,10 @@ import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent;
 import org.eclipse.che.ide.api.resources.marker.MarkerChangedEvent.MarkerChangedHandler;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView.ActionDelegate;
 import org.eclipse.che.ide.project.node.SyntheticNode;
@@ -72,6 +64,10 @@ import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.data.TreeExpander;
+import org.eclipse.che.ide.ui.smartTree.data.settings.NodeSettings;
+import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -90,21 +86,17 @@ public class ProjectExplorerPresenter extends BasePresenter
         MarkerChangedHandler,
         SyntheticNodeUpdateEvent.SyntheticNodeUpdateHandler {
   private static final int PART_SIZE = 500;
-
-  private ProjectExplorerView view;
-  private EventBus eventBus;
-  private ResourceNode.NodeFactory nodeFactory;
-  private SettingsProvider settingsProvider;
-  private CoreLocalizationConstant locale;
-  private Resources resources;
-  private TreeExpander treeExpander;
-  private AppContext appContext;
-  private RequestTransmitter requestTransmitter;
+  private final ProjectExplorerView view;
+  private final EventBus eventBus;
+  private final ResourceNode.NodeFactory nodeFactory;
+  private final SettingsProvider settingsProvider;
+  private final CoreLocalizationConstant locale;
+  private final Resources resources;
+  private final TreeExpander treeExpander;
+  private final AppContext appContext;
+  private final RequestTransmitter requestTransmitter;
+  private final DtoFactory dtoFactory;
   private NotificationManager notificationManager;
-  private LinkWithEditorAction linkWithEditorAction;
-  private PreferencesManager preferencesManager;
-  private DtoFactory dtoFactory;
-
   private UpdateTask updateTask = new UpdateTask();
   private Set<Path> expandQueue = new HashSet<>();
   private boolean hiddenFilesAreShown;
@@ -118,11 +110,8 @@ public class ProjectExplorerPresenter extends BasePresenter
       ResourceNode.NodeFactory nodeFactory,
       SettingsProvider settingsProvider,
       AppContext appContext,
-      Provider<WorkspaceAgent> workspaceAgentProvider,
       RequestTransmitter requestTransmitter,
       NotificationManager notificationManager,
-      LinkWithEditorAction linkWithEditorAction,
-      PreferencesManager preferencesManager,
       DtoFactory dtoFactory) {
     this.view = view;
     this.eventBus = eventBus;
@@ -133,8 +122,6 @@ public class ProjectExplorerPresenter extends BasePresenter
     this.appContext = appContext;
     this.requestTransmitter = requestTransmitter;
     this.notificationManager = notificationManager;
-    this.linkWithEditorAction = linkWithEditorAction;
-    this.preferencesManager = preferencesManager;
     this.dtoFactory = dtoFactory;
     this.view.setDelegate(this);
 
@@ -142,6 +129,14 @@ public class ProjectExplorerPresenter extends BasePresenter
     eventBus.addHandler(MarkerChangedEvent.getType(), this);
     eventBus.addHandler(SyntheticNodeUpdateEvent.getType(), this);
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> getTree().getNodeStorage().clear());
+    eventBus.addHandler(WorkspaceRunningEvent.TYPE, event -> view.showPlaceholder(false));
+    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> view.showPlaceholder(true));
+    eventBus.addHandler(WorkspaceStartingEvent.TYPE, event -> view.showPlaceholder(true));
+    eventBus.addHandler(WorkspaceStoppingEvent.TYPE, event -> view.showPlaceholder(true));
+
+    if (WorkspaceStatus.RUNNING != appContext.getWorkspace().getStatus()) {
+      view.showPlaceholder(true);
+    }
 
     view.getTree()
         .getSelectionModel()
@@ -178,20 +173,11 @@ public class ProjectExplorerPresenter extends BasePresenter
     // when ide has already initialized, then we force set focus to the current part
     eventBus.addHandler(
         ExtensionsInitializedEvent.getType(),
-        event -> partStack.setActivePart(ProjectExplorerPresenter.this));
-
-    Scheduler.get()
-        .scheduleDeferred(
-            () -> {
-              PartStack partStack =
-                  checkNotNull(
-                      workspaceAgentProvider.get().getPartStack(PartStackType.NAVIGATION),
-                      "Navigation part stack should not be a null");
-              partStack.addPart(ProjectExplorerPresenter.this);
-              partStack.setActivePart(ProjectExplorerPresenter.this);
-            });
-
-    updateLinkWithEditorButtonState();
+        event -> {
+          if (partStack != null) {
+            partStack.setActivePart(ProjectExplorerPresenter.this);
+          }
+        });
   }
 
   public void addSelectionHandler(SelectionHandler<Node> handler) {
@@ -200,7 +186,6 @@ public class ProjectExplorerPresenter extends BasePresenter
 
   @Inject
   public void initFileWatchers() {
-    final String endpointId = "ws-agent";
     final String method = "track/project-tree";
 
     getTree()
@@ -212,7 +197,7 @@ public class ProjectExplorerPresenter extends BasePresenter
                 Resource data = ((ResourceNode) node).getData();
                 requestTransmitter
                     .newRequest()
-                    .endpointId(endpointId)
+                    .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                     .methodName(method)
                     .paramsAsDto(
                         dtoFactory
@@ -232,7 +217,7 @@ public class ProjectExplorerPresenter extends BasePresenter
                 Resource data = ((ResourceNode) node).getData();
                 requestTransmitter
                     .newRequest()
-                    .endpointId(endpointId)
+                    .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                     .methodName(method)
                     .paramsAsDto(
                         dtoFactory
@@ -466,8 +451,13 @@ public class ProjectExplorerPresenter extends BasePresenter
    * @param node node which should be activated in "Go Into" mode
    */
   @Deprecated
-  public void goInto(Node node) {
-    view.setGoIntoModeOn(node);
+  public boolean goInto(Node node) {
+    return view.setGoIntoModeOn(node);
+  }
+
+  /** Deactivate "Go Into" mode. */
+  public void goBack() {
+    view.setGoIntoModeOff();
   }
 
   /**
@@ -481,9 +471,8 @@ public class ProjectExplorerPresenter extends BasePresenter
   }
 
   /** Collapse all non-leaf nodes. */
-  @Deprecated
   public void collapseAll() {
-    view.collapseAll();
+    doCollapse();
   }
 
   /**
@@ -506,17 +495,6 @@ public class ProjectExplorerPresenter extends BasePresenter
   @Deprecated
   public boolean isShowHiddenFiles() {
     return hiddenFilesAreShown;
-  }
-
-  @Override
-  public void onLinkWithEditorButtonClicked() {
-    linkWithEditorAction.actionPerformed(null);
-    updateLinkWithEditorButtonState();
-  }
-
-  private void updateLinkWithEditorButtonState() {
-    String linkWithEditorValue = preferencesManager.getValue(LINK_WITH_EDITOR);
-    view.activateLinkWithEditorButton(parseBoolean(linkWithEditorValue));
   }
 
   private class UpdateTask extends DelayedTask {

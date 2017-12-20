@@ -106,7 +106,7 @@ public class FileNotExistIntoEditorAfterDeleteTest {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
     loader.waitOnClosed();
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor(EXPECTED_TEXT_2);
 
     projectExplorer.selectItem(PATH_TO_JAVA_FILE);

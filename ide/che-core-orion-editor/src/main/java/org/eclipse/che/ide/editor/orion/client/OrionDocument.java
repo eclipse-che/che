@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.editor.orion.client;
 
+import static org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewShowOptionsOverlay.ViewAnchorValue.CENTER;
+
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import org.eclipse.che.ide.api.editor.document.AbstractDocument;
 import org.eclipse.che.ide.api.editor.document.Document;
@@ -30,6 +32,7 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionSelectionOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextModelOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextModelOverlay.EventHandler;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewShowOptionsOverlay;
 
 /**
  * The implementation of {@link Document} for Orion.
@@ -160,7 +163,9 @@ public class OrionDocument extends AbstractDocument {
 
   @Override
   public void setCursorPosition(final TextPosition position) {
-    this.editorOverlay.setCaretOffset(getIndexFromPosition(position));
+    OrionTextViewShowOptionsOverlay showOptionsOverlay = OrionTextViewShowOptionsOverlay.create();
+    showOptionsOverlay.setViewAnchor(CENTER.getValue());
+    this.editorOverlay.setCaretOffset(getIndexFromPosition(position), showOptionsOverlay);
   }
 
   public int getCursorOffset() {

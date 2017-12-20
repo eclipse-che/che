@@ -27,6 +27,7 @@ public class ConsoleGinModule extends AbstractGinModule {
                 Names.named("command"),
                 CommandOutputConsolePresenter.class)
             .implement(OutputConsole.class, Names.named("default"), DefaultOutputConsole.class)
+            .implement(OutputConsole.class, Names.named("composite"), CompositeOutputConsole.class)
             .build(CommandConsoleFactory.class));
   }
 }

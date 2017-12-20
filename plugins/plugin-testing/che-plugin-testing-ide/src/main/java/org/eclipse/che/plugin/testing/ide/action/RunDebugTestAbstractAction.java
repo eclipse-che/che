@@ -73,7 +73,7 @@ public abstract class RunDebugTestAbstractAction extends AbstractPerspectiveActi
       @NotNull String description,
       @NotNull String text,
       SVGResource icon) {
-    super(perspectives, text, description, null, icon);
+    super(perspectives, text, description, icon);
     this.testDetector = testDetector;
     this.testResultPresenter = testResultPresenter;
     this.testingHandler = testingHandler;

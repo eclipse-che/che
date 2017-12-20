@@ -10,28 +10,20 @@
  */
 'use strict';
 
-
 /**
  * Defines a directive for checking git URL
  * @author Florent Benoit
  */
-export class GitUrlValidator {
+export class GitUrlValidator implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor () {
-    this.restrict='A';
-    this.require = 'ngModel';
-
-  }
+  restrict = 'A';
+  require = 'ngModel';
 
   /**
    * Check that the GIT URL is compliant
    */
-  link(scope, element, attributes, ngModel) {
-    ngModel.$validators.gitUrl = function(modelValue) {
+  link($scope: ng.IScope, $element: ng.IAugmentedJQuery, $attributes: ng.IAttributes, $ngModel: ng.INgModelController): void {
+    ($ngModel.$validators as any).gitUrl = function(modelValue: string) {
       var res = /((git|ssh|http(s)?)|(git@[\w\.]+))(:(\/\/))?([\w\.@\:/\-~]+)(\.git)?(\/)?/.test(modelValue);
       return res;
     };

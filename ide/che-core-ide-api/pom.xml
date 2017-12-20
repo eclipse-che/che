@@ -16,11 +16,11 @@
     <parent>
         <artifactId>che-core-ide-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.23.0-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che.core</groupId>
     <artifactId>che-core-ide-api</artifactId>
-    <packaging>jar</packaging>
+    <packaging>gwt-lib</packaging>
     <name>Che Core :: IDE :: API</name>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/gen</dto-generator-out-directory>
@@ -57,11 +57,26 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-auth-shared</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-core</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-debug-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-debug-shared</artifactId>
+            <classifier>sources</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -73,11 +88,17 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-factory-shared</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-git-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-machine-shared</artifactId>
+            <artifactId>che-core-api-git-shared</artifactId>
+            <classifier>sources</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -85,7 +106,17 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-model</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-project-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-project-shared</artifactId>
+            <classifier>sources</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -93,7 +124,17 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-project-templates-shared</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-ssh-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-ssh-shared</artifactId>
+            <classifier>sources</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -101,7 +142,17 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-user-shared</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-workspace-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-workspace-shared</artifactId>
+            <classifier>sources</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -158,13 +209,7 @@
         </dependency>
     </dependencies>
     <build>
-        <sourceDirectory>src/main/java</sourceDirectory>
-        <testSourceDirectory>src/test/java</testSourceDirectory>
-        <outputDirectory>target/classes</outputDirectory>
         <resources>
-            <resource>
-                <directory>src/main/java</directory>
-            </resource>
             <resource>
                 <directory>src/main/resources</directory>
             </resource>
@@ -173,6 +218,14 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>net.ltgt.gwt.maven</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <moduleName>org.eclipse.che.ide.Api</moduleName>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -235,7 +288,7 @@
                         <package>org.eclipse.che.api.user</package>
                         <package>org.eclipse.che.api.debug.shared.dto</package>
                         <package>org.eclipse.che.ide.api.debug.dto</package>
-                        <package>org.eclipse.che.ide.statepersistance.dto</package>
+                        <package>org.eclipse.che.ide.api.command.exec.dto</package>
                     </dtoPackages>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
                     <genClassName>org.eclipse.che.ide.api.dto.DtoClientImpls</genClassName>
@@ -247,17 +300,40 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
                     <excludes>
-                        <exclude>**/*.png</exclude>
-                        <exclude>**/*.gif</exclude>
-                        <exclude>**/*.jpg</exclude>
                         <exclude>**/ide/api/editor/text/TypedPosition.java</exclude>
-                        <exclude>**/ide/api/text/annotation/AnnotationModelEvent.java</exclude>
                         <exclude>**/ide/api/editor/text/rules/**/*.*</exclude>
                         <exclude>**/org/eclipse/che/ide/api/editor/reconciler/DirtyRegion.java</exclude>
                         <exclude>**/org/eclipse/che/ide/api/editor/reconciler/DirtyRegionQueue.java</exclude>
                         <exclude>**/org/eclipse/che/ide/api/editor/annotation/AnnotationModelEvent.java</exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <ignoredUnusedDeclaredDependencies>
+                                <!-- Ignore *-sources.jar analysis due to the fact that analyzer works at bytecode level
+                                     but *-sources.jar is required for including to the GWT source path. -->
+                                <dep>org.eclipse.che.core:che-core-api-auth-shared</dep>
+                                <dep>org.eclipse.che.core:che-core-api-factory-shared</dep>
+                                <dep>org.eclipse.che.core:che-core-api-core</dep>
+                                <dep>org.eclipse.che.core:che-core-api-model</dep>
+                                <dep>org.eclipse.che.core:che-core-api-git-shared</dep>
+                                <dep>org.eclipse.che.core:che-core-api-workspace-shared</dep>
+                                <dep>org.eclipse.che.core:che-core-api-project-shared</dep>
+                                <dep>org.eclipse.che.core:che-core-api-user-shared</dep>
+                                <dep>org.eclipse.che.core:che-core-api-project-templates-shared</dep>
+                                <dep>org.eclipse.che.core:che-core-api-debug-shared</dep>
+                                <dep>org.eclipse.che.core:che-core-api-ssh-shared</dep>
+                                <dep>org.eclipse.che.core:che-core-gwt-logger</dep>
+                            </ignoredUnusedDeclaredDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

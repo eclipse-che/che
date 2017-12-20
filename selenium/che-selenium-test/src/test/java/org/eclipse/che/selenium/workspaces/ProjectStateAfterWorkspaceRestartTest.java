@@ -18,7 +18,6 @@ import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -26,7 +25,6 @@ import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.testng.annotations.BeforeClass;
@@ -46,7 +44,6 @@ public class ProjectStateAfterWorkspaceRestartTest {
   @Inject private Consoles consoles;
   @Inject private ToastLoader toastLoader;
   @Inject private Menu menu;
-  @Inject private NotificationsPopupPanel notificationsPanel;
   @Inject private CodenvyEditor editor;
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
@@ -72,11 +69,10 @@ public class ProjectStateAfterWorkspaceRestartTest {
     projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
-    editor.waitActiveEditor();
+    editor.waitActive();
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    editor.waitActiveEditor();
-    notificationsPanel.waitProgressPopupPanelClose();
+    editor.waitActive();
     loader.waitOnClosed();
 
     // stop and start workspace
@@ -85,19 +81,15 @@ public class ProjectStateAfterWorkspaceRestartTest {
     toastLoader.waitToastLoaderIsOpen();
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running");
     loader.waitOnClosed();
-    notificationsPanel.waitPopUpPanelsIsClosed();
     consoles.closeProcessesArea();
     editor.waitTabIsNotPresent("AppController");
     editor.waitTabIsNotPresent("index.jsp");
-    // projectExplorer.clickOnProjectExplorerTab();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME);
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running");
     toastLoader.clickOnStartButton();
 
     // check state of the project
-    notificationsPanel.waitExpectedMessageOnProgressPanelAndClosed(
-        TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
     projectExplorer.waitProjectExplorer();
     toastLoader.waitToastLoaderIsClosed();
     loader.waitOnClosed();
@@ -109,7 +101,7 @@ public class ProjectStateAfterWorkspaceRestartTest {
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
     projectExplorer.openItemByPath(PROJECT_NAME + "/README.md");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextNotPresentIntoEditor(EXP_TEXT_NOT_PRESENT);
     editor.waitTextIntoEditor("Developer Workspace");
   }

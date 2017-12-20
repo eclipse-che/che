@@ -9,6 +9,7 @@
  */
 package org.eclipse.che.plugin.zdb.server;
 
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -19,6 +20,7 @@ import java.util.List;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.SuspendPolicy;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
@@ -29,6 +31,7 @@ import org.eclipse.che.api.debug.shared.model.impl.action.ResumeActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepIntoActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepOutActionImpl;
 import org.eclipse.che.api.debug.shared.model.impl.action.StepOverActionImpl;
+import org.eclipse.che.api.fs.server.FsManager;
 import org.testng.annotations.Test;
 
 /**
@@ -45,12 +48,14 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
       (new File(ZendDbgConfigurationTest.class.getResource("/php/classes.php").getPath()))
           .getAbsolutePath();
 
+  private final FsManager fsManager = mock(FsManager.class);
+
   @Test(
     groups = {"zendDbg"},
     dependsOnGroups = {"checkPHP"}
   )
   public void testSslConnection() throws Exception {
-    triggerSession(dbgHelloFile, getDbgSettings(true, true));
+    triggerSession(dbgHelloFile, getDbgSettings(true, true), fsManager);
     awaitSuspend(dbgHelloFile, 2);
     debugger.resume(new ResumeActionImpl());
   }
@@ -60,13 +65,13 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
     dependsOnGroups = {"checkPHP"}
   )
   public void testStepping() throws Exception {
-    triggerSession(dbgHelloFile, getDbgSettings(true, false));
+    triggerSession(dbgHelloFile, getDbgSettings(true, false), fsManager);
     awaitSuspend(dbgHelloFile, 2);
-    debugger.stepOver(new StepOverActionImpl());
+    debugger.stepOver(new StepOverActionImpl(SuspendPolicy.ALL));
     awaitSuspend(dbgHelloFile, 4);
-    debugger.stepInto(new StepIntoActionImpl());
+    debugger.stepInto(new StepIntoActionImpl(SuspendPolicy.ALL));
     awaitSuspend(dbgClassesFile, 9);
-    debugger.stepOut(new StepOutActionImpl());
+    debugger.stepOut(new StepOutActionImpl(SuspendPolicy.ALL));
     awaitSuspend(dbgHelloFile, 4);
   }
 
@@ -75,7 +80,7 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
     dependsOnGroups = {"checkPHP"}
   )
   public void testEvaluation() throws Exception {
-    triggerSession(dbgHelloFile, getDbgSettings(true, false));
+    triggerSession(dbgHelloFile, getDbgSettings(true, false), fsManager);
     awaitSuspend(dbgHelloFile, 2);
     String result = debugger.evaluate("2+2");
     assertEquals(result, "4");
@@ -95,7 +100,7 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
     Breakpoint bp2 = new BreakpointImpl(ZendDbgLocationHandler.createDBG(dbgHelloFile, 8));
     breakpoints.add(bp1);
     breakpoints.add(bp2);
-    triggerSession(dbgHelloFile, getDbgSettings(true, false), breakpoints);
+    triggerSession(dbgHelloFile, getDbgSettings(true, false), breakpoints, fsManager);
     awaitBreakpointActivated(bp1);
     awaitBreakpointActivated(bp2);
     awaitSuspend(dbgHelloFile, 2);
@@ -122,7 +127,7 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
     Breakpoint bp2 = new BreakpointImpl(ZendDbgLocationHandler.createDBG(dbgClassesFile, 10));
     breakpoints.add(bp1);
     breakpoints.add(bp2);
-    triggerSession(dbgHelloFile, getDbgSettings(false, false), breakpoints);
+    triggerSession(dbgHelloFile, getDbgSettings(false, false), breakpoints, fsManager);
     awaitBreakpointActivated(bp1);
     awaitBreakpointActivated(bp2);
     awaitSuspend(dbgHelloFile, 4);
@@ -140,7 +145,7 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
     Breakpoint bp2 = new BreakpointImpl(ZendDbgLocationHandler.createDBG(dbgClassesFile, 25));
     breakpoints.add(bp1);
     breakpoints.add(bp2);
-    triggerSession(dbgHelloFile, getDbgSettings(false, false), breakpoints);
+    triggerSession(dbgHelloFile, getDbgSettings(false, false), breakpoints, fsManager);
     awaitBreakpointActivated(bp1);
     awaitBreakpointActivated(bp2);
     awaitSuspend(dbgClassesFile, 16);
@@ -172,7 +177,7 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
     List<Breakpoint> breakpoints = new ArrayList<>();
     Breakpoint bp1 = new BreakpointImpl(ZendDbgLocationHandler.createDBG(dbgClassesFile, 16));
     breakpoints.add(bp1);
-    triggerSession(dbgHelloFile, getDbgSettings(false, false), breakpoints);
+    triggerSession(dbgHelloFile, getDbgSettings(false, false), breakpoints, fsManager);
     awaitBreakpointActivated(bp1);
     awaitSuspend(dbgClassesFile, 16);
     debugger.dumpStackFrame();
@@ -201,7 +206,7 @@ public class ZendDbgSessionTest extends AbstractZendDbgSessionTest {
     List<Breakpoint> breakpoints = new ArrayList<>();
     Breakpoint bp1 = new BreakpointImpl(ZendDbgLocationHandler.createDBG(dbgHelloFile, 5));
     breakpoints.add(bp1);
-    triggerSession(dbgHelloFile, getDbgSettings(false, false), breakpoints);
+    triggerSession(dbgHelloFile, getDbgSettings(false, false), breakpoints, fsManager);
     awaitBreakpointActivated(bp1);
     awaitSuspend(dbgHelloFile, 5);
     StackFrameDump stackFrameDump = debugger.dumpStackFrame();

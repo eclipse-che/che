@@ -23,7 +23,7 @@ import java.util.Map;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
-import org.eclipse.che.ide.api.component.StateComponent;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.parts.PartPresenter;
@@ -33,6 +33,7 @@ import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.parts.PerspectiveManager.PerspectiveTypeListener;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.api.statepersistance.StateComponent;
 import org.eclipse.che.ide.menu.MainMenuPresenter;
 import org.eclipse.che.ide.menu.StatusPanelGroupPresenter;
 import org.eclipse.che.ide.ui.toolbar.MainToolbar;
@@ -158,6 +159,7 @@ public class WorkspacePresenter
   }
 
   @Override
+  @Nullable
   public PartPresenter getActivePart() {
     return activePerspective.getActivePart();
   }

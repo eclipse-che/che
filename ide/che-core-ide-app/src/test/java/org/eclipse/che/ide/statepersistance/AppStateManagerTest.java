@@ -14,20 +14,26 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.inject.Provider;
+import com.google.web.bindery.event.shared.EventBus;
 import elemental.json.Json;
 import elemental.json.JsonFactory;
 import elemental.json.JsonObject;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
-import org.eclipse.che.ide.api.component.StateComponent;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.api.statepersistance.StateComponent;
+import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,11 +53,17 @@ public class AppStateManagerTest {
 
   private static final String WS_ID = "ws_id";
 
+  @Mock private StateComponentRegistry stateComponentRegistry;
+  @Mock private Provider<StateComponentRegistry> stateComponentRegistryProvider;
   @Mock private StateComponent component1;
   @Mock private StateComponent component2;
+  @Mock private Provider<StateComponent> component1Provider;
+  @Mock private Provider<StateComponent> component2Provider;
   @Mock private Promise<Void> promise;
   @Mock private PreferencesManager preferencesManager;
   @Mock private JsonFactory jsonFactory;
+  @Mock private EventBus eventBus;
+  @Mock private AppContext appContext;
   @Mock private JsonObject pref;
   @Mock private PromiseProvider promiseProvider;
 
@@ -67,9 +79,20 @@ public class AppStateManagerTest {
 
   @Before
   public void setUp() {
-    Set<StateComponent> components = new HashSet<>();
+    WorkspaceImpl workspace = mock(WorkspaceImpl.class);
+    when(workspace.getId()).thenReturn(WS_ID);
+    when(appContext.getWorkspace()).thenReturn(workspace);
+
+    List<StateComponent> components = new ArrayList<>();
     components.add(component1);
     components.add(component2);
+
+    when(stateComponentRegistry.getComponents()).thenReturn(components);
+    when(stateComponentRegistry.getComponentById(anyString())).thenReturn(Optional.of(component1));
+    when(stateComponentRegistryProvider.get()).thenReturn(stateComponentRegistry);
+
+    when(component1Provider.get()).thenReturn(component1);
+    when(component2Provider.get()).thenReturn(component2);
 
     when(component1.getId()).thenReturn("component1");
     when(component2.getId()).thenReturn("component2");
@@ -77,25 +100,32 @@ public class AppStateManagerTest {
     when(preferencesManager.getValue(AppStateManager.PREFERENCE_PROPERTY_NAME)).thenReturn("");
     when(jsonFactory.parse(anyString())).thenReturn(pref = Json.createObject());
     appStateManager =
-        new AppStateManager(components, preferencesManager, jsonFactory, promiseProvider);
+        new AppStateManager(
+            stateComponentRegistryProvider,
+            preferencesManager,
+            jsonFactory,
+            promiseProvider,
+            eventBus,
+            appContext);
+    appStateManager.readStateFromPreferences();
   }
 
   @Test
   public void shouldStoreStateInPreferences() throws Exception {
-    appStateManager.persistWorkspaceState(WS_ID);
+    appStateManager.persistWorkspaceState();
     verify(preferencesManager).flushPreferences();
   }
 
   @Test
   public void shouldCallGetStateOnStateComponent() throws Exception {
-    appStateManager.persistWorkspaceState(WS_ID);
+    appStateManager.persistWorkspaceState();
     verify(component1, atLeastOnce()).getState();
     verify(component2, atLeastOnce()).getState();
   }
 
   @Test
   public void shouldStoreStateByWsId() throws Exception {
-    appStateManager.persistWorkspaceState(WS_ID);
+    appStateManager.persistWorkspaceState();
     verify(preferencesManager)
         .setValue(preferenceArgumentCaptor.capture(), jsonArgumentCaptor.capture());
     assertThat(preferenceArgumentCaptor.getValue()).isNotNull();
@@ -110,7 +140,7 @@ public class AppStateManagerTest {
     object.put("key1", "value1");
     when(component1.getState()).thenReturn(object);
 
-    appStateManager.persistWorkspaceState(WS_ID);
+    appStateManager.persistWorkspaceState();
 
     verify(component1).getState();
     verify(preferencesManager).setValue(anyString(), jsonArgumentCaptor.capture());
@@ -128,7 +158,7 @@ public class AppStateManagerTest {
   @Test
   public void restoreShouldReadFromPreferences() throws Exception {
     pref.put(WS_ID, Json.createObject());
-    appStateManager.restoreWorkspaceState(WS_ID);
+    appStateManager.restoreWorkspaceState();
 
     verify(preferencesManager).getValue(AppStateManager.PREFERENCE_PROPERTY_NAME);
   }
@@ -145,7 +175,7 @@ public class AppStateManagerTest {
 
     when(promiseProvider.resolve(nullable(Void.class))).thenReturn(sequentialRestore);
 
-    appStateManager.restoreWorkspaceState(WS_ID);
+    appStateManager.restoreWorkspaceState();
 
     verify(sequentialRestore).thenPromise(sequentialRestoreThenFunction.capture());
     sequentialRestoreThenFunction.getValue().apply(null);

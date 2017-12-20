@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.plugin.languageserver.ide;
 
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
 
 import com.google.inject.Inject;
@@ -17,12 +18,14 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.editor.events.FileEvent;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.api.workspace.event.WsAgentServerRunningEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.browser.UserAgent;
@@ -36,6 +39,8 @@ import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.GoToSymbolAct
 import org.eclipse.che.plugin.languageserver.ide.navigation.workspace.FindSymbolAction;
 import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry;
 import org.eclipse.che.plugin.languageserver.ide.rename.LSRenameAction;
+import org.eclipse.che.plugin.languageserver.ide.service.PublishDiagnosticsReceiver;
+import org.eclipse.che.plugin.languageserver.ide.service.ShowMessageJsonRpcReceiver;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
@@ -47,6 +52,28 @@ import org.eclipse.lsp4j.TextDocumentItem;
 @Singleton
 public class LanguageServerExtension {
   private final String GROUP_ASSISTANT_REFACTORING = "assistantRefactoringGroup";
+
+  @Inject
+  public LanguageServerExtension(
+      LanguageServerFileTypeRegister languageServerFileTypeRegister,
+      EventBus eventBus,
+      AppContext appContext,
+      ShowMessageJsonRpcReceiver showMessageJsonRpcReceiver,
+      PublishDiagnosticsReceiver publishDiagnosticsReceiver) {
+    eventBus.addHandler(
+        WsAgentServerRunningEvent.TYPE,
+        e -> {
+          languageServerFileTypeRegister.start();
+          showMessageJsonRpcReceiver.subscribe();
+          publishDiagnosticsReceiver.subscribe();
+        });
+
+    if (appContext.getWorkspace().getStatus() == RUNNING) {
+      languageServerFileTypeRegister.start();
+      showMessageJsonRpcReceiver.subscribe();
+      publishDiagnosticsReceiver.subscribe();
+    }
+  }
 
   @Inject
   protected void injectCss(LanguageServerResources resources) {

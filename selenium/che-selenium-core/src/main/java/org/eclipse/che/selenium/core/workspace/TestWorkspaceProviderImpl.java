@@ -12,7 +12,6 @@ package org.eclipse.che.selenium.core.workspace;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -28,6 +27,7 @@ import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.utils.WorkspaceDtoDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,26 +42,29 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
   private static final String AUTO = "auto";
 
   private final int poolSize;
+  private final TestUser defaultUser;
   private final int defaultMemoryGb;
-  private final Provider<TestUser> defaultUser;
   private final TestWorkspaceServiceClient testWorkspaceServiceClient;
   private final TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory;
+  private final WorkspaceDtoDeserializer workspaceDtoDeserializer;
 
   private ArrayBlockingQueue<TestWorkspace> testWorkspaceQueue;
   private ScheduledExecutorService executor;
 
   @Inject
   public TestWorkspaceProviderImpl(
-      @Named("sys.workspace_pool_size") String poolSize,
+      @Named("che.workspace_pool_size") String poolSize,
+      @Named("che.threads") int threads,
       @Named("workspace.default_memory_gb") int defaultMemoryGb,
-      @Named("sys.threads") int threads,
-      Provider<TestUser> defaultUser,
+      TestUser defaultUser,
+      WorkspaceDtoDeserializer workspaceDtoDeserializer,
       TestWorkspaceServiceClient testWorkspaceServiceClient,
       TestWorkspaceServiceClientFactory testWorkspaceServiceClientFactory) {
-    this.defaultMemoryGb = defaultMemoryGb;
     this.defaultUser = defaultUser;
+    this.defaultMemoryGb = defaultMemoryGb;
     this.testWorkspaceServiceClient = testWorkspaceServiceClient;
     this.testWorkspaceServiceClientFactory = testWorkspaceServiceClientFactory;
+    this.workspaceDtoDeserializer = workspaceDtoDeserializer;
 
     if (poolSize.equals(AUTO)) {
       this.poolSize = (threads - 1) / 2 + 1;
@@ -85,14 +88,14 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
         generateName(),
         owner,
         memoryGB,
-        template,
+        workspaceDtoDeserializer.deserializeWorkspaceTemplate(template),
         testWorkspaceServiceClientFactory.create(owner.getEmail(), owner.getPassword()));
   }
 
   private boolean hasDefaultValues(TestUser testUser, int memoryGB, String template) {
     return memoryGB == defaultMemoryGb
         && WorkspaceTemplate.DEFAULT.equals(template)
-        && testUser.getEmail().equals(defaultUser.get().getEmail());
+        && testUser.getEmail().equals(defaultUser.getEmail());
   }
 
   private TestWorkspace doGetWorkspaceFromPool() throws Exception {
@@ -140,6 +143,7 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
       }
       LOG.info("Workspace threads pool is terminated");
     }
+
     LOG.info("Destroy remained workspaces: {}.", extractWorkspaceInfo());
     testWorkspaceQueue.parallelStream().forEach(TestWorkspace::delete);
 
@@ -178,14 +182,22 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
         () -> {
           while (testWorkspaceQueue.remainingCapacity() != 0) {
             String name = generateName();
-            TestWorkspace testWorkspace =
-                new TestWorkspaceImpl(
-                    name,
-                    defaultUser.get(),
-                    defaultMemoryGb,
-                    WorkspaceTemplate.DEFAULT,
-                    testWorkspaceServiceClient);
-
+            TestWorkspace testWorkspace;
+            try {
+              testWorkspace =
+                  new TestWorkspaceImpl(
+                      name,
+                      defaultUser,
+                      defaultMemoryGb,
+                      workspaceDtoDeserializer.deserializeWorkspaceTemplate(
+                          WorkspaceTemplate.DEFAULT),
+                      testWorkspaceServiceClient);
+            } catch (Exception e) {
+              // scheduled executor service doesn't log any exceptions, so log possible exception
+              // here
+              LOG.error(e.getLocalizedMessage(), e);
+              throw e;
+            }
             try {
               if (!testWorkspaceQueue.offer(testWorkspace)) {
                 LOG.warn("Workspace {} can't be added into the pool and will be destroyed.", name);

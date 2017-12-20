@@ -34,17 +34,18 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.InputCallback;
-import org.eclipse.che.ide.api.dialogs.InputValidator;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.ui.dialogs.CancelCallback;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.ui.dialogs.input.InputCallback;
+import org.eclipse.che.ide.ui.dialogs.input.InputValidator;
 import org.eclipse.che.ide.util.browser.BrowserUtils;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.pullrequest.client.ContributeMessages;
+import org.eclipse.che.plugin.pullrequest.client.ContributeResources;
 import org.eclipse.che.plugin.pullrequest.client.events.ContextInvalidatedEvent;
 import org.eclipse.che.plugin.pullrequest.client.events.ContextInvalidatedHandler;
 import org.eclipse.che.plugin.pullrequest.client.events.ContextPropertyChangeEvent;
@@ -58,6 +59,7 @@ import org.eclipse.che.plugin.pullrequest.client.workflow.Context;
 import org.eclipse.che.plugin.pullrequest.client.workflow.Step;
 import org.eclipse.che.plugin.pullrequest.client.workflow.WorkflowExecutor;
 import org.eclipse.che.plugin.pullrequest.client.workflow.WorkflowStatus;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * Part for the contribution configuration.
@@ -72,6 +74,7 @@ public class ContributePartPresenter extends BasePresenter
         CurrentContextChangedHandler,
         ContextInvalidatedHandler {
   private final ContributePartView view;
+  private final ContributeResources resources;
   private final WorkspaceAgent workspaceAgent;
   private final ContributeMessages messages;
   private final WorkflowExecutor workflowExecutor;
@@ -84,6 +87,7 @@ public class ContributePartPresenter extends BasePresenter
   public ContributePartPresenter(
       final ContributePartView view,
       final ContributeMessages messages,
+      final ContributeResources resources,
       final WorkspaceAgent workspaceAgent,
       final EventBus eventBus,
       final WorkflowExecutor workflow,
@@ -92,6 +96,7 @@ public class ContributePartPresenter extends BasePresenter
       final DialogFactory dialogFactory,
       final Map<String, StagesProvider> stagesProviders) {
     this.view = view;
+    this.resources = resources;
     this.workspaceAgent = workspaceAgent;
     this.workflowExecutor = workflow;
     this.messages = messages;
@@ -252,6 +257,11 @@ public class ContributePartPresenter extends BasePresenter
   }
 
   @Override
+  public SVGResource getTitleImage() {
+    return resources.titleIcon();
+  }
+
+  @Override
   public void onOpenPullRequestOnVcsHost() {
     final Context context = workflowExecutor.getCurrentContext();
 
@@ -340,7 +350,7 @@ public class ContributePartPresenter extends BasePresenter
   @Nullable
   @Override
   public String getTitleToolTip() {
-    return null;
+    return messages.contributePartTitle();
   }
 
   @Override
@@ -485,6 +495,14 @@ public class ContributePartPresenter extends BasePresenter
   @Override
   public void onContextInvalidated(Context context) {
     resetView();
+  }
+
+  public void showStub(String stubContent) {
+    view.showStub(stubContent);
+  }
+
+  public void showContent() {
+    view.showContent();
   }
 
   /**

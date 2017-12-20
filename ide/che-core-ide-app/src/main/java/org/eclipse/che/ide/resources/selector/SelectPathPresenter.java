@@ -17,14 +17,14 @@ import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
-import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
+import org.eclipse.che.ide.ui.smartTree.data.Node;
+import org.eclipse.che.ide.ui.smartTree.data.settings.NodeSettings;
+import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
 
 /** @author Vlad Zhukovskiy */
 @Singleton

@@ -28,14 +28,15 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class CheckFindActionFeatureInCheTest {
-  private static final String FIRST_ACTION_NAME = "configu";
+  private static final String FIRST_ACTION_NAME = "config";
   private static final String SECOND_ACTION_NAME = "commands";
   private static final String THIRD_ACTION_NAME = "che";
 
   private static final String FIRST_EXPECTED_ITEMS_WITH_DISABLED_NONE_MENU_ACTIONS_CHECKBOX =
       "Update Project Configuration...  Project\n"
           + "Configure Classpath  Project\n"
-          + "Edit Debug Configurations... [Alt+Shift+F9]  Run";
+          + "Edit Debug Configurations... [Alt+Shift+F9]  Run\n"
+          + "Import From Che Config...  Project";
 
   private static final String SECOND_EXPECTED_ITEMS_WITH_DISABLED_NONE_MENU_ACTIONS_CHECKBOX =
       "Commands Palette [Shift+F10]  Run";
@@ -44,14 +45,18 @@ public class CheckFindActionFeatureInCheTest {
       "Branches... [Ctrl+B]  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
 
   private static final String FIRST_EXPECTED_ITEMS_WITH_ENABLED_NONE_MENU_ACTIONS_CHECKBOX =
-      "Configuration \n"
-          + "Update Project Configuration...  Project\n"
+      "Update Project Configuration...  Project\n"
+          + "Configure \n"
           + "Configure Classpath  Project\n"
           + "Edit Debug Configurations... [Alt+Shift+F9]  Run\n"
+          + "Import From Che Config...  Project\n"
           + "breakpointConfiguration ";
 
   private static final String SECOND_EXPECTED_ITEMS_WITH_ENABLED_NONE_MENU_ACTIONS_CHECKBOX =
-      "Commands \n" + "Commands Palette [Shift+F10]  Run";
+      "Commands \n"
+          + "Commands [Ctrl+Alt+4]  Tool Windows\n"
+          + "Commands \n"
+          + "Commands Palette [Shift+F10]  Run";
   private static final String THIRD_EXPECTED_ITEMS_WITH_ENABLED_NONE_MENU_ACTIONS_CHECKBOX =
       "Branches... [Ctrl+B]  GitCommandGroup\n" + "Checkout Reference...  GitCommandGroup";
 
@@ -86,7 +91,6 @@ public class CheckFindActionFeatureInCheTest {
 
   @Test(dataProvider = "checkingDataAllActionsData")
   public void checkSearchActionsForAllItemsTest(String actionName, String result) {
-    findAction.setCheckBoxInSelectedPosition();
     checkAction(actionName, result);
   }
 

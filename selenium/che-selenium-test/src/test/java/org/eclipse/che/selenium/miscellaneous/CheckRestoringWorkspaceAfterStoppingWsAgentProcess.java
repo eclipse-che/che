@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.miscellaneous;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -23,24 +24,23 @@ import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestWorkspaceConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.pageobject.Events;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.ToastLoader;
+import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
- * //
- *
  * @author Musienko Maxim
+ * @author Serhii Skoryk
  */
 public class CheckRestoringWorkspaceAfterStoppingWsAgentProcess {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
@@ -52,8 +52,8 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcess {
   @Inject private TestUser defaultTestUser;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private Events events;
-  @Inject private ToastLoader toastLoader;
+  @Inject private MachineTerminal terminal;
+  @Inject private Consoles consoles;
   @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
@@ -75,18 +75,26 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcess {
     ide.open(workspace);
   }
 
-  @Test(priority = 0)
+  @Test()
   public void checkRestoreWsAgentByApi() throws Exception {
     String expectedMessageOInDialog =
         "Workspace agent is no longer responding. To fix the problem, restart the workspace.";
+    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    toastLoader.waitAppeareanceAndClosing();
+    terminal.waitTerminalTab();
     projectExplorer.invokeCommandWithContextMenu(
         ProjectExplorer.CommandsGoal.COMMON, PROJECT_NAME, nameCommandForKillWsAgent);
-    new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//span[text()='" + expectedMessageOInDialog + "']")));
+
+    try {
+      new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
+          .until(
+              ExpectedConditions.visibilityOfElementLocated(
+                  By.xpath("//span[text()='" + expectedMessageOInDialog + "']")));
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/6329");
+    }
+
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfElementLocated(By.id("ask-dialog-first")))
         .click();
@@ -96,7 +104,13 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcess {
   @Test(priority = 1)
   public void checkRestoreIdeItems() {
     projectExplorer.waitItem(PROJECT_NAME);
-    events.clickProjectEventsTab();
-    events.waitExpectedMessage(TestWorkspaceConstants.RUNNING_WORKSPACE_MESS);
+    terminal.waitTerminalTab();
+
+    try {
+      consoles.waitExpectedTextIntoConsole("Server start up in");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/6329");
+    }
   }
 }

@@ -16,10 +16,10 @@
     <parent>
         <artifactId>che-plugin-yaml-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.23.0-SNAPSHOT</version>
+        <version>6.0.0-M4-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-yaml-ide</artifactId>
-    <packaging>jar</packaging>
+    <packaging>gwt-lib</packaging>
     <name>Che Plugin :: Yaml :: Ide</name>
     <dependencies>
         <dependency>
@@ -41,6 +41,11 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-yaml-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-yaml-shared</artifactId>
+            <classifier>sources</classifier>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -69,6 +74,12 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-workspace-shared</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-workspace-shared</artifactId>
+            <classifier>sources</classifier>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -113,13 +124,30 @@
         </dependency>
     </dependencies>
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-        </resources>
+        <plugins>
+            <plugin>
+                <groupId>net.ltgt.gwt.maven</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <moduleName>org.eclipse.che.plugin.yaml.Yaml</moduleName>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <ignoredUnusedDeclaredDependencies>
+                                <!-- Ignore *-sources.jar analysis due to the fact that analyzer works at bytecode level                                     but *-sources.jar is required for including to the GWT source path. -->
+                                <dep>org.eclipse.che.plugin:che-plugin-yaml-shared</dep>
+                            </ignoredUnusedDeclaredDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 </project>

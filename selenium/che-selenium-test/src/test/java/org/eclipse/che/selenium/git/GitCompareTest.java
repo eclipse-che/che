@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.git;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -29,6 +31,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.WarningDialog;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.git.Git;
+import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -161,7 +164,7 @@ public class GitCompareTest {
     git.closeGroupGitCompareForm();
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/com/codenvy/example/spring/A.java");
-    editor.waitActiveEditor();
+    editor.waitActive();
     editor.waitTextIntoEditor("//***che***codenvy***");
 
     // check the 'git compare' after commit
@@ -191,7 +194,7 @@ public class GitCompareTest {
         TestMenuCommandsConstants.Git.Compare.COMPARE_WITH_BRANCH);
     git.waitGitCompareBranchFormIsOpen();
     git.selectBranchIntoGitCompareBranchForm("newbranch");
-    git.clickOnCompareBranchFormButton();
+    clickOnCompareBranchFormButton();
     loader.waitOnClosed();
     git.waitGitCompareFormIsOpen();
     git.waitExpTextIntoCompareLeftEditor("// <<< checking compare content >>>");
@@ -206,7 +209,7 @@ public class GitCompareTest {
         TestMenuCommandsConstants.Git.Compare.COMPARE_WITH_BRANCH);
     git.waitGitCompareBranchFormIsOpen();
     git.selectBranchIntoGitCompareBranchForm("origin/master");
-    git.clickOnCompareBranchFormButton();
+    clickOnCompareBranchFormButton();
     loader.waitOnClosed();
     git.waitGitCompareFormIsOpen();
     git.waitExpTextIntoCompareLeftEditor("// <<< checking compare content >>>");
@@ -250,10 +253,19 @@ public class GitCompareTest {
     git.closeBranchesForm();
   }
 
-  public void acceptDialogWithText(String expectedText) {
+  private void acceptDialogWithText(String expectedText) {
     askDialog.waitFormToOpen();
     askDialog.containsText(expectedText);
     askDialog.clickOkBtn();
     loader.waitOnClosed();
+  }
+
+  private void clickOnCompareBranchFormButton() {
+    try {
+      git.clickOnCompareBranchFormButton();
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7887", ex);
+    }
   }
 }

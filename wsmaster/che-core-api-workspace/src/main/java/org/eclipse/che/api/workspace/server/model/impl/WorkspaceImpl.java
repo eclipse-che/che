@@ -11,7 +11,6 @@
 package org.eclipse.che.api.workspace.server.model.impl;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.persistence.CascadeType;
@@ -27,7 +26,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
@@ -35,11 +33,10 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
@@ -101,16 +98,9 @@ public class WorkspaceImpl implements Workspace {
   @JoinColumn(name = "accountid", nullable = false)
   private AccountImpl account;
 
-  // This mapping is for explicit constraint between
-  // snapshots and workspace, it's impossible to do so on snapshot side
-  // as workspace and machine are different modules and cyclic reference will appear.
-  @OneToMany(fetch = FetchType.LAZY)
-  @JoinColumn(name = "workspaceId", insertable = false, updatable = false)
-  private List<SnapshotImpl> snapshots;
-
   @Transient private WorkspaceStatus status;
 
-  @Transient private WorkspaceRuntimeImpl runtime;
+  @Transient private Runtime runtime;
 
   public WorkspaceImpl() {}
 
@@ -122,7 +112,7 @@ public class WorkspaceImpl implements Workspace {
       String id,
       Account account,
       WorkspaceConfig config,
-      WorkspaceRuntime runtime,
+      Runtime runtime,
       Map<String, String> attributes,
       boolean isTemporary,
       WorkspaceStatus status) {
@@ -134,7 +124,8 @@ public class WorkspaceImpl implements Workspace {
       this.config = new WorkspaceConfigImpl(config);
     }
     if (runtime != null) {
-      this.runtime = new WorkspaceRuntimeImpl(runtime);
+      this.runtime =
+          new RuntimeImpl(runtime.getActiveEnv(), runtime.getMachines(), runtime.getOwner());
     }
     if (attributes != null) {
       this.attributes = new HashMap<>(attributes);
@@ -223,11 +214,11 @@ public class WorkspaceImpl implements Workspace {
   }
 
   @Override
-  public WorkspaceRuntimeImpl getRuntime() {
+  public Runtime getRuntime() {
     return runtime;
   }
 
-  public void setRuntime(WorkspaceRuntimeImpl runtime) {
+  public void setRuntime(Runtime runtime) {
     this.runtime = runtime;
   }
 
@@ -322,7 +313,7 @@ public class WorkspaceImpl implements Workspace {
     private boolean isTemporary;
     private WorkspaceStatus status;
     private WorkspaceConfig config;
-    private WorkspaceRuntime runtime;
+    private Runtime runtime;
     private Map<String, String> attributes;
 
     private WorkspaceImplBuilder() {}
@@ -366,7 +357,7 @@ public class WorkspaceImpl implements Workspace {
       return this;
     }
 
-    public WorkspaceImplBuilder setRuntime(WorkspaceRuntime runtime) {
+    public WorkspaceImplBuilder setRuntime(Runtime runtime) {
       this.runtime = runtime;
       return this;
     }

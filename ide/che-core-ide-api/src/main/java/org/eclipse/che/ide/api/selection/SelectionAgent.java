@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.api.selection;
 
 import com.google.web.bindery.event.shared.EventBus;
-import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.extension.SDK;
 
 /**

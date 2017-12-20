@@ -24,14 +24,14 @@ import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Presenter for resetting head to commit.
@@ -144,7 +144,7 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
                   (error.getMessage() != null) ? error.getMessage() : constant.logFailed();
               GitOutputConsole console = gitOutputConsoleFactory.create(LOG_COMMAND_NAME);
               console.printError(errorMessage);
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.logFailed(), FAIL, FLOAT_MODE);
             });
   }
@@ -162,7 +162,7 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
         .then(
             ignored -> {
               console.print(constant.resetSuccessfully());
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.resetSuccessfully());
 
               project.synchronize();
@@ -172,7 +172,7 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
               String errorMessage =
                   (error.getMessage() != null) ? error.getMessage() : constant.resetFail();
               console.printError(errorMessage);
-              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+              consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.resetFail(), FAIL, FLOAT_MODE);
             });
   }

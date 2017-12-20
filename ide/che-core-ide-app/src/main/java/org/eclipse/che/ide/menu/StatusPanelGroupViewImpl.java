@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +30,6 @@ import org.eclipse.che.ide.api.action.CustomComponentAction;
 import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.action.Separator;
-import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.ui.toolbar.CloseMenuHandler;
 import org.eclipse.che.ide.ui.toolbar.MenuLockLayer;
 import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
@@ -45,7 +43,6 @@ import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 public class StatusPanelGroupViewImpl extends Composite
     implements StatusPanelGroupView, CloseMenuHandler, ActionSelectedHandler {
   private final MenuResources resources;
-  private final Provider<PerspectiveManager> perspectiveManager;
 
   private final PresentationFactory presentationFactory = new PresentationFactory();
 
@@ -72,13 +69,9 @@ public class StatusPanelGroupViewImpl extends Composite
 
   /** Create new {@link MainMenuViewImpl} */
   @Inject
-  public StatusPanelGroupViewImpl(
-      MenuResources resources,
-      ActionManager actionManager,
-      Provider<PerspectiveManager> perspectiveManager) {
+  public StatusPanelGroupViewImpl(MenuResources resources, ActionManager actionManager) {
     this.resources = resources;
     this.actionManager = actionManager;
-    this.perspectiveManager = perspectiveManager;
 
     initWidget(rootPanel);
 
@@ -183,7 +176,7 @@ public class StatusPanelGroupViewImpl extends Composite
     final Action[] children = mainActionGroup.getChildren(null);
     for (final Action action : children) {
       final Presentation presentation = presentationFactory.getPresentation(action);
-      final ActionEvent e = new ActionEvent(presentation, actionManager, perspectiveManager.get());
+      final ActionEvent e = new ActionEvent(presentation, actionManager);
       action.update(e);
       if (presentation.isVisible()) { // add only visible items
         newVisibleActions.add(action);
