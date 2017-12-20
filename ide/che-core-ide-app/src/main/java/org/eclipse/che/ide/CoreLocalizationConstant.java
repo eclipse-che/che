@@ -26,6 +26,12 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("extension.category")
   String extensionCategory();
 
+  @Key("action.revealResource.text")
+  String actionRevealResourceText();
+
+  @Key("action.revealResource.description")
+  String actionRevealResourceDescription();
+
   @Key("action.navigateToFile.text")
   String actionNavigateToFileText();
 
@@ -1273,4 +1279,19 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("menu.loader.pullingImage")
   String menuLoaderPullingImage(String image);
+
+  @Key("gwt_recompile.action.setup.title")
+  String gwtDevModeSetUpActionTitle();
+
+  @Key("gwt_recompile.action.off.title")
+  String gwtDevModeOffActionTitle();
+
+  @Key("gwt_recompile.dialog.title")
+  String gwtRecompileDialogTitle();
+
+  @Key("gwt_recompile.dialog.message.recompiling")
+  String gwtRecompileDialogRecompilingMessage(String host);
+
+  @Key("gwt_recompile.dialog.message.no_server")
+  String gwtRecompileDialogNoServerMessage();
 }

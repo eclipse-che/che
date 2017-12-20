@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.filewatcher;
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FileWatcherExcludeOperations.ADD_TO_FILE_WATCHER_EXCLUDES;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FileWatcherExcludeOperations.REMOVE_FROM_FILE_WATCHER_EXCLUDES;
-import static org.openqa.selenium.Keys.ENTER;
 
 import com.google.inject.Inject;
 import java.nio.file.Paths;
@@ -31,6 +30,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -38,7 +38,7 @@ public class CheckFileWatcherExcludeFeatureTest {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
   private static final String FOLDER_NAME_FOR_EXCLUDE = "src";
   private static final String FILE_WATCHER_IGNORE_FILE_NAME = "fileWatcherIgnore";
-
+  @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestProjectServiceClient projectServiceClient;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private ProjectExplorer projectExplorer;
@@ -59,32 +59,27 @@ public class CheckFileWatcherExcludeFeatureTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
-
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.quickExpandWithJavaScript();
-  }
-
-  @Test
-  public void testAddRemoveFileFromFileWatcherExcludeFeature() throws Exception {
-    String fileNameForExcluding = "pom.xml";
-    String pathToExcludedFile = PROJECT_NAME + "/" + fileNameForExcluding;
-
-    projectExplorer.waitItem(PROJECT_NAME);
-    doFileWatcherExcludeOperation(pathToExcludedFile, ADD_TO_FILE_WATCHER_EXCLUDES);
-    doFileWatcherExcludeOperation(pathToExcludedFile, REMOVE_FROM_FILE_WATCHER_EXCLUDES);
-
-    // Refresh web page(for checking that the File Watcher Exclude feature works after refresh)
-    seleniumWebDriver.navigate().refresh();
-    projectExplorer.waitItem(PROJECT_NAME);
-
-    // Exclude file and check that its name is in the 'fileWatcherIgnore' file
-    doFileWatcherExcludeOperation(pathToExcludedFile, ADD_TO_FILE_WATCHER_EXCLUDES);
+    // We enable hidden files because in the test we use file Watcher Ignore, which is hidden.
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.SHOW_HIDE_HIDDEN_FILES);
-    projectExplorer.waitItemInVisibleArea(".che");
-    projectExplorer.openItemByVisibleNameInExplorer(".che");
+    projectExplorer.quickExpandWithJavaScript();
+    projectExplorer.selectItem(PROJECT_NAME);
+    doFileWatcherExcludeOperation(PROJECT_NAME + "/" + "pom.xml", ADD_TO_FILE_WATCHER_EXCLUDES);
+    projectExplorer.clickOnRefreshTreeButton();
+  }
+
+  @AfterMethod
+  public void closeOpenedTabs() {
+    editor.closeAllTabs();
+  }
+
+  @Test
+  public void checkFileWatcherIgnoreFileAfterIncludingAndExcludingFileWatching() throws Exception {
+    String fileNameForExcluding = "pom.xml";
+    String pathToExcludedFile = PROJECT_NAME + "/" + fileNameForExcluding;
     projectExplorer.waitItemInVisibleArea(FILE_WATCHER_IGNORE_FILE_NAME);
     projectExplorer.openItemByVisibleNameInExplorer(FILE_WATCHER_IGNORE_FILE_NAME);
     editor.waitActive();
@@ -97,57 +92,36 @@ public class CheckFileWatcherExcludeFeatureTest {
     projectExplorer.openItemByVisibleNameInExplorer(FILE_WATCHER_IGNORE_FILE_NAME);
     editor.selectTabByName(FILE_WATCHER_IGNORE_FILE_NAME);
     editor.waitTextNotPresentIntoEditor(fileNameForExcluding);
-
-    editor.closeAllTabsByContextMenu();
   }
 
   @Test
-  public void testFeatureAfterExcludingFile() {
+  public void testFeatureAfterExcludingFile() throws Exception {
     String fileNameForExluding = "README.md";
     String pathToExcludedFile = PROJECT_NAME + "/" + fileNameForExluding;
-
+    String currentTimeInMillis = Long.toString(System.currentTimeMillis());
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByVisibleNameInExplorer(fileNameForExluding);
     editor.waitActive();
 
-    // Check that changes with file in the Terminal appeared in the Editor
-    terminal.selectTerminalTab();
-    terminal.waitTerminalConsole();
-    terminal.waitTerminalIsNotEmpty();
-    terminal.typeIntoTerminal(format("cd /projects/%s%s", PROJECT_NAME, ENTER));
-    terminal.waitExpectedTextIntoTerminal("/projects/" + PROJECT_NAME);
-    terminal.typeIntoTerminal(format("df > %s%s", fileNameForExluding, ENTER));
-    editor.selectTabByName(fileNameForExluding);
-    editor.waitTextIntoEditor("Filesystem");
-
     // Add the file to exclude and check that the file content in the Editor is not changed
     doFileWatcherExcludeOperation(pathToExcludedFile, ADD_TO_FILE_WATCHER_EXCLUDES);
-
-    terminal.selectTerminalTab();
-    terminal.waitTerminalConsole();
-    terminal.waitTerminalIsNotEmpty();
-    terminal.typeIntoTerminal(format("cd /projects/%s%s", PROJECT_NAME, ENTER));
-    terminal.waitExpectedTextIntoTerminal("/projects/" + PROJECT_NAME);
-    terminal.typeIntoTerminal(format("pwd > %s%s", fileNameForExluding, ENTER));
-    editor.selectTabByName(fileNameForExluding);
-    editor.waitTextNotPresentIntoEditor("/projects/" + PROJECT_NAME);
+    testProjectServiceClient.updateFile(
+        testWorkspace.getId(), pathToExcludedFile, currentTimeInMillis);
+    editor.waitTextNotPresentIntoEditor(currentTimeInMillis);
 
     // Close file and open again and check that the file content is changed
     editor.clickOnCloseFileIcon(fileNameForExluding);
     projectExplorer.openItemByVisibleNameInExplorer(fileNameForExluding);
     editor.waitActive();
-    editor.waitTextIntoEditor("/projects/" + PROJECT_NAME);
-    doFileWatcherExcludeOperation(pathToExcludedFile, REMOVE_FROM_FILE_WATCHER_EXCLUDES);
-
-    editor.closeAllTabsByContextMenu();
+    editor.waitTextIntoEditor(currentTimeInMillis);
   }
 
   @Test
-  public void testFeatureAfterExcludingFolder() {
+  public void testFeatureAfterExcludingFolder() throws Exception {
     String fileNameForExcluding = "AppController.java";
     String pathToJavaFile =
-        format("/projects/%s/src/main/java/org/eclipse/qa/examples", PROJECT_NAME);
-
+        format("%s/src/main/java/org/eclipse/qa/examples/AppController.java", PROJECT_NAME);
+    String currentTimeInMillis = Long.toString(System.currentTimeMillis());
     // Exclude 'src' folder
     doFileWatcherExcludeOperation(
         PROJECT_NAME + "/" + FOLDER_NAME_FOR_EXCLUDE, ADD_TO_FILE_WATCHER_EXCLUDES);
@@ -156,36 +130,21 @@ public class CheckFileWatcherExcludeFeatureTest {
     projectExplorer.openItemByVisibleNameInExplorer(fileNameForExcluding);
     editor.waitActive();
 
-    // Change content of file from the excluded folder
-    terminal.selectTerminalTab();
-    terminal.waitTerminalConsole();
-    terminal.waitTerminalIsNotEmpty();
-    terminal.typeIntoTerminal(format("cd %s%s", pathToJavaFile, ENTER));
-    terminal.waitExpectedTextIntoTerminal(pathToJavaFile);
-    terminal.typeIntoTerminal(
-        format(
-            "pwd | cat - %s > temp && mv temp %s%s",
-            fileNameForExcluding, fileNameForExcluding, ENTER));
-
-    // Check that content in the excluded file is not changed in the Editor
+    testProjectServiceClient.updateFile(testWorkspace.getId(), pathToJavaFile, currentTimeInMillis);
     editor.selectTabByName("AppController");
-    editor.waitTextNotPresentIntoEditor(pathToJavaFile);
+    editor.waitTextNotPresentIntoEditor(currentTimeInMillis);
 
     // Reopen the file and check that its content changed
     editor.clickOnCloseFileIcon("AppController");
     projectExplorer.openItemByVisibleNameInExplorer(fileNameForExcluding);
     editor.waitActive();
-    editor.waitTextIntoEditor(pathToJavaFile);
-    doFileWatcherExcludeOperation(
-        PROJECT_NAME + "/" + FOLDER_NAME_FOR_EXCLUDE, REMOVE_FROM_FILE_WATCHER_EXCLUDES);
-
-    editor.closeAllTabsByContextMenu();
+    editor.waitTextIntoEditor(currentTimeInMillis);
   }
 
   @Test
   public void testIsNotExcludeOperationEventAboutIgnoreFile() {
     projectExplorer.waitItem(PROJECT_NAME);
-
+    projectExplorer.openItemByPath(PROJECT_NAME + "/" + "README.md");
     // Clear event log
     events.clickEventLogBtn();
     events.clearAllMessages();
@@ -206,5 +165,6 @@ public class CheckFileWatcherExcludeFeatureTest {
     projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(typeOfOperation);
     loader.waitOnClosed();
+    projectExplorer.waitContextMenuPopUpClosed();
   }
 }

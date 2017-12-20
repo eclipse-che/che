@@ -21,6 +21,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import com.google.inject.Inject;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import javax.inject.Singleton;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
@@ -341,6 +342,10 @@ public class WorkspaceManager {
                 removeWorkspaceQuietly(workspace);
               }
             });
+  }
+
+  public Set<String> getSupportedRecipes() {
+    return runtimes.getSupportedRecipes();
   }
 
   /** Asynchronously starts given workspace. */

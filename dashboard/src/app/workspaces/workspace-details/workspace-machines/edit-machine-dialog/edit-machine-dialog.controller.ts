@@ -42,7 +42,6 @@ export class EditMachineDialogController {
   private environment: che.IWorkspaceEnvironment;
   private copyEnvironment: che.IWorkspaceEnvironment;
   private editorMode: string;
-  private prevName: string;
 
   /**
    * Environment recipe service.

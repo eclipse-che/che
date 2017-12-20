@@ -19,6 +19,7 @@ import (
 	"github.com/eclipse/che/agents/go-agents/bootstrapper/cfg"
 	"github.com/eclipse/che/agents/go-agents/core/jsonrpc"
 	"github.com/eclipse/che/agents/go-agents/core/jsonrpc/jsonrpcws"
+	"github.com/eclipse/che/agents/go-agents/core/process"
 )
 
 func main() {
@@ -26,6 +27,8 @@ func main() {
 
 	cfg.Parse()
 	cfg.Print()
+
+	process.SetShellInterpreter("/bin/sh")
 
 	booter.Init(
 		cfg.RuntimeID,

@@ -15,7 +15,6 @@ export interface IEnvironmentManagerMachine extends che.IEnvironmentMachine {
   servers?: {
     [serverRef: string]: IEnvironmentManagerMachineServer
   };
-  env?: Map<string, string>;
 }
 
 export interface IEnvironmentManagerMachineServer extends che.IEnvironmentMachineServer {

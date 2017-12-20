@@ -31,4 +31,13 @@ public interface LanguageServerLauncher {
 
   /** Indicates if language server is installed and is ready to be started. */
   boolean isAbleToLaunch();
+
+  /**
+   * Denotes if the language server will be launched in a local environment or remote (i.e. if
+   * <code>isLocal</code> returns <code>true</code> than the server is launched in the local
+   * physical/virtual machine, otherwise means that the server is launched in the remote machine)
+   */
+  default boolean isLocal() {
+    return true;
+  }
 }

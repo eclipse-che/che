@@ -58,7 +58,6 @@ import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.resources.impl.ResourceDeltaImpl;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.ui.smartTree.data.HasDataObject;
@@ -414,10 +413,6 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, Reso
 
   private void clearProjects() {
     if (!rootProjects.isEmpty()) {
-      rootProjects.forEach(
-          project ->
-              eventBus.fireEvent(
-                  new ResourceChangedEvent(new ResourceDeltaImpl(project, REMOVED))));
       rootProjects.clear();
     }
   }

@@ -16,12 +16,12 @@ LOCAL_IP_ADDRESS=$(detectIP)
 if [[ "$OSTYPE" == "darwin"* ]]; then
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
-    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.6.0/openshift-origin-client-tools-v3.6.0-c4dd4cf-mac.zip"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-mac.zip"
     DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-osx-amd64"
 else
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
-    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.6.0/openshift-origin-client-tools-v3.6.0-c4dd4cf-linux-64bit.tar.gz"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-linux-64bit.tar.gz"
     DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"
 fi
 
@@ -76,6 +76,7 @@ get_tools() {
     TOOLS_DIR="/tmp"
     OC_BINARY="$TOOLS_DIR/oc"
     JQ_BINARY="$TOOLS_DIR/jq"
+    OC_VERSION=$(echo $DEFAULT_OC_BINARY_DOWNLOAD_URL | cut -d '/' -f 8)
     #OS specific extract archives
     if [[ "$OSTYPE" == "darwin"* ]]; then
         OC_PACKAGE="openshift-origin-client-tools.zip"
@@ -87,11 +88,21 @@ get_tools() {
         EXTRA_ARGS="-C $TOOLS_DIR"
     fi
 
-    if [ ! -f $OC_BINARY ]; then
-        echo "download oc client..."
+    download_oc() {
+        echo "download oc client $OC_VERSION"
         wget -q -O $TOOLS_DIR/$OC_PACKAGE $OC_BINARY_DOWNLOAD_URL
         eval "$ARCH" "$TOOLS_DIR"/"$OC_PACKAGE" "$EXTRA_ARGS" &>/dev/null
-        rm -rf "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE "${TOOLS_DIR:-/tmp}"/"$OC_PACKAGE"
+        rm -f "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE "${TOOLS_DIR:-/tmp}"/"$OC_PACKAGE"
+    }
+
+    if [[ ! -f $OC_BINARY ]]; then
+        download_oc
+    else
+        # here we check is installed version is same version defined in script, if not we update version to one that defined in script.
+        if [[ $($OC_BINARY version 2> /dev/null | grep "oc v" | cut -d " " -f2 | cut -d '+' -f1 || true) != *"$OC_VERSION"* ]]; then
+            rm -f "$OC_BINARY" "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE
+            download_oc
+        fi
     fi
 
     if [ ! -f $JQ_BINARY ]; then
@@ -134,8 +145,6 @@ wait_ocp() {
 run_ocp() {
     $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
     wait_ocp
-    $OC_BINARY login -u system:admin
-    $OC_BINARY create serviceaccount pv-recycler-controller -n openshift-infra
 }
 
 deploy_che_to_ocp() {
@@ -148,6 +157,9 @@ deploy_che_to_ocp() {
     cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
     bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
     wait_until_server_is_booted
+    if [ $CHE_MULTIUSER == true ]; then
+        wait_until_kc_is_booted
+    fi
 }
 
 server_is_booted() {
@@ -170,6 +182,32 @@ wait_until_server_is_booted() {
   done
 }
 
+wait_until_kc_is_booted() {
+  echo "[CHE] wait Keycloak pod booting..."
+  available=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
+  progressing=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
+
+  DEPLOYMENT_TIMEOUT_SEC=1200
+  POLLING_INTERVAL_SEC=5
+  end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
+  while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
+    available=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
+    progressing=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
+    timeout_in=$((end-SECONDS))
+    echo "[CHE] Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, Timeout in ${timeout_in}s)"
+    sleep ${POLLING_INTERVAL_SEC}
+  done
+
+  if [ "${progressing}" == "\"True\"" ]; then
+    echo "[CHE] Keycloak deployed successfully"
+  elif [ "${progressing}" == "False" ]; then
+    echo "[CHE] [ERROR] Keycloak deployment failed. Aborting. Run command 'oc rollout status keycloak' to get more details."
+  elif [ ${SECONDS} -ge ${end} ]; then
+    echo "[CHE] [ERROR] Deployment timeout. Aborting."
+    exit 1
+  fi
+}
+
 destroy_ocp() {
     $OC_BINARY login -u system:admin
     $OC_BINARY delete pvc --all
@@ -182,15 +220,16 @@ detectIP() {
 }
 
 parse_args() {
-    HELP="valid args: \\n
-    --run-ocp - run ocp cluster\\n
-    --destroy - destroy ocp cluster \\n
-    --deploy-che - deploy che to ocp \\n
-    --multiuser - deploy che in multiuser mode \\n
-    =================================== \\n
-    ENV vars \\n
-    CHE_IMAGE_TAG - set CHE images tag, default: nightly \\n
-    CHE_MULTIUSER - set CHE multi user mode, default: false (single user) \\n
+    HELP="valid args:
+    --help - this help menu
+    --run-ocp - run ocp cluster
+    --destroy - destroy ocp cluster
+    --deploy-che - deploy che to ocp
+    --multiuser - deploy che in multiuser mode
+    ===================================
+    ENV vars
+    CHE_IMAGE_TAG - set CHE images tag, default: nightly
+    CHE_MULTIUSER - set CHE multi user mode, default: false (single user) 
 "
 
     DEPLOY_SCRIPT_ARGS=""
@@ -230,8 +269,12 @@ parse_args() {
            --update)
                shift
            ;;
+           --help)
+               echo -e "$HELP"
+               exit 1
+           ;;
            *)
-               echo "You've passed wrong arg!"
+               echo "You've passed wrong arg."
                echo -e "$HELP"
                exit 1
            ;;
