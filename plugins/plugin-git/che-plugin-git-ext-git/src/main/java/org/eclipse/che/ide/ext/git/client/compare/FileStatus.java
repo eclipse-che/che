@@ -16,6 +16,7 @@ import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.DELET
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.MODIFIED;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.RENAMED;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.UNMODIFIED;
+import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.UNTRACKED;
 
 /**
  * Class for determining git status of given changed file.
@@ -52,6 +53,8 @@ public class FileStatus {
         return RENAMED;
       case "C":
         return COPIED;
+      case "U":
+        return UNTRACKED;
     }
     return UNMODIFIED;
   }
