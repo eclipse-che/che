@@ -61,6 +61,10 @@
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-debug-shared</artifactId>
         </dependency>
+       <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-languageserver-shared</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-languageserver-shared</artifactId>
@@ -189,6 +193,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-gwt</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
             <scope>test</scope>
@@ -258,6 +268,7 @@
                                      but *-sources.jar is required for including to the GWT source path. -->
                                 <dep>org.eclipse.che.core:che-core-api-model</dep>
                                 <dep>org.eclipse.che.core:che-core-api-project-shared</dep>
+                                <dep>org.eclipse.che.core:che-core-api-languageserver-shared</dep>
                                 <dep>org.eclipse.che.plugin:che-plugin-java-ext-lang-shared</dep>
                                 <dep>org.eclipse.che.ls.jdt:jdt.ls.extension.api</dep>
                             </ignoredUnusedDeclaredDependencies>
@@ -295,15 +306,15 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-				    <imports>
-				    	<import>static org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.*</import>
-				    </imports>
-				    <dtoPackages>
-				    	<dtoPackage>org.eclipse.che.jdt.ls.extension.api.dto</dtoPackage>
-				    </dtoPackages>
-				    <excludes>
-				    	<exclude>org.eclipse.che.jdt.ls.extension.api.dto.LinearRange</exclude>
-				    </excludes>
+                    <imports>
+                        <import>static org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.*</import>
+                    </imports>
+                    <dtoPackages>
+                        <dtoPackage>org.eclipse.che.jdt.ls.extension.api.dto</dtoPackage>
+                    </dtoPackages>
+                    <excludes>
+                        <exclude>org.eclipse.che.jdt.ls.extension.api.dto.LinearRange</exclude>
+                    </excludes>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
                     <genClassName>org.eclipse.che.ide.ext.java.dto.DtoClientImpls</genClassName>
                     <impl>client</impl>

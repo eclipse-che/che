@@ -51,6 +51,8 @@ import org.eclipse.che.ide.ext.java.client.reference.JavaFqnProvider;
 import org.eclipse.che.ide.ext.java.client.resource.ClassInterceptor;
 import org.eclipse.che.ide.ext.java.client.resource.JavaSourceRenameValidator;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderInterceptor;
+import org.eclipse.che.ide.ext.java.client.search.FindUsagesView;
+import org.eclipse.che.ide.ext.java.client.search.FindUsagesViewImpl;
 import org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorsWarningsPreferenceManager;
 import org.eclipse.che.ide.ext.java.client.settings.compiler.JavaCompilerPreferenceManager;
 import org.eclipse.che.ide.ext.java.client.settings.compiler.JavaCompilerPreferencePresenter;
@@ -123,6 +125,7 @@ public class JavaGinModule extends AbstractGinModule {
     install(
         new GinFactoryModuleBuilder()
             .build(org.eclipse.che.ide.ext.java.client.search.NodeFactory.class));
+    bind(FindUsagesView.class).to(FindUsagesViewImpl.class);
 
     GinMultibinder<PreferencePagePresenter> settingsBinder =
         GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class);

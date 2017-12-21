@@ -20,8 +20,8 @@ public class SnippetParameters {
 
   public SnippetParameters() {}
 
-  public SnippetParameters(String path, List<LinearRange> edits) {
-    this.uri = path;
+  public SnippetParameters(String uri, List<LinearRange> edits) {
+    this.uri = uri;
     this.ranges = edits;
   }
 
