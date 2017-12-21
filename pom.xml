@@ -1877,7 +1877,11 @@
                     <codeserverArgs>
                         <arg>-noprecompile</arg>
                         <arg>-noincremental</arg>
+                        <arg>-generateJsInteropExports</arg>
                     </codeserverArgs>
+                    <compilerArgs>
+                        <arg>-generateJsInteropExports</arg>
+                    </compilerArgs>
                     <jvmArgs>
                         <arg>${gwt.compiler.jvmArgs.Xss}</arg>
                         <arg>${gwt.compiler.jvmArgs.Xmx}</arg>

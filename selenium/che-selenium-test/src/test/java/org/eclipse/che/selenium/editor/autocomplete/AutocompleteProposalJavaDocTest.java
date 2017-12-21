@@ -169,7 +169,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.waitContextMenuJavaDocText(
         ".*Returns a hash code value for the object. "
             + "This method is supported for the benefit of hash tables such as those provided by "
-            + "<code><a href='.*/javadoc/get\\?.*projectpath=/multi-module-java-with-ext-libs/app&handle=%E2%98%82%3Dmulti-module-java-with-ext-libs%5C%2Fapp%2F%5C%2Fopt%5C%2Fjdk1.8.0_45%5C%2Fjre%5C%2Flib%5C%2Frt.jar%3Cjava.lang%28Object.class%E2%98%83Object%7EhashCode%E2%98%82java.util.HashMap'>java.util.HashMap</a></code>.*");
+            + "<code><a href='.*/javadoc/get\\?.*projectpath=/multi-module-java-with-ext-libs/app&handle=%E2%98%82%3Dmulti-module-java-with-ext-libs.*%3Cjava.lang%28Object.class%E2%98%83Object%7EhashCode%E2%98%82java.util.HashMap'>java.util.HashMap</a></code>.*");
   }
 
   @Test

@@ -24,7 +24,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "eclipse/che-dev:che6"
+      "origin": "eclipse/che-dev:nightly"
     },
     "workspaceConfig": {
       "environments": {
@@ -68,7 +68,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/che-dev:che6",
+            "location": "eclipse/che-dev:nightly",
             "type": "dockerimage"
           }
         }

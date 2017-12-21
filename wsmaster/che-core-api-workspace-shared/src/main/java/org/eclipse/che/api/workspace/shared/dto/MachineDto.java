@@ -12,6 +12,7 @@ package org.eclipse.che.api.workspace.shared.dto;
 
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.dto.shared.DTO;
 
 /** @author Alexander Garagatyi */
@@ -27,4 +28,9 @@ public interface MachineDto extends Machine {
   Map<String, ServerDto> getServers();
 
   MachineDto withServers(Map<String, ServerDto> servers);
+
+  @Override
+  MachineStatus getStatus();
+
+  MachineDto withStatus(MachineStatus status);
 }

@@ -111,6 +111,11 @@ public class WorkspaceOverview {
         .click();
   }
 
+  public void isDeleteWorkspaceButtonExists() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(deleteWorkspaceBtn));
+  }
+
   public void waitDownloadWorkspaceJsonFileBtn() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(elementToBeClickable(downloadWsJsonBtn));

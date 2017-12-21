@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
@@ -27,6 +28,7 @@ import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -64,7 +66,13 @@ public class DirectUrlFactoryWithSpecificBranch {
 
   @Test
   public void factoryWithDirectUrlWithSpecificBranch() throws Exception {
-    testFactoryWithSpecificBranch.authenticateAndOpen();
+    try {
+      testFactoryWithSpecificBranch.authenticateAndOpen();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7555");
+    }
+
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitProgressPopupPanelClose();
     events.clickEventLogBtn();
@@ -76,7 +84,14 @@ public class DirectUrlFactoryWithSpecificBranch {
     events.waitExpectedMessage(
         "Project: gitPullTest | cloned from: gitPullTest | remote branch: refs/remotes/origin/contrib-12092015 | local branch: contrib-12092015",
         UPDATING_PROJECT_TIMEOUT_SEC);
-    projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");
+
+    try {
+      projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7959");
+    }
+
     projectExplorer.waitItem("gitPullTest/my-lib/pom.xml");
 
     String wsId =

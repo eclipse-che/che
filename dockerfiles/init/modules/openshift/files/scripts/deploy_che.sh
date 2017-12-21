@@ -8,11 +8,11 @@
 # This script is meant for quick & easy install of Che on OpenShift via:
 #
 #  ``` bash
-#   DEPLOY_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/che6/dockerfiles/cli/scripts/openshift/deploy_che.sh
+#   DEPLOY_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/dockerfiles/cli/scripts/openshift/deploy_che.sh
 #   curl -fsSL ${DEPLOY_SCRIPT_URL} -o get-che.sh
-#   WAIT_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/che6/dockerfiles/cli/scripts/openshift/wait_until_che_is_available.sh
+#   WAIT_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/dockerfiles/cli/scripts/openshift/wait_until_che_is_available.sh
 #   curl -fsSL ${WAIT_SCRIPT_URL} -o wait-che.sh
-#   STACKS_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/che6/dockerfiles/cli/scripts/openshift/replace_stacks.sh
+#   STACKS_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/dockerfiles/cli/scripts/openshift/replace_stacks.sh
 #   curl -fsSL ${STACKS_SCRIPT_URL} -o stacks-che.sh
 #   bash get-che.sh && wait-che.sh && stacks-che.sh
 #   ```
@@ -182,7 +182,7 @@ CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
 DEFAULT_COMMAND="deploy"
 DEFAULT_CHE_MULTIUSER="false"
 DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server"
-DEFAULT_CHE_IMAGE_TAG="che6"
+DEFAULT_CHE_IMAGE_TAG="nightly"
 DEFAULT_CHE_KEYCLOAK_OSO_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token"
 DEFAULT_KEYCLOAK_GITHUB_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/github/token"
 

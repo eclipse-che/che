@@ -17,10 +17,8 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Musienko Maxim */
@@ -38,8 +36,10 @@ public class WorkspaceProjects {
   private interface Locators {
     String PROJECT_BY_NAME = "//div[contains(@ng-click, 'projectItem')]/span[text()='%s']";
     String DELETE_PROJECT = "//button/span[text()='Delete']";
-    String DELETE_IT_PROJECT = "//che-button-primary[@che-button-title='Delete']/button";
+    String DELETE_SELECTED_PROJECTS = "//che-button-primary[@che-button-title='Delete']/button";
+    String DELETE_IT_PROJECT = "//md-dialog//che-button-primary[@che-button-title='Delete']/button";
     String ADD_NEW_PROJECT_BUTTON = "//che-button-primary[@che-button-title='Add Project']/button";
+    String PROJECT_CHECKBOX = "//md-checkbox[contains(@aria-label, 'Project %s')]";
   }
 
   /**
@@ -74,7 +74,7 @@ public class WorkspaceProjects {
   public void openSettingsForProjectByName(String projectName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.visibilityOfElementLocated(
+            visibilityOfElementLocated(
                 By.xpath(String.format(Locators.PROJECT_BY_NAME, projectName))))
         .click();
   }
@@ -82,15 +82,20 @@ public class WorkspaceProjects {
   /** click on 'DELETE' button in settings of project */
   public void clickOnDeleteProject() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.DELETE_PROJECT)))
+        .until(visibilityOfElementLocated(By.xpath(Locators.DELETE_PROJECT)))
         .click();
   }
 
   /** click on 'DELETE IT!' button in the confirming window */
   public void clickOnDeleteItInDialogWindow() {
-    WaitUtils.sleepQuietly(1);
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.DELETE_IT_PROJECT)))
+        .until(visibilityOfElementLocated(By.xpath(Locators.DELETE_IT_PROJECT)))
+        .click();
+  }
+
+  public void clickOnDeleteProjectButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath(Locators.DELETE_SELECTED_PROJECTS)))
         .click();
   }
 
@@ -98,6 +103,15 @@ public class WorkspaceProjects {
   public void clickOnAddNewProjectButton() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(Locators.ADD_NEW_PROJECT_BUTTON)))
+        .click();
+  }
+
+  /** click on the Add Project button */
+  public void selectProject(String projectName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            visibilityOfElementLocated(
+                By.xpath(String.format(Locators.PROJECT_CHECKBOX, projectName))))
         .click();
   }
 }

@@ -18,7 +18,7 @@ if [ "${CHE_EPHEMERAL}" == "true" ]; then
   oc delete pvc/postgres-data
 fi
 
-IMAGE_INIT=${IMAGE_INIT:-"eclipse/che-init:che6"}
+IMAGE_INIT=${IMAGE_INIT:-"eclipse/che-init:nightly"}
 
 oc create -f - <<-EOF
 

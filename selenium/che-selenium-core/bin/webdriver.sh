@@ -50,7 +50,9 @@ initVariables() {
     readonly FAILSAFE_REPORT="target/site/failsafe-report.html"
 
     readonly SINGLE_TEST_MSG="single test/package"
+
     export CHE_MULTIUSER=${CHE_MULTIUSER:-false}
+    export CHE_INFRASTRUCTURE=${CHE_INFRASTRUCTURE:-docker}
 
     # CALLER variable contains parent caller script name
     # CUR_DIR variable contains the current directory where CALLER is executed
@@ -517,9 +519,9 @@ fetchActualResults() {
 
     # define the URL of CI job to compare result with result on it
     if [[ ${CHE_MULTIUSER} == true ]]; then
-      local nameOfCIJob=che-multiuser-integration-tests-che6
+      local nameOfCIJob=che-multiuser-integration-tests
     else
-      local nameOfCIJob=che-integration-tests-che6
+      local nameOfCIJob=che-integration-tests
     fi
 
     [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/$nameOfCIJob/"; }
@@ -820,6 +822,67 @@ prepareToFirstRun() {
     checkIfProductIsRun
     cleanUpEnvironment
     initRunMode
+
+    if [[ ${CHE_MULTIUSER} == false ]]; then
+      prepareTestUserForSingleuserChe
+    else
+      prepareTestUserForMultiuserChe
+    fi
+}
+
+prepareTestUserForSingleuserChe() {
+    export CHE_ADMIN_EMAIL=
+    export CHE_ADMIN_PASSWORD=
+
+    export CHE_TESTUSER_EMAIL=che@eclipse.org
+    export CHE_TESTUSER_PASSWORD=secret
+}
+
+prepareTestUserForMultiuserChe() {
+    export CHE_ADMIN_NAME=${CHE_ADMIN_NAME:-admin}
+    export CHE_ADMIN_EMAIL=${CHE_ADMIN_EMAIL:-admin@admin.com}
+    export CHE_ADMIN_PASSWORD=${CHE_ADMIN_PASSWORD:-admin}
+
+    if [[ -n ${CHE_TESTUSER_EMAIL+x} ]] && [[ -n ${CHE_TESTUSER_PASSWORD+x} ]]; then
+        return
+    fi
+
+    # create test user by executing kcadm.sh commands inside keycloak docker container if there are no its credentials among environment variables
+    if [[ "${PRODUCT_HOST}" == "$(detectDockerInterfaceIp)" ]] || [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
+
+        echo "[TEST] Creating test user..."
+        local time=$(date +%s)
+        export CHE_TESTUSER_NAME=${CHE_TESTUSER_NAME:-user${time}}
+        export CHE_TESTUSER_EMAIL=${CHE_TESTUSER_EMAIL:-${CHE_TESTUSER_NAME}@1.com}
+        export CHE_TESTUSER_PASSWORD=${CHE_TESTUSER_PASSWORD:-${time}}
+
+        if [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
+            local kc_container_id=$(docker ps | grep keycloak_keycloak-1 | cut -d ' ' -f1)
+        else
+            local kc_container_id=$(docker ps | grep che_keycloak_1 | cut -d ' ' -f1)
+        fi
+
+        local cli_auth="--no-config --server http://localhost:8080/auth --user ${CHE_ADMIN_NAME} --password ${CHE_ADMIN_PASSWORD} --realm master"
+        local response=$(docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh create users -r che -s username=${CHE_TESTUSER_NAME} -s enabled=true $cli_auth 2>&1")
+        if [[ "$response" =~ "Created new user with id" ]]; then
+           userId=$(echo "$response" | grep "Created new user with id" | sed -e "s#Created new user with id ##" | sed -e "s#'##g")
+           # set test user's permanent password
+           docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh set-password -r che --username ${CHE_TESTUSER_NAME} --new-password ${CHE_TESTUSER_PASSWORD} $cli_auth"
+           # set email of test user to ${cheTestUserEmail}
+           docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh update users/$userId -r che --set email=${CHE_TESTUSER_EMAIL} $cli_auth"
+           # add realm role "user" test user
+           docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh add-roles -r che --uusername ${CHE_TESTUSER_NAME} --rolename user $cli_auth"
+           # add role "read-token" of client "broker" to test user
+           docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh add-roles -r che --uusername ${CHE_TESTUSER_NAME} --cclientid broker --rolename read-token $cli_auth"
+        else
+           # set test user credentials to be equal to admin ones in case of problem with creation of user
+           echo -e "${RED}[WARN] There is a problem with creation of test user in Keycloak server: '${response}'.${NO_COLOUR}"
+           echo -e "Admin user will be used as a test user."
+           CHE_TESTUSER_NAME=${CHE_ADMIN_NAME}
+           CHE_TESTUSER_EMAIL=${CHE_ADMIN_EMAIL}
+           CHE_TESTUSER_PASSWORD=${CHE_ADMIN_PASSWORD}
+        fi
+    fi
 }
 
 testProduct() {

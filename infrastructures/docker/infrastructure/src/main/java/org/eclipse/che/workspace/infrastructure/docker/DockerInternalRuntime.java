@@ -277,6 +277,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         serverCheckerFactory.create(getContext().getIdentity(), name, machine.getServers());
     readinessChecker.startAsync(new ServerReadinessHandler(name));
     readinessChecker.await();
+
+    machine.setStatus(MachineStatus.RUNNING);
   }
 
   private void checkInterruption() throws InterruptedException {

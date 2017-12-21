@@ -494,6 +494,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                 })
         .catchError(
             error -> {
+              debuggerManager.setActiveDebugger(null);
               notification.setTitle(
                   constant.failedToConnectToRemoteDebuggerDescription(
                       debuggerDescriptor.getAddress(), error.getMessage()));
