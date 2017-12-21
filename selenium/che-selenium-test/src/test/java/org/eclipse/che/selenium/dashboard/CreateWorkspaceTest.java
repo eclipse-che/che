@@ -11,10 +11,13 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.ANDROID;
+import static org.eclipse.che.selenium.core.constant.TestStacksConstants.DOTNET;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
+import static org.eclipse.che.selenium.core.constant.TestStacksConstants.PHP;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
@@ -78,8 +81,8 @@ public class CreateWorkspaceTest {
     workspaceServiceClient.delete(WORKSPACE, defaultTestUser.getName());
   }
 
-  // @Test
-  public void checkAddDeleteProjects() {
+  @Test
+  public void checkProjectSourcePage() {
     createWorkspace.clickOnQuickStartTab();
 
     // add the web-java-spring from the Java stack
@@ -103,8 +106,10 @@ public class CreateWorkspaceTest {
     assertEquals(projectSourcePage.getProjectDescription(), projectDescription);
     projectSourcePage.waitCreatedProjectButton(projectName);
 
-    // change the added project's name and save changes
+    // change the added project's name and description
     projectSourcePage.changeProjectName(newProjectName);
+    projectSourcePage.changeProjectDescription(newProjectDescription);
+    assertEquals(projectSourcePage.getProjectDescription(), newProjectDescription);
     assertEquals(projectSourcePage.getProjectName(), newProjectName);
     projectSourcePage.clickOnSaveChangesButton();
     projectSourcePage.waitCreatedProjectButton(newProjectName);
@@ -115,13 +120,64 @@ public class CreateWorkspaceTest {
   }
 
   @Test
+  public void checkFiltersStacksFeature() {
+    createWorkspace.clickOnAllStacksTab();
+    createWorkspace.clickOnFiltersButton();
+    createWorkspace.typeToFiltersInput("java");
+    // TODO add locators for suggestions
+    createWorkspace.selectFilterSuggestion("JAVA");
+    assertTrue(createWorkspace.isStackVisible(JAVA.getId()));
+    assertFalse(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
+    createWorkspace.clickOnMultiMachineTab();
+    assertFalse(createWorkspace.isStackVisible(JAVA.getId()));
+
+    createWorkspace.clickOnSingleMachineTab();
+    createWorkspace.clickOnFiltersButton();
+    createWorkspace.typeToFiltersInput("mysql");
+    createWorkspace.selectFilterSuggestion("MYSQL");
+    assertTrue(createWorkspace.isStackVisible(PHP.getId()));
+
+    createWorkspace.clickOnMultiMachineTab();
+    createWorkspace.clickOnFiltersButton();
+    createWorkspace.typeToFiltersInput("java");
+    createWorkspace.selectFilterSuggestion("MYSQL");
+    assertTrue(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
+    createWorkspace.clickOnSingleMachineTab();
+    assertFalse(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
+  }
+
+  @Test
   public void checkSearchStackFeature() {
-    createWorkspace.clickOnQuickStartTab();
-
     createWorkspace.typeToSearchInput("java");
+    createWorkspace.clickOnSingleMachineTab();
+    assertTrue(createWorkspace.isStackVisible(JAVA.getId()));
+    assertTrue(createWorkspace.isStackVisible(ANDROID.getId()));
+    assertTrue(createWorkspace.isStackVisible("che-in-che"));
+    assertFalse(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
+    createWorkspace.clickOnAllStacksTab();
+    assertTrue(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
+    createWorkspace.clearTextInSearchInput();
 
-    createWorkspace.waitStackNameVisible(JAVA.getId());
-    createWorkspace.waitStackNameVisible(JAVA_MYSQL.getId());
-    createWorkspace.waitStackNameVisible(ANDROID.getId());
+    createWorkspace.typeToSearchInput("php");
+    createWorkspace.clickOnQuickStartTab();
+    assertTrue(createWorkspace.isStackVisible(PHP.getId()));
+    assertFalse(createWorkspace.isStackVisible("php-gae"));
+    createWorkspace.clickOnAllStacksTab();
+    assertTrue(createWorkspace.isStackVisible(PHP.getId()));
+    assertTrue(createWorkspace.isStackVisible("php-gae"));
+    createWorkspace.clearTextInSearchInput();
+
+    createWorkspace.typeToSearchInput("mysql");
+    createWorkspace.clickOnMultiMachineTab();
+    assertTrue(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
+    assertFalse(createWorkspace.isStackVisible(PHP.getId()));
+    createWorkspace.clickOnAllStacksTab();
+    assertTrue(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
+    assertTrue(createWorkspace.isStackVisible(PHP.getId()));
+
+    createWorkspace.typeToSearchInput("net");
+    assertTrue(createWorkspace.isStackVisible(DOTNET.getId()));
+    createWorkspace.clickOnMultiMachineTab();
+    assertFalse(createWorkspace.isStackVisible(DOTNET.getId()));
   }
 }

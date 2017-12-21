@@ -47,14 +47,32 @@ public class CreateWorkspace {
     String SELECT_SINGLE_MACHINE_STACKS_TAB = "single-machine-button";
     String SELECT_MULTI_MACHINE_STACKS_TAB = "multi-machine-button";
     String ADD_STACK_BUTTON = "search-stack-input";
-    String FILTER_STACK_BUTTON = "search-stack-input";
+
+    String FILTERS_STACK_BUTTON = "filter-stacks-button";
+    String FILTER_STACK_INPUT = "//input[@ng-model='cheStackLibraryFilterCtrl.chip']";
+    String FILTER_SUGGESTION_TEXT =
+        "//div[contains(@class,'stack-library-filter-suggestion-text')]";
+    String FILTER_SUGGESTION_BUTTON =
+        "//div[contains(@class,'stack-library-filter-suggestion-text')]/../div[2]";
+    String FILTER_SELECTED_SUGGESTION_TEXT =
+        "//div[contains(@class,'stack-library-filter-tag-text')]";
 
     String SEARCH_INPUT = "//div[@id='search-stack-input']//input";
+    String CLEAR_INPUT = "//div[@id='search-stack-input']//div[@role='button']";
 
     String STACK_ROW_XPATH = "//div[@data-stack-id='%s']";
     String RAM_INPUT_XPATH = "//input[@name='memory']";
     String MACHINE_RAM_ID = "machine-%s-ram";
+
+    String ERROR_MESSAGE =
+        "//div[@che-form='workspaceNameForm']//div[contains(@ng-messages,'$error')]";
   }
+
+  @FindBy(id = Locators.FILTERS_STACK_BUTTON)
+  WebElement filtersStackButton;
+
+  @FindBy(xpath = Locators.FILTER_STACK_INPUT)
+  WebElement filterStackInput;
 
   @FindBy(id = Locators.TOOLBAR_TITLE_ID)
   WebElement toolbarTitle;
@@ -68,6 +86,9 @@ public class CreateWorkspace {
   @FindBy(xpath = Locators.SEARCH_INPUT)
   WebElement searchInput;
 
+  @FindBy(xpath = Locators.CLEAR_INPUT)
+  WebElement clearInput;
+
   @FindBy(id = Locators.SELECT_ALL_STACKS_TAB)
   WebElement selectAllStacksTab;
 
@@ -80,6 +101,30 @@ public class CreateWorkspace {
   @FindBy(id = Locators.SELECT_MULTI_MACHINE_STACKS_TAB)
   WebElement selectMultiMachineStacksTab;
 
+  public void clickOnFiltersButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(filtersStackButton))
+        .click();
+  }
+
+  public void typeToFiltersInput(String value) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(filterStackInput))
+        .clear();
+    filterStackInput.sendKeys(value);
+  }
+
+  public String getTextFromFiltersInput() {
+    return filterStackInput.getAttribute("value");
+  }
+
+  public void selectFilterSuggestion(String suggestion) {
+    WebElement webElement =
+        new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
+            .until(visibilityOfElementLocated(By.xpath(Locators.FILTER_SUGGESTION_BUTTON)));
+    webElement.click();
+  }
+
   public void waitToolbar() {
     new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.id(Locators.TOOLBAR_TITLE_ID)));
@@ -90,13 +135,23 @@ public class CreateWorkspace {
   }
 
   public void typeToSearchInput(String value) {
-    searchInput.clear();
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(searchInput))
+        .clear();
     searchInput.sendKeys(value);
   }
 
-  public void waitStackNameVisible(String stackName) {
+  public void clearTextInSearchInput() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(format(Locators.STACK_ROW_XPATH, stackName))));
+        .until(visibilityOf(clearInput))
+        .click();
+  }
+
+  public boolean isStackVisible(String stackName) {
+    return seleniumWebDriver
+            .findElements(By.xpath(format(Locators.STACK_ROW_XPATH, stackName)))
+            .size()
+        > 0;
   }
 
   public void selectStack(String stackId) {
