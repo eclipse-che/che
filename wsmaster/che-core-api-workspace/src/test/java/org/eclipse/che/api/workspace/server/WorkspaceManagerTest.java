@@ -20,9 +20,9 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.CREATED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
-import static org.eclipse.che.api.workspace.shared.Constants.STARTED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -373,7 +373,7 @@ public class WorkspaceManagerTest {
         workspace.getId(), workspace.getConfig().getDefaultEnv(), emptyMap());
 
     verify(runtimes).startAsync(workspace, workspace.getConfig().getDefaultEnv(), emptyMap());
-    assertNotNull(workspace.getAttributes().get(STARTED_ATTRIBUTE_NAME));
+    assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
   }
 
   @Test
