@@ -91,7 +91,7 @@ public class TestUserImpl implements TestUser {
     this.userServiceClient.create(name, email, password);
     this.authToken = authServiceClient.login(name, password);
     this.id = userServiceClient.findByEmail(email).getId();
-    LOG.info("User name='{}', id='{}' has been created", name, id);
+    LOG.info("User name='{}', id='{}' is being used for testing", name, id);
     this.workspaceServiceClient = wsServiceClientFactory.create(email, password);
   }
 

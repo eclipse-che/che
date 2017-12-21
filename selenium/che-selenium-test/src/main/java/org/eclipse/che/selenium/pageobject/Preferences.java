@@ -23,11 +23,11 @@ import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
-import org.eclipse.che.selenium.core.client.TestGitHubKeyUploader;
 import org.eclipse.che.selenium.core.client.TestSshServiceClient;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
 /** @autor by mmusienko on 9/19/14. */
 @Singleton
 public class Preferences {
+
+  private static final String GITHUB_COM = "github.com";
   private final Loader loader;
   private final ActionsFactory actionsFactory;
   private final AskDialog askDialog;
@@ -258,24 +260,20 @@ public class Preferences {
         .click();
   }
 
-  public boolean isSshKeyTableIsEmpty(String expText) {
-    loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(ExpectedConditions.presenceOfElementLocated(By.xpath(Locators.SSH_KEYS_TABLE)));
-    return sshKeysTable.getAttribute("style").contains(expText);
-  }
-
   public boolean isSshKeyIsPresent(String host) {
-    loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.SSH_KEYS_TABLE)));
-    return sshKeysTable.getText().contains(host);
+    try {
+      new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+          .until(ExpectedConditions.presenceOfElementLocated(By.xpath(Locators.SSH_KEYS_TABLE)));
+      return sshKeysTable.getText().contains(host);
+    } catch (TimeoutException e) {
+      return false;
+    }
   }
 
   // timeout is changed to 40 sec, is related to running tests on ocp platform
   public void waitSshKeyIsPresent(final String host) {
     new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
-        .until((ExpectedCondition<Boolean>) driver -> sshKeysTable.getText().contains(host));
+        .until((ExpectedCondition<Boolean>) driver -> isSshKeyIsPresent(host));
   }
 
   public void deleteSshKeyByHost(String host) {
@@ -292,6 +290,9 @@ public class Preferences {
           .until(ExpectedConditions.visibilityOf(element))
           .click();
     }
+
+    askDialog.clickOkBtn();
+    askDialog.waitFormToClose();
   }
 
   /**
@@ -535,20 +536,33 @@ public class Preferences {
     waitSshKeyIsPresent(titleOfKey);
   }
 
-  public void regenerateAndUploadSshKeyOnGithub(String githubUsername, String githubPassword)
+  public void generateAndUploadSshKeyOnGithub(String githubUsername, String githubPassword)
       throws Exception {
-    testSshServiceClient.deleteVCSKey(TestGitHubKeyUploader.GITHUB_COM);
-
     waitMenuInCollapsedDropdown(Preferences.DropDownSshKeysMenu.VCS);
     selectDroppedMenuByName(Preferences.DropDownSshKeysMenu.VCS);
 
     loader.waitOnClosed();
+
+    // delete github keu if it exists
+    if (isSshKeyIsPresent(GITHUB_COM)) {
+      deleteSshKeyByHost(GITHUB_COM);
+    }
 
     String ideWin = seleniumWebDriver.getWindowHandle();
 
     // regenerate key and upload it on the gitHub
     clickOnGenerateAndUploadToGitHub();
 
+    loader.waitOnClosed();
+
+    // check if github key has been uploaded without authorization on github.com
+    if (isSshKeyIsPresent(GITHUB_COM)) {
+      clickOnCloseBtn();
+      waitPreferencesFormIsClosed();
+      return;
+    }
+
+    // login to github
     askDialog.waitFormToOpen(25);
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
@@ -561,6 +575,7 @@ public class Preferences {
 
     loader.waitOnClosed();
 
+    // authorize on github.com
     if (seleniumWebDriver.getWindowHandles().size() > 1) {
       loader.waitOnClosed();
       gitHub.waitAuthorizeBtn();
@@ -570,7 +585,7 @@ public class Preferences {
 
     seleniumWebDriver.switchTo().window(ideWin);
     loader.waitOnClosed();
-    waitSshKeyIsPresent("github.com");
+    waitSshKeyIsPresent(GITHUB_COM);
     loader.waitOnClosed();
     clickOnCloseBtn();
     waitPreferencesFormIsClosed();
