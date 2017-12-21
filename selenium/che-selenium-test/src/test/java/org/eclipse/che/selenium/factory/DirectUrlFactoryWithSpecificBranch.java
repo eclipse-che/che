@@ -70,7 +70,7 @@ public class DirectUrlFactoryWithSpecificBranch {
       testFactoryWithSpecificBranch.authenticateAndOpen();
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7555", ex);
+      fail("Known issue https://github.com/eclipse/che/issues/7555");
     }
 
     projectExplorer.waitProjectExplorer();
@@ -89,7 +89,7 @@ public class DirectUrlFactoryWithSpecificBranch {
       projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7959", ex);
+      fail("Known issue https://github.com/eclipse/che/issues/7959");
     }
 
     projectExplorer.waitItem("gitPullTest/my-lib/pom.xml");
