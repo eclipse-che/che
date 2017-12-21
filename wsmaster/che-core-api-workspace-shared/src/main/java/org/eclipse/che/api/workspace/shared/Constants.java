@@ -41,6 +41,8 @@ public final class Constants {
 
   /** This attribute describes time when workspace was created. */
   public static final String CREATED_ATTRIBUTE_NAME = "created";
+  /** This attribute describes time when workspace was started. */
+  public static final String STARTED_ATTRIBUTE_NAME = "started";
   /** This attribute describes time when workspace was last updated or started */
   public static final String UPDATED_ATTRIBUTE_NAME = "updated";
   /** This attribute describes time when workspace was last stopped */
