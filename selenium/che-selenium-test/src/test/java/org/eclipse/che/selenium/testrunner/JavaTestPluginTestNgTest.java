@@ -167,7 +167,12 @@ public class JavaTestPluginTestNgTest {
     editor.goToCursorPositionVisible(25, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     notifications.waitExpectedMessageOnProgressPanelAndClosed("Test runner executed successfully.");
-    pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
+    try {
+      pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7338", ex);
+    }
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
     editor.goToCursorPositionVisible(30, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
