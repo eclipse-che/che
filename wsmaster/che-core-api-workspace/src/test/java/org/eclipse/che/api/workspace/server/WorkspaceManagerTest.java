@@ -18,7 +18,11 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.server.WorkspaceManager.UPDATED_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.CREATED_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -137,7 +141,7 @@ public class WorkspaceManagerTest {
     assertEquals(workspace.getConfig(), cfg);
     assertFalse(workspace.isTemporary());
     assertEquals(workspace.getStatus(), STOPPED);
-    assertNotNull(workspace.getAttributes().get(WorkspaceManager.CREATED_ATTRIBUTE_NAME));
+    assertNotNull(workspace.getAttributes().get(CREATED_ATTRIBUTE_NAME));
     verify(workspaceDao).create(workspace);
   }
 
@@ -432,7 +436,10 @@ public class WorkspaceManagerTest {
 
     verify(runtimes).stopAsync(workspace, emptyMap());
     verify(workspaceDao).update(workspaceCaptor.capture());
-    assertNotNull(workspaceCaptor.getValue().getAttributes().get(UPDATED_ATTRIBUTE_NAME));
+    assertNotNull(workspaceCaptor.getValue().getAttributes().get(STOPPED_ATTRIBUTE_NAME));
+    assertFalse(
+        Boolean.valueOf(
+            workspaceCaptor.getValue().getAttributes().get(STOPPED_ABNORMALLY_ATTRIBUTE_NAME)));
   }
 
   @Test
@@ -460,6 +467,20 @@ public class WorkspaceManagerTest {
 
     workspaceManager.stopWorkspace(workspace.getId(), emptyMap());
     verify(workspaceDao).remove(workspace.getId());
+  }
+
+  @Test
+  public void setsErrorAttributesAfterWorkspaceStartFailed() throws Exception {
+    final WorkspaceConfigImpl workspaceConfig = createConfig();
+    final WorkspaceImpl workspace = createAndMockWorkspace(workspaceConfig, NAMESPACE_1);
+    mockAnyWorkspaceStartFailed(new ServerException("start failed"));
+
+    workspaceManager.startWorkspace(workspaceConfig, workspace.getNamespace(), false, emptyMap());
+    verify(workspaceDao).update(workspaceCaptor.capture());
+    Workspace ws = workspaceCaptor.getAllValues().get(workspaceCaptor.getAllValues().size() - 1);
+    assertNotNull(ws.getAttributes().get(STOPPED_ATTRIBUTE_NAME));
+    assertTrue(Boolean.valueOf(ws.getAttributes().get(STOPPED_ABNORMALLY_ATTRIBUTE_NAME)));
+    assertEquals(ws.getAttributes().get(ERROR_MESSAGE_ATTRIBUTE_NAME), "start failed");
   }
 
   @Test

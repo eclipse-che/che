@@ -39,6 +39,17 @@ public final class Constants {
 
   public static final String CHE_WORKSPACE_AUTO_START = "che.workspace.auto_start";
 
+  /** This attribute describes time when workspace was created. */
+  public static final String CREATED_ATTRIBUTE_NAME = "created";
+  /** This attribute describes time when workspace was last updated or started */
+  public static final String UPDATED_ATTRIBUTE_NAME = "updated";
+  /** This attribute describes time when workspace was last stopped */
+  public static final String STOPPED_ATTRIBUTE_NAME = "stopped";
+  /** This attribute indicates that last workspace stop was abnormal */
+  public static final String STOPPED_ABNORMALLY_ATTRIBUTE_NAME = "stoppedAbnormally";
+  /** This attribute describes latest workspace runtime error message */
+  public static final String ERROR_MESSAGE_ATTRIBUTE_NAME = "errorMessage";
+
   public static final String COMMAND_PREVIEW_URL_ATTRIBUTE_NAME = "previewUrl";
   public static final String COMMAND_GOAL_ATTRIBUTE_NAME = "goal";
 
