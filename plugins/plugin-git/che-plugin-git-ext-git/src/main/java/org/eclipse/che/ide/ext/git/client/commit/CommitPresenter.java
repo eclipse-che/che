@@ -72,6 +72,7 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
   private final ProcessesPanelPresenter consolesPanelPresenter;
 
   private Project project;
+  private String latestCommitMessage;
 
   @Inject
   public CommitPresenter(
@@ -115,7 +116,11 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
               service
                   .log(project.getLocation(), null, -1, 1, false)
                   .then(
-                      arg -> {
+                      log -> {
+                        final Revision revision = getFirst(log.getCommits(), null);
+                        if (revision != null) {
+                          latestCommitMessage = revision.getMessage();
+                        }
                         if (diff.isEmpty()) {
                           showAskForAmendDialog();
                         } else {
@@ -137,6 +142,9 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
                                     newFiles.addAll(status.getUntracked());
                                     show(newFiles.stream().collect(joining("\nA\t", "A\t", "")));
                                   });
+                        } else {
+                          view.setMessage("");
+                          notificationManager.notify(constant.logFailed(), FAIL, NOT_EMERGE_MODE);
                         }
                       });
             })
@@ -259,30 +267,11 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
 
   @Override
   public void setAmendCommitMessage() {
-    service
-        .log(project.getLocation(), null, -1, -1, false)
-        .then(
-            log -> {
-              String message = "";
-              final Revision revision = getFirst(log.getCommits(), null);
-              if (revision != null) {
-                message = revision.getMessage();
-              }
-              CommitPresenter.this.view.setMessage(message);
-              CommitPresenter.this.view.setEnableCommitButton(!message.isEmpty());
-            })
-        .catchError(
-            error -> {
-              if (getErrorCode(error.getCause()) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
-                dialogFactory
-                    .createMessageDialog(
-                        constant.commitTitle(), constant.initCommitWasNotPerformed(), null)
-                    .show();
-              } else {
-                CommitPresenter.this.view.setMessage("");
-                notificationManager.notify(constant.logFailed(), FAIL, NOT_EMERGE_MODE);
-              }
-            });
+    if (latestCommitMessage == null) {
+      return;
+    }
+    view.setMessage(latestCommitMessage);
+    view.setEnableCommitButton(!latestCommitMessage.isEmpty());
   }
 
   private void onCommitSuccess(@NotNull final Revision revision) {
