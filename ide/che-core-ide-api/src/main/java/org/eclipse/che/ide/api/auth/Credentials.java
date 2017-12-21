@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.ui.dialogs.askcredentials;
+package org.eclipse.che.ide.api.auth;
 
 /**
  * Credentials object for subversion operations.

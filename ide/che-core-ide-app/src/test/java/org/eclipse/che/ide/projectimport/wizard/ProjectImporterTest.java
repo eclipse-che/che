@@ -21,10 +21,12 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.wizard.Wizard;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,6 +57,8 @@ public class ProjectImporterTest {
   @Mock private Project.ProjectRequest importRequest;
   @Mock private Promise<Project> importPromise;
   @Mock private Project importedProject;
+  @Mock private OAuthServiceClient oAuthServiceClient;
+  @Mock private DtoUnmarshallerFactory unmarshallerFactory;
 
   @Captor private ArgumentCaptor<Function<Project, Promise<Project>>> importProjectCaptor;
 
@@ -77,7 +81,14 @@ public class ProjectImporterTest {
 
     importer =
         new ProjectImporter(
-            localizationConstant, subscriberFactory, appContext, resolver, null, null);
+            localizationConstant,
+            subscriberFactory,
+            appContext,
+            resolver,
+            null,
+            null,
+            unmarshallerFactory,
+            oAuthServiceClient);
   }
 
   @Test
