@@ -68,8 +68,8 @@ public class ImportProjectIntoSpecifiedBranchTest {
         TestMenuCommandsConstants.Profile.PROFILE_MENU,
         TestMenuCommandsConstants.Profile.PREFERENCES);
     preferences.waitPreferencesForm();
-    //  gitHubClientService.deleteAllGrants(gitHubUsername, gitHubPassword);
-    // preferences.regenerateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);
+    gitHubClientService.deleteAllGrants(gitHubUsername, gitHubPassword);
+    preferences.regenerateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);
   }
 
   @AfterMethod
@@ -79,7 +79,7 @@ public class ImportProjectIntoSpecifiedBranchTest {
 
   @Test
   public void checkImportProjectInBranchBySshUrl() throws IOException, JsonParseException {
-    projectExplorer.waitItem("max", 1);
+    projectExplorer.waitProjectExplorer();
     performImportIntoBranch(
         "git@github.com:" + gitHubUsername + "/Repo_For_Test.git", PROJECT_NAME, BRANCH_1);
     projectExplorer.waitItem(PROJECT_NAME);
@@ -94,7 +94,7 @@ public class ImportProjectIntoSpecifiedBranchTest {
         PROJECT_NAME + "/src/main/java/com/codenvy/example/spring/GreetingController.java");
   }
 
-  // @Test(priority = 1)
+  @Test(priority = 1)
   public void checkImportProjectInBranchByHttpsUrl() throws IOException, JsonParseException {
     projectExplorer.waitProjectExplorer();
     performImportIntoBranch(
@@ -111,7 +111,7 @@ public class ImportProjectIntoSpecifiedBranchTest {
         PROJECT_NAME + "/src/main/java/com/codenvy/example/spring/GreetingController.java");
   }
 
-  //  @Test(priority = 2)
+  @Test(priority = 2)
   public void checkImportProjectInBranchFromGitHub() throws Exception {
     projectExplorer.waitProjectExplorer();
     importIntoBranchFromGitHub();
