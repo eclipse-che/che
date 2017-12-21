@@ -46,12 +46,15 @@ import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
@@ -73,9 +76,12 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocation;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.UsagesResponse;
+import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSymbolInformationDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
 import org.eclipse.lsp4j.ExecuteCommandParams;
+import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.CollectionTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EitherTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EnumTypeAdapterFactory;
@@ -169,6 +175,12 @@ public class JavaLanguageServerExtensionService {
         .paramsAsString()
         .resultAsListOfDto(ClasspathEntryDto.class)
         .withFunction(this::getClasspathTree);
+    requestHandler
+        .newConfiguration()
+        .methodName("java/usages")
+        .paramsAsDto(TextDocumentPositionParams.class)
+        .resultAsDto(UsagesResponse.class)
+        .withFunction(this::usages);
   }
 
   /**
@@ -492,6 +504,41 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
+  private UsagesResponse usages(TextDocumentPositionParams parameters) {
+    String uri = LanguageServiceUtils.prefixURI(parameters.getUri());
+    parameters.setUri(uri);
+    parameters.getTextDocument().setUri(uri);
+    try {
+      CompletableFuture<Object> responses =
+          getLanguageServer()
+              .getWorkspaceService()
+              .executeCommand(
+                  new ExecuteCommandParams(
+                      Commands.USAGES_COMMAND, Collections.singletonList(parameters)));
+      Type targetClassType = new TypeToken<ArrayList<UsagesResponse>>() {}.getType();
+      List<UsagesResponse> results =
+          gson.fromJson(gson.toJson(responses.get(10, TimeUnit.SECONDS)), targetClassType);
+      if (results.isEmpty()) {
+        return null;
+      }
+      results
+          .get(0)
+          .getSearchResults()
+          .forEach(
+              result -> {
+                iterate(
+                    result,
+                    r -> r.getChildren(),
+                    r -> {
+                      r.setUri(LanguageServiceUtils.fixUri(r.getUri()));
+                    });
+              });
+      return new DtoServerImpls.UsagesResponseDto(results.get(0));
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
   public Location findResourcesByFqn(String fqn, int lineNumber) {
     CompletableFuture<Object> result =
         getLanguageServer()
@@ -517,6 +564,14 @@ public class JavaLanguageServerExtensionService {
       }
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  private <T> void iterate(
+      T root, Function<T, List<T>> childrenAccessor, Consumer<T> elementHandler) {
+    elementHandler.accept(root);
+    for (T child : childrenAccessor.apply(root)) {
+      iterate(child, childrenAccessor, elementHandler);
     }
   }
 }

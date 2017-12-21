@@ -155,12 +155,12 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
   public ServerCapabilities initialize(String fileUri) throws LanguageServerException {
     long thread = Thread.currentThread().getId();
-    List<LanguageServerLauncher> interestedLaunchers = findApplicableLaunchers(fileUri);
-    LOG.info("interested launchers for thread {} : {} ", thread, interestedLaunchers);
+    List<LanguageServerLauncher> requiredToLaunch = findLaunchersToLaunch(fileUri);
+    LOG.info("required to launch for thread " + thread + ": " + requiredToLaunch);
     // launchers is the set of things we need to have initialized
     Set<String> requiredServers = new HashSet<>();
 
-    for (LanguageServerLauncher launcher : interestedLaunchers) {
+    for (LanguageServerLauncher launcher : requiredToLaunch) {
       LaunchingStrategy launchingStrategy = launcher.getLaunchingStrategy();
       String key = launchingStrategy.getLaunchKey(fileUri);
       requiredServers.add(key);
@@ -259,7 +259,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     return getCapabilities(fileUri);
   }
 
-  private List<LanguageServerLauncher> findApplicableLaunchers(String fileUri) {
+  private List<LanguageServerLauncher> findLaunchersToLaunch(String fileUri) {
     LanguageDescription language = findLanguage(fileUri);
     if (language == null) {
       return Collections.emptyList();
