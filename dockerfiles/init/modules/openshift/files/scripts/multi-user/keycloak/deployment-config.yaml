@@ -62,7 +62,7 @@ spec:
           limits:
             memory: 1024Mi
           requests:
-            memory: 512Mi
+            memory: 756Mi
         volumeMounts:
         - mountPath: /opt/jboss/keycloak/standalone/data
           name: keycloak-data
