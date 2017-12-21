@@ -24,6 +24,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
@@ -38,6 +39,10 @@ public class CreateWorkspaceTest {
   private final String WORKSPACE = NameGenerator.generate("workspace", 4);
   private static final String TOO_SHORT_WORKSPACE_NAME = NameGenerator.generate("", 2);
   private static final String TOO_LONG_WORKSPACE_NAME = NameGenerator.generate("", 101);
+  private static final String WS_NAME_TOO_SHORT =
+      ("The name has to be more than 3 characters long.");
+  private static final String WS_NAME_TOO_LONG =
+      ("The name has to be less than 100 characters long.");
 
   private String projectName = WEB_JAVA_SPRING;
   private String newProjectName = projectName + "-1";
@@ -68,17 +73,17 @@ public class CreateWorkspaceTest {
   }
 
   @Test
-  public void checkWorspaceNameField() {
+  public void checkWorspaceName() {
     createWorkspace.typeWorkspaceName(TOO_SHORT_WORKSPACE_NAME);
-    assertTrue(createWorkspace.isWorkspaceNameWrong());
+    assertTrue(createWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
+    assertFalse(createWorkspace.isCreateWorkspaceButtonEnabled());
     createWorkspace.typeWorkspaceName(TOO_LONG_WORKSPACE_NAME);
-    assertTrue(createWorkspace.isWorkspaceNameWrong());
-
-    createWorkspace.typeWorkspaceName("wsname");
-    assertFalse(createWorkspace.isWorkspaceNameWrong());
+    WaitUtils.sleepQuietly(1);
+    assertTrue(createWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
+    assertFalse(createWorkspace.isCreateWorkspaceButtonEnabled());
   }
 
-  // @Test
+  @Test
   public void checkProjectSourcePage() {
     createWorkspace.clickOnQuickStartTab();
 
@@ -116,7 +121,7 @@ public class CreateWorkspaceTest {
     assertTrue(projectSourcePage.isProjectNotExists(newProjectName));
   }
 
-  //  @Test
+  @Test
   public void checkMachines() {
     String machineName = "dev-machine";
 
@@ -148,7 +153,7 @@ public class CreateWorkspaceTest {
     createWorkspace.setMachineRAM(machineName, "100");
   }
 
-  //  @Test
+  @Test
   public void checkFiltersStacksFeature() {
     createWorkspace.clickOnAllStacksTab();
     createWorkspace.clickOnFiltersButton();
@@ -180,7 +185,7 @@ public class CreateWorkspaceTest {
     createWorkspace.clearSuggestions();
   }
 
-  //  @Test
+  @Test
   public void checkSearchStackFeature() {
     createWorkspace.typeToSearchInput("java");
     createWorkspace.clickOnSingleMachineTab();
