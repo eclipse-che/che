@@ -48,7 +48,9 @@ public class CreateWorkspace {
     String SELECT_MULTI_MACHINE_STACKS_TAB = "multi-machine-button";
     String ADD_STACK_BUTTON = "search-stack-input";
     String FILTER_STACK_BUTTON = "search-stack-input";
-    String SEARCH_INPUT = "search-stack-input";
+
+    String SEARCH_INPUT = "//div[@id='search-stack-input']//input";
+
     String STACK_ROW_XPATH = "//div[@data-stack-id='%s']";
     String RAM_INPUT_XPATH = "//input[@name='memory']";
     String MACHINE_RAM_ID = "machine-%s-ram";
@@ -63,7 +65,7 @@ public class CreateWorkspace {
   @FindBy(id = Locators.CREATE_BUTTON)
   WebElement createWorkspaceButton;
 
-  @FindBy(id = Locators.SEARCH_INPUT)
+  @FindBy(xpath = Locators.SEARCH_INPUT)
   WebElement searchInput;
 
   @FindBy(id = Locators.SELECT_ALL_STACKS_TAB)
@@ -83,8 +85,18 @@ public class CreateWorkspace {
         .until(visibilityOfElementLocated(By.id(Locators.TOOLBAR_TITLE_ID)));
   }
 
+  public String getTextFromSearchInput() {
+    return searchInput.getAttribute("value");
+  }
+
   public void typeToSearchInput(String value) {
+    searchInput.clear();
     searchInput.sendKeys(value);
+  }
+
+  public void waitStackNameVisible(String stackName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath(format(Locators.STACK_ROW_XPATH, stackName))));
   }
 
   public void selectStack(String stackId) {
