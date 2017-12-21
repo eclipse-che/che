@@ -301,7 +301,7 @@ public abstract class SeleniumTestHandler
     Object testInstance = result.getInstance();
 
     collectInjectedWebDrivers(testInstance, webDrivers);
-    webDrivers.forEach(webDriver -> captureScreenshot(result, webDriver));
+    webDrivers.forEach(webDriver -> captureScreenshots(result, webDriver));
   }
 
   private void captureHtmlSource(ITestResult result) {
@@ -353,10 +353,9 @@ public abstract class SeleniumTestHandler
     }
   }
 
-  private void captureScreenshot(ITestResult result, SeleniumWebDriver webDriver) {
+  private void captureScreenshotForCurrentWindow(ITestResult result, SeleniumWebDriver webDriver) {
     String testName = result.getTestClass().getName() + "." + result.getMethod().getMethodName();
     String filename = NameGenerator.generate(testName + "_", 8) + ".png";
-
     try {
       byte[] data = webDriver.getScreenshotAs(OutputType.BYTES);
       Path screenshot = Paths.get(screenshotDir, filename);
@@ -365,6 +364,16 @@ public abstract class SeleniumTestHandler
     } catch (WebDriverException | IOException e) {
       LOG.error(format("Can't capture screenshot for test %s", testName), e);
     }
+  }
+
+  private void captureScreenshots(ITestResult result, SeleniumWebDriver webDriver) {
+    webDriver
+        .getWindowHandles()
+        .forEach(
+            currentWin -> {
+              webDriver.switchTo().window(currentWin);
+              captureScreenshotForCurrentWindow(result, webDriver);
+            });
   }
 
   private void dumpHtmlCodeFromTheCurrentPage(ITestResult result, SeleniumWebDriver webDriver) {
