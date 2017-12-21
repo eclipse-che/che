@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -24,7 +23,6 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -179,6 +177,12 @@ public class Refactor {
 
   @FindBy(id = Locators.RIGHT_EDITOR)
   WebElement rightEditor;
+
+  @FindBy(xpath = Locators.ERROR_CONTAINER_OF_COMPILATION_FORM)
+  WebElement errorContainerOfCompilationForm;
+
+  @FindBy(xpath = Locators.TEXT_MESSAGE_MOVE_FORM)
+  WebElement textMessageMoveForm;
 
   /** wait the 'rename package form' is open */
   public void waitRenamePackageFormIsOpen() {
@@ -487,30 +491,39 @@ public class Refactor {
    * @param newValue new name
    */
   public void typeAndWaitNewName(String newValue) {
-    typeNewName(newValue);
-    waitTextIntoNewNameField(newValue);
+    typeAndWaitTextInProvidedElement(newNameFileInput, newValue);
   }
 
-  /**
+  private void typeAndWaitTextInProvidedElement(WebElement element, String newValue) {
+    waitElementVisibility(element).clear();
+    waitExpectedText(element, "");
+    waitElementVisibility(element).sendKeys(newValue);
+    waitExpectedText(element, newValue);
+  }
+  /*
+  *
    * clear field, type a new user value into 'New Name field'
    *
    * @param newValue new name
-   */
+
   public void typeNewName(String newValue) {
-    try {
-      new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-          .until(ExpectedConditions.visibilityOf(newNameFileInput))
-          .clear();
+      waitElementVisibility(newNameFileInput).clear();
+      waitExpectedText(newNameFileInput, "");
       loader.waitOnClosed();
       newNameFileInput.sendKeys(newValue);
-    } catch (Exception e) {
-      new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-          .until(ExpectedConditions.visibilityOf(newNameFileInput))
-          .clear();
-      newNameFileInput.sendKeys(newValue);
-    }
-    new WebDriverWait(seleniumWebDriver, ATTACHING_ELEM_TO_DOM_SEC)
-        .until(ExpectedConditions.textToBePresentInElementValue(newNameFileInput, newValue));
+      waitExpectedText(newNameFileInput, newValue);
+  }*/
+
+  private void waitExpectedText(WebElement element, String expectedText) {
+    waitElementVisibility(element);
+
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(ExpectedConditions.attributeToBe(element, "value", expectedText));
+  }
+
+  private WebElement waitElementVisibility(WebElement element) {
+    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(element));
   }
 
   /**
@@ -519,28 +532,25 @@ public class Refactor {
    * @param keys
    */
   public void sendKeysIntoField(String keys) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(newNameFileInput))
-        .sendKeys(keys);
-    loader.waitOnClosed();
+    waitElementVisibility(newNameFileInput).sendKeys(keys);
   }
+  /*
+    *
+     * wait new name into the ''New Name field'
+     *
+     * @param expectedName expected name in new name field
 
-  /**
-   * wait new name into the ''New Name field'
-   *
-   * @param expectedName expected name in new name field
-   */
-  public void waitTextIntoNewNameField(final String expectedName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                webDriver ->
-                    seleniumWebDriver
-                        .findElement(By.xpath(Locators.NEW_NAME_FIELD))
-                        .getAttribute("value")
-                        .equals(expectedName));
-  }
-
+    public void waitTextIntoNewNameField(final String expectedName) {
+      new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+          .until(
+              (ExpectedCondition<Boolean>)
+                  webDriver ->
+                      seleniumWebDriver
+                          .findElement(By.xpath(Locators.NEW_NAME_FIELD))
+                          .getAttribute("value")
+                          .equals(expectedName));
+    }
+  */
   /**
    * type and wait file name into 'File name patterns'
    *
@@ -557,10 +567,7 @@ public class Refactor {
    * @param fileName name of file
    */
   public void typeFileNamePatterns(String fileName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(namePatternsInput))
-        .clear();
-    namePatternsInput.sendKeys(fileName);
+    typeAndWaitTextInProvidedElement(namePatternsInput, fileName);
   }
 
   /**
@@ -568,15 +575,8 @@ public class Refactor {
    *
    * @param expectedName expected file name
    */
-  public void waitTextIntoNamePatternsField(final String expectedName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                webDriver ->
-                    seleniumWebDriver
-                        .findElement(By.xpath(Locators.NAME_PATTERNS_FIELD))
-                        .getAttribute("value")
-                        .equals(expectedName));
+  public void waitTextIntoNamePatternsField(final String expectedText) {
+    waitExpectedText(namePatternsInput, expectedText);
   }
 
   /**
@@ -584,11 +584,8 @@ public class Refactor {
    *
    * @param mess expected error
    */
-  public void waitTextInErrorMessage(String mess) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.textToBePresentInElementLocated(
-                By.xpath(Locators.ERROR_CONTAINER_OF_COMPILATION_FORM), mess));
+  public void waitTextInErrorMessage(String expectedText) {
+    waitExpectedText(errorContainerOfCompilationForm, expectedText);
   }
 
   /**
@@ -596,11 +593,8 @@ public class Refactor {
    *
    * @param mess expected message
    */
-  public void waitTextInMoveForm(String mess) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.presenceOfElementLocated(
-                By.xpath(String.format(Locators.TEXT_MESSAGE_MOVE_FORM, mess))));
+  public void waitTextInMoveForm(String expectedText) {
+    waitExpectedText(textMessageMoveForm, expectedText);
   }
 
   /**
@@ -618,8 +612,7 @@ public class Refactor {
 
   /** wait appearance of refactor preview form */
   public void waitRefactorPreviewFormIsOpened() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(previewRefactorForm));
+    waitElementVisibility(previewRefactorForm);
   }
 
   /** wait the refactor preview form is closed */
@@ -639,7 +632,7 @@ public class Refactor {
     List<WebElement> itemList =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(
+                ExpectedConditions.visibilityOfAllElementsLocatedBy(
                     By.xpath(String.format(Locators.ITEM_CHANGES_TO_BE_PERFORMED, nameItem))));
     itemList.get(position).click();
   }
@@ -724,7 +717,7 @@ public class Refactor {
     int lineQuantity =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(
+                ExpectedConditions.visibilityOfAllElementsLocatedBy(
                     By.xpath(Locators.LEASED_LINE_LEFT_EDITOR)))
             .size();
     return lineQuantity;
