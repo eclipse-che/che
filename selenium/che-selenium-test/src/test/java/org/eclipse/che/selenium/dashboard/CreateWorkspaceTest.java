@@ -22,19 +22,11 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.pageobject.Loader;
-import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -44,6 +36,8 @@ import org.testng.annotations.Test;
 public class CreateWorkspaceTest {
 
   private final String WORKSPACE = NameGenerator.generate("workspace", 4);
+  private static final String TOO_SHORT_WORKSPACE_NAME = NameGenerator.generate("", 2);
+  private static final String TOO_LONG_WORKSPACE_NAME = NameGenerator.generate("", 101);
 
   private String projectName = WEB_JAVA_SPRING;
   private String newProjectName = projectName + "-1";
@@ -52,18 +46,10 @@ public class CreateWorkspaceTest {
   private String newProjectDescription = "This is " + projectDescription;
 
   @Inject private Dashboard dashboard;
-  @Inject private WorkspaceProjects workspaceProjects;
-  @Inject private WorkspaceDetails workspaceDetails;
-  @Inject private NavigationBar navigationBar;
   @Inject private CreateWorkspace createWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
-  @Inject private Loader loader;
-  @Inject private ProjectExplorer explorer;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestUser defaultTestUser;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
-  @Inject private MavenPluginStatusBar mavenPluginStatusBar;
   @Inject private Workspaces workspaces;
 
   @BeforeClass
@@ -82,6 +68,17 @@ public class CreateWorkspaceTest {
   }
 
   @Test
+  public void checkWorspaceNameField() {
+    createWorkspace.typeWorkspaceName(TOO_SHORT_WORKSPACE_NAME);
+    assertTrue(createWorkspace.isWorkspaceNameWrong());
+    createWorkspace.typeWorkspaceName(TOO_LONG_WORKSPACE_NAME);
+    assertTrue(createWorkspace.isWorkspaceNameWrong());
+
+    createWorkspace.typeWorkspaceName("wsname");
+    assertFalse(createWorkspace.isWorkspaceNameWrong());
+  }
+
+  // @Test
   public void checkProjectSourcePage() {
     createWorkspace.clickOnQuickStartTab();
 
@@ -119,7 +116,39 @@ public class CreateWorkspaceTest {
     assertTrue(projectSourcePage.isProjectNotExists(newProjectName));
   }
 
-  @Test
+  //  @Test
+  public void checkMachines() {
+    String machineName = "dev-machine";
+
+    createWorkspace.clickOnAllStacksTab();
+    createWorkspace.selectStack(JAVA.getId());
+    assertTrue(createWorkspace.isMachineExists(machineName));
+    assertEquals(createWorkspace.getRAM(machineName), 2.0);
+    createWorkspace.clickOnIncrementMemoryButton(machineName);
+    assertEquals(createWorkspace.getRAM(machineName), 2.5);
+    createWorkspace.clickOnDecrementMemoryButton(machineName);
+    createWorkspace.clickOnDecrementMemoryButton(machineName);
+    createWorkspace.clickOnDecrementMemoryButton(machineName);
+    assertEquals(createWorkspace.getRAM(machineName), 1.0);
+    createWorkspace.setMachineRAM(machineName, "5");
+    assertEquals(createWorkspace.getRAM(machineName), 5.0);
+
+    createWorkspace.selectStack(JAVA_MYSQL.getId());
+    assertTrue(createWorkspace.isMachineExists("db"));
+    assertTrue(createWorkspace.isMachineExists(machineName));
+    createWorkspace.clickOnDecrementMemoryButton(machineName);
+    createWorkspace.clickOnDecrementMemoryButton("db");
+    assertEquals(createWorkspace.getRAM(machineName), 1.5);
+    assertEquals(createWorkspace.getRAM("db"), 0.5);
+
+    createWorkspace.clickOnDecrementMemoryButton("db");
+    assertEquals(createWorkspace.getRAM("db"), 0.5);
+    createWorkspace.setMachineRAM(machineName, "100");
+    createWorkspace.clickOnIncrementMemoryButton(machineName);
+    createWorkspace.setMachineRAM(machineName, "100");
+  }
+
+  //  @Test
   public void checkFiltersStacksFeature() {
     createWorkspace.clickOnAllStacksTab();
     createWorkspace.clickOnFiltersButton();
@@ -133,20 +162,25 @@ public class CreateWorkspaceTest {
 
     createWorkspace.clickOnSingleMachineTab();
     createWorkspace.clickOnFiltersButton();
+    createWorkspace.clearSuggestions();
     createWorkspace.typeToFiltersInput("mysql");
     createWorkspace.selectFilterSuggestion("MYSQL");
     assertTrue(createWorkspace.isStackVisible(PHP.getId()));
 
     createWorkspace.clickOnMultiMachineTab();
     createWorkspace.clickOnFiltersButton();
+    createWorkspace.clearSuggestions();
     createWorkspace.typeToFiltersInput("java");
     createWorkspace.selectFilterSuggestion("MYSQL");
     assertTrue(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
     createWorkspace.clickOnSingleMachineTab();
     assertFalse(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
+
+    createWorkspace.clickOnFiltersButton();
+    createWorkspace.clearSuggestions();
   }
 
-  @Test
+  //  @Test
   public void checkSearchStackFeature() {
     createWorkspace.typeToSearchInput("java");
     createWorkspace.clickOnSingleMachineTab();
@@ -179,5 +213,7 @@ public class CreateWorkspaceTest {
     assertTrue(createWorkspace.isStackVisible(DOTNET.getId()));
     createWorkspace.clickOnMultiMachineTab();
     assertFalse(createWorkspace.isStackVisible(DOTNET.getId()));
+
+    createWorkspace.clearTextInSearchInput();
   }
 }

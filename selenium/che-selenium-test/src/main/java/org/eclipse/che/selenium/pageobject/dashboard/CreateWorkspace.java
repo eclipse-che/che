@@ -39,8 +39,11 @@ public class CreateWorkspace {
   }
 
   private interface Locators {
-    String TOOLBAR_TITLE_ID = "New_Workspace";
     String WORKSPACE_NAME_INPUT = "workspace-name-input";
+    String ERROR_MESSAGE =
+        "//div[@che-form='workspaceNameForm']//div[contains(@ng-messages,'$error')]";
+
+    String TOOLBAR_TITLE_ID = "New_Workspace";
     String CREATE_BUTTON = "create-workspace-button";
     String SELECT_ALL_STACKS_TAB = "all-stacks-button";
     String SELECT_QUICK_START_STACKS_TAB = "quick-start-button";
@@ -54,19 +57,34 @@ public class CreateWorkspace {
         "//div[contains(@class,'stack-library-filter-suggestion-text')]";
     String FILTER_SUGGESTION_BUTTON =
         "//div[contains(@class,'stack-library-filter-suggestion-text')]/../div[2]";
-    String FILTER_SELECTED_SUGGESTION_TEXT =
-        "//div[contains(@class,'stack-library-filter-tag-text')]";
+    String FILTER_SELECTED_SUGGESTION_BUTTON = "//button[@class='md-chip-remove ng-scope']";
 
     String SEARCH_INPUT = "//div[@id='search-stack-input']//input";
     String CLEAR_INPUT = "//div[@id='search-stack-input']//div[@role='button']";
 
     String STACK_ROW_XPATH = "//div[@data-stack-id='%s']";
-    String RAM_INPUT_XPATH = "//input[@name='memory']";
-    String MACHINE_RAM_ID = "machine-%s-ram";
 
-    String ERROR_MESSAGE =
-        "//div[@che-form='workspaceNameForm']//div[contains(@ng-messages,'$error')]";
+    String MACHINE_NAME =
+        "//span[contains(@class,'ram-settings-machine-item-item-name') and text()='%s']";
+    String MACHINE_IMAGE = "//span[@class='ram-settings-machine-item-secondary-color']";
+
+    String DECREMENT_MEMORY_BUTTON =
+        "//*[@id='machine-%s-ram']//button[@aria-label='Decrement memory']";
+    String RAM_INPUT_FIELD = "//input[@name='memory']";
+    String INCREMENT_MEMORY_BUTTON =
+        "//*[@id='machine-%s-ram']//button[@aria-label='Increment memory']";
+
+    String MACHINE_RAM_VALUE = "//*[@id='machine-%s-ram']//input";
   }
+
+  @FindBy(xpath = Locators.RAM_INPUT_FIELD)
+  WebElement ramInputField;
+
+  @FindBy(xpath = Locators.DECREMENT_MEMORY_BUTTON)
+  WebElement decrementmemoryButton;
+
+  @FindBy(xpath = Locators.INCREMENT_MEMORY_BUTTON)
+  WebElement incrementMemoryButton;
 
   @FindBy(id = Locators.FILTERS_STACK_BUTTON)
   WebElement filtersStackButton;
@@ -101,6 +119,78 @@ public class CreateWorkspace {
   @FindBy(id = Locators.SELECT_MULTI_MACHINE_STACKS_TAB)
   WebElement selectMultiMachineStacksTab;
 
+  public void typeWorkspaceName(String name) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(workspaceNameInput));
+    workspaceNameInput.clear();
+    workspaceNameInput.sendKeys(name);
+  }
+
+  public String getWorkspaceNameValue() {
+    return workspaceNameInput.getAttribute("value");
+  }
+
+  public boolean isWorkspaceNameWrong() {
+    String s =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(visibilityOf(workspaceNameInput))
+            .getText();
+
+    return s.equals("");
+  }
+
+  public boolean isMachineExists(String machineName) {
+    return seleniumWebDriver
+            .findElements(By.xpath(format(Locators.MACHINE_NAME, machineName)))
+            .size()
+        > 0;
+  }
+
+  public void clickOnIncrementMemoryButton(String machineName) {
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
+        .until(
+            visibilityOfElementLocated(
+                By.xpath(format(Locators.INCREMENT_MEMORY_BUTTON, machineName))))
+        .click();
+  }
+
+  public void clickOnDecrementMemoryButton(String machineName) {
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
+        .until(
+            visibilityOfElementLocated(
+                By.xpath(format(Locators.DECREMENT_MEMORY_BUTTON, machineName))))
+        .click();
+  }
+
+  public double getRAM() {
+    String s =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(visibilityOf(ramInputField))
+            .getAttribute("value");
+    return Double.parseDouble(s);
+  }
+
+  public double getRAM(String machineName) {
+    String s =
+        seleniumWebDriver
+            .findElement(By.xpath(format(Locators.MACHINE_RAM_VALUE, machineName)))
+            .getAttribute("value");
+    return Double.parseDouble(s);
+  }
+
+  public void setMachineRAM(String value) {
+    WebElement ramInput = seleniumWebDriver.findElement(By.xpath(Locators.RAM_INPUT_FIELD));
+    ramInput.clear();
+    ramInput.sendKeys(value);
+  }
+
+  public void setMachineRAM(String machineName, String value) {
+    WebElement ramInput =
+        seleniumWebDriver.findElement(By.xpath(format(Locators.MACHINE_RAM_VALUE, machineName)));
+    ramInput.clear();
+    ramInput.sendKeys(value);
+  }
+
   public void clickOnFiltersButton() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOf(filtersStackButton))
@@ -110,12 +200,19 @@ public class CreateWorkspace {
   public void typeToFiltersInput(String value) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOf(filterStackInput))
-        .clear();
-    filterStackInput.sendKeys(value);
+        .sendKeys(value);
   }
 
   public String getTextFromFiltersInput() {
     return filterStackInput.getAttribute("value");
+  }
+
+  public void clearSuggestions() {
+    WebElement webElement =
+        new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
+            .until(
+                visibilityOfElementLocated(By.xpath(Locators.FILTER_SELECTED_SUGGESTION_BUTTON)));
+    webElement.click();
   }
 
   public void selectFilterSuggestion(String suggestion) {
@@ -156,37 +253,14 @@ public class CreateWorkspace {
 
   public void selectStack(String stackId) {
     WebElement stack =
-        seleniumWebDriver.findElement(By.xpath(format(Locators.STACK_ROW_XPATH, stackId)));
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(visibilityOfElementLocated(By.xpath(format(Locators.STACK_ROW_XPATH, stackId))));
     new Actions(seleniumWebDriver).moveToElement(stack).perform();
     stack.click();
   }
 
   public void clickOnCreateWorkspaceButton() {
     createWorkspaceButton.click();
-  }
-
-  public void typeWorkspaceName(String name) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOf(workspaceNameInput));
-    workspaceNameInput.clear();
-    workspaceNameInput.sendKeys(name);
-  }
-
-  public String getWorkspaceNameValue() {
-    return workspaceNameInput.getAttribute("value");
-  }
-
-  public void setMachineRAM(String value) {
-    WebElement ramInput = seleniumWebDriver.findElement(By.xpath(Locators.RAM_INPUT_XPATH));
-    ramInput.clear();
-    ramInput.sendKeys(value);
-  }
-
-  public void setMachineRAM(String machine, String value) {
-    WebElement ramInput =
-        seleniumWebDriver.findElement(By.id(format(Locators.MACHINE_RAM_ID, machine)));
-    ramInput.clear();
-    ramInput.sendKeys(value);
   }
 
   public void clickOnAllStacksTab() {
