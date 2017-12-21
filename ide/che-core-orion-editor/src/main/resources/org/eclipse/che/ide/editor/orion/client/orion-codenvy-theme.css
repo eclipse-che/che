@@ -474,6 +474,6 @@
     font-weight: bold;
 }
 
-.support type propertyName css{
-       color: #00bcd4;
-    }
+.support.type.propertyName.css{
+    color: #00bcd4;
+}
