@@ -99,6 +99,6 @@ public class TerminalJso extends JavaScriptObject {
     }-*/;
 
   public final native int maxLineLength() /*-{
-      return this.maxLineLength();
+      return this.maxLineWidth;
     }-*/;
 }

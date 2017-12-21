@@ -158,6 +158,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
               this.terminalJso = TerminalJso.create(terminalSource, termOps);
               terminalJso.open(consoleLines.asWidget().getElement());
+              resize();
 //              Log.info(getClass(),  "Constructor !!!! "
 //                                    + " " + consoleLines.getElement().getClientHeight()
 //                                    + " " + consoleLines.getElement().getClientWidth()
@@ -198,9 +199,9 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
       Log.info(getClass(), "Client height "+ terminalJso.getElement().getClientHeight() + " width " + terminalJso.getElement().getClientWidth());
       Log.info(getClass(), "char measure element: height= " + terminalJso.getCharMeasure().getHeight() + " width= " + terminalJso.getCharMeasure().getWidth());
 
-      int maxLineLength = terminalJso.maxLineLength();
+      //int maxLineLength = terminalJso.maxLineLength();
 
-      int cols = Math.max(maxLineLength, visibleCols);
+      int cols = Math.max(terminalJso.maxLineLength(), visibleCols);
 
       Log.info(getClass(), "size: rows " + visibleRows + " cols " + cols);
 
