@@ -12,11 +12,11 @@ package org.eclipse.che.ide.ext.java.client.navigation.node;
 
 import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.validation.constraints.NotNull;
-
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.navigation.factory.NodeFactory;
@@ -31,9 +31,6 @@ import org.eclipse.che.ide.ui.smartTree.data.HasAction;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.vectomatic.dom.svg.ui.SVGResource;
-
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 
 /**
  * Representation of java type for the java navigation tree.

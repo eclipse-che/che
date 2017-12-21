@@ -5,7 +5,8 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: Red Hat, Inc. - initial API and implementation
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.ide.ext.java.client.search;
 
@@ -150,7 +151,7 @@ public class FindUsagesPresenter extends BasePresenter implements BaseActionDele
     view.showUsages(response);
   }
 
-  public Promise<List<Node>> computeMatches(ElementNode elementNode) {
+  public Promise<List<MatchNode>> computeMatches(ElementNode elementNode) {
     Node ancestor = elementNode.getParent();
     SearchResult rootElement = elementNode.getElement();
 
@@ -165,13 +166,13 @@ public class FindUsagesPresenter extends BasePresenter implements BaseActionDele
 
     return loadMatches(rootElement)
         .then(
-            (Function<Map<LinearRange, SnippetResult>, List<Node>>)
+            (Function<Map<LinearRange, SnippetResult>, List<MatchNode>>)
                 matches -> {
                   return filterMatches(elementNode.getElement(), matches);
                 });
   }
 
-  private List<Node> filterMatches(SearchResult sr, Map<LinearRange, SnippetResult> matches) {
+  private List<MatchNode> filterMatches(SearchResult sr, Map<LinearRange, SnippetResult> matches) {
     return sr.getMatches()
         .stream()
         .filter(

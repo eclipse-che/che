@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2012-2017 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.ide.ext.java.client.search;
 
 import com.google.gwt.dom.client.Element;
@@ -99,5 +109,10 @@ public class MatchNode extends AbstractTreeNode implements HasNewPresentation, H
   @Override
   public void actionPerformed() {
     openHelper.openLocation(uri, snippet.getLinearRange());
+  }
+
+  // visible for testing
+  SnippetResult getSnippet() {
+    return snippet;
   }
 }

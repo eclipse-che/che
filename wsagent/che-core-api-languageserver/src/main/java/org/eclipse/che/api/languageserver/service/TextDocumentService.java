@@ -5,7 +5,8 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: Red Hat, Inc. - initial API and implementation
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.api.languageserver.service;
 
@@ -975,9 +976,8 @@ public class TextDocumentService {
     return result[0];
   }
 
-  private List<SnippetResult> getSnippets(SnippetParameters params) {
+  List<SnippetResult> getSnippets(SnippetParameters params) {
     try {
-      List<SnippetResult> result = new ArrayList<>();
       String uri = params.getUri();
       if (LanguageServiceUtils.isWorkspaceUri(uri)) {
         uri = LanguageServiceUtils.workspaceURIToFileURI(uri);
@@ -989,7 +989,6 @@ public class TextDocumentService {
         String wsPath = absolutize(path);
 
         if (fsManager.existsAsFile(wsPath)) {
-          List<TextEdit> undo = new ArrayList<>();
           content = new InputStreamReader(new BufferedInputStream(fsManager.read(wsPath)));
         }
       } else {
@@ -1000,21 +999,19 @@ public class TextDocumentService {
       }
 
       if (content != null) {
+        ArrayList<LinearRange> ranges = new ArrayList<>(params.getRanges());
         try {
-          ArrayList<LinearRange> ranges = new ArrayList<>(params.getRanges());
+          List<SnippetResult> result = new ArrayList<>();
           Collections.sort(ranges, LinearRangeComparator.INSTANCE);
           LineReader lineReader = new LineReader(content);
           for (LinearRange range : ranges) {
             lineReader.readTo(range.getOffset());
-            LinearRange rangeInLine =
-                new LinearRange(
-                    range.getOffset() - lineReader.getCurrentLineStartOffset(), range.getLength());
+            String snippet = lineReader.getCurrentLine();
+            int offsetInLine = range.getOffset() - lineReader.getCurrentLineStartOffset();
+            int lengthInLine = Math.min(snippet.length() - offsetInLine, range.getLength());
+            LinearRange rangeInLine = new LinearRange(offsetInLine, lengthInLine);
             result.add(
-                new SnippetResult(
-                    range,
-                    lineReader.getCurrentLine(),
-                    lineReader.getCurrentLineIndex(),
-                    rangeInLine));
+                new SnippetResult(range, snippet, lineReader.getCurrentLineIndex(), rangeInLine));
           }
           return result;
         } finally {
