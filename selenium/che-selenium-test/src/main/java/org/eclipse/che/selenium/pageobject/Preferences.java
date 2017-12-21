@@ -272,7 +272,7 @@ public class Preferences {
     return sshKeysTable.getText().contains(host);
   }
 
-  // timeout is changed to 40 sec, is related to running tests on che6-ocp platform
+  // timeout is changed to 40 sec, is related to running tests on ocp platform
   public void waitSshKeyIsPresent(final String host) {
     new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
         .until((ExpectedCondition<Boolean>) driver -> sshKeysTable.getText().contains(host));
