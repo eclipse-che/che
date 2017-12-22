@@ -375,7 +375,7 @@ public class JavaLanguageServerExtensionService {
     Type targetClassType = new TypeToken<String>() {}.getType();
     try {
       return gson.fromJson(
-          gson.toJson(result.get(EFFECTIVE_POM_REQUEST_TIMEOUT, TimeUnit.SECONDS)),
+          gson.toJson(result.get(EFFECTIVE_POM_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS)),
           targetClassType);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
@@ -409,7 +409,8 @@ public class JavaLanguageServerExtensionService {
       result =
           gson.fromJson(
               gson.toJson(
-                  requestResult.get(REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT, TimeUnit.SECONDS)),
+                  requestResult.get(
+                      REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS)),
               targetClassType);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
