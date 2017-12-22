@@ -57,7 +57,7 @@ class MachineStatusEventHandler {
           final String workspaceId = event.getIdentity().getWorkspaceId();
 
           eventBus.fireEvent(
-              new MachineStatusChangedEvent(machineName, workspaceId, event.getEventType()));
+              new MachineStatusChangedEvent(machineName, event.getEventType()));
 
           workspaceServiceClient
               .getWorkspace(workspaceId)

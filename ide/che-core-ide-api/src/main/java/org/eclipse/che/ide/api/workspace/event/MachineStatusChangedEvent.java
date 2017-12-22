@@ -21,22 +21,15 @@ public class MachineStatusChangedEvent extends GwtEvent<MachineStatusChangedEven
 
   private String machineName;
 
-  private String workspaceId;
-
   private MachineStatus status;
 
-  public MachineStatusChangedEvent(String machineName, String workspaceId, MachineStatus status) {
+  public MachineStatusChangedEvent(String machineName, MachineStatus status) {
     this.machineName = machineName;
-    this.workspaceId = workspaceId;
     this.status = status;
   }
 
   public String getMachineName() {
     return machineName;
-  }
-
-  public String getWorkspaceId() {
-    return workspaceId;
   }
 
   public MachineStatus getStatus() {
