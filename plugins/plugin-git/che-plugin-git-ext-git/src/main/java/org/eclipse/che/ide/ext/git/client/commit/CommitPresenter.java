@@ -143,7 +143,6 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
                                     show(newFiles.stream().collect(joining("\nA\t", "A\t", "")));
                                   });
                         } else {
-                          view.setMessage("");
                           notificationManager.notify(constant.logFailed(), FAIL, NOT_EMERGE_MODE);
                         }
                       });
