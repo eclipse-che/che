@@ -122,7 +122,7 @@ public class JavaTestPluginJunit4Test {
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppOne");
 
     try {
-      pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
+      pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppOne");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7338", ex);

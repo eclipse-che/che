@@ -12,6 +12,7 @@
 package org.eclipse.che.ide.ui.dialogs.askcredentials;
 
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.api.auth.Credentials;
 
 /**
  * Dialog for retrieving credentials for operations.

@@ -12,7 +12,7 @@ export CHE_EPHEMERAL=${CHE_EPHEMERAL:-false}
 
 "$COMMAND_DIR"/deploy_postgres_only.sh
 
-oc create -f "$COMMAND_DIR"/keycloak/
+oc apply -f "$COMMAND_DIR"/keycloak/
 
 if [ "${CHE_EPHEMERAL}" == "true" ]; then
   oc volume dc/keycloak --remove --confirm
@@ -22,7 +22,7 @@ fi
 
 IMAGE_KEYCLOACK=${IMAGE_KEYCLOACK:-"jboss/keycloak-openshift:3.3.0.CR2-3"}
 
-oc create -f - <<-EOF
+oc apply -f - <<-EOF
 
 apiVersion: v1
 kind: ImageStream
