@@ -9,9 +9,9 @@
 COMMAND_DIR=$(dirname "$0")
 export CHE_EPHEMERAL=${CHE_EPHEMERAL:-false}
 
-oc create -f "$COMMAND_DIR"/che-init-image-stream.yaml
+oc apply -f "$COMMAND_DIR"/che-init-image-stream.yaml
 
-oc create -f "$COMMAND_DIR"/postgres/
+oc apply -f "$COMMAND_DIR"/postgres/
 
 if [ "${CHE_EPHEMERAL}" == "true" ]; then
   oc volume dc/postgres --remove --confirm
@@ -20,7 +20,7 @@ fi
 
 IMAGE_INIT=${IMAGE_INIT:-"eclipse/che-init:nightly"}
 
-oc create -f - <<-EOF
+oc apply -f - <<-EOF
 
 apiVersion: v1
 kind: BuildConfig
@@ -53,7 +53,7 @@ EOF
 
 IMAGE_POSTGRES=${IMAGE_POSTGRES:-centos/postgresql-96-centos7}
 
-oc create -f - <<-EOF
+oc apply -f - <<-EOF
 
 apiVersion: v1
 kind: ImageStream

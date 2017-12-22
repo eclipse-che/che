@@ -10,49 +10,27 @@
  */
 package org.eclipse.che.ide.ext.git.server.github;
 
-import java.io.IOException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.core.UriBuilder;
-import org.eclipse.che.api.auth.shared.dto.OAuthToken;
-import org.eclipse.che.api.git.CredentialsProvider;
-import org.eclipse.che.api.git.UserCredential;
-import org.eclipse.che.api.git.exception.GitException;
+import org.eclipse.che.api.git.GitBasicAuthenticationCredentialsProvider;
 import org.eclipse.che.api.git.shared.ProviderInfo;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.security.oauth.shared.OAuthTokenProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** @author Sergii Kabashniuk */
 @Singleton
-public class GitHubOAuthCredentialProvider implements CredentialsProvider {
+public class GitHubOAuthCredentialProvider extends GitBasicAuthenticationCredentialsProvider {
 
   private static final Logger LOG = LoggerFactory.getLogger(GitHubOAuthCredentialProvider.class);
 
   private static String OAUTH_PROVIDER_NAME = "github";
-  private final OAuthTokenProvider oAuthTokenProvider;
   private final String authorizationServicePath;
 
   @Inject
-  public GitHubOAuthCredentialProvider(OAuthTokenProvider oAuthTokenProvider) {
-    this.oAuthTokenProvider = oAuthTokenProvider;
+  public GitHubOAuthCredentialProvider() {
     this.authorizationServicePath = "/oauth/authenticate";
-  }
-
-  @Override
-  public UserCredential getUserCredential() throws GitException {
-    try {
-      OAuthToken token =
-          oAuthTokenProvider.getToken(
-              OAUTH_PROVIDER_NAME, EnvironmentContext.getCurrent().getSubject().getUserId());
-      if (token != null) {
-        return new UserCredential(token.getToken(), token.getToken(), OAUTH_PROVIDER_NAME);
-      }
-    } catch (IOException e) {
-      LOG.warn(e.getLocalizedMessage());
-    }
-    return null;
   }
 
   @Override
@@ -72,7 +50,7 @@ public class GitHubOAuthCredentialProvider implements CredentialsProvider {
         UriBuilder.fromPath(authorizationServicePath)
             .queryParam("oauth_provider", OAUTH_PROVIDER_NAME)
             .queryParam("userId", EnvironmentContext.getCurrent().getSubject().getUserId())
-            .queryParam("scope", "repo")
+            .queryParam("scope", "repo,write:public_key")
             .build()
             .toString());
   }

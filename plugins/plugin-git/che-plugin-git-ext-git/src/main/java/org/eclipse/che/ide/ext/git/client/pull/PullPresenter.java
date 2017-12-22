@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.ext.git.client.pull;
 
+import static org.eclipse.che.api.core.ErrorCodes.MERGE_CONFLICT;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -26,13 +27,17 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchListMode;
+import org.eclipse.che.api.git.shared.PullResponse;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.auth.Credentials;
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.BranchSearcher;
+import org.eclipse.che.ide.ext.git.client.GitAuthActionPresenter;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
@@ -47,16 +52,13 @@ import org.eclipse.che.ide.ui.dialogs.DialogFactory;
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class PullPresenter implements PullView.ActionDelegate {
+public class PullPresenter extends GitAuthActionPresenter implements PullView.ActionDelegate {
   public static final String PULL_COMMAND_NAME = "Git pull";
 
   private static final String GREEN_COLOR = "lightgreen";
 
   private final PullView view;
   private final GitServiceClient service;
-  private final GitLocalizationConstant constant;
-  private final AppContext appContext;
-  private final NotificationManager notificationManager;
   private final DialogFactory dialogFactory;
   private final BranchSearcher branchSearcher;
   private final GitOutputConsoleFactory gitOutputConsoleFactory;
@@ -68,13 +70,14 @@ public class PullPresenter implements PullView.ActionDelegate {
   public PullPresenter(
       PullView view,
       GitServiceClient service,
-      AppContext appContext,
       GitLocalizationConstant constant,
       NotificationManager notificationManager,
       DialogFactory dialogFactory,
       BranchSearcher branchSearcher,
       GitOutputConsoleFactory gitOutputConsoleFactory,
-      ProcessesPanelPresenter processesPanelPresenter) {
+      ProcessesPanelPresenter processesPanelPresenter,
+      OAuthServiceClient oauthServiceClient) {
+    super(notificationManager, constant, oauthServiceClient);
     this.view = view;
     this.dialogFactory = dialogFactory;
     this.branchSearcher = branchSearcher;
@@ -82,8 +85,6 @@ public class PullPresenter implements PullView.ActionDelegate {
     this.consolesPanelPresenter = processesPanelPresenter;
     this.view.setDelegate(this);
     this.service = service;
-    this.constant = constant;
-    this.appContext = appContext;
     this.notificationManager = notificationManager;
   }
 
@@ -145,29 +146,39 @@ public class PullPresenter implements PullView.ActionDelegate {
     view.close();
 
     final StatusNotification notification =
-        notificationManager.notify(constant.pullProcess(), PROGRESS, FLOAT_MODE);
+        notificationManager.notify(locale.pullProcess(), PROGRESS, FLOAT_MODE);
+    GitOutputConsole console = gitOutputConsoleFactory.create(PULL_COMMAND_NAME);
 
-    service
-        .pull(project.getLocation(), getRefs(), view.getRepositoryName(), view.getRebase())
+    performOperationWithTokenRequestIfNeeded(
+            new RemoteGitOperation<PullResponse>() {
+              @Override
+              public Promise<PullResponse> perform(Credentials credentials) {
+                return service.pull(
+                    project.getLocation(),
+                    getRefs(),
+                    view.getRepositoryName(),
+                    view.getRebase(),
+                    credentials);
+              }
+            })
         .then(
             response -> {
-              GitOutputConsole console = gitOutputConsoleFactory.create(PULL_COMMAND_NAME);
               console.print(response.getCommandOutput(), GREEN_COLOR);
               consolesPanelPresenter.addCommandOutput(console);
               notification.setStatus(SUCCESS);
               if (response.getCommandOutput().contains("Already up-to-date")) {
-                notification.setTitle(constant.pullUpToDate());
+                notification.setTitle(locale.pullUpToDate());
               } else {
                 project.synchronize();
-                notification.setTitle(constant.pullSuccess(view.getRepositoryUrl()));
+                notification.setTitle(locale.pullSuccess(view.getRepositoryUrl()));
               }
             })
         .catchError(
             error -> {
-              notification.setStatus(FAIL);
-              if (getErrorCode(error.getCause()) == ErrorCodes.MERGE_CONFLICT) {
+              if (getErrorCode(error.getCause()) == MERGE_CONFLICT) {
                 project.synchronize();
               }
+              notification.setStatus(FAIL);
               handleError(error.getCause(), PULL_COMMAND_NAME, notification);
             });
   }
@@ -205,12 +216,12 @@ public class PullPresenter implements PullView.ActionDelegate {
     int errorCode = getErrorCode(exception);
     if (errorCode == ErrorCodes.NO_COMMITTER_NAME_OR_EMAIL_DEFINED) {
       dialogFactory
-          .createMessageDialog(constant.pullTitle(), constant.committerIdentityInfoEmpty(), null)
+          .createMessageDialog(locale.pullTitle(), locale.committerIdentityInfoEmpty(), null)
           .show();
       return;
     } else if (errorCode == ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY) {
       dialogFactory
-          .createMessageDialog(constant.pullTitle(), constant.messagesUnableGetSshKey(), null)
+          .createMessageDialog(locale.pullTitle(), locale.messagesUnableGetSshKey(), null)
           .show();
       return;
     }
@@ -219,13 +230,13 @@ public class PullPresenter implements PullView.ActionDelegate {
     if (errorMessage == null) {
       switch (commandName) {
         case REMOTE_REPO_COMMAND_NAME:
-          errorMessage = constant.remoteListFailed();
+          errorMessage = locale.remoteListFailed();
           break;
         case BRANCH_LIST_COMMAND_NAME:
-          errorMessage = constant.branchesListFailed();
+          errorMessage = locale.branchesListFailed();
           break;
         case PULL_COMMAND_NAME:
-          errorMessage = constant.pullFail(view.getRepositoryUrl());
+          errorMessage = locale.pullFail(view.getRepositoryUrl());
           break;
       }
     }

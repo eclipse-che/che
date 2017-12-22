@@ -26,12 +26,15 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchListMode;
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.api.auth.Credentials;
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.BranchSearcher;
+import org.eclipse.che.ide.ext.git.client.GitAuthActionPresenter;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
@@ -45,18 +48,15 @@ import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class FetchPresenter implements FetchView.ActionDelegate {
+public class FetchPresenter extends GitAuthActionPresenter implements FetchView.ActionDelegate {
   public static final String FETCH_COMMAND_NAME = "Git fetch";
 
   private final DtoFactory dtoFactory;
-  private final NotificationManager notificationManager;
   private final BranchSearcher branchSearcher;
   private final GitOutputConsoleFactory gitOutputConsoleFactory;
   private final ProcessesPanelPresenter processesPanelPresenter;
   private final FetchView view;
   private final GitServiceClient service;
-  private final AppContext appContext;
-  private final GitLocalizationConstant constant;
 
   private Project project;
 
@@ -65,12 +65,13 @@ public class FetchPresenter implements FetchView.ActionDelegate {
       DtoFactory dtoFactory,
       FetchView view,
       GitServiceClient service,
-      AppContext appContext,
       GitLocalizationConstant constant,
       NotificationManager notificationManager,
       BranchSearcher branchSearcher,
       GitOutputConsoleFactory gitOutputConsoleFactory,
-      ProcessesPanelPresenter processesPanelPresenter) {
+      ProcessesPanelPresenter processesPanelPresenter,
+      OAuthServiceClient oauthServiceClient) {
+    super(notificationManager, constant, oauthServiceClient);
     this.dtoFactory = dtoFactory;
     this.view = view;
     this.branchSearcher = branchSearcher;
@@ -78,8 +79,6 @@ public class FetchPresenter implements FetchView.ActionDelegate {
     this.processesPanelPresenter = processesPanelPresenter;
     this.view.setDelegate(this);
     this.service = service;
-    this.appContext = appContext;
-    this.constant = constant;
     this.notificationManager = notificationManager;
   }
 
@@ -108,9 +107,9 @@ public class FetchPresenter implements FetchView.ActionDelegate {
         .catchError(
             error -> {
               GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
-              console.printError(constant.remoteListFailed());
+              console.printError(locale.remoteListFailed());
               processesPanelPresenter.addCommandOutput(console);
-              notificationManager.notify(constant.remoteListFailed(), FAIL, FLOAT_MODE);
+              notificationManager.notify(locale.remoteListFailed(), FAIL, FLOAT_MODE);
               view.setEnableFetchButton(false);
             });
   }
@@ -142,11 +141,11 @@ public class FetchPresenter implements FetchView.ActionDelegate {
         .catchError(
             error -> {
               final String errorMessage =
-                  error.getMessage() != null ? error.getMessage() : constant.branchesListFailed();
+                  error.getMessage() != null ? error.getMessage() : locale.branchesListFailed();
               GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
               console.printError(errorMessage);
               processesPanelPresenter.addCommandOutput(console);
-              notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
+              notificationManager.notify(locale.branchesListFailed(), FAIL, FLOAT_MODE);
               view.setEnableFetchButton(false);
             });
   }
@@ -157,18 +156,27 @@ public class FetchPresenter implements FetchView.ActionDelegate {
     final String remoteUrl = view.getRepositoryUrl();
 
     final StatusNotification notification =
-        notificationManager.notify(constant.fetchProcess(), PROGRESS, FLOAT_MODE);
+        notificationManager.notify(locale.fetchProcess(), PROGRESS, FLOAT_MODE);
     final GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
 
-    service
-        .fetch(
-            project.getLocation(), view.getRepositoryName(), getRefs(), view.isRemoveDeletedRefs())
+    performOperationWithTokenRequestIfNeeded(
+            new RemoteGitOperation<Void>() {
+              @Override
+              public Promise<Void> perform(Credentials credentials) {
+                return service.fetch(
+                    project.getLocation(),
+                    view.getRepositoryName(),
+                    getRefs(),
+                    view.isRemoveDeletedRefs(),
+                    credentials);
+              }
+            })
         .then(
             ignored -> {
-              console.print(constant.fetchSuccess(remoteUrl));
+              console.print(locale.fetchSuccess(remoteUrl));
               processesPanelPresenter.addCommandOutput(console);
               notification.setStatus(SUCCESS);
-              notification.setTitle(constant.fetchSuccess(remoteUrl));
+              notification.setTitle(locale.fetchSuccess(remoteUrl));
             })
         .catchError(
             error -> {
@@ -208,16 +216,16 @@ public class FetchPresenter implements FetchView.ActionDelegate {
     String errorMessage = throwable.getMessage();
     notification.setStatus(FAIL);
     if (errorMessage == null) {
-      console.printError(constant.fetchFail(remoteUrl));
-      notification.setTitle(constant.fetchFail(remoteUrl));
+      console.printError(locale.fetchFail(remoteUrl));
+      notification.setTitle(locale.fetchFail(remoteUrl));
       return;
     }
 
     try {
       errorMessage = dtoFactory.createDtoFromJson(errorMessage, ServiceError.class).getMessage();
       if (errorMessage.equals("Unable get private ssh key")) {
-        console.printError(constant.messagesUnableGetSshKey());
-        notification.setTitle(constant.messagesUnableGetSshKey());
+        console.printError(locale.messagesUnableGetSshKey());
+        notification.setTitle(locale.messagesUnableGetSshKey());
         return;
       }
       console.printError(errorMessage);

@@ -11,12 +11,14 @@
 package org.eclipse.che.selenium.git;
 
 import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -31,12 +33,15 @@ import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.Wizard;
+import org.slf4j.Logger;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class PullRequestPluginWithForkTest {
+  private static final Logger LOG = getLogger(PullRequestPluginWithForkTest.class);
+
   private static final String PROJECT_NAME = "pull-request-plugin-fork-test";
   private static final String PROJECT_URL =
       "https://github.com/iedexmain1/pull-request-plugin-fork-test.git";
@@ -93,18 +98,30 @@ public class PullRequestPluginWithForkTest {
         TestMenuCommandsConstants.Profile.PROFILE_MENU,
         TestMenuCommandsConstants.Profile.PREFERENCES);
     preferences.waitPreferencesForm();
-    gitHubClientService.deleteAllGrants(gitHubUsername, gitHubPassword);
-    preferences.regenerateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);
+    preferences.generateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    gitHubClientService.deleteRepo(FORK_NAME_REPO, gitHubUsername, gitHubPassword);
+    try {
+      gitHubClientService.deleteRepo(FORK_NAME_REPO, gitHubUsername, gitHubPassword);
+    } catch (NotFoundException e) {
+      // ignore absent repo to delete
+      LOG.debug("Repo {} is not found.", FORK_NAME_REPO);
+      return;
+    }
+
     List<String> listPullRequest =
         gitHubClientService.getNumbersOfOpenedPullRequests(
             NAME_REPO, githubUserCloneName, githubUserClonePassword);
-    gitHubClientService.closePullRequest(
-        NAME_REPO, Collections.max(listPullRequest), githubUserCloneName, githubUserClonePassword);
+
+    if (!listPullRequest.isEmpty()) {
+      gitHubClientService.closePullRequest(
+          NAME_REPO,
+          Collections.max(listPullRequest),
+          githubUserCloneName,
+          githubUserClonePassword);
+    }
   }
 
   @Test
