@@ -146,7 +146,7 @@ public class CommitPresenter extends GitAuthActionPresenter
                                     show(newFiles.stream().collect(joining("\nA\t", "A\t", "")));
                                   });
                         } else {
-                          notificationManager.notify(constant.logFailed(), FAIL, NOT_EMERGE_MODE);
+                          notificationManager.notify(locale.logFailed(), FAIL, NOT_EMERGE_MODE);
                         }
                       });
             })
