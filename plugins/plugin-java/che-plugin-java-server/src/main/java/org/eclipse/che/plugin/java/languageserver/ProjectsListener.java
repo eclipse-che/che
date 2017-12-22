@@ -108,17 +108,33 @@ public class ProjectsListener {
     executorService.submit(
         () -> {
           LOG.info(
-              "Workspace updating. Added projects'{}', removed projects '{}'",
+              "Workspace isb being updated with added projects'{}', removed projects '{}'",
               updateWorkspaceParameters.getAddedProjectsUri().toString(),
               updateWorkspaceParameters.getRemovedProjectsUri().toString());
 
           JobResult jobResult = service.updateWorkspace(updateWorkspaceParameters);
 
-          LOG.info(
-              "Workspace updated. Severity: '{}, result code: '{}', message: '{}'",
-              jobResult.getSeverity(),
-              jobResult.getResultCode(),
-              jobResult.getMessage());
+          switch (jobResult.getSeverity()) {
+            case ERROR:
+              LOG.error(
+                  "Workspace updated. Result code: '{}', message: '{}'",
+                  jobResult.getResultCode(),
+                  jobResult.getMessage());
+              break;
+            case WARNING:
+            case CANCEL:
+              LOG.warn(
+                  "Workspace updated. Result code: '{}', message: '{}'",
+                  jobResult.getResultCode(),
+                  jobResult.getMessage());
+              break;
+            default:
+              LOG.info(
+                  "Workspace updated. Result code: '{}', message: '{}'",
+                  jobResult.getResultCode(),
+                  jobResult.getMessage());
+              break;
+          }
         });
   }
 }

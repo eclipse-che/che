@@ -66,6 +66,7 @@ import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.jdt.ls.extension.api.Commands;
+import org.eclipse.che.jdt.ls.extension.api.Severity;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
@@ -376,26 +377,25 @@ public class JavaLanguageServerExtensionService {
   private List<Jar> getProjectExternalLibraries(ExternalLibrariesParameters params) {
     params.setProjectUri(prefixURI(params.getProjectUri()));
     Type type = new TypeToken<ArrayList<Jar>>() {}.getType();
-    return doGetList(GET_EXTERNAL_LIBRARIES_COMMAND, singletonList(params), type);
+    return doGetList(GET_EXTERNAL_LIBRARIES_COMMAND, params, type);
   }
 
   private List<JarEntry> getExternalLibrariesChildren(ExternalLibrariesParameters params) {
     params.setProjectUri(prefixURI(params.getProjectUri()));
     Type type = new TypeToken<ArrayList<JarEntry>>() {}.getType();
-    return doGetList(GET_EXTERNAL_LIBRARIES_CHILDREN_COMMAND, singletonList(params), type);
+    return doGetList(GET_EXTERNAL_LIBRARIES_CHILDREN_COMMAND, params, type);
   }
 
   private List<JarEntry> getLibraryChildren(ExternalLibrariesParameters params) {
     params.setProjectUri(prefixURI(params.getProjectUri()));
     Type type = new TypeToken<ArrayList<JarEntry>>() {}.getType();
-    return doGetList(GET_LIBRARY_CHILDREN_COMMAND, singletonList(params), type);
+    return doGetList(GET_LIBRARY_CHILDREN_COMMAND, params, type);
   }
 
   private List<ClasspathEntryDto> getClasspathTree(String projectPath) {
     String projectUri = prefixURI(projectPath);
     Type type = new TypeToken<ArrayList<ClasspathEntry>>() {}.getType();
-    List<ClasspathEntry> entries =
-        doGetList(GET_CLASS_PATH_TREE_COMMAND, singletonList(projectUri), type);
+    List<ClasspathEntry> entries = doGetList(GET_CLASS_PATH_TREE_COMMAND, projectUri, type);
     return convertToClasspathEntryDto(entries);
   }
 
@@ -421,7 +421,11 @@ public class JavaLanguageServerExtensionService {
     TestFindParameters parameters =
         new TestFindParameters(fileUri, methodAnnotation, projectAnnotation, offset, classes);
     Type type = new TypeToken<ArrayList<String>>() {}.getType();
-    return doGetList(commandId, singletonList(parameters), type);
+    return doGetList(commandId, parameters, type);
+  }
+
+  private <T, P> List<T> doGetList(String command, P params, Type type) {
+    return doGetList(command, singletonList(params), type);
   }
 
   private <T> List<T> doGetList(String command, List<Object> params, Type type) {
@@ -446,9 +450,15 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
+  private LanguageServer getLanguageServer() {
+    return registry
+        .findServer(server -> (server.getLauncher() instanceof JavaLanguageServerLauncher))
+        .get()
+        .getServer();
+  }
+
   private CompletableFuture<Object> executeCommand(String commandId, List<Object> parameters) {
     ExecuteCommandParams params = new ExecuteCommandParams(commandId, parameters);
-
     try {
       return getOrInitLanguageServer().getWorkspaceService().executeCommand(params);
     } catch (LanguageServerException e) {
@@ -508,11 +518,19 @@ public class JavaLanguageServerExtensionService {
   }
 
   public String identifyFqnInResource(String filePath, int lineNumber) {
-    Type type = new TypeToken<String>() {}.getType();
-    return doGetOne(
-        Commands.IDENTIFY_FQN_IN_RESOURCE,
-        ImmutableList.of(prefixURI(filePath), String.valueOf(lineNumber)),
-        type);
+    CompletableFuture<Object> result =
+        getLanguageServer()
+            .getWorkspaceService()
+            .executeCommand(
+                new ExecuteCommandParams(
+                    Commands.IDENTIFY_FQN_IN_RESOURCE,
+                    ImmutableList.of(prefixURI(filePath), String.valueOf(lineNumber))));
+
+    try {
+      return (String) result.get(10, TimeUnit.SECONDS);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
   }
 
   public Location findResourcesByFqn(String fqn, int lineNumber) {
@@ -533,13 +551,14 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
+  /** Update jdt.ls workspace accordingly to added or removed projects. */
   public JobResult updateWorkspace(UpdateWorkspaceParameters updateWorkspaceParameters) {
     if (updateWorkspaceParameters.getAddedProjectsUri().isEmpty()) {
       if (!findInitializedLanguageServer().isPresent()) {
-        JobResult jobResult = new JobResult();
-        jobResult.setMessage(
+        return new JobResult(
+            Severity.OK,
+            0,
             "Skipped. Language server not initialized. Workspace updating is not required.");
-        return jobResult;
       }
     }
 
