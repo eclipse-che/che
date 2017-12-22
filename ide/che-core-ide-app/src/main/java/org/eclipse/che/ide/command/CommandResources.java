@@ -75,11 +75,11 @@ public interface CommandResources extends ClientBundle {
 
     String processesListLoader();
 
-    String processesListLoaderRect1();
+    String processesListLoaderBar1();
 
-    String processesListLoaderRect2();
+    String processesListLoaderBar2();
 
-    String processesListLoaderRect3();
+    String processesListLoaderBar3();
 
     String processWidgetText();
 

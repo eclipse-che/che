@@ -32,6 +32,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
   private final Map<Process, ProcessItemRenderer> renderers;
   private final FlowPanel rootPanel;
   private final DropdownList dropdownList;
+  private final CommandResources resources;
   private final EmptyListWidget emptyListWidget;
   private final ToolbarMessages messages;
   private final CreateCommandItem createCommandItem;
@@ -49,6 +50,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
   @Inject
   public ProcessesListViewImpl(
       CommandResources resources, EmptyListWidget emptyListWidget, ToolbarMessages messages) {
+    this.resources = resources;
     this.emptyListWidget = emptyListWidget;
     this.messages = messages;
 
@@ -58,20 +60,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
     execLabel = new Label("EXEC");
     execLabel.addStyleName(resources.commandToolbarCss().processesListExecLabel());
 
-    loadAnimation = new FlowPanel();
-    loadAnimation.addStyleName(resources.commandToolbarCss().processesListLoader());
-
-    FlowPanel rect1 = new FlowPanel();
-    rect1.addStyleName(resources.commandToolbarCss().processesListLoaderRect1());
-    loadAnimation.add(rect1);
-
-    FlowPanel rect2 = new FlowPanel();
-    rect2.addStyleName(resources.commandToolbarCss().processesListLoaderRect2());
-    loadAnimation.add(rect2);
-
-    FlowPanel rect3 = new FlowPanel();
-    rect3.addStyleName(resources.commandToolbarCss().processesListLoaderRect3());
-    loadAnimation.add(rect3);
+    loadAnimation = getAnimationWidget();
 
     dropdownList = new DropdownList(emptyListWidget, true);
     dropdownList.setWidth("100%");
@@ -109,6 +98,30 @@ public class ProcessesListViewImpl implements ProcessesListView {
     loadingProgress = new FlowPanel();
     loadingProgress.setStyleName(resources.commandToolbarCss().loaderPanelProgressBar());
     loadInfo.add(loadingProgress);
+  }
+
+  /**
+   * Creates an animation widget containing three animated vertical bars.
+   *
+   * @return animation widget
+   */
+  private FlowPanel getAnimationWidget() {
+    FlowPanel animation = new FlowPanel();
+    animation.addStyleName(resources.commandToolbarCss().processesListLoader());
+
+    FlowPanel bar1 = new FlowPanel();
+    bar1.addStyleName(resources.commandToolbarCss().processesListLoaderBar1());
+    animation.add(bar1);
+
+    FlowPanel bar2 = new FlowPanel();
+    bar2.addStyleName(resources.commandToolbarCss().processesListLoaderBar2());
+    animation.add(bar2);
+
+    FlowPanel bar3 = new FlowPanel();
+    bar3.addStyleName(resources.commandToolbarCss().processesListLoaderBar3());
+    animation.add(bar3);
+
+    return animation;
   }
 
   @Override

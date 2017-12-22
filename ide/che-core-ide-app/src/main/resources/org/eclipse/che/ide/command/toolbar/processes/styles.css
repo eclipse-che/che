@@ -50,9 +50,9 @@
     background: commandsToolbarProcessesLabelBackground;
 }
 
-.processesListLoaderRect1,
-.processesListLoaderRect2,
-.processesListLoaderRect3 {
+.processesListLoaderBar1,
+.processesListLoaderBar2,
+.processesListLoaderBar3 {
     background-color: #4a90e2;
     width: 2px;
     height: literal("calc(100% - 4px)");
@@ -62,15 +62,15 @@
     animation: stretchAnimation 1.2s infinite ease-in-out;
 }
 
-.processesListLoaderRect1 {
+.processesListLoaderBar1 {
     margin-left: 16px;
 }
 
-.processesListLoaderRect2 {
+.processesListLoaderBar2 {
     animation-delay: 0.1s;
 }
 
-.processesListLoaderRect3 {
+.processesListLoaderBar3 {
     animation-delay: 0.2s;
 }
 
