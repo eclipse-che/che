@@ -435,6 +435,6 @@ echo "[CHE] Che deployment has been successufully bootstrapped"
 echo "[CHE] -> To check OpenShift deployment logs: 'oc get events -w'"
 echo "[CHE] -> To check Che server logs: 'oc logs -f dc/che'"
 echo "[CHE] -> Once the deployment is completed Che will be available at: "
-echo "[CHE]    http://${che_route}"
+echo "[CHE]    ${HTTP_PROTOCOL}://${che_route}"
 echo
 echo
