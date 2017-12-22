@@ -34,6 +34,7 @@ import java.util.List;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -45,6 +46,9 @@ import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.navigation.FindImplementationsCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.navigation.ImplementationsDescriptor;
+import org.eclipse.che.jdt.ls.extension.api.dto.navigation.ImplementersResponse;
 import org.eclipse.che.plugin.languageserver.ide.service.ServiceUtil;
 import org.eclipse.lsp4j.WorkspaceEdit;
 
@@ -293,6 +297,30 @@ public class JavaLanguageExtensionServiceClient {
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
+  }
+
+  /**
+   * Get implementations of the selected element.
+   *
+   * @return descriptor of the implementations
+   */
+  public Promise<ImplementersResponse> findImplementations(
+      FindImplementationsCommandParameters params) {
+    return Promises.create(
+        (resolve, reject) -> {
+          requestTransmitter
+              .newRequest()
+              .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+              .methodName("java/implementations")
+              .paramsAsDto(params)
+              .sendAndReceiveResultAsDto(ImplementersResponse.class, 10000)
+              .onSuccess(resolve::apply)
+              .onTimeout(() -> onTimeout(reject))
+              .onFailure(
+                  error -> {
+                    reject.apply(ServiceUtil.getPromiseError(error));
+                  });
+        });
   }
 
   private void onTimeout(RejectFunction reject) {

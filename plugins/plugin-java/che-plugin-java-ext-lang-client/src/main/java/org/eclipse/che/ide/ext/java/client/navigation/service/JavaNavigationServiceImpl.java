@@ -11,17 +11,13 @@
 package org.eclipse.che.ide.ext.java.client.navigation.service;
 
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
-import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 
-import com.google.gwt.jsonp.client.TimeoutException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.java.shared.Jar;
@@ -36,9 +32,6 @@ import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
-import org.eclipse.che.jdt.ls.extension.api.dto.navigation.FindImplementationsCommandParameters;
-import org.eclipse.che.jdt.ls.extension.api.dto.navigation.ImplementationsDescriptor;
-import org.eclipse.che.plugin.languageserver.ide.service.ServiceUtil;
 
 /** @author Evgen Vidolob */
 @Singleton
@@ -244,42 +237,6 @@ public class JavaNavigationServiceImpl implements JavaNavigationService {
     return requestFactory
         .createGetRequest(url)
         .send(unmarshallerFactory.newUnmarshaller(ClassContent.class));
-  }
-
-  @Override
-  public Promise<ImplementationsDescriptor> findImplementations(
-      FindImplementationsCommandParameters params) {
-    return Promises.create(
-        (resolve, reject) -> {
-          requestTransmitter
-              .newRequest()
-              .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-              .methodName("java/navigation")
-              .paramsAsDto(params)
-              .sendAndReceiveResultAsDto(ImplementationsDescriptor.class, 10000)
-              .onSuccess(resolve::apply)
-              .onTimeout(
-                  () -> {
-                    reject.apply(
-                        new PromiseError() {
-                          TimeoutException t = new TimeoutException("Timeout");
-
-                          @Override
-                          public String getMessage() {
-                            return t.getMessage();
-                          }
-
-                          @Override
-                          public Throwable getCause() {
-                            return t;
-                          }
-                        });
-                  })
-              .onFailure(
-                  error -> {
-                    reject.apply(ServiceUtil.getPromiseError(error));
-                  });
-        });
   }
 
   @Override

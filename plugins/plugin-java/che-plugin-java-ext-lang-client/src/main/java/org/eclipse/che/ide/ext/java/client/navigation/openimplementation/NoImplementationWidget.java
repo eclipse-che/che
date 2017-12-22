@@ -79,7 +79,7 @@ public class NoImplementationWidget extends PopupWidget<SymbolInformation> {
         new EventListener() {
           @Override
           public void handleEvent(final Event evt) {
-            openImplementationPresenter.actionPerformed(itemModel);
+            openImplementationPresenter.openOneImplementation(itemModel);
             hide();
           }
         };
@@ -126,7 +126,6 @@ public class NoImplementationWidget extends PopupWidget<SymbolInformation> {
       case Enum:
         icon = javaResources.enumItem();
         break;
-        // case Annotation: icon = javaResources.annotationItem();  break;
       default:
         icon = javaResources.javaFile();
     }

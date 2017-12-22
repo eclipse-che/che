@@ -89,14 +89,6 @@ public interface JavaNavigationService {
    */
   Promise<CompilationUnit> getCompilationUnit(Path project, String fqn, boolean showInherited);
 
-  /**
-   * Get implementations of the selected element.
-   *
-   * @return descriptor of the implementations
-   */
-  Promise<ImplementationsDescriptor> findImplementations(
-      FindImplementationsCommandParameters params);
-
   Promise<List<JavaProject>> getProjectsAndPackages(boolean includePackage);
 
   /**

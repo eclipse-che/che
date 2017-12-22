@@ -99,7 +99,11 @@ import org.eclipse.che.jdt.ls.extension.api.dto.UpdateWorkspaceParameters;
 =======
 import org.eclipse.che.jdt.ls.extension.api.dto.navigation.FindImplementationsCommandParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.navigation.ImplementationsDescriptor;
+<<<<<<< HEAD
 >>>>>>> che-6736: Port implementors to jdt.ls extension
+=======
+import org.eclipse.che.jdt.ls.extension.api.dto.navigation.ImplementersResponse;
+>>>>>>> che-6736: fix naming and language server call
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSymbolInformationDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ImplementationsDescriptorDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
@@ -225,9 +229,9 @@ public class JavaLanguageServerExtensionService {
         .withFunction(this::organizeImports);
     requestHandler
         .newConfiguration()
-        .methodName("java/navigation")
+        .methodName("java/implementations")
         .paramsAsDto(FindImplementationsCommandParameters.class)
-        .resultAsDto(ImplementationsDescriptorDto.class)
+        .resultAsDto(ImplementersResponseDto.class)
         .withFunction(this::findImplementations);
   }
 
@@ -464,8 +468,7 @@ public class JavaLanguageServerExtensionService {
       ImplementationsDescriptor implementationsDescriptor =
           gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
       for (SymbolInformation symbolInformation : implementationsDescriptor.getImplementations()) {
-        Location location = symbolInformation.getLocation();
-        location.setUri(LanguageServiceUtils.removePrefixUri(location.getUri()));
+        symbolInformation.setLocation(LanguageServiceUtils.fixLocation(symbolInformation.getLocation()));
       }
       return new ImplementationsDescriptorDto(implementationsDescriptor);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
