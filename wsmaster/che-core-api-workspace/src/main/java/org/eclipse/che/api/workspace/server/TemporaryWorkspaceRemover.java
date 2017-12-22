@@ -60,7 +60,6 @@ public class TemporaryWorkspaceRemover {
 
   @VisibleForTesting
   void removeTemporaryWs() throws ServerException {
-    ;
     for (WorkspaceImpl workspace :
         Pages.iterate(
             (maxItems, skipCount) -> workspaceDao.getWorkspaces(true, maxItems, skipCount))) {

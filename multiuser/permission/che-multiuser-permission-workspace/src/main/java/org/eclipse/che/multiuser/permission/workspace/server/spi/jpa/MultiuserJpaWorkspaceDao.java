@@ -165,7 +165,7 @@ public class MultiuserJpaWorkspaceDao implements WorkspaceDao {
       final long count =
           manager
               .createNamedQuery("Workspace.getByNamespaceCount", Long.class)
-              .setParameter("namespace", namespace.toLowerCase())
+              .setParameter("namespace", namespace)
               .getSingleResult();
       return new Page<>(list, skipCount, maxItems, count);
     } catch (RuntimeException x) {

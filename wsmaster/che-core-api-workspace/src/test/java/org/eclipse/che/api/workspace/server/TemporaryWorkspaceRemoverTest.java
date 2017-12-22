@@ -22,7 +22,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.api.core.Page;
-import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.mockito.InjectMocks;
@@ -44,21 +43,21 @@ public class TemporaryWorkspaceRemoverTest {
   @Test
   public void shouldRemoveTemporaryWorkspaces() throws Exception {
     when(workspaceDao.getWorkspaces(eq(true), anyInt(), anyLong()))
-        .thenReturn(new Page<>(
-            createEntities(DEFAULT_PAGE_SIZE),
-            0,
-            DEFAULT_PAGE_SIZE,
-            COUNT_OF_WORKSPACES))
-        .thenReturn(new Page<>(
-            createEntities(DEFAULT_PAGE_SIZE),
-            DEFAULT_PAGE_SIZE,
-            DEFAULT_PAGE_SIZE,
-            COUNT_OF_WORKSPACES))
-        .thenReturn(new Page<>(
-            createEntities(DEFAULT_PAGE_SIZE),
-            DEFAULT_PAGE_SIZE * 2,
-            DEFAULT_PAGE_SIZE,
-            COUNT_OF_WORKSPACES));
+        .thenReturn(
+            new Page<>(
+                createEntities(DEFAULT_PAGE_SIZE), 0, DEFAULT_PAGE_SIZE, COUNT_OF_WORKSPACES))
+        .thenReturn(
+            new Page<>(
+                createEntities(DEFAULT_PAGE_SIZE),
+                DEFAULT_PAGE_SIZE,
+                DEFAULT_PAGE_SIZE,
+                COUNT_OF_WORKSPACES))
+        .thenReturn(
+            new Page<>(
+                createEntities(DEFAULT_PAGE_SIZE),
+                DEFAULT_PAGE_SIZE * 2,
+                DEFAULT_PAGE_SIZE,
+                COUNT_OF_WORKSPACES));
     remover.removeTemporaryWs();
 
     verify(workspaceDao, times(COUNT_OF_WORKSPACES)).remove(anyString());

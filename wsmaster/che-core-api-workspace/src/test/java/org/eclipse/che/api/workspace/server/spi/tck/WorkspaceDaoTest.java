@@ -127,15 +127,17 @@ public class WorkspaceDaoTest {
   }
 
   @Test
-  public void shouldGetWorkspacesByNamespace() throws Exception {
+  public void shouldGetWorkspacesByNamespaceWithinSingleResponse() throws Exception {
     final WorkspaceImpl workspace1 = workspaces[0];
     final WorkspaceImpl workspace2 = workspaces[1];
     assertEquals(
         workspace1.getNamespace(), workspace2.getNamespace(), "Namespaces must be the same");
 
-    final Page<WorkspaceImpl> found = workspaceDao.getByNamespace(workspace1.getNamespace(), 30, 0);
+    final Page<WorkspaceImpl> found = workspaceDao.getByNamespace(workspace1.getNamespace(), 6, 0);
 
     assertEquals(new HashSet<>(found.getItems()), new HashSet<>(asList(workspace1, workspace2)));
+    assertEquals(found.getTotalItemsCount(), 2);
+    assertEquals(found.getItemsCount(), 2);
   }
 
   @Test

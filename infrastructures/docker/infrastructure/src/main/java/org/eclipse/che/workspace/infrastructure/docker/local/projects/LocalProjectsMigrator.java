@@ -28,8 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Performs migration of projects that are stored for workspace in directories, named respectively
- * by their names, to new
+ * Performs migration of workspace project files, that are stored in old format (in directories
+ * named after their workspace name), so they will be stored in folders named after their workspace
+ * ID.
  *
  * @author Mykhailo Kuznietsov
  */
@@ -45,6 +46,7 @@ public class LocalProjectsMigrator {
   private static final Logger LOG = LoggerFactory.getLogger(LocalProjectsMigrator.class);
 
   public void performMigration(String workspaceProjectsRootFolder) {
+    LOG.debug("Starting migration of workspace project files");
     Map<String, String> workspaceName2id = getId2NameWorkspaceMapping();
     for (Entry<String, String> entry : workspaceName2id.entrySet()) {
       Path workspaceStoredByNameLocation =
@@ -53,7 +55,7 @@ public class LocalProjectsMigrator {
         // migration is not needed for this workspace
         continue;
       }
-      LOG.info(
+      LOG.debug(
           "Performing migration of workspace with id '{}' and name '{}'",
           entry.getKey(),
           entry.getValue());
@@ -69,7 +71,7 @@ public class LocalProjectsMigrator {
             entry.getKey(),
             entry.getValue());
       } catch (IOException e) {
-        LOG.error(
+        LOG.debug(
             "Failed to migrate projects of workspace with id '{}' and name '{}'",
             entry.getKey(),
             entry.getValue());

@@ -79,22 +79,6 @@ public class LocalProjectMigratorTest {
     assertFalse(Files.exists(oldWorkspacePath));
     assertTrue(Files.exists(newWorkspacePath));
   }
-  //
-  //  @Test
-  //  public void shouldMigrateOnlyWorkspacesWithOldLocation() throws Exception {
-  //    List<WorkspaceImpl> workspaces1 = createWorkspaces(1, "oldWorkspace", true);
-  //    List<WorkspaceImpl> workspaces2 = createWorkspaces(1, "newWorkspace", false);
-  //    when(workspaceDao.getWorkspaces(anyBoolean(), anyInt(), anyLong()))
-  //        .thenReturn(new Page<WorkspaceImpl>(workspaces1.addAll(workspaces2), 0, 2, 2));
-  //
-  //    localProjectsMigrator.performMigration(workspacesRoot);
-  //
-  //    Path newWorkspacePath = Paths.get(workspacesRoot).resolve("ws_id_oldWorkspace1");
-  //    Path oldWorkspacePath = Paths.get(workspacesRoot).resolve("ws_name_oldWorkspace1");
-  //
-  //    assertFalse(Files.exists(oldWorkspacePath));
-  //    assertTrue(Files.exists(newWorkspacePath));
-  //  }
 
   private List<WorkspaceImpl> createWorkspaces(
       int amount, String namePrefix, boolean oldProjectsLocation) throws IOException {
