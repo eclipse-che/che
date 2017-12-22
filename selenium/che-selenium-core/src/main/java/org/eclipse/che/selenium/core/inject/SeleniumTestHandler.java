@@ -18,6 +18,7 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.name.Named;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.AccessibleObject;
@@ -39,10 +40,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import javax.annotation.PreDestroy;
-import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.constant.TestBrowser;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
@@ -109,8 +110,17 @@ public abstract class SeleniumTestHandler
   @Named("sys.driver.version")
   private String webDriverVersion;
 
+  @Inject
+  @Named("github.username")
+  private String gitHubUsername;
+
+  @Inject
+  @Named("github.password")
+  private String gitHubPassword;
+
   @Inject private TestUser defaultTestUser;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
+  @Inject private TestGitHubServiceClient gitHubClientService;
 
   private final Injector injector;
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
@@ -120,6 +130,16 @@ public abstract class SeleniumTestHandler
     injector.injectMembers(this);
 
     getRuntime().addShutdownHook(new Thread(this::shutdown));
+
+    revokeGithubOauthToken();
+  }
+
+  private void revokeGithubOauthToken() {
+    try {
+      gitHubClientService.deleteAllGrants(gitHubUsername, gitHubPassword);
+    } catch (Exception e) {
+      LOG.warn("There was an error of revoking the github oauth token.", e);
+    }
   }
 
   @Override

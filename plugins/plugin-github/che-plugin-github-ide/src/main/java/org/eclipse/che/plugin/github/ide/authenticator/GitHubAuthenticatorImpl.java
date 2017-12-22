@@ -56,7 +56,7 @@ public class GitHubAuthenticatorImpl
   private final GitHubLocalizationConstant locale;
   private final String baseUrl;
   private final AppContext appContext;
-  private final SecurityTokenProvider securityTokenPærovider;
+  private final SecurityTokenProvider securityTokenProvider;
   private String authenticationUrl;
 
   @Inject
@@ -68,11 +68,11 @@ public class GitHubAuthenticatorImpl
       GitHubLocalizationConstant locale,
       NotificationManager notificationManager,
       AppContext appContext,
-      SecurityTokenProvider securityTokenPærovider) {
+      SecurityTokenProvider securityTokenProvider) {
     this.registry = registry;
     this.sshServiceClient = sshServiceClient;
     this.view = view;
-    this.securityTokenPærovider = securityTokenPærovider;
+    this.securityTokenProvider = securityTokenProvider;
     this.view.setDelegate(this);
     this.locale = locale;
     this.baseUrl = appContext.getMasterApiEndpoint();
@@ -130,10 +130,10 @@ public class GitHubAuthenticatorImpl
     JsOAuthWindow authWindow;
     if (authenticationUrl == null) {
       authWindow =
-          new JsOAuthWindow(getAuthUrl(), "error.url", 500, 980, this, securityTokenPærovider);
+          new JsOAuthWindow(getAuthUrl(), "error.url", 500, 980, this, securityTokenProvider);
     } else {
       authWindow =
-          new JsOAuthWindow(authenticationUrl, "error.url", 500, 980, this, securityTokenPærovider);
+          new JsOAuthWindow(authenticationUrl, "error.url", 500, 980, this, securityTokenProvider);
     }
     authWindow.loginWithOAuth();
   }

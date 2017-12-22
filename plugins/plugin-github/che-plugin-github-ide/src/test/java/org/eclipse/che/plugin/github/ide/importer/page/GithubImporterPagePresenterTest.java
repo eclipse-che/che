@@ -13,11 +13,9 @@ package org.eclipse.che.plugin.github.ide.importer.page;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -27,21 +25,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.gwt.core.client.JsArrayMixed;
-import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
@@ -49,12 +44,9 @@ import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.plugin.github.ide.GitHubClientService;
 import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
+import org.eclipse.che.plugin.github.ide.GitHubServiceClient;
 import org.eclipse.che.plugin.github.ide.load.ProjectData;
-import org.eclipse.che.plugin.github.shared.GitHubRepository;
 import org.eclipse.che.plugin.github.shared.GitHubUser;
 import org.eclipse.che.security.oauth.OAuthStatus;
 import org.junit.Before;
@@ -64,8 +56,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 /**
  * Testing {@link GithubImporterPagePresenter} functionality.
@@ -77,30 +67,20 @@ public class GithubImporterPagePresenterTest {
 
   @Captor private ArgumentCaptor<AsyncCallback<OAuthStatus>> asyncCallbackCaptor;
 
-  @Captor
-  private ArgumentCaptor<AsyncRequestCallback<Map<String, List<GitHubRepository>>>>
-      asyncRequestCallbackRepoListCaptor;
-
   @Mock private Wizard.UpdateDelegate updateDelegate;
   @Mock private DtoFactory dtoFactory;
   @Mock private GithubImporterPageView view;
-  @Mock private GitHubClientService gitHubClientService;
-  @Mock private DtoUnmarshallerFactory dtoUnmarshallerFactory;
-  @Mock private NotificationManager notificationManager;
+  @Mock private GitHubServiceClient gitHubClientService;
   @Mock private GitHubLocalizationConstant locale;
   @Mock private MutableProjectConfig dataObject;
   @Mock private MutableProjectConfig.MutableSourceStorage source;
-  @Mock private Map<String, String> parameters;
-  @Mock private Promise<GitHubUser> gitHubUserPromise;
-  @Mock private Promise<List<GitHubUser>> gitHubOrgsPromise;
-  @Mock private Promise<List<GitHubRepository>> gitHubReposPromise;
-  @Mock private JsArrayMixed jsArrayMixed;
   @Mock private GitHubUser gitHubUser;
   @Mock private PromiseError promiseError;
-  @Mock private Response response;
   @Mock private OAuth2Authenticator gitHubAuthenticator;
   @Mock private OAuth2AuthenticatorRegistry gitHubAuthenticatorRegistry;
   @Mock private AppContext appContext;
+  @Mock private OAuthServiceClient oAuthServiceClient;
+  @Mock private NotificationManager notificationManager;
 
   private GithubImporterPagePresenter presenter;
 
@@ -120,7 +100,9 @@ public class GithubImporterPagePresenterTest {
                 gitHubClientService,
                 dtoFactory,
                 appContext,
-                locale));
+                locale,
+                oAuthServiceClient,
+                notificationManager));
     doReturn(Collections.singletonList(gitHubUser))
         .when(presenter)
         .toOrgList(nullable(JsArrayMixed.class));
@@ -151,68 +133,46 @@ public class GithubImporterPagePresenterTest {
 
   @Test
   public void onLoadRepoClickedWhenGetUserReposIsSuccessful() throws Exception {
-    doAnswer(
-            new Answer() {
-              @Override
-              public Void answer(InvocationOnMock invocation) throws Throwable {
-                presenter.onSuccessRequest(jsArrayMixed);
-                return null;
-              }
-            })
-        .when(presenter)
-        .doRequest(nullable(Promise.class), nullable(Promise.class), nullable(Promise.class));
     when(view.getAccountName()).thenReturn("AccountName");
 
     presenter.onLoadRepoClicked();
 
-    verify(gitHubClientService).getRepositoriesList();
-    verify(gitHubClientService).getUserInfo();
-    verify(gitHubClientService).getOrganizations();
+    verify(gitHubClientService).getRepositoriesList(anyString());
+    verify(gitHubClientService).getUserInfo(anyString());
+    verify(gitHubClientService).getOrganizations(anyString());
 
     verify(view).setLoaderVisibility(eq(true));
     verify(view).setInputsEnableState(eq(false));
     verify(view).setLoaderVisibility(eq(false));
     verify(view).setInputsEnableState(eq(true));
-    verify(view).setAccountNames(org.mockito.ArgumentMatchers.<Set>anyObject());
+    verify(view).setAccountNames(org.mockito.ArgumentMatchers.<Set>any());
     verify(view, times(2)).showGithubPanel();
-    verify(view).setRepositories(org.mockito.ArgumentMatchers.<List<ProjectData>>anyObject());
+    verify(view).setRepositories(org.mockito.ArgumentMatchers.any());
     verify(view).reset();
   }
 
   @Test
   public void onLoadRepoClickedWhenGetUserReposIsFailed() throws Exception {
-    doAnswer(
-            new Answer() {
-              @Override
-              public Void answer(InvocationOnMock invocation) throws Throwable {
-                presenter.onFailRequest(promiseError);
-                return null;
-              }
-            })
-        .when(presenter)
-        .doRequest(nullable(Promise.class), nullable(Promise.class), nullable(Promise.class));
-
     presenter.onLoadRepoClicked();
 
-    verify(gitHubClientService).getRepositoriesList();
-    verify(gitHubClientService).getUserInfo();
-    verify(gitHubClientService).getOrganizations();
+    verify(gitHubClientService).getRepositoriesList(anyString());
+    verify(gitHubClientService).getUserInfo(anyString());
+    verify(gitHubClientService).getOrganizations(anyString());
 
     verify(view).setLoaderVisibility(eq(true));
     verify(view).setInputsEnableState(eq(false));
     verify(view).setLoaderVisibility(eq(false));
     verify(view).setInputsEnableState(eq(true));
-    verify(view, never()).setAccountNames((Set<String>) anyObject());
+    verify(view, never()).setAccountNames(any());
     verify(view, never()).showGithubPanel();
-    verify(view, never())
-        .setRepositories(org.mockito.ArgumentMatchers.<List<ProjectData>>anyObject());
+    verify(view, never()).setRepositories(org.mockito.ArgumentMatchers.any());
   }
 
   @Test
   public void onRepositorySelectedTest() {
     ProjectData projectData =
         new ProjectData(
-            "name", "description", "type", new ArrayList<String>(), "repoUrl", "readOnlyUrl");
+            "name", "description", "type", Collections.emptyList(), "repoUrl", "readOnlyUrl");
 
     presenter.onRepositorySelected(projectData);
 
@@ -497,23 +457,13 @@ public class GithubImporterPagePresenterTest {
     when(user.getId()).thenReturn(userId);
 
     final Throwable exception = mock(UnauthorizedException.class);
-    doAnswer(
-            new Answer() {
-              @Override
-              public Void answer(InvocationOnMock invocation) throws Throwable {
-                presenter.onFailRequest(promiseError);
-                return null;
-              }
-            })
-        .when(presenter)
-        .doRequest(nullable(Promise.class), nullable(Promise.class), nullable(Promise.class));
     doReturn(exception).when(promiseError).getCause();
 
     presenter.onLoadRepoClicked();
 
-    verify(gitHubClientService).getRepositoriesList();
-    verify(gitHubClientService).getUserInfo();
-    verify(gitHubClientService).getOrganizations();
+    verify(gitHubClientService).getRepositoriesList(anyString());
+    verify(gitHubClientService).getUserInfo(anyString());
+    verify(gitHubClientService).getOrganizations(anyString());
 
     verify(gitHubAuthenticator).authenticate(anyString(), asyncCallbackCaptor.capture());
     AsyncCallback<OAuthStatus> asyncCallback = asyncCallbackCaptor.getValue();
@@ -522,32 +472,13 @@ public class GithubImporterPagePresenterTest {
     verify(view, times(2)).setLoaderVisibility(eq(true));
     verify(view, times(2)).setInputsEnableState(eq(false));
     verify(view, times(2)).setInputsEnableState(eq(true));
-    verify(view, never()).setAccountNames((Set<String>) anyObject());
+    verify(view, never()).setAccountNames(any());
     verify(view, never()).showGithubPanel();
-    verify(view, never())
-        .setRepositories(org.mockito.ArgumentMatchers.<List<ProjectData>>anyObject());
+    verify(view, never()).setRepositories(org.mockito.ArgumentMatchers.any());
   }
 
   @Test
   public void onLoadRepoClickedWhenAuthorizeIsSuccessful() throws Exception {
-    doAnswer(
-            new Answer() {
-              @Override
-              public Void answer(InvocationOnMock invocation) throws Throwable {
-                presenter.onFailRequest(promiseError);
-                return null;
-              }
-            })
-        .doAnswer(
-            new Answer() {
-              @Override
-              public Void answer(InvocationOnMock invocation) throws Throwable {
-                presenter.onSuccessRequest(jsArrayMixed);
-                return null;
-              }
-            })
-        .when(presenter)
-        .doRequest(nullable(Promise.class), nullable(Promise.class), nullable(Promise.class));
     final Throwable exception = mock(UnauthorizedException.class);
     String userId = "userId";
     CurrentUser user = mock(CurrentUser.class);
@@ -558,9 +489,9 @@ public class GithubImporterPagePresenterTest {
 
     presenter.onLoadRepoClicked();
 
-    verify(gitHubClientService).getRepositoriesList();
-    verify(gitHubClientService).getUserInfo();
-    verify(gitHubClientService).getOrganizations();
+    verify(gitHubClientService).getRepositoriesList(anyString());
+    verify(gitHubClientService).getUserInfo(anyString());
+    verify(gitHubClientService).getOrganizations(anyString());
 
     verify(gitHubAuthenticator).authenticate(anyString(), asyncCallbackCaptor.capture());
     AsyncCallback<OAuthStatus> asyncCallback = asyncCallbackCaptor.getValue();

@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -59,25 +60,42 @@ import org.slf4j.LoggerFactory;
  */
 @Path("/github")
 public class GitHubService {
-  @Inject private GitHubFactory gitHubFactory;
 
-  @Inject private GitHubDTOFactory gitHubDTOFactory;
+  private final GitHubDTOFactory gitHubDTOFactory;
 
-  @Inject private GitHubKeyUploader githubKeyUploader;
+  private final GitHubKeyUploader githubKeyUploader;
 
-  @Inject private SshServiceClient sshServiceClient;
+  private final SshServiceClient sshServiceClient;
+
+  private final GitHubFactory gitHubFactory;
+
+  private static final String AUTH_HEADER_NAME = "X-Oauth-Token";
 
   private static final Logger LOG = LoggerFactory.getLogger(GitHubService.class);
+
+  @Inject
+  public GitHubService(
+      GitHubDTOFactory gitHubDTOFactory,
+      GitHubKeyUploader githubKeyUploader,
+      SshServiceClient sshServiceClient,
+      GitHubFactory gitHubFactory) {
+    this.gitHubDTOFactory = gitHubDTOFactory;
+    this.githubKeyUploader = githubKeyUploader;
+    this.sshServiceClient = sshServiceClient;
+    this.gitHubFactory = gitHubFactory;
+  }
 
   @GET
   @Path("repositories/{user}/{repository}")
   @Produces(MediaType.APPLICATION_JSON)
   public GitHubRepository getUserRepository(
-      @PathParam("user") String user, @PathParam("repository") String repository)
+      @PathParam("user") String user,
+      @PathParam("repository") String repository,
+      @HeaderParam(AUTH_HEADER_NAME) String oauthToken)
       throws ApiException {
     try {
       return gitHubDTOFactory.createRepository(
-          gitHubFactory.connect().getUser(user).getRepository(repository));
+          gitHubFactory.oauthConnect(oauthToken).getUser(user).getRepository(repository));
     } catch (IOException e) {
       LOG.error("Get user info error", e);
       throw new ServerException(e.getMessage());
@@ -87,11 +105,12 @@ public class GitHubService {
   @GET
   @Path("list/user")
   @Produces(MediaType.APPLICATION_JSON)
-  public GitHubRepositoryList listRepositoriesByUser(@QueryParam("username") String userName)
+  public GitHubRepositoryList listRepositoriesByUser(
+      @QueryParam("username") String userName, @HeaderParam(AUTH_HEADER_NAME) String oauthToken)
       throws ApiException {
     try {
       return gitHubDTOFactory.createRepositoriesList(
-          gitHubFactory.connect().getUser(userName).listRepositories());
+          gitHubFactory.oauthConnect(oauthToken).getUser(userName).listRepositories());
     } catch (IOException e) {
       LOG.error("Get list repositories by user fail", e);
       throw new ServerException(e.getMessage());
@@ -102,10 +121,12 @@ public class GitHubService {
   @Path("list/org")
   @Produces(MediaType.APPLICATION_JSON)
   public GitHubRepositoryList listRepositoriesByOrganization(
-      @QueryParam("organization") String organization) throws ApiException {
+      @QueryParam("organization") String organization,
+      @HeaderParam(AUTH_HEADER_NAME) String oauthToken)
+      throws ApiException {
     try {
       return gitHubDTOFactory.createRepositoriesList(
-          gitHubFactory.connect().getOrganization(organization).listRepositories());
+          gitHubFactory.oauthConnect(oauthToken).getOrganization(organization).listRepositories());
     } catch (IOException e) {
       LOG.error("Get list repositories by organization fail", e);
       throw new ServerException(e.getMessage());
@@ -115,9 +136,10 @@ public class GitHubService {
   @GET
   @Path("list/account")
   @Produces(MediaType.APPLICATION_JSON)
-  public GitHubRepositoryList listRepositoriesByAccount(@QueryParam("account") String account)
+  public GitHubRepositoryList listRepositoriesByAccount(
+      @QueryParam("account") String account, @HeaderParam(AUTH_HEADER_NAME) String oauthToken)
       throws ApiException {
-    GitHub gitHub = gitHubFactory.connect();
+    GitHub gitHub = gitHubFactory.oauthConnect(oauthToken);
     try {
       // First, try to retrieve organization repositories:
       return gitHubDTOFactory.createRepositoriesList(
@@ -137,10 +159,12 @@ public class GitHubService {
   @GET
   @Path("list")
   @Produces(MediaType.APPLICATION_JSON)
-  public List<GitHubRepository> listRepositories() throws ApiException {
+  public List<GitHubRepository> listRepositories(@HeaderParam(AUTH_HEADER_NAME) String oauthToken)
+      throws ApiException {
     try {
       return gitHubDTOFactory
-          .createRepositoriesList(gitHubFactory.connect().getMyself().listRepositories())
+          .createRepositoriesList(
+              gitHubFactory.oauthConnect(oauthToken).getMyself().listRepositories())
           .getRepositories();
     } catch (IOException e) {
       LOG.error("Get list repositories fail", e);
@@ -152,13 +176,15 @@ public class GitHubService {
   @Path("forks/{user}/{repository}")
   @Produces(MediaType.APPLICATION_JSON)
   public GitHubRepositoryList forks(
-      @PathParam("user") String user, @PathParam("repository") String repository)
+      @PathParam("user") String user,
+      @PathParam("repository") String repository,
+      @HeaderParam(AUTH_HEADER_NAME) String oauthToken)
       throws ApiException {
     GitHubRepositoryList gitHubRepositoryList;
     try {
       gitHubRepositoryList = gitHubDTOFactory.createRepositoriesList();
-
-      for (GHRepository ghRepository : gitHubFactory.connect().getMyself().listRepositories()) {
+      for (GHRepository ghRepository :
+          gitHubFactory.oauthConnect(oauthToken).getMyself().listRepositories()) {
         if (ghRepository.isFork() && ghRepository.getName().equals(repository)) {
           gitHubRepositoryList = gitHubDTOFactory.createRepositoriesList(ghRepository);
           break;
@@ -175,11 +201,13 @@ public class GitHubService {
   @Path("createfork/{user}/{repository}")
   @Produces(MediaType.APPLICATION_JSON)
   public GitHubRepository fork(
-      @PathParam("user") String user, @PathParam("repository") String repository)
+      @PathParam("user") String user,
+      @PathParam("repository") String repository,
+      @HeaderParam(AUTH_HEADER_NAME) String oauthToken)
       throws ApiException {
     try {
       return gitHubDTOFactory.createRepository(
-          gitHubFactory.connect().getUser(user).getRepository(repository).fork());
+          gitHubFactory.oauthConnect(oauthToken).getUser(user).getRepository(repository).fork());
     } catch (IOException e) {
       LOG.error("Fork fail", e);
       throw new ServerException(e.getMessage());
@@ -193,11 +221,12 @@ public class GitHubService {
       @PathParam("user") String user,
       @PathParam("repository") String repository,
       @PathParam("issue") String issue,
+      @HeaderParam(AUTH_HEADER_NAME) String oauthToken,
       GitHubIssueCommentInput input)
       throws ApiException {
     try {
       gitHubFactory
-          .connect()
+          .oauthConnect(oauthToken)
           .getUser(user)
           .getRepository(repository)
           .getIssue(Integer.getInteger(issue))
@@ -214,12 +243,13 @@ public class GitHubService {
   public GitHubPullRequestList listPullRequestsByRepository(
       @PathParam("user") String user,
       @PathParam("repository") String repository,
-      @QueryParam("head") String head)
+      @QueryParam("head") String head,
+      @HeaderParam(AUTH_HEADER_NAME) String oauthToken)
       throws ApiException {
     try {
       return gitHubDTOFactory.createPullRequestsList(
           gitHubFactory
-              .connect()
+              .oauthConnect(oauthToken)
               .getUser(user)
               .getRepository(repository)
               .queryPullRequests()
@@ -238,12 +268,13 @@ public class GitHubService {
   public GitHubPullRequestList getPullRequestsById(
       @PathParam("user") String user,
       @PathParam("repository") String repository,
-      @PathParam("pullRequestId") String pullRequestId)
+      @PathParam("pullRequestId") String pullRequestId,
+      @HeaderParam(AUTH_HEADER_NAME) String oauthToken)
       throws ApiException {
     try {
       return gitHubDTOFactory.createPullRequestsList(
           gitHubFactory
-              .connect()
+              .oauthConnect(oauthToken)
               .getUser(user)
               .getRepository(repository)
               .getPullRequest(Integer.valueOf(pullRequestId)));
@@ -259,12 +290,13 @@ public class GitHubService {
   public GitHubPullRequest createPullRequest(
       @PathParam("user") String user,
       @PathParam("repository") String repository,
+      @HeaderParam(AUTH_HEADER_NAME) String oauthToken,
       GitHubPullRequestCreationInput input)
       throws ApiException {
     try {
       GHPullRequest pullRequest =
           gitHubFactory
-              .connect()
+              .oauthConnect(oauthToken)
               .getUser(user)
               .getRepository(repository)
               .createPullRequest(
@@ -285,12 +317,13 @@ public class GitHubService {
       @PathParam("user") String user,
       @PathParam("repository") String repository,
       @PathParam("pullRequestId") String pullRequestId,
+      @HeaderParam(AUTH_HEADER_NAME) String oauthToken,
       GitHubPullRequest pullRequest)
       throws ServerException, UnauthorizedException {
     try {
       final GHPullRequest ghPullRequest =
           gitHubFactory
-              .connect()
+              .oauthConnect(oauthToken)
               .getUser(user)
               .getRepository(repository)
               .getPullRequest(Integer.valueOf(pullRequestId));
@@ -311,10 +344,12 @@ public class GitHubService {
   @GET
   @Path("orgs")
   @Produces(MediaType.APPLICATION_JSON)
-  public List<GitHubUser> listOrganizations() throws ApiException {
+  public List<GitHubUser> listOrganizations(@HeaderParam(AUTH_HEADER_NAME) String oauthToken)
+      throws ApiException {
     try {
       return gitHubDTOFactory
-          .createCollaborators(gitHubFactory.connect().getMyself().getAllOrganizations())
+          .createCollaborators(
+              gitHubFactory.oauthConnect(oauthToken).getMyself().getAllOrganizations())
           .getCollaborators();
     } catch (IOException e) {
       LOG.error("Getting list of available organizations fail", e);
@@ -325,9 +360,10 @@ public class GitHubService {
   @GET
   @Path("user")
   @Produces(MediaType.APPLICATION_JSON)
-  public GitHubUser getUserInfo() throws ApiException {
+  public GitHubUser getUserInfo(@HeaderParam(AUTH_HEADER_NAME) String oauthToken)
+      throws ApiException {
     try {
-      return gitHubDTOFactory.createUser(gitHubFactory.connect().getMyself());
+      return gitHubDTOFactory.createUser(GitHub.connectUsingOAuth(oauthToken).getMyself());
     } catch (IOException e) {
       LOG.error("Getting user info fail", e);
       throw new ServerException(e.getMessage());
@@ -338,11 +374,17 @@ public class GitHubService {
   @Path("collaborators/{user}/{repository}")
   @Produces(MediaType.APPLICATION_JSON)
   public Collaborators collaborators(
-      @PathParam("user") String user, @PathParam("repository") String repository)
+      @PathParam("user") String user,
+      @PathParam("repository") String repository,
+      @HeaderParam(AUTH_HEADER_NAME) String oauthToken)
       throws ApiException {
     try {
       return gitHubDTOFactory.createCollaborators(
-          gitHubFactory.connect().getUser(user).getRepository(repository).getCollaborators());
+          gitHubFactory
+              .oauthConnect(oauthToken)
+              .getUser(user)
+              .getRepository(repository)
+              .getCollaborators());
     } catch (IOException e) {
       LOG.error("Get collaborators fail", e);
       throw new ServerException(e.getMessage());
@@ -351,7 +393,7 @@ public class GitHubService {
 
   @POST
   @Path("ssh/generate")
-  public void updateSSHKey() throws ApiException {
+  public void updateSSHKey(@HeaderParam(AUTH_HEADER_NAME) String oauthToken) throws ApiException {
     final String host = "github.com";
     SshPair sshPair = null;
     try {
@@ -374,7 +416,7 @@ public class GitHubService {
 
     // update public key
     try {
-      githubKeyUploader.uploadKey(sshPair.getPublicKey());
+      githubKeyUploader.uploadKey(sshPair.getPublicKey(), oauthToken);
     } catch (IOException e) {
       LOG.error("Upload github ssh key fail", e);
       throw new GitException(e.getMessage(), e);
