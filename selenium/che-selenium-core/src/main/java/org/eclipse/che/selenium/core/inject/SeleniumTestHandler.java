@@ -301,7 +301,7 @@ public abstract class SeleniumTestHandler
     Object testInstance = result.getInstance();
 
     collectInjectedWebDrivers(testInstance, webDrivers);
-    webDrivers.forEach(webDriver -> captureScreenshots(result, webDriver));
+    webDrivers.forEach(webDriver -> captureScreenshotsFromOpenedWindows(result, webDriver));
   }
 
   private void captureHtmlSource(ITestResult result) {
@@ -353,7 +353,7 @@ public abstract class SeleniumTestHandler
     }
   }
 
-  private void captureScreenshotForCurrentWindow(ITestResult result, SeleniumWebDriver webDriver) {
+  private void captureScreenshotFromWindow(ITestResult result, SeleniumWebDriver webDriver) {
     String testName = result.getTestClass().getName() + "." + result.getMethod().getMethodName();
     String filename = NameGenerator.generate(testName + "_", 8) + ".png";
     try {
@@ -366,13 +366,14 @@ public abstract class SeleniumTestHandler
     }
   }
 
-  private void captureScreenshots(ITestResult result, SeleniumWebDriver webDriver) {
+  private void captureScreenshotsFromOpenedWindows(
+      ITestResult result, SeleniumWebDriver webDriver) {
     webDriver
         .getWindowHandles()
         .forEach(
             currentWin -> {
               webDriver.switchTo().window(currentWin);
-              captureScreenshotForCurrentWindow(result, webDriver);
+              captureScreenshotFromWindow(result, webDriver);
             });
   }
 
