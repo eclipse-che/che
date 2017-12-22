@@ -60,9 +60,9 @@ spec:
         - containerPort: 8080
         resources:
           limits:
-            memory: 1024Mi
+            memory: 1536Mi
           requests:
-            memory: 512Mi
+            memory: 1024Mi
         volumeMounts:
         - mountPath: /opt/jboss/keycloak/standalone/data
           name: keycloak-data
