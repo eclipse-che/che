@@ -205,7 +205,7 @@ export class ImportGithubProjectController {
    * Shows authentication popup window.
    */
   authenticateWithGitHub(): void {
-    if (!this.importGithubProjectService.getIsGitHubOAuthProviderAvailable()) {
+    if (!this.keycloakAuth.isPresent && !this.importGithubProjectService.getIsGitHubOAuthProviderAvailable()) {
       this.$mdDialog.show({
         controller: 'NoGithubOauthDialogController',
         controllerAs: 'noGithubOauthDialogController',
@@ -240,13 +240,14 @@ export class ImportGithubProjectController {
       + this.$location.port()
       + (this.$browser as any).baseHref()
       + 'gitHubCallback.html';
-    this.githubPopup.open('/api/oauth/authenticate'
+    let link = '/api/oauth/authenticate'
       + '?oauth_provider=github'
       + '&scope=' + ['user', 'repo', 'write:public_key'].join(',')
       + '&userId=' + this.importGithubProjectService.getCurrentUserId()
       + token
       + '&redirect_after_login='
-      + redirectUrl,
+      + redirectUrl;
+    this.githubPopup.open(link,
       {
         width: 1020,
         height: 618
