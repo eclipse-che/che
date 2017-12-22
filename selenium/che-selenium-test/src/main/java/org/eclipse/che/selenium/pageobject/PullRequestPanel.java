@@ -10,10 +10,12 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
-import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBe;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
@@ -23,9 +25,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
@@ -231,8 +237,11 @@ public class PullRequestPanel {
   }
 
   public void openPullRequestOnGitHub() {
-    loadPageDriverWait
-        .until(elementToBeClickable(By.xpath(PullRequestLocators.OPEN_GITHUB_BTN)))
-        .click();
+    Wait<WebDriver> wait =
+        new FluentWait(seleniumWebDriver)
+            .withTimeout(ATTACHING_ELEM_TO_DOM_SEC, SECONDS)
+            .pollingEvery(500, MILLISECONDS)
+            .ignoring(WebDriverException.class);
+    wait.until(visibilityOfElementLocated(By.xpath(PullRequestLocators.OPEN_GITHUB_BTN))).click();
   }
 }
