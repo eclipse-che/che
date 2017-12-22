@@ -15,7 +15,6 @@ import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.project.server.ProjectImporter;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.server.GitHubDTOFactory;
-import org.eclipse.che.plugin.github.server.GitHubFactory;
 import org.eclipse.che.plugin.github.server.GitHubKeyUploader;
 import org.eclipse.che.plugin.github.server.GitHubProjectImporter;
 import org.eclipse.che.plugin.github.server.rest.GitHubService;
@@ -32,7 +31,6 @@ public class GitHubModule extends AbstractModule {
   /** {@inheritDoc} */
   @Override
   protected void configure() {
-    bind(GitHubFactory.class);
     bind(GitHubDTOFactory.class);
 
     Multibinder<ProjectImporter> projectImporterMultibinder =

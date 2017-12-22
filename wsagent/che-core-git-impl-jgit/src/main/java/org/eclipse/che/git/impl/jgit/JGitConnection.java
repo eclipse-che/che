@@ -797,7 +797,7 @@ class JGitConnection implements GitConnection {
 
   @Override
   public DiffPage diff(DiffParams params) throws GitException {
-    return new JGitDiffPage(params, repository);
+    return new JGitDiffPage(params, repository, this);
   }
 
   @Override

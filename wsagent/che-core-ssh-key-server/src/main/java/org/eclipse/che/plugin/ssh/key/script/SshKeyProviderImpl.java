@@ -11,13 +11,10 @@
 package org.eclipse.che.plugin.ssh.key.script;
 
 import com.google.inject.Inject;
-import java.io.IOException;
-import java.util.Optional;
 import java.util.Set;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.rest.shared.dto.ExtendedError;
 import org.eclipse.che.api.ssh.shared.model.SshPair;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -71,29 +68,6 @@ public class SshKeyProviderImpl implements SshKeyProvider {
           DtoFactory.newDto(ExtendedError.class)
               .withMessage("Unable get private ssh key")
               .withErrorCode(ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY));
-    }
-
-    final String publicKey = pair.getPublicKey();
-    if (publicKey != null) {
-      final Optional<SshKeyUploader> optionalKeyUploader =
-          sshKeyUploaders.stream().filter(keyUploader -> keyUploader.match(url)).findFirst();
-      if (optionalKeyUploader.isPresent()) {
-        final SshKeyUploader uploader = optionalKeyUploader.get();
-        try {
-          uploader.uploadKey(publicKey);
-        } catch (IOException e) {
-          throw new ServerException(e.getMessage(), e);
-        } catch (UnauthorizedException e) {
-          // action might fail without uploaded public SSH key.
-          LOG.warn(
-              String.format(
-                  "Unable upload public SSH key with %s", uploader.getClass().getSimpleName()),
-              e);
-        }
-      } else {
-        // action might fail without uploaded public SSH key.
-        LOG.warn(String.format("Not found ssh key uploader for %s", host));
-      }
     }
     return privateKey.getBytes();
   }

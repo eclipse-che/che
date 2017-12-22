@@ -1138,7 +1138,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "eclipse/ubuntu_rails"
+      "origin": "eclipse/ruby_rails"
     },
     "workspaceConfig": {
       "environments": {
@@ -1160,7 +1160,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/ubuntu_rails",
+            "location": "eclipse/ruby_rails",
             "type": "dockerimage"
           }
         }
@@ -1211,7 +1211,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "eclipse/debian_jre"
+      "origin": "eclipse/debian_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -1228,7 +1228,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/debian_jre",
+            "location": "eclipse/debian_jdk8",
             "type": "dockerimage"
           }
         }
@@ -1256,7 +1256,7 @@
     ],
     "source": {
       "type": "image",
-      "origin": "eclipse/debian_jre"
+      "origin": "eclipse/debian_jdk8"
     },
     "workspaceConfig": {
       "environments": {
@@ -1278,7 +1278,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/debian_jre",
+            "location": "eclipse/debian_jdk8",
             "type": "dockerimage"
           }
         }
@@ -1878,7 +1878,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/ubuntu_jre",
+            "location": "eclipse/ubuntu_jdk8",
             "type": "dockerimage"
           }
         }
@@ -1889,7 +1889,7 @@
     },
     "source": {
       "type": "image",
-      "origin": "eclipse/ubuntu_jre"
+      "origin": "eclipse/ubuntu_jdk8"
     }
   },
   {
@@ -2703,7 +2703,7 @@
     "name": "Ceylon with Java JavaScript Dart on CentOS",
     "id": "ceylon-java-javascript-dart-centos",
     "source": {
-      "origin": "eclipse/centos_ceylon_nodejs_dart",
+      "origin": "registry.centos.org/che-stacks/centos-ceylon-nodejs-dart",
       "type": "image"
     },
     "components": [
@@ -2779,7 +2779,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/centos_ceylon_nodejs_dart",
+            "location": "registry.centos.org/che-stacks/centos-ceylon-nodejs-dart",
             "type": "dockerimage"
           }
         }
