@@ -55,6 +55,13 @@ public class NameUtilsTest {
         NameUtils.checkFileName(invalidFolderName));
   }
 
+  @Test
+  public void getFileExtension() {
+    assertEquals("txt", NameUtils.getFileExtension("123.txt"));
+    assertEquals("", NameUtils.getFileExtension("123"));
+    assertEquals("zz", NameUtils.getFileExtension("123.txt.zz"));
+  }
+
   @DataProvider(name = "ValidFilenames")
   public Object[][] getValidFilenames() {
     return toDataProviderData(VALID_FILENAMES);

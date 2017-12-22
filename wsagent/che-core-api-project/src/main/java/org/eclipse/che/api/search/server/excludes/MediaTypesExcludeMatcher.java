@@ -55,6 +55,14 @@ public class MediaTypesExcludeMatcher implements PathMatcher {
     this.fsManager = fsManager;
   }
 
+  public void addExcludedMediaType(MediaType mediaType) {
+    excludedMediaTypes.add(mediaType);
+  }
+
+  public void addExcludedTypes(String type) {
+    excludedTypes.add(type);
+  }
+
   @Override
   public boolean matches(Path fsPath) {
     if (!fsPath.toFile().exists()) {

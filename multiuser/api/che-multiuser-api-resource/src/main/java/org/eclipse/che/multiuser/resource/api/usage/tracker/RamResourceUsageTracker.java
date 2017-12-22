@@ -21,6 +21,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
@@ -57,10 +58,11 @@ public class RamResourceUsageTracker implements ResourceUsageTracker {
       throws NotFoundException, ServerException {
     final Account account = accountManager.getById(accountId);
     List<WorkspaceImpl> activeWorkspaces =
-        workspaceManagerProvider
-            .get()
-            .getByNamespace(account.getName(), true)
-            .stream()
+        Pages.stream(
+                (maxItems, skipCount) ->
+                    workspaceManagerProvider
+                        .get()
+                        .getByNamespace(account.getName(), true, maxItems, skipCount))
             .filter(ws -> STOPPED != ws.getStatus())
             .collect(Collectors.toList());
     long currentlyUsedRamMB = 0;
