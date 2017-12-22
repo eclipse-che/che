@@ -160,7 +160,8 @@ public class Consoles {
   }
 
   public void clickOnPlusMenuButton() {
-    redrawDriverWait.until(visibilityOf(plusMenuBtn)).click();
+    redrawDriverWait.until(visibilityOf(plusMenuBtn));
+    new Actions(seleniumWebDriver).moveToElement(plusMenuBtn).click().perform();
   }
 
   public void clickOnHideInternalServers() {
