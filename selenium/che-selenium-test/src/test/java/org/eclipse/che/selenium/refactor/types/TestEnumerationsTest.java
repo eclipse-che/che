@@ -84,7 +84,7 @@ public class TestEnumerationsTest {
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
         TestMenuCommandsConstants.Assistant.Refactoring.RENAME);
 
-    refactorPanel.typeNewName("B.java");
+    refactorPanel.typeAndWaitNewName("B.java");
     refactorPanel.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactorPanel.clickOkButtonRefactorForm();
     askDialog.waitFormToOpen();

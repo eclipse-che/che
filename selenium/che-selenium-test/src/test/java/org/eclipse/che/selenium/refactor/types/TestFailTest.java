@@ -130,11 +130,11 @@ public class TestFailTest {
    */
   private void doRefactorWithWifget(String newClassName) {
     try {
-      refactorPanel.typeNewName(newClassName);
+      refactorPanel.typeAndWaitNewName(newClassName);
       refactorPanel.clickOkButtonRefactorForm();
     } catch (WebDriverException ex) {
       LOG.warn(ex.getLocalizedMessage());
-      refactorPanel.typeNewName(newClassName);
+      refactorPanel.typeAndWaitNewName(newClassName);
       refactorPanel.sendKeysIntoField(Keys.ARROW_LEFT.toString());
       refactorPanel.sendKeysIntoField(Keys.ARROW_LEFT.toString());
       refactorPanel.clickOkButtonRefactorForm();

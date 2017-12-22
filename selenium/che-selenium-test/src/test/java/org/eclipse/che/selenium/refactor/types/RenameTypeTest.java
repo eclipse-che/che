@@ -186,14 +186,14 @@ public class RenameTypeTest {
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
         TestMenuCommandsConstants.Assistant.Refactoring.RENAME);
 
-    refactorPanel.typeNewName("B.java");
+    refactorPanel.typeAndWaitNewName("B.java");
 
     try {
       refactorPanel.clickOkButtonRefactorForm();
     } catch (org.openqa.selenium.TimeoutException ex) {
       // For response from server side if a net works too slowly
       WaitUtils.sleepQuietly(1);
-      refactorPanel.typeNewName("B.java");
+      refactorPanel.typeAndWaitNewName("B.java");
       refactorPanel.sendKeysIntoField(Keys.ARROW_LEFT.toString());
       refactorPanel.sendKeysIntoField(Keys.ARROW_LEFT.toString());
       refactorPanel.clickOkButtonRefactorForm();

@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.refactor.fields;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -29,6 +31,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.eclipse.che.selenium.refactor.Services;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -80,7 +83,7 @@ public class RenamePrivateFieldTest {
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameFieldFormIsOpen();
-    refactor.typeAndWaitNewName("g");
+    typeAndWaitNewName("g");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.clickOkButtonRefactorForm();
@@ -102,7 +105,7 @@ public class RenamePrivateFieldTest {
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameFieldFormIsOpen();
-    refactor.typeAndWaitNewName("g");
+    typeAndWaitNewName("g");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.clickOkButtonRefactorForm();
@@ -124,7 +127,7 @@ public class RenamePrivateFieldTest {
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameFieldFormIsOpen();
-    refactor.typeAndWaitNewName("g");
+    typeAndWaitNewName("g");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(false);
     refactor.clickOkButtonRefactorForm();
@@ -146,9 +149,7 @@ public class RenamePrivateFieldTest {
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameFieldFormIsOpen();
-    refactor.typeAndWaitNewName("g");
-    refactor.sendKeysIntoField("g");
-    refactor.waitTextIntoNewNameField("gg");
+    typeAndWaitNewName("gg");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateCommentsAndStringsCheckbox(true);
@@ -173,10 +174,7 @@ public class RenamePrivateFieldTest {
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameFieldFormIsOpen();
-    refactor.typeAndWaitNewName("fY");
-    refactor.sendKeysIntoField("o");
-    refactor.sendKeysIntoField("u");
-    refactor.waitTextIntoNewNameField("fYou");
+    typeAndWaitNewName("fYou");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateCommentsAndStringsCheckbox(true);
@@ -201,10 +199,7 @@ public class RenamePrivateFieldTest {
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameFieldFormIsOpen();
-    refactor.typeAndWaitNewName("fY");
-    refactor.sendKeysIntoField("o");
-    refactor.sendKeysIntoField("u");
-    refactor.waitTextIntoNewNameField("fYou");
+    typeAndWaitNewName("fYou");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.clickOkButtonRefactorForm();
@@ -228,10 +223,7 @@ public class RenamePrivateFieldTest {
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameFieldFormIsOpen();
-    refactor.typeAndWaitNewName("fY");
-    refactor.sendKeysIntoField("o");
-    refactor.sendKeysIntoField("u");
-    refactor.waitTextIntoNewNameField("fYou");
+    typeAndWaitNewName("fYou");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.clickOkButtonRefactorForm();
@@ -255,10 +247,7 @@ public class RenamePrivateFieldTest {
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameFieldFormIsOpen();
-    refactor.typeAndWaitNewName("fS");
-    refactor.sendKeysIntoField("mal");
-    refactor.sendKeysIntoField("l");
-    refactor.waitTextIntoNewNameField("fSmall");
+    typeAndWaitNewName("fSmall");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.clickOkButtonRefactorForm();
@@ -282,7 +271,7 @@ public class RenamePrivateFieldTest {
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameFieldFormIsOpen();
-    refactor.typeAndWaitNewName("g");
+    typeAndWaitNewName("g");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.clickOkButtonRefactorForm();
@@ -304,10 +293,7 @@ public class RenamePrivateFieldTest {
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameFieldFormIsOpen();
-    refactor.typeAndWaitNewName("fS");
-    refactor.sendKeysIntoField("mal");
-    refactor.sendKeysIntoField("l");
-    refactor.waitTextIntoNewNameField("fSmall");
+    typeAndWaitNewName("fSmall");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.clickOkButtonRefactorForm();
@@ -330,10 +316,7 @@ public class RenamePrivateFieldTest {
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameFieldFormIsOpen();
     loader.waitOnClosed();
-    refactor.typeAndWaitNewName("fElem");
-    refactor.sendKeysIntoField("ent");
-    refactor.sendKeysIntoField("s");
-    refactor.waitTextIntoNewNameField("fElements");
+    typeAndWaitNewName("fElements");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     loader.waitOnClosed();
@@ -359,10 +342,7 @@ public class RenamePrivateFieldTest {
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameFieldFormIsOpen();
     loader.waitOnClosed();
-    refactor.typeAndWaitNewName("fElem");
-    refactor.sendKeysIntoField("ent");
-    refactor.sendKeysIntoField("s");
-    refactor.waitTextIntoNewNameField("fElements");
+    typeAndWaitNewName("fElements");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     loader.waitOnClosed();
@@ -386,10 +366,7 @@ public class RenamePrivateFieldTest {
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameFieldFormIsOpen();
-    refactor.typeAndWaitNewName("fe");
-    refactor.sendKeysIntoField("e");
-    refactor.sendKeysIntoField("l");
-    refactor.waitTextIntoNewNameField("feel");
+    typeAndWaitNewName("feel");
     loader.waitOnClosed();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.clickOkButtonRefactorForm();
@@ -429,5 +406,14 @@ public class RenamePrivateFieldTest {
     }
 
     return result;
+  }
+
+  private void typeAndWaitNewName(String newName) {
+    try {
+      refactor.typeAndWaitNewName(newName);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7500");
+    }
   }
 }

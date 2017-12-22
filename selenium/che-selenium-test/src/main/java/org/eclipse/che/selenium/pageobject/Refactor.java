@@ -10,20 +10,49 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.ERROR_CONTAINER_OF_COMPILATION_FORM;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.EXPAND_ITEM_ICON;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.FLAG_ITEM;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.FLAG_ITEM_INPUT;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.ITEM_CHANGES_TO_BE_PERFORMED;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.LEASED_LINE_LEFT_EDITOR;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.LEASED_LINE_RIGHT_EDITOR;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.MOVE_DESTINATION_FOR_ITEM;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.MOVE_EXPAND_TREE_ICON;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.NEW_NAME_FIELD;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.PREVIEW_FORM;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.REFACTOR_CANCEL_BUTTON;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.RENAME_FIELD_FORM;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.RENAME_METHOD_FORM;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.RENAME_PACKAGE_FORM;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.RENAME_PARAMETERS_FORM;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.RENAME_SUBPACKAGES_CHECKBOX;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.TEXT_MESSAGE_MOVE_FORM;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.UPDATE_COMMENTS_STRINGS_CHECKBOX;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.UPDATE_NON_JAVA_FILES_CHECKBOX;
+import static org.eclipse.che.selenium.pageobject.Refactor.Locators.UPDATE_REFERENCES_CHECKBOX;
+import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementSelectionStateToBe;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Aleksandr Shmaraev on 30.10.15 */
@@ -32,15 +61,21 @@ public class Refactor {
 
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
+  private final WebDriverWait redrawUiElementWait;
+  private final WebDriverWait loadPageWait;
+  private final WebDriverWait elementWait;
 
   @Inject
   public Refactor(SeleniumWebDriver seleniumWebDriver, Loader loader) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
+    this.redrawUiElementWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    this.loadPageWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
+    this.elementWait = new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
-  private interface Locators {
+  protected interface Locators {
     String RENAME_PACKAGE_FORM = "//div[text()='Rename Package']/ancestor::div[3]";
     String RENAME_JAVA_CLASS_FORM = "//div[text()='Rename Type']/ancestor::div[3]";
     String RENAME_COMPILATION_UNIT_FORM =
@@ -103,34 +138,34 @@ public class Refactor {
     String LEASED_LINE_RIGHT_EDITOR = "//div[contains(@class,'annotationLine deletedBlockDiff')]";
   }
 
-  @FindBy(xpath = Locators.RENAME_PACKAGE_FORM)
+  @FindBy(xpath = RENAME_PACKAGE_FORM)
   WebElement renamePackageForm;
 
   @FindBy(xpath = Locators.RENAME_JAVA_CLASS_FORM)
   WebElement renameJavaClass;
 
-  @FindBy(xpath = Locators.RENAME_METHOD_FORM)
+  @FindBy(xpath = RENAME_METHOD_FORM)
   WebElement renameMethodForm;
 
-  @FindBy(xpath = Locators.RENAME_PARAMETERS_FORM)
+  @FindBy(xpath = RENAME_PARAMETERS_FORM)
   WebElement renameParametersForm;
 
   @FindBy(xpath = Locators.MOVE_ITEM_FORM)
   WebElement moveItemForm;
 
-  @FindBy(xpath = Locators.RENAME_FIELD_FORM)
+  @FindBy(xpath = RENAME_FIELD_FORM)
   WebElement renameFieldForm;
 
   @FindBy(id = Locators.REFACTOR_PREVIEW_BUTTON)
   WebElement previewRefactorButton;
 
-  @FindBy(id = Locators.REFACTOR_CANCEL_BUTTON)
+  @FindBy(id = REFACTOR_CANCEL_BUTTON)
   WebElement cancelRefactorButton;
 
   @FindBy(id = Locators.REFACTOR_OK_BUTTON)
   WebElement okRefactorButton;
 
-  @FindBy(xpath = Locators.PREVIEW_FORM)
+  @FindBy(xpath = PREVIEW_FORM)
   WebElement previewRefactorForm;
 
   @FindBy(id = Locators.PREVIEW_OK_BUTTON)
@@ -139,7 +174,7 @@ public class Refactor {
   @FindBy(xpath = Locators.UPDATE_REFERENCES_CHECKBOX_SPAN)
   WebElement updateReferencesCheckBoxSpan;
 
-  @FindBy(xpath = Locators.UPDATE_REFERENCES_CHECKBOX)
+  @FindBy(xpath = UPDATE_REFERENCES_CHECKBOX)
   WebElement updateReferencesCheckBox;
 
   @FindBy(xpath = Locators.UPDATE_VARIABLES_METHODS_CHECKBOX)
@@ -148,10 +183,10 @@ public class Refactor {
   @FindBy(xpath = Locators.RENAME_SUBPACKAGES_CHECKBOX_SPAN)
   WebElement renameSubpackagesCheckBoxSpan;
 
-  @FindBy(xpath = Locators.RENAME_SUBPACKAGES_CHECKBOX)
+  @FindBy(xpath = RENAME_SUBPACKAGES_CHECKBOX)
   WebElement renameSubpackagesCheckBox;
 
-  @FindBy(xpath = Locators.UPDATE_COMMENTS_STRINGS_CHECKBOX)
+  @FindBy(xpath = UPDATE_COMMENTS_STRINGS_CHECKBOX)
   WebElement updateCommentAndStringsBox;
 
   @FindBy(xpath = Locators.UPDATE_COMMENT_STRING_CHECKBOX_SPAN)
@@ -160,10 +195,10 @@ public class Refactor {
   @FindBy(xpath = Locators.UPDATE_NON_JAVA_FILES_CHECKBOX_SPAN)
   WebElement updateNonJavaFilesBoxSpan;
 
-  @FindBy(xpath = Locators.UPDATE_NON_JAVA_FILES_CHECKBOX)
+  @FindBy(xpath = UPDATE_NON_JAVA_FILES_CHECKBOX)
   WebElement updateNonJavaFilesBox;
 
-  @FindBy(xpath = Locators.NEW_NAME_FIELD)
+  @FindBy(xpath = NEW_NAME_FIELD)
   WebElement newNameFileInput;
 
   @FindBy(xpath = Locators.NAME_PATTERNS_FIELD)
@@ -178,83 +213,60 @@ public class Refactor {
   @FindBy(id = Locators.RIGHT_EDITOR)
   WebElement rightEditor;
 
-  @FindBy(xpath = Locators.ERROR_CONTAINER_OF_COMPILATION_FORM)
-  WebElement errorContainerOfCompilationForm;
-
-  @FindBy(xpath = Locators.TEXT_MESSAGE_MOVE_FORM)
-  WebElement textMessageMoveForm;
-
   /** wait the 'rename package form' is open */
   public void waitRenamePackageFormIsOpen() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(renamePackageForm));
+    redrawUiElementWait.until(visibilityOf(renamePackageForm));
   }
 
   /** wait the 'rename package form' is closed */
   public void waitRenamePackageFormIsClosed() {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(
-                By.xpath(Locators.RENAME_PACKAGE_FORM)));
+    elementWait.until(invisibilityOfElementLocated(By.xpath(RENAME_PACKAGE_FORM)));
   }
 
   /** wait the 'rename compilation unit form' is open */
   public void waitRenameCompilationUnitFormIsOpen() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(renameCompilationUnit));
+    elementWait.until(visibilityOf(renameCompilationUnit));
   }
 
   /** wait the 'Rename Method' form is open */
   public void waitRenameMethodFormIsOpen() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(renameMethodForm));
+    redrawUiElementWait.until(visibilityOf(renameMethodForm));
   }
 
   /** wait the 'Rename Method' form is closed */
   public void waitRenameMethodFormIsClosed() {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(By.xpath(Locators.RENAME_METHOD_FORM)));
+    elementWait.until(invisibilityOfElementLocated(By.xpath(RENAME_METHOD_FORM)));
   }
 
   /** wait the 'Rename Field' form is open */
   public void waitRenameFieldFormIsOpen() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(renameFieldForm));
+    redrawUiElementWait.until(visibilityOf(renameFieldForm));
   }
 
   /** wait the 'Rename Field' form is closed */
   public void waitRenameFieldFormIsClosed() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(By.xpath(Locators.RENAME_FIELD_FORM)));
+    redrawUiElementWait.until(invisibilityOfElementLocated(By.xpath(RENAME_FIELD_FORM)));
   }
 
   /** wait the 'Rename Parameters' form is open */
   public void waitRenameParametersFormIsOpen() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(renameParametersForm));
+    redrawUiElementWait.until(visibilityOf(renameParametersForm));
   }
 
   /** wait the 'Rename Parameters' form is closed */
   public void waitRenameParametersFormIsClosed() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(
-                By.xpath(Locators.RENAME_PARAMETERS_FORM)));
+    redrawUiElementWait.until(invisibilityOfElementLocated(By.xpath(RENAME_PARAMETERS_FORM)));
   }
 
   /** wait the 'Move item' form is open */
   public void waitMoveItemFormIsOpen() {
     loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(moveItemForm));
+    redrawUiElementWait.until(visibilityOf(moveItemForm));
   }
 
   /** wait the 'Move item' form is closed */
   public void waitMoveItemFormIsClosed() {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(Locators.MOVE_ITEM_FORM)));
+    elementWait.until(invisibilityOfElementLocated(By.xpath(Locators.MOVE_ITEM_FORM)));
   }
 
   /**
@@ -264,10 +276,8 @@ public class Refactor {
    */
   public void clickOnExpandIconTree(String name) {
     loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.MOVE_EXPAND_TREE_ICON, name))))
+    loadPageWait
+        .until(visibilityOfElementLocated(By.xpath(format(MOVE_EXPAND_TREE_ICON, name))))
         .click();
   }
 
@@ -278,48 +288,38 @@ public class Refactor {
    */
   public void chooseDestinationForItem(String name) {
     loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.MOVE_DESTINATION_FOR_ITEM, name))))
+    loadPageWait
+        .until(visibilityOfElementLocated(By.xpath(format(MOVE_DESTINATION_FOR_ITEM, name))))
         .click();
   }
 
   /** click on the 'Preview' button */
   public void clickPreviewButtonRefactorForm() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(previewRefactorButton))
-        .click();
+    redrawUiElementWait.until(elementToBeClickable(previewRefactorButton)).click();
   }
 
   /** click on the 'Cancel' button */
   public void clickCancelButtonRefactorForm() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(cancelRefactorButton))
-        .click();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(
-                By.id(Locators.REFACTOR_CANCEL_BUTTON)));
+    redrawUiElementWait.until(elementToBeClickable(cancelRefactorButton)).click();
+    redrawUiElementWait.until(invisibilityOfElementLocated(By.id(REFACTOR_CANCEL_BUTTON)));
   }
 
   /** click on the 'OK' button */
   public void clickOkButtonRefactorForm() {
-    String someFailMessage = "//div[@style='color: rgb(195, 77, 77);' and contains(text(), ' ')]";
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(someFailMessage)));
-    String activeStateLocator = "//button[@id='move-accept-button' and not(@disabled)]";
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(activeStateLocator)))
+    redrawUiElementWait.until(
+        invisibilityOfElementLocated(
+            By.xpath("//div[@style='color: rgb(195, 77, 77);' and contains(text(), ' ')]")));
+    redrawUiElementWait
+        .until(
+            visibilityOfElementLocated(
+                By.xpath("//button[@id='move-accept-button' and not(@disabled)]")))
         .click();
     loader.waitOnClosed();
   }
 
   /** click on the 'Update references' checkbox */
   public void clickOnUpdateReferencesCheckbox() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(updateReferencesCheckBoxSpan))
-        .click();
+    redrawUiElementWait.until(visibilityOf(updateReferencesCheckBoxSpan)).click();
   }
 
   /** click on the 'OK' button in preview form */
@@ -330,41 +330,31 @@ public class Refactor {
 
   /** wait the 'Update references' checkbox is selected */
   public void waitUpdateReferencesIsSelected() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.elementSelectionStateToBe(
-                By.xpath(Locators.UPDATE_REFERENCES_CHECKBOX), true));
+    redrawUiElementWait.until(
+        elementSelectionStateToBe(By.xpath(UPDATE_REFERENCES_CHECKBOX), true));
   }
 
   /** wait the 'Update references' checkbox is not selected */
   public void waitUpdateReferencesIsNotSelected() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.elementSelectionStateToBe(
-                By.xpath(Locators.UPDATE_REFERENCES_CHECKBOX), false));
+    redrawUiElementWait.until(
+        elementSelectionStateToBe(By.xpath(UPDATE_REFERENCES_CHECKBOX), false));
   }
 
   /** click on the 'Rename subpackages' checkbox */
   public void clickOnRenameSubpackagesCheckbox() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(renameSubpackagesCheckBoxSpan))
-        .click();
+    redrawUiElementWait.until(visibilityOf(renameSubpackagesCheckBoxSpan)).click();
   }
 
   /** wait the 'Rename subpackages' checkbox is selected */
   public void waitRenameSubpackagesIsSelected() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.elementSelectionStateToBe(
-                By.xpath(Locators.RENAME_SUBPACKAGES_CHECKBOX), true));
+    redrawUiElementWait.until(
+        elementSelectionStateToBe(By.xpath(RENAME_SUBPACKAGES_CHECKBOX), true));
   }
 
   /** wait the 'Rename subpackages' checkbox is not selected */
   public void waitRenameSubpackagesIsNotSelected() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.elementSelectionStateToBe(
-                By.xpath(Locators.RENAME_SUBPACKAGES_CHECKBOX), false));
+    redrawUiElementWait.until(
+        elementSelectionStateToBe(By.xpath(RENAME_SUBPACKAGES_CHECKBOX), false));
   }
 
   /**
@@ -426,23 +416,19 @@ public class Refactor {
 
   /** click on the 'Update...in comments and strings' checkbox */
   public void clickOnUpdateCommentsAndStringsCheckbox() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(updateCommentAndStringBoxSpan))
-        .click();
+    redrawUiElementWait.until(visibilityOf(updateCommentAndStringBoxSpan)).click();
   }
 
   /** wait the 'Update...in comments and strings' checkbox is selected */
   public void waitUpdateCommentsAndStringsIsSelected() {
-    String locator = Locators.UPDATE_COMMENTS_STRINGS_CHECKBOX;
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementSelectionStateToBe(By.xpath(locator), true));
+    redrawUiElementWait.until(
+        elementSelectionStateToBe(By.xpath(UPDATE_COMMENTS_STRINGS_CHECKBOX), true));
   }
 
   /** wait the 'Update...in comments and strings' checkbox is not selected */
   public void waitUpdateCommentsAndStringsIsNotSelected() {
-    String locator = Locators.UPDATE_COMMENTS_STRINGS_CHECKBOX;
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementSelectionStateToBe(By.xpath(locator), false));
+    redrawUiElementWait.until(
+        elementSelectionStateToBe(By.xpath(UPDATE_COMMENTS_STRINGS_CHECKBOX), false));
   }
 
   /**
@@ -466,23 +452,19 @@ public class Refactor {
 
   /** click on the 'Update...in non-java text files' checkbox */
   public void clickOnUpdateNonJavaFilesCheckbox() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(updateNonJavaFilesBoxSpan))
-        .click();
+    redrawUiElementWait.until(visibilityOf(updateNonJavaFilesBoxSpan)).click();
   }
 
   /** wait the 'Update...in non-java text files' checkbox is selected */
   public void waitUpdateNonJavaFilesIsSelected() {
-    String locator = Locators.UPDATE_NON_JAVA_FILES_CHECKBOX;
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementSelectionStateToBe(By.xpath(locator), true));
+    redrawUiElementWait.until(
+        elementSelectionStateToBe(By.xpath(UPDATE_NON_JAVA_FILES_CHECKBOX), true));
   }
 
   /** wait the 'Update...in non-java text files' checkbox is selected */
   public void waitUpdateNonJavaFilesIsNotSelected() {
-    String locator = Locators.UPDATE_NON_JAVA_FILES_CHECKBOX;
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementSelectionStateToBe(By.xpath(locator), false));
+    redrawUiElementWait.until(
+        elementSelectionStateToBe(By.xpath(UPDATE_NON_JAVA_FILES_CHECKBOX), false));
   }
 
   /**
@@ -494,38 +476,6 @@ public class Refactor {
     typeAndWaitTextInProvidedElement(newNameFileInput, newValue);
   }
 
-  private void typeAndWaitTextInProvidedElement(WebElement element, String newValue) {
-    waitElementVisibility(element).clear();
-    waitExpectedText(element, "");
-    waitElementVisibility(element).sendKeys(newValue);
-    waitExpectedText(element, newValue);
-  }
-  /*
-  *
-   * clear field, type a new user value into 'New Name field'
-   *
-   * @param newValue new name
-
-  public void typeNewName(String newValue) {
-      waitElementVisibility(newNameFileInput).clear();
-      waitExpectedText(newNameFileInput, "");
-      loader.waitOnClosed();
-      newNameFileInput.sendKeys(newValue);
-      waitExpectedText(newNameFileInput, newValue);
-  }*/
-
-  private void waitExpectedText(WebElement element, String expectedText) {
-    waitElementVisibility(element);
-
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.attributeToBe(element, "value", expectedText));
-  }
-
-  private WebElement waitElementVisibility(WebElement element) {
-    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(element));
-  }
-
   /**
    * type into refactoring widget field any key without clear
    *
@@ -534,23 +484,16 @@ public class Refactor {
   public void sendKeysIntoField(String keys) {
     waitElementVisibility(newNameFileInput).sendKeys(keys);
   }
-  /*
-    *
-     * wait new name into the ''New Name field'
-     *
-     * @param expectedName expected name in new name field
 
-    public void waitTextIntoNewNameField(final String expectedName) {
-      new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-          .until(
-              (ExpectedCondition<Boolean>)
-                  webDriver ->
-                      seleniumWebDriver
-                          .findElement(By.xpath(Locators.NEW_NAME_FIELD))
-                          .getAttribute("value")
-                          .equals(expectedName));
-    }
-  */
+  /**
+   * wait new name into the ''New Name field'
+   *
+   * @param expectedName expected name in new name field
+   */
+  public void waitTextIntoNewNameField(final String expectedName) {
+    waitExpectedText(NEW_NAME_FIELD, expectedName);
+  }
+
   /**
    * type and wait file name into 'File name patterns'
    *
@@ -573,7 +516,7 @@ public class Refactor {
   /**
    * wait file name into the 'File name patterns'
    *
-   * @param expectedName expected file name
+   * @param expectedText expected file name
    */
   public void waitTextIntoNamePatternsField(final String expectedText) {
     waitExpectedText(namePatternsInput, expectedText);
@@ -582,19 +525,19 @@ public class Refactor {
   /**
    * wait error text fragment in the 'Rename compilation form'
    *
-   * @param mess expected error
+   * @param expectedText expected error
    */
   public void waitTextInErrorMessage(String expectedText) {
-    waitExpectedText(errorContainerOfCompilationForm, expectedText);
+    waitExpectedText(ERROR_CONTAINER_OF_COMPILATION_FORM, expectedText);
   }
 
   /**
    * wait text message in the 'Move item' form
    *
-   * @param mess expected message
+   * @param expectedText expected message
    */
   public void waitTextInMoveForm(String expectedText) {
-    waitExpectedText(textMessageMoveForm, expectedText);
+    waitExpectedText(TEXT_MESSAGE_MOVE_FORM, expectedText);
   }
 
   /**
@@ -617,8 +560,7 @@ public class Refactor {
 
   /** wait the refactor preview form is closed */
   public void waitRefactorPreviewFormIsClosed() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.PREVIEW_FORM)));
+    redrawUiElementWait.until(invisibilityOfElementLocated(By.id(PREVIEW_FORM)));
   }
 
   /**
@@ -629,12 +571,12 @@ public class Refactor {
    * @param position position of item
    */
   public void clickOnItemByNameAndPosition(String nameItem, int position) {
-    List<WebElement> itemList =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(
-                ExpectedConditions.visibilityOfAllElementsLocatedBy(
-                    By.xpath(String.format(Locators.ITEM_CHANGES_TO_BE_PERFORMED, nameItem))));
-    itemList.get(position).click();
+    redrawUiElementWait
+        .until(
+            visibilityOfAllElementsLocatedBy(
+                By.xpath(format(ITEM_CHANGES_TO_BE_PERFORMED, nameItem))))
+        .get(position)
+        .click();
   }
 
   /**
@@ -643,8 +585,7 @@ public class Refactor {
    * @param expectedText expected text
    */
   public void checkTextFromLeftEditor(String expectedText) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.textToBePresentInElement(leftEditor, expectedText));
+    loadPageWait.until(textToBePresentInElement(leftEditor, expectedText));
   }
 
   /**
@@ -653,9 +594,7 @@ public class Refactor {
    * @param expectedText expected text
    */
   public void checkTextFromRightEditor(String expectedText) {
-
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.textToBePresentInElement(rightEditor, expectedText));
+    loadPageWait.until(textToBePresentInElement(rightEditor, expectedText));
   }
 
   /**
@@ -666,13 +605,10 @@ public class Refactor {
    * @param position number of position
    */
   public void clickOnExpandItemByNameAndPosition(String nameItem, int position) {
-
-    List<WebElement> expandItemList =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(
-                    By.xpath(String.format(Locators.EXPAND_ITEM_ICON, nameItem))));
-    expandItemList.get(position).click();
+    redrawUiElementWait
+        .until(presenceOfAllElementsLocatedBy(By.xpath(format(EXPAND_ITEM_ICON, nameItem))))
+        .get(position)
+        .click();
   }
 
   /**
@@ -684,12 +620,10 @@ public class Refactor {
    */
   public void setFlagItemByNameAndPosition(String nameItem, int position) {
     clickOnItemByNameAndPosition(nameItem, position);
-    List<WebElement> flagItemList =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(
-                    By.xpath(String.format(Locators.FLAG_ITEM, nameItem))));
-    flagItemList.get(position).click();
+    redrawUiElementWait
+        .until(presenceOfAllElementsLocatedBy(By.xpath(format(FLAG_ITEM, nameItem))))
+        .get(position)
+        .click();
   }
 
   /**
@@ -700,12 +634,10 @@ public class Refactor {
    * @return value of attribute "checked"
    */
   public boolean itemIsSelectedByNameAndPosition(String nameItem, int position) {
-    List<WebElement> itemList =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(
-                    By.xpath(String.format(Locators.FLAG_ITEM_INPUT, nameItem))));
-    return itemList.get(position).isSelected();
+    return redrawUiElementWait
+        .until(presenceOfAllElementsLocatedBy(By.xpath(format(FLAG_ITEM_INPUT, nameItem))))
+        .get(position)
+        .isSelected();
   }
 
   /**
@@ -714,13 +646,9 @@ public class Refactor {
    * @return quantity of leased lines
    */
   public int getQuantityLeasedLineInLeftEditor() {
-    int lineQuantity =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(
-                ExpectedConditions.visibilityOfAllElementsLocatedBy(
-                    By.xpath(Locators.LEASED_LINE_LEFT_EDITOR)))
-            .size();
-    return lineQuantity;
+    return redrawUiElementWait
+        .until(visibilityOfAllElementsLocatedBy(By.xpath(LEASED_LINE_LEFT_EDITOR)))
+        .size();
   }
 
   /**
@@ -729,12 +657,32 @@ public class Refactor {
    * @return quantity of leased lines
    */
   public int getQuantityLeasedLineInRightEditor() {
-    int lineQuantity =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(
-                    By.xpath(Locators.LEASED_LINE_RIGHT_EDITOR)))
-            .size();
-    return lineQuantity;
+    return redrawUiElementWait
+        .until(presenceOfAllElementsLocatedBy(By.xpath(LEASED_LINE_RIGHT_EDITOR)))
+        .size();
+  }
+
+  private void typeAndWaitTextInProvidedElement(WebElement element, String newValue) {
+    waitElementVisibility(element).clear();
+    waitExpectedText(element, "");
+    waitElementVisibility(element).sendKeys(newValue);
+    waitExpectedText(element, newValue);
+  }
+
+  private void waitExpectedText(WebElement element, String expectedText) {
+    waitElementVisibility(element);
+    loadPageWait.until(attributeToBe(element, "value", expectedText));
+  }
+
+  private void waitExpectedText(String elementXpath, String expectedText) {
+    loadPageWait.until(attributeToBe(waitElementVisibility(elementXpath), "value", expectedText));
+  }
+
+  private WebElement waitElementVisibility(WebElement element) {
+    return loadPageWait.until(visibilityOf(element));
+  }
+
+  private WebElement waitElementVisibility(String elementXpath) {
+    return loadPageWait.until(visibilityOfElementLocated(By.xpath(elementXpath)));
   }
 }
