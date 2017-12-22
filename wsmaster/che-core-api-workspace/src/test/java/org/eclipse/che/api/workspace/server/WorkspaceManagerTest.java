@@ -26,6 +26,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_N
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -481,6 +482,26 @@ public class WorkspaceManagerTest {
     assertNotNull(ws.getAttributes().get(STOPPED_ATTRIBUTE_NAME));
     assertTrue(Boolean.valueOf(ws.getAttributes().get(STOPPED_ABNORMALLY_ATTRIBUTE_NAME)));
     assertEquals(ws.getAttributes().get(ERROR_MESSAGE_ATTRIBUTE_NAME), "start failed");
+  }
+
+  @Test
+  public void clearsErrorAttributesAfterWorkspaceStart() throws Exception {
+    final WorkspaceConfigImpl workspaceConfig = createConfig();
+    final WorkspaceImpl workspace = createAndMockWorkspace(workspaceConfig, NAMESPACE_1);
+    workspace
+        .getAttributes()
+        .put(STOPPED_ATTRIBUTE_NAME, Long.toString(System.currentTimeMillis()));
+    workspace.getAttributes().put(STOPPED_ABNORMALLY_ATTRIBUTE_NAME, Boolean.TRUE.toString());
+    workspace.getAttributes().put(ERROR_MESSAGE_ATTRIBUTE_NAME, "start failed");
+    when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+    mockStart(workspace);
+
+    workspaceManager.startWorkspace(workspace.getId(), null, emptyMap());
+    verify(workspaceDao, atLeastOnce()).update(workspaceCaptor.capture());
+    Workspace ws = workspaceCaptor.getAllValues().get(workspaceCaptor.getAllValues().size() - 1);
+    assertNull(ws.getAttributes().get(STOPPED_ATTRIBUTE_NAME));
+    assertNull(ws.getAttributes().get(STOPPED_ABNORMALLY_ATTRIBUTE_NAME));
+    assertNull(ws.getAttributes().get(ERROR_MESSAGE_ATTRIBUTE_NAME));
   }
 
   @Test

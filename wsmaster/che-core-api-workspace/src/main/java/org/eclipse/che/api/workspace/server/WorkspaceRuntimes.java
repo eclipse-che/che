@@ -584,9 +584,9 @@ public class WorkspaceRuntimes {
     @Override
     public void onEvent(RuntimeStatusEvent event) {
       if (event.isFailed()) {
-        RuntimeState state = runtimes.remove(event.getIdentity().getWorkspaceId());
+        String workspaceId = event.getIdentity().getWorkspaceId();
+        RuntimeState state = runtimes.remove(workspaceId);
         if (state != null) {
-          String workspaceId = state.runtime.getContext().getIdentity().getWorkspaceId();
           publishWorkspaceStatusEvent(
               workspaceId,
               STOPPED,
