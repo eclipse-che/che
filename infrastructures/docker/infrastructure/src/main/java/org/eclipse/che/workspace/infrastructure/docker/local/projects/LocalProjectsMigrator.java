@@ -46,7 +46,7 @@ public class LocalProjectsMigrator {
   private static final Logger LOG = LoggerFactory.getLogger(LocalProjectsMigrator.class);
 
   public void performMigration(String workspaceProjectsRootFolder) {
-    LOG.debug("Starting migration of workspace project files");
+    LOG.info("Starting migration of workspace project files");
     Map<String, String> workspaceName2id = getId2NameWorkspaceMapping();
     for (Entry<String, String> entry : workspaceName2id.entrySet()) {
       Path workspaceStoredByNameLocation =
@@ -55,10 +55,6 @@ public class LocalProjectsMigrator {
         // migration is not needed for this workspace
         continue;
       }
-      LOG.debug(
-          "Performing migration of workspace with id '{}' and name '{}'",
-          entry.getKey(),
-          entry.getValue());
       Path workspaceStoredByIdLocation =
           Paths.get(workspaceProjectsRootFolder).resolve(entry.getKey());
       try {
@@ -71,7 +67,7 @@ public class LocalProjectsMigrator {
             entry.getKey(),
             entry.getValue());
       } catch (IOException e) {
-        LOG.debug(
+        LOG.error(
             "Failed to migrate projects of workspace with id '{}' and name '{}'",
             entry.getKey(),
             entry.getValue());

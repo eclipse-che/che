@@ -127,7 +127,7 @@ public class WorkspaceDaoTest {
   }
 
   @Test
-  public void shouldGetWorkspacesByNamespaceWithinSingleResponse() throws Exception {
+  public void shouldGetWorkspacesByNamespace() throws Exception {
     final WorkspaceImpl workspace1 = workspaces[0];
     final WorkspaceImpl workspace2 = workspaces[1];
     assertEquals(
@@ -226,11 +226,23 @@ public class WorkspaceDaoTest {
 
   @Test
   public void shouldGetWorkspacesByNonTemporary() throws Exception {
-    Page<WorkspaceImpl> result = workspaceDao.getWorkspaces(false, 2, 0);
+    final WorkspaceImpl workspace = workspaces[4];
+    workspace.setTemporary(true);
+    workspaceDao.update(workspace);
 
-    assertEquals(result.getItems().size(), 2);
+    Page<WorkspaceImpl> firstPage = workspaceDao.getWorkspaces(false, 2, 0);
+
+    assertEquals(firstPage.getItems().size(), 2);
+    assertEquals(firstPage.getTotalItemsCount(), 4);
     assertEquals(
-        new HashSet<>(result.getItems()), new HashSet<>(asList(workspaces[0], workspaces[1])));
+        new HashSet<>(firstPage.getItems()), new HashSet<>(asList(workspaces[0], workspaces[1])));
+
+    Page<WorkspaceImpl> secondPage = workspaceDao.getWorkspaces(false, 2, 2);
+
+    assertEquals(secondPage.getItems().size(), 2);
+    assertEquals(secondPage.getTotalItemsCount(), 4);
+    assertEquals(
+        new HashSet<>(secondPage.getItems()), new HashSet<>(asList(workspaces[2], workspaces[3])));
   }
 
   @Test
@@ -242,6 +254,7 @@ public class WorkspaceDaoTest {
     Page<WorkspaceImpl> result = workspaceDao.getWorkspaces(true, 30, 0);
 
     assertEquals(result.getItems().size(), 1);
+    assertEquals(result.getTotalItemsCount(), 1);
     assertEquals(result.getItems().iterator().next(), workspaceDao.get(workspace.getId()));
   }
 
