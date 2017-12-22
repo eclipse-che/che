@@ -98,6 +98,28 @@ export abstract class EnvironmentManager {
   };
 
   /**
+   * Returns object with volumes.
+   *
+   * @param {IEnvironmentManagerMachine} machine
+   * @returns {any}
+   */
+  getMachineVolumes(machine: IEnvironmentManagerMachine): any {
+    return machine && machine.volumes ? machine.volumes : {};
+  }
+
+  /**
+   * Sets volumes.
+   * @param {IEnvironmentManagerMachine} machine
+   * @param {any} volumes
+   */
+  setMachineVolumes(machine: IEnvironmentManagerMachine, volumes: any): any {
+    if (!machine || !volumes) {
+      return;
+    }
+    machine.volumes = volumes;
+  }
+
+  /**
    * Gets unique name for new machine based on prefix.
    *
    * @param environment
@@ -230,9 +252,6 @@ export abstract class EnvironmentManager {
       machine.installers = machine.installers ? machine.installers : [];
       if (!hasWsAgent) {
         machine.installers.push(WS_AGENT_NAME);
-      }
-      if (machine.installers.indexOf(SSH_AGENT_NAME) < 0) {
-        machine.installers.push(SSH_AGENT_NAME);
       }
       if (machine.installers.indexOf(TERMINAL_AGENT_NAME) < 0) {
         machine.installers.push(TERMINAL_AGENT_NAME);

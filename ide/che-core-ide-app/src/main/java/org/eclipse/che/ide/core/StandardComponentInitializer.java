@@ -118,6 +118,8 @@ import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.command.editor.CommandEditorProvider;
 import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
+import org.eclipse.che.ide.devmode.DevModeOffAction;
+import org.eclipse.che.ide.devmode.DevModeSetUpAction;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.imageviewer.PreviewImageAction;
 import org.eclipse.che.ide.js.plugin.action.DisablePluginsAction;
@@ -359,6 +361,10 @@ public class StandardComponentInitializer {
   @Inject private AddToFileWatcherExcludesAction addToFileWatcherExcludesAction;
 
   @Inject private RemoveFromFileWatcherExcludesAction removeFromFileWatcherExcludesAction;
+
+  @Inject private DevModeSetUpAction devModeSetUpAction;
+
+  @Inject private DevModeOffAction devModeOffAction;
 
   @Inject private CollapseAllAction collapseAllAction;
 
@@ -656,6 +662,12 @@ public class StandardComponentInitializer {
     actionManager.registerAction("downloadItemAction", downloadResourceAction);
     actionManager.registerAction(NAVIGATE_TO_FILE, navigateToFileAction);
     assistantGroup.add(navigateToFileAction);
+
+    assistantGroup.addSeparator();
+    actionManager.registerAction("devModeSetUpAction", devModeSetUpAction);
+    actionManager.registerAction("devModeOffAction", devModeOffAction);
+    assistantGroup.add(devModeSetUpAction);
+    assistantGroup.add(devModeOffAction);
 
     // Compose Profile menu
     DefaultActionGroup profileGroup = (DefaultActionGroup) actionManager.getAction(GROUP_PROFILE);

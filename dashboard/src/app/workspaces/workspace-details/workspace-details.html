@@ -113,6 +113,22 @@
       </md-tab-body>
     </md-tab>
 
+    <!-- Machine Volumes -->
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Volumes);">
+      <md-tab-label>
+        <span class="che-tab-label-title">Volumes</span>
+      </md-tab-label>
+      <md-tab-body>
+        <che-machine-selector content-title="Volumes"
+                              workspace-details="workspaceDetailsController.workspaceDetails"
+                              on-change="workspaceDetailsController.checkEditMode({environment: environment})">
+          <che-machine-volumes environment-manager="environmentManager"
+                             selected-machine="machine"
+                             on-change="onChange()"></che-machine-volumes>
+        </che-machine-selector>
+      </md-tab-body>
+    </md-tab>
+
     <!-- Config tab -->
     <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Config);">
       <md-tab-label>

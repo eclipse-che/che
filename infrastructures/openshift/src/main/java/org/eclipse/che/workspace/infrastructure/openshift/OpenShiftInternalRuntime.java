@@ -126,6 +126,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
           machine.waitRunning(machineStartTimeoutMin);
           bootstrapMachine(machine);
           checkMachineServers(machine);
+          machine.setStatus(MachineStatus.RUNNING);
           sendRunningEvent(machine.getName());
         } catch (InfrastructureException rethrow) {
           sendFailedEvent(machine.getName(), rethrow.getMessage());
@@ -245,7 +246,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
         return;
       }
 
-      machine.setStatus(serverRef, ServerStatus.RUNNING);
+      machine.setServerStatus(serverRef, ServerStatus.RUNNING);
 
       eventService.publish(
           DtoFactory.newDto(ServerStatusEvent.class)

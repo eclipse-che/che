@@ -28,8 +28,9 @@ import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.plugin.github.ide.GitHubClientService;
+import org.eclipse.che.plugin.github.ide.GitHubServiceClient;
 import org.eclipse.che.plugin.github.shared.GitHubPullRequest;
 import org.eclipse.che.plugin.github.shared.GitHubPullRequestCreationInput;
 import org.eclipse.che.plugin.github.shared.GitHubPullRequestList;
@@ -71,30 +72,34 @@ public class GitHubHostingService implements VcsHostingService {
 
   private final AppContext appContext;
   private final DtoFactory dtoFactory;
-  private final GitHubClientService gitHubClientService;
+  private final GitHubServiceClient gitHubClientService;
   private final HostingServiceTemplates templates;
   private final String baseUrl;
   private final SecurityTokenProvider securityTokenProvider;
+  private final OAuthServiceClient oAuthServiceClient;
 
   @Inject
   public GitHubHostingService(
       @NotNull final AppContext appContext,
       @NotNull final DtoFactory dtoFactory,
-      @NotNull final GitHubClientService gitHubClientService,
+      @NotNull final GitHubServiceClient gitHubClientService,
       @NotNull final GitHubTemplates templates,
-      SecurityTokenProvider securityTokenProvider) {
+      SecurityTokenProvider securityTokenProvider,
+      OAuthServiceClient oAuthServiceClient) {
     this.appContext = appContext;
     this.dtoFactory = dtoFactory;
     this.gitHubClientService = gitHubClientService;
     this.templates = templates;
     this.baseUrl = appContext.getMasterApiEndpoint();
     this.securityTokenProvider = securityTokenProvider;
+    this.oAuthServiceClient = oAuthServiceClient;
   }
 
   @Override
   public Promise<HostUser> getUserInfo() {
-    return gitHubClientService
-        .getUserInfo()
+    return oAuthServiceClient
+        .getToken(SERVICE_NAME.toLowerCase())
+        .thenPromise(token -> gitHubClientService.getUserInfo(token.getToken()))
         .then(
             new Function<GitHubUser, HostUser>() {
               @Override
@@ -111,15 +116,11 @@ public class GitHubHostingService implements VcsHostingService {
 
   @Override
   public Promise<Repository> getRepository(String owner, String repositoryName) {
-    return gitHubClientService
-        .getRepository(owner, repositoryName)
-        .then(
-            new Function<GitHubRepository, Repository>() {
-              @Override
-              public Repository apply(GitHubRepository ghRepo) throws FunctionException {
-                return valueOf(ghRepo);
-              }
-            });
+    return oAuthServiceClient
+        .getToken(SERVICE_NAME.toLowerCase())
+        .thenPromise(
+            token -> gitHubClientService.getRepository(token.getToken(), owner, repositoryName))
+        .then((Function<GitHubRepository, Repository>) this::valueOf);
   }
 
   @NotNull
@@ -159,8 +160,9 @@ public class GitHubHostingService implements VcsHostingService {
 
   @Override
   public Promise<Repository> fork(final String owner, final String repository) {
-    return gitHubClientService
-        .fork(owner, repository)
+    return oAuthServiceClient
+        .getToken(SERVICE_NAME.toLowerCase())
+        .thenPromise(token -> gitHubClientService.fork(token.getToken(), owner, repository))
         .thenPromise(
             new Function<GitHubRepository, Promise<Repository>>() {
               @Override
@@ -232,8 +234,12 @@ public class GitHubHostingService implements VcsHostingService {
   @Override
   public Promise<PullRequest> getPullRequest(
       String owner, String repository, String username, final String branchName) {
-    return gitHubClientService
-        .getPullRequests(owner, repository, username + ':' + branchName)
+    return oAuthServiceClient
+        .getToken(SERVICE_NAME.toLowerCase())
+        .thenPromise(
+            token ->
+                gitHubClientService.getPullRequests(
+                    token.getToken(), owner, repository, username + ':' + branchName))
         .thenPromise(
             new Function<GitHubPullRequestList, Promise<PullRequest>>() {
               @Override
@@ -260,8 +266,10 @@ public class GitHubHostingService implements VcsHostingService {
       @NotNull final String repository,
       @NotNull final AsyncCallback<List<PullRequest>> callback) {
 
-    gitHubClientService
-        .getPullRequests(owner, repository)
+    oAuthServiceClient
+        .getToken(SERVICE_NAME.toLowerCase())
+        .thenPromise(
+            token -> gitHubClientService.getPullRequests(token.getToken(), owner, repository))
         .then(
             result -> {
               final List<PullRequest> pullRequests = new ArrayList<>();
@@ -284,8 +292,10 @@ public class GitHubHostingService implements VcsHostingService {
    */
   private Promise<List<PullRequest>> getPullRequests(String owner, String repository) {
 
-    return gitHubClientService
-        .getPullRequests(owner, repository)
+    return oAuthServiceClient
+        .getToken(SERVICE_NAME.toLowerCase())
+        .thenPromise(
+            token -> gitHubClientService.getPullRequests(token.getToken(), owner, repository))
         .then(
             new Function<GitHubPullRequestList, List<PullRequest>>() {
               @Override
@@ -327,8 +337,11 @@ public class GitHubHostingService implements VcsHostingService {
             .withHead(brName)
             .withBase(baseBranchName)
             .withBody(body);
-    return gitHubClientService
-        .createPullRequest(owner, repository, input)
+    return oAuthServiceClient
+        .getToken(SERVICE_NAME.toLowerCase())
+        .thenPromise(
+            token ->
+                gitHubClientService.createPullRequest(token.getToken(), owner, repository, input))
         .then(
             new Function<GitHubPullRequest, PullRequest>() {
               @Override
@@ -395,8 +408,9 @@ public class GitHubHostingService implements VcsHostingService {
       @NotNull final String owner,
       @NotNull final String repository,
       @NotNull final AsyncCallback<List<Repository>> callback) {
-    gitHubClientService
-        .getForks(owner, repository)
+    oAuthServiceClient
+        .getToken(SERVICE_NAME.toLowerCase())
+        .thenPromise(token -> gitHubClientService.getForks(token.getToken(), owner, repository))
         .then(
             gitHubRepositoryList -> {
               final List<Repository> repositories = new ArrayList<>();
@@ -413,8 +427,9 @@ public class GitHubHostingService implements VcsHostingService {
   }
 
   private Promise<List<Repository>> getForks(final String owner, final String repository) {
-    return gitHubClientService
-        .getForks(owner, repository)
+    return oAuthServiceClient
+        .getToken(SERVICE_NAME.toLowerCase())
+        .thenPromise(token -> gitHubClientService.getForks(token.getToken(), owner, repository))
         .then(
             new Function<GitHubRepositoryList, List<Repository>>() {
               @Override
@@ -520,15 +535,17 @@ public class GitHubHostingService implements VcsHostingService {
   @Override
   public Promise<PullRequest> updatePullRequest(
       String owner, String repository, PullRequest pullRequest) {
-    return gitHubClientService
-        .updatePullRequest(owner, repository, pullRequest.getNumber(), valueOf(pullRequest))
-        .then(
-            new Function<GitHubPullRequest, PullRequest>() {
-              @Override
-              public PullRequest apply(GitHubPullRequest arg) throws FunctionException {
-                return valueOf(arg);
-              }
-            });
+    return oAuthServiceClient
+        .getToken(SERVICE_NAME.toLowerCase())
+        .thenPromise(
+            token ->
+                gitHubClientService.updatePullRequest(
+                    token.getToken(),
+                    owner,
+                    repository,
+                    pullRequest.getNumber(),
+                    valueOf(pullRequest)))
+        .then((Function<GitHubPullRequest, PullRequest>) this::valueOf);
   }
 
   private GitHubPullRequest valueOf(PullRequest pullRequest) {

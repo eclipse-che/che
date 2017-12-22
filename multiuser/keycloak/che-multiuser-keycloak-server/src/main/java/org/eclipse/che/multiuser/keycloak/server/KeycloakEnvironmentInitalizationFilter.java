@@ -123,7 +123,24 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
         }
       }
     }
-    return user.get();
+    return actualizeUser(user.get(), email);
+  }
+  /** Performs check that emails in JWT and local DB are match, and synchronize them otherwise */
+  private User actualizeUser(User actualUser, String email) throws ServerException {
+    if (actualUser.getEmail().equals(email)) {
+      return actualUser;
+    }
+    UserImpl update = new UserImpl(actualUser);
+    update.setEmail(email);
+    try {
+      userManager.update(update);
+    } catch (NotFoundException e) {
+      throw new ServerException("Unable to actualize user email. User not found.", e);
+    } catch (ConflictException e) {
+      throw new ServerException(
+          "Unable to actualize user email. Another user with such email exists", e);
+    }
+    return update;
   }
 
   private Optional<User> getUser(String id) throws ServerException {

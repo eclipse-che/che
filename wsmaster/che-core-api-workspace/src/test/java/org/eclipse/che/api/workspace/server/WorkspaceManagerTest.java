@@ -52,6 +52,7 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -571,7 +572,7 @@ public class WorkspaceManagerTest {
   }
 
   private MachineImpl createMachine() {
-    return new MachineImpl(emptyMap(), emptyMap());
+    return new MachineImpl(emptyMap(), emptyMap(), MachineStatus.RUNNING);
   }
 
   private RuntimeContext mockContext(RuntimeIdentity identity) throws Exception {

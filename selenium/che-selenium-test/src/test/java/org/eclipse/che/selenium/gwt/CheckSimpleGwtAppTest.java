@@ -135,7 +135,7 @@ public class CheckSimpleGwtAppTest {
             .getUrl()
             .replace("tcp", "http");
 
-    // the timeout needs for che6-ocp platform
+    // the timeout needs for ocp platform
     WaitUtils.sleepQuietly(10);
     seleniumWebDriver.get(url);
 

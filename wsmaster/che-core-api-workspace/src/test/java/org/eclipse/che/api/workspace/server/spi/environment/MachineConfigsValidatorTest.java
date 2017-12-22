@@ -16,7 +16,6 @@ import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -199,39 +198,6 @@ public class MachineConfigsValidatorTest {
     machinesValidator.validate(singletonMap(MACHINE_NAME, machine));
   }
 
-  @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Environment should contain exactly 1 machine with wsagent, but contains '.*'. All machines with this agent: .*",
-    dataProvider = "severalWsAgentsProvider"
-  )
-  public void shouldFailIfThereIsMoreThan1MachineWithWsAgent(
-      Map<String, InternalMachineConfig> machines) throws Exception {
-    // when
-    machinesValidator.validate(machines);
-  }
-
-  @DataProvider(name = "severalWsAgentsProvider")
-  public static Object[][] severalWsAgentsProvider() {
-    return new Object[][] {
-      {
-        ImmutableMap.of(
-            "machine1", machineMockWithServers(Constants.SERVER_WS_AGENT_HTTP_REFERENCE),
-            "machine2", machineMockWithServers(Constants.SERVER_WS_AGENT_HTTP_REFERENCE))
-      },
-      {
-        ImmutableMap.of(
-            "machine1", machineMockWithInstallers(WsAgentMachineFinderUtil.WS_AGENT_INSTALLER),
-            "machine2", machineMockWithServers(Constants.SERVER_WS_AGENT_HTTP_REFERENCE))
-      },
-      {
-        ImmutableMap.of(
-            "machine1", machineMockWithInstallers(WsAgentMachineFinderUtil.WS_AGENT_INSTALLER),
-            "machine2", machineMockWithInstallers(WsAgentMachineFinderUtil.WS_AGENT_INSTALLER))
-      }
-    };
-  }
-
   private static InternalMachineConfig machineMock() {
     InternalMachineConfig machineConfig = mock(InternalMachineConfig.class);
     when(machineConfig.getServers()).thenReturn(emptyMap());
@@ -242,12 +208,6 @@ public class MachineConfigsValidatorTest {
   private static InternalMachineConfig machineMockWithServers(String... servers) {
     InternalMachineConfig machineConfig = machineMock();
     when(machineConfig.getServers()).thenReturn(createServers(servers));
-    return machineConfig;
-  }
-
-  private static InternalMachineConfig machineMockWithInstallers(String... installers) {
-    InternalMachineConfig machineConfig = machineMock();
-    when(machineConfig.getInstallers()).thenReturn(createInstallers(installers));
     return machineConfig;
   }
 

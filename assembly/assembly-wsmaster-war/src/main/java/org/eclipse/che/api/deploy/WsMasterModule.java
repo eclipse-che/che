@@ -41,9 +41,6 @@ import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao;
 import org.eclipse.che.api.user.server.jpa.JpaUserDao;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
-import org.eclipse.che.api.workspace.server.adapter.StackMessageBodyAdapter;
-import org.eclipse.che.api.workspace.server.adapter.WorkspaceConfigMessageBodyAdapter;
-import org.eclipse.che.api.workspace.server.adapter.WorkspaceMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.spi.provision.InstallerConfigProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
@@ -172,9 +169,6 @@ public class WsMasterModule extends AbstractModule {
 
     bind(org.eclipse.che.security.oauth.OAuthAuthenticatorProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl.class);
-    bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
-        .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
-    bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
 
     // installers
     install(new InstallerModule());
@@ -193,9 +187,6 @@ public class WsMasterModule extends AbstractModule {
 
     final Multibinder<MessageBodyAdapter> adaptersMultibinder =
         Multibinder.newSetBinder(binder(), MessageBodyAdapter.class);
-    adaptersMultibinder.addBinding().to(WorkspaceConfigMessageBodyAdapter.class);
-    adaptersMultibinder.addBinding().to(WorkspaceMessageBodyAdapter.class);
-    adaptersMultibinder.addBinding().to(StackMessageBodyAdapter.class);
 
     final MessageBodyAdapterInterceptor interceptor = new MessageBodyAdapterInterceptor();
     requestInjection(interceptor);
@@ -258,6 +249,10 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.user.server.CheUserCreator.class);
 
     bindConstant().annotatedWith(Names.named("che.agents.auth_enabled")).to(false);
+
+    bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
+        .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
+    bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
   }
 
   private void configureMultiUserMode() {

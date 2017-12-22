@@ -215,13 +215,12 @@ public class FactoryService extends Service {
 
     for (Pair<String, String> pair : query) {
       if (!pair.first.equals("creator.userId") && !pair.first.equals("name")) {
-        LOG.warn(
-            "Method factory.find is going to be removed or limited in scope in 6.0 GA."
-                + " Requested attributes {}, skipCount {}, maxItems {}",
-            query,
-            skip,
-            maxItems);
-        break;
+        throw new BadRequestException(
+            String.format(
+                "Method factory.find is going to be removed or limited in scope in 6.0 GA."
+                    + " Search allowed only by creator.userId and name parameters."
+                    + " Requested attributes %s, skipCount %s, maxItems %s",
+                query, skip, maxItems));
       }
     }
 

@@ -37,7 +37,7 @@ public class WorkspaceDtoDeserializer {
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceDtoDeserializer.class);
 
   @Inject
-  @Named("che.selenium.infrastructure")
+  @Named("che.infrastructure")
   private String infrastructure;
 
   public WorkspaceConfigDto deserializeWorkspaceTemplate(String templateName) {

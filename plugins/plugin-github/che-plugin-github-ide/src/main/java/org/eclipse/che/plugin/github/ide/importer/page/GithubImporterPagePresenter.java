@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.plugin.github.ide.importer.page;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.JsArrayMixed;
@@ -18,18 +21,16 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorUrlProvider;
@@ -38,8 +39,8 @@ import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.NameUtils;
-import org.eclipse.che.plugin.github.ide.GitHubClientService;
 import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
+import org.eclipse.che.plugin.github.ide.GitHubServiceClient;
 import org.eclipse.che.plugin.github.ide.load.ProjectData;
 import org.eclipse.che.plugin.github.shared.GitHubRepository;
 import org.eclipse.che.plugin.github.shared.GitHubUser;
@@ -65,13 +66,15 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
   private static final RegExp WHITE_SPACE = RegExp.compile("^\\s");
 
   private final DtoFactory dtoFactory;
-  private GitHubClientService gitHubClientService;
+  private GitHubServiceClient gitHubClientService;
   private Map<String, List<GitHubRepository>> repositories;
   private GitHubLocalizationConstant locale;
   private GithubImporterPageView view;
   private final String baseUrl;
   private final AppContext appContext;
   private OAuth2Authenticator gitHubAuthenticator;
+  private final OAuthServiceClient oAuthServiceClient;
+  private final NotificationManager notificationManager;
 
   private boolean ignoreChanges;
 
@@ -79,16 +82,20 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
   public GithubImporterPagePresenter(
       GithubImporterPageView view,
       OAuth2AuthenticatorRegistry gitHubAuthenticatorRegistry,
-      GitHubClientService gitHubClientService,
+      GitHubServiceClient gitHubClientService,
       DtoFactory dtoFactory,
       AppContext appContext,
-      GitHubLocalizationConstant locale) {
+      GitHubLocalizationConstant locale,
+      OAuthServiceClient oAuthServiceClient,
+      NotificationManager notificationManager) {
     this.view = view;
     this.baseUrl = appContext.getMasterApiEndpoint();
     this.appContext = appContext;
     this.gitHubAuthenticator = gitHubAuthenticatorRegistry.getAuthenticator("github");
     this.gitHubClientService = gitHubClientService;
     this.dtoFactory = dtoFactory;
+    this.oAuthServiceClient = oAuthServiceClient;
+    this.notificationManager = notificationManager;
     this.view.setDelegate(this);
     this.locale = locale;
   }
@@ -260,32 +267,16 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
   private void getUserRepositoriesAndOrganizations() {
     showProcessing(true);
 
-    Promise<GitHubUser> userInfo = gitHubClientService.getUserInfo();
-    Promise<List<GitHubUser>> organizations = gitHubClientService.getOrganizations();
-    Promise<List<GitHubRepository>> allRepositories = gitHubClientService.getRepositoriesList();
-
-    doRequest(userInfo, organizations, allRepositories);
-  }
-
-  protected void doRequest(
-      Promise<GitHubUser> userInfo,
-      Promise<List<GitHubUser>> organizations,
-      Promise<List<GitHubRepository>> allRepositories) {
-    Promises.all(userInfo, organizations, allRepositories)
-        .then(
-            new Operation<JsArrayMixed>() {
-              @Override
-              public void apply(JsArrayMixed arg) throws OperationException {
-                onSuccessRequest(arg);
-              }
-            })
-        .catchError(
-            new Operation<PromiseError>() {
-              @Override
-              public void apply(PromiseError arg) throws OperationException {
-                onFailRequest(arg);
-              }
-            });
+    oAuthServiceClient
+        .getToken(gitHubAuthenticator.getProviderName())
+        .thenPromise(
+            token ->
+                Promises.all(
+                    gitHubClientService.getUserInfo(token.getToken()),
+                    gitHubClientService.getOrganizations(token.getToken()),
+                    gitHubClientService.getRepositoriesList(token.getToken())))
+        .then(this::onSuccessRequest)
+        .catchError(this::onFailRequest);
   }
 
   protected void onSuccessRequest(JsArrayMixed arg) {
@@ -308,6 +299,8 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
     showProcessing(false);
     if (arg.getCause() instanceof UnauthorizedException) {
       authorize();
+    } else {
+      notificationManager.notify(locale.authorizationFailed(), FAIL, FLOAT_MODE);
     }
   }
 
@@ -365,7 +358,7 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
 
     Map<String, String> login2OrgName = getLogin2OrgName(gitHubOrganizations);
     for (String orgName : login2OrgName.values()) {
-      repositories.put(orgName, new ArrayList<GitHubRepository>());
+      repositories.put(orgName, new ArrayList<>());
     }
 
     for (GitHubRepository gitHubRepository : gitHubRepositories) {
@@ -410,14 +403,7 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
         projectsData.add(projectData);
       }
 
-      Collections.sort(
-          projectsData,
-          new Comparator<ProjectData>() {
-            @Override
-            public int compare(ProjectData o1, ProjectData o2) {
-              return o1.getName().compareTo(o2.getName());
-            }
-          });
+      projectsData.sort(Comparator.comparing(ProjectData::getName));
 
       view.setRepositories(projectsData);
       view.reset();

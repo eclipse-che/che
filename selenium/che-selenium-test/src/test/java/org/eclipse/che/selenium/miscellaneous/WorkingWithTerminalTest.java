@@ -59,7 +59,7 @@ public class WorkingWithTerminalTest {
   private static final String MC_HELP_DIALOG =
       "This is the main help screen for GNU Midnight Commander.";
   private static final String MC_USER_MENU_DIALOG = "User menu";
-  private static final String[] VIEW_BIN_FOLDER = {"bash", "bunzip2", "bzcat"};
+  private static final String[] VIEW_BIN_FOLDER = {"bash", "chmod", "date"};
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -164,7 +164,7 @@ public class WorkingWithTerminalTest {
 
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7592", ex);
+      fail("Known issue https://github.com/eclipse/che-lib/issues/57", ex);
     }
 
     terminal.moveDownListTerminal(".dockerenv");
@@ -185,7 +185,7 @@ public class WorkingWithTerminalTest {
       }
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7592", ex);
+      fail("Known issue https://github.com/eclipse/che-lib/issues/57", ex);
     }
 
     terminal.waitExpectedTextNotPresentTerminal(".dockerenv");
@@ -226,7 +226,7 @@ public class WorkingWithTerminalTest {
       }
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7592", ex);
+      fail("Known issue https://github.com/eclipse/che-lib/issues/57", ex);
     }
 
     terminal.typeIntoTerminal(Keys.F10.toString());
@@ -342,6 +342,7 @@ public class WorkingWithTerminalTest {
 
   @Test(priority = 12)
   public void closeTerminalByExitCommand() {
+    terminal.waitTerminalConsole();
     terminal.typeIntoTerminal("exit" + Keys.ENTER);
     terminal.waitTerminalIsNotPresent(1);
   }

@@ -11,20 +11,20 @@
 package org.eclipse.che.ide.navigation;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.sort;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+import static org.eclipse.che.ide.util.NameUtils.getFileExtension;
 
-import com.google.common.base.Optional;
 import com.google.gwt.http.client.URL;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.shared.dto.ProjectSearchRequestDto;
 import org.eclipse.che.api.project.shared.dto.ProjectSearchResponseDto;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
@@ -74,12 +74,9 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
         .getWorkspaceRoot()
         .getFile(path)
         .then(
-            new Operation<Optional<File>>() {
-              @Override
-              public void apply(Optional<File> optFile) throws OperationException {
-                if (optFile.isPresent()) {
-                  editorAgent.openEditor(optFile.get());
-                }
+            optFile -> {
+              if (optFile.isPresent()) {
+                editorAgent.openEditor(optFile.get());
               }
             });
   }
@@ -103,8 +100,20 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
         .methodName("project/search")
         .paramsAsDto(requestParams)
         .sendAndReceiveResultAsDto(ProjectSearchResponseDto.class, 20_000)
-        .onSuccess(response -> view.showItems(response.getItemReferences()))
+        .onSuccess(response -> prepareResults(response))
         .onFailure(error -> Log.error(getClass(), error.getMessage()))
         .onTimeout(() -> Log.error(getClass(), "Project search request failed due timeout"));
+  }
+
+  private void prepareResults(ProjectSearchResponseDto response) {
+    List<SearchResultDto> results = response.getItemReferences();
+    sort(
+        results,
+        (o1, o2) -> {
+          String ext1 = getFileExtension(o1.getItemReference().getName());
+          String ext2 = getFileExtension(o2.getItemReference().getName());
+          return ext1.compareToIgnoreCase(ext2);
+        });
+    view.showItems(results);
   }
 }
