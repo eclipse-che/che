@@ -12,6 +12,8 @@ package org.eclipse.che.multiuser.resource.api.usage.tracker;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -27,6 +29,7 @@ import javax.inject.Provider;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.multiuser.resource.api.type.WorkspaceResourceType;
@@ -72,8 +75,8 @@ public class WorkspaceResourceUsageTrackerTest {
     when(accountManager.getById(any())).thenReturn(account);
     when(account.getName()).thenReturn("testAccount");
 
-    when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
-        .thenReturn(Collections.emptyList());
+    when(workspaceManager.getByNamespace(anyString(), anyBoolean(), anyInt(), anyLong()))
+        .thenReturn(new Page<>(Collections.emptyList(), 0, 1, 0));
 
     Optional<Resource> usedWorkspacesOpt =
         workspaceResourceUsageTracker.getUsedResource("account123");
@@ -86,8 +89,13 @@ public class WorkspaceResourceUsageTrackerTest {
     when(accountManager.getById(any())).thenReturn(account);
     when(account.getName()).thenReturn("testAccount");
 
-    when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
-        .thenReturn(Arrays.asList(new WorkspaceImpl(), new WorkspaceImpl(), new WorkspaceImpl()));
+    when(workspaceManager.getByNamespace(anyString(), anyBoolean(), anyInt(), anyLong()))
+        .thenReturn(
+            new Page<>(
+                Arrays.asList(new WorkspaceImpl(), new WorkspaceImpl(), new WorkspaceImpl()),
+                0,
+                3,
+                3));
 
     Optional<Resource> usedWorkspacesOpt =
         workspaceResourceUsageTracker.getUsedResource("account123");
@@ -98,6 +106,6 @@ public class WorkspaceResourceUsageTrackerTest {
     assertEquals(usedWorkspaces.getAmount(), 3);
     assertEquals(usedWorkspaces.getUnit(), WorkspaceResourceType.UNIT);
     verify(accountManager).getById(eq("account123"));
-    verify(workspaceManager).getByNamespace(eq("testAccount"), eq(false));
+    verify(workspaceManager).getByNamespace(eq("testAccount"), eq(false), anyInt(), anyLong());
   }
 }

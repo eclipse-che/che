@@ -10,7 +10,11 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.local.projects;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -21,13 +25,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.workspace.infrastructure.docker.WindowsHostUtils;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -37,8 +45,10 @@ public class LocalProjectsFolderPathProviderTest {
 
   private static final String WS_ID = "testWsId";
   private static final String WS_NAME = "testWsName";
+  private static final String WS_NAMESPACE = "che";
 
   @Mock private WorkspaceDao workspaceDao;
+  @Mock private LocalProjectsMigrator localProjectsMigrator;
 
   private String singleFolderForAllWorkspaces;
   private String oldWorkspacesRoot;
@@ -50,8 +60,13 @@ public class LocalProjectsFolderPathProviderTest {
     WorkspaceImpl workspace = mock(WorkspaceImpl.class);
     WorkspaceConfigImpl workspaceConfig = mock(WorkspaceConfigImpl.class);
     when(workspaceDao.get(WS_ID)).thenReturn(workspace);
+    when(workspaceDao.get(WS_NAME, WS_NAMESPACE)).thenReturn(workspace);
+    when(workspaceDao.getWorkspaces(eq(false), anyInt(), anyLong()))
+        .thenReturn(new Page<>(Collections.singletonList(workspace), 0, 1, 1));
     when(workspace.getConfig()).thenReturn(workspaceConfig);
     when(workspaceConfig.getName()).thenReturn(WS_NAME);
+    when(workspace.getNamespace()).thenReturn(WS_NAMESPACE);
+    when(workspace.getId()).thenReturn(WS_ID);
 
     Path tempDirectory = Files.createTempDirectory(getClass().getSimpleName());
     workspacesRoot = tempDirectory.toString();
@@ -61,12 +76,18 @@ public class LocalProjectsFolderPathProviderTest {
     oldWorkspacesRoot = Paths.get(workspacesRoot, "oldWorkspacesRoot").toString();
   }
 
+  @AfterMethod
+  public void tearDown() throws Exception {
+    IoUtil.deleteRecursive(workspacesRootFile);
+  }
+
   @Test
   public void createsFoldersByDefault() throws Exception {
     assertTrue(workspacesRootFile.delete());
 
     LocalProjectsFolderPathProvider provider =
-        new LocalProjectsFolderPathProvider(workspacesRoot, workspaceDao);
+        new LocalProjectsFolderPathProvider(
+            workspacesRoot, false, workspaceDao, localProjectsMigrator);
 
     provider.init();
 
@@ -86,9 +107,11 @@ public class LocalProjectsFolderPathProviderTest {
         new LocalProjectsFolderPathProvider(
             workspacesRoot,
             null,
+            false,
             null,
             true, // <- Create folder if it doesn't exist
             workspaceDao,
+            localProjectsMigrator,
             false);
 
     provider.init();
@@ -104,14 +127,16 @@ public class LocalProjectsFolderPathProviderTest {
 
   @Test
   public void worksIfWorkspaceFolderExists() throws Exception {
-    assertTrue(Paths.get(workspacesRoot, WS_NAME).toFile().mkdir());
+    assertTrue(Paths.get(workspacesRoot, WS_ID).toFile().mkdir());
     LocalProjectsFolderPathProvider provider =
         new LocalProjectsFolderPathProvider(
             workspacesRoot,
             null,
+            false,
             null,
             false, // <- Do not create folders
             workspaceDao,
+            localProjectsMigrator,
             false);
 
     provider.init();
@@ -119,7 +144,7 @@ public class LocalProjectsFolderPathProviderTest {
     assertTrue(workspacesRootFile.exists());
     assertTrue(workspacesRootFile.isDirectory());
 
-    String providerPath = provider.getPath(WS_ID);
+    String providerPath = provider.getPathByName(WS_NAME, WS_NAMESPACE);
 
     assertTrue(new File(providerPath).exists());
     assertTrue(new File(providerPath).isDirectory());
@@ -132,9 +157,11 @@ public class LocalProjectsFolderPathProviderTest {
         new LocalProjectsFolderPathProvider(
             workspacesRoot,
             null,
+            false,
             null,
             false, // <- Do not create folders
             workspaceDao,
+            localProjectsMigrator,
             false);
 
     provider.init();
@@ -150,16 +177,18 @@ public class LocalProjectsFolderPathProviderTest {
         new LocalProjectsFolderPathProvider(
             workspacesRoot,
             oldWorkspacesRoot,
+            false,
             singleFolderForAllWorkspaces,
             false,
             workspaceDao,
+            localProjectsMigrator,
             true);
 
     provider.init();
     String providerPath = provider.getPath(WS_ID);
 
     assertEquals(
-        providerPath, WindowsHostUtils.getCheHome().resolve("vfs").resolve(WS_NAME).toString());
+        providerPath, WindowsHostUtils.getCheHome().resolve("vfs").resolve(WS_ID).toString());
   }
 
   @Test
@@ -168,9 +197,11 @@ public class LocalProjectsFolderPathProviderTest {
         new LocalProjectsFolderPathProvider(
             workspacesRoot,
             oldWorkspacesRoot,
+            false,
             singleFolderForAllWorkspaces,
             false,
             workspaceDao,
+            localProjectsMigrator,
             false);
 
     provider.init();
@@ -179,26 +210,15 @@ public class LocalProjectsFolderPathProviderTest {
     assertEquals(providerPath, singleFolderForAllWorkspaces);
   }
 
-  @Test
-  public void useOlderFolderIfConfigured() throws Exception {
-    LocalProjectsFolderPathProvider provider =
-        new LocalProjectsFolderPathProvider(
-            workspacesRoot, oldWorkspacesRoot, null, false, workspaceDao, false);
-
-    provider.init();
-    String providerPath = provider.getPath(WS_ID);
-
-    assertEquals(providerPath, Paths.get(oldWorkspacesRoot, WS_NAME).toString());
-  }
-
   @Test(
     expectedExceptions = IOException.class,
     expectedExceptionsMessageRegExp = "Workspace folder '.*' is not directory"
   )
   public void throwsExceptionIfFileIsFoundByWorkspacesPath() throws Exception {
-    assertTrue(Paths.get(workspacesRoot, WS_NAME).toFile().createNewFile());
+    assertTrue(Paths.get(workspacesRoot, WS_ID).toFile().createNewFile());
     LocalProjectsFolderPathProvider provider =
-        new LocalProjectsFolderPathProvider(workspacesRoot, null, null, true, workspaceDao, false);
+        new LocalProjectsFolderPathProvider(
+            workspacesRoot, null, false, null, true, workspaceDao, localProjectsMigrator, false);
 
     provider.init();
     provider.getPath(WS_ID);
@@ -213,7 +233,14 @@ public class LocalProjectsFolderPathProviderTest {
     Path tempFile = Files.createTempFile(getClass().getSimpleName(), null);
     LocalProjectsFolderPathProvider provider =
         new LocalProjectsFolderPathProvider(
-            tempFile.toString(), null, null, true, workspaceDao, false);
+            tempFile.toString(),
+            null,
+            false,
+            null,
+            true,
+            workspaceDao,
+            localProjectsMigrator,
+            false);
 
     provider.init();
   }
@@ -227,7 +254,14 @@ public class LocalProjectsFolderPathProviderTest {
     Path tempFile = Files.createTempFile(getClass().getSimpleName(), null);
     LocalProjectsFolderPathProvider provider =
         new LocalProjectsFolderPathProvider(
-            workspacesRoot, oldWorkspacesRoot, tempFile.toString(), true, workspaceDao, false);
+            workspacesRoot,
+            oldWorkspacesRoot,
+            false,
+            tempFile.toString(),
+            true,
+            workspaceDao,
+            localProjectsMigrator,
+            false);
 
     provider.init();
     provider.getPath(WS_ID);
@@ -238,11 +272,27 @@ public class LocalProjectsFolderPathProviderTest {
     expectedExceptionsMessageRegExp = "expected test exception"
   )
   public void throwsIOExceptionIfWorkspaceRetrievalFails() throws Exception {
-    when(workspaceDao.get(WS_ID)).thenThrow(new ServerException("expected test exception"));
+    when(workspaceDao.get(WS_NAME, WS_NAMESPACE))
+        .thenThrow(new ServerException("expected test exception"));
     LocalProjectsFolderPathProvider provider =
-        new LocalProjectsFolderPathProvider(workspacesRoot, null, null, false, workspaceDao, true);
+        new LocalProjectsFolderPathProvider(
+            workspacesRoot, null, false, null, false, workspaceDao, localProjectsMigrator, true);
 
     provider.init();
-    provider.getPath(WS_ID);
+    provider.getPathByName(WS_NAME, WS_NAMESPACE);
+  }
+
+  @Test
+  public void shouldPerformWorkspaceMigration() throws Exception {
+    Files.createDirectories(Paths.get(workspacesRoot).resolve(WS_NAME));
+    Files.createFile(Paths.get(workspacesRoot).resolve(WS_NAME).resolve("pom.xml"));
+
+    LocalProjectsFolderPathProvider provider =
+        new LocalProjectsFolderPathProvider(
+            workspacesRoot, null, true, null, false, workspaceDao, localProjectsMigrator, false);
+
+    provider.init();
+
+    verify(localProjectsMigrator).performMigration(eq(workspacesRoot));
   }
 }

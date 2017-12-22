@@ -11,12 +11,17 @@
 package org.eclipse.che.plugin.pullrequest.client.vcs;
 
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_GIT_OPERATION;
+import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
+import static org.eclipse.che.ide.util.ExceptionUtils.getAttributes;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
@@ -31,10 +36,13 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.auth.Credentials;
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.util.StringUtils;
 
 /** Git backed implementation for {@link VcsService}. */
 @Singleton
@@ -44,16 +52,19 @@ public class GitVcsService implements VcsService {
   private final GitServiceClient service;
   private final DtoFactory dtoFactory;
   private final AppContext appContext;
+  private final OAuthServiceClient oAuthServiceClient;
 
   @Inject
   public GitVcsService(
       final DtoFactory dtoFactory,
       final DtoUnmarshallerFactory dtoUnmarshallerFactory,
       final GitServiceClient service,
-      final AppContext appContext) {
+      final AppContext appContext,
+      final OAuthServiceClient oAuthServiceClient) {
     this.dtoFactory = dtoFactory;
     this.service = service;
     this.appContext = appContext;
+    this.oAuthServiceClient = oAuthServiceClient;
   }
 
   @Override
@@ -204,7 +215,38 @@ public class GitVcsService implements VcsService {
             appContext.getRootProject().getLocation(),
             Collections.singletonList(localBranchName),
             remote,
-            true)
+            true,
+            null)
+        .catchErrorPromise(
+            error -> {
+              if (getErrorCode(error.getCause()) != UNAUTHORIZED_GIT_OPERATION) {
+                return null;
+              }
+              Map<String, String> attributes = getAttributes(error.getCause());
+              String providerName = attributes.get(PROVIDER_NAME);
+              if (!StringUtils.isNullOrEmpty(providerName)) {
+                return pushBranchAuthenticated(remote, localBranchName, providerName);
+              } else if (BRANCH_UP_TO_DATE_ERROR_MESSAGE.equalsIgnoreCase(error.getMessage())) {
+                return Promises.reject(
+                    JsPromiseError.create(new BranchUpToDateException(localBranchName)));
+              } else {
+                return Promises.reject(error);
+              }
+            });
+  }
+
+  public Promise<PushResponse> pushBranchAuthenticated(
+      final String remote, final String localBranchName, final String providerName) {
+    return oAuthServiceClient
+        .getToken(providerName)
+        .thenPromise(
+            token ->
+                service.push(
+                    appContext.getRootProject().getLocation(),
+                    Collections.singletonList(localBranchName),
+                    remote,
+                    true,
+                    new Credentials(token.getToken(), token.getToken())))
         .catchErrorPromise(
             error -> {
               if (BRANCH_UP_TO_DATE_ERROR_MESSAGE.equalsIgnoreCase(error.getMessage())) {
