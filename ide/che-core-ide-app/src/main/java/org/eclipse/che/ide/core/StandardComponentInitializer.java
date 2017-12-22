@@ -141,6 +141,7 @@ import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
 import org.eclipse.che.ide.part.explorer.project.synchronize.ProjectConfigSynchronized;
 import org.eclipse.che.ide.processes.NewTerminalAction;
 import org.eclipse.che.ide.processes.actions.CloseConsoleAction;
+import org.eclipse.che.ide.processes.actions.DisplayMachineOutputAction;
 import org.eclipse.che.ide.processes.actions.ReRunProcessAction;
 import org.eclipse.che.ide.processes.actions.StopProcessAction;
 import org.eclipse.che.ide.processes.loading.ShowWorkspaceStatusAction;
@@ -357,6 +358,8 @@ public class StandardComponentInitializer {
   @Inject private StopProcessAction stopProcessAction;
 
   @Inject private CloseConsoleAction closeConsoleAction;
+
+  @Inject private DisplayMachineOutputAction displayMachineOutputAction;
 
   @Inject private ShowConsoleTreeAction showConsoleTreeAction;
 
@@ -784,6 +787,9 @@ public class StandardComponentInitializer {
     consolesTreeContextMenu.add(reRunProcessAction);
     consolesTreeContextMenu.add(stopProcessAction);
     consolesTreeContextMenu.add(closeConsoleAction);
+
+    actionManager.registerAction(DisplayMachineOutputAction.ID, displayMachineOutputAction);
+    consolesTreeContextMenu.add(displayMachineOutputAction);
 
     // Editor context menu group
     DefaultActionGroup editorTabContextMenu =
