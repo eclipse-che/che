@@ -23,7 +23,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.MachineFailedEvent;
 import org.eclipse.che.ide.api.workspace.event.MachineRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.MachineStartingEvent;
-import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.MachineStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.api.workspace.model.RuntimeImpl;

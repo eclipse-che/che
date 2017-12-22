@@ -32,7 +32,7 @@ import org.eclipse.che.ide.api.workspace.event.InstallerFailedEvent;
 import org.eclipse.che.ide.api.workspace.event.InstallerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.InstallerStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.MachineRunningEvent;
-import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
+import org.eclipse.che.ide.workspace.events.MachineStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
