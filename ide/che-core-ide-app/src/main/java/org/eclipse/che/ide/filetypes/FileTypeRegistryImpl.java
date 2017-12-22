@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.filetypes;
 
+import static org.eclipse.che.ide.util.NameUtils.getFileExtension;
+
 import com.google.common.base.Strings;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.inject.Inject;
@@ -83,14 +85,5 @@ public class FileTypeRegistryImpl implements FileTypeRegistry {
     }
 
     return unknownFileType;
-  }
-
-  private String getFileExtension(String name) {
-    final int lastDotPosition = name.lastIndexOf('.');
-    // name has no extension
-    if (lastDotPosition < 0) {
-      return "";
-    }
-    return name.substring(lastDotPosition + 1);
   }
 }
