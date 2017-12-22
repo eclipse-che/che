@@ -37,6 +37,7 @@ import org.testng.annotations.Test;
 public class RemoveLocalProjectsFolderOnWorkspaceRemoveTest {
 
   private static final String WORKSPACE_NAME = "test-workspace";
+  private static final String WORKSPACE_NAMESPACE = "che";
   private static final String WORKSPACE_ID = "workspace123";
 
   private static final String HOST_INSTANCE_DATA_FOLDER = "/home";
@@ -58,6 +59,7 @@ public class RemoveLocalProjectsFolderOnWorkspaceRemoveTest {
     when(workspaceConfig.getName()).thenReturn(WORKSPACE_NAME);
 
     when(workspace.getId()).thenReturn(WORKSPACE_ID);
+    when(workspace.getNamespace()).thenReturn(WORKSPACE_NAMESPACE);
     when(workspace.getConfig()).thenReturn(workspaceConfig);
   }
 
@@ -72,13 +74,13 @@ public class RemoveLocalProjectsFolderOnWorkspaceRemoveTest {
 
   @Test
   public void hostInstanceDataFolderShouldBeCutAndProjectsFolderShouldBeCleaned() throws Exception {
-    when(projectsFolderPathProvider.getPathByName(anyString())).thenReturn(HOST_PROJECTS_FOLDER);
+    when(projectsFolderPathProvider.getPath(anyString())).thenReturn(HOST_PROJECTS_FOLDER);
     when(removeLocalProjectsFolderOnWorkspaceRemove.getInstanceDataPath())
         .thenReturn(HOST_INSTANCE_DATA_FOLDER);
 
     removeLocalProjectsFolderOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
 
-    verify(projectsFolderPathProvider).getPathByName(WORKSPACE_NAME);
+    verify(projectsFolderPathProvider).getPath(WORKSPACE_ID);
     verify(removeLocalProjectsFolderOnWorkspaceRemove)
         .deleteRecursiveAsync(WORKSPACE_ID, CONTAINER_MOUNTED_PROJECTS_FOLDER);
   }
@@ -90,13 +92,13 @@ public class RemoveLocalProjectsFolderOnWorkspaceRemoveTest {
             new RemoveLocalProjectsFolderOnWorkspaceRemove(
                 HOST_PROJECTS_FOLDER, projectsFolderPathProvider));
 
-    when(projectsFolderPathProvider.getPathByName(anyString())).thenReturn(HOST_PROJECTS_FOLDER);
+    when(projectsFolderPathProvider.getPath(anyString())).thenReturn(HOST_PROJECTS_FOLDER);
     when(removeLocalProjectsFolderOnWorkspaceRemove.getInstanceDataPath())
         .thenReturn(HOST_INSTANCE_DATA_FOLDER);
 
     removeLocalProjectsFolderOnWorkspaceRemove.onEvent(new WorkspaceRemovedEvent(workspace));
 
-    verify(projectsFolderPathProvider).getPathByName(WORKSPACE_NAME);
+    verify(projectsFolderPathProvider).getPath(WORKSPACE_ID);
     verify(removeLocalProjectsFolderOnWorkspaceRemove, never())
         .deleteRecursiveAsync(anyString(), anyString());
   }

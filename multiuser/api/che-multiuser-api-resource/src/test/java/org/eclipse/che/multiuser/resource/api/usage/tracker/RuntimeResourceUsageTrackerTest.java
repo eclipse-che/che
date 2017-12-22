@@ -13,6 +13,8 @@ package org.eclipse.che.multiuser.resource.api.usage.tracker;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -21,6 +23,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,6 +31,7 @@ import javax.inject.Provider;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -75,8 +79,8 @@ public class RuntimeResourceUsageTrackerTest {
     when(accountManager.getById(any())).thenReturn(account);
     when(account.getName()).thenReturn("testAccount");
 
-    when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
-        .thenReturn(singletonList(createWorkspace(WorkspaceStatus.STOPPED)));
+    when(workspaceManager.getByNamespace(anyString(), anyBoolean(), anyInt(), anyLong()))
+        .thenReturn(new Page<>(singletonList(createWorkspace(WorkspaceStatus.STOPPED)), 0, 1, 1));
 
     Optional<Resource> usedRuntimesOpt = runtimeResourceUsageTracker.getUsedResource("account123");
 
@@ -88,11 +92,12 @@ public class RuntimeResourceUsageTrackerTest {
     when(accountManager.getById(any())).thenReturn(account);
     when(account.getName()).thenReturn("testAccount");
 
-    when(workspaceManager.getByNamespace(anyString(), anyBoolean()))
-        .thenReturn(
-            Stream.of(WorkspaceStatus.values())
-                .map(RuntimeResourceUsageTrackerTest::createWorkspace)
-                .collect(Collectors.toList()));
+    List<WorkspaceImpl> runtimes =
+        Stream.of(WorkspaceStatus.values())
+            .map(RuntimeResourceUsageTrackerTest::createWorkspace)
+            .collect(Collectors.toList());
+    when(workspaceManager.getByNamespace(anyString(), anyBoolean(), anyInt(), anyLong()))
+        .thenReturn(new Page<>(runtimes, 0, runtimes.size(), runtimes.size()));
 
     Optional<Resource> usedRuntimesOpt = runtimeResourceUsageTracker.getUsedResource("account123");
 
@@ -103,7 +108,7 @@ public class RuntimeResourceUsageTrackerTest {
         usedRuntimes.getAmount(), WorkspaceStatus.values().length - 1); // except stopped workspaces
     assertEquals(usedRuntimes.getUnit(), RuntimeResourceType.UNIT);
     verify(accountManager).getById(eq("account123"));
-    verify(workspaceManager).getByNamespace(eq("testAccount"), eq(false));
+    verify(workspaceManager).getByNamespace(eq("testAccount"), eq(false), anyInt(), anyLong());
   }
 
   /** Creates users workspace object based on the status. */
