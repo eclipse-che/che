@@ -20,7 +20,6 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.G
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.FILE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -37,7 +36,6 @@ import org.eclipse.che.selenium.pageobject.*;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -151,13 +149,7 @@ public class GitColorsTest {
     askForValueDialog.typeAndWaitText("newFile");
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-
-    try {
-      editor.waitYellowTab("newFile");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7856", ex);
-    }
+    editor.waitYellowTab("newFile");
 
     // check that the file color is yellow
     projectExplorer.waitYellowNode(PROJECT_NAME + "/newFile");
