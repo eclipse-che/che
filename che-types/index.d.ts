@@ -8,32 +8,6 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-declare module "*.svg" {
-    const content: string;
-    export default content;
-}
-declare function require(string): any;
-declare module "*.png" {
-    const content: any;
-    export default content;
-}
-declare module "*.html" {
-    const content: any;
-    export default content;
-}
-
-declare interface Map<K, V> {
-    size(): number;
-    isEmpty(): boolean;
-    containsKey(key: object): boolean;
-    containsValue(value: object);
-    get(key: object): V;
-    put(key: K, value: V): V;
-    remove(key: Object): V;
-    putAll(m: Map<K, V>): void;
-    clear(): void;
-}
-
 declare interface CheApi {
     imageRegistry: ImageRegistry;
     actionManager: ActionManager;
@@ -45,7 +19,7 @@ declare interface CheApi {
 
 declare interface EventBus {
     fire<E>(type: EventType<E>, event: E): EventBus;
-    addHandler<E>(type: EventType<E>, handler: { (event: E): void });
+    addHandler<E>(type: EventType<E>, handler: { (event: E): void }): void;
 }
 declare interface EventType<E> {
     type(): string;
@@ -164,11 +138,11 @@ declare interface CurrentUser {
 }
 
 declare interface EditorManager {
-
+    //TODO
 }
 
 declare interface EditorPartPresenter {
-    //TODO 
+    //TODO
 }
 
 
@@ -274,7 +248,7 @@ declare namespace che {
                  */
                 static valueOf(pathstring: string): Path;
 
-                /** 
+                /**
                  * Returns a new path which is the same as this path but with the given file extension added. If
                  * this path is empty, root or has a trailing separator, this path is returned. If this path
                  * already has an extension, the existing extension is left and the given extension simply
@@ -303,7 +277,7 @@ declare namespace che {
                  */
                 addLeadingSeparator(): Path;
 
-                /** 
+                /**
                  * Returns the canonicalized path obtained from the concatenation of the given path's segments to
                  * the end of this path. If the given path has a trailing separator, the result will have a
                  * trailing separator. The device id of this path is preserved (the one of the given path is
@@ -312,7 +286,7 @@ declare namespace che {
                  */
                 appendPath(path: Path): Path;
 
-                /** 
+                /**
                  * Returns the canonicalized path obtained from the concatenation of the given path's segments to
                  * the end of this path. If the given path has a trailing separator, the result will have a
                  * trailing separator. The device id of this path is preserved (the one of the given path is
@@ -738,7 +712,7 @@ declare namespace che {
 
                 getMixins(): string[];
 
-                getAttributes(): Map<string, string[]>;
+                getAttributes(): che.util.Map<string, string[]>;
 
                 getSource(): SourceStorage;
 
@@ -750,7 +724,7 @@ declare namespace che {
 
                 getLocation(): string;
 
-                getParameters(): Map<string, string>;
+                getParameters(): che.util.Map<string, string>;
             }
 
             /** Class contains an information about result of the text search operation. */
@@ -1799,7 +1773,7 @@ declare namespace che {
                  */
                 getAttributes(key: string): string[];
 
-                getAttributes(): Map<string, string[]>;
+                getAttributes(): che.util.Map<string, string[]>;
             }
 
             interface ProjectProblem {
@@ -1876,7 +1850,7 @@ declare namespace che {
 
                 getMixins(): string[];
 
-                getAttributes(): Map<string, string[]>;
+                getAttributes(): che.util.Map<string, string[]>;
 
                 getSource(): SourceStorage;
 
@@ -1888,7 +1862,7 @@ declare namespace che {
 
                 getLocation(): string;
 
-                getParameters(): Map<string, string>;
+                getParameters(): che.util.Map<string, string>;
             }
 
             namespace event {
@@ -1940,7 +1914,22 @@ declare namespace che {
             }
         }
     }
-
+    namespace util {
+        /**
+         * Java like Map interface
+         */
+        interface Map<K, V> {
+            size(): number;
+            isEmpty(): boolean;
+            containsKey(key: object): boolean;
+            containsValue(value: object): boolean;
+            get(key: object): V;
+            put(key: K, value: V): V;
+            remove(key: Object): V;
+            putAll(m: Map<K, V>): void;
+            clear(): void;
+        }
+    }
 }
 
 
