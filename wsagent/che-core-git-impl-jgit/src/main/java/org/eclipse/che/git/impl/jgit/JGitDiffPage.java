@@ -21,9 +21,13 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.git.DiffPage;
+import org.eclipse.che.api.git.GitConnection;
+import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.params.DiffParams;
 import org.eclipse.che.api.git.shared.DiffType;
+import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.jgit.diff.ContentSource;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
@@ -44,6 +48,8 @@ import org.eclipse.jgit.treewalk.FileTreeIterator;
 import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
 import org.eclipse.jgit.treewalk.filter.PathFilterGroup;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Contains information about difference between two commits, commit and working tree, working tree
@@ -54,10 +60,14 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 class JGitDiffPage extends DiffPage {
   private final DiffParams params;
   private final Repository repository;
+  private final GitConnection gitConnection;
 
-  JGitDiffPage(DiffParams params, Repository repository) {
+  private static final Logger LOG = LoggerFactory.getLogger(JGitDiffPage.class);
+
+  JGitDiffPage(DiffParams params, Repository repository, GitConnection gitConnection) {
     this.params = params;
     this.repository = repository;
+    this.gitConnection = gitConnection;
   }
 
   @Override
@@ -97,6 +107,8 @@ class JGitDiffPage extends DiffPage {
       } else {
         writeRawDiff(diff, formatter);
       }
+    } catch (GitException e) {
+      LOG.error(e.getMessage());
     } finally {
       formatter.close();
       repository.close();
@@ -329,33 +341,47 @@ class JGitDiffPage extends DiffPage {
     writer.flush();
   }
 
-  private void writeNamesAndStatus(List<DiffEntry> diff, OutputStream out) throws IOException {
+  private void writeNamesAndStatus(List<DiffEntry> diff, OutputStream out)
+      throws IOException, GitException {
     PrintWriter writer = new PrintWriter(out);
     int diffSize = diff.size();
+
+    Status status =
+        gitConnection.status(diff.stream().map(DiffEntry::getNewPath).collect(Collectors.toList()));
+
     for (DiffEntry de : diff) {
-      if (de.getChangeType() == ChangeType.ADD) {
-        writer.print(
-            "A\t" + de.getNewPath() + (diffSize != diff.indexOf(de) + 1 ? lineSeparator() : ""));
-      } else if (de.getChangeType() == ChangeType.DELETE) {
-        writer.print(
-            "D\t" + de.getOldPath() + (diffSize != diff.indexOf(de) + 1 ? lineSeparator() : ""));
-      } else if (de.getChangeType() == ChangeType.MODIFY) {
-        writer.print(
-            "M\t" + de.getNewPath() + (diffSize != diff.indexOf(de) + 1 ? lineSeparator() : ""));
-      } else if (de.getChangeType() == ChangeType.COPY) {
-        writer.print(
-            "C\t"
-                + de.getOldPath()
-                + '\t'
-                + de.getNewPath()
-                + (diffSize != diff.indexOf(de) + 1 ? lineSeparator() : ""));
-      } else if (de.getChangeType() == ChangeType.RENAME) {
-        writer.print(
-            "R\t"
-                + de.getOldPath()
-                + '\t'
-                + de.getNewPath()
-                + (diffSize != diff.indexOf(de) + 1 ? lineSeparator() : ""));
+      switch (de.getChangeType()) {
+        case ADD:
+          writer.print(
+              (status.getUntracked().contains(de.getNewPath()) ? "U" : "A")
+                  + "\t"
+                  + de.getNewPath()
+                  + (diffSize != diff.indexOf(de) + 1 ? lineSeparator() : ""));
+          break;
+        case DELETE:
+          writer.print(
+              "D\t" + de.getOldPath() + (diffSize != diff.indexOf(de) + 1 ? lineSeparator() : ""));
+          break;
+        case MODIFY:
+          writer.print(
+              "M\t" + de.getNewPath() + (diffSize != diff.indexOf(de) + 1 ? lineSeparator() : ""));
+          break;
+        case COPY:
+          writer.print(
+              "C\t"
+                  + de.getOldPath()
+                  + '\t'
+                  + de.getNewPath()
+                  + (diffSize != diff.indexOf(de) + 1 ? lineSeparator() : ""));
+          break;
+        case RENAME:
+          writer.print(
+              "R\t"
+                  + de.getOldPath()
+                  + '\t'
+                  + de.getNewPath()
+                  + (diffSize != diff.indexOf(de) + 1 ? lineSeparator() : ""));
+          break;
       }
     }
     writer.flush();

@@ -168,9 +168,6 @@ public class WsMasterModule extends AbstractModule {
 
     bind(org.eclipse.che.security.oauth.OAuthAuthenticatorProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl.class);
-    bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
-        .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
-    bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
 
     // installers
     install(new InstallerModule());
@@ -249,6 +246,10 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.user.server.CheUserCreator.class);
 
     bindConstant().annotatedWith(Names.named("che.agents.auth_enabled")).to(false);
+
+    bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
+        .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
+    bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
   }
 
   private void configureMultiUserMode() {

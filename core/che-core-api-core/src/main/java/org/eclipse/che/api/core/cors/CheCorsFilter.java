@@ -49,7 +49,7 @@ public class CheCorsFilter implements Filter {
   public void init(FilterConfig filterConfig) throws ServletException {
     corsFilter = new CorsFilter();
 
-    corsFilter.init(new CodenvyCorsFilterConfig());
+    corsFilter.init(new CheCorsFilterConfig());
   }
 
   @Override
@@ -64,11 +64,11 @@ public class CheCorsFilter implements Filter {
     corsFilter.destroy();
   }
 
-  private class CodenvyCorsFilterConfig implements FilterConfig {
+  private class CheCorsFilterConfig implements FilterConfig {
 
     private final Map<String, String> filterParams;
 
-    public CodenvyCorsFilterConfig() {
+    public CheCorsFilterConfig() {
       filterParams = new HashMap<>();
       filterParams.put(PARAM_CORS_ALLOWED_ORIGINS, DEFAULT_ALLOWED_ORIGINS);
       filterParams.put(
@@ -77,6 +77,7 @@ public class CheCorsFilter implements Filter {
           PARAM_CORS_ALLOWED_HEADERS,
           "Content-Type,"
               + "X-Requested-With,"
+              + "X-Oauth-Token,"
               + "accept,"
               + "Origin,"
               + "Authorization,"
