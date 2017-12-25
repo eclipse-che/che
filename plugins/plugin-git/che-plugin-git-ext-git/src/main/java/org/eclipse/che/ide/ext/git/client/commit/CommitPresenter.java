@@ -31,13 +31,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ErrorCodes;
+import org.eclipse.che.api.git.shared.PushResponse;
 import org.eclipse.che.api.git.shared.Revision;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.auth.Credentials;
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
+import org.eclipse.che.ide.ext.git.client.GitAuthActionPresenter;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
 import org.eclipse.che.ide.ext.git.client.compare.AlteredFiles;
@@ -57,7 +62,8 @@ import org.eclipse.che.ide.ui.dialogs.DialogFactory;
  * @author Igor Vinokur
  */
 @Singleton
-public class CommitPresenter implements CommitView.ActionDelegate, SelectionCallBack {
+public class CommitPresenter extends GitAuthActionPresenter
+    implements CommitView.ActionDelegate, SelectionCallBack {
   private static final String COMMIT_COMMAND_NAME = "Git commit";
 
   private final SelectableChangesPanelPresenter selectableChangesPanelPresenter;
@@ -65,8 +71,6 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
   private final AppContext appContext;
   private final CommitView view;
   private final GitServiceClient service;
-  private final GitLocalizationConstant constant;
-  private final NotificationManager notificationManager;
   private final DateTimeFormatter dateTimeFormatter;
   private final GitOutputConsoleFactory gitOutputConsoleFactory;
   private final ProcessesPanelPresenter consolesPanelPresenter;
@@ -84,7 +88,9 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
       AppContext appContext,
       DateTimeFormatter dateTimeFormatter,
       GitOutputConsoleFactory gitOutputConsoleFactory,
-      ProcessesPanelPresenter processesPanelPresenter) {
+      ProcessesPanelPresenter processesPanelPresenter,
+      OAuthServiceClient oAuthServiceClient) {
+    super(notificationManager, constant, oAuthServiceClient);
     this.view = view;
     this.selectableChangesPanelPresenter = selectableChangesPanelPresenter;
     this.dialogFactory = dialogFactory;
@@ -94,9 +100,6 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
     this.consolesPanelPresenter = processesPanelPresenter;
     this.view.setDelegate(this);
     this.service = service;
-    this.constant = constant;
-    this.notificationManager = notificationManager;
-
     this.view.setChangesPanelView(selectableChangesPanelPresenter.getView());
   }
 
@@ -142,7 +145,7 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
             })
         .catchError(
             arg -> {
-              notificationManager.notify(constant.diffFailed(), FAIL, FLOAT_MODE);
+              notificationManager.notify(locale.diffFailed(), FAIL, FLOAT_MODE);
             });
 
     service
@@ -150,17 +153,17 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
         .then(view::setRemoteBranchesList)
         .catchError(
             error -> {
-              notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
+              notificationManager.notify(locale.branchesListFailed(), FAIL, FLOAT_MODE);
             });
   }
 
   private void showAskForAmendDialog() {
     dialogFactory
         .createConfirmDialog(
-            constant.commitTitle(),
-            constant.commitNothingToCommitMessageText(),
-            constant.buttonYes(),
-            constant.buttonNo(),
+            locale.commitTitle(),
+            locale.commitNothingToCommitMessageText(),
+            locale.buttonYes(),
+            locale.buttonNo(),
             () -> {
               view.setValueToAmendCheckBox(true);
               view.setEnablePushAfterCommitCheckBox(false);
@@ -210,7 +213,7 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
             })
         .catchError(
             error -> {
-              notificationManager.notify(constant.addFailed(), FAIL, FLOAT_MODE);
+              notificationManager.notify(locale.addFailed(), FAIL, FLOAT_MODE);
             });
   }
 
@@ -228,15 +231,20 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
     String remoteBranch = view.getRemoteBranch();
     String remote = remoteBranch.split("/")[0];
     String branch = remoteBranch.split("/")[1];
-    service
-        .push(location, singletonList(branch), remote, false)
+    performOperationWithTokenRequestIfNeeded(
+            new RemoteGitOperation<PushResponse>() {
+              @Override
+              public Promise<PushResponse> perform(Credentials credentials) {
+                return service.push(location, singletonList(branch), remote, false, credentials);
+              }
+            })
         .then(
             result -> {
-              notificationManager.notify(constant.pushSuccess(remote), SUCCESS, FLOAT_MODE);
+              notificationManager.notify(locale.pushSuccess(remote), SUCCESS, FLOAT_MODE);
             })
         .catchError(
             error -> {
-              notificationManager.notify(constant.pushFail(), FAIL, FLOAT_MODE);
+              notificationManager.notify(locale.pushFail(), FAIL, FLOAT_MODE);
             });
   }
 
@@ -276,23 +284,23 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
               if (getErrorCode(error.getCause()) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
                 dialogFactory
                     .createMessageDialog(
-                        constant.commitTitle(), constant.initCommitWasNotPerformed(), null)
+                        locale.commitTitle(), locale.initCommitWasNotPerformed(), null)
                     .show();
               } else {
                 CommitPresenter.this.view.setMessage("");
-                notificationManager.notify(constant.logFailed(), FAIL, NOT_EMERGE_MODE);
+                notificationManager.notify(locale.logFailed(), FAIL, NOT_EMERGE_MODE);
               }
             });
   }
 
   private void onCommitSuccess(@NotNull final Revision revision) {
     String date = dateTimeFormatter.getFormattedDate(revision.getCommitTime());
-    String message = constant.commitMessage(revision.getId(), date);
+    String message = locale.commitMessage(revision.getId(), date);
 
     if ((revision.getCommitter() != null
         && revision.getCommitter().getName() != null
         && !revision.getCommitter().getName().isEmpty())) {
-      message += " " + constant.commitUser(revision.getCommitter().getName());
+      message += " " + locale.commitUser(revision.getCommitter().getName());
     }
     GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
     console.print(message);
@@ -306,7 +314,7 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
         && ((ServerException) exception).getErrorCode()
             == ErrorCodes.NO_COMMITTER_NAME_OR_EMAIL_DEFINED) {
       dialogFactory
-          .createMessageDialog(constant.commitTitle(), constant.committerIdentityInfoEmpty(), null)
+          .createMessageDialog(locale.commitTitle(), locale.committerIdentityInfoEmpty(), null)
           .show();
       return;
     }
@@ -314,10 +322,10 @@ public class CommitPresenter implements CommitView.ActionDelegate, SelectionCall
     String errorMessage =
         (exceptionMessage != null && !exceptionMessage.isEmpty())
             ? exceptionMessage
-            : constant.commitFailed();
+            : locale.commitFailed();
     GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
     console.printError(errorMessage);
     consolesPanelPresenter.addCommandOutput(console);
-    notificationManager.notify(constant.commitFailed(), errorMessage, FAIL, FLOAT_MODE);
+    notificationManager.notify(locale.commitFailed(), errorMessage, FAIL, FLOAT_MODE);
   }
 }

@@ -10,13 +10,9 @@
  */
 package org.eclipse.che.plugin.github.server;
 
-import com.google.inject.Inject;
 import java.io.IOException;
-import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
-import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.security.oauth.shared.OAuthTokenProvider;
 import org.kohsuke.github.GitHub;
 
 /**
@@ -27,41 +23,17 @@ import org.kohsuke.github.GitHub;
  */
 public class GitHubFactory {
 
-  private final OAuthTokenProvider oauthTokenProvider;
-
-  @Inject
-  private GitHubFactory(OAuthTokenProvider oauthTokenProvider) {
-    this.oauthTokenProvider = oauthTokenProvider;
-  }
-
   /**
-   * Connect to GitHub API
+   * Connect to GitHub API using OAuth
    *
+   * @param oauthToken token for OAuth connection
    * @return connected GitHub API class
    */
-  public GitHub connect() throws ServerException, UnauthorizedException {
+  public GitHub oauthConnect(String oauthToken) throws ServerException, UnauthorizedException {
     try {
-      return GitHub.connectUsingOAuth(getToken());
+      return GitHub.connectUsingOAuth(oauthToken);
     } catch (IOException e) {
       throw new ServerException(e.getMessage());
     }
-  }
-
-  private String getToken() throws ServerException, UnauthorizedException {
-    OAuthToken token;
-    try {
-      token =
-          oauthTokenProvider.getToken(
-              "github", EnvironmentContext.getCurrent().getSubject().getUserId());
-    } catch (IOException e) {
-      throw new ServerException(e.getMessage());
-    }
-
-    String oauthToken = token != null ? token.getToken() : null;
-    if (oauthToken == null || oauthToken.isEmpty()) {
-      throw new UnauthorizedException("User doesn't have access token to github");
-    }
-
-    return oauthToken;
   }
 }

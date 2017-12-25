@@ -29,6 +29,7 @@ import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.auth.Credentials;
 import org.eclipse.che.ide.resource.Path;
 
 /**
@@ -65,8 +66,14 @@ public interface GitServiceClient {
    *     </ul>
    *
    * @param removeDeletedRefs if <code>true</code> then delete removed refs from local repository
+   * @param credentials credentials to perform vcs authorization
    */
-  Promise<Void> fetch(Path project, String remote, List<String> refspec, boolean removeDeletedRefs);
+  Promise<Void> fetch(
+      Path project,
+      String remote,
+      List<String> refspec,
+      boolean removeDeletedRefs,
+      Credentials credentials);
 
   /**
    * Get the list of the branches. For now, all branches cannot be returned at once, so the
@@ -191,8 +198,10 @@ public interface GitServiceClient {
    *
    * @param remote remote remote repository's name
    * @param rebase use rebase instead of merge
+   * @param credentials credentials to perform vcs authorization
    */
-  Promise<PullResponse> pull(Path project, String refSpec, String remote, boolean rebase);
+  Promise<PullResponse> pull(
+      Path project, String refSpec, String remote, boolean rebase, Credentials credentials);
 
   /**
    * Push changes from local repository to remote one (sends request over WebSocket).
@@ -203,8 +212,10 @@ public interface GitServiceClient {
    * @param force push refuses to update a remote ref that is not an ancestor of the local ref used
    *     to overwrite it. If <code>true</code> disables the check. This can cause the remote
    *     repository to lose commits
+   * @param credentials credentials to perform vcs authorization
    */
-  Promise<PushResponse> push(Path project, List<String> refSpec, String remote, boolean force);
+  Promise<PushResponse> push(
+      Path project, List<String> refSpec, String remote, boolean force, Credentials credentials);
 
   /**
    * Clones one remote repository to local one (over WebSocket).

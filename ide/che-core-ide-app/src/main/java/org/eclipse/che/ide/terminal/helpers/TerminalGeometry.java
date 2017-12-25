@@ -10,20 +10,16 @@
  */
 package org.eclipse.che.ide.terminal;
 
-import com.google.gwt.core.client.JavaScriptObject;
+import jsinterop.annotations.JsPackage;
+import jsinterop.annotations.JsProperty;
+import jsinterop.annotations.JsType;
 
-/**
- * @author Alexander Andrienko
- */
-public class CharMeasureJso extends JavaScriptObject {
+@JsType(isNative = true, namespace = JsPackage.GLOBAL)
+public class TerminalGeometry {
 
-    protected CharMeasureJso() {}
+  @JsProperty(name = "cols")
+  public native int getCols();
 
-    public final native int getWidth() /*-{
-        return this.width;
-    }-*/;
-
-    public final native int getHeight() /*-{
-        return this.height;
-    }-*/;
+  @JsProperty(name = "rows")
+  public native int getRows();
 }

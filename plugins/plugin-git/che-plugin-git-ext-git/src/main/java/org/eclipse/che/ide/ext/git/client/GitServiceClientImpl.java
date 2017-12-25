@@ -52,6 +52,7 @@ import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.auth.Credentials;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequest;
@@ -213,13 +214,17 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<PushResponse> push(
-      Path project, List<String> refSpec, String remote, boolean force) {
+      Path project, List<String> refSpec, String remote, boolean force, Credentials credentials) {
     PushRequest pushRequest =
         dtoFactory
             .createDto(PushRequest.class)
             .withRemote(remote)
             .withRefSpec(refSpec)
             .withForce(force);
+    if (credentials != null) {
+      pushRequest.setUsername(credentials.getUsername());
+      pushRequest.setPassword(credentials.getPassword());
+    }
     String url = getWsAgentBaseUrl() + PUSH + "?projectPath=" + encodePath(project);
     return asyncRequestFactory
         .createPostRequest(url, pushRequest)
@@ -391,25 +396,38 @@ public class GitServiceClientImpl implements GitServiceClient {
 
   @Override
   public Promise<Void> fetch(
-      Path project, String remote, List<String> refspec, boolean removeDeletedRefs) {
+      Path project,
+      String remote,
+      List<String> refspec,
+      boolean removeDeletedRefs,
+      Credentials credentials) {
     FetchRequest fetchRequest =
         dtoFactory
             .createDto(FetchRequest.class)
             .withRefSpec(refspec)
             .withRemote(remote)
             .withRemoveDeletedRefs(removeDeletedRefs);
+    if (credentials != null) {
+      fetchRequest.setUsername(credentials.getUsername());
+      fetchRequest.setPassword(credentials.getPassword());
+    }
     String url = getWsAgentBaseUrl() + FETCH + "?projectPath=" + encodePath(project);
     return asyncRequestFactory.createPostRequest(url, fetchRequest).send();
   }
 
   @Override
-  public Promise<PullResponse> pull(Path project, String refSpec, String remote, boolean rebase) {
+  public Promise<PullResponse> pull(
+      Path project, String refSpec, String remote, boolean rebase, Credentials credentials) {
     PullRequest pullRequest =
         dtoFactory
             .createDto(PullRequest.class)
             .withRemote(remote)
             .withRefSpec(refSpec)
             .withRebase(rebase);
+    if (credentials != null) {
+      pullRequest.setUsername(credentials.getUsername());
+      pullRequest.setPassword(credentials.getPassword());
+    }
     String url = getWsAgentBaseUrl() + PULL + "?projectPath=" + encodePath(project);
     return asyncRequestFactory
         .createPostRequest(url, pullRequest)

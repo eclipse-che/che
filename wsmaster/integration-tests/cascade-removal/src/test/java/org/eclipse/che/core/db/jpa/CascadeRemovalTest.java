@@ -239,7 +239,7 @@ public class CascadeRemovalTest {
     assertNull(notFoundToNull(() -> profileDao.getById(user.getId())));
     assertTrue(preferenceDao.getPreferences(user.getId()).isEmpty());
     assertTrue(sshDao.get(user.getId()).isEmpty());
-    assertTrue(workspaceDao.getByNamespace(user.getName()).isEmpty());
+    assertTrue(workspaceDao.getByNamespace(user.getName(), 30, 0).isEmpty());
   }
 
   @Test(dataProvider = "beforeUserRemoveRollbackActions")
@@ -286,7 +286,7 @@ public class CascadeRemovalTest {
     }
 
     // Check all the data rolled back
-    assertFalse(workspaceDao.getByNamespace(user.getName()).isEmpty());
+    assertFalse(workspaceDao.getByNamespace(user.getName(), 30, 0).isEmpty());
     wipeTestData();
   }
 

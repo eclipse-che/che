@@ -28,5 +28,5 @@ public interface TerminalFactory {
    * @param options options for new terminal
    * @return an instance of {@link TerminalPresenter}
    */
-  TerminalPresenter create(@Assisted MachineImpl machine, @Assisted TerminalOptionsJso options);
+  TerminalPresenter create(@Assisted MachineImpl machine, @Assisted TerminalOptions options);
 }

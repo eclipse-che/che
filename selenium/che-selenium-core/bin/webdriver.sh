@@ -83,12 +83,17 @@ initVariables() {
     unset TMP_SUITE_PATH
     unset ORIGIN_TESTS_SCOPE
     unset TMP_DIR
+    unset NEW_USER_ID
 }
 
 cleanUpEnvironment() {
     if [[ ${MODE} == "grid" ]]; then
         stopWebDriver
-        stopDockerContainers
+        stopSeleniumDockerContainers
+    fi
+
+    if [[ -n ${NEW_USER_ID} ]]; then
+       removeTestUser
     fi
 }
 
@@ -317,9 +322,10 @@ initRunMode() {
     fi
 }
 
-stopDockerContainers() {
+stopSeleniumDockerContainers() {
     local containers=$(docker ps -qa --filter="name=selenium_*" | wc -l)
     if [[ ${containers} != "0" ]]; then
+        echo "[TEST] Stopping selenium docker containers..."
         docker stop $(docker ps -qa --filter="name=selenium_*")
         docker rm $(docker ps -qa --filter="name=selenium_*")
     fi
@@ -865,11 +871,11 @@ prepareTestUserForMultiuserChe() {
         local cli_auth="--no-config --server http://localhost:8080/auth --user ${CHE_ADMIN_NAME} --password ${CHE_ADMIN_PASSWORD} --realm master"
         local response=$(docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh create users -r che -s username=${CHE_TESTUSER_NAME} -s enabled=true $cli_auth 2>&1")
         if [[ "$response" =~ "Created new user with id" ]]; then
-           userId=$(echo "$response" | grep "Created new user with id" | sed -e "s#Created new user with id ##" | sed -e "s#'##g")
+           NEW_USER_ID=$(echo "$response" | grep "Created new user with id" | sed -e "s#Created new user with id ##" | sed -e "s#'##g")
            # set test user's permanent password
            docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh set-password -r che --username ${CHE_TESTUSER_NAME} --new-password ${CHE_TESTUSER_PASSWORD} $cli_auth"
            # set email of test user to ${cheTestUserEmail}
-           docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh update users/$userId -r che --set email=${CHE_TESTUSER_EMAIL} $cli_auth"
+           docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh update users/${NEW_USER_ID} -r che --set email=${CHE_TESTUSER_EMAIL} $cli_auth"
            # add realm role "user" test user
            docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh add-roles -r che --uusername ${CHE_TESTUSER_NAME} --rolename user $cli_auth"
            # add role "read-token" of client "broker" to test user
@@ -883,6 +889,18 @@ prepareTestUserForMultiuserChe() {
            CHE_TESTUSER_PASSWORD=${CHE_ADMIN_PASSWORD}
         fi
     fi
+}
+
+removeTestUser() {
+    echo "[TEST] Removing test user with name '${CHE_TESTUSER_NAME}'..."
+    if [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
+        local kc_container_id=$(docker ps | grep keycloak_keycloak-1 | cut -d ' ' -f1)
+    else
+        local kc_container_id=$(docker ps | grep che_keycloak_1 | cut -d ' ' -f1)
+    fi
+
+    local cli_auth="--no-config --server http://localhost:8080/auth --user ${CHE_ADMIN_NAME} --password ${CHE_ADMIN_PASSWORD} --realm master"
+    local response=$(docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh delete users/${NEW_USER_ID} -r che -s username=${CHE_TESTUSER_NAME} $cli_auth 2>&1")
 }
 
 testProduct() {

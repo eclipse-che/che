@@ -18,13 +18,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.ui.dialogs.CancelCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
-import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
 import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
 import org.eclipse.che.security.oauth.JsOAuthWindow;
 import org.eclipse.che.security.oauth.OAuthCallback;
@@ -39,7 +38,7 @@ import org.eclipse.che.security.oauth.SecurityTokenProvider;
 @Singleton
 public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
 
-  private final GitHubClientService gitHubService;
+  private final GitHubServiceClient gitHubService;
   private final String baseUrl;
   private final GitHubLocalizationConstant constant;
   private final NotificationManager notificationManager;
@@ -47,19 +46,21 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
   private final DialogFactory dialogFactory;
   private final AppContext appContext;
   private final SecurityTokenProvider securityTokenProvider;
+  private final OAuthServiceClient oAuthServiceClient;
 
   private AsyncCallback<Void> callback;
   private String userId;
 
   @Inject
   public GitHubSshKeyUploader(
-      GitHubClientService gitHubService,
+      GitHubServiceClient gitHubService,
       GitHubLocalizationConstant constant,
       NotificationManager notificationManager,
       ProductInfoDataProvider productInfoDataProvider,
       DialogFactory dialogFactory,
       AppContext appContext,
-      SecurityTokenProvider securityTokenProvider) {
+      SecurityTokenProvider securityTokenProvider,
+      OAuthServiceClient oAuthServiceClient) {
     this.gitHubService = gitHubService;
     this.baseUrl = appContext.getMasterApiEndpoint();
     this.constant = constant;
@@ -68,6 +69,7 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
     this.dialogFactory = dialogFactory;
     this.appContext = appContext;
     this.securityTokenProvider = securityTokenProvider;
+    this.oAuthServiceClient = oAuthServiceClient;
   }
 
   /** {@inheritDoc} */
@@ -76,23 +78,32 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
     this.callback = callback;
     this.userId = userId;
 
-    gitHubService.updatePublicKey(
-        new AsyncRequestCallback<Void>() {
-          @Override
-          protected void onSuccess(Void o) {
-            callback.onSuccess(o);
-          }
+    oAuthServiceClient
+        .getToken("github")
+        .then(
+            result -> {
+              gitHubService.updatePublicKey(
+                  result.getToken(),
+                  new AsyncRequestCallback<Void>() {
+                    @Override
+                    protected void onSuccess(Void o) {
+                      callback.onSuccess(o);
+                    }
 
-          @Override
-          protected void onFailure(Throwable e) {
-            if (e instanceof UnauthorizedException) {
+                    @Override
+                    protected void onFailure(Throwable e) {
+                      if (e instanceof UnauthorizedException) {
+                        oAuthLoginStart();
+                        return;
+                      }
+                      callback.onFailure(e);
+                    }
+                  });
+            })
+        .catchError(
+            error -> {
               oAuthLoginStart();
-              return;
-            }
-
-            callback.onFailure(e);
-          }
-        });
+            });
   }
 
   /** Log in github */
@@ -101,18 +112,8 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
         .createConfirmDialog(
             constant.authorizationDialogTitle(),
             constant.authorizationDialogText(productInfoDataProvider.getName()),
-            new ConfirmCallback() {
-              @Override
-              public void accepted() {
-                showPopUp();
-              }
-            },
-            new CancelCallback() {
-              @Override
-              public void cancelled() {
-                callback.onFailure(new Exception(constant.authorizationRequestRejected()));
-              }
-            })
+            () -> showPopUp(),
+            () -> callback.onFailure(new Exception(constant.authorizationRequestRejected())))
         .show();
   }
 

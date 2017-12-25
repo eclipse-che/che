@@ -34,6 +34,7 @@ import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.commons.exception.ServerException;
@@ -61,6 +62,7 @@ public class CommitPresenterTest extends BaseTest {
   @Mock private CommitView view;
   @Mock private DateTimeFormatter dateTimeFormatter;
   @Mock private SelectableChangesPanelPresenter selectableChangesPanelPresenter;
+  @Mock private OAuthServiceClient oAuthServiceClient;
 
   private CommitPresenter presenter;
 
@@ -80,7 +82,8 @@ public class CommitPresenterTest extends BaseTest {
                 appContext,
                 dateTimeFormatter,
                 gitOutputConsoleFactory,
-                processesPanelPresenter));
+                processesPanelPresenter,
+                oAuthServiceClient));
 
     when(view.getCommitMessage()).thenReturn(EMPTY_TEXT);
 
@@ -116,7 +119,7 @@ public class CommitPresenterTest extends BaseTest {
         .thenReturn(stringPromise);
     when(service.branchList(any(Path.class), any(BranchListMode.class)))
         .thenReturn(branchListPromise);
-    when(service.push(any(Path.class), anyList(), anyString(), anyBoolean()))
+    when(service.push(any(Path.class), anyList(), anyString(), anyBoolean(), null))
         .thenReturn(pushPromise);
     when(service.log(any(Path.class), eq(null), anyInt(), anyInt(), anyBoolean()))
         .thenReturn(logPromise);

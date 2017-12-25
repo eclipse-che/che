@@ -21,7 +21,7 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
-import org.eclipse.che.ide.terminal.TerminalOptionsJso;
+import org.eclipse.che.ide.terminal.TerminalOptions;
 
 /**
  * Action to open new terminal for the selected machine.
@@ -79,7 +79,7 @@ public class NewTerminalAction extends AbstractPerspectiveAction
 
   @Override
   public void actionPerformed(ActionEvent event) {
-    processesPanelPresenter.newTerminal(TerminalOptionsJso.createDefault());
+    processesPanelPresenter.newTerminal(new TerminalOptions());
   }
 
   @Override
