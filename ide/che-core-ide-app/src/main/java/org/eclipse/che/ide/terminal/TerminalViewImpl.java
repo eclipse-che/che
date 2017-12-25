@@ -41,7 +41,7 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
 
   private ActionDelegate delegate;
 
-  private TerminalJso terminal;
+  private Terminal terminal;
   private Element terminalElement;
 
   public TerminalViewImpl() {
@@ -55,7 +55,7 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
 
   /** {@inheritDoc} */
   @Override
-  public void openTerminal(@NotNull final TerminalJso terminal) {
+  public void openTerminal(@NotNull final Terminal terminal) {
     unavailableLabel.setVisible(false);
 
     this.terminal = terminal;
@@ -64,7 +64,7 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
     terminalElement.getStyle().setProperty("opacity", "0");
 
     terminal.open(terminalPanel.getElement());
-    terminal.attachCustomKeyDownHandler(CustomKeyDownTerminalHandler.create());
+    terminal.attachCustomKeyDownHandler(new CustomKeyDownHandlerImpl(terminal));
     resizeTerminal();
 
     terminalElement.getFirstChildElement().getStyle().clearProperty("backgroundColor");
@@ -82,7 +82,7 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
   }
 
   /**
-   * Resize {@link TerminalJso} to current widget size. To improve performance we should resize only
+   * Resize {@link Terminal} to current widget size. To improve performance we should resize only
    * visible terminals, because "resize terminal" is quite expensive operation. When you click on
    * the tab to activate hidden terminal this method will be executed too, so terminal will be
    * resized anyway.
@@ -103,9 +103,9 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
       };
 
   private void resizeTerminal() {
-    TerminalGeometryJso geometryJso = terminal.proposeGeometry();
-    int x = geometryJso.getCols();
-    int y = geometryJso.getRows();
+    TerminalGeometry geometry = terminal.proposeGeometry();
+    int x = geometry.getCols();
+    int y = geometry.getRows();
     if (x <= 0 || y <= 0) {
       resizeTimer.cancel();
       resizeTimer.schedule(500);

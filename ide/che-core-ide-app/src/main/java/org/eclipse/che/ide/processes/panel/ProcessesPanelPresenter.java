@@ -105,7 +105,7 @@ import org.eclipse.che.ide.processes.runtime.RuntimeInfoLocalization;
 import org.eclipse.che.ide.processes.runtime.RuntimeInfoProvider;
 import org.eclipse.che.ide.processes.runtime.RuntimeInfoWidgetFactory;
 import org.eclipse.che.ide.terminal.TerminalFactory;
-import org.eclipse.che.ide.terminal.TerminalOptionsJso;
+import org.eclipse.che.ide.terminal.TerminalOptions;
 import org.eclipse.che.ide.terminal.TerminalPresenter;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
@@ -346,7 +346,7 @@ public class ProcessesPanelPresenter extends BasePresenter
    */
   public void provideTerminal() {
     if (terminals.isEmpty()) {
-      newTerminal(TerminalOptionsJso.createDefault(), true);
+      newTerminal(new TerminalOptions(), true);
       return;
     }
 
@@ -358,7 +358,7 @@ public class ProcessesPanelPresenter extends BasePresenter
 
     ProcessTreeNode terminalNode = view.getNodeById(lastActiveTerminalId);
     if (terminalNode == null) {
-      newTerminal(TerminalOptionsJso.createDefault(), true);
+      newTerminal(new TerminalOptions(), true);
       return;
     }
 
@@ -367,12 +367,12 @@ public class ProcessesPanelPresenter extends BasePresenter
   }
 
   /** Opens new terminal for the selected machine. */
-  public void newTerminal(TerminalOptionsJso options) {
+  public void newTerminal(TerminalOptions options) {
     newTerminal(options, true);
   }
 
   /** Opens new terminal for the selected machine and activates terminal tab. */
-  public void newTerminal(TerminalOptionsJso options, boolean activate) {
+  public void newTerminal(TerminalOptions options, boolean activate) {
     final ProcessTreeNode selectedTreeNode = view.getSelectedTreeNode();
 
     final Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
@@ -450,7 +450,7 @@ public class ProcessesPanelPresenter extends BasePresenter
    * @param options terminal options
    */
   @Override
-  public void onAddTerminal(final String machineId, TerminalOptionsJso options) {
+  public void onAddTerminal(final String machineId, TerminalOptions options) {
     onAddTerminal(machineId, options, true);
   }
 
@@ -461,7 +461,7 @@ public class ProcessesPanelPresenter extends BasePresenter
    * @param options terminal options
    * @param activate activate terminal tab
    */
-  public void onAddTerminal(final String machineId, TerminalOptionsJso options, boolean activate) {
+  public void onAddTerminal(final String machineId, TerminalOptions options, boolean activate) {
     final MachineImpl machine = getMachine(machineId);
     if (machine == null) {
       notificationManager.notify(
@@ -1081,7 +1081,9 @@ public class ProcessesPanelPresenter extends BasePresenter
 
     if (appContext.getWorkspace().getStatus() == RUNNING) {
       selectDevMachine();
-      TerminalOptionsJso options = TerminalOptionsJso.createDefault().withFocusOnOpen(false);
+      TerminalOptions options = new TerminalOptions();
+      options.setFocusOnOpen(false);
+
       newTerminal(options);
     }
   }
@@ -1094,7 +1096,8 @@ public class ProcessesPanelPresenter extends BasePresenter
     if (devMachine.isPresent() && event.getMachineName().equals(devMachine.get().getName())) {
       provideMachineNode(event.getMachineName(), true, false);
 
-      TerminalOptionsJso options = TerminalOptionsJso.createDefault().withFocusOnOpen(false);
+      TerminalOptions options = new TerminalOptions();
+      options.setFocusOnOpen(false);
       newTerminal(options, false);
     }
   }
