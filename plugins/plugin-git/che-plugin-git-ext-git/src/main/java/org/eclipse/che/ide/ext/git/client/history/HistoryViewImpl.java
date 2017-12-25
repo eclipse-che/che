@@ -151,7 +151,7 @@ public class HistoryViewImpl extends Window implements HistoryView {
         new Column<Revision, String>(new TextCell()) {
           @Override
           public String getValue(Revision revision) {
-            return revision.getCommitter().getName();
+            return revision.getAuthor().getName();
           }
         };
     Column<Revision, String> titleColumn =

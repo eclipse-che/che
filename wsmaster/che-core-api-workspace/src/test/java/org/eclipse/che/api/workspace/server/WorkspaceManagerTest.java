@@ -20,6 +20,8 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.WorkspaceManager.UPDATED_ATTRIBUTE_NAME;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -40,13 +42,13 @@ import static org.testng.util.Strings.isNullOrEmpty;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
@@ -209,17 +211,18 @@ public class WorkspaceManagerTest {
     final WorkspaceImpl workspace1 = createAndMockWorkspace(config, NAMESPACE_1);
     final WorkspaceImpl workspace2 = createAndMockWorkspace(config, NAMESPACE_2);
     final TestInternalRuntime runtime2 = mockRuntime(workspace2, RUNNING);
-    when(workspaceDao.getWorkspaces(NAMESPACE_1)).thenReturn(asList(workspace1, workspace2));
+    when(workspaceDao.getWorkspaces(eq(NAMESPACE_1), anyInt(), anyLong()))
+        .thenReturn(new Page<>(asList(workspace1, workspace2), 0, 2, 2));
 
-    final List<WorkspaceImpl> result = workspaceManager.getWorkspaces(NAMESPACE_1, true);
+    final Page<WorkspaceImpl> result = workspaceManager.getWorkspaces(NAMESPACE_1, true, 30, 0);
 
-    assertEquals(result.size(), 2);
-    final WorkspaceImpl res1 = result.get(0);
+    assertEquals(result.getItems().size(), 2);
+    final WorkspaceImpl res1 = result.getItems().get(0);
     assertEquals(
         res1.getStatus(), STOPPED, "Workspace status wasn't changed from STARTING to STOPPED");
     assertNull(res1.getRuntime(), "Workspace has unexpected runtime");
     assertFalse(res1.isTemporary(), "Workspace must be permanent");
-    final WorkspaceImpl res2 = result.get(1);
+    final WorkspaceImpl res2 = result.getItems().get(1);
     assertEquals(
         res2.getStatus(),
         RUNNING,
@@ -236,25 +239,26 @@ public class WorkspaceManagerTest {
     final WorkspaceImpl workspace1 = createAndMockWorkspace(config, NAMESPACE_1);
     final WorkspaceImpl workspace2 = createAndMockWorkspace(config, NAMESPACE_2);
 
-    when(workspaceDao.getWorkspaces(NAMESPACE_1)).thenReturn(asList(workspace1, workspace2));
+    when(workspaceDao.getWorkspaces(eq(NAMESPACE_1), anyInt(), anyLong()))
+        .thenReturn(new Page<>(asList(workspace1, workspace2), 0, 2, 2));
     mockRuntimeStatus(workspace1, STOPPED);
     mockRuntimeStatus(workspace2, RUNNING);
 
     doNothing().when(runtimes).injectRuntime(workspace1);
 
     // when
-    final List<WorkspaceImpl> result = workspaceManager.getWorkspaces(NAMESPACE_1, false);
+    final Page<WorkspaceImpl> result = workspaceManager.getWorkspaces(NAMESPACE_1, false, 30, 0);
 
     // then
-    assertEquals(result.size(), 2);
+    assertEquals(result.getItems().size(), 2);
 
-    final WorkspaceImpl res1 = result.get(0);
+    final WorkspaceImpl res1 = result.getItems().get(0);
     assertEquals(
         res1.getStatus(), STOPPED, "Workspace status wasn't changed from STARTING to STOPPED");
     assertNull(res1.getRuntime(), "Workspace has unexpected runtime");
     assertFalse(res1.isTemporary(), "Workspace must be permanent");
 
-    final WorkspaceImpl res2 = result.get(1);
+    final WorkspaceImpl res2 = result.getItems().get(1);
     assertEquals(
         res2.getStatus(),
         RUNNING,
@@ -270,13 +274,13 @@ public class WorkspaceManagerTest {
     mockRuntimeStatus(workspace, RUNNING);
 
     // when
-    final List<WorkspaceImpl> result =
-        workspaceManager.getByNamespace(workspace.getNamespace(), false);
+    final Page<WorkspaceImpl> result =
+        workspaceManager.getByNamespace(workspace.getNamespace(), false, 30, 0);
 
     // then
-    assertEquals(result.size(), 1);
+    assertEquals(result.getItems().size(), 1);
 
-    final WorkspaceImpl res1 = result.get(0);
+    final WorkspaceImpl res1 = result.getItems().get(0);
     assertEquals(
         res1.getStatus(),
         RUNNING,
@@ -292,13 +296,13 @@ public class WorkspaceManagerTest {
     final TestInternalRuntime runtime = mockRuntime(workspace, RUNNING);
 
     // when
-    final List<WorkspaceImpl> result =
-        workspaceManager.getByNamespace(workspace.getNamespace(), true);
+    final Page<WorkspaceImpl> result =
+        workspaceManager.getByNamespace(workspace.getNamespace(), true, 30, 0);
 
     // then
-    assertEquals(result.size(), 1);
+    assertEquals(result.getItems().size(), 1);
 
-    final WorkspaceImpl res1 = result.get(0);
+    final WorkspaceImpl res1 = result.getItems().get(0);
     assertEquals(
         res1.getStatus(),
         RUNNING,
@@ -523,10 +527,12 @@ public class WorkspaceManagerTest {
     when(workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace()))
         .thenReturn(workspace);
     when(workspaceDao.get(workspace.getConfig().getName(), NAMESPACE_1)).thenReturn(workspace);
-    when(workspaceDao.getByNamespace(workspace.getNamespace()))
-        .thenReturn(singletonList(workspace));
-    when(workspaceDao.getByNamespace(NAMESPACE_1)).thenReturn(singletonList(workspace));
-    when(workspaceDao.getWorkspaces(USER_ID)).thenReturn(singletonList(workspace));
+    when(workspaceDao.getByNamespace(eq(workspace.getNamespace()), anyInt(), anyLong()))
+        .thenReturn(new Page<>(singletonList(workspace), 0, 1, 1));
+    when(workspaceDao.getByNamespace(eq(NAMESPACE_1), anyInt(), anyLong()))
+        .thenReturn(new Page<>(singletonList(workspace), 0, 1, 1));
+    when(workspaceDao.getWorkspaces(eq(USER_ID), anyInt(), anyLong()))
+        .thenReturn(new Page<>(singletonList(workspace), 0, 1, 1));
     return workspace;
   }
 

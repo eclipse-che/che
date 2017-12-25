@@ -20,7 +20,6 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 
 import com.google.inject.Inject;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Singleton;
@@ -28,6 +27,7 @@ import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
@@ -177,11 +177,11 @@ public class WorkspaceManager {
    * @throws ServerException when any server error occurs while getting workspaces with {@link
    *     WorkspaceDao#getWorkspaces(String)}
    */
-  public List<WorkspaceImpl> getWorkspaces(String user, boolean includeRuntimes)
-      throws ServerException {
+  public Page<WorkspaceImpl> getWorkspaces(
+      String user, boolean includeRuntimes, int maxItems, long skipCount) throws ServerException {
     requireNonNull(user, "Required non-null user id");
-    final List<WorkspaceImpl> workspaces = workspaceDao.getWorkspaces(user);
-    for (WorkspaceImpl workspace : workspaces) {
+    final Page<WorkspaceImpl> workspaces = workspaceDao.getWorkspaces(user, maxItems, skipCount);
+    for (WorkspaceImpl workspace : workspaces.getItems()) {
       normalizeState(workspace, includeRuntimes);
     }
     return workspaces;
@@ -203,11 +203,13 @@ public class WorkspaceManager {
    * @throws ServerException when any server error occurs while getting workspaces with {@link
    *     WorkspaceDao#getByNamespace(String)}
    */
-  public List<WorkspaceImpl> getByNamespace(String namespace, boolean includeRuntimes)
+  public Page<WorkspaceImpl> getByNamespace(
+      String namespace, boolean includeRuntimes, int maxItems, long skipCount)
       throws ServerException {
     requireNonNull(namespace, "Required non-null namespace");
-    final List<WorkspaceImpl> workspaces = workspaceDao.getByNamespace(namespace);
-    for (WorkspaceImpl workspace : workspaces) {
+    final Page<WorkspaceImpl> workspaces =
+        workspaceDao.getByNamespace(namespace, maxItems, skipCount);
+    for (WorkspaceImpl workspace : workspaces.getItems()) {
       normalizeState(workspace, includeRuntimes);
     }
     return workspaces;

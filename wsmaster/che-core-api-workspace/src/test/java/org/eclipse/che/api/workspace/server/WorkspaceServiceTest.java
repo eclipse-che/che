@@ -26,6 +26,8 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -45,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
@@ -603,7 +606,8 @@ public class WorkspaceServiceTest {
   public void shouldGetWorkspaces() throws Exception {
     final WorkspaceImpl workspace1 = createWorkspace(createConfigDto());
     final WorkspaceImpl workspace2 = createWorkspace(createConfigDto(), STARTING);
-    when(wsManager.getWorkspaces(USER_ID, false)).thenReturn(asList(workspace1, workspace2));
+    when(wsManager.getWorkspaces(eq(USER_ID), eq(false), anyInt(), anyLong()))
+        .thenReturn(new Page<>(asList(workspace1, workspace2), 0, 2, 2));
 
     final Response response =
         given()
@@ -625,7 +629,8 @@ public class WorkspaceServiceTest {
   public void shouldGetWorkspacesByNamespace() throws Exception {
     final WorkspaceImpl workspace1 = createWorkspace(createConfigDto());
     final WorkspaceImpl workspace2 = createWorkspace(createConfigDto(), STARTING);
-    when(wsManager.getByNamespace(NAMESPACE, false)).thenReturn(asList(workspace1, workspace2));
+    when(wsManager.getByNamespace(eq(NAMESPACE), eq(false), anyInt(), anyLong()))
+        .thenReturn(new Page<>(asList(workspace1, workspace2), 0, 2, 2));
 
     final Response response =
         given()
@@ -647,7 +652,8 @@ public class WorkspaceServiceTest {
   public void shouldGetWorkspacesByStatus() throws Exception {
     final WorkspaceImpl workspace1 = createWorkspace(createConfigDto());
     final WorkspaceImpl workspace2 = createWorkspace(createConfigDto(), STARTING);
-    when(wsManager.getWorkspaces(USER_ID, false)).thenReturn(asList(workspace1, workspace2));
+    when(wsManager.getWorkspaces(eq(USER_ID), eq(false), anyInt(), anyLong()))
+        .thenReturn(new Page<>(asList(workspace1, workspace2), 0, 2, 2));
 
     final Response response =
         given()
