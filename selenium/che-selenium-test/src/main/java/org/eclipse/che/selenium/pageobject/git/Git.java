@@ -363,7 +363,7 @@ public class Git {
   }
 
   /**
-   * check open state of commit form
+   * check opened state of commit form
    *
    * @return true if widget is open
    */
