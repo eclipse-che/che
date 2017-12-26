@@ -32,6 +32,7 @@ public final class Constants {
   // LS requests timeout constants
   public static final int REQUEST_TIMEOUT = 10_000;
   public static final int EFFECTIVE_POM_REQUEST_TIMEOUT = 30_000;
+  public static final int REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT = 60_000;
 
   // JSON RPC methods
   public static final String FILE_STRUCTURE = "java/filestructure";
@@ -41,6 +42,8 @@ public final class Constants {
   public static final String EXTERNAL_LIBRARY_ENTRY = "java/libraryEntry";
   public static final String EXTERNAL_NODE_CONTENT = "java/libraryNodeContentByPath";
   public static final String CLASS_PATH_TREE = "java/classpathTree";
+  public static final String EFFECTIVE_POM = "java/effective-pom";
+  public static final String REIMPORT_MAVEN_PROJECTS = "java/reimport-maven-projects";
 
   private Constants() {
     throw new UnsupportedOperationException("Unused constructor.");
