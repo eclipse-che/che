@@ -39,6 +39,8 @@ export interface IPodItemContainer {
  *  @author Oleksii Orel
  */
 export class OpenshiftMachineRecipeParser {
+  private recipeByContent: Map<string, IPodItem> = new Map();
+  private recipeKeys: Array<string> = [];
 
   /**
    * Parses recipe content
@@ -47,8 +49,18 @@ export class OpenshiftMachineRecipeParser {
    * @returns {IPodItem} recipe object
    */
   parse(content: string): IPodItem {
+    if (this.recipeByContent.has(content)) {
+       return this.recipeByContent.get(content);
+    }
     const recipe = jsyaml.load(content);
     this.validate(recipe);
+    // add to buffer
+    this.recipeByContent.set(content, recipe);
+    this.recipeKeys.push(content);
+    if (this.recipeKeys.length > 10) {
+      this.recipeByContent.delete(this.recipeKeys.shift());
+    }
+
     return recipe;
   }
 
@@ -59,7 +71,7 @@ export class OpenshiftMachineRecipeParser {
    * @returns {string} recipe content
    */
   dump(recipe: IPodItem): string {
-    return jsyaml.dump(recipe, {'indent': 1});
+    return jsyaml.safeDump(recipe, {'indent': 1});
   }
 
   /**
@@ -96,10 +108,13 @@ export class OpenshiftMachineRecipeParser {
       throw new TypeError(`Recipe pod item spec containers should contain at least one 'container'.`);
     }
     recipe.spec.containers.forEach((podItemContainer: IPodItemContainer) => {
+      if (!podItemContainer) {
+        return;
+      }
       if (!podItemContainer.name) {
         throw new TypeError(`Recipe pod item container should contain 'name' section.`);
       }
-      if (!this.testName(podItemContainer.name)) {
+      if (podItemContainer.name && !this.testName(podItemContainer.name)) {
         throw new TypeError(`Recipe pod item container name should not contain special characters like dollar, etc.`);
       }
       if (!podItemContainer.image) {
