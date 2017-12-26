@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -61,7 +62,9 @@ import org.eclipse.che.api.fs.server.FsDtoConverter;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectService;
+import org.eclipse.che.api.project.server.notification.PreProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
+import org.eclipse.che.api.project.server.notification.ProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
@@ -214,9 +217,20 @@ public class ProjectServiceApi {
     wsPath = absolutize(wsPath);
 
     if (projectManager.isRegistered(wsPath)) {
+      Optional<RegisteredProject> project = projectManager.get(wsPath);
+      project.ifPresent(
+          registeredProject ->
+              eventService.publish(new PreProjectDeletedEvent(registeredProject.getPath())));
+
       projectManager.delete(wsPath);
+
+      project.ifPresent(
+          registeredProject ->
+              eventService.publish(new ProjectDeletedEvent(registeredProject.getPath())));
     } else {
+      eventService.publish(new PreProjectDeletedEvent(wsPath));
       fsManager.delete(wsPath);
+      eventService.publish(new ProjectDeletedEvent(wsPath));
     }
   }
 
@@ -276,6 +290,8 @@ public class ProjectServiceApi {
     wsPath = absolutize(wsPath);
 
     projectManager.doImport(wsPath, sourceStorage, force, jsonRpcImportConsumer(clientId));
+
+    eventService.publish(new ProjectCreatedEvent(wsPath));
   }
 
   /** Create file with specified path, name and content */
