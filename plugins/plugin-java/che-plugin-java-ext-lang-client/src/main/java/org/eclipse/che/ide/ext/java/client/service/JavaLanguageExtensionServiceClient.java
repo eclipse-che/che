@@ -21,6 +21,7 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHI
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_NODE_CONTENT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REQUEST_TIMEOUT;
@@ -41,6 +42,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
 import org.eclipse.che.plugin.languageserver.ide.service.ServiceUtil;
+import org.eclipse.lsp4j.WorkspaceEdit;
 
 @Singleton
 public class JavaLanguageExtensionServiceClient {
@@ -226,6 +228,26 @@ public class JavaLanguageExtensionServiceClient {
                 .methodName(EXTERNAL_NODE_CONTENT)
                 .paramsAsDto(params)
                 .sendAndReceiveResultAsString(REQUEST_TIMEOUT)
+                .onSuccess(resolve::apply)
+                .onTimeout(() -> onTimeout(reject))
+                .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
+  }
+
+  /**
+   * Organize imports in a file or in all files in the specific directory.
+   *
+   * @param path the path to the file or to the directory
+   * @return {@link WorkspaceEdit} changes to apply
+   */
+  public Promise<WorkspaceEdit> organizeImports(String path) {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName(ORGANIZE_IMPORTS)
+                .paramsAsString(path)
+                .sendAndReceiveResultAsDto(WorkspaceEdit.class, REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
