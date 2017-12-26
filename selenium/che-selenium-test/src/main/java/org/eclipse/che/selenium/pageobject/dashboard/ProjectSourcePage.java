@@ -163,6 +163,12 @@ public class ProjectSourcePage {
     cancelButton.click();
   }
 
+  public boolean isConnectGitHubAccountButtonVisible() {
+    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath(Locators.CONNECT_GITHUB_ACCOUNT_BUTTON)))
+        .isDisplayed();
+  }
+
   public void clickOnConnectGithubAccountButton() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(Locators.CONNECT_GITHUB_ACCOUNT_BUTTON)))

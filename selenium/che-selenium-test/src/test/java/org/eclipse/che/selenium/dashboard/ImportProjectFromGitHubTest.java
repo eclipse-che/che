@@ -85,8 +85,11 @@ public class ImportProjectFromGitHubTest {
 
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSourceTab(GITHUB);
-    projectSourcePage.clickOnConnectGithubAccountButton();
-    clickOnConnectYourGithubAccountButton();
+
+    if (projectSourcePage.isConnectGitHubAccountButtonVisible()) {
+      connectGithubAccount();
+    }
+
     projectSourcePage.waitGithubProjectsList();
     projectSourcePage.selectProjectFromList(GITHUB_PROJECT_NAME);
     projectSourcePage.clickOnAddProjectButton();
@@ -104,7 +107,9 @@ public class ImportProjectFromGitHubTest {
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(projectName, PROJECT_FOLDER);
   }
 
-  private void clickOnConnectYourGithubAccountButton() {
+  private void connectGithubAccount() {
+    projectSourcePage.clickOnConnectGithubAccountButton();
+
     seleniumWebDriver.switchToNoneCurrentWindow(ideWin);
 
     gitHub.waitAuthorizationPageOpened();
