@@ -84,13 +84,7 @@ public class CheckRestoringSplitEditorTest {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     splitEditorAndOpenFiles();
-    try {
-      setPositionsForSplittedEditor();
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7729", ex);
-    }
-
+    setPositionsForSplittedEditor();
     editor.waitActive();
     if (popupDialogsBrowser.isAlertPresent()) {
       popupDialogsBrowser.acceptAlert();
@@ -98,7 +92,6 @@ public class CheckRestoringSplitEditorTest {
 
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitItem(PROJECT_NAME);
-
     try {
       projectExplorer.waitItemInVisibleArea(javaClassName);
     } catch (TimeoutException ex) {

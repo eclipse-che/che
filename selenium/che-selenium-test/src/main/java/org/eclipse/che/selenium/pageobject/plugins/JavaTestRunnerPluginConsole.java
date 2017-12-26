@@ -18,6 +18,7 @@ import com.google.inject.Singleton;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.By;
@@ -66,8 +67,9 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   private WebElement resultTreeMainForm;
 
   @Inject
-  public JavaTestRunnerPluginConsole(SeleniumWebDriver seleniumWebDriver, Loader loader) {
-    super(seleniumWebDriver, loader);
+  public JavaTestRunnerPluginConsole(
+      SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory) {
+    super(seleniumWebDriver, loader, actionsFactory);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 

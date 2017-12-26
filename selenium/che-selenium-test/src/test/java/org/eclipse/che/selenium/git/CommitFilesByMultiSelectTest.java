@@ -129,7 +129,7 @@ public class CommitFilesByMultiSelectTest {
     // Check the 'Cancel' button
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitCommitMainFormIsOpened();
-    git.clickOnCancelBtnComitForm();
+    git.clickOnCancelBtnCommitForm();
 
     // perform init commit
     projectExplorer.selectItem(PROJECT_NAME);
