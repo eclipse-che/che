@@ -17,7 +17,7 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import java.util.Collection;
 import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.icon.IconRegistry;
-import org.eclipse.che.plugin.maven.client.MavenResources;
+import org.eclipse.che.ide.ext.java.client.MavenResources;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
