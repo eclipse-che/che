@@ -32,7 +32,6 @@ import org.eclipse.che.ide.api.workspace.event.InstallerFailedEvent;
 import org.eclipse.che.ide.api.workspace.event.InstallerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.InstallerStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.MachineRunningEvent;
-import org.eclipse.che.ide.workspace.events.MachineStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
@@ -46,6 +45,7 @@ import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelView;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
+import org.eclipse.che.ide.workspace.events.MachineStatusChangedEvent;
 
 /** Listens workspace events and outputs and visualizes the workspace loading process. */
 @Singleton
