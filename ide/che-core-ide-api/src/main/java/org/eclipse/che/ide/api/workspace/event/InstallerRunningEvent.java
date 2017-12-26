@@ -20,12 +20,12 @@ public class InstallerRunningEvent extends GwtEvent<InstallerRunningEvent.Handle
 
   private final String installer;
   private final String machineName;
-  private final boolean serverDefined;
+  private final boolean serverRunning;
 
-  public InstallerRunningEvent(String installer, String machineName, boolean serverDefined) {
+  public InstallerRunningEvent(String installer, String machineName, boolean serverRunning) {
     this.installer = installer;
     this.machineName = machineName;
-    this.serverDefined = serverDefined;
+    this.serverRunning = serverRunning;
   }
 
   /** Returns the installer identifier. */
@@ -39,8 +39,8 @@ public class InstallerRunningEvent extends GwtEvent<InstallerRunningEvent.Handle
   }
 
   /** Returns true if corresponding server is defined and running. */
-  public boolean isServerDefined() {
-    return serverDefined;
+  public boolean isServerRunning() {
+    return serverRunning;
   }
 
   @Override
