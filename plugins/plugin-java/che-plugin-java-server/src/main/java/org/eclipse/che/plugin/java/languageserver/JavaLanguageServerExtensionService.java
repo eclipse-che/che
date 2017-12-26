@@ -13,7 +13,9 @@ package org.eclipse.che.plugin.java.languageserver;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.ide.ext.java.shared.Constants.CLASS_PATH_TREE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EFFECTIVE_POM_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES_CHILDREN;
@@ -21,6 +23,8 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHI
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_NODE_CONTENT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
+import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_ENTRY_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_FOLDER_COMMAND;
@@ -35,6 +39,7 @@ import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_CHILDREN
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_ENTRY_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_NODE_CONTENT_BY_PATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_OUTPUT_DIR_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.REIMPORT_MAVEN_PROJECTS_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.RESOLVE_CLASSPATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.TEST_DETECT_COMMAND;
 
@@ -48,6 +53,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -69,6 +75,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
+import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocation;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
@@ -123,10 +130,17 @@ public class JavaLanguageServerExtensionService {
 
     requestHandler
         .newConfiguration()
-        .methodName("java/effective-pom")
+        .methodName(EFFECTIVE_POM)
         .paramsAsString()
         .resultAsString()
         .withFunction(this::getEffectivePom);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(REIMPORT_MAVEN_PROJECTS)
+        .paramsAsDto(ReImportMavenProjectsCommandParameters.class)
+        .resultAsListOfString()
+        .withFunction(this::reImportMavenProjects);
 
     requestHandler
         .newConfiguration()
@@ -361,11 +375,52 @@ public class JavaLanguageServerExtensionService {
     Type targetClassType = new TypeToken<String>() {}.getType();
     try {
       return gson.fromJson(
-          gson.toJson(result.get(EFFECTIVE_POM_REQUEST_TIMEOUT, TimeUnit.SECONDS)),
+          gson.toJson(result.get(EFFECTIVE_POM_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS)),
           targetClassType);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
+  }
+
+  /**
+   * Updates given maven projects.
+   *
+   * @param parameters dto with list of paths to projects (relatively to projects root (e.g.
+   *     /projects)) which should be re-imported.
+   * @return list of paths (relatively to projects root) to projects which were updated.
+   */
+  public List<String> reImportMavenProjects(ReImportMavenProjectsCommandParameters parameters) {
+    final List<String> projectsToReImport = parameters.getProjectsToUpdate();
+    if (projectsToReImport.isEmpty()) {
+      return emptyList();
+    }
+
+    ListIterator<String> iterator = projectsToReImport.listIterator();
+    while (iterator.hasNext()) {
+      iterator.set(prefixURI(iterator.next()));
+    }
+
+    CompletableFuture<Object> requestResult =
+        executeCommand(REIMPORT_MAVEN_PROJECTS_COMMAND, singletonList(parameters));
+
+    final List<String> result;
+    Type targetClassType = new TypeToken<ArrayList<String>>() {}.getType();
+    try {
+      result =
+          gson.fromJson(
+              gson.toJson(
+                  requestResult.get(
+                      REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS)),
+              targetClassType);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+
+    iterator = result.listIterator();
+    while (iterator.hasNext()) {
+      iterator.set(removePrefixUri(iterator.next()));
+    }
+    return result;
   }
 
   private List<Jar> getProjectExternalLibraries(ExternalLibrariesParameters params) {
