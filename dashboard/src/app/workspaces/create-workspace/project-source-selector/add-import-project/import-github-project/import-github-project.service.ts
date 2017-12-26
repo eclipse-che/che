@@ -162,7 +162,6 @@ export class ImportGithubProjectService implements IEditingProgress {
    */
   getOrFetchOAuthProvider(): ng.IPromise<any> {
     const defer = this.$q.defer();
-
     this.isGitHubOAuthProviderAvailable = this.cheAPI.getOAuthProvider().isOAuthProviderRegistered('github');
     if (this.isGitHubOAuthProviderAvailable) {
       defer.resolve(this.isGitHubOAuthProviderAvailable);
@@ -313,7 +312,7 @@ export class ImportGithubProjectService implements IEditingProgress {
    * @return {boolean}
    */
   getIsGitHubOAuthProviderAvailable(): boolean {
-    return this.isGitHubOAuthProviderAvailable;
+    return this.cheAPI.getOAuthProvider().isOAuthProviderRegistered('github');
   }
 
   /**

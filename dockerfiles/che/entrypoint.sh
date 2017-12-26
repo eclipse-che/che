@@ -230,8 +230,6 @@ init() {
     sudo chown -R ${CHE_USER} ${CHE_LOGS_DIR}
   fi
 
-
-  export CHE_WORKSPACE_STORAGE=/data/workspaces
   export CHE_DATABASE=/data/storage
   export CHE_TEMPLATE_STORAGE=/data/templates
   export CHE_WORKSPACE_AGENT_DEV=${CHE_DATA_HOST}/lib/ws-agent.tar.gz
@@ -246,6 +244,7 @@ init() {
     export CHE_DOCKER_IP_EXTERNAL=${HOSTNAME}
   fi
   ### Necessary to allow the container to write projects to the folder
+  export CHE_WORKSPACE_STORAGE__MASTER__PATH=/data/workspaces
   export CHE_WORKSPACE_STORAGE="${CHE_DATA_HOST}/workspaces"
   export CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false
 
