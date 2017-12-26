@@ -474,7 +474,7 @@ public class Refactor {
    * @param newValue new name
    */
   public void typeAndWaitNewName(String newValue) {
-    typeAndWaitTextInProvidedElement(newNameFileInput, newValue);
+    typeAndWaitText(newNameFileInput, newValue);
   }
 
   /**
@@ -511,7 +511,7 @@ public class Refactor {
    * @param fileName name of file
    */
   public void typeFileNamePatterns(String fileName) {
-    typeAndWaitTextInProvidedElement(namePatternsInput, fileName);
+    typeAndWaitText(namePatternsInput, fileName);
   }
 
   /**
@@ -664,7 +664,7 @@ public class Refactor {
         .size();
   }
 
-  private void typeAndWaitTextInProvidedElement(WebElement element, String newValue) {
+  private void typeAndWaitText(WebElement element, String newValue) {
     waitElementVisibility(element).clear();
     waitExpectedText(element, "");
     waitElementVisibility(element).sendKeys(newValue);
