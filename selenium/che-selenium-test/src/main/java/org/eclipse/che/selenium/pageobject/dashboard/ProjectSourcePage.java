@@ -10,14 +10,18 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard;
 
+import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -60,6 +64,10 @@ public class ProjectSourcePage {
     String ZIP_SKIP_ROOT_XPATH = "zip-skip-root-folder-checkbox";
     String ADD_PROJECT_BUTTON = "add-project-button";
     String CANCEL_BUTTON = "cancel-button";
+    String CONNECT_GITHUB_ACCOUNT_BUTTON = "//span[text()='Connect your github account']";
+    String GITHUB_PROJECTS_LIST =
+        "//md-list[contains(@class,'import-github-project-repositories-list')]";
+    String GITHUB_PROJECT_CHECKBOX = "//md-checkbox[@aria-label='GitHub repository %s']";
   }
 
   public interface Template {
@@ -95,7 +103,7 @@ public class ProjectSourcePage {
 
   // wait that the Project Source Selector visible
   public void waitOpened() {
-    new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOADER_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(visibilityOf(projectSourceSelector));
   }
 
@@ -117,7 +125,7 @@ public class ProjectSourcePage {
    */
   public void selectSample(String name) {
     WebElement sample =
-        seleniumWebDriver.findElement(By.xpath(String.format(Locators.SAMPLE_CHECKBOX, name)));
+        seleniumWebDriver.findElement(By.xpath(format(Locators.SAMPLE_CHECKBOX, name)));
     sample.click();
   }
 
@@ -151,5 +159,24 @@ public class ProjectSourcePage {
 
   public void clickOnCancelProjectButton() {
     cancelButton.click();
+  }
+
+  public void clickOnConnectGithubAccountButton() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath(Locators.CONNECT_GITHUB_ACCOUNT_BUTTON)))
+        .click();
+  }
+
+  public void waitGithubProjectsList() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath(Locators.GITHUB_PROJECTS_LIST)));
+  }
+
+  public void selectProjectFromList(String projectName) {
+    WebElement project =
+        seleniumWebDriver.findElement(
+            By.xpath(format(Locators.GITHUB_PROJECT_CHECKBOX, projectName)));
+    new Actions(seleniumWebDriver).moveToElement(project).perform();
+    project.click();
   }
 }
