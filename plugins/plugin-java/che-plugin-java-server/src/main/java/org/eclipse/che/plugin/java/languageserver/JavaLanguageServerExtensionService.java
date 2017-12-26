@@ -643,6 +643,6 @@ public class JavaLanguageServerExtensionService {
    */
   public WorkspaceEdit organizeImports(String path) {
     Type type = new TypeToken<WorkspaceEdit>() {}.getType();
-    return doGetOne("java.edit.organizeImports", prefixURI(path), type);
+    return doGetOne("java.edit.organizeImports", singletonList(prefixURI(path)), type);
   }
 }
