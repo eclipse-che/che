@@ -19,7 +19,7 @@ import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
-import org.eclipse.che.plugin.maven.client.MavenResources;
+import org.eclipse.che.ide.ext.java.client.MavenResources;
 
 /**
  * Maven command type.

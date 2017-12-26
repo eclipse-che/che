@@ -487,4 +487,17 @@ public interface JavaLocalizationConstant extends Messages {
 
   @Key("formatter.preferences.import.button")
   String formatterPreferencesImportButton();
+
+  // Maven
+  @Key("action.effectivePom.title")
+  String actionGetEffectivePomTitle();
+
+  @Key("action.effectivePom.description")
+  String actionGetEffectivePomDescription();
+
+  @Key("action.reimportDependencies.title")
+  String actionReimportDependenciesTitle();
+
+  @Key("action.reimportDependencies.description")
+  String actionReimportDependenciesDescription();
 }

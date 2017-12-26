@@ -9,14 +9,12 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.maven.client.actions;
+package org.eclipse.che.ide.ext.java.client.action;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -25,9 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -35,36 +30,43 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
-import org.eclipse.che.plugin.maven.client.service.MavenServerServiceClient;
+import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
+import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
+import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
+import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 
 /**
  * Action for reimport maven dependencies.
  *
  * @author Roman Nikitenko
+ * @author Mykola Morhun
  */
 @Singleton
 public class ReimportMavenDependenciesAction extends AbstractPerspectiveAction {
 
   private final AppContext appContext;
   private final NotificationManager notificationManager;
-  private final MavenServerServiceClient mavenServerServiceClient;
+  private final JavaLanguageExtensionServiceClient javaLanguageExtensionServiceClient;
+  private final DtoFactory dtoFactory;
 
   @Inject
   public ReimportMavenDependenciesAction(
-      MavenLocalizationConstant constant,
       AppContext appContext,
       NotificationManager notificationManager,
       Resources resources,
-      MavenServerServiceClient mavenServerServiceClient) {
+      JavaLanguageExtensionServiceClient javaLanguageExtensionServiceClient,
+      DtoFactory dtoFactory,
+      JavaLocalizationConstant localization) {
     super(
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
-        constant.actionReimportDependenciesTitle(),
-        constant.actionReimportDependenciesDescription(),
+        localization.actionReimportDependenciesTitle(),
+        localization.actionReimportDependenciesDescription(),
         resources.refresh());
     this.appContext = appContext;
     this.notificationManager = notificationManager;
-    this.mavenServerServiceClient = mavenServerServiceClient;
+    this.javaLanguageExtensionServiceClient = javaLanguageExtensionServiceClient;
+    this.dtoFactory = dtoFactory;
   }
 
   @Override
@@ -74,18 +76,35 @@ public class ReimportMavenDependenciesAction extends AbstractPerspectiveAction {
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    mavenServerServiceClient
-        .reImportProjects(getPathsToSelectedMavenProject())
-        .catchError(
-            new Operation<PromiseError>() {
-              @Override
-              public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(
-                    "Problem with reimporting maven dependencies",
-                    arg.getMessage(),
-                    FAIL,
-                    EMERGE_MODE);
+    ReImportMavenProjectsCommandParameters paramsDto =
+        dtoFactory
+            .createDto(ReImportMavenProjectsCommandParameters.class)
+            .withProjectsToUpdate(getPathsToSelectedMavenProject());
+
+    javaLanguageExtensionServiceClient
+        .reImportMavenProjects(paramsDto)
+        .then(
+            updatedProjects -> {
+              for (final String path : updatedProjects) {
+                appContext
+                    .getWorkspaceRoot()
+                    .getContainer(path)
+                    .then(
+                        container -> {
+                          if (container.isPresent()) {
+                            container.get().synchronize();
+                          }
+                        });
               }
+              // TODO update error markers in poms if needed
+            })
+        .catchError(
+            error -> {
+              notificationManager.notify(
+                  "Problem with reimporting maven dependencies",
+                  error.getMessage(),
+                  FAIL,
+                  EMERGE_MODE);
             });
   }
 
@@ -104,10 +123,10 @@ public class ReimportMavenDependenciesAction extends AbstractPerspectiveAction {
     Set<String> paths = new HashSet<>();
 
     for (Resource resource : resources) {
-      final Optional<Project> project = resource.getRelatedProject();
+      final Project project = resource.getProject();
 
-      if (project.isPresent() && project.get().isTypeOf(MAVEN_ID)) {
-        paths.add(project.get().getLocation().toString());
+      if (project != null && project.isTypeOf(MavenAttributes.MAVEN_ID)) {
+        paths.add(project.getLocation().toString());
       }
     }
 

@@ -35,10 +35,10 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.ext.java.client.MavenResources;
 import org.eclipse.che.ide.ext.java.client.tree.library.JarFileNode;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
-import org.eclipse.che.plugin.maven.client.MavenResources;
 import org.eclipse.che.plugin.maven.client.service.MavenServerServiceClient;
 
 /**
