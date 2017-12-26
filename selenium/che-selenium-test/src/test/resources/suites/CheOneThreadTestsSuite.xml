@@ -12,11 +12,34 @@
 -->
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 <suite name="One-thread Eclipse Che selenium tests"
-       verbose="10"
-       parallel="classes"
-       thread-count="1">
+       verbose="10">
 
     <test name="all">
+      <method-selectors>
+        <method-selector>
+          <script language="beanshell">
+        <![CDATA[
+    boolean isTestGroupsAgreedWithRequestedGroups() {
+     String testGroupsVal = System.getProperty("groups");
+      if (testGroupsVal == null || testGroupsVal.trim().isEmpty() || groups.isEmpty()){
+        return true;
+      }
+
+      String[] testGroups = testGroupsVal.split(",");
+      for (String group: groups.keySet()) {
+        if (!Arrays.asList(testGroups).contains(group)) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    isTestGroupsAgreedWithRequestedGroups();
+]]>
+          </script>
+        </method-selector>
+      </method-selectors>
         <classes>
             <class name="org.eclipse.che.selenium.dashboard.organization.UserEmptyOrganizationTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfParentOrganizationTest"/>

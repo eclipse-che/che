@@ -24,6 +24,7 @@ import com.google.inject.Inject;
 import java.util.Map;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
@@ -42,6 +43,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
+@Test(groups = {TestGroup.DOCKER})
 public class WorkspaceDetailsComposeTest {
   private static final String WORKSPACE = NameGenerator.generate("java-mysql", 4);
   private static final Map<String, String> EXPECTED_VARIABLES =
@@ -75,7 +77,6 @@ public class WorkspaceDetailsComposeTest {
     workspaceServiceClient.delete(WORKSPACE, testUser.getName());
   }
 
-  @Test
   public void workingWithEnvVariables() {
     workspaceDetails.selectTabInWorkspaceMenu(ENV_VARIABLES);
 
@@ -119,7 +120,6 @@ public class WorkspaceDetailsComposeTest {
     clickOnSaveButton();
   }
 
-  @Test
   public void workingWithMachines() {
     String machineName = "new_machine";
 

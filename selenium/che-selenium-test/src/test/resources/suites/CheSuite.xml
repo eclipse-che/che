@@ -17,7 +17,33 @@
        thread-count="4">
 
     <test name="all">
-        <classes>
+      <method-selectors>
+         <method-selector>
+            <script language="beanshell">
+               <![CDATA[
+    boolean isTestGroupsAgreedWithRequestedGroups() {
+     String testGroupsVal = System.getProperty("groups");
+      if (testGroupsVal == null || testGroupsVal.trim().isEmpty() || groups.isEmpty()){
+        return true;
+      }
+
+      String[] testGroups = testGroupsVal.split(",");
+      for (String group: groups.keySet()) {
+        if (!Arrays.asList(testGroups).contains(group)) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    isTestGroupsAgreedWithRequestedGroups();
+]]>
+                </script>
+            </method-selector>
+        </method-selectors>
+
+      <classes>
           <class name="org.eclipse.che.selenium.assistant.CheckFindActionFeatureInCheTest"/>
           <class name="org.eclipse.che.selenium.assistant.KeyBindingsTest"/>
           <class name="org.eclipse.che.selenium.assistant.OrganizeImportsTest"/>

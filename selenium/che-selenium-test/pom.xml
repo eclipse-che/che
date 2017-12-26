@@ -252,6 +252,9 @@
                                     <value>${project.build.testOutputDirectory}/logging.properties</value>
                                 </property>
                             </systemProperties>
+                            <systemPropertyVariables>
+                                <groups>${groups}</groups>
+                            </systemPropertyVariables>
                         </configuration>
                     </execution>
                 </executions>
