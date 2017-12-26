@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.git;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.net.URL;
@@ -31,6 +33,8 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -87,6 +91,13 @@ public class CommitFilesTest {
     ide.open(ws);
   }
 
+  @AfterMethod
+  public void closeForm() {
+    if (git.isCommitWidgetOpened()) {
+      git.clickOnCancelBtnCommitForm();
+    }
+  }
+
   @Test
   public void testCheckBoxSelections() {
     projectExplorer.waitProjectExplorer();
@@ -140,7 +151,7 @@ public class CommitFilesTest {
     git.waitItemCheckBoxToBeUnSelectedInCommitWindow("jsp", "guess_num.jsp");
     git.waitItemCheckBoxToBeSelectedInCommitWindow("web.xml", "spring-servlet.xml", "index.jsp");
 
-    git.clickOnCancelBtnComitForm();
+    git.clickOnCancelBtnCommitForm();
     git.waitCommitFormClosed();
   }
 
@@ -165,19 +176,26 @@ public class CommitFilesTest {
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitCommitMainFormIsOpened();
-    git.waitItemCheckBoxToBeSelectedInCommitWindow(
-        "src/main",
-        "java/org/eclipse/dev/examples",
-        "AppController.java",
-        "webapp",
-        "WEB-INF",
-        "jsp",
-        "guess_num.jsp",
-        "web.xml",
-        "spring-servlet.xml",
-        "index.jsp",
-        "pom.xml");
-    git.clickOnCancelBtnComitForm();
+
+    try {
+      git.waitItemCheckBoxToBeSelectedInCommitWindow(
+          "src/main",
+          "java/org/eclipse/dev/examples",
+          "AppController.java",
+          "webapp",
+          "WEB-INF",
+          "jsp",
+          "guess_num.jsp",
+          "web.xml",
+          "spring-servlet.xml",
+          "index.jsp",
+          "pom.xml");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8042", ex);
+    }
+
+    git.clickOnCancelBtnCommitForm();
     git.waitCommitFormClosed();
   }
 
@@ -186,7 +204,14 @@ public class CommitFilesTest {
     // perform init commit without one folder
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
-    git.clickItemCheckBoxInCommitWindow("java/org/eclipse/dev/examples");
+
+    try {
+      git.clickItemCheckBoxInCommitWindow("java/org/eclipse/dev/examples");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8042", ex);
+    }
+
     git.waitAndRunCommit("init");
     loader.waitOnClosed();
 
