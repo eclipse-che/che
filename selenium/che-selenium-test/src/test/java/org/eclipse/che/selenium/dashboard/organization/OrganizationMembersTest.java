@@ -101,9 +101,9 @@ public class OrganizationMembersTest {
     // Delete the members from the members list
     try {
       organizationPage.deleteMember(testUser.getEmail());
-    } catch (TimeoutException e) {
+    } catch (TimeoutException ex) {
       // remove try-catch block after the issue has been resolved
-      fail("Known issue https://github.com/codenvy/codenvy/issues/2473", e);
+      fail("Known issue https://github.com/eclipse/che/issues/7897", ex);
     }
   }
 
