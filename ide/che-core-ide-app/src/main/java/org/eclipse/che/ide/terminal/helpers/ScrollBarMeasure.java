@@ -8,22 +8,21 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.terminal;
+package org.eclipse.che.ide.terminal.helpers;
 
-import com.google.gwt.core.client.JavaScriptObject;
+import jsinterop.annotations.JsPackage;
+import jsinterop.annotations.JsType;
+import org.eclipse.che.ide.terminal.Terminal;
 
 /**
+ * Helper element to simplify evaluation {@link Terminal} scrollbar size.
+ *
  * @author Alexander Andrienko
  */
-public class ScrollBarMeasureJso extends JavaScriptObject {
+@JsType(isNative = true, namespace = JsPackage.GLOBAL)
+public class ScrollBarMeasure {
 
-    protected ScrollBarMeasureJso() {}
+  public native int getHorizontalWidth();
 
-    public final native int getHorizontalWidth() /*-{
-        return this.getHorizontalWidth();
-    }-*/;
-
-    public final native int getVerticalWidth() /*-{
-        return this.getVerticalWidth();
-    }-*/;
+  public native int getVerticalWidth();
 }

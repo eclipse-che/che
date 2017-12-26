@@ -15,6 +15,12 @@ import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
+/**
+ * Terminal options. See more {@link Terminal}.
+ *
+ * @author Evgen Vidolob
+ * @author Oleksandr Andriienko
+ */
 @JsType(namespace = JsPackage.GLOBAL)
 public class TerminalOptions {
   /** Default terminal options constructor */
@@ -37,6 +43,7 @@ public class TerminalOptions {
     setTabStopWidth(8);
 
     setFocusOnOpen(true);
+    setReadOnly(false);
   }
 
   @JsProperty(name = "theme")
@@ -134,4 +141,10 @@ public class TerminalOptions {
 
   @JsProperty(name = "focusOnOpen")
   public native boolean getFocusOnOpen();
+
+  @JsProperty(name = "readOnly")
+  public native void setReadOnly(boolean readOnly);
+
+  @JsProperty(name = "readOnly")
+  public native boolean getReadOnly();
 }

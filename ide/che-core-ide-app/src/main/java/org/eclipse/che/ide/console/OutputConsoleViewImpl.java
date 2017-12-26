@@ -15,7 +15,6 @@ import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTO
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -31,12 +30,11 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.machine.MachineResources;
-import org.eclipse.che.ide.terminal.TerminalInitializePromiseHolder;
-import org.eclipse.che.ide.terminal.TerminalJso;
-import org.eclipse.che.ide.terminal.TerminalOptionsJso;
+import org.eclipse.che.ide.terminal.Terminal;
+import org.eclipse.che.ide.terminal.TerminalOptions;
+import org.eclipse.che.ide.terminal.helpers.TerminalGeometry;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.requirejs.ModuleHolder;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
@@ -47,7 +45,7 @@ import org.vectomatic.dom.svg.ui.SVGImage;
  */
 public class OutputConsoleViewImpl extends Composite implements OutputConsoleView, RequiresResize {
 
-  private TerminalJso terminalJso;
+  private Terminal terminal;
 
   interface OutputConsoleViewUiBinder extends UiBinder<Widget, OutputConsoleViewImpl> {}
 
@@ -83,11 +81,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
   @UiField protected FlowPanel downloadOutputsButton;
 
   @Inject
-  public OutputConsoleViewImpl(
-      final ModuleHolder moduleHolder,
-      MachineResources resources,
-      CoreLocalizationConstant localization,
-      TerminalInitializePromiseHolder promiseHolder) {
+  public OutputConsoleViewImpl(MachineResources resources, CoreLocalizationConstant localization) {
     initWidget(UI_BINDER.createAndBindUi(this));
 
     reRunProcessButton.add(new SVGImage(resources.reRunIcon()));
@@ -145,27 +139,28 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
         MIDDLE,
         localization.consolesClearOutputsButtonTooltip());
 
-    promiseHolder
-        .getInitializerPromise()
-        .then(
-            arg -> {
-              JavaScriptObject terminalSource = moduleHolder.getModule("Xterm");
-              TerminalOptionsJso termOps =
-                  TerminalOptionsJso.createDefault()
-                      .withFocusOnOpen(false)
-                      .withScrollBack(SCROLL_BACK)
-                      .withReadOnly(true);
+    TerminalOptions termOptions = new TerminalOptions();
+    termOptions.setFocusOnOpen(false);
+    termOptions.setReadOnly(true);
+    termOptions.setDisableStdin(true);
+    termOptions.setScrollBack(SCROLL_BACK);
 
-              this.terminalJso = TerminalJso.create(terminalSource, termOps);
-              terminalJso.open(consoleLines.asWidget().getElement());
-              resize();
-//              Log.info(getClass(),  "Constructor !!!! "
-//                                    + " " + consoleLines.getElement().getClientHeight()
-//                                    + " " + consoleLines.getElement().getClientWidth()
-//                                    + " " + consoleLines.isVisible()
-//                                    + " " + consoleLines.isAttached()
-//                                    + " " + hashCode());
-            });
+    this.terminal = new Terminal();
+    terminal.setTerminalOptions(termOptions);
+    Log.info(getClass(), "Create dev console! " + hashCode());
+
+    terminal.open(consoleLines.getElement());
+//    Log.info(getClass(), "char Measure " + terminal.getCharMeasure());
+//    Log.info(getClass(), "char Measure height " + terminal.getCharMeasure().getHeight());
+//    Log.info(getClass(), "horizontal scroll bar size " + terminal.getScrollBarMeasure().getHorizontalWidth());
+//        resize();
+
+    //              Log.info(getClass(),  "Constructor !!!! "
+    //                                    + " " + consoleLines.getElement().getClientHeight()
+    //                                    + " " + consoleLines.getElement().getClientWidth()
+    //                                    + " " + consoleLines.isVisible()
+    //                                    + " " + consoleLines.isAttached()
+    //                                    + " " + hashCode());
   }
 
   private Timer resizeTimer =
@@ -178,49 +173,69 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
   @Override
   public void onResize() {
-//    Log.info(getClass(),  "!!!! "
-//                          + " " + consoleLines.getElement().getClientHeight()
-//                          + " " + consoleLines.getElement().getClientWidth()
-//                          + " " + consoleLines.isVisible()
-//                          + " " + consoleLines.isAttached()
-//                          + " " + hashCode());
+    //    Log.info(getClass(),  "!!!! "
+    //                          + " " + consoleLines.getElement().getClientHeight()
+    //                          + " " + consoleLines.getElement().getClientWidth()
+    //                          + " " + consoleLines.isVisible()
+    //                          + " " + consoleLines.isAttached()
+    //                          + " " + hashCode());
     resizeTimer.schedule(200);
   }
 
   private void resize() {
-    if (terminalJso == null) {
+    if (terminal == null) {
       return;
     }
-    int visibleCols = evaluateVisibleCols();
-    int visibleRows = evaluateVisibleRows();
+
+//    int visibleCols = evaluateVisibleCols();
+//    int visibleRows = evaluateVisibleRows();
+    TerminalGeometry geometry = terminal.proposeGeometry();
+    int visibleCols = geometry.getCols();
+    int visibleRows = geometry.getRows();
+    Log.info(getClass(), "RESIZE!!! " + visibleCols + " " + visibleRows);
 
     if (visibleRows > 0 && visibleCols > 0) {
 
-      Log.info(getClass(), "Client height "+ terminalJso.getElement().getClientHeight() + " width " + terminalJso.getElement().getClientWidth());
-      Log.info(getClass(), "char measure element: height= " + terminalJso.getCharMeasure().getHeight() + " width= " + terminalJso.getCharMeasure().getWidth());
+//      Log.info(
+//          getClass(),
+//          "Client height "
+//              + terminal.getElement().getClientHeight()
+//              + " width "
+//              + terminal.getElement().getClientWidth());
+//      Log.info(
+//          getClass(),
+//          "char measure element: height= "
+//              + terminal.getCharMeasure().getHeight()
+//              + " width= "
+//              + terminal.getCharMeasure().getWidth());
 
-      //int maxLineLength = terminalJso.maxLineLength();
+      // int getMaxLineLength = terminalJso.getMaxLineLength();
 
-      int cols = Math.max(terminalJso.maxLineLength(), visibleCols);
-
+//      int cols = Math.max(terminal.getMaxLineLength(), visibleCols);
+      int cols = visibleCols;
       Log.info(getClass(), "size: rows " + visibleRows + " cols " + cols);
 
-      terminalJso.resize(cols, visibleRows);
+      terminal.resize(cols, visibleRows);
     }
   }
 
   private int evaluateVisibleRows() {
-    return Math.round((terminalJso.getElement().getClientHeight() - terminalJso.getScrollBarMeasure().getVerticalWidth()) / terminalJso.getCharMeasure().getHeight());
+    return Math.round(
+        (consoleLines.getElement().getClientHeight()
+                - terminal.getScrollBarMeasure().getVerticalWidth())
+            / terminal.getCharMeasure().getHeight());
   }
 
   private int evaluateVisibleCols() {
-    return Math.round((terminalJso.getElement().getClientWidth() - terminalJso.getScrollBarMeasure().getHorizontalWidth()) / terminalJso.getCharMeasure().getWidth());
+    return Math.round(
+        (consoleLines.getElement().getClientWidth()
+                - terminal.getScrollBarMeasure().getHorizontalWidth())
+            / terminal.getCharMeasure().getWidth());
   }
-
 
   @Override
   public void print(String text) {
-    terminalJso.writeln(text);
+    terminal.writeln(text);
   }
 
   /**

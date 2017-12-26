@@ -8,29 +8,24 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.terminal;
+package org.eclipse.che.ide.terminal.helpers;
 
-import com.google.gwt.core.client.JavaScriptObject;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
+import org.eclipse.che.ide.terminal.Terminal;
 
 /**
+ * Helper element to simplify evaluation {@link Terminal} character size.
+ *
  * @author Alexander Andrienko
  */
 @JsType(isNative = true, namespace = JsPackage.GLOBAL)
-public class CharMeasureJso extends JavaScriptObject {
+public class CharMeasure {
 
-    @JsProperty(name = "width")
-    public native int getWidth();
+  @JsProperty(name = "width")
+  public native int getWidth();
 
-    protected CharMeasureJso() {}
-
-//    public final native int getWidth() /*-{
-//        return this.width;
-//    }-*/;
-
-    public final native int getHeight() /*-{
-        return this.height;
-    }-*/;
+  @JsProperty(name = "height")
+  public native int getHeight();
 }

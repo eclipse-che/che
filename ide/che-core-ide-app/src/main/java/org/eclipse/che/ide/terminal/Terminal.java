@@ -17,8 +17,16 @@ import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
+import org.eclipse.che.ide.terminal.helpers.CharMeasure;
+import org.eclipse.che.ide.terminal.helpers.ScrollBarMeasure;
+import org.eclipse.che.ide.terminal.helpers.TerminalGeometry;
 
-/** Created by Oleksandr Andriienko */
+/**
+ * GWT binding to term.js script
+ *
+ * @author Evgen Vidolob
+ * @author Oleksandr Andriienko
+ */
 @JsType(isNative = true, namespace = JsPackage.GLOBAL)
 public class Terminal {
 
@@ -49,6 +57,15 @@ public class Terminal {
   @JsProperty(name = "element")
   public native Element getElement();
 
+  @JsProperty(name = "charMeasure")
+  public native CharMeasure getCharMeasure();
+
+  @JsProperty(name = "scrollBarMeasure")
+  public native ScrollBarMeasure getScrollBarMeasure();
+
+  @JsProperty(name = "maxLineWidth")
+  public native int getMaxLineLength();
+
   public native void open(Element element);
 
   public native void write(String data);
@@ -62,6 +79,8 @@ public class Terminal {
   public native void focus();
 
   public native void blur();
+
+  public native void fit();
 
   public native boolean hasSelection();
 

@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.terminal;
+package org.eclipse.che.ide.terminal.helpers;
 
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
