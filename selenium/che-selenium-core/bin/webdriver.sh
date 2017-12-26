@@ -711,9 +711,9 @@ getTestGroups() {
   local testGroups=${CHE_INFRASTRUCTURE}
 
   if [[ ${CHE_MULTIUSER} == true ]]; then
-    testGroups="${testGroups}, multiuser"
+    testGroups=${testGroups},multiuser
   else
-    testGroups="${testGroups}, singleuser"
+    testGroups=${testGroups},singleuser
   fi
 
   echo ${testGroups}
