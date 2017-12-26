@@ -9,14 +9,13 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.maven.client.actions;
+package org.eclipse.che.ide.ext.java.client.action;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -33,10 +32,10 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.SyntheticFile;
+import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
+import org.eclipse.che.ide.ext.java.client.MavenResources;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
-import org.eclipse.che.plugin.maven.client.MavenResources;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 
 /**
@@ -55,7 +54,7 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
 
   @Inject
   public GetEffectivePomAction(
-      MavenLocalizationConstant constant,
+      JavaLocalizationConstant localization,
       MavenResources mavenResources,
       EditorAgent editorAgent,
       NotificationManager notificationManager,
@@ -63,8 +62,8 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
       AppContext appContext) {
     super(
         Collections.singletonList(PROJECT_PERSPECTIVE_ID),
-        constant.actionGetEffectivePomTitle(),
-        constant.actionGetEffectivePomDescription(),
+        localization.actionGetEffectivePomTitle(),
+        localization.actionGetEffectivePomDescription(),
         mavenResources.maven());
     this.editorAgent = editorAgent;
     this.notificationManager = notificationManager;
@@ -86,7 +85,7 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
       return;
     }
 
-    event.getPresentation().setEnabledAndVisible(project.isTypeOf(MAVEN_ID));
+    event.getPresentation().setEnabledAndVisible(project.isTypeOf(MavenAttributes.MAVEN_ID));
   }
 
   @Override
@@ -95,7 +94,7 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
     checkNotNull(resource);
 
     final Project project = resource.getProject();
-    checkState(MAVEN_ID.equals(project.getType()));
+    checkState(MavenAttributes.MAVEN_ID.equals(project.getType()));
 
     javaLanguageExtensionServiceClient
         .effectivePom(project.getLocation().toString())
