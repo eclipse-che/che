@@ -21,10 +21,16 @@ public class WsAgentAuthServletModule extends ServletModule {
   protected void configureServlets() {
     if (Boolean.valueOf(System.getenv("CHE_AUTH_ENABLED"))) {
       configureMultiUserMode();
+    } else {
+      configureSingleUserMode();
     }
   }
 
   private void configureMultiUserMode() {
     filter("/*").through(MachineLoginFilter.class);
+  }
+
+  private void configureSingleUserMode() {
+    filter("/*").through(org.eclipse.che.EnvironmentInitializationFilter.class);
   }
 }

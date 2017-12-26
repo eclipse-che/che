@@ -27,6 +27,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -80,13 +81,16 @@ public class Consoles {
   }
 
   protected final SeleniumWebDriver seleniumWebDriver;
+  private final ActionsFactory actionsFactory;
   private final Loader loader;
   private static final String CONSOLE_PANEL_DRUGGER_CSS = "div.gwt-SplitLayoutPanel-VDragger";
 
   @Inject
-  public Consoles(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public Consoles(
+      SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
+    this.actionsFactory = actionsFactory;
     redrawDriverWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     loadPageDriverWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     updateProjDriverWait = new WebDriverWait(seleniumWebDriver, UPDATING_PROJECT_TIMEOUT_SEC);
@@ -160,7 +164,8 @@ public class Consoles {
   }
 
   public void clickOnPlusMenuButton() {
-    redrawDriverWait.until(visibilityOf(plusMenuBtn)).click();
+    redrawDriverWait.until(visibilityOf(plusMenuBtn));
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(plusMenuBtn).click().perform();
   }
 
   public void clickOnHideInternalServers() {

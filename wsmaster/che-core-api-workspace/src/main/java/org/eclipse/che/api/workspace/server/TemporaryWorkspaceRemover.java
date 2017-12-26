@@ -13,11 +13,11 @@ package org.eclipse.che.api.workspace.server;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
@@ -60,22 +60,17 @@ public class TemporaryWorkspaceRemover {
 
   @VisibleForTesting
   void removeTemporaryWs() throws ServerException {
-    final int count = 100;
-    int skip = 0;
-    List<WorkspaceImpl> workspaces = workspaceDao.getWorkspaces(true, skip, count);
-    while (!workspaces.isEmpty()) {
-      for (WorkspaceImpl workspace : workspaces) {
-        try {
-          workspaceDao.remove(workspace.getId());
-        } catch (ServerException e) {
-          LOG.error(
-              "Unable to cleanup temporary workspace {}. Reason is {}",
-              workspace.getId(),
-              e.getLocalizedMessage());
-        }
+    for (WorkspaceImpl workspace :
+        Pages.iterate(
+            (maxItems, skipCount) -> workspaceDao.getWorkspaces(true, maxItems, skipCount))) {
+      try {
+        workspaceDao.remove(workspace.getId());
+      } catch (ServerException e) {
+        LOG.error(
+            "Unable to cleanup temporary workspace {}. Reason is {}",
+            workspace.getId(),
+            e.getLocalizedMessage());
       }
-      skip = skip + count;
-      workspaces = workspaceDao.getWorkspaces(true, skip, count);
     }
   }
 }

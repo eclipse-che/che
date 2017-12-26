@@ -25,6 +25,7 @@ import java.util.List;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.ext.git.client.BranchSearcher;
 import org.eclipse.che.ide.resource.Path;
@@ -43,6 +44,7 @@ public class FetchPresenterTest extends BaseTest {
   @Mock private FetchView view;
   @Mock private Branch branch;
   @Mock private BranchSearcher branchSearcher;
+  @Mock private OAuthServiceClient oAuthServiceClient;
 
   private FetchPresenter presenter;
 
@@ -55,12 +57,12 @@ public class FetchPresenterTest extends BaseTest {
             dtoFactory,
             view,
             service,
-            appContext,
             constant,
             notificationManager,
             branchSearcher,
             gitOutputConsoleFactory,
-            processesPanelPresenter);
+            processesPanelPresenter,
+            oAuthServiceClient);
 
     when(service.remoteList(any(Path.class), anyString(), anyBoolean()))
         .thenReturn(remoteListPromise);
