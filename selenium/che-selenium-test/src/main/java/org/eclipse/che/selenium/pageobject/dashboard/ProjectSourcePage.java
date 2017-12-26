@@ -19,9 +19,9 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -31,10 +31,12 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class ProjectSourcePage {
 
   private final SeleniumWebDriver seleniumWebDriver;
+  private final ActionsFactory actionsFactory;
 
   @Inject
-  public ProjectSourcePage(SeleniumWebDriver seleniumWebDriver) {
+  public ProjectSourcePage(SeleniumWebDriver seleniumWebDriver, ActionsFactory actionsFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
+    this.actionsFactory = actionsFactory;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -176,7 +178,7 @@ public class ProjectSourcePage {
     WebElement project =
         seleniumWebDriver.findElement(
             By.xpath(format(Locators.GITHUB_PROJECT_CHECKBOX, projectName)));
-    new Actions(seleniumWebDriver).moveToElement(project).perform();
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(project).perform();
     project.click();
   }
 }
