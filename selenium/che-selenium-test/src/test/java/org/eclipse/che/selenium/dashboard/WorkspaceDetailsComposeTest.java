@@ -21,7 +21,6 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import java.util.Map;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -44,7 +43,7 @@ import org.testng.annotations.Test;
 /** @author Skoryk Serhii */
 public class WorkspaceDetailsComposeTest {
   private static final String WORKSPACE = NameGenerator.generate("java-mysql", 4);
-  private static final Map<String, String> EXPECTED_VARIABLES =
+  private static final ImmutableMap<String, String> EXPECTED_VARIABLES =
       ImmutableMap.of(
           "MYSQL_DATABASE", "petclinic",
           "MYSQL_PASSWORD", "password",

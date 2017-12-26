@@ -12,19 +12,26 @@ package org.eclipse.che.api.workspace.server;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
+import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -45,7 +52,11 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
+import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
+import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.core.db.DBInitializer;
+import org.eclipse.che.dto.server.DtoFactory;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -170,6 +181,45 @@ public class WorkspaceRuntimesTest {
     assertEquals(workspace.getRuntime().getMachines().keySet(), r1machines.keySet());
   }
 
+  @Test
+  public void attributesIsSetWhenRuntimeAbnormallyStopped() throws Exception {
+    String error = "Some kind of error happened";
+    EventService localEventService = new EventService();
+    WorkspaceRuntimes localRuntimes =
+        new WorkspaceRuntimes(
+            localEventService,
+            ImmutableMap.of(TEST_ENVIRONMENT_TYPE, testEnvFactory),
+            infrastructure,
+            sharedPool,
+            workspaceDao,
+            dbInitializer);
+    localRuntimes.init();
+    RuntimeIdentityDto identity =
+        DtoFactory.newDto(RuntimeIdentityDto.class)
+            .withWorkspaceId("workspace123")
+            .withEnvName("my-env")
+            .withOwner("me");
+    mockWorkspace(identity);
+    mockContext(identity);
+    RuntimeStatusEvent event =
+        DtoFactory.newDto(RuntimeStatusEvent.class)
+            .withIdentity(identity)
+            .withFailed(true)
+            .withError(error);
+    localRuntimes.recoverOne(infrastructure, identity);
+    ArgumentCaptor<WorkspaceImpl> captor = ArgumentCaptor.forClass(WorkspaceImpl.class);
+
+    // when
+    localEventService.publish(event);
+
+    // than
+    verify(workspaceDao, atLeastOnce()).update(captor.capture());
+    WorkspaceImpl ws = captor.getAllValues().get(captor.getAllValues().size() - 1);
+    assertNotNull(ws.getAttributes().get(STOPPED_ATTRIBUTE_NAME));
+    assertTrue(Boolean.valueOf(ws.getAttributes().get(STOPPED_ABNORMALLY_ATTRIBUTE_NAME)));
+    assertEquals(ws.getAttributes().get(ERROR_MESSAGE_ATTRIBUTE_NAME), error);
+  }
+
   private RuntimeContext mockContext(RuntimeIdentity identity)
       throws ValidationException, InfrastructureException {
     RuntimeContext context = mock(RuntimeContext.class);
@@ -193,6 +243,7 @@ public class WorkspaceRuntimesTest {
     WorkspaceImpl workspace = mock(WorkspaceImpl.class);
     when(workspace.getConfig()).thenReturn(config);
     when(workspace.getId()).thenReturn(identity.getWorkspaceId());
+    when(workspace.getAttributes()).thenReturn(new HashMap<>());
 
     when(workspaceDao.get(identity.getWorkspaceId())).thenReturn(workspace);
 

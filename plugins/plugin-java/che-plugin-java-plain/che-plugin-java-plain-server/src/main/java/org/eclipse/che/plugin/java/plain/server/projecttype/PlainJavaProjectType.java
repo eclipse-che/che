@@ -19,7 +19,9 @@ import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.apache.tika.mime.MediaType;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
+import org.eclipse.che.api.search.server.excludes.MediaTypesExcludeMatcher;
 
 /**
  * Project type for plain java projects.
@@ -29,7 +31,9 @@ import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 @Singleton
 public class PlainJavaProjectType extends ProjectTypeDef {
   @Inject
-  public PlainJavaProjectType(PlainJavaValueProviderFactory valueProviderFactory) {
+  public PlainJavaProjectType(
+      PlainJavaValueProviderFactory valueProviderFactory,
+      MediaTypesExcludeMatcher mediaTypesExcludeMatcher) {
     super(JAVAC, JAVAC_PROJECT_NAME, true, false, true);
 
     setValueProviderFactory(SOURCE_FOLDER, valueProviderFactory);
@@ -38,5 +42,8 @@ public class PlainJavaProjectType extends ProjectTypeDef {
     addVariableDefinition(LIBRARY_FOLDER, "java library folder", false);
 
     addParent(JAVA_ID);
+
+    mediaTypesExcludeMatcher.addExcludedMediaType(new MediaType("application", "java-vm"));
+    mediaTypesExcludeMatcher.addExcludedMediaType(new MediaType("application", "java-archive"));
   }
 }
