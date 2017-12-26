@@ -136,8 +136,7 @@ public class TerminalPresenter implements Presenter, TerminalView.ActionDelegate
 
     socket.setOnOpenHandler(
         () -> {
-          terminal = new Terminal();
-          terminal.setTerminalOptions(options);
+          terminal = new Terminal(options);
 
           connected = true;
 

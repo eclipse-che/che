@@ -142,25 +142,22 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     TerminalOptions termOptions = new TerminalOptions();
     termOptions.setFocusOnOpen(false);
     termOptions.setReadOnly(true);
-    termOptions.setDisableStdin(true);
+    // todo seems we can use it...
+    // termOptions.setDisableStdin(true);
     termOptions.setScrollBack(SCROLL_BACK);
 
-    this.terminal = new Terminal();
-    terminal.setTerminalOptions(termOptions);
-    Log.info(getClass(), "Create dev console! " + hashCode());
-
-    terminal.open(consoleLines.getElement());
+    this.terminal = new Terminal(termOptions);
 //    Log.info(getClass(), "char Measure " + terminal.getCharMeasure());
 //    Log.info(getClass(), "char Measure height " + terminal.getCharMeasure().getHeight());
 //    Log.info(getClass(), "horizontal scroll bar size " + terminal.getScrollBarMeasure().getHorizontalWidth());
 //        resize();
 
-    //              Log.info(getClass(),  "Constructor !!!! "
-    //                                    + " " + consoleLines.getElement().getClientHeight()
-    //                                    + " " + consoleLines.getElement().getClientWidth()
-    //                                    + " " + consoleLines.isVisible()
-    //                                    + " " + consoleLines.isAttached()
-    //                                    + " " + hashCode());
+//                  Log.info(getClass(),  "Constructor !!!! "
+//                                        + " " + consoleLines.getElement().getClientHeight()
+//                                        + " " + consoleLines.getElement().getClientWidth()
+//                                        + " " + consoleLines.isVisible()
+//                                        + " " + consoleLines.isAttached()
+//                                        + " " + hashCode());
   }
 
   private Timer resizeTimer =
@@ -173,28 +170,40 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
   @Override
   public void onResize() {
+//    Log.info(getClass(), "isAttached");
+//    Log.info(getClass(), "%%% " + consoleLines.getElement().getClientHeight());
+//    Log.info(getClass(), "What about parent ? in the xterm.js " + terminal.getParent());
+    if (consoleLines.getElement().getClientHeight() > 0 && !termIsOpen()) {
+      terminal.open(consoleLines.getElement());
+
+      Log.info(getClass(), "open!");
+//      terminal.print();
+    }
+
     //    Log.info(getClass(),  "!!!! "
     //                          + " " + consoleLines.getElement().getClientHeight()
     //                          + " " + consoleLines.getElement().getClientWidth()
     //                          + " " + consoleLines.isVisible()
     //                          + " " + consoleLines.isAttached()
     //                          + " " + hashCode());
-    resizeTimer.schedule(200);
+    if (termIsOpen()) {
+      resizeTimer.schedule(200);
+    }
+  }
+
+  private boolean termIsOpen() {
+    return consoleLines.getElement().equals(terminal.getParent());
   }
 
   private void resize() {
-    if (terminal == null) {
-      return;
-    }
-
 //    int visibleCols = evaluateVisibleCols();
 //    int visibleRows = evaluateVisibleRows();
     TerminalGeometry geometry = terminal.proposeGeometry();
     int visibleCols = geometry.getCols();
     int visibleRows = geometry.getRows();
-    Log.info(getClass(), "RESIZE!!! " + visibleCols + " " + visibleRows);
 
     if (visibleRows > 0 && visibleCols > 0) {
+//      Log.info(getClass(), "Check scrollBar " + terminal.getScrollBarMeasure().getHorizontalWidth() + " " + terminal.getScrollBarMeasure().getVerticalWidth());
 
 //      Log.info(
 //          getClass(),
@@ -209,14 +218,17 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 //              + " width= "
 //              + terminal.getCharMeasure().getWidth());
 
-      // int getMaxLineLength = terminalJso.getMaxLineLength();
-
-//      int cols = Math.max(terminal.getMaxLineLength(), visibleCols);
-      int cols = visibleCols;
-      Log.info(getClass(), "size: rows " + visibleRows + " cols " + cols);
-
+      int cols = Math.max(terminal.getMaxLineLength(), visibleCols);
+      Log.info(getClass(), "Resize!!! visible rows " + visibleRows + " visible cols " + visibleCols +  " max line width " + terminal.getMaxLineLength());
+//      Log.info(getClass(), "Propose max amount colums!!!! " + cols + " " + terminal.getMaxLineLength());
+//      int cols = visibleCols;
+//      Log.info(getClass(), "size: rows " + visibleRows + " cols " + visibleCols);
       terminal.resize(cols, visibleRows);
     }
+  }
+
+  private boolean consoleIsFit() {
+    return consoleLines.getElement().getClientHeight() > 0;
   }
 
   private int evaluateVisibleRows() {

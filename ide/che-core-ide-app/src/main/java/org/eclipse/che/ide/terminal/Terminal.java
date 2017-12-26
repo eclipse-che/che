@@ -30,6 +30,10 @@ import org.eclipse.che.ide.terminal.helpers.TerminalGeometry;
 @JsType(isNative = true, namespace = JsPackage.GLOBAL)
 public class Terminal {
 
+  @SuppressWarnings("unused")
+  public Terminal(TerminalOptions options) {
+  }
+
   @JsFunction
   @FunctionalInterface
   public interface TerminalEventHandler {
@@ -45,9 +49,6 @@ public class Terminal {
   @JsProperty(name = "options")
   public native TerminalOptions getOptions();
 
-  @JsProperty(name = "options")
-  public native void setTerminalOptions(TerminalOptions options);
-
   @JsProperty(name = "cols")
   public native int getCols();
 
@@ -56,6 +57,9 @@ public class Terminal {
 
   @JsProperty(name = "element")
   public native Element getElement();
+
+  @JsProperty(name = "parent")
+  public native Element getParent();
 
   @JsProperty(name = "charMeasure")
   public native CharMeasure getCharMeasure();
@@ -71,6 +75,9 @@ public class Terminal {
   public native void write(String data);
 
   public native void writeln(String data);
+
+  //todo test method should be reworked
+  public native void print();
 
   public native void resize(int cols, int rows);
 

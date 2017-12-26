@@ -1878,6 +1878,8 @@
                         <arg>-noprecompile</arg>
                         <arg>-noincremental</arg>
                         <arg>-generateJsInteropExports</arg>
+                        <arg>-src</arg>
+                        <arg>/home/user/projects/che-lib/che-terminal-client/target/classes</arg>
                     </codeserverArgs>
                     <compilerArgs>
                         <arg>-generateJsInteropExports</arg>
