@@ -20,10 +20,6 @@ CHE_DIR=$HOME/che
 LS_DIR=${CHE_DIR}/test-ls
 LS_LAUNCHER=${LS_DIR}/launch.sh
 
-echo "Test failing of language server" >&2
-# exit with error
-exit 1
-
 if [ -f /etc/centos-release ]; then
     FILE="/etc/centos-release"
     LINUX_TYPE=$(cat $FILE | awk '{print $1}')
