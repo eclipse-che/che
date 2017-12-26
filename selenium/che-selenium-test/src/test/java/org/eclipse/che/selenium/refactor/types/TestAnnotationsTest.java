@@ -111,6 +111,6 @@ public class TestAnnotationsTest {
   }
 
   private String getTextFromFile(URL url) throws Exception {
-    return Joiner.on("/n").join(readAllLines(get(url.toURI()), forName("UTF-8")));
+    return Joiner.on("\n").join(readAllLines(get(url.toURI()), forName("UTF-8")));
   }
 }

@@ -53,6 +53,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Aleksandr Shmaraev on 30.10.15 */
@@ -537,7 +538,8 @@ public class Refactor {
    * @param expectedText expected message
    */
   public void waitTextInMoveForm(String expectedText) {
-    waitExpectedText(TEXT_MESSAGE_MOVE_FORM, expectedText);
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath(format(TEXT_MESSAGE_MOVE_FORM, expectedText))));
   }
 
   /**
@@ -675,7 +677,9 @@ public class Refactor {
   }
 
   private void waitExpectedText(String elementXpath, String expectedText) {
-    loadPageWait.until(attributeToBe(waitElementVisibility(elementXpath), "value", expectedText));
+    loadPageWait.until(
+        (ExpectedCondition<Boolean>)
+            driver -> waitElementVisibility(elementXpath).getText().equals(expectedText));
   }
 
   private WebElement waitElementVisibility(WebElement element) {
