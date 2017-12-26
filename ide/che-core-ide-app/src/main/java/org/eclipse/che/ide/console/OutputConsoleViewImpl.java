@@ -170,23 +170,10 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
   @Override
   public void onResize() {
-//    Log.info(getClass(), "isAttached");
-//    Log.info(getClass(), "%%% " + consoleLines.getElement().getClientHeight());
-//    Log.info(getClass(), "What about parent ? in the xterm.js " + terminal.getParent());
-    if (consoleLines.getElement().getClientHeight() > 0 && !termIsOpen()) {
-      terminal.open(consoleLines.getElement());
-
-      Log.info(getClass(), "open!");
-//      terminal.print();
-    }
-
-    //    Log.info(getClass(),  "!!!! "
-    //                          + " " + consoleLines.getElement().getClientHeight()
-    //                          + " " + consoleLines.getElement().getClientWidth()
-    //                          + " " + consoleLines.isVisible()
-    //                          + " " + consoleLines.isAttached()
-    //                          + " " + hashCode());
-    if (termIsOpen()) {
+    if (consoleIsFit()) {
+      if (!termIsOpen()) {
+        terminal.open(consoleLines.getElement());
+      }
       resizeTimer.schedule(200);
     }
   }
@@ -195,40 +182,21 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     return consoleLines.getElement().equals(terminal.getParent());
   }
 
+  private boolean consoleIsFit() {
+    return consoleLines.getElement().getClientHeight() > 0 && consoleLines.getElement().getClientWidth() > 0;
+  }
+
   private void resize() {
-//    int visibleCols = evaluateVisibleCols();
-//    int visibleRows = evaluateVisibleRows();
     TerminalGeometry geometry = terminal.proposeGeometry();
     int visibleCols = geometry.getCols();
     int visibleRows = geometry.getRows();
+    //    int visibleCols = evaluateVisibleCols();
+//    int visibleRows = evaluateVisibleRows();
 
     if (visibleRows > 0 && visibleCols > 0) {
-//      Log.info(getClass(), "Check scrollBar " + terminal.getScrollBarMeasure().getHorizontalWidth() + " " + terminal.getScrollBarMeasure().getVerticalWidth());
-
-//      Log.info(
-//          getClass(),
-//          "Client height "
-//              + terminal.getElement().getClientHeight()
-//              + " width "
-//              + terminal.getElement().getClientWidth());
-//      Log.info(
-//          getClass(),
-//          "char measure element: height= "
-//              + terminal.getCharMeasure().getHeight()
-//              + " width= "
-//              + terminal.getCharMeasure().getWidth());
-
       int cols = Math.max(terminal.getMaxLineLength(), visibleCols);
-      Log.info(getClass(), "Resize!!! visible rows " + visibleRows + " visible cols " + visibleCols +  " max line width " + terminal.getMaxLineLength());
-//      Log.info(getClass(), "Propose max amount colums!!!! " + cols + " " + terminal.getMaxLineLength());
-//      int cols = visibleCols;
-//      Log.info(getClass(), "size: rows " + visibleRows + " cols " + visibleCols);
       terminal.resize(cols, visibleRows);
     }
-  }
-
-  private boolean consoleIsFit() {
-    return consoleLines.getElement().getClientHeight() > 0;
   }
 
   private int evaluateVisibleRows() {
