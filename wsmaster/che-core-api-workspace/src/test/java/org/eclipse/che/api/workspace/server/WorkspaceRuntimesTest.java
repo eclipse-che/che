@@ -212,7 +212,7 @@ public class WorkspaceRuntimesTest {
     // when
     localEventService.publish(event);
 
-    //than
+    // than
     verify(workspaceDao, atLeastOnce()).update(captor.capture());
     WorkspaceImpl ws = captor.getAllValues().get(captor.getAllValues().size() - 1);
     assertNotNull(ws.getAttributes().get(STOPPED_ATTRIBUTE_NAME));

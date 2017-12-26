@@ -47,8 +47,8 @@ public final class Constants {
    */
   public static final String CREATED_ATTRIBUTE_NAME = "created";
   /**
-   * Describes time when workspace was last updated or started. Should be set/read
-   * from {@link Workspace#getAttributes}
+   * Describes time when workspace was last updated or started. Should be set/read from {@link
+   * Workspace#getAttributes}
    */
   public static final String UPDATED_ATTRIBUTE_NAME = "updated";
   /**
