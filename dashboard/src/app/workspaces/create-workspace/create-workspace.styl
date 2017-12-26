@@ -1,16 +1,20 @@
 .create-workspace-progress
-  position: absolute;
-  top: 56px;
-  z-index: 2;
+  position absolute
+  top 56px
+  z-index 2
 
-.create-workspace-content
+md-content.create-workspace-content
   background-color $very-light-grey-background-color !important
-  padding 15px;
+  overflow auto
+  padding 15px
 
   .che-label-container-label-name
     text-transform uppercase
     color $grey-input-label-color !important
     font-weight bold !important
+
+  .che-label-container-content
+    min-width 850px
 
   .create-workspace-content-hidden
     visibility hidden
