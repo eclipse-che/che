@@ -19,6 +19,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.multiuser.resource.api.ResourceUsageTracker;
@@ -48,10 +49,11 @@ public class RuntimeResourceUsageTracker implements ResourceUsageTracker {
       throws NotFoundException, ServerException {
     final Account account = accountManager.getById(accountId);
     final long currentlyUsedRuntimes =
-        workspaceManagerProvider
-            .get()
-            .getByNamespace(account.getName(), false)
-            .stream()
+        Pages.stream(
+                (maxItems, skipCount) ->
+                    workspaceManagerProvider
+                        .get()
+                        .getByNamespace(account.getName(), false, maxItems, skipCount))
             .filter(ws -> STOPPED != ws.getStatus())
             .count();
     if (currentlyUsedRuntimes > 0) {

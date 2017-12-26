@@ -208,6 +208,7 @@ public class CommitViewImpl extends Window implements CommitView {
       this.message.setValue("");
     }
     delegate.onValueChanged();
+    message.setFocus(true);
   }
 
   @Override

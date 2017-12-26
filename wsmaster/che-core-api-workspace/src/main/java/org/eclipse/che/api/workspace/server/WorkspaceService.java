@@ -47,6 +47,7 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
@@ -225,10 +226,14 @@ public class WorkspaceService extends Service {
           Integer maxItems,
       @ApiParam("Workspace status") @QueryParam("status") String status)
       throws ServerException, BadRequestException {
-    // TODO add maxItems & skipCount to manager
     return withLinks(
         workspaceManager
-            .getWorkspaces(EnvironmentContext.getCurrent().getSubject().getUserId(), false)
+            .getWorkspaces(
+                EnvironmentContext.getCurrent().getSubject().getUserId(),
+                false,
+                maxItems,
+                skipCount)
+            .getItems()
             .stream()
             .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
             .map(DtoConverter::asDto)
@@ -253,9 +258,9 @@ public class WorkspaceService extends Service {
       @ApiParam("The namespace") @PathParam("namespace") String namespace)
       throws ServerException, BadRequestException {
     return withLinks(
-        workspaceManager
-            .getByNamespace(namespace, false)
-            .stream()
+        Pages.stream(
+                (maxItems, skipCount) ->
+                    workspaceManager.getByNamespace(namespace, false, maxItems, skipCount))
             .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
             .map(DtoConverter::asDto)
             .collect(toList()));

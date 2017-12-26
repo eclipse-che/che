@@ -12,11 +12,15 @@ package org.eclipse.che.api.workspace.server;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
+import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
+import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -114,8 +118,8 @@ public class WorkspaceRuntimes {
   }
 
   @PostConstruct
-  private void init() {
-    subscribeCleanupOnAbnormalRuntimeStopEvent();
+  void init() {
+    subscribeAbnormalRuntimeStopListener();
     recover();
   }
 
@@ -484,8 +488,8 @@ public class WorkspaceRuntimes {
     }
   }
 
-  private void subscribeCleanupOnAbnormalRuntimeStopEvent() {
-    eventService.subscribe(new CleanupRuntimeOnAbnormalRuntimeStop());
+  private void subscribeAbnormalRuntimeStopListener() {
+    eventService.subscribe(new AbnormalRuntimeStopListener());
   }
 
   private void publishWorkspaceStatusEvent(
@@ -576,18 +580,34 @@ public class WorkspaceRuntimes {
     return nameIfNoUser;
   }
 
-  private class CleanupRuntimeOnAbnormalRuntimeStop implements EventSubscriber<RuntimeStatusEvent> {
+  private class AbnormalRuntimeStopListener implements EventSubscriber<RuntimeStatusEvent> {
     @Override
     public void onEvent(RuntimeStatusEvent event) {
       if (event.isFailed()) {
-        RuntimeState state = runtimes.remove(event.getIdentity().getWorkspaceId());
+        String workspaceId = event.getIdentity().getWorkspaceId();
+        RuntimeState state = runtimes.remove(workspaceId);
         if (state != null) {
           publishWorkspaceStatusEvent(
-              state.runtime.getContext().getIdentity().getWorkspaceId(),
+              workspaceId,
               STOPPED,
               RUNNING,
               "Error occurs on workspace runtime stop. Error: " + event.getError());
+          setAbnormalStopAttributes(workspaceId, event.getError());
         }
+      }
+    }
+
+    private void setAbnormalStopAttributes(String workspaceId, String error) {
+      try {
+        WorkspaceImpl workspace = workspaceDao.get(workspaceId);
+        workspace.getAttributes().put(ERROR_MESSAGE_ATTRIBUTE_NAME, error);
+        workspace.getAttributes().put(STOPPED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
+        workspace.getAttributes().put(STOPPED_ABNORMALLY_ATTRIBUTE_NAME, Boolean.toString(true));
+        workspaceDao.update(workspace);
+      } catch (NotFoundException | ServerException | ConflictException e) {
+        LOG.warn(
+            String.format(
+                "Cannot set error status of the workspace %s. Error is: %s", workspaceId, error));
       }
     }
   }
