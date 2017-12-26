@@ -43,7 +43,7 @@ public class CreateWorkspace {
 
   private interface Locators {
     String WORKSPACE_NAME_INPUT = "workspace-name-input";
-    String ERROR_MESSAGE = "new-workspace-error-message"; // TODO
+    String ERROR_MESSAGE = "new-workspace-error-message";
 
     String TOOLBAR_TITLE_ID = "New_Workspace";
     String CREATE_BUTTON = "create-workspace-button";
@@ -58,7 +58,7 @@ public class CreateWorkspace {
     String FILTER_SUGGESTION_TEXT =
         "//div[contains(@class,'stack-library-filter-suggestion-text')]";
     String FILTER_SUGGESTION_BUTTON =
-        "//div[@name='suggestionText' and text()='%s']/../div[@name='suggestionText'"; // TODO
+        "//div[@name='suggestionText' and text()='%s']/../div[@name='suggestionButton']"; // TODO
     String FILTER_SELECTED_SUGGESTION_BUTTON = "//button[@class='md-chip-remove ng-scope']";
 
     String SEARCH_INPUT = "//div[@id='search-stack-input']//input";
