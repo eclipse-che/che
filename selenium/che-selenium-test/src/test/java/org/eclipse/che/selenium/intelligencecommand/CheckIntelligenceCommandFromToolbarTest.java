@@ -87,29 +87,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
     groups = {TestGroup.DOCKER}
   )
   public void checkButtonsOnToolbarOnDocker() {
-    projectExplorer.waitProjectExplorer();
-    String currentWindow = seleniumWebDriver.getWindowHandle();
-    commandsToolbar.clickExecStopBtn();
-
-    // it needs when the test is running on the ocp platform
-    String previewUrl = consoles.getPreviewUrl();
-    String expectedText = "This site can’t be reached";
-
-    consoles.clickOnPreviewUrl();
-    checkTestAppAndReturnToIde(currentWindow, expectedText);
-    commandsToolbar.clickExecRerunBtn();
-    consoles.waitExpectedTextIntoConsole(" Server startup in");
-    consoles.clickOnPreviewUrl();
-    checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
-    Assert.assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
-    Assert.assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#2"));
-
-    commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("dev-machine:tomcat8");
-    checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
-    commandsToolbar.clickExecStopBtn();
-    commandsToolbar.clickWithHoldAndLaunchDebuCmdFromList(PROJECT_NAME + ": debug");
-    consoles.waitExpectedTextIntoConsole("Listening for transport dt_socket at address: 8000", 60);
-    consoles.waitExpectedTextIntoConsole(" Server startup in", 30);
+    checkButtonsOnToolbar("This site can’t be reached");
   }
 
   @Test(
@@ -117,14 +95,16 @@ public class CheckIntelligenceCommandFromToolbarTest {
     groups = {TestGroup.OPENSHIFT}
   )
   public void checkButtonsOnToolbarOnOpenshift() {
+    checkButtonsOnToolbar("Application is not available");
+  }
+
+  private void checkButtonsOnToolbar(String expectedText) {
     projectExplorer.waitProjectExplorer();
     String currentWindow = seleniumWebDriver.getWindowHandle();
     commandsToolbar.clickExecStopBtn();
 
     // it needs when the test is running on the ocp platform
     String previewUrl = consoles.getPreviewUrl();
-    String expectedText = "Application is not available";
-
     consoles.clickOnPreviewUrl();
     checkTestAppAndReturnToIde(currentWindow, expectedText);
     commandsToolbar.clickExecRerunBtn();
