@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 
 public class ImportMavenProjectFromGitHubTest {
   private final String WORKSPACE = NameGenerator.generate("ImtMvnPrjGitHub", 4);
-  private static final String GITHUB_PROJECT_NAME = "guess-project";
+  private static final String GITHUB_PROJECT_NAME = "AngularJS";
 
   private String projectName;
   private String ideWin;
