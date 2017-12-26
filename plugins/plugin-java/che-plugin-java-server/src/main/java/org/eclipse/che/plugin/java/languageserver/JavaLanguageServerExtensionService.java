@@ -493,13 +493,14 @@ public class JavaLanguageServerExtensionService {
   }
 
   private <T> T doGetOne(String command, List<Object> params, Type type) {
-    return doGetOne(command, params, type, TIMEOUT);
+    return doGetOne(command, params, type, TIMEOUT, TimeUnit.SECONDS);
   }
 
-  private <T> T doGetOne(String command, List<Object> params, Type type, long timeoutInSeconds) {
+  private <T> T doGetOne(
+      String command, List<Object> params, Type type, long timeoutInSeconds, TimeUnit timeUnit) {
     CompletableFuture<Object> result = executeCommand(command, params);
     try {
-      return gson.fromJson(gson.toJson(result.get(timeoutInSeconds, TimeUnit.SECONDS)), type);
+      return gson.fromJson(gson.toJson(result.get(timeoutInSeconds, timeUnit)), type);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
@@ -618,6 +619,11 @@ public class JavaLanguageServerExtensionService {
     }
 
     Type type = new TypeToken<JobResult>() {}.getType();
-    return doGetOne(Commands.UPDATE_WORKSPACE, singletonList(updateWorkspaceParameters), type, 60);
+    return doGetOne(
+        Commands.UPDATE_WORKSPACE,
+        singletonList(updateWorkspaceParameters),
+        type,
+        REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT,
+        TimeUnit.MILLISECONDS);
   }
 }

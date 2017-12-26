@@ -31,7 +31,11 @@ import org.eclipse.che.jdt.ls.extension.api.dto.UpdateWorkspaceParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** @author Anatolii Bazko */
+/**
+ * Monitors projects activity and updates jdt.ls workspace.
+ *
+ * @author Anatolii Bazko
+ */
 @Singleton
 public class ProjectsListener {
   private static final Logger LOG = LoggerFactory.getLogger(ProjectsListener.class);
@@ -106,35 +110,36 @@ public class ProjectsListener {
 
   private void doUpdateWorkspaceAsync(UpdateWorkspaceParameters updateWorkspaceParameters) {
     executorService.submit(
-        () -> {
-          LOG.info(
-              "Workspace isb being updated with added projects'{}', removed projects '{}'",
-              updateWorkspaceParameters.getAddedProjectsUri().toString(),
-              updateWorkspaceParameters.getRemovedProjectsUri().toString());
-
-          JobResult jobResult = service.updateWorkspace(updateWorkspaceParameters);
-
-          switch (jobResult.getSeverity()) {
-            case ERROR:
-              LOG.error(
-                  "Workspace updated. Result code: '{}', message: '{}'",
-                  jobResult.getResultCode(),
-                  jobResult.getMessage());
-              break;
-            case WARNING:
-            case CANCEL:
-              LOG.warn(
-                  "Workspace updated. Result code: '{}', message: '{}'",
-                  jobResult.getResultCode(),
-                  jobResult.getMessage());
-              break;
-            default:
+        (Runnable)
+            () -> {
               LOG.info(
-                  "Workspace updated. Result code: '{}', message: '{}'",
-                  jobResult.getResultCode(),
-                  jobResult.getMessage());
-              break;
-          }
-        });
+                  "Workspace isb being updated with added projects'{}', removed projects '{}'",
+                  updateWorkspaceParameters.getAddedProjectsUri().toString(),
+                  updateWorkspaceParameters.getRemovedProjectsUri().toString());
+
+              JobResult jobResult = service.updateWorkspace(updateWorkspaceParameters);
+
+              switch (jobResult.getSeverity()) {
+                case ERROR:
+                  LOG.error(
+                      "Workspace updated. Result code: '{}', message: '{}'",
+                      jobResult.getResultCode(),
+                      jobResult.getMessage());
+                  break;
+                case WARNING:
+                case CANCEL:
+                  LOG.warn(
+                      "Workspace updated. Result code: '{}', message: '{}'",
+                      jobResult.getResultCode(),
+                      jobResult.getMessage());
+                  break;
+                default:
+                  LOG.info(
+                      "Workspace updated. Result code: '{}', message: '{}'",
+                      jobResult.getResultCode(),
+                      jobResult.getMessage());
+                  break;
+              }
+            });
   }
 }
