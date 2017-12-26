@@ -118,7 +118,7 @@ public class WorkspaceRuntimes {
   }
 
   @PostConstruct
-  private void init() {
+  void init() {
     subscribeAbnormalRuntimeStopListener();
     recover();
   }
