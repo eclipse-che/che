@@ -128,7 +128,7 @@ public class MultiuserJpaWorkspaceDaoTest {
 
   @Test
   public void shouldFindStackByPermissions() throws Exception {
-    List<WorkspaceImpl> results = dao.getWorkspaces(users[0].getId());
+    List<WorkspaceImpl> results = dao.getWorkspaces(users[0].getId(), 30, 0).getItems();
     assertEquals(results.size(), 2);
     assertTrue(results.contains(workspaces[0]));
     assertTrue(results.contains(workspaces[1]));

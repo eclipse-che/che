@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
@@ -203,6 +204,12 @@ public class PhpProjectDebuggingTest {
    */
   private void startWebPhpScriptInDebugMode() {
     final String previewUrl = consoles.getPreviewUrl() + START_DEBUG_PARAMETERS;
+
+    // it needs when the test is running on the che6-ocp platform
+    if (previewUrl.contains("route")) {
+      WaitUtils.sleepQuietly(10);
+    }
+
     new Thread(
             () -> {
               try {

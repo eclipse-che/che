@@ -54,4 +54,13 @@ public class NameUtils {
   public static boolean checkProjectName(String name) {
     return PROJECT_NAME.test(name);
   }
+
+  public static String getFileExtension(String name) {
+    final int lastDotPosition = name.lastIndexOf('.');
+    // name has no extension
+    if (lastDotPosition < 0) {
+      return "";
+    }
+    return name.substring(lastDotPosition + 1);
+  }
 }

@@ -15,6 +15,8 @@ import static com.google.inject.multibindings.Multibinder.newSetBinder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Names;
+import java.nio.file.PathMatcher;
 import java.util.Collections;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
@@ -32,6 +34,7 @@ import org.eclipse.che.plugin.maven.server.core.MavenServerNotifier;
 import org.eclipse.che.plugin.maven.server.core.MavenTerminalImpl;
 import org.eclipse.che.plugin.maven.server.core.project.PomChangeListener;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenProjectType;
+import org.eclipse.che.plugin.maven.server.projecttype.MavenTargetExcludeMatcher;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenValueProviderFactory;
 import org.eclipse.che.plugin.maven.server.projecttype.handler.ArchetypeGenerationStrategy;
 import org.eclipse.che.plugin.maven.server.projecttype.handler.GeneratorStrategy;
@@ -64,6 +67,15 @@ public class MavenModule extends AbstractModule {
         newSetBinder(binder(), GeneratorStrategy.class);
     generatorStrategyMultibinder.addBinding().to(SimpleGeneratorStrategy.class);
     generatorStrategyMultibinder.addBinding().to(ArchetypeGenerationStrategy.class);
+
+    Multibinder<PathMatcher> excludeMatcher =
+        newSetBinder(binder(), PathMatcher.class, Names.named("vfs.index_filter_matcher"));
+    excludeMatcher.addBinding().to(MavenTargetExcludeMatcher.class);
+
+    Multibinder<PathMatcher> fileWatcherExcludes =
+        newSetBinder(
+            binder(), PathMatcher.class, Names.named("che.user.workspaces.storage.excludes"));
+    fileWatcherExcludes.addBinding().to(MavenTargetExcludeMatcher.class);
 
     bind(MavenTerminal.class).to(MavenTerminalImpl.class).in(Singleton.class);
     bind(MavenProgressNotifier.class).to(MavenServerNotifier.class).in(Singleton.class);

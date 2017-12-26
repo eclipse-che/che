@@ -36,6 +36,7 @@ import javax.inject.Inject;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
@@ -132,19 +133,21 @@ public class WorkspaceDaoTest {
     assertEquals(
         workspace1.getNamespace(), workspace2.getNamespace(), "Namespaces must be the same");
 
-    final List<WorkspaceImpl> found = workspaceDao.getByNamespace(workspace1.getNamespace());
+    final Page<WorkspaceImpl> found = workspaceDao.getByNamespace(workspace1.getNamespace(), 6, 0);
 
-    assertEquals(new HashSet<>(found), new HashSet<>(asList(workspace1, workspace2)));
+    assertEquals(new HashSet<>(found.getItems()), new HashSet<>(asList(workspace1, workspace2)));
+    assertEquals(found.getTotalItemsCount(), 2);
+    assertEquals(found.getItemsCount(), 2);
   }
 
   @Test
   public void emptyListShouldBeReturnedWhenThereAreNoWorkspacesInGivenNamespace() throws Exception {
-    assertTrue(workspaceDao.getByNamespace("non-existing-namespace").isEmpty());
+    assertTrue(workspaceDao.getByNamespace("non-existing-namespace", 30, 0).isEmpty());
   }
 
   @Test(expectedExceptions = NullPointerException.class)
   public void shouldThrowNpeWhenGettingWorkspaceByNullNamespace() throws Exception {
-    workspaceDao.getByNamespace(null);
+    workspaceDao.getByNamespace(null, 30, 0);
   }
 
   @Test
@@ -223,10 +226,23 @@ public class WorkspaceDaoTest {
 
   @Test
   public void shouldGetWorkspacesByNonTemporary() throws Exception {
-    List<WorkspaceImpl> result = workspaceDao.getWorkspaces(false, 0, 2);
+    final WorkspaceImpl workspace = workspaces[4];
+    workspace.setTemporary(true);
+    workspaceDao.update(workspace);
 
-    assertEquals(result.size(), 2);
-    assertEquals(new HashSet<>(result), new HashSet<>(asList(workspaces[0], workspaces[1])));
+    Page<WorkspaceImpl> firstPage = workspaceDao.getWorkspaces(false, 2, 0);
+
+    assertEquals(firstPage.getItems().size(), 2);
+    assertEquals(firstPage.getTotalItemsCount(), 4);
+    assertEquals(
+        new HashSet<>(firstPage.getItems()), new HashSet<>(asList(workspaces[0], workspaces[1])));
+
+    Page<WorkspaceImpl> secondPage = workspaceDao.getWorkspaces(false, 2, 2);
+
+    assertEquals(secondPage.getItems().size(), 2);
+    assertEquals(secondPage.getTotalItemsCount(), 4);
+    assertEquals(
+        new HashSet<>(secondPage.getItems()), new HashSet<>(asList(workspaces[2], workspaces[3])));
   }
 
   @Test
@@ -235,10 +251,11 @@ public class WorkspaceDaoTest {
     workspace.setTemporary(true);
     workspaceDao.update(workspace);
 
-    List<WorkspaceImpl> result = workspaceDao.getWorkspaces(true, 0, 0);
+    Page<WorkspaceImpl> result = workspaceDao.getWorkspaces(true, 30, 0);
 
-    assertEquals(result.size(), 1);
-    assertEquals(result.iterator().next(), workspaceDao.get(workspace.getId()));
+    assertEquals(result.getItems().size(), 1);
+    assertEquals(result.getTotalItemsCount(), 1);
+    assertEquals(result.getItems().iterator().next(), workspaceDao.get(workspace.getId()));
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)

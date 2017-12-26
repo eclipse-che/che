@@ -100,7 +100,9 @@ public class ContributionMixinProvider {
         event -> {
           lastSelected = null;
           contributePart.showStub("");
-          selectionHandlerReg.removeHandler();
+          if (selectionHandlerReg != null) {
+            selectionHandlerReg.removeHandler();
+          }
         });
   }
 
