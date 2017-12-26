@@ -24,9 +24,11 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.che.api.search.server.excludes.HiddenItemPathMatcher;
+import org.eclipse.che.api.project.server.notification.ProjectInitializedEvent;
 
 @Singleton
 public class OnWorkspaceStartProjectInitializer {
@@ -35,6 +37,7 @@ public class OnWorkspaceStartProjectInitializer {
   private final ProjectSynchronizer projectSynchronizer;
   private final ProjectConfigRegistry projectConfigRegistry;
   private final ProjectHandlerRegistry projectHandlerRegistry;
+  private final EventService eventService;
   private final HiddenItemPathMatcher hiddenItemPathMatcher;
 
   @Inject
@@ -43,12 +46,15 @@ public class OnWorkspaceStartProjectInitializer {
       ProjectSynchronizer projectSynchronizer,
       ProjectConfigRegistry projectConfigRegistry,
       ProjectHandlerRegistry projectHandlerRegistry,
-      HiddenItemPathMatcher hiddenItemPathMatcher) {
+      HiddenItemPathMatcher hiddenItemPathMatcher,
+      ProjectHandlerRegistry projectHandlerRegistry,
+      EventService eventService) {
     this.fsManager = fsManager;
     this.projectSynchronizer = projectSynchronizer;
     this.projectConfigRegistry = projectConfigRegistry;
     this.projectHandlerRegistry = projectHandlerRegistry;
     this.hiddenItemPathMatcher = hiddenItemPathMatcher;
+    this.eventService = eventService;
   }
 
   @PostConstruct
@@ -90,6 +96,8 @@ public class OnWorkspaceStartProjectInitializer {
           hOptional.get().onProjectInitialized(project.getBaseFolder());
         }
       }
+
+      eventService.publish(new ProjectInitializedEvent(project.getBaseFolder()));
     }
   }
 }
