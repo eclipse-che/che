@@ -182,7 +182,7 @@ public class WorkspaceRuntimesTest {
   }
 
   @Test
-  public void propertiesIsSetWhenRuntimeAbnormallyStopped() throws Exception {
+  public void attributesIsSetWhenRuntimeAbnormallyStopped() throws Exception {
     String error = "Some kind of error happened";
     EventService localEventService = new EventService();
     WorkspaceRuntimes localRuntimes =
