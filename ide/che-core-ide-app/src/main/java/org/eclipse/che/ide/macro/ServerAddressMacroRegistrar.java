@@ -73,8 +73,10 @@ public class ServerAddressMacroRegistrar {
     eventBus.addHandler(
         WorkspaceStoppedEvent.TYPE,
         e -> {
-          macros.forEach(macro -> macroRegistryProvider.get().unregister(macro));
-          macros.clear();
+          if (macros  != null) {
+            macros.forEach(macro -> macroRegistryProvider.get().unregister(macro));
+            macros.clear();
+          }
         });
   }
 
