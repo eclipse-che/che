@@ -305,8 +305,8 @@
             }
           },
           "recipe": {
-            "location": "eclipse/ubuntu_jdk8",
-            "type": "content"
+            "content": "eclipse/ubuntu_jdk8",
+            "type": "dockerimage"
           }
         }
       },
