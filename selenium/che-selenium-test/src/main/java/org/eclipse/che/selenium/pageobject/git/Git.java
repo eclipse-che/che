@@ -362,8 +362,17 @@ public class Git {
     gitCommit.waitMainFormCommit();
   }
 
+  /**
+   * check opened state of commit form
+   *
+   * @return true if widget is open
+   */
+  public boolean isCommitWidgetOpened() {
+    return gitCommit.isWidgetOpened();
+  }
+
   /** click on the "Cancel' button in tne 'Commit' main form wait the main form is closed */
-  public void clickOnCancelBtnComitForm() {
+  public void clickOnCancelBtnCommitForm() {
     gitCommit.clickOnCancelBtn();
     gitCommit.waitMainFormCommitIsClosed();
   }

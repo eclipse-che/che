@@ -256,8 +256,7 @@ public class WorkspaceDetailsSingleMachineTest {
   }
 
   private void checkServerInServersList(String serverName) {
-    consoles.clickOnPlusMenuButton();
-    consoles.clickOnServerItemInContextMenu();
+    consoles.openServersTabFromContextMenu("dev-machine");
     consoles.waitProcessInProcessConsoleTree("Servers");
     consoles.waitTabNameProcessIsPresent("Servers");
     consoles.waitExpectedTextIntoServerTableCation("Servers of dev-machine:");
