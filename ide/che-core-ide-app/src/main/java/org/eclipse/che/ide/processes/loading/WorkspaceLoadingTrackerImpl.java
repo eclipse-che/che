@@ -10,7 +10,15 @@
  */
 package org.eclipse.che.ide.processes.loading;
 
+import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
+import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
+
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -20,77 +28,52 @@ import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.workspace.event.InstallerFailedEvent;
+import org.eclipse.che.ide.api.workspace.event.InstallerRunningEvent;
+import org.eclipse.che.ide.api.workspace.event.InstallerStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.MachineRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.model.EnvironmentImpl;
 import org.eclipse.che.ide.api.workspace.model.MachineConfigImpl;
+import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.command.toolbar.processes.ProcessesListView;
 import org.eclipse.che.ide.machine.MachineResources;
-import org.eclipse.che.ide.processes.panel.EnvironmentOutputEvent;
+import org.eclipse.che.ide.processes.DisplayMachineOutputEvent;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelView;
+import org.eclipse.che.ide.rest.AsyncRequestFactory;
+import org.eclipse.che.ide.rest.StringUnmarshaller;
+import org.eclipse.che.ide.workspace.events.MachineStatusChangedEvent;
 
 /** Listens workspace events and outputs and visualizes the workspace loading process. */
 @Singleton
 public class WorkspaceLoadingTrackerImpl
-    implements WorkspaceLoadingTracker, EnvironmentOutputEvent.Handler {
-
-  /** Part of a docker image. */
-  private class Chunk {
-    long size = 0;
-    long downloaded = 0;
-  }
-
-  /** Docker image. */
-  private class Image {
-    private String machineName;
-    private String dockerImage;
-    private Map<String, Chunk> chunks;
-    private boolean downloaded;
-
-    public Image(String machineName) {
-      this.machineName = machineName;
-      chunks = new HashMap<>();
-    }
-
-    public String getMachineName() {
-      return machineName;
-    }
-
-    public void setDockerImage(String dockerImage) {
-      this.dockerImage = dockerImage;
-    }
-
-    public String getDockerImage() {
-      return dockerImage;
-    }
-
-    public Map<String, Chunk> getChunks() {
-      return chunks;
-    }
-
-    public void setDownloaded(boolean downloaded) {
-      this.downloaded = downloaded;
-    }
-
-    public boolean isDownloaded() {
-      return downloaded;
-    }
-  }
+    implements WorkspaceLoadingTracker,
+        InstallerStartingEvent.Handler,
+        InstallerRunningEvent.Handler,
+        InstallerFailedEvent.Handler,
+        WorkspaceStartingEvent.Handler,
+        WorkspaceRunningEvent.Handler,
+        WorkspaceStoppedEvent.Handler,
+        MachineStatusChangedEvent.Handler,
+        WorkspaceLoadingTrackerView.ActionDelegate {
 
   private final AppContext appContext;
-  private final EventBus eventBus;
   private final ProcessesPanelPresenter processesPanelPresenter;
   private final MachineResources resources;
-
   private final WorkspaceLoadingTrackerView view;
   private final ProcessesListView processesListView;
   private final CoreLocalizationConstant localizationConstant;
+  private final EventBus eventBus;
 
-  private Map<String, Image> images = new HashMap<>();
+  private AsyncRequestFactory asyncRequestFactory;
 
-  private int percentage = 0;
-  private int delta = 0;
+  private Map<String, String> installernames = new HashMap<>();
+  private Map<String, String> installerDescriptions = new HashMap<>();
+
+  private boolean isWorkspaceStarting = false;
 
   @Inject
   public WorkspaceLoadingTrackerImpl(
@@ -100,39 +83,190 @@ public class WorkspaceLoadingTrackerImpl
       MachineResources resources,
       WorkspaceLoadingTrackerView view,
       ProcessesListView processesListView,
-      CoreLocalizationConstant localizationConstant) {
-
+      CoreLocalizationConstant localizationConstant,
+      AsyncRequestFactory asyncRequestFactory) {
     this.appContext = appContext;
-    this.eventBus = eventBus;
     this.processesPanelPresenter = processesPanelPresenter;
     this.resources = resources;
     this.view = view;
     this.processesListView = processesListView;
     this.localizationConstant = localizationConstant;
+    this.asyncRequestFactory = asyncRequestFactory;
+    this.eventBus = eventBus;
 
-    eventBus.addHandler(
-        WorkspaceRunningEvent.TYPE,
-        event -> {
-          onWorkspaceRunnning();
-        });
+    view.setDelegate(this);
+
+    eventBus.addHandler(WorkspaceStartingEvent.TYPE, this);
+    eventBus.addHandler(WorkspaceRunningEvent.TYPE, this);
+    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
 
     eventBus.addHandler(
         MachineRunningEvent.TYPE,
         event -> {
-          view.onMachineRunning(event.getMachine().getName());
           processesListView.setLoadingMessage(
               localizationConstant.menuLoaderMachineRunning(event.getMachine().getName()));
-          percentage += delta;
-          processesListView.setLoadingProgress(percentage);
         });
+
+    eventBus.addHandler(InstallerStartingEvent.TYPE, this);
+    eventBus.addHandler(InstallerRunningEvent.TYPE, this);
+    eventBus.addHandler(InstallerFailedEvent.TYPE, this);
+
+    eventBus.addHandler(MachineStatusChangedEvent.TYPE, this);
+
+    Scheduler.get().scheduleDeferred(() -> loadInstallers());
   }
 
-  private void onWorkspaceRunnning() {
-    for (String machineName : images.keySet()) {
-      view.onPullingComplete(machineName);
+  @Override
+  public void startTracking() {
+    if (WorkspaceStatus.RUNNING == appContext.getWorkspace().getStatus()) {
+      return;
     }
 
-    view.onWorkspaceStarted();
+    showWorkspaceStatusPanel();
+    addMachines();
+
+    processesListView.setLoadMode();
+    processesListView.setLoadingMessage(localizationConstant.menuLoaderWaitingWorkspace());
+    processesListView.setLoadingProgress(0);
+  }
+
+  private void showWorkspaceStatusPanel() {
+    ((ProcessesPanelView) processesPanelPresenter.getView()).hideProcessOutput("*");
+
+    ((ProcessesPanelView) processesPanelPresenter.getView())
+        .addWidget("*", "Workspace Status", resources.output(), view, true);
+
+    ((ProcessesPanelView) processesPanelPresenter.getView()).showProcessOutput("*");
+  }
+
+  @Override
+  public void showPanel() {
+    showWorkspaceStatusPanel();
+    addMachines();
+    showInstallers();
+
+    if (WorkspaceStatus.RUNNING == appContext.getWorkspace().getStatus()) {
+      view.showWorkspaceStarted();
+
+      Map<String, MachineImpl> runtimeMachines =
+          appContext.getWorkspace().getRuntime().getMachines();
+      for (String machineName : runtimeMachines.keySet()) {
+        view.setMachineRunning(machineName);
+      }
+
+      String defaultEnvironmentName = appContext.getWorkspace().getConfig().getDefaultEnv();
+      EnvironmentImpl defaultEnvironment =
+          appContext.getWorkspace().getConfig().getEnvironments().get(defaultEnvironmentName);
+
+      Map<String, MachineConfigImpl> environmentMachines = defaultEnvironment.getMachines();
+      for (final String machineName : environmentMachines.keySet()) {
+        MachineConfigImpl machineConfig = environmentMachines.get(machineName);
+
+        for (String installerId : machineConfig.getInstallers()) {
+          view.setInstallerRunning(machineName, installerId);
+        }
+      }
+    }
+  }
+
+  private void addMachines() {
+    String defaultEnvironmentName = appContext.getWorkspace().getConfig().getDefaultEnv();
+    EnvironmentImpl defaultEnvironment =
+        appContext.getWorkspace().getConfig().getEnvironments().get(defaultEnvironmentName);
+
+    Map<String, MachineConfigImpl> machines = defaultEnvironment.getMachines();
+
+    for (final String machineName : machines.keySet()) {
+      MachineConfigImpl machineConfig = machines.get(machineName);
+      view.addMachine(machineName);
+    }
+  }
+
+  private void loadInstallers() {
+    asyncRequestFactory
+        .createGetRequest(appContext.getMasterApiEndpoint() + "/installer")
+        .header(ACCEPT, APPLICATION_JSON)
+        .header(CONTENT_TYPE, APPLICATION_JSON)
+        .send(new StringUnmarshaller())
+        .then(
+            content -> {
+              JSONValue parsed = JSONParser.parseStrict(content);
+              if (parsed.isArray() == null) {
+                return;
+              }
+
+              JSONArray installers = parsed.isArray();
+              for (int i = 0; i < installers.size(); i++) {
+                JSONObject installer = installers.get(i).isObject();
+
+                String id = installer.get("id").isString().stringValue();
+                String name = installer.get("name").isString().stringValue();
+                String description = installer.get("description").isString().stringValue();
+                installernames.put(id, name);
+                installerDescriptions.put(id, description);
+              }
+
+              showInstallers();
+            });
+  }
+
+  private void showInstallers() {
+    String defaultEnvironmentName = appContext.getWorkspace().getConfig().getDefaultEnv();
+    EnvironmentImpl defaultEnvironment =
+        appContext.getWorkspace().getConfig().getEnvironments().get(defaultEnvironmentName);
+
+    Map<String, MachineConfigImpl> machines = defaultEnvironment.getMachines();
+    for (final String machineName : machines.keySet()) {
+      MachineConfigImpl machineConfig = machines.get(machineName);
+
+      for (String installerId : machineConfig.getInstallers()) {
+        String installerName = installernames.get(installerId);
+        if (installerName == null) {
+          installerName = "";
+        }
+
+        String installerDescription = installerDescriptions.get(installerId);
+        if (installerDescription == null) {
+          installerDescription = "";
+        }
+
+        view.addInstaller(machineName, installerId, installerName, installerDescription);
+      }
+    }
+  }
+
+  @Override
+  public void onInstallerStarting(InstallerStartingEvent event) {
+    view.setInstallerStarting(event.getMachineName(), event.getInstaller());
+  }
+
+  @Override
+  public void onInstallerRunning(InstallerRunningEvent event) {
+    view.setInstallerRunning(event.getMachineName(), event.getInstaller());
+  }
+
+  @Override
+  public void onInstallerFailed(InstallerFailedEvent event) {
+    view.setMachineFailed(event.getMachineName());
+    view.setInstallerFailed(event.getMachineName(), event.getInstaller(), event.getError());
+  }
+
+  @Override
+  public void onWorkspaceStarting(WorkspaceStartingEvent event) {
+    isWorkspaceStarting = true;
+
+    view.showWorkspaceStarting();
+
+    addMachines();
+    showInstallers();
+  }
+
+  @Override
+  public void onWorkspaceRunning(WorkspaceRunningEvent event) {
+    isWorkspaceStarting = false;
+
+    view.showWorkspaceStarted();
+
     processesListView.setLoadingMessage(localizationConstant.menuLoaderWorkspaceStarted());
     processesListView.setLoadingProgress(100);
 
@@ -152,306 +286,33 @@ public class WorkspaceLoadingTrackerImpl
   }
 
   @Override
-  public void startTracking() {
-    if (WorkspaceStatus.RUNNING == appContext.getWorkspace().getStatus()) {
+  public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+    if (isWorkspaceStarting) {
+      view.showWorkspaceFailed(null);
       return;
     }
 
-    view.startLoading();
-
-    processesListView.setLoadMode();
-    processesListView.setLoadingMessage(localizationConstant.menuLoaderWaitingWorkspace());
-    processesListView.setLoadingProgress(0);
-
-    String defaultEnvironmentName = appContext.getWorkspace().getConfig().getDefaultEnv();
-    EnvironmentImpl defaultEnvironment =
-        appContext.getWorkspace().getConfig().getEnvironments().get(defaultEnvironmentName);
-
-    Map<String, MachineConfigImpl> machines = defaultEnvironment.getMachines();
-    for (final String machineName : machines.keySet()) {
-      view.pullMachine(machineName);
-      images.put(machineName, new Image(machineName));
-    }
-
-    delta = 100 / machines.size() / 2;
-
-    eventBus.addHandler(EnvironmentOutputEvent.TYPE, this);
-    ((ProcessesPanelView) processesPanelPresenter.getView())
-        .addWidget("*", "Workspace-start", resources.output(), view, true);
+    view.showWorkspaceStopped();
   }
 
   @Override
-  public void onEnvironmentOutput(EnvironmentOutputEvent event) {
-    Image machine = images.get(event.getMachineName());
-    if (machine == null) {
-      return;
-    }
-
-    String text = event.getContent();
-
-    if (text.startsWith("[DOCKER] ")) {
-      handleDockerOutput(machine, text);
-      return;
-    }
-  }
-
-  private void handleDockerOutput(Image machine, String text) {
-    try {
-      if (dockerPullingLatest(machine, text)) {
-        // [DOCKER] latest: Pulling from eclipse/ubuntu_jdk8
-        // Indicates the latest version is being downloading and contains image URL
-        return;
-
-      } else if (dockerPullingStarted(machine, text)) {
-        // [DOCKER] sha256:40a6dd3c1f3af152d834e66fdf1dbca722dbc8ab4e98e157251c5179e8a6aa44: Pulling
-        // from docker.io/eclipse/ubuntu_jdk8
-        // Containing image SHA and image URL
-        return;
-
-      } else if (dockerPullingFinished(machine, text)) {
-        // [DOCKER] Digest: sha256:40a6dd3c1f3af152d834e66fdf1dbca722dbc8ab4e98e157251c5179e8a6aa44
-        // indicates image has been fully downloaded
-        return;
-
-      } else if (dockerPreparePullingChunk(machine, text)) {
-        // [DOCKER] 6a447dcfe27d: Pulling fs layer
-        // [DOCKER] d010c8cf75d7: Waiting
-        return;
-
-      } else if (dockerChunkPullingProgress(machine, text)) {
-        // [DOCKER] 9fb6c798fa41: Downloading 16.22 MB/47.54 MB
-        // gives how much of chunk has been already downloaded
-        return;
-
-      } else if (dockerChunkPullingCompleted(machine, text)) {
-        // [DOCKER] 6fabefc10853: Download complete
-        // mark chunk as fully downloaded
-        return;
-      }
-
-    } catch (Exception e) {
-      return;
+  public void onMachineStatusChanged(MachineStatusChangedEvent event) {
+    switch (event.getStatus()) {
+      case STARTING:
+        view.setMachineStarting(event.getMachineName());
+        break;
+      case RUNNING:
+        view.setMachineRunning(event.getMachineName());
+        break;
+      case STOPPED:
+        break;
+      case FAILED:
+        break;
     }
   }
 
-  /**
-   * [DOCKER] latest: Pulling from eclipse/ubuntu_jdk8
-   *
-   * @param machine
-   * @param text
-   * @return
-   */
-  private boolean dockerPullingLatest(Image machine, String text) {
-    if (!text.startsWith("[DOCKER] latest: Pulling from ")) {
-      return false;
-    }
-
-    String dockerImage = text.substring("[DOCKER] latest: Pulling from ".length()).trim();
-    machine.setDockerImage(dockerImage);
-    view.setMachineImage(machine.getMachineName(), dockerImage);
-    processesListView.setLoadingMessage(localizationConstant.menuLoaderPullingImage(dockerImage));
-
-    return true;
-  }
-
-  /**
-   * [DOCKER] sha256:40a6dd3c1f3af152d834e66fdf1dbca722dbc8ab4e98e157251c5179e8a6aa44: Pulling from
-   * docker.io/eclipse/ubuntu_jdk8
-   *
-   * @param machine
-   * @param text
-   * @return
-   */
-  private boolean dockerPullingStarted(Image machine, String text) {
-    if (!text.startsWith("[DOCKER] sha256:")) {
-      return false;
-    }
-
-    String[] parts = text.split(":");
-
-    String dockerImage = parts[2];
-    if (dockerImage.startsWith(" Pulling from ")) {
-      dockerImage = dockerImage.substring(" Pulling from ".length()).trim();
-      machine.setDockerImage(dockerImage);
-      view.setMachineImage(machine.getMachineName(), dockerImage);
-      processesListView.setLoadingMessage(localizationConstant.menuLoaderPullingImage(dockerImage));
-    }
-
-    return true;
-  }
-
-  /**
-   * [DOCKER] Digest: sha256:40a6dd3c1f3af152d834e66fdf1dbca722dbc8ab4e98e157251c5179e8a6aa44
-   *
-   * @param machine
-   * @param text
-   * @return
-   */
-  private boolean dockerPullingFinished(Image machine, String text) {
-    if (!text.startsWith("[DOCKER] Digest: ")) {
-      return false;
-    }
-
-    machine.setDownloaded(true);
-
-    view.onPullingComplete(machine.getMachineName());
-    view.startWorkspaceMachines();
-    view.startWorkspaceMachine(machine.getMachineName(), machine.getDockerImage());
-    processesListView.setLoadingMessage(
-        localizationConstant.menuLoaderMachineStarting(machine.getMachineName()));
-
-    percentage += delta;
-    processesListView.setLoadingProgress(percentage);
-
-    return true;
-  }
-
-  /**
-   * [DOCKER] 6a447dcfe27d: Pulling fs layer [DOCKER] d010c8cf75d7: Waiting
-   *
-   * @param machine
-   * @param text
-   * @return
-   */
-  private boolean dockerPreparePullingChunk(Image machine, String text) {
-    if (!(text.startsWith("[DOCKER] ")
-        && (text.indexOf(": Pulling fs layer") > 0 || text.indexOf(": Waiting") > 0))) {
-      return false;
-    }
-
-    text = text.substring("[DOCKER] ".length());
-
-    String[] parts = text.split(":");
-    String hash = parts[0];
-
-    Chunk chunk = machine.getChunks().get(hash);
-    if (chunk == null) {
-      chunk = new Chunk();
-      machine.getChunks().put(hash, chunk);
-    }
-
-    return true;
-  }
-
-  /**
-   * [DOCKER] e7cfbd075aa8: Downloading 67.58 MB/244.3 MB
-   *
-   * @param machine
-   * @param text
-   * @return
-   */
-  private boolean dockerChunkPullingProgress(Image machine, String text) {
-    if (!(text.startsWith("[DOCKER] ") && text.indexOf(": Downloading ") > 0)) {
-      return false;
-    }
-
-    text = text.substring("[DOCKER] ".length());
-    // now text must be like `e7cfbd075aa8: Downloading 67.58 MB/244.3 MB`
-
-    String[] parts = text.split(":");
-
-    String hash = parts[0];
-    String value = parts[1].substring(" Downloading ".length());
-    // now value must be like `67.58 MB/244.3 MB`
-
-    String[] values = value.split("/");
-
-    long downloaded = getSizeInBytes(values[0]);
-    long size = getSizeInBytes(values[1]);
-
-    Chunk chunk = machine.getChunks().get(hash);
-    if (chunk == null) {
-      chunk = new Chunk();
-      machine.getChunks().put(hash, chunk);
-    }
-
-    chunk.downloaded = downloaded;
-    chunk.size = size;
-
-    refreshMachineDownloadingProgress(machine);
-
-    return true;
-  }
-
-  private void refreshMachineDownloadingProgress(Image machine) {
-    long totalDownloaded = 0;
-    long totalSize = 0;
-
-    for (Chunk chunk : machine.chunks.values()) {
-      totalSize += chunk.size;
-      totalDownloaded += chunk.downloaded;
-    }
-
-    int percents =
-        totalDownloaded == 0 || totalSize == 0 ? 0 : Math.round(totalDownloaded * 100 / totalSize);
-    view.onPullingProgress(machine.getMachineName(), percents);
-  }
-
-  /**
-   * `621 B` -> return 621 `490.8 kB` -> return 490.8 * 1024 `1.474 MB` -> return 1.474 * 1024 *
-   * 1024 `244.3 MB` -> return 244.3 * 1024 * 1024
-   *
-   * @param value
-   * @return
-   */
-  private long getSizeInBytes(String value) {
-    value = value.toUpperCase();
-    long size = 0;
-
-    if (value.endsWith(" GB")) {
-      value = value.substring(0, value.length() - 3);
-      size = (long) (Double.parseDouble(value) * 1024 * 1024 * 1024);
-    } else if (value.endsWith("GB")) {
-      value = value.substring(0, value.length() - 2);
-      size = (long) (Double.parseDouble(value) * 1024 * 1024 * 1024);
-    } else if (value.endsWith(" MB")) {
-      value = value.substring(0, value.length() - 3);
-      size = (long) (Double.parseDouble(value) * 1024 * 1024);
-    } else if (value.endsWith("MB")) {
-      value = value.substring(0, value.length() - 2);
-      size = (long) (Double.parseDouble(value) * 1024 * 1024);
-    } else if (value.endsWith(" KB")) {
-      value = value.substring(0, value.length() - 3);
-      size = (long) (Double.parseDouble(value) * 1024);
-    } else if (value.endsWith("KB")) {
-      value = value.substring(0, value.length() - 2);
-      size = (long) (Double.parseDouble(value) * 1024);
-    } else if (value.endsWith(" B")) {
-      value = value.substring(0, value.length() - 2);
-      size = Long.parseLong(value);
-    } else if (value.endsWith("B")) {
-      value = value.substring(0, value.length() - 1);
-      size = Long.parseLong(value);
-    }
-
-    return size;
-  }
-
-  /**
-   * [DOCKER] 6fabefc10853: Download complete
-   *
-   * @param machine
-   * @param text
-   * @return
-   */
-  private boolean dockerChunkPullingCompleted(Image machine, String text) {
-    if (!(text.startsWith("[DOCKER] ") && text.indexOf(": Download complete") > 0)) {
-      return false;
-    }
-
-    text = text.substring("[DOCKER] ".length());
-    // now text must be like `e7cfbd075aa8: Download complete`
-
-    String[] parts = text.split(":");
-
-    String hash = parts[0];
-
-    Chunk chunk = machine.getChunks().get(hash);
-    if (chunk != null) {
-      chunk.downloaded = chunk.size;
-      refreshMachineDownloadingProgress(machine);
-    }
-
-    return true;
+  @Override
+  public void onShowMachineOutputs(String machineName) {
+    eventBus.fireEvent(new DisplayMachineOutputEvent(machineName));
   }
 }

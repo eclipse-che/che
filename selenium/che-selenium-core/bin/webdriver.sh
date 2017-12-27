@@ -863,9 +863,9 @@ prepareTestUserForMultiuserChe() {
         export CHE_TESTUSER_PASSWORD=${CHE_TESTUSER_PASSWORD:-${time}}
 
         if [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
-            local kc_container_id=$(docker ps | grep keycloak_keycloak-1 | cut -d ' ' -f1)
+            local kc_container_id=$(docker ps | grep 'eclipse-che/keycloak' | cut -d ' ' -f1)
         else
-            local kc_container_id=$(docker ps | grep che_keycloak_1 | cut -d ' ' -f1)
+            local kc_container_id=$(docker ps | grep che_keycloak | cut -d ' ' -f1)
         fi
 
         local cli_auth="--no-config --server http://localhost:8080/auth --user ${CHE_ADMIN_NAME} --password ${CHE_ADMIN_PASSWORD} --realm master"
@@ -894,9 +894,9 @@ prepareTestUserForMultiuserChe() {
 removeTestUser() {
     echo "[TEST] Removing test user with name '${CHE_TESTUSER_NAME}'..."
     if [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
-        local kc_container_id=$(docker ps | grep keycloak_keycloak-1 | cut -d ' ' -f1)
+        local kc_container_id=$(docker ps | grep 'eclipse-che/keycloak' | cut -d ' ' -f1)
     else
-        local kc_container_id=$(docker ps | grep che_keycloak_1 | cut -d ' ' -f1)
+        local kc_container_id=$(docker ps | grep che_keycloak | cut -d ' ' -f1)
     fi
 
     local cli_auth="--no-config --server http://localhost:8080/auth --user ${CHE_ADMIN_NAME} --password ${CHE_ADMIN_PASSWORD} --realm master"

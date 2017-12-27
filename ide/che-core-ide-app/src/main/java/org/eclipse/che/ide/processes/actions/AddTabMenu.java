@@ -15,6 +15,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REF
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.web.bindery.event.shared.EventBus;
 import java.util.Map;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.FontAwesome;
@@ -31,6 +32,7 @@ import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.ide.menu.ContextMenu;
+import org.eclipse.che.ide.processes.DisplayMachineOutputEvent;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.processes.runtime.RuntimeInfoLocalization;
 import org.eclipse.che.ide.terminal.TerminalOptionsJso;
@@ -39,6 +41,7 @@ import org.eclipse.che.ide.terminal.TerminalOptionsJso;
  * Menu for adding new tab in processes panel.
  *
  * @author Vitaliy Guliy
+ * @author Vlad Zhukovskyi
  */
 public class AddTabMenu extends ContextMenu {
 
@@ -47,6 +50,7 @@ public class AddTabMenu extends ContextMenu {
   private final CoreLocalizationConstant coreLocalizationConstant;
   private final MachineResources machineResources;
   private final RuntimeInfoLocalization runtimeInfoLocalization;
+  private final EventBus eventBus;
 
   @Inject
   public AddTabMenu(
@@ -57,7 +61,8 @@ public class AddTabMenu extends ContextMenu {
       ProcessesPanelPresenter processesPanelPresenter,
       CoreLocalizationConstant coreLocalizationConstant,
       MachineResources machineResources,
-      RuntimeInfoLocalization runtimeInfoLocalization) {
+      RuntimeInfoLocalization runtimeInfoLocalization,
+      EventBus eventBus) {
     super(actionManager, keyBindingAgent, managerProvider);
 
     this.appContext = appContext;
@@ -65,6 +70,7 @@ public class AddTabMenu extends ContextMenu {
     this.coreLocalizationConstant = coreLocalizationConstant;
     this.machineResources = machineResources;
     this.runtimeInfoLocalization = runtimeInfoLocalization;
+    this.eventBus = eventBus;
   }
 
   /** {@inheritDoc} */
@@ -96,6 +102,10 @@ public class AddTabMenu extends ContextMenu {
 
       ShowServersAction showServersAction = new ShowServersAction(machine.getName());
       actionGroup.add(showServersAction);
+
+      ShowMachineOutputAction showMachineOutputAction =
+          new ShowMachineOutputAction(machine.getName());
+      actionGroup.add(showMachineOutputAction);
     }
 
     return actionGroup;
@@ -153,6 +163,24 @@ public class AddTabMenu extends ContextMenu {
     @Override
     public void actionPerformed(ActionEvent e) {
       processesPanelPresenter.onPreviewServers(machineName);
+    }
+  }
+
+  /** Action to display machine output. */
+  public class ShowMachineOutputAction extends BaseAction {
+    private String machineName;
+
+    public ShowMachineOutputAction(String machineName) {
+      super(
+          coreLocalizationConstant.machineOutputActionTitle(),
+          coreLocalizationConstant.machineOutputActionDescription(),
+          machineResources.output());
+      this.machineName = machineName;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      eventBus.fireEvent(new DisplayMachineOutputEvent(machineName));
     }
   }
 }
