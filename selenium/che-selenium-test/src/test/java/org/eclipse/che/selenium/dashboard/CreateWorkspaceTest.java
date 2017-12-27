@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
-import static org.eclipse.che.selenium.core.constant.TestStacksConstants.ANDROID;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.DOTNET;
+import static org.eclipse.che.selenium.core.constant.TestStacksConstants.ECLIPSE_CHE;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.PHP;
@@ -22,13 +22,10 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -52,8 +49,6 @@ public class CreateWorkspaceTest {
   @Inject private Dashboard dashboard;
   @Inject private CreateWorkspace createWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
-  @Inject private TestUser defaultTestUser;
   @Inject private Workspaces workspaces;
 
   @BeforeClass
@@ -66,13 +61,8 @@ public class CreateWorkspaceTest {
     createWorkspace.waitToolbar();
   }
 
-  @AfterClass
-  public void tearDown() throws Exception {
-    workspaceServiceClient.delete(WORKSPACE, defaultTestUser.getName());
-  }
-
   @Test
-  public void checkWorspaceName() {
+  public void checkWorkspaceName() {
 
     // type name with 1 characters and check error message that this name is too short
     createWorkspace.typeWorkspaceName(TOO_SHORT_WORKSPACE_NAME);
@@ -106,7 +96,7 @@ public class CreateWorkspaceTest {
     assertEquals(createWorkspace.getRAM(machineName), 1.0);
 
     // type number of memory in the RAM field
-    createWorkspace.setMachineRAM(machineName, "5");
+    createWorkspace.setMachineRAM(machineName, 5.0);
     assertEquals(createWorkspace.getRAM(machineName), 5.0);
 
     // check the RAM section of the Java-MySql stack(with two machines)
@@ -119,9 +109,9 @@ public class CreateWorkspaceTest {
     assertEquals(createWorkspace.getRAM("db"), 0.5);
     createWorkspace.clickOnDecrementMemoryButton("db");
     assertEquals(createWorkspace.getRAM("db"), 0.5);
-    createWorkspace.setMachineRAM(machineName, "100");
+    createWorkspace.setMachineRAM(machineName, 100.0);
     createWorkspace.clickOnIncrementMemoryButton(machineName);
-    createWorkspace.setMachineRAM(machineName, "100");
+    assertEquals(createWorkspace.getRAM(machineName), 100.0);
   }
 
   @Test
@@ -166,8 +156,7 @@ public class CreateWorkspaceTest {
     createWorkspace.typeToSearchInput("java");
     createWorkspace.clickOnSingleMachineTab();
     assertTrue(createWorkspace.isStackVisible(JAVA.getId()));
-    assertTrue(createWorkspace.isStackVisible(ANDROID.getId()));
-    assertTrue(createWorkspace.isStackVisible("che-in-che"));
+    assertTrue(createWorkspace.isStackVisible(ECLIPSE_CHE.getId()));
     assertFalse(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
     createWorkspace.clickOnAllStacksTab();
     assertTrue(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
@@ -211,7 +200,7 @@ public class CreateWorkspaceTest {
     projectSourcePage.selectSample(projectName);
     projectSourcePage.clickOnAddProjectButton();
     projectSourcePage.waitCreatedProjectButton(projectName);
-    projectSourcePage.clickOnCreatedProjectButton(projectName);
+    projectSourcePage.clickOnCreateProjectButton(projectName);
 
     // change the added project's name and cancel changes
     assertEquals(projectSourcePage.getProjectName(), projectName);

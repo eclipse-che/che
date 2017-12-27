@@ -191,7 +191,7 @@ public class ProjectSourcePage {
         .until(invisibilityOfElementLocated(By.id(projectName)));
   }
 
-  public void clickOnCreatedProjectButton(String projectName) {
+  public void clickOnCreateProjectButton(String projectName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.id(projectName)))
         .click();

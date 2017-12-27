@@ -18,10 +18,10 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -32,10 +32,12 @@ public class CreateWorkspace {
 
   private final SeleniumWebDriver seleniumWebDriver;
   private final WebDriverWait redrawUiElementsTimeout;
+  private final ActionsFactory actionsFactory;
 
   @Inject
-  public CreateWorkspace(SeleniumWebDriver seleniumWebDriver) {
+  public CreateWorkspace(SeleniumWebDriver seleniumWebDriver, ActionsFactory actionsFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
+    this.actionsFactory = actionsFactory;
     this.redrawUiElementsTimeout =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
@@ -44,7 +46,6 @@ public class CreateWorkspace {
   private interface Locators {
     String WORKSPACE_NAME_INPUT = "workspace-name-input";
     String ERROR_MESSAGE = "new-workspace-error-message";
-
     String TOOLBAR_TITLE_ID = "New_Workspace";
     String CREATE_BUTTON = "create-workspace-button";
     String SELECT_ALL_STACKS_TAB = "all-stacks-button";
@@ -52,19 +53,16 @@ public class CreateWorkspace {
     String SELECT_SINGLE_MACHINE_STACKS_TAB = "single-machine-button";
     String SELECT_MULTI_MACHINE_STACKS_TAB = "multi-machine-button";
     String ADD_STACK_BUTTON = "search-stack-input";
-
     String FILTERS_STACK_BUTTON = "filter-stacks-button";
     String FILTER_STACK_INPUT = "filter-stack-input";
     String FILTER_SUGGESTION_TEXT =
         "//div[contains(@class,'stack-library-filter-suggestion-text')]";
     String FILTER_SUGGESTION_BUTTON =
-        "//div[@name='suggestionText' and text()='%s']/../div[@name='suggestionButton']"; // TODO
+        "//div[@name='suggestionText' and text()='%s']/../div[@name='suggestionButton']";
     String FILTER_SELECTED_SUGGESTION_BUTTON = "//button[@class='md-chip-remove ng-scope']";
-
     String SEARCH_INPUT = "//div[@id='search-stack-input']//input";
     String CLEAR_INPUT = "//div[@id='search-stack-input']//div[@role='button']";
     String STACK_ROW_XPATH = "//div[@data-stack-id='%s']";
-
     String MACHINE_NAME =
         "//span[contains(@class,'ram-settings-machine-item-item-name') and text()='%s']";
     String MACHINE_IMAGE = "//span[@class='ram-settings-machine-item-secondary-color']";
@@ -163,11 +161,11 @@ public class CreateWorkspace {
     ramInput.sendKeys(value);
   }
 
-  public void setMachineRAM(String machineName, String value) {
+  public void setMachineRAM(String machineName, double value) {
     WebElement ramInput =
         seleniumWebDriver.findElement(By.xpath(format(Locators.MACHINE_RAM_VALUE, machineName)));
     ramInput.clear();
-    ramInput.sendKeys(value);
+    ramInput.sendKeys(Double.toString(value));
   }
 
   public void clickOnFiltersButton() {
@@ -225,7 +223,7 @@ public class CreateWorkspace {
     WebElement stack =
         redrawUiElementsTimeout.until(
             visibilityOfElementLocated(By.xpath(format(Locators.STACK_ROW_XPATH, stackId))));
-    new Actions(seleniumWebDriver).moveToElement(stack).perform();
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(stack).perform();
     stack.click();
   }
 
