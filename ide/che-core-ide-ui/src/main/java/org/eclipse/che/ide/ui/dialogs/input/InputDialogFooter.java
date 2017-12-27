@@ -95,6 +95,10 @@ public class InputDialogFooter implements IsWidget {
     return okButton;
   }
 
+  Button getCancelButton() {
+    return cancelButton;
+  }
+
   @Override
   public Widget asWidget() {
     return rootPanel;

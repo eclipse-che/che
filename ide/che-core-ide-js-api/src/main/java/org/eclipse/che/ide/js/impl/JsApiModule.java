@@ -13,10 +13,12 @@ package org.eclipse.che.ide.js.impl;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import org.eclipse.che.ide.js.api.action.ActionManager;
+import org.eclipse.che.ide.js.api.dialog.DialogManager;
 import org.eclipse.che.ide.js.api.editor.EditorManager;
 import org.eclipse.che.ide.js.api.parts.PartManager;
 import org.eclipse.che.ide.js.api.resources.ImageRegistry;
 import org.eclipse.che.ide.js.impl.action.JsActionManager;
+import org.eclipse.che.ide.js.impl.dialog.JsDialogManager;
 import org.eclipse.che.ide.js.impl.editor.JsEditorManager;
 import org.eclipse.che.ide.js.impl.eventbus.EventBusAdapter;
 import org.eclipse.che.ide.js.impl.parts.JsPartManager;
@@ -32,5 +34,6 @@ public class JsApiModule extends AbstractGinModule {
     bind(ImageRegistry.class).to(ImageRegistryImpl.class);
     bind(PartManager.class).to(JsPartManager.class);
     bind(EditorManager.class).to(JsEditorManager.class);
+    bind(DialogManager.class).to(JsDialogManager.class);
   }
 }

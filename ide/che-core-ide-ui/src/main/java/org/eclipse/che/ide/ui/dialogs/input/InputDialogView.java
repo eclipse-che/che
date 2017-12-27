@@ -39,6 +39,9 @@ public interface InputDialogView {
   /** Sets new label for Ok button */
   void setOkButtonLabel(String label);
 
+  /** Sets new label for Cancel button */
+  void setCancelButtonLabel(String label);
+
   /** Returns the input value. */
   String getValue();
 

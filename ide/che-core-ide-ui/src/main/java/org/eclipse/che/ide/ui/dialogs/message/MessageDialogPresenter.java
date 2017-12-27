@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.ui.dialogs.message;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.assistedinject.Assisted;
@@ -44,6 +46,16 @@ public class MessageDialogPresenter implements MessageDialog, MessageDialogView.
   @AssistedInject
   public MessageDialogPresenter(
       @NotNull MessageDialogView view,
+      @NotNull @Assisted("title") String title,
+      @NotNull @Assisted("message") String message,
+      @Nullable @Assisted("confirmButtonText") String confirmButtonText,
+      @Nullable @Assisted ConfirmCallback confirmCallback) {
+    this(view, title, new InlineHTML(message), confirmCallback, confirmButtonText);
+  }
+
+  @AssistedInject
+  public MessageDialogPresenter(
+      @NotNull MessageDialogView view,
       @NotNull @Assisted String title,
       @NotNull @Assisted IsWidget content,
       @Nullable @Assisted ConfirmCallback confirmCallback) {
@@ -67,7 +79,7 @@ public class MessageDialogPresenter implements MessageDialog, MessageDialogView.
       content.asWidget().ensureDebugId("info-window-message");
     }
 
-    if (confirmButtonText != null) {
+    if (!isNullOrEmpty(confirmButtonText)) {
       view.setConfirmButtonText(confirmButtonText);
     }
   }

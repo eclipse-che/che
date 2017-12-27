@@ -43,6 +43,21 @@ public interface DialogFactory {
       @Nullable ConfirmCallback confirmCallback);
 
   /**
+   * Create a message dialog with text as content.
+   *
+   * @param title the window title
+   * @param content the window text
+   * @param confirmButtonText overwrite label for OK button
+   * @param confirmCallback the callback used on OK
+   * @return a {@link ConfirmDialog} instance
+   */
+  MessageDialog createMessageDialog(
+      @NotNull @Assisted("title") String title,
+      @NotNull @Assisted("message") String content,
+      @Nullable @Assisted("confirmButtonText") String confirmButtonText,
+      @Nullable ConfirmCallback confirmCallback);
+
+  /**
    * Create a message dialog with only text as content.
    *
    * @param title the window title
@@ -55,7 +70,7 @@ public interface DialogFactory {
       @NotNull @Assisted("title") String title,
       @NotNull IsWidget content,
       @Nullable ConfirmCallback confirmCallback,
-      @NotNull @Assisted("confirmButtonText") String confirmButtonText);
+      @Nullable @Assisted("confirmButtonText") String confirmButtonText);
 
   /**
    * Create a message dialog with a widget as content.
@@ -199,6 +214,34 @@ public interface DialogFactory {
       @NotNull @Assisted("selectionStartIndex") Integer selectionStartIndex,
       @NotNull @Assisted("selectionLength") Integer selectionLength,
       @NotNull @Assisted("okButtonLabel") String okButtonLabel,
+      @Nullable InputCallback inputCallback,
+      @Nullable CancelCallback cancelCallback);
+
+  /**
+   * Create an input dialog with the specified initial value.
+   *
+   * <p>The {@code initialValue} may be pre-selected. Selection begins at the specified {@code
+   * selectionStartIndex} and extends to the character at index {@code selectionLength}.
+   *
+   * @param title the window title
+   * @param label the label of the input field
+   * @param initialValue the value used to initialize the input
+   * @param selectionStartIndex the beginning index of the {@code initialValue} to select, inclusive
+   * @param selectionLength the number of characters of the {@code initialValue} to be selected
+   * @param okButtonLabel label for OK button
+   * @param cancelButtonLabel label for Cancel button
+   * @param inputCallback the callback used on OK
+   * @param cancelCallback the callback used on cancel
+   * @return an {@link InputDialog} instance
+   */
+  InputDialog createInputDialog(
+      @NotNull @Assisted("title") String title,
+      @NotNull @Assisted("label") String label,
+      @NotNull @Assisted("initialValue") String initialValue,
+      @NotNull @Assisted("selectionStartIndex") Integer selectionStartIndex,
+      @NotNull @Assisted("selectionLength") Integer selectionLength,
+      @NotNull @Assisted("okButtonLabel") String okButtonLabel,
+      @NotNull @Assisted("cancelButtonLabel") String cancelButtonLabel,
       @Nullable InputCallback inputCallback,
       @Nullable CancelCallback cancelCallback);
 
