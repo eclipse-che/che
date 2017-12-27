@@ -29,11 +29,13 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/** @author Andrey Chizhikov */
+/** @author Serhii Skoryk */
 public class CreateWorkspaceTest {
 
-  private final String WORKSPACE = NameGenerator.generate("workspace", 4);
+  private final String WORKSPACE_NAME = NameGenerator.generate("workspace", 4);
+  private static final String MIN_VALID_WORKSPACE_NAME = NameGenerator.generate("", 3);
   private static final String TOO_SHORT_WORKSPACE_NAME = NameGenerator.generate("", 2);
+  private static final String MAX_VALID_WORKSPACE_NAME = NameGenerator.generate("", 100);
   private static final String TOO_LONG_WORKSPACE_NAME = NameGenerator.generate("", 101);
   private static final String WS_NAME_TOO_SHORT =
       ("The name has to be more than 3 characters long.");
@@ -75,7 +77,11 @@ public class CreateWorkspaceTest {
     assertFalse(createWorkspace.isCreateWorkspaceButtonEnabled());
 
     // type a valid name and check that the Create button is enabled
-    createWorkspace.typeWorkspaceName(WORKSPACE);
+    createWorkspace.typeWorkspaceName(MIN_VALID_WORKSPACE_NAME);
+    assertTrue(createWorkspace.isCreateWorkspaceButtonEnabled());
+    createWorkspace.typeWorkspaceName(WORKSPACE_NAME);
+    assertTrue(createWorkspace.isCreateWorkspaceButtonEnabled());
+    createWorkspace.typeWorkspaceName(MAX_VALID_WORKSPACE_NAME);
     assertTrue(createWorkspace.isCreateWorkspaceButtonEnabled());
   }
 
