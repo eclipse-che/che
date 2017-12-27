@@ -47,10 +47,10 @@ Variables:
 
   # Must be exported as this will be needed by Tomcat's JVM
   DEFAULT_CHE_REGISTRY_HOST=localhost
-  export CHE_REGISTRY_HOST=${CHE_REGISTRY_HOST:-${DEFAULT_CHE_REGISTRY_HOST}}
+  [ -z "$CHE_REGISTRY_HOST" ] && export CHE_REGISTRY_HOST=${CHE_REGISTRY_HOST:-${DEFAULT_CHE_REGISTRY_HOST}}
 
   DEFAULT_CHE_PORT=8080
-  export CHE_PORT=${CHE_PORT:-${DEFAULT_CHE_PORT}}
+  [ -z "$CHE_PORT" ] && export CHE_PORT=${CHE_PORT:-${DEFAULT_CHE_PORT}}
 
   DEFAULT_CHE_IP=
   CHE_IP=${CHE_IP:-${DEFAULT_CHE_IP}}
@@ -59,7 +59,7 @@ Variables:
   CHE_LOG_LEVEL=${CHE_LOG_LEVEL:-${DEFAULT_CHE_LOG_LEVEL}}
 
   DEFAULT_CHE_LOGS_DIR="${CATALINA_HOME}/logs/"
-  export CHE_LOGS_DIR=${CHE_LOGS_DIR:-${DEFAULT_CHE_LOGS_DIR}}
+  [ -z "$CHE_LOGS_DIR" ] && export CHE_LOGS_DIR=${CHE_LOGS_DIR:-${DEFAULT_CHE_LOGS_DIR}}
 
   DEFAULT_CHE_DEBUG_SERVER=false
   CHE_DEBUG_SERVER=${CHE_DEBUG_SERVER:-${DEFAULT_CHE_DEBUG_SERVER}}
@@ -84,7 +84,7 @@ set_environment_variables () {
   # CHE_DOCKER_IP is used internally by Che to set its IP address
   if [[ -z "${CHE_DOCKER_IP}" ]]; then
     if [[ -n "${CHE_IP}" ]]; then
-        export CHE_DOCKER_IP="${CHE_IP}"
+        [ -z "$CHE_DOCKER_IP" ] && export CHE_DOCKER_IP="${CHE_IP}"
     fi
   fi
 
@@ -110,7 +110,7 @@ set_environment_variables () {
   # Internal properties - should generally not be overridden
   export CATALINA_BASE="${CHE_HOME}/tomcat"
   export ASSEMBLY_BIN_DIR="${CATALINA_HOME}/bin"
-  export CHE_LOGS_LEVEL="${CHE_LOG_LEVEL}"
+  [ -z "$CHE_LOGS_LEVEL" ] && export CHE_LOGS_LEVEL="${CHE_LOG_LEVEL}"
 }
 
 docker_exec() {
@@ -201,22 +201,22 @@ launch_docker_registry () {
 
 init() {
   ### Any variables with export is a value that native Tomcat che.sh startup script requires
-  export CHE_IP=${CHE_IP}
+  [ -z "$CHE_IP" ] && export CHE_IP=${CHE_IP}
 
   if [ -f "/assembly/tomcat/bin/catalina.sh" ]; then
     echo "Found custom assembly..."
-    export CHE_HOME="/assembly"
+    [ -z "$CHE_HOME" ] && export CHE_HOME="/assembly"
   else
     echo "Using embedded assembly..."
-    export CHE_HOME=$(echo /home/user/eclipse-che/)
+    [ -z "$CHE_HOME" ] && export CHE_HOME=$(echo /home/user/eclipse-che/)
   fi
 
   ### We need to discover the host mount provided by the user for `/data`
-  export CHE_DATA="/data"
+  [ -z "$CHE_DATA" ] && export CHE_DATA="/data"
   CHE_DATA_HOST=$(get_che_data_from_host)
 
   CHE_USER=${CHE_USER:-root}
-  export CHE_USER=$CHE_USER
+  [ -z "$CHE_USER" ] && export CHE_USER=$CHE_USER
   if [ "$CHE_USER" != "root" ]; then
     if [ ! $(getent group docker) ]; then
       echo "!!!"
@@ -224,29 +224,29 @@ init() {
       echo "!!!"
       exit 1
     fi
-    export CHE_USER_ID=${CHE_USER}
+    [ -z "$CHE_USER_ID" ] && export CHE_USER_ID=${CHE_USER}
     sudo chown -R ${CHE_USER} ${CHE_DATA}
     sudo chown -R ${CHE_USER} ${CHE_HOME}
     sudo chown -R ${CHE_USER} ${CHE_LOGS_DIR}
   fi
 
-  export CHE_DATABASE=/data/storage
-  export CHE_TEMPLATE_STORAGE=/data/templates
-  export CHE_WORKSPACE_AGENT_DEV=${CHE_DATA_HOST}/lib/ws-agent.tar.gz
-  export CHE_WORKSPACE_TERMINAL__LINUX__AMD64=${CHE_DATA_HOST}/lib/linux_amd64/terminal
-  export CHE_WORKSPACE_TERMINAL__LINUX__ARM7=${CHE_DATA_HOST}/lib/linux_arm7/terminal
-  export CHE_WORKSPACE_EXEC__LINUX__AMD64=${CHE_DATA_HOST}/lib/linux_amd64/exec
+  [ -z "$CHE_DATABASE" ] && export CHE_DATABASE=${CHE_DATA}/storage
+  [ -z "$CHE_TEMPLATE_STORAGE" ] && export CHE_TEMPLATE_STORAGE=${CHE_DATA}/templates
+  [ -z "$CHE_WORKSPACE_AGENT_DEV" ] && export CHE_WORKSPACE_AGENT_DEV=${CHE_DATA_HOST}/lib/ws-agent.tar.gz
+  [ -z "$CHE_WORKSPACE_TERMINAL__LINUX__AMD64" ] && export CHE_WORKSPACE_TERMINAL__LINUX__AMD64=${CHE_DATA_HOST}/lib/linux_amd64/terminal
+  [ -z "$CHE_WORKSPACE_TERMINAL__LINUX__ARM7" ] && export CHE_WORKSPACE_TERMINAL__LINUX__ARM7=${CHE_DATA_HOST}/lib/linux_arm7/terminal
+  [ -z "$CHE_WORKSPACE_EXEC__LINUX__AMD64" ] && export CHE_WORKSPACE_EXEC__LINUX__AMD64=${CHE_DATA_HOST}/lib/linux_amd64/exec
 
   # CHE_DOCKER_IP_EXTERNAL must be set if you are in a VM.
   HOSTNAME=${CHE_DOCKER_IP_EXTERNAL:-$(get_docker_external_hostname)}
   if has_external_hostname; then
     # Internal property used by Che to set hostname.
-    export CHE_DOCKER_IP_EXTERNAL=${HOSTNAME}
+    [ -z "$CHE_DOCKER_IP_EXTERNAL" ] && export CHE_DOCKER_IP_EXTERNAL=${HOSTNAME}
   fi
   ### Necessary to allow the container to write projects to the folder
-  export CHE_WORKSPACE_STORAGE__MASTER__PATH=/data/workspaces
-  export CHE_WORKSPACE_STORAGE="${CHE_DATA_HOST}/workspaces"
-  export CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false
+  [ -z "$CHE_WORKSPACE_STORAGE__MASTER__PATH" ] && export CHE_WORKSPACE_STORAGE__MASTER__PATH=${CHE_DATA}/workspaces
+  [ -z "$CHE_WORKSPACE_STORAGE" ] && export CHE_WORKSPACE_STORAGE="${CHE_DATA_HOST}/workspaces"
+  [ -z "$CHE_WORKSPACE_STORAGE_CREATE_FOLDERS" ] && export CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false
 
   # Move files from /lib to /lib-copy.  This puts files onto the host.
   rm -rf ${CHE_DATA}/lib/*
