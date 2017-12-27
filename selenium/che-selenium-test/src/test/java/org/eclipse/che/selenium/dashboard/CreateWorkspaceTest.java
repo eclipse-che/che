@@ -65,18 +65,15 @@ public class CreateWorkspaceTest {
 
   @Test
   public void checkWorkspaceName() {
-
-    // type name with 1 characters and check error message that this name is too short
     createWorkspace.typeWorkspaceName(TOO_SHORT_WORKSPACE_NAME);
     assertTrue(createWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
     assertFalse(createWorkspace.isCreateWorkspaceButtonEnabled());
 
-    // type name with 101 characters and check error message that this name is too long
     createWorkspace.typeWorkspaceName(TOO_LONG_WORKSPACE_NAME);
     assertTrue(createWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
     assertFalse(createWorkspace.isCreateWorkspaceButtonEnabled());
 
-    // type a valid name and check that the Create button is enabled
+    // type valid names and check that the Create button is enabled
     createWorkspace.typeWorkspaceName(MIN_VALID_WORKSPACE_NAME);
     assertTrue(createWorkspace.isCreateWorkspaceButtonEnabled());
     createWorkspace.typeWorkspaceName(WORKSPACE_NAME);
@@ -133,7 +130,7 @@ public class CreateWorkspaceTest {
     createWorkspace.clickOnMultiMachineTab();
     assertFalse(createWorkspace.isStackVisible(JAVA.getId()));
 
-    // filter stacks by 'php' value from the Single Machine tab and check filtered stacks list
+    // filter stacks by 'php' value and check filtered stacks list
     createWorkspace.clickOnSingleMachineTab();
     createWorkspace.clickOnFiltersButton();
     createWorkspace.clearSuggestions();
@@ -187,7 +184,7 @@ public class CreateWorkspaceTest {
     assertTrue(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
     assertTrue(createWorkspace.isStackVisible(PHP.getId()));
 
-    // search stacks with '.net' value
+    // search stacks with 'net' value
     createWorkspace.typeToSearchInput("net");
     assertTrue(createWorkspace.isStackVisible(DOTNET.getId()));
     createWorkspace.clickOnMultiMachineTab();
@@ -200,7 +197,7 @@ public class CreateWorkspaceTest {
   public void checkProjectSourcePage() {
     createWorkspace.clickOnQuickStartTab();
 
-    // add the web-java-spring from the Java stack
+    // add a project from the 'web-java-spring' sample
     createWorkspace.selectStack(JAVA.getId());
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(projectName);
