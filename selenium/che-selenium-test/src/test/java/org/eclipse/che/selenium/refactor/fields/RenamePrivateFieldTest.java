@@ -88,7 +88,7 @@ public class RenamePrivateFieldTest {
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.clickOkButtonRefactorForm();
     refactor.waitRenameFieldFormIsClosed();
-    editor.waitTextIntoEditor(contentFromOutA);
+    waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
 
@@ -110,7 +110,7 @@ public class RenamePrivateFieldTest {
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.clickOkButtonRefactorForm();
     refactor.waitRenameFieldFormIsClosed();
-    editor.waitTextIntoEditor(contentFromOutA);
+    waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
 
@@ -132,7 +132,7 @@ public class RenamePrivateFieldTest {
     refactor.setAndWaitStateUpdateReferencesCheckbox(false);
     refactor.clickOkButtonRefactorForm();
     refactor.waitRenameFieldFormIsClosed();
-    editor.waitTextIntoEditor(contentFromOutA);
+    waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
 
@@ -157,7 +157,7 @@ public class RenamePrivateFieldTest {
     loader.waitOnClosed();
     refactor.waitRenameFieldFormIsClosed();
     loader.waitOnClosed();
-    editor.waitTextIntoEditor(contentFromOutA);
+    waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
 
@@ -182,7 +182,7 @@ public class RenamePrivateFieldTest {
     loader.waitOnClosed();
     refactor.waitRenameFieldFormIsClosed();
     loader.waitOnClosed();
-    editor.waitTextIntoEditor(contentFromOutA);
+    waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
 
@@ -206,7 +206,7 @@ public class RenamePrivateFieldTest {
     loader.waitOnClosed();
     refactor.waitRenameFieldFormIsClosed();
     loader.waitOnClosed();
-    editor.waitTextIntoEditor(contentFromOutA);
+    waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
 
@@ -230,7 +230,7 @@ public class RenamePrivateFieldTest {
     loader.waitOnClosed();
     refactor.waitRenameFieldFormIsClosed();
     loader.waitOnClosed();
-    editor.waitTextIntoEditor(contentFromOutA);
+    waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
 
@@ -254,7 +254,7 @@ public class RenamePrivateFieldTest {
     loader.waitOnClosed();
     refactor.waitRenameFieldFormIsClosed();
     loader.waitOnClosed();
-    editor.waitTextIntoEditor(contentFromOutA);
+    waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
 
@@ -276,7 +276,7 @@ public class RenamePrivateFieldTest {
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.clickOkButtonRefactorForm();
     refactor.waitRenameFieldFormIsClosed();
-    editor.waitTextIntoEditor(contentFromOutA);
+    waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
 
@@ -298,7 +298,7 @@ public class RenamePrivateFieldTest {
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.clickOkButtonRefactorForm();
     refactor.waitRenameFieldFormIsClosed();
-    editor.waitTextIntoEditor(contentFromOutA);
+    waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
 
@@ -323,7 +323,7 @@ public class RenamePrivateFieldTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitRenameFieldFormIsClosed();
-    editor.waitTextIntoEditor(contentFromOutA);
+    waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
 
@@ -349,7 +349,7 @@ public class RenamePrivateFieldTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitRenameFieldFormIsClosed();
-    editor.waitTextIntoEditor(contentFromOutA);
+    waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
 
@@ -373,7 +373,7 @@ public class RenamePrivateFieldTest {
     loader.waitOnClosed();
     refactor.waitRenameFieldFormIsClosed();
     loader.waitOnClosed();
-    editor.waitTextIntoEditor(contentFromOutA);
+    waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }
 
@@ -411,6 +411,15 @@ public class RenamePrivateFieldTest {
   private void typeAndWaitNewName(String newName) {
     try {
       refactor.typeAndWaitNewName(newName);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7500");
+    }
+  }
+
+  private void waitTextIntoEditor(String expectedText) {
+    try {
+      editor.waitTextIntoEditor(expectedText);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7500");
