@@ -11,6 +11,8 @@
 package org.eclipse.che.ide.ext.git.client;
 
 import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.util.ExceptionUtils.getAttributes;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
@@ -18,6 +20,7 @@ import java.util.Map;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
+import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
@@ -68,7 +71,12 @@ public class GitAuthActionPresenter {
                       .thenPromise(
                           token ->
                               Promises.resolve(new Credentials(token.getToken(), token.getToken())))
-                      .thenPromise(operation::perform);
+                      .thenPromise(operation::perform)
+                      .catchError(
+                          (Operation<PromiseError>)
+                              err ->
+                                  notificationManager.notify(
+                                      locale.messagesNotAuthorizedContent(), FAIL, FLOAT_MODE));
                 }
                 return Promises.reject(error);
               }
