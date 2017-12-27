@@ -235,7 +235,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/ubuntu_jdk8",
+            "content": "eclipse/ubuntu_jdk8",
             "type": "dockerimage"
           }
         }
@@ -306,7 +306,7 @@
           },
           "recipe": {
             "location": "eclipse/ubuntu_jdk8",
-            "type": "dockerimage"
+            "type": "content"
           }
         }
       },
@@ -368,7 +368,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/ubuntu_android",
+            "content": "eclipse/ubuntu_android",
             "type": "dockerimage"
           }
         }
@@ -439,7 +439,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/cpp_gcc",
+            "content": "eclipse/cpp_gcc",
             "type": "dockerimage"
           }
         }
@@ -509,7 +509,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/dotnet_core",
+            "content": "eclipse/dotnet_core",
             "type": "dockerimage"
           }
         }
@@ -587,7 +587,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/ubuntu_go",
+            "content": "eclipse/ubuntu_go",
             "type": "dockerimage"
           }
         }
@@ -670,7 +670,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/hadoop-dev",
+            "content": "eclipse/hadoop-dev",
             "type": "dockerimage"
           }
         }
@@ -760,7 +760,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/node",
+            "content": "eclipse/node",
             "type": "dockerimage"
           }
         }
@@ -843,7 +843,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/php",
+            "content": "eclipse/php",
             "type": "dockerimage"
           }
         }
@@ -973,7 +973,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/php:5.6",
+            "content": "eclipse/php:5.6",
             "type": "dockerimage"
           }
         }
@@ -1084,7 +1084,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/ubuntu_python:latest",
+            "content": "eclipse/ubuntu_python:latest",
             "type": "dockerimage"
           }
         }
@@ -1160,7 +1160,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/ruby_rails",
+            "content": "eclipse/ruby_rails",
             "type": "dockerimage"
           }
         }
@@ -1228,7 +1228,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/debian_jdk8",
+            "content": "eclipse/debian_jdk8",
             "type": "dockerimage"
           }
         }
@@ -1278,7 +1278,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/debian_jdk8",
+            "content": "eclipse/debian_jdk8",
             "type": "dockerimage"
           }
         }
@@ -1348,7 +1348,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/centos_jdk8",
+            "content": "eclipse/centos_jdk8",
             "type": "dockerimage"
           }
         }
@@ -1424,7 +1424,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/debian_jdk8",
+            "content": "eclipse/debian_jdk8",
             "type": "dockerimage"
           }
         }
@@ -1512,7 +1512,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/php:gae",
+            "content": "eclipse/php:gae",
             "type": "dockerimage"
           }
         }
@@ -1587,7 +1587,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/ubuntu_python:2.7",
+            "content": "eclipse/ubuntu_python:2.7",
             "type": "dockerimage"
           }
         }
@@ -1659,7 +1659,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/ubuntu_python:gae_python2.7",
+            "content": "eclipse/ubuntu_python:gae_python2.7",
             "type": "dockerimage"
           }
         }
@@ -1762,7 +1762,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/selenium",
+            "content": "eclipse/selenium",
             "type": "dockerimage"
           }
         }
@@ -1827,7 +1827,7 @@
             }
           },
           "recipe": {
-            "location": "tomitribe/ubuntu_tomee_173_jdk8",
+            "content": "tomitribe/ubuntu_tomee_173_jdk8",
             "type": "dockerimage"
           }
         }
@@ -1878,7 +1878,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/ubuntu_jdk8",
+            "content": "eclipse/ubuntu_jdk8",
             "type": "dockerimage"
           }
         }
@@ -1956,7 +1956,7 @@
             }
           },
           "recipe": {
-            "location": "kaloyanraev/che-zendserver",
+            "content": "kaloyanraev/che-zendserver",
             "type": "dockerimage"
           }
         }
@@ -2073,7 +2073,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/platformio:latest",
+            "content": "eclipse/platformio:latest",
             "type": "dockerimage"
           }
         }
@@ -2196,7 +2196,7 @@
             }
           },
           "recipe": {
-            "location": "registry.centos.org/che-stacks/vertx",
+            "content": "registry.centos.org/che-stacks/vertx",
             "type": "dockerimage"
           }
         }
@@ -2273,7 +2273,7 @@
       "environments": {
         "default": {
           "recipe": {
-            "location": "registry.centos.org/che-stacks/spring-boot",
+            "content": "registry.centos.org/che-stacks/spring-boot",
             "type": "dockerimage"
           },
           "machines": {
@@ -2371,7 +2371,7 @@
       "environments": {
         "default": {
           "recipe": {
-            "location": "registry.centos.org/che-stacks/wildfly-swarm",
+            "content": "registry.centos.org/che-stacks/wildfly-swarm",
             "type": "dockerimage"
           },
           "machines": {
@@ -2462,7 +2462,7 @@
       "environments": {
         "default": {
           "recipe": {
-            "location": "registry.centos.org/che-stacks/centos-nodejs",
+            "content": "registry.centos.org/che-stacks/centos-nodejs",
             "type": "dockerimage"
           },
           "machines": {
@@ -2570,7 +2570,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/kotlin",
+            "content": "eclipse/kotlin",
             "type": "dockerimage"
           }
         }
@@ -2624,7 +2624,7 @@
             }
           },
           "recipe": {
-            "location": "registry.centos.org/che-stacks/centos-go",
+            "content": "registry.centos.org/che-stacks/centos-go",
             "type": "dockerimage"
           }
         }
@@ -2682,7 +2682,7 @@
           }
         },
         "recipe": {
-          "location": "registry.centos.org/che-stacks/centos-stack-base",
+          "content": "registry.centos.org/che-stacks/centos-stack-base",
           "type": "dockerimage"
         }
       }
@@ -2779,7 +2779,7 @@
             }
           },
           "recipe": {
-            "location": "registry.centos.org/che-stacks/centos-ceylon-nodejs-dart",
+            "content": "registry.centos.org/che-stacks/centos-ceylon-nodejs-dart",
             "type": "dockerimage"
           }
         }
