@@ -17,12 +17,12 @@
        thread-count="4">
 
     <test name="all">
-      <method-selectors>
-         <method-selector>
-            <script language="beanshell">
-               <![CDATA[
+        <method-selectors>
+            <method-selector>
+                <script language="beanshell">
+                    <![CDATA[
     boolean isTestGroupsAgreedWithRequestedGroups() {
-     String testGroupsVal = System.getProperty("groups");
+     String testGroupsVal = System.getProperty("testGroups");
       if (testGroupsVal == null || testGroupsVal.trim().isEmpty() || groups.isEmpty()){
         return true;
       }

@@ -253,7 +253,7 @@
                                 </property>
                             </systemProperties>
                             <systemPropertyVariables>
-                                <groups>${groups}</groups>
+                                <testGroups>${testGroups}</testGroups>
                             </systemPropertyVariables>
                         </configuration>
                     </execution>
