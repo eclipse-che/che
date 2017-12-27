@@ -73,8 +73,10 @@ public class GitAuthActionPresenter {
                               Promises.resolve(new Credentials(token.getToken(), token.getToken())))
                       .thenPromise(operation::perform)
                       .catchError(
-                          (Operation<PromiseError>) err -> notificationManager
-                              .notify(locale.messagesNotAuthorizedContent(), FAIL, FLOAT_MODE));
+                          (Operation<PromiseError>)
+                              err ->
+                                  notificationManager.notify(
+                                      locale.messagesNotAuthorizedContent(), FAIL, FLOAT_MODE));
                 }
                 return Promises.reject(error);
               }
