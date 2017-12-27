@@ -122,10 +122,10 @@ public class CheckIntelligenceCommandFromToolbarTest {
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> isPreviewLinkAvailable(currentWindow, expectedTextOnPreviewPage));
+                driver -> isPreviewPageAvailable(currentWindow, expectedTextOnPreviewPage));
   }
 
-  private Boolean isPreviewLinkAvailable(String currentWindow, String expectedText) {
+  private Boolean isPreviewPageAvailable(String currentWindow, String expectedText) {
     consoles.clickOnPreviewUrl();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
 
