@@ -79,6 +79,8 @@ public class Terminal {
   //todo test method should be reworked
   public native void print();
 
+  public native String getText();
+
   public native void resize(int cols, int rows);
 
   public native void on(String event, TerminalEventHandler function);

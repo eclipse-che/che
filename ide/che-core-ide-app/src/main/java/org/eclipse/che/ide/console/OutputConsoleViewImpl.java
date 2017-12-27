@@ -34,7 +34,6 @@ import org.eclipse.che.ide.terminal.Terminal;
 import org.eclipse.che.ide.terminal.TerminalOptions;
 import org.eclipse.che.ide.terminal.helpers.TerminalGeometry;
 import org.eclipse.che.ide.ui.Tooltip;
-import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
@@ -142,8 +141,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     TerminalOptions termOptions = new TerminalOptions();
     termOptions.setFocusOnOpen(false);
     termOptions.setReadOnly(true);
-    // todo seems we can use it...
-    // termOptions.setDisableStdin(true);
+    termOptions.setDisableStdin(true);
     termOptions.setScrollBack(SCROLL_BACK);
 
     this.terminal = new Terminal(termOptions);
@@ -160,23 +158,24 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 //                                        + " " + hashCode());
   }
 
-  private Timer resizeTimer =
-      new Timer() {
-        @Override
-        public void run() {
-          resize();
-        }
-      };
-
   @Override
   public void onResize() {
     if (consoleIsFit()) {
       if (!termIsOpen()) {
         terminal.open(consoleLines.getElement());
       }
-      resizeTimer.schedule(200);
+//      resizeTimer.schedule(200);
+      resize();
     }
   }
+
+  private Timer resizeTimer =
+          new Timer() {
+            @Override
+            public void run() {
+              resize();
+            }
+          };
 
   private boolean termIsOpen() {
     return consoleLines.getElement().equals(terminal.getParent());
@@ -190,7 +189,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     TerminalGeometry geometry = terminal.proposeGeometry();
     int visibleCols = geometry.getCols();
     int visibleRows = geometry.getRows();
-    //    int visibleCols = evaluateVisibleCols();
+//    int visibleCols = evaluateVisibleCols();
 //    int visibleRows = evaluateVisibleRows();
 
     if (visibleRows > 0 && visibleCols > 0) {
@@ -295,7 +294,6 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
   @Override
   public String getText() {
-    // todo complete this method. This method used for download output
-    return "";
+    return terminal.getText();
   }
 }
