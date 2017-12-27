@@ -16,6 +16,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.RUNNING;
 import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_LOG_METHOD;
+import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_ENVIRONMENT_STATUS_CHANNEL;
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_LOG_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_STATUS_CHANGED_METHOD;
@@ -156,6 +157,8 @@ public class WsMasterJsonRpcInitializer {
     subscriptionManagerClient.subscribe(WS_MASTER_JSON_RPC_ENDPOINT_ID, MACHINE_LOG_METHOD, scope);
     subscriptionManagerClient.subscribe(
         WS_MASTER_JSON_RPC_ENDPOINT_ID, INSTALLER_LOG_METHOD, scope);
+    subscriptionManagerClient.subscribe(
+        WS_MASTER_JSON_RPC_ENDPOINT_ID, INSTALLER_STATUS_CHANGED_METHOD, scope);
   }
 
   private void unsubscribeFromEvents() {
@@ -171,6 +174,8 @@ public class WsMasterJsonRpcInitializer {
         WS_MASTER_JSON_RPC_ENDPOINT_ID, MACHINE_LOG_METHOD, scope);
     subscriptionManagerClient.unSubscribe(
         WS_MASTER_JSON_RPC_ENDPOINT_ID, INSTALLER_LOG_METHOD, scope);
+    subscriptionManagerClient.unSubscribe(
+        WS_MASTER_JSON_RPC_ENDPOINT_ID, INSTALLER_STATUS_CHANGED_METHOD, scope);
   }
 
   /**

@@ -32,6 +32,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
   private final Map<Process, ProcessItemRenderer> renderers;
   private final FlowPanel rootPanel;
   private final DropdownList dropdownList;
+  private final CommandResources resources;
   private final EmptyListWidget emptyListWidget;
   private final ToolbarMessages messages;
   private final CreateCommandItem createCommandItem;
@@ -40,7 +41,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
   private ActionDelegate delegate;
 
   private final Label execLabel;
-  private final Label loadLabel;
+  private final FlowPanel loadAnimation;
 
   private FlowPanel loadInfo;
   private FlowPanel loadingLabel;
@@ -49,6 +50,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
   @Inject
   public ProcessesListViewImpl(
       CommandResources resources, EmptyListWidget emptyListWidget, ToolbarMessages messages) {
+    this.resources = resources;
     this.emptyListWidget = emptyListWidget;
     this.messages = messages;
 
@@ -58,8 +60,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
     execLabel = new Label("EXEC");
     execLabel.addStyleName(resources.commandToolbarCss().processesListExecLabel());
 
-    loadLabel = new Label("LOAD");
-    loadLabel.addStyleName(resources.commandToolbarCss().processesListLoadLabel());
+    loadAnimation = getAnimationWidget();
 
     dropdownList = new DropdownList(emptyListWidget, true);
     dropdownList.setWidth("100%");
@@ -79,7 +80,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
 
     rootPanel = new FlowPanel();
     rootPanel.add(execLabel);
-    rootPanel.add(loadLabel);
+    rootPanel.add(loadAnimation);
     rootPanel.add(dropdownList);
 
     createCommandItem = new CreateCommandItem();
@@ -99,12 +100,36 @@ public class ProcessesListViewImpl implements ProcessesListView {
     loadInfo.add(loadingProgress);
   }
 
+  /**
+   * Creates an animation widget containing three animated vertical bars.
+   *
+   * @return animation widget
+   */
+  private FlowPanel getAnimationWidget() {
+    FlowPanel animation = new FlowPanel();
+    animation.addStyleName(resources.commandToolbarCss().processesListLoader());
+
+    FlowPanel bar1 = new FlowPanel();
+    bar1.addStyleName(resources.commandToolbarCss().processesListLoaderBar1());
+    animation.add(bar1);
+
+    FlowPanel bar2 = new FlowPanel();
+    bar2.addStyleName(resources.commandToolbarCss().processesListLoaderBar2());
+    animation.add(bar2);
+
+    FlowPanel bar3 = new FlowPanel();
+    bar3.addStyleName(resources.commandToolbarCss().processesListLoaderBar3());
+    animation.add(bar3);
+
+    return animation;
+  }
+
   @Override
   public void setLoadMode() {
     execLabel.getElement().getStyle().setDisplay(Style.Display.NONE);
     dropdownList.getElement().getStyle().setDisplay(Style.Display.NONE);
 
-    loadLabel.getElement().getStyle().setDisplay(Style.Display.BLOCK);
+    loadAnimation.getElement().getStyle().setDisplay(Style.Display.BLOCK);
     loadInfo.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
   }
 
@@ -113,7 +138,7 @@ public class ProcessesListViewImpl implements ProcessesListView {
     execLabel.getElement().getStyle().clearDisplay();
     dropdownList.getElement().getStyle().clearDisplay();
 
-    loadLabel.getElement().getStyle().clearDisplay();
+    loadAnimation.getElement().getStyle().clearDisplay();
     loadInfo.getElement().getStyle().clearDisplay();
   }
 
