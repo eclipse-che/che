@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.server.spi.provision.env;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.Pair;
 
 /**
@@ -29,8 +30,10 @@ public class JavaOptsEnvVariableProvider implements EnvVarProvider {
   private String javaOpts;
 
   @Inject
-  public JavaOptsEnvVariableProvider(@Named("che.workspace.java.options") String javaOpts) {
-    this.javaOpts = javaOpts;
+  public JavaOptsEnvVariableProvider(
+      @Named("che.workspace.java_options") String javaOpts,
+      @Nullable @Named("che.workspace.http_proxy_java_options") String httpProxyJavaOptions) {
+    this.javaOpts = httpProxyJavaOptions == null ? javaOpts : javaOpts + " " + httpProxyJavaOptions;
   }
 
   @Override

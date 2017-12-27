@@ -40,7 +40,7 @@ public class EnvVarEnvironmentProvisioner implements InternalEnvironmentProvisio
       internalEnvironment
           .getMachines()
           .values()
-          .forEach(m -> m.getEnv().put(envVar.first, envVar.second));
+          .forEach(m -> m.getEnv().putIfAbsent(envVar.first, envVar.second));
     }
   }
 }

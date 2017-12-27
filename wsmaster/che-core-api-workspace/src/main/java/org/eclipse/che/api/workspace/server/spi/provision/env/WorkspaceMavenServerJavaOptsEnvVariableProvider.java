@@ -16,25 +16,23 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.Pair;
 
-/**
- * Provides MAVEN_OPTS environment variable with a value set to either maven options from
- * configuration or java options if maven options are not set.
- *
- * @author Yevhenii Voevodin
- */
-public class MavenOptsEnvVariableProvider implements EnvVarProvider {
+public class WorkspaceMavenServerJavaOptsEnvVariableProvider implements EnvVarProvider {
 
-  private final String javaOpts;
+  /** Env variable for jvm settings */
+  public static final String CHE_WORKSPACE_MAVEN_SERVER_JAVA_OPTIONS =
+      "CHE_WORKSPACE_MAVEN__SERVER__JAVA__OPTIONS";
+
+  private String javaOpts;
 
   @Inject
-  public MavenOptsEnvVariableProvider(
-      @Named("che.workspace.maven_options") String javaOpts,
+  public WorkspaceMavenServerJavaOptsEnvVariableProvider(
+      @Named("che.workspace.maven_server_java_options") String javaOpts,
       @Nullable @Named("che.workspace.http_proxy_java_options") String httpProxyJavaOptions) {
     this.javaOpts = httpProxyJavaOptions == null ? javaOpts : javaOpts + " " + httpProxyJavaOptions;
   }
 
   @Override
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) {
-    return Pair.of("MAVEN_OPTS", javaOpts);
+    return Pair.of(CHE_WORKSPACE_MAVEN_SERVER_JAVA_OPTIONS, javaOpts);
   }
 }
