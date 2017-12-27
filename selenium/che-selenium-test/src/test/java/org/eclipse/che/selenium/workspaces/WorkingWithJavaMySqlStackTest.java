@@ -50,7 +50,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
-@Test(groups = {TestGroup.OPENSHIFT})
+@Test(groups = {TestGroup.DOCKER})
 public class WorkingWithJavaMySqlStackTest {
   private static final String WORKSPACE = NameGenerator.generate("java-mysql", 4);
   private static final String PROJECT_NAME = "web-java-petclinic";
