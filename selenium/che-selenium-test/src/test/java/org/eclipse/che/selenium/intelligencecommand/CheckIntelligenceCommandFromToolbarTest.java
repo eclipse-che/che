@@ -67,7 +67,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
     commandsToolbar.clickWithHoldAndLaunchCommandFromList(PROJECT_NAME + ": build and run");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
 
-    waitAndCheckPreviewUrlIsAvailable(currentWindow, "Enter your name");
+    waitOnAvailablePreviewUrl(currentWindow, "Enter your name");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitProjectExplorer();
@@ -96,7 +96,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
     consoles.waitExpectedTextIntoConsole(" Server startup in");
     consoles.clickOnPreviewUrl();
 
-    waitAndCheckPreviewUrlIsAvailable(currentWindow, "Enter your name:");
+    waitOnAvailablePreviewUrl(currentWindow, "Enter your name:");
     Assert.assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
     Assert.assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#2"));
 
@@ -118,12 +118,14 @@ public class CheckIntelligenceCommandFromToolbarTest {
     seleniumWebDriver.switchTo().window(currentWindow);
   }
 
-  private void waitAndCheckPreviewUrlIsAvailable(String currentWindow, String expectedText) {
+  private void waitOnAvailablePreviewUrl(String currentWindow, String expectedText) {
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until((ExpectedCondition<Boolean>) driver -> linkIsAvailable(currentWindow, expectedText));
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> isPreviewLinkAvailable(currentWindow, expectedText));
   }
 
-  private Boolean linkIsAvailable(String currentWindow, String expectedText) {
+  private Boolean isPreviewLinkAvailable(String currentWindow, String expectedText) {
     consoles.clickOnPreviewUrl();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
 
