@@ -12,6 +12,5 @@
 
 -->
 <module>
-    <stylesheet src="IDE.css"/>
     <entry-point class="org.eclipse.che.ide.client.IDE"/>
 </module>

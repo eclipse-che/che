@@ -12,6 +12,8 @@ package org.eclipse.che.selenium.intelligencecommand;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTIPLE;
 
 import com.google.inject.Inject;
@@ -28,6 +30,8 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsToolbar;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
@@ -104,20 +108,15 @@ public class CheckIntelligenceCommandFromToolbarTest {
     commandsToolbar.clickExecStopBtn();
 
     // it needs when the test is running on the ocp platform
-    String previewUrl = consoles.getPreviewUrl();
     consoles.clickOnPreviewUrl();
     checkTestAppAndReturnToIde(currentWindow, expectedText);
     commandsToolbar.clickExecRerunBtn();
     consoles.waitExpectedTextIntoConsole(" Server startup in");
     consoles.clickOnPreviewUrl();
-    checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
+
+    waitOnAvailablePreviewPage(currentWindow, "Enter your name:");
     Assert.assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
     Assert.assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#2"));
-
-    // it needs when the test is running on the ocp platform
-    if (previewUrl.contains("route")) {
-      WaitUtils.sleepQuietly(10);
-    }
 
     commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("dev-machine:tomcat8");
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
@@ -135,5 +134,37 @@ public class CheckIntelligenceCommandFromToolbarTest {
                 By.tagName("body"), expectedTextOnTestAppPage));
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
+  }
+
+  private void waitOnAvailablePreviewPage(String currentWindow, String expectedTextOnPreviewPage) {
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> isPreviewPageAvailable(currentWindow, expectedTextOnPreviewPage));
+  }
+
+  private Boolean isPreviewPageAvailable(String currentWindow, String expectedText) {
+    consoles.clickOnPreviewUrl();
+    seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
+
+    if (getBodyText().contains(expectedText)) {
+      seleniumWebDriver.close();
+      seleniumWebDriver.switchTo().window(currentWindow);
+      return true;
+    }
+
+    seleniumWebDriver.close();
+    seleniumWebDriver.switchTo().window(currentWindow);
+    return false;
+  }
+
+  private WebElement getBody() {
+    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
+  }
+
+  private String getBodyText() {
+    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until((ExpectedCondition<String>) driver -> getBody().getText());
   }
 }

@@ -206,6 +206,9 @@ public interface Resources
   @Source("panel/panel-selector-right.svg")
   SVGResource panelSelectorRight();
 
+  @Source("machine/machine-cube.svg")
+  SVGResource machineCube();
+
   @Source("searchMatch.svg")
   SVGResource searchMatch();
 
