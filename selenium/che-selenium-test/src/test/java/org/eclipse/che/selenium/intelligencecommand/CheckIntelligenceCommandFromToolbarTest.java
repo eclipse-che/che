@@ -68,12 +68,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
     commandsToolbar.clickWithHoldAndLaunchCommandFromList(PROJECT_NAME + ": build and run");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
 
-    // it needs when the test is running on the ocp platform
-    String previewUrl = consoles.getPreviewUrl();
-
     waitUntilPreviewUrlIsAvailable(currentWindow, "Enter your name");
-    consoles.clickOnPreviewUrl();
-    checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitProjectExplorer();
@@ -105,7 +100,6 @@ public class CheckIntelligenceCommandFromToolbarTest {
     Assert.assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
     Assert.assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#2"));
 
-    // it needs when the test is running on the ocp platform
     if (previewUrl.contains("route")) {
       WaitUtils.sleepQuietly(10);
     }
