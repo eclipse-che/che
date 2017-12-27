@@ -12,63 +12,55 @@ package org.eclipse.che.ide.processes.loading;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
-/** Created by vetal on 9/29/17. */
+/** View displaying loading progress of the workspace */
 public interface WorkspaceLoadingTrackerView extends IsWidget {
 
-  /** Displays loading title and pulling machines section. */
-  void startLoading();
+  /** Adds machine to be booted. */
+  void addMachine(String machineName);
 
-  /**
-   * Adds machine to the downloading list.
-   *
-   * @param machine machine name
-   */
-  void pullMachine(String machine);
+  /** Sets image name for machine. */
+  void setMachineImageName(String machineName, String imageName);
 
-  /**
-   * Displays docker image for a machine.
-   *
-   * @param machine machine name
-   * @param image docker image
-   */
-  void setMachineImage(String machine, String image);
+  /** Sets starting state for machine. */
+  void setMachineStarting(String machineName);
 
-  /**
-   * Updates state of machine pulling progress.
-   *
-   * @param machine machine name
-   * @param percents how much of the image has been already downloaded
-   */
-  void onPullingProgress(String machine, int percents);
+  /** Sets running state for machine. */
+  void setMachineRunning(String machineName);
 
-  /**
-   * Sets pulling complete for machine.
-   *
-   * @param machine machine name
-   */
-  void onPullingComplete(String machine);
+  /** Creates installer and adds it to the machine. */
+  void addInstaller(
+      String machineName, String installerId, String installerName, String installerDescription);
 
-  /** Switches to step 2. Displays `Starting workspace runtimes` section. */
-  void startWorkspaceMachines();
+  /** Sets starting state for installer. */
+  void setInstallerStarting(String machineName, String installerId);
 
-  /**
-   * Starts a workspace machine with a docker image.
-   *
-   * @param machine machine name
-   * @param image docker image
-   */
-  void startWorkspaceMachine(String machine, String image);
+  /** Sets running state for installer. */
+  void setInstallerRunning(String machineName, String installerId);
 
-  /**
-   * Displays machine in running state.
-   *
-   * @param machine machine name
-   */
-  void onMachineRunning(String machine);
+  /** Shows workspace starting section. */
+  void showWorkspaceStarting();
 
-  /** Step 3. Initializing workspace agents. */
-  void showInitializingWorkspaceAgents();
+  /** Shows workspace started section. */
+  void showWorkspaceStarted();
 
-  /** Step 4. Workspace started. */
-  void onWorkspaceStarted();
+  /** Shows workspace stopped section. */
+  void showWorkspaceStopped();
+
+  /** Marks machine failed. */
+  void setMachineFailed(String machineName);
+
+  /** Marks installer failed and displays corresponding error message. */
+  void setInstallerFailed(String machineName, String installerId, String errorMessage);
+
+  /** Shows workspace failed section. */
+  void showWorkspaceFailed(String error);
+
+  /** Sets action delegate. */
+  void setDelegate(ActionDelegate delegate);
+
+  interface ActionDelegate {
+
+    /** On show output for the machine. */
+    void onShowMachineOutputs(String machineName);
+  }
 }

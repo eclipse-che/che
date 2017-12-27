@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.macro.BaseMacro;
@@ -48,7 +47,7 @@ public class ServerAddressMacroRegistrar {
   private final AppContext appContext;
   private final WsAgentServerUtil wsAgentServerUtil;
 
-  private Set<Macro> macros;
+  private Set<Macro> macros = new HashSet<>();
 
   @Inject
   public ServerAddressMacroRegistrar(
@@ -84,19 +83,14 @@ public class ServerAddressMacroRegistrar {
     final Optional<MachineImpl> devMachine = wsAgentServerUtil.getWsAgentServerMachine();
 
     if (devMachine.isPresent()) {
-      macros = getMacros(devMachine.get());
+      macros.clear();
+
+      for (Map.Entry<String, ? extends Server> entry : devMachine.get().getServers().entrySet()) {
+        macros.add(new ServerAddressMacro(entry.getKey(), entry.getValue().getUrl()));
+      }
+
       macroRegistryProvider.get().register(macros);
     }
-  }
-
-  private Set<Macro> getMacros(Machine machine) {
-    Set<Macro> macros = new HashSet<>();
-
-    for (Map.Entry<String, ? extends Server> entry : machine.getServers().entrySet()) {
-      macros.add(new ServerAddressMacro(entry.getKey(), entry.getValue().getUrl()));
-    }
-
-    return macros;
   }
 
   private class ServerAddressMacro extends BaseMacro {

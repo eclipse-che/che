@@ -15,7 +15,6 @@ import com.google.gwt.regexp.shared.RegExp;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
-import java.util.logging.Logger;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -38,7 +37,6 @@ import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryS
 /** @author Evgen Vidolob */
 @Singleton
 public class LanguageServerFileTypeRegister {
-  private static Logger LOGGER = Logger.getLogger(LanguageServerFileTypeRegister.class.getName());
 
   private final LanguageServerRegistryServiceClient serverLanguageRegistry;
   private final LanguageServerRegistry lsRegistry;
@@ -83,7 +81,6 @@ public class LanguageServerFileTypeRegister {
             new Operation<List<LanguageDescription>>() {
               @Override
               public void apply(List<LanguageDescription> langs) throws OperationException {
-                LOGGER.info("registering language descriptions");
                 if (!langs.isEmpty()) {
                   JsArrayString contentTypes = JsArrayString.createArray().cast();
                   for (LanguageDescription lang : langs) {
@@ -117,7 +114,6 @@ public class LanguageServerFileTypeRegister {
                     config.setContentTypes(mimeType);
                     config.setPatterns(lang.getHighlightingConfiguration());
                     contentTypeRegistrant.registerFileType(contentType, config);
-                    LOGGER.info("registered language description for " + lang.getLanguageId());
                   }
                   orionHoverRegistrant.registerHover(contentTypes, hoverProvider);
                   orionOccurrencesRegistrant.registerOccurrencesHandler(

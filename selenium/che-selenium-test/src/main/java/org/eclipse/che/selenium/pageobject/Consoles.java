@@ -71,7 +71,8 @@ public class Consoles {
       "gwt-debug-runtimeInfoHideServersCheckBox";
   public static final String MACHINE_NAME =
       "//div[@id='gwt-debug-process-tree']//span[text()= '%s']";
-  public static final String CONTEXT_MENU = "gwt-debug-contextMenu/commandsActionGroup";
+  public static final String COMMANDS_MENU_ITEM = "gwt-debug-contextMenu/commandsActionGroup";
+  public static final String SERVERS_MENU_ITEM = "contextMenu/Servers";
   public static final String COMMAND_NAME = "//tr[contains(@id,'command_%s')]";
 
   public interface CommandsGoal {
@@ -139,8 +140,11 @@ public class Consoles {
   @FindBy(id = SERVER_INFO_HIDE_INTERNAL_CHECK_BOX)
   WebElement serverInfoHideInternalCheckBox;
 
-  @FindBy(id = CONTEXT_MENU)
-  WebElement contextMenu;
+  @FindBy(id = COMMANDS_MENU_ITEM)
+  WebElement commandsMenuItem;
+
+  @FindBy(id = SERVERS_MENU_ITEM)
+  WebElement serversMenuItem;
 
   /**
    * click on consoles icon in side line and wait opening console area (terminal on other console )
@@ -388,6 +392,16 @@ public class Consoles {
         .perform();
   }
 
+  public void openServersTabFromContextMenu(String machineName) {
+    WebElement machine =
+        redrawDriverWait.until(
+            visibilityOfElementLocated(By.xpath(format(MACHINE_NAME, machineName))));
+    machine.click();
+
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(machine).contextClick().perform();
+    redrawDriverWait.until(visibilityOf(serversMenuItem)).click();
+  }
+
   public void startCommandFromProcessesArea(
       String machineName, String commandGoal, String commandName) {
     WebElement machine =
@@ -397,7 +411,7 @@ public class Consoles {
 
     Actions action = new Actions(seleniumWebDriver);
     action.moveToElement(machine).contextClick().perform();
-    redrawDriverWait.until(visibilityOf(contextMenu)).click();
+    redrawDriverWait.until(visibilityOf(commandsMenuItem)).click();
 
     redrawDriverWait.until(visibilityOfElementLocated(By.id(commandGoal))).click();
     redrawDriverWait
