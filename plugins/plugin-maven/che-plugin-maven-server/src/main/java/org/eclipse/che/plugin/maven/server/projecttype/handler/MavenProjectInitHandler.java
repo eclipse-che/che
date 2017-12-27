@@ -12,19 +12,22 @@ package org.eclipse.che.plugin.maven.server.projecttype.handler;
 
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.plugin.java.server.projecttype.AbstractJavaInitHandler;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 
 /** @author Vitaly Parfonov */
 @Singleton
-public class MavenProjectInitHandler extends AbstractJavaInitHandler {
-
-  @Inject
-  public MavenProjectInitHandler() {}
-
+public class MavenProjectInitHandler implements ProjectInitHandler {
   @Override
   public String getProjectType() {
     return MAVEN_ID;
   }
+
+  @Override
+  public void onProjectInitialized(String projectFolder)
+      throws ServerException, ForbiddenException, ConflictException, NotFoundException {}
 }

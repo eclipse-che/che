@@ -12,8 +12,11 @@ package org.eclipse.che.plugin.java.plain.server.projecttype;
 
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 
-import com.google.inject.Inject;
-import org.eclipse.che.plugin.java.server.projecttype.AbstractJavaInitHandler;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 
 /**
  * Init handler for simple java project.
@@ -21,13 +24,13 @@ import org.eclipse.che.plugin.java.server.projecttype.AbstractJavaInitHandler;
  * @author Evgen Vidolob
  * @author Valeriy Svydenko
  */
-public class PlainJavaInitHandler extends AbstractJavaInitHandler {
-
-  @Inject
-  public PlainJavaInitHandler() {}
-
+public class PlainJavaInitHandler implements ProjectInitHandler {
   @Override
   public String getProjectType() {
     return JAVAC;
   }
+
+  @Override
+  public void onProjectInitialized(String projectFolder)
+      throws ServerException, ForbiddenException, ConflictException, NotFoundException {}
 }
