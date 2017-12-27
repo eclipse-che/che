@@ -78,8 +78,6 @@ cmd_config() {
 
   fi
 
-  info "config" "Generating $CHE_MINI_PRODUCT_NAME configuration..."
-
   # Run the docker configurator
   if ! skip_config; then
     generate_configuration_with_puppet
@@ -121,6 +119,8 @@ cmd_config() {
 
 # Runs puppet image to generate che configuration
 generate_configuration_with_puppet() {
+  info "config" "Generating $CHE_MINI_PRODUCT_NAME configuration..."
+
   if is_docker_for_windows; then
     CHE_ENV_FILE=$(convert_posix_to_windows "${CHE_HOST_INSTANCE}/config/$CHE_MINI_PRODUCT_NAME.env")
   else
