@@ -181,7 +181,7 @@ public class BranchListViewImpl extends Window implements BranchListView {
   @Override
   protected void onKeyDownEvent(KeyDownEvent event) {
     if (event.getNativeEvent().getKeyCode() == KEY_BACKSPACE) {
-      branchesList.addBackspaceToFilter();
+      branchesList.removeLastCharacter();
     }
   }
 

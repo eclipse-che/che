@@ -57,8 +57,8 @@ public class FilterableSimpleList<M> extends SimpleList<M> {
     doFilter();
   }
 
-  /** Add Backspace to the filter and update items according to new filter value. */
-  public void addBackspaceToFilter() {
+  /** Remove last character from the filter and update items according to new filter value. */
+  public void removeLastCharacter() {
     filter.deleteCharAt(filter.length() - 1);
     filterChangedHandler.onFilterChanged(filter.toString());
     doFilter();
