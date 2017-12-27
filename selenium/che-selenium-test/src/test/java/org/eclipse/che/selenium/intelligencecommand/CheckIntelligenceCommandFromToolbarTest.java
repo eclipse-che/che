@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.intelligencecommand;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTIPLE;
 
@@ -69,11 +70,8 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
     // it needs when the test is running on the ocp platform
     String previewUrl = consoles.getPreviewUrl();
-    if (previewUrl.contains("route")) {
-      WaitUtils.sleepQuietly(10);
-    }
 
-    waitUntilPreviewUrlIsAvailable(currentWindow);
+    waitUntilPreviewUrlIsAvailable(currentWindow, "Enter your name");
     consoles.clickOnPreviewUrl();
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
@@ -130,24 +128,24 @@ public class CheckIntelligenceCommandFromToolbarTest {
     seleniumWebDriver.switchTo().window(currentWindow);
   }
 
-  private Boolean linkIsAvailable(String currentWindow) {
+  private void waitUntilPreviewUrlIsAvailable(String currentWindow, String expectedText) {
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        .until((ExpectedCondition<Boolean>) driver -> linkIsAvailable(currentWindow, expectedText));
+  }
+
+  private Boolean linkIsAvailable(String currentWindow, String expectedText) {
     consoles.clickOnPreviewUrl();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
 
-    if (getBodyText().contains("This site can’t be reached")) {
+    if (getBodyText().contains(expectedText)) {
       seleniumWebDriver.close();
       seleniumWebDriver.switchTo().window(currentWindow);
-      return false;
+      return true;
     }
 
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
-    return true;
-  }
-
-  private void waitUntilPreviewUrlIsAvailable(String currentWindow) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until((ExpectedCondition<Boolean>) driver -> linkIsAvailable(currentWindow));
+    return false;
   }
 
   private WebElement getBody() {
