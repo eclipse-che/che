@@ -73,7 +73,7 @@ public class ImportProjectFromGitHubTest {
   }
 
   @Test
-  public void checkAbilityImportMavenProjectTest() throws Exception {
+  public void checkAbilityImportProjectFromGithub() throws Exception {
     ideWin = seleniumWebDriver.getWindowHandle();
 
     dashboard.waitDashboardToolbarTitle();
