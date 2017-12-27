@@ -44,6 +44,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
@@ -93,6 +94,7 @@ import org.eclipse.che.ide.console.CommandOutputConsolePresenter;
 import org.eclipse.che.ide.console.CompositeOutputConsole;
 import org.eclipse.che.ide.console.DefaultOutputConsole;
 import org.eclipse.che.ide.machine.MachineResources;
+import org.eclipse.che.ide.processes.DisplayMachineOutputEvent;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
 import org.eclipse.che.ide.processes.ProcessTreeNode.ProcessNodeType;
 import org.eclipse.che.ide.processes.ProcessTreeNodeSelectedEvent;
@@ -233,10 +235,32 @@ public class ProcessesPanelPresenter extends BasePresenter
     eventBus.addHandler(
         ActivateProcessOutputEvent.TYPE, event -> setActiveProcessOutput(event.getPid()));
     eventBus.addHandler(BasicIDEInitializedEvent.TYPE, this);
+    eventBus.addHandler(DisplayMachineOutputEvent.TYPE, this::displayMachineOutput);
 
     Scheduler.get().scheduleDeferred(() -> workspaceLoadingTrackerProvider.get().startTracking());
 
     Scheduler.get().scheduleDeferred(this::updateMachineList);
+  }
+
+  protected void displayMachineOutput(DisplayMachineOutputEvent event) {
+    String machineName = event.getMachineName();
+    OutputConsole outputConsole = consoles.get(machineName);
+
+    if (outputConsole == null) {
+      return;
+    }
+
+    outputConsole.go(
+        widget -> {
+          String title = outputConsole.getTitle();
+          SVGResource icon = outputConsole.getTitleIcon();
+          view.addWidget(machineName, title, icon, widget, true);
+          ProcessTreeNode node = view.getNodeById(machineName);
+          view.selectNode(node);
+          notifyTreeNodeSelected(node);
+        });
+
+    outputConsole.addActionDelegate(this);
   }
 
   /** Updates list of the machines from application context. */
@@ -262,10 +286,11 @@ public class ProcessesPanelPresenter extends BasePresenter
       provideMachineNode(machine.getName(), true, false);
     }
 
-    ProcessTreeNode machineToSelect = machineNodes.entrySet().iterator().next().getValue();
-
-    view.selectNode(machineToSelect);
-    notifyTreeNodeSelected(machineToSelect);
+    if (WorkspaceStatus.RUNNING == appContext.getWorkspace().getStatus()) {
+      ProcessTreeNode machineToSelect = machineNodes.entrySet().iterator().next().getValue();
+      view.selectNode(machineToSelect);
+      notifyTreeNodeSelected(machineToSelect);
+    }
   }
 
   /** determines whether process tree is visible. */
@@ -490,7 +515,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     terminals.put(terminalId, newTerminal);
     view.addProcessNode(terminalNode);
     terminalWidget.asWidget().ensureDebugId(terminalName);
-    view.addWidget(terminalId, terminalName, terminalNode.getTitleIcon(), terminalWidget, false);
+    view.addWidget(terminalId, terminalName, terminalNode.getTitleIcon(), terminalWidget, true);
     refreshStopButtonState(terminalId);
 
     workspaceAgentProvider.get().setActivePart(this);
@@ -702,7 +727,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     commandId = commandNode.getId();
     addChildToMachineNode(commandNode, machineTreeNode, activate);
 
-    addOutputConsole(commandId, commandNode, outputConsole, false, activate);
+    addOutputConsole(commandId, commandNode, outputConsole, true, activate);
 
     refreshStopButtonState(commandId);
     workspaceAgentProvider.get().setActivePart(this);
@@ -727,7 +752,7 @@ public class ProcessesPanelPresenter extends BasePresenter
       final String id,
       final ProcessTreeNode processNode,
       final OutputConsole outputConsole,
-      final boolean machineConsole,
+      final boolean removable,
       final boolean activate) {
     consoles.put(id, outputConsole);
     consoleCommands.put(outputConsole, id);
@@ -738,7 +763,7 @@ public class ProcessesPanelPresenter extends BasePresenter
           public void setWidget(final IsWidget widget) {
             view.addProcessNode(processNode);
             view.addWidget(
-                id, outputConsole.getTitle(), outputConsole.getTitleIcon(), widget, machineConsole);
+                id, outputConsole.getTitle(), outputConsole.getTitleIcon(), widget, removable);
             if (!MACHINE_NODE.equals(processNode.getType())) {
               ProcessTreeNode node = view.getNodeById(id);
               if (activate) {
@@ -851,7 +876,6 @@ public class ProcessesPanelPresenter extends BasePresenter
     }
 
     removeChildFromMachineNode(node, parentNode);
-    view.selectNode(neighborNode);
     notifyTreeNodeSelected(neighborNode);
   }
 
@@ -1062,7 +1086,6 @@ public class ProcessesPanelPresenter extends BasePresenter
     }
 
     view.setProcessesData(rootNode);
-    selectDevMachine();
   }
 
   @Override
@@ -1147,7 +1170,7 @@ public class ProcessesPanelPresenter extends BasePresenter
                       getAndPrintProcessLogs(console, pid);
                       subscribeToProcess(console, pid);
 
-                      addCommandOutput(machineName, console, false);
+                      addCommandOutput(machineName, console, true);
                     } else {
                       final CommandImpl commandByName = commandOptional.get();
                       macroProcessorProvider
@@ -1171,7 +1194,7 @@ public class ProcessesPanelPresenter extends BasePresenter
                                   getAndPrintProcessLogs(console, pid);
                                   subscribeToProcess(console, pid);
 
-                                  addCommandOutput(machineName, console, false);
+                                  addCommandOutput(machineName, console, true);
                                 }
                               });
                     }
