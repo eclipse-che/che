@@ -13,7 +13,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.search.ui.IQueryListener;
 import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.ISearchResultViewPart;
 
 /**
  * A facade for access to the new search UI facilities.
@@ -110,7 +109,7 @@ public class NewSearchUI {
    * @throws IllegalArgumentException Thrown when the passed query is not able to run in background
    * @since 3.2
    */
-  public static void runQueryInBackground(ISearchQuery query, ISearchResultViewPart view)
+  public static void runQueryInBackground(ISearchQuery query, Object view)
       throws IllegalArgumentException {
     if (query == null) {
       throw new IllegalArgumentException("query must not be null"); // $NON-NLS-1$
@@ -158,7 +157,7 @@ public class NewSearchUI {
    * @since 3.2
    */
   public static IStatus runQueryInForeground(
-      IRunnableContext context, ISearchQuery query, ISearchResultViewPart view) {
+      IRunnableContext context, ISearchQuery query, Object view) {
     if (query == null) {
       throw new IllegalArgumentException("query must not be null"); // $NON-NLS-1$
     }
