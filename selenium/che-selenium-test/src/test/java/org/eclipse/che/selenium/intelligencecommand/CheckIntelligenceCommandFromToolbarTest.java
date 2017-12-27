@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.intelligencecommand;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTIPLE;
 
 import com.google.inject.Inject;
@@ -27,6 +28,8 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsToolbar;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
@@ -70,6 +73,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
       WaitUtils.sleepQuietly(10);
     }
 
+    waitUntilPreviewUrlIsAvailable(currentWindow);
     consoles.clickOnPreviewUrl();
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
@@ -124,5 +128,35 @@ public class CheckIntelligenceCommandFromToolbarTest {
                 By.tagName("body"), expectedTextOnTestAppPage));
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
+  }
+
+  private Boolean linkIsAvailable(String currentWindow) {
+    consoles.clickOnPreviewUrl();
+    seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
+
+    if (getBodyText().contains("This site can’t be reached")) {
+      seleniumWebDriver.close();
+      seleniumWebDriver.switchTo().window(currentWindow);
+      return false;
+    }
+
+    seleniumWebDriver.close();
+    seleniumWebDriver.switchTo().window(currentWindow);
+    return true;
+  }
+
+  private void waitUntilPreviewUrlIsAvailable(String currentWindow) {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until((ExpectedCondition<Boolean>) driver -> linkIsAvailable(currentWindow));
+  }
+
+  private WebElement getBody() {
+    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
+  }
+
+  private String getBodyText() {
+    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until((ExpectedCondition<String>) driver -> getBody().getText());
   }
 }

@@ -127,7 +127,7 @@ public class CommandsToolbar {
    */
   public void clickWithHoldAndLaunchCommandFromList(String nameOfCommand) {
     redrawWait.until(visibilityOf(commandsToolbarSelect));
-    waitCommandDropDownIsExpandedAndClickItem(nameOfCommand);
+    waitCommandDropDownIsExpandedAndClickItem(commandsToolbarSelect, nameOfCommand);
   }
 
   /**
@@ -138,7 +138,7 @@ public class CommandsToolbar {
    */
   public void clickWithHoldAndLaunchDebuCmdFromList(String nameOfCommand) {
     redrawWait.until(visibilityOf(debugCommandBtn));
-    waitCommandDropDownIsExpandedAndClickItem(nameOfCommand);
+    waitCommandDropDownIsExpandedAndClickItem(debugCommandBtn, nameOfCommand);
   }
 
   /** wait rerun button on exec toolbar command widget and click it */
@@ -202,9 +202,10 @@ public class CommandsToolbar {
     selectPreviewUrlFromDropDawn(urlCommand);
   }
 
-  private void waitCommandDropDownIsExpandedAndClickItem(String nameOfCommand) {
+  private void waitCommandDropDownIsExpandedAndClickItem(
+      WebElement webElement, String nameOfCommand) {
     Actions action = new Actions(seleniumWebDriver);
-    action.clickAndHold(commandsToolbarSelect).perform();
+    action.clickAndHold(webElement).perform();
 
     testWebElementRenderChecker.waitElementIsRendered(
         format(
