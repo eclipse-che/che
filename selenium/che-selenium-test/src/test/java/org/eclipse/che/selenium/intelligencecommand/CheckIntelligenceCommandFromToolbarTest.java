@@ -19,7 +19,6 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTI
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -68,7 +67,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
     commandsToolbar.clickWithHoldAndLaunchCommandFromList(PROJECT_NAME + ": build and run");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
 
-    waitUntilPreviewUrlIsAvailable(currentWindow, "Enter your name");
+    waitAndCheckPreviewUrlIsAvailable(currentWindow, "Enter your name");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitProjectExplorer();
@@ -96,13 +95,10 @@ public class CheckIntelligenceCommandFromToolbarTest {
     commandsToolbar.clickExecRerunBtn();
     consoles.waitExpectedTextIntoConsole(" Server startup in");
     consoles.clickOnPreviewUrl();
-    checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
+
+    waitAndCheckPreviewUrlIsAvailable(currentWindow, "Enter your name:");
     Assert.assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
     Assert.assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#2"));
-
-    if (previewUrl.contains("route")) {
-      WaitUtils.sleepQuietly(10);
-    }
 
     commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("dev-machine:tomcat8");
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
@@ -122,7 +118,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
     seleniumWebDriver.switchTo().window(currentWindow);
   }
 
-  private void waitUntilPreviewUrlIsAvailable(String currentWindow, String expectedText) {
+  private void waitAndCheckPreviewUrlIsAvailable(String currentWindow, String expectedText) {
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until((ExpectedCondition<Boolean>) driver -> linkIsAvailable(currentWindow, expectedText));
   }
