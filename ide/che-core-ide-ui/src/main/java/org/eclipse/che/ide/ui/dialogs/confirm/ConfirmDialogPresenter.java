@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.ui.dialogs.confirm;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.assistedinject.Assisted;
@@ -56,8 +58,13 @@ public class ConfirmDialogPresenter implements ConfirmDialog, ConfirmDialogView.
       final @Nullable @Assisted CancelCallback cancelCallback) {
     this(view, title, new InlineHTML(message), confirmCallback, cancelCallback);
 
-    view.setOkButtonLabel(okButtonLabel);
-    view.setCancelButtonLabel(cancelButtonLabel);
+    if (!isNullOrEmpty(okButtonLabel)) {
+      view.setOkButtonLabel(okButtonLabel);
+    }
+
+    if (!isNullOrEmpty(cancelButtonLabel)) {
+      view.setCancelButtonLabel(cancelButtonLabel);
+    }
   }
 
   @AssistedInject

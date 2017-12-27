@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.ui.dialogs.input;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import javax.validation.constraints.NotNull;
@@ -113,15 +115,24 @@ public class InputDialogPresenter implements InputDialog, InputDialogView.Action
     this.view = view;
     this.view.setContent(label);
     this.view.setTitle(title);
-    this.view.setValue(initialValue);
     this.view.setSelectionStartIndex(selectionStartIndex);
     this.view.setSelectionLength(selectionLength);
-    this.view.setOkButtonLabel(okButtonLabel);
-    this.view.setCancelButtonLabel(cancelButtonLabel);
     this.inputCallback = inputCallback;
     this.cancelCallback = cancelCallback;
     this.view.setDelegate(this);
     this.localizationConstant = localizationConstant;
+
+    if (!isNullOrEmpty(initialValue)) {
+      view.setValue(initialValue);
+    }
+
+    if (!isNullOrEmpty(okButtonLabel)) {
+      view.setOkButtonLabel(okButtonLabel);
+    }
+
+    if (!isNullOrEmpty(cancelButtonLabel)) {
+      view.setCancelButtonLabel(cancelButtonLabel);
+    }
   }
 
   @Override

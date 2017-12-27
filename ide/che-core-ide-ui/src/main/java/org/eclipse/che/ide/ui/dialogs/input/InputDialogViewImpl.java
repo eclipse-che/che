@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.ui.dialogs.input;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -59,7 +61,10 @@ public class InputDialogViewImpl extends Window implements InputDialogView {
   @Override
   public void show() {
     super.show();
-    value.setSelectionRange(selectionStartIndex, selectionLength);
+    if (!isNullOrEmpty(value.getText())) {
+      value.setSelectionRange(selectionStartIndex, selectionLength);
+    }
+
     new Timer() {
       @Override
       public void run() {
