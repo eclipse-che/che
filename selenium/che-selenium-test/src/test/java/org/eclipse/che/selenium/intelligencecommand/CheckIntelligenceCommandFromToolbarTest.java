@@ -20,7 +20,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -53,12 +52,12 @@ public class CheckIntelligenceCommandFromToolbarTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private NotificationsPopupPanel notificationsPanel;
 
-  @BeforeClass
+  @BeforeClass(groups = {TestGroup.DOCKER, TestGroup.OPENSHIFT})
   public void setUp() throws Exception {
     ide.open(testWorkspace);
   }
 
-  @Test(priority = 1)
+  @Test(groups = {TestGroup.DOCKER, TestGroup.OPENSHIFT})
   public void launchClonedWepAppTest() throws Exception {
     String currentWindow = seleniumWebDriver.getWindowHandle();
     projectExplorer.waitProjectExplorer();
@@ -69,14 +68,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
     commandsToolbar.clickWithHoldAndLaunchCommandFromList(PROJECT_NAME + ": build and run");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
 
-    // it needs when the test is running on the ocp platform
-    String previewUrl = consoles.getPreviewUrl();
-    if (previewUrl.contains("route")) {
-      WaitUtils.sleepQuietly(10);
-    }
-
-    consoles.clickOnPreviewUrl();
-    checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
+    waitOnAvailablePreviewPage(currentWindow, "Enter your name");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitProjectExplorer();
@@ -87,7 +79,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
   }
 
   @Test(
-    priority = 2,
+    priority = 1,
     groups = {TestGroup.DOCKER}
   )
   public void checkButtonsOnToolbarOnDocker() {
@@ -95,7 +87,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
   }
 
   @Test(
-    priority = 2,
+    priority = 1,
     groups = {TestGroup.OPENSHIFT}
   )
   public void checkButtonsOnToolbarOnOpenshift() {
@@ -107,7 +99,6 @@ public class CheckIntelligenceCommandFromToolbarTest {
     String currentWindow = seleniumWebDriver.getWindowHandle();
     commandsToolbar.clickExecStopBtn();
 
-    // it needs when the test is running on the ocp platform
     consoles.clickOnPreviewUrl();
     checkTestAppAndReturnToIde(currentWindow, expectedText);
     commandsToolbar.clickExecRerunBtn();
