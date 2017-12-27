@@ -24,6 +24,7 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
+import static org.eclipse.che.api.git.shared.Constants.CHECKOUT_IN_PROGRESS_ERROR;
 import static org.eclipse.che.api.git.shared.Constants.COMMIT_IN_PROGRESS_ERROR;
 import static org.eclipse.che.api.git.shared.Constants.NOT_A_GIT_REPOSITORY_ERROR;
 import static org.eclipse.che.api.git.shared.EditedRegionType.DELETION;
@@ -91,13 +92,7 @@ import org.eclipse.che.api.git.GitUrlUtils;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.git.LogPage;
 import org.eclipse.che.api.git.UserCredential;
-import org.eclipse.che.api.git.exception.GitCommitInProgressException;
-import org.eclipse.che.api.git.exception.GitConflictException;
-import org.eclipse.che.api.git.exception.GitException;
-import org.eclipse.che.api.git.exception.GitInvalidRefNameException;
-import org.eclipse.che.api.git.exception.GitInvalidRepositoryException;
-import org.eclipse.che.api.git.exception.GitRefAlreadyExistsException;
-import org.eclipse.che.api.git.exception.GitRefNotFoundException;
+import org.eclipse.che.api.git.exception.*;
 import org.eclipse.che.api.git.params.AddParams;
 import org.eclipse.che.api.git.params.CheckoutParams;
 import org.eclipse.che.api.git.params.CloneParams;
@@ -304,6 +299,7 @@ class JGitConnection implements GitConnection {
   private static final Logger LOG = LoggerFactory.getLogger(JGitConnection.class);
 
   private static final Set<String> COMMITTING_REPOSITORIES = new CopyOnWriteArraySet<>();
+  private static final Set<String> CHECKOUT_REPOSITORIES = new CopyOnWriteArraySet<>();
 
   private Git git;
   private JGitConfigImpl config;
@@ -431,6 +427,7 @@ class JGitConnection implements GitConnection {
       checkoutCommand.setUpstreamMode(SetupUpstreamMode.SET_UPSTREAM);
     }
     try {
+      CHECKOUT_REPOSITORIES.add(getRepositoryPath());
       checkoutCommand.call();
     } catch (CheckoutConflictException exception) {
       throw new GitConflictException(exception.getMessage(), exception.getConflictingPaths());
@@ -448,6 +445,8 @@ class JGitConnection implements GitConnection {
                 name != null ? name : cleanRemoteName(trackBranch)));
       }
       throw new GitException(exception.getMessage(), exception);
+    } finally {
+      CHECKOUT_REPOSITORIES.remove(getRepositoryPath());
     }
   }
 
@@ -1865,9 +1864,14 @@ class JGitConnection implements GitConnection {
     if (!isInsideWorkTree()) {
       throw new GitInvalidRepositoryException(NOT_A_GIT_REPOSITORY_ERROR);
     }
+    String repositoryPath = getRepositoryPath();
     // Status can be not actual, if commit is in progress.
-    if (COMMITTING_REPOSITORIES.contains(getRepository().getDirectory().getPath())) {
+    if (COMMITTING_REPOSITORIES.contains(repositoryPath)) {
       throw new GitCommitInProgressException(COMMIT_IN_PROGRESS_ERROR);
+    }
+    // Status can be not actual, if checkout is in progress.
+    if (CHECKOUT_REPOSITORIES.contains(repositoryPath)) {
+      throw new GitCheckoutInProgressException(CHECKOUT_IN_PROGRESS_ERROR);
     }
     String branchName = getCurrentBranch();
     StatusCommand statusCommand = getGit().status();
@@ -2226,6 +2230,10 @@ class JGitConnection implements GitConnection {
 
   private Repository getRepository() {
     return repository;
+  }
+
+  private String getRepositoryPath() {
+    return getRepository().getDirectory().getPath();
   }
 
   /**
