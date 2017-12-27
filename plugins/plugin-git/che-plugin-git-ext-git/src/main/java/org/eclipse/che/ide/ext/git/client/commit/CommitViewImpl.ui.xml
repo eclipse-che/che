@@ -25,11 +25,13 @@
         <g:north size="350" addStyleNames="{style.emptyBorder}">
             <g:FlowPanel ui:field="changesPanel" debugId="git-commit-changed-files"/>
         </g:north>
-        <g:center size="50" addStyleNames="{style.emptyBorder}">
-            <g:CheckBox ui:field="amend" HTML="{locale.commitAmendFieldTitle}" debugId="git-commit-amend"/>
-        </g:center>
-        <g:south size="130" addStyleNames="{style.emptyBorder}">
-            <g:TextArea ui:field="message" width="588px" height="118px" addStyleNames="{res.gitCSS.textFont}" debugId="git-commit-message"/>
+        <g:south size="146" addStyleNames="{style.emptyBorder}">
+            <g:FlowPanel>
+                <g:CheckBox ui:field="amend" HTML="{locale.commitAmendFieldTitle}"
+                            debugId="git-commit-amend"/>
+                <g:TextArea ui:field="message" width="588px" height="116px" addStyleNames="{res.gitCSS.textFont}"
+                            debugId="git-commit-message"/>
+            </g:FlowPanel>
         </g:south>
 
     </g:DockLayoutPanel>
