@@ -42,7 +42,7 @@ export class RecipeBuilder {
                     }
 
                     if (cheStructWorkspace.runtime.docker.image) {
-                        return {"contentType": "text/x-dockerfile", "type": "dockerimage", "location": cheStructWorkspace.runtime.docker.image};
+                        return {"contentType": "text/x-dockerfile", "type": "dockerimage", "content": cheStructWorkspace.runtime.docker.image};
                     } else if (cheStructWorkspace.runtime.docker.content) {
                         return {
                             "contentType": "text/x-dockerfile",

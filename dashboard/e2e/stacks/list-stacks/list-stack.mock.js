@@ -29,7 +29,7 @@ exports.listStacksTheeEntries = function () {
                     'installers': ['org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh'],
                     'attributes': {'memoryLimitBytes': '2147483648'}
                   }
-                }, 'recipe': {'location': 'codenvy/node', 'type': 'dockerimage'}
+                }, 'recipe': {'content': 'codenvy/node', 'type': 'dockerimage'}
               }
             }, 'commands': [], 'projects': [], 'defaultEnv': 'default', 'name': 'default', 'links': []
           };
