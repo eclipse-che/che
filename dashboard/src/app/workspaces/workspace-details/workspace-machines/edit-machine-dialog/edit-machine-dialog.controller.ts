@@ -83,7 +83,7 @@ export class EditMachineDialogController {
         // we can add a new machine in case with scalable type of recipes only
         return;
       }
-      this.machine = this.environmentManager.createNewDefaultMachine(this.copyEnvironment);
+      this.machine = this.environmentManager.createMachine(this.copyEnvironment);
       this.copyEnvironment = this.environmentManager.addMachine(this.copyEnvironment, this.machine);
     } else {
       const machines = this.environmentManager.getMachines(this.copyEnvironment);

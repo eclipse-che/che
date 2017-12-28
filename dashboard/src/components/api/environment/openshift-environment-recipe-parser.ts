@@ -10,6 +10,7 @@
  */
 'use strict';
 import {IPodItem, OpenshiftMachineRecipeParser} from './openshift-machine-recipe-parser';
+import {IParser} from './parser';
 
 export interface IPodList {
   kind: string;
@@ -21,7 +22,7 @@ export interface IPodList {
  *
  *  @author Oleksii Orel
  */
-export class OpenshiftEnvironmentRecipeParser {
+export class OpenshiftEnvironmentRecipeParser implements IParser {
   private machineRecipeParser = new OpenshiftMachineRecipeParser();
   private recipeByContent: Map<string, IPodList> = new Map();
   private recipeKeys: Array<string> = [];

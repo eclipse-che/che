@@ -313,7 +313,7 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
    * @param {string} image
    * @return {IEnvironmentManagerMachine}
    */
-  createNewDefaultMachine(environment: che.IWorkspaceEnvironment, image?: string): IEnvironmentManagerMachine {
+  createMachine(environment: che.IWorkspaceEnvironment, image?: string): IEnvironmentManagerMachine {
     const machineName = this.getUniqueMachineName(environment);
     const machineImage = !image ? 'eclipse/ubuntu_jdk8' : image;
 

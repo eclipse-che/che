@@ -10,6 +10,8 @@
  */
 'use strict';
 
+import {IParser} from './parser';
+
 /**
  * Simple parser and simple dumper of dockerfiles.
  * @author Oleksii Kurinnyi
@@ -23,7 +25,7 @@ interface IRecipeLine {
   emptyLine?: boolean;
 }
 
-export class DockerfileParser {
+export class DockerfileParser implements IParser {
   /**
    * RegExp to match the very first instruction to be 'FROM'.
    */

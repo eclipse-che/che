@@ -48,14 +48,14 @@ enum MemoryUnit { 'B', 'Ki', 'Mi', 'Gi' }
  */
 
 export class OpenshiftEnvironmentManager extends EnvironmentManager {
-  private openshiftEnvironmentRecipeParser: OpenshiftEnvironmentRecipeParser;
-  private openshiftMachineRecipeParser: OpenshiftMachineRecipeParser;
+  parser: OpenshiftEnvironmentRecipeParser;
+  private machineParser: OpenshiftMachineRecipeParser;
 
   constructor($log: ng.ILogService) {
     super($log);
 
-    this.openshiftEnvironmentRecipeParser = new OpenshiftEnvironmentRecipeParser();
-    this.openshiftMachineRecipeParser = new OpenshiftMachineRecipeParser();
+    this.parser = new OpenshiftEnvironmentRecipeParser();
+    this.machineParser = new OpenshiftMachineRecipeParser();
   }
 
   get type(): string {
@@ -72,7 +72,7 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
    * @returns {IPodItem} recipe object
    */
   parseMachineRecipe(content: string): IPodItem {
-    return this.openshiftMachineRecipeParser.parse(content);
+    return this.machineParser.parse(content);
   }
 
   /**
@@ -81,7 +81,7 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
    * @returns {IPodList} recipe object
    */
   parseRecipe(content: string): IPodList {
-    return this.openshiftEnvironmentRecipeParser.parse(content);
+    return this.parser.parse(content);
   }
 
   /**
@@ -90,7 +90,7 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
    * @returns {string} recipe content
    */
   stringifyRecipe(recipe: IPodList): string {
-    return this.openshiftEnvironmentRecipeParser.dump(recipe);
+    return this.parser.dump(recipe);
   }
 
   /**
@@ -330,7 +330,7 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
    * @param {string} image
    * @return {IEnvironmentManagerMachine}
    */
-  createNewDefaultMachine(environment: che.IWorkspaceEnvironment, image?: string): IEnvironmentManagerMachine {
+  createMachine(environment: che.IWorkspaceEnvironment, image?: string): IEnvironmentManagerMachine {
     const uniqueMachineName = this.getUniqueMachineName(environment);
     const [podName, containerName] = this.splitName(uniqueMachineName);
     const machineImage = !image ? 'rhche/centos_jdk8:latest' : image;
