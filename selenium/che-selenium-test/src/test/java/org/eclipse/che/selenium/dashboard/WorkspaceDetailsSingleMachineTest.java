@@ -22,6 +22,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.PROJECTS;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.SERVERS;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
@@ -131,6 +132,10 @@ public class WorkspaceDetailsSingleMachineTest {
   @Test
   public void checkWorkingWithInstallers() {
     workspaceDetails.selectTabInWorkspaceMenu(INSTALLERS);
+
+    // check the 'Workspace API' installer
+    assertFalse(workspaceInstallers.isInstallerStateTurnedOn("Workspace API", "1.0.0"));
+    assertTrue(workspaceInstallers.isInstallerStateNotChangeable("Workspace API", "1.0.0"));
 
     // check all needed installers in dev-machine exist
     workspaceMachines.selectMachine("Workspace Installers", "dev-machine");
