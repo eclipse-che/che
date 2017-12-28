@@ -15,13 +15,11 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.promises.client.Operation;
@@ -34,7 +32,6 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.command.ClasspathContainer;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.ClasspathPagePresenter;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.ide.ui.dialogs.CancelCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmCallback;
@@ -149,34 +146,28 @@ public class ProjectClasspathPresenter
 
     Preconditions.checkState(resources != null && resources.length == 1);
 
-    final Optional<Project> project = resources[0].getRelatedProject();
+    final Project project = resources[0].getProject();
 
-    Preconditions.checkState(isJavaProject(project.get()));
+    Preconditions.checkState(isJavaProject(project));
 
     classpathContainer
-        .getClasspathEntries(project.get().getLocation().toString())
+        .getClasspathEntries(project.getLocation().toString())
         .then(
-            new Operation<List<ClasspathEntryDto>>() {
-              @Override
-              public void apply(List<ClasspathEntryDto> arg) throws OperationException {
-                classpathResolver.resolveClasspathEntries(arg);
-                if (propertiesMap == null) {
-                  propertiesMap = new HashMap<>();
-                  for (ClasspathPagePresenter page : classpathPages) {
-                    Set<ClasspathPagePresenter> pages = propertiesMap.get(page.getCategory());
-                    if (pages == null) {
-                      pages = new HashSet<>();
-                      propertiesMap.put(page.getCategory(), pages);
-                    }
-                    pages.add(page);
-                  }
-
-                  view.setPages(propertiesMap);
+            arg -> {
+              classpathResolver.resolveClasspathEntries(arg);
+              if (propertiesMap == null) {
+                propertiesMap = new HashMap<>();
+                for (ClasspathPagePresenter page : classpathPages) {
+                  Set<ClasspathPagePresenter> pages =
+                      propertiesMap.computeIfAbsent(page.getCategory(), k -> new HashSet<>());
+                  pages.add(page);
                 }
-                view.showDialog();
-                view.selectPage(
-                    propertiesMap.entrySet().iterator().next().getValue().iterator().next());
+
+                view.setPages(propertiesMap);
               }
+              view.showDialog();
+              view.selectPage(
+                  propertiesMap.entrySet().iterator().next().getValue().iterator().next());
             })
         .catchError(
             new Operation<PromiseError>() {
