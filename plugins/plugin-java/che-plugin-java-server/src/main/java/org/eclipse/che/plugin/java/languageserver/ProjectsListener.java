@@ -113,7 +113,7 @@ public class ProjectsListener {
         (Runnable)
             () -> {
               LOG.info(
-                  "Workspace isb being updated with added projects'{}', removed projects '{}'",
+                  "Workspace is being updated with added projects'{}', removed projects '{}'",
                   updateWorkspaceParameters.getAddedProjectsUri().toString(),
                   updateWorkspaceParameters.getRemovedProjectsUri().toString());
 

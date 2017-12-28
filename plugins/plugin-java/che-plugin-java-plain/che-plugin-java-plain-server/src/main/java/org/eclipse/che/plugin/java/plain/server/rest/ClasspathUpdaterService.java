@@ -12,16 +12,10 @@
 package org.eclipse.che.plugin.java.plain.server.rest;
 
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
-import static org.eclipse.core.runtime.Path.fromOSString;
-import static org.eclipse.jdt.core.JavaCore.newContainerEntry;
-import static org.eclipse.jdt.core.JavaCore.newLibraryEntry;
-import static org.eclipse.jdt.core.JavaCore.newProjectEntry;
-import static org.eclipse.jdt.core.JavaCore.newSourceEntry;
-import static org.eclipse.jdt.core.JavaCore.newVariableEntry;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
 
 import com.google.inject.Inject;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -33,19 +27,12 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
-import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.NewProjectConfigImpl;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.JavaModel;
-import org.eclipse.jdt.internal.core.JavaModelManager;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
+import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 
 /**
  * Service for updating classpath.
@@ -54,16 +41,14 @@ import org.eclipse.jdt.internal.core.JavaModelManager;
  */
 @Path("jdt/classpath/update")
 public class ClasspathUpdaterService {
-
-  private static final JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
-
   private final ProjectManager projectManager;
-  private final PathTransformer pathTransformer;
+  private JavaLanguageServerExtensionService extensionService;
 
   @Inject
-  public ClasspathUpdaterService(ProjectManager projectManager, PathTransformer pathTransformer) {
+  public ClasspathUpdaterService(
+      ProjectManager projectManager, JavaLanguageServerExtensionService extensionService) {
     this.projectManager = projectManager;
-    this.pathTransformer = pathTransformer;
+    this.extensionService = extensionService;
   }
 
   /**
@@ -71,7 +56,6 @@ public class ClasspathUpdaterService {
    *
    * @param projectPath path to the current project
    * @param entries list of classpath entries which need to set
-   * @throws JavaModelException if JavaModel has a failure
    * @throws ServerException if some server error
    * @throws ForbiddenException if operation is forbidden
    * @throws ConflictException if update operation causes conflicts
@@ -80,13 +64,10 @@ public class ClasspathUpdaterService {
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   public void updateClasspath(
-      @QueryParam("projectpath") String projectPath, List<ClasspathEntryDto> entries)
-      throws JavaModelException, ServerException, ForbiddenException, ConflictException,
-          NotFoundException, IOException, BadRequestException {
-    IJavaProject javaProject = model.getJavaProject(projectPath);
-
-    javaProject.setRawClasspath(
-        createModifiedEntry(entries), javaProject.getOutputLocation(), new NullProgressMonitor());
+      @QueryParam("projectpath") String projectPath, List<ClasspathEntry> entries)
+      throws ServerException, ForbiddenException, ConflictException, NotFoundException, IOException,
+          BadRequestException {
+    extensionService.updateClasspath(prefixURI(projectPath), entries);
 
     updateProjectConfig(projectPath);
   }
@@ -95,7 +76,7 @@ public class ClasspathUpdaterService {
       throws IOException, ForbiddenException, ConflictException, NotFoundException, ServerException,
           BadRequestException {
     String wsPath = absolutize(projectWsPath);
-    ProjectConfig project =
+    RegisteredProject project =
         projectManager
             .get(wsPath)
             .orElseThrow(() -> new NotFoundException("Can't find project: " + projectWsPath));
@@ -104,25 +85,5 @@ public class ClasspathUpdaterService {
         new NewProjectConfigImpl(
             projectWsPath, project.getName(), project.getType(), project.getSource());
     projectManager.update(projectConfig);
-  }
-
-  private IClasspathEntry[] createModifiedEntry(List<ClasspathEntryDto> entries) {
-    List<IClasspathEntry> coreClasspathEntries = new ArrayList<>(entries.size());
-    for (ClasspathEntryDto entry : entries) {
-      IPath path = fromOSString(entry.getPath());
-      int entryKind = entry.getEntryKind();
-      if (IClasspathEntry.CPE_LIBRARY == entryKind) {
-        coreClasspathEntries.add(newLibraryEntry(path, null, null));
-      } else if (IClasspathEntry.CPE_SOURCE == entryKind) {
-        coreClasspathEntries.add(newSourceEntry(path));
-      } else if (IClasspathEntry.CPE_VARIABLE == entryKind) {
-        coreClasspathEntries.add(newVariableEntry(path, null, null));
-      } else if (IClasspathEntry.CPE_CONTAINER == entryKind) {
-        coreClasspathEntries.add(newContainerEntry(path));
-      } else if (IClasspathEntry.CPE_PROJECT == entryKind) {
-        coreClasspathEntries.add(newProjectEntry(path));
-      }
-    }
-    return coreClasspathEntries.toArray(new IClasspathEntry[coreClasspathEntries.size()]);
   }
 }

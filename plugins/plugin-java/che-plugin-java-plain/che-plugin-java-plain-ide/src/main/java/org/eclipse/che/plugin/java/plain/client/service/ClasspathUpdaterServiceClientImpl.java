@@ -19,10 +19,10 @@ import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 
 /**
  * The implementation of {@link ClasspathUpdaterServiceClient}.
@@ -48,7 +48,7 @@ public class ClasspathUpdaterServiceClientImpl implements ClasspathUpdaterServic
   }
 
   @Override
-  public Promise<Void> setRawClasspath(String projectPath, List<ClasspathEntryDto> entries) {
+  public Promise<Void> setRawClasspath(String projectPath, List<ClasspathEntry> entries) {
     final String url =
         appContext.getWsAgentServerApiEndpoint()
             + pathToService

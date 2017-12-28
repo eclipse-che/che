@@ -14,16 +14,12 @@ package org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pag
 import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.SOURCE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -34,7 +30,7 @@ import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathResolver;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.AbstractClasspathPagePresenter;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.SelectNodePresenter;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors.SourceFolderNodeInterceptor;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 
 /**
  * The page for the information about source folders which are including into classpath.
@@ -53,7 +49,7 @@ public class SourceEntryPresenter extends AbstractClasspathPagePresenter
 
   private boolean dirty;
   private boolean isPlainJava;
-  private Map<String, ClasspathEntryDto> categories;
+  private Map<String, ClasspathEntry> categories;
 
   @Inject
   public SourceEntryPresenter(
@@ -90,9 +86,9 @@ public class SourceEntryPresenter extends AbstractClasspathPagePresenter
 
     Preconditions.checkState(resource != null);
 
-    final Optional<Project> project = resource.getRelatedProject();
+    final Project project = resource.getProject();
 
-    isPlainJava = JAVAC.equals(project.get().getType());
+    isPlainJava = JAVAC.equals(project.getType());
 
     setReadOnlyMod();
 
@@ -104,20 +100,17 @@ public class SourceEntryPresenter extends AbstractClasspathPagePresenter
     }
 
     classpathContainer
-        .getClasspathEntries(project.get().getLocation().toString())
+        .getClasspathEntries(project.getLocation().toString())
         .then(
-            new Operation<List<ClasspathEntryDto>>() {
-              @Override
-              public void apply(List<ClasspathEntryDto> entries) throws OperationException {
-                categories.clear();
-                for (ClasspathEntryDto entry : entries) {
-                  if (SOURCE == entry.getEntryKind()) {
-                    categories.put(entry.getPath(), entry);
-                  }
+            entries -> {
+              categories.clear();
+              for (ClasspathEntry entry : entries) {
+                if (SOURCE == entry.getEntryKind()) {
+                  categories.put(entry.getPath(), entry);
                 }
-                view.setData(categories);
-                view.renderNodes();
               }
+              view.setData(categories);
+              view.renderNodes();
             });
   }
 
@@ -135,7 +128,7 @@ public class SourceEntryPresenter extends AbstractClasspathPagePresenter
   public void storeChanges() {
     classpathResolver.getSources().clear();
 
-    for (Map.Entry<String, ClasspathEntryDto> entry : categories.entrySet()) {
+    for (Map.Entry<String, ClasspathEntry> entry : categories.entrySet()) {
       if (SOURCE == entry.getValue().getEntryKind()) {
         classpathResolver.getSources().add(entry.getKey());
       }
@@ -167,7 +160,7 @@ public class SourceEntryPresenter extends AbstractClasspathPagePresenter
     dirty = true;
     delegate.onDirtyChanged();
 
-    categories.put(path, dtoFactory.createDto(ClasspathEntryDto.class).withEntryKind(kind));
+    categories.put(path, dtoFactory.createDto(ClasspathEntry.class).withEntryKind(kind));
     view.setData(categories);
     view.renderNodes();
   }
