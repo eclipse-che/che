@@ -23,7 +23,7 @@ import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathChangedEvent;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,7 +39,7 @@ public class ClasspathContainerTest {
   @Mock private JavaLanguageExtensionServiceClient classpathServiceClient;
   @Mock private EventBus eventBus;
 
-  @Mock private Promise<List<ClasspathEntryDto>> classpathEntries;
+  @Mock private Promise<List<ClasspathEntry>> classpathEntries;
 
   @InjectMocks private ClasspathContainer classpathContainer;
 
@@ -55,7 +55,7 @@ public class ClasspathContainerTest {
 
   @Test
   public void classpathShouldBeAdded() throws Exception {
-    Promise<List<ClasspathEntryDto>> entries = classpathContainer.getClasspathEntries(PROJECT_PATH);
+    Promise<List<ClasspathEntry>> entries = classpathContainer.getClasspathEntries(PROJECT_PATH);
 
     verify(classpathServiceClient).classpathTree(PROJECT_PATH);
     assertEquals(classpathEntries, entries);
@@ -67,7 +67,7 @@ public class ClasspathContainerTest {
 
     reset(classpathServiceClient);
 
-    Promise<List<ClasspathEntryDto>> entries = classpathContainer.getClasspathEntries(PROJECT_PATH);
+    Promise<List<ClasspathEntry>> entries = classpathContainer.getClasspathEntries(PROJECT_PATH);
 
     verify(classpathServiceClient, never()).classpathTree(PROJECT_PATH);
     assertEquals(classpathEntries, entries);
