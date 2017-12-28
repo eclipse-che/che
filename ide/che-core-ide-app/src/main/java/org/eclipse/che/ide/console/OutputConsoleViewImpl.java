@@ -145,6 +145,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     termOptions.setScrollBack(SCROLL_BACK);
 
     this.terminal = new Terminal(termOptions);
+    terminal.attachCustomKeyDownHandler(new OutputConsoleCustomKeyDownHandler(terminal));
 //    Log.info(getClass(), "char Measure " + terminal.getCharMeasure());
 //    Log.info(getClass(), "char Measure height " + terminal.getCharMeasure().getHeight());
 //    Log.info(getClass(), "horizontal scroll bar size " + terminal.getScrollBarMeasure().getHorizontalWidth());

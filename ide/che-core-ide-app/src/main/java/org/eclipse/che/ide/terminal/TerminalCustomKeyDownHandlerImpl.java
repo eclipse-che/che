@@ -26,11 +26,11 @@ import static com.google.gwt.event.dom.client.KeyCodes.KEY_V;
  *
  * @author Alexander Andrienko
  */
-public final class CustomKeyDownHandlerImpl implements Terminal.CustomKeyDownHandler {
+public final class TerminalCustomKeyDownHandlerImpl implements Terminal.CustomKeyDownHandler {
 
   private final Terminal terminal;
 
-  public CustomKeyDownHandlerImpl(Terminal terminal) {
+  public TerminalCustomKeyDownHandlerImpl(Terminal terminal) {
     this.terminal = terminal;
   }
 

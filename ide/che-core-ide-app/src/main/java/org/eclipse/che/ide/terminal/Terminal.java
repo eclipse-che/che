@@ -91,6 +91,12 @@ public class Terminal {
 
   public native void fit();
 
+  public native void scrollDisp(int dispDiff);
+
+  public native void scrollEnd();
+
+  public native void scrollHome();
+
   public native boolean hasSelection();
 
   public native TerminalGeometry proposeGeometry();

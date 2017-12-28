@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.terminal.helpers.TerminalGeometry;
-import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * The class contains methods to display terminal.
@@ -66,7 +65,7 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
     terminalElement.getStyle().setProperty("opacity", "0");
 
     terminal.open(terminalPanel.getElement());
-    terminal.attachCustomKeyDownHandler(new CustomKeyDownHandlerImpl(terminal));
+    terminal.attachCustomKeyDownHandler(new TerminalCustomKeyDownHandlerImpl(terminal));
     resizeTerminal();
 
     terminalElement.getFirstChildElement().getStyle().clearProperty("backgroundColor");
