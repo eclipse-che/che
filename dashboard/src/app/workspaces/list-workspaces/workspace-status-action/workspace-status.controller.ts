@@ -59,6 +59,10 @@ export class WorkspaceStatusController {
       this.updateRecentWorkspace(this.workspaceId);
     }
     this.isRequestPending = true;
+    this.cheWorkspace.fetchStatusChange(this.workspaceId, 'ERROR').then((data: any) => {
+      this.cheNotification.showError(data.error);
+    });
+
     const promise = isRunButton ? this.cheWorkspace.startWorkspace(this.workspaceId, environment) : this.cheWorkspace.stopWorkspace(this.workspaceId);
     promise.catch((error: any) => {
       this.cheNotification.showError(`${isRunButton ? 'Run' : 'Stop'} workspace error.`, error);
