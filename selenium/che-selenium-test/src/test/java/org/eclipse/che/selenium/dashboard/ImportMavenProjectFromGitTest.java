@@ -32,8 +32,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
-public class ImportMavenProjectFromGitHubTest {
-  private final String WORKSPACE = NameGenerator.generate("ImtMvnPrjGitHub", 4);
+public class ImportMavenProjectFromGitTest {
+  private final String WORKSPACE = NameGenerator.generate("ImtMvnPrjGit", 4);
   private static final String PROJECT_NAME = "guess-project";
 
   @Inject private Dashboard dashboard;
