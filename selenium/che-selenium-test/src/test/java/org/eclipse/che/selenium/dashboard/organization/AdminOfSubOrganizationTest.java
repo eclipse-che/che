@@ -24,7 +24,7 @@ import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.ArrayList;
-import org.eclipse.che.selenium.core.annotation.Multiuser;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
@@ -41,7 +41,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-@Multiuser
+@Test(groups = {TestGroup.MULTIUSER})
 public class AdminOfSubOrganizationTest {
   private int initialOrgNumber;
 

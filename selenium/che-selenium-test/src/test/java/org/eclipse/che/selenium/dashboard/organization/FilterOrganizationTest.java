@@ -19,7 +19,7 @@ import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.eclipse.che.selenium.core.annotation.Multiuser;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
@@ -37,7 +37,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-@Multiuser
+@Test(groups = {TestGroup.MULTIUSER})
 public class FilterOrganizationTest {
   private static final String WRONG_ORG_NAME = generate("wrong-org-", 7);
 
@@ -62,7 +62,6 @@ public class FilterOrganizationTest {
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
 
-  @Test
   public void testOrganizationListFiler() {
     // Test that organization exist
     navigationBar.waitNavigationBar();

@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.AskDialog;
@@ -49,6 +50,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
+@Test(groups = {TestGroup.DOCKER})
 public class WorkingWithJavaMySqlStackTest {
   private static final String WORKSPACE = NameGenerator.generate("java-mysql", 4);
   private static final String PROJECT_NAME = "web-java-petclinic";
@@ -81,7 +83,6 @@ public class WorkingWithJavaMySqlStackTest {
     workspaceServiceClient.delete(WORKSPACE, defaultTestUser.getName());
   }
 
-  @Test
   public void checkJavaMySqlAndRunApp() {
     String currentWindow;
 

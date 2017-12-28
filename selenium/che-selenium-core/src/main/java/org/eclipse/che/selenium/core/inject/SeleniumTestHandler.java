@@ -57,7 +57,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.IAnnotationTransformer;
 import org.testng.IConfigurationListener;
 import org.testng.IExecutionListener;
 import org.testng.IInvokedMethod;
@@ -79,11 +78,7 @@ import org.testng.TestException;
  * @author Dmytro Nochevnov
  */
 public abstract class SeleniumTestHandler
-    implements ITestListener,
-        ISuiteListener,
-        IInvokedMethodListener,
-        IAnnotationTransformer,
-        IExecutionListener {
+    implements ITestListener, ISuiteListener, IInvokedMethodListener, IExecutionListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestHandler.class);
   private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
