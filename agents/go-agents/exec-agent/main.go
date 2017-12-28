@@ -19,13 +19,15 @@ import (
 	"os"
 	"time"
 
+	"strconv"
+
 	"github.com/eclipse/che/agents/go-agents/core/auth"
 	"github.com/eclipse/che/agents/go-agents/core/jsonrpc"
 	"github.com/eclipse/che/agents/go-agents/core/jsonrpc/jsonrpcws"
 	"github.com/eclipse/che/agents/go-agents/core/process"
 	"github.com/eclipse/che/agents/go-agents/core/rest"
+	"github.com/eclipse/che/agents/go-agents/core/rest/restutil"
 	"github.com/eclipse/che/agents/go-agents/exec-agent/exec"
-	"strconv"
 )
 
 var (
@@ -93,8 +95,9 @@ func main() {
 	jsonrpc.RegRoutesGroups(appOpRoutes)
 	jsonrpc.PrintRoutes(appOpRoutes)
 
-	var handler = getHandler(r)
+	var handler = wrapWithAuth(r)
 	http.Handle("/", handler)
+	http.Handle("/liveness", restutil.LivenessCheckingHandler())
 
 	server := &http.Server{
 		Handler:      handler,
@@ -105,7 +108,7 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func getHandler(h http.Handler) http.Handler {
+func wrapWithAuth(h http.Handler) http.Handler {
 	// required authentication for all the requests, if it is configured
 	if config.authEnabled {
 		cache := auth.NewCache(time.Minute*time.Duration(config.tokensExpirationTimeoutInMinutes), time.Minute*5)

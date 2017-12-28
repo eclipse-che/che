@@ -44,3 +44,10 @@ func IntQueryParam(r *http.Request, name string, defaultValue int) int {
 	}
 	return v
 }
+
+// LivenessCheckingHandler responds 200 to the requests for a server liveness checks
+func LivenessCheckingHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+}

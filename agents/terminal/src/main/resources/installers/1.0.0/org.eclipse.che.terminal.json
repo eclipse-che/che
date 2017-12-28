@@ -10,6 +10,11 @@
       "port": "4411/tcp",
       "protocol": "ws",
       "path" : "/pty"
+    },
+    "terminal-liveness": {
+      "port": "4411/tcp",
+      "protocol": "http",
+      "path" : "/liveness"
     }
   }
 }

@@ -18,6 +18,11 @@
       "port": "4401/tcp",
       "protocol": "ws",
       "path" : "/wsagent"
+    },
+    "wsagent-liveness": {
+      "port": "4401/tcp",
+      "protocol": "http",
+      "path" : "/liveness"
     }
   }
 }

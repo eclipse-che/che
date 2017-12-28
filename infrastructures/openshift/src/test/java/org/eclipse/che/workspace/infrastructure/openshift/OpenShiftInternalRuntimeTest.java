@@ -65,6 +65,8 @@ import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
+import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
+import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -126,6 +128,8 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private OpenShiftPods pods;
   @Mock private OpenShiftBootstrapper bootstrapper;
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
+  @Mock private WorkspaceProbesFactory workspaceProbesFactory;
+  @Mock private ProbeScheduler probesScheduler;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
@@ -145,6 +149,8 @@ public class OpenShiftInternalRuntimeTest {
             bootstrapperFactory,
             serverCheckerFactory,
             volumesStrategy,
+            probesScheduler,
+            workspaceProbesFactory,
             context,
             project,
             emptyList());

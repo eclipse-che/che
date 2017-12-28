@@ -11,6 +11,7 @@
 package org.eclipse.che.wsagent.server;
 
 import com.google.inject.servlet.ServletModule;
+import javax.servlet.http.HttpServlet;
 import org.eclipse.che.inject.DynaModule;
 import org.everrest.websockets.WSConnectionTracker;
 
@@ -24,5 +25,7 @@ public class WsAgentServletModule extends ServletModule {
   @Override
   protected void configureServlets() {
     getServletContext().addListener(new WSConnectionTracker());
+    // responds with 200 to liveness checks
+    serve("/liveness").with(new HttpServlet() {});
   }
 }

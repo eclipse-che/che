@@ -44,6 +44,8 @@ import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
+import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
+import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -83,6 +85,8 @@ public class DockerInternalRuntimeTest {
   @Mock private DockerMachineStarter starter;
   @Mock private NetworkLifecycle networks;
   @Mock private DockerBootstrapper bootstrapper;
+  @Mock private WorkspaceProbesFactory workspaceProbesFactory;
+  @Mock private ProbeScheduler probesScheduler;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> eventCaptor;
 
@@ -122,7 +126,9 @@ public class DockerInternalRuntimeTest {
             eventService,
             bootstrapperFactory,
             serversCheckerFactory,
-            mock(MachineLoggersFactory.class));
+            mock(MachineLoggersFactory.class),
+            probesScheduler,
+            workspaceProbesFactory);
   }
 
   @Test
