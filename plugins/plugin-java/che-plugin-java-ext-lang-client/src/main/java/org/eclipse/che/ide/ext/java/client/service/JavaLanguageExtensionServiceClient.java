@@ -34,7 +34,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
@@ -139,7 +139,7 @@ public class JavaLanguageExtensionServiceClient {
    * @param projectPath path to the project
    * @return classpath structure
    */
-  public Promise<List<ClasspathEntryDto>> classpathTree(String projectPath) {
+  public Promise<List<ClasspathEntry>> classpathTree(String projectPath) {
     return Promises.create(
         (resolve, reject) ->
             requestTransmitter
@@ -147,7 +147,7 @@ public class JavaLanguageExtensionServiceClient {
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName(CLASS_PATH_TREE)
                 .paramsAsString(projectPath)
-                .sendAndReceiveResultAsListOfDto(ClasspathEntryDto.class, REQUEST_TIMEOUT)
+                .sendAndReceiveResultAsListOfDto(ClasspathEntry.class, REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
