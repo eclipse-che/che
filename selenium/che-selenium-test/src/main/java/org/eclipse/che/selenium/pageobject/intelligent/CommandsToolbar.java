@@ -128,17 +128,7 @@ public class CommandsToolbar {
     Actions action = new Actions(seleniumWebDriver);
     action.clickAndHold(commandsToolbarSelect).perform();
 
-    testWebElementRenderChecker.waitElementIsRendered(
-        String.format(
-            "//div[text()='%s']/parent::div/parent::div/parent::div[@class='popupContent']",
-            nameOfCommand));
-
-    action.release();
-    loadPageWait
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.COMMAND_DROPDAWN, nameOfCommand))))
-        .click();
+    waitListIsRenderedAndClickOnItem(nameOfCommand, action);
   }
 
   /**
@@ -152,17 +142,7 @@ public class CommandsToolbar {
     Actions action = new Actions(seleniumWebDriver);
     action.clickAndHold(debugCommandBtn).perform();
 
-    testWebElementRenderChecker.waitElementIsRendered(
-        String.format(
-            "//div[text()='%s']/parent::div/parent::div/parent::div[@class='popupContent']",
-            nameOfCommand));
-
-    action.release();
-    loadPageWait
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.COMMAND_DROPDAWN, nameOfCommand))))
-        .click();
+    waitListIsRenderedAndClickOnItem(nameOfCommand, action);
   }
 
   /** wait rerun button on exec toolbar command widget and click it */
@@ -223,5 +203,19 @@ public class CommandsToolbar {
   public void clickOnPreviewCommandBtnAndSelectUrl(String urlCommand) {
     clickOnPreviewsUrlButton();
     selectPreviewUrlFromDropDawn(urlCommand);
+  }
+
+  private void waitListIsRenderedAndClickOnItem(String nameOfCommand, Actions action) {
+    testWebElementRenderChecker.waitElementIsRendered(
+        String.format(
+            "//div[text()='%s']/parent::div/parent::div/parent::div[@class='popupContent']",
+            nameOfCommand));
+
+    action.release();
+    loadPageWait
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(String.format(Locators.COMMAND_DROPDAWN, nameOfCommand))))
+        .click();
   }
 }
