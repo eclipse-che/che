@@ -75,7 +75,7 @@ public class OAuthAuthenticationServiceTest {
             .queryParam("oauth_provider", "unknown")
             .get(SECURE_PATH + "/oauth/token");
 
-    assertEquals(response.getStatusCode(), 400);
+    assertEquals(response.getStatusCode(), 404);
     assertEquals(
         DtoFactory.getInstance()
             .createDtoFromJson(response.getBody().asInputStream(), ServiceError.class)

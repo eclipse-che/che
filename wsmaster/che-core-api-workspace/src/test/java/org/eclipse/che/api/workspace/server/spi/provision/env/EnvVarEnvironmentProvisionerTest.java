@@ -136,7 +136,7 @@ public class EnvVarEnvironmentProvisionerTest {
   }
 
   @Test
-  public void shouldReplaceExistingEnvVarsWithMatchingNames() throws Exception {
+  public void shouldNotReplaceExistingEnvVarsWithMatchingNames() throws Exception {
     // given
     EnvVarEnvironmentProvisioner provisioner =
         new EnvVarEnvironmentProvisioner(singleton(provider1));
@@ -152,6 +152,6 @@ public class EnvVarEnvironmentProvisionerTest {
     provisioner.provision(RUNTIME_IDENTITY, internalEnvironment);
 
     // then
-    assertEquals(ImmutableMap.of(existingEnvVarName, envVarValueFromProvider), machine1Env);
+    assertEquals(ImmutableMap.of(existingEnvVarName, oldEnvVarValue), machine1Env);
   }
 }

@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.workspaces;
 
 import com.google.inject.Inject;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
@@ -21,6 +22,7 @@ import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.testng.annotations.Test;
 
 /** @author Alexander Garagatyi */
+@Test(groups = {TestGroup.DOCKER})
 public class WorkspaceFromOfficialUbuntuImageStartTest {
   @InjectTestWorkspace(template = WorkspaceTemplate.UBUNTU)
   private TestWorkspace testWorkspace;
@@ -30,7 +32,6 @@ public class WorkspaceFromOfficialUbuntuImageStartTest {
   @Inject private ToastLoader toastLoader;
   @Inject private MachineTerminal terminal;
 
-  @Test
   public void ensureWorkspaceStartsFromOfficialUbuntuImage() throws Exception {
     ide.open(testWorkspace);
     projectExplorer.waitProjectExplorer();

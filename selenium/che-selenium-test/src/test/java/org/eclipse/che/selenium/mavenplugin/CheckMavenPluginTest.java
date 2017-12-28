@@ -101,6 +101,7 @@ public class CheckMavenPluginTest {
   @Test(priority = 2)
   public void shouldAccessClassCreatedInAnotherModuleAfterIncludingModule() {
     includeModulesInTheParentPom();
+    projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
     editor.waitActive();

@@ -23,6 +23,8 @@ export interface IPodList {
  */
 export class OpenshiftEnvironmentRecipeParser {
   private machineRecipeParser = new OpenshiftMachineRecipeParser();
+  private recipeByContent: Map<string, IPodList> = new Map();
+  private recipeKeys: Array<string> = [];
 
   /**
    * Parses recipe content
@@ -30,8 +32,18 @@ export class OpenshiftEnvironmentRecipeParser {
    * @returns {IPodList} recipe object
    */
   parse(content: string): IPodList {
-    const recipe = jsyaml.load(content);
+    if (this.recipeByContent.has(content)) {
+      return this.recipeByContent.get(content);
+    }
+    const recipe = jsyaml.safeLoad(content);
     this.validate(recipe);
+    // add to buffer
+    this.recipeByContent.set(content, recipe);
+    this.recipeKeys.push(content);
+    if (this.recipeKeys.length > 3) {
+      this.recipeByContent.delete(this.recipeKeys.shift());
+    }
+
     return recipe;
   }
 
@@ -41,7 +53,7 @@ export class OpenshiftEnvironmentRecipeParser {
    * @returns {string} recipe content
    */
   dump(recipe: IPodList): string {
-    return jsyaml.dump(recipe, {'indent': 1});
+    return jsyaml.safeDump(recipe, {'indent': 1});
   }
 
   /**
@@ -55,7 +67,7 @@ export class OpenshiftEnvironmentRecipeParser {
     if (recipe.kind.toLowerCase() !== 'list') {
       throw new TypeError(`Recipe 'kind' section should be equals 'list'.`);
     }
-    const podItems = (<IPodList>recipe).items;
+    const podItems = recipe.items;
     if (!podItems) {
       throw new TypeError(`Recipe pod list should contain an 'items' section.`);
     }
@@ -63,6 +75,9 @@ export class OpenshiftEnvironmentRecipeParser {
       throw new TypeError(`Recipe pod list should contain at least one 'item'.`);
     } else {
       podItems.forEach((podItem: IPodItem) => {
+        if (!podItem) {
+          return;
+        }
         // skip services
         if (podItem.kind && podItem.kind.toLowerCase() === 'service') {
           return;

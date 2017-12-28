@@ -323,6 +323,9 @@ export abstract class EnvironmentManager {
   }
 
   setAgents(machine: IEnvironmentManagerMachine, agents: string[]): void {
+    if (!machine) {
+      return;
+    }
     machine.installers = angular.copy(agents);
   }
 
