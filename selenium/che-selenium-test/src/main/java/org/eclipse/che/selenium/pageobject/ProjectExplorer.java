@@ -942,7 +942,7 @@ public class ProjectExplorer {
     } catch (StaleElementReferenceException ex) {
       sleepQuietly(1);
     }
-    navigateToFile.waitListOfFilesNames(file);
+    navigateToFile.isFilenameSuggested(file);
     navigateToFile.selectFileByName(file);
     navigateToFile.waitFormToClose();
     revealResourceByOptionsButton();

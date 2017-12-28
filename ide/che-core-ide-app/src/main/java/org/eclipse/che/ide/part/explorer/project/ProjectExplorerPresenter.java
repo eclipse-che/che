@@ -340,8 +340,15 @@ public class ProjectExplorerPresenter extends BasePresenter
       final Node node = getNode(delta.getResource().getLocation());
       if (node != null) {
 
-        if (node instanceof ResourceNode && !delta.getResource().isProject()) {
-          ((ResourceNode) node).setData(delta.getResource());
+        if (node instanceof ResourceNode) {
+          int srcResourceType = ((ResourceNode) node).getData().getResourceType();
+          if (srcResourceType != resource.getResourceType()) { // resource changed own type
+            String oldId = tree.getNodeStorage().getKeyProvider().getKey(node);
+            ((ResourceNode) node).setData(delta.getResource());
+            tree.getNodeStorage().reIndexNode(oldId, node);
+          } else {
+            ((ResourceNode) node).setData(delta.getResource());
+          }
         }
 
         if (node instanceof HasPresentation) {
