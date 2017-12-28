@@ -13,6 +13,12 @@ package org.eclipse.che.selenium.pageobject;
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.Keys.ALT;
+import static org.openqa.selenium.Keys.CONTROL;
+import static org.openqa.selenium.Keys.ESCAPE;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -20,13 +26,10 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** Created by aleksandr shmaraev on 12.12.14. */
@@ -68,27 +71,20 @@ public class NavigateToFile {
   /** wait opening of 'Navigate to file' widget */
   public void waitFormToOpen() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(navigateToFileForm));
+        .until(visibilityOf(navigateToFileForm));
   }
 
   /** wait closing of 'Navigate to file' widget */
   public void waitFormToClose() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.NAVIGATE_TO_FILE_FORM)));
+        .until(invisibilityOfElementLocated(By.id(Locators.NAVIGATE_TO_FILE_FORM)));
   }
 
   /** launch the 'Navigate To File' widget by keyboard (with Ctrl + 'n' keys) */
   public void launchNavigateToFileByKeyboard() {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action
-        .keyDown(Keys.CONTROL)
-        .keyDown(Keys.ALT)
-        .sendKeys("n")
-        .keyUp(Keys.CONTROL)
-        .keyUp(Keys.ALT)
-        .perform();
+    action.keyDown(CONTROL).keyDown(ALT).sendKeys("n").keyUp(CONTROL).keyUp(ALT).perform();
   }
 
   /**
@@ -98,8 +94,7 @@ public class NavigateToFile {
    */
   public void typeSymbolInFileNameField(String symbol) {
     loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(fileNameInput));
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(visibilityOf(fileNameInput));
     fileNameInput.clear();
     WaitUtils.sleepQuietly(1); // timeout for waiting that input field is cleared
     fileNameInput.sendKeys(symbol);
@@ -111,19 +106,14 @@ public class NavigateToFile {
    * @param symbol the first symbol of search with key word
    */
   public void typeSymbolWithoutClear(String symbol) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(fileNameInput));
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(visibilityOf(fileNameInput));
     fileNameInput.sendKeys(symbol);
   }
 
   /** wait appearance of the dropdawn list (may be empty) */
   public void waitFileNamePopUp() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(suggestionPanel));
-  }
-
-  public Boolean isFilenameSuggested(final String nameFragment) {
-    return suggestionPanel.getText().contains(nameFragment);
+        .until(visibilityOf(suggestionPanel));
   }
 
   /**
@@ -131,9 +121,12 @@ public class NavigateToFile {
    *
    * @param text a text that should be into list
    */
-  public void waitListOfFilesNames(final String text) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until((ExpectedCondition<Boolean>) webDriver -> suggestionPanel.getText().contains(text));
+  public boolean isFilenameSuggested(String text) {
+    WebElement webElement =
+        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+            .until(visibilityOf(suggestionPanel));
+
+    return webElement.getText().contains(text);
   }
 
   public String getText() {
@@ -148,7 +141,7 @@ public class NavigateToFile {
   public void selectFileByFullName(String pathName) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.visibilityOfElementLocated(
+            visibilityOfElementLocated(
                 By.xpath(format(Locators.FILE_NAME_LIST_SELECT_WITH_PATH, pathName))))
         .click();
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
@@ -163,7 +156,7 @@ public class NavigateToFile {
   public void selectFileByName(String nameOfFile) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.visibilityOfElementLocated(
+            visibilityOfElementLocated(
                 By.xpath(format(Locators.FILE_NAME_LIST_SELECT, nameOfFile))))
         .click();
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
@@ -172,7 +165,7 @@ public class NavigateToFile {
   /** close the Navigate to file widget by 'Escape' key and wait closing of the widget */
   public void closeNavigateToFileForm() {
     loader.waitOnClosed();
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ESCAPE).perform();
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(ESCAPE).perform();
     waitFormToClose();
   }
 }

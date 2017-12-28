@@ -141,8 +141,10 @@ import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
 import org.eclipse.che.ide.part.explorer.project.synchronize.ProjectConfigSynchronized;
 import org.eclipse.che.ide.processes.NewTerminalAction;
 import org.eclipse.che.ide.processes.actions.CloseConsoleAction;
+import org.eclipse.che.ide.processes.actions.DisplayMachineOutputAction;
 import org.eclipse.che.ide.processes.actions.ReRunProcessAction;
 import org.eclipse.che.ide.processes.actions.StopProcessAction;
+import org.eclipse.che.ide.processes.loading.ShowWorkspaceStatusAction;
 import org.eclipse.che.ide.resources.action.CopyResourceAction;
 import org.eclipse.che.ide.resources.action.CutResourceAction;
 import org.eclipse.che.ide.resources.action.PasteResourceAction;
@@ -345,6 +347,8 @@ public class StandardComponentInitializer {
 
   @Inject private StopWorkspaceAction stopWorkspaceAction;
 
+  @Inject private ShowWorkspaceStatusAction showWorkspaceStatusAction;
+
   @Inject private RunCommandAction runCommandAction;
 
   @Inject private NewTerminalAction newTerminalAction;
@@ -354,6 +358,8 @@ public class StandardComponentInitializer {
   @Inject private StopProcessAction stopProcessAction;
 
   @Inject private CloseConsoleAction closeConsoleAction;
+
+  @Inject private DisplayMachineOutputAction displayMachineOutputAction;
 
   @Inject private ShowConsoleTreeAction showConsoleTreeAction;
 
@@ -508,6 +514,7 @@ public class StandardComponentInitializer {
 
     workspaceGroup.addSeparator();
     workspaceGroup.add(stopWorkspaceAction);
+    workspaceGroup.add(showWorkspaceStatusAction);
 
     // Project (New Menu)
     DefaultActionGroup projectGroup = (DefaultActionGroup) actionManager.getAction(GROUP_PROJECT);
@@ -678,6 +685,7 @@ public class StandardComponentInitializer {
 
     // Processes panel actions
     actionManager.registerAction("stopWorkspace", stopWorkspaceAction);
+    actionManager.registerAction("showWorkspaceStatus", showWorkspaceStatusAction);
     actionManager.registerAction("runCommand", runCommandAction);
     actionManager.registerAction("newTerminal", newTerminalAction);
 
@@ -779,6 +787,9 @@ public class StandardComponentInitializer {
     consolesTreeContextMenu.add(reRunProcessAction);
     consolesTreeContextMenu.add(stopProcessAction);
     consolesTreeContextMenu.add(closeConsoleAction);
+
+    actionManager.registerAction(DisplayMachineOutputAction.ID, displayMachineOutputAction);
+    consolesTreeContextMenu.add(displayMachineOutputAction);
 
     // Editor context menu group
     DefaultActionGroup editorTabContextMenu =

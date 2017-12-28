@@ -17,6 +17,11 @@ import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.api.workspace.shared.Constants.CREATED_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_NAME;
 
 import com.google.inject.Inject;
 import java.util.Collections;
@@ -56,11 +61,6 @@ import org.slf4j.LoggerFactory;
 public class WorkspaceManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceManager.class);
-
-  /** This attribute describes time when workspace was created. */
-  public static final String CREATED_ATTRIBUTE_NAME = "created";
-  /** This attribute describes time when workspace was last updated or started/stopped/recovered. */
-  public static final String UPDATED_ATTRIBUTE_NAME = "updated";
 
   private final WorkspaceDao workspaceDao;
   private final WorkspaceRuntimes runtimes;
@@ -330,7 +330,8 @@ public class WorkspaceManager {
     final WorkspaceImpl workspace = normalizeState(workspaceDao.get(workspaceId), true);
     checkWorkspaceIsRunningOrStarting(workspace);
     if (!workspace.isTemporary()) {
-      workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
+      workspace.getAttributes().put(STOPPED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
+      workspace.getAttributes().put(STOPPED_ABNORMALLY_ATTRIBUTE_NAME, Boolean.toString(false));
       workspaceDao.update(workspace);
     }
 
@@ -363,10 +364,13 @@ public class WorkspaceManager {
 
     runtimes
         .startAsync(workspace, env, firstNonNull(options, Collections.emptyMap()))
+        .thenAccept(aVoid -> handleStartupSuccess(workspace))
         .exceptionally(
             ex -> {
               if (workspace.isTemporary()) {
                 removeWorkspaceQuietly(workspace);
+              } else {
+                handleStartupError(workspace, ex.getCause());
               }
               return null;
             });
@@ -405,6 +409,38 @@ public class WorkspaceManager {
       workspace.setStatus(runtimes.getStatus(workspace.getId()));
     }
     return workspace;
+  }
+
+  private void handleStartupError(Workspace workspace, Throwable t) {
+    workspace
+        .getAttributes()
+        .put(
+            ERROR_MESSAGE_ATTRIBUTE_NAME,
+            t instanceof RuntimeException ? t.getCause().getMessage() : t.getMessage());
+    workspace.getAttributes().put(STOPPED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
+    workspace.getAttributes().put(STOPPED_ABNORMALLY_ATTRIBUTE_NAME, Boolean.toString(true));
+    try {
+      updateWorkspace(workspace.getId(), workspace);
+    } catch (NotFoundException | ServerException | ValidationException | ConflictException e) {
+      LOG.warn(
+          String.format(
+              "Cannot set error status of the workspace %s. Error is: %s",
+              workspace.getId(), e.getMessage()));
+    }
+  }
+
+  private void handleStartupSuccess(Workspace workspace) {
+    workspace.getAttributes().remove(STOPPED_ATTRIBUTE_NAME);
+    workspace.getAttributes().remove(STOPPED_ABNORMALLY_ATTRIBUTE_NAME);
+    workspace.getAttributes().remove(ERROR_MESSAGE_ATTRIBUTE_NAME);
+    try {
+      updateWorkspace(workspace.getId(), workspace);
+    } catch (NotFoundException | ServerException | ValidationException | ConflictException e) {
+      LOG.warn(
+          String.format(
+              "Cannot clear error status status of the workspace %s. Error is: %s",
+              workspace.getId(), e.getMessage()));
+    }
   }
 
   private WorkspaceImpl doCreateWorkspace(

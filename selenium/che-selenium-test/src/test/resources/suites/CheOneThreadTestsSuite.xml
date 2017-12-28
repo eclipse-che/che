@@ -17,6 +17,31 @@
        thread-count="1">
 
     <test name="all">
+        <method-selectors>
+            <method-selector>
+                <script language="beanshell">
+                    <![CDATA[
+    boolean isTestGroupsAgreedWithRequestedGroups() {
+     String testGroupsVal = System.getProperty("testGroups");
+      if (testGroupsVal == null || testGroupsVal.trim().isEmpty() || groups.isEmpty()){
+        return true;
+      }
+
+      String[] testGroups = testGroupsVal.split(",");
+      for (String group: groups.keySet()) {
+        if (!Arrays.asList(testGroups).contains(group)) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    isTestGroupsAgreedWithRequestedGroups();
+]]>
+                </script>
+            </method-selector>
+        </method-selectors>
         <classes>
             <class name="org.eclipse.che.selenium.dashboard.organization.UserEmptyOrganizationTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfParentOrganizationTest"/>
