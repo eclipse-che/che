@@ -18,7 +18,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
-import org.eclipse.che.selenium.core.annotation.Multiuser;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -36,7 +36,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-@Multiuser
+@Test(groups = {TestGroup.MULTIUSER})
 public class RenameOrganizationTest {
   private static final String NEW_PARENT_ORG_NAME = generate("new-parent-", 5);
   private static final String NEW_CHILD_ORG_NAME = generate("new-child-", 5);
@@ -69,7 +69,6 @@ public class RenameOrganizationTest {
     dashboard.open(testUser.getName(), testUser.getPassword());
   }
 
-  @Test
   public void testParentOrganizationRename() {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);

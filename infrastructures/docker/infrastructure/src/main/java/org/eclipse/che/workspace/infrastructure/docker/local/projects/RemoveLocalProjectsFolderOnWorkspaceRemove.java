@@ -81,11 +81,11 @@ public class RemoveLocalProjectsFolderOnWorkspaceRemove
   @Override
   public void onEvent(WorkspaceRemovedEvent event) {
     Workspace workspace = event.getWorkspace();
-    String workspaceName = workspace.getConfig().getName();
+    String workspaceId = workspace.getId();
 
     String projectSourcesPath;
     try {
-      projectSourcesPath = workspaceFolderPathProvider.getPathByName(workspaceName);
+      projectSourcesPath = workspaceFolderPathProvider.getPath(workspaceId);
     } catch (IOException e) {
       LOG.error(
           "Failed to evaluate projects files path for workspace with id: '{}'. Cause: '{}'",

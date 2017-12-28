@@ -27,6 +27,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -70,7 +71,8 @@ public class Consoles {
       "gwt-debug-runtimeInfoHideServersCheckBox";
   public static final String MACHINE_NAME =
       "//div[@id='gwt-debug-process-tree']//span[text()= '%s']";
-  public static final String CONTEXT_MENU = "gwt-debug-contextMenu/commandsActionGroup";
+  public static final String COMMANDS_MENU_ITEM = "gwt-debug-contextMenu/commandsActionGroup";
+  public static final String SERVERS_MENU_ITEM = "contextMenu/Servers";
   public static final String COMMAND_NAME = "//tr[contains(@id,'command_%s')]";
 
   public interface CommandsGoal {
@@ -80,13 +82,16 @@ public class Consoles {
   }
 
   protected final SeleniumWebDriver seleniumWebDriver;
+  private final ActionsFactory actionsFactory;
   private final Loader loader;
   private static final String CONSOLE_PANEL_DRUGGER_CSS = "div.gwt-SplitLayoutPanel-VDragger";
 
   @Inject
-  public Consoles(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public Consoles(
+      SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
+    this.actionsFactory = actionsFactory;
     redrawDriverWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     loadPageDriverWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     updateProjDriverWait = new WebDriverWait(seleniumWebDriver, UPDATING_PROJECT_TIMEOUT_SEC);
@@ -135,8 +140,11 @@ public class Consoles {
   @FindBy(id = SERVER_INFO_HIDE_INTERNAL_CHECK_BOX)
   WebElement serverInfoHideInternalCheckBox;
 
-  @FindBy(id = CONTEXT_MENU)
-  WebElement contextMenu;
+  @FindBy(id = COMMANDS_MENU_ITEM)
+  WebElement commandsMenuItem;
+
+  @FindBy(id = SERVERS_MENU_ITEM)
+  WebElement serversMenuItem;
 
   /**
    * click on consoles icon in side line and wait opening console area (terminal on other console )
@@ -160,7 +168,8 @@ public class Consoles {
   }
 
   public void clickOnPlusMenuButton() {
-    redrawDriverWait.until(visibilityOf(plusMenuBtn)).click();
+    redrawDriverWait.until(visibilityOf(plusMenuBtn));
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(plusMenuBtn).click().perform();
   }
 
   public void clickOnHideInternalServers() {
@@ -383,6 +392,16 @@ public class Consoles {
         .perform();
   }
 
+  public void openServersTabFromContextMenu(String machineName) {
+    WebElement machine =
+        redrawDriverWait.until(
+            visibilityOfElementLocated(By.xpath(format(MACHINE_NAME, machineName))));
+    machine.click();
+
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(machine).contextClick().perform();
+    redrawDriverWait.until(visibilityOf(serversMenuItem)).click();
+  }
+
   public void startCommandFromProcessesArea(
       String machineName, String commandGoal, String commandName) {
     WebElement machine =
@@ -392,7 +411,7 @@ public class Consoles {
 
     Actions action = new Actions(seleniumWebDriver);
     action.moveToElement(machine).contextClick().perform();
-    redrawDriverWait.until(visibilityOf(contextMenu)).click();
+    redrawDriverWait.until(visibilityOf(commandsMenuItem)).click();
 
     redrawDriverWait.until(visibilityOfElementLocated(By.id(commandGoal))).click();
     redrawDriverWait

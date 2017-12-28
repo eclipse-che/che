@@ -25,7 +25,7 @@ import static org.testng.Assert.fail;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.util.ArrayList;
-import org.eclipse.che.selenium.core.annotation.Multiuser;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
@@ -42,7 +42,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-@Multiuser
+@Test(groups = {TestGroup.MULTIUSER})
 public class SystemAdminOrganizationTest {
   private int initialRootOrgNumber;
 
@@ -70,7 +70,6 @@ public class SystemAdminOrganizationTest {
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
 
-  @Test
   public void testOrganizationListComponents() {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
@@ -104,7 +103,6 @@ public class SystemAdminOrganizationTest {
     assertTrue(organizationListPage.getValues(NAME).contains(parentOrg.getQualifiedName()));
   }
 
-  @Test
   public void testOrganizationViews() {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);

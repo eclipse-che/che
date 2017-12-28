@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -74,6 +75,14 @@ public class GitCommit {
   public void waitMainFormCommitIsClosed() {
     new WebDriverWait(seleniumWebDriver, 5)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.MAIN_FORM_COMMIT)));
+  }
+
+  public boolean isWidgetOpened() {
+    try {
+      return btnCancel.isDisplayed();
+    } catch (NoSuchElementException ex) {
+      return false;
+    }
   }
 
   public void typeCommitMsg(String text) {

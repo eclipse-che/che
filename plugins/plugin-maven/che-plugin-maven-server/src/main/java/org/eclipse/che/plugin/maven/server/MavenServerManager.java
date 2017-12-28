@@ -19,8 +19,10 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.commons.lang.execution.CommandLine;
 import org.eclipse.che.commons.lang.execution.JavaParameters;
@@ -47,25 +49,34 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
   private static final Logger LOG = LoggerFactory.getLogger(MavenServerManager.class);
   private static final String MAVEN_SERVER_MAIN = "org.eclipse.che.maven.server.MavenServerMain";
 
-  private RmiClient<MavenRemoteServer> client;
-  private RmiLogger rmiLogger = new RmiLogger();
-  private RmiMavenServerDownloadListener rmiDownloadListener = new RmiMavenServerDownloadListener();
+  private final RmiClient<MavenRemoteServer> client;
+  private final List<String> mavenServerJavaOptionsList;
+  private final RmiLogger rmiLogger = new RmiLogger();
+  private final RmiMavenServerDownloadListener rmiDownloadListener =
+      new RmiMavenServerDownloadListener();
   private boolean loggerExported;
   private boolean listenerExported;
-  private String mavenServerPath;
+  private final String mavenServerPath;
   private File localRepository;
 
   @Inject
-  public MavenServerManager(@Named("che.maven.server.path") String mavenServerPath) {
+  public MavenServerManager(
+      @Named("che.maven.server.path") String mavenServerPath,
+      @Named("che.workspace.maven_server_java_options") String mavenServerJavaOptions) {
     this.mavenServerPath = mavenServerPath;
 
-    client =
+    this.client =
         new RmiClient<MavenRemoteServer>(MavenRemoteServer.class) {
           @Override
           protected ProcessExecutor getExecutor() {
             return createExecutor();
           }
         };
+    this.mavenServerJavaOptionsList =
+        Arrays.stream(mavenServerJavaOptions.split(" "))
+            .map(String::trim)
+            .filter(v -> !v.isEmpty())
+            .collect(Collectors.toList());
   }
 
   private static void addDirToClasspath(List<String> classPath, File dir) {
@@ -215,8 +226,7 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
     }
 
     parameters.getClassPath().addAll(classPath);
-
-    parameters.getVmParameters().add("-Xmx512m");
+    parameters.getVmParameters().addAll(mavenServerJavaOptionsList);
 
     return parameters;
   }

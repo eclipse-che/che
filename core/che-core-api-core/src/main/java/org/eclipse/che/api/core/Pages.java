@@ -26,7 +26,7 @@ import org.eclipse.che.api.core.Page.PageRef;
 public final class Pages {
 
   /** An experimental value used as default page size where necessary. */
-  private static final int DEFAULT_PAGE_SIZE = 50;
+  public static final int DEFAULT_PAGE_SIZE = 50;
 
   /**
    * Defines an interface for page supplier.
