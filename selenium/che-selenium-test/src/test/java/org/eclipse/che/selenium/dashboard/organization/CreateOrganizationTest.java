@@ -19,7 +19,7 @@ import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.eclipse.che.selenium.core.annotation.Multiuser;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -36,7 +36,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-@Multiuser
+@Test(groups = {TestGroup.MULTIUSER})
 public class CreateOrganizationTest {
   private static final String PARENT_ORG_NAME = generate("parent-", 4);
   private static final String CHILD_ORG_NAME = generate("child-", 4);
@@ -66,7 +66,6 @@ public class CreateOrganizationTest {
     testOrganizationServiceClient.deleteByName(PARENT_ORG_NAME);
   }
 
-  @Test
   public void testCreateOrganization() {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);

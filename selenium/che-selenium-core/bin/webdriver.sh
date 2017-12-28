@@ -454,6 +454,7 @@ printRunOptions() {
     echo "[TEST] Product Protocol    : "${PRODUCT_PROTOCOL}
     echo "[TEST] Product Host        : "${PRODUCT_HOST}
     echo "[TEST] Product Port        : "${PRODUCT_PORT}
+    echo "[TEST] Infrastructure      : "$(getTestGroups)
     echo "[TEST] Tests               : "${TESTS_SCOPE}
     echo "[TEST] Threads             : "${THREADS}
     echo "[TEST] Workspace pool size : "${WORKSPACE_POOL_SIZE}
@@ -699,9 +700,23 @@ runTests() {
                 -Dbrowser=${BROWSER} \
                 -Dche.threads=${THREADS} \
                 -Dche.workspace_pool_size=${WORKSPACE_POOL_SIZE} \
+                -DtestGroups="$(getTestGroups)" \
                 ${DEBUG_OPTIONS} \
                 ${GRID_OPTIONS} \
                 ${MAVEN_OPTIONS}
+}
+
+# Return list of test groups in comma-separated view
+getTestGroups() {
+  local testGroups=${CHE_INFRASTRUCTURE}
+
+  if [[ ${CHE_MULTIUSER} == true ]]; then
+    testGroups=${testGroups},multiuser
+  else
+    testGroups=${testGroups},singleuser
+  fi
+
+  echo ${testGroups}
 }
 
 # Reruns failed tests

@@ -10,6 +10,11 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SIMPLE;
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.testng.Assert.assertTrue;
 
@@ -21,20 +26,15 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NavigateToFile;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
-import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -54,13 +54,10 @@ public class NavigateToFileTest {
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
-  @Inject private MachineTerminal terminal;
   @Inject private CodenvyEditor editor;
   @Inject private NavigateToFile navigateToFile;
   @Inject private Menu menu;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private Git git;
-  @Inject private AskDialog askDialog;
   @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private CommandsPalette commandsPalette;
 
@@ -68,20 +65,14 @@ public class NavigateToFileTest {
   public void setUp() throws Exception {
     URL resource = getClass().getResource("/projects/guess-project");
     testProjectServiceClient.importProject(
-        workspace.getId(),
-        Paths.get(resource.toURI()),
-        PROJECT_NAME,
-        ProjectTemplates.MAVEN_SIMPLE);
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SIMPLE);
 
     testProjectServiceClient.importProject(
-        workspace.getId(),
-        Paths.get(resource.toURI()),
-        PROJECT_NAME_2,
-        ProjectTemplates.MAVEN_SIMPLE);
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME_2, MAVEN_SIMPLE);
     testCommandServiceClient.createCommand(
-        String.format("touch /projects/%s/%s", PROJECT_NAME_2, FILE_CREATED_FROM_CONSOLE),
+        format("touch /projects/%s/%s", PROJECT_NAME_2, FILE_CREATED_FROM_CONSOLE),
         COMMAND_FOR_FILE_CREATION,
-        TestCommandsConstants.CUSTOM,
+        CUSTOM,
         workspace.getId());
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
@@ -162,9 +153,7 @@ public class NavigateToFileTest {
 
   private void launchNavigateToFileFromUIAndTypeValue(String navigatingValue) {
     loader.waitOnClosed();
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE);
+    menu.runCommand(ASSISTANT, NAVIGATE_TO_FILE);
     navigateToFile.waitFormToOpen();
     loader.waitOnClosed();
     navigateToFile.typeSymbolInFileNameField(navigatingValue);
@@ -176,7 +165,7 @@ public class NavigateToFileTest {
         .values()
         .stream()
         .map(it -> it.toString())
-        .forEach(it -> navigateToFile.waitListOfFilesNames(it));
+        .forEach(it -> Assert.assertTrue(navigateToFile.isFilenameSuggested(it)));
   }
 
   @DataProvider
