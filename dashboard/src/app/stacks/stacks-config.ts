@@ -22,6 +22,8 @@ import {SamplesTagFilter} from './stack-details/select-template/samples-tag.filt
 import {ImportStackController} from './list-stacks/import-stack/import-stack.controller';
 import {ImportStackService} from './stack-details/import-stack.service';
 import {StackValidationService} from './stack-details/stack-validation.service';
+import {RecipeEditorController} from './list-stacks/import-stack/recipe-editor/recipe-editor.controller';
+import {RecipeEditorDirective} from './list-stacks/import-stack/recipe-editor/recipe-editor.directive';
 
 /**
  * @ngdoc controller
@@ -47,6 +49,9 @@ export class StacksConfig {
     register.controller('ImportStackController', ImportStackController);
     register.service('importStackService', ImportStackService);
     register.service('stackValidationService', StackValidationService);
+
+    register.controller('RecipeEditorController', RecipeEditorController);
+    register.directive('recipeEditor', RecipeEditorDirective);
 
     // config routes
     register.app.config(($routeProvider: any) => {
