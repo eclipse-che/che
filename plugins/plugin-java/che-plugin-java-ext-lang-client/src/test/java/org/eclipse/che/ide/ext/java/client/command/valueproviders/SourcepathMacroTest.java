@@ -33,8 +33,8 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.command.ClasspathContainer;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathResolver;
 import org.eclipse.che.ide.ext.java.shared.Constants;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,9 +55,9 @@ public class SourcepathMacroTest {
   @Mock private Resource resource;
   @Mock private Optional<Project> projectOptional;
   @Mock private Project project;
-  @Mock private Promise<List<ClasspathEntryDto>> classpathEntriesPromise;
+  @Mock private Promise<List<ClasspathEntry>> classpathEntriesPromise;
 
-  @Captor private ArgumentCaptor<Function<List<ClasspathEntryDto>, String>> classpathEntriesCapture;
+  @Captor private ArgumentCaptor<Function<List<ClasspathEntry>, String>> classpathEntriesCapture;
 
   @InjectMocks private SourcepathMacro sourcepathMacro;
 
@@ -85,7 +85,7 @@ public class SourcepathMacroTest {
     String source1 = "/name/source1";
     String source2 = "/name/source2";
 
-    List<ClasspathEntryDto> entries = new ArrayList<>();
+    List<ClasspathEntry> entries = new ArrayList<>();
 
     Set<String> sources = new HashSet<>();
     sources.add(source1);
@@ -105,7 +105,7 @@ public class SourcepathMacroTest {
 
   @Test
   public void defaultValueOfSourcepathShouldBeBuilt() throws Exception {
-    List<ClasspathEntryDto> entries = new ArrayList<>();
+    List<ClasspathEntry> entries = new ArrayList<>();
     Path projectsRoot = Path.valueOf("/projects");
 
     when(appContext.getProjectsRoot()).thenReturn(projectsRoot);
