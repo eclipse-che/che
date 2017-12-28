@@ -22,12 +22,12 @@ import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.f
 const DEFAULT_WORKSPACE_RAM: number = 2 * Math.pow(1024, 3);
 /**
  * @ngdoc controller
- * @name stacks.list-stacks.import-stack.controller:ImportStackController
+ * @name stacks.list-stacks.build-stack.controller:BuildStackController
  * @description This class is handling the controller for a dialog box with recipe editors of all supported types.
  * @author Oleksii Orel
  * @author Oleksii Kurinnyi
  */
-export class ImportStackController {
+export class BuildStackController {
 
   importStackService: ImportStackService;
   cheEnvironmentRegistry: CheEnvironmentRegistry;

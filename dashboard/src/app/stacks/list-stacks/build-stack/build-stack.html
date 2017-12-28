@@ -10,17 +10,17 @@
       Red Hat, Inc. - initial API and implementation
 
 -->
-<che-popup title="Build stack from recipe" on-close="importStackController.cancel()">
-  <div class="import-stack">
+<che-popup title="Build stack from recipe" on-close="buildStackController.cancel()">
+  <div class="build-stack">
 
     <md-tabs md-dynamic-height
              md-stretch-tabs="auto"
              md-no-ink-bar="true">
 
-      <md-tab ng-repeat="editor in importStackController.recipeEditors">
+      <md-tab ng-repeat="editor in buildStackController.recipeEditors">
 
         <md-tab-label>
-          <span class="import-stack-{{ editor.recipe.type }}">{{ editor.title }}</span>
+          <span class="build-stack-{{ editor.recipe.type }}">{{ editor.title }}</span>
         </md-tab-label>
 
         <md-tab-body>
@@ -35,15 +35,15 @@
 
           <div layout="row" layout-align="start start">
             <div class="recipe-docs-link">
-              <a ng-href="{{importStackController.stackDocsUrl}}" target="_blank">Custom stack documentation</a>
+              <a ng-href="{{buildStackController.stackDocsUrl}}" target="_blank">Custom stack documentation</a>
             </div>
             <div flex></div>
             <che-button-notice che-button-title="Cancel"
-                               ng-click="importStackController.cancel()">
+                               ng-click="buildStackController.cancel()">
             </che-button-notice>
             <che-button-primary che-button-title="Ok"
                                 ng-disabled="editorForm.$invalid"
-                                ng-click="importStackController.importRecipe(editor)">
+                                ng-click="buildStackController.importRecipe(editor)">
             </che-button-primary>
           </div>
         </md-tab-body>

@@ -24,7 +24,7 @@ export interface IRecipeEditorControllerScope {
 export class RecipeEditorDirective implements ng.IDirective {
 
   restrict = 'E';
-  templateUrl = 'app/stacks/list-stacks/import-stack/recipe-editor/recipe-editor.html';
+  templateUrl = 'app/stacks/list-stacks/build-stack/recipe-editor/recipe-editor.html';
 
   controller = 'RecipeEditorController';
   controllerAs = 'recipeEditorController';

@@ -12,7 +12,7 @@
 
 import {CheHttpBackend} from '../../../../components/api/test/che-http-backend';
 import {CheAPIBuilder} from '../../../../components/api/builder/che-api-builder.factory';
-import {ImportStackController} from './import-stack.controller';
+import {BuildStackController} from './build-stack.controller';
 import {CheStack} from '../../../../components/api/che-stack.factory';
 import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
 import {CheRecipeTypes} from '../../../../components/api/recipe/che-recipe-types';
@@ -27,10 +27,10 @@ interface ITestScope extends ng.IScope {
 }
 
 /**
- * Test of the ImportStack dialog
+ * Test of the BuildStack dialog
  * @author Oleksii Kurinnyi
  */
-describe(`ImportStack dialog >`, () => {
+describe(`BuildStack dialog >`, () => {
 
   let $scope: ITestScope;
 
@@ -45,7 +45,7 @@ describe(`ImportStack dialog >`, () => {
   let cheAPIBuilder: CheAPIBuilder;
 
   let $controller: ng.IControllerService;
-  let controller: ImportStackController;
+  let controller: BuildStackController;
 
   let cheHttpBackend: CheHttpBackend;
 
@@ -165,15 +165,15 @@ describe(`ImportStack dialog >`, () => {
     $mdDialog.show({
       parent: modalDialogElement, // set parent element for dialog
 
-      controller: 'ImportStackController',
-      controllerAs: 'importStackController',
+      controller: 'BuildStackController',
+      controllerAs: 'buildStackController',
       scope: $scope,
       bindToController: true,
       clickOutsideToClose: true,
       locals: {
         callbackController: this
       },
-      templateUrl: 'app/stacks/list-stacks/import-stack/import-stack.html'
+      templateUrl: 'app/stacks/list-stacks/build-stack/build-stack.html'
     });
 
     $scope.$digest();
@@ -185,7 +185,7 @@ describe(`ImportStack dialog >`, () => {
   });
 
   it(`should show modal window >`, () => {
-    expect(modalDialogElement.find('.import-stack').length).toEqual(1);
+    expect(modalDialogElement.find('.build-stack').length).toEqual(1);
   });
 
   describe(`dialog window >`, () => {
@@ -196,7 +196,7 @@ describe(`ImportStack dialog >`, () => {
 
     it(`should have correct tab names >`, () => {
       for (let name of supportedEnvTypes) {
-        expect(modalDialogElement.find(`md-tab-item .import-stack-${name}`).length).toEqual(1);
+        expect(modalDialogElement.find(`md-tab-item .build-stack-${name}`).length).toEqual(1);
       }
     });
 
@@ -205,7 +205,7 @@ describe(`ImportStack dialog >`, () => {
   describe(`controller >`, () => {
 
     beforeEach(() => {
-      controller = $controller('ImportStackController');
+      controller = $controller('BuildStackController');
       $timeout.flush();
     });
 
