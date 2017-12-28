@@ -13,7 +13,7 @@ package org.eclipse.che.ide.ext.java.client.project.classpath;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import java.util.List;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 
 /**
  * This event should be fired when classpath is changed.
@@ -25,7 +25,7 @@ public class ClasspathChangedEvent extends GwtEvent<ClasspathChangedEvent.Classp
   /** Type class used to register this event. */
   public static Type<ClasspathChangedHandler> TYPE = new Type<>();
 
-  private final List<ClasspathEntryDto> entries;
+  private final List<ClasspathEntry> entries;
   private final String projectPath;
 
   /**
@@ -34,7 +34,7 @@ public class ClasspathChangedEvent extends GwtEvent<ClasspathChangedEvent.Classp
    * @param projectPath path to the project
    * @param entries classpath entries
    */
-  public ClasspathChangedEvent(String projectPath, List<ClasspathEntryDto> entries) {
+  public ClasspathChangedEvent(String projectPath, List<ClasspathEntry> entries) {
     this.projectPath = projectPath;
     this.entries = entries;
   }
@@ -50,7 +50,7 @@ public class ClasspathChangedEvent extends GwtEvent<ClasspathChangedEvent.Classp
   }
 
   /** Returns classpath entries. */
-  public List<ClasspathEntryDto> getEntries() {
+  public List<ClasspathEntry> getEntries() {
     return entries;
   }
 
