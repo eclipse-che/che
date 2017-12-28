@@ -26,6 +26,7 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.CREATE_SIMPLE_PROJECT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_ENTRY_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_FOLDER_COMMAND;
@@ -40,9 +41,11 @@ import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_CHILDREN
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_ENTRY_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_NODE_CONTENT_BY_PATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_OUTPUT_DIR_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_SOURCE_FOLDERS;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.REIMPORT_MAVEN_PROJECTS_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.RESOLVE_CLASSPATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.TEST_DETECT_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.UPDATE_PROJECT_CLASSPATH;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
@@ -52,7 +55,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
@@ -70,8 +73,6 @@ import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
-import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.jdt.ls.extension.api.Commands;
 import org.eclipse.che.jdt.ls.extension.api.Severity;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
@@ -86,6 +87,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocation;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.UpdateClasspathParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.UpdateWorkspaceParameters;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSymbolInformationDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
@@ -189,7 +191,7 @@ public class JavaLanguageServerExtensionService {
         .newConfiguration()
         .methodName(CLASS_PATH_TREE)
         .paramsAsString()
-        .resultAsListOfDto(ClasspathEntryDto.class)
+        .resultAsListOfDto(ClasspathEntry.class)
         .withFunction(this::getClasspathTree);
 
     requestHandler
@@ -212,6 +214,23 @@ public class JavaLanguageServerExtensionService {
     Type targetClassType = new TypeToken<String>() {}.getType();
     try {
       return gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), targetClassType);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  /**
+   * Compute output directory of the project.
+   *
+   * @param projectName project URI
+   * @param sourceFolder name of source folder
+   */
+  public void createSimpleProject(String projectName, String sourceFolder) {
+    CompletableFuture<Object> result =
+        executeCommand(CREATE_SIMPLE_PROJECT, Arrays.asList(projectName, sourceFolder));
+    Type targetClassType = new TypeToken<String>() {}.getType();
+    try {
+      gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), targetClassType);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
@@ -255,6 +274,31 @@ public class JavaLanguageServerExtensionService {
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
+  }
+
+  /**
+   * Updates classpath of plain java project.
+   *
+   * @param projectUri project URI
+   * @param entries classpath entries
+   */
+  public void updateClasspath(String projectUri, List<ClasspathEntry> entries) {
+    UpdateClasspathParameters params = new UpdateClasspathParameters();
+    params.setProjectUri(projectUri);
+    params.setEntries(entries);
+    executeCommand(UPDATE_PROJECT_CLASSPATH, singletonList(params));
+  }
+
+  /**
+   * Gets source folders of plain java project.
+   *
+   * @param projectPath project path
+   * @return source folders
+   */
+  public List<String> getSourceFolders(String projectPath) {
+    String projectUri = prefixURI(projectPath);
+    Type type = new TypeToken<ArrayList<String>>() {}.getType();
+    return doGetList(GET_SOURCE_FOLDERS, projectUri, type);
   }
 
   /**
@@ -456,11 +500,10 @@ public class JavaLanguageServerExtensionService {
     return doGetList(GET_LIBRARY_CHILDREN_COMMAND, params, type);
   }
 
-  private List<ClasspathEntryDto> getClasspathTree(String projectPath) {
+  private List<ClasspathEntry> getClasspathTree(String projectPath) {
     String projectUri = prefixURI(projectPath);
     Type type = new TypeToken<ArrayList<ClasspathEntry>>() {}.getType();
-    List<ClasspathEntry> entries = doGetList(GET_CLASS_PATH_TREE_COMMAND, projectUri, type);
-    return convertToClasspathEntryDto(entries);
+    return doGetList(GET_CLASS_PATH_TREE_COMMAND, projectUri, type);
   }
 
   private JarEntry getLibraryEntry(ExternalLibrariesParameters params) {
@@ -559,27 +602,6 @@ public class JavaLanguageServerExtensionService {
     for (ExtendedSymbolInformation child : symbol.getChildren()) {
       fixLocation(child);
     }
-  }
-
-  private List<ClasspathEntryDto> convertToClasspathEntryDto(
-      List<ClasspathEntry> classpathEntries) {
-    List<ClasspathEntryDto> result = new LinkedList<>();
-    for (ClasspathEntry classpathEntry : classpathEntries) {
-      ClasspathEntryDto classpathEntryDto =
-          DtoFactory.newDto(ClasspathEntryDto.class)
-              .withEntryKind(classpathEntry.getEntryKind())
-              .withPath(classpathEntry.getPath());
-
-      List<ClasspathEntry> children = classpathEntry.getChildren();
-
-      if (children != null) {
-        classpathEntryDto.withExpandedEntries(convertToClasspathEntryDto(children));
-      }
-
-      result.add(classpathEntryDto);
-    }
-
-    return result;
   }
 
   public String identifyFqnInResource(String filePath, int lineNumber) {

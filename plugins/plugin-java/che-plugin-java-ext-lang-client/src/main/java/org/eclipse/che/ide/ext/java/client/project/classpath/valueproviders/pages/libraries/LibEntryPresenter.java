@@ -15,16 +15,12 @@ import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.CONTAINER;
 import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.LIBRARY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -36,7 +32,7 @@ import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.page
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.SelectNodePresenter;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors.JarNodeInterceptor;
 import org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 
 /**
  * The page for the information about libraries which are including into classpath.
@@ -55,7 +51,7 @@ public class LibEntryPresenter extends AbstractClasspathPagePresenter
 
   private boolean dirty;
   private boolean isPlainJava;
-  private Map<String, ClasspathEntryDto> categories;
+  private Map<String, ClasspathEntry> categories;
 
   @Inject
   public LibEntryPresenter(
@@ -91,9 +87,9 @@ public class LibEntryPresenter extends AbstractClasspathPagePresenter
 
     Preconditions.checkState(resource != null);
 
-    final Optional<Project> project = resource.getRelatedProject();
+    final Project project = resource.getProject();
 
-    isPlainJava = JAVAC.equals(project.get().getType());
+    isPlainJava = JAVAC.equals(project.getType());
 
     setReadOnlyMod();
 
@@ -105,20 +101,17 @@ public class LibEntryPresenter extends AbstractClasspathPagePresenter
     }
 
     classpathContainer
-        .getClasspathEntries(project.get().getPath())
+        .getClasspathEntries(project.getPath())
         .then(
-            new Operation<List<ClasspathEntryDto>>() {
-              @Override
-              public void apply(List<ClasspathEntryDto> arg) throws OperationException {
-                categories.clear();
-                for (ClasspathEntryDto entry : arg) {
-                  if (CONTAINER == entry.getEntryKind() || LIBRARY == entry.getEntryKind()) {
-                    categories.put(entry.getPath(), entry);
-                  }
+            entries -> {
+              categories.clear();
+              for (ClasspathEntry entry : entries) {
+                if (CONTAINER == entry.getEntryKind() || LIBRARY == entry.getEntryKind()) {
+                  categories.put(entry.getPath(), entry);
                 }
-                view.setData(categories);
-                view.renderLibraries();
               }
+              view.setData(categories);
+              view.renderLibraries();
             });
   }
 
@@ -137,7 +130,7 @@ public class LibEntryPresenter extends AbstractClasspathPagePresenter
     classpathResolver.getLibs().clear();
     classpathResolver.getContainers().clear();
 
-    for (Map.Entry<String, ClasspathEntryDto> entry : categories.entrySet()) {
+    for (Map.Entry<String, ClasspathEntry> entry : categories.entrySet()) {
       if (ClasspathEntryKind.LIBRARY == entry.getValue().getEntryKind()) {
         classpathResolver.getLibs().add(entry.getKey());
       } else if (CONTAINER == entry.getValue().getEntryKind()) {
@@ -176,7 +169,7 @@ public class LibEntryPresenter extends AbstractClasspathPagePresenter
     dirty = true;
     delegate.onDirtyChanged();
 
-    categories.put(path, dtoFactory.createDto(ClasspathEntryDto.class).withEntryKind(kind));
+    categories.put(path, dtoFactory.createDto(ClasspathEntry.class).withEntryKind(kind));
     view.setData(categories);
     view.renderLibraries();
   }

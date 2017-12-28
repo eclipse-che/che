@@ -15,7 +15,7 @@ import com.google.inject.ImplementedBy;
 import java.util.Map;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.node.NodeWidget;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 
 /**
  * View interface for the information about source folders on the build path.
@@ -32,7 +32,7 @@ public interface SourceEntryView extends View<SourceEntryView.ActionDelegate> {
    *
    * @param data map which binds categories of the sources
    */
-  void setData(Map<String, ClasspathEntryDto> data);
+  void setData(Map<String, ClasspathEntry> data);
 
   /**
    * Removes node from the sources.
