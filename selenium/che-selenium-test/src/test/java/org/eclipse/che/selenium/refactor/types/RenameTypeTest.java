@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.refactor.types;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -31,6 +33,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
+import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -185,7 +188,14 @@ public class RenameTypeTest {
         TestMenuCommandsConstants.Assistant.Refactoring.RENAME);
 
     refactorPanel.typeAndWaitNewName("B.java");
-    refactorPanel.clickOkButtonRefactorForm();
+
+    try {
+      refactorPanel.clickOkButtonRefactorForm();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7500", ex);
+    }
+
     askDialog.waitFormToOpen();
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
