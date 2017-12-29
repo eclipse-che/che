@@ -31,13 +31,48 @@ export class CheEditor implements ng.IDirective {
   templateUrl: string = 'components/widget/editor/che-editor.html';
   controller: string = 'CheEditorController';
   controllerAs: string = 'cheEditorController';
+  transclude: boolean = true;
   bindToController: boolean = true;
 
-  scope: any = {
+  // scope values
+  scope = {
     editorContent: '=',
     editorState: '=?',
     editorMode: '@?',
     validator: '&?',
     onContentChange: '&?'
   };
+
+  compile(element: ng.IRootElementService, attrs: ng.IAttributes): ng.IDirectiveCompileFn {
+    const avoidAttrs = ['ng-model', 'editor-content', 'editor-state', 'editor-mode', 'validator', 'on-content-change'];
+    const avoidStartWithAttrs: Array<string> = ['$'];
+
+    const keys = Object.keys(attrs.$attr);
+    // search the input field
+    const inputJqEl = element.find('.custom-checks che-input');
+
+    keys.forEach((key: string) => {
+      const attr = attrs.$attr[key];
+      if (!attr) {
+        return;
+      }
+      if (avoidStartWithAttrs.find((avoidStartWithAttr: string) => {
+          return attr.indexOf(avoidStartWithAttr) === 0;
+        })) {
+        return;
+      }
+      if (avoidAttrs.indexOf(attr) !== -1) {
+        return;
+      }
+      let value = attrs[key];
+
+      // set the value of the attribute
+      inputJqEl.attr(attr, value);
+      // add also the material version of max length (only one the first input which is the md-input)
+      element.removeAttr(attr);
+    });
+
+    return;
+  }
+
 }

@@ -163,7 +163,7 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
    */
   getEnvironment(environment: che.IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[]): che.IWorkspaceEnvironment {
     const newEnvironment = super.getEnvironment(environment, machines);
-    if (environment && environment.recipe && environment.recipe.content) {
+    if (!environment || !environment.recipe || !environment.recipe.content) {
       return newEnvironment;
     }
     let recipe: IPodList;
