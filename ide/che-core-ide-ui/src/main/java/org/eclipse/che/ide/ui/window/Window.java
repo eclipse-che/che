@@ -15,6 +15,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.user.client.Timer;
@@ -278,9 +280,7 @@ public abstract class Window implements IsWidget {
         new ViewEvents() {
           @Override
           public void onEscapeKey() {
-            if (hideOnEscapeEnabled && !blocked) {
-              Window.this.onClose();
-            }
+            Window.this.onEscapeKey();
           }
 
           @Override
@@ -294,8 +294,31 @@ public abstract class Window implements IsWidget {
           public void onEnterKey() {
             onEnterClicked();
           }
+
+          @Override
+          public void onKeyDownEvent(KeyDownEvent event) {
+            Window.this.onKeyDownEvent(event);
+          }
+
+          @Override
+          public void onKeyPressEvent(KeyPressEvent event) {
+            Window.this.onKeyPressEvent(event);
+          }
         });
   }
+
+  /** @see ViewEvents#onEscapeKey() */
+  protected void onEscapeKey() {
+    if (hideOnEscapeEnabled && !blocked) {
+      Window.this.onClose();
+    }
+  }
+
+  /** @see ViewEvents#onKeyDownEvent(KeyDownEvent) */
+  protected void onKeyDownEvent(KeyDownEvent event) {}
+
+  /** @see ViewEvents#onKeyPressEvent(KeyPressEvent) */
+  protected void onKeyPressEvent(KeyPressEvent event) {}
 
   /** Is called when user closes the Window. */
   protected void onClose() {
@@ -372,10 +395,22 @@ public abstract class Window implements IsWidget {
 
   /** The events sources by the View. */
   public interface ViewEvents {
+    /** Is called when ESCAPE key is pressed. */
     void onEscapeKey();
 
     void onClose();
 
+    /** Is called when ENTER key is pressed. */
     void onEnterKey();
+
+    /**
+     * Is called when {@link KeyDownEvent} is fired except events from ESCAPE and ENTER keys. In
+     * those cases {@link ViewEvents#onEscapeKey()} or {@link ViewEvents#onEnterKey()} will be
+     * fired.
+     */
+    void onKeyDownEvent(KeyDownEvent event);
+
+    /** Is called when {@link KeyPressEvent} is fired. */
+    void onKeyPressEvent(KeyPressEvent event);
   }
 }
