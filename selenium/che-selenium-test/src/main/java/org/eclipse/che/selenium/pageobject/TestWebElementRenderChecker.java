@@ -62,17 +62,16 @@ public class TestWebElementRenderChecker {
    * @param locator list or context menu Xpath which need check
    */
   public void waitElementIsRendered(By locator) {
-    waitElementIsRendered(getAndWaitWebElement(locator));
+    waitElementIsRendered(waitAndGetWebElement(locator));
   }
 
   /**
    * wait until element have the same size between two checks it means that element is fully opened
    *
-   * @param webElementXpath list or context menu Xpath which need check
-   * @param seconds timeout for check
+   * @param locator list or context menu Xpath which need check
    */
-  public void waitElementIsRendered(String webElementXpath, int seconds) {
-    waitElementIsRendered(getAndWaitWebElement(webElementXpath), seconds);
+  public void waitElementIsRendered(By locator, int seconds) {
+    waitElementIsRendered(waitAndGetWebElement(locator), seconds);
   }
 
   private Boolean dimensionsAreEquivalent(AtomicInteger sizeHashCode, Dimension newDimension) {
@@ -92,7 +91,7 @@ public class TestWebElementRenderChecker {
     webDriverWait.until(
         (ExpectedCondition<Boolean>)
             driver -> {
-              Dimension newDimension = getAndWaitWebElement(webElement).getSize();
+              Dimension newDimension = waitAndGetWebElement(webElement).getSize();
 
               if (dimensionsAreEquivalent(sizeHashCode, newDimension)) {
                 return true;
@@ -114,15 +113,11 @@ public class TestWebElementRenderChecker {
     return dimension.getWidth() + (dimension.getHeight() * 10000);
   }
 
-  private WebElement getAndWaitWebElement(String webElementXpath) {
-    return loadPageWebDriverWait.until(visibilityOfElementLocated(By.xpath(webElementXpath)));
-  }
-
-  private WebElement getAndWaitWebElement(WebElement webElement) {
+  private WebElement waitAndGetWebElement(WebElement webElement) {
     return loadPageWebDriverWait.until(visibilityOf(webElement));
   }
 
-  private WebElement getAndWaitWebElement(By locator) {
+  private WebElement waitAndGetWebElement(By locator) {
     return loadPageWebDriverWait.until(visibilityOfElementLocated(locator));
   }
 }
