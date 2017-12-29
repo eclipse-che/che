@@ -19,6 +19,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTI
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -51,12 +52,12 @@ public class CheckIntelligenceCommandFromToolbarTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private NotificationsPopupPanel notificationsPanel;
 
-  @BeforeClass
+  @BeforeClass(groups = {TestGroup.DOCKER, TestGroup.OPENSHIFT})
   public void setUp() throws Exception {
     ide.open(testWorkspace);
   }
 
-  @Test(priority = 1)
+  @Test(groups = {TestGroup.DOCKER, TestGroup.OPENSHIFT})
   public void launchClonedWepAppTest() throws Exception {
     String currentWindow = seleniumWebDriver.getWindowHandle();
     projectExplorer.waitProjectExplorer();
@@ -77,18 +78,26 @@ public class CheckIntelligenceCommandFromToolbarTest {
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
   }
 
-  @Test(priority = 2)
-  public void checkButtonsOnToolbar() {
+  @Test(
+    priority = 1,
+    groups = {TestGroup.DOCKER}
+  )
+  public void checkButtonsOnToolbarOnDocker() {
+    checkButtonsOnToolbar("This site can’t be reached");
+  }
+
+  @Test(
+    priority = 1,
+    groups = {TestGroup.OPENSHIFT}
+  )
+  public void checkButtonsOnToolbarOnOpenshift() {
+    checkButtonsOnToolbar("Application is not available");
+  }
+
+  private void checkButtonsOnToolbar(String expectedText) {
     projectExplorer.waitProjectExplorer();
     String currentWindow = seleniumWebDriver.getWindowHandle();
     commandsToolbar.clickExecStopBtn();
-
-    // it needs when the test is running on the ocp platform
-    String previewUrl = consoles.getPreviewUrl();
-    String expectedText =
-        previewUrl.contains("route")
-            ? "Application is not available"
-            : "This site can’t be reached";
 
     consoles.clickOnPreviewUrl();
     checkTestAppAndReturnToIde(currentWindow, expectedText);

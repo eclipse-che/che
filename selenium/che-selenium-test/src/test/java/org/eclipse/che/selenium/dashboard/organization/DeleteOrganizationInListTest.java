@@ -19,7 +19,7 @@ import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.eclipse.che.selenium.core.annotation.Multiuser;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
@@ -36,7 +36,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-@Multiuser
+@Test(groups = {TestGroup.MULTIUSER})
 public class DeleteOrganizationInListTest {
   private int initialOrgNumber;
 
@@ -61,7 +61,6 @@ public class DeleteOrganizationInListTest {
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
 
-  @Test
   public void testOrganizationDeletionFromList() {
     // Open the Organization list and check that created organization exist
     navigationBar.waitNavigationBar();

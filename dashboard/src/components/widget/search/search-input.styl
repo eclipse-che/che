@@ -1,7 +1,7 @@
 .search-input-component
   background-color $white-color
   overflow hidden
-  width 150px
+  max-width 150px
   min-width 34px
   min-height 36px
   max-height 36px
@@ -18,7 +18,7 @@
     font-size 16px
 
   .search-icon
-    padding-left 10px
+    padding-left 5px
 
     i
       color darken($stroke-color, 17%) !important
@@ -35,9 +35,10 @@
     height inherit
     font-size 12px
     text-align left
-    padding 0 5px 0 5px
+    padding 0 6px 0 6px
     text-overflow ellipsis
     color $default-dark-color
+    background-color inherit
 
   .search-input input::-webkit-input-placeholder
     position relative

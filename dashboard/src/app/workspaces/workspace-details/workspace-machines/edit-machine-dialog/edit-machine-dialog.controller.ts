@@ -86,7 +86,8 @@ export class EditMachineDialogController {
       this.machine = this.environmentManager.createNewDefaultMachine(this.copyEnvironment);
       this.copyEnvironment = this.environmentManager.addMachine(this.copyEnvironment, this.machine);
     } else {
-      this.machine = angular.copy(this.environmentManager.getMachines(this.copyEnvironment).find((machine: IEnvironmentManagerMachine) => {
+      const machines = this.environmentManager.getMachines(this.copyEnvironment);
+      this.machine = angular.copy(machines.find((machine: IEnvironmentManagerMachine) => {
         return machine.name === this.machineName;
       }));
     }
