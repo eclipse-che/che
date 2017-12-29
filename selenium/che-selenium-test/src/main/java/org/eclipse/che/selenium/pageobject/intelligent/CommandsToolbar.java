@@ -206,11 +206,7 @@ public class CommandsToolbar {
   }
 
   private void waitListIsRenderedAndClickOnItem(String nameOfCommand, Actions action) {
-    testWebElementRenderChecker.waitElementIsRendered(
-        String.format(
-            "//div[text()='%s']/parent::div/parent::div/parent::div[@class='popupContent']",
-            nameOfCommand));
-
+    testWebElementRenderChecker.waitElementIsRendered("//div[@id='commandsPopup']");
     action.release();
     loadPageWait
         .until(
