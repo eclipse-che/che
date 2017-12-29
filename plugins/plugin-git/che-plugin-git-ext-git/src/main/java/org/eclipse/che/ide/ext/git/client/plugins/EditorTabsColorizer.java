@@ -80,7 +80,12 @@ public class EditorTabsColorizer implements GitEventsSubscriber {
         .get()
         .getOpenedEditors()
         .stream()
-        .filter(editor -> editor instanceof HasVcsChangeMarkerRender)
+        .filter(
+            editor ->
+                editor instanceof HasVcsChangeMarkerRender
+                    && statusChangedEventDto
+                        .getProjectName()
+                        .equals(editor.getEditorInput().getFile().getLocation().segment(0)))
         .forEach(
             editor -> {
               EditorTab tab = multiPartStackProvider.get().getTabByPart(editor);

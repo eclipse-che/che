@@ -82,7 +82,12 @@ public class ProjectExplorerTreeColorizer implements GitEventsSubscriber {
     tree.getNodeStorage()
         .getAll()
         .stream()
-        .filter(node -> node instanceof FileNode)
+        .filter(
+            node ->
+                node instanceof FileNode
+                    && statusChangedEventDto
+                        .getProjectName()
+                        .equals(((ResourceNode) node).getData().getLocation().segment(0)))
         .forEach(
             node -> {
               Resource resource = ((ResourceNode) node).getData();
