@@ -229,6 +229,9 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
           @Override
           public void onKeyUp(KeyUpEvent event) {
             acceptButton.setEnabled(!text.getValue().isEmpty());
+            if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+              delegate.onEnterClicked();
+            }
           }
         });
 
@@ -237,19 +240,6 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
           @Override
           public void onClick(ClickEvent event) {
             showSelectPathDialog();
-          }
-        });
-
-    text.addKeyUpHandler(
-        new KeyUpHandler() {
-          @Override
-          public void onKeyUp(KeyUpEvent event) {
-            acceptButton.setEnabled(!text.getValue().isEmpty());
-            if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-              if (!text.getValue().isEmpty()) {
-                delegate.search(text.getText());
-              }
-            }
           }
         });
   }
