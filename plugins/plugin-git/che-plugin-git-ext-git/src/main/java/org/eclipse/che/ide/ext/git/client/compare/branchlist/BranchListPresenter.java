@@ -99,7 +99,6 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
 
   @Override
   public void onClose() {
-    view.close();
     view.updateSearchFilterLabel("");
     view.clearSearchFilter();
   }
@@ -140,14 +139,13 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
                 } else {
                   changesListPresenter.show(alteredFiles, selectedBranch.getName(), null);
                 }
+                view.close();
               }
             })
         .catchError(
             error -> {
               notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
             });
-
-    view.close();
   }
 
   @Override

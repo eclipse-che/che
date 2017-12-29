@@ -7,10 +7,6 @@
  */
 package org.eclipse.che.ide.ui.list;
 
-import static com.google.gwt.event.dom.client.KeyCodes.KEY_BACKSPACE;
-import static com.google.gwt.event.dom.client.KeyCodes.KEY_ESCAPE;
-
-import com.google.gwt.user.client.ui.FocusPanel;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -18,9 +14,9 @@ import java.util.stream.Collectors;
  * A focus panel witch contain {@link SimpleList} widget. Supports filtering items according to
  * typed from keyboard symbols.
  */
-public class FilterableSimpleList<M> extends FocusPanel {
+public class FilterableSimpleList<M> extends SimpleList<M> {
+  private final FilterChangedHandler filterChangedHandler;
   private Map<String, M> filterableItems;
-  private SimpleList<M> simpleList;
   private StringBuilder filter;
 
   public interface FilterChangedHandler {
@@ -34,35 +30,9 @@ public class FilterableSimpleList<M> extends FocusPanel {
       SimpleList.ListItemRenderer<M> itemRenderer,
       SimpleList.ListEventDelegate<M> eventDelegate,
       FilterChangedHandler filterChangedHandler) {
-    super();
-    simpleList = SimpleList.create(view, css, itemRenderer, eventDelegate);
-    this.getElement().setAttribute("style", "outline: 0");
-
-    addKeyDownHandler(
-        keyDownEvent -> {
-          int keyCode = keyDownEvent.getNativeEvent().getKeyCode();
-          if (keyCode == KEY_BACKSPACE) {
-            filter.deleteCharAt(filter.length() - 1);
-            filterChangedHandler.onFilterChanged(filter.toString());
-          } else if (keyCode == KEY_ESCAPE && !filter.toString().isEmpty()) {
-            clearFilter();
-            keyDownEvent.stopPropagation();
-            filterChangedHandler.onFilterChanged("");
-          } else {
-            return;
-          }
-          doFilter();
-        });
-
-    addKeyPressHandler(
-        keyPressEvent -> {
-          filter.append(String.valueOf(keyPressEvent.getCharCode()));
-          filterChangedHandler.onFilterChanged(filter.toString());
-          doFilter();
-        });
-
-    add(simpleList);
-    filter = new StringBuilder();
+    super(view, view, view, css, itemRenderer, eventDelegate);
+    this.filterChangedHandler = filterChangedHandler;
+    this.filter = new StringBuilder();
   }
 
   public static <M> FilterableSimpleList<M> create(
@@ -75,6 +45,32 @@ public class FilterableSimpleList<M> extends FocusPanel {
         view, simpleListCss, itemRenderer, eventDelegate, filterChangedHandler);
   }
 
+  /** Clear the filter. */
+  public void clearFilter() {
+    filter.delete(0, filter.length() + 1);
+  }
+
+  /** Clear the filter and show all items. */
+  public void resetFilter() {
+    clearFilter();
+    filterChangedHandler.onFilterChanged("");
+    doFilter();
+  }
+
+  /** Remove last character from the filter and update items according to new filter value. */
+  public void removeLastCharacter() {
+    filter.deleteCharAt(filter.length() - 1);
+    filterChangedHandler.onFilterChanged(filter.toString());
+    doFilter();
+  }
+
+  /** Add character to the filter and update items according to new filter value. */
+  public void addCharacterToFilter(String character) {
+    filter.append(character);
+    filterChangedHandler.onFilterChanged(filter.toString());
+    doFilter();
+  }
+
   /**
    * Render the list with given items.
    *
@@ -85,22 +81,17 @@ public class FilterableSimpleList<M> extends FocusPanel {
     doFilter();
   }
 
-  /** Reset the filter. */
-  public void clearFilter() {
-    filter.delete(0, filter.length() + 1);
-  }
-
-  /** Returns the selection model from parent {@link SimpleList} widget. */
-  public HasSelection<M> getSelectionModel() {
-    return simpleList.getSelectionModel();
+  /** Returns the filter's value. */
+  public String getFilter() {
+    return filter.toString();
   }
 
   private void doFilter() {
-    simpleList.render(
+    render(
         filterableItems
             .keySet()
             .stream()
-            .filter(name -> name.contains(filter.toString()))
+            .filter(name -> name.toLowerCase().contains(filter.toString().toLowerCase()))
             .map(name -> filterableItems.get(name))
             .collect(Collectors.toList()));
   }
