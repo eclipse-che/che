@@ -11,6 +11,8 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +24,6 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -58,10 +59,10 @@ public class TestWebElementRenderChecker {
   /**
    * wait until element have the same size between two checks it means that element is fully opened
    *
-   * @param webElementXpath list or context menu Xpath which need check
+   * @param locator list or context menu Xpath which need check
    */
-  public void waitElementIsRendered(String webElementXpath) {
-    waitElementIsRendered(getAndWaitWebElement(webElementXpath));
+  public void waitElementIsRendered(By locator) {
+    waitElementIsRendered(getAndWaitWebElement(locator));
   }
 
   /**
@@ -114,11 +115,14 @@ public class TestWebElementRenderChecker {
   }
 
   private WebElement getAndWaitWebElement(String webElementXpath) {
-    return loadPageWebDriverWait.until(
-        ExpectedConditions.visibilityOfElementLocated(By.xpath(webElementXpath)));
+    return loadPageWebDriverWait.until(visibilityOfElementLocated(By.xpath(webElementXpath)));
   }
 
   private WebElement getAndWaitWebElement(WebElement webElement) {
-    return loadPageWebDriverWait.until(ExpectedConditions.visibilityOf(webElement));
+    return loadPageWebDriverWait.until(visibilityOf(webElement));
+  }
+
+  private WebElement getAndWaitWebElement(By locator) {
+    return loadPageWebDriverWait.until(visibilityOfElementLocated(locator));
   }
 }
