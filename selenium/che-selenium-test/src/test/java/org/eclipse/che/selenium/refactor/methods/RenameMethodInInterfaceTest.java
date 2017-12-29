@@ -168,7 +168,7 @@ public class RenameMethodInInterfaceTest {
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameMethodFormIsOpen();
-    refactor.typeNewName(newName);
+    refactor.typeAndWaitNewName(newName);
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactor.clickOkButtonRefactorForm();
@@ -184,7 +184,7 @@ public class RenameMethodInInterfaceTest {
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameMethodFormIsOpen();
-    refactor.typeNewName(newName);
+    refactor.typeAndWaitNewName(newName);
     WaitUtils.sleepQuietly(1);
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());

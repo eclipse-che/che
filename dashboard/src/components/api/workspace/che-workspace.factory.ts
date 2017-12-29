@@ -668,19 +668,21 @@ export class CheWorkspace {
     if (this.subscribedWorkspacesIds.indexOf(workspaceId) < 0) {
       this.subscribedWorkspacesIds.push(workspaceId);
       this.cheJsonRpcMasterApi.subscribeWorkspaceStatus(workspaceId, (message: any) => {
-        if (this.workspaceStatuses.indexOf(message.status) >= 0) {
-          this.getWorkspaceById(workspaceId).status = message.status;
+        let status = message.error ? 'ERROR' : message.status;
+
+        if (this.workspaceStatuses.indexOf(status) >= 0) {
+          this.getWorkspaceById(workspaceId).status = status;
         }
 
-        if (!this.statusDefers[workspaceId] || !this.statusDefers[workspaceId][message.status]) {
+        if (!this.statusDefers[workspaceId] || !this.statusDefers[workspaceId][status]) {
           return;
         }
 
-        this.statusDefers[workspaceId][message.status].forEach((defer: any) => {
+        this.statusDefers[workspaceId][status].forEach((defer: any) => {
           defer.resolve(message);
         });
 
-        this.statusDefers[workspaceId][message.status].length = 0;
+        this.statusDefers[workspaceId][status].length = 0;
       });
     }
   }

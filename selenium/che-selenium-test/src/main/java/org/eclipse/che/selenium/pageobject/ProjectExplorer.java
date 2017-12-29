@@ -561,6 +561,7 @@ public class ProjectExplorer {
    *     javaSource folder. We can use this types from ProjectExlorer.FolderTypes public interface.
    */
   public void waitFolderDefinedTypeOfFolderByPath(String pathToFolder, String typeFolder) {
+    loader.waitOnClosed();
     loadPageTimeout.until(
         visibilityOfElementLocated(
             By.xpath(

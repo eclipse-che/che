@@ -77,6 +77,8 @@ import {UserItemController} from './share-workspace/user-item/user-item.controll
 import {UserItem} from './share-workspace/user-item/user-item.directive';
 import {WorkspaceConfigService} from './workspace-config.service';
 import {WorkspaceDetailsConfig} from './workspace-details/workspace-details-config';
+import {WorkspaceWarnings} from './workspace-details/warnings/workspace-warnings.directive';
+import {WorkspaceWarningsController} from './workspace-details/warnings/workspace-warnings.controller';
 
 
 /**
@@ -108,6 +110,8 @@ export class WorkspacesConfig {
     register.directive('cheWorkspaceRamAllocationSlider', CheWorkspaceRamAllocationSlider);
     register.directive('workspaceStatus', WorkspaceStatus);
     register.directive('workspaceStatusIndicator', WorkspaceStatusIndicator);
+    register.directive('workspaceWarnings', WorkspaceWarnings);
+    register.controller('WorkspaceWarningsController', WorkspaceWarningsController);
     register.controller('StackSelectorController', StackSelectorController);
     register.service('stackSelectorSvc', StackSelectorSvc);
     register.directive('stackSelector', StackSelector);
@@ -159,6 +163,7 @@ export class WorkspacesConfig {
     register.controller('UserItemController', UserItemController);
     register.directive('userItem', UserItem);
     register.service('workspaceConfigService', WorkspaceConfigService);
+
     // config routes
     register.app.config(($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/workspaces', {

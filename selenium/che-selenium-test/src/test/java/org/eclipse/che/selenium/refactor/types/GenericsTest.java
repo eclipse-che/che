@@ -88,7 +88,7 @@ public class GenericsTest {
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
         TestMenuCommandsConstants.Assistant.Refactoring.RENAME);
 
-    refactorPanel.typeNewName("B.java");
+    refactorPanel.typeAndWaitNewName("B.java");
     refactorPanel.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactorPanel.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactorPanel.clickOkButtonRefactorForm();
