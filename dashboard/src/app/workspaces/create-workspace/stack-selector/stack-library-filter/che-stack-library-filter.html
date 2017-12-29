@@ -14,6 +14,7 @@
                   md-on-remove="cheStackLibraryFilterCtrl.onRemove()"
                   md-separator-keys="cheStackLibraryFilterCtrl.keys">
             <input type="text"
+                   id="filter-stack-input"
                    ng-model="cheStackLibraryFilterCtrl.chip"
                    ng-change="cheStackLibraryFilterCtrl.querySearch(cheStackLibraryFilterCtrl.chip)"/>
           <md-chip-template>
@@ -30,14 +31,16 @@
     </div>
     <div layout="row" flex="100" layout-align="start center" class="stack-library-filter-suggestions-row" ng-class="{'stack-library-filter-hidden': !cheStackLibraryFilterCtrl.suggestions.length}">
       <label flex="25">Suggestions: </label>
-      <div layout="column" flex="85">
+      <div layout="column" flex="85" name="filterSuggestion">
         <md-chips ng-model="cheStackLibraryFilterCtrl.suggestions"
                   class="stack-library-filter-suggestions"
                   readonly="true">
           <md-chip-template>
             <div class="stack-library-filter-suggestion-text"
+                 name="suggestionText"
                  ng-dblclick="cheStackLibraryFilterCtrl.onSelectSuggestion($chip)">{{$chip | uppercase}}</div>
             <div class="stack-library-filter-suggestion-btn"
+                 name="suggestionButton"
                  ng-click="cheStackLibraryFilterCtrl.onSelectSuggestion($chip)">
               <i class="fa fa-plus"></i>
             </div>

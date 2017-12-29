@@ -454,7 +454,7 @@ printRunOptions() {
     echo "[TEST] Product Protocol    : "${PRODUCT_PROTOCOL}
     echo "[TEST] Product Host        : "${PRODUCT_HOST}
     echo "[TEST] Product Port        : "${PRODUCT_PORT}
-    echo "[TEST] Infrastructure      : "$(getTestGroups)
+    echo "[TEST] Product Config      : "$(getTestGroups)
     echo "[TEST] Tests               : "${TESTS_SCOPE}
     echo "[TEST] Threads             : "${THREADS}
     echo "[TEST] Workspace pool size : "${WORKSPACE_POOL_SIZE}

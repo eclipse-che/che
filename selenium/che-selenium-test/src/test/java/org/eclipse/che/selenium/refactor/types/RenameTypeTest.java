@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.refactor.types;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -22,7 +24,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -32,7 +33,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
-import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -186,18 +187,15 @@ public class RenameTypeTest {
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
         TestMenuCommandsConstants.Assistant.Refactoring.RENAME);
 
-    refactorPanel.typeNewName("B.java");
+    refactorPanel.typeAndWaitNewName("B.java");
 
     try {
       refactorPanel.clickOkButtonRefactorForm();
-    } catch (org.openqa.selenium.TimeoutException ex) {
-      // For response from server side if a net works too slowly
-      WaitUtils.sleepQuietly(1);
-      refactorPanel.typeNewName("B.java");
-      refactorPanel.sendKeysIntoField(Keys.ARROW_LEFT.toString());
-      refactorPanel.sendKeysIntoField(Keys.ARROW_LEFT.toString());
-      refactorPanel.clickOkButtonRefactorForm();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7500", ex);
     }
+
     askDialog.waitFormToOpen();
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();

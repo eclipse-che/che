@@ -13,6 +13,8 @@ package org.eclipse.che.selenium.pageobject.dashboard;
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
@@ -65,7 +67,12 @@ public class ProjectSourcePage {
     String ZIP_XPATH = "remote-zip-url-input";
     String ZIP_SKIP_ROOT_XPATH = "zip-skip-root-folder-checkbox";
     String ADD_PROJECT_BUTTON = "add-project-button";
-    String CANCEL_BUTTON = "cancel-button";
+    String CANCEL_BUTTON = "cancelButton";
+    String SAVE_BUTTON = "saveButton";
+    String REMOVE_BUTTON = "removeButton";
+
+    String PROJECT_NAME = "//input[@name='projectName']";
+    String PROJECT_DESCRIPTION = "//input[@name='projectDescription']";
     String CONNECT_GITHUB_ACCOUNT_BUTTON = "//span[text()='Connect your github account']";
     String GITHUB_PROJECTS_LIST =
         "//md-list[contains(@class,'import-github-project-repositories-list')]";
@@ -93,8 +100,14 @@ public class ProjectSourcePage {
   @FindBy(id = Locators.ZIP_SKIP_ROOT_XPATH)
   WebElement zipSkipRoot;
 
-  @FindBy(id = Locators.CANCEL_BUTTON)
+  @FindBy(name = Locators.CANCEL_BUTTON)
   WebElement cancelButton;
+
+  @FindBy(name = Locators.SAVE_BUTTON)
+  WebElement saveButton;
+
+  @FindBy(name = Locators.REMOVE_BUTTON)
+  WebElement removeButton;
 
   @FindBy(id = Locators.ADD_PROJECT_BUTTON)
   WebElement addProjectButton;
@@ -159,8 +172,62 @@ public class ProjectSourcePage {
     addProjectButton.click();
   }
 
-  public void clickOnCancelProjectButton() {
-    cancelButton.click();
+  public void clickOnCancelChangesButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(cancelButton))
+        .click();
+  }
+
+  public void clickOnSaveChangesButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(saveButton))
+        .click();
+  }
+
+  public void clickOnRemoveProjectButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(removeButton))
+        .click();
+  }
+
+  public void waitCreatedProjectButton(String projectName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.id(projectName)));
+  }
+
+  public boolean isProjectNotExists(String projectName) {
+    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(invisibilityOfElementLocated(By.id(projectName)));
+  }
+
+  public void clickOnCreateProjectButton(String projectName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.id(projectName)))
+        .click();
+  }
+
+  public String getProjectName() {
+    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath(Locators.PROJECT_NAME)))
+        .getAttribute("value");
+  }
+
+  public void changeProjectName(String name) {
+    WebElement webElement = seleniumWebDriver.findElement(By.xpath(Locators.PROJECT_NAME));
+    webElement.clear();
+    webElement.sendKeys(name);
+  }
+
+  public String getProjectDescription() {
+    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath(Locators.PROJECT_DESCRIPTION)))
+        .getAttribute("value");
+  }
+
+  public void changeProjectDescription(String description) {
+    WebElement webElement = seleniumWebDriver.findElement(By.xpath(Locators.PROJECT_DESCRIPTION));
+    webElement.clear();
+    webElement.sendKeys(description);
   }
 
   public boolean isConnectGitHubAccountButtonVisible() {
