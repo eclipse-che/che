@@ -11,13 +11,10 @@
 package org.eclipse.che.api.search.server.impl;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.concurrent.Executors.newSingleThreadExecutor;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
-import static org.eclipse.che.commons.lang.IoUtil.deleteRecursive;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.CharStreams;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,17 +22,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.MalformedInputException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.CountDownLatch;
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -67,17 +65,14 @@ import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.highlight.QueryScorer;
 import org.apache.lucene.search.highlight.TokenSources;
-import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.SingleInstanceLockFactory;
-import org.apache.lucene.util.IOUtils;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.fs.server.PathTransformer;
+import org.eclipse.che.api.search.server.OffsetData;
+import org.eclipse.che.api.search.server.QueryExpression;
 import org.eclipse.che.api.search.server.SearchResult;
 import org.eclipse.che.api.search.server.Searcher;
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -88,6 +83,7 @@ import org.slf4j.LoggerFactory;
  * Lucene based searcher.
  *
  * @author andrew00x
+ * @author Sergii Kabashniuk
  */
 @Singleton
 public class LuceneSearcher implements Searcher {
@@ -100,103 +96,71 @@ public class LuceneSearcher implements Searcher {
   private static final String TEXT_FIELD = "text";
 
   private final Set<PathMatcher> excludePatterns;
-  private final ExecutorService executor;
   private final File indexDirectory;
   private final PathTransformer pathTransformer;
 
-  private File root;
-  private IndexWriter luceneIndexWriter;
-  private SearcherManager searcherManager;
-
-  private boolean closed = true;
+  private final File root;
+  private final IndexWriter luceneIndexWriter;
+  private final SearcherManager searcherManager;
+  private final Analyzer analyzer;
+  private final CountDownLatch initialIndexingLatch = new CountDownLatch(1);
 
   @Inject
   protected LuceneSearcher(
       @Named("vfs.index_filter_matcher") Set<PathMatcher> excludePatterns,
       @Named("vfs.local.fs_index_root_dir") File indexDirectory,
       @Named("che.user.workspaces.storage") File root,
-      PathTransformer pathTransformer) {
+      PathTransformer pathTransformer)
+      throws IOException {
+
+    if (indexDirectory.exists()) {
+      if (indexDirectory.isFile()) {
+        throw new IOException("Wrong configuration `vfs.local.fs_index_root_dir` is a file");
+      }
+    } else {
+      Files.createDirectories(indexDirectory.toPath());
+    }
+
     this.indexDirectory = indexDirectory;
     this.root = root;
     this.excludePatterns = excludePatterns;
     this.pathTransformer = pathTransformer;
-
-    executor =
-        newSingleThreadExecutor(
-            new ThreadFactoryBuilder()
-                .setDaemon(true)
-                .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
-                .setNameFormat("LuceneSearcherInitThread")
-                .build());
+    this.analyzer =
+        CustomAnalyzer.builder()
+            .withTokenizer(WhitespaceTokenizerFactory.class)
+            .addTokenFilter(LowerCaseFilterFactory.class)
+            .build();
+    this.luceneIndexWriter =
+        new IndexWriter(
+            FSDirectory.open(indexDirectory.toPath(), new SingleInstanceLockFactory()),
+            new IndexWriterConfig(analyzer));
+    this.searcherManager =
+        new SearcherManager(luceneIndexWriter, true, true, new SearcherFactory());
   }
 
   @PostConstruct
-  private void initialize() throws ServerException {
-    doInitialize();
-    if (!executor.isShutdown()) {
-      executor.execute(
-          () -> {
-            try {
-              addDirectory(root.toPath());
-            } catch (ServerException e) {
-              LOG.error(e.getMessage());
-            }
-          });
-    }
+  @VisibleForTesting
+  void initialize() {
+    Thread initializer =
+        new Thread(
+            () -> {
+              try {
+                long start = System.currentTimeMillis();
+                add(root.toPath());
+                LOG.info(
+                    "Initial indexing complete after {} msec ", System.currentTimeMillis() - start);
+              } finally {
+                initialIndexingLatch.countDown();
+              }
+            });
+    initializer.setName("LuceneSearcherInitThread");
+    initializer.setDaemon(true);
+    initializer.start();
   }
 
-  @PreDestroy
-  private void terminate() {
-    doTerminate();
-    executor.shutdown();
-    try {
-      if (!executor.awaitTermination(5, SECONDS)) {
-        executor.shutdownNow();
-      }
-    } catch (InterruptedException ie) {
-      executor.shutdownNow();
-    }
-  }
-
-  private Analyzer makeAnalyzer() throws IOException {
-    return CustomAnalyzer.builder()
-        .withTokenizer(WhitespaceTokenizerFactory.class)
-        .addTokenFilter(LowerCaseFilterFactory.class)
-        .build();
-  }
-
-  private Directory makeDirectory() throws ServerException {
-    try {
-      Files.createDirectories(indexDirectory.toPath());
-      return FSDirectory.open(indexDirectory.toPath(), new SingleInstanceLockFactory());
-    } catch (IOException e) {
-      throw new ServerException(e);
-    }
-  }
-
-  private void doInitialize() throws ServerException {
-    try {
-      luceneIndexWriter = new IndexWriter(makeDirectory(), new IndexWriterConfig(makeAnalyzer()));
-      searcherManager = new SearcherManager(luceneIndexWriter, true, true, new SearcherFactory());
-      closed = false;
-    } catch (IOException e) {
-      throw new ServerException(e);
-    }
-  }
-
-  private void doTerminate() {
-    if (!closed) {
-      try {
-        IOUtils.close(luceneIndexWriter, luceneIndexWriter.getDirectory(), searcherManager);
-        if (!deleteRecursive(indexDirectory)) {
-          LOG.warn("Unable delete index directory '{}', add it in FileCleaner", indexDirectory);
-          FileCleaner.addFile(indexDirectory);
-        }
-      } catch (IOException e) {
-        LOG.error(e.getMessage(), e);
-      }
-      closed = true;
-    }
+  @VisibleForTesting
+  CountDownLatch getInitialIndexingLatch() {
+    return initialIndexingLatch;
   }
 
   @Override
@@ -329,12 +293,12 @@ public class LuceneSearcher implements Searcher {
       luceneQueryBuilder.add(new PrefixQuery(new Term(PATH_FIELD, path)), BooleanClause.Occur.MUST);
     }
     if (name != null) {
-      QueryParser qParser = new QueryParser(NAME_FIELD, makeAnalyzer());
+      QueryParser qParser = new QueryParser(NAME_FIELD, analyzer);
       qParser.setAllowLeadingWildcard(true);
       luceneQueryBuilder.add(qParser.parse(name), BooleanClause.Occur.MUST);
     }
     if (text != null) {
-      QueryParser qParser = new QueryParser(TEXT_FIELD, makeAnalyzer());
+      QueryParser qParser = new QueryParser(TEXT_FIELD, analyzer);
       qParser.setAllowLeadingWildcard(true);
       luceneQueryBuilder.add(qParser.parse(text), BooleanClause.Occur.MUST);
     }
@@ -373,42 +337,36 @@ public class LuceneSearcher implements Searcher {
   }
 
   @Override
-  public final void add(Path fsPath) throws ServerException, NotFoundException {
-    if (fsPath.toFile().isDirectory()) {
-      addDirectory(fsPath);
-    } else {
-      addFile(fsPath);
-    }
-  }
+  public final void add(Path fsPath) {
 
-  private void addDirectory(Path fsPath) throws ServerException {
-    long start = System.currentTimeMillis();
-    LinkedList<File> queue = new LinkedList<>();
-    queue.add(fsPath.toFile());
-    int indexedFiles = 0;
-    while (!queue.isEmpty()) {
-      File folder = queue.pop();
-      if (folder.exists() && folder.isDirectory()) {
-        File[] files = folder.listFiles();
-        if (files == null) {
-          continue;
+    try {
+      if (fsPath.toFile().isDirectory()) {
+        try {
+          Files.walkFileTree(
+              fsPath,
+              new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                  addFile(file);
+                  return FileVisitResult.CONTINUE;
+                }
+              });
+        } catch (IOException ignore) {
+          LOG.warn("Not able to index {} because {} ", fsPath.toString(), ignore.getMessage());
         }
-        for (File child : files) {
-          if (child.isDirectory()) {
-            queue.push(child);
-          } else {
-            addFile(child.toPath());
-            indexedFiles++;
-          }
-        }
+      } else {
+        addFile(fsPath);
       }
+      luceneIndexWriter.commit();
+    } catch (IOException e) {
+      LOG.warn(
+          "Can't commit changes to index for: {} because {} ",
+          fsPath.toAbsolutePath().toString(),
+          e.getMessage());
     }
-
-    long end = System.currentTimeMillis();
-    LOG.debug("Indexed {} files from {}, time: {} ms", indexedFiles, fsPath, (end - start));
   }
 
-  private void addFile(Path fsPath) throws ServerException {
+  private void addFile(Path fsPath) {
     if (!fsPath.toFile().exists()) {
       return;
     }
@@ -416,23 +374,27 @@ public class LuceneSearcher implements Searcher {
     if (!isNotExcluded(fsPath)) {
       return;
     }
-
     String wsPath = pathTransformer.transform(fsPath);
-
     try (Reader reader =
         new BufferedReader(new InputStreamReader(new FileInputStream(fsPath.toFile()), "utf-8"))) {
-      luceneIndexWriter.updateDocument(
-          new Term(PATH_FIELD, wsPath), createDocument(wsPath, reader));
-    } catch (OutOfMemoryError oome) {
-      doTerminate();
-      throw oome;
-    } catch (IOException e) {
-      throw new ServerException(e.getMessage(), e);
+      String name = nameOf(wsPath);
+      Document doc = new Document();
+      doc.add(new StringField(PATH_FIELD, wsPath, Field.Store.YES));
+      doc.add(new TextField(NAME_FIELD, name, Field.Store.YES));
+      try {
+        doc.add(new TextField(TEXT_FIELD, CharStreams.toString(reader), Field.Store.YES));
+      } catch (MalformedInputException e) {
+        LOG.warn("Can't index file: {}", wsPath);
+      }
+      luceneIndexWriter.updateDocument(new Term(PATH_FIELD, wsPath), doc);
+
+    } catch (IOException oome) {
+      LOG.warn("Can't index file: {}", wsPath);
     }
   }
 
   @Override
-  public final void delete(Path fsPath) throws ServerException {
+  public final void delete(Path fsPath) {
     String wsPath = pathTransformer.transform(fsPath);
     try {
       if (fsPath.toFile().isFile()) {
@@ -442,56 +404,17 @@ public class LuceneSearcher implements Searcher {
         Term term = new Term(PATH_FIELD, wsPath + '/');
         luceneIndexWriter.deleteDocuments(new PrefixQuery(term));
       }
+      luceneIndexWriter.commit();
     } catch (OutOfMemoryError oome) {
-      doTerminate();
       throw oome;
     } catch (IOException e) {
-      throw new ServerException(e.getMessage(), e);
+      LOG.warn("Can't delete index for file: {}", wsPath);
     }
   }
 
   @Override
-  public final void update(Path fsPath) throws ServerException {
-    String wsPath = pathTransformer.transform(fsPath);
-    doUpdate(new Term(PATH_FIELD, wsPath), fsPath);
-  }
-
-  private void doUpdate(Term deleteTerm, Path fsPath) throws ServerException {
-    if (!fsPath.toFile().exists()) {
-      return;
-    }
-
-    if (!isNotExcluded(fsPath)) {
-      return;
-    }
-
-    String wsPath = pathTransformer.transform(fsPath);
-
-    try (Reader reader =
-        new BufferedReader(new InputStreamReader(new FileInputStream(fsPath.toFile()), "utf-8"))) {
-      luceneIndexWriter.updateDocument(deleteTerm, createDocument(wsPath, reader));
-    } catch (OutOfMemoryError oome) {
-      doTerminate();
-      throw oome;
-    } catch (IOException e) {
-      throw new ServerException(e.getMessage(), e);
-    }
-  }
-
-  private Document createDocument(String wsPath, Reader reader) throws ServerException {
-    String name = nameOf(wsPath);
-    Document doc = new Document();
-    doc.add(new StringField(PATH_FIELD, wsPath, Field.Store.YES));
-    doc.add(new TextField(NAME_FIELD, name, Field.Store.YES));
-    try {
-      doc.add(new TextField(TEXT_FIELD, CharStreams.toString(reader), Field.Store.YES));
-    } catch (MalformedInputException e) {
-      LOG.warn("Can't index file: {}", wsPath);
-    } catch (IOException e) {
-      LOG.error("Can't index file: {}", wsPath);
-      throw new ServerException(e.getLocalizedMessage(), e);
-    }
-    return doc;
+  public final void update(Path fsPath) {
+    addFile(fsPath);
   }
 
   private boolean isNotExcluded(Path fsPath) {
@@ -501,33 +424,5 @@ public class LuceneSearcher implements Searcher {
       }
     }
     return true;
-  }
-
-  public static class OffsetData {
-
-    public String phrase;
-    public int startOffset;
-    public int endOffset;
-    public int docId;
-    public float score;
-    public int lineNum;
-    public String line;
-
-    public OffsetData(
-        String phrase,
-        int startOffset,
-        int endOffset,
-        int docId,
-        float score,
-        int lineNum,
-        String line) {
-      this.phrase = phrase;
-      this.startOffset = startOffset;
-      this.endOffset = endOffset;
-      this.docId = docId;
-      this.score = score;
-      this.lineNum = lineNum;
-      this.line = line;
-    }
   }
 }

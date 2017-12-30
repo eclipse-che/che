@@ -11,7 +11,7 @@
 package org.eclipse.che.api.search.server.impl;
 
 import java.util.List;
-import org.eclipse.che.api.search.server.impl.LuceneSearcher.OffsetData;
+import org.eclipse.che.api.search.server.OffsetData;
 
 /** Single item in {@code SearchResult}. */
 public class SearchResultEntry {

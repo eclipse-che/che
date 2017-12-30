@@ -14,15 +14,10 @@ import java.nio.file.Path;
 import java.util.function.Consumer;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.search.server.Searcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class IndexedFileUpdateConsumer implements Consumer<Path> {
-  private static final Logger LOG = LoggerFactory.getLogger(IndexedFileDeleteConsumer.class);
 
   private final Searcher searcher;
 
@@ -33,10 +28,6 @@ public class IndexedFileUpdateConsumer implements Consumer<Path> {
 
   @Override
   public void accept(Path fsPath) {
-    try {
-      searcher.update(fsPath);
-    } catch (ServerException | NotFoundException e) {
-      LOG.error("Issue happened during updating modified file in index", e);
-    }
+    searcher.update(fsPath);
   }
 }

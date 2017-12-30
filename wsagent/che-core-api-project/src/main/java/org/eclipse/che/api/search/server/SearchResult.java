@@ -15,7 +15,6 @@ import static java.util.stream.Collectors.toList;
 
 import com.google.common.base.Optional;
 import java.util.List;
-import org.eclipse.che.api.search.server.impl.QueryExpression;
 import org.eclipse.che.api.search.server.impl.SearchResultEntry;
 
 /** Result of executing {@link Searcher#search(QueryExpression)}. */
