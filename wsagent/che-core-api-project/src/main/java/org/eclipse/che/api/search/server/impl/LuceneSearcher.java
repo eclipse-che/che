@@ -106,7 +106,7 @@ public class LuceneSearcher implements Searcher {
   private final CountDownLatch initialIndexingLatch = new CountDownLatch(1);
 
   @Inject
-  protected LuceneSearcher(
+  public LuceneSearcher(
       @Named("vfs.index_filter_matcher") Set<PathMatcher> excludePatterns,
       @Named("vfs.local.fs_index_root_dir") File indexDirectory,
       @Named("che.user.workspaces.storage") File root,
