@@ -383,7 +383,7 @@ public class LuceneSearcher implements Searcher {
       String name = nameOf(wsPath);
       Document doc = new Document();
       doc.add(new StringField(PATH_FIELD, wsPath, Field.Store.YES));
-      doc.add(new StringField(NAME_FIELD, name, Field.Store.YES));
+      doc.add(new TextField(NAME_FIELD, name, Field.Store.YES));
       try {
         doc.add(new TextField(TEXT_FIELD, CharStreams.toString(reader), Field.Store.YES));
       } catch (MalformedInputException e) {

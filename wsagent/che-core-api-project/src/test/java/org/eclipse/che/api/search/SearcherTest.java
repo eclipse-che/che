@@ -13,6 +13,7 @@ package org.eclipse.che.api.search;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
@@ -25,12 +26,17 @@ import java.util.List;
 import java.util.Set;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.impl.RootAwarePathTransformer;
+import org.eclipse.che.api.search.server.OffsetData;
 import org.eclipse.che.api.search.server.QueryExpression;
+import org.eclipse.che.api.search.server.SearchResult;
 import org.eclipse.che.api.search.server.Searcher;
 import org.eclipse.che.api.search.server.impl.LuceneSearcher;
+import org.eclipse.che.api.search.server.impl.SearchResultEntry;
 import org.eclipse.che.commons.lang.IoUtil;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("Duplicates")
@@ -109,12 +115,12 @@ public class SearcherTest {
     // given
     contentBuilder.createFolder("aaa").createFile("aaa.txt", TEST_CONTENT[2]);
     searcher.add(contentBuilder.getLastUpdatedFile());
-    assertEmptyResult("should",);
+    assertEmptyResult("should");
     // when
     contentBuilder.createFile("aaa.txt", TEST_CONTENT[1]);
     searcher.add(contentBuilder.getLastUpdatedFile());
     // then
-    assertFind("should",, "/aaa/aaa.txt");
+    assertFind("should", "/aaa/aaa.txt");
   }
 
   @Test
@@ -192,7 +198,7 @@ public class SearcherTest {
   }
 
   @Test
-  public void shouldBeAbleToSearchesByWordFragment() throws Exception {
+  public void shouldBeAbleToSearchByWordFragment() throws Exception {
     // given
     contentBuilder
         .createFolder("folder")
@@ -204,79 +210,90 @@ public class SearcherTest {
     // then
     assertFind("*stone*", "/folder/xxx.txt");
   }
-  //
-  //  @Test
-  //  public void searchesByTextAndFileName() throws Exception {
-  //    VirtualFileSystem virtualFileSystem = virtualFileSystem();
-  //    VirtualFile folder = virtualFileSystem.getRoot().createFolder("folder");
-  //    folder.createFile("xxx.txt", TEST_CONTENT[2]);
-  //    folder.createFile("zzz.txt", TEST_CONTENT[2]);
-  //    searcher.init(virtualFileSystem);
-  //
-  //    List<String> paths =
-  //        searcher.search(new QueryExpression().setText("be").setName("xxx.txt")).getFilePaths();
-  //    assertEquals(newArrayList("/folder/xxx.txt"), paths);
-  //  }
-  //
-  //  @Test
-  //  public void searchesByFullTextAndFileName() throws Exception {
-  //    VirtualFileSystem virtualFileSystem = virtualFileSystem();
-  //    VirtualFile folder = virtualFileSystem.getRoot().createFolder("folder");
-  //    folder.createFile("xxx.txt", TEST_CONTENT[2]);
-  //    folder.createFile("zzz.txt", TEST_CONTENT[2]);
-  //    searcher.init(virtualFileSystem);
-  //
-  //    SearchResult result =
-  //        searcher.search(
-  //            new QueryExpression().setText("*be*").setName("xxx.txt").setIncludePositions(true));
-  //    List<String> paths = result.getFilePaths();
-  //    assertEquals(newArrayList("/folder/xxx.txt"), paths);
-  //    assertEquals(result.getResults().get(0).getData().size(), 4);
-  //  }
-  //
-  //  @Test
-  //  public void searchesByFullTextAndFileName2() throws Exception {
-  //    VirtualFileSystem virtualFileSystem = virtualFileSystem();
-  //    VirtualFile folder = virtualFileSystem.getRoot().createFolder("folder");
-  //    folder.createFile("xxx.txt", TEST_CONTENT[2]);
-  //    folder.createFile("zzz.txt", TEST_CONTENT[4]);
-  //    searcher.init(virtualFileSystem);
-  //
-  //    SearchResult result =
-  //        searcher.search(new QueryExpression().setText("*to*").setIncludePositions(true));
-  //    List<String> paths = result.getFilePaths();
-  //    assertEquals(paths.size(), 2);
-  //    assertEquals(result.getResults().get(0).getData().size(), 2);
-  //  }
-  //
-  //  @DataProvider
-  //  public Object[][] searchByName() {
-  //    return new Object[][] {
-  //      {"sameName.txt", "sameName.txt"},
-  //      {"notCaseSensitive.txt", "notcasesensitive.txt"},
-  //      {"fullName.txt", "full*"},
-  //      {"file name.txt", "file name"},
-  //      {"prefixFileName.txt", "prefixF*"},
-  //      {"name.with.dot.txt", "name.With.Dot.txt"},
-  //    };
-  //  }
-  //
-  //  @Test(dataProvider = "searchByName")
-  //  public void searchFileByName(String fileName, String searchedFileName) throws Exception {
-  //    VirtualFileSystem virtualFileSystem = virtualFileSystem();
-  //    VirtualFile folder = virtualFileSystem.getRoot().createFolder("parent/child");
-  //    VirtualFile folder2 = virtualFileSystem.getRoot().createFolder("folder2");
-  //    folder.createFile(NameGenerator.generate(null, 10), TEST_CONTENT[3]);
-  //    folder.createFile(fileName, TEST_CONTENT[2]);
-  //    folder.createFile(NameGenerator.generate(null, 10), TEST_CONTENT[1]);
-  //    folder2.createFile(NameGenerator.generate(null, 10), TEST_CONTENT[2]);
-  //    folder2.createFile(NameGenerator.generate(null, 10), TEST_CONTENT[2]);
-  //    searcher.init(virtualFileSystem);
-  //
-  //    List<String> paths =
-  //        searcher.search(new QueryExpression().setName(searchedFileName)).getFilePaths();
-  //    assertEquals(newArrayList("/parent/child/" + fileName), paths);
-  //  }
+
+  @Test
+  public void shouldBeAbleToSearchByTextTermAndFileName() throws Exception {
+    // given
+    contentBuilder
+        .createFolder("folder")
+        .createFile("xxx.txt", TEST_CONTENT[2])
+        .createFile("yyy.txt", TEST_CONTENT[1])
+        .createFile("zzz.txt", TEST_CONTENT[2]);
+    searcher.add(contentBuilder.getCurrentFolder());
+    // when
+    // then
+    assertFind(new QueryExpression().setText("be").setName("xxx.txt"), "/folder/xxx.txt");
+  }
+
+  @Test
+  public void shouldBeAbleToSearchByFullTextPatternAndFileName() throws Exception {
+    // given
+    contentBuilder
+        .createFolder("folder")
+        .createFile("xxx.txt", TEST_CONTENT[2])
+        .createFile("yyy.txt", TEST_CONTENT[1])
+        .createFile("zzz.txt", TEST_CONTENT[2]);
+    searcher.add(contentBuilder.getCurrentFolder());
+    // when
+    // then
+    assertFind(new QueryExpression().setText("*be*").setName("xxx.txt"), "/folder/xxx.txt");
+  }
+
+  @Test
+  public void shouldBeAbleToSearchWithPositions() throws Exception {
+    // given
+    contentBuilder
+        .createFolder("folder")
+        .createFile("xxx.txt", TEST_CONTENT[2])
+        .createFile("yyy.txt", TEST_CONTENT[1])
+        .createFile("zzz.txt", TEST_CONTENT[4]);
+    searcher.add(contentBuilder.getCurrentFolder());
+    // when
+
+    // then
+    assertFind(
+        new QueryExpression().setText("*to*").setIncludePositions(true),
+        new SearchResultEntry(
+            "/folder/xxx.txt",
+            ImmutableList.of(
+                new OffsetData("To", 0, 2, 0, 1.0f, 0, TEST_CONTENT[2]),
+                new OffsetData("to", 13, 15, 0, 1.0f, 0, TEST_CONTENT[2]))),
+        new SearchResultEntry(
+            "/folder/zzz.txt",
+            ImmutableList.of(new OffsetData("to", 5, 7, 2, 1.0f, 0, TEST_CONTENT[4]))));
+  }
+
+  @DataProvider
+  public Object[][] searchByName() {
+    return new Object[][] {
+      {"sameName.txt", "sameName.txt"},
+      {"notCaseSensitive.txt", "notcasesensitive.txt"},
+      {"fullName.txt", "full*"},
+      {"file name.txt", "file name"},
+      {"prefixFileName.txt", "prefixF*"},
+      {"name.with.dot.txt", "name.With.Dot.txt"},
+    };
+  }
+
+  @Test(dataProvider = "searchByName")
+  public void searchFileByName(String fileName, String searchedFileName) throws Exception {
+    //given
+    contentBuilder
+        .createFolder("parent")
+        .createFolder("child")
+        .createFile(NameGenerator.generate(null, 10), TEST_CONTENT[3])
+        .createFile(fileName, TEST_CONTENT[2])
+        .createFile(NameGenerator.generate(null, 10), TEST_CONTENT[1]);
+    searcher.add(contentBuilder.getCurrentFolder());
+    contentBuilder
+        .takeParent()
+        .takeParent()
+        .createFolder("folder2")
+        .createFile(NameGenerator.generate(null, 10), TEST_CONTENT[2])
+        .createFile(NameGenerator.generate(null, 10), TEST_CONTENT[2]);
+    searcher.add(contentBuilder.getCurrentFolder());
+    assertFind(new QueryExpression().setName(searchedFileName), "/parent/child/" + fileName);
+  }
   //
   //  @Test
   //  public void searchesByTextAndPath() throws Exception {
@@ -408,6 +425,12 @@ public class SearcherTest {
   //    assertTrue(Collections.disjoint(firstPage.getFilePaths(), lastPage.getFilePaths()));
   //  }
 
+  public void assertFind(QueryExpression query, SearchResultEntry... expectedResults)
+      throws ServerException {
+    SearchResult result = searcher.search(query);
+    assertEquals(result.getResults(), Arrays.asList(expectedResults));
+  }
+
   public void assertFind(QueryExpression query, String... expectedPaths) throws ServerException {
     List<String> paths = searcher.search(query).getFilePaths();
     assertEquals(paths, Arrays.asList(expectedPaths));
@@ -423,7 +446,7 @@ public class SearcherTest {
   }
 
   public void assertEmptyResult(String text) throws ServerException {
-    assertFind(new QueryExpression().setText(text));
+    assertEmptyResult(new QueryExpression().setText(text));
   }
 
   public static class ContentBuilder {
