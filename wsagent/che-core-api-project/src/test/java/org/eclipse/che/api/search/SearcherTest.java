@@ -73,7 +73,6 @@ public class SearcherTest {
     contentBuilder = new ContentBuilder(workspaceStorage.toPath());
   }
 
-
   @AfterMethod
   public void tearDown() throws Exception {
     IoUtil.deleteRecursive(indexDirectory);
@@ -88,7 +87,7 @@ public class SearcherTest {
     // when
     searcher.add(contentBuilder.getLastUpdatedFile());
     // then
-    assertFind(new QueryExpression().setText("should"), "/aaa/aaa.txt");
+    assertFind("should", "/aaa/aaa.txt");
   }
 
   @Test
@@ -101,8 +100,8 @@ public class SearcherTest {
     // when
     searcher.add(contentBuilder.getCurrentFolder());
     // then
-    assertFind(new QueryExpression().setText("be"), "/folder/xxx.txt");
-    assertFind(new QueryExpression().setText("should"), "/folder/zzz.txt");
+    assertFind("be", "/folder/xxx.txt");
+    assertFind("should", "/folder/zzz.txt");
   }
 
   @Test
@@ -110,12 +109,12 @@ public class SearcherTest {
     // given
     contentBuilder.createFolder("aaa").createFile("aaa.txt", TEST_CONTENT[2]);
     searcher.add(contentBuilder.getLastUpdatedFile());
-    assertEmptyResult(new QueryExpression().setText("should"));
+    assertEmptyResult("should",);
     // when
     contentBuilder.createFile("aaa.txt", TEST_CONTENT[1]);
     searcher.add(contentBuilder.getLastUpdatedFile());
     // then
-    assertFind(new QueryExpression().setText("should"), "/aaa/aaa.txt");
+    assertFind("should",, "/aaa/aaa.txt");
   }
 
   @Test
@@ -126,21 +125,20 @@ public class SearcherTest {
         .createFile("xxx.txt", TEST_CONTENT[2])
         .createFile("zzz.txt", TEST_CONTENT[1]);
     searcher.add(contentBuilder.getCurrentFolder());
-    contentBuilder.takeParent()
+    contentBuilder
+        .takeParent()
         .createFolder("aaa")
         .createFile("aaa.txt1", TEST_CONTENT[3])
         .createFile("aaa.txt", TEST_CONTENT[2]);
     searcher.add(contentBuilder.getCurrentFolder());
-    assertFind(new QueryExpression().setText("be"), "/folder/xxx.txt", "/aaa/aaa.txt");
-
+    assertFind("be", "/folder/xxx.txt", "/aaa/aaa.txt");
 
     // when
     contentBuilder.deleteFileInCurrentFolder("aaa.txt");
     searcher.delete(contentBuilder.getLastUpdatedFile());
     // then
-    assertFind(new QueryExpression().setText("be"), "/folder/xxx.txt");
+    assertFind("be", "/folder/xxx.txt");
   }
-
 
   @Test
   public void shouldBeAbleToFindNumberWithComaInText() throws Exception {
@@ -150,9 +148,9 @@ public class SearcherTest {
         .createFile("aaa.txt1", TEST_CONTENT[3])
         .createFile("aaa.txt", TEST_CONTENT[2]);
     searcher.add(contentBuilder.getCurrentFolder());
-    //when
-    //then
-    assertFind(new QueryExpression().setText("1961,"),  "/aaa/aaa.txt1");
+    // when
+    // then
+    assertFind("1961,", "/aaa/aaa.txt1");
   }
 
   @Test
@@ -163,11 +161,10 @@ public class SearcherTest {
         .createFile("aaa.txt1", TEST_CONTENT[3])
         .createFile("aaa.txt", TEST_CONTENT[2]);
     searcher.add(contentBuilder.getCurrentFolder());
-    //when
-    //then
-    assertFind(new QueryExpression().setText("was generally"),  "/aaa/aaa.txt1");
+    // when
+    // then
+    assertFind("was generally", "/aaa/aaa.txt1");
   }
-
 
   @Test
   public void shouldBeAbleToDeleteFolder() throws Exception {
@@ -177,58 +174,36 @@ public class SearcherTest {
         .createFile("xxx.txt", TEST_CONTENT[2])
         .createFile("zzz.txt", TEST_CONTENT[1]);
     searcher.add(contentBuilder.getCurrentFolder());
-    contentBuilder.takeParent()
+    contentBuilder
+        .takeParent()
         .createFolder("aaa")
         .createFile("aaa.txt1", TEST_CONTENT[3])
         .createFile("aaa.txt", TEST_CONTENT[2]);
     searcher.add(contentBuilder.getCurrentFolder());
-    assertFind(new QueryExpression().setText("be"), "/folder/xxx.txt", "/aaa/aaa.txt");
-    assertFind(new QueryExpression().setText("generally"),  "/aaa/aaa.txt1");
-
+    assertFind("be", "/folder/xxx.txt", "/aaa/aaa.txt");
+    assertFind("generally", "/aaa/aaa.txt1");
 
     // when
     searcher.delete(contentBuilder.getCurrentFolder());
     contentBuilder.deleteCurrentFolder();
     // then
-    assertFind(new QueryExpression().setText("be"), "/folder/xxx.txt");
-    assertEmptyResult(new QueryExpression().setText("generally"));
+    assertFind("be", "/folder/xxx.txt");
+    assertEmptyResult("generally");
   }
 
-
-
-  //
-  //  @Test
-  //  public void deletesFileTreeFromIndex() throws Exception {
-  //    VirtualFileSystem virtualFileSystem = virtualFileSystem();
-  //    VirtualFile folder = virtualFileSystem.getRoot().createFolder("folder");
-  //    folder.createFile("xxx.txt", TEST_CONTENT[2]);
-  //    folder.createFile("zzz.txt", TEST_CONTENT[1]);
-  //    searcher.init(virtualFileSystem);
-  //
-  //    List<String> paths = searcher.search(new QueryExpression().setText("be")).getFilePaths();
-  //    assertEquals(newArrayList("/folder/xxx.txt"), paths);
-  //    paths = searcher.search(new QueryExpression().setText("should")).getFilePaths();
-  //    assertEquals(newArrayList("/folder/zzz.txt"), paths);
-  //
-  //    searcher.delete("/folder", false);
-  //
-  //    paths = searcher.search(new QueryExpression().setText("be")).getFilePaths();
-  //    assertTrue(paths.isEmpty());
-  //    paths = searcher.search(new QueryExpression().setText("should")).getFilePaths();
-  //    assertTrue(paths.isEmpty());
-  //  }
-  //
-  //  @Test
-  //  public void searchesByWordFragment() throws Exception {
-  //    VirtualFileSystem virtualFileSystem = virtualFileSystem();
-  //    VirtualFile folder = virtualFileSystem.getRoot().createFolder("folder");
-  //    folder.createFile("xxx.txt", TEST_CONTENT[0]);
-  //    searcher.init(virtualFileSystem);
-  //
-  //    List<String> paths = searcher.search(new
-  // QueryExpression().setText("*stone*")).getFilePaths();
-  //    assertEquals(newArrayList("/folder/xxx.txt"), paths);
-  //  }
+  @Test
+  public void shouldBeAbleToSearchesByWordFragment() throws Exception {
+    // given
+    contentBuilder
+        .createFolder("folder")
+        .createFile("xxx.txt", TEST_CONTENT[0])
+        .createFile("yyy.txt", TEST_CONTENT[1])
+        .createFile("zzz.txt", TEST_CONTENT[2]);
+    searcher.add(contentBuilder.getCurrentFolder());
+    // when
+    // then
+    assertFind("*stone*", "/folder/xxx.txt");
+  }
   //
   //  @Test
   //  public void searchesByTextAndFileName() throws Exception {
@@ -438,9 +413,17 @@ public class SearcherTest {
     assertEquals(paths, Arrays.asList(expectedPaths));
   }
 
+  public void assertFind(String text, String... expectedPaths) throws ServerException {
+    assertFind(new QueryExpression().setText(text), expectedPaths);
+  }
+
   public void assertEmptyResult(QueryExpression query) throws ServerException {
     List<String> paths = searcher.search(query).getFilePaths();
     assertTrue(paths.isEmpty());
+  }
+
+  public void assertEmptyResult(String text) throws ServerException {
+    assertFind(new QueryExpression().setText(text));
   }
 
   public static class ContentBuilder {
