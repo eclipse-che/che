@@ -52,7 +52,8 @@ public class SearcherTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    indexDirectory = Files.createTempDir();
+    indexDirectory = Paths.get("/tmp/indexdir").toFile();
+    IoUtil.deleteRecursive(indexDirectory);
     workspaceStorage = Files.createTempDir();
     excludePatterns = Collections.emptySet();
     //    File targetDir =
@@ -71,6 +72,7 @@ public class SearcherTest {
         new LuceneSearcher(excludePatterns, indexDirectory, workspaceStorage, pathTransformer);
     contentBuilder = new ContentBuilder(workspaceStorage.toPath());
   }
+
 
   @AfterMethod
   public void tearDown() throws Exception {
@@ -116,23 +118,84 @@ public class SearcherTest {
     assertFind(new QueryExpression().setText("should"), "/aaa/aaa.txt");
   }
 
+  @Test
+  public void shouldBeAbleToDeleteSingleFile() throws Exception {
+    // given
+    contentBuilder
+        .createFolder("folder")
+        .createFile("xxx.txt", TEST_CONTENT[2])
+        .createFile("zzz.txt", TEST_CONTENT[1]);
+    searcher.add(contentBuilder.getCurrentFolder());
+    contentBuilder.takeParent()
+        .createFolder("aaa")
+        .createFile("aaa.txt1", TEST_CONTENT[3])
+        .createFile("aaa.txt", TEST_CONTENT[2]);
+    searcher.add(contentBuilder.getCurrentFolder());
+    assertFind(new QueryExpression().setText("be"), "/folder/xxx.txt", "/aaa/aaa.txt");
 
-  //
-  //  @Test
-  //  public void deletesSingleFileFromIndex() throws Exception {
-  //    VirtualFileSystem virtualFileSystem = virtualFileSystem();
-  //    VirtualFile file =
-  //        virtualFileSystem.getRoot().createFolder("aaa").createFile("aaa.txt", TEST_CONTENT[2]);
-  //    searcher.init(virtualFileSystem);
-  //
-  //    List<String> paths = searcher.search(new QueryExpression().setText("be")).getFilePaths();
-  //    assertEquals(newArrayList(file.getPath().toString()), paths);
-  //
-  //    searcher.delete(file.getPath().toString(), file.isFile());
-  //
-  //    paths = searcher.search(new QueryExpression().setText("be")).getFilePaths();
-  //    assertTrue(paths.isEmpty());
-  //  }
+
+    // when
+    contentBuilder.deleteFileInCurrentFolder("aaa.txt");
+    searcher.delete(contentBuilder.getLastUpdatedFile());
+    // then
+    assertFind(new QueryExpression().setText("be"), "/folder/xxx.txt");
+  }
+
+
+  @Test
+  public void shouldBeAbleToFindNumberWithComaInText() throws Exception {
+    // given
+    contentBuilder
+        .createFolder("aaa")
+        .createFile("aaa.txt1", TEST_CONTENT[3])
+        .createFile("aaa.txt", TEST_CONTENT[2]);
+    searcher.add(contentBuilder.getCurrentFolder());
+    //when
+    //then
+    assertFind(new QueryExpression().setText("1961,"),  "/aaa/aaa.txt1");
+  }
+
+  @Test
+  public void shouldBeAbleToFindTwoWordsInText() throws Exception {
+    // given
+    contentBuilder
+        .createFolder("aaa")
+        .createFile("aaa.txt1", TEST_CONTENT[3])
+        .createFile("aaa.txt", TEST_CONTENT[2]);
+    searcher.add(contentBuilder.getCurrentFolder());
+    //when
+    //then
+    assertFind(new QueryExpression().setText("was generally"),  "/aaa/aaa.txt1");
+  }
+
+
+  @Test
+  public void shouldBeAbleToDeleteFolder() throws Exception {
+    // given
+    contentBuilder
+        .createFolder("folder")
+        .createFile("xxx.txt", TEST_CONTENT[2])
+        .createFile("zzz.txt", TEST_CONTENT[1]);
+    searcher.add(contentBuilder.getCurrentFolder());
+    contentBuilder.takeParent()
+        .createFolder("aaa")
+        .createFile("aaa.txt1", TEST_CONTENT[3])
+        .createFile("aaa.txt", TEST_CONTENT[2]);
+    searcher.add(contentBuilder.getCurrentFolder());
+    assertFind(new QueryExpression().setText("be"), "/folder/xxx.txt", "/aaa/aaa.txt");
+    assertFind(new QueryExpression().setText("generally"),  "/aaa/aaa.txt1");
+
+
+    // when
+    searcher.delete(contentBuilder.getCurrentFolder());
+    contentBuilder.deleteCurrentFolder();
+    // then
+    assertFind(new QueryExpression().setText("be"), "/folder/xxx.txt");
+    assertEmptyResult(new QueryExpression().setText("generally"));
+  }
+
+
+
   //
   //  @Test
   //  public void deletesFileTreeFromIndex() throws Exception {
@@ -404,8 +467,25 @@ public class SearcherTest {
       return this.root;
     }
 
+    public ContentBuilder takeParent() {
+      this.root = this.root.getParent();
+      return this;
+    }
+
     public Path getLastUpdatedFile() {
       return lastUpdatedFile;
+    }
+
+    public ContentBuilder deleteCurrentFolder() {
+      IoUtil.deleteRecursive(this.root.toFile());
+      this.root = this.root.getParent();
+      return this;
+    }
+
+    public ContentBuilder deleteFileInCurrentFolder(String name) {
+      this.lastUpdatedFile = Paths.get(this.root.toString(), name);
+      this.lastUpdatedFile.toFile().delete();
+      return this;
     }
   }
 }

@@ -55,6 +55,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.PrefixQuery;
@@ -62,6 +63,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.SearcherFactory;
 import org.apache.lucene.search.SearcherManager;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.highlight.QueryScorer;
 import org.apache.lucene.search.highlight.TokenSources;
@@ -347,6 +349,7 @@ public class LuceneSearcher implements Searcher {
               new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                  LOG.info("Path {}", file.toString());
                   addFile(file);
                   return FileVisitResult.CONTINUE;
                 }
@@ -380,7 +383,7 @@ public class LuceneSearcher implements Searcher {
       String name = nameOf(wsPath);
       Document doc = new Document();
       doc.add(new StringField(PATH_FIELD, wsPath, Field.Store.YES));
-      doc.add(new TextField(NAME_FIELD, name, Field.Store.YES));
+      doc.add(new StringField(NAME_FIELD, name, Field.Store.YES));
       try {
         doc.add(new TextField(TEXT_FIELD, CharStreams.toString(reader), Field.Store.YES));
       } catch (MalformedInputException e) {
@@ -395,20 +398,50 @@ public class LuceneSearcher implements Searcher {
 
   @Override
   public final void delete(Path fsPath) {
+
     String wsPath = pathTransformer.transform(fsPath);
     try {
-      if (fsPath.toFile().isFile()) {
-        Term term = new Term(PATH_FIELD, wsPath);
-        luceneIndexWriter.deleteDocuments(term);
-      } else {
-        Term term = new Term(PATH_FIELD, wsPath + '/');
-        luceneIndexWriter.deleteDocuments(new PrefixQuery(term));
-      }
+
+      // Since in most cases this is post action there is no way to find out is this a file
+      // or directory. Lets try to delete both
+      BooleanQuery.Builder deleteFileOrFolder = new BooleanQuery.Builder();
+      deleteFileOrFolder.setMinimumNumberShouldMatch(1);
+      deleteFileOrFolder.add(new TermQuery(new Term(PATH_FIELD, wsPath)), Occur.SHOULD);
+      deleteFileOrFolder.add(new PrefixQuery(new Term(PATH_FIELD, wsPath + "/")), Occur.SHOULD);
+      printStatistic();
+      luceneIndexWriter.deleteDocuments(deleteFileOrFolder.build());
+      printStatistic();
       luceneIndexWriter.commit();
+      printStatistic();
+      luceneIndexWriter.forceMerge(1);
+      printStatistic();
     } catch (OutOfMemoryError oome) {
       throw oome;
     } catch (IOException e) {
       LOG.warn("Can't delete index for file: {}", wsPath);
+    }
+  }
+
+  private void printStatistic() throws IOException {
+    IndexSearcher luceneSearcher = null;
+    try {
+      final long startTime = System.currentTimeMillis();
+      searcherManager.maybeRefresh();
+      luceneSearcher = searcherManager.acquire();
+      IndexReader reader = luceneSearcher.getIndexReader();
+      LOG.info(
+          "IndexReader numDocs={} numDeletedDocs={} maxDoc={} hasDeletions={}. Writer numDocs={} numRamDocs={} hasPendingMerges={}  hasUncommittedChanges={} hasDeletions={}",
+          reader.numDocs(),
+          reader.numDeletedDocs(),
+          reader.maxDoc(),
+          reader.hasDeletions(),
+          luceneIndexWriter.numDocs(),
+          luceneIndexWriter.numRamDocs(),
+          luceneIndexWriter.hasPendingMerges(),
+          luceneIndexWriter.hasUncommittedChanges(),
+          luceneIndexWriter.hasDeletions());
+    } finally {
+      searcherManager.release(luceneSearcher);
     }
   }
 
