@@ -31,8 +31,7 @@ import org.eclipse.che.ide.terminal.helpers.TerminalGeometry;
 public class Terminal {
 
   @SuppressWarnings("unused")
-  public Terminal(TerminalOptions options) {
-  }
+  public Terminal(TerminalOptions options) {}
 
   @JsFunction
   @FunctionalInterface
@@ -76,7 +75,7 @@ public class Terminal {
 
   public native void writeln(String data);
 
-  //todo test method should be reworked
+  // todo test method should be reworked
   public native void print();
 
   public native String getText();

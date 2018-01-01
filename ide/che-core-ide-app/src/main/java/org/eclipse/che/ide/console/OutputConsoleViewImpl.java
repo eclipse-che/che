@@ -146,17 +146,18 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
     this.terminal = new Terminal(termOptions);
     terminal.attachCustomKeyDownHandler(new OutputConsoleCustomKeyDownHandler(terminal));
-//    Log.info(getClass(), "char Measure " + terminal.getCharMeasure());
-//    Log.info(getClass(), "char Measure height " + terminal.getCharMeasure().getHeight());
-//    Log.info(getClass(), "horizontal scroll bar size " + terminal.getScrollBarMeasure().getHorizontalWidth());
-//        resize();
+    //    Log.info(getClass(), "char Measure " + terminal.getCharMeasure());
+    //    Log.info(getClass(), "char Measure height " + terminal.getCharMeasure().getHeight());
+    //    Log.info(getClass(), "horizontal scroll bar size " +
+    // terminal.getScrollBarMeasure().getHorizontalWidth());
+    //        resize();
 
-//                  Log.info(getClass(),  "Constructor !!!! "
-//                                        + " " + consoleLines.getElement().getClientHeight()
-//                                        + " " + consoleLines.getElement().getClientWidth()
-//                                        + " " + consoleLines.isVisible()
-//                                        + " " + consoleLines.isAttached()
-//                                        + " " + hashCode());
+    //                  Log.info(getClass(),  "Constructor !!!! "
+    //                                        + " " + consoleLines.getElement().getClientHeight()
+    //                                        + " " + consoleLines.getElement().getClientWidth()
+    //                                        + " " + consoleLines.isVisible()
+    //                                        + " " + consoleLines.isAttached()
+    //                                        + " " + hashCode());
   }
 
   @Override
@@ -165,33 +166,34 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
       if (!termIsOpen()) {
         terminal.open(consoleLines.getElement());
       }
-//      resizeTimer.schedule(200);
+      //      resizeTimer.schedule(200);
       resize();
     }
   }
 
   private Timer resizeTimer =
-          new Timer() {
-            @Override
-            public void run() {
-              resize();
-            }
-          };
+      new Timer() {
+        @Override
+        public void run() {
+          resize();
+        }
+      };
 
   private boolean termIsOpen() {
     return consoleLines.getElement().equals(terminal.getParent());
   }
 
   private boolean consoleIsFit() {
-    return consoleLines.getElement().getClientHeight() > 0 && consoleLines.getElement().getClientWidth() > 0;
+    return consoleLines.getElement().getClientHeight() > 0
+        && consoleLines.getElement().getClientWidth() > 0;
   }
 
   private void resize() {
     TerminalGeometry geometry = terminal.proposeGeometry();
     int visibleCols = geometry.getCols();
     int visibleRows = geometry.getRows();
-//    int visibleCols = evaluateVisibleCols();
-//    int visibleRows = evaluateVisibleRows();
+    //    int visibleCols = evaluateVisibleCols();
+    //    int visibleRows = evaluateVisibleRows();
 
     if (visibleRows > 0 && visibleCols > 0) {
       int cols = Math.max(terminal.getMaxLineLength(), visibleCols);

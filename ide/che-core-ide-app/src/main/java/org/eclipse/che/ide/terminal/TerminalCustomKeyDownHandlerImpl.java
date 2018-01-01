@@ -10,10 +10,10 @@
  */
 package org.eclipse.che.ide.terminal;
 
-import elemental.events.KeyboardEvent;
-
 import static com.google.gwt.event.dom.client.KeyCodes.KEY_C;
 import static com.google.gwt.event.dom.client.KeyCodes.KEY_V;
+
+import elemental.events.KeyboardEvent;
 
 /**
  * Custom keyDown handler for {@link Terminal}. Implementation of the {@link
