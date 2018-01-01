@@ -21,7 +21,7 @@ public interface Searcher {
    * @return results of search
    * @throws ServerException if an error occurs
    */
-  SearchResult search(QueryExpression query) throws ServerException;
+  SearchResult search(QueryExpression query) throws InvalidQueryException, QueryExecutionException;
 
   /**
    * Add VirtualFile to index.

@@ -69,9 +69,10 @@ import org.apache.lucene.search.highlight.QueryScorer;
 import org.apache.lucene.search.highlight.TokenSources;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.SingleInstanceLockFactory;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.PathTransformer;
+import org.eclipse.che.api.search.server.InvalidQueryException;
 import org.eclipse.che.api.search.server.OffsetData;
+import org.eclipse.che.api.search.server.QueryExecutionException;
 import org.eclipse.che.api.search.server.QueryExpression;
 import org.eclipse.che.api.search.server.SearchResult;
 import org.eclipse.che.api.search.server.Searcher;
@@ -166,7 +167,8 @@ public class LuceneSearcher implements Searcher {
   }
 
   @Override
-  public SearchResult search(QueryExpression query) throws ServerException {
+  public SearchResult search(QueryExpression query)
+      throws InvalidQueryException, QueryExecutionException {
     IndexSearcher luceneSearcher = null;
     try {
       final long startTime = System.currentTimeMillis();
@@ -229,7 +231,7 @@ public class LuceneSearcher implements Searcher {
               endOffset = offsetAtt.endOffset();
 
               if ((endOffset > txt.length()) || (startOffset > txt.length())) {
-                throw new ServerException(
+                throw new QueryExecutionException(
                     "Token "
                         + termAtt.toString()
                         + " exceeds length of provided text size "
@@ -250,7 +252,8 @@ public class LuceneSearcher implements Searcher {
                           tokenText, startOffset, endOffset, docId, res, lineNum, foundLine));
                 } catch (BadLocationException e) {
                   LOG.error(e.getLocalizedMessage(), e);
-                  throw new ServerException("Can not provide data for token " + termAtt.toString());
+                  throw new QueryExecutionException(
+                      "Can not provide data for token " + termAtt.toString());
                 }
               }
             }
@@ -275,8 +278,10 @@ public class LuceneSearcher implements Searcher {
           .withNextPageQueryExpression(nextPageQueryExpression)
           .withElapsedTimeMillis(elapsedTimeMillis)
           .build();
-    } catch (IOException | ParseException e) {
-      throw new ServerException(e.getMessage(), e);
+    } catch (ParseException e) {
+      throw new InvalidQueryException(e.getMessage(), e);
+    } catch (IOException e) {
+      throw new QueryExecutionException(e.getMessage(), e);
     } finally {
       try {
         searcherManager.release(luceneSearcher);

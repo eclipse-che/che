@@ -666,7 +666,7 @@ public class ProjectService {
           @DefaultValue("-1")
           int maxItems,
       @ApiParam(value = "Skip count") @QueryParam("skipCount") int skipCount)
-      throws NotFoundException, ForbiddenException, ConflictException, ServerException {
+      throws NotFoundException, ServerException, BadRequestException {
 
     return getProjectServiceApi().search(wsPath, name, text, maxItems, skipCount);
   }

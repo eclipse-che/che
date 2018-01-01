@@ -75,7 +75,9 @@ import org.eclipse.che.api.project.shared.dto.SearchOccurrenceDto;
 import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
+import org.eclipse.che.api.search.server.InvalidQueryException;
 import org.eclipse.che.api.search.server.OffsetData;
+import org.eclipse.che.api.search.server.QueryExecutionException;
 import org.eclipse.che.api.search.server.QueryExpression;
 import org.eclipse.che.api.search.server.SearchResult;
 import org.eclipse.che.api.search.server.Searcher;
@@ -83,12 +85,15 @@ import org.eclipse.che.api.search.server.impl.SearchResultEntry;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Project service REST API back end. This class' methods are called from the {@link
  * ProjectService}.
  */
 public class ProjectServiceApi {
+  private static final Logger LOG = LoggerFactory.getLogger(ProjectServiceApi.class);
 
   private static Tika TIKA;
 
@@ -602,9 +607,9 @@ public class ProjectServiceApi {
    */
   public ProjectSearchResponseDto search(
       String wsPath, String name, String text, int maxItems, int skipCount)
-      throws NotFoundException, ForbiddenException, ConflictException, ServerException {
+      throws BadRequestException, ServerException, NotFoundException {
     if (skipCount < 0) {
-      throw new ConflictException(String.format("Invalid 'skipCount' parameter: %d.", skipCount));
+      throw new BadRequestException(String.format("Invalid 'skipCount' parameter: %d.", skipCount));
     }
     wsPath = absolutize(wsPath);
 
@@ -617,11 +622,18 @@ public class ProjectServiceApi {
             .setSkipCount(skipCount)
             .setIncludePositions(true);
 
-    SearchResult result = searcher.search(expr);
-    List<SearchResultEntry> searchResultEntries = result.getResults();
-    return DtoFactory.newDto(ProjectSearchResponseDto.class)
-        .withTotalHits(result.getTotalHits())
-        .withItemReferences(prepareResults(searchResultEntries));
+    try {
+      SearchResult result = searcher.search(expr);
+      List<SearchResultEntry> searchResultEntries = result.getResults();
+      return DtoFactory.newDto(ProjectSearchResponseDto.class)
+          .withTotalHits(result.getTotalHits())
+          .withItemReferences(prepareResults(searchResultEntries));
+    } catch (InvalidQueryException e) {
+      throw new BadRequestException(e.getMessage());
+    } catch (QueryExecutionException e) {
+      LOG.warn(e.getLocalizedMessage());
+      throw new ServerException(e.getMessage());
+    }
   }
 
   /**
@@ -629,7 +641,7 @@ public class ProjectServiceApi {
    * found given text
    */
   private List<SearchResultDto> prepareResults(List<SearchResultEntry> searchResultEntries)
-      throws ServerException, NotFoundException {
+      throws NotFoundException {
     List<SearchResultDto> results = new ArrayList<>(searchResultEntries.size());
     for (SearchResultEntry searchResultEntry : searchResultEntries) {
       String path = searchResultEntry.getFilePath();
@@ -680,7 +692,7 @@ public class ProjectServiceApi {
 
     try {
       return search(path, name, text, maxItems, skipCount);
-    } catch (ServerException | ConflictException | NotFoundException | ForbiddenException e) {
+    } catch (ServerException | NotFoundException | BadRequestException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
   }

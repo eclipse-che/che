@@ -25,9 +25,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.fs.server.impl.RootAwarePathTransformer;
+import org.eclipse.che.api.search.server.InvalidQueryException;
 import org.eclipse.che.api.search.server.OffsetData;
+import org.eclipse.che.api.search.server.QueryExecutionException;
 import org.eclipse.che.api.search.server.QueryExpression;
 import org.eclipse.che.api.search.server.SearchResult;
 import org.eclipse.che.api.search.server.Searcher;
@@ -76,7 +77,8 @@ public class SearcherTest {
   }
 
   @Test
-  public void shouldBeAbleToFindSingleFile() throws Exception {
+  public void shouldBeAbleToFindSingleFile()
+      throws InvalidQueryException, QueryExecutionException, IOException {
 
     // given
     contentBuilder.createFolder("aaa").createFile("aaa.txt", TEST_CONTENT[1]);
@@ -87,7 +89,8 @@ public class SearcherTest {
   }
 
   @Test
-  public void shouldBeAbleToFindTwoFilesAddedAsSingleDirectory() throws Exception {
+  public void shouldBeAbleToFindTwoFilesAddedAsSingleDirectory()
+      throws InvalidQueryException, QueryExecutionException, IOException {
     // given
     contentBuilder
         .createFolder("folder")
@@ -101,7 +104,8 @@ public class SearcherTest {
   }
 
   @Test
-  public void shouldBeAbleToUpdateSingleFile() throws Exception {
+  public void shouldBeAbleToUpdateSingleFile()
+      throws InvalidQueryException, QueryExecutionException, IOException {
     // given
     contentBuilder.createFolder("aaa").createFile("aaa.txt", TEST_CONTENT[2]);
     searcher.add(contentBuilder.getLastUpdatedFile());
@@ -114,7 +118,8 @@ public class SearcherTest {
   }
 
   @Test
-  public void shouldBeAbleToDeleteSingleFile() throws Exception {
+  public void shouldBeAbleToDeleteSingleFile()
+      throws InvalidQueryException, QueryExecutionException, IOException {
     // given
     contentBuilder
         .createFolder("folder")
@@ -137,7 +142,8 @@ public class SearcherTest {
   }
 
   @Test
-  public void shouldBeAbleToFindNumberWithComaInText() throws Exception {
+  public void shouldBeAbleToFindNumberWithComaInText()
+      throws InvalidQueryException, QueryExecutionException, IOException {
     // given
     contentBuilder
         .createFolder("aaa")
@@ -150,7 +156,8 @@ public class SearcherTest {
   }
 
   @Test
-  public void shouldBeAbleToFindTwoWordsInText() throws Exception {
+  public void shouldBeAbleToFindTwoWordsInText()
+      throws InvalidQueryException, QueryExecutionException, IOException {
     // given
     contentBuilder
         .createFolder("aaa")
@@ -163,7 +170,8 @@ public class SearcherTest {
   }
 
   @Test
-  public void shouldBeAbleToDeleteFolder() throws Exception {
+  public void shouldBeAbleToDeleteFolder()
+      throws InvalidQueryException, QueryExecutionException, IOException {
     // given
     contentBuilder
         .createFolder("folder")
@@ -188,7 +196,8 @@ public class SearcherTest {
   }
 
   @Test
-  public void shouldBeAbleToSearchByWordFragment() throws Exception {
+  public void shouldBeAbleToSearchByWordFragment()
+      throws InvalidQueryException, QueryExecutionException, IOException {
     // given
     contentBuilder
         .createFolder("folder")
@@ -202,7 +211,8 @@ public class SearcherTest {
   }
 
   @Test
-  public void shouldBeAbleToSearchByTextTermAndFileName() throws Exception {
+  public void shouldBeAbleToSearchByTextTermAndFileName()
+      throws InvalidQueryException, QueryExecutionException, IOException {
     // given
     contentBuilder
         .createFolder("folder")
@@ -216,7 +226,8 @@ public class SearcherTest {
   }
 
   @Test
-  public void shouldBeAbleToSearchByFullTextPatternAndFileName() throws Exception {
+  public void shouldBeAbleToSearchByFullTextPatternAndFileName()
+      throws InvalidQueryException, QueryExecutionException, IOException {
     // given
     contentBuilder
         .createFolder("folder")
@@ -230,7 +241,8 @@ public class SearcherTest {
   }
 
   @Test
-  public void shouldBeAbleToSearchWithPositions() throws Exception {
+  public void shouldBeAbleToSearchWithPositions()
+      throws InvalidQueryException, QueryExecutionException, IOException {
     // given
     contentBuilder
         .createFolder("folder")
@@ -266,7 +278,8 @@ public class SearcherTest {
   }
 
   @Test(dataProvider = "searchByName")
-  public void shouldSearchFileByName(String fileName, String searchedFileName) throws Exception {
+  public void shouldSearchFileByName(String fileName, String searchedFileName)
+      throws InvalidQueryException, QueryExecutionException, IOException {
     // given
     contentBuilder
         .createFolder("parent")
@@ -287,7 +300,8 @@ public class SearcherTest {
   }
 
   @Test
-  public void shouldSearchByTextAndPath() throws Exception {
+  public void shouldSearchByTextAndPath()
+      throws InvalidQueryException, QueryExecutionException, IOException {
     // given
     contentBuilder.createFolder("folder2").createFile("zzz.txt", TEST_CONTENT[2]);
     searcher.add(contentBuilder.getCurrentFolder());
@@ -304,7 +318,8 @@ public class SearcherTest {
   }
 
   @Test
-  public void shouldSearchByTextAndPathAndFileName() throws Exception {
+  public void shouldSearchByTextAndPathAndFileName()
+      throws InvalidQueryException, QueryExecutionException, IOException {
     contentBuilder
         .createFolder("folder1")
         .createFolder("a")
@@ -328,7 +343,8 @@ public class SearcherTest {
   }
 
   @Test
-  public void shouldLimitsNumberOfSearchResultsWhenMaxItemIsSet() throws Exception {
+  public void shouldLimitsNumberOfSearchResultsWhenMaxItemIsSet()
+      throws InvalidQueryException, QueryExecutionException, IOException {
 
     // given
     for (int i = 0; i < 125; i++) {
@@ -346,7 +362,7 @@ public class SearcherTest {
 
   @Test
   public void shouldBeAbleToGeneratesQueryExpressionForRetrievingNextPageOfResults()
-      throws Exception {
+      throws InvalidQueryException, QueryExecutionException, IOException {
     // given
     for (int i = 0; i < 125; i++) {
       contentBuilder.createFile(
@@ -368,7 +384,8 @@ public class SearcherTest {
   }
 
   @Test
-  public void shouldBeAbleToRetrievesSearchResultWithPages() throws Exception {
+  public void shouldBeAbleToRetrievesSearchResultWithPages()
+      throws InvalidQueryException, QueryExecutionException, IOException {
     for (int i = 0; i < 125; i++) {
       contentBuilder.createFile(
           String.format("file%02d", i), TEST_CONTENT[i % TEST_CONTENT.length]);
@@ -389,26 +406,29 @@ public class SearcherTest {
   }
 
   public void assertFind(QueryExpression query, SearchResultEntry... expectedResults)
-      throws ServerException {
+      throws InvalidQueryException, QueryExecutionException {
     SearchResult result = searcher.search(query);
     assertEquals(result.getResults(), Arrays.asList(expectedResults));
   }
 
-  public void assertFind(QueryExpression query, String... expectedPaths) throws ServerException {
+  public void assertFind(QueryExpression query, String... expectedPaths)
+      throws InvalidQueryException, QueryExecutionException {
     List<String> paths = searcher.search(query).getFilePaths();
     assertEquals(paths, Arrays.asList(expectedPaths));
   }
 
-  public void assertFind(String text, String... expectedPaths) throws ServerException {
+  public void assertFind(String text, String... expectedPaths)
+      throws InvalidQueryException, QueryExecutionException {
     assertFind(new QueryExpression().setText(text), expectedPaths);
   }
 
-  public void assertEmptyResult(QueryExpression query) throws ServerException {
+  public void assertEmptyResult(QueryExpression query)
+      throws InvalidQueryException, QueryExecutionException {
     List<String> paths = searcher.search(query).getFilePaths();
     assertTrue(paths.isEmpty());
   }
 
-  public void assertEmptyResult(String text) throws ServerException {
+  public void assertEmptyResult(String text) throws InvalidQueryException, QueryExecutionException {
     assertEmptyResult(new QueryExpression().setText(text));
   }
 
