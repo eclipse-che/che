@@ -42,7 +42,7 @@ import org.testng.annotations.Test;
 
 @SuppressWarnings("Duplicates")
 public class SearcherTest {
-  private static final String[] TEST_CONTENT = {
+  public static final String[] TEST_CONTENT = {
     "Apollo set several major human spaceflight milestones",
     "Maybe you should think twice",
     "To be or not to be beeeee lambergeeene",
