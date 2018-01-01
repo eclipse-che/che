@@ -29,7 +29,7 @@ public interface Searcher {
    * @param fsPath file to add
    * @throws ServerException if an error occurs
    */
-  void add(Path fsPath) ;
+  void add(Path fsPath);
 
   /**
    * Delete VirtualFile from index.

@@ -13,6 +13,7 @@ package org.eclipse.che.api.search;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import java.io.File;
@@ -58,21 +59,10 @@ public class SearcherTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    indexDirectory = Paths.get("/tmp/indexdir").toFile();
+    indexDirectory = Files.createTempDir(); // Paths.get("/tmp/indexdir").toFile();
     IoUtil.deleteRecursive(indexDirectory);
     workspaceStorage = Files.createTempDir();
     excludePatterns = Collections.emptySet();
-    //    File targetDir =
-    //        new File(Thread.currentThread().getContextClassLoader().getResource(".").getPath())
-    //            .getParentFile();
-    //    indexDirectory = new File(targetDir, NameGenerator.generate("index-", 4));
-    //    assertTrue(indexDirectory.mkdir());
-
-    //    filter = mock(VirtualFileFilter.class);
-    //    when(filter.accept(any(VirtualFile.class))).thenReturn(false);
-    //
-    //    closeCallback = mock(AbstractLuceneSearcherProvider.CloseCallback.class);
-
     pathTransformer = new RootAwarePathTransformer(workspaceStorage);
     searcher =
         new LuceneSearcher(excludePatterns, indexDirectory, workspaceStorage, pathTransformer);
@@ -132,7 +122,7 @@ public class SearcherTest {
         .createFile("zzz.txt", TEST_CONTENT[1]);
     searcher.add(contentBuilder.getCurrentFolder());
     contentBuilder
-        .takeParent()
+        .takeWorkspceRoot()
         .createFolder("aaa")
         .createFile("aaa.txt1", TEST_CONTENT[3])
         .createFile("aaa.txt", TEST_CONTENT[2]);
@@ -181,7 +171,7 @@ public class SearcherTest {
         .createFile("zzz.txt", TEST_CONTENT[1]);
     searcher.add(contentBuilder.getCurrentFolder());
     contentBuilder
-        .takeParent()
+        .takeWorkspceRoot()
         .createFolder("aaa")
         .createFile("aaa.txt1", TEST_CONTENT[3])
         .createFile("aaa.txt", TEST_CONTENT[2]);
@@ -276,7 +266,7 @@ public class SearcherTest {
   }
 
   @Test(dataProvider = "searchByName")
-  public void searchFileByName(String fileName, String searchedFileName) throws Exception {
+  public void shouldSearchFileByName(String fileName, String searchedFileName) throws Exception {
     // given
     contentBuilder
         .createFolder("parent")
@@ -286,8 +276,7 @@ public class SearcherTest {
         .createFile(NameGenerator.generate(null, 10), TEST_CONTENT[1]);
     searcher.add(contentBuilder.getCurrentFolder());
     contentBuilder
-        .takeParent()
-        .takeParent()
+        .takeWorkspceRoot()
         .createFolder("folder2")
         .createFile(NameGenerator.generate(null, 10), TEST_CONTENT[2])
         .createFile(NameGenerator.generate(null, 10), TEST_CONTENT[2]);
@@ -298,137 +287,106 @@ public class SearcherTest {
   }
 
   @Test
-  public void searchesByTextAndPath() throws Exception {
+  public void shouldSearchByTextAndPath() throws Exception {
     // given
     contentBuilder.createFolder("folder2").createFile("zzz.txt", TEST_CONTENT[2]);
     searcher.add(contentBuilder.getCurrentFolder());
     contentBuilder
-        .takeParent()
+        .takeWorkspceRoot()
         .createFolder("folder1")
         .createFolder("a")
         .createFolder("B")
         .createFile("xxx.txt", TEST_CONTENT[2]);
     searcher.add(contentBuilder.getCurrentFolder());
-    //when
-    //then
+    // when
+    // then
     assertFind(new QueryExpression().setText("be").setPath("/folder1"), "/folder1/a/B/xxx.txt");
   }
 
-  //  @Test
-  //  public void searchesByTextAndPathAndFileName() throws Exception {
-  //    VirtualFileSystem virtualFileSystem = virtualFileSystem();
-  //    VirtualFile folder1 = virtualFileSystem.getRoot().createFolder("folder1/a/b");
-  //    VirtualFile folder2 = virtualFileSystem.getRoot().createFolder("folder2/a/b");
-  //    folder1.createFile("xxx.txt", TEST_CONTENT[2]);
-  //    folder1.createFile("yyy.txt", TEST_CONTENT[2]);
-  //    folder2.createFile("zzz.txt", TEST_CONTENT[2]);
-  //    searcher.init(virtualFileSystem);
-  //
-  //    List<String> paths =
-  //        searcher
-  //            .search(new QueryExpression().setText("be").setPath("/folder1").setName("xxx.txt"))
-  //            .getFilePaths();
-  //    assertEquals(newArrayList("/folder1/a/b/xxx.txt"), paths);
-  //  }
-  //
-  //  @Test
-  //  public void closesLuceneIndexWriterWhenSearcherClosed() throws Exception {
-  //    VirtualFileSystem virtualFileSystem = virtualFileSystem();
-  //    searcher.init(virtualFileSystem);
-  //
-  //    searcher.close();
-  //
-  //    assertTrue(searcher.isClosed());
-  //    assertFalse(searcher.getIndexWriter().isOpen());
-  //  }
-  //
-  //  @Test
-  //  public void notifiesCallbackWhenSearcherClosed() throws Exception {
-  //    VirtualFileSystem virtualFileSystem = virtualFileSystem();
-  //    searcher.init(virtualFileSystem);
-  //
-  //    searcher.close();
-  //    verify(closeCallback).onClose();
-  //  }
-  //
-  //  @Test
-  //  public void excludesFilesFromIndexWithFilter() throws Exception {
-  //    VirtualFileSystem virtualFileSystem = virtualFileSystem();
-  //    VirtualFile folder = virtualFileSystem.getRoot().createFolder("folder");
-  //    folder.createFile("xxx.txt", TEST_CONTENT[2]);
-  //    folder.createFile("yyy.txt", TEST_CONTENT[2]);
-  //    folder.createFile("zzz.txt", TEST_CONTENT[2]);
-  //
-  //    when(filter.accept(withName("yyy.txt"))).thenReturn(true);
-  //    searcher.init(virtualFileSystem);
-  //
-  //    List<String> paths = searcher.search(new QueryExpression().setText("be")).getFilePaths();
-  //    assertEquals(newArrayList("/folder/xxx.txt", "/folder/zzz.txt"), paths);
-  //  }
-  //
-  //  @Test
-  //  public void limitsNumberOfSearchResultsWhenMaxItemIsSet() throws Exception {
-  //    VirtualFileSystem virtualFileSystem = virtualFileSystem();
-  //    for (int i = 0; i < 125; i++) {
-  //      virtualFileSystem
-  //          .getRoot()
-  //          .createFile(String.format("file%02d", i), TEST_CONTENT[i % TEST_CONTENT.length]);
-  //    }
-  //    searcher.init(virtualFileSystem);
-  //
-  //    SearchResult result = searcher.search(new
-  // QueryExpression().setText("mission").setMaxItems(5));
-  //
-  //    assertEquals(25, result.getTotalHits());
-  //    assertEquals(5, result.getFilePaths().size());
-  //  }
-  //
-  //  @Test
-  //  public void generatesQueryExpressionForRetrievingNextPageOfResults() throws Exception {
-  //    VirtualFileSystem virtualFileSystem = virtualFileSystem();
-  //    for (int i = 0; i < 125; i++) {
-  //      virtualFileSystem
-  //          .getRoot()
-  //          .createFile(String.format("file%02d", i), TEST_CONTENT[i % TEST_CONTENT.length]);
-  //    }
-  //    searcher.init(virtualFileSystem);
-  //
-  //    SearchResult result =
-  //        searcher.search(new QueryExpression().setText("spaceflight").setMaxItems(7));
-  //
-  //    assertEquals(result.getTotalHits(), 25);
-  //
-  //    Optional<QueryExpression> optionalNextPageQueryExpression =
-  // result.getNextPageQueryExpression();
-  //    assertTrue(optionalNextPageQueryExpression.isPresent());
-  //    QueryExpression nextPageQueryExpression = optionalNextPageQueryExpression.get();
-  //    assertEquals("spaceflight", nextPageQueryExpression.getText());
-  //    assertEquals(7, nextPageQueryExpression.getSkipCount());
-  //    assertEquals(7, nextPageQueryExpression.getMaxItems());
-  //  }
-  //
-  //  @Test
-  //  public void retrievesSearchResultWithPages() throws Exception {
-  //    VirtualFileSystem virtualFileSystem = virtualFileSystem();
-  //    for (int i = 0; i < 125; i++) {
-  //      virtualFileSystem
-  //          .getRoot()
-  //          .createFile(String.format("file%02d", i), TEST_CONTENT[i % TEST_CONTENT.length]);
-  //    }
-  //    searcher.init(virtualFileSystem);
-  //
-  //    SearchResult firstPage =
-  //        searcher.search(new QueryExpression().setText("spaceflight").setMaxItems(8));
-  //    assertEquals(firstPage.getFilePaths().size(), 8);
-  //
-  //    QueryExpression nextPageQueryExpression = firstPage.getNextPageQueryExpression().get();
-  //    nextPageQueryExpression.setMaxItems(100);
-  //
-  //    SearchResult lastPage = searcher.search(nextPageQueryExpression);
-  //    assertEquals(lastPage.getFilePaths().size(), 17);
-  //
-  //    assertTrue(Collections.disjoint(firstPage.getFilePaths(), lastPage.getFilePaths()));
-  //  }
+  @Test
+  public void shouldSearchByTextAndPathAndFileName() throws Exception {
+    contentBuilder
+        .createFolder("folder1")
+        .createFolder("a")
+        .createFolder("b")
+        .createFile("yyy.txt", TEST_CONTENT[2])
+        .createFile("xxx.txt", TEST_CONTENT[2]);
+    searcher.add(contentBuilder.getCurrentFolder());
+
+    contentBuilder
+        .takeWorkspceRoot()
+        .createFolder("folder2")
+        .createFolder("a")
+        .createFolder("b")
+        .createFile("zzz.txt", TEST_CONTENT[2]);
+    searcher.add(contentBuilder.getCurrentFolder());
+    // when
+    // then
+    assertFind(
+        new QueryExpression().setText("be").setPath("/folder1").setName("xxx.txt"),
+        "/folder1/a/b/xxx.txt");
+  }
+
+  @Test
+  public void shouldLimitsNumberOfSearchResultsWhenMaxItemIsSet() throws Exception {
+
+    // given
+    for (int i = 0; i < 125; i++) {
+      contentBuilder.createFile(
+          String.format("file%02d", i), TEST_CONTENT[i % TEST_CONTENT.length]);
+    }
+    searcher.add(contentBuilder.getCurrentFolder());
+
+    // when
+    SearchResult result = searcher.search(new QueryExpression().setText("mission").setMaxItems(5));
+    // then
+    assertEquals(25, result.getTotalHits());
+    assertEquals(5, result.getFilePaths().size());
+  }
+
+  @Test
+  public void shouldBeAbleToGeneratesQueryExpressionForRetrievingNextPageOfResults()
+      throws Exception {
+    // given
+    for (int i = 0; i < 125; i++) {
+      contentBuilder.createFile(
+          String.format("file%02d", i), TEST_CONTENT[i % TEST_CONTENT.length]);
+    }
+    searcher.add(contentBuilder.getCurrentFolder());
+
+    SearchResult result =
+        searcher.search(new QueryExpression().setText("spaceflight").setMaxItems(7));
+
+    assertEquals(result.getTotalHits(), 25);
+
+    Optional<QueryExpression> optionalNextPageQueryExpression = result.getNextPageQueryExpression();
+    assertTrue(optionalNextPageQueryExpression.isPresent());
+    QueryExpression nextPageQueryExpression = optionalNextPageQueryExpression.get();
+    assertEquals("spaceflight", nextPageQueryExpression.getText());
+    assertEquals(7, nextPageQueryExpression.getSkipCount());
+    assertEquals(7, nextPageQueryExpression.getMaxItems());
+  }
+
+  @Test
+  public void shouldBeAbleToRetrievesSearchResultWithPages() throws Exception {
+    for (int i = 0; i < 125; i++) {
+      contentBuilder.createFile(
+          String.format("file%02d", i), TEST_CONTENT[i % TEST_CONTENT.length]);
+    }
+    searcher.add(contentBuilder.getCurrentFolder());
+
+    SearchResult firstPage =
+        searcher.search(new QueryExpression().setText("spaceflight").setMaxItems(8));
+    assertEquals(firstPage.getFilePaths().size(), 8);
+
+    QueryExpression nextPageQueryExpression = firstPage.getNextPageQueryExpression().get();
+    nextPageQueryExpression.setMaxItems(100);
+
+    SearchResult lastPage = searcher.search(nextPageQueryExpression);
+    assertEquals(lastPage.getFilePaths().size(), 17);
+
+    assertTrue(Collections.disjoint(firstPage.getFilePaths(), lastPage.getFilePaths()));
+  }
 
   public void assertFind(QueryExpression query, SearchResultEntry... expectedResults)
       throws ServerException {
@@ -455,10 +413,12 @@ public class SearcherTest {
   }
 
   public static class ContentBuilder {
+    private final Path workspaceRoot;
     private Path root;
     private Path lastUpdatedFile;
 
     public ContentBuilder(Path root) {
+      this.workspaceRoot = root;
       this.root = root;
     }
 
@@ -480,6 +440,11 @@ public class SearcherTest {
 
     public ContentBuilder takeParent() {
       this.root = this.root.getParent();
+      return this;
+    }
+
+    public ContentBuilder takeWorkspceRoot() {
+      this.root = workspaceRoot;
       return this;
     }
 

@@ -44,7 +44,8 @@ public class SearchResultEntry {
 
     SearchResultEntry that = (SearchResultEntry) o;
 
-    if (getFilePath() != null ? !getFilePath().equals(that.getFilePath())
+    if (getFilePath() != null
+        ? !getFilePath().equals(that.getFilePath())
         : that.getFilePath() != null) {
       return false;
     }
@@ -60,9 +61,6 @@ public class SearchResultEntry {
 
   @Override
   public String toString() {
-    return "SearchResultEntry{" +
-        "filePath='" + filePath + '\'' +
-        ", data=" + data +
-        '}';
+    return "SearchResultEntry{" + "filePath='" + filePath + '\'' + ", data=" + data + '}';
   }
 }

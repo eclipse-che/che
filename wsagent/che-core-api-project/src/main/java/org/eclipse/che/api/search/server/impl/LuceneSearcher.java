@@ -349,7 +349,6 @@ public class LuceneSearcher implements Searcher {
               new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-                  LOG.info("Path {}", file.toString());
                   addFile(file);
                   return FileVisitResult.CONTINUE;
                 }
@@ -361,6 +360,7 @@ public class LuceneSearcher implements Searcher {
         addFile(fsPath);
       }
       luceneIndexWriter.commit();
+      printStatistic();
     } catch (IOException e) {
       LOG.warn(
           "Can't commit changes to index for: {} because {} ",
@@ -378,6 +378,8 @@ public class LuceneSearcher implements Searcher {
       return;
     }
     String wsPath = pathTransformer.transform(fsPath);
+    LOG.debug("Adding file {} ", wsPath);
+
     try (Reader reader =
         new BufferedReader(new InputStreamReader(new FileInputStream(fsPath.toFile()), "utf-8"))) {
       String name = nameOf(wsPath);
@@ -408,12 +410,8 @@ public class LuceneSearcher implements Searcher {
       deleteFileOrFolder.setMinimumNumberShouldMatch(1);
       deleteFileOrFolder.add(new TermQuery(new Term(PATH_FIELD, wsPath)), Occur.SHOULD);
       deleteFileOrFolder.add(new PrefixQuery(new Term(PATH_FIELD, wsPath + "/")), Occur.SHOULD);
-      printStatistic();
       luceneIndexWriter.deleteDocuments(deleteFileOrFolder.build());
-      printStatistic();
       luceneIndexWriter.commit();
-      printStatistic();
-      luceneIndexWriter.forceMerge(1);
       printStatistic();
     } catch (OutOfMemoryError oome) {
       throw oome;
@@ -423,25 +421,27 @@ public class LuceneSearcher implements Searcher {
   }
 
   private void printStatistic() throws IOException {
-    IndexSearcher luceneSearcher = null;
-    try {
-      final long startTime = System.currentTimeMillis();
-      searcherManager.maybeRefresh();
-      luceneSearcher = searcherManager.acquire();
-      IndexReader reader = luceneSearcher.getIndexReader();
-      LOG.info(
-          "IndexReader numDocs={} numDeletedDocs={} maxDoc={} hasDeletions={}. Writer numDocs={} numRamDocs={} hasPendingMerges={}  hasUncommittedChanges={} hasDeletions={}",
-          reader.numDocs(),
-          reader.numDeletedDocs(),
-          reader.maxDoc(),
-          reader.hasDeletions(),
-          luceneIndexWriter.numDocs(),
-          luceneIndexWriter.numRamDocs(),
-          luceneIndexWriter.hasPendingMerges(),
-          luceneIndexWriter.hasUncommittedChanges(),
-          luceneIndexWriter.hasDeletions());
-    } finally {
-      searcherManager.release(luceneSearcher);
+    if (LOG.isDebugEnabled()) {
+      IndexSearcher luceneSearcher = null;
+      try {
+        final long startTime = System.currentTimeMillis();
+        searcherManager.maybeRefresh();
+        luceneSearcher = searcherManager.acquire();
+        IndexReader reader = luceneSearcher.getIndexReader();
+        LOG.debug(
+            "IndexReader numDocs={} numDeletedDocs={} maxDoc={} hasDeletions={}. Writer numDocs={} numRamDocs={} hasPendingMerges={}  hasUncommittedChanges={} hasDeletions={}",
+            reader.numDocs(),
+            reader.numDeletedDocs(),
+            reader.maxDoc(),
+            reader.hasDeletions(),
+            luceneIndexWriter.numDocs(),
+            luceneIndexWriter.numRamDocs(),
+            luceneIndexWriter.hasPendingMerges(),
+            luceneIndexWriter.hasUncommittedChanges(),
+            luceneIndexWriter.hasDeletions());
+      } finally {
+        searcherManager.release(luceneSearcher);
+      }
     }
   }
 
