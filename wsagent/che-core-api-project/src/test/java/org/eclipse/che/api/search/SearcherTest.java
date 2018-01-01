@@ -46,7 +46,7 @@ public class SearcherTest {
   public static final String[] TEST_CONTENT = {
     "Apollo set several major human spaceflight milestones",
     "Maybe you should think twice",
-    "To be or not to be beeeee lambergeeene",
+    "To be or not to be beeeee lambergeeene\n or may be not to be \n or insidebigword_to_continuebigword end of line",
     "In early 1961, direct ascent was generally the mission mode in favor at NASA",
     "Time to think"
   };
@@ -253,13 +253,17 @@ public class SearcherTest {
     // when
 
     // then
+
+    String[] lines = TEST_CONTENT[2].split("\\r?\\n");
     assertFind(
         new QueryExpression().setText("*to*").setIncludePositions(true),
         new SearchResultEntry(
             "/folder/xxx.txt",
             ImmutableList.of(
-                new OffsetData("To", 0, 2, 0, 1.0f, 0, TEST_CONTENT[2]),
-                new OffsetData("to", 13, 15, 0, 1.0f, 0, TEST_CONTENT[2]))),
+                new OffsetData("To", 0, 2, 0, 1.0f, 0, lines[0]),
+                new OffsetData("to", 13, 15, 0, 1.0f, 0, lines[0]),
+                new OffsetData("to", 54, 56, 0, 1.0f, 1, lines[1]),
+                new OffsetData("insidebigword_to_continuebigword", 65, 97, 0, 1.0f, 2, lines[2]))),
         new SearchResultEntry(
             "/folder/zzz.txt",
             ImmutableList.of(new OffsetData("to", 5, 7, 2, 1.0f, 0, TEST_CONTENT[4]))));

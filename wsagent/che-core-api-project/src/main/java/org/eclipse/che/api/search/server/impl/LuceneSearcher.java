@@ -31,6 +31,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import javax.annotation.PostConstruct;
@@ -76,9 +77,6 @@ import org.eclipse.che.api.search.server.QueryExecutionException;
 import org.eclipse.che.api.search.server.QueryExpression;
 import org.eclipse.che.api.search.server.SearchResult;
 import org.eclipse.che.api.search.server.Searcher;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -240,21 +238,23 @@ public class LuceneSearcher implements Searcher {
 
               float res = queryScorer.getTokenScore();
               if (res > 0.0F && startOffset <= endOffset) {
-                try {
-                  IDocument document = new org.eclipse.jface.text.Document(txt);
-                  int lineNum = document.getLineOfOffset(startOffset);
-                  IRegion lineInfo = document.getLineInformation(lineNum);
-                  String foundLine = document.get(lineInfo.getOffset(), lineInfo.getLength());
-                  String tokenText = document.get(startOffset, endOffset - startOffset);
+                String tokenText = txt.substring(startOffset, endOffset);
+                Scanner sc = new Scanner(txt);
+                int lineNum = 0;
+                long len = 0;
+                String foundLine = "";
+                while (sc.hasNextLine()) {
+                  foundLine = sc.nextLine();
 
-                  offsetData.add(
-                      new OffsetData(
-                          tokenText, startOffset, endOffset, docId, res, lineNum, foundLine));
-                } catch (BadLocationException e) {
-                  LOG.error(e.getLocalizedMessage(), e);
-                  throw new QueryExecutionException(
-                      "Can not provide data for token " + termAtt.toString());
+                  len += foundLine.length();
+                  if (len > startOffset) {
+                    break;
+                  }
+                  lineNum++;
                 }
+                offsetData.add(
+                    new OffsetData(
+                        tokenText, startOffset, endOffset, docId, res, lineNum, foundLine));
               }
             }
           }
@@ -418,8 +418,6 @@ public class LuceneSearcher implements Searcher {
       luceneIndexWriter.deleteDocuments(deleteFileOrFolder.build());
       luceneIndexWriter.commit();
       printStatistic();
-    } catch (OutOfMemoryError oome) {
-      throw oome;
     } catch (IOException e) {
       LOG.warn("Can't delete index for file: {}", wsPath);
     }
