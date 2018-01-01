@@ -277,7 +277,7 @@ public class SearcherTest {
 
   @Test(dataProvider = "searchByName")
   public void searchFileByName(String fileName, String searchedFileName) throws Exception {
-    //given
+    // given
     contentBuilder
         .createFolder("parent")
         .createFolder("child")
@@ -292,23 +292,28 @@ public class SearcherTest {
         .createFile(NameGenerator.generate(null, 10), TEST_CONTENT[2])
         .createFile(NameGenerator.generate(null, 10), TEST_CONTENT[2]);
     searcher.add(contentBuilder.getCurrentFolder());
+    // when
+    // then
     assertFind(new QueryExpression().setName(searchedFileName), "/parent/child/" + fileName);
   }
-  //
-  //  @Test
-  //  public void searchesByTextAndPath() throws Exception {
-  //    VirtualFileSystem virtualFileSystem = virtualFileSystem();
-  //    VirtualFile folder1 = virtualFileSystem.getRoot().createFolder("folder1/a/b");
-  //    VirtualFile folder2 = virtualFileSystem.getRoot().createFolder("folder2");
-  //    folder1.createFile("xxx.txt", TEST_CONTENT[2]);
-  //    folder2.createFile("zzz.txt", TEST_CONTENT[2]);
-  //    searcher.init(virtualFileSystem);
-  //
-  //    List<String> paths =
-  //        searcher.search(new QueryExpression().setText("be").setPath("/folder1")).getFilePaths();
-  //    assertEquals(newArrayList("/folder1/a/b/xxx.txt"), paths);
-  //  }
-  //
+
+  @Test
+  public void searchesByTextAndPath() throws Exception {
+    // given
+    contentBuilder.createFolder("folder2").createFile("zzz.txt", TEST_CONTENT[2]);
+    searcher.add(contentBuilder.getCurrentFolder());
+    contentBuilder
+        .takeParent()
+        .createFolder("folder1")
+        .createFolder("a")
+        .createFolder("B")
+        .createFile("xxx.txt", TEST_CONTENT[2]);
+    searcher.add(contentBuilder.getCurrentFolder());
+    //when
+    //then
+    assertFind(new QueryExpression().setText("be").setPath("/folder1"), "/folder1/a/B/xxx.txt");
+  }
+
   //  @Test
   //  public void searchesByTextAndPathAndFileName() throws Exception {
   //    VirtualFileSystem virtualFileSystem = virtualFileSystem();
