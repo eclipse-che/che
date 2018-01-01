@@ -22,11 +22,6 @@
     "wsagent-debug": {
       "port": "4403/tcp",
       "protocol": "tcp"
-    },
-    "wsagent-liveness": {
-      "port": "4401/tcp",
-      "protocol": "http",
-      "path" : "/liveness"
     }
   }
 }

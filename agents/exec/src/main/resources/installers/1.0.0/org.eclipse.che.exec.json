@@ -15,11 +15,6 @@
       "port": "4412/tcp",
       "protocol": "ws",
       "path": "/connect"
-    },
-    "exec-agent-liveness": {
-      "port": "4411/tcp",
-      "protocol": "http",
-      "path" : "/liveness"
     }
   }
 }

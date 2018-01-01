@@ -26,6 +26,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"time"
 
 	"strconv"
@@ -61,15 +62,25 @@ func main() {
 
 	appHTTPRoutes := []rest.RoutesGroup{
 		term.HTTPRoutes,
+		{
+			Name: "Terminal-Agent liveness route",
+			Items: []rest.Route{
+				{
+					Method:     "GET",
+					Path:       "/liveness",
+					Name:       "Check Terminal-Agent liveness",
+					HandleFunc: restutil.OKRespondingFunc,
+				},
+			},
+		},
 	}
 
 	// register routes and http handlers
 	r := rest.NewDefaultRouter(config.basePath, appHTTPRoutes)
 	rest.PrintRoutes(appHTTPRoutes)
 
-	var handler = wrapWithAuth(r)
-	http.Handle("/", handler)
-	http.Handle("/liveness", restutil.LivenessCheckingHandler())
+	// do not protect liveness check endpoint
+	var handler = wrapWithAuth(r, "/liveness")
 
 	server := &http.Server{
 		Handler:      handler,
@@ -80,14 +91,15 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func wrapWithAuth(h http.Handler) http.Handler {
-	// required authentication for all the requests, if it is configured
-	if config.authEnabled {
-		cache := auth.NewCache(time.Minute*time.Duration(config.tokensExpirationTimeoutInMinutes), time.Minute*5)
-		return auth.NewCachingHandler(h, config.apiEndpoint, droppingTerminalConnectionsUnauthorizedHandler, cache)
+func wrapWithAuth(h http.Handler, mapping string) http.Handler {
+	// required authentication for all the requests that match mappings, if auth is configured
+	if !config.authEnabled {
+		return h
 	}
 
-	return h
+	pattern := regexp.MustCompile(mapping)
+	cache := auth.NewCache(time.Minute*time.Duration(config.tokensExpirationTimeoutInMinutes), time.Minute*5)
+	return auth.NewCachingHandler(h, config.apiEndpoint, droppingTerminalConnectionsUnauthorizedHandler, cache, pattern)
 }
 
 func droppingTerminalConnectionsUnauthorizedHandler(w http.ResponseWriter, req *http.Request, err error) {

@@ -15,6 +15,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+
+	"github.com/eclipse/che/agents/go-agents/core/rest"
 )
 
 // WriteJSON writes body as json to the response writer
@@ -45,9 +47,8 @@ func IntQueryParam(r *http.Request, name string, defaultValue int) int {
 	return v
 }
 
-// LivenessCheckingHandler responds 200 to the requests for a server liveness checks
-func LivenessCheckingHandler() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
+// OKRespondingFunc responds 200 to the requests for a server liveness checks
+func OKRespondingFunc(w http.ResponseWriter, r *http.Request, _ rest.Params) error {
+	w.WriteHeader(http.StatusOK)
+	return nil
 }

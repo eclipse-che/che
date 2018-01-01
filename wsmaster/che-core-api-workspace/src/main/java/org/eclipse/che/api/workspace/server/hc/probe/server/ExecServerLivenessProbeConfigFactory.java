@@ -10,10 +10,11 @@
  */
 package org.eclipse.che.api.workspace.server.hc.probe.server;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.hc.probe.HttpProbeConfig;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Produces {@link HttpProbeConfig} for exec agent liveness probes.
@@ -27,6 +28,6 @@ public class ExecServerLivenessProbeConfigFactory implements HttpProbeConfigFact
     URL url = new URL(server.getUrl());
 
     return new HttpProbeConfig(
-        url.getPort(), url.getHost(), url.getProtocol(), url.getPath(), 1, 3, 120, 10, 10);
+        url.getPort(), url.getHost(), url.getProtocol(), "/liveness", 1, 3, 120, 10, 10);
   }
 }

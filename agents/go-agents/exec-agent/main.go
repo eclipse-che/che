@@ -17,6 +17,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"time"
 
 	"strconv"
@@ -83,6 +84,17 @@ func main() {
 				},
 			},
 		},
+		{
+			Name: "Exec-Agent liveness route",
+			Items: []rest.Route{
+				{
+					Method:     "GET",
+					Path:       "/liveness",
+					Name:       "Check Exec-Agent liveness",
+					HandleFunc: restutil.OKRespondingFunc,
+				},
+			},
+		},
 	}
 
 	appOpRoutes := []jsonrpc.RoutesGroup{
@@ -95,9 +107,8 @@ func main() {
 	jsonrpc.RegRoutesGroups(appOpRoutes)
 	jsonrpc.PrintRoutes(appOpRoutes)
 
-	var handler = wrapWithAuth(r)
-	http.Handle("/", handler)
-	http.Handle("/liveness", restutil.LivenessCheckingHandler())
+	// do not protect liveness check endpoint
+	var handler = wrapWithAuth(r, "/liveness")
 
 	server := &http.Server{
 		Handler:      handler,
@@ -108,14 +119,15 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func wrapWithAuth(h http.Handler) http.Handler {
-	// required authentication for all the requests, if it is configured
-	if config.authEnabled {
-		cache := auth.NewCache(time.Minute*time.Duration(config.tokensExpirationTimeoutInMinutes), time.Minute*5)
-		return auth.NewCachingHandler(h, config.apiEndpoint, droppingRPCChannelsUnauthorizedHandler, cache)
+func wrapWithAuth(h http.Handler, mapping string) http.Handler {
+	// required authentication for all the requests that match mappings, if auth is configured
+	if !config.authEnabled {
+		return h
 	}
 
-	return h
+	pattern := regexp.MustCompile(mapping)
+	cache := auth.NewCache(time.Minute*time.Duration(config.tokensExpirationTimeoutInMinutes), time.Minute*5)
+	return auth.NewCachingHandler(h, config.apiEndpoint, droppingRPCChannelsUnauthorizedHandler, cache, pattern)
 }
 
 func droppingRPCChannelsUnauthorizedHandler(w http.ResponseWriter, req *http.Request, err error) {

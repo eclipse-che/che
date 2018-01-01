@@ -11,11 +11,7 @@
 package org.eclipse.che.api.workspace.server.hc.probe;
 
 import com.google.common.collect.ImmutableMap;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
@@ -25,6 +21,12 @@ import org.eclipse.che.api.workspace.server.hc.probe.server.TerminalServerLivene
 import org.eclipse.che.api.workspace.server.hc.probe.server.WsAgentServerLivenessProbeConfigFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Produces instances of {@link WorkspaceProbes} according to provided servers of a workspace
@@ -37,11 +39,11 @@ public class WorkspaceProbesFactory {
   // It is also a workaround to set correct paths for servers readiness checks.
   private static final Map<String, HttpProbeConfigFactory> probeConfigFactories =
       ImmutableMap.of(
-          "wsagent-liveness",
+          "wsagent/http",
           new WsAgentServerLivenessProbeConfigFactory(),
-          "exec-agent-liveness",
+          "exec-agent/http",
           new ExecServerLivenessProbeConfigFactory(),
-          "terminal-liveness",
+          "terminal",
           new TerminalServerLivenessProbeConfigFactory());
 
   /**

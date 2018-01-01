@@ -10,19 +10,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker;
 
-import static java.lang.String.format;
-import static java.util.Collections.emptyMap;
-import static java.util.stream.Collectors.toMap;
-import static org.slf4j.LoggerFactory.getLogger;
-
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.function.Consumer;
+
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
@@ -57,6 +47,18 @@ import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDe
 import org.eclipse.che.workspace.infrastructure.docker.network.NetworkLifecycle;
 import org.eclipse.che.workspace.infrastructure.docker.server.mapping.ExternalIpURLRewriter;
 import org.slf4j.Logger;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
+
+import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toMap;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /** @author Alexander Garagatyi */
 public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext> {
@@ -372,7 +374,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       if (probeStatus == ProbeStatus.FAILED && oldServerStatus == ServerStatus.RUNNING) {
         serverStatus = ServerStatus.STOPPED;
       } else if (probeStatus == ProbeStatus.PASSED
-          && (oldServerStatus == ServerStatus.UNKNOWN || oldServerStatus == ServerStatus.STOPPED)) {
+          && (oldServerStatus == null || oldServerStatus == ServerStatus.UNKNOWN || oldServerStatus == ServerStatus.STOPPED)) {
         serverStatus = ServerStatus.RUNNING;
       } else {
         return;
