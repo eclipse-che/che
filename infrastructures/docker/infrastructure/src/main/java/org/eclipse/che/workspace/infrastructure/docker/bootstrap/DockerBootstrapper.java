@@ -12,7 +12,16 @@ package org.eclipse.che.workspace.infrastructure.docker.bootstrap;
 
 import com.google.gson.Gson;
 import com.google.inject.assistedinject.Assisted;
-
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.FileCleaner;
@@ -25,25 +34,14 @@ import org.eclipse.che.workspace.infrastructure.docker.DockerMachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-
 /**
  * Bootstraps installers in docker machines.
  *
  * @author Sergii Leshchenko
  */
 public class DockerBootstrapper extends AbstractBootstrapper {
-  private static final Logger LOG  = LoggerFactory.getLogger(DockerBootstrapper.class);
-  private static final Gson   GSON = new Gson();
+  private static final Logger LOG = LoggerFactory.getLogger(DockerBootstrapper.class);
+  private static final Gson GSON = new Gson();
 
   private static final String BOOTSTRAPPER_BASE_DIR = "/tmp/";
   private static final String BOOTSTRAPPER_DIR = BOOTSTRAPPER_BASE_DIR + "bootstrapper/";

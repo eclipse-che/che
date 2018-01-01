@@ -10,11 +10,10 @@
  */
 package org.eclipse.che.api.workspace.server.hc.probe.server;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Server;
-import org.eclipse.che.api.workspace.server.hc.probe.HttpProbeConfig;
-
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
+import org.eclipse.che.api.workspace.server.hc.probe.HttpProbeConfig;
 
 /**
  * Produces {@link HttpProbeConfig} for ws-agent liveness probes.
@@ -28,6 +27,14 @@ public class WsAgentServerLivenessProbeConfigFactory implements HttpProbeConfigF
     URL url = new URL(server.getUrl());
 
     return new HttpProbeConfig(
-        url.getPort(), url.getHost(), url.getProtocol(), url.getPath() + "/liveness", 1, 3, 120, 10, 10);
+        url.getPort(),
+        url.getHost(),
+        url.getProtocol(),
+        url.getPath() + "/liveness",
+        1,
+        3,
+        120,
+        10,
+        10);
   }
 }

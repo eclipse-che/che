@@ -10,11 +10,10 @@
  */
 package org.eclipse.che.api.workspace.server.hc.probe.server;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Server;
-import org.eclipse.che.api.workspace.server.hc.probe.HttpProbeConfig;
-
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
+import org.eclipse.che.api.workspace.server.hc.probe.HttpProbeConfig;
 
 /**
  * Produces {@link HttpProbeConfig} for exec agent liveness probes.

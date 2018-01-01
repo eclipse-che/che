@@ -10,12 +10,11 @@
  */
 package org.eclipse.che.api.workspace.server.hc.probe.server;
 
-import org.eclipse.che.api.core.model.workspace.runtime.Server;
-import org.eclipse.che.api.workspace.server.hc.probe.HttpProbeConfig;
-
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
+import org.eclipse.che.api.workspace.server.hc.probe.HttpProbeConfig;
 
 /**
  * Produces {@link HttpProbeConfig} for terminal agent liveness probes.
@@ -40,6 +39,6 @@ public class TerminalServerLivenessProbeConfigFactory implements HttpProbeConfig
     }
 
     return new HttpProbeConfig(
-            uri.getPort(), uri.getHost(), protocol, "/liveness", 1, 3, 120, 10, 10);
+        uri.getPort(), uri.getHost(), protocol, "/liveness", 1, 3, 120, 10, 10);
   }
 }
