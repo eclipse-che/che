@@ -25,6 +25,7 @@ public enum TestStacksConstants {
   BITNAMI_SWIFT("bitnami-swift", "Bitnami Swift"),
   CPP("cpp-default", "C++"),
   DOTNET("dotnet-default", ".NET"),
+  ECLIPSE_CHE("che-in-che", "Eclipse Che"),
   NODE("node-default", "Node"),
   PHP("php-default", "PHP"),
   PYTHON("python-default", "Python"),

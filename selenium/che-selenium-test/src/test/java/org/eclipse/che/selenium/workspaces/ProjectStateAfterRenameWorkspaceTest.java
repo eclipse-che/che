@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
-import static org.eclipse.che.selenium.core.constant.TestWorkspaceConstants.RUNNING_WORKSPACE_MESS;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.RUNNING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPING;
 import static org.testng.Assert.fail;
@@ -98,7 +98,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
     workspaceOverview.enterNameWorkspace(WORKSPACE_NEW_NAME);
     workspaceDetails.clickOnSaveChangesBtn();
     workspaceDetails.checkStateOfWorkspace(STOPPING);
-    workspaceDetails.checkStateOfWorkspace(RUNNING);
+    workspaceDetails.checkStateOfWorkspace(RUNNING, EXPECTED_MESS_IN_CONSOLE_SEC);
     workspaceOverview.checkNameWorkspace(WORKSPACE_NEW_NAME);
 
     // open the IDE, check state of the project
@@ -108,17 +108,16 @@ public class ProjectStateAfterRenameWorkspaceTest {
 
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
+
     try {
       projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
     } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/3574");
+      // Remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7551");
     }
 
     projectExplorer.waitItem(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    events.clickEventLogBtn();
-    events.waitExpectedMessage(RUNNING_WORKSPACE_MESS);
     editor.waitTabIsPresent("index.jsp");
     editor.waitTabIsPresent("AppController");
     editor.waitActive();

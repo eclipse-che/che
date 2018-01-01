@@ -49,7 +49,9 @@ public class MavenProjectManagerTest {
   private final String mavenServerPath =
       MavenProjectManagerTest.class.getResource("/maven-server").getPath();
 
-  private MavenServerManager manager = new MavenServerManager(mavenServerPath);
+  private MavenServerManager manager =
+      new MavenServerManager(
+          mavenServerPath, "-XX:MaxRAM=128m -XX:MaxRAMFraction=1 -XX:+UseParallelGC");
 
   private MavenProjectManager projectManager;
 

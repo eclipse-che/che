@@ -37,7 +37,7 @@
         <div ng-message="maxlength">Component's version should be less than 256 characters long.</div>
       </che-input>
     </div>
-    <che-button-primary che-button-title="{{editComponentDialogController.index === -1 ? 'Add' : 'Edit'}}"
+    <che-button-primary che-button-title="{{editComponentDialogController.index === -1 ? 'Add' : 'Save'}}"
                         ng-click="editComponentDialogController.updateComponent()"
                         ng-disabled="editComponentForm.$invalid">
     </che-button-primary>

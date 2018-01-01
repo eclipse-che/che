@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.workspaces;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.STOP_WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -27,6 +28,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -65,7 +67,12 @@ public class ProjectStateAfterRefreshTest {
     openFilesInEditor();
     checkFilesAreOpened();
     seleniumWebDriver.navigate().refresh();
-    checkFilesAreOpened();
+    try {
+      checkFilesAreOpened();
+    } catch (TimeoutException ex) {
+      // Remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7551");
+    }
     editor.closeAllTabsByContextMenu();
   }
 
@@ -101,7 +108,12 @@ public class ProjectStateAfterRefreshTest {
 
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    editor.waitTabIsPresent("qa-spring-sample");
+    try {
+      editor.waitTabIsPresent("qa-spring-sample");
+    } catch (TimeoutException ex) {
+      // Remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7551");
+    }
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsp");

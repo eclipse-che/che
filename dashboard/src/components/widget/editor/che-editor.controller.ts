@@ -14,6 +14,13 @@ interface IEditor {
   refresh: Function;
   on(name: string, listener: (...args: any[]) => any);
   getDoc(): any;
+  getCursor(): ICursorPos;
+  setCursor(cursorPos: ICursorPos): void;
+}
+
+interface ICursorPos {
+  line: number;
+  ch: number;
 }
 
 interface IEditorState {
@@ -51,6 +58,10 @@ export class CheEditorController {
    * Editor mode.
    */
   private editorMode: string;
+  /**
+   * Cursor position.
+   */
+  private cursorPos: ICursorPos = {line: 0, ch: 0};
 
   /**
    * Default constructor that is using resource injection
@@ -65,6 +76,13 @@ export class CheEditorController {
         }, 500);
         const doc = editor.getDoc();
         editor.on('change', () => {
+          const {line, ch} = editor.getCursor();
+          if (line === 0 && ch === 0) {
+            editor.setCursor(this.cursorPos);
+          } else {
+            this.cursorPos.ch = ch;
+            this.cursorPos.line = line;
+          }
           $timeout(() => {
             this.editorState.errors.length = 0;
             let editorErrors: Array<{ id: string; message: string }> = doc.getAllMarks().filter((mark: any) => {
@@ -81,17 +99,24 @@ export class CheEditorController {
               }
               return {id: mark.id, message: message};
             });
-            if (angular.isFunction(this.validator)) {
-              const customValidatorState: IEditorState = this.validator();
-              if (customValidatorState && angular.isArray(customValidatorState.errors)) {
-                customValidatorState.errors.forEach((error: string) => {
-                  this.editorState.errors.push(error);
-                });
-              }
-            }
             editorErrors.forEach((editorError: { id: string; message: string }) => {
+              if (!editorError || !editorError.message) {
+                return;
+              }
               this.editorState.errors.push(editorError.message);
             });
+            if (angular.isFunction(this.validator)) {
+              try {
+                const customValidatorState: IEditorState = this.validator();
+                if (customValidatorState && angular.isArray(customValidatorState.errors)) {
+                  customValidatorState.errors.forEach((error: string) => {
+                    this.editorState.errors.push(error);
+                  });
+                }
+              } catch (error) {
+                this.editorState.errors.push(error.toString());
+              }
+            }
             this.editorState.isValid = this.editorState.errors.length === 0;
             if (angular.isFunction(this.onContentChange)) {
               this.onContentChange({editorState: this.editorState});

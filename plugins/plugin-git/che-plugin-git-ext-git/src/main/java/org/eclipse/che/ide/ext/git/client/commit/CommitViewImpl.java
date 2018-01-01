@@ -87,6 +87,7 @@ public class CommitViewImpl extends Window implements CommitView {
 
     remoteBranches = new ListBox();
     remoteBranches.setEnabled(false);
+    remoteBranches.getElement().setAttribute("style", "width: 230px");
 
     pushAfterCommit = new CheckBox();
     pushAfterCommit.setHTML(locale.commitPushCheckboxTitle());
@@ -208,6 +209,7 @@ public class CommitViewImpl extends Window implements CommitView {
       this.message.setValue("");
     }
     delegate.onValueChanged();
+    message.setFocus(true);
   }
 
   @Override

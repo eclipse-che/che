@@ -111,4 +111,7 @@ public interface BranchView extends View<BranchView.ActionDelegate> {
 
   /** Clear search filter. */
   void clearSearchFilter();
+
+  /** Set focus to current window. */
+  void setFocus();
 }

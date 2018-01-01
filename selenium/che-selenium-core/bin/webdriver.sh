@@ -454,6 +454,7 @@ printRunOptions() {
     echo "[TEST] Product Protocol    : "${PRODUCT_PROTOCOL}
     echo "[TEST] Product Host        : "${PRODUCT_HOST}
     echo "[TEST] Product Port        : "${PRODUCT_PORT}
+    echo "[TEST] Product Config      : "$(getTestGroups)
     echo "[TEST] Tests               : "${TESTS_SCOPE}
     echo "[TEST] Threads             : "${THREADS}
     echo "[TEST] Workspace pool size : "${WORKSPACE_POOL_SIZE}
@@ -699,9 +700,23 @@ runTests() {
                 -Dbrowser=${BROWSER} \
                 -Dche.threads=${THREADS} \
                 -Dche.workspace_pool_size=${WORKSPACE_POOL_SIZE} \
+                -DtestGroups="$(getTestGroups)" \
                 ${DEBUG_OPTIONS} \
                 ${GRID_OPTIONS} \
                 ${MAVEN_OPTIONS}
+}
+
+# Return list of test groups in comma-separated view
+getTestGroups() {
+  local testGroups=${CHE_INFRASTRUCTURE}
+
+  if [[ ${CHE_MULTIUSER} == true ]]; then
+    testGroups=${testGroups},multiuser
+  else
+    testGroups=${testGroups},singleuser
+  fi
+
+  echo ${testGroups}
 }
 
 # Reruns failed tests
@@ -863,9 +878,9 @@ prepareTestUserForMultiuserChe() {
         export CHE_TESTUSER_PASSWORD=${CHE_TESTUSER_PASSWORD:-${time}}
 
         if [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
-            local kc_container_id=$(docker ps | grep keycloak_keycloak-1 | cut -d ' ' -f1)
+            local kc_container_id=$(docker ps | grep 'eclipse-che/keycloak' | cut -d ' ' -f1)
         else
-            local kc_container_id=$(docker ps | grep che_keycloak_1 | cut -d ' ' -f1)
+            local kc_container_id=$(docker ps | grep che_keycloak | cut -d ' ' -f1)
         fi
 
         local cli_auth="--no-config --server http://localhost:8080/auth --user ${CHE_ADMIN_NAME} --password ${CHE_ADMIN_PASSWORD} --realm master"
@@ -894,9 +909,9 @@ prepareTestUserForMultiuserChe() {
 removeTestUser() {
     echo "[TEST] Removing test user with name '${CHE_TESTUSER_NAME}'..."
     if [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
-        local kc_container_id=$(docker ps | grep keycloak_keycloak-1 | cut -d ' ' -f1)
+        local kc_container_id=$(docker ps | grep 'eclipse-che/keycloak' | cut -d ' ' -f1)
     else
-        local kc_container_id=$(docker ps | grep che_keycloak_1 | cut -d ' ' -f1)
+        local kc_container_id=$(docker ps | grep che_keycloak | cut -d ' ' -f1)
     fi
 
     local cli_auth="--no-config --server http://localhost:8080/auth --user ${CHE_ADMIN_NAME} --password ${CHE_ADMIN_PASSWORD} --realm master"

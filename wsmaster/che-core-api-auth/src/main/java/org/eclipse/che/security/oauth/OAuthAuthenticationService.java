@@ -41,10 +41,10 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
-import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.rest.annotations.Required;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
@@ -97,7 +97,7 @@ public class OAuthAuthenticationService {
   public Response authenticate(
       @Required @QueryParam("oauth_provider") String oauthProvider,
       @QueryParam("scope") List<String> scopes)
-      throws ForbiddenException, BadRequestException, OAuthAuthenticationException {
+      throws ForbiddenException, NotFoundException, OAuthAuthenticationException {
     OAuthAuthenticator oauth = getAuthenticator(oauthProvider);
     final String authUrl =
         oauth.getAuthenticateUrl(getRequestUrl(uriInfo), scopes == null ? emptyList() : scopes);
@@ -107,7 +107,7 @@ public class OAuthAuthenticationService {
   @GET
   @Path("callback")
   public Response callback(@QueryParam("errorValues") List<String> errorValues)
-      throws OAuthAuthenticationException, BadRequestException {
+      throws OAuthAuthenticationException, NotFoundException {
     URL requestUrl = getRequestUrl(uriInfo);
     Map<String, List<String>> params = getQueryParametersFromState(getState(requestUrl));
     if (errorValues != null && errorValues.contains("access_denied")) {
@@ -166,7 +166,7 @@ public class OAuthAuthenticationService {
   @Path("token")
   @Produces(MediaType.APPLICATION_JSON)
   public OAuthToken token(@Required @QueryParam("oauth_provider") String oauthProvider)
-      throws ServerException, BadRequestException, NotFoundException, ForbiddenException {
+      throws ServerException, UnauthorizedException, NotFoundException, ForbiddenException {
     OAuthAuthenticator provider = getAuthenticator(oauthProvider);
     final Subject subject = EnvironmentContext.getCurrent().getSubject();
     try {
@@ -177,7 +177,8 @@ public class OAuthAuthenticationService {
       if (token != null) {
         return token;
       }
-      throw new NotFoundException("OAuth token for user " + subject.getUserId() + " was not found");
+      throw new UnauthorizedException(
+          "OAuth token for user " + subject.getUserId() + " was not found");
     } catch (IOException e) {
       throw new ServerException(e.getLocalizedMessage(), e);
     }
@@ -186,13 +187,13 @@ public class OAuthAuthenticationService {
   @DELETE
   @Path("token")
   public void invalidate(@Required @QueryParam("oauth_provider") String oauthProvider)
-      throws BadRequestException, NotFoundException, ServerException, ForbiddenException {
+      throws UnauthorizedException, NotFoundException, ServerException, ForbiddenException {
 
     OAuthAuthenticator oauth = getAuthenticator(oauthProvider);
     final Subject subject = EnvironmentContext.getCurrent().getSubject();
     try {
       if (!oauth.invalidateToken(subject.getUserId())) {
-        throw new NotFoundException(
+        throw new UnauthorizedException(
             "OAuth token for user " + subject.getUserId() + " was not found");
       }
     } catch (IOException e) {
@@ -200,12 +201,11 @@ public class OAuthAuthenticationService {
     }
   }
 
-  protected OAuthAuthenticator getAuthenticator(String oauthProviderName)
-      throws BadRequestException {
+  protected OAuthAuthenticator getAuthenticator(String oauthProviderName) throws NotFoundException {
     OAuthAuthenticator oauth = providers.getAuthenticator(oauthProviderName);
     if (oauth == null) {
       LOG.warn("Unsupported OAuth provider {} ", oauthProviderName);
-      throw new BadRequestException("Unsupported OAuth provider " + oauthProviderName);
+      throw new NotFoundException("Unsupported OAuth provider " + oauthProviderName);
     }
     return oauth;
   }

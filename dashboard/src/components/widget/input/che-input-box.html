@@ -15,7 +15,7 @@
                 ng-class="myForm[inputName] && myForm[inputName].$invalid ? 'fa-times' : 'fa-check'"></span>
         </div>
         <!-- display error messages for the form -->
-        <div ng-messages="myForm[inputName].$error" ng-transclude></div>
+        <div ng-messages="myForm[inputName].$error" id="new-workspace-error-message" ng-transclude></div>
       </div>
     </div>
     <div hide-xs hide-sm flex layout="raw">

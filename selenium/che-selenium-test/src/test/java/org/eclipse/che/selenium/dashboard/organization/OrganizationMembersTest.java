@@ -16,7 +16,7 @@ import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.eclipse.che.selenium.core.annotation.Multiuser;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
@@ -35,7 +35,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Sergey Skorik */
-@Multiuser
+@Test(groups = {TestGroup.MULTIUSER})
 public class OrganizationMembersTest {
   private static final String NEW_ORG_NAME = generate("new-org-", 5);
 
@@ -66,7 +66,6 @@ public class OrganizationMembersTest {
     testOrganizationServiceClient.deleteByName(NEW_ORG_NAME);
   }
 
-  @Test
   public void testOperationsWithMembersInExistsOrganization() {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);
@@ -101,13 +100,12 @@ public class OrganizationMembersTest {
     // Delete the members from the members list
     try {
       organizationPage.deleteMember(testUser.getEmail());
-    } catch (TimeoutException e) {
+    } catch (TimeoutException ex) {
       // remove try-catch block after the issue has been resolved
-      fail("Known issue https://github.com/codenvy/codenvy/issues/2473", e);
+      fail("Known issue https://github.com/eclipse/che/issues/7897", ex);
     }
   }
 
-  @Test
   public void testAddingMembersToNewOrganization() {
     navigationBar.waitNavigationBar();
     navigationBar.clickOnMenu(ORGANIZATIONS);

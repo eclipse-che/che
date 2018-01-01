@@ -169,6 +169,8 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     if (listener != null) {
       listener.onWidgetRemoving(removeCallback);
     }
+
+    widgets.removeIf(widgetToShow -> widgetToShow.getWidget().equals(widget));
   }
 
   @Override

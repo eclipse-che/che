@@ -561,6 +561,7 @@ public class ProjectExplorer {
    *     javaSource folder. We can use this types from ProjectExlorer.FolderTypes public interface.
    */
   public void waitFolderDefinedTypeOfFolderByPath(String pathToFolder, String typeFolder) {
+    loader.waitOnClosed();
     loadPageTimeout.until(
         visibilityOfElementLocated(
             By.xpath(
@@ -942,7 +943,7 @@ public class ProjectExplorer {
     } catch (StaleElementReferenceException ex) {
       sleepQuietly(1);
     }
-    navigateToFile.waitListOfFilesNames(file);
+    navigateToFile.isFilenameSuggested(file);
     navigateToFile.selectFileByName(file);
     navigateToFile.waitFormToClose();
     revealResourceByOptionsButton();

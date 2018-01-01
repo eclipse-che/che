@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.api.workspace.shared;
 
+import org.eclipse.che.api.core.model.workspace.Workspace;
+
 /**
  * Constants for Workspace API
  *
@@ -38,6 +40,32 @@ public final class Constants {
   public static final String WS_AGENT_PROCESS_NAME = "CheWsAgent";
 
   public static final String CHE_WORKSPACE_AUTO_START = "che.workspace.auto_start";
+
+  /**
+   * Describes time when workspace was created. Should be set/read from {@link
+   * Workspace#getAttributes}
+   */
+  public static final String CREATED_ATTRIBUTE_NAME = "created";
+  /**
+   * Describes time when workspace was last updated or started. Should be set/read from {@link
+   * Workspace#getAttributes}
+   */
+  public static final String UPDATED_ATTRIBUTE_NAME = "updated";
+  /**
+   * Describes time when workspace was last stopped. Should be set/read from {@link
+   * Workspace#getAttributes}
+   */
+  public static final String STOPPED_ATTRIBUTE_NAME = "stopped";
+  /**
+   * Indicates that last workspace stop was abnormal. Should be set/read from {@link
+   * Workspace#getAttributes}
+   */
+  public static final String STOPPED_ABNORMALLY_ATTRIBUTE_NAME = "stoppedAbnormally";
+  /**
+   * Describes latest workspace runtime error message. Should be set/read from {@link
+   * Workspace#getAttributes}
+   */
+  public static final String ERROR_MESSAGE_ATTRIBUTE_NAME = "errorMessage";
 
   public static final String COMMAND_PREVIEW_URL_ATTRIBUTE_NAME = "previewUrl";
   public static final String COMMAND_GOAL_ATTRIBUTE_NAME = "goal";

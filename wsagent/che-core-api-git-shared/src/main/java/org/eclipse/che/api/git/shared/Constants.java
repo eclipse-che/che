@@ -16,6 +16,7 @@ public class Constants {
   public static final String DEFAULT_PAGE_SIZE_QUERY_PARAM = "20";
   public static final String EVENT_GIT_FILE_CHANGED = "event/git-change";
   public static final String COMMIT_IN_PROGRESS_ERROR = "Commit in progress";
+  public static final String CHECKOUT_IN_PROGRESS_ERROR = "Checkout in progress";
   public static final String NOT_A_GIT_REPOSITORY_ERROR = "Not a git repository";
 
   private Constants() {}
