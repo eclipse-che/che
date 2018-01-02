@@ -41,7 +41,7 @@ describe('DockerImageEnvironmentManager', () => {
             }
           }, 'installers': ['ws-agent', 'org.eclipse.che.ws-agent'], 'attributes': {'memoryLimitBytes': '16642998272'}
         }
-      }, 'recipe': {'location': 'codenvy/ubuntu_jdk8', 'type': 'dockerimage'}
+      }, 'recipe': {'content': 'codenvy/ubuntu_jdk8', 'type': 'dockerimage'}
     };
 
     machines = envManager.getMachines(environment);
