@@ -40,6 +40,9 @@ export CHE_DEPLOY=${CHE_DEPLOY:-${DEFAULT_CHE_DEPLOY}}
 DEFAULT_CHE_REMOVE_PROJECT=false
 export CHE_REMOVE_PROJECT=${CHE_REMOVE_PROJECT:-${DEFAULT_CHE_REMOVE_PROJECT}}
 
+DEFAULT_CHE_GENERATE_SCRIPTS=true
+export CHE_GENERATE_SCRIPTS=${CHE_GENERATE_SCRIPTS:-${DEFAULT_CHE_REMOVE_PROJECT}}
+
 DEFAULT_OPENSHIFT_USERNAME="developer"
 export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
 
@@ -57,7 +60,6 @@ export OPENSHIFT_FLAVOR="ocp"
 
 DEFAULT_OPENSHIFT_ENDPOINT="https://${OC_PUBLIC_HOSTNAME}:8443"
 export OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
-export CHE_INFRA_OPENSHIFT_MASTER__URL=${CHE_INFRA_OPENSHIFT_MASTER__URL:-${OPENSHIFT_ENDPOINT}}
 
 DEFAULT_ENABLE_SSL="false"
 export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
@@ -156,7 +158,7 @@ run_ocp() {
 
 deploy_che_to_ocp() {
     #Only generate scripts and config files if deploy_che.sh does not exist in same folder
-    if [ ! -f deploy_che.sh ]; then
+    if [ CHE_GENERATE_SCRIPTS ]; then
       #Repull init image only if IMAGE_PULL_POLICY is set to Always
       if [ $IMAGE_PULL_POLICY == "Always" ]; then
           docker pull "$IMAGE_INIT"
@@ -170,6 +172,9 @@ deploy_che_to_ocp() {
     fi
     bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
     wait_until_server_is_booted
+    if [ $CHE_MULTIUSER == true ]; then
+        wait_until_kc_is_booted
+    fi
 }
 
 server_is_booted() {
@@ -192,6 +197,32 @@ wait_until_server_is_booted() {
     ELAPSED=$((ELAPSED+1))
   done
   echo "Done!"
+}
+
+wait_until_kc_is_booted() {
+  echo "[CHE] wait Keycloak pod booting..."
+  available=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
+  progressing=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
+
+  DEPLOYMENT_TIMEOUT_SEC=1200
+  POLLING_INTERVAL_SEC=5
+  end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
+  while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
+    available=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
+    progressing=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
+    timeout_in=$((end-SECONDS))
+    echo "[CHE] Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, Timeout in ${timeout_in}s)"
+    sleep ${POLLING_INTERVAL_SEC}
+  done
+
+  if [ "${progressing}" == "\"True\"" ]; then
+    echo "[CHE] Keycloak deployed successfully"
+  elif [ "${progressing}" == "False" ]; then
+    echo "[CHE] [ERROR] Keycloak deployment failed. Aborting. Run command 'oc rollout status keycloak' to get more details."
+  elif [ ${SECONDS} -ge ${end} ]; then
+    echo "[CHE] [ERROR] Deployment timeout. Aborting."
+    exit 1
+  fi
 }
 
 destroy_ocp() {
@@ -248,7 +279,6 @@ parse_args() {
     --deploy-che - deploy che to ocp
     --multiuser - deploy che in multiuser mode
     --remove-che - remove existing che project
-    --replace-stacks - replace stacks of running che project
     ===================================
     ENV vars
     CHE_IMAGE_TAG - set CHE images tag, default: nightly
@@ -257,7 +287,6 @@ parse_args() {
     OC_PUBLIC_IP - set ocp hostname for routing suffix, default: host ip
     DNS_PROVIDER - set ocp DNS provider for routing suffix, default: nip.io
     OPENSHIFT_TOKEN - set ocp token for authentication (eg $(oc whoami -t) )
-    CHE_INFRA_ENABLED - set if CHE_INFRA_OPENSHIFT_USERNAME/PASSWORD , default: true
 "
 
     DEPLOY_SCRIPT_ARGS=""
