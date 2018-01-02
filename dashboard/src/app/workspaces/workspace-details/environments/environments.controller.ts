@@ -11,6 +11,7 @@
 'use strict';
 import {CheEnvironmentRegistry} from '../../../../components/api/environment/che-environment-registry.factory';
 import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
+import {CheNotification} from "../../../../components/notification/che-notification.factory";
 
 /**
  * @ngdoc controller
@@ -51,15 +52,25 @@ export class WorkspaceEnvironmentsController {
   environmentOnChange: Function;
 
   private $q: ng.IQService;
+  /**
+   * Logging service.
+   */
+  private $log: ng.ILogService;
+  /**
+   * Notification factory.
+   */
+  private cheNotification: CheNotification;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $scope: ng.IScope, $timeout: ng.ITimeoutService, $mdDialog: ng.material.IDialogService, cheEnvironmentRegistry: CheEnvironmentRegistry) {
+  constructor($q: ng.IQService, $scope: ng.IScope, $timeout: ng.ITimeoutService, $mdDialog: ng.material.IDialogService, cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService, cheNotification: CheNotification) {
     this.$q = $q;
     this.$mdDialog = $mdDialog;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
+    this.$log = $log;
+    this.cheNotification = cheNotification;
 
     this.editorOptions = {
       lineWrapping: true,
@@ -99,7 +110,14 @@ export class WorkspaceEnvironmentsController {
       return;
     }
 
-    this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(this.recipe.type);
+    const recipeType = this.recipe.type;
+    this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
+    if (!this.environmentManager) {
+      const errorMessage = `Unsupported recipe type '${recipeType}'`;
+      this.$log.error(errorMessage);
+      this.cheNotification.showError(errorMessage);
+      return;
+    }
 
     this.editorOptions.mode = this.environmentManager.editorMode;
 

@@ -17,6 +17,7 @@ import {CreateWorkspaceSvc} from './create-workspace.service';
 import {NamespaceSelectorSvc} from './namespace-selector/namespace-selector.service';
 import {StackSelectorSvc} from './stack-selector/stack-selector.service';
 import {RandomSvc} from '../../../components/utils/random.service';
+import {CheNotification} from "../../../components/notification/che-notification.factory";
 
 /**
  * This class is handling the controller for workspace creation.
@@ -48,6 +49,14 @@ export class CreateWorkspaceController {
    * Generator for random strings.
    */
   private randomSvc: RandomSvc;
+  /**
+   * Logging service.
+   */
+  private $log: ng.ILogService;
+  /**
+   * Notification factory.
+   */
+  private cheNotification: CheNotification;
   /**
    * The environment manager.
    */
@@ -89,13 +98,15 @@ export class CreateWorkspaceController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($timeout: ng.ITimeoutService, cheEnvironmentRegistry: CheEnvironmentRegistry, createWorkspaceSvc: CreateWorkspaceSvc, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, randomSvc: RandomSvc) {
+  constructor($timeout: ng.ITimeoutService, cheEnvironmentRegistry: CheEnvironmentRegistry, createWorkspaceSvc: CreateWorkspaceSvc, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, randomSvc: RandomSvc, $log: ng.ILogService, cheNotification: CheNotification) {
     this.$timeout = $timeout;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
     this.createWorkspaceSvc = createWorkspaceSvc;
     this.namespaceSelectorSvc = namespaceSelectorSvc;
     this.stackSelectorSvc = stackSelectorSvc;
     this.randomSvc = randomSvc;
+    this.$log = $log;
+    this.cheNotification = cheNotification;
 
     this.usedNamesList = [];
     this.stackMachines = [];
@@ -137,7 +148,12 @@ export class CreateWorkspaceController {
     const environment = this.stack.workspaceConfig.environments[environmentName];
     const recipeType = environment.recipe.type;
     this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
-
+    if (!this.environmentManager) {
+      const errorMessage = `Unsupported recipe type '${recipeType}'`;
+      this.$log.error(errorMessage);
+      this.cheNotification.showError(errorMessage);
+      return;
+    }
     this.memoryByMachine = {};
     this.stackMachines = this.environmentManager.getMachines(environment);
   }
