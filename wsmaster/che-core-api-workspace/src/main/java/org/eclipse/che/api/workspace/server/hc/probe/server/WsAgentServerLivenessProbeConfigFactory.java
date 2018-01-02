@@ -25,16 +25,14 @@ public class WsAgentServerLivenessProbeConfigFactory implements HttpProbeConfigF
   @Override
   public HttpProbeConfig get(Server server) throws MalformedURLException {
     URL url = new URL(server.getUrl());
+    String path;
+    if (url.getPath() != null && !url.getPath().endsWith("/")) {
+      path = url.getPath() + "/";
+    } else {
+      path = url.getPath();
+    }
 
     return new HttpProbeConfig(
-        url.getPort(),
-        url.getHost(),
-        url.getProtocol(),
-        url.getPath() + "/liveness",
-        1,
-        3,
-        120,
-        10,
-        10);
+        url.getPort(), url.getHost(), url.getProtocol(), path, 1, 3, 120, 10, 10);
   }
 }
