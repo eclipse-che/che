@@ -52,7 +52,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
   private static final OutputConsoleViewUiBinder UI_BINDER =
       GWT.create(OutputConsoleViewUiBinder.class);
 
-  private static final String DEFAULT_TEXT_COLOR = "\u001B[0m";
+  private static final String RESET_TEXT_COLOR = "\u001B[0m";
 
   private ActionDelegate delegate;
 
@@ -148,10 +148,12 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     termOptions.setFocusOnOpen(false);
     termOptions.setReadOnly(true);
     termOptions.setDisableStdin(true);
+    termOptions.setConvertEol(true);
     termOptions.setScrollBack(SCROLL_BACK);
 
     this.terminal = new Terminal(termOptions);
     terminal.attachCustomKeyDownHandler(new OutputConsoleCustomKeyDownHandler(terminal));
+    terminal.open(consoleLines.getElement());
     //    Log.info(getClass(), "char Measure " + terminal.getCharMeasure());
     //    Log.info(getClass(), "char Measure height " + terminal.getCharMeasure().getHeight());
     //    Log.info(getClass(), "horizontal scroll bar size " +
@@ -169,25 +171,25 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
   @Override
   public void onResize() {
     if (consoleIsFit()) {
-      if (!termIsOpen()) {
-        terminal.open(consoleLines.getElement());
-      }
+//      if (!termIsOpen()) {
+//        terminal.open(consoleLines.getElement());
+//      }
       //      resizeTimer.schedule(200);
       resize();
     }
   }
 
-  private Timer resizeTimer =
-      new Timer() {
-        @Override
-        public void run() {
-          resize();
-        }
-      };
+//  private Timer resizeTimer =
+//      new Timer() {
+//        @Override
+//        public void run() {
+//          resize();
+//        }
+//      };
 
-  private boolean termIsOpen() {
-    return consoleLines.getElement().equals(terminal.getParent());
-  }
+//  private boolean termIsOpen() {
+//    return consoleLines.getElement().equals(terminal.getParent());
+//  }
 
   private boolean consoleIsFit() {
     return consoleLines.getElement().getClientHeight() > 0
@@ -226,7 +228,11 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     if (consoleColorizer != null) {
       text = consoleColorizer.colorize(text);
     }
-    terminal.writeln(text);
+    if (text.endsWith("\n|\r\n")) {
+      terminal.write(text);
+    } else {
+      terminal.writeln(text);
+    }
   }
 
   /**
@@ -241,9 +247,9 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
    */
   @Override
   public void print(
-      String text, int background, int red, int blue, int green) { // Todo use byte not int
+      String text, int background, int red, int blue, int green) { // Todo use char instead of int
     String color = "\u001B[" + background + ";2;" + red + ";" + blue + ";" + green + "m";
-    text = color + text + DEFAULT_TEXT_COLOR;
+    text = color + text + RESET_TEXT_COLOR;
     print(text);
   }
 
@@ -264,7 +270,8 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
   @Override
   public void clearConsole() {
-    consoleLines.getElement().setInnerHTML("");
+    // todo seems reset sometimes works incorrectly, reset terminal.getMaxLineLength()
+    terminal.reset();
   }
 
   @Override

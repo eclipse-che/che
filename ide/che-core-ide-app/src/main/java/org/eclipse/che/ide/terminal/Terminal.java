@@ -102,4 +102,6 @@ public class Terminal {
 
   @JsMethod(name = "attachCustomKeydownHandler")
   public native void attachCustomKeyDownHandler(CustomKeyDownHandler customKeyDownHandl);
+
+  public native void reset();
 }
