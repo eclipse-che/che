@@ -486,6 +486,11 @@ public class Refactor {
     waitElementVisibility(newNameFileInput).sendKeys(keys);
   }
 
+  /**
+   * type into refactoring widget field any key with clear
+   *
+   * @param keys
+   */
   public void clearFieldAndSendKeys(String keys) {
     waitElementVisibility(newNameFileInput).clear();
     waitExpectedText(newNameFileInput, "");
