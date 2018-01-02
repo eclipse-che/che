@@ -84,7 +84,7 @@ set_environment_variables () {
   # CHE_DOCKER_IP is used internally by Che to set its IP address
   if [[ -z "${CHE_DOCKER_IP}" ]]; then
     if [[ -n "${CHE_IP}" ]]; then
-        [ -z "$CHE_DOCKER_IP" ] && export CHE_DOCKER_IP="${CHE_IP}"
+      export CHE_DOCKER_IP="${CHE_IP}"
     fi
   fi
 
@@ -110,7 +110,7 @@ set_environment_variables () {
   # Internal properties - should generally not be overridden
   export CATALINA_BASE="${CHE_HOME}/tomcat"
   export ASSEMBLY_BIN_DIR="${CATALINA_HOME}/bin"
-  [ -z "$CHE_LOGS_LEVEL" ] && export CHE_LOGS_LEVEL="${CHE_LOG_LEVEL}"
+  export CHE_LOGS_LEVEL="${CHE_LOG_LEVEL}"
 }
 
 docker_exec() {
@@ -201,7 +201,7 @@ launch_docker_registry () {
 
 init() {
   ### Any variables with export is a value that native Tomcat che.sh startup script requires
-  [ -z "$CHE_IP" ] && export CHE_IP=${CHE_IP}
+  export CHE_IP=${CHE_IP}
 
   if [ -f "/assembly/tomcat/bin/catalina.sh" ]; then
     echo "Found custom assembly..."
