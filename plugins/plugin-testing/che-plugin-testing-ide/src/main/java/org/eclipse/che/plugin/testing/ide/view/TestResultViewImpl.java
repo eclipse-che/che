@@ -15,6 +15,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -40,7 +41,7 @@ import org.eclipse.che.plugin.testing.ide.view.navigation.nodes.TestStateNode;
  */
 @Singleton
 public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
-    implements TestResultView {
+    implements TestResultView, RequiresResize {
 
   private static final TestResultViewImplUiBinder UI_BINDER =
       GWT.create(TestResultViewImplUiBinder.class);
@@ -214,6 +215,11 @@ public class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate>
   public TestRootState getRootState() {
     testRootState = new TestRootState();
     return testRootState;
+  }
+
+  @Override
+  public void onResize() {
+    splitLayoutPanel.onResize();
   }
 
   interface TestResultViewImplUiBinder extends UiBinder<Widget, TestResultViewImpl> {}
