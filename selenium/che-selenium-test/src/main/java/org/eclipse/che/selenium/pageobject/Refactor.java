@@ -486,6 +486,12 @@ public class Refactor {
     waitElementVisibility(newNameFileInput).sendKeys(keys);
   }
 
+  public void clearFieldAndSendKeys(String keys) {
+    waitElementVisibility(newNameFileInput).clear();
+    waitExpectedText(newNameFileInput, "");
+    waitElementVisibility(newNameFileInput).sendKeys(keys);
+  }
+
   /**
    * wait new name into the ''New Name field'
    *
@@ -679,7 +685,8 @@ public class Refactor {
   private void waitExpectedText(String elementXpath, String expectedText) {
     loadPageWait.until(
         (ExpectedCondition<Boolean>)
-            driver -> waitElementVisibility(elementXpath).getText().equals(expectedText));
+            driver ->
+                waitElementVisibility(elementXpath).getAttribute("value").equals(expectedText));
   }
 
   private WebElement waitElementVisibility(WebElement element) {
