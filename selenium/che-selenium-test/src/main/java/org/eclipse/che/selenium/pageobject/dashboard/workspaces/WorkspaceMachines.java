@@ -45,9 +45,7 @@ public class WorkspaceMachines {
     String EDIT_MACHINE = "//div[@edit-machine='%s']";
     String DELETE_MACHINE = "//div[@delete-machine='%s']";
     String NEW_MACHINE_NAME = "//div[@che-form='editMachineForm']//input";
-
     String SAVE_MACHINE_BUTTON = "save-machine-button";
-
     String EDIT_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Edit the machine']";
     String REMOVE_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Remove machine']";
     String ADD_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Add a new machine']";
