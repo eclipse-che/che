@@ -17,7 +17,6 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPA
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.BUILD;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.RUN;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -35,7 +34,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -105,12 +103,7 @@ public class WorkingWithNodeWsTest {
     consoles.waitPreviewUrlIsPresent();
     seleniumWebDriver.navigate().refresh();
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    try {
-      consoles.waitPreviewUrlIsPresent();
-    } catch (TimeoutException ex) {
-      // Remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7072");
-    }
+    consoles.waitPreviewUrlIsPresent();
 
     // Run the application
     projectExplorer.selectItem(PROJECT_NAME);
