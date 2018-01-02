@@ -9,20 +9,8 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
+/** */
+@JsPackage(namespace = "che.ide.dialogs")
 package org.eclipse.che.ide.js.api.dialog;
 
-import jsinterop.annotations.JsProperty;
-import jsinterop.annotations.JsType;
-
-/**
- * Container for the information necessary to create Message dialog
- *
- * @author Roman Nikitenko
- */
-@JsType(isNative = true)
-public interface MessageDialogData extends DialogData {
-
-  /** Returns the Confirm button text. */
-  @JsProperty(name = "confirmButtonText")
-  String getConfirmButtonText();
-}
+import jsinterop.annotations.JsPackage;

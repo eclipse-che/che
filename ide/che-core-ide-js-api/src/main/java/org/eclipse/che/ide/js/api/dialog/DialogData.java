@@ -11,7 +11,6 @@
 
 package org.eclipse.che.ide.js.api.dialog;
 
-import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
@@ -20,7 +19,7 @@ import jsinterop.annotations.JsType;
  *
  * @author Roman Nikitenko
  */
-@JsType(isNative = true, name = "?", namespace = JsPackage.GLOBAL)
+@JsType(isNative = true)
 public interface DialogData {
 
   /** Returns the dialog title. */
