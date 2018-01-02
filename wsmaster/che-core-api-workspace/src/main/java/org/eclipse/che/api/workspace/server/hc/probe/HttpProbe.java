@@ -13,6 +13,8 @@ package org.eclipse.che.api.workspace.server.hc.probe;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Probes a HTTP(s) URL for a response with code >=200 and <400
@@ -26,6 +28,7 @@ public class HttpProbe extends Probe {
 
   private final URL url;
   private final int timeout;
+  private final Map<String, String> headers;
 
   private HttpURLConnection httpURLConnection;
 
@@ -35,18 +38,23 @@ public class HttpProbe extends Probe {
    * @param url HTTP endpoint to probe
    * @param timeout connection and read timeouts
    */
-  public HttpProbe(URL url, int timeout) {
+  public HttpProbe(URL url, int timeout, Map<String, String> headers) {
     this.url = url;
     this.timeout = timeout;
+    this.headers = new HashMap<>();
+    if (headers != null) {
+      this.headers.putAll(headers);
+    }
+    this.headers.put(CONNECTION_HEADER, CONNECTION_CLOSE);
   }
 
   @Override
-  public boolean probe() {
+  public boolean doProbe() {
     try {
       httpURLConnection = (HttpURLConnection) url.openConnection();
       httpURLConnection.setConnectTimeout(timeout);
       httpURLConnection.setReadTimeout(timeout);
-      httpURLConnection.setRequestProperty(CONNECTION_HEADER, CONNECTION_CLOSE);
+      headers.forEach((name, value) -> httpURLConnection.setRequestProperty(name, value));
       return isConnectionSuccessful(httpURLConnection);
     } catch (IOException e) {
       return false;

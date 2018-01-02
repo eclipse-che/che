@@ -10,10 +10,17 @@
  */
 package org.eclipse.che.api.workspace.server.hc.probe.server;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import static java.util.Collections.singletonMap;
+
+import java.net.URI;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriBuilderException;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.hc.probe.HttpProbeConfig;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.api.workspace.server.token.MachineTokenException;
+import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 
 /**
  * Produces {@link HttpProbeConfig} for ws-agent liveness probes.
@@ -21,18 +28,38 @@ import org.eclipse.che.api.workspace.server.hc.probe.HttpProbeConfig;
  * @author Alexander Garagatyi
  */
 public class WsAgentServerLivenessProbeConfigFactory implements HttpProbeConfigFactory {
+  private final MachineTokenProvider machineTokenProvider;
+
+  public WsAgentServerLivenessProbeConfigFactory(MachineTokenProvider machineTokenProvider) {
+    this.machineTokenProvider = machineTokenProvider;
+  }
 
   @Override
-  public HttpProbeConfig get(Server server) throws MalformedURLException {
-    URL url = new URL(server.getUrl());
-    String path;
-    if (url.getPath() != null && !url.getPath().endsWith("/")) {
-      path = url.getPath() + "/";
-    } else {
-      path = url.getPath();
-    }
+  public HttpProbeConfig get(String workspaceId, Server server)
+      throws InternalInfrastructureException {
 
-    return new HttpProbeConfig(
-        url.getPort(), url.getHost(), url.getProtocol(), path, 1, 3, 120, 10, 10);
+    try {
+      // add trailing slash
+      URI uri = UriBuilder.fromUri(server.getUrl()).path("/").build();
+
+      return new HttpProbeConfig(
+          uri.getPort(),
+          uri.getHost(),
+          uri.getScheme(),
+          uri.getPath(),
+          singletonMap(HttpHeaders.AUTHORIZATION, machineTokenProvider.getToken(workspaceId)),
+          1,
+          3,
+          120,
+          10,
+          10);
+    } catch (MachineTokenException e) {
+      throw new InternalInfrastructureException(
+          "Failed to retrieve workspace token for ws-agent server liveness probe. Error: "
+              + e.getMessage());
+    } catch (UriBuilderException e) {
+      throw new InternalInfrastructureException(
+          "Wsagent server liveness probe url is invalid. Error: " + e.getMessage());
+    }
   }
 }

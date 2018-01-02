@@ -14,6 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.hc.probe.HttpProbeConfig;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 
 /**
  * Produces {@link HttpProbeConfig} for exec agent liveness probes.
@@ -23,10 +24,15 @@ import org.eclipse.che.api.workspace.server.hc.probe.HttpProbeConfig;
 public class ExecServerLivenessProbeConfigFactory implements HttpProbeConfigFactory {
 
   @Override
-  public HttpProbeConfig get(Server server) throws MalformedURLException {
-    URL url = new URL(server.getUrl());
-
-    return new HttpProbeConfig(
-        url.getPort(), url.getHost(), url.getProtocol(), "/liveness", 1, 3, 120, 10, 10);
+  public HttpProbeConfig get(String workspaceId, Server server)
+      throws InternalInfrastructureException {
+    try {
+      URL url = new URL(server.getUrl());
+      return new HttpProbeConfig(
+          url.getPort(), url.getHost(), url.getProtocol(), "/liveness", null, 1, 3, 120, 10, 10);
+    } catch (MalformedURLException e) {
+      throw new InternalInfrastructureException(
+          "Exec agent server liveness probe url is invalid. Error: " + e.getMessage());
+    }
   }
 }

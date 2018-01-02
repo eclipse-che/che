@@ -139,7 +139,7 @@ public class ProbeScheduler {
       Probe probe = probeFactory.get();
       timeouts.schedule(
           new TimeoutProbeTask(probe), TimeUnit.SECONDS.toMillis(probeConfig.getTimeoutSeconds()));
-      boolean success = probe.run();
+      boolean success = probe.probe();
       if (success) {
         // current success increases successes count and clears failures count
         successes++;

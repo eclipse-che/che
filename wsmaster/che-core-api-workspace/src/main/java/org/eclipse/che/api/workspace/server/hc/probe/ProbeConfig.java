@@ -37,6 +37,7 @@ public abstract class ProbeConfig {
       int timeoutSeconds,
       int periodSeconds,
       int initialDelaySeconds) {
+    // TODO check values
     this.successThreshold = successThreshold;
     this.failureThreshold = failureThreshold;
     this.timeoutSeconds = timeoutSeconds;

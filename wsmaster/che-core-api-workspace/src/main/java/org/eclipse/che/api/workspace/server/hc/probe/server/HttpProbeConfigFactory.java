@@ -10,21 +10,24 @@
  */
 package org.eclipse.che.api.workspace.server.hc.probe.server;
 
-import java.net.MalformedURLException;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.hc.probe.HttpProbeConfig;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 
 /**
  * Produces {@link HttpProbeConfig} for a server liveness probes.
  *
  * @author Alexander Garagatyi
+ * @apiNote this is a workaround needed because Che agents doesn't have a way to specify liveness
+ *     probes configuration. We should remove this when it is possible to configure ws-agent, exec
+ *     and terminal agents probes configuration
  */
 public interface HttpProbeConfigFactory {
 
   /**
    * Returns liveness probe config for a specified server
    *
-   * @throws MalformedURLException when server url is invalid
+   * @throws InternalInfrastructureException when server probe creation failed
    */
-  HttpProbeConfig get(Server server) throws MalformedURLException;
+  HttpProbeConfig get(String workspaceId, Server server) throws InternalInfrastructureException;
 }

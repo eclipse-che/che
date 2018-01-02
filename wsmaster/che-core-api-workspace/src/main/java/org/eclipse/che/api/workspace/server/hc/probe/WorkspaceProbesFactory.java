@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
@@ -25,6 +26,7 @@ import org.eclipse.che.api.workspace.server.hc.probe.server.TerminalServerLivene
 import org.eclipse.che.api.workspace.server.hc.probe.server.WsAgentServerLivenessProbeConfigFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 
 /**
  * Produces instances of {@link WorkspaceProbes} according to provided servers of a workspace
@@ -35,14 +37,19 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 public class WorkspaceProbesFactory {
   // Is used to define servers which will be checked by this server checker class.
   // It is also a workaround to set correct paths for servers readiness checks.
-  private static final Map<String, HttpProbeConfigFactory> probeConfigFactories =
-      ImmutableMap.of(
-          "wsagent/http",
-          new WsAgentServerLivenessProbeConfigFactory(),
-          "exec-agent/http",
-          new ExecServerLivenessProbeConfigFactory(),
-          "terminal",
-          new TerminalServerLivenessProbeConfigFactory());
+  private final Map<String, HttpProbeConfigFactory> probeConfigFactories;
+
+  @Inject
+  public WorkspaceProbesFactory(MachineTokenProvider machineTokenProvider) {
+    probeConfigFactories =
+        ImmutableMap.of(
+            "wsagent/http",
+            new WsAgentServerLivenessProbeConfigFactory(machineTokenProvider),
+            "exec-agent/http",
+            new ExecServerLivenessProbeConfigFactory(),
+            "terminal",
+            new TerminalServerLivenessProbeConfigFactory());
+  }
 
   /**
    * Get {@link WorkspaceProbes} for a whole workspace runtime
@@ -106,6 +113,7 @@ public class WorkspaceProbesFactory {
       return null;
     }
 
-    return new HttpProbeFactory(workspaceId, machineName, serverRef, configFactory.get(server));
+    return new HttpProbeFactory(
+        workspaceId, machineName, serverRef, configFactory.get(workspaceId, server));
   }
 }

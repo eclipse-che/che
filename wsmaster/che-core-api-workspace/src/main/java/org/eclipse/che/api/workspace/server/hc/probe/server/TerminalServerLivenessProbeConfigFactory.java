@@ -10,11 +10,11 @@
  */
 package org.eclipse.che.api.workspace.server.hc.probe.server;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.hc.probe.HttpProbeConfig;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 
 /**
  * Produces {@link HttpProbeConfig} for terminal agent liveness probes.
@@ -24,12 +24,14 @@ import org.eclipse.che.api.workspace.server.hc.probe.HttpProbeConfig;
 public class TerminalServerLivenessProbeConfigFactory implements HttpProbeConfigFactory {
 
   @Override
-  public HttpProbeConfig get(Server server) throws MalformedURLException {
+  public HttpProbeConfig get(String workspaceId, Server server)
+      throws InternalInfrastructureException {
     URI uri;
     try {
       uri = new URI(server.getUrl());
     } catch (URISyntaxException e) {
-      throw new MalformedURLException(e.getMessage());
+      throw new InternalInfrastructureException(
+          "Terminal agent server liveness probe url is invalid. Error: " + e.getMessage());
     }
     String protocol;
     if ("wss".equals(uri.getScheme())) {
@@ -39,6 +41,6 @@ public class TerminalServerLivenessProbeConfigFactory implements HttpProbeConfig
     }
 
     return new HttpProbeConfig(
-        uri.getPort(), uri.getHost(), protocol, "/liveness", 1, 3, 120, 10, 10);
+        uri.getPort(), uri.getHost(), protocol, "/liveness", null, 1, 3, 120, 10, 10);
   }
 }

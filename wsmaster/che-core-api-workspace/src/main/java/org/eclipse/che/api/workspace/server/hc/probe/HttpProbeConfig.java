@@ -10,6 +10,10 @@
  */
 package org.eclipse.che.api.workspace.server.hc.probe;
 
+import static java.util.Collections.emptyMap;
+
+import java.util.Map;
+
 /**
  * Configuration of a HTTP URL probe.
  *
@@ -19,12 +23,14 @@ public class HttpProbeConfig extends TcpProbeConfig {
 
   private final String scheme;
   private final String path;
+  private final Map<String, String> headers;
 
   public HttpProbeConfig(
       int port,
       String host,
       String scheme,
       String path,
+      Map<String, String> headers,
       int successThreshold,
       int failureThreshold,
       int timeoutSeconds,
@@ -40,6 +46,7 @@ public class HttpProbeConfig extends TcpProbeConfig {
         host);
     this.scheme = scheme;
     this.path = path;
+    this.headers = headers != null ? headers : emptyMap();
 
     if (!"http".equals(scheme) && !"https".equals(scheme)) {
       throw new IllegalArgumentException("HTTP probe scheme must be 'http' or 'https'");
@@ -52,5 +59,9 @@ public class HttpProbeConfig extends TcpProbeConfig {
 
   public String getPath() {
     return path;
+  }
+
+  public Map<String, String> getHeaders() {
+    return headers;
   }
 }

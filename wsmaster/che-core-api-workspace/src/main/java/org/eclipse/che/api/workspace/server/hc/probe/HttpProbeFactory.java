@@ -12,6 +12,7 @@ package org.eclipse.che.api.workspace.server.hc.probe;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 public class HttpProbeFactory extends ProbeFactory {
   private final URL url;
   private final int timeout;
+  private final Map<String, String> headers;
 
   public HttpProbeFactory(
       String workspaceId, String machineName, String serverName, HttpProbeConfig probeConfig)
@@ -35,10 +37,11 @@ public class HttpProbeFactory extends ProbeFactory {
             probeConfig.getPort(),
             probeConfig.getPath());
     timeout = (int) TimeUnit.SECONDS.toMillis(probeConfig.getTimeoutSeconds());
+    headers = probeConfig.getHeaders();
   }
 
   @Override
   public HttpProbe get() {
-    return new HttpProbe(url, timeout);
+    return new HttpProbe(url, timeout, headers);
   }
 }
