@@ -32,6 +32,7 @@ import org.eclipse.che.selenium.pageobject.Refactor;
 import org.eclipse.che.selenium.refactor.Services;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -68,6 +69,16 @@ public class RenamePrivateFieldTest {
     projectExplorer.waitItem(PROJECT_NAME);
     new Services(projectExplorer, notificationsPopupPanel, refactor)
         .expandSpringProjectNodes(PROJECT_NAME);
+  }
+
+  @AfterMethod
+  public void closeForm() {
+    if (refactor.isWidgetOpened()) {
+      refactor.clickCancelButtonRefactorForm();
+    }
+    if (editor.isAnyTabsOpened()) {
+      editor.closeAllTabs();
+    }
   }
 
   @Test
