@@ -92,6 +92,7 @@ public class MenuButton extends FlowPanel {
       getActionHandler().ifPresent(handler -> menu.setActionHandler(handler));
       menu.setPopupPosition(getAbsoluteLeft(), getAbsoluteTop() + getOffsetHeight());
       menu.show();
+      menu.getElement().setId("commandsPopup");
     }
   }
 
