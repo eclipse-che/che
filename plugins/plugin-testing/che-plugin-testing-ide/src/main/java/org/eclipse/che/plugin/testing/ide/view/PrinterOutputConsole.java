@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.testing.ide.view;
 
 import javax.inject.Inject;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.console.DefaultOutPutConsoleColorizer;
 import org.eclipse.che.ide.console.OutputConsoleViewImpl;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.plugin.testing.ide.model.Printable;
@@ -23,8 +24,11 @@ public class PrinterOutputConsole extends OutputConsoleViewImpl implements Print
   private TestState currentTest;
 
   @Inject
-  public PrinterOutputConsole(MachineResources resources, CoreLocalizationConstant localization) {
-    super(resources, localization);
+  public PrinterOutputConsole(
+      MachineResources resources,
+      CoreLocalizationConstant localization,
+      DefaultOutPutConsoleColorizer consoleColorizer) {
+    super(resources, localization, consoleColorizer);
 
     reRunProcessButton.removeFromParent();
     stopProcessButton.removeFromParent();

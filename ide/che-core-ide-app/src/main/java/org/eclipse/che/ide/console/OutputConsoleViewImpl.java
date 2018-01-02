@@ -44,7 +44,8 @@ import org.vectomatic.dom.svg.ui.SVGImage;
  */
 public class OutputConsoleViewImpl extends Composite implements OutputConsoleView, RequiresResize {
 
-  private Terminal terminal;
+  private final Terminal terminal;
+  private final OutputConsoleColorizer consoleColorizer;
 
   interface OutputConsoleViewUiBinder extends UiBinder<Widget, OutputConsoleViewImpl> {}
 
@@ -80,7 +81,12 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
   @UiField protected FlowPanel downloadOutputsButton;
 
   @Inject
-  public OutputConsoleViewImpl(MachineResources resources, CoreLocalizationConstant localization) {
+  public OutputConsoleViewImpl(
+      MachineResources resources,
+      CoreLocalizationConstant localization,
+      OutputConsoleColorizer consoleColorizer) {
+    this.consoleColorizer = consoleColorizer;
+
     initWidget(UI_BINDER.createAndBindUi(this));
 
     reRunProcessButton.add(new SVGImage(resources.reRunIcon()));
@@ -217,6 +223,9 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
   @Override
   public void print(String text) {
+    if (consoleColorizer != null) {
+      text = consoleColorizer.colorize(text);
+    }
     terminal.writeln(text);
   }
 

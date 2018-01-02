@@ -20,6 +20,7 @@ public class ConsoleGinModule extends AbstractGinModule {
   @Override
   protected void configure() {
     bind(OutputConsoleView.class).to(OutputConsoleViewImpl.class);
+    bind(OutputConsoleColorizer.class).to(DefaultOutPutConsoleColorizer.class);
     install(
         new GinFactoryModuleBuilder()
             .implement(
