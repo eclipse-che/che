@@ -187,7 +187,7 @@ public class RenamePrivateMethodTest {
     editor.launchRefactorFormFromEditor();
     editor.launchRefactorFormFromEditor();
     refactor.waitRenameMethodFormIsOpen();
-    refactor.typeNewName("k");
+    refactor.typeAndWaitNewName("k");
     refactor.clickOkButtonRefactorForm();
     askDialog.waitFormToOpen();
     askDialog.containsText(

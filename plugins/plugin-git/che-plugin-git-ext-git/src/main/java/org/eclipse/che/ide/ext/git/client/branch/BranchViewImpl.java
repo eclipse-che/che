@@ -10,9 +10,12 @@
  */
 package org.eclipse.che.ide.ext.git.client.branch;
 
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_BACKSPACE;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -35,7 +38,6 @@ import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
-import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.list.FilterableSimpleList;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.ui.window.Window;
@@ -70,7 +72,6 @@ public class BranchViewImpl extends Window implements BranchView {
   @UiField(provided = true)
   final GitLocalizationConstant locale;
 
-  private final DialogFactory dialogFactory;
   private FilterableSimpleList<Branch> branchesList;
   private ActionDelegate delegate;
 
@@ -78,11 +79,9 @@ public class BranchViewImpl extends Window implements BranchView {
   protected BranchViewImpl(
       GitResources resources,
       GitLocalizationConstant locale,
-      org.eclipse.che.ide.Resources coreRes,
-      DialogFactory dialogFactory) {
+      org.eclipse.che.ide.Resources coreRes) {
     this.res = resources;
     this.locale = locale;
-    this.dialogFactory = dialogFactory;
     this.ensureDebugId("git-branches-window");
 
     setTitle(locale.branchTitle());
@@ -149,7 +148,6 @@ public class BranchViewImpl extends Window implements BranchView {
     this.localRemoteFilter.addItem("Remote", "remote");
 
     createButtons();
-    addHandlers();
   }
 
   private void onFilterChanged(String filter) {
@@ -162,14 +160,6 @@ public class BranchViewImpl extends Window implements BranchView {
   @UiHandler("localRemoteFilter")
   public void onLocalRemoteFilterChanged(ChangeEvent event) {
     delegate.onLocalRemoteFilterChanged();
-    branchesList.setFocus(true);
-  }
-
-  private void addHandlers() {
-    ClickHandler clickHandler = event -> branchesList.setFocus(true);
-    localRemoteFilter.addClickHandler(clickHandler);
-    searchFilterLabel.addClickHandler(clickHandler);
-    searchFilterIcon.addClickHandler(clickHandler);
   }
 
   private void createButtons() {
@@ -183,7 +173,8 @@ public class BranchViewImpl extends Window implements BranchView {
     addButtonToFooter(btnRename);
 
     btnDelete =
-        createButton(locale.buttonDelete(), "git-branches-delete", event -> onDeleteClicked());
+        createButton(
+            locale.buttonDelete(), "git-branches-delete", event -> delegate.onDeleteClicked());
     addButtonToFooter(btnDelete);
 
     btnCreate =
@@ -199,15 +190,25 @@ public class BranchViewImpl extends Window implements BranchView {
     addButtonToFooter(btnCheckout);
   }
 
-  private void onDeleteClicked() {
-    dialogFactory
-        .createConfirmDialog(
-            locale.branchDelete(),
-            locale.branchDeleteAsk(
-                branchesList.getSelectionModel().getSelectedItem().getDisplayName()),
-            () -> delegate.onDeleteClicked(),
-            null)
-        .show();
+  @Override
+  protected void onKeyDownEvent(KeyDownEvent event) {
+    if (event.getNativeEvent().getKeyCode() == KEY_BACKSPACE) {
+      branchesList.removeLastCharacter();
+    }
+  }
+
+  @Override
+  protected void onKeyPressEvent(KeyPressEvent event) {
+    branchesList.addCharacterToFilter(String.valueOf(event.getCharCode()));
+  }
+
+  @Override
+  protected void onEscapeKey() {
+    if (branchesList.getFilter().isEmpty()) {
+      super.onEscapeKey();
+    } else {
+      branchesList.resetFilter();
+    }
   }
 
   @Override
@@ -223,7 +224,7 @@ public class BranchViewImpl extends Window implements BranchView {
     }
 
     if (isWidgetFocused(btnDelete)) {
-      onDeleteClicked();
+      delegate.onDeleteClicked();
       return;
     }
 
@@ -274,13 +275,13 @@ public class BranchViewImpl extends Window implements BranchView {
   @Override
   public void close() {
     this.hide();
+    delegate.onClose();
   }
 
   @Override
   public void showDialogIfClosed() {
     if (!super.isShowing()) {
       this.show(btnCreate);
-      branchesList.setFocus(true);
     }
   }
 
@@ -295,7 +296,12 @@ public class BranchViewImpl extends Window implements BranchView {
   }
 
   @Override
+  public void setFocus() {
+    super.focus();
+  }
+
+  @Override
   public void onClose() {
-    delegate.onClose();
+    close();
   }
 }

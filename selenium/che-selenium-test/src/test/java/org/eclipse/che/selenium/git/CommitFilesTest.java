@@ -166,12 +166,8 @@ public class CommitFilesTest {
     refactor.waitRenamePackageFormIsOpen();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     loader.waitOnClosed();
-    refactor.typeAndWaitNewName("org.eclipse.de");
-    refactor.sendKeysIntoField("v.exam");
-    refactor.sendKeysIntoField("pl");
-    refactor.sendKeysIntoField("es");
-    refactor.sendKeysIntoField("");
-    refactor.waitTextIntoNewNameField(NEW_NAME_PACKAGE);
+    typeAndWaitNewName(NEW_NAME_PACKAGE);
+
     refactor.clickOkButtonRefactorForm();
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
@@ -324,5 +320,14 @@ public class CommitFilesTest {
     git.waitExpTextIntoCompareLeftEditor(expText);
     git.waitTextNotPresentIntoCompareRightEditor(expText);
     git.closeGitCompareForm();
+  }
+
+  private void typeAndWaitNewName(String newName) {
+    try {
+      refactor.typeAndWaitNewName(newName);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7500");
+    }
   }
 }
