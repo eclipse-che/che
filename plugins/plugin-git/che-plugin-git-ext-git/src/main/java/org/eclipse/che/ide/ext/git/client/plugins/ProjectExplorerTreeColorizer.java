@@ -14,6 +14,7 @@ import static org.eclipse.che.ide.api.vcs.VcsStatus.ADDED;
 import static org.eclipse.che.ide.api.vcs.VcsStatus.MODIFIED;
 import static org.eclipse.che.ide.api.vcs.VcsStatus.NOT_MODIFIED;
 import static org.eclipse.che.ide.api.vcs.VcsStatus.UNTRACKED;
+import static org.eclipse.che.ide.ext.git.client.GitUtil.getRootProject;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -87,7 +88,7 @@ public class ProjectExplorerTreeColorizer implements GitEventsSubscriber {
                 node instanceof FileNode
                     && statusChangedEventDto
                         .getProjectName()
-                        .equals(((ResourceNode) node).getData().getLocation().segment(0)))
+                        .equals(getRootProject(((ResourceNode) node).getData().asFile()).getName()))
         .forEach(
             node -> {
               Resource resource = ((ResourceNode) node).getData();
