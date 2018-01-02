@@ -96,6 +96,11 @@ done
 DEFAULT_COMMAND="deploy"
 COMMAND=${COMMAND:-${DEFAULT_COMMAND}}
 
+# OPENSHIFT_FLAVOR can be minishift or openshift
+# TODO Set flavour via a parameter
+DEFAULT_OPENSHIFT_FLAVOR=minishift
+OPENSHIFT_FLAVOR=${OPENSHIFT_FLAVOR:-${DEFAULT_OPENSHIFT_FLAVOR}}
+
 export CHE_EPHEMERAL=${CHE_EPHEMERAL:-false}
 CHE_USE_ACME_CERTIFICATE=${CHE_USE_ACME_CERTIFICATE:-false}
 
@@ -119,6 +124,9 @@ if [ "${CHE_MULTIUSER}" == "true" ]; then
     CHE_DEDICATED_KEYCLOAK="false"
     DEFAULT_CHE_IMAGE_REPO="docker.io/rhchestage/che-server-multiuser"
     DEFAULT_CHE_IMAGE_TAG="nightly-fabric8"
+    if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
+      export CHE_FABRIC8_MULTITENANT=false
+    fi
   else
     CHE_DEDICATED_KEYCLOAK=${CHE_DEDICATED_KEYCLOAK:-"true"}
     DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server-multiuser"
@@ -146,11 +154,6 @@ DEFAULT_KEYCLOAK_OSO_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/brok
 KEYCLOAK_OSO_ENDPOINT=${KEYCLOAK_OSO_ENDPOINT:-${DEFAULT_KEYCLOAK_OSO_ENDPOINT}}
 DEFAULT_KEYCLOAK_GITHUB_ENDPOINT="https://auth.openshift.io/api/token?for=https://github.com"
 KEYCLOAK_GITHUB_ENDPOINT=${KEYCLOAK_GITHUB_ENDPOINT:-${DEFAULT_KEYCLOAK_GITHUB_ENDPOINT}}
-
-# OPENSHIFT_FLAVOR can be minishift or openshift
-# TODO Set flavour via a parameter
-DEFAULT_OPENSHIFT_FLAVOR=minishift
-OPENSHIFT_FLAVOR=${OPENSHIFT_FLAVOR:-${DEFAULT_OPENSHIFT_FLAVOR}}
 
 # TODO move this env variable as a config map in the deployment config
 # as soon as the 'che-multiuser' branch is merged to master
@@ -384,7 +387,9 @@ CHE_IMAGE="${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}"
 # e.g. docker.io/rhchestage => docker.io\/rhchestage
 CHE_IMAGE_SANITIZED=$(echo "${CHE_IMAGE}" | sed 's/\//\\\//g')
 
-CHE_SERVER_CONFIGURATION="          - name: \"CHE_WORKSPACE_LOGS\"
+CHE_SERVER_CONFIGURATION="          - name: \"CHE_FABRIC8_MULTITENANT\"
+            value: \"${CHE_FABRIC8_MULTITENANT}\"
+          - name: \"CHE_WORKSPACE_LOGS\"
             value: \"${CHE_WORKSPACE_LOGS}\"
           - name: \"CHE_HOST\"
             value: \"${CHE_HOST}\"
@@ -396,9 +401,7 @@ CHE_SERVER_CONFIGURATION="          - name: \"CHE_WORKSPACE_LOGS\"
             value: \"${CHE_OAUTH_GITHUB_CLIENTSECRET}\""
 
 if [ "${CHE_FABRIC8_MULTITENANT}" == "true" ]; then
-  CHE_SERVER_CONFIGURATION="          - name: \"CHE_FABRIC8_MULTITENANT\"
-            value: \"${CHE_FABRIC8_MULTITENANT}\"
-          - name: \"CHE_FABRIC8_USER__SERVICE_ENDPOINT\"
+  CHE_SERVER_CONFIGURATION="          - name: \"CHE_FABRIC8_USER__SERVICE_ENDPOINT\"
             value: \"${CHE_FABRIC8_USER__SERVICE_ENDPOINT}\"
           - name: \"CHE_FABRIC8_WORKSPACES_ROUTING__SUFFIX\"
             value: \"${CHE_FABRIC8_WORKSPACES_ROUTING__SUFFIX}\"
