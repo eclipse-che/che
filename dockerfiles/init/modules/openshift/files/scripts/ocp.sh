@@ -34,6 +34,9 @@ export JQ_BINARY_DOWNLOAD_URL=${JQ_BINARY_DOWNLOAD_URL:-${DEFAULT_JQ_BINARY_DOWN
 DEFAULT_CHE_MULTIUSER="false"
 export CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
 
+DEFAULT_CHE_GENERATE_SCRIPTS=true
+export CHE_GENERATE_SCRIPTS=${CHE_GENERATE_SCRIPTS:-${DEFAULT_CHE_REMOVE_PROJECT}}
+
 DEFAULT_OPENSHIFT_USERNAME="developer"
 export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
 
@@ -45,7 +48,8 @@ export DNS_PROVIDER=${DNS_PROVIDER:-${DEFAULT_DNS_PROVIDER}}
 
 export OPENSHIFT_ROUTING_SUFFIX="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
 
-export CHE_OPENSHIFT_PROJECT="eclipse-che"
+DEFAULT_CHE_OPENSHIFT_PROJECT="eclipse-che"
+export CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
 
 export OPENSHIFT_FLAVOR="ocp"
 
@@ -148,14 +152,29 @@ run_ocp() {
 }
 
 deploy_che_to_ocp() {
-    #Repull init image only if IMAGE_PULL_POLICY is set to Always
-    if [ $IMAGE_PULL_POLICY == "Always" ]; then
-        docker pull "$IMAGE_INIT"
+    #Only generate scripts and config files if CHE_GENERATE_SCRIPTS=true
+    if [ $CHE_GENERATE_SCRIPTS == true ]; then
+      echo "OCP generating temporary scripts and configuration files at ${CONFIG_DIR}/instance/config/openshift/scripts/ ."
+      #Repull init image only if IMAGE_PULL_POLICY is set to Always
+      if [ $IMAGE_PULL_POLICY == "Always" ]; then
+          docker pull "$IMAGE_INIT"
+      fi
+      docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} destroy --quiet --skip:pull --skip:nightly
+      docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} config --skip:pull --skip:nightly
+      cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
+    else
+      echo "OCP using existing scripts in current folder."
     fi
-    docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} destroy --quiet --skip:pull --skip:nightly
-    docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} config --skip:pull --skip:nightly
-    cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
-    bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
+    if $CHE_REMOVE_PROJECT; then
+      remove_che_from_ocp
+    fi
+    if [[ ! -f "deploy_che.sh" ]]; then
+      CURRENT_PWD=$(pwd)
+      echo "OCP script deploy_che.sh does not exist in ${CURRENT_PWD} ."
+      exit 1
+    else
+      bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
+    fi
     wait_until_server_is_booted
     if [ $CHE_MULTIUSER == true ]; then
         wait_until_kc_is_booted
@@ -174,12 +193,40 @@ server_is_booted() {
 
 wait_until_server_is_booted() {
   SERVER_BOOT_TIMEOUT=300
-  echo "[CHE] wait CHE pod booting..."
+  echo -n "[CHE] wait CHE pod booting..."
   ELAPSED=0
   until server_is_booted || [ ${ELAPSED} -eq "${SERVER_BOOT_TIMEOUT}" ]; do
+    echo -n "."
     sleep 2
     ELAPSED=$((ELAPSED+1))
   done
+  echo "Done!"
+}
+
+wait_until_kc_is_booted() {
+  echo "[CHE] wait Keycloak pod booting..."
+  available=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
+  progressing=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
+
+  DEPLOYMENT_TIMEOUT_SEC=1200
+  POLLING_INTERVAL_SEC=5
+  end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
+  while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
+    available=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
+    progressing=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
+    timeout_in=$((end-SECONDS))
+    echo "[CHE] Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, Timeout in ${timeout_in}s)"
+    sleep ${POLLING_INTERVAL_SEC}
+  done
+
+  if [ "${progressing}" == "\"True\"" ]; then
+    echo "[CHE] Keycloak deployed successfully"
+  elif [ "${progressing}" == "False" ]; then
+    echo "[CHE] [ERROR] Keycloak deployment failed. Aborting. Run command 'oc rollout status keycloak' to get more details."
+  elif [ ${SECONDS} -ge ${end} ]; then
+    echo "[CHE] [ERROR] Deployment timeout. Aborting."
+    exit 1
+  fi
 }
 
 wait_until_kc_is_booted() {
@@ -215,6 +262,41 @@ destroy_ocp() {
     $OC_BINARY cluster down
 }
 
+remove_che_from_ocp() {
+  if $CHE_REMOVE_PROJECT; then
+    echo "[CHE] Checking if project \"${CHE_OPENSHIFT_PROJECT}\" exists before removing..."
+    WAIT_FOR_PROJECT_TO_DELETE=true
+    DELETE_OPENSHIFT_PROJECT_MESSAGE="[CHE] Removing Project \"${CHE_OPENSHIFT_PROJECT}\"."
+    if $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
+      echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" exists."
+      while $WAIT_FOR_PROJECT_TO_EXIT
+      do
+      { # try
+
+          if $CHE_REMOVE_PROJECT; then
+            echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
+            CHE_REMOVE_PROJECT=false
+            $OC_BINARY delete project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
+            DELETE_OPENSHIFT_PROJECT_MESSAGE="."
+          fi
+          if ! $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
+            WAIT_FOR_PROJECT_TO_EXIT=false
+            CHE_REMOVE_PROJECT=false
+          fi
+          echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
+      } || { # catch
+          echo "[CHE] Could not find project \"${CHE_OPENSHIFT_PROJECT}\" to delete."
+          WAIT_FOR_PROJECT_TO_EXIT=false
+      }
+      done
+      echo "Done!"
+    else
+      echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" does NOT exists."
+    fi
+    CHE_REMOVE_PROJECT=false
+  fi
+}
+
 detectIP() {
     docker run --rm --net host eclipse/che-ip:nightly
 }
@@ -226,10 +308,15 @@ parse_args() {
     --destroy - destroy ocp cluster
     --deploy-che - deploy che to ocp
     --multiuser - deploy che in multiuser mode
+    --remove-che - remove existing che project
     ===================================
     ENV vars
     CHE_IMAGE_TAG - set CHE images tag, default: nightly
-    CHE_MULTIUSER - set CHE multi user mode, default: false (single user) 
+    CHE_MULTIUSER - set CHE multi user mode, default: false (single user)
+    OC_PUBLIC_HOSTNAME - set ocp hostname to admin console, default: host ip
+    OC_PUBLIC_IP - set ocp hostname for routing suffix, default: host ip
+    DNS_PROVIDER - set ocp DNS provider for routing suffix, default: nip.io
+    OPENSHIFT_TOKEN - set ocp token for authentication (eg $(oc whoami -t) )
 "
 
     DEPLOY_SCRIPT_ARGS=""
@@ -264,6 +351,10 @@ parse_args() {
                shift
            ;;
            --multiuser)
+               shift
+           ;;
+           --remove-che)
+               remove_che_from_ocp
                shift
            ;;
            --update)
