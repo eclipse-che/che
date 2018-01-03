@@ -34,9 +34,6 @@ export JQ_BINARY_DOWNLOAD_URL=${JQ_BINARY_DOWNLOAD_URL:-${DEFAULT_JQ_BINARY_DOWN
 DEFAULT_CHE_MULTIUSER="false"
 export CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
 
-DEFAULT_CHE_REMOVE_PROJECT=false
-export CHE_REMOVE_PROJECT=${CHE_REMOVE_PROJECT:-${DEFAULT_CHE_REMOVE_PROJECT}}
-
 DEFAULT_CHE_GENERATE_SCRIPTS=true
 export CHE_GENERATE_SCRIPTS=${CHE_GENERATE_SCRIPTS:-${DEFAULT_CHE_REMOVE_PROJECT}}
 
@@ -310,10 +307,6 @@ parse_args() {
 
     if [[ "$@" == *"--update"* ]]; then
       DEPLOY_SCRIPT_ARGS="-c rollupdate"
-    fi
-
-    if [[ "$@" == *"--remove-che"* ]]; then
-      CHE_REMOVE_PROJECT=true
     fi
 
     for i in "${@}"
