@@ -70,6 +70,9 @@ export IMAGE_INIT=${IMAGE_INIT:-${DEFAULT_IMAGE_INIT}}:${CHE_IMAGE_TAG}
 DEFAULT_CONFIG_DIR="/tmp/che-config"
 export CONFIG_DIR=${CONFIG_DIR:-${DEFAULT_CONFIG_DIR}}
 
+DEFAULT_CHE_REMOVE_PROJECT=false
+export CHE_REMOVE_PROJECT=${CHE_REMOVE_PROJECT:-${DEFAULT_CHE_REMOVE_PROJECT}}
+
 }
 
 get_tools() {
@@ -156,6 +159,9 @@ deploy_che_to_ocp() {
     docker run -v "${CONFIG_DIR}":/to_remove alpine sh -c "rm -rf /to_remove/" || true
     docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} config --skip:pull --skip:nightly
     cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
+    if $CHE_REMOVE_PROJECT; then
+      remove_che_from_ocp
+    fi
     bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
     wait_until_server_is_booted
     if [ $CHE_MULTIUSER == true ]; then
@@ -216,6 +222,39 @@ destroy_ocp() {
     $OC_BINARY cluster down
 }
 
+remove_che_from_ocp() {
+  if $CHE_REMOVE_PROJECT; then
+    echo "[CHE] Checking if project \"${CHE_OPENSHIFT_PROJECT}\" exists before removing..."
+    WAIT_FOR_PROJECT_TO_DELETE=true
+    DELETE_OPENSHIFT_PROJECT_MESSAGE="[CHE] Removing Project \"${CHE_OPENSHIFT_PROJECT}\"."
+    if $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
+      echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" exists."
+      while $WAIT_FOR_PROJECT_TO_EXIT
+      do
+      { # try
+
+          if $CHE_REMOVE_PROJECT; then
+            echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
+            $OC_BINARY delete project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
+            DELETE_OPENSHIFT_PROJECT_MESSAGE="."
+          fi
+          if ! $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
+            WAIT_FOR_PROJECT_TO_EXIT=false
+          fi
+          echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
+      } || { # catch
+          echo "[CHE] Could not find project \"${CHE_OPENSHIFT_PROJECT}\" to delete."
+          WAIT_FOR_PROJECT_TO_EXIT=false
+      }
+      done
+      echo "Done!"
+    else
+      echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" does NOT exists."
+    fi
+    CHE_REMOVE_PROJECT=false
+  fi
+}
+
 detectIP() {
     docker run --rm --net host eclipse/che-ip:nightly
 }
@@ -227,6 +266,7 @@ parse_args() {
     --destroy - destroy ocp cluster
     --deploy-che - deploy che to ocp
     --multiuser - deploy che in multiuser mode
+    --remove-che - remove existing che project
     ===================================
     ENV vars
     CHE_IMAGE_TAG - set CHE images tag, default: nightly
@@ -249,6 +289,10 @@ parse_args() {
       DEPLOY_SCRIPT_ARGS="-c rollupdate"
     fi
 
+    if [[ "$@" == *"--remove-che"* ]]; then
+      CHE_REMOVE_PROJECT=true
+    fi
+
     for i in "${@}"
     do
         case $i in
@@ -265,6 +309,10 @@ parse_args() {
                shift
            ;;
            --multiuser)
+               shift
+           ;;
+           --remove-che)
+               remove_che_from_ocp
                shift
            ;;
            --update)
