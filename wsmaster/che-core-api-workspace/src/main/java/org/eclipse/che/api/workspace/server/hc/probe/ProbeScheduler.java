@@ -22,6 +22,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult.ProbeStatus;
 
@@ -43,10 +45,11 @@ public class ProbeScheduler {
   /** Mapping of workspaceId to a list of futures with probes of a workspace. */
   private final Map<String, List<ScheduledFuture>> probesFutures;
 
-  public ProbeScheduler() {
+  @Inject
+  public ProbeScheduler(@Named("che.workspace.probe_pool_size") int probeSchedulerPoolSize) {
     probesExecutor =
         new ScheduledThreadPoolExecutor(
-            10, // TODO make it configurable
+            probeSchedulerPoolSize,
             new ThreadFactoryBuilder().setDaemon(true).setNameFormat("ServerProbes-%s").build());
     timeouts = new Timer("ServerProbesTimeouts", true);
     probesFutures = new HashMap<>();
@@ -147,8 +150,8 @@ public class ProbeScheduler {
 
         if (successes >= probeConfig.getSuccessThreshold()) {
           // TODO make them completable futures? Then we should ensure that
-          // TODO consecutive calls won't use executors thread time but rather use common thread
-          // pool
+          // consecutive calls won't use executors thread time but rather use common thread
+          // pool to perform processing of passed probe result
           if (cancelled.get()) {
             return;
           }

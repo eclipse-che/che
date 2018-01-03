@@ -10,12 +10,21 @@
  */
 package org.eclipse.che.api.workspace.server.hc.probe;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 /** @author Alexander Garagatyi */
 public class TcpProbeConfig extends ProbeConfig {
 
   private final int port;
   private final String host;
 
+  /**
+   * Creates probe configuration.
+   *
+   * @param port port of the TCP server to probe
+   * @param host hostname of the TCP server to probe
+   * @see ProbeConfig#ProbeConfig(int, int, int, int, int)
+   */
   public TcpProbeConfig(
       int successThreshold,
       int failureThreshold,
@@ -25,8 +34,15 @@ public class TcpProbeConfig extends ProbeConfig {
       int port,
       String host) {
     super(successThreshold, failureThreshold, timeoutSeconds, periodSeconds, initialDelaySeconds);
-    // TODO check port, host
+    if (port < 0) {
+      throw new IllegalArgumentException(
+          "Port '" + timeoutSeconds + "' is illegal. Port should not be less than 0");
+    }
     this.port = port;
+    if (isNullOrEmpty(host)) {
+      throw new IllegalArgumentException(
+          "Host '" + host + "' is illegal. Host should not be empty");
+    }
     this.host = host;
   }
 

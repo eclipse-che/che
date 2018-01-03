@@ -37,10 +37,25 @@ public abstract class ProbeConfig {
       int timeoutSeconds,
       int periodSeconds,
       int initialDelaySeconds) {
-    // TODO check values
+    if (successThreshold < 1) {
+      throw new IllegalArgumentException(
+          "Success threshold value '" + successThreshold + "' is illegal. Should be not less than 1");
+    }
     this.successThreshold = successThreshold;
+    if (failureThreshold < 1) {
+      throw new IllegalArgumentException(
+          "Failure threshold value '" + failureThreshold + "' is illegal. Should be not less than 1");
+    }
     this.failureThreshold = failureThreshold;
+    if (timeoutSeconds < 1) {
+      throw new IllegalArgumentException(
+          "Timeout value '" + timeoutSeconds + "' is illegal. Should be not less than 1");
+    }
     this.timeoutSeconds = timeoutSeconds;
+    if (periodSeconds < 1) {
+      throw new IllegalArgumentException(
+          "Period value '" + periodSeconds + "' is illegal. Should be not less than 1");
+    }
     this.periodSeconds = periodSeconds;
     this.initialDelaySeconds = initialDelaySeconds;
   }

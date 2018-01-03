@@ -200,15 +200,16 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       startSynchronizer.complete();
     } catch (InfrastructureException | InterruptedException | RuntimeException e) {
       boolean interrupted = Thread.interrupted() || e instanceof InterruptedException;
+
+      // Cancels workspace servers probes if any
+      probeScheduler.cancel(getContext().getIdentity().getWorkspaceId());
+
       try {
         destroyRuntime(emptyMap());
       } catch (InternalInfrastructureException destExc) {
         LOG.error(destExc.getMessage(), destExc);
       } catch (InfrastructureException ignore) {
       }
-
-      // Cancels workspace servers probes if any
-      probeScheduler.cancel(getContext().getIdentity().getWorkspaceId());
 
       if (interrupted) {
         final RuntimeStartInterruptedException ex =
@@ -231,6 +232,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
   protected void internalStop(Map<String, String> stopOptions) throws InfrastructureException {
     // Cancels workspace servers probes if any
     probeScheduler.cancel(getContext().getIdentity().getWorkspaceId());
+
     if (startSynchronizer.interrupt()) {
       try {
         startSynchronizer.await();
@@ -411,8 +413,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
   private class AbnormalMachineStopHandlerImpl implements AbnormalMachineStopHandler {
     @Override
     public void handle(String error) {
-      // Cancels workspace servers probes if any
-      probeScheduler.cancel(getContext().getIdentity().getWorkspaceId());
       try {
         internalStop(emptyMap());
       } catch (InfrastructureException e) {

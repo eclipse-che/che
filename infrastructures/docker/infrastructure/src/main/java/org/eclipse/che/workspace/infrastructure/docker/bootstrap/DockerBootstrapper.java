@@ -31,8 +31,6 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.commons.lang.TarUtils;
 import org.eclipse.che.workspace.infrastructure.docker.DockerMachine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Bootstraps installers in docker machines.
@@ -40,7 +38,6 @@ import org.slf4j.LoggerFactory;
  * @author Sergii Leshchenko
  */
 public class DockerBootstrapper extends AbstractBootstrapper {
-  private static final Logger LOG = LoggerFactory.getLogger(DockerBootstrapper.class);
   private static final Gson GSON = new Gson();
 
   private static final String BOOTSTRAPPER_BASE_DIR = "/tmp/";

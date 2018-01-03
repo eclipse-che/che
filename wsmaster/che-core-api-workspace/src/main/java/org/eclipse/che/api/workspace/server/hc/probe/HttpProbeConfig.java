@@ -25,6 +25,14 @@ public class HttpProbeConfig extends TcpProbeConfig {
   private final String path;
   private final Map<String, String> headers;
 
+  /**
+   * Creates probe configuration.
+   *
+   * @param scheme protocol of the HTTP server (http or https)
+   * @param path path for the HTTP probe
+   * @param headers optional headers to add into the HTTP probe request
+   * @see TcpProbeConfig#TcpProbeConfig(int, int, int, int, int, int, String)
+   */
   public HttpProbeConfig(
       int port,
       String host,
@@ -44,13 +52,12 @@ public class HttpProbeConfig extends TcpProbeConfig {
         initialDelaySeconds,
         port,
         host);
-    this.scheme = scheme;
-    this.path = path;
-    this.headers = headers != null ? headers : emptyMap();
-
     if (!"http".equals(scheme) && !"https".equals(scheme)) {
       throw new IllegalArgumentException("HTTP probe scheme must be 'http' or 'https'");
     }
+    this.scheme = scheme;
+    this.path = path;
+    this.headers = headers != null ? headers : emptyMap();
   }
 
   public String getScheme() {

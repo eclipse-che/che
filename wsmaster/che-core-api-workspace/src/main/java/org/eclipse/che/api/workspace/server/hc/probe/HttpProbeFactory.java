@@ -25,6 +25,7 @@ public class HttpProbeFactory extends ProbeFactory {
   private final URL url;
   private final int timeout;
   private final Map<String, String> headers;
+  private final HttpProbeConfig probeConfig;
 
   public HttpProbeFactory(
       String workspaceId, String machineName, String serverName, HttpProbeConfig probeConfig)
@@ -38,6 +39,12 @@ public class HttpProbeFactory extends ProbeFactory {
             probeConfig.getPath());
     timeout = (int) TimeUnit.SECONDS.toMillis(probeConfig.getTimeoutSeconds());
     headers = probeConfig.getHeaders();
+    this.probeConfig = probeConfig;
+  }
+
+  @Override
+  public HttpProbeConfig getProbeConfig() {
+    return probeConfig;
   }
 
   @Override

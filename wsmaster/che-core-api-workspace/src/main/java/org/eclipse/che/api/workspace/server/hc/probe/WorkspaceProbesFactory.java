@@ -27,6 +27,7 @@ import org.eclipse.che.api.workspace.server.hc.probe.server.WsAgentServerLivenes
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
+import org.eclipse.che.api.workspace.shared.Constants;
 
 /**
  * Produces instances of {@link WorkspaceProbes} according to provided servers of a workspace
@@ -43,11 +44,11 @@ public class WorkspaceProbesFactory {
   public WorkspaceProbesFactory(MachineTokenProvider machineTokenProvider) {
     probeConfigFactories =
         ImmutableMap.of(
-            "wsagent/http",
+            Constants.SERVER_WS_AGENT_HTTP_REFERENCE,
             new WsAgentServerLivenessProbeConfigFactory(machineTokenProvider),
-            "exec-agent/http",
+            Constants.SERVER_EXEC_AGENT_HTTP_REFERENCE,
             new ExecServerLivenessProbeConfigFactory(),
-            "terminal",
+            Constants.SERVER_TERMINAL_REFERENCE,
             new TerminalServerLivenessProbeConfigFactory());
   }
 
