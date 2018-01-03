@@ -45,7 +45,7 @@ public class WorkspaceMachines {
     String EDIT_MACHINE = "//div[@edit-machine='%s']";
     String DELETE_MACHINE = "//div[@delete-machine='%s']";
     String NEW_MACHINE_NAME = "//div[@che-form='editMachineForm']//input";
-    String EDIT_MACHINE_NAME_BUTTON = "//che-button-primary[@che-button-title='Edit']/button";
+    String SAVE_MACHINE_BUTTON = "save-machine-button";
     String EDIT_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Edit the machine']";
     String REMOVE_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Remove machine']";
     String ADD_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Add a new machine']";
@@ -157,7 +157,7 @@ public class WorkspaceMachines {
    */
   public void waitWarningMessage(String mess) {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(String.format(Locators.WARNING_MSG, mess))));
+        .until(visibilityOfElementLocated(By.xpath(format(Locators.WARNING_MSG, mess))));
   }
 
   /**
@@ -169,13 +169,13 @@ public class WorkspaceMachines {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             visibilityOfElementLocated(
-                By.xpath(String.format(Locators.CONFIG_MACHINE_SWITCH, nameMachine))))
+                By.xpath(format(Locators.CONFIG_MACHINE_SWITCH, nameMachine))))
         .click();
   }
 
-  public void clickOnEditNameDialogButton() {
+  public void clickOnSaveNameDialogButton() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(Locators.EDIT_MACHINE_NAME_BUTTON)))
+        .until(visibilityOfElementLocated(By.id(Locators.SAVE_MACHINE_BUTTON)))
         .click();
   }
 }

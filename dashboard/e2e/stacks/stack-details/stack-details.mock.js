@@ -26,7 +26,7 @@ exports.dockerimageStack = function () {
                     'installers': ['org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh'],
                     'attributes': {'memoryLimitBytes': '2147483648'}
                   }
-                }, 'recipe': {'location': 'eclipse/node', 'type': 'dockerimage'}
+                }, 'recipe': {'content': 'eclipse/node', 'type': 'dockerimage'}
               }
             }, 'commands': [], 'projects': [], 'defaultEnv': 'default', 'name': 'default', 'links': []
           };
