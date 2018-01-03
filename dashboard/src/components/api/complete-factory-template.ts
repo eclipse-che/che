@@ -64,7 +64,7 @@ export class CheFactoryTemplates {
               }
             },
             'recipe': {
-              'location': 'codenvy/ubuntu_jdk8',
+              'content': 'codenvy/ubuntu_jdk8',
               'type': 'dockerimage'
             }
           }
@@ -125,7 +125,7 @@ export class CheFactoryTemplates {
               }
             },
             'recipe': {
-              'location': 'codenvy/ubuntu_jdk8',
+              'content': 'codenvy/ubuntu_jdk8',
               'type': 'dockerimage'
             }
           }
