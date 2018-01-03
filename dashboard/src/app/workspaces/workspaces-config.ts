@@ -79,7 +79,7 @@ import {WorkspaceConfigService} from './workspace-config.service';
 import {WorkspaceDetailsConfig} from './workspace-details/workspace-details-config';
 import {WorkspaceWarnings} from './workspace-details/warnings/workspace-warnings.directive';
 import {WorkspaceWarningsController} from './workspace-details/warnings/workspace-warnings.controller';
-
+import {WorkspacesService} from './workspaces.service';
 
 /**
  * @ngdoc controller
@@ -163,6 +163,7 @@ export class WorkspacesConfig {
     register.controller('UserItemController', UserItemController);
     register.directive('userItem', UserItem);
     register.service('workspaceConfigService', WorkspaceConfigService);
+    register.service('workspacesService', WorkspacesService);
 
     // config routes
     register.app.config(($routeProvider: che.route.IRouteProvider) => {

@@ -77,7 +77,9 @@
       <div flex-gt-xs="15"
            class="workspace-item-actions">
         <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
-        <span class="che-list-actions">
+
+        <div class="che-list-actions"
+             ng-if="workspaceItemCtrl.isSupported === true">
           <che-workspace-status workspace-id="workspaceItemCtrl.workspace.id"
                                 is-request-pending="workspaceItemCtrl.isRequestPending"></che-workspace-status>
           <a href="#/workspace/{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspace.config.name}}?tab=Config"
@@ -87,7 +89,15 @@
           <span ng-click="workspaceItemCtrl.redirectToWorkspaceDetails('Projects');" uib-tooltip="Add project">
             <span class="fa fa-plus-square-o"></span>
           </span>
-        </span>
+        </div>
+        <div class="che-list-item-secondary workspace-item-not-supported"
+             ng-if="workspaceItemCtrl.isSupported === false">
+          <div>
+            <span>Not supported</span>
+            <span class="che-list-actions"><i class="fa fa-question-circle" uib-tooltip="Current infrastructure doesn't support this workspace recipe type."></i></span>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
