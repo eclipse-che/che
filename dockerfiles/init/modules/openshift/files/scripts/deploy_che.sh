@@ -282,13 +282,39 @@ if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
   if [ "${COMMAND}" == "cleanup" ] || [ "${COMMAND}" == "rollupdate" ]; then echo "**ERROR** project doesn't exist. Aborting"; exit 1; fi
   if [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then echo "**ERROR** project doesn't exist on OSIO. Aborting"; exit 1; fi
 
-  echo -n "Project does not exist...creating it..."
-  oc new-project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
+  # OpenShift will not get project but project still exists for for a period after being deleted.
+  # The following will loop until it can create successfully.
+
+  WAIT_FOR_PROJECT_TO_DELETE=true
+  WAIT_FOR_PROJECT_TO_DELETE_MESSAGE="Waiting for project to be deleted fully(~15 seconds)..."
+
+  echo "Project \"${CHE_OPENSHIFT_PROJECT}\" does not exist...trying to creating it."
+  while $WAIT_FOR_PROJECT_TO_DELETE
+  do
+  { # try
+
+      oc new-project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null && \
+      WAIT_FOR_PROJECT_TO_DELETE=false # Only excutes if project creation is successfully
+  } || { # catch
+      echo -n $WAIT_FOR_PROJECT_TO_DELETE_MESSAGE
+      WAIT_FOR_PROJECT_TO_DELETE_MESSAGE="."
+      sleep 2
+  }
+  done
 fi
-echo "done!"
+echo "Project \"${CHE_OPENSHIFT_PROJECT}\" creation done!"
 
 echo -n "[CHE] Switching to \"${CHE_OPENSHIFT_PROJECT}\"..."
-oc project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
+WAIT_TO_SWITCH_TO_PROJECT=true
+while $WAIT_TO_SWITCH_TO_PROJECT
+do
+{ # try
+    oc project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null && \
+    WAIT_TO_SWITCH_TO_PROJECT=false # Only excutes after project creation is successfully
+} || { # catch
+    echo -n "."
+}
+done
 echo "done!"
 
 # -------------------------------------------------------------
