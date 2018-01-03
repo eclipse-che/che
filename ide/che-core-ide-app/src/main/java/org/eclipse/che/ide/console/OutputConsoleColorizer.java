@@ -9,22 +9,18 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
-/**
- * View representation of output console.
- *
- * @author Vitaliy Guliy
- * @author Alexander Andriienko
- */
 package org.eclipse.che.ide.console;
 
 /**
- * Output console colorizer finds some text fragments by regex pattern from the console output
- * content and applies color control sequences to change text fragments color.
+ * Output console colorizer uses to change color for some output fragments.
+ *
+ * @author Alexander Andriienko
  */
 public interface OutputConsoleColorizer {
   /**
-   * Find some text fragment in the output content and colorize them by applying ansi color control
-   * sequences.
+   * Find "special text fragment" by regexp pattern in the output content {@code outPutText} and
+   * colorize them by applying ansi color control sequences. Returns original text in case if
+   * "special text fragments" was not found.
    *
    * @param outPutText text to colorize
    */

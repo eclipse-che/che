@@ -17,7 +17,7 @@ import com.google.gwt.regexp.shared.RegExp;
 import javax.inject.Inject;
 
 /**
- * Default implementation {@link OutputConsoleColorizer} for {@link OutputConsoleView}.
+ * Default implementation {@link OutputConsoleColorizer} for {@link OutputConsoleViewImpl}.
  *
  * @author Vitaliy Guliy
  * @author Alexander Andriienko
@@ -75,8 +75,7 @@ public class DefaultOutPutConsoleColorizer implements OutputConsoleColorizer {
           result.append(outPutText.substring(offSet, matchResult.getIndex()));
           offSet = COLOR_REGEXP.getLastIndex();
 
-          String textToColorize =
-              outPutText.substring(matchResult.getIndex(), offSet);
+          String textToColorize = outPutText.substring(matchResult.getIndex(), offSet);
           switch (group) {
             case DOCKER:
               textToColorize =

@@ -101,4 +101,6 @@ public class Terminal {
   public native void attachCustomKeyDownHandler(CustomKeyDownHandler customKeyDownHandl);
 
   public native void reset();
+
+  public native void destroy();
 }
