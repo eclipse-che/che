@@ -120,10 +120,10 @@ export class DockerImageEnvironmentManager extends EnvironmentManager {
       });
 
       if (!machine) {
-        machine = {name: machineName, recipe: this.parseRecipe(environment.recipe.location)};
+        machine = {name: machineName, recipe: this.parseRecipe(environment.recipe.content)};
         machines.push(machine);
       } else {
-        machine.recipe = this.parseRecipe(environment.recipe.location);
+        machine.recipe = this.parseRecipe(environment.recipe.content);
       }
       angular.merge(machine, environment.machines[machineName]);
     });
@@ -140,7 +140,7 @@ export class DockerImageEnvironmentManager extends EnvironmentManager {
    */
   getEnvironment(environment: che.IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[]): che.IWorkspaceEnvironment {
     let newEnvironment = super.getEnvironment(environment, machines);
-    newEnvironment.recipe.location = this.stringifyRecipe(machines[0].recipe);
+    newEnvironment.recipe.content = this.stringifyRecipe(machines[0].recipe);
 
     return newEnvironment;
   }
