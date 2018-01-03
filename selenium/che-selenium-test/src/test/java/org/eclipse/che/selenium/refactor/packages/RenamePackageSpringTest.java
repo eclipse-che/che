@@ -93,7 +93,7 @@ public class RenamePackageSpringTest {
     refactor.waitRenamePackageFormIsOpen();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     loader.waitOnClosed();
-    refactor.sendKeysIntoField("org.eclipse.dev.examples");
+    refactor.sendKeysIntoField(NEW_NAME_PACKAGE);
     waitTextIntoNewNameField(NEW_NAME_PACKAGE);
     loader.waitOnClosed();
     refactor.clickOkButtonRefactorForm();
@@ -110,7 +110,7 @@ public class RenamePackageSpringTest {
     refactor.waitRenamePackageFormIsOpen();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     loader.waitOnClosed();
-    refactor.sendKeysIntoField("org.eclipse.dev.examples");
+    refactor.sendKeysIntoField(OLD_NAME_PACKAGE);
     waitTextIntoNewNameField(OLD_NAME_PACKAGE);
     loader.waitOnClosed();
     refactor.clickOkButtonRefactorForm();

@@ -17,12 +17,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
@@ -37,14 +37,21 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class CommandsToolbar {
   private WebDriverWait appearanceWait;
   private WebDriverWait redrawWait;
+  private WebDriverWait loadPageWait;
 
   private final SeleniumWebDriver seleniumWebDriver;
+  private final TestWebElementRenderChecker testWebElementRenderChecker;
 
   @Inject
-  public CommandsToolbar(SeleniumWebDriver seleniumWebDriver) {
+  public CommandsToolbar(
+      SeleniumWebDriver seleniumWebDriver,
+      TestWebElementRenderChecker testWebElementRenderChecker) {
     this.seleniumWebDriver = seleniumWebDriver;
     redrawWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     appearanceWait = new WebDriverWait(seleniumWebDriver, MULTIPLE);
+    loadPageWait =
+        new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC);
+    this.testWebElementRenderChecker = testWebElementRenderChecker;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -64,7 +71,7 @@ public class CommandsToolbar {
     static final String PREVIEWS_DROPDAWN_CONTAINER = "gwt-debug-dropdown-list-content-panel";
     static final String DEBUG_COMMAND_DROPDAWN = "gwt-debug-command_toolbar-button_Debug";
 
-    private Locators() {}
+    protected Locators() {}
   }
 
   @FindBy(id = Locators.COMMANDS_TOOLBAR_SELECT)
@@ -120,16 +127,8 @@ public class CommandsToolbar {
     redrawWait.until(ExpectedConditions.visibilityOf(commandsToolbarSelect));
     Actions action = new Actions(seleniumWebDriver);
     action.clickAndHold(commandsToolbarSelect).perform();
-    Wait<WebDriver> wait =
-        new FluentWait<WebDriver>(seleniumWebDriver)
-            .withTimeout(REDRAW_UI_ELEMENTS_TIMEOUT_SEC, TimeUnit.SECONDS)
-            .pollingEvery(200, TimeUnit.MILLISECONDS)
-            .ignoring(WebDriverException.class, NoSuchElementException.class);
-    wait.until(
-            ExpectedConditions.elementToBeClickable(
-                By.xpath(String.format(Locators.COMMAND_DROPDAWN, nameOfCommand))))
-        .click();
-    action.release();
+
+    waitListIsRenderedAndClickOnItem(nameOfCommand, action);
   }
 
   /**
@@ -142,16 +141,8 @@ public class CommandsToolbar {
     redrawWait.until(ExpectedConditions.visibilityOf(debugCommandBtn));
     Actions action = new Actions(seleniumWebDriver);
     action.clickAndHold(debugCommandBtn).perform();
-    Wait<WebDriver> wait =
-        new FluentWait<WebDriver>(seleniumWebDriver)
-            .withTimeout(REDRAW_UI_ELEMENTS_TIMEOUT_SEC, TimeUnit.SECONDS)
-            .pollingEvery(200, TimeUnit.MILLISECONDS)
-            .ignoring(WebDriverException.class, NoSuchElementException.class);
-    wait.until(
-            ExpectedConditions.elementToBeClickable(
-                By.xpath(String.format(Locators.COMMAND_DROPDAWN, nameOfCommand))))
-        .click();
-    action.release();
+
+    waitListIsRenderedAndClickOnItem(nameOfCommand, action);
   }
 
   /** wait rerun button on exec toolbar command widget and click it */
@@ -212,5 +203,15 @@ public class CommandsToolbar {
   public void clickOnPreviewCommandBtnAndSelectUrl(String urlCommand) {
     clickOnPreviewsUrlButton();
     selectPreviewUrlFromDropDawn(urlCommand);
+  }
+
+  private void waitListIsRenderedAndClickOnItem(String nameOfCommand, Actions action) {
+    testWebElementRenderChecker.waitElementIsRendered(By.id("commandsPopup"));
+    action.release();
+    loadPageWait
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(String.format(Locators.COMMAND_DROPDAWN, nameOfCommand))))
+        .click();
   }
 }

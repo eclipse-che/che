@@ -114,7 +114,7 @@ export class WorkspaceSelectStackController {
     let type = this.workspaceImportedRecipe.type || 'compose';
     if (type === 'dockerimage') {
       type = 'dockerfile';
-      this.recipeScript = 'FROM ' + this.workspaceImportedRecipe.location;
+      this.recipeScript = 'FROM ' + this.workspaceImportedRecipe.content;
       this.tabName = 'stack-authoring';
     } else  if (angular.isDefined(this.workspaceImportedRecipe.location)) {
       this.tabName = 'stack-import';

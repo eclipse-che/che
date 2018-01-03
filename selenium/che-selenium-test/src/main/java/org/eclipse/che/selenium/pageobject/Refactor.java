@@ -487,12 +487,23 @@ public class Refactor {
   }
 
   /**
+   * type into refactoring widget field any key with clear
+   *
+   * @param keys
+   */
+  public void clearFieldAndSendKeys(String keys) {
+    waitElementVisibility(newNameFileInput).clear();
+    waitExpectedText(newNameFileInput, "");
+    waitElementVisibility(newNameFileInput).sendKeys(keys);
+  }
+
+  /**
    * wait new name into the ''New Name field'
    *
    * @param expectedName expected name in new name field
    */
   public void waitTextIntoNewNameField(final String expectedName) {
-    waitExpectedText(NEW_NAME_FIELD, expectedName);
+    waitExpectedText(By.xpath(NEW_NAME_FIELD), expectedName);
   }
 
   /**
@@ -529,7 +540,7 @@ public class Refactor {
    * @param expectedText expected error
    */
   public void waitTextInErrorMessage(String expectedText) {
-    waitExpectedText(ERROR_CONTAINER_OF_COMPILATION_FORM, expectedText);
+    waitExpectedText(By.xpath(ERROR_CONTAINER_OF_COMPILATION_FORM), expectedText);
   }
 
   /**
@@ -676,17 +687,17 @@ public class Refactor {
     loadPageWait.until(attributeToBe(element, "value", expectedText));
   }
 
-  private void waitExpectedText(String elementXpath, String expectedText) {
+  private void waitExpectedText(By locator, String expectedText) {
     loadPageWait.until(
         (ExpectedCondition<Boolean>)
-            driver -> waitElementVisibility(elementXpath).getText().equals(expectedText));
+            driver -> waitElementVisibility(locator).getAttribute("value").equals(expectedText));
   }
 
   private WebElement waitElementVisibility(WebElement element) {
     return loadPageWait.until(visibilityOf(element));
   }
 
-  private WebElement waitElementVisibility(String elementXpath) {
-    return loadPageWait.until(visibilityOfElementLocated(By.xpath(elementXpath)));
+  private WebElement waitElementVisibility(By locator) {
+    return loadPageWait.until(visibilityOfElementLocated(locator));
   }
 }
