@@ -26,8 +26,6 @@ import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 @Singleton
 public class PreviewSSHAction extends BaseAction {
 
-  public static final String ID = PreviewSSHAction.class.getSimpleName();
-
   private final Provider<ProcessesPanelPresenter> processesPanelPresenter;
 
   @Inject
