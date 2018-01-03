@@ -141,7 +141,7 @@ public class WorkspaceDetailsComposeTest {
     workspaceMachines.clickOnEditMachineButton(machineName);
     workspaceMachines.checkEditTheMachineDialogIsOpen();
     workspaceMachines.setMachineNameInDialog("machine");
-    workspaceMachines.clickOnEditNameDialogButton();
+    workspaceMachines.clickOnSaveNameDialogButton();
     workspaceMachines.checkMachineExists("machine");
     clickOnSaveButton();
     workspaceMachines.checkMachineExists("machine");
