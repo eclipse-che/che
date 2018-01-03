@@ -16,6 +16,7 @@ import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOI
 import static org.eclipse.che.ide.util.NameUtils.getFileExtension;
 
 import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
@@ -45,6 +46,8 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
   private final NavigateToFileView view;
   private final AppContext appContext;
 
+  private Timer timer;
+
   @Inject
   public NavigateToFilePresenter(
       NavigateToFileView view,
@@ -59,6 +62,12 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
     this.dtoFactory = dtoFactory;
 
     this.view.setDelegate(this);
+
+    timer =
+        new Timer() {
+          @Override
+          public void run() {}
+        };
   }
 
   /** Show dialog with view for navigation. */
@@ -93,16 +102,27 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
             .createDto(ProjectSearchRequestDto.class)
             .withPath("")
             .withName(URL.encodePathSegment(fileName + "*"));
+    if (timer.isRunning()) {
+      timer.cancel();
+    }
 
-    requestTransmitter
-        .newRequest()
-        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-        .methodName("project/search")
-        .paramsAsDto(requestParams)
-        .sendAndReceiveResultAsDto(ProjectSearchResponseDto.class, 20_000)
-        .onSuccess(response -> prepareResults(response))
-        .onFailure(error -> Log.error(getClass(), error.getMessage()))
-        .onTimeout(() -> Log.error(getClass(), "Project search request failed due timeout"));
+    timer =
+        new Timer() {
+          @Override
+          public void run() {
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName("project/search")
+                .paramsAsDto(requestParams)
+                .sendAndReceiveResultAsDto(ProjectSearchResponseDto.class, 20_000)
+                .onSuccess(response -> prepareResults(response))
+                .onFailure(error -> Log.error(getClass(), error.getMessage()))
+                .onTimeout(
+                    () -> Log.error(getClass(), "Project search request failed due timeout"));
+          }
+        };
+    timer.schedule(500);
   }
 
   private void prepareResults(ProjectSearchResponseDto response) {
