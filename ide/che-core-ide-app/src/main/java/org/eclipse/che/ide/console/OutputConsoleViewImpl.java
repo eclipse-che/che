@@ -18,7 +18,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -154,42 +153,14 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     this.terminal = new Terminal(termOptions);
     terminal.attachCustomKeyDownHandler(new OutputConsoleCustomKeyDownHandler(terminal));
     terminal.open(consoleLines.getElement());
-    //    Log.info(getClass(), "char Measure " + terminal.getCharMeasure());
-    //    Log.info(getClass(), "char Measure height " + terminal.getCharMeasure().getHeight());
-    //    Log.info(getClass(), "horizontal scroll bar size " +
-    // terminal.getScrollBarMeasure().getHorizontalWidth());
-    //        resize();
-
-    //                  Log.info(getClass(),  "Constructor !!!! "
-    //                                        + " " + consoleLines.getElement().getClientHeight()
-    //                                        + " " + consoleLines.getElement().getClientWidth()
-    //                                        + " " + consoleLines.isVisible()
-    //                                        + " " + consoleLines.isAttached()
-    //                                        + " " + hashCode());
   }
 
   @Override
   public void onResize() {
     if (consoleIsFit()) {
-//      if (!termIsOpen()) {
-//        terminal.open(consoleLines.getElement());
-//      }
-      //      resizeTimer.schedule(200);
       resize();
     }
   }
-
-//  private Timer resizeTimer =
-//      new Timer() {
-//        @Override
-//        public void run() {
-//          resize();
-//        }
-//      };
-
-//  private boolean termIsOpen() {
-//    return consoleLines.getElement().equals(terminal.getParent());
-//  }
 
   private boolean consoleIsFit() {
     return consoleLines.getElement().getClientHeight() > 0
@@ -270,7 +241,6 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
   @Override
   public void clearConsole() {
-    // todo seems reset sometimes works incorrectly, reset terminal.getMaxLineLength()
     terminal.reset();
   }
 
