@@ -19,8 +19,8 @@ import org.eclipse.che.commons.lang.Pair;
 public class WorkspaceAgentJavaOptsEnvVariableProvider implements EnvVarProvider {
 
   /** Env variable for jvm settings */
-  public static final String CHE_WORKSPACE_WSAGENT_JAVA_OPTIONS =
-      "CHE_WORKSPACE_WSAGENT_JAVA_OPTIONS";
+  public static final String CHE_WORKSPACE_WSAGENT__JAVA__OPTIONS =
+      "CHE_WORKSPACE_WSAGENT__JAVA__OPTIONS";
 
   private String javaOpts;
 
@@ -33,6 +33,6 @@ public class WorkspaceAgentJavaOptsEnvVariableProvider implements EnvVarProvider
 
   @Override
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) {
-    return Pair.of(CHE_WORKSPACE_WSAGENT_JAVA_OPTIONS, javaOpts);
+    return Pair.of(CHE_WORKSPACE_WSAGENT__JAVA__OPTIONS, javaOpts);
   }
 }
