@@ -22,6 +22,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.GitHub;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -116,11 +117,10 @@ public class ImportProjectFromGitHubTest {
     gitHub.typeLogin(gitHubUsername);
     gitHub.typePass(gitHubPassword);
     gitHub.clickOnSignInButton();
-    loader.waitOnClosed();
+    WaitUtils.sleepQuietly(5);
 
     // authorize on github.com
     if (seleniumWebDriver.getWindowHandles().size() > 1) {
-      loader.waitOnClosed();
       gitHub.waitAuthorizeBtn();
       gitHub.clickOnAuthorizeBtn();
     }
