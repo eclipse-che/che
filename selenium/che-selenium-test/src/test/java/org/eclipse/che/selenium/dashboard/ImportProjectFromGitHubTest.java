@@ -116,8 +116,6 @@ public class ImportProjectFromGitHubTest {
     gitHub.typeLogin(gitHubUsername);
     gitHub.typePass(gitHubPassword);
     gitHub.clickOnSignInButton();
-    gitHub.waitAuthorizeBtn();
-    gitHub.clickOnAuthorizeBtn();
     loader.waitOnClosed();
 
     // authorize on github.com
@@ -125,7 +123,6 @@ public class ImportProjectFromGitHubTest {
       loader.waitOnClosed();
       gitHub.waitAuthorizeBtn();
       gitHub.clickOnAuthorizeBtn();
-      seleniumWebDriver.switchTo().window(ideWin);
     }
 
     seleniumWebDriver.switchTo().window(ideWin);

@@ -10,13 +10,15 @@
  */
 package org.eclipse.che.selenium.refactor.types;
 
+import static java.lang.String.format;
+import static java.nio.charset.Charset.forName;
+import static java.nio.file.Files.readAllLines;
+import static java.nio.file.Paths.get;
+
+import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Random;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -35,9 +37,9 @@ import org.testng.annotations.Test;
 /** @author Musienko Maxim */
 public class TestAnnotationsTest {
   private static final String nameOfProject =
-      TestAnnotationsTest.class.getSimpleName() + new Random().nextInt(9999);
+      NameGenerator.generate(TestAnnotationsTest.class.getName(), 4);
   private static final String pathToPackageInChePrefix =
-      nameOfProject + "/src" + "/main" + "/java" + "/renametype";
+      nameOfProject + "/src/main/java/renametype";
 
   private String pathToCurrentPackage;
   private String contentFromInA;
@@ -57,10 +59,7 @@ public class TestAnnotationsTest {
   public void setup() throws Exception {
     URL resource = TestAnnotationsTest.this.getClass().getResource("/projects/RenameType");
     testProjectServiceClient.importProject(
-        workspace.getId(),
-        Paths.get(resource.toURI()),
-        nameOfProject,
-        ProjectTemplates.MAVEN_SIMPLE);
+        workspace.getId(), get(resource.toURI()), nameOfProject, ProjectTemplates.MAVEN_SIMPLE);
 
     ide.open(workspace);
   }
@@ -79,11 +78,11 @@ public class TestAnnotationsTest {
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
         TestMenuCommandsConstants.Assistant.Refactoring.RENAME);
 
-    refactorPanel.typeNewName("B.java");
+    refactorPanel.typeAndWaitNewName("B.java");
     try {
       refactorPanel.clickOkButtonRefactorForm();
     } catch (org.openqa.selenium.TimeoutException ex) {
-      refactorPanel.typeNewName("B.java");
+      refactorPanel.typeAndWaitNewName("B.java");
       refactorPanel.sendKeysIntoField(Keys.ARROW_LEFT.toString());
       refactorPanel.sendKeysIntoField(Keys.ARROW_LEFT.toString());
       refactorPanel.clickOkButtonRefactorForm();
@@ -101,24 +100,17 @@ public class TestAnnotationsTest {
     URL resourcesInA =
         getClass()
             .getResource(
-                "/org/eclipse/che/selenium/refactor/types/" + nameCurrentTest + "/in/A.java");
+                format("/org/eclipse/che/selenium/refactor/types/%s/in/A.java", nameCurrentTest));
     URL resourcesOutA =
         getClass()
             .getResource(
-                "/org/eclipse/che/selenium/refactor/types/" + nameCurrentTest + "/out/B.java");
+                format("/org/eclipse/che/selenium/refactor/types/%s/out/B.java", nameCurrentTest));
 
     contentFromInA = getTextFromFile(resourcesInA);
     contentFromInB = getTextFromFile(resourcesOutA);
   }
 
   private String getTextFromFile(URL url) throws Exception {
-    String result = "";
-    List<String> listWithAllLines =
-        Files.readAllLines(Paths.get(url.toURI()), Charset.forName("UTF-8"));
-    for (String buffer : listWithAllLines) {
-      result += buffer + '\n';
-    }
-
-    return result;
+    return Joiner.on("\n").join(readAllLines(get(url.toURI()), forName("UTF-8")));
   }
 }

@@ -32,6 +32,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -88,13 +89,23 @@ public class TestFailTest {
     }
   }
 
+  @AfterMethod
+  public void closeForm() {
+    if (refactor.isWidgetOpened()) {
+      refactor.clickCancelButtonRefactorForm();
+    }
+    if (editor.isAnyTabsOpened()) {
+      editor.closeAllTabs();
+    }
+  }
+
   @Test
   public void testFail26() {
     loader.waitOnClosed();
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     services.invokeRefactorWizardForProjectExplorerItem(pathToCurrentPackage + "/A.java");
-    doRefactorWithWifget(renameItem);
+    doRefactorWithWidget(renameItem);
     refactorPanel.waitTextInErrorMessage("Compilation unit 'B.java' already exists");
     refactorPanel.clickCancelButtonRefactorForm();
   }
@@ -104,7 +115,7 @@ public class TestFailTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     services.invokeRefactorWizardForProjectExplorerItem(pathToCurrentPackage + "/A.java");
-    doRefactorWithWifget(renameItem);
+    doRefactorWithWidget(renameItem);
     askDialog.waitFormToOpen();
     askDialog.acceptDialogWithText(
         "Found potential matches. Please review changes on the preview page.");
@@ -116,7 +127,7 @@ public class TestFailTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     services.invokeRefactorWizardForProjectExplorerItem(pathToCurrentPackage + "/A.java");
-    doRefactorWithWifget(renameItem);
+    doRefactorWithWidget(renameItem);
     askDialog.waitFormToOpen();
     askDialog.acceptDialogWithText(
         "Local Type declared inside 'renametype.testFail80.A' is named B");
@@ -128,13 +139,13 @@ public class TestFailTest {
    *
    * @param newClassName the new class for refactoring
    */
-  private void doRefactorWithWifget(String newClassName) {
+  private void doRefactorWithWidget(String newClassName) {
     try {
-      refactorPanel.typeNewName(newClassName);
+      refactorPanel.typeAndWaitNewName(newClassName);
       refactorPanel.clickOkButtonRefactorForm();
     } catch (WebDriverException ex) {
       LOG.warn(ex.getLocalizedMessage());
-      refactorPanel.typeNewName(newClassName);
+      refactorPanel.typeAndWaitNewName(newClassName);
       refactorPanel.sendKeysIntoField(Keys.ARROW_LEFT.toString());
       refactorPanel.sendKeysIntoField(Keys.ARROW_LEFT.toString());
       refactorPanel.clickOkButtonRefactorForm();

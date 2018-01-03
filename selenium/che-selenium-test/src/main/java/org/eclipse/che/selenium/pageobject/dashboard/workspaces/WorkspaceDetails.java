@@ -128,6 +128,11 @@ public class WorkspaceDetails {
         .until(textToBePresentInElement(workspaceState, stateWorkspace.getStatus()));
   }
 
+  public void checkStateOfWorkspace(StateWorkspace stateWorkspace, int timeout) {
+    new WebDriverWait(seleniumWebDriver, timeout)
+        .until(textToBePresentInElement(workspaceState, stateWorkspace.getStatus()));
+  }
+
   /** click on 'RUN' button in 'Workspace Information' */
   public void clickOnRunWorkspace() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)

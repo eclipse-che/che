@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-java-ext-jdt-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.0.0-M4-SNAPSHOT</version>
+        <version>6.0.0-M5-SNAPSHOT</version>
     </parent>
     <artifactId>org.eclipse.jdt.ui</artifactId>
     <packaging>jar</packaging>
@@ -131,10 +131,6 @@
         <dependency>
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>registry</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.search</groupId>
-            <artifactId>org.eclipse.search</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.text</groupId>
