@@ -373,10 +373,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
 
       if (probeStatus == ProbeStatus.FAILED && oldServerStatus == ServerStatus.RUNNING) {
         serverStatus = ServerStatus.STOPPED;
-      } else if (probeStatus == ProbeStatus.PASSED
-          && (oldServerStatus == null
-              || oldServerStatus == ServerStatus.UNKNOWN
-              || oldServerStatus == ServerStatus.STOPPED)) {
+      } else if (probeStatus == ProbeStatus.PASSED && (oldServerStatus != ServerStatus.RUNNING)) {
         serverStatus = ServerStatus.RUNNING;
       } else {
         return;

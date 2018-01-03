@@ -297,8 +297,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
 
       if (probeStatus == ProbeStatus.FAILED && oldServerStatus == ServerStatus.RUNNING) {
         serverStatus = ServerStatus.STOPPED;
-      } else if (probeStatus == ProbeStatus.PASSED
-          && (oldServerStatus == ServerStatus.UNKNOWN || oldServerStatus == ServerStatus.STOPPED)) {
+      } else if (probeStatus == ProbeStatus.PASSED && (oldServerStatus != ServerStatus.RUNNING)) {
         serverStatus = ServerStatus.RUNNING;
       } else {
         return;
