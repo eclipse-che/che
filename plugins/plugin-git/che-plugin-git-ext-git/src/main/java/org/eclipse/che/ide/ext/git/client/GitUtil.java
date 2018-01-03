@@ -57,7 +57,7 @@ public class GitUtil {
     return project;
   }
 
-  /** Returns the first segment of the given Path or {@code null} if the Path is empty.*/
+  /** Returns the first segment of the given Path or {@code null} if the Path is empty. */
   @Nullable
   public static String getRootPath(final Path path) {
     return path.segment(0);
