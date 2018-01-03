@@ -32,8 +32,6 @@ import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 @Singleton
 public class ShowRuntimeInfoAction extends AbstractPerspectiveAction {
 
-  public static final String ID = ShowRuntimeInfoAction.class.getSimpleName();
-
   private final Provider<ProcessesPanelPresenter> processesPanelPresenter;
 
   @Inject

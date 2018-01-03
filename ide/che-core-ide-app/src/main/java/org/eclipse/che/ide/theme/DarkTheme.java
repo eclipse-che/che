@@ -909,7 +909,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String consolesToolbarBackground() {
-    return "#21252B";
+    return "#242A3A";
   }
 
   @Override
@@ -940,6 +940,11 @@ public class DarkTheme implements Theme {
   @Override
   public String processTreeDevLabel() {
     return "white";
+  }
+
+  @Override
+  public String processesTreeMachineNameColor() {
+    return "#6fb400";
   }
 
   @Override

@@ -915,6 +915,11 @@ public class LightTheme implements Theme {
   }
 
   @Override
+  public String processesTreeMachineNameColor() {
+    return "#6fb400";
+  }
+
+  @Override
   public String outputBackgroundColor() {
     return "white";
   }

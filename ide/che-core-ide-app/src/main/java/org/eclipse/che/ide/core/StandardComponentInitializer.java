@@ -142,9 +142,11 @@ import org.eclipse.che.ide.part.explorer.project.synchronize.ProjectConfigSynchr
 import org.eclipse.che.ide.processes.NewTerminalAction;
 import org.eclipse.che.ide.processes.actions.CloseConsoleAction;
 import org.eclipse.che.ide.processes.actions.DisplayMachineOutputAction;
+import org.eclipse.che.ide.processes.actions.PreviewSSHAction;
 import org.eclipse.che.ide.processes.actions.ReRunProcessAction;
 import org.eclipse.che.ide.processes.actions.StopProcessAction;
 import org.eclipse.che.ide.processes.loading.ShowWorkspaceStatusAction;
+import org.eclipse.che.ide.processes.runtime.ShowRuntimeInfoAction;
 import org.eclipse.che.ide.resources.action.CopyResourceAction;
 import org.eclipse.che.ide.resources.action.CutResourceAction;
 import org.eclipse.che.ide.resources.action.PasteResourceAction;
@@ -349,6 +351,8 @@ public class StandardComponentInitializer {
 
   @Inject private ShowWorkspaceStatusAction showWorkspaceStatusAction;
 
+  @Inject private ShowRuntimeInfoAction showRuntimeInfoAction;
+
   @Inject private RunCommandAction runCommandAction;
 
   @Inject private NewTerminalAction newTerminalAction;
@@ -360,6 +364,8 @@ public class StandardComponentInitializer {
   @Inject private CloseConsoleAction closeConsoleAction;
 
   @Inject private DisplayMachineOutputAction displayMachineOutputAction;
+
+  @Inject private PreviewSSHAction previewSSHAction;
 
   @Inject private ShowConsoleTreeAction showConsoleTreeAction;
 
@@ -781,15 +787,22 @@ public class StandardComponentInitializer {
         (DefaultActionGroup) actionManager.getAction(GROUP_RIGHT_TOOLBAR);
     toolbarPresenter.bindRightGroup(rightToolbarGroup);
 
+    actionManager.registerAction("showServers", showRuntimeInfoAction);
+
     // Consoles tree context menu group
     DefaultActionGroup consolesTreeContextMenu =
         (DefaultActionGroup) actionManager.getAction(GROUP_CONSOLES_TREE_CONTEXT_MENU);
+    consolesTreeContextMenu.add(showRuntimeInfoAction);
+    consolesTreeContextMenu.add(newTerminalAction);
     consolesTreeContextMenu.add(reRunProcessAction);
     consolesTreeContextMenu.add(stopProcessAction);
     consolesTreeContextMenu.add(closeConsoleAction);
 
-    actionManager.registerAction(DisplayMachineOutputAction.ID, displayMachineOutputAction);
+    actionManager.registerAction("displayMachineOutput", displayMachineOutputAction);
     consolesTreeContextMenu.add(displayMachineOutputAction);
+
+    actionManager.registerAction("previewSSH", previewSSHAction);
+    consolesTreeContextMenu.add(previewSSHAction);
 
     // Editor context menu group
     DefaultActionGroup editorTabContextMenu =
