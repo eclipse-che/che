@@ -540,7 +540,12 @@ public class Refactor {
    * @param expectedText expected error
    */
   public void waitTextInErrorMessage(String expectedText) {
-    waitExpectedText(By.xpath(ERROR_CONTAINER_OF_COMPILATION_FORM), expectedText);
+    loadPageWait.until(
+        (ExpectedCondition<Boolean>)
+            driver ->
+                waitElementVisibility(By.xpath(ERROR_CONTAINER_OF_COMPILATION_FORM))
+                    .getText()
+                    .equals(expectedText));
   }
 
   /**
