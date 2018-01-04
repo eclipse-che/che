@@ -91,15 +91,15 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func wrapWithAuth(h http.Handler, mapping string) http.Handler {
+func wrapWithAuth(h http.Handler, ignoreMapping string) http.Handler {
 	// required authentication for all the requests that match mappings, if auth is configured
 	if !config.authEnabled {
 		return h
 	}
 
-	pattern := regexp.MustCompile(mapping)
+	ignorePattern := regexp.MustCompile(ignoreMapping)
 	cache := auth.NewCache(time.Minute*time.Duration(config.tokensExpirationTimeoutInMinutes), time.Minute*5)
-	return auth.NewCachingHandler(h, config.apiEndpoint, droppingTerminalConnectionsUnauthorizedHandler, cache, pattern)
+	return auth.NewCachingHandler(h, config.apiEndpoint, droppingTerminalConnectionsUnauthorizedHandler, cache, ignorePattern)
 }
 
 func droppingTerminalConnectionsUnauthorizedHandler(w http.ResponseWriter, req *http.Request, err error) {

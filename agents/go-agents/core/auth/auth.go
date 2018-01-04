@@ -38,7 +38,7 @@ type handler struct {
 	delegate            http.Handler
 	apiEndpoint         string
 	unauthorizedHandler UnauthorizedHandler
-	noAuthPattern       *regexp.Regexp
+	ignoreMapping       *regexp.Regexp
 }
 
 type cachingHandler struct {
@@ -46,14 +46,14 @@ type cachingHandler struct {
 	apiEndpoint         string
 	cache               TokenCache
 	unauthorizedHandler UnauthorizedHandler
-	noAuthPattern       *regexp.Regexp
+	ignoreMapping       *regexp.Regexp
 }
 
 // NewHandler creates HTTP handler that authenticates http calls that don't match provided non authenticated path pattern on workspace master.
 // Checks on workspace master if provided by request token is valid and calls ServerHTTP on delegate.
 // Otherwise if UnauthorizedHandler is configured calls ServerHTTP on it.
 // If it is not configured returns 401 with appropriate error message.
-func NewHandler(delegate http.Handler, apiEndpoint string, unauthorizedHandler UnauthorizedHandler, noAuthPattern *regexp.Regexp) http.Handler {
+func NewHandler(delegate http.Handler, apiEndpoint string, unauthorizedHandler UnauthorizedHandler, ignoreMapping *regexp.Regexp) http.Handler {
 	if unauthorizedHandler == nil {
 		unauthorizedHandler = defaultUnauthorizedHandler
 	}
@@ -61,7 +61,7 @@ func NewHandler(delegate http.Handler, apiEndpoint string, unauthorizedHandler U
 		delegate:            delegate,
 		apiEndpoint:         apiEndpoint,
 		unauthorizedHandler: unauthorizedHandler,
-		noAuthPattern:       noAuthPattern,
+		ignoreMapping:       ignoreMapping,
 	}
 }
 
@@ -70,7 +70,7 @@ func NewHandler(delegate http.Handler, apiEndpoint string, unauthorizedHandler U
 // Otherwise if UnauthorizedHandler is configured calls ServerHTTP on it.
 // If it is not configured returns 401 with appropriate error message.
 // This implementation caches the results of authentication to speedup request handling.
-func NewCachingHandler(delegate http.Handler, apiEndpoint string, unauthorizedHandler UnauthorizedHandler, cache TokenCache, noAuthPattern *regexp.Regexp) http.Handler {
+func NewCachingHandler(delegate http.Handler, apiEndpoint string, unauthorizedHandler UnauthorizedHandler, cache TokenCache, ignoreMapping *regexp.Regexp) http.Handler {
 	if cache == nil {
 		panic("TokenCache argument of NewCachingHandler required")
 	}
@@ -82,13 +82,13 @@ func NewCachingHandler(delegate http.Handler, apiEndpoint string, unauthorizedHa
 		apiEndpoint:         apiEndpoint,
 		cache:               cache,
 		unauthorizedHandler: unauthorizedHandler,
-		noAuthPattern:       noAuthPattern,
+		ignoreMapping:       ignoreMapping,
 	}
 }
 
 func (handler handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// check whether to protect this URL
-	if handler.noAuthPattern.MatchString(req.URL.Path) {
+	if handler.ignoreMapping.MatchString(req.URL.Path) {
 		handler.delegate.ServeHTTP(w, req)
 		return
 	}
@@ -102,7 +102,7 @@ func (handler handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 func (handler cachingHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// check whether to protect this URL
-	if handler.noAuthPattern.MatchString(req.URL.Path) {
+	if handler.ignoreMapping.MatchString(req.URL.Path) {
 		handler.delegate.ServeHTTP(w, req)
 		return
 	}
