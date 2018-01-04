@@ -33,10 +33,17 @@
 .processTree span {
 }
 
-.processTree .nameLabel {
+.processTree .machineName {
     font-weight: bold;
     line-height: 20px;
     color: processesTreeMachineNameColor;
+    font-family: "Open Sans", sans-serif;
+    font-size: 9pt;
+}
+
+.processName {
+    font-family: "Open Sans", sans-serif;
+    font-size: 9pt;
 }
 
 .processTree .machineStatus {

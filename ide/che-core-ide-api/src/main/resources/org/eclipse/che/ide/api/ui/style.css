@@ -179,7 +179,7 @@
 @def menuIconSize 12px;
 
 /* Font Sizes */
-@def fontSize 11px;
+@def fontSize 9pt;
 @def largeFontSize 16px;
 @def productFontSize 20px;
 @def landingTitleFontSize 20px;
@@ -188,9 +188,9 @@
 @def smallFontSize 10px;
 @def largeLabel 12px;
 @def largeDropdownLabel 12px;
-@def buttonFontSize 11px;
+@def buttonFontSize 9pt;
 
-@def consoleFontSize 11px;
+@def consoleFontSize 9pt;
 @def consoleLineHeight 13px;
 
 /* Fonts */
@@ -204,7 +204,7 @@
 
 /* Text fields */
 @def textFieldFontFamily "Open Sans", sans-serif;
-@def textFieldFontSize 11px;
+@def textFieldFontSize 9pt;
 
 /*Menu*/
 @eval menuBackgroundColor org.eclipse.che.ide.api.theme.Style.getMenuBackgroundColor();

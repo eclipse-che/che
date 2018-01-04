@@ -34,11 +34,11 @@
             box-sizing: border-box;
             border-bottom: tabBorderColor 1px solid;
             color: mainFontColor;
-            font-family: "Open Sans", sans-serif;
-            font-size: 11px;
             line-height: 22px;
             text-overflow: ellipsis;
             padding-left: 3px;
+            font-family: "Open Sans", sans-serif;
+            font-size: 9pt;
         }
 
         .tree {

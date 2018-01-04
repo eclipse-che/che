@@ -259,6 +259,7 @@ input::selection {
     background: buttonBackground;
     border: 1px solid buttonBorderColor;
     color: buttonFontColor;
+    border-radius: 0px;
 }
 
 .gwt-Button:hover, button:hover {

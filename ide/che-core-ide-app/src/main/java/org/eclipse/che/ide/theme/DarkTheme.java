@@ -949,7 +949,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String outputBackgroundColor() {
-    return "#1f1f1f";
+    return "#191c28";
   }
 
   @Override

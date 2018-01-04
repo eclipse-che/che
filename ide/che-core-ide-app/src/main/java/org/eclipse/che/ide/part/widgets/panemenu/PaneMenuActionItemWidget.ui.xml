@@ -25,10 +25,10 @@
         .main {
             height: 20px;
             line-height: 20px;
-            font-size: 11px;
-            font-family: "Helvetica Neue", "Myriad Pro", arial, Verdana, Verdana, sans-serif;
             color: openedFilesDropdownListTextColor;
             position: relative;
+            font-family: "Open Sans", sans-serif;
+            font-size: 9pt;
         }
 
         .icon {

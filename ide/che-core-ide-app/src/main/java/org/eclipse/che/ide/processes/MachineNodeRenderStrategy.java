@@ -125,7 +125,7 @@ public class MachineNodeRenderStrategy
     Node monitorNode = (Node) machineMonitors.getMonitorWidget(machineName, this).getElement();
     monitorsElement.appendChild(monitorNode);
 
-    Element nameElement = Elements.createSpanElement(resources.getCss().nameLabel());
+    Element nameElement = Elements.createSpanElement(resources.getCss().machineName());
     nameElement.setTextContent(machineName);
     Tooltip.create(nameElement, BOTTOM, MIDDLE, machineName);
     root.appendChild(nameElement);

@@ -42,8 +42,8 @@
         .cursorPosition,
         .fileType,
         .encoding {
-            font-family: "DejaVu Sans Mono", "Helvetica Neue", "Myriad Pro", "open sans", arial, sans-serif;
-            font-size: 9px;
+            font-family: "Open Sans", sans-serif;
+            font-size: 9pt;
             color: editorInfoTextColor;
             height: 18px;
             line-height: 18px;
