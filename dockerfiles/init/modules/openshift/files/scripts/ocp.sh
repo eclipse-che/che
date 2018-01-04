@@ -34,6 +34,8 @@ export JQ_BINARY_DOWNLOAD_URL=${JQ_BINARY_DOWNLOAD_URL:-${DEFAULT_JQ_BINARY_DOWN
 DEFAULT_CHE_MULTIUSER="false"
 export CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
 
+#Using local scripts is error prone and should only be used temporarly while developing Che.
+#If unsure leave the default value true set.
 DEFAULT_CHE_GENERATE_SCRIPTS=true
 export CHE_GENERATE_SCRIPTS=${CHE_GENERATE_SCRIPTS:-${DEFAULT_CHE_REMOVE_PROJECT}}
 
