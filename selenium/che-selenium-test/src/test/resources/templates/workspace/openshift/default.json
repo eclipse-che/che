@@ -27,7 +27,7 @@
         }
       },
       "recipe":{
-        "location":"eclipse/ubuntu_jdk8",
+        "content":"eclipse/ubuntu_jdk8",
         "type":"dockerimage"
       }
     }
