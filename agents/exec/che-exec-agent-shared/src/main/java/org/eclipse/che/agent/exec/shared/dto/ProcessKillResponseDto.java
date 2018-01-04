@@ -8,8 +8,15 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.api.command.exec.dto.event;
+package org.eclipse.che.agent.exec.shared.dto;
 
-public interface DtoWithPid {
-  int getPid();
+import org.eclipse.che.dto.shared.DTO;
+
+@DTO
+public interface ProcessKillResponseDto extends DtoWithPid {
+  ProcessKillResponseDto withPid(int pid);
+
+  String getText();
+
+  ProcessKillResponseDto withText(String text);
 }

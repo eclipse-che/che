@@ -8,8 +8,9 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.api.command.exec.dto.event;
+package org.eclipse.che.agent.exec.shared.dto.event;
 
+import org.eclipse.che.agent.exec.shared.dto.DtoWithPid;
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO

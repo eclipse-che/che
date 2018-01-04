@@ -8,19 +8,19 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.api.command.exec.dto.event;
+package org.eclipse.che.agent.exec.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
-public interface ProcessStdErrEventDto extends DtoWithPid {
-  ProcessStdErrEventDto withPid(int pid);
+public interface ProcessSubscribeRequestDto extends DtoWithPid {
+  ProcessSubscribeRequestDto withPid(int pid);
 
-  String getTime();
+  String getEventTypes();
 
-  ProcessStdErrEventDto withTime(String time);
+  ProcessSubscribeRequestDto withEventTypes(String eventTypes);
 
-  String getText();
+  String getAfter();
 
-  ProcessStdErrEventDto withText(String text);
+  ProcessSubscribeRequestDto withAfter(String after);
 }

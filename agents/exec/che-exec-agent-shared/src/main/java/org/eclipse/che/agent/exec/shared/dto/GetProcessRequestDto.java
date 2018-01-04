@@ -8,22 +8,11 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.api.command.exec.dto;
+package org.eclipse.che.agent.exec.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
-/** @author Dmitry Kuleshov */
 @DTO
-public interface GetProcessLogsResponseDto {
-  String getKind();
-
-  GetProcessLogsResponseDto withKind(String kind);
-
-  String getTime();
-
-  GetProcessLogsResponseDto withTime(String time);
-
-  String getText();
-
-  GetProcessLogsResponseDto withText(String text);
+public interface GetProcessRequestDto extends DtoWithPid {
+  GetProcessRequestDto withPid(int pid);
 }

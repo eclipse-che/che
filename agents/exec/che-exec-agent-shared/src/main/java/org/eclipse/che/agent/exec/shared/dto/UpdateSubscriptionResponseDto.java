@@ -8,13 +8,19 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.api.command.exec.dto;
+package org.eclipse.che.agent.exec.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
-public interface GetProcessesRequestDto {
-  boolean isAll();
+public interface UpdateSubscriptionResponseDto extends DtoWithPid {
+  UpdateSubscriptionResponseDto withPid(int pid);
 
-  GetProcessesRequestDto withAll(boolean all);
+  String getEventTypes();
+
+  UpdateSubscriptionResponseDto withEventTypes(String eventTypes);
+
+  String getText();
+
+  UpdateSubscriptionResponseDto withText(String text);
 }

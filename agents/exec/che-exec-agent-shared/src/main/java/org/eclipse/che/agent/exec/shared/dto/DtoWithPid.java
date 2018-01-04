@@ -8,21 +8,8 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.api.command.exec.dto;
+package org.eclipse.che.agent.exec.shared.dto;
 
-import org.eclipse.che.dto.shared.DTO;
-
-@DTO
-public interface ProcessStartRequestDto {
-  String getName();
-
-  ProcessStartRequestDto withName(String name);
-
-  String getCommandLine();
-
-  ProcessStartRequestDto withCommandLine(String commandLine);
-
-  String getType();
-
-  ProcessStartRequestDto withType(String type);
+public interface DtoWithPid {
+  int getPid();
 }

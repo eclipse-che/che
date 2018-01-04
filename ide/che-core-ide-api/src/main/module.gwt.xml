@@ -34,6 +34,7 @@
     <inherits name="org.eclipse.che.api.testing.Testing"/>
     <inherits name="org.eclipse.che.api.user.User"/>
     <inherits name="org.eclipse.che.api.workspace.Workspace"/>
+    <inherits name="org.eclipse.che.agent.exec.Exec"/>
 
     <!-- commons-gwt -->
     <inherits name="org.eclipse.che.ide.Commons"/>

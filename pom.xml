@@ -134,6 +134,17 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
+                <artifactId>che-exec-agent-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>che-exec-agent-shared</artifactId>
+                <version>${che.version}</version>
+                <classifier>sources</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
                 <artifactId>che-ide-gwt-app</artifactId>
                 <version>${che.version}</version>
                 <type>pom</type>

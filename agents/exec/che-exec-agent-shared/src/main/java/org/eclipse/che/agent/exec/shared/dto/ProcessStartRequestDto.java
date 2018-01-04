@@ -8,27 +8,21 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.api.command.exec.dto.event;
+package org.eclipse.che.agent.exec.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
-public interface ProcessStartedEventDto extends DtoWithPid {
-  ProcessStartedEventDto withPid(int pid);
-
-  String getTime();
-
-  ProcessStartedEventDto withTime(String time);
-
-  int getNativePid();
-
-  ProcessStartedEventDto withNativePid(int nativePid);
-
+public interface ProcessStartRequestDto {
   String getName();
 
-  ProcessStartedEventDto withName(String name);
+  ProcessStartRequestDto withName(String name);
 
   String getCommandLine();
 
-  ProcessStartedEventDto withCommandLine(String commandLine);
+  ProcessStartRequestDto withCommandLine(String commandLine);
+
+  String getType();
+
+  ProcessStartRequestDto withType(String type);
 }
