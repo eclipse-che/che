@@ -209,7 +209,7 @@ export class GitHubService {
         /**
          * Unpaginate GitHub API request when it can. It means:
          * - detect if the url is targeted to http://api.github.com, unless return direct response,
-         * - detect if URL headers contain a Link one with a rel="next", unless return direct response, serverEndpoint of recursion in case of
+         * - detect if URL headers contain a Link one with a rel="next", unless return direct response, endpoint of recursion in case of
          * unpagination (see below explanation).
          * - call this next page link to retrieve next page of result and concat it to first response.
          *

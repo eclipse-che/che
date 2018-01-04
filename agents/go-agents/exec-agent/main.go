@@ -169,9 +169,9 @@ func (cfg *execAgentConfig) init() {
 	// workspace master server configuration
 	flag.StringVar(
 		&cfg.apiEndpoint,
-		"api-serverEndpoint",
+		"api-endpoint",
 		os.Getenv("CHE_API"),
-		`api-serverEndpoint used by exec-agent modules(such as authentication)
+		`api-endpoint used by exec-agent modules(such as authentication)
 	to request workspace master. By default the value from 'CHE_API' environment variable is used`,
 	)
 
@@ -239,7 +239,7 @@ func (cfg *execAgentConfig) printAll() {
 		log.Printf("    - Enabled: %t\n", cfg.authEnabled)
 		log.Printf("    - Tokens expiration timeout: %dm\n", cfg.tokensExpirationTimeoutInMinutes)
 		log.Println("  Workspace master server")
-		log.Printf("    - API serverEndpoint: %s\n", cfg.apiEndpoint)
+		log.Printf("    - API endpoint: %s\n", cfg.apiEndpoint)
 	}
 	log.Println("  Process executor")
 	log.Printf("    - Logs dir: %s\n", cfg.processLogsDir)

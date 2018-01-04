@@ -46,7 +46,7 @@ func main() {
 	// push logs
 	if len(cfg.PushLogsEndpoint) != 0 {
 		connector := &wsDialConnector{
-			serverEndpoint: cfg.PushLogsEndpoint,
+			endpoint: cfg.PushLogsEndpoint,
 			token:    cfg.Token,
 		}
 		if cfg.PushLogsEndpoint == cfg.PushStatusesEndpoint {
@@ -61,16 +61,16 @@ func main() {
 	}
 }
 
-func connectOrFail(serverEndpoint string, token string) *jsonrpc.Tunnel {
-	tunnel, err := connect(serverEndpoint, token)
+func connectOrFail(endpoint string, token string) *jsonrpc.Tunnel {
+	tunnel, err := connect(endpoint, token)
 	if err != nil {
-		log.Fatalf("Couldn't connect to serverEndpoint '%s', due to error '%s'", serverEndpoint, err)
+		log.Fatalf("Couldn't connect to endpoint '%s', due to error '%s'", endpoint, err)
 	}
 	return tunnel
 }
 
-func connect(serverEndpoint string, token string) (*jsonrpc.Tunnel, error) {
-	conn, err := jsonrpcws.Dial(serverEndpoint, token)
+func connect(endpoint string, token string) (*jsonrpc.Tunnel, error) {
+	conn, err := jsonrpcws.Dial(endpoint, token)
 	if err != nil {
 		return nil, err
 	}
@@ -78,8 +78,8 @@ func connect(serverEndpoint string, token string) (*jsonrpc.Tunnel, error) {
 }
 
 type wsDialConnector struct {
-	serverEndpoint string
+	endpoint string
 	token    string
 }
 
-func (c *wsDialConnector) Connect() (*jsonrpc.Tunnel, error) { return connect(c.serverEndpoint, c.token) }
+func (c *wsDialConnector) Connect() (*jsonrpc.Tunnel, error) { return connect(c.endpoint, c.token) }

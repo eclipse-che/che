@@ -52,7 +52,7 @@ var (
 	// CheckServersPeriodSec how much time(seconds) is between servers checks for one installer.
 	CheckServersPeriodSec int
 
-	// LogsEndpointReconnectPeriodSec how much time(seconds) is between logs serverEndpoint reconnect attempts.
+	// LogsEndpointReconnectPeriodSec how much time(seconds) is between logs endpoint reconnect attempts.
 	LogsEndpointReconnectPeriodSec int
 )
 
@@ -69,15 +69,15 @@ func init() {
 	)
 	flag.StringVar(
 		&PushStatusesEndpoint,
-		"push-serverEndpoint",
+		"push-endpoint",
 		"",
-		"WebSocket serverEndpoint where to push statuses",
+		"WebSocket endpoint where to push statuses",
 	)
 	flag.StringVar(
 		&PushLogsEndpoint,
-		"push-logs-serverEndpoint",
+		"push-logs-endpoint",
 		"",
-		"WebSocket serverEndpoint where to push logs",
+		"WebSocket endpoint where to push logs",
 	)
 	// auth configuration
 	defaultAuthEnabled := false
@@ -121,9 +121,9 @@ func init() {
 	)
 	flag.IntVar(
 		&LogsEndpointReconnectPeriodSec,
-		"logs-serverEndpoint-reconnect-period",
+		"logs-endpoint-reconnect-period",
 		10,
-		`Time(in seconds) between attempts to reconnect to push-logs-serverEndpoint.
+		`Time(in seconds) between attempts to reconnect to push-logs-endpoint.
 	Bootstrapper tries to reconnect to push-logs-serverEndpoint when previously established connection lost`,
 	)
 }
@@ -132,12 +132,12 @@ func init() {
 func Parse() {
 	flag.Parse()
 
-	// push-serverEndpoint
+	// push-endpoint
 	if len(PushStatusesEndpoint) == 0 {
-		log.Fatal("Push serverEndpoint required(set it with -push-serverEndpoint argument)")
+		log.Fatal("Push endpoint required(set it with -push-endpoint argument)")
 	}
 	if !strings.HasPrefix(PushStatusesEndpoint, "ws") {
-		log.Fatal("Push serverEndpoint protocol must be either ws or wss")
+		log.Fatal("Push endpoint protocol must be either ws or wss")
 	}
 
 	// push-logs-serverEndpoint
@@ -176,8 +176,8 @@ func Parse() {
 // Print prints configuration.
 func Print() {
 	log.Print("Bootstrapper configuration")
-	log.Printf("  Push serverEndpoint: %s", PushStatusesEndpoint)
-	log.Printf("  Push logs serverEndpoint: %s", PushLogsEndpoint)
+	log.Printf("  Push endpoint: %s", PushStatusesEndpoint)
+	log.Printf("  Push logs endpoint: %s", PushLogsEndpoint)
 	log.Printf("  Auth enabled: %t", AuthEnabled)
 	log.Print("  Runtime ID:")
 	log.Printf("    Workspace: %s", RuntimeID.Workspace)
@@ -186,7 +186,7 @@ func Print() {
 	log.Printf("  Machine name: %s", MachineName)
 	log.Printf("  Installer timeout: %dseconds", InstallerTimeoutSec)
 	log.Printf("  Check servers period: %dseconds", CheckServersPeriodSec)
-	log.Printf("  Push logs serverEndpoint reconnect period: %dseconds", LogsEndpointReconnectPeriodSec)
+	log.Printf("  Push logs endpoint reconnect period: %dseconds", LogsEndpointReconnectPeriodSec)
 }
 
 // ReadInstallersConfig reads content of file by path cfg.FilePath,

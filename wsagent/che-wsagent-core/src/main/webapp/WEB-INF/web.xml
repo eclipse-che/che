@@ -25,11 +25,11 @@
         <param-value>/api</param-value>
     </context-param>
     <context-param>
-        <param-name>org.eclipse.che.websocket.serverEndpoint</param-name>
+        <param-name>org.eclipse.che.websocket.endpoint</param-name>
         <param-value>/ws</param-value>
     </context-param>
     <context-param>
-        <param-name>org.eclipse.che.eventbus.serverEndpoint</param-name>
+        <param-name>org.eclipse.che.eventbus.endpoint</param-name>
         <param-value>/eventbus</param-value>
     </context-param>
     <listener>
