@@ -51,7 +51,7 @@ func TestBootstrap(t *testing.T) {
 	installerTimeout = time.Second * 2
 	installers = []Installer{print10numbersInst, echoTestInst}
 
-	// configuring jsonrpc endpoint
+	// configuring jsonrpc serverEndpoint
 	tunnel, cr, rr := jsonrpctest.NewTmpTunnel(2 * time.Second)
 	defer tunnel.Close()
 	defer rr.Close()

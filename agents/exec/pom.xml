@@ -23,6 +23,7 @@
     <name>Agent :: Exec :: Parent</name>
     <modules>
         <module>che-exec-agent-shared</module>
+        <module>che-exec-agent-client</module>
         <module>installer</module>
     </modules>
 </project>

@@ -206,7 +206,7 @@ func (u *Upgrader) Upgrade(w http.ResponseWriter, r *http.Request, responseHeade
 //		return
 //	}
 //
-// If the endpoint supports subprotocols, then the application is responsible
+// If the serverEndpoint supports subprotocols, then the application is responsible
 // for negotiating the protocol used on the connection. Use the Subprotocols()
 // function to get the subprotocols requested by the client. Use the
 // Sec-Websocket-Protocol response header to specify the subprotocol selected

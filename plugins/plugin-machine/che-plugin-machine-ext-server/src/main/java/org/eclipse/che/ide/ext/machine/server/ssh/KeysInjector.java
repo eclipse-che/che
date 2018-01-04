@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ext.machine.server.ssh;
 
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_EXEC_AGENT_HTTP_REFERENCE;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +18,10 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.agent.exec.client.ExecAgentClient;
+import org.eclipse.che.agent.exec.client.ExecAgentClientFactory;
+import org.eclipse.che.agent.exec.shared.dto.GetProcessResponseDto;
+import org.eclipse.che.agent.exec.shared.dto.ProcessStartResponseDto;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
@@ -27,12 +30,10 @@ import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.ssh.server.SshManager;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.infrastructure.docker.client.DockerConnector;
@@ -46,6 +47,7 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton // must be eager
 public class KeysInjector {
+
   private static final Logger LOG = LoggerFactory.getLogger(KeysInjector.class);
 
   private final EventService eventService;
@@ -53,7 +55,7 @@ public class KeysInjector {
   private final SshManager sshManager;
   private final UserManager userManager;
   private final WorkspaceManager workspaceManager;
-  private final HttpJsonRequestFactory requestFactory;
+  private final ExecAgentClientFactory execAgentClientFactory;
 
   @Inject
   public KeysInjector(
@@ -62,13 +64,14 @@ public class KeysInjector {
       SshManager sshManager,
       UserManager userManager,
       WorkspaceManager workspaceManager,
-      HttpJsonRequestFactory requestFactory) {
+      ExecAgentClientFactory execAgentClientFactory
+  ) {
     this.eventService = eventService;
     this.docker = dockerConnector;
     this.sshManager = sshManager;
     this.userManager = userManager;
     this.workspaceManager = workspaceManager;
-    this.requestFactory = requestFactory;
+    this.execAgentClientFactory = execAgentClientFactory;
   }
 
   @PostConstruct
@@ -83,7 +86,7 @@ public class KeysInjector {
             if (event.getEventType() == MachineStatus.RUNNING) {
               User user;
               try {
-                user = userManager.getByName(event.getIdentity().getOwner());
+                user = userManager.getByName(owner);
               } catch (NotFoundException | ServerException e) {
                 LOG.warn(
                     "Unable to get owner of the workspace {} with namespace {}",
@@ -94,8 +97,9 @@ public class KeysInjector {
 
               Server execServer;
               try {
-                Workspace ws = workspaceManager.getWorkspace(event.getIdentity().getWorkspaceId());
-                execServer = ws.getRuntime().getMachines().get(event.getMachineName()).getServers().get(SERVER_EXEC_AGENT_HTTP_REFERENCE);
+                Workspace ws = workspaceManager.getWorkspace(workspaceId);
+                execServer = ws.getRuntime().getMachines().get(event.getMachineName()).getServers()
+                    .get(SERVER_EXEC_AGENT_HTTP_REFERENCE);
               } catch (NotFoundException | ServerException e) {
                 LOG.warn(
                     "Unable to get workspace {}",
@@ -106,7 +110,6 @@ public class KeysInjector {
               if (execServer == null) {
                 return; // no exec server installed, so not possible to execute command
               }
-
 
               // get machine keypairs
               try {
@@ -147,16 +150,15 @@ public class KeysInjector {
                       .append(publicKey)
                       .append("' >> ~/.ssh/authorized_keys");
                 }
-                CommandDto commandDto = newDto(CommandDto.class)
-                    .withCommandLine(commandLine.toString()).withName("sshCommand")
-                    .withType("custom");
 
-//                try {
-//                  requestFactory.fromUrl(execServer.getUrl()).usePostMethod().setBody(commandDto)
-//                      .request().asDto(???.class);
-//                } catch (IOException | ConflictException | BadRequestException | UnauthorizedException | NotFoundException | ForbiddenException e) {
-//                  e.printStackTrace();
-//                }
+                ExecAgentClient client = execAgentClientFactory.create(execServer.getUrl());
+                ProcessStartResponseDto responseDto = client
+                    .startProcess(commandLine.toString(), "sshUpload", "custom");
+                GetProcessResponseDto process = client.getProcess(responseDto.getPid());
+                if (process.isAlive() || process.getExitCode() != 0) {
+                  LOG.warn("Uploading key failed");
+                }
+
               } catch (ServerException e) {
                 LOG.error(e.getLocalizedMessage(), e);
               }

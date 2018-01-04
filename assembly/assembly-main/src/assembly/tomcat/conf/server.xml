@@ -62,7 +62,7 @@
     -->
 
 
-    <!-- A "Connector" represents an endpoint by which requests are received
+    <!-- A "Connector" represents an serverEndpoint by which requests are received
          and responses are returned. Documentation at :
          Java HTTP Connector: /docs/config/http.html (blocking & non-blocking)
          Java AJP  Connector: /docs/config/ajp.html

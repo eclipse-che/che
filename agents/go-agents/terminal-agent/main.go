@@ -142,9 +142,9 @@ func (cfg *terminalAgentConfig) init() {
 	// workspace master server configuration
 	flag.StringVar(
 		&cfg.apiEndpoint,
-		"api-endpoint",
+		"api-serverEndpoint",
 		os.Getenv("CHE_API"),
-		`api-endpoint used by terminal-agent modules(such as activity checker or authentication)
+		`api-serverEndpoint used by terminal-agent modules(such as activity checker or authentication)
 	to request workspace master. By default the value from 'CHE_API' environment variable is used`,
 	)
 
@@ -187,7 +187,7 @@ func (cfg *terminalAgentConfig) printAll() {
 	}
 	if cfg.authEnabled || cfg.activityTrackingEnabled {
 		log.Println("  Workspace master server")
-		log.Printf("    - API endpoint: %s\n", cfg.apiEndpoint)
+		log.Printf("    - API serverEndpoint: %s\n", cfg.apiEndpoint)
 	}
 	log.Println()
 }

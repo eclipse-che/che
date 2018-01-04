@@ -35,4 +35,8 @@ public interface GetProcessResponseDto extends DtoWithPid {
   int getNativePid();
 
   GetProcessResponseDto withNativePid(int nativePid);
+
+  int getExitCode();
+
+  GetProcessResponseDto withExitCode(int exitCode);
 }

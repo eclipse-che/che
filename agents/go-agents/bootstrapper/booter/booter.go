@@ -61,7 +61,7 @@ func AddAll(newInstallers []Installer) {
 }
 
 // PushLogs sets given tunnel as consumer of installer logs.
-// Connector is used to reconnect to jsonrpc endpoint if
+// Connector is used to reconnect to jsonrpc serverEndpoint if
 // established connection behind given tunnel was lost.
 func PushLogs(tun *jsonrpc.Tunnel, connector Connector) {
 	bus.Sub(&tunnelBroadcaster{
@@ -314,10 +314,10 @@ func (tb *tunnelBroadcaster) goReconnect() {
 		time.Sleep(tb.reconnectPeriod)
 
 		if tunnel, err := tb.connector.Connect(); err != nil {
-			log.Printf("Reconnect to logs endpoint failed, next attempt in %ds", logsEndpointReconnectPeriod/time.Second)
+			log.Printf("Reconnect to logs serverEndpoint failed, next attempt in %ds", logsEndpointReconnectPeriod/time.Second)
 			tb.goReconnect()
 		} else {
-			log.Printf("Successfully reconnected to logs endpoint")
+			log.Printf("Successfully reconnected to logs serverEndpoint")
 			PushLogs(tunnel, tb.connector)
 		}
 	}()
