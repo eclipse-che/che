@@ -33,12 +33,17 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter.NoOpURLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
+import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult;
+import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult.ProbeStatus;
+import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
+import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
@@ -75,6 +80,8 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
   private final OpenShiftBootstrapperFactory bootstrapperFactory;
   private final Map<String, OpenShiftMachine> machines;
   private final int machineStartTimeoutMin;
+  private final ProbeScheduler probeScheduler;
+  private final WorkspaceProbesFactory probesFactory;
   private final OpenShiftProject project;
   private final WorkspaceVolumesStrategy volumesStrategy;
 
@@ -86,6 +93,8 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       OpenShiftBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
       WorkspaceVolumesStrategy volumesStrategy,
+      ProbeScheduler probeScheduler,
+      WorkspaceProbesFactory probesFactory,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project,
       @Assisted List<Warning> warnings) {
@@ -95,15 +104,19 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
     this.serverCheckerFactory = serverCheckerFactory;
     this.volumesStrategy = volumesStrategy;
     this.machineStartTimeoutMin = machineStartTimeoutMin;
+    this.probeScheduler = probeScheduler;
+    this.probesFactory = probesFactory;
     this.project = project;
     this.machines = new ConcurrentHashMap<>();
   }
 
   @Override
   protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
+    OpenShiftRuntimeContext context = getContext();
+    String workspaceId = context.getIdentity().getWorkspaceId();
     try {
-      final OpenShiftEnvironment osEnv = getContext().getEnvironment();
-      volumesStrategy.prepare(osEnv, getContext().getIdentity().getWorkspaceId());
+      final OpenShiftEnvironment osEnv = context.getEnvironment();
+      volumesStrategy.prepare(osEnv, workspaceId);
 
       List<Service> createdServices = new ArrayList<>();
       for (Service service : osEnv.getServices().values()) {
@@ -136,9 +149,11 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
     } catch (InfrastructureException | RuntimeException | InterruptedException e) {
       LOG.warn(
           "Failed to start OpenShift runtime of workspace {}. Cause: {}",
-          getContext().getIdentity().getWorkspaceId(),
+          workspaceId,
           e.getMessage());
       boolean interrupted = Thread.interrupted() || e instanceof InterruptedException;
+      // Cancels workspace servers probes if any
+      probeScheduler.cancel(workspaceId);
       try {
         project.cleanUp();
       } catch (InfrastructureException ignored) {
@@ -163,6 +178,8 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
 
   @Override
   protected void internalStop(Map<String, String> stopOptions) throws InfrastructureException {
+    // Cancels workspace servers probes if any
+    probeScheduler.cancel(getContext().getIdentity().getWorkspaceId());
     project.cleanUp();
   }
 
@@ -202,6 +219,11 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
             getContext().getIdentity(), machine.getName(), machine.getServers());
     check.startAsync(new ServerReadinessHandler(machine.getName()));
     check.await();
+
+    probeScheduler.schedule(
+        probesFactory.getProbes(
+            getContext().getIdentity().getWorkspaceId(), machine.getName(), machine.getServers()),
+        new ServerLivenessHandler());
   }
 
   /**
@@ -258,6 +280,34 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
     }
   }
 
+  private class ServerLivenessHandler implements Consumer<ProbeResult> {
+    @Override
+    public void accept(ProbeResult probeResult) {
+      String machineName = probeResult.getMachineName();
+      OpenShiftMachine machine = machines.get(machineName);
+      if (machine == null) {
+        // Probably machine was removed from the list during server check start due to some reason
+        return;
+      }
+      String serverName = probeResult.getServerName();
+      ProbeStatus probeStatus = probeResult.getStatus();
+      Server server = machine.getServers().get(serverName);
+      ServerStatus oldServerStatus = server.getStatus();
+      ServerStatus serverStatus;
+
+      if (probeStatus == ProbeStatus.FAILED && oldServerStatus == ServerStatus.RUNNING) {
+        serverStatus = ServerStatus.STOPPED;
+      } else if (probeStatus == ProbeStatus.PASSED && (oldServerStatus != ServerStatus.RUNNING)) {
+        serverStatus = ServerStatus.RUNNING;
+      } else {
+        return;
+      }
+
+      machine.setServerStatus(serverName, serverStatus);
+      sendServerStatusEvent(machineName, serverName, machine.getServers().get(serverName));
+    }
+  }
+
   private void sendStartingEvent(String machineName) {
     eventService.publish(
         DtoFactory.newDto(MachineStatusEvent.class)
@@ -293,6 +343,16 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
             .withError(errorMsg));
   }
 
+  private void sendServerStatusEvent(String machineName, String serverName, Server server) {
+    eventService.publish(
+        DtoFactory.newDto(ServerStatusEvent.class)
+            .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
+            .withMachineName(machineName)
+            .withServerName(serverName)
+            .withStatus(server.getStatus())
+            .withServerUrl(server.getUrl()));
+  }
+
   /** Listens container's events and publish them as machine logs. */
   class MachineLogsPublisher implements ContainerEventHandler {
 
@@ -321,6 +381,8 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
 
     @Override
     public void handle(Action action, Pod pod) {
+      // Cancels workspace servers probes if any
+      probeScheduler.cancel(getContext().getIdentity().getWorkspaceId());
       if (pod.getStatus() != null && POD_FAILED_STATUS.equals(pod.getStatus().getPhase())) {
         try {
           internalStop(emptyMap());
