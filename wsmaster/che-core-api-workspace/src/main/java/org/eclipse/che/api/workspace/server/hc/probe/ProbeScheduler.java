@@ -12,11 +12,11 @@ package org.eclipse.che.api.workspace.server.hc.probe;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -52,7 +52,7 @@ public class ProbeScheduler {
             probeSchedulerPoolSize,
             new ThreadFactoryBuilder().setDaemon(true).setNameFormat("ServerProbes-%s").build());
     timeouts = new Timer("ServerProbesTimeouts", true);
-    probesFutures = new HashMap<>();
+    probesFutures = new ConcurrentHashMap<>();
   }
 
   /**
