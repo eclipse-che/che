@@ -524,7 +524,8 @@ public class ProjectExplorer {
     getVisibleElement(visibleItem).click();
     actionsFactory
         .createAction(seleniumWebDriver)
-        .doubleClick(getVisibleElement(visibleItem))
+        .moveToElement(getVisibleElement(visibleItem))
+        .doubleClick()
         .perform();
     loader.waitOnClosed();
   }
