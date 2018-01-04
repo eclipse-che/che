@@ -247,6 +247,8 @@ public class GitHub {
   /** click on authorize button */
   public void clickOnAuthorizeBtn() {
     waitAuthorizeBtn();
+    new WebDriverWait(seleniumWebDriver, 10)
+        .until(ExpectedConditions.elementToBeClickable(authorizeBtn));
     authorizeBtn.click();
   }
 
