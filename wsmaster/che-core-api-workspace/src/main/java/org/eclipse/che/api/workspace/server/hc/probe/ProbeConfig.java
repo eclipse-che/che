@@ -10,24 +10,27 @@
  */
 package org.eclipse.che.api.workspace.server.hc.probe;
 
-/** @author Alexander Garagatyi */
+/**
+ * Configuration of a workspace server probe.
+ *
+ * @author Alexander Garagatyi
+ */
 public abstract class ProbeConfig {
-  private int successThreshold = 1;
-  private int failureThreshold = 3;
-  private int timeoutSeconds = 1;
-  private int periodSeconds = 10;
+  private int successThreshold;
+  private int failureThreshold;
+  private int timeoutSeconds;
+  private int periodSeconds;
   private int initialDelaySeconds;
 
   /**
    * Creates probe configuration.
    *
    * @param successThreshold minimum consecutive successes for the probe to be considered successful
-   *     after having failed. Minimum value is 1. Defaults to 1.
+   *     after having failed. Minimum value is 1.
    * @param failureThreshold consecutive failures of a probe needed to consider probe failed.
-   *     Minimum value is 1. Defaults to 3.
-   * @param timeoutSeconds number of seconds after which the probe times out. Defaults to 1 second.
    *     Minimum value is 1.
-   * @param periodSeconds how often to perform the probe. Default to 10 seconds. Minimum value is 1.
+   * @param timeoutSeconds number of seconds after which the probe times out. Minimum value is 1.
+   * @param periodSeconds how often to perform the probe. Minimum value is 1.
    * @param initialDelaySeconds number of seconds after the probe is submitted for checks before
    *     probes are initiated.
    */

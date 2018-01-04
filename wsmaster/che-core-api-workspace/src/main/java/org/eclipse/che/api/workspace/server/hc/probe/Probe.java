@@ -39,7 +39,7 @@ public abstract class Probe {
    * Returns {@code true} if probe finishes successfully, {@code false} otherwise. Must return false
    * when probe is interrupted even if interruption is not respected by probe implementation.
    */
-  public abstract boolean doProbe();
+  protected abstract boolean doProbe();
 
   /**
    * Interrupts execution of the probe. May be useful when probing takes too much time. Doesn't

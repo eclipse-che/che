@@ -90,7 +90,7 @@ public class ProbeScheduler {
       String workspaceId, ProbeFactory probeFactory, Consumer<ProbeResult> probeResultConsumer) {
     ProbeConfig probeConfig = probeFactory.getProbeConfig();
     Task task = new Task(probeFactory, probeResultConsumer);
-    // scheduleWithFixedDelay is used in favor of scheduleAtFixedRate because in case of bug amount
+    // scheduleWithFixedDelay is used in favor of scheduleAtFixedRate because in case of big amount
     // of scheduled probes start time of tasks may shift and this may lead to a situation when
     // another probeConfig is needed immediately after the previous one is finished which doesn't
     // seem a good thing

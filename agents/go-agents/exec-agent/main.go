@@ -18,9 +18,8 @@ import (
 	"net/url"
 	"os"
 	"regexp"
-	"time"
-
 	"strconv"
+	"time"
 
 	"github.com/eclipse/che/agents/go-agents/core/auth"
 	"github.com/eclipse/che/agents/go-agents/core/jsonrpc"
