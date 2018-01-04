@@ -68,7 +68,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/che-dev:nightly",
+            "content": "eclipse/che-dev:nightly",
             "type": "dockerimage"
           }
         }

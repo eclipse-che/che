@@ -397,7 +397,7 @@ public class RenamePackageTest {
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.setAndWaitStateRenameSubpackagesCheckbox(true);
     refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(true);
-    refactor.sendKeysIntoField("test4.q");
+    refactor.clearFieldAndSendKeys("test4.q");
     waitTextInNewNameField("test4.q");
     loader.waitOnClosed();
     refactor.typeAndWaitFileNamePatterns("*.txt");
@@ -493,7 +493,7 @@ public class RenamePackageTest {
     refactor.setAndWaitStateRenameSubpackagesCheckbox(true);
     refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(false);
     loader.waitOnClosed();
-    refactor.sendKeysIntoField("test7.q");
+    refactor.clearFieldAndSendKeys("test7.q");
     waitTextInNewNameField("test7.q");
     loader.waitOnClosed();
     clickOkButtonIntoRefactorForm();
@@ -586,7 +586,7 @@ public class RenamePackageTest {
     refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(false);
     refactor.setAndWaitStateCommentsAndStringsCheckbox(true);
     loader.waitOnClosed();
-    refactor.sendKeysIntoField("your.pack");
+    refactor.clearFieldAndSendKeys("your.pack");
     waitTextInNewNameField("your.pack");
     loader.waitOnClosed();
     refactor.clickOkButtonRefactorForm();
