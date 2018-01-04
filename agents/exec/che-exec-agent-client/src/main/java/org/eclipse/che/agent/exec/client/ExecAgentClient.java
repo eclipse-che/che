@@ -26,6 +26,8 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.workspace.server.token.MachineTokenException;
+import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 
 /**
  * Helps to interact with exec agent via REST.
@@ -35,20 +37,28 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 public class ExecAgentClient {
 
   private final HttpJsonRequestFactory requestFactory;
+  private final MachineTokenProvider machineTokenProvider;
   private final String serverEndpoint;
 
   @Inject
-  public ExecAgentClient(HttpJsonRequestFactory requestFactory, @Assisted String serverEndpoint) {
+  public ExecAgentClient(
+      HttpJsonRequestFactory requestFactory,
+      MachineTokenProvider machineTokenProvider,
+      @Assisted String serverEndpoint) {
     this.requestFactory = requestFactory;
+    this.machineTokenProvider = machineTokenProvider;
     this.serverEndpoint = serverEndpoint;
   }
 
-  public ProcessStartResponseDto startProcess(String command, String name, String type) {
+  public ProcessStartResponseDto startProcess(
+      String workspaceId, String command, String name, String type) {
     ProcessStartRequestDto commandDto =
         newDto(ProcessStartRequestDto.class).withCommandLine(command).withName(name).withType(type);
     try {
       return requestFactory
           .fromUrl(serverEndpoint)
+          .addQueryParam("token", machineTokenProvider.getToken(workspaceId))
+          .setAuthorizationHeader("none") // to prevent sending KC token
           .usePostMethod()
           .setBody(commandDto)
           .request()
@@ -59,16 +69,19 @@ public class ExecAgentClient {
         | BadRequestException
         | UnauthorizedException
         | NotFoundException
+        | MachineTokenException
         | ForbiddenException e) {
       e.printStackTrace();
     }
     return null;
   }
 
-  public GetProcessResponseDto getProcess(int pid) {
+  public GetProcessResponseDto getProcess(String workspaceId, int pid) {
     try {
       return requestFactory
           .fromUrl(serverEndpoint + "/" + pid)
+          .addQueryParam("token", machineTokenProvider.getToken(workspaceId))
+          .setAuthorizationHeader("none") // to prevent sending KC token
           .useGetMethod()
           .request()
           .asDto(GetProcessResponseDto.class);
@@ -78,17 +91,20 @@ public class ExecAgentClient {
         | BadRequestException
         | UnauthorizedException
         | NotFoundException
+        | MachineTokenException
         | ForbiddenException e) {
       e.printStackTrace();
     }
     return null;
   }
 
-  public ProcessKillResponseDto killProcess(int pid) {
+  public ProcessKillResponseDto killProcess(String workspaceId, int pid) {
     try {
       return requestFactory
           .fromUrl(serverEndpoint + "/" + pid)
           .useDeleteMethod()
+          .addQueryParam("token", machineTokenProvider.getToken(workspaceId))
+          .setAuthorizationHeader("none") // to prevent sending KC token
           .request()
           .asDto(ProcessKillResponseDto.class);
     } catch (ServerException
@@ -97,6 +113,7 @@ public class ExecAgentClient {
         | BadRequestException
         | UnauthorizedException
         | NotFoundException
+        | MachineTokenException
         | ForbiddenException e) {
       e.printStackTrace();
     }

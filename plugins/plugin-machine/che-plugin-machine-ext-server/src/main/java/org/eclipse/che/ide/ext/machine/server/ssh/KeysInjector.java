@@ -64,8 +64,7 @@ public class KeysInjector {
       SshManager sshManager,
       UserManager userManager,
       WorkspaceManager workspaceManager,
-      ExecAgentClientFactory execAgentClientFactory
-  ) {
+      ExecAgentClientFactory execAgentClientFactory) {
     this.eventService = eventService;
     this.docker = dockerConnector;
     this.sshManager = sshManager;
@@ -98,8 +97,12 @@ public class KeysInjector {
               Server execServer;
               try {
                 Workspace ws = workspaceManager.getWorkspace(workspaceId);
-                execServer = ws.getRuntime().getMachines().get(event.getMachineName()).getServers()
-                    .get(SERVER_EXEC_AGENT_HTTP_REFERENCE);
+                execServer =
+                    ws.getRuntime()
+                        .getMachines()
+                        .get(event.getMachineName())
+                        .getServers()
+                        .get(SERVER_EXEC_AGENT_HTTP_REFERENCE);
               } catch (NotFoundException | ServerException e) {
                 LOG.warn(
                     "Unable to get workspace {}",
@@ -146,15 +149,17 @@ public class KeysInjector {
 
                 StringBuilder commandLine = new StringBuilder("mkdir ~/.ssh/ -p");
                 for (String publicKey : publicKeys) {
-                  commandLine.append("&& echo '")
+                  commandLine
+                      .append("&& echo '")
                       .append(publicKey)
                       .append("' >> ~/.ssh/authorized_keys");
                 }
 
                 ExecAgentClient client = execAgentClientFactory.create(execServer.getUrl());
-                ProcessStartResponseDto responseDto = client
-                    .startProcess(commandLine.toString(), "sshUpload", "custom");
-                GetProcessResponseDto process = client.getProcess(responseDto.getPid());
+                ProcessStartResponseDto responseDto =
+                    client.startProcess(workspaceId, commandLine.toString(), "sshUpload", "custom");
+                GetProcessResponseDto process =
+                    client.getProcess(workspaceId, responseDto.getPid());
                 if (process.isAlive() || process.getExitCode() != 0) {
                   LOG.warn("Uploading key failed");
                 }
