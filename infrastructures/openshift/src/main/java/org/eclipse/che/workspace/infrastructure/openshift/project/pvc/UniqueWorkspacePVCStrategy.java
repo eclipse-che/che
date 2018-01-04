@@ -10,9 +10,11 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project.pvc;
 
+import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.newPVC;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.newVolume;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.newVolumeMount;
+import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.putLabel;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
@@ -111,20 +113,23 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
       String subPath = workspaceId + '/' + volumeName;
       String pvcUniqueName = pvcNamePrefix + '-' + workspaceId + '-' + volumeName;
 
+      PersistentVolumeClaim newPVC = newPVC(pvcUniqueName, pvcAccessMode, pvcQuantity);
+      putLabel(newPVC, CHE_WORKSPACE_ID_LABEL, workspaceId);
+      claims.put(pvcUniqueName, newPVC);
+
       container.getVolumeMounts().add(newVolumeMount(pvcUniqueName, volumePath, subPath));
-      claims.put(pvcUniqueName, newPVC(pvcUniqueName, pvcAccessMode, pvcQuantity));
+
       addVolumeIfAbsent(podSpec, pvcUniqueName);
     }
   }
 
   @Override
   public void cleanup(String workspaceId) throws InfrastructureException {
-    final String pvcUniqueName = pvcNamePrefix + '-' + workspaceId;
     clientFactory
         .create()
         .persistentVolumeClaims()
         .inNamespace(projectName)
-        .withName(pvcUniqueName)
+        .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
         .delete();
   }
 
