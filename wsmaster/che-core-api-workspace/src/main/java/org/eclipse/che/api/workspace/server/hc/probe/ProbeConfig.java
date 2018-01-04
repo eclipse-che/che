@@ -42,12 +42,16 @@ public abstract class ProbeConfig {
       int initialDelaySeconds) {
     if (successThreshold < 1) {
       throw new IllegalArgumentException(
-          "Success threshold value '" + successThreshold + "' is illegal. Should be not less than 1");
+          "Success threshold value '"
+              + successThreshold
+              + "' is illegal. Should be not less than 1");
     }
     this.successThreshold = successThreshold;
     if (failureThreshold < 1) {
       throw new IllegalArgumentException(
-          "Failure threshold value '" + failureThreshold + "' is illegal. Should be not less than 1");
+          "Failure threshold value '"
+              + failureThreshold
+              + "' is illegal. Should be not less than 1");
     }
     this.failureThreshold = failureThreshold;
     if (timeoutSeconds < 1) {
