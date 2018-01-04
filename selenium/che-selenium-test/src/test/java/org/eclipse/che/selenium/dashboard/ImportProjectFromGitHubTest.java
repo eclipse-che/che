@@ -116,7 +116,6 @@ public class ImportProjectFromGitHubTest {
     gitHub.typeLogin(gitHubUsername);
     gitHub.typePass(gitHubPassword);
     gitHub.clickOnSignInButton();
-    gitHub.waitClosingLoginPage();
 
     // authorize on github.com
     if (gitHub.isAuthorizeButtonPresent()) {
