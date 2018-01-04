@@ -33,6 +33,7 @@ import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
+import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.infrastructure.docker.client.DockerConnector;
 import org.slf4j.Logger;
@@ -76,6 +77,9 @@ public class KeysInjector {
         new EventSubscriber<MachineStatusEvent>() {
           @Override
           public void onEvent(MachineStatusEvent event) {
+            final RuntimeIdentityDto identity = event.getIdentity();
+            final String workspaceId = identity.getWorkspaceId();
+            final String owner = identity.getOwner();
             if (event.getEventType() == MachineStatus.RUNNING) {
               User user;
               try {
