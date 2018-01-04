@@ -273,9 +273,11 @@ public class BranchViewImpl extends Window implements BranchView {
   }
 
   @Override
-  public void close() {
-    this.hide();
-    delegate.onClose();
+  public void closeDialogIfShowing() {
+    if (super.isShowing()) {
+      this.hide();
+      delegate.onClose();
+    }
   }
 
   @Override
@@ -302,6 +304,6 @@ public class BranchViewImpl extends Window implements BranchView {
 
   @Override
   public void onClose() {
-    close();
+    closeDialogIfShowing();
   }
 }
