@@ -156,9 +156,10 @@ deploy_che_to_ocp() {
       echo "OCP generating temporary scripts and configuration files at ${CONFIG_DIR}/instance/config/openshift/scripts/ ."
       #Repull init image only if IMAGE_PULL_POLICY is set to Always
       if [ $IMAGE_PULL_POLICY == "Always" ]; then
-          docker pull "$IMAGE_INIT"
+         docker pull "$IMAGE_INIT"
       fi
-      docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} destroy --quiet --skip:pull --skip:nightly
+      #wipeout config folder
+      docker run -v "${CONFIG_DIR}":/to_remove alpine sh -c "rm -rf /to_remove/" || true
       docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} config --skip:pull --skip:nightly
       cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
     else
