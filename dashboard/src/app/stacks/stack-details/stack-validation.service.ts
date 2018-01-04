@@ -237,9 +237,9 @@ export class StackValidationService {
     }
 
     if (CheRecipeTypes.DOCKERFILE === recipe.type) {
-      if (angular.isDefined(recipe.location) && !recipe.location) {
+      if (angular.isDefined(recipe.content) && !recipe.content) {
         isValid = false;
-        errors.push('Unknown recipe location.');
+        errors.push('Unknown recipe content.');
       }
       if (!recipe.contentType) {
         errors.push('Unknown recipe contentType.');
@@ -253,12 +253,12 @@ export class StackValidationService {
         errors.push('Unknown recipe contentType.');
       }
     } else if (CheRecipeTypes.DOCKERIMAGE === recipe.type) {
-      if (!recipe.location) {
+      if (!recipe.content) {
         isValid = false;
-        errors.push('Unknown recipe location.');
-      } else if (recipe.location.length > 256) {
+        errors.push('Unknown recipe content.');
+      } else if (recipe.content.length > 256) {
         isValid = false;
-        errors.push('Location length is invalid.');
+        errors.push('Content length is invalid.');
       }
     } else if (CheRecipeTypes.OPENSHIFT === recipe.type) {
       if (angular.isDefined(recipe.location) && !recipe.location) {

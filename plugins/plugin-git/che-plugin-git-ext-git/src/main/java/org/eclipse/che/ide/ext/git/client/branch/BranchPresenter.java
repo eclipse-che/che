@@ -128,6 +128,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
         .then(
             ignored -> {
               getBranches();
+              view.setFocus();
             })
         .catchError(
             error -> {
@@ -146,17 +147,24 @@ public class BranchPresenter implements BranchView.ActionDelegate {
 
   @Override
   public void onDeleteClicked() {
-
-    service
-        .branchDelete(project.getLocation(), selectedBranch.getName(), true)
-        .then(
-            ignored -> {
-              getBranches();
-            })
-        .catchError(
-            error -> {
-              handleError(error.getCause(), BRANCH_DELETE_COMMAND_NAME);
-            });
+    dialogFactory
+        .createConfirmDialog(
+            constant.branchDelete(),
+            constant.branchDeleteAsk(getSelectedBranchName()),
+            () ->
+                service
+                    .branchDelete(project.getLocation(), selectedBranch.getName(), true)
+                    .then(
+                        ignored -> {
+                          getBranches();
+                          view.setFocus();
+                        })
+                    .catchError(
+                        error -> {
+                          handleError(error.getCause(), BRANCH_DELETE_COMMAND_NAME);
+                        }),
+            null)
+        .show();
   }
 
   @Override
@@ -218,6 +226,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
                   .then(
                       branch -> {
                         getBranches();
+                        view.setFocus();
                       })
                   .catchError(
                       error -> {

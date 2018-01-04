@@ -289,6 +289,7 @@ declare namespace che {
       updated?: number;
       created?: number;
       stackId?: string;
+      errorMessage?: string;
       [propName: string]: string | number;
     };
     config: IWorkspaceConfig;
@@ -359,7 +360,7 @@ declare namespace che {
   }
 
   export interface IWorkspaceWarning {
-    code: number;
+    code?: number;
     message: string;
   }
 

@@ -55,7 +55,8 @@
     <che-button-notice che-button-title="Close"
                        ng-click="editMachineDialogController.cancel()">
     </che-button-notice>
-    <che-button-primary che-button-title="{{editMachineDialogController.isAdd ? 'Add' : 'Edit'}}"
+    <che-button-primary che-button-title="{{editMachineDialogController.isAdd ? 'Add' : 'Save'}}"
+                        id="save-machine-button"
                         ng-click="editMachineDialogController.updateMachine()"
                         ng-disabled="editMachineForm.$invalid || !editMachineDialogController.isChange() || !editorState.isValid">
     </che-button-primary>

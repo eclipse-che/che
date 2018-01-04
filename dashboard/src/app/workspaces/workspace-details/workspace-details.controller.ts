@@ -37,6 +37,7 @@ export class WorkspaceDetailsController {
   private $scope: ng.IScope;
   private $log: ng.ILogService;
   private $location: ng.ILocationService;
+  private $timeout: ng.ITimeoutService;
   private cheNotification: CheNotification;
   private cheWorkspace: CheWorkspace;
   private ideSvc: IdeSvc;
@@ -62,9 +63,10 @@ export class WorkspaceDetailsController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, $log: ng.ILogService, $scope: ng.IScope, cheNotification: CheNotification, cheWorkspace: CheWorkspace, ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService, initData: IInitData) {
+  constructor($location: ng.ILocationService, $log: ng.ILogService, $scope: ng.IScope, cheNotification: CheNotification, cheWorkspace: CheWorkspace, ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService, initData: IInitData, $timeout: ng.ITimeoutService) {
     this.$log = $log;
     this.$scope = $scope;
+    this.$timeout = $timeout;
     this.$location = $location;
     this.cheNotification = cheNotification;
     this.cheWorkspace = cheWorkspace;
@@ -224,42 +226,44 @@ export class WorkspaceDetailsController {
 
 
   checkEditMode(): void {
-    if (!this.originWorkspaceDetails || !this.workspaceDetails) {
-      return;
-    }
-    this.editMode = !angular.equals(this.originWorkspaceDetails.config, this.workspaceDetails.config);
-    if (this.editMode === false) {
-      this.editModeMessage = '';
-      this.showApplyMessage = false;
-      return;
-    }
-    this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
-    const failTabs = [];
-    const tabs = Object.keys(this.tab).filter((tabKey: string) => {
-      return !isNaN(parseInt(tabKey, 10));
-    });
-    tabs.forEach((tabKey: string) => {
-      if (this.checkFormsNotValid(tabKey)) {
-        failTabs.push(this.tab[tabKey]);
+    this.$timeout(() => {
+      if (!this.originWorkspaceDetails || !this.workspaceDetails) {
+        return;
+      }
+      this.editMode = !angular.equals(this.originWorkspaceDetails.config, this.workspaceDetails.config);
+      if (this.editMode === false) {
+        this.editModeMessage = '';
+        this.showApplyMessage = false;
+        return;
+      }
+      this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
+      const failTabs = [];
+      const tabs = Object.keys(this.tab).filter((tabKey: string) => {
+        return !isNaN(parseInt(tabKey, 10));
+      });
+      tabs.forEach((tabKey: string) => {
+        if (this.checkFormsNotValid(tabKey)) {
+          failTabs.push(this.tab[tabKey]);
+        }
+      });
+      if (failTabs.length) {
+        const url = this.$location.absUrl().split('?')[0];
+        this.editModeMessage = '<i class="error fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Impossible to save and apply the configuration. Errors in ';
+        this.editModeMessage += failTabs.map((tab: string) => {
+          return `<a href='${url}?tab=${tab}'>${tab}</a>`;
+        }).join(', ');
+        this.showApplyMessage = true;
+        return;
+      }
+      this.editModeMessage = 'Changes will be applied and workspace restarted';
+      const needRunningStatus = this.workspaceDetailsService.needRunningToUpdate();
+      if (needRunningStatus) {
+        this.showApplyMessage = true;
+      } else  {
+        const statusStr = this.getWorkspaceStatus();
+        this.showApplyMessage = [STOPPED, STOPPING].indexOf(statusStr) === -1;
       }
     });
-    if (failTabs.length) {
-      const url = this.$location.absUrl().split('?')[0];
-      this.editModeMessage = '<i class="error fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Impossible to save and apply the configuration. Errors in ';
-      this.editModeMessage += failTabs.map((tab: string) => {
-        return `<a href='${url}?tab=${tab}'>${tab}</a>`;
-      }).join(', ');
-      this.showApplyMessage = true;
-      return;
-    }
-    this.editModeMessage = 'Changes will be applied and workspace restarted';
-    const needRunningStatus = this.workspaceDetailsService.needRunningToUpdate();
-    if (needRunningStatus) {
-      this.showApplyMessage = true;
-    } else  {
-      const statusStr = this.getWorkspaceStatus();
-      this.showApplyMessage = [STOPPED, STOPPING].indexOf(statusStr) === -1;
-    }
   }
 
   /**
