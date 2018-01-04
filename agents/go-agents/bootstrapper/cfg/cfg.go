@@ -124,7 +124,7 @@ func init() {
 		"logs-endpoint-reconnect-period",
 		10,
 		`Time(in seconds) between attempts to reconnect to push-logs-endpoint.
-	Bootstrapper tries to reconnect to push-logs-serverEndpoint when previously established connection lost`,
+	Bootstrapper tries to reconnect to push-logs-endpoint when previously established connection lost`,
 	)
 }
 
@@ -140,9 +140,9 @@ func Parse() {
 		log.Fatal("Push endpoint protocol must be either ws or wss")
 	}
 
-	// push-logs-serverEndpoint
+	// push-logs-endpoint
 	if len(PushLogsEndpoint) != 0 && !strings.HasPrefix(PushLogsEndpoint, "ws") {
-		log.Fatal("Push logs serverEndpoint protocol must be either ws or wss")
+		log.Fatal("Push logs endpoint protocol must be either ws or wss")
 	}
 
 	// auth-enabled - fetch CHE_MACHINE_TOKEN
