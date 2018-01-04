@@ -377,6 +377,10 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: che" | oc apply -f -
+  CHE_INFRA_OPENSHIFT_USERNAME=""
+  CHE_INFRA_OPENSHIFT_PASSWORD=""
+  oc create serviceaccount che -n ${CHE_OPENSHIFT_PROJECT}
+  CHE_INFRA_OPENSHIFT_OAUTH__TOKEN=$(oc sa get-token che -n ${CHE_OPENSHIFT_PROJECT})  
 fi
 
 # ----------------------------------------------
