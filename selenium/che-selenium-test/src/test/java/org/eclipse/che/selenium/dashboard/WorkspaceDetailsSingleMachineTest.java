@@ -251,6 +251,7 @@ public class WorkspaceDetailsSingleMachineTest {
   }
 
   private void checkServerInServersList(String serverName) {
+    loader.waitOnClosed();
     consoles.openServersTabFromContextMenu("dev-machine");
     consoles.waitProcessInProcessConsoleTree("Servers");
     consoles.waitTabNameProcessIsPresent("Servers");
