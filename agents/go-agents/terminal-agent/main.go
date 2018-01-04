@@ -27,9 +27,8 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"time"
-
 	"strconv"
+	"time"
 
 	"github.com/eclipse/che/agents/go-agents/core/activity"
 	"github.com/eclipse/che/agents/go-agents/core/auth"

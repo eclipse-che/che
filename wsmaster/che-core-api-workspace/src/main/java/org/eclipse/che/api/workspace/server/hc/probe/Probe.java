@@ -10,7 +10,12 @@
  */
 package org.eclipse.che.api.workspace.server.hc.probe;
 
-/** @author Alexander Garagatyi */
+/**
+ * One-time probe for a server. Should not be used directly but rather by a probe scheduling
+ * framework.
+ *
+ * @author Alexander Garagatyi
+ */
 public abstract class Probe {
 
   private Thread probeThread;
