@@ -178,17 +178,6 @@ public class PerspectiveViewImpl extends LayoutPanel
     smallBorder.getStyle().setProperty("top", "0px");
     smallBorder.getStyle().setProperty("backgroundColor", Style.getSplitterSmallBorderColor());
     el.appendChild(smallBorder);
-
-    /** Add large border */
-    DivElement largeBorder = Document.get().createDivElement();
-    largeBorder.getStyle().setProperty("position", "absolute");
-    largeBorder.getStyle().setProperty("width", "1px");
-    largeBorder.getStyle().setProperty("height", "100%");
-    largeBorder.getStyle().setProperty("left", "1px");
-    largeBorder.getStyle().setProperty("top", "0px");
-    largeBorder.getStyle().setProperty("opacity", "0.4");
-    largeBorder.getStyle().setProperty("backgroundColor", Style.getSplitterLargeBorderColor());
-    el.appendChild(largeBorder);
   }
 
   /**
@@ -217,17 +206,6 @@ public class PerspectiveViewImpl extends LayoutPanel
     smallBorder.getStyle().setProperty("top", "0px");
     smallBorder.getStyle().setProperty("backgroundColor", Style.getSplitterSmallBorderColor());
     el.appendChild(smallBorder);
-
-    /** Add large border */
-    DivElement largeBorder = Document.get().createDivElement();
-    largeBorder.getStyle().setProperty("position", "absolute");
-    largeBorder.getStyle().setProperty("width", "1px");
-    largeBorder.getStyle().setProperty("height", "100%");
-    largeBorder.getStyle().setProperty("left", "3px");
-    largeBorder.getStyle().setProperty("top", "0px");
-    largeBorder.getStyle().setProperty("opacity", "0.4");
-    largeBorder.getStyle().setProperty("backgroundColor", Style.getSplitterLargeBorderColor());
-    el.appendChild(largeBorder);
   }
 
   /**

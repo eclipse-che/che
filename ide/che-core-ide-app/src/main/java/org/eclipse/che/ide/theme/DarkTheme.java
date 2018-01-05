@@ -944,7 +944,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String processesTreeMachineNameColor() {
-    return "#6fb400";
+    return "#3aa461";
   }
 
   @Override
@@ -1009,7 +1009,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getSplitterSmallBorderColor() {
-    return "#1b1e2b";
+    return "#13151f";
   }
 
   @Override

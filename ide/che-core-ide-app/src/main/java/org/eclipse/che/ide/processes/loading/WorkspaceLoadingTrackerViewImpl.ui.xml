@@ -36,8 +36,8 @@
         }
 
         .table > tbody > tr > td {
-            font-family: monospace;
-            font-size: 11px;
+            font-family: "Open Sans", sans-serif;
+            font-size: 9pt;
             line-height: 13px;
             white-space: pre;
             vertical-align: top;
