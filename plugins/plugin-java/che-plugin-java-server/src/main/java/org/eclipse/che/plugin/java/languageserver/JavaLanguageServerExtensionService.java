@@ -55,7 +55,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,6 +69,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
@@ -77,6 +77,7 @@ import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.jdt.ls.extension.api.Commands;
 import org.eclipse.che.jdt.ls.extension.api.Severity;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
@@ -110,7 +111,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Mäder
  */
-@Singleton
 public class JavaLanguageServerExtensionService {
   private static final int TIMEOUT = 10;
 
@@ -121,15 +121,18 @@ public class JavaLanguageServerExtensionService {
       LoggerFactory.getLogger(JavaLanguageServerExtensionService.class);
   private final RequestHandlerConfigurator requestHandler;
   private final ProjectManager projectManager;
+  private final EventService eventService;
 
   @Inject
   public JavaLanguageServerExtensionService(
       LanguageServerRegistry registry,
       RequestHandlerConfigurator requestHandler,
-      ProjectManager projectManager) {
+      ProjectManager projectManager,
+      EventService eventService) {
     this.registry = registry;
     this.requestHandler = requestHandler;
     this.projectManager = projectManager;
+    this.eventService = eventService;
     this.gson =
         new GsonBuilder()
             .registerTypeAdapterFactory(new CollectionTypeAdapterFactory())
@@ -599,14 +602,17 @@ public class JavaLanguageServerExtensionService {
 
   private void updatePlainJavaProjectsWithProblems(List<String> addedProjectsUri) {
     for (String projectUri : addedProjectsUri) {
+      final String projectPath = removePrefixUri(projectUri);
+
       projectManager
-          .get(removePrefixUri(projectUri))
+          .get(projectPath)
           .ifPresent(
               projectConfig -> {
                 if (projectConfig.getType().equals(JAVAC)
                     && !projectConfig.getProblems().isEmpty()) {
                   try {
                     projectManager.update(projectConfig);
+                    eventService.publish(new ProjectUpdatedEvent(projectPath));
                   } catch (Exception e) {
                     LOG.error(format("Failed to update project '%s' configuration", projectUri), e);
                   }
