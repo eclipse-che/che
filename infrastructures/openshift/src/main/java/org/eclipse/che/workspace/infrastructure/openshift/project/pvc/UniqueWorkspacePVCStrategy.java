@@ -48,7 +48,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
 
   public static final String UNIQUE_STRATEGY = "unique";
 
-  private final String pvcName;
+  private final String pvcNamePrefix;
   private final String projectName;
   private final String pvcQuantity;
   private final String pvcAccessMode;
@@ -58,12 +58,12 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   @Inject
   public UniqueWorkspacePVCStrategy(
       @Nullable @Named("che.infra.openshift.project") String projectName,
-      @Named("che.infra.openshift.pvc.name") String pvcName,
+      @Named("che.infra.openshift.pvc.name") String pvcNamePrefix,
       @Named("che.infra.openshift.pvc.quantity") String pvcQuantity,
       @Named("che.infra.openshift.pvc.access_mode") String pvcAccessMode,
       OpenShiftProjectFactory factory,
       OpenShiftClientFactory clientFactory) {
-    this.pvcName = pvcName;
+    this.pvcNamePrefix = pvcNamePrefix;
     this.pvcQuantity = pvcQuantity;
     this.projectName = projectName;
     this.pvcAccessMode = pvcAccessMode;
@@ -109,17 +109,17 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
       String volumeName = volumeEntry.getKey();
       String volumePath = volumeEntry.getValue().getPath();
       String subPath = workspaceId + '/' + volumeName;
-      String pvcUniqueName = pvcName + '-' + workspaceId + '-' + volumeName;
+      String pvcUniqueName = pvcNamePrefix + '-' + workspaceId + '-' + volumeName;
 
       container.getVolumeMounts().add(newVolumeMount(pvcUniqueName, volumePath, subPath));
       claims.put(pvcUniqueName, newPVC(pvcUniqueName, pvcAccessMode, pvcQuantity));
-      addVolumeIfNeeded(podSpec, pvcUniqueName);
+      addVolumeIfAbsent(podSpec, pvcUniqueName);
     }
   }
 
   @Override
   public void cleanup(String workspaceId) throws InfrastructureException {
-    final String pvcUniqueName = pvcName + '-' + workspaceId;
+    final String pvcUniqueName = pvcNamePrefix + '-' + workspaceId;
     clientFactory
         .create()
         .persistentVolumeClaims()
@@ -128,9 +128,8 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
         .delete();
   }
 
-  private void addVolumeIfNeeded(PodSpec podSpec, String pvcUniqueName) {
-    if (podSpec.getVolumes().stream().noneMatch(volume -> volume.getName().equals(pvcName))) {
-
+  private void addVolumeIfAbsent(PodSpec podSpec, String pvcUniqueName) {
+    if (podSpec.getVolumes().stream().noneMatch(volume -> volume.getName().equals(pvcUniqueName))) {
       podSpec.getVolumes().add(newVolume(pvcUniqueName, pvcUniqueName));
     }
   }

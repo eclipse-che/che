@@ -19,10 +19,9 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -64,8 +63,8 @@ public class UniqueWorkspacePVCStrategyTest {
 
   private static final String WORKSPACE_ID = "workspace123";
   private static final String PROJECT_NAME = "che";
-  private static final String PVC_NAME = "che-claim";
-  private static final String PVC_UNIQUE_NAME = PVC_NAME + '-' + WORKSPACE_ID;
+  private static final String PVC_NAME_PREFIX = "che-claim";
+  private static final String PVC_UNIQUE_NAME = PVC_NAME_PREFIX + '-' + WORKSPACE_ID;
   private static final String POD_NAME = "main";
   private static final String POD_NAME_2 = "second";
   private static final String CONTAINER_NAME = "app";
@@ -102,7 +101,7 @@ public class UniqueWorkspacePVCStrategyTest {
   public void setup() throws Exception {
     strategy =
         new UniqueWorkspacePVCStrategy(
-            PROJECT_NAME, PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, factory, clientFactory);
+            PROJECT_NAME, PVC_NAME_PREFIX, PVC_QUANTITY, PVC_ACCESS_MODE, factory, clientFactory);
     when(clientFactory.create()).thenReturn(client);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
@@ -168,18 +167,12 @@ public class UniqueWorkspacePVCStrategyTest {
 
     strategy.provision(osEnv, IDENTITY);
 
-    verify(container, times(2)).getVolumeMounts();
-    verify(container2).getVolumeMounts();
-    verify(container3).getVolumeMounts();
-    // 2x on each volume in pod 1
-    verify(podSpec, times(6)).getVolumes();
-    verify(podSpec2, times(2)).getVolumes();
-    assertFalse(podSpec.getVolumes().isEmpty());
-    assertFalse(podSpec2.getVolumes().isEmpty());
-    assertFalse(container.getVolumeMounts().isEmpty());
-    assertFalse(container2.getVolumeMounts().isEmpty());
-    assertFalse(container3.getVolumeMounts().isEmpty());
-    assertFalse(osEnv.getPersistentVolumeClaims().isEmpty());
+    assertEquals(podSpec.getVolumes().size(), 2);
+    assertEquals(podSpec2.getVolumes().size(), 1);
+    assertEquals(container.getVolumeMounts().size(), 2);
+    assertEquals(container2.getVolumeMounts().size(), 1);
+    assertEquals(container3.getVolumeMounts().size(), 1);
+    assertEquals(osEnv.getPersistentVolumeClaims().size(), 2);
     assertTrue(
         osEnv.getPersistentVolumeClaims().containsKey(PVC_UNIQUE_NAME + '-' + VOLUME_1_NAME));
     assertTrue(
@@ -188,8 +181,8 @@ public class UniqueWorkspacePVCStrategyTest {
 
   @Test
   public void testCreatesPVCsOnPrepare() throws Exception {
-    final PersistentVolumeClaim pvc = mockName(mock(PersistentVolumeClaim.class), PVC_NAME);
-    when(osEnv.getPersistentVolumeClaims()).thenReturn(singletonMap(PVC_NAME, pvc));
+    final PersistentVolumeClaim pvc = mockName(mock(PersistentVolumeClaim.class), PVC_NAME_PREFIX);
+    when(osEnv.getPersistentVolumeClaims()).thenReturn(singletonMap(PVC_NAME_PREFIX, pvc));
     doNothing().when(pvcs).createIfNotExist(any());
 
     strategy.prepare(osEnv, WORKSPACE_ID);
@@ -199,8 +192,8 @@ public class UniqueWorkspacePVCStrategyTest {
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void throwsInfrastructureExceptionWhenFailedToCreatePVCs() throws Exception {
-    final PersistentVolumeClaim pvc = mockName(mock(PersistentVolumeClaim.class), PVC_NAME);
-    when(osEnv.getPersistentVolumeClaims()).thenReturn(singletonMap(PVC_NAME, pvc));
+    final PersistentVolumeClaim pvc = mockName(mock(PersistentVolumeClaim.class), PVC_NAME_PREFIX);
+    when(osEnv.getPersistentVolumeClaims()).thenReturn(singletonMap(PVC_NAME_PREFIX, pvc));
     doThrow(InfrastructureException.class).when(pvcs).createIfNotExist(any());
 
     strategy.prepare(osEnv, WORKSPACE_ID);
@@ -213,7 +206,7 @@ public class UniqueWorkspacePVCStrategyTest {
     final Resource resource = mock(Resource.class);
     doReturn(mixedOperation).when(client).persistentVolumeClaims();
     doReturn(namespace).when(mixedOperation).inNamespace(PROJECT_NAME);
-    doReturn(resource).when(namespace).withName(PVC_NAME + '-' + WORKSPACE_ID);
+    doReturn(resource).when(namespace).withName(PVC_NAME_PREFIX + '-' + WORKSPACE_ID);
     when(resource.delete()).thenReturn(true);
 
     strategy.cleanup(WORKSPACE_ID);
@@ -228,7 +221,7 @@ public class UniqueWorkspacePVCStrategyTest {
     final Resource resource = mock(Resource.class);
     doReturn(mixedOperation).when(client).persistentVolumeClaims();
     doReturn(namespace).when(mixedOperation).inNamespace(PROJECT_NAME);
-    doReturn(resource).when(namespace).withName(PVC_NAME + '-' + WORKSPACE_ID);
+    doReturn(resource).when(namespace).withName(PVC_NAME_PREFIX + '-' + WORKSPACE_ID);
     when(resource.delete()).thenReturn(false);
 
     strategy.cleanup(WORKSPACE_ID);
