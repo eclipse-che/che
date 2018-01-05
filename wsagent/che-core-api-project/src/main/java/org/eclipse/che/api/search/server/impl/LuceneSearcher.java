@@ -259,7 +259,9 @@ public class LuceneSearcher implements Searcher {
             }
           }
         }
+
         String filePath = doc.getField(PATH_FIELD).stringValue();
+        LOG.debug("Doc {} path {} score {} ", docId, filePath, scoreDoc.score);
         results.add(new SearchResultEntry(filePath, offsetData));
       }
 
