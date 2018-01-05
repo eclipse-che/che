@@ -15,23 +15,15 @@ public class OffsetData {
   private final String phrase;
   private final int startOffset;
   private final int endOffset;
-  private final int docId;
   private final float score;
   private final int lineNum;
   private final String line;
 
   public OffsetData(
-      String phrase,
-      int startOffset,
-      int endOffset,
-      int docId,
-      float score,
-      int lineNum,
-      String line) {
+      String phrase, int startOffset, int endOffset, float score, int lineNum, String line) {
     this.phrase = phrase;
     this.startOffset = startOffset;
     this.endOffset = endOffset;
-    this.docId = docId;
     this.score = score;
     this.lineNum = lineNum;
     this.line = line;
@@ -47,10 +39,6 @@ public class OffsetData {
 
   public int getEndOffset() {
     return endOffset;
-  }
-
-  public int getDocId() {
-    return docId;
   }
 
   public float getScore() {
@@ -75,8 +63,6 @@ public class OffsetData {
         + startOffset
         + ", endOffset="
         + endOffset
-        + ", docId="
-        + docId
         + ", score="
         + score
         + ", lineNum="
@@ -104,9 +90,6 @@ public class OffsetData {
     if (getEndOffset() != that.getEndOffset()) {
       return false;
     }
-    if (getDocId() != that.getDocId()) {
-      return false;
-    }
     if (Float.compare(that.getScore(), getScore()) != 0) {
       return false;
     }
@@ -124,7 +107,6 @@ public class OffsetData {
     int result = getPhrase() != null ? getPhrase().hashCode() : 0;
     result = 31 * result + getStartOffset();
     result = 31 * result + getEndOffset();
-    result = 31 * result + getDocId();
     result = 31 * result + (getScore() != +0.0f ? Float.floatToIntBits(getScore()) : 0);
     result = 31 * result + getLineNum();
     result = 31 * result + (getLine() != null ? getLine().hashCode() : 0);

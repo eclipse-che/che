@@ -259,8 +259,7 @@ public class LuceneSearcher implements Searcher {
                   lineNum++;
                 }
                 offsetData.add(
-                    new OffsetData(
-                        tokenText, startOffset, endOffset, docId, res, lineNum, foundLine));
+                    new OffsetData(tokenText, startOffset, endOffset, res, lineNum, foundLine));
               }
             }
           }
