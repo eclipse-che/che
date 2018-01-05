@@ -236,7 +236,6 @@ parse_args() {
     OC_PUBLIC_HOSTNAME - set ocp hostname to admin console, default: host ip
     OC_PUBLIC_IP - set ocp hostname for routing suffix, default: host ip
     DNS_PROVIDER - set ocp DNS provider for routing suffix, default: nip.io
-    OPENSHIFT_TOKEN - set ocp token for authentication (eg $(oc whoami -t) )
 "
 
     DEPLOY_SCRIPT_ARGS=""
