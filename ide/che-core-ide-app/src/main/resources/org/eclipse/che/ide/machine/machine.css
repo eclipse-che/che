@@ -34,7 +34,6 @@
 }
 
 .processTree .machineName {
-    font-weight: bold;
     line-height: 20px;
     color: processesTreeMachineNameColor;
     font-family: "Open Sans", sans-serif;

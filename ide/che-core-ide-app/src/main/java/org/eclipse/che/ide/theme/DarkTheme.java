@@ -1009,7 +1009,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getSplitterSmallBorderColor() {
-    return "#13151f";
+    return "#1b1e2b";
   }
 
   @Override

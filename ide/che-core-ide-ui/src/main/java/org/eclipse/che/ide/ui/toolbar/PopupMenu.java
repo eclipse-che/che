@@ -458,7 +458,11 @@ public class PopupMenu extends Composite {
     if (!hasIcons) {
       for (int i = 0; i < list.size(); i++) {
         Element cellElement = table.getCellFormatter().getElement(i, 0);
-        cellElement.getStyle().setWidth(3, Unit.PX);
+        if (hasCheckedItems) {
+          cellElement.getStyle().setWidth(3, Unit.PX);
+        } else {
+          cellElement.getStyle().setWidth(7, Unit.PX);
+        }
       }
     }
 
