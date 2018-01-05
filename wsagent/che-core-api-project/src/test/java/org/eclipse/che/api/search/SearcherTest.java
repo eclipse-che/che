@@ -132,7 +132,7 @@ public class SearcherTest {
         .createFile("aaa.txt1", TEST_CONTENT[3])
         .createFile("aaa.txt", TEST_CONTENT[2]);
     searcher.add(contentBuilder.getCurrentFolder());
-    assertFind("be", "/folder/xxx.txt", "/aaa/aaa.txt");
+    assertFind("be", "/aaa/aaa.txt", "/folder/xxx.txt");
 
     // when
     contentBuilder.deleteFileInCurrentFolder("aaa.txt");
@@ -184,7 +184,7 @@ public class SearcherTest {
         .createFile("aaa.txt1", TEST_CONTENT[3])
         .createFile("aaa.txt", TEST_CONTENT[2]);
     searcher.add(contentBuilder.getCurrentFolder());
-    assertFind("be", "/folder/xxx.txt", "/aaa/aaa.txt");
+    assertFind("be", "/aaa/aaa.txt", "/folder/xxx.txt");
     assertFind("generally", "/aaa/aaa.txt1");
 
     // when

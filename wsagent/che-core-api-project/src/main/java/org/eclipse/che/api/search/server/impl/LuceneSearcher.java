@@ -47,6 +47,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexReader;
@@ -64,12 +65,15 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.SearcherFactory;
 import org.apache.lucene.search.SearcherManager;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.highlight.QueryScorer;
 import org.apache.lucene.search.highlight.TokenSources;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.SingleInstanceLockFactory;
+import org.apache.lucene.util.BytesRef;
 import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.search.server.InvalidQueryException;
 import org.eclipse.che.api.search.server.OffsetData;
@@ -105,6 +109,7 @@ public class LuceneSearcher implements Searcher {
   private final SearcherManager searcherManager;
   private final Analyzer analyzer;
   private final CountDownLatch initialIndexingLatch = new CountDownLatch(1);
+  private final Sort sort;
 
   @Inject
   public LuceneSearcher(
@@ -137,6 +142,7 @@ public class LuceneSearcher implements Searcher {
             new IndexWriterConfig(analyzer));
     this.searcherManager =
         new SearcherManager(luceneIndexWriter, true, true, new SearcherFactory());
+    this.sort = new Sort(SortField.FIELD_SCORE, new SortField(PATH_FIELD, SortField.Type.STRING));
   }
 
   @PostConstruct
@@ -183,7 +189,7 @@ public class LuceneSearcher implements Searcher {
 
       final int numDocs =
           query.getMaxItems() > 0 ? Math.min(query.getMaxItems(), RESULT_LIMIT) : RESULT_LIMIT;
-      TopDocs topDocs = luceneSearcher.searchAfter(after, luceneQuery, numDocs);
+      TopDocs topDocs = luceneSearcher.searchAfter(after, luceneQuery, numDocs, sort, true, true);
       final long totalHitsNum = topDocs.totalHits;
 
       List<SearchResultEntry> results = newArrayList();
@@ -321,7 +327,7 @@ public class LuceneSearcher implements Searcher {
     int retrievedDocs = 0;
     TopDocs topDocs;
     do {
-      topDocs = luceneSearcher.searchAfter(scoreDoc, luceneQuery, readFrameSize);
+      topDocs = luceneSearcher.searchAfter(scoreDoc, luceneQuery, readFrameSize, sort, true, true);
       if (topDocs.scoreDocs.length > 0) {
         scoreDoc = topDocs.scoreDocs[topDocs.scoreDocs.length - 1];
       }
@@ -392,6 +398,7 @@ public class LuceneSearcher implements Searcher {
       String name = nameOf(wsPath);
       Document doc = new Document();
       doc.add(new StringField(PATH_FIELD, wsPath, Field.Store.YES));
+      doc.add(new SortedDocValuesField(PATH_FIELD, new BytesRef(wsPath)));
       doc.add(new TextField(NAME_FIELD, name, Field.Store.YES));
       try {
         doc.add(new TextField(TEXT_FIELD, CharStreams.toString(reader), Field.Store.YES));
