@@ -87,7 +87,7 @@ public class ExecAgentClient {
   /**
    * Gets information about started process.
    *
-   * @param workspaceId workspace to run command
+   * @param workspaceId workspace to get process
    * @param pid pid of started process
    * @return process response DTO
    * @throws ServerException when get of the process is failed
@@ -113,9 +113,9 @@ public class ExecAgentClient {
   }
 
   /**
-   * Kills about started process.
+   * Kills started process.
    *
-   * @param workspaceId workspace to run command
+   * @param workspaceId workspace kill process
    * @param pid pid of started process
    * @return kill process response DTO
    * @throws ServerException when kill of the process is failed
