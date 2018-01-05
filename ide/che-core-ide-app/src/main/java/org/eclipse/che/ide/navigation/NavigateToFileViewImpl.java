@@ -10,8 +10,16 @@
  */
 package org.eclipse.che.ide.navigation;
 
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_BACKSPACE;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_DELETE;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_DOWN;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_ENTER;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_ESCAPE;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_PAGEDOWN;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_PAGEUP;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_UP;
+
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.CssResource;
@@ -220,6 +228,11 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
     updatePositionAndSize();
   }
 
+  @Override
+  public String getFileName() {
+    return fileName.getText();
+  }
+
   private void updatePositionAndSize() {
     // Update position
     setPopupPosition(
@@ -270,8 +283,9 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
 
   @UiHandler("fileName")
   void handleKeyDown(KeyDownEvent event) {
-    switch (event.getNativeKeyCode()) {
-      case KeyCodes.KEY_UP:
+    int nativeKeyCode = event.getNativeKeyCode();
+    switch (nativeKeyCode) {
+      case KEY_UP:
         event.stopPropagation();
         event.preventDefault();
         if (list != null) {
@@ -279,7 +293,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         }
         break;
 
-      case KeyCodes.KEY_DOWN:
+      case KEY_DOWN:
         event.stopPropagation();
         event.preventDefault();
         if (list != null) {
@@ -287,7 +301,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         }
         break;
 
-      case KeyCodes.KEY_PAGEUP:
+      case KEY_PAGEUP:
         event.stopPropagation();
         event.preventDefault();
         if (list != null) {
@@ -295,7 +309,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         }
         break;
 
-      case KeyCodes.KEY_PAGEDOWN:
+      case KEY_PAGEDOWN:
         event.stopPropagation();
         event.preventDefault();
         if (list != null) {
@@ -303,7 +317,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         }
         break;
 
-      case KeyCodes.KEY_ENTER:
+      case KEY_ENTER:
         event.stopPropagation();
         event.preventDefault();
         SearchResultDto selectedItem = list.getSelectionModel().getSelectedItem();
@@ -312,7 +326,7 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         }
         break;
 
-      case KeyCodes.KEY_ESCAPE:
+      case KEY_ESCAPE:
         event.stopPropagation();
         event.preventDefault();
         hidePopup();
@@ -323,7 +337,15 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
         new Timer() {
           @Override
           public void run() {
-            delegate.onFileNameChanged(fileName.getText());
+            String fileName = NavigateToFileViewImpl.this.fileName.getText();
+            // Skip handling non letter characters.
+            if (nativeKeyCode == KEY_BACKSPACE
+                || nativeKeyCode == KEY_DELETE
+                || fileName
+                    .toLowerCase()
+                    .contains(String.valueOf((char) nativeKeyCode).toLowerCase())) {
+              delegate.onFileNameChanged(fileName);
+            }
           }
         }.schedule(300);
         break;

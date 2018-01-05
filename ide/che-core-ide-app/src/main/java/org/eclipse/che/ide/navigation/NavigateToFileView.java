@@ -56,4 +56,7 @@ public interface NavigateToFileView extends View<NavigateToFileView.ActionDelega
    * @param items items of suggestions
    */
   void showItems(List<SearchResultDto> items);
+
+  /** Returns entered file name. */
+  String getFileName();
 }

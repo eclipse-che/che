@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.navigation;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.sort;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.util.NameUtils.getFileExtension;
 
@@ -40,6 +39,8 @@ import org.eclipse.che.ide.util.loging.Log;
 @Singleton
 public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegate {
 
+  private static final int TYPING_PERIOD_DELAY_MS = 400;
+
   private final EditorAgent editorAgent;
   private final RequestTransmitter requestTransmitter;
   private final DtoFactory dtoFactory;
@@ -62,12 +63,6 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
     this.dtoFactory = dtoFactory;
 
     this.view.setDelegate(this);
-
-    timer =
-        new Timer() {
-          @Override
-          public void run() {}
-        };
   }
 
   /** Show dialog with view for navigation. */
@@ -91,7 +86,7 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
   }
 
   @Override
-  public void onFileNameChanged(String fileName) {
+  public void onFileNameChanged(final String fileName) {
     if (fileName.isEmpty()) {
       view.showItems(emptyList());
       return;
@@ -102,7 +97,7 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
             .createDto(ProjectSearchRequestDto.class)
             .withPath("")
             .withName(URL.encodePathSegment(fileName + "*"));
-    if (timer.isRunning()) {
+    if (timer != null) {
       timer.cancel();
     }
 
@@ -116,19 +111,25 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
                 .methodName("project/search")
                 .paramsAsDto(requestParams)
                 .sendAndReceiveResultAsDto(ProjectSearchResponseDto.class, 20_000)
-                .onSuccess(response -> prepareResults(response))
+                .onSuccess(
+                    response -> {
+                      // Check that the file name from request corresponds to the actual file name
+                      // from the view.
+                      if (fileName.equals(view.getFileName())) {
+                        prepareResults(response);
+                      }
+                    })
                 .onFailure(error -> Log.error(getClass(), error.getMessage()))
                 .onTimeout(
                     () -> Log.error(getClass(), "Project search request failed due timeout"));
           }
         };
-    timer.schedule(500);
+    timer.schedule(TYPING_PERIOD_DELAY_MS);
   }
 
   private void prepareResults(ProjectSearchResponseDto response) {
     List<SearchResultDto> results = response.getItemReferences();
-    sort(
-        results,
+    results.sort(
         (o1, o2) -> {
           String ext1 = getFileExtension(o1.getItemReference().getName());
           String ext2 = getFileExtension(o2.getItemReference().getName());
