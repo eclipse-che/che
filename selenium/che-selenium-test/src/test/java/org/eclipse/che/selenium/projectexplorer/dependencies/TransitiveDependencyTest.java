@@ -68,8 +68,10 @@ public class TransitiveDependencyTest {
     projectExplorer.openItemByPath(PROJECT_NAME);
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
+    projectExplorer.quickExpandWithJavaScript();
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
+    editor.waitActive();
     projectExplorer.openItemByVisibleNameInExplorer(LIB_FOLDER);
 
     try {
