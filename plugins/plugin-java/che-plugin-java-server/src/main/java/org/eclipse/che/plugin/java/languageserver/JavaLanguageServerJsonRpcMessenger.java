@@ -29,7 +29,7 @@ import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
  * @author Anatolii Bazko
  */
 @Singleton
-public class JdtLsJsonRpcMessenger implements EventSubscriber<ProjectUpdatedEvent> {
+public class JavaLanguageServerJsonRpcMessenger {
   private static final String EVENT_JDT_PROJECT_UPDATED = "event:jdt:project-updated";
   private static final String EVENT_JDT_SUBSCRIBE = "event:jdt:subscribe";
   private static final String EVENT_JDT_UNSUBSCRIBE = "event:jdt:unsubscribe";
@@ -41,10 +41,10 @@ public class JdtLsJsonRpcMessenger implements EventSubscriber<ProjectUpdatedEven
   private final Set<String> endpointIds = newConcurrentHashSet();
 
   @Inject
-  public JdtLsJsonRpcMessenger(EventService eventService, RequestTransmitter transmitter) {
+  public JavaLanguageServerJsonRpcMessenger(EventService eventService, RequestTransmitter transmitter) {
     this.eventService = eventService;
     this.transmitter = transmitter;
-    this.projectUpdatedEventSubscriber = JdtLsJsonRpcMessenger.this::onEvent;
+    this.projectUpdatedEventSubscriber = JavaLanguageServerJsonRpcMessenger.this::onEvent;
   }
 
   @PostConstruct
@@ -57,8 +57,7 @@ public class JdtLsJsonRpcMessenger implements EventSubscriber<ProjectUpdatedEven
     eventService.unsubscribe(projectUpdatedEventSubscriber, ProjectUpdatedEvent.class);
   }
 
-  @Override
-  public void onEvent(ProjectUpdatedEvent event) {
+  private void onEvent(ProjectUpdatedEvent event) {
     endpointIds.forEach(
         it ->
             transmitter
