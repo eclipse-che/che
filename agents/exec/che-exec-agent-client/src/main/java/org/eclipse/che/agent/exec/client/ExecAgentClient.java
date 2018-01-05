@@ -50,8 +50,18 @@ public class ExecAgentClient {
     this.serverEndpoint = serverEndpoint;
   }
 
+  /**
+   * Starts a process within a given command.
+   *
+   * @param workspaceId workspace to run command
+   * @param command command to execute
+   * @param name command name
+   * @param type command type
+   * @return start process response DTO
+   * @throws ServerException when submit of the process is failed
+   */
   public ProcessStartResponseDto startProcess(
-      String workspaceId, String command, String name, String type) {
+      String workspaceId, String command, String name, String type) throws ServerException {
     ProcessStartRequestDto commandDto =
         newDto(ProcessStartRequestDto.class).withCommandLine(command).withName(name).withType(type);
     try {
@@ -63,20 +73,26 @@ public class ExecAgentClient {
           .setBody(commandDto)
           .request()
           .asDto(ProcessStartResponseDto.class);
-    } catch (ServerException
-        | IOException
+    } catch (IOException
         | ConflictException
         | BadRequestException
         | UnauthorizedException
         | NotFoundException
         | MachineTokenException
         | ForbiddenException e) {
-      e.printStackTrace();
+      throw new ServerException(e);
     }
-    return null;
   }
 
-  public GetProcessResponseDto getProcess(String workspaceId, int pid) {
+  /**
+   * Gets information about started process.
+   *
+   * @param workspaceId workspace to run command
+   * @param pid pid of started process
+   * @return process response DTO
+   * @throws ServerException when get of the process is failed
+   */
+  public GetProcessResponseDto getProcess(String workspaceId, int pid) throws ServerException {
     try {
       return requestFactory
           .fromUrl(serverEndpoint + "/" + pid)
@@ -85,20 +101,26 @@ public class ExecAgentClient {
           .useGetMethod()
           .request()
           .asDto(GetProcessResponseDto.class);
-    } catch (ServerException
-        | IOException
+    } catch (IOException
         | ConflictException
         | BadRequestException
         | UnauthorizedException
         | NotFoundException
         | MachineTokenException
         | ForbiddenException e) {
-      e.printStackTrace();
+      throw new ServerException(e);
     }
-    return null;
   }
 
-  public ProcessKillResponseDto killProcess(String workspaceId, int pid) {
+  /**
+   * Kills about started process.
+   *
+   * @param workspaceId workspace to run command
+   * @param pid pid of started process
+   * @return kill process response DTO
+   * @throws ServerException when kill of the process is failed
+   */
+  public ProcessKillResponseDto killProcess(String workspaceId, int pid) throws ServerException {
     try {
       return requestFactory
           .fromUrl(serverEndpoint + "/" + pid)
@@ -107,16 +129,14 @@ public class ExecAgentClient {
           .setAuthorizationHeader("none") // to prevent sending KC token
           .request()
           .asDto(ProcessKillResponseDto.class);
-    } catch (ServerException
-        | IOException
+    } catch (IOException
         | ConflictException
         | BadRequestException
         | UnauthorizedException
         | NotFoundException
         | MachineTokenException
         | ForbiddenException e) {
-      e.printStackTrace();
+      throw new ServerException(e);
     }
-    return null;
   }
 }

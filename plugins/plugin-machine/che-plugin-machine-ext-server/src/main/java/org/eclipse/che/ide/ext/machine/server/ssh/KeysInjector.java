@@ -12,7 +12,6 @@ package org.eclipse.che.ide.ext.machine.server.ssh;
 
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_EXEC_AGENT_HTTP_REFERENCE;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
@@ -25,7 +24,8 @@ import org.eclipse.che.agent.exec.shared.dto.ProcessStartResponseDto;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
-import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.notification.EventService;
@@ -36,7 +36,6 @@ import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.infrastructure.docker.client.DockerConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +50,6 @@ public class KeysInjector {
   private static final Logger LOG = LoggerFactory.getLogger(KeysInjector.class);
 
   private final EventService eventService;
-  private final DockerConnector docker;
   private final SshManager sshManager;
   private final UserManager userManager;
   private final WorkspaceManager workspaceManager;
@@ -60,13 +58,11 @@ public class KeysInjector {
   @Inject
   public KeysInjector(
       EventService eventService,
-      DockerConnector dockerConnector,
       SshManager sshManager,
       UserManager userManager,
       WorkspaceManager workspaceManager,
       ExecAgentClientFactory execAgentClientFactory) {
     this.eventService = eventService;
-    this.docker = dockerConnector;
     this.sshManager = sshManager;
     this.userManager = userManager;
     this.workspaceManager = workspaceManager;
@@ -79,96 +75,100 @@ public class KeysInjector {
         new EventSubscriber<MachineStatusEvent>() {
           @Override
           public void onEvent(MachineStatusEvent event) {
+            if (event.getEventType() != MachineStatus.RUNNING) {
+              return;
+            }
             final RuntimeIdentityDto identity = event.getIdentity();
             final String workspaceId = identity.getWorkspaceId();
-            final String owner = identity.getOwner();
-            if (event.getEventType() == MachineStatus.RUNNING) {
-              User user;
+            User user = getOwner(workspaceId, identity.getOwner());
+            if (user == null) {
+              return;
+            }
+            Server execServer = getExecServer(workspaceId, event.getMachineName());
+            if (execServer == null) {
+              return; // no exec server installed, so not possible to execute command
+            }
+            // get machine keypairs
+            try {
+              List<SshPairImpl> sshPairs = sshManager.getPairs(user.getId(), "machine");
+              List<String> publicKeys =
+                  sshPairs
+                      .stream()
+                      .filter(sshPair -> sshPair.getPublicKey() != null)
+                      .map(SshPairImpl::getPublicKey)
+                      .collect(Collectors.toList());
+              // get workspace keypair (if any)
+              SshPairImpl sshWorkspacePair = null;
               try {
-                user = userManager.getByName(owner);
-              } catch (NotFoundException | ServerException e) {
-                LOG.warn(
-                    "Unable to get owner of the workspace {} with namespace {}",
-                    event.getIdentity().getWorkspaceId(),
-                    event.getIdentity().getOwner());
+                sshWorkspacePair = sshManager.getPair(user.getId(), "workspace", workspaceId);
+              } catch (NotFoundException e) {
+                LOG.debug("No ssh key associated to the workspace", e);
+              }
+
+              if (sshWorkspacePair != null && sshWorkspacePair.getPublicKey() != null) {
+                publicKeys.add(sshWorkspacePair.getPublicKey());
+              }
+
+              if (publicKeys.isEmpty()) {
                 return;
               }
 
-              Server execServer;
-              try {
-                Workspace ws = workspaceManager.getWorkspace(workspaceId);
-                execServer =
-                    ws.getRuntime()
-                        .getMachines()
-                        .get(event.getMachineName())
-                        .getServers()
-                        .get(SERVER_EXEC_AGENT_HTTP_REFERENCE);
-              } catch (NotFoundException | ServerException e) {
-                LOG.warn(
-                    "Unable to get workspace {}",
-                    event.getIdentity().getWorkspaceId(),
-                    event.getIdentity().getOwner());
-                return;
-              }
-              if (execServer == null) {
-                return; // no exec server installed, so not possible to execute command
+              StringBuilder commandLine = new StringBuilder("mkdir ~/.ssh/ -p");
+              for (String publicKey : publicKeys) {
+                commandLine
+                    .append("&& echo '")
+                    .append(publicKey)
+                    .append("' >> ~/.ssh/authorized_keys");
               }
 
-              // get machine keypairs
-              try {
-                List<SshPairImpl> sshPairs = sshManager.getPairs(user.getId(), "machine");
-                final List<String> publicMachineKeys =
-                    sshPairs
-                        .stream()
-                        .filter(sshPair -> sshPair.getPublicKey() != null)
-                        .map(SshPairImpl::getPublicKey)
-                        .collect(Collectors.toList());
-                // get workspace keypair (if any)
-                SshPairImpl sshWorkspacePair = null;
-                try {
-                  sshWorkspacePair =
-                      sshManager.getPair(
-                          user.getId(), "workspace", event.getIdentity().getWorkspaceId());
-                } catch (NotFoundException e) {
-                  LOG.debug("No ssh key associated to the workspace", e);
-                }
+              ExecAgentClient client = execAgentClientFactory.create(execServer.getUrl());
+              ProcessStartResponseDto startProcess =
+                  client.startProcess(workspaceId, commandLine.toString(), "sshUpload", "custom");
 
-                // build list of all pairs.
-                final List<String> publicKeys;
-                if (sshWorkspacePair != null && sshWorkspacePair.getPublicKey() != null) {
-                  publicKeys = new ArrayList<>(publicMachineKeys.size() + 1);
-                  publicKeys.add(sshWorkspacePair.getPublicKey());
-                  publicKeys.addAll(publicMachineKeys);
-                } else {
-                  publicKeys = publicMachineKeys;
-                }
-
-                if (publicKeys.isEmpty()) {
+              GetProcessResponseDto process = client.getProcess(workspaceId, startProcess.getPid());
+              int tryNumber = 1;
+              while (process.isAlive()) {
+                process = client.getProcess(workspaceId, startProcess.getPid());
+                tryNumber++;
+                if (tryNumber > 10) {
+                  LOG.warn("Uploading key command executed too long, exiting.");
+                  client.killProcess(workspaceId, startProcess.getPid());
                   return;
                 }
-
-                StringBuilder commandLine = new StringBuilder("mkdir ~/.ssh/ -p");
-                for (String publicKey : publicKeys) {
-                  commandLine
-                      .append("&& echo '")
-                      .append(publicKey)
-                      .append("' >> ~/.ssh/authorized_keys");
-                }
-
-                ExecAgentClient client = execAgentClientFactory.create(execServer.getUrl());
-                ProcessStartResponseDto responseDto =
-                    client.startProcess(workspaceId, commandLine.toString(), "sshUpload", "custom");
-                GetProcessResponseDto process =
-                    client.getProcess(workspaceId, responseDto.getPid());
-                if (process.isAlive() || process.getExitCode() != 0) {
-                  LOG.warn("Uploading key failed");
-                }
-
-              } catch (ServerException e) {
-                LOG.error(e.getLocalizedMessage(), e);
               }
+              if (process.getExitCode() != 0) {
+                LOG.warn("Uploading key failed with exit code " + process.getExitCode());
+              }
+
+            } catch (ServerException e) {
+              LOG.error(e.getLocalizedMessage(), e);
             }
           }
         });
+  }
+
+  private Server getExecServer(String workspaceId, String machineName) {
+    try {
+      Runtime runtime =  workspaceManager.getWorkspace(workspaceId).getRuntime();
+      if (runtime != null) {
+        Machine machine = runtime.getMachines().get(machineName);
+        if (machine != null) {
+          return machine.getServers().get(SERVER_EXEC_AGENT_HTTP_REFERENCE);
+        }
+      }
+    } catch (NotFoundException | ServerException e) {
+      LOG.warn("Unable to get workspace {}. Error: {}", workspaceId, e.getMessage());
+    }
+    LOG.warn("Unable to get exec server of workspace {} machine {}.", workspaceId, machineName);
+    return null;
+  }
+
+  private User getOwner(String workspaceId, String owner) {
+    try {
+      return userManager.getByName(owner);
+    } catch (NotFoundException | ServerException e) {
+      LOG.warn("Unable to get owner of the workspace {} with namespace {}", workspaceId, owner);
+      return null;
+    }
   }
 }
