@@ -30,6 +30,7 @@ import org.eclipse.che.agent.exec.client.ExecAgentClientFactory;
 import org.eclipse.che.agent.exec.shared.dto.GetProcessResponseDto;
 import org.eclipse.che.agent.exec.shared.dto.ProcessStartResponseDto;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
@@ -99,22 +100,7 @@ public class KeysInjectorTest {
     when(client.getProcess(anyString(), anyInt()))
         .thenReturn(
             newDto(GetProcessResponseDto.class).withAlive(false).withPid(100).withExitCode(0));
-
-    ServerDto server1 = newDto(ServerDto.class).withUrl("http://localhost:38001/exec");
-    ServerDto server2 = newDto(ServerDto.class).withUrl("http://localhost:38002/exec");
-    Map<String, ServerDto> map1 = new HashMap<>();
-    Map<String, ServerDto> map2 = new HashMap<>();
-    map1.put(SERVER_EXEC_AGENT_HTTP_REFERENCE, server1);
-    map2.put(SERVER_EXEC_AGENT_HTTP_REFERENCE, server2);
-    MachineDto machine1 = newDto(MachineDto.class).withServers(map1);
-    MachineDto machine2 = newDto(MachineDto.class).withServers(map2);
-    Map<String, MachineDto> machineMap = new HashMap<>();
-    machineMap.put("machine1", machine1);
-    machineMap.put("machine2", machine2);
-
-    when(workspaceManager.getWorkspace(anyString())).thenReturn(workspace);
-    when(workspace.getRuntime()).thenReturn(runtime);
-    when(runtime.getMachines()).thenReturn(machineMap);
+    prepareAndMockServers();
 
     EnvironmentContext context = new EnvironmentContext();
     context.setSubject(new SubjectImpl("name", OWNER, "token123", false));
@@ -269,5 +255,23 @@ public class KeysInjectorTest {
     verify(sshManager).getPair(eq(OWNER), eq("workspace"), eq(WORKSPACE_ID));
 
     verifyZeroInteractions(execAgentClientFactory, sshManager);
+  }
+
+  private void prepareAndMockServers() throws ServerException, NotFoundException {
+    ServerDto server1 = newDto(ServerDto.class).withUrl("http://localhost:38001/exec");
+    ServerDto server2 = newDto(ServerDto.class).withUrl("http://localhost:38002/exec");
+    Map<String, ServerDto> map1 = new HashMap<>();
+    Map<String, ServerDto> map2 = new HashMap<>();
+    map1.put(SERVER_EXEC_AGENT_HTTP_REFERENCE, server1);
+    map2.put(SERVER_EXEC_AGENT_HTTP_REFERENCE, server2);
+    MachineDto machine1 = newDto(MachineDto.class).withServers(map1);
+    MachineDto machine2 = newDto(MachineDto.class).withServers(map2);
+    Map<String, MachineDto> machineMap = new HashMap<>();
+    machineMap.put("machine1", machine1);
+    machineMap.put("machine2", machine2);
+
+    when(workspaceManager.getWorkspace(anyString())).thenReturn(workspace);
+    when(workspace.getRuntime()).thenReturn(runtime);
+    when(runtime.getMachines()).thenReturn(machineMap);
   }
 }
