@@ -114,14 +114,16 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
   }
 
   private void injectBootstrapper() throws InfrastructureException {
-    LOG.debug("Creating folder for bootstrapper");
+    String machineName = openShiftMachine.getName();
+    LOG.debug(
+        "Bootstrapping {}:{}. Creating folder for bootstrapper", runtimeIdentity, machineName);
     openShiftMachine.exec("mkdir", "-p", BOOTSTRAPPER_DIR);
-    LOG.debug("Downloading bootstrapper binary");
+    LOG.debug("Bootstrapping {}:{}. Downloading bootstrapper binary", runtimeIdentity, machineName);
     openShiftMachine.exec(
         "curl", "-o", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE, bootstrapperBinaryUrl);
     openShiftMachine.exec("chmod", "+x", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE);
 
-    LOG.debug("Creating bootstrapper config file");
+    LOG.debug("Bootstrapping {}:{}. Creating config file", runtimeIdentity, machineName);
     openShiftMachine.exec(
         "sh",
         "-c",

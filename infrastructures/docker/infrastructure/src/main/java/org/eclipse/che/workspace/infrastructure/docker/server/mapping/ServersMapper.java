@@ -102,9 +102,8 @@ public class ServersMapper {
         hostname = this.hostname;
       }
 
-      if (refs == null) {
-        mapped.put(rawPort, new ServerImpl().withUrl(makeUrl(port, null, null, hostname)));
-      } else {
+      // if there is no matching ServerConfig we do not show it as Server
+      if (refs != null) {
         for (String ref : refs) {
           ServerConfig cfg = configs.get(ref);
           mapped.put(
