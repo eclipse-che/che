@@ -38,8 +38,8 @@ import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
  * @author Alexander Garagatyi
  */
 public class ServersChecker {
-  // workaround to set correct paths for servers readiness checks
-  // TODO replace with checks set in server config
+  // Is used to define servers which will be checked by this server checker class.
+  // It is also a workaround to set correct paths for servers readiness checks.
   private static final Map<String, String> LIVENESS_CHECKS_PATHS =
       ImmutableMap.of(
           "wsagent/http", "/api/",
@@ -74,7 +74,8 @@ public class ServersChecker {
   }
 
   /**
-   * Asynchronously starts checking readiness of servers of a machine.
+   * Asynchronously starts checking readiness of servers of a machine. Method {@link #await()} waits
+   * the result of this asynchronous check.
    *
    * @param serverReadinessHandler consumer which will be called with server reference as the
    *     argument when server become available
