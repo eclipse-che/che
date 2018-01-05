@@ -29,7 +29,16 @@ public class ExecServerLivenessProbeConfigFactory implements HttpProbeConfigFact
     try {
       URL url = new URL(server.getUrl());
       return new HttpProbeConfig(
-          url.getPort(), url.getHost(), url.getProtocol(), "/liveness", null, 1, 3, 120, 10, 10);
+          url.getPort() == -1 ? 80 : url.getPort(),
+          url.getHost(),
+          url.getProtocol(),
+          "/liveness",
+          null,
+          1,
+          3,
+          120,
+          10,
+          10);
     } catch (MalformedURLException e) {
       throw new InternalInfrastructureException(
           "Exec agent server liveness probe url is invalid. Error: " + e.getMessage());

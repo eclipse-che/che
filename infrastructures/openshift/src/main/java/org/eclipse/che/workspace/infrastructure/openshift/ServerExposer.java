@@ -47,6 +47,9 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesP
  * {@link Service}. To make it also publicly accessible it is needed to create corresponding {@link
  * Route} for exposing this port.
  *
+ * <p>Created services and routes will have serialized servers which are exposed by the
+ * corresponding object and machine name to which these servers belongs to.
+ *
  * <p>Container, service and route are linked in the following way:
  *
  * <pre>
@@ -144,6 +147,7 @@ public class ServerExposer {
     Service service =
         new ServiceBuilder()
             .withName(generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + '-' + machineName)
+            .withMachineName(machineName)
             .withSelectorEntry(CHE_ORIGINAL_NAME_LABEL, pod.getMetadata().getName())
             .withPorts(new ArrayList<>(portToServicePort.values()))
             .withServers(internalServers)
@@ -164,6 +168,7 @@ public class ServerExposer {
       Route route =
           new RouteBuilder()
               .withName(serviceName + '-' + servicePort.getName())
+              .withMachineName(machineName)
               .withTargetPort(servicePort.getName())
               .withServers(routesServers)
               .withTo(serviceName)
@@ -211,6 +216,7 @@ public class ServerExposer {
 
   private static class ServiceBuilder {
     private String name;
+    private String machineName;
     private Map<String, String> selector = new HashMap<>();
     private List<ServicePort> ports = Collections.emptyList();
     private Map<String, ? extends ServerConfig> serversConfigs = Collections.emptyMap();
@@ -241,13 +247,22 @@ public class ServerExposer {
       return builder
           .withNewMetadata()
           .withName(name.replace("/", "-"))
-          .withAnnotations(Annotations.newSerializer().servers(serversConfigs).annotations())
+          .withAnnotations(
+              Annotations.newSerializer()
+                  .servers(serversConfigs)
+                  .machineName(machineName)
+                  .annotations())
           .endMetadata()
           .withNewSpec()
           .withSelector(selector)
           .withPorts(ports)
           .endSpec()
           .build();
+    }
+
+    public ServiceBuilder withMachineName(String machineName) {
+      this.machineName = machineName;
+      return this;
     }
   }
 
@@ -256,6 +271,7 @@ public class ServerExposer {
     private String serviceName;
     private IntOrString targetPort;
     private Map<String, ? extends ServerConfig> serversConfigs;
+    private String machineName;
 
     private RouteBuilder withName(String name) {
       this.name = name;
@@ -277,6 +293,11 @@ public class ServerExposer {
       return this;
     }
 
+    public RouteBuilder withMachineName(String machineName) {
+      this.machineName = machineName;
+      return this;
+    }
+
     private Route build() {
       io.fabric8.openshift.api.model.RouteBuilder builder =
           new io.fabric8.openshift.api.model.RouteBuilder();
@@ -284,7 +305,11 @@ public class ServerExposer {
       return builder
           .withNewMetadata()
           .withName(name.replace("/", "-"))
-          .withAnnotations(Annotations.newSerializer().servers(serversConfigs).annotations())
+          .withAnnotations(
+              Annotations.newSerializer()
+                  .servers(serversConfigs)
+                  .machineName(machineName)
+                  .annotations())
           .endMetadata()
           .withNewSpec()
           .withNewTo()

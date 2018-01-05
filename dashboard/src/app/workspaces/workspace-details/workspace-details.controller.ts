@@ -224,19 +224,30 @@ export class WorkspaceDetailsController {
     this.checkEditMode();
   }
 
-
+  /**
+   * Checks editing mode for workspace config.
+   */
   checkEditMode(): void {
+    if (!this.originWorkspaceDetails || !this.workspaceDetails) {
+      return;
+    }
+    this.editMode = !angular.equals(this.originWorkspaceDetails.config, this.workspaceDetails.config);
+    if (this.editMode === false) {
+      this.editModeMessage = '';
+      this.showApplyMessage = false;
+      return;
+    }
+    this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
+    this.editModeMessage = 'Changes will be applied and workspace restarted';
+    const needRunningStatus = this.workspaceDetailsService.needRunningToUpdate();
+    if (needRunningStatus) {
+      this.showApplyMessage = true;
+    } else {
+      const statusStr = this.getWorkspaceStatus();
+      this.showApplyMessage = [STOPPED, STOPPING].indexOf(statusStr) === -1;
+    }
+    // check for fail tab.
     this.$timeout(() => {
-      if (!this.originWorkspaceDetails || !this.workspaceDetails) {
-        return;
-      }
-      this.editMode = !angular.equals(this.originWorkspaceDetails.config, this.workspaceDetails.config);
-      if (this.editMode === false) {
-        this.editModeMessage = '';
-        this.showApplyMessage = false;
-        return;
-      }
-      this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
       const failTabs = [];
       const tabs = Object.keys(this.tab).filter((tabKey: string) => {
         return !isNaN(parseInt(tabKey, 10));
@@ -248,22 +259,15 @@ export class WorkspaceDetailsController {
       });
       if (failTabs.length) {
         const url = this.$location.absUrl().split('?')[0];
-        this.editModeMessage = '<i class="error fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Impossible to save and apply the configuration. Errors in ';
+        this.editModeMessage = `<i class="error fa fa-exclamation-circle" 
+                                   aria-hidden="true"></i>&nbsp;Impossible to save and apply the configuration. Errors in `;
         this.editModeMessage += failTabs.map((tab: string) => {
           return `<a href='${url}?tab=${tab}'>${tab}</a>`;
         }).join(', ');
         this.showApplyMessage = true;
         return;
       }
-      this.editModeMessage = 'Changes will be applied and workspace restarted';
-      const needRunningStatus = this.workspaceDetailsService.needRunningToUpdate();
-      if (needRunningStatus) {
-        this.showApplyMessage = true;
-      } else  {
-        const statusStr = this.getWorkspaceStatus();
-        this.showApplyMessage = [STOPPED, STOPPING].indexOf(statusStr) === -1;
-      }
-    });
+    }, 500);
   }
 
   /**
