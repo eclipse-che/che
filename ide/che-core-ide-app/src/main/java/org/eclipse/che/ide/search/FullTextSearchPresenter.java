@@ -150,14 +150,6 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
 
   @Override
   public void onEnterClicked() {
-    if (view.isAcceptButtonInFocus()) {
-      String searchText = view.getSearchText();
-      if (!searchText.isEmpty()) {
-        search(searchText);
-      }
-      return;
-    }
-
     if (view.isCancelButtonInFocus()) {
       view.close();
       return;
@@ -165,6 +157,13 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
 
     if (view.isSelectPathButtonInFocus()) {
       view.showSelectPathDialog();
+      return;
+    }
+
+    // start search if Enter is pressed anywhere else in the dialog
+    String searchText = view.getSearchText();
+    if (!searchText.isEmpty()) {
+      search(searchText);
     }
   }
 }

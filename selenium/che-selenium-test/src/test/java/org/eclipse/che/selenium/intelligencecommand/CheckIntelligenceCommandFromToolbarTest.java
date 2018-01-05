@@ -52,12 +52,12 @@ public class CheckIntelligenceCommandFromToolbarTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private NotificationsPopupPanel notificationsPanel;
 
-  @BeforeClass(groups = {TestGroup.DOCKER, TestGroup.OPENSHIFT})
+  @BeforeClass
   public void setUp() throws Exception {
     ide.open(testWorkspace);
   }
 
-  @Test(groups = {TestGroup.DOCKER, TestGroup.OPENSHIFT})
+  @Test
   public void launchClonedWepAppTest() throws Exception {
     String currentWindow = seleniumWebDriver.getWindowHandle();
     projectExplorer.waitProjectExplorer();
