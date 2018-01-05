@@ -246,7 +246,7 @@ public class LuceneSearcher implements Searcher {
               if (res > 0.0F && startOffset <= endOffset) {
                 String tokenText = txt.substring(startOffset, endOffset);
                 Scanner sc = new Scanner(txt);
-                int lineNum = 0;
+                int lineNum = 1;
                 long len = 0;
                 String foundLine = "";
                 while (sc.hasNextLine()) {

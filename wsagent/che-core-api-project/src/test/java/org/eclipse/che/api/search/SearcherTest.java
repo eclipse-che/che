@@ -260,13 +260,13 @@ public class SearcherTest {
         new SearchResultEntry(
             "/folder/xxx.txt",
             ImmutableList.of(
-                new OffsetData("To", 0, 2, 0, 1.0f, 0, lines[0]),
-                new OffsetData("to", 13, 15, 0, 1.0f, 0, lines[0]),
-                new OffsetData("to", 54, 56, 0, 1.0f, 1, lines[1]),
-                new OffsetData("insidebigword_to_continuebigword", 65, 97, 0, 1.0f, 2, lines[2]))),
+                new OffsetData("To", 0, 2, 0, 1.0f, 1, lines[0]),
+                new OffsetData("to", 13, 15, 0, 1.0f, 1, lines[0]),
+                new OffsetData("to", 54, 56, 0, 1.0f, 2, lines[1]),
+                new OffsetData("insidebigword_to_continuebigword", 65, 97, 0, 1.0f, 3, lines[2]))),
         new SearchResultEntry(
             "/folder/zzz.txt",
-            ImmutableList.of(new OffsetData("to", 5, 7, 2, 1.0f, 0, TEST_CONTENT[4]))));
+            ImmutableList.of(new OffsetData("to", 5, 7, 2, 1.0f, 1, TEST_CONTENT[4]))));
   }
 
   @DataProvider
