@@ -48,6 +48,7 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
@@ -89,6 +90,7 @@ public class WorkspaceRuntimes {
   private final AtomicBoolean isStartRefused;
   private final Map<String, InternalEnvironmentFactory> environmentFactories;
   private final RuntimeInfrastructure infrastructure;
+  private final ProbeScheduler probeScheduler;
 
   @Inject
   public WorkspaceRuntimes(
@@ -97,7 +99,9 @@ public class WorkspaceRuntimes {
       RuntimeInfrastructure infra,
       WorkspaceSharedPool sharedPool,
       WorkspaceDao workspaceDao,
-      @SuppressWarnings("unused") DBInitializer ignored) {
+      @SuppressWarnings("unused") DBInitializer ignored,
+      ProbeScheduler probeScheduler) {
+    this.probeScheduler = probeScheduler;
     this.runtimes = new ConcurrentHashMap<>();
     this.eventService = eventService;
     this.sharedPool = sharedPool;
@@ -275,6 +279,9 @@ public class WorkspaceRuntimes {
         publishWorkspaceStatusEvent(workspaceId, RUNNING, STARTING, null);
       } catch (InfrastructureException e) {
         runtimes.remove(workspaceId);
+        // Cancels workspace servers probes if any
+        probeScheduler.cancel(workspaceId);
+
         String failureCause = "failed";
         if (e instanceof RuntimeStartInterruptedException) {
           failureCause = "interrupted";
@@ -363,6 +370,8 @@ public class WorkspaceRuntimes {
     @Override
     public void run() {
       String workspaceId = workspace.getId();
+      // Cancels workspace servers probes if any
+      probeScheduler.cancel(workspaceId);
       try {
         state.runtime.stop(options);
 
@@ -585,6 +594,8 @@ public class WorkspaceRuntimes {
     public void onEvent(RuntimeStatusEvent event) {
       if (event.isFailed()) {
         String workspaceId = event.getIdentity().getWorkspaceId();
+        // Cancels workspace servers probes if any
+        probeScheduler.cancel(workspaceId);
         RuntimeState state = runtimes.remove(workspaceId);
         if (state != null) {
           publishWorkspaceStatusEvent(

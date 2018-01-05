@@ -175,12 +175,14 @@ server_is_booted() {
 
 wait_until_server_is_booted() {
   SERVER_BOOT_TIMEOUT=300
-  echo "[CHE] wait CHE pod booting..."
+  echo -n "[CHE] wait CHE pod booting..."
   ELAPSED=0
   until server_is_booted || [ ${ELAPSED} -eq "${SERVER_BOOT_TIMEOUT}" ]; do
+    echo -n "."
     sleep 2
     ELAPSED=$((ELAPSED+1))
   done
+  echo "Done!"
 }
 
 wait_until_kc_is_booted() {
@@ -231,6 +233,10 @@ parse_args() {
     ENV vars
     CHE_IMAGE_TAG - set CHE images tag, default: nightly
     CHE_MULTIUSER - set CHE multi user mode, default: false (single user) 
+    OC_PUBLIC_HOSTNAME - set ocp hostname to admin console, default: host ip
+    OC_PUBLIC_IP - set ocp hostname for routing suffix, default: host ip
+    DNS_PROVIDER - set ocp DNS provider for routing suffix, default: nip.io
+    OPENSHIFT_TOKEN - set ocp token for authentication
 "
 
     DEPLOY_SCRIPT_ARGS=""
