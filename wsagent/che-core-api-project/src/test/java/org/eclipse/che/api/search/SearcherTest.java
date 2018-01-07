@@ -60,7 +60,7 @@ public class SearcherTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    indexDirectory = Files.createTempDir(); // Paths.get("/tmp/indexdir").toFile();
+    indexDirectory = Files.createTempDir();
     IoUtil.deleteRecursive(indexDirectory);
     workspaceStorage = Files.createTempDir();
     excludePatterns = Collections.emptySet();
