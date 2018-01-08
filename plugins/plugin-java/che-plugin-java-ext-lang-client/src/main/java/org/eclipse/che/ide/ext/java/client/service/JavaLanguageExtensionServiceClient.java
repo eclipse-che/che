@@ -48,12 +48,10 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ImplementersResponse;
 import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
-import org.eclipse.che.plugin.languageserver.ide.service.ServiceUtil;
-import org.eclipse.lsp4j.TextDocumentPositionParams;
-import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.che.jdt.ls.extension.api.dto.UsagesResponse;
 import org.eclipse.che.plugin.languageserver.ide.service.ServiceUtil;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
+import org.eclipse.lsp4j.WorkspaceEdit;
 
 @Singleton
 public class JavaLanguageExtensionServiceClient {
