@@ -18,7 +18,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -44,7 +43,7 @@ import org.vectomatic.dom.svg.ui.SVGImage;
  */
 public class OutputConsoleViewImpl extends Composite implements OutputConsoleView, RequiresResize {
 
-  private final Terminal terminal;
+  private final Terminal xtermWidget;
   private final OutputConsoleColorizer consoleColorizer;
 
   interface OutputConsoleViewUiBinder extends UiBinder<Widget, OutputConsoleViewImpl> {}
@@ -151,45 +150,17 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     termOptions.setConvertEol(true);
     termOptions.setScrollBack(SCROLL_BACK);
 
-    this.terminal = new Terminal(termOptions);
-    terminal.attachCustomKeyDownHandler(new OutputConsoleCustomKeyDownHandler(terminal));
-    terminal.open(consoleLines.getElement());
-    //    Log.info(getClass(), "char Measure " + terminal.getCharMeasure());
-    //    Log.info(getClass(), "char Measure height " + terminal.getCharMeasure().getHeight());
-    //    Log.info(getClass(), "horizontal scroll bar size " +
-    // terminal.getScrollBarMeasure().getHorizontalWidth());
-    //        resize();
-
-    //                  Log.info(getClass(),  "Constructor !!!! "
-    //                                        + " " + consoleLines.getElement().getClientHeight()
-    //                                        + " " + consoleLines.getElement().getClientWidth()
-    //                                        + " " + consoleLines.isVisible()
-    //                                        + " " + consoleLines.isAttached()
-    //                                        + " " + hashCode());
+    this.xtermWidget = new Terminal(termOptions);
+    xtermWidget.attachCustomKeyDownHandler(new OutputConsoleCustomKeyDownHandler(xtermWidget));
+    xtermWidget.open(consoleLines.getElement());
   }
 
   @Override
   public void onResize() {
     if (consoleIsFit()) {
-//      if (!termIsOpen()) {
-//        terminal.open(consoleLines.getElement());
-//      }
-      //      resizeTimer.schedule(200);
       resize();
     }
   }
-
-//  private Timer resizeTimer =
-//      new Timer() {
-//        @Override
-//        public void run() {
-//          resize();
-//        }
-//      };
-
-//  private boolean termIsOpen() {
-//    return consoleLines.getElement().equals(terminal.getParent());
-//  }
 
   private boolean consoleIsFit() {
     return consoleLines.getElement().getClientHeight() > 0
@@ -197,30 +168,30 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
   }
 
   private void resize() {
-    TerminalGeometry geometry = terminal.proposeGeometry();
+    TerminalGeometry geometry = xtermWidget.proposeGeometry();
     int visibleCols = geometry.getCols();
     int visibleRows = geometry.getRows();
     //    int visibleCols = evaluateVisibleCols();
     //    int visibleRows = evaluateVisibleRows();
 
     if (visibleRows > 0 && visibleCols > 0) {
-      int cols = Math.max(terminal.getMaxLineLength(), visibleCols);
-      terminal.resize(cols, visibleRows);
+      int cols = Math.max(xtermWidget.getMaxLineLength(), visibleCols);
+      xtermWidget.resize(cols, visibleRows);
     }
   }
 
   private int evaluateVisibleRows() {
     return Math.round(
         (consoleLines.getElement().getClientHeight()
-                - terminal.getScrollBarMeasure().getVerticalWidth())
-            / terminal.getCharMeasure().getHeight());
+                - xtermWidget.getScrollBarMeasure().getVerticalWidth())
+            / xtermWidget.getCharMeasure().getHeight());
   }
 
   private int evaluateVisibleCols() {
     return Math.round(
         (consoleLines.getElement().getClientWidth()
-                - terminal.getScrollBarMeasure().getHorizontalWidth())
-            / terminal.getCharMeasure().getWidth());
+                - xtermWidget.getScrollBarMeasure().getHorizontalWidth())
+            / xtermWidget.getCharMeasure().getWidth());
   }
 
   @Override
@@ -229,9 +200,9 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
       text = consoleColorizer.colorize(text);
     }
     if (text.endsWith("\n|\r\n")) {
-      terminal.write(text);
+      xtermWidget.write(text);
     } else {
-      terminal.writeln(text);
+      xtermWidget.writeln(text);
     }
   }
 
@@ -270,8 +241,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
   @Override
   public void clearConsole() {
-    // todo seems reset sometimes works incorrectly, reset terminal.getMaxLineLength()
-    terminal.reset();
+    xtermWidget.reset();
   }
 
   @Override
@@ -313,6 +283,6 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
   @Override
   public String getText() {
-    return terminal.getText();
+    return xtermWidget.getText();
   }
 }

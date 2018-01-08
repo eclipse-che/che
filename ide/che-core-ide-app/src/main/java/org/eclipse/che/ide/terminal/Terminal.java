@@ -75,9 +75,6 @@ public class Terminal {
 
   public native void writeln(String data);
 
-  // todo test method should be reworked
-  public native void print();
-
   public native String getText();
 
   public native void resize(int cols, int rows);
@@ -104,4 +101,6 @@ public class Terminal {
   public native void attachCustomKeyDownHandler(CustomKeyDownHandler customKeyDownHandl);
 
   public native void reset();
+
+  public native void destroy();
 }

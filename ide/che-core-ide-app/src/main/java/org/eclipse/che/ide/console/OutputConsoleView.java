@@ -41,8 +41,8 @@ public interface OutputConsoleView extends View<OutputConsoleView.ActionDelegate
   void print(String text);
 
   /**
-   * Prints colored text. Color of the text is defined by in the true color format with background,
-   * red, blue and green components.
+   * Prints colored text. Color of the text is defined by true color format with background, red,
+   * blue and green components.
    *
    * @param text text to print
    * @param background background color component
