@@ -26,13 +26,15 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/eclipse/che/agents/go-agents/core/activity"
 	"github.com/eclipse/che/agents/go-agents/core/auth"
 	"github.com/eclipse/che/agents/go-agents/core/rest"
+	"github.com/eclipse/che/agents/go-agents/core/rest/restutil"
 	"github.com/eclipse/che/agents/go-agents/terminal-agent/term"
-	"strconv"
 )
 
 var (
@@ -59,14 +61,25 @@ func main() {
 
 	appHTTPRoutes := []rest.RoutesGroup{
 		term.HTTPRoutes,
+		{
+			Name: "Terminal-Agent liveness route",
+			Items: []rest.Route{
+				{
+					Method:     "GET",
+					Path:       "/liveness",
+					Name:       "Check Terminal-Agent liveness",
+					HandleFunc: restutil.OKRespondingFunc,
+				},
+			},
+		},
 	}
 
 	// register routes and http handlers
 	r := rest.NewDefaultRouter(config.basePath, appHTTPRoutes)
 	rest.PrintRoutes(appHTTPRoutes)
 
-	var handler = getHandler(r)
-	http.Handle("/", handler)
+	// do not protect liveness check endpoint
+	var handler = wrapWithAuth(r, "/liveness")
 
 	server := &http.Server{
 		Handler:      handler,
@@ -77,14 +90,15 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func getHandler(h http.Handler) http.Handler {
-	// required authentication for all the requests, if it is configured
-	if config.authEnabled {
-		cache := auth.NewCache(time.Minute*time.Duration(config.tokensExpirationTimeoutInMinutes), time.Minute*5)
-		return auth.NewCachingHandler(h, config.apiEndpoint, droppingTerminalConnectionsUnauthorizedHandler, cache)
+func wrapWithAuth(h http.Handler, ignoreMapping string) http.Handler {
+	// required authentication for all the requests that match mappings, if auth is configured
+	if !config.authEnabled {
+		return h
 	}
 
-	return h
+	ignorePattern := regexp.MustCompile(ignoreMapping)
+	cache := auth.NewCache(time.Minute*time.Duration(config.tokensExpirationTimeoutInMinutes), time.Minute*5)
+	return auth.NewCachingHandler(h, config.apiEndpoint, droppingTerminalConnectionsUnauthorizedHandler, cache, ignorePattern)
 }
 
 func droppingTerminalConnectionsUnauthorizedHandler(w http.ResponseWriter, req *http.Request, err error) {

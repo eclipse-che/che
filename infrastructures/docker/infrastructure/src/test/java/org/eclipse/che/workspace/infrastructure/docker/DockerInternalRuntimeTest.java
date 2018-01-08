@@ -13,12 +13,15 @@ package org.eclipse.che.workspace.infrastructure.docker;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.FAILED;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STOPPED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
@@ -37,14 +40,22 @@ import com.google.common.collect.Maps;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
+import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult;
+import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult.ProbeStatus;
+import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
+import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbes;
+import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
@@ -64,6 +75,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -76,6 +88,8 @@ public class DockerInternalRuntimeTest {
   private static final RuntimeIdentity IDENTITY = new RuntimeIdentityImpl("ws1", "env1", "usr1");
   private static final String DEV_MACHINE = "DEV_MACHINE";
   private static final String DB_MACHINE = "DB_MACHINE";
+  private static final String SERVER_1 = "serv1";
+  private static final String SERVER_URL = "https://localhost:443/path";
 
   @Mock private DockerBootstrapperFactory bootstrapperFactory;
   @Mock private DockerRuntimeContext runtimeContext;
@@ -83,7 +97,12 @@ public class DockerInternalRuntimeTest {
   @Mock private DockerMachineStarter starter;
   @Mock private NetworkLifecycle networks;
   @Mock private DockerBootstrapper bootstrapper;
+  @Mock private WorkspaceProbesFactory workspaceProbesFactory;
+  @Mock private ProbeScheduler probesScheduler;
+  @Mock private WorkspaceProbes workspaceProbes;
+  @Mock private DockerMachine dockerMachine;
 
+  @Captor private ArgumentCaptor<Consumer<ProbeResult>> probeResultConsumerCaptor;
   @Captor private ArgumentCaptor<MachineStatusEvent> eventCaptor;
 
   private DockerInternalRuntime dockerRuntime;
@@ -112,6 +131,8 @@ public class DockerInternalRuntimeTest {
     ServersCheckerFactory serversCheckerFactory = mock(ServersCheckerFactory.class);
     when(serversCheckerFactory.create(any(), nullable(String.class), any()))
         .thenReturn(mock(ServersChecker.class));
+    when(workspaceProbesFactory.getProbes(eq(IDENTITY.getWorkspaceId()), anyString(), any()))
+        .thenReturn(workspaceProbes);
     dockerRuntime =
         new DockerInternalRuntime(
             runtimeContext,
@@ -122,7 +143,9 @@ public class DockerInternalRuntimeTest {
             eventService,
             bootstrapperFactory,
             serversCheckerFactory,
-            mock(MachineLoggersFactory.class));
+            mock(MachineLoggersFactory.class),
+            probesScheduler,
+            workspaceProbesFactory);
   }
 
   @Test
@@ -234,6 +257,99 @@ public class DockerInternalRuntimeTest {
     }
   }
 
+  @Test
+  public void cancelsProbesCheckingOnRuntimeStartFailed() throws Exception {
+    mockInstallersBootstrap();
+    mockContainerStartFailed(new InfrastructureException(""));
+
+    try {
+      dockerRuntime.start(emptyMap());
+    } catch (InfrastructureException ex) {
+      verify(probesScheduler).cancel(IDENTITY.getWorkspaceId());
+    }
+  }
+
+  @Test
+  public void cancelsProbesCheckingOnRuntimeStop() throws Exception {
+    dockerRuntime.internalStop(emptyMap());
+
+    verify(probesScheduler).cancel(IDENTITY.getWorkspaceId());
+  }
+
+  @Test
+  public void schedulesProbesOnServerChecksCall() throws Exception {
+    mockInstallersBootstrap();
+    mockContainerStart();
+    dockerRuntime.start(emptyMap());
+    verify(probesScheduler, times(2)).schedule(eq(workspaceProbes), any());
+
+    dockerRuntime.checkServers();
+
+    verify(probesScheduler, times(4)).schedule(eq(workspaceProbes), any());
+  }
+
+  @Test
+  public void schedulesProbesOnMachineStart() throws Exception {
+    mockInstallersBootstrap();
+    mockContainerStart();
+    WorkspaceProbes m1Probes = mock(WorkspaceProbes.class);
+    WorkspaceProbes m2Probes = mock(WorkspaceProbes.class);
+    when(workspaceProbesFactory.getProbes(eq(IDENTITY.getWorkspaceId()), eq(DB_MACHINE), any()))
+        .thenReturn(m1Probes);
+    when(workspaceProbesFactory.getProbes(eq(IDENTITY.getWorkspaceId()), eq(DEV_MACHINE), any()))
+        .thenReturn(m2Probes);
+
+    dockerRuntime.start(emptyMap());
+
+    verify(probesScheduler).schedule(eq(m1Probes), any());
+    verify(probesScheduler).schedule(eq(m2Probes), any());
+  }
+
+  @Test(dataProvider = "serverProbeReactionProvider")
+  public void updatesServerStatusOnProbeResult(
+      ProbeStatus probeStatus,
+      ServerStatus oldServerStatus,
+      boolean serverStatusChanged,
+      ServerStatus newServerStatus)
+      throws Exception {
+
+    when(dockerMachine.getServers())
+        .thenReturn(
+            singletonMap(
+                SERVER_1, new ServerImpl().withUrl(SERVER_URL).withStatus(oldServerStatus)));
+    mockInstallersBootstrap();
+    mockContainerStart();
+    WorkspaceProbes m1Probes = mock(WorkspaceProbes.class);
+    when(workspaceProbesFactory.getProbes(eq(IDENTITY.getWorkspaceId()), eq(DB_MACHINE), any()))
+        .thenReturn(m1Probes);
+    dockerRuntime.start(emptyMap());
+    verify(probesScheduler).schedule(eq(m1Probes), probeResultConsumerCaptor.capture());
+    Consumer<ProbeResult> resultConsumer = probeResultConsumerCaptor.getValue();
+
+    resultConsumer.accept(
+        new ProbeResult(IDENTITY.getWorkspaceId(), DB_MACHINE, SERVER_1, probeStatus));
+
+    if (serverStatusChanged) {
+      verify(dockerMachine).setServerStatus(SERVER_1, newServerStatus);
+    } else {
+      verify(dockerMachine, never()).setServerStatus(eq(SERVER_1), any());
+    }
+  }
+
+  @DataProvider
+  public static Object[][] serverProbeReactionProvider() {
+    return new Object[][] {
+      {ProbeStatus.FAILED, ServerStatus.RUNNING, true, ServerStatus.STOPPED},
+      {ProbeStatus.FAILED, ServerStatus.UNKNOWN, false, null},
+      {ProbeStatus.FAILED, null, false, null},
+      {ProbeStatus.FAILED, ServerStatus.STOPPED, false, null},
+      {ProbeStatus.PASSED, ServerStatus.STOPPED, true, ServerStatus.RUNNING},
+      {ProbeStatus.PASSED, ServerStatus.UNKNOWN, true, ServerStatus.RUNNING},
+      {ProbeStatus.PASSED, null, true, ServerStatus.RUNNING},
+      {ProbeStatus.PASSED, ServerStatus.RUNNING, false, null},
+    };
+  }
+
   private void verifyEventsOrder(MachineStatusEvent... expectedEvents) {
     final Iterator<MachineStatusEvent> actualEvents = captureEvents().iterator();
     for (MachineStatusEvent expected : expectedEvents) {
@@ -269,7 +385,7 @@ public class DockerInternalRuntimeTest {
             nullable(DockerContainerConfig.class),
             nullable(RuntimeIdentity.class),
             nullable(AbnormalMachineStopHandler.class)))
-        .thenReturn(mock(DockerMachine.class));
+        .thenReturn(dockerMachine);
   }
 
   private void mockContainerStartFailed(InfrastructureException exception)

@@ -14,6 +14,7 @@ import static org.eclipse.che.ide.api.vcs.VcsStatus.ADDED;
 import static org.eclipse.che.ide.api.vcs.VcsStatus.MODIFIED;
 import static org.eclipse.che.ide.api.vcs.VcsStatus.NOT_MODIFIED;
 import static org.eclipse.che.ide.api.vcs.VcsStatus.UNTRACKED;
+import static org.eclipse.che.ide.ext.git.client.GitUtil.getRootPath;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -80,7 +81,12 @@ public class EditorTabsColorizer implements GitEventsSubscriber {
         .get()
         .getOpenedEditors()
         .stream()
-        .filter(editor -> editor instanceof HasVcsChangeMarkerRender)
+        .filter(
+            editor ->
+                editor instanceof HasVcsChangeMarkerRender
+                    && statusChangedEventDto
+                        .getProjectName()
+                        .equals(getRootPath(editor.getEditorInput().getFile().getLocation())))
         .forEach(
             editor -> {
               EditorTab tab = multiPartStackProvider.get().getTabByPart(editor);

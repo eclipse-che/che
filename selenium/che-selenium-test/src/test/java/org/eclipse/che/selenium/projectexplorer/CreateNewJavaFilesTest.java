@@ -72,6 +72,7 @@ public class CreateNewJavaFilesTest {
     projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
     projectExplorer.quickExpandWithJavaScript();
+    projectExplorer.waitItemInVisibleArea("AppController.java");
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
     loader.waitOnClosed();
 

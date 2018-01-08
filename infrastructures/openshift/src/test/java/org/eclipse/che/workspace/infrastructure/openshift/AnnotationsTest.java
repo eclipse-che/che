@@ -43,6 +43,7 @@ public class AnnotationsTest {
             .servers(
                 ImmutableMap.of(
                     "my-server2", new ServerConfigImpl("8080/tcp", "ws", "/connect", emptyMap())))
+            .machineName("test-machine")
             .annotations();
     Map<String, String> expected =
         ImmutableMap.<String, String>builder()
@@ -54,6 +55,7 @@ public class AnnotationsTest {
             .put("org.eclipse.che.server.my-server2.protocol", "ws")
             .put("org.eclipse.che.server.my-server2.path", "/connect")
             .put("org.eclipse.che.server.my-server2.attributes", stringEmptyAttributes)
+            .put("org.eclipse.che.machine.name", "test-machine")
             .build();
 
     assertEquals(serialized, expected);
@@ -74,11 +76,14 @@ public class AnnotationsTest {
             .put("org.eclipse.che.server.my-server3.port", "7070/tcp")
             .put("org.eclipse.che.server.my-server3.protocol", "http")
             .put("org.eclipse.che.server.my-server3.attributes", stringEmptyAttributes)
+            .put("org.eclipse.che.machine.name", "test-machine")
             .build();
 
     Annotations.Deserializer deserializer = Annotations.newDeserializer(annotations);
 
     Map<String, ServerConfigImpl> servers = deserializer.servers();
+
+    assertEquals(deserializer.machineName(), "test-machine");
 
     Map<String, ServerConfigImpl> expected = new HashMap<>();
     expected.put("my-server1/http", new ServerConfigImpl("8000/tcp", "http", "/api/info", null));

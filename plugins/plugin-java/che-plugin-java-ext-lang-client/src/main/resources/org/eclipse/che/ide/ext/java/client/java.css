@@ -10,6 +10,7 @@
  */
 @eval errorColor org.eclipse.che.ide.api.theme.Style.getErrorColor();
 @eval disableTextColor org.eclipse.che.ide.api.theme.Style.getEditorInfoTextColor();
+@eval findResultsTextColor org.eclipse.che.ide.api.theme.Style.theme.findResultsTextColor();
 
 .exo-autocomplete-fqn {
     color: gray;
@@ -68,6 +69,7 @@
 
 .search-match {
     background: linear-gradient(to bottom, #c1be9e 6%, #B89C07 64%);
+    color: findResultsTextColor;
     border-radius: 2px;
     padding-right: 2px;
     padding-left: 2px;

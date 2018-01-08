@@ -96,8 +96,8 @@ public interface BranchView extends View<BranchView.ActionDelegate> {
   /** Returns selected branch filter. */
   String getFilterValue();
 
-  /** Close dialog. */
-  void close();
+  /** Close dialog if it is showing. */
+  void closeDialogIfShowing();
 
   /** Show dialog. */
   void showDialogIfClosed();

@@ -59,8 +59,8 @@ public interface BranchListView extends View<BranchListView.ActionDelegate> {
    */
   void setEnableCompareButton(boolean enabled);
 
-  /** Close dialog. */
-  void close();
+  /** Close dialog if it is showing. */
+  void closeDialogIfShowing();
 
   /**
    * Returns whether the view is shown.

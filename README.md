@@ -1,6 +1,6 @@
 # Eclipse Che - Eclipse Next-Generation IDE
 [![Eclipse License](https://img.shields.io/badge/license-Eclipse-brightgreen.svg)](https://github.com/codenvy/che/blob/master/LICENSE)
-[![Build Status](https://ci.codenvycorp.com/buildStatus/icon?job=che-ci-master)](https://ci.codenvycorp.com/job/che-ci-master)
+[![Build Status](https://ci.codenvycorp.com/buildStatus/icon?job=che-master-ci)](https://ci.codenvycorp.com/job/che-master-ci)
 
 https://www.eclipse.org/che/. Next-generation Eclipse platform, developer workspace server and cloud IDE. Che defines workspaces that include their dependencies including embedded containerized runtimes, Web IDE, and project code. This makes workspaces distributed, collaborative, and portable to run anywhere on a desktop or a server ... [Read More](https://www.eclipse.org/che/features/)
 

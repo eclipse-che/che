@@ -31,7 +31,7 @@ const buildWorkspacesData = function() {
                   servers: {},
                   agents: ['org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh', 'org.eclipse.che.exec'],
                   recipe: {
-                    location: 'eclipse/ubuntu_jdk8',
+                    content: 'eclipse/ubuntu_jdk8',
                     type: 'dockerimage'
                   }
                 }

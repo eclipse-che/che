@@ -101,21 +101,14 @@ public class ServersMapperTest {
                     .withUrl("ws://" + hostname + ":32080/ws-endpoint")
                     .withAttributes(emptyMap()))
       },
-      {
-        ImmutableMap.of("8080/tcp", "0.0.0.0:32080"),
-        ImmutableMap.of(),
-        ImmutableMap.of("8080/tcp", new ServerImpl().withUrl("tcp://" + hostname + ":32080"))
-      },
+      // ensure that ports that don't have matching server config are not shown as servers
       {
         ImmutableMap.of(
             "8080/tcp", "0.0.0.0:32080",
             "8081/udp", "0.0.0.0:32081",
             "8082", "0.0.0.0:32082"),
         ImmutableMap.of(),
-        ImmutableMap.of(
-            "8080/tcp", new ServerImpl().withUrl("tcp://" + hostname + ":32080"),
-            "8081/udp", new ServerImpl().withUrl("udp://" + hostname + ":32081"),
-            "8082/tcp", new ServerImpl().withUrl("tcp://" + hostname + ":32082"))
+        emptyMap()
       },
       {
         ImmutableMap.of(
@@ -139,26 +132,26 @@ public class ServersMapperTest {
             "exec-agent-ws",
                 new ServerImpl()
                     .withUrl("ws://" + hostname + ":32401/connect")
-                    .withAttributes(ATTRIBUTES_MAP),
-            "8000/tcp", new ServerImpl().withUrl("tcp://" + hostname + ":32000"),
-            "2288/udp", new ServerImpl().withUrl("udp://" + hostname + ":32288"))
+                    .withAttributes(ATTRIBUTES_MAP))
       },
       // mapping of internal servers
       {
-        mapOf(
-            "2288/udp", null,
-            "4401/tcp", null),
+        mapOf("4401/tcp", null),
         ImmutableMap.of(
             "ls-api", new ServerConfigImpl("4401", "tcp", null, INTERNAL_SERVER_ATTRIBUTE_MAP)),
         ImmutableMap.of(
             "ls-api",
             new ServerImpl()
                 .withUrl("tcp://" + machine + ":4401")
-                .withAttributes(INTERNAL_SERVER_ATTRIBUTE_MAP),
-            "2288/udp",
-            new ServerImpl().withUrl("udp://" + machine + ":2288"))
+                .withAttributes(INTERNAL_SERVER_ATTRIBUTE_MAP))
       }
     };
+  }
+
+  private Map<String, String> mapOf(String key, String value) {
+    HashMap<String, String> result = new HashMap<>();
+    result.put(key, value);
+    return result;
   }
 
   private Map<String, String> mapOf(String key, String value, String key2, String value2) {
