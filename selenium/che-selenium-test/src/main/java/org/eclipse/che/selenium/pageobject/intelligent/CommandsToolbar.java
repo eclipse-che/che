@@ -199,11 +199,15 @@ public class CommandsToolbar {
 
     WaitUtils.sleepQuietly(3);
 
-    loadPageWait
-        .until(visibilityOfElementLocated(By.xpath(format("//div[text()='%s']", urlCommand))))
-        .click();
+    Actions action = new Actions(seleniumWebDriver);
+    action.moveToElement(getPreviewPopup(urlCommand)).click().perform();
 
     System.out.println("============>>>   3");
+  }
+
+  private WebElement getPreviewPopup(String urlCommand) {
+    return loadPageWait.until(
+        visibilityOfElementLocated(By.xpath(format("//div[text()='%s']", urlCommand))));
   }
 
   /**
