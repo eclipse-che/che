@@ -125,6 +125,7 @@ public class KeysInjector {
                     client.getProcess(workspaceId, startProcess.getPid());
                 int tryNumber = 1;
                 while (process.isAlive()) {
+                  Thread.sleep(100);
                   process = client.getProcess(workspaceId, startProcess.getPid());
                   tryNumber++;
                   if (tryNumber > 10) {
@@ -137,7 +138,7 @@ public class KeysInjector {
                   LOG.warn("Uploading key failed with exit code " + process.getExitCode());
                 }
               }
-            } catch (ServerException e) {
+            } catch (ServerException | InterruptedException e) {
               LOG.error(e.getLocalizedMessage(), e);
             }
           }
