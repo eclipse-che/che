@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.selenium.projectexplorer.dependencies;
 
-import static org.testng.Assert.fail;
-
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -26,7 +24,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -76,10 +73,9 @@ public class TransitiveDependencyTest {
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     editor.waitActive();
+
     projectExplorer.openItemByVisibleNameInExplorer(LIB_FOLDER);
-
-    waitMainLibraryIsPresent();
-
+    projectExplorer.waitLibraryIsPresent(MAIN_LIBRARY);
     projectExplorer.waitLibraryIsPresent(TRANSITIVE_DEPENDENCY_FOR_MAIN_LIBRARY);
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     loader.waitOnClosed();
@@ -98,15 +94,6 @@ public class TransitiveDependencyTest {
     for (int i = 36; i <= 40; i++) {
       editor.setCursorToLine(i);
       editor.selectLineAndDelete();
-    }
-  }
-
-  private void waitMainLibraryIsPresent() {
-    try {
-      projectExplorer.waitLibraryIsPresent(MAIN_LIBRARY);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8017");
     }
   }
 }
