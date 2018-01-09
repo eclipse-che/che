@@ -101,7 +101,7 @@ func Start() error {
 		if err := installOne(installer); err != nil {
 			log.Printf("Installation of '%s' failed", installer.ID)
 			pubInstallationFailed(installer.ID, err.Error())
-			pubBootstrappingFailed()
+			pubBootstrappingFailed(err.Error())
 			closeConsumers()
 			killProcesses()
 			return err
@@ -165,9 +165,10 @@ func killProcesses() {
 	}
 }
 
-func pubBootstrappingFailed() {
+func pubBootstrappingFailed(err string) {
 	bus.Pub(&StatusChangedEvent{
 		Status: StatusFailed,
+		Error:  err,
 		MachineEvent: MachineEvent{
 			MachineName: machineName,
 			RuntimeID:   runtimeID,
