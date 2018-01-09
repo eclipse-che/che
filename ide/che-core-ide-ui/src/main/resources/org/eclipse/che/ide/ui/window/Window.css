@@ -84,7 +84,7 @@
 .header {
     background: windowHeaderBackground;
     border-bottom: 1px solid windowHeaderBorderColor;
-    height: 22px;
+    height: 26px;
     padding: 0px 16px 0px 12px;
     user-select: none;
     cursor: default;
@@ -130,12 +130,13 @@
     font-family: mainFontFamily;
     font-size: windowTitleFontSize;
     color: windowTitleFontColor;
+    font-weight: bold;
 }
 
 .closeButton {
     position: absolute;
-    right: 16px;
-    top: 0px;
+    right: 10px;
+    top: 2px;
     line-height: 22px;
     padding: 0px 0px 0px 5px;
     cursor: pointer;
@@ -143,6 +144,8 @@
 
 .closeButton svg {
     fill: windowTitleFontColor;
+    width: 10px;
+    height: 10px;
 }
 
 .closeButton:hover svg {

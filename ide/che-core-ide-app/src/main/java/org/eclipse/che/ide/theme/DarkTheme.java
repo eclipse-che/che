@@ -649,32 +649,32 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getWindowHeaderBackground() {
-    return "#2E3A45";
+    return "#242a3a";
   }
 
   @Override
   public String getWindowHeaderBorderColor() {
-    return "#1A68AF";
+    return "#1b1e2b";
   }
 
   @Override
   public String getWindowFooterBackground() {
-    return "#292C2F";
+    return "#242a3a";
   }
 
   @Override
   public String getWindowFooterBorderColor() {
-    return "#121416";
+    return "#1b1e2b";
   }
 
   @Override
   public String getWindowSeparatorColor() {
-    return "#121416";
+    return "#1b1e2b";
   }
 
   @Override
   public String getWindowTitleFontColor() {
-    return "#AAAAAA";
+    return "#a0a9b7";
   }
 
   @Override
