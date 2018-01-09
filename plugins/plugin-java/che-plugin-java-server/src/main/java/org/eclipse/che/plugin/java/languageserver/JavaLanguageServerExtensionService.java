@@ -221,9 +221,7 @@ public class JavaLanguageServerExtensionService {
    * @return output directory
    */
   public String getOutputDir(String projectPath) {
-    if (!findInitializedLanguageServer().isPresent()) {
-      throw new IllegalStateException("Language server isn't initialized");
-    }
+    checkLanguageServerInitialized();
 
     String projectUri = prefixURI(projectPath);
     Type type = new TypeToken<String>() {}.getType();
@@ -307,13 +305,17 @@ public class JavaLanguageServerExtensionService {
    * @return source folders
    */
   public List<String> getSourceFolders(String projectPath) {
-    if (!findInitializedLanguageServer().isPresent()) {
-      throw new IllegalStateException("Language server isn't initialized");
-    }
+    checkLanguageServerInitialized();
 
     String projectUri = prefixURI(projectPath);
     Type type = new TypeToken<ArrayList<String>>() {}.getType();
     return doGetList(GET_SOURCE_FOLDERS, projectUri, type);
+  }
+
+  private void checkLanguageServerInitialized() {
+    if (!findInitializedLanguageServer().isPresent()) {
+      throw new IllegalStateException("Language server isn't initialized");
+    }
   }
 
   /**
