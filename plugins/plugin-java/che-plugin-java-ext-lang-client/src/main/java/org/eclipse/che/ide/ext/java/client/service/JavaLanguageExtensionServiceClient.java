@@ -29,11 +29,15 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.REQUEST_TIMEOUT;
 import com.google.gwt.jsonp.client.TimeoutException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
@@ -46,11 +50,49 @@ import org.eclipse.lsp4j.WorkspaceEdit;
 
 @Singleton
 public class JavaLanguageExtensionServiceClient {
+  private static final String EVENT_JDT_PROJECT_UPDATED = "event:jdt:project-updated";
+  private static final String EVENT_JDT_SUBSCRIBE = "event:jdt:subscribe";
+
   private final RequestTransmitter requestTransmitter;
+  private final RequestHandlerConfigurator configurator;
+  private final RequestTransmitter transmitter;
+  private final AppContext appContext;
 
   @Inject
-  public JavaLanguageExtensionServiceClient(RequestTransmitter requestTransmitter) {
+  public JavaLanguageExtensionServiceClient(
+      RequestTransmitter requestTransmitter,
+      RequestHandlerConfigurator configurator,
+      RequestTransmitter transmitter,
+      AppContext appContext,
+      EventBus eventBus) {
     this.requestTransmitter = requestTransmitter;
+    this.configurator = configurator;
+    this.transmitter = transmitter;
+    this.appContext = appContext;
+
+    eventBus.addHandler(WorkspaceReadyEvent.getType(), e -> subscribe());
+  }
+
+  @Inject
+  protected void handleEvents() {
+    configurator
+        .newConfiguration()
+        .methodName(EVENT_JDT_PROJECT_UPDATED)
+        .paramsAsDto(String.class)
+        .noResult()
+        .withBiConsumer(
+            (endpointId, projectPath) -> {
+              onProjectUpdated(projectPath);
+            });
+  }
+
+  private void subscribe() {
+    transmitter
+        .newRequest()
+        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+        .methodName(EVENT_JDT_SUBSCRIBE)
+        .noParams()
+        .sendAndSkipResult();
   }
 
   public Promise<List<ExtendedSymbolInformation>> fileStructure(
@@ -258,5 +300,17 @@ public class JavaLanguageExtensionServiceClient {
         create(
             new TimeoutException(
                 "Looks like the language server is taking to long to respond, please try again in sometime.")));
+  }
+
+  private void onProjectUpdated(String projectPath) {
+    appContext
+        .getWorkspaceRoot()
+        .getContainer(projectPath)
+        .then(
+            container -> {
+              if (container.isPresent()) {
+                container.get().synchronize();
+              }
+            });
   }
 }
