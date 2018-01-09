@@ -44,7 +44,13 @@
     </method-selectors>
 
     <classes>
+      <class name="org.eclipse.che.selenium.intelligencecommand.MacrosCommandsEditorTest"/>
+      <class name="org.eclipse.che.selenium.intelligencecommand.AutocompleteCommandsEditorTest"/>
+      <class name="org.eclipse.che.selenium.intelligencecommand.CheckBasicFunctionalityInCommandsExplorerTest"/>
       <class name="org.eclipse.che.selenium.intelligencecommand.CheckIntelligenceCommandFromToolbarTest"/>
+      <class name="org.eclipse.che.selenium.intelligencecommand.CommandsEditorTest"/>
+      <class name="org.eclipse.che.selenium.intelligencecommand.CommandsPaletteTest"/>
+      <class name="org.eclipse.che.selenium.intelligencecommand.PreviewUrlIntoCommandsEditorTest"/>
     </classes>
   </test>
 </suite>
