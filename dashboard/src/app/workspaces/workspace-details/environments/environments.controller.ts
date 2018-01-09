@@ -12,6 +12,7 @@
 import {CheEnvironmentRegistry} from '../../../../components/api/environment/che-environment-registry.factory';
 import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
 import {CheNotification} from "../../../../components/notification/che-notification.factory";
+import {CheRecipeService} from "../che-recipe.service";
 
 /**
  * @ngdoc controller
@@ -60,17 +61,22 @@ export class WorkspaceEnvironmentsController {
    * Notification factory.
    */
   private cheNotification: CheNotification;
+  /**
+   * Environment recipe service.
+   */
+  private cheRecipeService: CheRecipeService;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $scope: ng.IScope, $timeout: ng.ITimeoutService, $mdDialog: ng.material.IDialogService, cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService, cheNotification: CheNotification) {
+  constructor($q: ng.IQService, $scope: ng.IScope, $timeout: ng.ITimeoutService, $mdDialog: ng.material.IDialogService, cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService, cheNotification: CheNotification, cheRecipeService: CheRecipeService) {
     this.$q = $q;
     this.$mdDialog = $mdDialog;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
     this.$log = $log;
     this.cheNotification = cheNotification;
+    this.cheRecipeService = cheRecipeService;
 
     this.editorOptions = {
       lineWrapping: true,
@@ -127,6 +133,15 @@ export class WorkspaceEnvironmentsController {
     if (!this.machinesViewStatus[this.environmentName]) {
       this.machinesViewStatus[this.environmentName] = {};
     }
+  }
+
+  /**
+   * Returns true if the recipe type is scalable.
+   *
+   * @returns {boolean}
+   */
+  isScalable(): boolean {
+    return this.cheRecipeService.isScalable(this.environment.recipe);
   }
 
   /**

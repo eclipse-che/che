@@ -33,17 +33,20 @@ export class OpenshiftEnvironmentRecipeParser implements IParser {
    * @returns {IPodList} recipe object
    */
   parse(content: string): IPodList {
+    let recipe: IPodList;
     if (this.recipeByContent.has(content)) {
-      return this.recipeByContent.get(content);
+      recipe = angular.copy(this.recipeByContent.get(content));
+      this.validate(recipe);
+      return recipe;
     }
-    const recipe = jsyaml.safeLoad(content);
-    this.validate(recipe);
+    recipe = jsyaml.safeLoad(content);
     // add to buffer
-    this.recipeByContent.set(content, recipe);
+    this.recipeByContent.set(content, angular.copy(recipe));
     this.recipeKeys.push(content);
     if (this.recipeKeys.length > 3) {
       this.recipeByContent.delete(this.recipeKeys.shift());
     }
+    this.validate(recipe);
 
     return recipe;
   }
