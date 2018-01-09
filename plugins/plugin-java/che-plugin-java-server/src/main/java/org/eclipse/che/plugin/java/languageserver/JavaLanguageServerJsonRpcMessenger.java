@@ -41,7 +41,8 @@ public class JavaLanguageServerJsonRpcMessenger {
   private final Set<String> endpointIds = newConcurrentHashSet();
 
   @Inject
-  public JavaLanguageServerJsonRpcMessenger(EventService eventService, RequestTransmitter transmitter) {
+  public JavaLanguageServerJsonRpcMessenger(
+      EventService eventService, RequestTransmitter transmitter) {
     this.eventService = eventService;
     this.transmitter = transmitter;
     this.projectUpdatedEventSubscriber = JavaLanguageServerJsonRpcMessenger.this::onEvent;
