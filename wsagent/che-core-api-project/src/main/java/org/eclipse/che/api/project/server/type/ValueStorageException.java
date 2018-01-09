@@ -29,4 +29,8 @@ public class ValueStorageException extends ConflictException {
   public ValueStorageException(ServiceError serviceError) {
     super(serviceError);
   }
+
+  public ValueStorageException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }
