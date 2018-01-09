@@ -190,14 +190,20 @@ public class CommandsToolbar {
    * @param urlCommand an expected command
    */
   public void selectPreviewUrlFromDropDawn(String urlCommand) {
+    System.out.println("============>>>   1");
+
     testWebElementRenderChecker.waitElementIsRendered(
         By.xpath("//div[@id='gwt-debug-dropdown-list-content-panel']/div"));
+
+    System.out.println("============>>>   2");
 
     WaitUtils.sleepQuietly(3);
 
     loadPageWait
         .until(visibilityOfElementLocated(By.xpath(format("//div[text()='%s']", urlCommand))))
         .click();
+
+    System.out.println("============>>>   3");
   }
 
   /**
