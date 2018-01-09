@@ -10,10 +10,10 @@
  */
 package org.eclipse.che.plugin.java.plain.server.projecttype;
 
+import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
-import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
 import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_SOURCE_FOLDER_VALUE;
@@ -89,7 +89,13 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
     }
 
     private List<String> getOutputFolder() throws ValueStorageException {
-      String outputDir = extensionService.getOutputDir(prefixURI(wsPath));
+      String outputDir;
+      try {
+        outputDir = extensionService.getOutputDir(wsPath);
+      } catch (Exception e) {
+        throw new ValueStorageException(
+            format("Failed to get '%s'. ", OUTPUT_FOLDER), e.getCause());
+      }
 
       return outputDir.startsWith(wsPath)
           ? singletonList(outputDir.substring(wsPath.length() + 1))
@@ -97,7 +103,13 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
     }
 
     private List<String> getSourceFolders() throws ValueStorageException {
-      List<String> sourceFolders = extensionService.getSourceFolders(wsPath);
+      List<String> sourceFolders;
+      try {
+        sourceFolders = extensionService.getSourceFolders(wsPath);
+      } catch (Exception e) {
+        throw new ValueStorageException(
+            format("Failed to get '%s'. ", SOURCE_FOLDER), e.getCause());
+      }
 
       List<String> filteredResult =
           sourceFolders
