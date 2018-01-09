@@ -47,5 +47,4 @@
             <artifactId>che-core-api-workspace</artifactId>
         </dependency>
     </dependencies>
-    <build />
 </project>

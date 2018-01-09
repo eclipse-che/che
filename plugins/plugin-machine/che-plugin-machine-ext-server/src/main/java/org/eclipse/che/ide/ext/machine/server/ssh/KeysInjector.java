@@ -32,7 +32,6 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.ssh.server.SshManager;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
-import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -51,7 +50,6 @@ public class KeysInjector {
 
   private final EventService eventService;
   private final SshManager sshManager;
-  private final UserManager userManager;
   private final WorkspaceManager workspaceManager;
   private final ExecAgentClientFactory execAgentClientFactory;
 
@@ -59,12 +57,10 @@ public class KeysInjector {
   public KeysInjector(
       EventService eventService,
       SshManager sshManager,
-      UserManager userManager,
       WorkspaceManager workspaceManager,
       ExecAgentClientFactory execAgentClientFactory) {
     this.eventService = eventService;
     this.sshManager = sshManager;
-    this.userManager = userManager;
     this.workspaceManager = workspaceManager;
     this.execAgentClientFactory = execAgentClientFactory;
   }
@@ -78,68 +74,27 @@ public class KeysInjector {
             if (event.getStatus() != WorkspaceStatus.RUNNING) {
               return;
             }
+
             final String workspaceId = event.getWorkspaceId();
-            final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
-            final List<String> serverURLs = getExecServerUrls(workspaceId);
-            if (serverURLs.isEmpty()) {
+            final List<String> execServerUrls = getExecServerUrls(workspaceId);
+            if (execServerUrls.isEmpty()) {
               return; // no exec servers installed, so not possible to execute commands
             }
-            // get machine keypairs
-            try {
-              List<SshPairImpl> sshPairs = sshManager.getPairs(userId, "machine");
-              List<String> publicKeys =
-                  sshPairs
-                      .stream()
-                      .filter(sshPair -> sshPair.getPublicKey() != null)
-                      .map(SshPairImpl::getPublicKey)
-                      .collect(Collectors.toList());
-              // get workspace keypair (if any)
-              SshPairImpl sshWorkspacePair = null;
-              try {
-                sshWorkspacePair = sshManager.getPair(userId, "workspace", workspaceId);
-              } catch (NotFoundException e) {
-                LOG.debug("No ssh key associated to the workspace " + workspaceId, e);
-              }
 
-              if (sshWorkspacePair != null && sshWorkspacePair.getPublicKey() != null) {
-                publicKeys.add(sshWorkspacePair.getPublicKey());
-              }
+            List<String> publicKeys = getPublicKeys(workspaceId);
+            if (publicKeys.isEmpty()) {
+              return; // no keys found, exiting
+            }
 
-              if (publicKeys.isEmpty()) {
-                return; // no keys found, exiting
-              }
-
-              StringBuilder commandLine = new StringBuilder("mkdir ~/.ssh/ -p");
-              for (String publicKey : publicKeys) {
-                commandLine
-                    .append("&& echo '")
-                    .append(publicKey)
-                    .append("' >> ~/.ssh/authorized_keys");
-              }
-
-              for (String serverURL : serverURLs) {
-                ExecAgentClient client = execAgentClientFactory.create(serverURL);
-                ProcessStartResponseDto startProcess =
-                    client.startProcess(workspaceId, commandLine.toString(), "sshUpload", "custom");
-                GetProcessResponseDto process =
-                    client.getProcess(workspaceId, startProcess.getPid());
-                int tryNumber = 1;
-                while (process.isAlive()) {
-                  Thread.sleep(100);
-                  process = client.getProcess(workspaceId, startProcess.getPid());
-                  tryNumber++;
-                  if (tryNumber > 10) {
-                    LOG.warn("Uploading key command executed too long, exiting.");
-                    client.killProcess(workspaceId, startProcess.getPid());
-                    return;
-                  }
-                }
-                if (process.getExitCode() != 0) {
-                  LOG.warn("Uploading key failed with exit code " + process.getExitCode());
-                }
-              }
-            } catch (ServerException | InterruptedException e) {
-              LOG.error(e.getLocalizedMessage(), e);
+            StringBuilder commandLine = new StringBuilder("mkdir ~/.ssh/ -p");
+            for (String publicKey : publicKeys) {
+              commandLine
+                  .append("&& echo '")
+                  .append(publicKey)
+                  .append("' >> ~/.ssh/authorized_keys");
+            }
+            for (String serverUrl : execServerUrls) {
+              doInjectPublicKeys(serverUrl, workspaceId, commandLine.toString());
             }
           }
         });
@@ -161,5 +116,59 @@ public class KeysInjector {
       LOG.warn("Unable to get workspace {}. Error: {}", workspaceId, e.getMessage());
     }
     return execServerUrls;
+  }
+
+  private List<String> getPublicKeys(String workspaceId) {
+    final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
+    List<String> publicKeys = new ArrayList<>();
+    try {
+      // get machine keypairs
+      List<SshPairImpl> sshPairs = sshManager.getPairs(userId, "machine");
+      publicKeys.addAll(
+          sshPairs
+              .stream()
+              .filter(sshPair -> sshPair.getPublicKey() != null)
+              .map(SshPairImpl::getPublicKey)
+              .collect(Collectors.toList()));
+      // get workspace keypair (if any)
+      SshPairImpl sshWorkspacePair = null;
+      try {
+        sshWorkspacePair = sshManager.getPair(userId, "workspace", workspaceId);
+      } catch (NotFoundException e) {
+        LOG.debug("No ssh key associated to the workspace " + workspaceId, e);
+      }
+
+      if (sshWorkspacePair != null && sshWorkspacePair.getPublicKey() != null) {
+        publicKeys.add(sshWorkspacePair.getPublicKey());
+      }
+    } catch (ServerException e) {
+      LOG.warn("Unable to get workspace {} public keys. Error: {}", workspaceId, e.getMessage());
+    }
+    return publicKeys;
+  }
+
+  private void doInjectPublicKeys(String execServerUrl, String workspaceId, String command) {
+    ExecAgentClient client = execAgentClientFactory.create(execServerUrl);
+    try {
+      ProcessStartResponseDto startProcess =
+          client.startProcess(workspaceId, command, "sshUpload", "custom");
+      GetProcessResponseDto process = client.getProcess(workspaceId, startProcess.getPid());
+      int tryNumber = 1;
+      while (process.isAlive()) {
+        Thread.sleep(100);
+        process = client.getProcess(workspaceId, startProcess.getPid());
+        tryNumber++;
+        if (tryNumber > 10) {
+          LOG.warn("Uploading key command executed too long, exiting.");
+          client.killProcess(workspaceId, startProcess.getPid());
+          return;
+        }
+      }
+      if (process.getExitCode() != 0) {
+        LOG.warn("Uploading key failed with exit code " + process.getExitCode());
+      }
+    } catch (ServerException | InterruptedException e) {
+      LOG.warn("Unable to inject workspace {} public keys. Error: {}", workspaceId, e.getMessage());
+    }
   }
 }

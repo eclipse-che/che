@@ -19,12 +19,8 @@ import org.eclipse.che.agent.exec.shared.dto.GetProcessResponseDto;
 import org.eclipse.che.agent.exec.shared.dto.ProcessKillResponseDto;
 import org.eclipse.che.agent.exec.shared.dto.ProcessStartRequestDto;
 import org.eclipse.che.agent.exec.shared.dto.ProcessStartResponseDto;
-import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.workspace.server.token.MachineTokenException;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
@@ -73,13 +69,7 @@ public class ExecAgentClient {
           .setBody(commandDto)
           .request()
           .asDto(ProcessStartResponseDto.class);
-    } catch (IOException
-        | ConflictException
-        | BadRequestException
-        | UnauthorizedException
-        | NotFoundException
-        | MachineTokenException
-        | ForbiddenException e) {
+    } catch (IOException | ApiException | MachineTokenException e) {
       throw new ServerException(e);
     }
   }
@@ -101,13 +91,7 @@ public class ExecAgentClient {
           .useGetMethod()
           .request()
           .asDto(GetProcessResponseDto.class);
-    } catch (IOException
-        | ConflictException
-        | BadRequestException
-        | UnauthorizedException
-        | NotFoundException
-        | MachineTokenException
-        | ForbiddenException e) {
+    } catch (IOException | ApiException | MachineTokenException e) {
       throw new ServerException(e);
     }
   }
@@ -129,13 +113,7 @@ public class ExecAgentClient {
           .setAuthorizationHeader("none") // to prevent sending KC token
           .request()
           .asDto(ProcessKillResponseDto.class);
-    } catch (IOException
-        | ConflictException
-        | BadRequestException
-        | UnauthorizedException
-        | NotFoundException
-        | MachineTokenException
-        | ForbiddenException e) {
+    } catch (IOException | ApiException | MachineTokenException e) {
       throw new ServerException(e);
     }
   }

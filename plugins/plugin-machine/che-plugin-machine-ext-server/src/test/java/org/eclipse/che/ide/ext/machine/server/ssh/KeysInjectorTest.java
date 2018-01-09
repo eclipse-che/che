@@ -36,7 +36,6 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.ssh.server.SshManager;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
-import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.MachineDto;
@@ -75,7 +74,6 @@ public class KeysInjectorTest {
 
   @Mock private EventService eventService;
   @Mock private SshManager sshManager;
-  @Mock private UserManager userManager;
   @Mock private WorkspaceManager workspaceManager;
   @Mock private ExecAgentClient client;
   @Mock private ExecAgentClientFactory execAgentClientFactory;
@@ -87,8 +85,7 @@ public class KeysInjectorTest {
   @BeforeMethod
   public void setUp() throws Exception {
     keysInjector =
-        new KeysInjector(
-            eventService, sshManager, userManager, workspaceManager, execAgentClientFactory);
+        new KeysInjector(eventService, sshManager, workspaceManager, execAgentClientFactory);
 
     keysInjector.start();
     verify(eventService).subscribe(subscriberCaptor.capture());
@@ -110,7 +107,7 @@ public class KeysInjectorTest {
   @Test
   public void shouldNotDoAnythingIfEventTypeDoesNotEqualToRunning() {
     subscriber.onEvent(newDto(WorkspaceStatusEvent.class).withStatus(WorkspaceStatus.STARTING));
-    verifyZeroInteractions(execAgentClientFactory, userManager, workspaceManager, sshManager);
+    verifyZeroInteractions(execAgentClientFactory, workspaceManager, sshManager);
   }
 
   @Test
