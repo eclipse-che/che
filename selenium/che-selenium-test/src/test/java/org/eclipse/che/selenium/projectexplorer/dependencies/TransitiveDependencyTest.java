@@ -10,13 +10,12 @@
  */
 package org.eclipse.che.selenium.projectexplorer.dependencies;
 
-import static org.testng.Assert.fail;
-
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Random;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -25,7 +24,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -65,20 +63,19 @@ public class TransitiveDependencyTest {
   @Test
   public void transitiveDependencyTest() throws Exception {
     projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
+    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.MAVEN);
+    projectExplorer.clickOnNewContextMenuItem(TestProjectExplorerContextMenuConstants.REIMPORT);
+    loader.waitOnClosed();
     projectExplorer.openItemByPath(PROJECT_NAME);
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
+    editor.waitActive();
+
     projectExplorer.openItemByVisibleNameInExplorer(LIB_FOLDER);
-
-    try {
-      projectExplorer.waitLibraryIsPresent(MAIN_LIBRARY);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8017");
-    }
-
+    projectExplorer.waitLibraryIsPresent(MAIN_LIBRARY);
     projectExplorer.waitLibraryIsPresent(TRANSITIVE_DEPENDENCY_FOR_MAIN_LIBRARY);
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     loader.waitOnClosed();

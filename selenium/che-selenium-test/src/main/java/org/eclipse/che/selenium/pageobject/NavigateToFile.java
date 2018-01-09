@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.Keys.ALT;
@@ -30,6 +31,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** Created by aleksandr shmaraev on 12.12.14. */
@@ -122,11 +124,16 @@ public class NavigateToFile {
    * @param text a text that should be into list
    */
   public boolean isFilenameSuggested(String text) {
-    WebElement webElement =
-        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-            .until(visibilityOf(suggestionPanel));
+    return suggestionPanel.getText().contains(text);
+  }
 
-    return webElement.getText().contains(text);
+  public void waitSuggestedPanelIsDisplayed() {
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver -> {
+                  return suggestionPanel.isDisplayed();
+                });
   }
 
   public String getText() {
