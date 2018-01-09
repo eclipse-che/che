@@ -818,16 +818,8 @@ public class ProjectExplorer {
 
   public void invokeCommandWithContextMenu(
       String commandsGoal, String pathToItem, String commandName, String machineName) {
-    selectItem(pathToItem);
-    openContextMenuByPathSelectedItem(pathToItem);
-    clickOnItemInContextMenu(COMMANDS);
-    clickOnItemInContextMenu(commandsGoal);
+    invokeCommandWithContextMenu(commandsGoal, pathToItem, commandName);
 
-    redrawUiElementsWait
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(String.format("//tr[@id[contains(.,'%s')]]", commandName))))
-        .click();
     loader.waitOnClosed();
     actionsFactory
         .createAction(seleniumWebDriver)
