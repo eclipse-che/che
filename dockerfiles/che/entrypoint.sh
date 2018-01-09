@@ -223,14 +223,14 @@ init() {
 
   if [ -f "/assembly/tomcat/bin/catalina.sh" ]; then
     echo "Found custom assembly..."
-    [ -z "$CHE_HOME" ] && export CHE_HOME="/assembly"
+    export CHE_HOME="/assembly"
   else
     echo "Using embedded assembly..."
-    [ -z "$CHE_HOME" ] && export CHE_HOME=$(echo /home/user/eclipse-che/)
+    export CHE_HOME=$(echo /home/user/eclipse-che/)
   fi
 
   ### We need to discover the host mount provided by the user for `/data`
-  [ -z "$CHE_DATA" ] && export CHE_DATA="/data"
+  export CHE_DATA="/data"
   CHE_DATA_HOST=$(get_che_data_from_host)
 
   CHE_USER=${CHE_USER:-root}
@@ -264,7 +264,7 @@ init() {
   HOSTNAME=${CHE_DOCKER_IP_EXTERNAL:-$(get_docker_external_hostname)}
   if has_external_hostname; then
     # Internal property used by Che to set hostname.
-    [ -z "$CHE_DOCKER_IP_EXTERNAL" ] && export CHE_DOCKER_IP_EXTERNAL=${HOSTNAME}
+    export CHE_DOCKER_IP_EXTERNAL=${HOSTNAME}
   fi
   ### Necessary to allow the container to write projects to the folder
   [ -z "$CHE_WORKSPACE_STORAGE__MASTER__PATH" ] && export CHE_WORKSPACE_STORAGE__MASTER__PATH=${CHE_DATA}/workspaces
