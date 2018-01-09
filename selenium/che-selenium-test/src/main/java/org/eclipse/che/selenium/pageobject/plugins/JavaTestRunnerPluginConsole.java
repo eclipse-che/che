@@ -10,23 +10,29 @@
  */
 package org.eclipse.che.selenium.pageobject.plugins;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NotFoundException;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindAll;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Dmytro Nochevnov */
@@ -94,9 +100,17 @@ public class JavaTestRunnerPluginConsole extends Consoles {
    * @param nameOfFailedMethods name of that should fail
    */
   public void waitMethodMarkedAsFailed(String nameOfFailedMethods) {
-    new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
-        .until(ExpectedConditions.presenceOfElementLocated(By.id(METHODS_MARKED_AS_FAILED)))
-        .findElement(By.xpath(String.format("//div[text()='%s']", nameOfFailedMethods)));
+    FluentWait<WebDriver> wait =
+        new FluentWait<WebDriver>(seleniumWebDriver)
+            .withTimeout(ATTACHING_ELEM_TO_DOM_SEC, TimeUnit.SECONDS)
+            .pollingEvery(200, TimeUnit.MILLISECONDS)
+            .ignoring(NotFoundException.class, StaleElementReferenceException.class);
+    String xpathToExpectedMethod = "//span[@id='%s']/following-sibling::*/div[text()='%s']";
+    wait.until(
+        ExpectedConditions.visibilityOfElementLocated(
+            By.xpath(
+                String.format(
+                    xpathToExpectedMethod, METHODS_MARKED_AS_FAILED, nameOfFailedMethods))));
   }
 
   /**
