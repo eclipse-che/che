@@ -50,7 +50,7 @@ export class CheInputBox {
   };
 
 
-  compile(element: ng.IRootElementService, attrs: ng.IAttributes) {
+  compile(element: ng.IAugmentedJQuery, attrs: ng.IAttributes): ng.IDirectivePrePost {
     const avoidAttrs = ['ng-model'];
     const avoidStartWithAttrs: Array<string> = ['$', 'che-'];
 
@@ -87,6 +87,8 @@ export class CheInputBox {
     if (!tabIndex) {
       inputJqEl.attr('tabindex', 0);
     }
+
+    return;
   }
 
   /**
