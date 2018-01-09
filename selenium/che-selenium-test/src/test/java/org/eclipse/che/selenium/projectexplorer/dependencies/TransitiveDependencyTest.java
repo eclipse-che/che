@@ -74,11 +74,14 @@ public class TransitiveDependencyTest {
     editor.waitActive();
     projectExplorer.openItemByVisibleNameInExplorer(LIB_FOLDER);
 
+    projectExplorer.clickOnRefreshTreeButton();
+
     try {
       projectExplorer.waitLibraryIsPresent(MAIN_LIBRARY);
     } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8017");
+      System.out.println("=============================>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.");
+      projectExplorer.clickOnRefreshTreeButton();
+      projectExplorer.waitItemInVisibleArea(LIB_FOLDER);
     }
 
     projectExplorer.waitLibraryIsPresent(TRANSITIVE_DEPENDENCY_FOR_MAIN_LIBRARY);
@@ -99,6 +102,15 @@ public class TransitiveDependencyTest {
     for (int i = 36; i <= 40; i++) {
       editor.setCursorToLine(i);
       editor.selectLineAndDelete();
+    }
+  }
+
+  private void waitMainLibraryIsPresent() {
+    try {
+      projectExplorer.waitLibraryIsPresent(MAIN_LIBRARY);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8017");
     }
   }
 }
