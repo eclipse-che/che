@@ -44,8 +44,6 @@ import org.eclipse.che.api.workspace.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
-import org.eclipse.che.infrastructure.docker.client.Exec;
-import org.eclipse.che.infrastructure.docker.client.LogMessage;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -67,8 +65,6 @@ public class KeysInjectorTest {
 
   @Captor private ArgumentCaptor<EventSubscriber<WorkspaceStatusEvent>> subscriberCaptor;
 
-  @Mock Exec exec;
-  @Mock LogMessage logMessage;
   @Mock private WorkspaceImpl workspace;
   @Mock private RuntimeDto runtime;
 
