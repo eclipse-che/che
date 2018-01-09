@@ -14,6 +14,7 @@ import static org.eclipse.che.ide.api.vcs.VcsStatus.ADDED;
 import static org.eclipse.che.ide.api.vcs.VcsStatus.MODIFIED;
 import static org.eclipse.che.ide.api.vcs.VcsStatus.NOT_MODIFIED;
 import static org.eclipse.che.ide.api.vcs.VcsStatus.UNTRACKED;
+import static org.eclipse.che.ide.ext.git.client.GitUtil.getRootPath;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -29,7 +30,6 @@ import org.eclipse.che.ide.ext.git.client.GitEventsSubscriber;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.tree.FileNode;
-import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 
 /**
@@ -61,13 +61,13 @@ public class ProjectExplorerTreeColorizer implements GitEventsSubscriber {
         .filter(
             node ->
                 node instanceof FileNode
-                    && ((ResourceNode) node)
+                    && ((FileNode) node)
                         .getData()
                         .getLocation()
                         .equals(Path.valueOf(dto.getPath())))
         .forEach(
             node -> {
-              ((ResourceNode) node)
+              ((FileNode) node)
                   .getData()
                   .asFile()
                   .setVcsStatus(VcsStatus.from(dto.getStatus().toString()));
@@ -82,10 +82,15 @@ public class ProjectExplorerTreeColorizer implements GitEventsSubscriber {
     tree.getNodeStorage()
         .getAll()
         .stream()
-        .filter(node -> node instanceof FileNode)
+        .filter(
+            node ->
+                node instanceof FileNode
+                    && statusChangedEventDto
+                        .getProjectName()
+                        .equals(getRootPath(((FileNode) node).getData().getLocation())))
         .forEach(
             node -> {
-              Resource resource = ((ResourceNode) node).getData();
+              Resource resource = ((FileNode) node).getData();
               File file = resource.asFile();
               String nodeLocation = resource.getLocation().removeFirstSegments(1).toString();
 
