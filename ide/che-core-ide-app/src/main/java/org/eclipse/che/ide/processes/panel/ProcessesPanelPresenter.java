@@ -551,8 +551,8 @@ public class ProcessesPanelPresenter extends BasePresenter
     final String sshPort;
     if (sshServiceAddress != null) {
       String[] parts = sshServiceAddress.split(":");
-      machineHost = parts[0];
-      sshPort = (parts.length == 2) ? parts[1] : SSH_PORT;
+      machineHost = parts[1].substring(2);
+      sshPort = (parts.length == 3) ? parts[2] : SSH_PORT;
     } else {
       sshPort = SSH_PORT;
       machineHost = "";
