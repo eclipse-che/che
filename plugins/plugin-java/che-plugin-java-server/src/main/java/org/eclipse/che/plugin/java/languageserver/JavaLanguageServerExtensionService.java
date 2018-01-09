@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.plugin.java.languageserver;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
@@ -23,6 +24,7 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHI
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_NODE_CONTENT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
@@ -67,12 +69,15 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
+import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.jdt.ls.extension.api.Commands;
 import org.eclipse.che.jdt.ls.extension.api.Severity;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
@@ -115,12 +120,19 @@ public class JavaLanguageServerExtensionService {
   private static final Logger LOG =
       LoggerFactory.getLogger(JavaLanguageServerExtensionService.class);
   private final RequestHandlerConfigurator requestHandler;
+  private final ProjectManager projectManager;
+  private final EventService eventService;
 
   @Inject
   public JavaLanguageServerExtensionService(
-      LanguageServerRegistry registry, RequestHandlerConfigurator requestHandler) {
+      LanguageServerRegistry registry,
+      RequestHandlerConfigurator requestHandler,
+      ProjectManager projectManager,
+      EventService eventService) {
     this.registry = registry;
     this.requestHandler = requestHandler;
+    this.projectManager = projectManager;
+    this.eventService = eventService;
     this.gson =
         new GsonBuilder()
             .registerTypeAdapterFactory(new CollectionTypeAdapterFactory())
@@ -205,18 +217,15 @@ public class JavaLanguageServerExtensionService {
   /**
    * Compute output directory of the project.
    *
-   * @param projectUri project URI
+   * @param projectPath project path
    * @return output directory
    */
-  public String getOutputDir(String projectUri) {
-    CompletableFuture<Object> result =
-        executeCommand(GET_OUTPUT_DIR_COMMAND, singletonList(projectUri));
-    Type targetClassType = new TypeToken<String>() {}.getType();
-    try {
-      return gson.fromJson(gson.toJson(result.get(TIMEOUT, TimeUnit.SECONDS)), targetClassType);
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
-      throw new JsonRpcException(-27000, e.getMessage());
-    }
+  public String getOutputDir(String projectPath) {
+    checkLanguageServerInitialized();
+
+    String projectUri = prefixURI(projectPath);
+    Type type = new TypeToken<String>() {}.getType();
+    return doGetOne(GET_OUTPUT_DIR_COMMAND, singletonList(projectUri), type);
   }
 
   /**
@@ -296,9 +305,17 @@ public class JavaLanguageServerExtensionService {
    * @return source folders
    */
   public List<String> getSourceFolders(String projectPath) {
+    checkLanguageServerInitialized();
+
     String projectUri = prefixURI(projectPath);
     Type type = new TypeToken<ArrayList<String>>() {}.getType();
     return doGetList(GET_SOURCE_FOLDERS, projectUri, type);
+  }
+
+  private void checkLanguageServerInitialized() {
+    if (!findInitializedLanguageServer().isPresent()) {
+      throw new IllegalStateException("Language server isn't initialized");
+    }
   }
 
   /**
@@ -531,6 +548,91 @@ public class JavaLanguageServerExtensionService {
     return doGetList(commandId, parameters, type);
   }
 
+  public String identifyFqnInResource(String filePath, int lineNumber) {
+    Type type = new TypeToken<String>() {}.getType();
+    ImmutableList<Object> params =
+        ImmutableList.of(prefixURI(filePath), String.valueOf(lineNumber));
+
+    return doGetOne(Commands.IDENTIFY_FQN_IN_RESOURCE, params, type);
+  }
+
+  public Location findResourcesByFqn(String fqn, int lineNumber) {
+    Type type = new TypeToken<List<Either<String, ResourceLocation>>>() {}.getType();
+    List<Either<String, ResourceLocation>> location =
+        doGetList(
+            Commands.FIND_RESOURCES_BY_FQN,
+            ImmutableList.of(fqn, String.valueOf(lineNumber)),
+            type);
+
+    Either<String, ResourceLocation> l = location.get(0);
+
+    if (l.isLeft()) {
+      return new LocationImpl(l.getLeft(), lineNumber, null);
+    } else {
+      return new LocationImpl(
+          l.getRight().getFqn(), lineNumber, true, l.getRight().getLibId(), null);
+    }
+  }
+
+  /** Update jdt.ls workspace accordingly to added or removed projects. */
+  public JobResult updateWorkspace(UpdateWorkspaceParameters updateWorkspaceParameters) {
+    if (updateWorkspaceParameters.getAddedProjectsUri().isEmpty()) {
+      if (!findInitializedLanguageServer().isPresent()) {
+        return new JobResult(
+            Severity.OK,
+            0,
+            "Skipped. Language server not initialized. Workspace updating is not required.");
+      }
+    }
+
+    Type type = new TypeToken<JobResult>() {}.getType();
+    List<Object> params = singletonList(updateWorkspaceParameters);
+
+    try {
+      return doGetOne(
+          Commands.UPDATE_WORKSPACE,
+          params,
+          type,
+          REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT,
+          TimeUnit.MILLISECONDS);
+    } catch (Exception e) {
+      return new JobResult(Severity.ERROR, 1, e.getMessage());
+    } finally {
+      updatePlainJavaProjectsWithProblems(updateWorkspaceParameters.getAddedProjectsUri());
+    }
+  }
+
+  private void updatePlainJavaProjectsWithProblems(List<String> addedProjectsUri) {
+    for (String projectUri : addedProjectsUri) {
+      final String projectPath = removePrefixUri(projectUri);
+
+      projectManager
+          .get(projectPath)
+          .ifPresent(
+              projectConfig -> {
+                if (projectConfig.getType().equals(JAVAC)
+                    && !projectConfig.getProblems().isEmpty()) {
+                  try {
+                    projectManager.update(projectConfig);
+                    eventService.publish(new ProjectUpdatedEvent(projectPath));
+                  } catch (Exception e) {
+                    LOG.error(format("Failed to update project '%s' configuration", projectUri), e);
+                  }
+                }
+              });
+    }
+  }
+
+  /**
+   * Organizes imports in a file or in a directory.
+   *
+   * @param path the path to the file or to the directory
+   */
+  public WorkspaceEdit organizeImports(String path) {
+    Type type = new TypeToken<WorkspaceEdit>() {}.getType();
+    return doGetOne("java.edit.organizeImports", singletonList(prefixURI(path)), type);
+  }
+
   private <T, P> List<T> doGetList(String command, P params, Type type) {
     return doGetList(command, singletonList(params), type);
   }
@@ -556,13 +658,6 @@ public class JavaLanguageServerExtensionService {
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
-  }
-
-  private LanguageServer getLanguageServer() {
-    return registry
-        .findServer(server -> (server.getLauncher() instanceof JavaLanguageServerLauncher))
-        .get()
-        .getServer();
   }
 
   private CompletableFuture<Object> executeCommand(String commandId, List<Object> parameters) {
@@ -602,69 +697,5 @@ public class JavaLanguageServerExtensionService {
     for (ExtendedSymbolInformation child : symbol.getChildren()) {
       fixLocation(child);
     }
-  }
-
-  public String identifyFqnInResource(String filePath, int lineNumber) {
-    CompletableFuture<Object> result =
-        getLanguageServer()
-            .getWorkspaceService()
-            .executeCommand(
-                new ExecuteCommandParams(
-                    Commands.IDENTIFY_FQN_IN_RESOURCE,
-                    ImmutableList.of(prefixURI(filePath), String.valueOf(lineNumber))));
-
-    try {
-      return (String) result.get(10, TimeUnit.SECONDS);
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
-      throw new JsonRpcException(-27000, e.getMessage());
-    }
-  }
-
-  public Location findResourcesByFqn(String fqn, int lineNumber) {
-    Type type = new TypeToken<List<Either<String, ResourceLocation>>>() {}.getType();
-    List<Either<String, ResourceLocation>> location =
-        doGetList(
-            Commands.FIND_RESOURCES_BY_FQN,
-            ImmutableList.of(fqn, String.valueOf(lineNumber)),
-            type);
-
-    Either<String, ResourceLocation> l = location.get(0);
-
-    if (l.isLeft()) {
-      return new LocationImpl(l.getLeft(), lineNumber, null);
-    } else {
-      return new LocationImpl(
-          l.getRight().getFqn(), lineNumber, true, l.getRight().getLibId(), null);
-    }
-  }
-
-  /** Update jdt.ls workspace accordingly to added or removed projects. */
-  public JobResult updateWorkspace(UpdateWorkspaceParameters updateWorkspaceParameters) {
-    if (updateWorkspaceParameters.getAddedProjectsUri().isEmpty()) {
-      if (!findInitializedLanguageServer().isPresent()) {
-        return new JobResult(
-            Severity.OK,
-            0,
-            "Skipped. Language server not initialized. Workspace updating is not required.");
-      }
-    }
-
-    Type type = new TypeToken<JobResult>() {}.getType();
-    return doGetOne(
-        Commands.UPDATE_WORKSPACE,
-        singletonList(updateWorkspaceParameters),
-        type,
-        REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT,
-        TimeUnit.MILLISECONDS);
-  }
-
-  /**
-   * Organizes imports in a file or in a directory.
-   *
-   * @param path the path to the file or to the directory
-   */
-  public WorkspaceEdit organizeImports(String path) {
-    Type type = new TypeToken<WorkspaceEdit>() {}.getType();
-    return doGetOne("java.edit.organizeImports", singletonList(prefixURI(path)), type);
   }
 }
