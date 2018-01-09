@@ -78,8 +78,6 @@ public class TransitiveDependencyTest {
     editor.waitActive();
     projectExplorer.openItemByVisibleNameInExplorer(LIB_FOLDER);
 
-    projectExplorer.clickOnRefreshTreeButton();
-
     waitMainLibraryIsPresent();
 
     projectExplorer.waitLibraryIsPresent(TRANSITIVE_DEPENDENCY_FOR_MAIN_LIBRARY);
