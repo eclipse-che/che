@@ -26,6 +26,7 @@ import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
+import org.eclipse.che.api.project.server.notification.PreProjectInitializedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectInitializedEvent;
 
 @Singleton
@@ -59,8 +60,10 @@ public class OnWorkspaceStartProjectInitializer {
     firePostInitializationHandlers();
   }
 
-  private void initializeRegisteredProjects() throws ServerException {
+  private void initializeRegisteredProjects()
+      throws ServerException, NotFoundException, ConflictException {
     for (ProjectConfig projectConfig : projectSynchronizer.getAll()) {
+      eventService.publish(new PreProjectInitializedEvent(projectConfig));
       projectConfigRegistry.put(projectConfig, false, false);
     }
   }

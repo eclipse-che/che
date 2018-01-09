@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.plugin.java.plain.server.projecttype;
 
+import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
@@ -22,6 +23,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.type.SettableValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
@@ -39,12 +41,16 @@ import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionSer
 public class PlainJavaValueProviderFactory implements ValueProviderFactory {
 
   private final ProjectManager projectManager;
+  private PathTransformer transformer;
   private final JavaLanguageServerExtensionService extensionService;
 
   @Inject
   public PlainJavaValueProviderFactory(
-      ProjectManager projectManager, JavaLanguageServerExtensionService extensionService) {
+      ProjectManager projectManager,
+      PathTransformer transformer,
+      JavaLanguageServerExtensionService extensionService) {
     this.projectManager = projectManager;
+    this.transformer = transformer;
     this.extensionService = extensionService;
   }
 
@@ -89,15 +95,28 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
     }
 
     private List<String> getOutputFolder() throws ValueStorageException {
-      String outputDir = extensionService.getOutputDir(prefixURI(wsPath));
+      String outputDir;
+      try {
+        outputDir = extensionService.getOutputDir(prefixURI(wsPath));
+      } catch (Exception e) {
+        throw new ValueStorageException(
+            format("Failed to get '%s'. Cause: '%s'", OUTPUT_FOLDER, e.getMessage()));
+      }
 
-      return outputDir.startsWith(wsPath)
-          ? singletonList(outputDir.substring(wsPath.length() + 1))
+      String fsPath = transformer.transform(wsPath).toString();
+      return outputDir.startsWith(fsPath)
+          ? singletonList(outputDir.substring(fsPath.length() + 1))
           : singletonList(outputDir);
     }
 
     private List<String> getSourceFolders() throws ValueStorageException {
-      List<String> sourceFolders = extensionService.getSourceFolders(wsPath);
+      List<String> sourceFolders;
+      try {
+        sourceFolders = extensionService.getSourceFolders(wsPath);
+      } catch (Exception e) {
+        throw new ValueStorageException(
+            format("Failed to get '%s'. Cause: '%s'", SOURCE_FOLDER, e.getMessage()));
+      }
 
       List<String> filteredResult =
           sourceFolders
