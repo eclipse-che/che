@@ -18,6 +18,7 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Comparator;
 import java.util.List;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.shared.dto.ProjectSearchRequestDto;
@@ -40,6 +41,12 @@ import org.eclipse.che.ide.util.loging.Log;
 public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegate {
 
   private static final int TYPING_PERIOD_DELAY_MS = 400;
+  private static final Comparator<SearchResultDto> SEARCH_COMPARATOR =
+      (o1, o2) -> {
+        String ext1 = getFileExtension(o1.getItemReference().getName());
+        String ext2 = getFileExtension(o2.getItemReference().getName());
+        return ext1.compareToIgnoreCase(ext2);
+      };
 
   private final EditorAgent editorAgent;
   private final RequestTransmitter requestTransmitter;
@@ -61,7 +68,6 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
     this.editorAgent = editorAgent;
     this.requestTransmitter = requestTransmitter;
     this.dtoFactory = dtoFactory;
-
     this.view.setDelegate(this);
   }
 
@@ -129,12 +135,7 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
 
   private void prepareResults(ProjectSearchResponseDto response) {
     List<SearchResultDto> results = response.getItemReferences();
-    results.sort(
-        (o1, o2) -> {
-          String ext1 = getFileExtension(o1.getItemReference().getName());
-          String ext2 = getFileExtension(o2.getItemReference().getName());
-          return ext1.compareToIgnoreCase(ext2);
-        });
+    results.sort(SEARCH_COMPARATOR);
     view.showItems(results);
   }
 }
