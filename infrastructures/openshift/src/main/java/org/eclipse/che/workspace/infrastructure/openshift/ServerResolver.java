@@ -10,40 +10,47 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
-import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.ContainerPort;
-import io.fabric8.kubernetes.api.model.IntOrString;
-import io.fabric8.kubernetes.api.model.Pod;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.Route;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 
 /**
- * Helps to resolve {@link ServerImpl servers} by container in pod according to specified {@link
- * Route routes} and {@link Service services}.
+ * Helps to resolve {@link ServerImpl servers} by machine name according to specified {@link Route
+ * routes} and {@link Service services}.
  *
- * <p>How {@link Container}, {@link Pod}, {@link Service} and {@link Route} are linked described in
- * {@link ServerExposer}.
+ * <p>Objects annotations are used to check if {@link Service service} or {@link Route route}
+ * exposes the specified machine servers.
  *
  * @author Sergii Leshchenko
  * @author Alexander Garagatyi
  * @see ServerExposer
+ * @see Annotations
  */
 public class ServerResolver {
-  private final List<Service> services;
-  private final List<Route> routes;
+  private final Multimap<String, Service> services;
+  private final Multimap<String, Route> routes;
 
   private ServerResolver(List<Service> services, List<Route> routes) {
-    this.services = services;
-    this.routes = routes;
+    this.services = ArrayListMultimap.create();
+    for (Service service : services) {
+      String machineName =
+          Annotations.newDeserializer(service.getMetadata().getAnnotations()).machineName();
+      this.services.put(machineName, service);
+    }
+
+    this.routes = ArrayListMultimap.create();
+    for (Route route : routes) {
+      String machineName =
+          Annotations.newDeserializer(route.getMetadata().getAnnotations()).machineName();
+      this.routes.put(machineName, route);
+    }
   }
 
   public static ServerResolver of(List<Service> services, List<Route> routes) {
@@ -51,27 +58,15 @@ public class ServerResolver {
   }
 
   /**
-   * Resolves servers by the specified container in the pod.
+   * Resolves servers by the specified machine name.
    *
-   * @param pod pod that should be matched by services
-   * @param container container that expose ports for services
+   * @param machineName machine to resolve servers
    * @return resolved servers
    */
-  public Map<String, ServerImpl> resolve(Pod pod, Container container) {
-    Set<String> matchedServices =
-        getMatchedServices(pod, container)
-            .stream()
-            .map(s -> s.getMetadata().getName())
-            .collect(Collectors.toSet());
+  public Map<String, ServerImpl> resolve(String machineName) {
     Map<String, ServerImpl> servers = new HashMap<>();
-    services
-        .stream()
-        .filter(service -> matchedServices.contains(service.getMetadata().getName()))
-        .forEach(service -> fillServiceServers(service, servers));
-    routes
-        .stream()
-        .filter(route -> matchedServices.contains(route.getSpec().getTo().getName()))
-        .forEach(route -> fillRouteServers(route, servers));
+    services.get(machineName).forEach(service -> fillServiceServers(service, servers));
+    routes.get(machineName).forEach(route -> fillRouteServers(route, servers));
     return servers;
   }
 
@@ -133,47 +128,5 @@ public class ServerResolver {
   /** Removes suffix of {@link ServerConfig} such as "/tcp" when port value "8080/tcp". */
   private String removeSuffix(String port) {
     return port.split("/")[0];
-  }
-
-  private List<Service> getMatchedServices(Pod pod, Container container) {
-    return services
-        .stream()
-        .filter(service -> isExposedByService(pod, service))
-        .filter(service -> isExposedByService(container, service))
-        .collect(Collectors.toList());
-  }
-
-  private boolean isExposedByService(Pod pod, Service service) {
-    Map<String, String> labels = pod.getMetadata().getLabels();
-    Map<String, String> selectorLabels = service.getSpec().getSelector();
-    if (labels == null) {
-      return false;
-    }
-    for (Map.Entry<String, String> selectorLabelEntry : selectorLabels.entrySet()) {
-      if (!selectorLabelEntry.getValue().equals(labels.get(selectorLabelEntry.getKey()))) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  private boolean isExposedByService(Container container, Service service) {
-    for (ServicePort servicePort : service.getSpec().getPorts()) {
-      IntOrString targetPort = servicePort.getTargetPort();
-      if (targetPort.getIntVal() != null) {
-        for (ContainerPort containerPort : container.getPorts()) {
-          if (targetPort.getIntVal().equals(containerPort.getContainerPort())) {
-            return true;
-          }
-        }
-      } else {
-        for (ContainerPort containerPort : container.getPorts()) {
-          if (targetPort.getStrVal().equals(containerPort.getName())) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
   }
 }

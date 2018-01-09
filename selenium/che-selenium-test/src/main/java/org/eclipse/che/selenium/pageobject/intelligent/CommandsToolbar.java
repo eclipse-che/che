@@ -10,15 +10,17 @@
  */
 package org.eclipse.che.selenium.pageobject.intelligent;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTIPLE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -110,13 +112,13 @@ public class CommandsToolbar {
     appearanceWait
         .until(
             ExpectedConditions.elementToBeClickable(
-                By.xpath(String.format(Locators.EXEC_COMMAND_SELECTOR, commandName))))
+                By.xpath(format(Locators.EXEC_COMMAND_SELECTOR, commandName))))
         .click();
   }
 
   /** click on the launch command button */
   public void clickOnChooseCommandBtn(String commandName) {
-    redrawWait.until(ExpectedConditions.visibilityOf(commandsToolbarSelect)).click();
+    redrawWait.until(visibilityOf(commandsToolbarSelect)).click();
   }
 
   /**
@@ -124,7 +126,7 @@ public class CommandsToolbar {
    * dropdown list
    */
   public void clickWithHoldAndLaunchCommandFromList(String nameOfCommand) {
-    redrawWait.until(ExpectedConditions.visibilityOf(commandsToolbarSelect));
+    redrawWait.until(visibilityOf(commandsToolbarSelect));
     Actions action = new Actions(seleniumWebDriver);
     action.clickAndHold(commandsToolbarSelect).perform();
 
@@ -138,7 +140,7 @@ public class CommandsToolbar {
    * @param nameOfCommand an expected command in the dropdawn
    */
   public void clickWithHoldAndLaunchDebuCmdFromList(String nameOfCommand) {
-    redrawWait.until(ExpectedConditions.visibilityOf(debugCommandBtn));
+    redrawWait.until(visibilityOf(debugCommandBtn));
     Actions action = new Actions(seleniumWebDriver);
     action.clickAndHold(debugCommandBtn).perform();
 
@@ -147,18 +149,18 @@ public class CommandsToolbar {
 
   /** wait rerun button on exec toolbar command widget and click it */
   public void clickExecRerunBtn() {
-    redrawWait.until(ExpectedConditions.visibilityOf(execRerunBtn)).click();
+    redrawWait.until(visibilityOf(execRerunBtn)).click();
   }
 
   /** wait stop button on exec toolbar command widget and click it */
   public void clickExecStopBtn() {
-    redrawWait.until(ExpectedConditions.visibilityOf(execStopBtn)).click();
+    redrawWait.until(visibilityOf(execStopBtn)).click();
   }
 
   /** click on the 'Execute selected command' on the toolbar */
   public void clickOnExecDropDawn() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(executeCommandToolbar))
+        .until(visibilityOf(executeCommandToolbar))
         .click();
   }
 
@@ -174,11 +176,11 @@ public class CommandsToolbar {
   }
 
   public String getNumOfProcessCounter() {
-    return redrawWait.until(ExpectedConditions.visibilityOf(execProcessCounter)).getText();
+    return redrawWait.until(visibilityOf(execProcessCounter)).getText();
   }
 
   public void clickOnPreviewsUrlButton() {
-    redrawWait.until(ExpectedConditions.visibilityOf(previewsUrlButton)).click();
+    redrawWait.until(visibilityOf(previewsUrlButton)).click();
   }
 
   /**
@@ -187,11 +189,12 @@ public class CommandsToolbar {
    * @param urlCommand an expected command
    */
   public void selectPreviewUrlFromDropDawn(String urlCommand) {
-    redrawWait.until(ExpectedConditions.visibilityOf(previewsDropDawnContainer));
-    WebElement element =
-        seleniumWebDriver.findElement(By.xpath(String.format("//div[text()='%s']", urlCommand)));
-    WaitUtils.sleepQuietly(1);
-    redrawWait.until(ExpectedConditions.visibilityOf(element)).click();
+    testWebElementRenderChecker.waitElementIsRendered(
+        By.xpath("//div[@id='gwt-debug-dropdown-list-content-panel']/div"));
+
+    loadPageWait
+        .until(visibilityOfElementLocated(By.xpath(format("//div[text()='%s']", urlCommand))))
+        .click();
   }
 
   /**
@@ -210,8 +213,7 @@ public class CommandsToolbar {
     action.release();
     loadPageWait
         .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.COMMAND_DROPDAWN, nameOfCommand))))
+            visibilityOfElementLocated(By.xpath(format(Locators.COMMAND_DROPDAWN, nameOfCommand))))
         .click();
   }
 }

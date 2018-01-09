@@ -43,7 +43,7 @@ public class WsAgentServerLivenessProbeConfigFactory implements HttpProbeConfigF
       URI uri = UriBuilder.fromUri(server.getUrl()).path("/").build();
 
       return new HttpProbeConfig(
-          uri.getPort(),
+          uri.getPort() == -1 ? 80 : uri.getPort(),
           uri.getHost(),
           uri.getScheme(),
           uri.getPath(),
