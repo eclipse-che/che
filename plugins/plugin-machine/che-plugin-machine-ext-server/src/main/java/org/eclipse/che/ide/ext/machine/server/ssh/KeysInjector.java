@@ -86,15 +86,16 @@ public class KeysInjector {
               return; // no keys found, exiting
             }
 
-            StringBuilder commandLine = new StringBuilder("mkdir ~/.ssh/ -p");
+            StringBuilder commandLine = new StringBuilder("mkdir ~/.ssh/ -p ");
             for (String publicKey : publicKeys) {
               commandLine
                   .append("&& echo '")
                   .append(publicKey)
-                  .append("' >> ~/.ssh/authorized_keys");
+                  .append("' >> ~/.ssh/authorized_keys ");
             }
+            final String command = commandLine.toString();
             for (String serverUrl : execServerUrls) {
-              doInjectPublicKeys(serverUrl, workspaceId, commandLine.toString());
+              doInjectPublicKeys(serverUrl, workspaceId, command);
             }
           }
         });
