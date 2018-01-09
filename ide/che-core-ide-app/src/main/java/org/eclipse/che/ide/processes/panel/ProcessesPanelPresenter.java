@@ -1064,8 +1064,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     try {
       for (ProcessTreeNode node : rootNode.getChildren()) {
         if (MACHINE_NODE == node.getType()) {
-          ArrayList<ProcessTreeNode> children = new ArrayList<>();
-          children.addAll(node.getChildren());
+          ArrayList<ProcessTreeNode> children = new ArrayList<>(node.getChildren());
 
           for (ProcessTreeNode child : children) {
             if (COMMAND_NODE == child.getType()) {
@@ -1078,6 +1077,9 @@ public class ProcessesPanelPresenter extends BasePresenter
             view.hideProcessOutput(child.getId());
             view.removeProcessNode(child);
           }
+
+          node.setTerminalServerRunning(false);
+          node.setSshServerRunning(false);
         }
       }
 
