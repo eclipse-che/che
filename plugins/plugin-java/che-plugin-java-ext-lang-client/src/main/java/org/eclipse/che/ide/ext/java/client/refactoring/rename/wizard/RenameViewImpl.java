@@ -14,12 +14,6 @@ import static com.google.gwt.dom.client.Style.Cursor.DEFAULT;
 import static com.google.gwt.dom.client.Style.Cursor.POINTER;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -27,7 +21,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -53,9 +46,7 @@ final class RenameViewImpl extends Window implements RenameView {
   @UiField(provided = true)
   final JavaLocalizationConstant locale;
 
-  @UiField FlowPanel headerPanelToHide;
   @UiField TextBox newName;
-  @UiField FlowPanel subSettings;
   @UiField CheckBox updateSubpackages;
   @UiField FlowPanel renameSubpackagesPanel;
   @UiField FlowPanel renameKeepOriginalMethodPanel;
@@ -65,9 +56,7 @@ final class RenameViewImpl extends Window implements RenameView {
   @UiField CheckBox updateSimilarlyVariables;
   @UiField CheckBox updateDelegateUpdating;
   @UiField CheckBox updateMarkDeprecated;
-  @UiField FlowPanel occurrencesPanel;
   @UiField FlowPanel fullNamePanel;
-  @UiField SimplePanel icon;
   @UiField TextBox patternField;
   @UiField CheckBox updateFullNames;
   @UiField CheckBox updateReferences;
@@ -90,51 +79,39 @@ final class RenameViewImpl extends Window implements RenameView {
 
     createButtons(locale);
 
-    updateFullNames.addValueChangeHandler(
-        new ValueChangeHandler<Boolean>() {
-          @Override
-          public void onValueChange(ValueChangeEvent<Boolean> event) {
-            patternField.setEnabled(event.getValue());
-          }
-        });
+    updateFullNames.addValueChangeHandler(event -> patternField.setEnabled(event.getValue()));
 
     updateDelegateUpdating.addValueChangeHandler(
-        new ValueChangeHandler<Boolean>() {
-          @Override
-          public void onValueChange(ValueChangeEvent<Boolean> event) {
-            updateMarkDeprecated.setEnabled(event.getValue());
-          }
-        });
+        event -> updateMarkDeprecated.setEnabled(event.getValue()));
 
     configureLabel.addClickHandler(
-        new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            if (isUpdateSimilarlyVariables()) {
-              similarNamesConfigurationPresenter.show();
-            }
+        event -> {
+          if (isUpdateSimilarlyVariables()) {
+            similarNamesConfigurationPresenter.show();
           }
         });
 
     newName.addKeyUpHandler(
-        new KeyUpHandler() {
-          @Override
-          public void onKeyUp(KeyUpEvent event) {
-            delegate.validateName();
-          }
+        event -> {
+          // here need some delay to be sure input box initiated with given value
+          // in manually testing hard to reproduce this problem but it reproduced with selenium
+          // tests
+          new Timer() {
+            @Override
+            public void run() {
+              delegate.validateName();
+            }
+          }.schedule(300);
         });
 
     updateSimilarlyVariables.addValueChangeHandler(
-        new ValueChangeHandler<Boolean>() {
-          @Override
-          public void onValueChange(ValueChangeEvent<Boolean> event) {
-            if (event.getValue()) {
-              configureLabel.getElement().getStyle().setCursor(POINTER);
-              configureLabel.getElement().getStyle().setColor(Style.getPrimaryHighlightsColor());
-            } else {
-              configureLabel.getElement().getStyle().setCursor(DEFAULT);
-              configureLabel.getElement().getStyle().setColor(Style.getButtonDisabledFontColor());
-            }
+        event -> {
+          if (event.getValue()) {
+            configureLabel.getElement().getStyle().setCursor(POINTER);
+            configureLabel.getElement().getStyle().setColor(Style.getPrimaryHighlightsColor());
+          } else {
+            configureLabel.getElement().getStyle().setCursor(DEFAULT);
+            configureLabel.getElement().getStyle().setColor(Style.getButtonDisabledFontColor());
           }
         });
   }
@@ -144,35 +121,22 @@ final class RenameViewImpl extends Window implements RenameView {
         createButton(
             locale.moveDialogButtonPreview(),
             "move-preview-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onPreviewButtonClicked();
-              }
-            });
+            event -> delegate.onPreviewButtonClicked());
 
     Button cancel =
         createButton(
             locale.moveDialogButtonCancel(),
             "move-cancel-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                hide();
-                delegate.onCancelButtonClicked();
-              }
+            event -> {
+              hide();
+              delegate.onCancelButtonClicked();
             });
 
     accept =
         createButton(
             locale.moveDialogButtonOk(),
             "move-accept-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onAcceptButtonClicked();
-              }
-            });
+            event -> delegate.onAcceptButtonClicked());
 
     addButtonToFooter(accept);
     addButtonToFooter(cancel);

@@ -88,7 +88,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
 
   @Override
   public void onClose() {
-    view.close();
+    view.closeDialogIfShowing();
     view.setTextToSearchFilterLabel("");
     view.clearSearchFilter();
   }
@@ -180,7 +180,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
         .checkout(project.getLocation(), checkoutRequest)
         .then(
             ignored -> {
-              view.close();
+              view.closeDialogIfShowing();
             })
         .catchError(
             error -> {

@@ -88,6 +88,8 @@ public class MachineTokenInterceptorTest {
             // To prevent real methods of manager calling
             bindInterceptor(
                 subclassesOf(WorkspaceRuntimes.class), names("startAsync"), invocation -> null);
+
+            bindConstant().annotatedWith(Names.named("che.workspace.probe_pool_size")).to(1);
           }
         };
 

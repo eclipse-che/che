@@ -79,9 +79,15 @@ public abstract class RuntimeInfrastructure {
   }
 
   /**
-   * Making Runtime is a two phase process. On the first phase implementation MUST prepare
-   * RuntimeContext, this is supposedly "fast" method On the second phase Runtime is created with
-   * RuntimeContext.start() which is supposedly "long" method.
+   * Starting the Runtime is a two phase process:
+   *
+   * <pre>
+   * <ul>
+   *   <li>On the first phase implementation MUST prepare RuntimeContext;</li>
+   *   <li>On the second phase the Runtime that can be fetched from RuntimeContext
+   *   should be started with InternalRuntime.start().</li>
+   * </ul>
+   * </pre>
    *
    * @param id the RuntimeIdentity
    * @param environment incoming internal environment
