@@ -14,9 +14,11 @@ import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.mockito.Mockito;
 
@@ -30,7 +32,9 @@ public class JavaLanguageServerExtensionStub extends JavaLanguageServerExtension
             LanguageServerRegistry.class, Mockito.withSettings().defaultAnswer(RETURNS_DEEP_STUBS)),
         mock(
             RequestHandlerConfigurator.class,
-            Mockito.withSettings().defaultAnswer(RETURNS_DEEP_STUBS)));
+            Mockito.withSettings().defaultAnswer(RETURNS_DEEP_STUBS)),
+        mock(ProjectManager.class, Mockito.withSettings().defaultAnswer(RETURNS_DEEP_STUBS)),
+        mock(EventService.class, Mockito.withSettings().defaultAnswer(RETURNS_DEEP_STUBS)));
   }
 
   @Override
