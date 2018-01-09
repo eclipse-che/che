@@ -86,6 +86,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
+            <artifactId>ls-clang-agent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
             <artifactId>ls-csharp-agent</artifactId>
         </dependency>
         <dependency>
@@ -415,6 +419,22 @@
                             <outputDirectory>${project.build.directory}/classes</outputDirectory>
                         </configuration>
                     </execution>
+                    <!-- <execution>
+                        <id>copy-jars</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/source-war/WEB-INF/lib</outputDirectory>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.eclipse.che</groupId>
+                                    <artifactId>ls-clang-agent</artifactId>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution> -->
                 </executions>
             </plugin>
             <plugin>
