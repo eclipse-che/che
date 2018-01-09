@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -191,6 +192,8 @@ public class CommandsToolbar {
   public void selectPreviewUrlFromDropDawn(String urlCommand) {
     testWebElementRenderChecker.waitElementIsRendered(
         By.xpath("//div[@id='gwt-debug-dropdown-list-content-panel']/div"));
+
+    WaitUtils.sleepQuietly(3);
 
     loadPageWait
         .until(visibilityOfElementLocated(By.xpath(format("//div[text()='%s']", urlCommand))))
