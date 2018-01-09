@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import javax.annotation.PostConstruct;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.PreProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectInitializedEvent;
@@ -43,11 +44,16 @@ public class ProjectsListener {
   private final JavaLanguageServerExtensionService service;
   private final EventService eventService;
   private final ExecutorService executorService;
+  private final ProjectManager projectManager;
 
   @Inject
-  public ProjectsListener(JavaLanguageServerExtensionService service, EventService eventService) {
+  public ProjectsListener(
+      JavaLanguageServerExtensionService service,
+      EventService eventService,
+      ProjectManager projectManager) {
     this.service = service;
     this.eventService = eventService;
+    this.projectManager = projectManager;
     this.executorService =
         Executors.newSingleThreadExecutor(
             new ThreadFactoryBuilder()
@@ -85,59 +91,73 @@ public class ProjectsListener {
   }
 
   private void onProjectCreated(ProjectCreatedEvent event) {
-    String projectUri = prefixURI(event.getProjectPath());
+    if (!isProjectRegistered(event.getProjectPath())) {
+      return;
+    }
 
+    String projectUri = prefixURI(event.getProjectPath());
     UpdateWorkspaceParameters params =
         new UpdateWorkspaceParameters(singletonList(projectUri), emptyList());
     doUpdateWorkspaceAsync(params);
   }
 
   private void onPreProjectDeleted(PreProjectDeletedEvent event) {
-    String projectUri = prefixURI(event.getProjectPath());
+    if (!isProjectRegistered(event.getProjectPath())) {
+      return;
+    }
 
+    String projectUri = prefixURI(event.getProjectPath());
     UpdateWorkspaceParameters params =
         new UpdateWorkspaceParameters(emptyList(), singletonList(projectUri));
     doUpdateWorkspaceAsync(params);
   }
 
   private void onProjectInitializedEvent(ProjectInitializedEvent event) {
-    String projectUri = prefixURI(event.getProjectPath());
+    if (!isProjectRegistered(event.getProjectPath())) {
+      return;
+    }
 
+    String projectUri = prefixURI(event.getProjectPath());
     UpdateWorkspaceParameters params =
         new UpdateWorkspaceParameters(singletonList(projectUri), emptyList());
     doUpdateWorkspaceAsync(params);
+  }
+
+  private boolean isProjectRegistered(String path) {
+    return projectManager.isRegistered(path);
   }
 
   private void doUpdateWorkspaceAsync(UpdateWorkspaceParameters updateWorkspaceParameters) {
     executorService.submit(
         (Runnable)
             () -> {
-              LOG.info(
-                  "Workspace is being updated with added projects'{}', removed projects '{}'",
-                  updateWorkspaceParameters.getAddedProjectsUri().toString(),
-                  updateWorkspaceParameters.getRemovedProjectsUri().toString());
-
               JobResult jobResult = service.updateWorkspace(updateWorkspaceParameters);
 
               switch (jobResult.getSeverity()) {
                 case ERROR:
                   LOG.error(
-                      "Workspace updated. Result code: '{}', message: '{}'",
+                      "Workspace updated. Result code: '{}', message: '{}'. Added projects: '{}', removed projects: '{}'",
                       jobResult.getResultCode(),
-                      jobResult.getMessage());
+                      jobResult.getMessage(),
+                      updateWorkspaceParameters.getAddedProjectsUri().toString(),
+                      updateWorkspaceParameters.getRemovedProjectsUri().toString());
                   break;
                 case WARNING:
                 case CANCEL:
                   LOG.warn(
-                      "Workspace updated. Result code: '{}', message: '{}'",
+                      "Workspace updated. Result code: '{}', message: '{}'. Added projects: '{}', removed projects: '{}'",
                       jobResult.getResultCode(),
-                      jobResult.getMessage());
+                      jobResult.getMessage(),
+                      updateWorkspaceParameters.getAddedProjectsUri().toString(),
+                      updateWorkspaceParameters.getRemovedProjectsUri().toString());
                   break;
                 default:
                   LOG.info(
-                      "Workspace updated. Result code: '{}', message: '{}'",
+                      "Workspace updated. Result code: '{}', message: '{}'. Added projects: '{}', removed projects: '{}'",
                       jobResult.getResultCode(),
-                      jobResult.getMessage());
+                      jobResult.getMessage(),
+                      updateWorkspaceParameters.getAddedProjectsUri().toString(),
+                      updateWorkspaceParameters.getRemovedProjectsUri().toString());
                   break;
               }
             });

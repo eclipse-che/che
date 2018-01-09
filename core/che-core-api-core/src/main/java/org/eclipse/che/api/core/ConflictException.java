@@ -30,4 +30,8 @@ public class ConflictException extends ApiException {
   public ConflictException(ServiceError serviceError) {
     super(serviceError);
   }
+
+  public ConflictException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }
