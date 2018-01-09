@@ -35,8 +35,6 @@ RUN mkdir $HOME/.m2 && \
    unzip   /home/user/tomcat8.zip -d /home/user/tomcat8;\
    rm /home/user/tomcat8.zip;\
    mkdir /home/user/tomcat8/webapps;\
-   sudo chgrp -R 0 ~/tomcat8;\
-   sudo chmod -R g+rwX ~/tomcat8;\
    sed -i -- 's/autoDeploy=\"false\"/autoDeploy=\"true\"/g' /home/user/tomcat8/conf/server.xml; \
    sed -i 's/<Context>/<Context reloadable=\"true\">/g' /home/user/tomcat8/conf/context.xml; \
    echo "export MAVEN_OPTS=\$JAVA_OPTS" >> /home/user/.bashrc
@@ -61,13 +59,13 @@ RUN mkdir /home/user/traefik ;\
     chmod +x /home/user/traefik/traefik
 COPY traefik.toml /home/user/traefik/
 ADD entrypoint.sh /home/user/entrypoint.sh
-RUN sudo chgrp -R 0 ~/traefik && \
-    sudo chmod -R g+rwX ~/traefik && \
-    sudo mkdir /var/run/sshd && \
+RUN sudo mkdir /var/run/sshd && \
     sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' && \
     sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_ecdsa_key -N '' && \
     sudo  ssh-keygen -t rsa -f /etc/ssh/ssh_host_ed25519_key -N '' && \
-    npm install -g typescript@2.5.3 typescript-language-server@0.1.4
+    npm install -g typescript@2.5.3 typescript-language-server@0.1.4 && \
+    sudo chgrp -R 0 ~ && \
+    sudo chmod -R g+rwX ~
 WORKDIR /projects
 ENTRYPOINT ["/home/user/entrypoint.sh"]
 CMD tail -f /dev/null
