@@ -21,7 +21,6 @@ import com.google.inject.Singleton;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -190,24 +189,10 @@ public class CommandsToolbar {
    * @param urlCommand an expected command
    */
   public void selectPreviewUrlFromDropDawn(String urlCommand) {
-    System.out.println("============>>>   1");
-
     testWebElementRenderChecker.waitElementIsRendered(
         By.xpath("//div[@id='gwt-debug-dropdown-list-content-panel']/div"));
 
-    System.out.println("============>>>   2");
-
-    WaitUtils.sleepQuietly(3);
-
-    Actions action = new Actions(seleniumWebDriver);
-    action.moveToElement(getPreviewPopup(urlCommand)).click().perform();
-
-    System.out.println("============>>>   3");
-  }
-
-  private WebElement getPreviewPopup(String urlCommand) {
-    return loadPageWait.until(
-        visibilityOfElementLocated(By.xpath(format("//div[text()='%s']", urlCommand))));
+    clickOnElement(getCommandsToolbarPreviewLink(urlCommand));
   }
 
   /**
@@ -221,12 +206,38 @@ public class CommandsToolbar {
     selectPreviewUrlFromDropDawn(urlCommand);
   }
 
+  /**
+   * simple click is does not working well in grid mode on the "CI" in drop-down lists
+   *
+   * @param element
+   */
+  private void clickOnElement(WebElement element) {
+    Actions action = new Actions(seleniumWebDriver);
+    action.moveToElement(element).click().perform();
+  }
+
+  /**
+   * simple click is does not working well in grid mode on the "CI" in drop-down lists
+   *
+   * @param element
+   */
+  private void clickOnElement(WebElement element, Actions action) {
+    action.moveToElement(element).click().perform();
+  }
+
   private void waitListIsRenderedAndClickOnItem(String nameOfCommand, Actions action) {
     testWebElementRenderChecker.waitElementIsRendered(By.id("commandsPopup"));
     action.release();
-    loadPageWait
-        .until(
-            visibilityOfElementLocated(By.xpath(format(Locators.COMMAND_DROPDAWN, nameOfCommand))))
-        .click();
+    clickOnElement(getElementFromCommandsDropDown(nameOfCommand), action);
+  }
+
+  private WebElement getCommandsToolbarPreviewLink(String urlCommand) {
+    return loadPageWait.until(
+        visibilityOfElementLocated(By.xpath(format("//div[text()='%s']", urlCommand))));
+  }
+
+  private WebElement getElementFromCommandsDropDown(String nameOfCommand) {
+    return loadPageWait.until(
+        visibilityOfElementLocated(By.xpath(format(Locators.COMMAND_DROPDAWN, nameOfCommand))));
   }
 }
