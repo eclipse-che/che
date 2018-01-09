@@ -14,7 +14,6 @@ package org.eclipse.che.plugin.testing.testng.server;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
 
 import com.beust.jcommander.JCommander;
 import com.google.inject.name.Named;
@@ -98,7 +97,7 @@ public class TestNGRunner extends AbstractJavaTestRunner {
   }
 
   private String getOutputDirectory(TestExecutionContext context) {
-    String outputDir = extensionService.getOutputDir(prefixURI(context.getProjectPath()));
+    String outputDir = extensionService.getOutputDir(context.getProjectPath());
 
     if (isNullOrEmpty(outputDir)) {
       return workspacePath + context.getProjectPath() + TEST_OUTPUT_FOLDER;
