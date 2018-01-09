@@ -157,8 +157,8 @@ public class KeysInjectorTest {
         .startProcess(eq(WORKSPACE_ID), argumentCaptor.capture(), anyString(), anyString());
     assertEquals(
         "mkdir ~/.ssh/ -p"
-            + "&& echo 'publicKey1' >> ~/.ssh/authorized_keys"
-            + "&& echo 'publicKey2' >> ~/.ssh/authorized_keys",
+            + " && echo 'publicKey1' >> ~/.ssh/authorized_keys"
+            + " && echo 'publicKey2' >> ~/.ssh/authorized_keys",
         argumentCaptor.getValue());
   }
 
@@ -188,7 +188,7 @@ public class KeysInjectorTest {
     verify(client, times(2))
         .startProcess(eq(WORKSPACE_ID), argumentCaptor.capture(), anyString(), anyString());
     assertEquals(
-        "mkdir ~/.ssh/ -p" + "&& echo 'publicKeyWorkspace' >> ~/.ssh/authorized_keys",
+        "mkdir ~/.ssh/ -p" + " && echo 'publicKeyWorkspace' >> ~/.ssh/authorized_keys",
         argumentCaptor.getValue());
   }
 
@@ -221,7 +221,7 @@ public class KeysInjectorTest {
     verify(client, times(2))
         .startProcess(eq(WORKSPACE_ID), argumentCaptor.capture(), anyString(), anyString());
     assertEquals(
-        "mkdir ~/.ssh/ -p" + "&& echo 'publicKey1' >> ~/.ssh/authorized_keys",
+        "mkdir ~/.ssh/ -p" + " && echo 'publicKey1' >> ~/.ssh/authorized_keys",
         argumentCaptor.getValue());
   }
 
