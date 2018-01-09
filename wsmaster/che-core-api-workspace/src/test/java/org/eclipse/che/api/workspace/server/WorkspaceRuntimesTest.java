@@ -40,6 +40,7 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
@@ -77,6 +78,8 @@ public class WorkspaceRuntimesTest {
 
   @Mock private WorkspaceSharedPool sharedPool;
 
+  @Mock private ProbeScheduler probeScheduler;
+
   private RuntimeInfrastructure infrastructure;
   @Mock private InternalEnvironmentFactory<InternalEnvironment> testEnvFactory;
   private WorkspaceRuntimes runtimes;
@@ -92,7 +95,8 @@ public class WorkspaceRuntimesTest {
             infrastructure,
             sharedPool,
             workspaceDao,
-            dbInitializer);
+            dbInitializer,
+            probeScheduler);
   }
 
   @Test
@@ -192,7 +196,8 @@ public class WorkspaceRuntimesTest {
             infrastructure,
             sharedPool,
             workspaceDao,
-            dbInitializer);
+            dbInitializer,
+            probeScheduler);
     localRuntimes.init();
     RuntimeIdentityDto identity =
         DtoFactory.newDto(RuntimeIdentityDto.class)

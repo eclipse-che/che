@@ -28,7 +28,6 @@
 export class CheEditor implements ng.IDirective {
 
   restrict: string = 'E';
-  templateUrl: string = 'components/widget/editor/che-editor.html';
   controller: string = 'CheEditorController';
   controllerAs: string = 'cheEditorController';
   transclude: boolean = true;
@@ -43,36 +42,51 @@ export class CheEditor implements ng.IDirective {
     onContentChange: '&?'
   };
 
-  compile(element: ng.IRootElementService, attrs: ng.IAttributes): ng.IDirectiveCompileFn {
+  template($element: ng.IAugmentedJQuery, $attrs: ng.IAttributes): string {
     const avoidAttrs = ['ng-model', 'editor-content', 'editor-state', 'editor-mode', 'validator', 'on-content-change'];
     const avoidStartWithAttrs: Array<string> = ['$'];
 
-    const keys = Object.keys(attrs.$attr);
-    // search the input field
-    const inputJqEl = element.find('.custom-checks che-input');
+    let additionalElement = '';
 
-    keys.forEach((key: string) => {
-      const attr = attrs.$attr[key];
-      if (!attr) {
-        return;
-      }
-      if (avoidStartWithAttrs.find((avoidStartWithAttr: string) => {
-          return attr.indexOf(avoidStartWithAttr) === 0;
-        })) {
-        return;
-      }
-      if (avoidAttrs.indexOf(attr) !== -1) {
-        return;
-      }
-      let value = attrs[key];
-
-      // set the value of the attribute
-      inputJqEl.attr(attr, value);
-      // add also the material version of max length (only one the first input which is the md-input)
-      element.removeAttr(attr);
+    let keys = Object.keys($attrs.$attr).filter((key: string) => {
+      const attr = $attrs.$attr[key];
+      return attr && avoidAttrs.indexOf(attr) === -1 && avoidStartWithAttrs.findIndex((avoidStartWithAttr: string) => {
+          return attr.startsWith(avoidStartWithAttr);
+        }) === -1;
     });
 
-    return;
+    if (keys.length) {
+      let additionalAttr = '';
+      keys.forEach((key: string) => {
+        const attr = $attrs.$attr[key];
+        additionalAttr += `${attr}="${$attrs[key]}" `;
+        $element.removeAttr(attr);
+      });
+      additionalElement += `<div class="custom-checks">
+                             <che-input ${additionalAttr} 
+                                      type="hidden" 
+                                      che-form="cheEditorController.editorForm"
+                                      ng-model-options="{ allowInvalid: true }"
+                                      ng-model="cheEditorController.editorContent">
+                               <ng-transclude></ng-transclude>
+                             </che-input>
+                           </div>`;
+    }
+
+    return `<div class="che-codemirror-editor">
+              <ng-form name="cheEditorController.editorForm">
+                <textarea ui-codemirror="cheEditorController.editorOptions"
+                          aria-label="editor"
+                          ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 500, 'blur': 0 }, allowInvalid: true }"
+                          ng-model="cheEditorController.editorContent"></textarea>
+                <div class="validator-checks">
+                  <div ng-messages="cheEditorController.editorForm.$invalid">
+                    <div ng-repeat="error in cheEditorController.editorState.errors">{{error}}</div>
+                  </div>
+                </div>
+                ${additionalElement}
+              </ng-form>
+            </div>`;
   }
 
 }

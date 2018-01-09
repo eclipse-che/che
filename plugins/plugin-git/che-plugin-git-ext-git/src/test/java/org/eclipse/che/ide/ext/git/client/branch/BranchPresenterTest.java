@@ -165,7 +165,7 @@ public class BranchPresenterTest extends BaseTest {
   public void testOnCloseClicked() throws Exception {
     presenter.onClose();
 
-    verify(view).close();
+    verify(view).closeDialogIfShowing();
   }
 
   @Test

@@ -22,8 +22,8 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 
 /**
- * Helps to convert {@link ServerConfig} objects to OpenShift infrastructure annotations and
- * vise-versa.
+ * Helps to convert servers related entities (like {@link ServerConfig} and machine name) to
+ * OpenShift annotations and vise-versa.
  *
  * @author Sergii Leshchenko
  */
@@ -36,6 +36,8 @@ public class Annotations {
   public static final String SERVER_PATH_ANNOTATION_FMT = ANNOTATION_PREFIX + "server.%s.path";
   public static final String SERVER_ATTR_ANNOTATION_FMT =
       ANNOTATION_PREFIX + "server.%s.attributes";
+
+  public static final String MACHINE_NAME_ANNOTATION = ANNOTATION_PREFIX + "machine.name";
 
   /** Pattern that matches server annotations e.g. "org.eclipse.che.server.exec-agent.port". */
   private static final Pattern SERVER_ANNOTATION_PATTERN =
@@ -86,6 +88,11 @@ public class Annotations {
       return this;
     }
 
+    public Serializer machineName(String machineName) {
+      annotations.put(MACHINE_NAME_ANNOTATION, machineName);
+      return this;
+    }
+
     public Map<String, String> annotations() {
       return annotations;
     }
@@ -120,6 +127,10 @@ public class Annotations {
         }
       }
       return servers;
+    }
+
+    public String machineName() {
+      return annotations.get(MACHINE_NAME_ANNOTATION);
     }
   }
 

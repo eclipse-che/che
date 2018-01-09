@@ -167,9 +167,11 @@ public class BranchListViewImpl extends Window implements BranchListView {
   }
 
   @Override
-  public void close() {
-    this.hide();
-    delegate.onClose();
+  public void closeDialogIfShowing() {
+    if (super.isShowing()) {
+      this.hide();
+      delegate.onClose();
+    }
   }
 
   @Override
@@ -212,11 +214,12 @@ public class BranchListViewImpl extends Window implements BranchListView {
 
   @Override
   public void onClose() {
-    close();
+    closeDialogIfShowing();
   }
 
   private void createButtons() {
-    btnClose = createButton(locale.buttonClose(), "git-compare-branch-close", event -> close());
+    btnClose =
+        createButton(locale.buttonClose(), "git-compare-branch-close", event -> delegate.onClose());
     addButtonToFooter(btnClose);
 
     btnCompare =
