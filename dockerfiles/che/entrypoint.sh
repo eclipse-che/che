@@ -199,6 +199,24 @@ launch_docker_registry () {
     fi
 }
 
+perform_database_migration() {
+  CHE_DATA=/data
+  # Move database to original location
+
+  if [ -f ${CHE_DATA}/storage/db/che.mv.db ]; then
+    echo "Performing migration of the database file, to it's original old path"
+    echo "In case if there was already a database file in old path, it will be renamed to 'che.mv.db.old'"
+    echo "See issue https://github.com/eclipse/che/issues/8068 for details"
+    #in case if there is existing database in old path, back it up
+    if [ -f ${CHE_DATA}/db/che.mv.db ]; then
+      mv ${CHE_DATA}/db/che.mv.db ${CHE_DATA}/db/che.mv.db.old
+    fi
+
+    mv ${CHE_DATA}/storage/db/che.mv.db ${CHE_DATA}/db/che.mv.db
+    echo "Database has been moved successfuly"
+  fi
+}
+
 init() {
   ### Any variables with export is a value that native Tomcat che.sh startup script requires
   export CHE_IP=${CHE_IP}
@@ -224,18 +242,23 @@ init() {
       echo "!!!"
       exit 1
     fi
-    [ -z "$CHE_USER_ID" ] && export CHE_USER_ID=${CHE_USER}
+    export CHE_USER_ID=${CHE_USER}
     sudo chown -R ${CHE_USER} ${CHE_DATA}
     sudo chown -R ${CHE_USER} ${CHE_HOME}
     sudo chown -R ${CHE_USER} ${CHE_LOGS_DIR}
   fi
 
-  [ -z "$CHE_DATABASE" ] && export CHE_DATABASE=${CHE_DATA}/storage
+  [ -z "$CHE_DATABASE" ] && export CHE_DATABASE=${CHE_DATA}
   [ -z "$CHE_TEMPLATE_STORAGE" ] && export CHE_TEMPLATE_STORAGE=${CHE_DATA}/templates
   [ -z "$CHE_WORKSPACE_AGENT_DEV" ] && export CHE_WORKSPACE_AGENT_DEV=${CHE_DATA_HOST}/lib/ws-agent.tar.gz
   [ -z "$CHE_WORKSPACE_TERMINAL__LINUX__AMD64" ] && export CHE_WORKSPACE_TERMINAL__LINUX__AMD64=${CHE_DATA_HOST}/lib/linux_amd64/terminal
   [ -z "$CHE_WORKSPACE_TERMINAL__LINUX__ARM7" ] && export CHE_WORKSPACE_TERMINAL__LINUX__ARM7=${CHE_DATA_HOST}/lib/linux_arm7/terminal
   [ -z "$CHE_WORKSPACE_EXEC__LINUX__AMD64" ] && export CHE_WORKSPACE_EXEC__LINUX__AMD64=${CHE_DATA_HOST}/lib/linux_amd64/exec
+
+  echo "!!!"
+  echo "!!! Starting migration"
+  echo "!!!"
+  perform_database_migration
 
   # CHE_DOCKER_IP_EXTERNAL must be set if you are in a VM.
   HOSTNAME=${CHE_DOCKER_IP_EXTERNAL:-$(get_docker_external_hostname)}
