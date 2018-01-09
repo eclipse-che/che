@@ -18,6 +18,7 @@ import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
+import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerJsonRpcMessenger;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerLauncher;
 import org.eclipse.che.plugin.java.languageserver.ProjectsListener;
 
@@ -29,6 +30,7 @@ public class JavaModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    bind(JavaLanguageServerJsonRpcMessenger.class).asEagerSingleton();
     bind(JavaLanguageServerExtensionService.class).asEagerSingleton();
     bind(ProjectsListener.class).asEagerSingleton();
     Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
