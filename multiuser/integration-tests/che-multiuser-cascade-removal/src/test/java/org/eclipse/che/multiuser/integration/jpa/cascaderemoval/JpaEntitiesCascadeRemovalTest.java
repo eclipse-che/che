@@ -264,6 +264,8 @@ public class JpaEntitiesCascadeRemovalTest {
                                     singletonList(
                                         new ResourceImpl(
                                             RamResourceType.ID, 1024, RamResourceType.UNIT)))));
+
+                bindConstant().annotatedWith(Names.named("che.workspace.probe_pool_size")).to(1);
               }
             });
 

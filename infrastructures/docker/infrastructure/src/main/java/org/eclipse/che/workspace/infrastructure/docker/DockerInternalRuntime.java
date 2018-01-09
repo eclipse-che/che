@@ -26,12 +26,18 @@ import java.util.function.Consumer;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
+import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult;
+import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult.ProbeStatus;
+import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
+import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -65,6 +71,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
   private final DockerBootstrapperFactory bootstrapperFactory;
   private final ServersCheckerFactory serverCheckerFactory;
   private final MachineLoggersFactory loggers;
+  private final ProbeScheduler probeScheduler;
+  private final WorkspaceProbesFactory probesFactory;
 
   /**
    * Creates non running runtime. Normally created by {@link
@@ -80,7 +88,9 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       EventService eventService,
       DockerBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
-      MachineLoggersFactory loggers) {
+      MachineLoggersFactory loggers,
+      ProbeScheduler probeScheduler,
+      WorkspaceProbesFactory probesFactory) {
     this(
         context,
         urlRewriter,
@@ -91,7 +101,9 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         eventService,
         bootstrapperFactory,
         serverCheckerFactory,
-        loggers);
+        loggers,
+        probeScheduler,
+        probesFactory);
   }
 
   /**
@@ -111,7 +123,9 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       ServersCheckerFactory serverCheckerFactory,
       MachineLoggersFactory loggers,
       DockerMachineCreator machineCreator,
-      DockerMachineStopDetector stopDetector)
+      DockerMachineStopDetector stopDetector,
+      ProbeScheduler probeScheduler,
+      WorkspaceProbesFactory probesFactory)
       throws InfrastructureException {
     this(
         context,
@@ -123,7 +137,9 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         eventService,
         bootstrapperFactory,
         serverCheckerFactory,
-        loggers);
+        loggers,
+        probeScheduler,
+        probesFactory);
 
     for (ContainerListEntry container : containers) {
       DockerMachine machine = machineCreator.create(container);
@@ -145,16 +161,20 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       EventService eventService,
       DockerBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
-      MachineLoggersFactory loggers) {
+      MachineLoggersFactory loggers,
+      ProbeScheduler probeScheduler,
+      WorkspaceProbesFactory probesFactory) {
     super(context, urlRewriter, warnings, running);
     this.networks = networks;
     this.containerStarter = machineStarter;
     this.eventService = eventService;
     this.bootstrapperFactory = bootstrapperFactory;
     this.serverCheckerFactory = serverCheckerFactory;
+    this.probesFactory = probesFactory;
     this.properties = new HashMap<>();
     this.startSynchronizer = new StartSynchronizer();
     this.loggers = loggers;
+    this.probeScheduler = probeScheduler;
   }
 
   @Override
@@ -180,6 +200,10 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       startSynchronizer.complete();
     } catch (InfrastructureException | InterruptedException | RuntimeException e) {
       boolean interrupted = Thread.interrupted() || e instanceof InterruptedException;
+
+      // Cancels workspace servers probes if any
+      probeScheduler.cancel(getContext().getIdentity().getWorkspaceId());
+
       try {
         destroyRuntime(emptyMap());
       } catch (InternalInfrastructureException destExc) {
@@ -206,6 +230,9 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
 
   @Override
   protected void internalStop(Map<String, String> stopOptions) throws InfrastructureException {
+    // Cancels workspace servers probes if any
+    probeScheduler.cancel(getContext().getIdentity().getWorkspaceId());
+
     if (startSynchronizer.interrupt()) {
       try {
         startSynchronizer.await();
@@ -244,11 +271,17 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       ServersChecker checker =
           serverCheckerFactory.create(getContext().getIdentity(), name, machine.getServers());
       checker.checkOnce(new ServerReadinessHandler(name));
+
+      probeScheduler.schedule(
+          probesFactory.getProbes(
+              getContext().getIdentity().getWorkspaceId(), name, machine.getServers()),
+          new ServerLivenessHandler());
     }
   }
 
   private void startMachine(String name, DockerContainerConfig containerConfig)
       throws InfrastructureException, InterruptedException {
+    RuntimeIdentity identity = getContext().getIdentity();
     InternalMachineConfig machineCfg = getContext().getEnvironment().getMachines().get(name);
 
     DockerMachine machine =
@@ -256,7 +289,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             getContext().getEnvironment().getNetwork(),
             name,
             containerConfig,
-            getContext().getIdentity(),
+            identity,
             new AbnormalMachineStopHandlerImpl());
     try {
       startSynchronizer.addMachine(name, machine);
@@ -267,18 +300,19 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       throw e;
     }
     if (machineCfg != null && !machineCfg.getInstallers().isEmpty()) {
-      bootstrapperFactory
-          .create(name, getContext().getIdentity(), machineCfg.getInstallers(), machine)
-          .bootstrap();
+      bootstrapperFactory.create(name, identity, machineCfg.getInstallers(), machine).bootstrap();
     }
 
     checkInterruption();
     ServersChecker readinessChecker =
-        serverCheckerFactory.create(getContext().getIdentity(), name, machine.getServers());
+        serverCheckerFactory.create(identity, name, machine.getServers());
     readinessChecker.startAsync(new ServerReadinessHandler(name));
     readinessChecker.await();
 
     machine.setStatus(MachineStatus.RUNNING);
+    probeScheduler.schedule(
+        probesFactory.getProbes(identity.getWorkspaceId(), name, machine.getServers()),
+        new ServerLivenessHandler());
   }
 
   private void checkInterruption() throws InterruptedException {
@@ -319,6 +353,34 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
               .withServerName(serverRef)
               .withStatus(ServerStatus.RUNNING)
               .withServerUrl(machine.getServers().get(serverRef).getUrl()));
+    }
+  }
+
+  private class ServerLivenessHandler implements Consumer<ProbeResult> {
+    @Override
+    public void accept(ProbeResult probeResult) {
+      String machineName = probeResult.getMachineName();
+      DockerMachine machine = startSynchronizer.getMachines().get(machineName);
+      if (machine == null) {
+        // Probably machine was removed from the list during server check start due to some reason
+        return;
+      }
+      String serverName = probeResult.getServerName();
+      ProbeStatus probeStatus = probeResult.getStatus();
+      Server server = machine.getServers().get(serverName);
+      ServerStatus oldServerStatus = server.getStatus();
+      ServerStatus serverStatus;
+
+      if (probeStatus == ProbeStatus.FAILED && oldServerStatus == ServerStatus.RUNNING) {
+        serverStatus = ServerStatus.STOPPED;
+      } else if (probeStatus == ProbeStatus.PASSED && (oldServerStatus != ServerStatus.RUNNING)) {
+        serverStatus = ServerStatus.RUNNING;
+      } else {
+        return;
+      }
+
+      machine.setServerStatus(serverName, serverStatus);
+      sendServerStatusEvent(machineName, serverName, machine.getServers().get(serverName));
     }
   }
 
@@ -395,6 +457,16 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             .withEventType(MachineStatus.STOPPED)
             .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
             .withMachineName(machineName));
+  }
+
+  private void sendServerStatusEvent(String machineName, String serverName, Server server) {
+    eventService.publish(
+        DtoFactory.newDto(ServerStatusEvent.class)
+            .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
+            .withMachineName(machineName)
+            .withServerName(serverName)
+            .withStatus(server.getStatus())
+            .withServerUrl(server.getUrl()));
   }
 
   /**

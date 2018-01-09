@@ -12,6 +12,7 @@ package org.eclipse.che.multiuser.keycloak.server.deploy;
 
 import com.google.inject.servlet.ServletModule;
 import javax.inject.Singleton;
+import org.eclipse.che.commons.logback.filter.IdentityIdLoggerFilter;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakAuthenticationFilter;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakEnvironmentInitalizationFilter;
 
@@ -26,5 +27,7 @@ public class KeycloakServletModule extends ServletModule {
         .through(KeycloakAuthenticationFilter.class);
     filterRegex("^(?!.*(/docs/))(?!.*(/keycloak/settings/?|/oauth/callback/?|/system/state/?)$).*")
         .through(KeycloakEnvironmentInitalizationFilter.class);
+    filterRegex("^(?!.*(/docs/))(?!.*(/keycloak/settings/?|/api/oauth/callback/?)$).*")
+        .through(IdentityIdLoggerFilter.class);
   }
 }

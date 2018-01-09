@@ -116,12 +116,9 @@ public class ImportProjectFromGitHubTest {
     gitHub.typeLogin(gitHubUsername);
     gitHub.typePass(gitHubPassword);
     gitHub.clickOnSignInButton();
-    loader.waitOnClosed();
 
     // authorize on github.com
-    if (seleniumWebDriver.getWindowHandles().size() > 1) {
-      loader.waitOnClosed();
-      gitHub.waitAuthorizeBtn();
+    if (gitHub.isAuthorizeButtonPresent()) {
       gitHub.clickOnAuthorizeBtn();
     }
 

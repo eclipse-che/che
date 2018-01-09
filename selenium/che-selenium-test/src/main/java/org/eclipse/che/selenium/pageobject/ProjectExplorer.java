@@ -524,7 +524,8 @@ public class ProjectExplorer {
     getVisibleElement(visibleItem).click();
     actionsFactory
         .createAction(seleniumWebDriver)
-        .doubleClick(getVisibleElement(visibleItem))
+        .moveToElement(getVisibleElement(visibleItem))
+        .doubleClick()
         .perform();
     loader.waitOnClosed();
   }
@@ -601,7 +602,7 @@ public class ProjectExplorer {
   /** wait for context menu. */
   public void waitContextMenu() {
     testWebElementRenderChecker.waitElementIsRendered(
-        "//tr[@id='gwt-debug-contextMenu/newGroup']/parent::tbody");
+        By.xpath("//tr[@id='gwt-debug-contextMenu/newGroup']/parent::tbody"));
 
     new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.id(CONTEXT_MENU_ID)));
