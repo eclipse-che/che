@@ -12,6 +12,7 @@
 import {CheWorkspace, WorkspaceStatus} from '../../../../components/api/workspace/che-workspace.factory';
 
 interface IWorkspaceStatusButtonScope extends ng.IScope {
+  buttonDisabled: boolean;
   isDisabled: boolean;
   showStopButton: boolean;
   workspaceStatus: string;
@@ -48,6 +49,7 @@ export class CheWorkspaceStatusButton {
   // scope values
   scope = {
     workspaceStatus: '=',
+    buttonDisabled: '=',
     onRunWorkspace: '&',
     onStopWorkspace: '&'
   };
