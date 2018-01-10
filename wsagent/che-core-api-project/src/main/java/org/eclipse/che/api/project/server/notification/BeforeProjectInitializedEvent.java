@@ -19,11 +19,11 @@ import org.eclipse.che.api.core.notification.EventOrigin;
  * @author Valeriy Svydenko
  */
 @EventOrigin("project")
-public class PreProjectInitializedEvent {
+public class BeforeProjectInitializedEvent {
 
   private ProjectConfig projectConfig;
 
-  public PreProjectInitializedEvent(ProjectConfig projectConfig) {
+  public BeforeProjectInitializedEvent(ProjectConfig projectConfig) {
     this.projectConfig = projectConfig;
   }
 

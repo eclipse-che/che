@@ -11,7 +11,9 @@
 package org.eclipse.che.plugin.java.plain.server.generator;
 
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
+import static org.eclipse.che.commons.lang.Deserializer.resolveVariables;
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_OUTPUT_FOLDER_VALUE;
@@ -32,7 +34,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
-import org.eclipse.che.api.project.server.notification.PreProjectInitializedEvent;
+import org.eclipse.che.api.project.server.notification.BeforeProjectInitializedEvent;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.slf4j.Logger;
@@ -48,6 +50,11 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
   private static final Logger LOG = LoggerFactory.getLogger(PlainJavaProjectGenerator.class);
 
   private static final String FILE_NAME = "Main.java";
+  private static final String MAIN_CLASS_RESOURCE = "files/Main";
+  private static final String PROJECT_FILE_RESOURCE = "files/project";
+  private static final String CLASSPATH_FILE_RESOURCE = "files/classpath";
+  private static final String PROJECT_NAME_PATTERN = "project_name";
+  private static final String SOURCE_FOLDER_PATTERN = "source_folder_value";
 
   private final FsManager fsManager;
 
@@ -57,9 +64,9 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
     this.fsManager = fsManager;
 
     eventService.subscribe(
-        new EventSubscriber<PreProjectInitializedEvent>() {
+        new EventSubscriber<BeforeProjectInitializedEvent>() {
           @Override
-          public void onEvent(PreProjectInitializedEvent event) {
+          public void onEvent(BeforeProjectInitializedEvent event) {
             onPreProjectInitializedEvent(event);
           }
         });
@@ -87,8 +94,7 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
 
     String mainJavaWsPath = resolve(sourceDirWsPath, FILE_NAME);
     fsManager.createFile(
-        mainJavaWsPath,
-        getClass().getClassLoader().getResourceAsStream("files/main_class_content"));
+        mainJavaWsPath, getClass().getClassLoader().getResourceAsStream(MAIN_CLASS_RESOURCE));
 
     createClasspath(projectWsPath, sourceFolders.get(0));
     createProjectConfig(projectWsPath);
@@ -96,14 +102,17 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
 
   private void createProjectConfig(String projectWsPath)
       throws ConflictException, NotFoundException, ServerException {
-    InputStream projectIS =
-        getClass().getClassLoader().getResourceAsStream("files/project_config_content");
+    InputStream projectIS = getClass().getClassLoader().getResourceAsStream(PROJECT_FILE_RESOURCE);
     try {
 
       String projectConfigTemplate = IOUtils.toString(projectIS);
-      String projectConfWsPath = resolve(projectWsPath, ".project");
+
       String projectConfContent =
-          projectConfigTemplate.replaceFirst("project_name", projectWsPath.substring(1));
+          resolveVariables(
+              projectConfigTemplate,
+              singletonMap(PROJECT_NAME_PATTERN, projectWsPath.substring(1)));
+
+      String projectConfWsPath = resolve(projectWsPath, ".project");
       fsManager.createFile(projectConfWsPath, projectConfContent);
     } catch (IOException e) {
       throw new ServerException(e.getMessage());
@@ -113,18 +122,19 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
   private void createClasspath(String projectWsPath, String srcFolder)
       throws ConflictException, NotFoundException, ServerException {
     InputStream classpathIS =
-        getClass().getClassLoader().getResourceAsStream("files/classpath_content");
+        getClass().getClassLoader().getResourceAsStream(CLASSPATH_FILE_RESOURCE);
     try {
       String classpathContent = IOUtils.toString(classpathIS);
+      String cpContent =
+          resolveVariables(classpathContent, singletonMap(SOURCE_FOLDER_PATTERN, srcFolder));
       String classpathWsPath = resolve(projectWsPath, ".classpath");
-      String cpContent = classpathContent.replaceFirst("source_folder_value", srcFolder);
       fsManager.createFile(classpathWsPath, cpContent);
     } catch (IOException e) {
       throw new ServerException(e.getMessage());
     }
   }
 
-  private void onPreProjectInitializedEvent(PreProjectInitializedEvent event) {
+  private void onPreProjectInitializedEvent(BeforeProjectInitializedEvent event) {
     ProjectConfig projectConfig = event.getProjectConfig();
     String oldClasspathWsPath = projectConfig.getPath() + "/.che/classpath";
     if (projectConfig.getType().equals(JAVAC) && fsManager.exists(oldClasspathWsPath)) {
