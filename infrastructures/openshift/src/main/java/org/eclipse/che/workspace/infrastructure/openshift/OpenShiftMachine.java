@@ -41,7 +41,8 @@ public class OpenShiftMachine implements Machine {
       String podName,
       String containerName,
       Map<String, ServerImpl> ref2Server,
-      OpenShiftProject project) {
+      OpenShiftProject project,
+      MachineStatus status) {
     this.machineName = machineName;
     this.podName = podName;
     this.containerName = containerName;
@@ -50,7 +51,7 @@ public class OpenShiftMachine implements Machine {
       this.ref2Server.putAll(ref2Server);
     }
     this.project = project;
-    this.status = MachineStatus.STARTING;
+    this.status = status;
   }
 
   public String getName() {
