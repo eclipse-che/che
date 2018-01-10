@@ -20,7 +20,6 @@ import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_SOURCE_FOLDER_VALUE;
 
 import com.google.inject.Inject;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
@@ -31,12 +30,10 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.notification.BeforeProjectInitializedEvent;
 import org.eclipse.che.api.project.server.type.AttributeValue;
-import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,17 +55,11 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
   private final FsManager fsManager;
 
   @Inject
-  protected PlainJavaProjectGenerator(
-      JavaLanguageServerExtensionService service, EventService eventService, FsManager fsManager) {
+  protected PlainJavaProjectGenerator(EventService eventService, FsManager fsManager) {
     this.fsManager = fsManager;
 
     eventService.subscribe(
-        new EventSubscriber<BeforeProjectInitializedEvent>() {
-          @Override
-          public void onEvent(BeforeProjectInitializedEvent event) {
-            onPreProjectInitializedEvent(event);
-          }
-        });
+        event -> onPreProjectInitializedEvent((BeforeProjectInitializedEvent) event));
   }
 
   @Override
@@ -92,8 +83,7 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
     fsManager.createDir(sourceDirWsPath);
 
     String mainJavaWsPath = resolve(sourceDirWsPath, MAIN_CLASS);
-    fsManager.createFile(
-        mainJavaWsPath, getClass().getClassLoader().getResourceAsStream(MAIN_CLASS));
+    fsManager.createFile(mainJavaWsPath, getResource(MAIN_CLASS));
 
     createClasspath(projectWsPath, sourceFolders.get(0));
     createProjectConfig(projectWsPath);
@@ -101,36 +91,22 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
 
   private void createProjectConfig(String projectWsPath)
       throws ConflictException, NotFoundException, ServerException {
-    InputStream projectIS = getClass().getClassLoader().getResourceAsStream(PROJECT_FILE_RESOURCE);
-    try {
+    String projectConfigTemplate = getResource(PROJECT_FILE_RESOURCE);
+    String projectConfContent =
+        resolveVariables(
+            projectConfigTemplate, singletonMap(PROJECT_NAME_PATTERN, projectWsPath.substring(1)));
 
-      String projectConfigTemplate = IOUtils.toString(projectIS);
-
-      String projectConfContent =
-          resolveVariables(
-              projectConfigTemplate,
-              singletonMap(PROJECT_NAME_PATTERN, projectWsPath.substring(1)));
-
-      String projectConfWsPath = resolve(projectWsPath, ".project");
-      fsManager.createFile(projectConfWsPath, projectConfContent);
-    } catch (IOException e) {
-      throw new ServerException(e.getMessage());
-    }
+    String projectConfWsPath = resolve(projectWsPath, ".project");
+    fsManager.createFile(projectConfWsPath, projectConfContent);
   }
 
   private void createClasspath(String projectWsPath, String srcFolder)
       throws ConflictException, NotFoundException, ServerException {
-    InputStream classpathIS =
-        getClass().getClassLoader().getResourceAsStream(CLASSPATH_FILE_RESOURCE);
-    try {
-      String classpathContent = IOUtils.toString(classpathIS);
-      String cpContent =
-          resolveVariables(classpathContent, singletonMap(SOURCE_FOLDER_PATTERN, srcFolder));
-      String classpathWsPath = resolve(projectWsPath, ".classpath");
-      fsManager.createFile(classpathWsPath, cpContent);
-    } catch (IOException e) {
-      throw new ServerException(e.getMessage());
-    }
+    String classpathContent = getResource(CLASSPATH_FILE_RESOURCE);
+    String cpContent =
+        resolveVariables(classpathContent, singletonMap(SOURCE_FOLDER_PATTERN, srcFolder));
+    String classpathWsPath = resolve(projectWsPath, ".classpath");
+    fsManager.createFile(classpathWsPath, cpContent);
   }
 
   private void onPreProjectInitializedEvent(BeforeProjectInitializedEvent event) {
@@ -143,6 +119,15 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
       } catch (ConflictException | NotFoundException | ServerException e) {
         LOG.error("Can't update project {}", projectConfig.getPath(), e);
       }
+    }
+  }
+
+  private String getResource(String resourceName) throws ServerException {
+    try {
+      InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(resourceName);
+      return IOUtils.toString(resourceAsStream);
+    } catch (Exception e) {
+      throw new ServerException(e.getMessage());
     }
   }
 
