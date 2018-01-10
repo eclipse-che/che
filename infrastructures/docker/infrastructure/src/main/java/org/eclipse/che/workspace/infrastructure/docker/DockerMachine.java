@@ -192,8 +192,9 @@ public class DockerMachine implements Machine {
 
     @Override
     public void destroy() throws InfrastructureException {
-      // Do nothing. May happen when runtime start is interrupted and the list of DockerMachines
-      // contains a StartingDockerMachine not yet replaced by the RunningDockerMachine
+      // Do nothing. May happen when runtime start is interrupted/failed and the list of
+      // DockerMachines contains a StartingDockerMachine not yet replaced by the
+      // RunningDockerMachine
     }
 
     @Override
