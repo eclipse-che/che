@@ -89,9 +89,6 @@ func TestBootstrap(t *testing.T) {
 		&StatusChangedEvent{Status: StatusDone},
 	}
 
-	if err := cr.WaitUntil(jsonrpctest.WriteCalledAtLeast(len(expectedEvents))); err != nil {
-		t.Fatal(err)
-	}
 	requests, err := cr.GetAllRequests()
 	if err != nil {
 		t.Fatal(err)

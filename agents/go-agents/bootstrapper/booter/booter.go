@@ -113,7 +113,9 @@ func Start() error {
 	log.Printf("All installations successfully finished")
 	pubBootstrappingDone()
 
-	return waitStartedProcessesDie()
+	err := waitStartedProcessesDie()
+	closeConsumers()
+	return err
 }
 
 func installOne(installer Installer) error {
