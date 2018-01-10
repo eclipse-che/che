@@ -313,7 +313,7 @@
 @eval windowFooterBorderColor org.eclipse.che.ide.api.theme.Style.getWindowFooterBorderColor();
 @eval windowSeparatorColor org.eclipse.che.ide.api.theme.Style.getWindowSeparatorColor();
 @eval windowTitleFontColor org.eclipse.che.ide.api.theme.Style.getWindowTitleFontColor();
-@def windowTitleFontSize 11px;
+@def windowTitleFontSize 9pt;
 
 /*syntax highlight*/
 @eval keyword org.eclipse.che.ide.api.theme.Style.getEditorKeyWord();

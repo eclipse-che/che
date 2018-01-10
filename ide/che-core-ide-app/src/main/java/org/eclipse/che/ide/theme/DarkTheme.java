@@ -329,12 +329,12 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getButtonBackground() {
-    return "#5A5A5A";
+    return "#313542";
   }
 
   @Override
   public String getButtonBorderColor() {
-    return "#161819";
+    return "#1b1e2b";
   }
 
   @Override
@@ -344,12 +344,12 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getButtonHoverBackground() {
-    return "#484848";
+    return "#434b5d";
   }
 
   @Override
   public String getButtonHoverBorderColor() {
-    return "#E9E9E9";
+    return "#1b1e2b";
   }
 
   @Override
@@ -359,12 +359,12 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getButtonClickedBackground() {
-    return "#3e3e3e";
+    return "#565e72";
   }
 
   @Override
   public String getButtonClickedBorderColor() {
-    return "#161819";
+    return "#1b1e2b";
   }
 
   @Override
@@ -374,12 +374,12 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getButtonDisabledBackground() {
-    return "rgba(40, 40, 40, 0.4)";
+    return "#313542";
   }
 
   @Override
   public String getButtonDisabledBorderColor() {
-    return "#161819";
+    return "#1b1e2b";
   }
 
   @Override
@@ -634,7 +634,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getWindowContentBackground() {
-    return "#292C2F";
+    return "#1e2331";
   }
 
   @Override
@@ -674,7 +674,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getWindowTitleFontColor() {
-    return "#a0a9b7";
+    return "#e4e4e4";
   }
 
   @Override
@@ -1064,12 +1064,12 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getTextFieldColor() {
-    return "#e4e4e4";
+    return "#aaaaaa";
   }
 
   @Override
   public String getTextFieldBackgroundColor() {
-    return "#212325";
+    return "#191D28";
   }
 
   @Override
@@ -1079,7 +1079,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getTextFieldFocusedBackgroundColor() {
-    return "#2d2f31";
+    return "#20242f";
   }
 
   @Override
@@ -1094,7 +1094,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getTextFieldBorderColor() {
-    return "#161819";
+    return "#323949";
   }
 
   @Override
@@ -1184,7 +1184,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String categoriesListHeaderBackgroundColor() {
-    return this.getPopupBkgColor();
+    return "#313542";
   }
 
   @Override
@@ -1194,7 +1194,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String categoriesListItemBackgroundColor() {
-    return this.getTextFieldFocusedBackgroundColor();
+    return "#242a3a";
   }
 
   @Override
