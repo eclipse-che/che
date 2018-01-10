@@ -22,7 +22,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.pageobject.GitHub;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
@@ -50,7 +49,6 @@ public class ImportProjectFromGitHubTest {
   private String gitHubPassword;
 
   @Inject private Loader loader;
-  @Inject private GitHub gitHub;
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
   @Inject private TestUser defaultTestUser;
@@ -112,14 +110,15 @@ public class ImportProjectFromGitHubTest {
 
     seleniumWebDriver.switchToNoneCurrentWindow(ideWin);
 
-    gitHub.waitAuthorizationPageOpened();
-    gitHub.typeLogin(gitHubUsername);
-    gitHub.typePass(gitHubPassword);
-    gitHub.clickOnSignInButton();
+    projectSourcePage.waitAuthorizationPageOpened();
+    projectSourcePage.typeLogin(gitHubUsername);
+    projectSourcePage.typePassword(gitHubPassword);
+    projectSourcePage.clickOnSignInButton();
+    projectSourcePage.waitClosingLoginPage();
 
     // authorize on github.com
-    if (gitHub.isAuthorizeButtonPresent()) {
-      gitHub.clickOnAuthorizeBtn();
+    if (projectSourcePage.isAuthorizeButtonPresent()) {
+      projectSourcePage.clickOnAuthorizeBtn();
     }
 
     seleniumWebDriver.switchTo().window(ideWin);

@@ -11,9 +11,11 @@
 package org.eclipse.che.selenium.pageobject.dashboard;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
@@ -23,9 +25,11 @@ import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Ann Shumilova */
@@ -77,6 +81,11 @@ public class ProjectSourcePage {
     String GITHUB_PROJECTS_LIST =
         "//md-list[contains(@class,'import-github-project-repositories-list')]";
     String GITHUB_PROJECT_CHECKBOX = "//md-checkbox[@aria-label='GitHub repository %s']";
+
+    String LOGIN_FIELD = "login_field";
+    String PASS_FIELD = "password";
+    String SIGN_IN_BTN = "input[value='Sign in']";
+    String AUTHORIZE_BUTTON = "//button[@id='js-oauth-authorize-btn']";
   }
 
   public interface Template {
@@ -111,6 +120,18 @@ public class ProjectSourcePage {
 
   @FindBy(id = Locators.ADD_PROJECT_BUTTON)
   WebElement addProjectButton;
+
+  @FindBy(id = Locators.LOGIN_FIELD)
+  WebElement loginField;
+
+  @FindBy(id = Locators.PASS_FIELD)
+  WebElement passField;
+
+  @FindBy(css = Locators.SIGN_IN_BTN)
+  WebElement signInBtn;
+
+  @FindBy(xpath = Locators.AUTHORIZE_BUTTON)
+  WebElement authorizeBtn;
 
   public void clickOnAddOrImportProjectButton() {
     addOrImportProjectButton.click();
@@ -253,5 +274,79 @@ public class ProjectSourcePage {
             By.xpath(format(Locators.GITHUB_PROJECT_CHECKBOX, projectName)));
     actionsFactory.createAction(seleniumWebDriver).moveToElement(project).perform();
     project.click();
+  }
+
+  /** Wait web elements on github login form. */
+  public void waitAuthorizationPageOpened() {
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        .until(
+            new ExpectedCondition<Boolean>() {
+              @Override
+              public Boolean apply(WebDriver elem) {
+                return loginField.isDisplayed()
+                    && passField.isDisplayed()
+                    && signInBtn.isDisplayed();
+              }
+            });
+  }
+
+  /**
+   * type login to login field
+   *
+   * @param login
+   */
+  public void typeLogin(String login) {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(visibilityOf(loginField));
+    loginField.sendKeys(login);
+  }
+
+  /**
+   * type password to password field
+   *
+   * @param password
+   */
+  public void typePassword(String password) {
+    passField.sendKeys(password);
+  }
+
+  /** wait closing github login form */
+  public void waitClosingLoginPage() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(invisibilityOfElementLocated(By.id(Locators.PASS_FIELD)));
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(invisibilityOfElementLocated(By.id(Locators.LOGIN_FIELD)));
+  }
+
+  /** click on the SignIn button on github auth form */
+  public void clickOnSignInButton() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(elementToBeClickable(signInBtn));
+    signInBtn.click();
+  }
+
+  /**
+   * wait and check if Authorization button is present.
+   *
+   * @return true if button is present, false otherwise
+   */
+  public boolean isAuthorizeButtonPresent() {
+    try {
+      waitAuthorizeBtn();
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  /** wait for Authorize button. */
+  public void waitAuthorizeBtn() {
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC).until(visibilityOf(authorizeBtn));
+  }
+
+  /** click on Authorize button */
+  public void clickOnAuthorizeBtn() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(elementToBeClickable(authorizeBtn));
+    authorizeBtn.click();
   }
 }
