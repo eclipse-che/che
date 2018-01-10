@@ -34,7 +34,6 @@ import org.eclipse.che.ide.ext.java.client.action.MarkDirAsSourceAction;
 import org.eclipse.che.ide.ext.java.client.action.MarkDirectoryAsGroup;
 import org.eclipse.che.ide.ext.java.client.action.NewJavaSourceFileAction;
 import org.eclipse.che.ide.ext.java.client.action.NewPackageAction;
-import org.eclipse.che.ide.ext.java.client.action.OpenDeclarationAction;
 import org.eclipse.che.ide.ext.java.client.action.OpenImplementationAction;
 import org.eclipse.che.ide.ext.java.client.action.OrganizeImportsAction;
 import org.eclipse.che.ide.ext.java.client.action.ParametersHintsAction;
@@ -59,7 +58,6 @@ public class JavaExtension {
   public static final String ORGANIZE_IMPORTS = "organizeImports";
   public static final String PARAMETERS_INFO = "parametersInfo";
   public static final String QUICK_FIX = "quickFix";
-  public static final String OPEN_JAVA_DECLARATION = "openJavaDeclaration";
   public static final String JAVA_RENAME_REFACTORING = "javaRenameRefactoring";
   public static final String JAVA_CUT_REFACTORING = "javaCutRefactoring";
   public static final String JAVA_MOVE_REFACTORING = "javaMoveRefactoring";
@@ -96,7 +94,6 @@ public class JavaExtension {
       RenameRefactoringAction renameRefactoringAction,
       QuickDocumentationAction quickDocumentationAction,
       QuickFixAction quickFixAction,
-      OpenDeclarationAction openDeclarationAction,
       OpenImplementationAction openImplementationAction,
       FindUsagesAction findUsagesAction,
       ParametersHintsAction parametersHintsAction) {
@@ -128,7 +125,6 @@ public class JavaExtension {
     assistantGroup.add(refactorGroup, new Constraints(Anchor.BEFORE, "updateDependency"));
 
     actionManager.registerAction(SHOW_QUICK_DOC, quickDocumentationAction);
-    actionManager.registerAction(OPEN_JAVA_DECLARATION, openDeclarationAction);
     actionManager.registerAction(OPEN_IMPLEMENTATION, openImplementationAction);
     actionManager.registerAction(JAVA_RENAME_REFACTORING, renameRefactoringAction);
     actionManager.registerAction(JAVA_MOVE_REFACTORING, moveAction);
@@ -142,8 +138,6 @@ public class JavaExtension {
     assistantGroup.add(
         quickDocumentationAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
     assistantGroup.add(quickFixAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
-    assistantGroup.add(
-        openDeclarationAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
     assistantGroup.add(
         organizeImportsAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
     assistantGroup.add(
@@ -172,8 +166,6 @@ public class JavaExtension {
 
     editorContextMenuGroup.add(quickDocumentationAction, new Constraints(Anchor.AFTER, "format"));
     editorContextMenuGroup.add(quickFixAction, new Constraints(Anchor.AFTER, SHOW_QUICK_DOC));
-    editorContextMenuGroup.add(openDeclarationAction, new Constraints(Anchor.AFTER, QUICK_FIX));
-    editorContextMenuGroup.add(refactorGroup, new Constraints(Anchor.AFTER, OPEN_JAVA_DECLARATION));
     editorContextMenuGroup.add(
         fileStructureAction, new Constraints(Anchor.AFTER, GROUP_ASSISTANT_REFACTORING));
 
@@ -217,9 +209,6 @@ public class JavaExtension {
           .getGlobal()
           .addKey(new KeyBuilder().alt().charCode(KeyCodeMap.ENTER).build(), QUICK_FIX);
     }
-    keyBinding
-        .getGlobal()
-        .addKey(new KeyBuilder().none().charCode(KeyCodeMap.F4).build(), OPEN_JAVA_DECLARATION);
     keyBinding
         .getGlobal()
         .addKey(new KeyBuilder().shift().charCode(KeyCodeMap.F6).build(), JAVA_RENAME_REFACTORING);

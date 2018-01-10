@@ -100,7 +100,7 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
         outputDir = extensionService.getOutputDir(prefixURI(wsPath));
       } catch (Exception e) {
         throw new ValueStorageException(
-            format("Failed to get '%s'. Cause: '%s'", OUTPUT_FOLDER, e.getMessage()));
+            format("Failed to get '%s'. ", OUTPUT_FOLDER), e.getCause());
       }
 
       String fsPath = transformer.transform(wsPath).toString();
@@ -115,7 +115,7 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
         sourceFolders = extensionService.getSourceFolders(wsPath);
       } catch (Exception e) {
         throw new ValueStorageException(
-            format("Failed to get '%s'. Cause: '%s'", SOURCE_FOLDER, e.getMessage()));
+            format("Failed to get '%s'. ", SOURCE_FOLDER), e.getCause());
       }
 
       List<String> filteredResult =
