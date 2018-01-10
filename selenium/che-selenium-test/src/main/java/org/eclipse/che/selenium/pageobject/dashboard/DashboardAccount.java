@@ -167,48 +167,83 @@ public class DashboardAccount {
   }
 
   public String getUserNameValue(){
-   return waitAndGetElement(By.id(USERNAME_FIELD_ID)).getAttribute("value");
+   return getFieldValue(By.id(USERNAME_FIELD_ID));
   }
 
   public String getEmailValue(){
-    return waitAndGetElement(By.id(EMAIL_FIELD_ID)).getAttribute("value");
+    return getFieldValue(By.id(EMAIL_FIELD_ID));
   }
 
   public String getFirstNameValue(){
-    return waitAndGetElement(By.id(FIRST_NAME_FIELD_ID)).getAttribute("value");
+    return getFieldValue(By.id(FIRST_NAME_FIELD_ID));
   }
 
   public String getLastNameValue(){
-    return waitAndGetElement(By.id(LAST_NAME_FIELD_ID)).getAttribute("value");
+    return getFieldValue(By.id(LAST_NAME_FIELD_ID));
+  }
+
+  public void setUserNameValue(String value){
+    setFieldValue(By.id(USERNAME_FIELD_ID), value);
+  }
+
+  public void setEmailValue(String value){
+    setFieldValue(By.id(EMAIL_FIELD_ID), value);
+  }
+
+  public void setFirstNameValue(String value){
+    setFieldValue(By.id(FIRST_NAME_FIELD_ID), value);
+  }
+
+  public void setLastNameValue(String value){
+    setFieldValue(By.id(LAST_NAME_FIELD_ID), value);
   }
 
   private WebElement waitAndGetElement(By locator){
     return loadPageWait.until(visibilityOfElementLocated(locator));
   }
 
-  private
+  private String getFieldValue(By fieldLocator){
+    return waitAndGetElement(fieldLocator).getAttribute("value");
+  }
 
   private void waitFieldValue(By fieldLocator, String expectedValue){
-    (ExpectedCondition<Boolean>) driver -> waitAndGetElement(fieldLocator).getAttribute()
+    loadPageWait.until((ExpectedCondition<Boolean>) driver -> getFieldValue(fieldLocator).equals(expectedValue));
   }
 
   private void setFieldValue(By fieldLocator, String value){
     waitAndGetElement(fieldLocator).clear();
+    waitFieldValue(fieldLocator, "");
+    waitAndGetElement(fieldLocator).sendKeys(value);
+    waitFieldValue(fieldLocator, value);
+  }
 
+  //==================================================================>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+  protected interface PasswordLocators{
+    String PASSWORD_FIELD_ID = "password";
+    String NEW_PASSWORD_FIELD_ID = "password-new";
+    String NEW_PASSWORD_CONFIRMATION_ID = "password-confirm";
+    String SAVE_BUTTON = "//button[text()='Save']";
+  }
 
+  public void setPasswordFieldValue(String value){
+    setFieldValue(By.id(PasswordLocators.PASSWORD_FIELD_ID), value);
+  }
 
+  public void setNewPasswordFieldValue(String value){
+    setFieldValue(By.id(PasswordLocators.NEW_PASSWORD_FIELD_ID), value);
+  }
+
+  public void setNewPasswordConfirmationFieldValue(String value){
+    setFieldValue(By.id(PasswordLocators.NEW_PASSWORD_CONFIRMATION_ID), value);
+  }
+
+  public void clickOnSavePasswordButton(){
+    loadPageWait.until(visibilityOfElementLocated(By.xpath(PasswordLocators.SAVE_BUTTON))).click();
   }
 
 
-
-
-
-
-
-
-
-
+  //==================================================================>>>>>>>>>>>>>>>>>>>>>>>>>>
   private class AccountFields {
     private String login;
     private String email;
