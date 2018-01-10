@@ -86,7 +86,7 @@ import java.util.TimeZone;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -356,7 +356,9 @@ public class OpenShiftConnector extends DockerConnector {
       if (!apiEndpointRetrieved) {
         apiEndpointRetrieved = true;
         apiEndpoint = retrieveApiEndpoint();
-        LOG.debug("apiEndpoint = {}", apiEndpoint);
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("apiEndpoint = {}", apiEndpoint);
+        }
       }
     }
 
@@ -1015,9 +1017,6 @@ public class OpenShiftConnector extends DockerConnector {
         Thread.currentThread().interrupt();
       }
 
-      OpenShiftClient waitOpenShiftClient =
-          ocFactory.newOcClient(
-              openshiftWorkspaceEnvironmentProvider.getWorkspacesOpenshiftConfig());
       createdImageStream =
           openShiftClient
               .imageStreams()
@@ -1303,13 +1302,16 @@ public class OpenShiftConnector extends DockerConnector {
   public void startExec(
       final StartExecParams params, @Nullable MessageProcessor<LogMessage> execOutputProcessor)
       throws IOException {
-    String execId = params.getExecId();
+    final String execId = params.getExecId();
 
     KubernetesExecHolder exec = execMap.get(execId);
     Subject subject = subjectForContainerId(exec.getContainerId());
 
     String podName = exec.getPod();
     String[] command = exec.getCommand();
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("statExec: {} - command = {}", execId, Arrays.asList(command));
+    }
     for (int i = 0; i < command.length; i++) {
       command[i] = URLEncoder.encode(command[i], "UTF-8");
     }
@@ -1318,49 +1320,126 @@ public class OpenShiftConnector extends DockerConnector {
         openshiftWorkspaceEnvironmentProvider.getWorkspacesOpenshiftConfig(subject);
     DefaultKubernetesClient kubeClient = ocFactory.newKubeClient(workspacesOpenshiftConfig);
 
-    ExecutorService executor = Executors.newFixedThreadPool(2);
+    ExecutorService executor = Executors.newFixedThreadPool(3);
+    final CountDownLatch readStreamsAvailable = new CountDownLatch(1);
+    final CountDownLatch execEnd = new CountDownLatch(1);
+    final boolean[] shouldReadStreams = new boolean[] {false};
     try {
-      try (ExecWatch watch =
-              kubeClient
-                  .pods()
-                  .inNamespace(
-                      openshiftWorkspaceEnvironmentProvider.getWorkspacesOpenshiftNamespace(
-                          subject))
-                  .withName(podName)
-                  .redirectingOutput()
-                  .redirectingError()
-                  .usingListener(
-                      new ExecListener() {
-                        @Override
-                        public void onOpen(Response response) {
-                          if (response != null && response.body() != null) {
-                            response.body().close();
-                          }
-                        }
+      try (final ExecWatch watch =
+          kubeClient
+              .pods()
+              .inNamespace(
+                  openshiftWorkspaceEnvironmentProvider.getWorkspacesOpenshiftNamespace(subject))
+              .withName(podName)
+              .redirectingOutput()
+              .redirectingError()
+              .usingListener(
+                  new ExecListener() {
+                    @Override
+                    public void onOpen(Response response) {
+                      if (response != null && response.body() != null) {
+                        response.body().close();
+                      }
+                      shouldReadStreams[0] = true;
+                      if (LOG.isDebugEnabled()) {
+                        LOG.debug(
+                            "onOpen for execId: {} - responseCode = {}",
+                            execId,
+                            response == null ? "<null>" : response.code());
+                      }
+                      readStreamsAvailable.countDown();
+                    }
 
-                        @Override
-                        public void onFailure(Throwable t, Response response) {
-                          if (response != null && response.body() != null) {
-                            response.body().close();
-                          }
-                        }
+                    @Override
+                    public void onFailure(Throwable t, Response response) {
+                      if (response != null && response.body() != null) {
+                        response.body().close();
+                        readStreamsAvailable.countDown();
+                      }
+                      LOG.warn(
+                          "onFailure for execId:"
+                              + execId
+                              + " - responseCode = "
+                              + (response == null ? "<null>" : response.code()),
+                          t);
+                      execEnd.countDown();
+                    }
 
-                        @Override
-                        public void onClose(int code, String reason) {}
-                      })
-                  .exec(command);
-          InputStreamPumper outputPump =
-              new InputStreamPumper(
-                  watch.getOutput(),
-                  new KubernetesOutputAdapter(LogMessage.Type.STDOUT, execOutputProcessor));
-          InputStreamPumper errorPump =
-              new InputStreamPumper(
-                  watch.getError(),
-                  new KubernetesOutputAdapter(LogMessage.Type.STDERR, execOutputProcessor))) {
-        Future<?> outFuture = executor.submit(outputPump);
-        Future<?> errFuture = executor.submit(errorPump);
-        // Short-term worksaround; the Futures above seem to never finish.
-        Thread.sleep(2500);
+                    @Override
+                    public void onClose(int code, String reason) {
+                      if (LOG.isDebugEnabled()) {
+                        LOG.debug(
+                            "onClose for execId: {} - code = {} - reason = {}",
+                            execId,
+                            code,
+                            (reason == null ? "<null>" : reason));
+                      }
+                      execEnd.countDown();
+                    }
+                  })
+              .exec(command)) {
+        long waitStart = System.currentTimeMillis();
+        if (readStreamsAvailable.await(10, TimeUnit.SECONDS)) {
+          if (LOG.isDebugEnabled()) {
+            LOG.debug(
+                "Waited {} ms before starting reading the streams of exec: {}",
+                System.currentTimeMillis() - waitStart,
+                execId);
+          }
+        } else {
+          LOG.warn(
+              "Timeout elapsed: {} ms while waiting to start reading the streams of exec: {}",
+              System.currentTimeMillis() - waitStart,
+              execId);
+          shouldReadStreams[0] = false;
+        }
+        if (shouldReadStreams[0]) {
+          try (InputStreamPumper outputPump =
+                  new InputStreamPumper(
+                      watch.getOutput(),
+                      new KubernetesOutputAdapter(LogMessage.Type.STDOUT, execOutputProcessor));
+              InputStreamPumper errorPump =
+                  new InputStreamPumper(
+                      watch.getError(),
+                      new KubernetesOutputAdapter(LogMessage.Type.STDERR, execOutputProcessor))) {
+            executor.submit(outputPump);
+            executor.submit(errorPump);
+            execEnd.await();
+
+            waitStart = System.currentTimeMillis();
+            final CountDownLatch streamReadEnd = new CountDownLatch(1);
+            executor.submit(
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    try {
+                      while (watch.getOutput().available() + watch.getError().available() > 0) {
+                        Thread.sleep(100);
+                      }
+                    } catch (InterruptedException e) {
+                    } catch (IOException e) {
+                      LOG.warn(
+                          "Exception while reading the streams of the following exec: " + execId,
+                          e);
+                    }
+                    streamReadEnd.countDown();
+                  }
+                });
+            if (streamReadEnd.await(5, TimeUnit.SECONDS)) {
+              if (LOG.isDebugEnabled()) {
+                LOG.debug(
+                    "Waited {} ms to finish reading the streams of exec: {}",
+                    System.currentTimeMillis() - waitStart,
+                    execId);
+              }
+            } else {
+              LOG.warn(
+                  "Timeout elapsed: {} ms while waiting to finish reading the streams of exec: {}",
+                  System.currentTimeMillis() - waitStart,
+                  execId);
+            }
+          }
+        }
       } catch (KubernetesClientException e) {
         throw new OpenShiftException(e.getMessage());
       } catch (InterruptedException e) {
