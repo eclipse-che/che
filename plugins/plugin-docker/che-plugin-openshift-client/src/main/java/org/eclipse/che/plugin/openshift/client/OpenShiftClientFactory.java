@@ -42,7 +42,7 @@ public class OpenShiftClientFactory {
       @Named("che.openshift.server.http.async_requests.max") int maxConcurrentRequests,
       @Named("che.openshift.server.http.async_requests.max_per_host") int maxConcurrentRequestsPerHost,
       @Named("che.openshift.server.http.connection_pool.max_idle") int maxIdleConnections,
-      @Named("che.openshift.server.http.connection_pool.keep_alive") int connectionPoolKeepAlive) {
+      @Named("che.openshift.server.http.connection_pool.keep_alive.mins") int connectionPoolKeepAlive) {
     Config defaultOpenshiftConfig = workspaceEnvironmentProvider.getDefaultOpenshiftConfig();
     OkHttpClient temporary = HttpClientUtils.createHttpClient(defaultOpenshiftConfig);
     OkHttpClient.Builder builder = temporary.newBuilder();
