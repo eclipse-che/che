@@ -43,6 +43,7 @@ public class Ide {
     URL workspaceUrl = testWorkspaceUrlResolver.resolve(testWorkspace);
     seleniumWebDriver.get(workspaceUrl.toString());
     entrance.login(testWorkspace.getOwner());
+
   }
 
   @PreDestroy

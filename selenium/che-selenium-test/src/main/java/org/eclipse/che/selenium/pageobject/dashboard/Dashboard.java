@@ -270,6 +270,28 @@ public class Dashboard {
     return !(workspaces.size() == 0);
   }
 
+  ////////////
+  ////////////
+  ////////////
+
+  public void clickOnUsernameButton() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.id(Locators.USER_NAME)))
+        .click();
+  }
+
+  public void clickOnAccountItem() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath("//span[text()=' Account']")))
+        .click();
+  }
+
+  public void clickOnLogoutItem() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath("//span[text()=' Logout']")))
+        .click();
+  }
+
   @PreDestroy
   public void close() {
     seleniumWebDriver.quit();
