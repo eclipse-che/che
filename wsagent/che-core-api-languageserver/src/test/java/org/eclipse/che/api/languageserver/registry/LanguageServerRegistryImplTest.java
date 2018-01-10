@@ -66,6 +66,7 @@ public class LanguageServerRegistryImplTest {
   @Mock private HttpJsonRequest httpJsonRequest;
   @Mock private HttpJsonResponse httpJsonResponse;
   @Mock private Workspace workspace;
+  @Mock private LanguageRecognizer languageRecognizer;
 
   private LanguageServerRegistryImpl registry;
   private LanguageServerDescription serverDescription;
@@ -94,6 +95,8 @@ public class LanguageServerRegistryImplTest {
     when(languageServer.getTextDocumentService()).thenReturn(mock(TextDocumentService.class));
     when(languageServer.initialize(any(InitializeParams.class))).thenReturn(completableFuture);
 
+    when(languageRecognizer.recognizeByPath(PREFIX + FILE_PATH)).thenReturn(languageDescription);
+
     when(pmp.get()).thenReturn(pm);
 
     when(clientFactory.create(anyString())).thenReturn(languageClient);
@@ -115,7 +118,8 @@ public class LanguageServerRegistryImplTest {
                 pmp,
                 initializer,
                 null,
-                clientFactory) {
+                clientFactory,
+                languageRecognizer) {
               @Override
               protected String extractProjectPath(String filePath) throws LanguageServerException {
                 return PROJECT_PATH;
