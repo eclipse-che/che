@@ -20,9 +20,33 @@
 
     <ui:style>
 
+        @def workspaceStatusBackgroundColor #191c28;
+        @def workspaceStatusDelimiterColor rgba(160, 169, 183, 0.2);
+        @def workspaceStatusMachineOutputsHyperlink #4973c1;
+
+        @def workspaceStatusWaitingWorkspaceSection #f0c530;
+        @def workspaceStatusWorkspaceStartedSection #3aa461;
+        @def workspaceStatusWorkspaceStoppedSection #f0c530;
+        @def workspaceStatusWorkspaceFailedSection red;
+
+        @def workspaceStatusMachineStateStarting #4973c1;
+        @def workspaceStatusMachineStateRunning #3aa461;
+        @def workspaceStatusMachineStateStopped #adadad;
+        @def workspaceStatusMachineStateFailed red;
+
+        @def workspaceStatusInstallerStateStarting #4973c1;
+        @def workspaceStatusInstallerStateRunning #4973c1;
+        @def workspaceStatusInstallerStateFailed red;
+
+        @def workspaceStatusInstallerStatusStarting #4973c1;
+        @def workspaceStatusInstallerStatusRunning #3aa461;
+        @def workspaceStatusInstallerStatusFailed red;
+
+        @def workspaceStatusErrorMessage red;
+
         .panel {
             overflow: auto;
-            background-color: #191c28;
+            background-color: workspaceStatusBackgroundColor;
             user-select: text;
             position: relative;
         }
@@ -45,7 +69,7 @@
 
         .table > tbody > tr > td > hr {
             border: none;
-            border-top: 1px solid rgba(160, 169, 183, 0.2);
+            border-top: 1px solid workspaceStatusDelimiterColor;
             margin-top: 15px;
             margin-bottom: 15px;
         }
@@ -74,9 +98,9 @@
             position: absolute;
             left: 3px;
             top: 37px;
-            line-height: 15px;
+            line-height: 15px!important;
             font-size: 9px;
-            color: #4973c1;;
+            color: workspaceStatusMachineOutputsHyperlink;
             text-decoration: underline;
             cursor: pointer;
         }
@@ -85,14 +109,14 @@
             color: white;
             font-size: 13px!important;
             text-transform: uppercase;
-            border-bottom: 1px solid rgba(160, 169, 183, 0.2);
+            border-bottom: 1px solid workspaceStatusDelimiterColor;
             height: 20px;
             line-height: 20px!important;
             padding-top: 11px;
         }
 
         .machineImage {
-            border-bottom: 1px solid rgba(160, 169, 183, 0.2);
+            border-bottom: 1px solid workspaceStatusDelimiterColor;
             height: 20px;
             line-height: 20px!important;
             padding-top: 11px;
@@ -100,26 +124,26 @@
 
         .machineState {
             font-size: 12px!important;
-            border-bottom: 1px solid rgba(160, 169, 183, 0.2);
+            border-bottom: 1px solid workspaceStatusDelimiterColor;
             height: 20px;
             line-height: 20px!important;
             padding-top: 11px;
         }
 
         .machineState[rel="starting"] {
-            color: #4973c1;
+            color: workspaceStatusMachineStateStarting;
         }
 
         .machineState[rel="running"] {
-            color: #3aa461;
+            color: workspaceStatusMachineStateRunning;
         }
 
         .machineState[rel="stopped"] {
-            color: #adadad;
+            color: workspaceStatusMachineStateStopped;
         }
 
         .machineState[rel="failed"] {
-            color: red;
+            color: workspaceStatusMachineStateFailed;
         }
 
         .installerRow {
@@ -153,32 +177,32 @@
         }
 
         .state[rel="starting"] {
-            color: #4973c1;
+            color: workspaceStatusInstallerStateStarting;
         }
 
         .state[rel="running"] {
-            color: #4973c1;
+            color: workspaceStatusInstallerStateRunning;
         }
 
         .state[rel="failed"] {
-            color: red;
+            color: workspaceStatusInstallerStateFailed;
         }
 
         .status[rel="starting"] {
-            color: #4973c1;
+            color: workspaceStatusInstallerStatusStarting;
         }
 
         .status[rel="running"],
         .status[rel="ok"] {
-            color: #3aa461;
+            color: workspaceStatusInstallerStatusRunning;
         }
 
         .status[rel="failed"] {
-            color: red;
+            color: workspaceStatusInstallerStatusFailed;
         }
 
         .error {
-            color: red;
+            color: workspaceStatusErrorMessage;
             white-space: normal!important;
             padding-right: 30px;
         }
@@ -187,9 +211,9 @@
             width: 60px;
             height: 22px;
             font-size: 20px;
-            line-height: 20px;
+            line-height: 20px!important;
             text-align: center;
-            color: red;
+            color: workspaceStatusErrorMessage;
             position: relative;
             vertical-align: middle;
         }
@@ -206,12 +230,43 @@
             user-select: text;
             white-space: pre;
             vertical-align: middle;
-            line-height: 20px;
+            line-height: 20px!important;
         }
 
         .workspaceFailedTitle > span {
             color: white;
             text-transform: uppercase;
+        }
+
+        .waitingWorkspaceSection,
+        .workspaceStartedSection,
+        .workspaceStoppedSection,
+        .workspaceFailedSection {
+            height: 40px;
+        }
+
+        .waitingWorkspaceSection td,
+        .workspaceStartedSection td,
+        .workspaceStoppedSection td,
+        .workspaceFailedSection td {
+            height: 50px;
+            line-height: 50px!important;
+        }
+
+        .waitingWorkspaceSection td {
+            color: workspaceStatusWaitingWorkspaceSection;
+        }
+
+        .workspaceStartedSection td {
+            color: workspaceStatusWorkspaceStartedSection;
+        }
+
+        .workspaceStoppedSection td {
+            color: workspaceStatusWorkspaceStoppedSection;
+        }
+
+        .workspaceFailedSection td {
+            color: workspaceStatusWorkspaceFailedSection;
         }
 
     </ui:style>
@@ -223,20 +278,20 @@
             <table cellpadding="0" cellspacing="0" class="{style.table}" border="0">
                 <tbody ui:field="tableBody">
 
-                    <tr ui:field="waitingWorkspaceSection" style="height: 40px;">
-                        <td colspan="8" style="color: #f0c530; height: 50px; line-height: 50px;">Starting and configuring your workspace machines</td>
+                    <tr ui:field="waitingWorkspaceSection" class="{style.waitingWorkspaceSection}">
+                        <td colspan="8">Starting and configuring your workspace machines</td>
                     </tr>
 
-                    <tr ui:field="workspaceStartedSection" style="display: none; height: 40px;">
-                        <td colspan="8" style="color: #3aa461; height: 50px; line-height: 50px;">Your workspace is ready to be used</td>
+                    <tr ui:field="workspaceStartedSection" class="{style.workspaceStartedSection}" style="display: none;">
+                        <td colspan="8">Your workspace is ready to be used</td>
                     </tr>
 
-                    <tr ui:field="workspaceStoppedSection" style="display: none; height: 40px;">
-                        <td colspan="8" style="color: #f0c530; height: 50px; line-height: 50px;">Workspace stopped</td>
+                    <tr ui:field="workspaceStoppedSection" class="{style.workspaceStoppedSection}" style="display: none;">
+                        <td colspan="8">Workspace stopped</td>
                     </tr>
 
-                    <tr ui:field="workspaceFailedSection" style="display: none; height: 40px;">
-                        <td colspan="8" style="color: red; height: 50px; line-height: 50px;">Your workspace failed to start</td>
+                    <tr ui:field="workspaceFailedSection" class="{style.workspaceFailedSection}" style="display: none;">
+                        <td colspan="8">Your workspace failed to start</td>
                     </tr>
 
                     <!-- Used as anchor when inserting elements. Insert machine elements before this element. -->

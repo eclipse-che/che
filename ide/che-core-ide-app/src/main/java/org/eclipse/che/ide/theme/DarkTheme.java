@@ -1039,7 +1039,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getPopupBorderColor() {
-    return "#3b4d6c";
+    return "#1b1e2b";
   }
 
   @Override
@@ -1089,7 +1089,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getTextFieldDisabledBackgroundColor() {
-    return "#2d2f31";
+    return "#242a3a";
   }
 
   @Override
