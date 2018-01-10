@@ -20,6 +20,7 @@ import io.fabric8.openshift.client.internal.OpenShiftOAuthInterceptor;
 import java.io.IOException;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import okhttp3.Authenticator;
 import okhttp3.Interceptor;
@@ -34,9 +35,13 @@ public class OpenShiftClientFactory {
 
   @Inject
   public OpenShiftClientFactory(
-      OpenshiftWorkspaceEnvironmentProvider workspaceEnvironmentProvider) {
-    this.httpClient =
-        HttpClientUtils.createHttpClient(workspaceEnvironmentProvider.getDefaultOpenshiftConfig());
+      OpenshiftWorkspaceEnvironmentProvider workspaceEnvironmentProvider,
+      @Named("che.openshift.server.concurrent.requests.total") int maxConcurrentRequests,
+      @Named("che.openshift.server.concurrent.requests.perhost") int maxConcurrentRequestsPerHost) {
+    Config defaultOpenshiftConfig = workspaceEnvironmentProvider.getDefaultOpenshiftConfig();
+    this.httpClient = HttpClientUtils.createHttpClient(defaultOpenshiftConfig);
+    httpClient.dispatcher().setMaxRequests(maxConcurrentRequests);
+    httpClient.dispatcher().setMaxRequestsPerHost(maxConcurrentRequestsPerHost);
   }
 
   @PreDestroy
