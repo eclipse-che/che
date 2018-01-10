@@ -32,7 +32,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {}
@@ -106,7 +106,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {}
@@ -181,7 +181,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -238,7 +238,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -296,7 +296,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -367,7 +367,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -432,7 +432,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.csharp"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ls.csharp"
               ],
               "servers": {},
               "attributes" : {
@@ -506,7 +506,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.csharp"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ls.csharp"
               ],
               "servers": {},
               "attributes" : {
@@ -579,7 +579,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -649,7 +649,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -726,7 +726,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -796,7 +796,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
               "attributes" : {
@@ -913,7 +913,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ls.php"
               ],
               "servers": {},
               "attributes" : {
@@ -1015,7 +1015,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.python"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ls.python"
               ],
               "servers": {},
               "attributes" : {
@@ -1086,7 +1086,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -1154,7 +1154,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -1202,7 +1202,6 @@
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
-                "org.eclipse.che.ssh",
                 "org.eclipse.che.ls.csharp",
                 "org.eclipse.che.ls.json",
                 "org.eclipse.che.ls.php"
@@ -1266,7 +1265,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -1342,7 +1341,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -1421,7 +1420,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
               "attributes" : {
@@ -1487,7 +1486,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.python"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ls.python"
               ],
               "servers": {},
               "attributes" : {
@@ -1550,7 +1549,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.python"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ls.python"
               ],
               "servers": {},
               "attributes" : {
@@ -1632,7 +1631,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -1684,7 +1683,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -1735,7 +1734,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -1796,7 +1795,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
               ],
               "servers": {},
               "attributes" : {
@@ -1903,7 +1902,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -2012,8 +2011,7 @@
               "agents": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
-                "org.eclipse.che.ws-agent",
-                "org.eclipse.che.ssh"
+                "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes": {
@@ -2107,8 +2105,7 @@
               "agents": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
-                "org.eclipse.che.ws-agent",
-                "org.eclipse.che.ssh"
+                "org.eclipse.che.ws-agent"
               ],
               "attributes": {
                 "memoryLimitBytes": "2147483648"
@@ -2196,8 +2193,7 @@
               "agents": [
 	        "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
-                "org.eclipse.che.ws-agent",
-                "org.eclipse.che.ssh"
+                "org.eclipse.che.ws-agent"
               ],
               "servers": {}
             }
@@ -2277,8 +2273,7 @@
               "agents": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
-                "org.eclipse.che.ws-agent",
-                "org.eclipse.che.ssh"
+                "org.eclipse.che.ws-agent"
               ],
               "servers": {}
             }
@@ -2353,7 +2348,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -2402,7 +2397,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
               ],
               "servers": {},
               "attributes" : {
@@ -2460,8 +2455,7 @@
           "dev-machine": {
             "agents": [
               "org.eclipse.che.terminal",
-              "org.eclipse.che.ws-agent",
-              "org.eclipse.che.ssh"
+              "org.eclipse.che.ws-agent"
             ],
             "servers": {},
             "attributes": {
@@ -2548,7 +2542,6 @@
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent",
-                "org.eclipse.che.ssh",
                 "org.eclipse.che.ls.json",
                 "org.eclipse.che.ls.js-ts"
               ]
