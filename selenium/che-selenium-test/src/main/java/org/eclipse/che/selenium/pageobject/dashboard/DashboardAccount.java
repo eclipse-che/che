@@ -37,7 +37,6 @@ import org.eclipse.che.selenium.core.user.TestUser;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 @Singleton
@@ -155,7 +154,7 @@ public class DashboardAccount {
         By.id(LAST_NAME_FIELD_ID));
   }
 
-  public AccountFields getFieldsValue(){
+  public AccountFields getFieldsValue() {
     AccountFields accountFields = new AccountFields();
 
     accountFields.setLogin(getUserNameValue());
@@ -166,84 +165,84 @@ public class DashboardAccount {
     return accountFields;
   }
 
-  public String getUserNameValue(){
-   return getFieldValue(By.id(USERNAME_FIELD_ID));
+  public String getUserNameValue() {
+    return getFieldValue(By.id(USERNAME_FIELD_ID));
   }
 
-  public String getEmailValue(){
+  public String getEmailValue() {
     return getFieldValue(By.id(EMAIL_FIELD_ID));
   }
 
-  public String getFirstNameValue(){
+  public String getFirstNameValue() {
     return getFieldValue(By.id(FIRST_NAME_FIELD_ID));
   }
 
-  public String getLastNameValue(){
+  public String getLastNameValue() {
     return getFieldValue(By.id(LAST_NAME_FIELD_ID));
   }
 
-  public void setUserNameValue(String value){
+  public void setUserNameValue(String value) {
     setFieldValue(By.id(USERNAME_FIELD_ID), value);
   }
 
-  public void setEmailValue(String value){
+  public void setEmailValue(String value) {
     setFieldValue(By.id(EMAIL_FIELD_ID), value);
   }
 
-  public void setFirstNameValue(String value){
+  public void setFirstNameValue(String value) {
     setFieldValue(By.id(FIRST_NAME_FIELD_ID), value);
   }
 
-  public void setLastNameValue(String value){
+  public void setLastNameValue(String value) {
     setFieldValue(By.id(LAST_NAME_FIELD_ID), value);
   }
 
-  private WebElement waitAndGetElement(By locator){
+  private WebElement waitAndGetElement(By locator) {
     return loadPageWait.until(visibilityOfElementLocated(locator));
   }
 
-  private String getFieldValue(By fieldLocator){
+  private String getFieldValue(By fieldLocator) {
     return waitAndGetElement(fieldLocator).getAttribute("value");
   }
 
-  private void waitFieldValue(By fieldLocator, String expectedValue){
-    loadPageWait.until((ExpectedCondition<Boolean>) driver -> getFieldValue(fieldLocator).equals(expectedValue));
+  private void waitFieldValue(By fieldLocator, String expectedValue) {
+    loadPageWait.until(
+        (ExpectedCondition<Boolean>) driver -> getFieldValue(fieldLocator).equals(expectedValue));
   }
 
-  private void setFieldValue(By fieldLocator, String value){
+  private void setFieldValue(By fieldLocator, String value) {
     waitAndGetElement(fieldLocator).clear();
     waitFieldValue(fieldLocator, "");
     waitAndGetElement(fieldLocator).sendKeys(value);
     waitFieldValue(fieldLocator, value);
   }
 
-  //==================================================================>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // ==================================================================>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-  protected interface PasswordLocators{
+  protected interface PasswordLocators {
     String PASSWORD_FIELD_ID = "password";
     String NEW_PASSWORD_FIELD_ID = "password-new";
     String NEW_PASSWORD_CONFIRMATION_ID = "password-confirm";
     String SAVE_BUTTON = "//button[text()='Save']";
   }
 
-  public void setPasswordFieldValue(String value){
+  public void setPasswordFieldValue(String value) {
     setFieldValue(By.id(PasswordLocators.PASSWORD_FIELD_ID), value);
   }
 
-  public void setNewPasswordFieldValue(String value){
+  public void setNewPasswordFieldValue(String value) {
     setFieldValue(By.id(PasswordLocators.NEW_PASSWORD_FIELD_ID), value);
   }
 
-  public void setNewPasswordConfirmationFieldValue(String value){
+  public void setNewPasswordConfirmationFieldValue(String value) {
     setFieldValue(By.id(PasswordLocators.NEW_PASSWORD_CONFIRMATION_ID), value);
   }
 
-  public void clickOnSavePasswordButton(){
+  public void clickOnSavePasswordButton() {
     loadPageWait.until(visibilityOfElementLocated(By.xpath(PasswordLocators.SAVE_BUTTON))).click();
   }
 
-
-  //==================================================================>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // ==================================================================>>>>>>>>>>>>>>>>>>>>>>>>>>
   private class AccountFields {
     private String login;
     private String email;
