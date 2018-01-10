@@ -24,7 +24,6 @@ import static org.eclipse.che.ide.ext.java.client.JavaExtension.JAVA_CUT_REFACTO
 import static org.eclipse.che.ide.ext.java.client.JavaExtension.JAVA_FIND_USAGES;
 import static org.eclipse.che.ide.ext.java.client.JavaExtension.JAVA_MOVE_REFACTORING;
 import static org.eclipse.che.ide.ext.java.client.JavaExtension.JAVA_RENAME_REFACTORING;
-import static org.eclipse.che.ide.ext.java.client.JavaExtension.OPEN_JAVA_DECLARATION;
 import static org.eclipse.che.ide.ext.java.client.JavaExtension.ORGANIZE_IMPORTS;
 import static org.eclipse.che.ide.ext.java.client.JavaExtension.PARAMETERS_INFO;
 import static org.eclipse.che.ide.ext.java.client.JavaExtension.QUICK_FIX;
@@ -86,7 +85,6 @@ public class EclipseKeyBinding {
     keys.put(PARAMETERS_INFO, new KeyBuilder().control().charCode('p').build());
     keys.put(JAVA_CLASS_STRUCTURE, new KeyBuilder().action().charCode('o').build());
     keys.put(ORGANIZE_IMPORTS, new KeyBuilder().action().charCode('O').build());
-    keys.put(OPEN_JAVA_DECLARATION, new KeyBuilder().charCode(KeyCodeMap.F3).build());
     keys.put(JAVA_CUT_REFACTORING, new KeyBuilder().action().charCode('x').build());
     keys.put(JAVA_FIND_USAGES, new KeyBuilder().control().alt().charCode('h').build());
     if (UserAgent.isMac()) {
