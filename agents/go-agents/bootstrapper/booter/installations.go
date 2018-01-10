@@ -37,7 +37,7 @@ type scriptInst struct {
 func (sci *scriptInst) execute() error {
 	diedC, err := executeScript(sci.installer)
 	if err != nil {
-		fmt.Errorf("Scrip execution failed. Error: %s", err)
+		return fmt.Errorf("Scrip execution failed. Error: %s", err)
 	}
 	select {
 	case died := <-diedC:
@@ -65,7 +65,7 @@ type serverInst struct {
 func (svi *serverInst) execute() error {
 	diedC, err := executeScript(svi.installer)
 	if err != nil {
-		fmt.Errorf("Scrip execution failed Error: %s", err)
+		return fmt.Errorf("Scrip execution failed Error: %s", err)
 	}
 	checker := &dialChecker{svi.period, make(chan bool, 1)}
 	select {
