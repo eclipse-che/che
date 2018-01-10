@@ -37,6 +37,6 @@ public class BeforeProjectInitializedEvent {
 
   @Override
   public String toString() {
-    return "ProjectInitializedEvent{" + "projectConfig='" + projectConfig + '\'' + '}';
+    return "BeforeProjectInitializedEvent{" + "projectConfig='" + projectConfig + '\'' + '}';
   }
 }
