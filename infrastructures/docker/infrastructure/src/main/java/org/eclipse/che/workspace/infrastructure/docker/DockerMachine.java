@@ -37,15 +37,16 @@ import org.slf4j.Logger;
 /** @author Alexander Garagatyi */
 public class DockerMachine implements Machine {
 
+  private static final Logger LOG = getLogger(DockerMachine.class);
+
+  /** Name of the latest tag used in Docker image. */
+  public static final String LATEST_TAG = "latest";
+
   /**
    * Default HOSTNAME that will be added in all docker containers that are started. This host will
    * container the Docker host's ip reachable inside the container.
    */
   public static final String CHE_HOST = "che-host";
-  /** Name of the latest tag used in Docker image. */
-  public static final String LATEST_TAG = "latest";
-
-  private static final Logger LOG = getLogger(DockerMachine.class);
 
   private final String container;
   private final DockerConnector docker;

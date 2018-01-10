@@ -149,7 +149,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       DockerMachine machine = machineCreator.create(container);
       String name = Labels.newDeserializer(container.getLabels()).machineName();
 
-      runtimeMachines.addMachine(name, machine);
+      runtimeMachines.putMachine(name, machine);
       stopDetector.startDetection(container.getId(), name, new AbnormalMachineStopHandlerImpl());
       streamLogsAsync(name, container.getId());
     }
@@ -193,7 +193,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         checkInterruption();
         String machineName = containerEntry.getKey();
 
-        runtimeMachines.addMachine(machineName, new DockerMachine.StartingDockerMachine());
+        runtimeMachines.putMachine(machineName, new DockerMachine.StartingDockerMachine());
         sendStartingEvent(machineName);
 
         try {
@@ -302,7 +302,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
             identity,
             new AbnormalMachineStopHandlerImpl());
     try {
-      runtimeMachines.replaceMachine(name, machine);
+      runtimeMachines.putMachine(name, machine);
 
       return machine;
     } catch (InfrastructureException e) {

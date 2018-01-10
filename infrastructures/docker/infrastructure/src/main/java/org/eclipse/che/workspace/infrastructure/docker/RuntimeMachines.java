@@ -17,7 +17,6 @@ import java.util.Map;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.workspace.infrastructure.docker.DockerMachine.StartingDockerMachine;
 
 /**
  * Holds machines during runtime lifecycle.
@@ -50,42 +49,19 @@ public class RuntimeMachines {
   }
 
   /**
-   * Adds a machine into the storage.
+   * Puts a machine into the storage. Replaces machine if another instance is already present.
    *
    * @param name the name of a machine
    * @param machine machine instance
    * @throws InternalInfrastructureException if runtime start is cancelled which led to removal of
    *     machines from this storage
    */
-  public synchronized void addMachine(String name, DockerMachine machine)
+  public synchronized void putMachine(String name, DockerMachine machine)
       throws InternalInfrastructureException {
     if (machines == null) {
       throw new InternalInfrastructureException("Start of runtime is canceled");
     }
     machines.put(name, machine);
-  }
-
-  /**
-   * Replaces existing machine with the provided one. Is supposed to be used to replace initial fake
-   * state of machine with the real one that returns all the information about machine.
-   *
-   * @param name name of the machine to replace
-   * @param machine replacement
-   * @throws InternalInfrastructureException if runtime start is cancelled which led to removal of
-   *     machines from this storage
-   * @throws InternalInfrastructureException if machine is not present in this storage which means
-   *     that correct runtime start flow is broken
-   */
-  public synchronized void replaceMachine(String name, DockerMachine machine)
-      throws InternalInfrastructureException {
-    if (machines == null) {
-      throw new InternalInfrastructureException("Start of runtime is canceled");
-    }
-    DockerMachine existingMachine = machines.get(name);
-    if (existingMachine == null || !(existingMachine instanceof StartingDockerMachine)) {
-      throw new InternalInfrastructureException("Machine is not in a STARTING state");
-    }
-    machines.replace(name, machine);
   }
 
   /**
