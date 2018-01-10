@@ -11,13 +11,14 @@
 package org.eclipse.che.ide.navigation;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.sort;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.util.NameUtils.getFileExtension;
 
 import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Comparator;
 import java.util.List;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.shared.dto.ProjectSearchRequestDto;
@@ -39,11 +40,21 @@ import org.eclipse.che.ide.util.loging.Log;
 @Singleton
 public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegate {
 
+  private static final int TYPING_PERIOD_DELAY_MS = 400;
+  private static final Comparator<SearchResultDto> SEARCH_COMPARATOR =
+      (o1, o2) -> {
+        String ext1 = getFileExtension(o1.getItemReference().getName());
+        String ext2 = getFileExtension(o2.getItemReference().getName());
+        return ext1.compareToIgnoreCase(ext2);
+      };
+
   private final EditorAgent editorAgent;
   private final RequestTransmitter requestTransmitter;
   private final DtoFactory dtoFactory;
   private final NavigateToFileView view;
   private final AppContext appContext;
+
+  private Timer timer;
 
   @Inject
   public NavigateToFilePresenter(
@@ -57,7 +68,6 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
     this.editorAgent = editorAgent;
     this.requestTransmitter = requestTransmitter;
     this.dtoFactory = dtoFactory;
-
     this.view.setDelegate(this);
   }
 
@@ -82,7 +92,7 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
   }
 
   @Override
-  public void onFileNameChanged(String fileName) {
+  public void onFileNameChanged(final String fileName) {
     if (fileName.isEmpty()) {
       view.showItems(emptyList());
       return;
@@ -93,27 +103,39 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
             .createDto(ProjectSearchRequestDto.class)
             .withPath("")
             .withName(URL.encodePathSegment(fileName + "*"));
+    if (timer != null) {
+      timer.cancel();
+    }
 
-    requestTransmitter
-        .newRequest()
-        .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-        .methodName("project/search")
-        .paramsAsDto(requestParams)
-        .sendAndReceiveResultAsDto(ProjectSearchResponseDto.class, 20_000)
-        .onSuccess(response -> prepareResults(response))
-        .onFailure(error -> Log.error(getClass(), error.getMessage()))
-        .onTimeout(() -> Log.error(getClass(), "Project search request failed due timeout"));
+    timer =
+        new Timer() {
+          @Override
+          public void run() {
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName("project/search")
+                .paramsAsDto(requestParams)
+                .sendAndReceiveResultAsDto(ProjectSearchResponseDto.class, 20_000)
+                .onSuccess(
+                    response -> {
+                      // Check that the file name from request corresponds to the actual file name
+                      // from the view.
+                      if (fileName.equals(view.getFileName())) {
+                        prepareResults(response);
+                      }
+                    })
+                .onFailure(error -> Log.error(getClass(), error.getMessage()))
+                .onTimeout(
+                    () -> Log.error(getClass(), "Project search request failed due timeout"));
+          }
+        };
+    timer.schedule(TYPING_PERIOD_DELAY_MS);
   }
 
   private void prepareResults(ProjectSearchResponseDto response) {
     List<SearchResultDto> results = response.getItemReferences();
-    sort(
-        results,
-        (o1, o2) -> {
-          String ext1 = getFileExtension(o1.getItemReference().getName());
-          String ext2 = getFileExtension(o2.getItemReference().getName());
-          return ext1.compareToIgnoreCase(ext2);
-        });
+    results.sort(SEARCH_COMPARATOR);
     view.showItems(results);
   }
 }

@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -247,6 +249,8 @@ public class GitHub {
   /** click on authorize button */
   public void clickOnAuthorizeBtn() {
     waitAuthorizeBtn();
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(ExpectedConditions.elementToBeClickable(authorizeBtn));
     authorizeBtn.click();
   }
 

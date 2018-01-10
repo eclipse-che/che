@@ -9,6 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 @def menuListBorderPx 1px;
+@eval findResultsTextColor org.eclipse.che.ide.api.theme.Style.theme.findResultsTextColor();
 
 .listBase {
     background: textFieldBackgroundColor;
@@ -49,6 +50,7 @@
 
 .search-match {
     background: linear-gradient(to bottom, #c1be9e 6%, #B89C07 64%);
+    color: findResultsTextColor;
     border-radius: 2px;
     padding-right: 2px;
     padding-left: 2px;

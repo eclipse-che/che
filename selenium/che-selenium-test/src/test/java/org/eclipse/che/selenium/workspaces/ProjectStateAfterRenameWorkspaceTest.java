@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.RUNNING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPING;
 import static org.testng.Assert.fail;
@@ -98,7 +98,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
     workspaceOverview.enterNameWorkspace(WORKSPACE_NEW_NAME);
     workspaceDetails.clickOnSaveChangesBtn();
     workspaceDetails.checkStateOfWorkspace(STOPPING);
-    workspaceDetails.checkStateOfWorkspace(RUNNING, EXPECTED_MESS_IN_CONSOLE_SEC);
+    workspaceDetails.checkStateOfWorkspace(RUNNING, UPDATING_PROJECT_TIMEOUT_SEC);
     workspaceOverview.checkNameWorkspace(WORKSPACE_NEW_NAME);
 
     // open the IDE, check state of the project

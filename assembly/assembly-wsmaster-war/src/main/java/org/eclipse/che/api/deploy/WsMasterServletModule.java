@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Singleton;
 import org.apache.catalina.filters.CorsFilter;
+import org.eclipse.che.commons.logback.filter.RequestIdLoggerFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakServletModule;
 import org.eclipse.che.multiuser.machine.authentication.server.MachineLoginFilter;
@@ -45,6 +46,7 @@ public class WsMasterServletModule extends ServletModule {
     bind(CorsFilter.class).in(Singleton.class);
 
     filter("/*").through(CorsFilter.class, corsFilterParams);
+    filter("/*").through(RequestIdLoggerFilter.class);
 
     serveRegex("^/(?!ws$|ws/|websocket.?)(.*)").with(GuiceEverrestServlet.class);
     install(new org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule());
