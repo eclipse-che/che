@@ -49,10 +49,9 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(PlainJavaProjectGenerator.class);
 
-  private static final String FILE_NAME = "Main.java";
-  private static final String MAIN_CLASS_RESOURCE = "files/Main";
-  private static final String PROJECT_FILE_RESOURCE = "files/project";
-  private static final String CLASSPATH_FILE_RESOURCE = "files/classpath";
+  private static final String MAIN_CLASS = "Main.java";
+  private static final String PROJECT_FILE_RESOURCE = "project";
+  private static final String CLASSPATH_FILE_RESOURCE = "classpath";
   private static final String PROJECT_NAME_PATTERN = "project_name";
   private static final String SOURCE_FOLDER_PATTERN = "source_folder_value";
 
@@ -92,9 +91,9 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
     String sourceDirWsPath = resolve(projectWsPath, sourceFolders.get(0));
     fsManager.createDir(sourceDirWsPath);
 
-    String mainJavaWsPath = resolve(sourceDirWsPath, FILE_NAME);
+    String mainJavaWsPath = resolve(sourceDirWsPath, MAIN_CLASS);
     fsManager.createFile(
-        mainJavaWsPath, getClass().getClassLoader().getResourceAsStream(MAIN_CLASS_RESOURCE));
+        mainJavaWsPath, getClass().getClassLoader().getResourceAsStream(MAIN_CLASS));
 
     createClasspath(projectWsPath, sourceFolders.get(0));
     createProjectConfig(projectWsPath);
