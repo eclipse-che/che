@@ -207,13 +207,13 @@ perform_database_migration() {
     echo "Performing migration of the database file, to it's original old path"
     echo "In case if there was already a database file in old path, it will be renamed to 'che.mv.db.old'"
     echo "See issue https://github.com/eclipse/che/issues/8068 for details"
-    #in case if there is existing database in old path, back it up
     if [ -f ${CHE_DATA}/db/che.mv.db ]; then
       mv ${CHE_DATA}/db/che.mv.db ${CHE_DATA}/db/che.mv.db.old
+      echo "Old database found, renamed to 'che.mv.db.old'"
     fi
 
     mv ${CHE_DATA}/storage/db/che.mv.db ${CHE_DATA}/db/che.mv.db
-    echo "Database has been moved successfuly"
+    echo "Database has been moved successfully"
   fi
 }
 
