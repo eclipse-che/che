@@ -202,11 +202,11 @@ launch_docker_registry () {
 perform_database_migration() {
   CHE_DATA=/data
   if [ -f ${CHE_DATA}/db/che.mv.db ]; then
-    echo "Detected Che database, that is stored by an old path: ${CHE_DATA}/db/che.mv.db"
-    echo "In case if you want to use it, move it manually to the new path ${CHE_DATA}/storage/db/che.mv.db"
-    echo "It will be moved automatically there, if no database is present by the new path"
+    echo "!!! Detected Che database, that is stored by an old path: ${CHE_DATA}/db/che.mv.db"
+    echo "!!! In case if you want to use it, move it manually to the new path ${CHE_DATA}/storage/db/che.mv.db"
+    echo "!!! It will be moved there automatically, if no database is present by the new path"
     if [ ! -f ${CHE_DATA}/db/storage/che.mv.db ]; then
-      mv ${CHE_DATA}/db/che.mv.db ${CHE_DATA}/db/storage/che.mv.db
+      mv ${CHE_DATA}/db/che.mv.db ${CHE_DATA}/storage/db/che.mv.db
       echo "Database has been successfully moved to the new path"
     fi
   fi
@@ -250,9 +250,6 @@ init() {
   [ -z "$CHE_WORKSPACE_TERMINAL__LINUX__ARM7" ] && export CHE_WORKSPACE_TERMINAL__LINUX__ARM7=${CHE_DATA_HOST}/lib/linux_arm7/terminal
   [ -z "$CHE_WORKSPACE_EXEC__LINUX__AMD64" ] && export CHE_WORKSPACE_EXEC__LINUX__AMD64=${CHE_DATA_HOST}/lib/linux_amd64/exec
 
-  echo "!!!"
-  echo "!!! Starting migration"
-  echo "!!!"
   perform_database_migration
 
   # CHE_DOCKER_IP_EXTERNAL must be set if you are in a VM.
