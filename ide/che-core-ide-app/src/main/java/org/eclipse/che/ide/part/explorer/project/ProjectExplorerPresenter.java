@@ -306,7 +306,8 @@ public class ProjectExplorerPresenter extends BasePresenter
             tree.getNodeStorage().reIndexNode(oldId, node);
             tree.refresh(node);
           } else {
-            tree.getNodeStorage().add(nodeFactory.newContainerNode((Container) resource, nodeSettings));
+            tree.getNodeStorage()
+                .add(nodeFactory.newContainerNode((Container) resource, nodeSettings));
           }
         }
       } else if (delta.getKind() == REMOVED) {
