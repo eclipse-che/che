@@ -201,19 +201,14 @@ launch_docker_registry () {
 
 perform_database_migration() {
   CHE_DATA=/data
-  # Move database to original location
-
-  if [ -f ${CHE_DATA}/storage/db/che.mv.db ]; then
-    echo "Performing migration of the database file, to it's original old path"
-    echo "In case if there was already a database file in old path, it will be renamed to 'che.mv.db.old'"
-    echo "See issue https://github.com/eclipse/che/issues/8068 for details"
-    if [ -f ${CHE_DATA}/db/che.mv.db ]; then
-      mv ${CHE_DATA}/db/che.mv.db ${CHE_DATA}/db/che.mv.db.old
-      echo "Old database found, renamed to 'che.mv.db.old'"
+  if [ -f ${CHE_DATA}/db/che.mv.db ]; then
+    echo "Detected Che database, that is stored by an old path: ${CHE_DATA}/db/che.mv.db"
+    echo "In case if you want to use it, move it manually to the new path ${CHE_DATA}/storage/db/che.mv.db"
+    echo "It will be moved automatically there, if no database is present by the new path"
+    if [ ! -f ${CHE_DATA}/db/storage/che.mv.db ]; then
+      mv ${CHE_DATA}/db/che.mv.db ${CHE_DATA}/db/storage/che.mv.db
+      echo "Database has been successfully moved to the new path"
     fi
-
-    mv ${CHE_DATA}/storage/db/che.mv.db ${CHE_DATA}/db/che.mv.db
-    echo "Database has been moved successfully"
   fi
 }
 
