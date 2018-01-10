@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.preferences.pages.appearance;
+package org.eclipse.che.ide.preferences.pages.general;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
@@ -20,67 +20,84 @@ import org.eclipse.che.ide.api.theme.ThemeAgent;
 
 /** @author Evgen Vidolob */
 @Singleton
-public class AppearancePresenter extends AbstractPreferencePagePresenter
-    implements AppearanceView.ActionDelegate {
+public class IdeGeneralPreferencesPresenter extends AbstractPreferencePagePresenter
+    implements IdeGeneralPreferencesView.ActionDelegate {
 
-  public static final String PREF_IDE_THEME = "ide.theme";
+  public static final String PREF_IDE_GENERAL_THEME = "ide.theme";
+  public static final String PREF_IDE_GENERAL_TAB_CLOSING = "ide.askBeforeClosingTab";
 
-  private AppearanceView view;
+  private IdeGeneralPreferencesView view;
   private ThemeAgent themeAgent;
   private PreferencesManager preferencesManager;
-  private boolean dirty = false;
+
   private String themeId;
+  private boolean isAskBeforeClosingTab;
 
   @Inject
-  public AppearancePresenter(
-      AppearanceView view,
+  public IdeGeneralPreferencesPresenter(
+      IdeGeneralPreferencesView view,
       CoreLocalizationConstant constant,
       ThemeAgent themeAgent,
       PreferencesManager preferencesManager) {
-    super(constant.appearanceTitle(), constant.appearanceCategory());
+    super(constant.generalTitle(), constant.generalCategory());
     this.view = view;
     this.themeAgent = themeAgent;
     this.preferencesManager = preferencesManager;
     view.setDelegate(this);
+
+    revertChanges();
   }
 
   @Override
   public boolean isDirty() {
-    return dirty;
+    return !(themeId.equals(themeAgent.getCurrentThemeId())
+        && isAskBeforeClosingTab == Boolean.parseBoolean(preferencesManager.getValue(PREF_IDE_GENERAL_TAB_CLOSING)));
   }
 
   @Override
   public void go(AcceptsOneWidget container) {
     container.setWidget(view);
 
-    String currentThemeId = preferencesManager.getValue(PREF_IDE_THEME);
+    String currentThemeId = preferencesManager.getValue(PREF_IDE_GENERAL_THEME);
     if (currentThemeId == null || currentThemeId.isEmpty()) {
       currentThemeId = themeAgent.getCurrentThemeId();
     }
     view.setThemes(themeAgent.getThemes(), currentThemeId);
+
+    view.setAskBeforeClosingTab(
+        Boolean.parseBoolean(preferencesManager.getValue(PREF_IDE_GENERAL_TAB_CLOSING)));
   }
 
   @Override
   public void themeSelected(String themeId) {
     this.themeId = themeId;
-    dirty = !themeId.equals(themeAgent.getCurrentThemeId());
+    delegate.onDirtyChanged();
+  }
+
+  @Override
+  public void onAskBeforeClosingTabChanged(boolean isChecked) {
+    this.isAskBeforeClosingTab = isChecked;
     delegate.onDirtyChanged();
   }
 
   @Override
   public void storeChanges() {
-    preferencesManager.setValue(PREF_IDE_THEME, themeId);
-    dirty = false;
+    preferencesManager.setValue(PREF_IDE_GENERAL_THEME, themeId);
+    preferencesManager.setValue(
+        PREF_IDE_GENERAL_TAB_CLOSING, String.valueOf(isAskBeforeClosingTab));
   }
 
   @Override
   public void revertChanges() {
-    String currentThemeId = preferencesManager.getValue(PREF_IDE_THEME);
+    String currentThemeId = preferencesManager.getValue(PREF_IDE_GENERAL_THEME);
     if (currentThemeId == null || currentThemeId.isEmpty()) {
       currentThemeId = themeAgent.getCurrentThemeId();
     }
     view.setThemes(themeAgent.getThemes(), currentThemeId);
+    themeId = currentThemeId;
 
-    dirty = false;
+    boolean currentAskBeforeClosingTab = Boolean.parseBoolean(preferencesManager.getValue(PREF_IDE_GENERAL_TAB_CLOSING));
+    view.setAskBeforeClosingTab(currentAskBeforeClosingTab);
+    isAskBeforeClosingTab = currentAskBeforeClosingTab;
   }
 }

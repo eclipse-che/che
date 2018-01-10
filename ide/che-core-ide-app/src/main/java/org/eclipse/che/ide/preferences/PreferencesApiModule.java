@@ -15,12 +15,12 @@ import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
-import org.eclipse.che.ide.preferences.pages.appearance.AppearancePresenter;
-import org.eclipse.che.ide.preferences.pages.appearance.AppearanceView;
-import org.eclipse.che.ide.preferences.pages.appearance.AppearanceViewImpl;
 import org.eclipse.che.ide.preferences.pages.extensions.ExtensionManagerPresenter;
 import org.eclipse.che.ide.preferences.pages.extensions.ExtensionManagerView;
 import org.eclipse.che.ide.preferences.pages.extensions.ExtensionManagerViewImpl;
+import org.eclipse.che.ide.preferences.pages.general.IdeGeneralPreferencesPresenter;
+import org.eclipse.che.ide.preferences.pages.general.IdeGeneralPreferencesView;
+import org.eclipse.che.ide.preferences.pages.general.IdeGeneralPreferencesViewImpl;
 
 /** GIN module for configuring Preferences API components. */
 public class PreferencesApiModule extends AbstractGinModule {
@@ -36,10 +36,12 @@ public class PreferencesApiModule extends AbstractGinModule {
 
     GinMultibinder<PreferencePagePresenter> pagesBinder =
         GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class);
-    pagesBinder.addBinding().to(AppearancePresenter.class);
+    pagesBinder.addBinding().to(IdeGeneralPreferencesPresenter.class);
     pagesBinder.addBinding().to(ExtensionManagerPresenter.class);
 
-    bind(AppearanceView.class).to(AppearanceViewImpl.class).in(Singleton.class);
+    bind(IdeGeneralPreferencesView.class)
+        .to(IdeGeneralPreferencesViewImpl.class)
+        .in(Singleton.class);
     bind(ExtensionManagerView.class).to(ExtensionManagerViewImpl.class).in(Singleton.class);
   }
 }
