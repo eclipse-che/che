@@ -111,7 +111,7 @@ public class OpenLocationPresenter extends BasePresenter
 
   @Override
   public String getTitleToolTip() {
-    return null;
+    return title;
   }
 
   @Override
