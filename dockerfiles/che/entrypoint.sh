@@ -234,7 +234,7 @@ init() {
   CHE_DATA_HOST=$(get_che_data_from_host)
 
   CHE_USER=${CHE_USER:-root}
-  [ -z "$CHE_USER" ] && export CHE_USER=$CHE_USER
+  export CHE_USER=$CHE_USER
   if [ "$CHE_USER" != "root" ]; then
     if [ ! $(getent group docker) ]; then
       echo "!!!"
