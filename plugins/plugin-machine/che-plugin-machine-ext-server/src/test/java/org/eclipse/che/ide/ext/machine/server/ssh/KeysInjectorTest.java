@@ -31,9 +31,6 @@ import org.eclipse.che.agent.exec.shared.dto.GetProcessResponseDto;
 import org.eclipse.che.agent.exec.shared.dto.ProcessStartResponseDto;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.ssh.server.SshManager;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
@@ -41,11 +38,9 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.MachineDto;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
 import org.eclipse.che.api.workspace.shared.dto.ServerDto;
-import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -63,29 +58,19 @@ public class KeysInjectorTest {
   private static final String WORKSPACE_ID = "workspace123";
   private static final String OWNER = "user123";
 
-  @Captor private ArgumentCaptor<EventSubscriber<WorkspaceStatusEvent>> subscriberCaptor;
-
   @Mock private WorkspaceImpl workspace;
   @Mock private RuntimeDto runtime;
 
-  @Mock private EventService eventService;
   @Mock private SshManager sshManager;
   @Mock private WorkspaceManager workspaceManager;
   @Mock private ExecAgentClient client;
   @Mock private ExecAgentClientFactory execAgentClientFactory;
 
-  private EventSubscriber<WorkspaceStatusEvent> subscriber;
-
   private KeysInjector keysInjector;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    keysInjector =
-        new KeysInjector(eventService, sshManager, workspaceManager, execAgentClientFactory);
-
-    keysInjector.start();
-    verify(eventService).subscribe(subscriberCaptor.capture());
-    subscriber = subscriberCaptor.getValue();
+    keysInjector = new KeysInjector(sshManager, workspaceManager, execAgentClientFactory);
 
     when(execAgentClientFactory.create(anyString())).thenReturn(client);
     when(client.startProcess(anyString(), anyString(), anyString(), anyString()))
@@ -101,19 +86,10 @@ public class KeysInjectorTest {
   }
 
   @Test
-  public void shouldNotDoAnythingIfEventTypeDoesNotEqualToRunning() {
-    subscriber.onEvent(newDto(WorkspaceStatusEvent.class).withStatus(WorkspaceStatus.STARTING));
-    verifyZeroInteractions(execAgentClientFactory, workspaceManager, sshManager);
-  }
-
-  @Test
   public void shouldNotInjectSshKeysWhenThereAreNotAnyPair() throws Exception {
     when(sshManager.getPairs(anyString(), anyString())).thenReturn(Collections.emptyList());
 
-    subscriber.onEvent(
-        newDto(WorkspaceStatusEvent.class)
-            .withStatus(WorkspaceStatus.RUNNING)
-            .withWorkspaceId(WORKSPACE_ID));
+    keysInjector.injectPublicKeys(WORKSPACE_ID);
 
     verify(sshManager).getPairs(eq(OWNER), eq("machine"));
     verify(sshManager).getPair(eq(OWNER), eq("workspace"), eq(WORKSPACE_ID));
@@ -126,10 +102,7 @@ public class KeysInjectorTest {
         .thenReturn(
             Collections.singletonList(new SshPairImpl(OWNER, "machine", "myPair", null, null)));
 
-    subscriber.onEvent(
-        newDto(WorkspaceStatusEvent.class)
-            .withStatus(WorkspaceStatus.RUNNING)
-            .withWorkspaceId(WORKSPACE_ID));
+    keysInjector.injectPublicKeys(WORKSPACE_ID);
 
     verify(sshManager).getPairs(eq(OWNER), eq("machine"));
     verify(sshManager).getPair(eq(OWNER), eq("workspace"), eq(WORKSPACE_ID));
@@ -144,10 +117,7 @@ public class KeysInjectorTest {
                 new SshPairImpl(OWNER, "machine", "myPair", "publicKey1", null),
                 new SshPairImpl(OWNER, "machine", "myPair", "publicKey2", null)));
 
-    subscriber.onEvent(
-        newDto(WorkspaceStatusEvent.class)
-            .withStatus(WorkspaceStatus.RUNNING)
-            .withWorkspaceId(WORKSPACE_ID));
+    keysInjector.injectPublicKeys(WORKSPACE_ID);
 
     verify(sshManager).getPairs(eq(OWNER), eq("machine"));
     verify(sshManager).getPair(eq(OWNER), eq("workspace"), eq(WORKSPACE_ID));
@@ -175,11 +145,7 @@ public class KeysInjectorTest {
     when(sshManager.getPair(anyString(), eq("workspace"), anyString()))
         .thenReturn(new SshPairImpl(OWNER, "workspace", WORKSPACE_ID, "publicKeyWorkspace", null));
 
-    subscriber.onEvent(
-        newDto(WorkspaceStatusEvent.class)
-            .withStatus(WorkspaceStatus.RUNNING)
-            .withWorkspaceId(WORKSPACE_ID));
-
+    keysInjector.injectPublicKeys(WORKSPACE_ID);
     // check calls for machine and workspace ssh pairs
     verify(sshManager).getPairs(eq(OWNER), eq("machine"));
     verify(sshManager).getPair(eq(OWNER), eq("workspace"), eq(WORKSPACE_ID));
@@ -209,10 +175,7 @@ public class KeysInjectorTest {
     when(sshManager.getPair(anyString(), eq("workspace"), anyString()))
         .thenReturn(new SshPairImpl(OWNER, "workspace", WORKSPACE_ID, null, null));
 
-    subscriber.onEvent(
-        newDto(WorkspaceStatusEvent.class)
-            .withStatus(WorkspaceStatus.RUNNING)
-            .withWorkspaceId(WORKSPACE_ID));
+    keysInjector.injectPublicKeys(WORKSPACE_ID);
     // check calls for machine and workspace ssh pairs
     verify(sshManager).getPairs(eq(OWNER), eq("machine"));
     verify(sshManager).getPair(eq(OWNER), eq("workspace"), eq(WORKSPACE_ID));
@@ -238,10 +201,7 @@ public class KeysInjectorTest {
     when(sshManager.getPair(anyString(), eq("workspace"), anyString()))
         .thenThrow(NotFoundException.class);
 
-    subscriber.onEvent(
-        newDto(WorkspaceStatusEvent.class)
-            .withStatus(WorkspaceStatus.RUNNING)
-            .withWorkspaceId(WORKSPACE_ID));
+    keysInjector.injectPublicKeys(WORKSPACE_ID);
 
     // check calls for machine and workspace ssh pairs
     verify(sshManager).getPairs(eq(OWNER), eq("machine"));
