@@ -54,7 +54,8 @@ public class WindowActionEvent extends GwtEvent<WindowActionHandler> {
 
   /**
    * Makes sense only for {@link WindowAction#CLOSING}.
-   * <p> Please note, that custom messages are not supported any more. See
+   *
+   * <p>Please note, that custom messages are not supported any more. See
    * https://bugs.chromium.org/p/chromium/issues/detail?id=587940 and
    * https://www.chromestatus.com/feature/5349061406228480
    *

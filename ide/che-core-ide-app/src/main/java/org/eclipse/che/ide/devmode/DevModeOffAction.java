@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.BaseAction;
+import org.eclipse.che.ide.core.BrowserTabCloseHandler;
 
 @Singleton
 public class DevModeOffAction extends BaseAction {
@@ -30,6 +31,7 @@ public class DevModeOffAction extends BaseAction {
 
   @Override
   public void actionPerformed(ActionEvent event) {
+    BrowserTabCloseHandler.setCloseImmediately(true);
     gwtDevMode.off();
   }
 }

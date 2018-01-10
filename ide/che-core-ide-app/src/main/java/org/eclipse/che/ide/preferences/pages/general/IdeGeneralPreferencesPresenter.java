@@ -51,7 +51,8 @@ public class IdeGeneralPreferencesPresenter extends AbstractPreferencePagePresen
   @Override
   public boolean isDirty() {
     return !(themeId.equals(themeAgent.getCurrentThemeId())
-        && isAskBeforeClosingTab == Boolean.parseBoolean(preferencesManager.getValue(PREF_IDE_GENERAL_TAB_CLOSING)));
+        && isAskBeforeClosingTab
+            == Boolean.parseBoolean(preferencesManager.getValue(PREF_IDE_GENERAL_TAB_CLOSING)));
   }
 
   @Override
@@ -96,7 +97,8 @@ public class IdeGeneralPreferencesPresenter extends AbstractPreferencePagePresen
     view.setThemes(themeAgent.getThemes(), currentThemeId);
     themeId = currentThemeId;
 
-    boolean currentAskBeforeClosingTab = Boolean.parseBoolean(preferencesManager.getValue(PREF_IDE_GENERAL_TAB_CLOSING));
+    boolean currentAskBeforeClosingTab =
+        Boolean.parseBoolean(preferencesManager.getValue(PREF_IDE_GENERAL_TAB_CLOSING));
     view.setAskBeforeClosingTab(currentAskBeforeClosingTab);
     isAskBeforeClosingTab = currentAskBeforeClosingTab;
   }

@@ -27,9 +27,14 @@ public class BrowserTabCloseHandler implements WindowActionHandler {
   private final Provider<EditorAgent> editorAgentProvider;
   private final PreferencesManager preferencesManager;
 
-  /** Is used when there is a need to close tab programmatically */
+  /** Is used to not to block programmatic close of browser tab */
   private static boolean closeImmediately = false;
 
+  /**
+   * If true given then no checks will be performed before IDE leave.
+   *
+   * <p>Typically should be invoked before automatic page leave/reloading.
+   */
   public static void setCloseImmediately(boolean closeImmediately) {
     BrowserTabCloseHandler.closeImmediately = closeImmediately;
   }
