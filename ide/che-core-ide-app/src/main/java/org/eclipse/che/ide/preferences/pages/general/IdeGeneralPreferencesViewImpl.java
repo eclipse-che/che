@@ -26,8 +26,8 @@ import org.eclipse.che.ide.ui.listbox.CustomListBox;
 /** @author Evgen Vidolob */
 public class IdeGeneralPreferencesViewImpl implements IdeGeneralPreferencesView {
 
-  private static AppearanceViewImplUiBinder ourUiBinder =
-      GWT.create(AppearanceViewImplUiBinder.class);
+  private static IdeGeneralPreferencesUiBinder ourUiBinder =
+      GWT.create(IdeGeneralPreferencesUiBinder.class);
   private final FlowPanel rootElement;
   @UiField CustomListBox themeBox;
   @UiField CheckBox askBeforeClosingTab;
@@ -80,5 +80,6 @@ public class IdeGeneralPreferencesViewImpl implements IdeGeneralPreferencesView 
     delegate.onAskBeforeClosingTabChanged(event.getValue());
   }
 
-  interface AppearanceViewImplUiBinder extends UiBinder<FlowPanel, IdeGeneralPreferencesViewImpl> {}
+  interface IdeGeneralPreferencesUiBinder
+      extends UiBinder<FlowPanel, IdeGeneralPreferencesViewImpl> {}
 }
