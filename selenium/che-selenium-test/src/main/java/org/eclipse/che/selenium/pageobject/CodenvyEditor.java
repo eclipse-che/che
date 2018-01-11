@@ -1296,7 +1296,6 @@ public class CodenvyEditor {
 
   /** check text present in javadoc popup */
   public void checkTextToBePresentInJavaDocPopUp(String text) {
-
     loadPageDriverWait.until(frameToBeAvailableAndSwitchToIt(By.xpath(Locators.JAVA_DOC_POPUP)));
     waitTextInJavaDoc(text);
     seleniumWebDriver.switchTo().parentFrame();
