@@ -24,6 +24,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+/**
+ * Testing splitting of test's output messages {@link LineSplitter}.
+ *
+ * @author Valeriy Svydenko
+ */
 @Listeners(MockitoTestNGListener.class)
 public class LineSplitterTest {
 
