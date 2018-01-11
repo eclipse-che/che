@@ -67,6 +67,9 @@ export CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
 DEFAULT_IMAGE_INIT="eclipse/che-init"
 export IMAGE_INIT=${IMAGE_INIT:-${DEFAULT_IMAGE_INIT}}:${CHE_IMAGE_TAG}
 
+DEFAULT_CHE_CLI_IMAGE="eclipse/che-cli"
+export CHE_CLI_IMAGE=${CHE_CLI_IMAGE:-${DEFAULT_CHE_CLI_IMAGE}}:${CHE_IMAGE_TAG}
+
 DEFAULT_CONFIG_DIR="/tmp/che-config"
 export CONFIG_DIR=${CONFIG_DIR:-${DEFAULT_CONFIG_DIR}}
 
@@ -154,7 +157,7 @@ deploy_che_to_ocp() {
     fi
     #wipeout config folder
     docker run -v "${CONFIG_DIR}":/to_remove alpine sh -c "rm -rf /to_remove/" || true
-    docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} config --skip:pull --skip:nightly
+    docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" ${CHE_CLI_IMAGE} config --skip:pull --skip:nightly
     cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
     bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
     wait_until_server_is_booted
