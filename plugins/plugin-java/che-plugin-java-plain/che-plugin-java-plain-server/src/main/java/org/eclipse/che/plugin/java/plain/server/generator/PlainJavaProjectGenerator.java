@@ -30,6 +30,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.notification.BeforeProjectInitializedEvent;
@@ -51,6 +52,8 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
   private static final String CLASSPATH_FILE_RESOURCE = "classpath";
   private static final String PROJECT_NAME_PATTERN = "project_name";
   private static final String SOURCE_FOLDER_PATTERN = "source_folder_value";
+  private static final String CLASSPATH_NAME = ".classpath";
+  private static final String PROJECT_NAME = ".project";
 
   private final FsManager fsManager;
 
@@ -59,7 +62,12 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
     this.fsManager = fsManager;
 
     eventService.subscribe(
-        event -> onPreProjectInitializedEvent((BeforeProjectInitializedEvent) event));
+        new EventSubscriber<BeforeProjectInitializedEvent>() {
+          @Override
+          public void onEvent(BeforeProjectInitializedEvent event) {
+            onPreProjectInitializedEvent(event);
+          }
+        });
   }
 
   @Override
@@ -85,41 +93,48 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
     String mainJavaWsPath = resolve(sourceDirWsPath, MAIN_CLASS);
     fsManager.createFile(mainJavaWsPath, getResource(MAIN_CLASS));
 
-    createClasspath(projectWsPath, sourceFolders.get(0));
-    createProjectConfig(projectWsPath);
+    // create .classpath
+    String dotClasspathWsPath = resolve(projectWsPath, CLASSPATH_NAME);
+    createFile(
+        dotClasspathWsPath,
+        CLASSPATH_FILE_RESOURCE,
+        singletonMap(SOURCE_FOLDER_PATTERN, sourceFolders.get(0)));
+
+    // create .project
+    String dotProjectWsPath = resolve(projectWsPath, PROJECT_NAME);
+    createFile(
+        dotProjectWsPath,
+        PROJECT_FILE_RESOURCE,
+        singletonMap(PROJECT_NAME_PATTERN, projectWsPath.substring(1)));
   }
 
-  private void createProjectConfig(String projectWsPath)
-      throws ConflictException, NotFoundException, ServerException {
-    String projectConfigTemplate = getResource(PROJECT_FILE_RESOURCE);
-    String projectConfContent =
-        resolveVariables(
-            projectConfigTemplate, singletonMap(PROJECT_NAME_PATTERN, projectWsPath.substring(1)));
-
-    String projectConfWsPath = resolve(projectWsPath, ".project");
-    fsManager.createFile(projectConfWsPath, projectConfContent);
-  }
-
-  private void createClasspath(String projectWsPath, String srcFolder)
-      throws ConflictException, NotFoundException, ServerException {
-    String classpathContent = getResource(CLASSPATH_FILE_RESOURCE);
-    String cpContent =
-        resolveVariables(classpathContent, singletonMap(SOURCE_FOLDER_PATTERN, srcFolder));
-    String classpathWsPath = resolve(projectWsPath, ".classpath");
-    fsManager.createFile(classpathWsPath, cpContent);
+  @Override
+  public String getProjectType() {
+    return JAVAC;
   }
 
   private void onPreProjectInitializedEvent(BeforeProjectInitializedEvent event) {
     ProjectConfig projectConfig = event.getProjectConfig();
-    String oldClasspathWsPath = projectConfig.getPath() + "/.che/classpath";
+    String projectWsPath = projectConfig.getPath();
+    String oldClasspathWsPath = projectWsPath + "/.che/classpath";
     if (projectConfig.getType().equals(JAVAC) && fsManager.exists(oldClasspathWsPath)) {
       try {
-        fsManager.move(oldClasspathWsPath, projectConfig.getPath() + "/.classpath");
-        createProjectConfig(projectConfig.getPath());
+        fsManager.move(oldClasspathWsPath, projectWsPath + "/.classpath");
+        createFile(
+            resolve(projectWsPath, PROJECT_NAME),
+            PROJECT_FILE_RESOURCE,
+            singletonMap(PROJECT_NAME_PATTERN, projectWsPath.substring(1)));
       } catch (ConflictException | NotFoundException | ServerException e) {
-        LOG.error("Can't update project {}", projectConfig.getPath(), e);
+        LOG.error("Can't update project {}", projectWsPath, e);
       }
     }
+  }
+
+  private void createFile(String fileWsPath, String resourceName, Map<String, String> parameters)
+      throws ConflictException, NotFoundException, ServerException {
+    String template = getResource(resourceName);
+    String content = resolveVariables(template, parameters);
+    fsManager.createFile(fileWsPath, content);
   }
 
   private String getResource(String resourceName) throws ServerException {
@@ -129,10 +144,5 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
     } catch (Exception e) {
       throw new ServerException(e.getMessage());
     }
-  }
-
-  @Override
-  public String getProjectType() {
-    return JAVAC;
   }
 }
