@@ -63,14 +63,15 @@ public class DockerMachine implements Machine {
       DockerConnector docker,
       Map<String, ServerImpl> servers,
       String registry,
-      DockerMachineStopDetector dockerMachineStopDetector) {
+      DockerMachineStopDetector dockerMachineStopDetector,
+      MachineStatus status) {
     this.container = containerId;
     this.docker = docker;
     this.image = image;
     this.registry = registry;
     this.dockerMachineStopDetector = dockerMachineStopDetector;
     this.servers = servers;
-    this.status = MachineStatus.STARTING;
+    this.status = status;
   }
 
   @Override
@@ -88,11 +89,7 @@ public class DockerMachine implements Machine {
     return status;
   }
 
-  public void setStatus(MachineStatus status) {
-    this.status = status;
-  }
-
-  void setServerStatus(String serverRef, ServerStatus status) {
+  public void setServerStatus(String serverRef, ServerStatus status) {
     if (servers == null) {
       throw new IllegalStateException("Servers are not initialized yet");
     }
@@ -132,18 +129,14 @@ public class DockerMachine implements Machine {
       docker.removeContainer(
           RemoveContainerParams.create(container).withRemoveVolumes(true).withForce(true));
     } catch (IOException e) {
-      throw new InternalInfrastructureException(e.getMessage(), e);
+      throw new InternalInfrastructureException(
+          "Error occurs on removing container '" + container + "'. Error: " + e.getMessage(), e);
     }
     try {
       docker.removeImage(RemoveImageParams.create(image).withForce(false));
     } catch (IOException e) {
       LOG.warn("IOException during destroy(). Ignoring.", e);
     }
-  }
-
-  /** Can be used for docker specific operations with machine */
-  public String getContainer() {
-    return container;
   }
 
   @Override
@@ -163,5 +156,60 @@ public class DockerMachine implements Machine {
         + ", container="
         + container
         + '}';
+  }
+
+  /**
+   * Represents {@link DockerMachine} in a starting state - aka fake state of the DockerMachine.
+   * This implementation returns empty map of servers and doesn't allow to change its own or any
+   * server status. This implementation is needed to represent Docker machine until we fetch
+   * information about Docker container and can create the real implementation of Docker machine.
+   */
+  static class StartingDockerMachine extends DockerMachine {
+
+    public StartingDockerMachine() {
+      super(null, null, null, null, null, null, MachineStatus.STARTING);
+    }
+
+    @Override
+    public Map<String, String> getAttributes() {
+      return Collections.emptyMap();
+    }
+
+    @Override
+    public Map<String, ServerImpl> getServers() {
+      return Collections.emptyMap();
+    }
+
+    @Override
+    public MachineStatus getStatus() {
+      return MachineStatus.STARTING;
+    }
+
+    @Override
+    public void setServerStatus(String serverRef, ServerStatus status) {
+      throw new IllegalStateException(
+          "Starting Docker machine doesn't support server status change");
+    }
+
+    @Override
+    public void destroy() throws InfrastructureException {
+      // Do nothing. May happen when runtime start is interrupted/failed and the list of
+      // DockerMachines contains a StartingDockerMachine not yet replaced by the
+      // RunningDockerMachine
+    }
+
+    @Override
+    public void putResource(String targetPath, InputStream sourceStream)
+        throws InfrastructureException {
+      throw new InternalInfrastructureException(
+          "Starting Docker machine doesn't support put resource operation");
+    }
+
+    @Override
+    public void exec(String script, MessageProcessor<LogMessage> messageProcessor)
+        throws InfrastructureException {
+      throw new InternalInfrastructureException(
+          "Starting Docker machine doesn't support exec operation");
+    }
   }
 }
