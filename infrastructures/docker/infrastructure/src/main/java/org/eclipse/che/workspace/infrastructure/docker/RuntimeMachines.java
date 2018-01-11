@@ -33,7 +33,7 @@ public class RuntimeMachines {
 
   /** Returns machines map. If runtime start is canceled returns empty map. */
   public synchronized Map<String, DockerMachine> getMachines() {
-    return machines != null ? machines : emptyMap();
+    return machines != null ? new HashMap<>(machines) : emptyMap();
   }
 
   /**
