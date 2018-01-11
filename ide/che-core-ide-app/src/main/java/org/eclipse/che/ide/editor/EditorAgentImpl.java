@@ -41,8 +41,6 @@ import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.LinkWithEditorAction;
-import org.eclipse.che.ide.api.WindowActionEvent;
-import org.eclipse.che.ide.api.WindowActionHandler;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.constraints.Direction;
 import org.eclipse.che.ide.api.editor.AsyncEditorProvider;
@@ -95,7 +93,6 @@ public class EditorAgentImpl
         EditorPartCloseHandler,
         ActivePartChangedHandler,
         SelectionChangedHandler,
-        WindowActionHandler,
         StateComponent,
         WorkspaceStoppedEvent.Handler {
 
@@ -148,7 +145,6 @@ public class EditorAgentImpl
 
     eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
     eventBus.addHandler(SelectionChangedEvent.TYPE, this);
-    eventBus.addHandler(WindowActionEvent.TYPE, this);
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
   }
 
@@ -181,23 +177,6 @@ public class EditorAgentImpl
       final VirtualFile file = activeEditor.getEditorInput().getFile();
       eventBus.fireEvent(new RevealResourceEvent(file.getLocation(), true, false));
     }
-  }
-
-  @Override
-  public void onWindowClosing(WindowActionEvent event) {
-    for (EditorPartPresenter editorPartPresenter : getOpenedEditors()) {
-      if (editorPartPresenter.isDirty()) {
-        event.setMessage(
-            coreLocalizationConstant
-                .changesMayBeLost()); // TODO need to move this into standalone component
-        return;
-      }
-    }
-  }
-
-  @Override
-  public void onWindowClosed(WindowActionEvent event) {
-    // do nothing
   }
 
   @Override

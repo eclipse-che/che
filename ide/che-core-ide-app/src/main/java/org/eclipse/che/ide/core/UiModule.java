@@ -75,6 +75,7 @@ public class UiModule extends AbstractGinModule {
     bind(IconRegistry.class).to(IconRegistryImpl.class).in(Singleton.class);
     bind(DefaultIconsRegistrar.class).asEagerSingleton();
     bind(FontAwesomeInjector.class).asEagerSingleton();
+    bind(BrowserTabCloseHandler.class).asEagerSingleton();
 
     // core UI components
     install(

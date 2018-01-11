@@ -50,11 +50,11 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("navigateToFile.searchIsCaseSensitive")
   String navigateToFileSearchIsCaseSensitive();
 
-  @Key("appearance.title")
-  String appearanceTitle();
+  @Key("general.title")
+  String generalTitle();
 
-  @Key("appearance.category")
-  String appearanceCategory();
+  @Key("general.category")
+  String generalCategory();
 
   /* Add resources to File Watcher excludes */
   @Key("action.fileWatcher.add.excludes.text")
@@ -493,6 +493,9 @@ public interface CoreLocalizationConstant extends Messages {
   String invalidName();
 
   /* Messages */
+  @Key("messages.closeTabConfirmation")
+  String closeTabConfirmation();
+
   @Key("messages.changesMayBeLost")
   String changesMayBeLost();
 

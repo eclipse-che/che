@@ -14,7 +14,7 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.user.client.Window;
 
 /**
- * Event that describes the fact that Codenvy browser's tab has been closed or closing now.
+ * Event that describes the fact that Che browser's tab has been closed or closing now.
  *
  * @author Artem Zatsarynnyi
  */
@@ -54,6 +54,10 @@ public class WindowActionEvent extends GwtEvent<WindowActionHandler> {
 
   /**
    * Makes sense only for {@link WindowAction#CLOSING}.
+   *
+   * <p>Please note, that custom messages are not supported any more. See
+   * https://bugs.chromium.org/p/chromium/issues/detail?id=587940 and
+   * https://www.chromestatus.com/feature/5349061406228480
    *
    * @see com.google.gwt.user.client.Window.ClosingEvent#setMessage(java.lang.String)
    */
