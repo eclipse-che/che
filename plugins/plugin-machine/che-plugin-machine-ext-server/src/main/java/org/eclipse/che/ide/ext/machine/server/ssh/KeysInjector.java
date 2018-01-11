@@ -10,15 +10,24 @@
  */
 package org.eclipse.che.ide.ext.machine.server.ssh;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_EXEC_AGENT_HTTP_REFERENCE;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.eclipse.che.agent.exec.client.ExecAgentClient;
+import org.eclipse.che.agent.exec.client.ExecAgentClientFactory;
+import org.eclipse.che.agent.exec.shared.dto.GetProcessResponseDto;
+import org.eclipse.che.agent.exec.shared.dto.ProcessStartResponseDto;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.ssh.server.SshManager;
-import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.infrastructure.docker.client.DockerConnector;
+import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,100 +35,115 @@ import org.slf4j.LoggerFactory;
  * Injects public parts of ssh keys in the machine after container start
  *
  * @author Sergii Leschenko
+ * @author Max Shaposhnyk
  */
-@Singleton // must be eager
 public class KeysInjector {
+
   private static final Logger LOG = LoggerFactory.getLogger(KeysInjector.class);
 
-  private final EventService eventService;
-  private final DockerConnector docker;
   private final SshManager sshManager;
-  // TODO replace with WorkspaceManager
-  //    private final CheEnvironmentEngine environmentEngine;
+  private final WorkspaceManager workspaceManager;
+  private final ExecAgentClientFactory execAgentClientFactory;
 
-  @Inject
   public KeysInjector(
-      EventService eventService, DockerConnector dockerConnector, SshManager sshManager
-      //                        CheEnvironmentEngine environmentEngine
-      ) {
-    this.eventService = eventService;
-    this.docker = dockerConnector;
+      SshManager sshManager,
+      WorkspaceManager workspaceManager,
+      ExecAgentClientFactory execAgentClientFactory) {
     this.sshManager = sshManager;
-    //        this.environmentEngine = environmentEngine;
+    this.workspaceManager = workspaceManager;
+    this.execAgentClientFactory = execAgentClientFactory;
   }
 
-  @PostConstruct
-  public void start() {
-    eventService.subscribe(
-        new EventSubscriber<MachineStatusEvent>() {
-          @Override
-          public void onEvent(MachineStatusEvent event) {
-            if (event.getEventType() == MachineStatus.RUNNING) {
-              /*final Instance machine;
-              try {
-                  machine = environmentEngine.getMachine(event.getWorkspaceId(),
-                                                         event.getMachineId());
-              } catch (NotFoundException e) {
-                  LOG.error("Unable to find machine: " + e.getLocalizedMessage(), e);
-                  return;
-              }*/
+  public void injectPublicKeys(String workspaceId) {
+    final List<String> execServerUrls = getExecServerUrls(workspaceId);
+    if (execServerUrls.isEmpty()) {
+      return; // no exec servers installed, so not possible to execute commands
+    }
 
-              /*try {
-                  // get machine keypairs
-                  List<SshPairImpl> sshPairs = sshManager.getPairs(machine.getOwner(), "machine");
-                  final List<String> publicMachineKeys = sshPairs.stream()
-                                                       .filter(sshPair -> sshPair.getPublicKey() != null)
-                                                       .map(SshPairImpl::getPublicKey)
-                                                       .collect(Collectors.toList());
+    List<String> publicKeys = getPublicKeys(workspaceId);
+    if (publicKeys.isEmpty()) {
+      return; // no keys found, exiting
+    }
 
-                  // get workspace keypair (if any)
-                  SshPairImpl sshWorkspacePair = null;
-                  try {
-                      sshWorkspacePair = sshManager.getPair(machine.getOwner(), "workspace", event.getWorkspaceId());
-                  } catch (NotFoundException e) {
-                      LOG.debug("No ssh key associated to the workspace", e);
-                  }
+    StringBuilder commandLine = new StringBuilder("mkdir ~/.ssh/ -p");
+    for (String publicKey : publicKeys) {
+      commandLine.append(" && echo '").append(publicKey).append("' >> ~/.ssh/authorized_keys");
+    }
+    final String command = commandLine.toString();
+    for (String serverUrl : execServerUrls) {
+      doInjectPublicKeys(serverUrl, workspaceId, command);
+    }
+  }
 
-                  // build list of all pairs.
-                  final List<String> publicKeys;
-                  if (sshWorkspacePair != null && sshWorkspacePair.getPublicKey() != null) {
-                      publicKeys = new ArrayList<>(publicMachineKeys.size() + 1);
-                      publicKeys.add(sshWorkspacePair.getPublicKey());
-                      publicKeys.addAll(publicMachineKeys);
-                  } else {
-                      publicKeys = publicMachineKeys;
-                  }
-
-                  if (publicKeys.isEmpty()) {
-                      return;
-                  }
-
-                  final String containerId = machine.getRuntime().getAttributes().get("id");
-                  StringBuilder command = new StringBuilder("mkdir ~/.ssh/ -p");
-                  for (String publicKey : publicKeys) {
-                      command.append("&& echo '")
-                             .append(publicKey)
-                             .append("' >> ~/.ssh/authorized_keys");
-                  }
-
-                  final Exec exec = docker.createExec(CreateExecParams.create(containerId,
-                                                                              new String[] {"/bin/bash",
-                                                                                            "-c",
-                                                                                            command.toString()})
-                                                                      .withDetach(true));
-                  docker.startExec(StartExecParams.create(exec.getId()), logMessage -> {
-                      if (logMessage.getType() == LogMessage.Type.STDERR) {
-                          try {
-                              machine.getLogger().writeLine("Error of injection public ssh keys. " + logMessage.getContent());
-                          } catch (IOException ignore) {
-                          }
-                      }
-                  });
-              } catch (IOException | ServerException e) {
-                  LOG.error(e.getLocalizedMessage(), e);
-              }*/
-            }
+  private List<String> getExecServerUrls(String workspaceId) {
+    List<String> execServerUrls = new ArrayList<>();
+    try {
+      Runtime runtime = workspaceManager.getWorkspace(workspaceId).getRuntime();
+      if (runtime != null) {
+        for (Machine machine : runtime.getMachines().values()) {
+          Server execServer = machine.getServers().get(SERVER_EXEC_AGENT_HTTP_REFERENCE);
+          if (execServer != null) {
+            execServerUrls.add(execServer.getUrl());
           }
-        });
+        }
+      }
+    } catch (NotFoundException | ServerException e) {
+      LOG.warn("Unable to get workspace {}. Error: {}", workspaceId, e.getMessage());
+    }
+    return execServerUrls;
+  }
+
+  private List<String> getPublicKeys(String workspaceId) {
+    final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
+    List<String> publicKeys = new ArrayList<>();
+    try {
+      // get machine keypairs
+      List<SshPairImpl> sshPairs = sshManager.getPairs(userId, "machine");
+      publicKeys.addAll(
+          sshPairs
+              .stream()
+              .filter(sshPair -> sshPair.getPublicKey() != null)
+              .map(SshPairImpl::getPublicKey)
+              .collect(Collectors.toList()));
+      // get workspace keypair (if any)
+      SshPairImpl sshWorkspacePair = null;
+      try {
+        sshWorkspacePair = sshManager.getPair(userId, "workspace", workspaceId);
+      } catch (NotFoundException e) {
+        LOG.debug("No ssh key associated to the workspace " + workspaceId, e);
+      }
+
+      if (sshWorkspacePair != null && sshWorkspacePair.getPublicKey() != null) {
+        publicKeys.add(sshWorkspacePair.getPublicKey());
+      }
+    } catch (ServerException e) {
+      LOG.warn("Unable to get workspace {} public keys. Error: {}", workspaceId, e.getMessage());
+    }
+    return publicKeys;
+  }
+
+  private void doInjectPublicKeys(String execServerUrl, String workspaceId, String command) {
+    ExecAgentClient client = execAgentClientFactory.create(execServerUrl);
+    try {
+      ProcessStartResponseDto startProcess =
+          client.startProcess(workspaceId, command, "sshUpload", "custom");
+      GetProcessResponseDto process = client.getProcess(workspaceId, startProcess.getPid());
+      int tryNumber = 1;
+      while (process.isAlive()) {
+        Thread.sleep(100);
+        process = client.getProcess(workspaceId, startProcess.getPid());
+        tryNumber++;
+        if (tryNumber > 10) {
+          LOG.warn("Uploading key command executed too long, exiting.");
+          client.killProcess(workspaceId, startProcess.getPid());
+          return;
+        }
+      }
+      if (process.getExitCode() != 0) {
+        LOG.warn("Uploading key failed with exit code " + process.getExitCode());
+      }
+    } catch (ServerException | InterruptedException e) {
+      LOG.warn("Unable to inject workspace {} public keys. Error: {}", workspaceId, e.getMessage());
+    }
   }
 }

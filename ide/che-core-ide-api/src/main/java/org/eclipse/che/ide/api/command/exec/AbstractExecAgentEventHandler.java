@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import org.eclipse.che.ide.api.command.exec.dto.event.DtoWithPid;
+import org.eclipse.che.agent.exec.shared.dto.DtoWithPid;
 
 public abstract class AbstractExecAgentEventHandler<P extends DtoWithPid>
     implements BiConsumer<String, P> {

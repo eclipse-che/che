@@ -298,9 +298,17 @@ public class ProjectExplorerPresenter extends BasePresenter
               tree.setExpanded(node, true);
             }
           }
-        } else if (getNode(resource.getLocation()) == null) {
-          tree.getNodeStorage()
-              .add(nodeFactory.newContainerNode((Container) resource, nodeSettings));
+        } else {
+          Node node = getNode(resource.getLocation());
+          if (node != null) {
+            String oldId = tree.getNodeStorage().getKeyProvider().getKey(node);
+            ((ResourceNode) node).setData(delta.getResource());
+            tree.getNodeStorage().reIndexNode(oldId, node);
+            tree.refresh(node);
+          } else {
+            tree.getNodeStorage()
+                .add(nodeFactory.newContainerNode((Container) resource, nodeSettings));
+          }
         }
       } else if (delta.getKind() == REMOVED) {
         Node node = getNode(resource.getLocation());

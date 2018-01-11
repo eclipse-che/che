@@ -20,6 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.openqa.selenium.By;
@@ -43,17 +44,20 @@ public class CommandsToolbar {
 
   private final SeleniumWebDriver seleniumWebDriver;
   private final TestWebElementRenderChecker testWebElementRenderChecker;
+  private final ActionsFactory actionsFactory;
 
   @Inject
   public CommandsToolbar(
       SeleniumWebDriver seleniumWebDriver,
-      TestWebElementRenderChecker testWebElementRenderChecker) {
+      TestWebElementRenderChecker testWebElementRenderChecker,
+      ActionsFactory actionsFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
     redrawWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     appearanceWait = new WebDriverWait(seleniumWebDriver, MULTIPLE);
     loadPageWait =
         new WebDriverWait(seleniumWebDriver, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC);
     this.testWebElementRenderChecker = testWebElementRenderChecker;
+    this.actionsFactory = actionsFactory;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -127,7 +131,7 @@ public class CommandsToolbar {
    */
   public void clickWithHoldAndLaunchCommandFromList(String nameOfCommand) {
     redrawWait.until(visibilityOf(commandsToolbarSelect));
-    Actions action = new Actions(seleniumWebDriver);
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
     action.clickAndHold(commandsToolbarSelect).perform();
 
     waitListIsRenderedAndClickOnItem(nameOfCommand, action);
@@ -141,7 +145,7 @@ public class CommandsToolbar {
    */
   public void clickWithHoldAndLaunchDebuCmdFromList(String nameOfCommand) {
     redrawWait.until(visibilityOf(debugCommandBtn));
-    Actions action = new Actions(seleniumWebDriver);
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
     action.clickAndHold(debugCommandBtn).perform();
 
     waitListIsRenderedAndClickOnItem(nameOfCommand, action);
@@ -192,9 +196,7 @@ public class CommandsToolbar {
     testWebElementRenderChecker.waitElementIsRendered(
         By.xpath("//div[@id='gwt-debug-dropdown-list-content-panel']/div"));
 
-    loadPageWait
-        .until(visibilityOfElementLocated(By.xpath(format("//div[text()='%s']", urlCommand))))
-        .click();
+    clickOnElement(getCommandsToolbarPreviewLink(urlCommand));
   }
 
   /**
@@ -208,12 +210,37 @@ public class CommandsToolbar {
     selectPreviewUrlFromDropDawn(urlCommand);
   }
 
+  /**
+   * simple click is does not working well in grid mode on the "CI" in drop-down lists
+   *
+   * @param element
+   */
+  private void clickOnElement(WebElement element) {
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(element).click().perform();
+  }
+
+  /**
+   * simple click is does not working well in grid mode on the "CI" in drop-down lists
+   *
+   * @param element
+   */
+  private void clickOnElement(WebElement element, Actions action) {
+    action.moveToElement(element).click().perform();
+  }
+
   private void waitListIsRenderedAndClickOnItem(String nameOfCommand, Actions action) {
     testWebElementRenderChecker.waitElementIsRendered(By.id("commandsPopup"));
     action.release();
-    loadPageWait
-        .until(
-            visibilityOfElementLocated(By.xpath(format(Locators.COMMAND_DROPDAWN, nameOfCommand))))
-        .click();
+    clickOnElement(getElementFromCommandsDropDown(nameOfCommand), action);
+  }
+
+  private WebElement getCommandsToolbarPreviewLink(String urlCommand) {
+    return loadPageWait.until(
+        visibilityOfElementLocated(By.xpath(format("//div[text()='%s']", urlCommand))));
+  }
+
+  private WebElement getElementFromCommandsDropDown(String nameOfCommand) {
+    return loadPageWait.until(
+        visibilityOfElementLocated(By.xpath(format(Locators.COMMAND_DROPDAWN, nameOfCommand))));
   }
 }

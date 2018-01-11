@@ -11,12 +11,12 @@
 package org.eclipse.che.ide.console;
 
 import java.util.function.Consumer;
+import org.eclipse.che.agent.exec.shared.dto.ProcessSubscribeResponseDto;
+import org.eclipse.che.agent.exec.shared.dto.event.ProcessDiedEventDto;
+import org.eclipse.che.agent.exec.shared.dto.event.ProcessStartedEventDto;
+import org.eclipse.che.agent.exec.shared.dto.event.ProcessStdErrEventDto;
+import org.eclipse.che.agent.exec.shared.dto.event.ProcessStdOutEventDto;
 import org.eclipse.che.ide.api.command.CommandImpl;
-import org.eclipse.che.ide.api.command.exec.dto.ProcessSubscribeResponseDto;
-import org.eclipse.che.ide.api.command.exec.dto.event.ProcessDiedEventDto;
-import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStartedEventDto;
-import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStdErrEventDto;
-import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStdOutEventDto;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 
 /** Describes requirements for the console for command output. */

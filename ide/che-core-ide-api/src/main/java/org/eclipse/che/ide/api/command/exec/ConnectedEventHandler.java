@@ -13,8 +13,8 @@ package org.eclipse.che.ide.api.command.exec;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.function.BiConsumer;
+import org.eclipse.che.agent.exec.shared.dto.event.ConnectedEventDto;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.ide.api.command.exec.dto.event.ConnectedEventDto;
 
 /**
  * Handles 'connected' event, the event is fired when we firstly connect to exec agent.

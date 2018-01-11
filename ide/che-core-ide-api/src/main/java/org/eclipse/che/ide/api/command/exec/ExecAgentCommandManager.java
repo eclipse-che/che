@@ -11,16 +11,16 @@
 package org.eclipse.che.ide.api.command.exec;
 
 import java.util.List;
+import org.eclipse.che.agent.exec.shared.dto.GetProcessLogsResponseDto;
+import org.eclipse.che.agent.exec.shared.dto.GetProcessResponseDto;
+import org.eclipse.che.agent.exec.shared.dto.GetProcessesResponseDto;
+import org.eclipse.che.agent.exec.shared.dto.ProcessKillResponseDto;
+import org.eclipse.che.agent.exec.shared.dto.ProcessStartResponseDto;
+import org.eclipse.che.agent.exec.shared.dto.ProcessSubscribeResponseDto;
+import org.eclipse.che.agent.exec.shared.dto.ProcessUnSubscribeResponseDto;
+import org.eclipse.che.agent.exec.shared.dto.UpdateSubscriptionResponseDto;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcPromise;
 import org.eclipse.che.api.core.model.workspace.config.Command;
-import org.eclipse.che.ide.api.command.exec.dto.GetProcessLogsResponseDto;
-import org.eclipse.che.ide.api.command.exec.dto.GetProcessResponseDto;
-import org.eclipse.che.ide.api.command.exec.dto.GetProcessesResponseDto;
-import org.eclipse.che.ide.api.command.exec.dto.ProcessKillResponseDto;
-import org.eclipse.che.ide.api.command.exec.dto.ProcessStartResponseDto;
-import org.eclipse.che.ide.api.command.exec.dto.ProcessSubscribeResponseDto;
-import org.eclipse.che.ide.api.command.exec.dto.ProcessUnSubscribeResponseDto;
-import org.eclipse.che.ide.api.command.exec.dto.UpdateSubscriptionResponseDto;
 
 /**
  * Manages calls to exec agent that are related to processes, subscription, etc.
