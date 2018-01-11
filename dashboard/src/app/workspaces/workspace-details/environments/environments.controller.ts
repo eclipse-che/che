@@ -11,8 +11,8 @@
 'use strict';
 import {CheEnvironmentRegistry} from '../../../../components/api/environment/che-environment-registry.factory';
 import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
-import {CheNotification} from "../../../../components/notification/che-notification.factory";
-import {CheRecipeService} from "../che-recipe.service";
+import {CheNotification} from '../../../../components/notification/che-notification.factory';
+import {CheRecipeService} from '../che-recipe.service';
 
 /**
  * @ngdoc controller
