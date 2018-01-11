@@ -43,10 +43,13 @@ public class CheckStopStartWsTest {
   @Test
   public void checkStopStartWorkspaceTest() {
     projectExplorer.waitProjectExplorer();
+    terminal.waitTerminalTab(LOADER_TIMEOUT_SEC);
     loader.waitOnClosed();
+
     menu.runCommand(WORKSPACE, STOP_WORKSPACE);
     toastLoader.waitExpectedTextInToastLoader("Stopping the workspace");
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running", 60);
+
     toastLoader.clickOnStartButton();
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();

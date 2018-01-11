@@ -10,10 +10,14 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,7 +31,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
@@ -48,7 +51,8 @@ public class ToastLoader {
   private interface Locators {
     String MAIN_FORM = "gwt-debug-popupLoader";
     String START_BUTTON = "//button[text()='Start']";
-    String MAINFORM_WITH_TEXT_CONTAINER = "//div[text()='%s']";
+    String MAINFORM_WITH_TEXT_CONTAINER =
+        "//div[@id='gwt-debug-popupLoader']/div[contains(text(),'%s')]";
   }
 
   @FindBy(id = Locators.MAIN_FORM)
@@ -59,8 +63,7 @@ public class ToastLoader {
 
   /** wait appearance toast loader widget */
   public void waitToastLoaderIsOpen() {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(mainForm));
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC).until(visibilityOf(mainForm));
   }
 
   /**
@@ -71,8 +74,8 @@ public class ToastLoader {
   public void waitExpectedTextInToastLoader(String expText) {
     new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.MAINFORM_WITH_TEXT_CONTAINER, expText))));
+            visibilityOfElementLocated(
+                By.xpath(format(Locators.MAINFORM_WITH_TEXT_CONTAINER, expText))));
   }
 
   /**
@@ -84,14 +87,14 @@ public class ToastLoader {
   public void waitExpectedTextInToastLoader(String expText, int timeout) {
     new WebDriverWait(seleniumWebDriver, timeout)
         .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.MAINFORM_WITH_TEXT_CONTAINER, expText))));
+            visibilityOfElementLocated(
+                By.xpath(format(Locators.MAINFORM_WITH_TEXT_CONTAINER, expText))));
   }
 
   /** wait for closing of widget */
   public void waitToastLoaderIsClosed() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.MAIN_FORM)));
+        .until(invisibilityOfElementLocated(By.id(Locators.MAIN_FORM)));
   }
 
   /**
@@ -101,7 +104,7 @@ public class ToastLoader {
    */
   public void waitToastLoaderIsClosed(int userTimeout) {
     new WebDriverWait(seleniumWebDriver, userTimeout)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.MAIN_FORM)));
+        .until(invisibilityOfElementLocated(By.id(Locators.MAIN_FORM)));
   }
 
   /** wait appearance the 'Toast widget' with some text, and wait disappearance this one */
@@ -186,14 +189,14 @@ public class ToastLoader {
 
   public String getTextFromToastLoader() {
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(mainForm))
+        .until(visibilityOf(mainForm))
         .getText();
   }
 
   /** wait appearance of start button in the widget */
   public void waitStartButtonInToastLoader() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(startBtn));
+        .until(visibilityOf(startBtn));
   }
 
   /** wait appearance of start button in the widget and click on this one */
