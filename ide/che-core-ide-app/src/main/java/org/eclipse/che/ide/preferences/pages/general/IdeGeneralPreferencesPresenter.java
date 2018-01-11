@@ -45,7 +45,8 @@ public class IdeGeneralPreferencesPresenter extends AbstractPreferencePagePresen
     this.preferencesManager = preferencesManager;
     view.setDelegate(this);
 
-    revertChanges();
+    themeId = getStoredThemeId();
+    isAskBeforeClosingTab = getStoredAskBeforeClosingTab();
   }
 
   @Override
@@ -90,16 +91,25 @@ public class IdeGeneralPreferencesPresenter extends AbstractPreferencePagePresen
 
   @Override
   public void revertChanges() {
+    String currentThemeId = getStoredThemeId();
+    boolean currentAskBeforeClosingTab = getStoredAskBeforeClosingTab();
+
+    view.setThemes(themeAgent.getThemes(), currentThemeId);
+    view.setAskBeforeClosingTab(currentAskBeforeClosingTab);
+
+    themeId = currentThemeId;
+    isAskBeforeClosingTab = currentAskBeforeClosingTab;
+  }
+
+  private boolean getStoredAskBeforeClosingTab() {
+    return Boolean.parseBoolean(preferencesManager.getValue(PREF_IDE_GENERAL_TAB_CLOSING));
+  }
+
+  private String getStoredThemeId() {
     String currentThemeId = preferencesManager.getValue(PREF_IDE_GENERAL_THEME);
     if (currentThemeId == null || currentThemeId.isEmpty()) {
       currentThemeId = themeAgent.getCurrentThemeId();
     }
-    view.setThemes(themeAgent.getThemes(), currentThemeId);
-    themeId = currentThemeId;
-
-    boolean currentAskBeforeClosingTab =
-        Boolean.parseBoolean(preferencesManager.getValue(PREF_IDE_GENERAL_TAB_CLOSING));
-    view.setAskBeforeClosingTab(currentAskBeforeClosingTab);
-    isAskBeforeClosingTab = currentAskBeforeClosingTab;
+    return currentThemeId;
   }
 }

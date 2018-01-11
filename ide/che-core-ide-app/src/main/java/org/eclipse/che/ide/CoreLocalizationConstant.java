@@ -493,6 +493,9 @@ public interface CoreLocalizationConstant extends Messages {
   String invalidName();
 
   /* Messages */
+  @Key("messages.closeTabConfirmation")
+  String closeTabConfirmation();
+
   @Key("messages.changesMayBeLost")
   String changesMayBeLost();
 

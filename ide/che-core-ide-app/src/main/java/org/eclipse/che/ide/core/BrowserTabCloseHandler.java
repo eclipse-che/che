@@ -15,6 +15,7 @@ import static org.eclipse.che.ide.preferences.pages.general.IdeGeneralPreference
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.WindowActionEvent;
 import org.eclipse.che.ide.api.WindowActionHandler;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -26,6 +27,7 @@ public class BrowserTabCloseHandler implements WindowActionHandler {
 
   private final Provider<EditorAgent> editorAgentProvider;
   private final PreferencesManager preferencesManager;
+  private final CoreLocalizationConstant localizationConstant;
 
   /** Is used to not to block programmatic close of browser tab */
   private static boolean closeImmediately = false;
@@ -43,9 +45,11 @@ public class BrowserTabCloseHandler implements WindowActionHandler {
   public BrowserTabCloseHandler(
       EventBus eventBus,
       Provider<EditorAgent> editorAgentProvider,
-      PreferencesManager preferencesManager) {
+      PreferencesManager preferencesManager,
+      CoreLocalizationConstant localizationConstant) {
     this.editorAgentProvider = editorAgentProvider;
     this.preferencesManager = preferencesManager;
+    this.localizationConstant = localizationConstant;
 
     eventBus.addHandler(WindowActionEvent.TYPE, this);
   }
@@ -54,9 +58,9 @@ public class BrowserTabCloseHandler implements WindowActionHandler {
   public void onWindowClosing(WindowActionEvent event) {
     if (!closeImmediately) {
       if (!isEditorsClean()) {
-        event.setMessage("ask user");
+        event.setMessage(localizationConstant.changesMayBeLost());
       } else if (Boolean.parseBoolean(preferencesManager.getValue(PREF_IDE_GENERAL_TAB_CLOSING))) {
-        event.setMessage("ask user");
+        event.setMessage(localizationConstant.closeTabConfirmation());
       }
     }
   }
