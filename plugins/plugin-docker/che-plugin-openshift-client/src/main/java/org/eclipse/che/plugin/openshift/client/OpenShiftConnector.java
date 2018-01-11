@@ -567,6 +567,8 @@ public class OpenShiftConnector extends DockerConnector {
     return null;
   }
 
+  private ThreadLocal<Boolean> retryingAfterCleanup = ThreadLocal.withInitial(()->false);
+  
   /**
    * @param createContainerParams
    * @return
@@ -715,6 +717,11 @@ public class OpenShiftConnector extends DockerConnector {
       LOG.info(e.getMessage());
       imageIdToWorkspaceId.remove(imageForDocker);
       openShiftDeploymentCleaner.cleanDeploymentResources(deploymentName);
+      if (! retryingAfterCleanup.get()) {
+          LOG.info("Retry the creation of the workspace container after cleaning pending deployment resources");
+          retryingAfterCleanup.set(true);
+          return createContainer(createContainerParams);
+      }
       try {
         openShiftClient =
             ocFactory.newOcClient(
@@ -727,6 +734,7 @@ public class OpenShiftConnector extends DockerConnector {
       throw e;
     }
 
+    retryingAfterCleanup.set(false);
     return new ContainerCreated(containerID, null);
   }
 
