@@ -948,6 +948,7 @@ public class ProjectExplorer {
     String jsScript = "IDE.ProjectExplorer.expandAll();";
     JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
     js.executeScript(jsScript);
+    loader.waitOnClosed();
   }
 
   /**
@@ -957,6 +958,7 @@ public class ProjectExplorer {
     String jsScript = "IDE.ProjectExplorer.collapseAll()";
     JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
     js.executeScript(jsScript);
+    loader.waitOnClosed();
   }
 
   /**
@@ -969,6 +971,7 @@ public class ProjectExplorer {
     String jsScript = "IDE.ProjectExplorer.reveal(\"" + absPathToResource.replace(".", "/") + "\")";
     JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
     js.executeScript(jsScript);
+    loader.waitOnClosed();
   }
 
   public void waitItemIsSelected(String path) {
