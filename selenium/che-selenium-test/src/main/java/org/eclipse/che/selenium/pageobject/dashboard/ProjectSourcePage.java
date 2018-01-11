@@ -25,6 +25,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -258,14 +259,19 @@ public class ProjectSourcePage {
   }
 
   public void clickOnConnectGithubAccountButton() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(Locators.CONNECT_GITHUB_ACCOUNT_BUTTON)))
         .click();
   }
 
-  public void waitGithubProjectsList() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(Locators.GITHUB_PROJECTS_LIST)));
+  public boolean isGithubProjectsListDisplayed() {
+    try {
+      return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+          .until(visibilityOfElementLocated(By.xpath(Locators.GITHUB_PROJECTS_LIST)))
+          .isDisplayed();
+    } catch (TimeoutException ex) {
+      return false;
+    }
   }
 
   public void selectProjectFromList(String projectName) {
