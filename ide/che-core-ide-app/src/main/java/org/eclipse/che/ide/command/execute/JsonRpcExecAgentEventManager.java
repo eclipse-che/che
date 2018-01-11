@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,15 +13,15 @@ package org.eclipse.che.ide.command.execute;
 import com.google.inject.Singleton;
 import java.util.function.Consumer;
 import javax.inject.Inject;
+import org.eclipse.che.agent.exec.shared.dto.event.ProcessDiedEventDto;
+import org.eclipse.che.agent.exec.shared.dto.event.ProcessStartedEventDto;
+import org.eclipse.che.agent.exec.shared.dto.event.ProcessStdErrEventDto;
+import org.eclipse.che.agent.exec.shared.dto.event.ProcessStdOutEventDto;
 import org.eclipse.che.ide.api.command.exec.ExecAgentEventManager;
 import org.eclipse.che.ide.api.command.exec.ProcessDiedEventHandler;
 import org.eclipse.che.ide.api.command.exec.ProcessStartedEventHandler;
 import org.eclipse.che.ide.api.command.exec.ProcessStdErrEventHandler;
 import org.eclipse.che.ide.api.command.exec.ProcessStdOutEventHandler;
-import org.eclipse.che.ide.api.command.exec.dto.event.ProcessDiedEventDto;
-import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStartedEventDto;
-import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStdErrEventDto;
-import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStdOutEventDto;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
