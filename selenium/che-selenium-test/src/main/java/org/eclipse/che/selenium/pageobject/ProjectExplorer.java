@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -948,6 +948,7 @@ public class ProjectExplorer {
     String jsScript = "IDE.ProjectExplorer.expandAll();";
     JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
     js.executeScript(jsScript);
+    loader.waitOnClosed();
   }
 
   /**
@@ -957,6 +958,7 @@ public class ProjectExplorer {
     String jsScript = "IDE.ProjectExplorer.collapseAll()";
     JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
     js.executeScript(jsScript);
+    loader.waitOnClosed();
   }
 
   /**
@@ -969,6 +971,7 @@ public class ProjectExplorer {
     String jsScript = "IDE.ProjectExplorer.reveal(\"" + absPathToResource.replace(".", "/") + "\")";
     JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
     js.executeScript(jsScript);
+    loader.waitOnClosed();
   }
 
   public void waitItemIsSelected(String path) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  */
 'use strict';
 import {IEnvironmentManagerMachine, IEnvironmentManagerMachineServer} from './environment-manager-machine';
+import {IParser} from './parser';
 
 /**
  * This is base class, which describes the environment manager.
@@ -22,6 +23,7 @@ const SSH_AGENT_NAME: string = 'org.eclipse.che.ssh';
 const DEFAULT_MEMORY_LIMIT: number = 2 * 1073741824;
 
 export abstract class EnvironmentManager {
+  parser: IParser;
   $log: ng.ILogService;
 
   constructor($log: ng.ILogService) {
@@ -54,13 +56,29 @@ export abstract class EnvironmentManager {
 
   abstract parseRecipe(content: string): any;
 
-  abstract stringifyRecipe(recipe: any): string;
+  /**
+   * Parses a recipe content and returns validation error.
+   *
+   * @param {string} content
+   * @returns {string} validation error
+   */
+  validateRecipe(content: string): string {
+    let error: string = null;
+    try {
+      this.parser.parse(content);
+    } catch (e) {
+      error = e.message;
+    }
+    return error;
+  }
+
+  abstract stringifyRecipe(recipeObj: any): string;
 
   abstract getSource(machine: IEnvironmentManagerMachine): {[sourceType: string]: string};
 
   abstract setSource(machine: IEnvironmentManagerMachine, image: string): void;
 
-  abstract createNewDefaultMachine(environment: che.IWorkspaceEnvironment, image?: string): IEnvironmentManagerMachine;
+  abstract createMachine(environment: che.IWorkspaceEnvironment, image?: string): IEnvironmentManagerMachine;
 
   abstract addMachine(environment: che.IWorkspaceEnvironment, machine: IEnvironmentManagerMachine): che.IWorkspaceEnvironment
 

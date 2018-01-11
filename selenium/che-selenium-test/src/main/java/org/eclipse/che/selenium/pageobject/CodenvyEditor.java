@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,6 +48,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -1296,8 +1297,22 @@ public class CodenvyEditor {
   /** check text present in javadoc popup */
   public void checkTextToBePresentInJavaDocPopUp(String text) {
     loadPageDriverWait.until(frameToBeAvailableAndSwitchToIt(By.xpath(Locators.JAVA_DOC_POPUP)));
-    loadPageDriverWait.until(textToBePresentInElementLocated(By.tagName("body"), text));
+    waitTextInJavaDoc(text);
     seleniumWebDriver.switchTo().parentFrame();
+  }
+
+  /**
+   * sometimes javadoc invoces with delays, in this case empty frame displaying first, and text
+   * waits in this frame even if javadoc was loaded successfuly
+   */
+  private void waitTextInJavaDoc(String expectedText) {
+    try {
+      loadPageDriverWait.until(textToBePresentInElementLocated(By.tagName("body"), expectedText));
+    } catch (TimeoutException ex) {
+      seleniumWebDriver.switchTo().parentFrame();
+      loadPageDriverWait.until(frameToBeAvailableAndSwitchToIt(By.xpath(Locators.JAVA_DOC_POPUP)));
+      loadPageDriverWait.until(textToBePresentInElementLocated(By.tagName("body"), expectedText));
+    }
   }
 
   /**
