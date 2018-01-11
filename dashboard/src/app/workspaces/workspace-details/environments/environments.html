@@ -103,9 +103,9 @@
   </che-label-container>
   <che-button-default class="add-machine-button"
                       che-button-title="Add" name="addButton"
-                      ng-disabled="!workspaceEnvironmentsController.isScalable()"
+                      ng-disabled="!workspaceEnvironmentsController.isMultiMachine()"
                       ng-click="workspaceEnvironmentsController.addMachine()"></che-button-default>
-  <div class="recipe-warning-container" ng-hide="workspaceEnvironmentsController.isScalable()">
+  <div class="recipe-warning-container" ng-hide="workspaceEnvironmentsController.isMultiMachine()">
     Add another machine by changing the environment type to <b>compose</b> or <b>openshift</b>
   </div>
 </div>

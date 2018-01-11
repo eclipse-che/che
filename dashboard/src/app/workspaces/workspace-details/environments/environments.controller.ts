@@ -140,7 +140,7 @@ export class WorkspaceEnvironmentsController {
    *
    * @returns {boolean}
    */
-  isScalable(): boolean {
+  isMultiMachine(): boolean {
     return this.cheRecipeService.isScalable(this.environment.recipe);
   }
 

@@ -17,7 +17,7 @@ import {CreateWorkspaceSvc} from './create-workspace.service';
 import {NamespaceSelectorSvc} from './namespace-selector/namespace-selector.service';
 import {StackSelectorSvc} from './stack-selector/stack-selector.service';
 import {RandomSvc} from '../../../components/utils/random.service';
-import {CheNotification} from "../../../components/notification/che-notification.factory";
+import {CheNotification} from '../../../components/notification/che-notification.factory';
 
 /**
  * This class is handling the controller for workspace creation.
