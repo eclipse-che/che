@@ -18,6 +18,7 @@ import org.eclipse.che.commons.lang.execution.ProcessOutputType;
  * Split input on lines and call {@link Consumer#consume(String, ProcessOutputType)} for each line.
  */
 public class LineSplitter {
+  private static final String TEST_MESSAGE_SUFFIX = "}>";
 
   private final Consumer consumer;
 
@@ -46,7 +47,7 @@ public class LineSplitter {
 
   private void processLine(String line, ProcessOutputType outputType) {
     StringBuilder buffer = buffers.get(outputType);
-    if (!line.endsWith("\n")) {
+    if (!line.endsWith("\n") && !line.endsWith(TEST_MESSAGE_SUFFIX)) {
       buffer.append(line);
       return;
     }
