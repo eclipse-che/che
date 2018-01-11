@@ -1302,6 +1302,10 @@ public class CodenvyEditor {
     seleniumWebDriver.switchTo().parentFrame();
   }
 
+  /**
+   * sometimes javadoc invoces with delays, in this case empty frame displaying first, and text
+   * waits in this frame even if javadoc was loaded successfuly
+   */
   private void waitTextInJavaDoc(String expectedText) {
     try {
       loadPageDriverWait.until(textToBePresentInElementLocated(By.tagName("body"), expectedText));
