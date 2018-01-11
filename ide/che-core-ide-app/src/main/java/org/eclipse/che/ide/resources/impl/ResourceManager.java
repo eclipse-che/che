@@ -1112,8 +1112,10 @@ public final class ResourceManager {
   }
 
   private Promise<Void> onExternalDeltaMoved(final ResourceDelta delta) {
-    final Optional<Resource> toRemove = store.getResource(delta.getFromPath());
-    store.dispose(delta.getFromPath(), true);
+      Optional<Resource> toRemove = store.getResource(delta.getFromPath());
+      Path pathToDispose = Path.commonPath(delta.getFromPath(), delta.getToPath());
+
+      store.dispose(pathToDispose, true);
 
     return findResource(delta.getToPath())
         .thenPromise(
