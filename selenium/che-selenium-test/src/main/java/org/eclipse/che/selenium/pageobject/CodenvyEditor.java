@@ -48,6 +48,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -1295,9 +1296,20 @@ public class CodenvyEditor {
 
   /** check text present in javadoc popup */
   public void checkTextToBePresentInJavaDocPopUp(String text) {
+
     loadPageDriverWait.until(frameToBeAvailableAndSwitchToIt(By.xpath(Locators.JAVA_DOC_POPUP)));
-    loadPageDriverWait.until(textToBePresentInElementLocated(By.tagName("body"), text));
+    waitTextInJavaDoc(text);
     seleniumWebDriver.switchTo().parentFrame();
+  }
+
+  private void waitTextInJavaDoc(String expectedText) {
+    try {
+      loadPageDriverWait.until(textToBePresentInElementLocated(By.tagName("body"), expectedText));
+    } catch (TimeoutException ex) {
+      seleniumWebDriver.switchTo().parentFrame();
+      loadPageDriverWait.until(frameToBeAvailableAndSwitchToIt(By.xpath(Locators.JAVA_DOC_POPUP)));
+      loadPageDriverWait.until(textToBePresentInElementLocated(By.tagName("body"), expectedText));
+    }
   }
 
   /**
