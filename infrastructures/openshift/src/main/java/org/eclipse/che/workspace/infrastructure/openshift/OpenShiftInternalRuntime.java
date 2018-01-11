@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -137,10 +137,10 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       for (OpenShiftMachine machine : machines.values()) {
         try {
           machine.waitRunning(machineStartTimeoutMin);
-          bootstrapMachine(machine);
-          checkMachineServers(machine);
           machine.setStatus(MachineStatus.RUNNING);
           sendRunningEvent(machine.getName());
+          bootstrapMachine(machine);
+          checkMachineServers(machine);
         } catch (InfrastructureException rethrow) {
           sendFailedEvent(machine.getName(), rethrow.getMessage());
           throw rethrow;
@@ -240,13 +240,15 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       final Pod createdPod = project.pods().create(toCreate);
       final ObjectMeta podMetadata = createdPod.getMetadata();
       for (Container container : createdPod.getSpec().getContainers()) {
+        String machineName = Names.machineName(toCreate, container);
         OpenShiftMachine machine =
             new OpenShiftMachine(
-                Names.machineName(toCreate, container),
+                machineName,
                 podMetadata.getName(),
                 container.getName(),
-                serverResolver.resolve(createdPod, container),
-                project);
+                serverResolver.resolve(machineName),
+                project,
+                MachineStatus.STARTING);
         machines.put(machine.getName(), machine);
         sendStartingEvent(machine.getName());
       }

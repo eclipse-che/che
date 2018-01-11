@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,7 @@ public class TcpProbeConfig extends ProbeConfig {
     super(successThreshold, failureThreshold, timeoutSeconds, periodSeconds, initialDelaySeconds);
     if (port < 0) {
       throw new IllegalArgumentException(
-          "Port '" + timeoutSeconds + "' is illegal. Port should not be less than 0");
+          "Port '" + port + "' is illegal. Port should not be less than 0");
     }
     this.port = port;
     if (isNullOrEmpty(host)) {

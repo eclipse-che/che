@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2012-2017 Red Hat, Inc.
+    Copyright (c) 2012-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -50,6 +50,15 @@
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>che-exec-agent-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>che-exec-agent-shared</artifactId>
+            <classifier>sources</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -288,7 +297,7 @@
                         <package>org.eclipse.che.api.user</package>
                         <package>org.eclipse.che.api.debug.shared.dto</package>
                         <package>org.eclipse.che.ide.api.debug.dto</package>
-                        <package>org.eclipse.che.ide.api.command.exec.dto</package>
+                        <package>org.eclipse.che.agent.exec.shared.dto</package>
                     </dtoPackages>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
                     <genClassName>org.eclipse.che.ide.api.dto.DtoClientImpls</genClassName>
@@ -330,6 +339,7 @@
                                 <dep>org.eclipse.che.core:che-core-api-debug-shared</dep>
                                 <dep>org.eclipse.che.core:che-core-api-ssh-shared</dep>
                                 <dep>org.eclipse.che.core:che-core-gwt-logger</dep>
+                                <dep>org.eclipse.che:che-exec-agent-shared</dep>
                             </ignoredUnusedDeclaredDependencies>
                         </configuration>
                     </execution>

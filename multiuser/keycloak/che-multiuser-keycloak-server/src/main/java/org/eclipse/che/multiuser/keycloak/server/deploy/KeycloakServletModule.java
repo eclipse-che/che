@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.che.multiuser.keycloak.server.deploy;
 
 import com.google.inject.servlet.ServletModule;
 import javax.inject.Singleton;
+import org.eclipse.che.commons.logback.filter.IdentityIdLoggerFilter;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakAuthenticationFilter;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakEnvironmentInitalizationFilter;
 
@@ -26,5 +27,7 @@ public class KeycloakServletModule extends ServletModule {
         .through(KeycloakAuthenticationFilter.class);
     filterRegex("^(?!.*(/docs/))(?!.*(/keycloak/settings/?|/oauth/callback/?|/system/state/?)$).*")
         .through(KeycloakEnvironmentInitalizationFilter.class);
+    filterRegex("^(?!.*(/docs/))(?!.*(/keycloak/settings/?|/api/oauth/callback/?)$).*")
+        .through(IdentityIdLoggerFilter.class);
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -211,13 +211,8 @@ public class WorkspaceRuntimes {
     try {
       InternalEnvironment internalEnv = createInternalEnvironment(environment);
       RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv);
-
       InternalRuntime runtime = runtimeContext.getRuntime();
-      if (runtime == null) {
-        throw new IllegalStateException(
-            "SPI contract violated. RuntimeInfrastructure.start(...) must not return null: "
-                + RuntimeInfrastructure.class);
-      }
+
       RuntimeState state = new RuntimeState(runtime, STARTING);
       if (isStartRefused.get()) {
         throw new ConflictException(

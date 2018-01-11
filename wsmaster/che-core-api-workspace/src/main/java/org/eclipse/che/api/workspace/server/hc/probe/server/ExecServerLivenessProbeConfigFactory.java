@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,16 @@ public class ExecServerLivenessProbeConfigFactory implements HttpProbeConfigFact
     try {
       URL url = new URL(server.getUrl());
       return new HttpProbeConfig(
-          url.getPort(), url.getHost(), url.getProtocol(), "/liveness", null, 1, 3, 120, 10, 10);
+          url.getPort() == -1 ? 80 : url.getPort(),
+          url.getHost(),
+          url.getProtocol(),
+          "/liveness",
+          null,
+          1,
+          3,
+          120,
+          10,
+          10);
     } catch (MalformedURLException e) {
       throw new InternalInfrastructureException(
           "Exec agent server liveness probe url is invalid. Error: " + e.getMessage());
