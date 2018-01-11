@@ -147,7 +147,13 @@ class IdeCtrl {
 
     this.$rootScope.hideLoader = true;
 
-    if (this.selectedWorkspace) {
+    if (!this.selectedWorkspace) {
+      return;
+    }
+
+    if (this.ideSvc.openedWorkspace && this.selectedWorkspace.id === this.ideSvc.openedWorkspace.id) {
+      this.ideSvc.displayIDE();
+    } else {
       this.ideSvc.openIde(this.selectedWorkspace.id);
     }
   }

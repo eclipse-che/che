@@ -175,8 +175,11 @@ public class DockerInternalRuntimeTest {
     } catch (InfrastructureException ex) {
       verify(starter, times(1))
           .startContainer(nullable(String.class), nullable(String.class), any(), any(), any());
-      verify(eventService, times(2)).publish(any(MachineStatusEvent.class));
-      verifyEventsOrder(newEvent(DEV_MACHINE, STARTING, null), newEvent(DEV_MACHINE, FAILED, msg));
+      verify(eventService, times(3)).publish(any(MachineStatusEvent.class));
+      verifyEventsOrder(
+          newEvent(DEV_MACHINE, STARTING, null),
+          newEvent(DEV_MACHINE, FAILED, msg),
+          newEvent(DEV_MACHINE, STOPPED, null));
       throw ex;
     }
   }
@@ -191,9 +194,10 @@ public class DockerInternalRuntimeTest {
       verify(starter, times(1))
           .startContainer(nullable(String.class), nullable(String.class), any(), any(), any());
       verify(bootstrapper, times(1)).bootstrap();
-      verify(eventService, times(3)).publish(any(MachineStatusEvent.class));
+      verify(eventService, times(4)).publish(any(MachineStatusEvent.class));
       verifyEventsOrder(
           newEvent(DEV_MACHINE, STARTING, null),
+          newEvent(DEV_MACHINE, RUNNING, null),
           newEvent(DEV_MACHINE, FAILED, "bootstrap failed"),
           newEvent(DEV_MACHINE, STOPPED, null));
       throw ex;

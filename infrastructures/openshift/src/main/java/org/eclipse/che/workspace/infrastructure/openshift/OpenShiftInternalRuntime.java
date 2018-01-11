@@ -137,10 +137,10 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       for (OpenShiftMachine machine : machines.values()) {
         try {
           machine.waitRunning(machineStartTimeoutMin);
-          bootstrapMachine(machine);
-          checkMachineServers(machine);
           machine.setStatus(MachineStatus.RUNNING);
           sendRunningEvent(machine.getName());
+          bootstrapMachine(machine);
+          checkMachineServers(machine);
         } catch (InfrastructureException rethrow) {
           sendFailedEvent(machine.getName(), rethrow.getMessage());
           throw rethrow;
@@ -247,7 +247,8 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
                 podMetadata.getName(),
                 container.getName(),
                 serverResolver.resolve(machineName),
-                project);
+                project,
+                MachineStatus.STARTING);
         machines.put(machine.getName(), machine);
         sendStartingEvent(machine.getName());
       }

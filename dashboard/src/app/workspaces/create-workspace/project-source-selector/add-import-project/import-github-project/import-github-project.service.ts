@@ -346,7 +346,7 @@ export class ImportGithubProjectService implements IEditingProgress {
       const path = '/' +  name.replace(/[^\w-_]/g, '_');
       props.name = name;
       props.displayName = name;
-      props.description = repository.description;
+      props.description = repository.description || '';
       props.path = path;
       props.category = '';
 

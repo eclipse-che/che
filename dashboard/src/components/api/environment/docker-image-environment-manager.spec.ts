@@ -50,7 +50,7 @@ describe('DockerImageEnvironmentManager', () => {
   it('should return source', () => {
     let source = envManager.getSource(machines[0]);
 
-    let expectedSource = {image: environment.recipe.location};
+    let expectedSource = {image: environment.recipe.content};
     expect(source).toEqual(expectedSource);
   });
 
@@ -84,7 +84,7 @@ describe('DockerImageEnvironmentManager', () => {
 
     envManager.setSource(machines[0], newSource);
     let newEnvironment = envManager.getEnvironment(environment, machines);
-    expect(newEnvironment.recipe.location).toEqual(newSource);
+    expect(newEnvironment.recipe.content).toEqual(newSource);
   });
 
 });

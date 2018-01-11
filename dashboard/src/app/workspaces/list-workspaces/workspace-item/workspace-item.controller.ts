@@ -10,6 +10,7 @@
  */
 'use strict';
 import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
+import {WorkspacesService} from '../../workspaces.service';
 
 /**
  * @ngdoc controller
@@ -19,8 +20,9 @@ import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.f
  */
 export class WorkspaceItemCtrl {
   $location: ng.ILocationService;
-  lodash: _.LoDashStatic;
+  lodash: any;
   cheWorkspace: CheWorkspace;
+  workspacesService: WorkspacesService;
 
   workspace: che.IWorkspace;
 
@@ -28,10 +30,23 @@ export class WorkspaceItemCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, lodash: _.LoDashStatic, cheWorkspace: CheWorkspace) {
+  constructor($location: ng.ILocationService,
+              lodash: any,
+              cheWorkspace: CheWorkspace,
+              workspacesService: WorkspacesService) {
     this.$location = $location;
     this.lodash = lodash;
     this.cheWorkspace = cheWorkspace;
+    this.workspacesService = workspacesService;
+  }
+
+  /**
+   * Returns `true` if default environment of workspace contains supported recipe type.
+   *
+   * @returns {boolean}
+   */
+  get isSupported(): boolean {
+    return this.workspacesService.isSupported(this.workspace);
   }
 
   /**

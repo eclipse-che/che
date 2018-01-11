@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.infrastructure.docker.client.DockerConnector;
@@ -75,6 +76,7 @@ public class DockerMachineCreator {
         new ServersMapper(hostname, deserializer.machineName())
             .map(networkSettings.getPorts(), configs),
         registry,
-        dockerMachineStopDetector);
+        dockerMachineStopDetector,
+        MachineStatus.RUNNING);
   }
 }

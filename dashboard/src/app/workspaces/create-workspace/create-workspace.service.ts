@@ -215,7 +215,6 @@ export class CreateWorkspaceSvc {
   redirectToIde(namespaceId: string, workspace: che.IWorkspace): void {
     const path = `/ide/${namespaceId}/${workspace.config.name}`;
     this.$location.path(path);
-    this.$location.search({'init': 'true'});
   }
 
   /**

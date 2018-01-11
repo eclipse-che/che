@@ -243,9 +243,12 @@ public class OpenShiftInternalRuntimeTest {
       verify(routes).create(any());
       verify(services).create(any());
       verify(bootstrapper).bootstrap();
-      verify(eventService, times(3)).publish(any());
+      verify(eventService, times(4)).publish(any());
       verifyEventsOrder(
-          newEvent(M1_NAME, STARTING), newEvent(M2_NAME, STARTING), newEvent(M1_NAME, FAILED));
+          newEvent(M1_NAME, STARTING),
+          newEvent(M2_NAME, STARTING),
+          newEvent(M1_NAME, RUNNING),
+          newEvent(M1_NAME, FAILED));
       throw rethrow;
     }
   }
@@ -280,7 +283,7 @@ public class OpenShiftInternalRuntimeTest {
       verify(routes).create(any());
       verify(services).create(any());
       verify(bootstrapper).bootstrap();
-      verifyEventsOrder(newEvent(M1_NAME, STARTING));
+      verifyEventsOrder(newEvent(M1_NAME, STARTING), newEvent(M1_NAME, RUNNING));
       throw rethrow;
     }
   }

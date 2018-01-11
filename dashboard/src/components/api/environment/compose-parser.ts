@@ -10,9 +10,16 @@
  */
 'use strict';
 
+import {IParser} from './parser';
+
+export interface IComposeServiceRecipe {
+  image: string;
+  [propName: string]: any;
+}
+
 export interface IComposeRecipe {
   services: {
-    [machineName: string]: any
+    [serviceName: string]: IComposeServiceRecipe
   };
 }
 
@@ -21,7 +28,7 @@ export interface IComposeRecipe {
  *
  * @author Oleksii Kurinnyi
  */
-export class ComposeParser {
+export class ComposeParser implements IParser {
 
   /**
    * Parses recipe content

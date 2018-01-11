@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.api.watcher.server.impl;
 
-import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.isDirectory;
 import static org.eclipse.che.api.watcher.server.impl.FileWatcherUtils.toInternalPath;
 
@@ -67,7 +67,7 @@ public class FileWatcherEventHandler {
     int id = idCounter.incrementAndGet();
     FileWatcherOperation operation = new FileWatcherOperation(id, create, modify, delete);
 
-    operations.putIfAbsent(path, newHashSet());
+    operations.putIfAbsent(path, newConcurrentHashSet());
     operations.get(path).add(operation);
 
     return id;

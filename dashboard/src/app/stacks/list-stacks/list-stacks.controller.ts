@@ -124,14 +124,14 @@ export class ListStacksController {
   showSelectStackRecipeDialog($event: MouseEvent): void {
     this.$mdDialog.show({
       targetEvent: $event,
-      controller: 'ImportStackController',
-      controllerAs: 'importStackController',
+      controller: 'BuildStackController',
+      controllerAs: 'buildStackController',
       bindToController: true,
       clickOutsideToClose: true,
       locals: {
         callbackController: this
       },
-      templateUrl: 'app/stacks/list-stacks/import-stack/import-stack.html'
+      templateUrl: 'app/stacks/list-stacks/build-stack/build-stack.html'
     });
   }
 
