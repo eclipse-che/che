@@ -14,6 +14,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:che='urn:import:org.eclipse.che.ide.ui.listbox'>
 
+    <ui:with type="org.eclipse.che.ide.preferences.PreferencesLocalizationConstants" field="localizationConstants"/>
     <ui:style>
         .main {
             margin: 5px;
@@ -35,11 +36,11 @@
     </ui:style>
     <g:FlowPanel styleName="{style.main}">
         <g:FlowPanel addStyleNames="{style.row}">
-            <g:Label addStyleNames="{style.leftAlign}">Theme</g:Label>
+            <g:Label text="{localizationConstants.ideGeneralThemeLabel}" addStyleNames="{style.leftAlign}"/>
             <che:CustomListBox ui:field="themeBox" debugId="window-preferences-general-themeBox" addStyleNames="{style.rightAlign} {style.dropDownShift}"/>
         </g:FlowPanel>
         <g:FlowPanel addStyleNames="{style.row}">
-            <g:Label addStyleNames="{style.leftAlign}">Ask before closing browser tab</g:Label>
+            <g:Label text="{localizationConstants.ideGeneralAskBeforeClosingTabLabel}" addStyleNames="{style.leftAlign}"/>
             <g:CheckBox ui:field="askBeforeClosingTab" debugId="window-preferences-general-ask-before-closing-tab" addStyleNames="{style.rightAlign}"/>
         </g:FlowPanel>
     </g:FlowPanel>

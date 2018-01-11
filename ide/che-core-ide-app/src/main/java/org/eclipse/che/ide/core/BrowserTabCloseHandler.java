@@ -29,17 +29,8 @@ public class BrowserTabCloseHandler implements WindowActionHandler {
   private final PreferencesManager preferencesManager;
   private final CoreLocalizationConstant localizationConstant;
 
-  /** Is used to not to block programmatic close of browser tab */
-  private static boolean closeImmediately = false;
-
-  /**
-   * If true given then no checks will be performed before IDE leave.
-   *
-   * <p>Typically should be invoked before automatic page leave/reloading.
-   */
-  public static void setCloseImmediately(boolean closeImmediately) {
-    BrowserTabCloseHandler.closeImmediately = closeImmediately;
-  }
+  /** Is used to not to block programmatic close/reload of browser tab. */
+  private boolean closeImmediately;
 
   @Inject
   public BrowserTabCloseHandler(
@@ -51,7 +42,17 @@ public class BrowserTabCloseHandler implements WindowActionHandler {
     this.preferencesManager = preferencesManager;
     this.localizationConstant = localizationConstant;
 
+    closeImmediately = false;
     eventBus.addHandler(WindowActionEvent.TYPE, this);
+  }
+
+  /**
+   * If true given then no checks will be performed before IDE leave.
+   *
+   * <p>Typically should be invoked before automatic page leave/reloading.
+   */
+  public void setCloseImmediately(boolean closeImmediately) {
+    this.closeImmediately = closeImmediately;
   }
 
   @Override
@@ -76,12 +77,10 @@ public class BrowserTabCloseHandler implements WindowActionHandler {
    * @return true if no unsaved changes, false otherwise
    */
   private boolean isEditorsClean() {
-    for (EditorPartPresenter editorPartPresenter : editorAgentProvider.get().getOpenedEditors()) {
-      if (editorPartPresenter.isDirty()) {
-        return false;
-      }
-    }
-
-    return true;
+    return editorAgentProvider
+        .get()
+        .getOpenedEditors()
+        .stream()
+        .noneMatch(EditorPartPresenter::isDirty);
   }
 }

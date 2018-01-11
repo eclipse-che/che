@@ -21,17 +21,22 @@ import org.eclipse.che.ide.core.BrowserTabCloseHandler;
 public class DevModeSetUpAction extends BaseAction {
 
   private final GWTDevMode gwtDevMode;
+  private final BrowserTabCloseHandler browserTabCloseHandler;
 
   @Inject
-  public DevModeSetUpAction(CoreLocalizationConstant messages, GWTDevMode gwtDevMode) {
+  public DevModeSetUpAction(
+      CoreLocalizationConstant messages,
+      GWTDevMode gwtDevMode,
+      BrowserTabCloseHandler browserTabCloseHandler) {
     super(messages.gwtDevModeSetUpActionTitle());
 
     this.gwtDevMode = gwtDevMode;
+    this.browserTabCloseHandler = browserTabCloseHandler;
   }
 
   @Override
   public void actionPerformed(ActionEvent event) {
-    BrowserTabCloseHandler.setCloseImmediately(true);
+    browserTabCloseHandler.setCloseImmediately(true);
     gwtDevMode.setUp();
   }
 }

@@ -19,8 +19,10 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.inject.Inject;
 import java.util.List;
 import org.eclipse.che.ide.api.theme.Theme;
+import org.eclipse.che.ide.preferences.PreferencesLocalizationConstants;
 import org.eclipse.che.ide.ui.listbox.CustomListBox;
 
 /** @author Evgen Vidolob */
@@ -31,9 +33,16 @@ public class IdeGeneralPreferencesViewImpl implements IdeGeneralPreferencesView 
   private final FlowPanel rootElement;
   @UiField CustomListBox themeBox;
   @UiField CheckBox askBeforeClosingTab;
+
+  @UiField(provided = true)
+  PreferencesLocalizationConstants localizationConstants;
+
   private ActionDelegate delegate;
 
-  public IdeGeneralPreferencesViewImpl() {
+  @Inject
+  public IdeGeneralPreferencesViewImpl(PreferencesLocalizationConstants localizationConstants) {
+    this.localizationConstants = localizationConstants;
+
     rootElement = ourUiBinder.createAndBindUi(this);
   }
 
