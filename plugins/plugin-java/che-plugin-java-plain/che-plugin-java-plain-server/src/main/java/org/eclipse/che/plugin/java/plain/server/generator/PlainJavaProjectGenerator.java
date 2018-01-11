@@ -47,13 +47,16 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(PlainJavaProjectGenerator.class);
 
-  private static final String MAIN_CLASS = "Main.java";
+  private static final String MAIN_CLASS_RESOURCE = "Main.java";
   private static final String PROJECT_FILE_RESOURCE = "project";
   private static final String CLASSPATH_FILE_RESOURCE = "classpath";
-  private static final String PROJECT_NAME_PATTERN = "project_name";
-  private static final String SOURCE_FOLDER_PATTERN = "source_folder_value";
-  private static final String CLASSPATH_NAME = ".classpath";
-  private static final String PROJECT_NAME = ".project";
+
+  private static final String PROJECT_NAME_TEMPLATE = "project_name";
+  private static final String SOURCE_FOLDER_TEMPLATE = "source_folder";
+
+  private static final String CLASSPATH_FILE = ".classpath";
+  private static final String PROJECT_FILE = ".project";
+  private static final String MAIN_CLASS_FILE = "Main.java";
 
   private final FsManager fsManager;
 
@@ -90,22 +93,22 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
     String sourceDirWsPath = resolve(projectWsPath, sourceFolders.get(0));
     fsManager.createDir(sourceDirWsPath);
 
-    String mainJavaWsPath = resolve(sourceDirWsPath, MAIN_CLASS);
-    fsManager.createFile(mainJavaWsPath, getResource(MAIN_CLASS));
+    String mainJavaWsPath = resolve(sourceDirWsPath, MAIN_CLASS_FILE);
+    fsManager.createFile(mainJavaWsPath, getResource(MAIN_CLASS_RESOURCE));
 
     // create .classpath
-    String dotClasspathWsPath = resolve(projectWsPath, CLASSPATH_NAME);
+    String dotClasspathWsPath = resolve(projectWsPath, CLASSPATH_FILE);
     createFile(
         dotClasspathWsPath,
         CLASSPATH_FILE_RESOURCE,
-        singletonMap(SOURCE_FOLDER_PATTERN, sourceFolders.get(0)));
+        singletonMap(SOURCE_FOLDER_TEMPLATE, sourceFolders.get(0)));
 
     // create .project
-    String dotProjectWsPath = resolve(projectWsPath, PROJECT_NAME);
+    String dotProjectWsPath = resolve(projectWsPath, PROJECT_FILE);
     createFile(
         dotProjectWsPath,
         PROJECT_FILE_RESOURCE,
-        singletonMap(PROJECT_NAME_PATTERN, projectWsPath.substring(1)));
+        singletonMap(PROJECT_NAME_TEMPLATE, projectWsPath.substring(1)));
   }
 
   @Override
@@ -121,9 +124,9 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
       try {
         fsManager.move(oldClasspathWsPath, projectWsPath + "/.classpath");
         createFile(
-            resolve(projectWsPath, PROJECT_NAME),
+            resolve(projectWsPath, PROJECT_FILE),
             PROJECT_FILE_RESOURCE,
-            singletonMap(PROJECT_NAME_PATTERN, projectWsPath.substring(1)));
+            singletonMap(PROJECT_NAME_TEMPLATE, projectWsPath.substring(1)));
       } catch (ConflictException | NotFoundException | ServerException e) {
         LOG.error("Can't update project {}", projectWsPath, e);
       }
