@@ -42,6 +42,12 @@ var (
 		Version:     "1.0",
 		Script:      "echo test",
 	}
+	print3numbersAndFailInst = Installer{
+		ID:          "test-installer-3",
+		Description: "Installer for testing",
+		Version:     "1.0",
+		Script:      "printf \"1\n\" && printf \"error\" >&2 && exit 1",
+	}
 )
 
 func TestBootstrap(t *testing.T) {
@@ -83,9 +89,41 @@ func TestBootstrap(t *testing.T) {
 		&StatusChangedEvent{Status: StatusDone},
 	}
 
-	if err := cr.WaitUntil(jsonrpctest.WriteCalledAtLeast(len(expectedEvents))); err != nil {
+	requests, err := cr.GetAllRequests()
+	if err != nil {
 		t.Fatal(err)
 	}
+	checkEvents(t, requests, expectedEvents...)
+}
+
+func TestBootstrapWhenItFails(t *testing.T) {
+	// configuring bootstrapper
+	runtimeID = testRuntimeID
+	machineName = testMachineName
+	installerTimeout = time.Second * 2
+	installers = []Installer{print3numbersAndFailInst}
+
+	// configuring jsonrpc endpoint
+	tunnel, cr, rr := jsonrpctest.NewTmpTunnel(2 * time.Second)
+	defer tunnel.Close()
+	defer rr.Close()
+	PushStatuses(tunnel)
+	PushLogs(tunnel, nil)
+
+	startAndWaitInstallations(t)
+
+	expectedEvents := []event.E{
+		&StatusChangedEvent{Status: StatusStarting},
+
+		&InstallerStatusChangedEvent{Status: InstallerStatusStarting, Installer: print3numbersAndFailInst.ID},
+		&InstallerLogEvent{Stream: StdoutStream, Text: "1", Installer: print3numbersAndFailInst.ID},
+		&InstallerLogEvent{Stream: StderrStream, Text: "error", Installer: print3numbersAndFailInst.ID},
+
+		&InstallerStatusChangedEvent{Status: InstallerStatusFailed, Installer: print3numbersAndFailInst.ID, Error: "error"},
+
+		&StatusChangedEvent{Status: InstallerStatusFailed, Error: "error"},
+	}
+
 	requests, err := cr.GetAllRequests()
 	if err != nil {
 		t.Fatal(err)
