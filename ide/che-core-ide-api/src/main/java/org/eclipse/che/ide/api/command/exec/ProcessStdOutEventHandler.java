@@ -12,8 +12,8 @@ package org.eclipse.che.ide.api.command.exec;
 
 import com.google.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.agent.exec.shared.dto.event.ProcessStdOutEventDto;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStdOutEventDto;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**

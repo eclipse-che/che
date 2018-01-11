@@ -11,10 +11,10 @@
 package org.eclipse.che.ide.api.command.exec;
 
 import java.util.function.Consumer;
-import org.eclipse.che.ide.api.command.exec.dto.event.ProcessDiedEventDto;
-import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStartedEventDto;
-import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStdErrEventDto;
-import org.eclipse.che.ide.api.command.exec.dto.event.ProcessStdOutEventDto;
+import org.eclipse.che.agent.exec.shared.dto.event.ProcessDiedEventDto;
+import org.eclipse.che.agent.exec.shared.dto.event.ProcessStartedEventDto;
+import org.eclipse.che.agent.exec.shared.dto.event.ProcessStdErrEventDto;
+import org.eclipse.che.agent.exec.shared.dto.event.ProcessStdOutEventDto;
 
 /**
  * Manages registration of operations related to different kinds of even sent by exec agent

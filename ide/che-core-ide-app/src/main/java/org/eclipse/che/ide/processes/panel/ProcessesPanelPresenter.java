@@ -42,6 +42,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import org.eclipse.che.agent.exec.shared.dto.GetProcessLogsResponseDto;
+import org.eclipse.che.agent.exec.shared.dto.GetProcessesResponseDto;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -63,8 +65,6 @@ import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
 import org.eclipse.che.ide.api.command.exec.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.command.exec.ProcessFinishedEvent;
-import org.eclipse.che.ide.api.command.exec.dto.GetProcessLogsResponseDto;
-import org.eclipse.che.ide.api.command.exec.dto.GetProcessesResponseDto;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
@@ -551,8 +551,8 @@ public class ProcessesPanelPresenter extends BasePresenter
     final String sshPort;
     if (sshServiceAddress != null) {
       String[] parts = sshServiceAddress.split(":");
-      machineHost = parts[0];
-      sshPort = (parts.length == 2) ? parts[1] : SSH_PORT;
+      machineHost = parts[1].substring(2);
+      sshPort = (parts.length == 3) ? parts[2] : SSH_PORT;
     } else {
       sshPort = SSH_PORT;
       machineHost = "";
