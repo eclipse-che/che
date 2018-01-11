@@ -13,6 +13,7 @@
 import {EnvironmentManager} from './environment-manager';
 import {DockerfileParser} from './docker-file-parser';
 import {IEnvironmentManagerMachine} from './environment-manager-machine';
+import {CheRecipeTypes} from '../recipe/che-recipe-types';
 
 /**
  * This is the implementation of environment manager that handles the docker file format of environment.
@@ -33,8 +34,6 @@ import {IEnvironmentManagerMachine} from './environment-manager-machine';
  * @author Ann Shumilova
  */
 
-const DOCKERFILE = 'dockerfile';
-const ENV_INSTRUCTION: string = 'ENV';
 const FROM_INSTRUCTION: string = 'FROM';
 
 export class DockerFileEnvironmentManager extends EnvironmentManager {
@@ -47,7 +46,7 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
   }
 
   get type(): string {
-    return DOCKERFILE;
+    return CheRecipeTypes.DOCKERFILE;
   }
 
   get editorMode(): string {
@@ -60,7 +59,7 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
    * @param {string} image
    * @return {IEnvironmentManagerMachine}
    */
-  createNewDefaultMachine(environment: che.IWorkspaceEnvironment, image?: string): IEnvironmentManagerMachine {
+  createMachine(environment: che.IWorkspaceEnvironment, image?: string): IEnvironmentManagerMachine {
     this.$log.error('EnvironmentManager: cannot create a new machine.');
     return null;
   }
@@ -180,7 +179,7 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
     }
 
     let from = machine.recipe.find((line: any) => {
-      return line.instruction === 'FROM';
+      return /^from$/i.test(line.instruction);
     });
 
     return {image: from.argument};

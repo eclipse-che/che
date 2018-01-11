@@ -310,14 +310,14 @@ export class StackSelectorController {
   onAddStack(): void {
     this.confirmDialogService.showConfirmDialog('Create stack', 'Would you like to create a stack from a recipe?', 'Yes', 'No').then(() => {
       this.$mdDialog.show({
-        controller: 'ImportStackController',
-        controllerAs: 'importStackController',
+        controller: 'BuildStackController',
+        controllerAs: 'buildStackController',
         bindToController: true,
         clickOutsideToClose: true,
         locals: {
           callbackController: this
         },
-        templateUrl: 'app/stacks/list-stacks/import-stack/import-stack.html'
+        templateUrl: 'app/stacks/list-stacks/build-stack/build-stack.html'
       });
     }, () => {
       this.$location.path('/stack/create');

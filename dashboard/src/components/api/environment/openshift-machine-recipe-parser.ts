@@ -10,6 +10,8 @@
  */
 'use strict';
 
+import {IParser} from './parser';
+
 export interface IPodItem {
   apiVersion: string;
   kind: string;
@@ -38,7 +40,7 @@ export interface IPodItemContainer {
  *
  *  @author Oleksii Orel
  */
-export class OpenshiftMachineRecipeParser {
+export class OpenshiftMachineRecipeParser implements IParser {
   private recipeByContent: Map<string, IPodItem> = new Map();
   private recipeKeys: Array<string> = [];
 
@@ -49,17 +51,20 @@ export class OpenshiftMachineRecipeParser {
    * @returns {IPodItem} recipe object
    */
   parse(content: string): IPodItem {
+    let recipe: IPodItem;
     if (this.recipeByContent.has(content)) {
-       return this.recipeByContent.get(content);
+      recipe = angular.copy(this.recipeByContent.get(content));
+      this.validate(recipe);
+      return recipe;
     }
-    const recipe = jsyaml.load(content);
-    this.validate(recipe);
+    recipe = jsyaml.safeLoad(content);
     // add to buffer
-    this.recipeByContent.set(content, recipe);
+    this.recipeByContent.set(content, angular.copy(recipe));
     this.recipeKeys.push(content);
     if (this.recipeKeys.length > 10) {
       this.recipeByContent.delete(this.recipeKeys.shift());
     }
+    this.validate(recipe);
 
     return recipe;
   }

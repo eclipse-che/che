@@ -19,9 +19,11 @@ import {ListComponentsController} from './stack-details/list-components/list-com
 import {EditComponentDialogController} from './stack-details/list-components/edit-component-dialog/edit-component-dialog.controller';
 import {SelectTemplateController} from './stack-details/select-template/select-template.controller';
 import {SamplesTagFilter} from './stack-details/select-template/samples-tag.filter';
-import {ImportStackController} from './list-stacks/import-stack/import-stack.controller';
+import {BuildStackController} from './list-stacks/build-stack/build-stack.controller';
 import {ImportStackService} from './stack-details/import-stack.service';
 import {StackValidationService} from './stack-details/stack-validation.service';
+import {RecipeEditorController} from './list-stacks/build-stack/recipe-editor/recipe-editor.controller';
+import {RecipeEditorDirective} from './list-stacks/build-stack/recipe-editor/recipe-editor.directive';
 
 /**
  * @ngdoc controller
@@ -44,9 +46,12 @@ export class StacksConfig {
     register.controller('EditComponentDialogController', EditComponentDialogController);
     register.controller('SelectTemplateController', SelectTemplateController);
     register.filter('samplesTagFilter', SamplesTagFilter.filter);
-    register.controller('ImportStackController', ImportStackController);
+    register.controller('BuildStackController', BuildStackController);
     register.service('importStackService', ImportStackService);
     register.service('stackValidationService', StackValidationService);
+
+    register.controller('RecipeEditorController', RecipeEditorController);
+    register.directive('recipeEditor', RecipeEditorDirective);
 
     // config routes
     register.app.config(($routeProvider: any) => {
