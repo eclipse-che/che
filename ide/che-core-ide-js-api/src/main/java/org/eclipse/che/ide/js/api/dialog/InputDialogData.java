@@ -23,14 +23,14 @@ import jsinterop.annotations.JsType;
 public interface InputDialogData extends ConfirmDialogData {
 
   /** Returns text used to initialize the input field. */
-  @JsProperty(name = "initialText")
+  @JsProperty
   String getInitialText();
 
   /** Returns the beginning index of the initial text to select, inclusive. */
-  @JsProperty(name = "selectionStartIndex")
+  @JsProperty
   int getSelectionStartIndex();
 
   /** Returns the number of characters to be selected in the input. */
-  @JsProperty(name = "selectionLength")
+  @JsProperty
   int getSelectionLength();
 }

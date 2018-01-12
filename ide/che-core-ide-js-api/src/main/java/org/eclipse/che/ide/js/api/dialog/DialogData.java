@@ -23,10 +23,10 @@ import jsinterop.annotations.JsType;
 public interface DialogData {
 
   /** Returns the dialog title. */
-  @JsProperty(name = "title")
+  @JsProperty
   String getTitle();
 
   /** Returns the dialog content. */
-  @JsProperty(name = "content")
+  @JsProperty
   String getContent();
 }

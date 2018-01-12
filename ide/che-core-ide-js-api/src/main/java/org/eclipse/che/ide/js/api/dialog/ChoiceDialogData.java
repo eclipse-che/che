@@ -23,14 +23,14 @@ import jsinterop.annotations.JsType;
 public interface ChoiceDialogData extends DialogData {
 
   /** Returns the first choice button text. */
-  @JsProperty(name = "firstChoiceButtonText")
+  @JsProperty
   String getFirstChoiceButtonText();
 
   /** Returns the second choice button text. */
-  @JsProperty(name = "secondChoiceButtonText")
+  @JsProperty
   String getSecondChoiceButtonText();
 
   /** Returns the third choice button text. */
-  @JsProperty(name = "thirdChoiceButtonText")
+  @JsProperty
   String getThirdChoiceButtonText();
 }

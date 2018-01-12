@@ -23,6 +23,6 @@ import jsinterop.annotations.JsType;
 public interface MessageDialogData extends DialogData {
 
   /** Returns the Confirm button text. */
-  @JsProperty(name = "confirmButtonText")
+  @JsProperty
   String getConfirmButtonText();
 }
