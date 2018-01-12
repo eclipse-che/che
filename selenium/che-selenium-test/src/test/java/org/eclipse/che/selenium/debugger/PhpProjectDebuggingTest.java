@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.debugger;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -31,6 +33,7 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
 import org.eclipse.che.selenium.pageobject.debug.PhpDebugConfig;
+import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -122,7 +125,7 @@ public class PhpProjectDebuggingTest {
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
 
     projectExplorer.openItemByPath(PATH_TO_LIB_PHP);
-    editor.setBreakpoint(14);
+    editor.setBreakpoint(13);
     editor.closeAllTabs();
 
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
@@ -139,8 +142,13 @@ public class PhpProjectDebuggingTest {
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RESUME_BTN_ID);
 
     // then
-    editor.waitTabFileWithSavedStatus("lib.php");
-    editor.waitActiveBreakpoint(14);
+    try {
+      editor.waitTabFileWithSavedStatus("lib.php");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue: https://github.com/eclipse/che/issues/8271", ex);
+    }
+    editor.waitActiveBreakpoint(13);
     debugPanel.waitDebugHighlightedText("return \"Hello, $name\"");
     debugPanel.waitTextInVariablesPanel("$name=\"man\"");
 
@@ -172,7 +180,7 @@ public class PhpProjectDebuggingTest {
             NON_DEFAULT_DEBUG_PORT));
 
     projectExplorer.openItemByPath(PATH_TO_LIB_PHP);
-    editor.setBreakpoint(14);
+    editor.setBreakpoint(13);
     editor.closeAllTabs();
 
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
@@ -184,8 +192,13 @@ public class PhpProjectDebuggingTest {
     debugPanel.openDebugPanel();
 
     // then
-    editor.waitTabFileWithSavedStatus("lib.php");
-    editor.waitActiveBreakpoint(14);
+    try {
+      editor.waitTabFileWithSavedStatus("lib.php");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue: https://github.com/eclipse/che/issues/8271", ex);
+    }
+    editor.waitActiveBreakpoint(13);
     debugPanel.waitDebugHighlightedText("return \"Hello, $name\"");
     debugPanel.waitTextInVariablesPanel("$name=\"man\"");
 
