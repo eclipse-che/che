@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,10 +43,13 @@ public class CheckStopStartWsTest {
   @Test
   public void checkStopStartWorkspaceTest() {
     projectExplorer.waitProjectExplorer();
+    terminal.waitTerminalTab(LOADER_TIMEOUT_SEC);
     loader.waitOnClosed();
+
     menu.runCommand(WORKSPACE, STOP_WORKSPACE);
     toastLoader.waitExpectedTextInToastLoader("Stopping the workspace");
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running", 60);
+
     toastLoader.clickOnStartButton();
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();

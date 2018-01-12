@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import org.eclipse.che.ide.api.command.exec.dto.event.DtoWithPid;
+import org.eclipse.che.agent.exec.shared.dto.DtoWithPid;
 
 public abstract class AbstractExecAgentEventHandler<P extends DtoWithPid>
     implements BiConsumer<String, P> {

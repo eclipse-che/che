@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import {CheAPIBuilder} from './builder/che-api-builder.factory';
 import {CheRemote} from './remote/che-remote.factory';
 import {CheOAuthProvider} from './che-o-auth-provider.factory';
 import {CheEnvironmentRegistry} from './environment/che-environment-registry.factory';
+import {CheEnvironmentManager} from './environment/che-environment-manager.factory';
 import {CheAgent} from './che-agent.factory';
 import {CheSsh} from './che-ssh.factory';
 import {CheNamespaceRegistry} from './namespace/che-namespace-registry.factory';
@@ -59,6 +60,7 @@ export class ApiConfig {
     register.factory('cheRemote', CheRemote);
     register.factory('cheOAuthProvider', CheOAuthProvider);
     register.factory('cheEnvironmentRegistry', CheEnvironmentRegistry);
+    register.factory('cheEnvironmentManager', CheEnvironmentManager);
     register.factory('cheAgent', CheAgent);
     register.factory('cheSsh', CheSsh);
     register.factory('cheNamespaceRegistry', CheNamespaceRegistry);
