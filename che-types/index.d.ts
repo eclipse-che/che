@@ -1918,30 +1918,30 @@ declare namespace che {
             interface DialogManager {
 
                 /**
-                 * Display a Message dialog.
+                 * Shows a Message dialog.
                  * A dialog consists of a title, main part with text as content and confirmation button.
                  * Confirmation button text is 'OK' by default, can be overridden.
                  *
                  * @param dialogData the information necessary to create a Message dialog window
-                 * @param confirmButtonClickedHandler the handler is used when user click on confirmation button
+                 * @param confirmButtonClickedHandler the handler is used when user clicks on confirmation button
                  */
-                displayMessageDialog(dialogData: MessageDialogData, confirmButtonClickedHandler: ClickButtonHandler): void;
+                showMessageDialog(dialogData: MessageDialogData, confirmButtonClickedHandler: ClickButtonHandler): void;
 
                 /**
-                 * Display a Confirmation dialog.
+                 * Shows a Confirmation dialog.
                  * A dialog consists of a title, main part with text as content, confirmation and cancel buttons.
                  * Confirmation button text is 'OK' by default.
                  * Cancel button text is 'Cancel' by default.
                  * Text for confirmation and cancel buttons can be overridden.
                  *
                  * @param dialogData the information necessary to create a Confirmation dialog window
-                 * @param confirmButtonClickedHandler the handler is used when user click on confirmation button
-                 * @param cancelButtonClickedHandler the handler is used when user click on cancel button
+                 * @param confirmButtonClickedHandler the handler is used when user clicks on confirmation button
+                 * @param cancelButtonClickedHandler the handler is used when user clicks on cancel button
                  */
-                displayConfirmDialog(dialogData: ConfirmDialogData, confirmButtonClickedHandler: ClickButtonHandler, cancelButtonClickedHandler: ClickButtonHandler): void;
+                showConfirmDialog(dialogData: ConfirmDialogData, confirmButtonClickedHandler: ClickButtonHandler, cancelButtonClickedHandler: ClickButtonHandler): void;
 
                 /**
-                 * Display an input dialog.
+                 * Shows an input dialog.
                  * A dialog consists of a title, main part with input field and label for it, confirmation and cancel buttons.
                  * Input field can contains an initial text. The initial text may be pre-selected.
                  * Confirmation button text is 'OK' by default.
@@ -1949,21 +1949,21 @@ declare namespace che {
                  * Text for confirmation and cancel buttons can be overridden.
                  *
                  * @param dialogData the information necessary to create an input dialog window
-                 * @param inputAcceptedHandler the handler is used when user click on confirmation button
-                 * @param cancelButtonClickedHandler the handler is used when user click on cancel button
+                 * @param inputAcceptedHandler the handler is used when user clicks on confirmation button
+                 * @param cancelButtonClickedHandler the handler is used when user clicks on cancel button
                  */
-                displayInputDialog(dialogData: InputDialogData, inputAcceptedHandler: { (value: string): void }, cancelButtonClickedHandler: ClickButtonHandler): void;
+                showInputDialog(dialogData: InputDialogData, inputAcceptedHandler: { (value: string): void }, cancelButtonClickedHandler: ClickButtonHandler): void;
 
                 /**
-                 * Display a Choice dialog.
+                 * Shows a Choice dialog.
                  * A dialog consists of a title, main part with text as content and three buttons to confirm some choice.
                  *
                  * @param dialogData the information necessary to create a Choice dialog window
-                 * @param firstButtonClickedHandler the handler is used when user click on first button on the right
-                 * @param secondButtonClickedHandler the handler is used when user click on second button on the right
-                 * @param thirdButtonClickedHandler the handler is used when user click on third button on the right
+                 * @param firstButtonClickedHandler the handler is used when user clicks on first button on the right
+                 * @param secondButtonClickedHandler the handler is used when user clicks on second button on the right
+                 * @param thirdButtonClickedHandler the handler is used when user clicks on third button on the right
                  */
-                displayChoiceDialog(dialogData: ChoiceDialogData, firstButtonClickedHandler: ClickButtonHandler, secondButtonClickedHandler: ClickButtonHandler, thirdButtonClickedHandler: ClickButtonHandler): void;
+                showChoiceDialog(dialogData: ChoiceDialogData, firstButtonClickedHandler: ClickButtonHandler, secondButtonClickedHandler: ClickButtonHandler, thirdButtonClickedHandler: ClickButtonHandler): void;
             }
 
             /** Container for the information necessary to create a dialog window */

@@ -8,7 +8,6 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-
 package org.eclipse.che.ide.js.impl.dialog;
 
 import javax.inject.Inject;
@@ -34,7 +33,7 @@ public class JsDialogManager implements DialogManager {
   }
 
   @Override
-  public void displayMessageDialog(
+  public void showMessageDialog(
       MessageDialogData dialogData, ClickButtonHandler confirmButtonClickedHandler) {
     dialogFactory
         .createMessageDialog(
@@ -46,7 +45,7 @@ public class JsDialogManager implements DialogManager {
   }
 
   @Override
-  public void displayConfirmDialog(
+  public void showConfirmDialog(
       ConfirmDialogData dialogData,
       ClickButtonHandler confirmButtonClickedHandler,
       ClickButtonHandler cancelButtonClickedHandler) {
@@ -62,7 +61,7 @@ public class JsDialogManager implements DialogManager {
   }
 
   @Override
-  public void displayInputDialog(
+  public void showInputDialog(
       InputDialogData dialogData,
       InputAcceptedHandler inputAcceptedHandler,
       ClickButtonHandler cancelButtonClickedHandler) {
@@ -81,7 +80,7 @@ public class JsDialogManager implements DialogManager {
   }
 
   @Override
-  public void displayChoiceDialog(
+  public void showChoiceDialog(
       ChoiceDialogData dialogData,
       ClickButtonHandler firstButtonClickedHandler,
       ClickButtonHandler secondButtonClickedHandler,
