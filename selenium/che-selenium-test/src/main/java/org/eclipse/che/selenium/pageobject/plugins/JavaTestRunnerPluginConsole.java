@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.pageobject.plugins;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
@@ -119,7 +118,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
    * @param nameOfFailedMethods name of that should fail
    */
   public void waitMethodMarkedAsIgnored(String nameOfFailedMethods) {
-    new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.presenceOfElementLocated(By.id(METHODS_MARKED_AS_IGNORED)))
         .findElement(By.xpath(String.format("//div[text()='%s']", nameOfFailedMethods)));
   }
@@ -130,7 +129,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
    * @param nameOfFailedMethods name of expected method
    */
   public void waitMethodMarkedAsPassed(String nameOfFailedMethods) {
-    new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.presenceOfElementLocated(By.id(METHODS_MARKED_AS_PASSED)))
         .findElement(By.xpath(String.format("//div[text()='%s']", nameOfFailedMethods)));
   }
@@ -141,7 +140,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
    * @param fqn
    */
   public void waitFqnOfTesClassInResultTree(String fqn) {
-    new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(String.format(TEST_RESULT_TREE_XPATH_TEMPLATE, fqn))));
@@ -171,7 +170,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   private List<String> getNamesOfMethodsWithDefinedStatus(String definedMethod) {
-    return new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
+    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.id(definedMethod)))
         .stream()
         .map(WebElement::getText)
@@ -197,7 +196,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
    * @param item name of the item (method or fqn of test class) in the test result tree
    */
   public void selectItemInResultTree(String item) {
-    new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOf(resultTreeMainForm))
         .findElement(By.xpath(String.format("//div[text()='%s']", item)))
         .click();
@@ -212,7 +211,7 @@ public class JavaTestRunnerPluginConsole extends Consoles {
    * @param methodState
    */
   public void selectMethodWithDefinedStatus(JunitMethodsState methodState, String nameOfMethod) {
-    WebDriverWait wait = new WebDriverWait(seleniumWebDriver, MINIMUM_SEC);
+    WebDriverWait wait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     switch (methodState) {
       case PASSED:
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id(METHODS_MARKED_AS_PASSED)))
