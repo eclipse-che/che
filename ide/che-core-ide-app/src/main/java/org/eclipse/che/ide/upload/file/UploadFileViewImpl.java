@@ -56,22 +56,10 @@ public class UploadFileViewImpl extends Window implements UploadFileView {
       CoreLocalizationConstant locale,
       AgentURLModifier agentURLModifier) {
 
-    this.setTitle(locale.uploadFileTitle());
+    this.agentURLModifier = agentURLModifier;
+    setTitle(locale.uploadFileTitle());
     setWidget(uploadFileViewBinder.createAndBindUi(this));
     bind();
-
-    btnCancel =
-        createButton(
-            locale.cancel(),
-            "file-uploadFile-cancel",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-              }
-            });
-    addButtonToFooter(btnCancel);
 
     btnUpload =
         createButton(
@@ -84,8 +72,24 @@ public class UploadFileViewImpl extends Window implements UploadFileView {
                 delegate.onUploadClicked();
               }
             });
+
+    btnUpload.addStyleName(resources.windowCss().primaryButton());
+    btnUpload.addStyleName(resources.windowCss().buttonAlignRight());
     addButtonToFooter(btnUpload);
-    this.agentURLModifier = agentURLModifier;
+
+    btnCancel =
+        createButton(
+            locale.cancel(),
+            "file-uploadFile-cancel",
+            new ClickHandler() {
+
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onCancelClicked();
+              }
+            });
+    btnCancel.addStyleName(resources.windowCss().buttonAlignRight());
+    addButtonToFooter(btnCancel);
   }
 
   /** Bind handlers. */

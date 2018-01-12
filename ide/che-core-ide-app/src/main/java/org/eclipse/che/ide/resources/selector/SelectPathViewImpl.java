@@ -153,6 +153,8 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
             hide();
           }
         });
+    submitBtn.addStyleName(resources.windowCss().primaryButton());
+    submitBtn.addStyleName(resources.windowCss().buttonAlignRight());
     addButtonToFooter(submitBtn);
 
     cancelButton = new Button("Cancel");
@@ -164,12 +166,12 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
             hide();
           }
         });
+    cancelButton.addStyleName(resources.windowCss().buttonAlignRight());
     addButtonToFooter(cancelButton);
 
     setHideOnEscapeEnabled(false);
     setTitle("Select Path");
     getWidget().setStyleName(styles.css().window());
-    hideCrossButton();
   }
 
   @Override

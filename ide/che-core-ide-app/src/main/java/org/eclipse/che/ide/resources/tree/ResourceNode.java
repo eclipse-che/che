@@ -192,7 +192,6 @@ public abstract class ResourceNode<R extends Resource> extends AbstractTreeNode
             ((Project) getData()).isProblem()
                 ? nodesResources.notValidProjectFolder()
                 : nodesResources.projectFolder());
-        cssBuilder.append("font-weight:bold;");
 
       } else if (getData().getResourceType() == FILE) {
         presentation.setPresentableIcon(nodesResources.file());

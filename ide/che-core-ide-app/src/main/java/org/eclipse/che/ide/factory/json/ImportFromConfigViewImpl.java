@@ -50,24 +50,29 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
     this.setTitle(locale.importFromConfigurationTitle());
     setWidget(importFromConfigViewBinder.createAndBindUi(this));
 
-    Button btnCancel =
-        createButton(
-            locale.cancelButton(),
-            "import-from-config-btn-cancel",
-            event -> delegate.onCancelClicked());
-    addButtonToFooter(btnCancel);
-
     buttonImport =
         createButton(
             locale.importButton(),
             "import-from-config-btn-import",
             event -> delegate.onImportClicked());
+    buttonImport.addStyleName(resources.windowCss().primaryButton());
+    buttonImport.addStyleName(resources.windowCss().buttonAlignRight());
     addButtonToFooter(buttonImport);
+
+    Button buttonCancel =
+        createButton(
+            locale.cancelButton(),
+            "import-from-config-btn-cancel",
+            event -> delegate.onCancelClicked());
+    buttonCancel.addStyleName(resources.windowCss().buttonAlignRight());
+    addButtonToFooter(buttonCancel);
   }
 
   /** {@inheritDoc} */
   @Override
   public void showDialog() {
+    uploadForm.clear();
+
     errorMessage.setText("");
     fileContent = null;
     fileUpload = new FileUpload();
@@ -86,9 +91,11 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
 
   /** {@inheritDoc} */
   @Override
-  public void closeDialog() {
+  public void onClose() {
     hide();
-    onClose();
+
+    uploadForm.remove(fileUpload);
+    fileUpload = null;
   }
 
   /** {@inheritDoc} */
@@ -105,13 +112,6 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
   @Override
   public String getFileContent() {
     return fileContent;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  protected void onClose() {
-    uploadForm.remove(fileUpload);
-    fileUpload = null;
   }
 
   private native void addHandler(Element element) /*-{
