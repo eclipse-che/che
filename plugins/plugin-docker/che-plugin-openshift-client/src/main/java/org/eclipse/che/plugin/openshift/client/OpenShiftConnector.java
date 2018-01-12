@@ -567,8 +567,8 @@ public class OpenShiftConnector extends DockerConnector {
     return null;
   }
 
-  private ThreadLocal<Boolean> retryingAfterCleanup = ThreadLocal.withInitial(()->false);
-  
+  private ThreadLocal<Boolean> canRecurseInCreateContainer = ThreadLocal.withInitial(() -> true);
+
   /**
    * @param createContainerParams
    * @return
@@ -714,13 +714,17 @@ public class OpenShiftConnector extends DockerConnector {
       // up
       // in an inconsistent state.
       LOG.info("Error while creating Pod, removing deployment");
-      LOG.info(e.getMessage());
+      String message = e.getMessage();
+      LOG.info(message);
       imageIdToWorkspaceId.remove(imageForDocker);
       openShiftDeploymentCleaner.cleanDeploymentResources(deploymentName);
-      if (! retryingAfterCleanup.get()) {
-          LOG.info("Retry the creation of the workspace container after cleaning pending deployment resources");
-          retryingAfterCleanup.set(true);
-          return createContainer(createContainerParams);
+      if (message != null
+          && message.contains("reason=AlreadyExists")
+          && canRecurseInCreateContainer.get()) {
+        LOG.info(
+            "Retry the creation of the workspace container after cleaning pending deployment resources");
+        canRecurseInCreateContainer.set(false);
+        return createContainer(createContainerParams);
       }
       try {
         openShiftClient =
@@ -729,12 +733,12 @@ public class OpenShiftConnector extends DockerConnector {
         openShiftClient.resource(imageStreamTag).delete();
       } catch (Exception ee) {
         LOG.info("Error while cleaning image stream tag {}", imageStreamTag.toString());
-        LOG.info(e.getMessage());
+        LOG.info(message);
       }
       throw e;
     }
 
-    retryingAfterCleanup.set(false);
+    canRecurseInCreateContainer.set(true);
     return new ContainerCreated(containerID, null);
   }
 
