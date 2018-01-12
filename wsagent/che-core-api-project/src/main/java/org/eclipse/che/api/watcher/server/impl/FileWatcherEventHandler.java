@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.api.watcher.server.impl;
 
-import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static java.nio.file.Files.isDirectory;
 import static org.eclipse.che.api.watcher.server.impl.FileWatcherUtils.toInternalPath;
 
@@ -67,7 +67,7 @@ public class FileWatcherEventHandler {
     int id = idCounter.incrementAndGet();
     FileWatcherOperation operation = new FileWatcherOperation(id, create, modify, delete);
 
-    operations.putIfAbsent(path, newHashSet());
+    operations.putIfAbsent(path, newConcurrentHashSet());
     operations.get(path).add(operation);
 
     return id;
