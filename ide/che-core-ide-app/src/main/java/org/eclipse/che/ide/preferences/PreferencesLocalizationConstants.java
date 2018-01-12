@@ -8,8 +8,15 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
+package org.eclipse.che.ide.preferences;
 
+import com.google.gwt.i18n.client.Messages;
 
-public class A7 {
-    A7 a;
+public interface PreferencesLocalizationConstants extends Messages {
+
+  @Key("ide.general.theme-label")
+  String ideGeneralThemeLabel();
+
+  @Key("ide.general.ask-before-closing-tab-label")
+  String ideGeneralAskBeforeClosingTabLabel();
 }

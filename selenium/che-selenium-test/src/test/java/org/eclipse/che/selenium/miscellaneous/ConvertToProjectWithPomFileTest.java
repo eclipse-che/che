@@ -36,6 +36,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
@@ -75,9 +76,15 @@ public class ConvertToProjectWithPomFileTest {
     testProjectServiceClient.importProject(
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
     ide.open(workspace);
+
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.selectItem(PROJECT_NAME);
+  }
+
+  @BeforeMethod
+  public void expandProject() {
+    projectExplorer.quickCollapseJavaScript();
     projectExplorer.quickExpandWithJavaScript();
   }
 
@@ -104,6 +111,7 @@ public class ConvertToProjectWithPomFileTest {
     createNewFile("pom", PATH_TO_POM_FILE, XML_FILE);
     editor.waitActive();
     editor.waitTabIsPresent("pom.xml");
+    editor.selectTabByName("pom.xml");
     editor.deleteAllContent();
     actionsFactory.createAction(seleniumWebDriver).sendKeys(EXPECTED_TEXT).perform();
     editor.waitTextIntoEditor(EXPECTED_TEXT);
@@ -116,7 +124,13 @@ public class ConvertToProjectWithPomFileTest {
     editor.closeAllTabs();
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitProjectExplorer();
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PATH_TO_POM_FILE, "simpleFolder");
+
+    try {
+      projectExplorer.waitFolderDefinedTypeOfFolderByPath(PATH_TO_POM_FILE, "simpleFolder");
+    } catch (TimeoutException ex) {
+      // Remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7551");
+    }
   }
 
   @Test
