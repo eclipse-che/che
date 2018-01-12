@@ -17,12 +17,15 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.P
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
+import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.*;
 import org.eclipse.che.selenium.pageobject.git.Git;
@@ -38,6 +41,15 @@ public class GitChangeMarkersTest {
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
 
+  @Inject
+  @Named("github.username")
+  private String gitHubUsername;
+
+  @Inject
+  @Named("github.password")
+  private String gitHubPassword;
+
+  @Inject private TestUser productUser;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
   @Inject private AskDialog askDialog;
@@ -47,10 +59,13 @@ public class GitChangeMarkersTest {
   @Inject private Events events;
   @Inject private Loader loader;
   @Inject private CodenvyEditor editor;
+  @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @BeforeClass
   public void prepare() throws Exception {
+    testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
+
     URL resource = getClass().getResource("/projects/simple-java-project");
     testProjectServiceClient.importProject(
         ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.PLAIN_JAVA);
