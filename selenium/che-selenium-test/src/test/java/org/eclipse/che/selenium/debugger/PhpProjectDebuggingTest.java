@@ -139,7 +139,6 @@ public class PhpProjectDebuggingTest {
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RESUME_BTN_ID);
 
     // then
-
     editor.waitTabFileWithSavedStatus("lib.php");
 
     editor.waitActiveBreakpoint(13);
@@ -186,7 +185,6 @@ public class PhpProjectDebuggingTest {
     debugPanel.openDebugPanel();
 
     // then
-
     editor.waitTabFileWithSavedStatus("lib.php");
 
     editor.waitActiveBreakpoint(13);
