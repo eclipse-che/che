@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012-2017 Red Hat, Inc.
+// Copyright (c) 2012-2018 Red Hat, Inc.
 // All rights reserved. This program and the accompanying materials
 // are made available under the terms of the Eclipse Public License v1.0
 // which accompanies this distribution, and is available at
@@ -37,7 +37,7 @@ type scriptInst struct {
 func (sci *scriptInst) execute() error {
 	diedC, err := executeScript(sci.installer)
 	if err != nil {
-		fmt.Errorf("Scrip execution failed. Error: %s", err)
+		return fmt.Errorf("Scrip execution failed. Error: %s", err)
 	}
 	select {
 	case died := <-diedC:
@@ -65,7 +65,7 @@ type serverInst struct {
 func (svi *serverInst) execute() error {
 	diedC, err := executeScript(svi.installer)
 	if err != nil {
-		fmt.Errorf("Scrip execution failed Error: %s", err)
+		return fmt.Errorf("Scrip execution failed Error: %s", err)
 	}
 	checker := &dialChecker{svi.period, make(chan bool, 1)}
 	select {
