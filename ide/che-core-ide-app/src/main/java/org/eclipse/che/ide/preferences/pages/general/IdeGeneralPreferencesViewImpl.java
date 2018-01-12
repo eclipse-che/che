@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,29 +8,41 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.preferences.pages.appearance;
+package org.eclipse.che.ide.preferences.pages.general;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.inject.Inject;
 import java.util.List;
 import org.eclipse.che.ide.api.theme.Theme;
+import org.eclipse.che.ide.preferences.PreferencesLocalizationConstants;
 import org.eclipse.che.ide.ui.listbox.CustomListBox;
 
 /** @author Evgen Vidolob */
-public class AppearanceViewImpl implements AppearanceView {
+public class IdeGeneralPreferencesViewImpl implements IdeGeneralPreferencesView {
 
-  private static AppearanceViewImplUiBinder ourUiBinder =
-      GWT.create(AppearanceViewImplUiBinder.class);
+  private static IdeGeneralPreferencesUiBinder ourUiBinder =
+      GWT.create(IdeGeneralPreferencesUiBinder.class);
   private final FlowPanel rootElement;
   @UiField CustomListBox themeBox;
+  @UiField CheckBox askBeforeClosingTab;
+
+  @UiField(provided = true)
+  PreferencesLocalizationConstants localizationConstants;
+
   private ActionDelegate delegate;
 
-  public AppearanceViewImpl() {
+  @Inject
+  public IdeGeneralPreferencesViewImpl(PreferencesLocalizationConstants localizationConstants) {
+    this.localizationConstants = localizationConstants;
+
     rootElement = ourUiBinder.createAndBindUi(this);
   }
 
@@ -56,11 +68,27 @@ public class AppearanceViewImpl implements AppearanceView {
     }
   }
 
+  @Override
+  public boolean isAskBeforeClosingTab() {
+    return askBeforeClosingTab.getValue();
+  }
+
+  @Override
+  public void setAskBeforeClosingTab(boolean askBeforeClosingTab) {
+    this.askBeforeClosingTab.setValue(askBeforeClosingTab);
+  }
+
   @UiHandler("themeBox")
   void handleSelectionChanged(ChangeEvent event) {
     themeBox.getSelectedIndex();
     delegate.themeSelected(themeBox.getValue(themeBox.getSelectedIndex()));
   }
 
-  interface AppearanceViewImplUiBinder extends UiBinder<FlowPanel, AppearanceViewImpl> {}
+  @UiHandler("askBeforeClosingTab")
+  void onAskBeforeClosingTabChanged(final ValueChangeEvent<Boolean> event) {
+    delegate.onAskBeforeClosingTabChanged(event.getValue());
+  }
+
+  interface IdeGeneralPreferencesUiBinder
+      extends UiBinder<FlowPanel, IdeGeneralPreferencesViewImpl> {}
 }
