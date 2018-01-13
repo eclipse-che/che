@@ -166,30 +166,26 @@ public class CommitFilesTest {
     refactor.waitRenamePackageFormIsOpen();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     loader.waitOnClosed();
-    typeAndWaitNewName(NEW_NAME_PACKAGE);
-
+    refactor.typeAndWaitNewName(NEW_NAME_PACKAGE);
     refactor.clickOkButtonRefactorForm();
+
+    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/dev/examples");
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitCommitMainFormIsOpened();
 
-    try {
-      git.waitItemCheckBoxToBeSelectedInCommitWindow(
-          "src/main",
-          "java/org/eclipse/dev/examples",
-          "AppController.java",
-          "webapp",
-          "WEB-INF",
-          "jsp",
-          "guess_num.jsp",
-          "web.xml",
-          "spring-servlet.xml",
-          "index.jsp",
-          "pom.xml");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8042", ex);
-    }
+    git.waitItemCheckBoxToBeSelectedInCommitWindow(
+        "src/main",
+        "java/org/eclipse/dev/examples",
+        "AppController.java",
+        "webapp",
+        "WEB-INF",
+        "jsp",
+        "guess_num.jsp",
+        "web.xml",
+        "spring-servlet.xml",
+        "index.jsp",
+        "pom.xml");
 
     git.clickOnCancelBtnCommitForm();
     git.waitCommitFormClosed();
@@ -320,14 +316,5 @@ public class CommitFilesTest {
     git.waitExpTextIntoCompareLeftEditor(expText);
     git.waitTextNotPresentIntoCompareRightEditor(expText);
     git.closeGitCompareForm();
-  }
-
-  private void typeAndWaitNewName(String newName) {
-    try {
-      refactor.typeAndWaitNewName(newName);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7500");
-    }
   }
 }
