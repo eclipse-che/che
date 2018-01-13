@@ -25,8 +25,6 @@ import org.eclipse.che.agent.exec.shared.dto.event.ProcessDiedEventDto;
 import org.eclipse.che.agent.exec.shared.dto.event.ProcessStartedEventDto;
 import org.eclipse.che.agent.exec.shared.dto.event.ProcessStdErrEventDto;
 import org.eclipse.che.agent.exec.shared.dto.event.ProcessStdOutEventDto;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandExecutor;

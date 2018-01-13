@@ -1901,7 +1901,7 @@
                         <arg>-generateJsInteropExports</arg>
                         <!--Todo clean up before merge! -->
                         <arg>-src</arg>
-                        <arg>/home/user/projects/che-lib/che-terminal-client/target/classes</arg>
+                        <arg>/home/antey/projects/che-lib/che-terminal-client/target/classes</arg>
                     </codeserverArgs>
                     <compilerArgs>
                         <arg>-generateJsInteropExports</arg>

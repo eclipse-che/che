@@ -17,6 +17,7 @@ import static com.google.gwt.event.dom.client.KeyCodes.KEY_HOME;
 import static com.google.gwt.event.dom.client.KeyCodes.KEY_PAGEDOWN;
 import static com.google.gwt.event.dom.client.KeyCodes.KEY_PAGEUP;
 import static com.google.gwt.event.dom.client.KeyCodes.KEY_UP;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_L;
 
 import elemental.events.KeyboardEvent;
 import org.eclipse.che.ide.terminal.Terminal;
@@ -39,6 +40,12 @@ public final class OutputConsoleCustomKeyDownHandler implements Terminal.CustomK
   @Override
   public boolean keyDown(KeyboardEvent ev) {
     if (ev.isCtrlKey() && !(ev.isShiftKey() || ev.isMetaKey() || ev.isAltKey())) {
+
+      // handle Ctrl + L - it's IDE hotkey to display go to line window
+      if (ev.getKeyCode() == KEY_L) {
+        return false;
+      }
+
       // handle Ctrl + C.
       return ev.getKeyCode() != KEY_C || !terminal.hasSelection();
     }
