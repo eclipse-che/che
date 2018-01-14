@@ -10,7 +10,8 @@
  */
 package org.eclipse.che.selenium.testrunner;
 
-import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.FAILED;
+import static org.eclipse.che.selenium.pageobject.plugins.TestRunnerPluginConsole.JunitMethodsState.FAILED;
+import static org.openqa.selenium.Keys.PAGE_UP;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -31,7 +32,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
-import org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole;
+import org.eclipse.che.selenium.pageobject.plugins.TestRunnerPluginConsole;
 import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -45,7 +46,7 @@ public class JavaTestPluginJunit4CheckRunSuitesAndScopesTest {
 
   private static final int VALUE_OF_SHIFTING_CONSOLES_ALONG_X_AXIS = -100;
 
-  @Inject private JavaTestRunnerPluginConsole pluginConsole;
+  @Inject private TestRunnerPluginConsole pluginConsole;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
   @Inject private NotificationsPopupPanel notifications;
@@ -102,8 +103,8 @@ public class JavaTestPluginJunit4CheckRunSuitesAndScopesTest {
 
     String expectedExceptionForFailedTest =
         "java.lang.AssertionError\n"
-            + " at org.junit.Assert.fail(Assert.java:86)\n"
-            + " at org.junit.Assert.assertTrue(Assert.java:41)";
+            + "at org.junit.Assert.fail(Assert.java:86)\n"
+            + "at org.junit.Assert.assertTrue(Assert.java:41)";
 
     projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_JUNIT4_TEST_CLASSES);
     projectExplorer.selectItem(JUNIT4_PROJECT);
@@ -127,7 +128,8 @@ public class JavaTestPluginJunit4CheckRunSuitesAndScopesTest {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7338", ex);
     }
-    assertTrue(pluginConsole.getTestErrorMessage().startsWith(expectedExceptionForFailedTest));
+    pluginConsole.typeHotKey(PAGE_UP.toString());
+    assertTrue(pluginConsole.getText().contains(expectedExceptionForFailedTest));
   }
 
   private void runCompileCommandByPallete(CompileCommand compileCommand) {

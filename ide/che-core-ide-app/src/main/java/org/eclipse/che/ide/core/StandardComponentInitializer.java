@@ -757,7 +757,7 @@ public class StandardComponentInitializer {
     actionManager.registerAction(REVEAL_RESOURCE, revealResourceAction);
     actionManager.registerAction(COLLAPSE_ALL, collapseAllAction);
 
-    actionManager.registerAction("openFile", openFileAction);
+    actionManager.registerAction("openJavaFile", openFileAction);
     actionManager.registerAction(SWITCH_LEFT_TAB, switchPreviousEditorAction);
     actionManager.registerAction(SWITCH_RIGHT_TAB, switchNextEditorAction);
 

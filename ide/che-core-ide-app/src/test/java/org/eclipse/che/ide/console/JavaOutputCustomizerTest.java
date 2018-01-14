@@ -31,8 +31,8 @@ public class JavaOutputCustomizerTest extends BaseOutputCustomizerTest {
 
   @Before
   public void setUp() throws Exception {
-    OutputCustomizer outputCustomizer = new JavaOutputCustomizer(appContext, editorAgent);
-    setupTestCustomizers(outputCustomizer, new OutputCustomizer[] {outputCustomizer});
+    //    OutputCustomizer outputCustomizer = new JavaOutputCustomizer(appContext, editorAgent);
+    //    setupTestCustomizers(outputCustomizer, new OutputCustomizer[] {outputCustomizer});
   }
 
   /**

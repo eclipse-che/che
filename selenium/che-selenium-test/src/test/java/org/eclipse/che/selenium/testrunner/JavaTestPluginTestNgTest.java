@@ -13,8 +13,9 @@ package org.eclipse.che.selenium.testrunner;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.RUN_MENU;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.TEST;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.TEST_NG_TEST_DROP_DAWN_ITEM;
-import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.FAILED;
-import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.PASSED;
+import static org.eclipse.che.selenium.pageobject.plugins.TestRunnerPluginConsole.JunitMethodsState.FAILED;
+import static org.eclipse.che.selenium.pageobject.plugins.TestRunnerPluginConsole.JunitMethodsState.PASSED;
+import static org.openqa.selenium.Keys.PAGE_UP;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -38,7 +39,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
-import org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole;
+import org.eclipse.che.selenium.pageobject.plugins.TestRunnerPluginConsole;
 import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -56,19 +57,19 @@ public class JavaTestPluginTestNgTest {
   public static final String APP_TEST_ONE_FAIL_OUTPUT_TEMPLATE =
       "[TestNG] Running:  /home/user/che/ws-agent/temp/che-testng-suite.xmlexpected [false] but found [true]\n"
           + "java.lang.AssertionError: expected [false] but found [true]\n"
-          + " at org.testng.Assert.fail(Assert.java:94)\n"
-          + " at org.testng.Assert.failNotEquals(Assert.java:494)\n"
-          + " at org.testng.Assert.assertFalse(Assert.java:63)\n"
-          + " at org.testng.Assert.assertFalse(Assert.java:73)\n"
-          + " at org.eclipse.che.examples.AppOneTest.shouldFailOfAppOne(AppOneTest.java:31)";
+          + "at org.testng.Assert.fail(Assert.java:94)\n"
+          + "at org.testng.Assert.failNotEquals(Assert.java:494)\n"
+          + "at org.testng.Assert.assertFalse(Assert.java:63)\n"
+          + "at org.testng.Assert.assertFalse(Assert.java:73)\n"
+          + "at org.eclipse.che.examples.AppOneTest.shouldFailOfAppOne(AppOneTest.java:31)";
 
   public static final String APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE =
       "[TestNG] Running:  /home/user/che/ws-agent/temp/che-testng-suite.xmlexpected [false] but found [true]\n"
           + "java.lang.AssertionError: expected [false] but found [true]\n"
-          + " at org.testng.Assert.fail(Assert.java:94)\n"
-          + " at org.testng.Assert.failNotEquals(Assert.java:494)\n"
-          + " at org.testng.Assert.assertFalse(Assert.java:63)\n"
-          + " at org.testng.Assert.assertFalse(Assert.java:73)";
+          + "at org.testng.Assert.fail(Assert.java:94)\n"
+          + "at org.testng.Assert.failNotEquals(Assert.java:494)\n"
+          + "at org.testng.Assert.assertFalse(Assert.java:63)\n"
+          + "at org.testng.Assert.assertFalse(Assert.java:73)";
 
   public static final String END_OF_FAILED_TEST =
       "===============================================Default SuiteTotal tests run: 1, Failures: 1, Skips: 0===============================================";
@@ -79,7 +80,7 @@ public class JavaTestPluginTestNgTest {
   @Inject private Ide ide;
   @Inject private TestUser user;
 
-  @Inject private JavaTestRunnerPluginConsole pluginConsole;
+  @Inject private TestRunnerPluginConsole pluginConsole;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
   @Inject private NotificationsPopupPanel notifications;
@@ -122,9 +123,11 @@ public class JavaTestPluginTestNgTest {
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppOne");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
-    String testErrorMessage = pluginConsole.getTestErrorMessage();
+    pluginConsole.typeHotKey(PAGE_UP.toString());
+    pluginConsole.typeHotKey(PAGE_UP.toString());
+    String testErrorMessage = pluginConsole.getText();
     assertTrue(
-        testErrorMessage.startsWith(APP_TEST_ONE_FAIL_OUTPUT_TEMPLATE),
+        testErrorMessage.contains(APP_TEST_ONE_FAIL_OUTPUT_TEMPLATE),
         "Actual message was: " + testErrorMessage);
   }
 
@@ -149,9 +152,10 @@ public class JavaTestPluginTestNgTest {
       fail("Known issue https://github.com/eclipse/che/issues/7338", ex);
     }
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
-    String testErrorMessage = pluginConsole.getTestErrorMessage();
+    pluginConsole.typeHotKey(PAGE_UP.toString());
+    String testErrorMessage = pluginConsole.getText();
     assertTrue(
-        testErrorMessage.startsWith(APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE),
+        testErrorMessage.contains(APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE),
         "Actual message was: " + testErrorMessage);
     assertTrue(
         testErrorMessage.endsWith(END_OF_FAILED_TEST), "Actual message was: " + testErrorMessage);
@@ -178,9 +182,10 @@ public class JavaTestPluginTestNgTest {
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
-    String testErrorMessage = pluginConsole.getTestErrorMessage();
+    pluginConsole.typeHotKey(PAGE_UP.toString());
+    String testErrorMessage = pluginConsole.getText();
     assertTrue(
-        testErrorMessage.startsWith(APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE),
+        testErrorMessage.contains(APP_TEST_ANOTHER_FAIL_OUTPUT_TEMPLATE),
         "Actual message was: " + testErrorMessage);
     assertTrue(
         testErrorMessage.endsWith(END_OF_FAILED_TEST), "Actual message was: " + testErrorMessage);

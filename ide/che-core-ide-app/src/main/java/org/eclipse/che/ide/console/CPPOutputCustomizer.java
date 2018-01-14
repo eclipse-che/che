@@ -52,7 +52,7 @@ public class CPPOutputCustomizer extends AbstractOutputCustomizer {
    * @see org.eclipse.che.ide.extension.machine.client.outputspanel.console.
    * OutputCustomizer#canCustomize(java.lang.String)
    */
-  @Override
+  //  @Override
   public boolean canCustomize(String text) {
     return (COMPILATION_MESSAGE.test(text) || LINKER_MESSAGE.test(text));
   }
@@ -63,7 +63,7 @@ public class CPPOutputCustomizer extends AbstractOutputCustomizer {
    * @see org.eclipse.che.ide.extension.machine.client.outputspanel.console.
    * OutputCustomizer#customize(java.lang.String)
    */
-  @Override
+  //  @Override
   public String customize(String text) {
     if (COMPILATION_MESSAGE.test(text)) return customizeCompilationMessage(text);
 
@@ -182,4 +182,17 @@ public class CPPOutputCustomizer extends AbstractOutputCustomizer {
             that.@org.eclipse.che.ide.console.CPPOutputCustomizer::handleLinkerMessageAnchorClick(*)(fileName,lineNumber);
         });
     }-*/;
+
+  @Override
+  public String getRegExpr() {
+    return null;
+  }
+
+  @Override
+  public void onClickLink(String lineContent) {}
+
+  @Override
+  public int getMatchIndex() {
+    return 0;
+  }
 }

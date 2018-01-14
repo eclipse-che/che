@@ -86,11 +86,12 @@ public class CommandOutputConsolePresenter
     this.eventBus = eventBus;
     this.commandExecutor = commandExecutor;
 
-    setCustomizer(
-        new CompoundOutputCustomizer(
-            new JavaOutputCustomizer(appContext, editorAgent),
-            new CSharpOutputCustomizer(appContext, editorAgent),
-            new CPPOutputCustomizer(appContext, editorAgent)));
+    //    setCustomizer(
+    //        new CompoundOutputCustomizer(
+    //            new JavaOutputCustomizer(appContext, editorAgent),
+    //            new CSharpOutputCustomizer(appContext, editorAgent),
+    //            new CPPOutputCustomizer(appContext, editorAgent)));
+    view.registerLinkifier(new JavaOutputCustomizer(appContext, editorAgent));
 
     view.setDelegate(this);
 

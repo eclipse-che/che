@@ -31,8 +31,8 @@ public class CPPOutputCustomizerTest extends BaseOutputCustomizerTest {
 
   @Before
   public void setUp() throws Exception {
-    OutputCustomizer outputCustomizer = new CPPOutputCustomizer(appContext, editorAgent);
-    setupTestCustomizers(outputCustomizer, new OutputCustomizer[] {outputCustomizer});
+    //    OutputCustomizer outputCustomizer = new CPPOutputCustomizer(appContext, editorAgent);
+    //    setupTestCustomizers(outputCustomizer, new OutputCustomizer[] {outputCustomizer});
   }
 
   /**

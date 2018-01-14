@@ -29,6 +29,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsToolbar;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -113,8 +114,12 @@ public class CheckIntelligenceCommandFromToolbarTest {
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
     commandsToolbar.clickExecStopBtn();
     commandsToolbar.clickWithHoldAndLaunchDebuCmdFromList(PROJECT_NAME + ": debug");
-    consoles.waitExpectedTextIntoConsole("Listening for transport dt_socket at address: 8000", 60);
     consoles.waitExpectedTextIntoConsole(" Server startup in", 30);
+    consoles.typeHotKey(Keys.HOME.toString());
+    consoles.typeHotKey(Keys.PAGE_DOWN.toString());
+    consoles.typeHotKey(Keys.PAGE_DOWN.toString());
+    consoles.typeHotKey(Keys.PAGE_DOWN.toString());
+    consoles.waitExpectedTextIntoConsole("Listening for transport dt_socket at address: 8000", 60);
   }
 
   private void checkTestAppAndReturnToIde(String currentWindow, String expectedTextOnTestAppPage) {

@@ -40,7 +40,7 @@ import org.eclipse.che.ide.resource.Path;
  *
  * @author Victor Rubezhny
  */
-public abstract class AbstractOutputCustomizer implements OutputCustomizer {
+public abstract class AbstractOutputCustomizer implements OutputLinkifier {
 
   protected AppContext appContext;
   protected EditorAgent editorAgent;
@@ -51,22 +51,22 @@ public abstract class AbstractOutputCustomizer implements OutputCustomizer {
   }
 
   /*
-   * (non-Javadoc)
-   *
-   * @see org.eclipse.che.ide.extension.machine.client.outputspanel.console.
-   * OutputCustomizer#canCustomize(java.lang.String)
-   */
-  @Override
-  public abstract boolean canCustomize(String text);
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.eclipse.che.ide.extension.machine.client.outputspanel.console.
-   * OutputCustomizer#customize(java.lang.String)
-   */
-  @Override
-  public abstract String customize(String text);
+  //   * (non-Javadoc)
+  //   *
+  //   * @see org.eclipse.che.ide.extension.machine.client.outputspanel.console.
+  //   * OutputCustomizer#canCustomize(java.lang.String)
+  //   */
+  //  @Override
+  //  public abstract boolean canCustomize(String text);
+  //
+  //  /*
+  //   * (non-Javadoc)
+  //   *
+  //   * @see org.eclipse.che.ide.extension.machine.client.outputspanel.console.
+  //   * OutputCustomizer#customize(java.lang.String)
+  //   */
+  //  @Override
+  //  public abstract String customize(String text);
 
   /*
    * Returns the list of workspace files filtered by a relative path

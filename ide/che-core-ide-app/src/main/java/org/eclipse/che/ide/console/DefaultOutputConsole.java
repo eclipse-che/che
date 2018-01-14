@@ -47,11 +47,12 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     this.title = title;
     this.resources = resources;
 
-    setCustomizer(
-        new CompoundOutputCustomizer(
-            new JavaOutputCustomizer(appContext, editorAgent),
-            new CSharpOutputCustomizer(appContext, editorAgent),
-            new CPPOutputCustomizer(appContext, editorAgent)));
+    view.registerLinkifier(new JavaOutputCustomizer(appContext, editorAgent));
+    //    setCustomizer(
+    //        new CompoundOutputCustomizer(
+    //            new JavaOutputCustomizer(appContext, editorAgent),
+    //            new CSharpOutputCustomizer(appContext, editorAgent),
+    //            new CPPOutputCustomizer(appContext, editorAgent)));
 
     view.setDelegate(this);
 

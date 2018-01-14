@@ -62,7 +62,7 @@ public class Consoles {
   public static final String HIDE_CONSOLES_ICON =
       "//div[@id='gwt-debug-infoPanel']//div[@id='gwt-debug-hideButton']";
   public static final String PREVIEW_URL = "//div[@active]//a[@href]";
-  public static final String COMMAND_CONSOLE_ID =
+  public static final String COMMAND_CONSOLE_XPATH =
       "//div[@active]//div[@id='gwt-debug-commandConsoleLines']";
   public static final String PLUS_ICON = "gwt-debug-plusPanel";
   public static final String SERVER_MENU_ITEM = "contextMenu/Servers";
@@ -119,7 +119,7 @@ public class Consoles {
   @FindBy(xpath = HIDE_CONSOLES_ICON)
   WebElement hideConsolesIcon;
 
-  @FindBy(xpath = COMMAND_CONSOLE_ID)
+  @FindBy(xpath = COMMAND_CONSOLE_XPATH)
   WebElement consoleContainer;
 
   @FindBy(xpath = PREVIEW_URL)
@@ -363,6 +363,11 @@ public class Consoles {
   public void waitExpectedTextIntoConsole(String expectedText, int definedTimeout) {
     new WebDriverWait(seleniumWebDriver, definedTimeout)
         .until(textToBePresentInElement(consoleContainer, expectedText));
+  }
+
+  public void typeHotKey(String hotKey) {
+    consoleContainer.findElement(By.className("xterm-theme-default")).click();
+    consoleContainer.findElement(By.className("xterm-helper-textarea")).sendKeys(hotKey);
   }
 
   /** wait a preview url into 'Consoles' */

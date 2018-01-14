@@ -12,7 +12,10 @@ package org.eclipse.che.plugin.testing.ide.view;
 
 import javax.inject.Inject;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.console.DefaultOutPutConsoleColorizer;
+import org.eclipse.che.ide.console.JavaOutputCustomizer;
 import org.eclipse.che.ide.console.OutputConsoleViewImpl;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.plugin.testing.ide.model.Printable;
@@ -27,7 +30,9 @@ public class PrinterOutputConsole extends OutputConsoleViewImpl implements Print
   public PrinterOutputConsole(
       MachineResources resources,
       CoreLocalizationConstant localization,
-      DefaultOutPutConsoleColorizer consoleColorizer) {
+      DefaultOutPutConsoleColorizer consoleColorizer,
+      AppContext appContext,
+      EditorAgent editorAgent) {
     super(resources, localization, consoleColorizer);
 
     reRunProcessButton.removeFromParent();
@@ -37,6 +42,8 @@ public class PrinterOutputConsole extends OutputConsoleViewImpl implements Print
 
     consolePanel.remove(commandPanel);
     consolePanel.remove(previewPanel);
+
+    registerLinkifier(new JavaOutputCustomizer(appContext, editorAgent));
   }
 
   @Override

@@ -50,7 +50,7 @@ public class CSharpOutputCustomizer extends AbstractOutputCustomizer {
    * @see org.eclipse.che.ide.extension.machine.client.outputspanel.console.
    * OutputCustomizer#canCustomize(java.lang.String)
    */
-  @Override
+
   public boolean canCustomize(String text) {
     return (COMPILATION_ERROR_OR_WARNING.exec(text) != null || LINE_AT.exec(text) != null);
   }
@@ -61,7 +61,7 @@ public class CSharpOutputCustomizer extends AbstractOutputCustomizer {
    * @see org.eclipse.che.ide.extension.machine.client.outputspanel.console.
    * OutputCustomizer#customize(java.lang.String)
    */
-  @Override
+
   public String customize(String text) {
     if (COMPILATION_ERROR_OR_WARNING.exec(text) != null)
       return customizeCompilationErrorOrWarning(text);
@@ -170,19 +170,38 @@ public class CSharpOutputCustomizer extends AbstractOutputCustomizer {
         appContext, editorAgent, Path.valueOf(fileName).removeFirstSegments(1), lineNumber, 0);
   }
 
-  /** Sets up a java callback to be called for an anchor for C# Compilation Error/Warning Message */
+  /** Sets up a java callback to be called for an anchor for C# Compilation Error/Warning Message
+ */
   public native void exportCompilationMessageAnchorClickHandlerFunction() /*-{
         var that = this;
         $wnd.openCSCM = $entry(function(fileName,projectFile,lineNumber,columnNumber) {
-            that.@org.eclipse.che.ide.console.CSharpOutputCustomizer::handleCompilationMessageAnchorClick(*)(fileName,projectFile,lineNumber,columnNumber);
+
+ that.@org.eclipse.che.ide.console.CSharpOutputCustomizer::handleCompilationMessageAnchorClick(*)(fileName,projectFile,lineNumber,columnNumber);
         });
     }-*/;
 
-  /** Sets up a java callback to be called for an anchor for C# Runtime Exception Stacktrace line */
+  /** Sets up a java callback to be called for an anchor for C# Runtime Exception Stacktrace line
+ */
   public native void exportStacktraceLineAnchorClickHandlerFunction() /*-{
         var that = this;
         $wnd.openCSSTL = $entry(function(fileName,lineNumber) {
-            that.@org.eclipse.che.ide.console.CSharpOutputCustomizer::handleStacktraceLineAnchorClick(*)(fileName,lineNumber);
+
+ that.@org.eclipse.che.ide.console.CSharpOutputCustomizer::handleStacktraceLineAnchorClick(*)(fileName,lineNumber);
         });
     }-*/;
-}
+
+     @Override
+     public String getRegExpr() {
+         return null;
+     }
+
+     @Override
+     public void onClickLink(String lineContent) {
+
+     }
+
+     @Override
+     public int getMatchIndex() {
+         return 0;
+     }
+ }

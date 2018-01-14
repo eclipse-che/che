@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
-import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NotFoundException;
@@ -36,16 +35,23 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Dmytro Nochevnov */
 @Singleton
-public class JavaTestRunnerPluginConsole extends Consoles {
+public class TestRunnerPluginConsole {
 
   private static final String TEST_RESULT_TREE_XPATH_TEMPLATE =
       "//div[contains(@id,'gwt-uid')]//div[text()='%s']";
+  public static final String COMMAND_CONSOLE_XPATH =
+      "//div[@focused]//div[@id='gwt-debug-commandConsoleLines']";
   private static final String TEST_OUTPUT_XPATH =
-      "//div[@focused]//div[@id='gwt-debug-commandConsoleLines']//pre";
+      "//div[@focused]//div[@id='gwt-debug-commandConsoleLines']//div[@class = 'xterm-rows']//div";
   private static final String METHODS_MARKED_AS_PASSED = "gwt-debug-test-state-passed";
   private static final String METHODS_MARKED_AS_FAILED = "gwt-debug-test-state-failed";
   private static final String METHODS_MARKED_AS_IGNORED = "gwt-debug-test-state-ignore";
   private static final String TEST_RESULT_NAVIGATION_TREE = "gwt-debug-test-tree-navigation-panel";
+
+  private final SeleniumWebDriver seleniumWebDriver;
+
+  @FindBy(xpath = COMMAND_CONSOLE_XPATH)
+  private WebElement consoleContainer;
 
   @FindAll({@FindBy(xpath = TEST_OUTPUT_XPATH)})
   private List<WebElement> testOutput;
@@ -72,10 +78,15 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   private WebElement resultTreeMainForm;
 
   @Inject
-  public JavaTestRunnerPluginConsole(
+  public TestRunnerPluginConsole(
       SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory) {
-    super(seleniumWebDriver, loader, actionsFactory);
+    this.seleniumWebDriver = seleniumWebDriver;
     PageFactory.initElements(seleniumWebDriver, this);
+  }
+
+  public void typeHotKey(String hotKey) {
+    consoleContainer.findElement(By.className("xterm-theme-default")).click();
+    consoleContainer.findElement(By.className("xterm-helper-textarea")).sendKeys(hotKey);
   }
 
   public enum JunitMethodsState {
@@ -85,11 +96,11 @@ public class JavaTestRunnerPluginConsole extends Consoles {
   }
 
   /** @return Stack trace displayed in the right test result panel. */
-  public String getTestErrorMessage() {
+  public String getText() {
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.visibilityOfAllElements(testOutput))
         .stream()
-        .map(WebElement::getText)
+        .map(webElement -> webElement.getText().trim() + "\n")
         .collect(Collectors.joining());
   }
 

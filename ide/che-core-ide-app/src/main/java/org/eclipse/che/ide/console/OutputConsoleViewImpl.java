@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.machine.MachineResources;
+import org.eclipse.che.ide.terminal.LinkMatcherOptions;
 import org.eclipse.che.ide.terminal.Terminal;
 import org.eclipse.che.ide.terminal.TerminalOptions;
 import org.eclipse.che.ide.terminal.helpers.TerminalGeometry;
@@ -218,7 +219,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
    */
   @Override
   public void print(
-      String text, int background, int red, int blue, int green) { // Todo use char instead of int
+      String text, int background, int red, int blue, int green) { // Todo simplify this stuff
     String color = "\u001B[" + background + ";2;" + red + ";" + blue + ";" + green + "m";
     text = color + text + RESET_TEXT_COLOR;
     print(text);
@@ -261,6 +262,20 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     } else {
       stopProcessButton.getElement().setAttribute("disabled", "");
     }
+  }
+
+  @Override
+  public void registerLinkifier(OutputLinkifier linkifier) {
+    LinkMatcherOptions linkOptions = new LinkMatcherOptions();
+    linkOptions.setMatchIndex(linkifier.getMatchIndex());
+    linkOptions.setPriority(0);
+
+    xtermWidget.registerLinkMatcher(
+        linkifier.getRegExpr(),
+        (event, link, lineContent) -> {
+          linkifier.onClickLink(lineContent);
+        },
+        linkOptions);
   }
 
   @Override

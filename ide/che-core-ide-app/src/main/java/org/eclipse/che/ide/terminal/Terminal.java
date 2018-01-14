@@ -100,6 +100,11 @@ public class Terminal {
   @JsMethod(name = "attachCustomKeydownHandler")
   public native void attachCustomKeyDownHandler(CustomKeyDownHandler customKeyDownHandl);
 
+  public native int registerLinkMatcher(
+      String regex, LinkMatcherHandler handler, LinkMatcherOptions options);
+
+  public native void deregisterLinkMatcher(int matcherId);
+
   public native void reset();
 
   public native void destroy();

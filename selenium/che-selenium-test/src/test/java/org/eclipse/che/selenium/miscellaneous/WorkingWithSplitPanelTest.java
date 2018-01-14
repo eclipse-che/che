@@ -120,6 +120,8 @@ public class WorkingWithSplitPanelTest {
     multiSplitPanel.selectSplitPanel(1);
     projectExplorer.invokeCommandWithContextMenu(
         ProjectExplorer.CommandsGoal.COMMON, PROJECT_NAME, BUILD_COMM);
+    // todo
+    // consoles.typeHotKey(PAGE_UP.toString());
     consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS, 120);
     multiSplitPanel.waitTabProcessIsPresent(1, BUILD_COMM);
     multiSplitPanel.waitTabNameProcessIsFocused(BUILD_COMM);

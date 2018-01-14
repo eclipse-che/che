@@ -36,14 +36,14 @@ public class CompoundOutputCustomizerTest extends BaseOutputCustomizerTest {
 
   @Before
   public void setUp() throws Exception {
-    OutputCustomizer[] customizers =
-        new OutputCustomizer[] {
-          new JavaOutputCustomizer(appContext, editorAgent),
-          new CSharpOutputCustomizer(appContext, editorAgent),
-          new CPPOutputCustomizer(appContext, editorAgent)
-        };
+    //    OutputCustomizer[] customizers =
+    //        new OutputCustomizer[] {
+    //          new JavaOutputCustomizer(appContext, editorAgent),
+    //          new CSharpOutputCustomizer(appContext, editorAgent),
+    //          new CPPOutputCustomizer(appContext, editorAgent)
+    //        };
 
-    setupTestCustomizers(new CompoundOutputCustomizer(customizers), customizers);
+    //    setupTestCustomizers(new CompoundOutputCustomizer(customizers), customizers);
   }
 
   /**

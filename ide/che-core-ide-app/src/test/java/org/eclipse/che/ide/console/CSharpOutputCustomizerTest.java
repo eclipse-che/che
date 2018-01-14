@@ -32,8 +32,8 @@ public class CSharpOutputCustomizerTest extends BaseOutputCustomizerTest {
 
   @Before
   public void setUp() throws Exception {
-    OutputCustomizer outputCustomizer = new CSharpOutputCustomizer(appContext, editorAgent);
-    setupTestCustomizers(outputCustomizer, new OutputCustomizer[] {outputCustomizer});
+    //    OutputCustomizer outputCustomizer = new CSharpOutputCustomizer(appContext, editorAgent);
+    //    setupTestCustomizers(outputCustomizer, new OutputCustomizer[] {outputCustomizer});
   }
 
   /**

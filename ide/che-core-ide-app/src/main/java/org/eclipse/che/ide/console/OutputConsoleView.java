@@ -19,6 +19,8 @@ import org.eclipse.che.ide.api.mvp.View;
  */
 public interface OutputConsoleView extends View<OutputConsoleView.ActionDelegate> {
 
+  void registerLinkifier(OutputLinkifier linkifier);
+
   /**
    * Shows the command line to the console.
    *
