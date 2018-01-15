@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -818,16 +818,8 @@ public class ProjectExplorer {
 
   public void invokeCommandWithContextMenu(
       String commandsGoal, String pathToItem, String commandName, String machineName) {
-    selectItem(pathToItem);
-    openContextMenuByPathSelectedItem(pathToItem);
-    clickOnItemInContextMenu(COMMANDS);
-    clickOnItemInContextMenu(commandsGoal);
+    invokeCommandWithContextMenu(commandsGoal, pathToItem, commandName);
 
-    redrawUiElementsWait
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(String.format("//tr[@id[contains(.,'%s')]]", commandName))))
-        .click();
     loader.waitOnClosed();
     actionsFactory
         .createAction(seleniumWebDriver)
@@ -956,6 +948,7 @@ public class ProjectExplorer {
     String jsScript = "IDE.ProjectExplorer.expandAll();";
     JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
     js.executeScript(jsScript);
+    loader.waitOnClosed();
   }
 
   /**
@@ -965,6 +958,7 @@ public class ProjectExplorer {
     String jsScript = "IDE.ProjectExplorer.collapseAll()";
     JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
     js.executeScript(jsScript);
+    loader.waitOnClosed();
   }
 
   /**
@@ -977,6 +971,7 @@ public class ProjectExplorer {
     String jsScript = "IDE.ProjectExplorer.reveal(\"" + absPathToResource.replace(".", "/") + "\")";
     JavascriptExecutor js = (JavascriptExecutor) seleniumWebDriver;
     js.executeScript(jsScript);
+    loader.waitOnClosed();
   }
 
   public void waitItemIsSelected(String path) {

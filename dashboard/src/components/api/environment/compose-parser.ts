@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,16 @@
  */
 'use strict';
 
+import {IParser} from './parser';
+
+export interface IComposeServiceRecipe {
+  image: string;
+  [propName: string]: any;
+}
+
 export interface IComposeRecipe {
   services: {
-    [machineName: string]: any
+    [serviceName: string]: IComposeServiceRecipe
   };
 }
 
@@ -21,7 +28,7 @@ export interface IComposeRecipe {
  *
  * @author Oleksii Kurinnyi
  */
-export class ComposeParser {
+export class ComposeParser implements IParser {
 
   /**
    * Parses recipe content
