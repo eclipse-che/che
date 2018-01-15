@@ -58,7 +58,9 @@ items:
     selector:
       app: che
     strategy:
-      type: Rolling
+      type: Recreate
+      recreateParams:
+        timeoutSeconds: 10000
     template:
       metadata:
         labels:

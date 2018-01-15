@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 'use strict';
 import {CheEnvironmentRegistry} from '../../../../components/api/environment/che-environment-registry.factory';
 import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
+import {CheNotification} from '../../../../components/notification/che-notification.factory';
+import {CheRecipeService} from '../che-recipe.service';
 
 /**
  * @ngdoc controller
@@ -51,15 +53,30 @@ export class WorkspaceEnvironmentsController {
   environmentOnChange: Function;
 
   private $q: ng.IQService;
+  /**
+   * Logging service.
+   */
+  private $log: ng.ILogService;
+  /**
+   * Notification factory.
+   */
+  private cheNotification: CheNotification;
+  /**
+   * Environment recipe service.
+   */
+  private cheRecipeService: CheRecipeService;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $scope: ng.IScope, $timeout: ng.ITimeoutService, $mdDialog: ng.material.IDialogService, cheEnvironmentRegistry: CheEnvironmentRegistry) {
+  constructor($q: ng.IQService, $scope: ng.IScope, $timeout: ng.ITimeoutService, $mdDialog: ng.material.IDialogService, cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService, cheNotification: CheNotification, cheRecipeService: CheRecipeService) {
     this.$q = $q;
     this.$mdDialog = $mdDialog;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
+    this.$log = $log;
+    this.cheNotification = cheNotification;
+    this.cheRecipeService = cheRecipeService;
 
     this.editorOptions = {
       lineWrapping: true,
@@ -99,7 +116,14 @@ export class WorkspaceEnvironmentsController {
       return;
     }
 
-    this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(this.recipe.type);
+    const recipeType = this.recipe.type;
+    this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
+    if (!this.environmentManager) {
+      const errorMessage = `Unsupported recipe type '${recipeType}'`;
+      this.$log.error(errorMessage);
+      this.cheNotification.showError(errorMessage);
+      return;
+    }
 
     this.editorOptions.mode = this.environmentManager.editorMode;
 
@@ -109,6 +133,15 @@ export class WorkspaceEnvironmentsController {
     if (!this.machinesViewStatus[this.environmentName]) {
       this.machinesViewStatus[this.environmentName] = {};
     }
+  }
+
+  /**
+   * Returns true if the recipe type is scalable.
+   *
+   * @returns {boolean}
+   */
+  isMultiMachine(): boolean {
+    return this.cheRecipeService.isScalable(this.environment.recipe);
   }
 
   /**

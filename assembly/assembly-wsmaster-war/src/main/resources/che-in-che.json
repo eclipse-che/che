@@ -78,7 +78,7 @@
       "description": null,
       "commands": [
         {
-          "commandLine": "cd ${current.project.path} && mvn clean install",
+          "commandLine": "cd ${current.project.path} && mvn clean install -Pnative",
           "name": "Build project",
           "type": "custom",
           "attributes": {
