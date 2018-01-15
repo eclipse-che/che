@@ -21,6 +21,7 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHI
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_NODE_CONTENT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.IMPLEMENTERS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
@@ -34,7 +35,6 @@ import java.util.List;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.promises.client.js.RejectFunction;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -43,13 +43,12 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.ImplementersResponse;
 import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
-import org.eclipse.che.jdt.ls.extension.api.dto.navigation.FindImplementationsCommandParameters;
-import org.eclipse.che.jdt.ls.extension.api.dto.navigation.ImplementationsDescriptor;
-import org.eclipse.che.jdt.ls.extension.api.dto.navigation.ImplementersResponse;
 import org.eclipse.che.plugin.languageserver.ide.service.ServiceUtil;
+import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.WorkspaceEdit;
 
 @Singleton
@@ -304,16 +303,15 @@ public class JavaLanguageExtensionServiceClient {
    *
    * @return descriptor of the implementations
    */
-  public Promise<ImplementersResponse> findImplementations(
-      FindImplementationsCommandParameters params) {
+  public Promise<ImplementersResponse> findImplementations(TextDocumentPositionParams params) {
     return Promises.create(
         (resolve, reject) -> {
           requestTransmitter
               .newRequest()
               .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-              .methodName("java/implementations")
+              .methodName(IMPLEMENTERS)
               .paramsAsDto(params)
-              .sendAndReceiveResultAsDto(ImplementersResponse.class, 10000)
+              .sendAndReceiveResultAsDto(ImplementersResponse.class, REQUEST_TIMEOUT)
               .onSuccess(resolve::apply)
               .onTimeout(() -> onTimeout(reject))
               .onFailure(

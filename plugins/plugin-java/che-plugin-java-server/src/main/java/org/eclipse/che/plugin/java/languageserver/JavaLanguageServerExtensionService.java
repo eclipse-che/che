@@ -24,13 +24,14 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHI
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_NODE_CONTENT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.IMPLEMENTERS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CREATE_SIMPLE_PROJECT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
-import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_IMPLEMENTORS_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_IMPLEMENTERS_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_ENTRY_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_FOLDER_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_PROJECT_COMMAND;
@@ -85,6 +86,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.ImplementersResponse;
 import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.JobResult;
@@ -93,27 +95,15 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocation;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
-<<<<<<< HEAD
 import org.eclipse.che.jdt.ls.extension.api.dto.UpdateClasspathParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.UpdateWorkspaceParameters;
-=======
-import org.eclipse.che.jdt.ls.extension.api.dto.navigation.FindImplementationsCommandParameters;
-import org.eclipse.che.jdt.ls.extension.api.dto.navigation.ImplementationsDescriptor;
-<<<<<<< HEAD
->>>>>>> che-6736: Port implementors to jdt.ls extension
-=======
-import org.eclipse.che.jdt.ls.extension.api.dto.navigation.ImplementersResponse;
->>>>>>> che-6736: fix naming and language server call
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSymbolInformationDto;
-import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ImplementationsDescriptorDto;
+import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ImplementersResponseDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
 import org.eclipse.lsp4j.ExecuteCommandParams;
-<<<<<<< HEAD
-import org.eclipse.lsp4j.WorkspaceEdit;
-=======
-import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.SymbolInformation;
->>>>>>> che-6736: Port implementors to jdt.ls extension
+import org.eclipse.lsp4j.TextDocumentPositionParams;
+import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.CollectionTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EitherTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EnumTypeAdapterFactory;
@@ -229,10 +219,10 @@ public class JavaLanguageServerExtensionService {
         .withFunction(this::organizeImports);
     requestHandler
         .newConfiguration()
-        .methodName("java/implementations")
-        .paramsAsDto(FindImplementationsCommandParameters.class)
+        .methodName(IMPLEMENTERS)
+        .paramsAsDto(TextDocumentPositionParams.class)
         .resultAsDto(ImplementersResponseDto.class)
-        .withFunction(this::findImplementations);
+        .withFunction(this::findImplementers);
   }
 
   /**
@@ -457,20 +447,22 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
-  public ImplementationsDescriptorDto findImplementations(
-      FindImplementationsCommandParameters params) {
-    params.setProjectUri(LanguageServiceUtils.prefixURI(params.getProjectUri()));
+  public ImplementersResponseDto findImplementers(TextDocumentPositionParams params) {
+    params
+        .getTextDocument()
+        .setUri(LanguageServiceUtils.prefixURI(params.getTextDocument().getUri()));
     CompletableFuture<Object> result =
-        executeCommand(FIND_IMPLEMENTORS_COMMAND, singletonList(params));
+        executeCommand(FIND_IMPLEMENTERS_COMMAND, singletonList(params));
 
-    Type targetClassType = new TypeToken<ImplementationsDescriptor>() {}.getType();
+    Type targetClassType = new TypeToken<ImplementersResponse>() {}.getType();
     try {
-      ImplementationsDescriptor implementationsDescriptor =
+      ImplementersResponse implementersResponse =
           gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
-      for (SymbolInformation symbolInformation : implementationsDescriptor.getImplementations()) {
-        symbolInformation.setLocation(LanguageServiceUtils.fixLocation(symbolInformation.getLocation()));
+      for (SymbolInformation symbolInformation : implementersResponse.getImplementers()) {
+        symbolInformation.setLocation(
+            LanguageServiceUtils.fixLocation(symbolInformation.getLocation()));
       }
-      return new ImplementationsDescriptorDto(implementationsDescriptor);
+      return new ImplementersResponseDto(implementersResponse);
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }

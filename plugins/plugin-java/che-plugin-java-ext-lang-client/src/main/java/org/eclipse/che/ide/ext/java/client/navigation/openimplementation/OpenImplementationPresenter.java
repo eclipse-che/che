@@ -12,36 +12,27 @@ package org.eclipse.che.ide.ext.java.client.navigation.openimplementation;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
-import com.google.common.base.Optional;
-import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.TextDocumentPositionParamsDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
 import org.eclipse.che.ide.api.editor.position.PositionConverter;
-import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.resources.Container;
-import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
-import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
-import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
-import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
-import org.eclipse.che.ide.ext.java.dto.DtoClientImpls.FindImplementationsCommandParametersDto;
 import org.eclipse.che.ide.ui.popup.PopupResources;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.jdt.ls.extension.api.dto.navigation.FindImplementationsCommandParameters;
-import org.eclipse.che.jdt.ls.extension.api.dto.navigation.ImplementationsDescriptor;
+import org.eclipse.che.jdt.ls.extension.api.dto.ImplementersResponse;
 import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
-import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
+import org.eclipse.lsp4j.TextDocumentPositionParams;
 
 /**
  * The class that manages implementations structure window.
@@ -52,9 +43,6 @@ import org.eclipse.lsp4j.SymbolInformation;
 public class OpenImplementationPresenter {
 
   private final JavaLanguageExtensionServiceClient javaLanguageExtensionServiceClient;
-  private final AppContext context;
-  private final EditorAgent editorAgent;
-  private final DtoFactory dtoFactory;
   private final JavaResources javaResources;
   private final PopupResources popupResources;
   private final JavaLocalizationConstant locale;
@@ -73,12 +61,9 @@ public class OpenImplementationPresenter {
       EditorAgent editorAgent,
       OpenFileInEditorHelper openHelper) {
     this.javaLanguageExtensionServiceClient = javaLanguageExtensionServiceClient;
-    this.context = context;
-    this.dtoFactory = dtoFactory;
     this.javaResources = javaResources;
     this.popupResources = popupResources;
     this.locale = locale;
-    this.editorAgent = editorAgent;
     this.openHelper = openHelper;
   }
 
@@ -95,46 +80,36 @@ public class OpenImplementationPresenter {
     activeEditor = ((TextEditor) editorPartPresenter);
     final VirtualFile file = activeEditor.getEditorInput().getFile();
 
-    if (file instanceof Resource) {
-      final Project project = ((Resource) file).getProject();
+    javaLanguageExtensionServiceClient
+        .findImplementations(
+            new TextDocumentPositionParamsDto(
+                new TextDocumentPositionParams(
+                    new TextDocumentIdentifier(file.getLocation().toString()),
+                    new Position(
+                        activeEditor.getCursorPosition().getLine(),
+                        activeEditor.getCursorPosition().getCharacter()))))
+        .then(
+            impls -> {
+              int overridingSize = impls.getImplementers().size();
 
-      final Optional<Resource> srcFolder =
-          ((Resource) file).getParentWithMarker(SourceFolderMarker.ID);
-
-      if (project == null || !srcFolder.isPresent()) {
-        return;
-      }
-
-      final String fqn = JavaUtil.resolveFQN((Container) srcFolder.get(), (Resource) file);
-
-      javaLanguageExtensionServiceClient
-          .findImplementations(
-              new FindImplementationsCommandParametersDto(
-                  new FindImplementationsCommandParameters(
-                      project.getLocation().toString(), fqn, activeEditor.getCursorOffset())))
-          .then(
-              impls -> {
-                int overridingSize = impls.getImplementations().size();
-
-                String title =
-                    locale.openImplementationWindowTitle(impls.getMemberName(), overridingSize);
-                NoImplementationWidget noImplementationWidget =
-                    new NoImplementationWidget(
-                        popupResources,
-                        javaResources,
-                        locale,
-                        OpenImplementationPresenter.this,
-                        title);
-                if (overridingSize == 1) {
-                  openOneImplementation(impls.getImplementations().get(0));
-                } else if (overridingSize > 1) {
-                  openImplementations(
-                      impls, noImplementationWidget, (TextEditor) editorPartPresenter);
-                } else if (!isNullOrEmpty(impls.getMemberName()) && overridingSize == 0) {
-                  showNoImplementations(noImplementationWidget, (TextEditor) editorPartPresenter);
-                }
-              });
-    }
+              String title =
+                  locale.openImplementationWindowTitle(impls.getSearchedElement(), overridingSize);
+              NoImplementationWidget noImplementationWidget =
+                  new NoImplementationWidget(
+                      popupResources,
+                      javaResources,
+                      locale,
+                      OpenImplementationPresenter.this,
+                      title);
+              if (overridingSize == 1) {
+                openOneImplementation(impls.getImplementers().get(0));
+              } else if (overridingSize > 1) {
+                openImplementations(
+                    impls, noImplementationWidget, (TextEditor) editorPartPresenter);
+              } else if (!isNullOrEmpty(impls.getSearchedElement()) && overridingSize == 0) {
+                showNoImplementations(noImplementationWidget, (TextEditor) editorPartPresenter);
+              }
+            });
   }
 
   public void openOneImplementation(final SymbolInformation symbolInformation) {
@@ -153,13 +128,13 @@ public class OpenImplementationPresenter {
   }
 
   private void openImplementations(
-      ImplementationsDescriptor implementationsDescriptor,
+      ImplementersResponse implementersResponse,
       NoImplementationWidget implementationWidget,
       TextEditor editorPartPresenter) {
     int offset = editorPartPresenter.getCursorOffset();
     PositionConverter.PixelCoordinates coordinates =
         editorPartPresenter.getPositionConverter().offsetToPixel(offset);
-    for (SymbolInformation symbolInformation : implementationsDescriptor.getImplementations()) {
+    for (SymbolInformation symbolInformation : implementersResponse.getImplementers()) {
       implementationWidget.addItem(symbolInformation);
     }
     implementationWidget.show(coordinates.getX(), coordinates.getY());

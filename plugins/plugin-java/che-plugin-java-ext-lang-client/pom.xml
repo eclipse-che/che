@@ -303,7 +303,6 @@
                     </classes>
                     <dtoPackages>
                         <package>org.eclipse.che.jdt.ls.extension.api.dto</package>
-                        <package>org.eclipse.che.jdt.ls.extension.api.dto.navigation</package>
                     </dtoPackages>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
                     <genClassName>org.eclipse.che.ide.ext.java.dto.DtoClientImpls</genClassName>

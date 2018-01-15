@@ -21,8 +21,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
 import org.eclipse.che.ide.ext.java.shared.dto.model.MethodParameters;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.jdt.ls.extension.api.dto.navigation.FindImplementationsCommandParameters;
-import org.eclipse.che.jdt.ls.extension.api.dto.navigation.ImplementationsDescriptor;
 
 /**
  * Service for the operations of navigation.
