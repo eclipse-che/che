@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.opendeclaration;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -21,6 +23,7 @@ import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -57,7 +60,14 @@ public class Eclipse0121Test {
     editor.waitActive();
     editor.goToCursorPositionVisible(15, 43);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("Collections");
+
+    try {
+      editor.waitTabIsPresent("Collections");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7161", ex);
+    }
+
     editor.waitSpecifiedValueForLineAndChar(14, 35);
   }
 }
