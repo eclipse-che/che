@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,17 @@ import org.testng.annotations.Test;
 /** @author Vlad Zhukovskyi */
 public class ServerRuntimeInfoTest {
 
+  private List<String> expectedReferenceList =
+      Lists.newArrayList(
+          "codeserver",
+          "tomcat8",
+          "tomcat8-debug",
+          "wsagent/ws",
+          "exec-agent/ws",
+          "wsagent/http",
+          "exec-agent/http",
+          "wsagent-debug");
+
   @Inject private TestWorkspace testWorkspace;
   @Inject private Loader loader;
   @Inject private Consoles consoles;
@@ -51,20 +62,8 @@ public class ServerRuntimeInfoTest {
     consoles.waitTabNameProcessIsPresent("Servers");
     consoles.waitExpectedTextIntoServerTableCation("Servers of dev-machine:");
 
-    List<String> expectedReferenceList =
-        Lists.newArrayList(
-            "codeserver",
-            "tomcat8",
-            "tomcat8-debug",
-            "wsagent/ws",
-            "exec-agent/ws",
-            "wsagent/http",
-            "exec-agent/http",
-            "wsagent-debug");
-
-    for (int i = 0; i < expectedReferenceList.size(); i++) {
-      String referenceId = "gwt-debug-runtime-info-reference-" + i;
-      consoles.checkReferenceList(referenceId, expectedReferenceList.get(i));
+    for (String server : expectedReferenceList) {
+      consoles.checkThatServerExists(server);
     }
 
     consoles.clickOnHideInternalServers();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,7 +79,7 @@ import {WorkspaceConfigService} from './workspace-config.service';
 import {WorkspaceDetailsConfig} from './workspace-details/workspace-details-config';
 import {WorkspaceWarnings} from './workspace-details/warnings/workspace-warnings.directive';
 import {WorkspaceWarningsController} from './workspace-details/warnings/workspace-warnings.controller';
-
+import {WorkspacesService} from './workspaces.service';
 
 /**
  * @ngdoc controller
@@ -163,6 +163,7 @@ export class WorkspacesConfig {
     register.controller('UserItemController', UserItemController);
     register.directive('userItem', UserItem);
     register.service('workspaceConfigService', WorkspaceConfigService);
+    register.service('workspacesService', WorkspacesService);
 
     // config routes
     register.app.config(($routeProvider: che.route.IRouteProvider) => {

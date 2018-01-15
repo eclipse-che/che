@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,11 +50,11 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("navigateToFile.searchIsCaseSensitive")
   String navigateToFileSearchIsCaseSensitive();
 
-  @Key("appearance.title")
-  String appearanceTitle();
+  @Key("general.title")
+  String generalTitle();
 
-  @Key("appearance.category")
-  String appearanceCategory();
+  @Key("general.category")
+  String generalCategory();
 
   /* Add resources to File Watcher excludes */
   @Key("action.fileWatcher.add.excludes.text")
@@ -493,6 +493,9 @@ public interface CoreLocalizationConstant extends Messages {
   String invalidName();
 
   /* Messages */
+  @Key("messages.closeTabConfirmation")
+  String closeTabConfirmation();
+
   @Key("messages.changesMayBeLost")
   String changesMayBeLost();
 
