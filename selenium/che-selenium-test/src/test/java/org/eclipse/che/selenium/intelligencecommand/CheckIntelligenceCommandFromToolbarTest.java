@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTIPLE;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -107,7 +108,13 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
     waitOnAvailablePreviewPage(currentWindow, "Enter your name:");
     Assert.assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
-    Assert.assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#2"));
+
+    try {
+      Assert.assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#2"));
+    } catch (AssertionError ex) {
+      // Remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8277");
+    }
 
     commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("dev-machine:tomcat8");
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
