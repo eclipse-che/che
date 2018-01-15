@@ -278,6 +278,7 @@ echo "done!"
 # --------------------------
 echo -n "[CHE] Checking if project \"${CHE_OPENSHIFT_PROJECT}\" exists..."
 if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
+
     if [ "${COMMAND}" == "cleanup" ] || [ "${COMMAND}" == "rollupdate" ]; then echo "**ERROR** project doesn't exist. Aborting"; exit 1; fi
     if [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then echo "**ERROR** project doesn't exist on OSIO. Aborting"; exit 1; fi
 
