@@ -70,9 +70,6 @@ export IMAGE_INIT=${IMAGE_INIT:-${DEFAULT_IMAGE_INIT}}:${CHE_IMAGE_TAG}
 DEFAULT_CONFIG_DIR="/tmp/che-config"
 export CONFIG_DIR=${CONFIG_DIR:-${DEFAULT_CONFIG_DIR}}
 
-DEFAULT_CHE_REMOVE_PROJECT=false
-export CHE_REMOVE_PROJECT=${CHE_REMOVE_PROJECT:-${DEFAULT_CHE_REMOVE_PROJECT}}
-
 }
 
 get_tools() {
@@ -159,9 +156,6 @@ deploy_che_to_ocp() {
     docker run -v "${CONFIG_DIR}":/to_remove alpine sh -c "rm -rf /to_remove/" || true
     docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} config --skip:pull --skip:nightly
     cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
-    if $CHE_REMOVE_PROJECT; then
-      remove_che_from_ocp
-    fi
     bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
     wait_until_server_is_booted
     if [ $CHE_MULTIUSER == true ]; then
@@ -181,12 +175,14 @@ server_is_booted() {
 
 wait_until_server_is_booted() {
   SERVER_BOOT_TIMEOUT=300
-  echo "[CHE] wait CHE pod booting..."
+  echo -n "[CHE] wait CHE pod booting..."
   ELAPSED=0
   until server_is_booted || [ ${ELAPSED} -eq "${SERVER_BOOT_TIMEOUT}" ]; do
+    echo -n "."
     sleep 2
     ELAPSED=$((ELAPSED+1))
   done
+  echo "Done!"
 }
 
 wait_until_kc_is_booted() {
@@ -223,36 +219,35 @@ destroy_ocp() {
 }
 
 remove_che_from_ocp() {
-  if $CHE_REMOVE_PROJECT; then
-    echo "[CHE] Checking if project \"${CHE_OPENSHIFT_PROJECT}\" exists before removing..."
-    WAIT_FOR_PROJECT_TO_DELETE=true
-    DELETE_OPENSHIFT_PROJECT_MESSAGE="[CHE] Removing Project \"${CHE_OPENSHIFT_PROJECT}\"."
-    if $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
-      echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" exists."
-      while $WAIT_FOR_PROJECT_TO_EXIT
-      do
-      { # try
-
-          if $CHE_REMOVE_PROJECT; then
-            echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
-            $OC_BINARY delete project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
-            DELETE_OPENSHIFT_PROJECT_MESSAGE="."
-          fi
-          if ! $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
-            WAIT_FOR_PROJECT_TO_EXIT=false
-          fi
-          echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
-      } || { # catch
-          echo "[CHE] Could not find project \"${CHE_OPENSHIFT_PROJECT}\" to delete."
-          WAIT_FOR_PROJECT_TO_EXIT=false
-      }
-      done
-      echo "Done!"
-    else
-      echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" does NOT exists."
-    fi
-    CHE_REMOVE_PROJECT=false
-  fi
+	echo "[CHE] Checking if project \"${CHE_OPENSHIFT_PROJECT}\" exists before removing..."
+	WAIT_FOR_PROJECT_TO_DELETE=true
+	CHE_REMOVE_PROJECT=true
+	DELETE_OPENSHIFT_PROJECT_MESSAGE="[CHE] Removing Project \"${CHE_OPENSHIFT_PROJECT}\"."
+	if $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
+		echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" exists."
+		while $WAIT_FOR_PROJECT_TO_EXIT
+		do
+		{ # try
+			echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
+			if $CHE_REMOVE_PROJECT; then
+				$OC_BINARY delete project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
+				CHE_REMOVE_PROJECT=false
+			fi
+			DELETE_OPENSHIFT_PROJECT_MESSAGE="."
+			if ! $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
+				WAIT_FOR_PROJECT_TO_EXIT=false
+			fi
+			echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
+		} || { # catch
+			echo "[CHE] Could not find project \"${CHE_OPENSHIFT_PROJECT}\" to delete."
+			WAIT_FOR_PROJECT_TO_EXIT=false
+		}
+		done
+		echo "Done!"
+	else
+		echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" does NOT exists."
+	fi
+	
 }
 
 detectIP() {
@@ -271,6 +266,10 @@ parse_args() {
     ENV vars
     CHE_IMAGE_TAG - set CHE images tag, default: nightly
     CHE_MULTIUSER - set CHE multi user mode, default: false (single user) 
+    OC_PUBLIC_HOSTNAME - set ocp hostname to admin console, default: host ip
+    OC_PUBLIC_IP - set ocp hostname for routing suffix, default: host ip
+    DNS_PROVIDER - set ocp DNS provider for routing suffix, default: nip.io
+    OPENSHIFT_TOKEN - set ocp token for authentication
 "
 
     DEPLOY_SCRIPT_ARGS=""
@@ -290,7 +289,7 @@ parse_args() {
     fi
 
     if [[ "$@" == *"--remove-che"* ]]; then
-      CHE_REMOVE_PROJECT=true
+      remove_che_from_ocp
     fi
 
     for i in "${@}"
@@ -309,10 +308,6 @@ parse_args() {
                shift
            ;;
            --multiuser)
-               shift
-           ;;
-           --remove-che)
-               remove_che_from_ocp
                shift
            ;;
            --update)
