@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,7 +45,7 @@ public class DashboardAccount {
     String LOGIN_FIELD = "//input[@name='login_name']";
     String FIRST_NAME_FIELD = "//input[@name='first_name']";
     String LAST_NAME_FIELD = "//input[@name='last_name']";
-    String EDIT_BUTTON = "//div[@name='editButton']/button";
+    String EDIT_BUTTON = "//che-button-default[@name='editButton']/button";
     String TITLE_ID = "Account";
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,20 @@ public class AccountFields {
   private String email;
   private String firstName;
   private String lastName;
+
+  public AccountFields() {
+    this.login = "";
+    this.email = "";
+    this.firstName = "";
+    this.lastName = "";
+  }
+
+  public AccountFields(String login, String email, String firstName, String lastName) {
+    this.login = login;
+    this.email = email;
+    this.firstName = firstName;
+    this.lastName = lastName;
+  }
 
   public void setLogin(String login) {
     this.login = login;
@@ -46,5 +60,12 @@ public class AccountFields {
 
   public String getLastName() {
     return lastName;
+  }
+
+  public boolean isEquals(AccountFields accountFieldsForCompare) {
+    return this.login.equals(accountFieldsForCompare.getLogin())
+        && this.email.equals(accountFieldsForCompare.getEmail())
+        && this.firstName.equals(accountFieldsForCompare.getFirstName())
+        && this.lastName.equals(accountFieldsForCompare.getLastName());
   }
 }
