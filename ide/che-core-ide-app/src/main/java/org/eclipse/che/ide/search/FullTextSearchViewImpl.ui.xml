@@ -15,10 +15,8 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:with field='res' type='org.eclipse.che.ide.Resources'/>
     <ui:with field='locale' type='org.eclipse.che.ide.CoreLocalizationConstant'/>
-    <ui:style>
-        @eval buttonHoverBackground org.eclipse.che.ide.api.theme.Style.getButtonHoverBackground();
-        @eval buttonHoverBorderColor org.eclipse.che.ide.api.theme.Style.getButtonHoverBorderColor();
 
+    <ui:style>
         .emptyBorder {
             margin: 6px;
         }
