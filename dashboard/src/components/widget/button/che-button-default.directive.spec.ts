@@ -131,34 +131,6 @@ describe(`cheButtonDefault >`, () => {
 
     });
 
-    describe(`ngClick directive >`, () => {
-      let buttonEl;
-
-      beforeEach(() => {
-        $scope.model.ngClick = jasmine.createSpy('ngClick');
-        $scope.model.cheButtonTitle = 'Test button title';
-        compileDirective();
-
-        buttonEl = compiledDirective.find('button');
-      });
-
-      it(`should be applied >`, () => {
-        expect(buttonEl.attr('ng-click')).toBeDefined();
-      });
-
-      it(`should be removed from top-level element >`, () => {
-        expect(compiledDirective.find('che-button-default').attr('ng-click')).toBeUndefined();
-      });
-
-      it(`should call a callback when clicked >`, () => {
-        buttonEl.click();
-        $scope.$digest();
-
-        expect($scope.model.ngClick).toHaveBeenCalled();
-      });
-
-    });
-
     describe(`ngDisable directive >`, () => {
       let buttonEl;
 
@@ -181,6 +153,52 @@ describe(`cheButtonDefault >`, () => {
         $scope.$digest();
 
         expect(buttonEl.attr('disabled')).toBeTruthy();
+      });
+
+    });
+
+    describe(`ngClick directive >`, () => {
+      let buttonEl;
+      let counter = 0;
+
+      beforeEach(() => {
+        $scope.model.ngClick = jasmine.createSpy('ngClick')
+          .and.callFake(() => {
+            // count number of calls
+            counter++;
+        });
+        $scope.model.ngDisabled = false;
+        $scope.model.cheButtonTitle = 'Test button title';
+        compileDirective();
+
+        buttonEl = compiledDirective.find('button');
+      });
+
+      it(`should call a callback when clicked >`, () => {
+        buttonEl.click();
+        $scope.$digest();
+
+        expect($scope.model.ngClick).toHaveBeenCalled();
+      });
+
+      it(`should call a callback exactly once >`, () => {
+        counter = 0;
+
+        buttonEl.click();
+        $scope.$digest();
+
+        expect(counter).toEqual(1);
+      });
+
+      describe(`when button is disabled >`, () => {
+
+        it(`shouldn't to call a callback when clicked >`, () => {
+          $scope.model.ngDisabled = true;
+          $scope.$digest();
+
+          expect($scope.model.ngClick).not.toHaveBeenCalled();
+        });
+
       });
 
     });

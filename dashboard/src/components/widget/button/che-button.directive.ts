@@ -51,7 +51,7 @@ export abstract class CheButton implements ng.IDirective {
   abstract getTemplateStart(): string;
 
   compile($element: ng.IAugmentedJQuery, $attrs: ICheButtonAttributes): ng.IDirectivePrePost {
-    const avoidAttrs = ['ng-model'];
+    const avoidAttrs = ['ng-model', 'ng-click'];
     const allowedAttrPrefixes = ['ng-'];
     const allowedAttributes = ['href', 'target', 'tabindex'];
 
