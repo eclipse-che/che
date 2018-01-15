@@ -11,6 +11,8 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -29,10 +31,14 @@ import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Aleksandr Shmaraev */
@@ -393,10 +399,15 @@ public class Consoles {
   }
 
   public void openServersTabFromContextMenu(String machineName) {
+    Wait<WebDriver> wait =
+        new FluentWait<WebDriver>(seleniumWebDriver)
+            .withTimeout(ELEMENT_TIMEOUT_SEC, SECONDS)
+            .pollingEvery(500, MILLISECONDS)
+            .ignoring(WebDriverException.class);
+
     WebElement machine =
-        redrawDriverWait.until(
-            visibilityOfElementLocated(By.xpath(format(MACHINE_NAME, machineName))));
-    machine.click();
+        wait.until(visibilityOfElementLocated(By.xpath(format(MACHINE_NAME, machineName))));
+    wait.until(visibilityOf(machine)).click();
 
     actionsFactory.createAction(seleniumWebDriver).moveToElement(machine).contextClick().perform();
     redrawDriverWait.until(visibilityOf(serversMenuItem)).click();
