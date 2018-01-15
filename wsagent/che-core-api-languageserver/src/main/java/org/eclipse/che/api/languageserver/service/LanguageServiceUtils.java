@@ -15,7 +15,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
-import org.eclipse.che.api.languageserver.shared.util.Constants;
 import org.eclipse.lsp4j.Location;
 
 /** Language service service utilities */
@@ -24,8 +23,8 @@ public class LanguageServiceUtils {
   private static final String PROJECTS = "/projects";
   private static final String FILE_PROJECTS = "file:///projects";
 
-  public static String prefixURI(String relativePath) {
-    return FILE_PROJECTS + relativePath;
+  public static String prefixURI(String uri) {
+    return uri.startsWith("/") ? FILE_PROJECTS + uri : uri;
   }
 
   public static String removePrefixUri(String uri) {
@@ -64,9 +63,7 @@ public class LanguageServiceUtils {
   }
 
   public static Location fixLocation(Location o) {
-    if (isProjectUri(o.getUri())) {
-      o.setUri(Constants.CHE_WKSP_SCHEME + removePrefixUri(o.getUri()));
-    }
+    o.setUri(removePrefixUri(o.getUri()));
     return o;
   }
 
