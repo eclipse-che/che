@@ -34,7 +34,7 @@ public class FormatterTest {
       NameGenerator.generate(FormatterTest.class.getSimpleName(), 4);
   private static final String FORMATTED_TEXT =
       "/*\n"
-          + " * Copyright (c) 2012-2017 Red Hat, Inc.\n"
+          + " * Copyright (c) 2012-2018 Red Hat, Inc.\n"
           + " * All rights reserved. This program and the accompanying materials\n"
           + " * are made available under the terms of the Eclipse Public License v1.0\n"
           + " * which accompanies this distribution, and is available at\n"
