@@ -89,6 +89,7 @@ import {CheEditor} from './editor/che-editor.directive';
 import {CheEditorController} from './editor/che-editor.controller';
 import {PagingButtons} from './paging-button/paging-button.directive';
 import {CheRowToolbar} from './toolbar/che-row-toolbar.directive';
+import {CheButtonDropdown2Directive} from './button-dropdown2/che-button-dropdown2.directive';
 
 export class WidgetConfig {
 
@@ -111,6 +112,8 @@ export class WidgetConfig {
       // dropdown
       .controller('CheButtonDropdownCtrl', CheButtonDropdownCtrl)
       .directive('cheButtonDropdown', CheButtonDropdown)
+      // dropdown2
+      .directive('cheButtonDropdown2', CheButtonDropdown2Directive)
       // clipboard
       .directive('cheClipboard', CheClipboard)
       .directive('cheCompile', CheCompile)

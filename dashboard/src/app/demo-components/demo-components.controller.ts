@@ -10,7 +10,12 @@
  */
 'use strict';
 
-enum Tab {Font, Panel, Selecter, Icons, Buttons, Input, List, Label_container, Stack_selector, Popover};
+import {
+  ICheButtonDropdownMainAction,
+  ICheButtonDropdownOtherAction
+} from '../../components/widget/button-dropdown2/che-button-dropdown2.directive';
+
+enum Tab {Font, Panel, Selecter, Icons, Dropdown_button, Buttons, Input, List, Label_container, Stack_selector, Popover}
 
 /**
  * This class is handling the controller for the demo of components
@@ -37,6 +42,13 @@ export class DemoComponentsController {
   numberIsChanged: number;
 
   placement: any;
+
+  links: any[];
+  dropdownHref: string;
+  buttonDropdownConfig: {
+    mainAction: ICheButtonDropdownMainAction;
+    otherActions: Array<ICheButtonDropdownOtherAction>;
+  };
 
   /**
    * Default constructor that is using resource
@@ -67,6 +79,29 @@ export class DemoComponentsController {
         'right-bottom'
       ],
       selected: 'top'
+    };
+    this.dropdownHref = '#/';
+    this.links = [{
+      name: 'Stacks',
+      href: '#/stacks'
+    }, {
+      name: 'Workspaces',
+      href: '#/workspaces'
+    }];
+    this.buttonDropdownConfig = {
+      mainAction: {
+        title: 'Main Action',
+        type: 'button'
+      },
+      otherActions: [{
+        title: 'Other action 2',
+        type: 'button',
+        orderNumber: 2
+      }, {
+        title: 'Other action 1',
+        type: 'button',
+        orderNumber: 1
+      }]
     };
     this.init();
   }
