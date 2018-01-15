@@ -84,7 +84,7 @@ set_environment_variables () {
   # CHE_DOCKER_IP is used internally by Che to set its IP address
   if [[ -z "${CHE_DOCKER_IP}" ]]; then
     if [[ -n "${CHE_IP}" ]]; then
-      export CHE_DOCKER_IP="${CHE_IP}"
+        export CHE_DOCKER_IP="${CHE_IP}"
     fi
   fi
 
