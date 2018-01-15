@@ -131,7 +131,7 @@ public class FileStructureNodesTest {
       fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     } catch (WebDriverException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8294");
+      fail("Known issue https://github.com/eclipse/che/issues/8300");
     }
 
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
