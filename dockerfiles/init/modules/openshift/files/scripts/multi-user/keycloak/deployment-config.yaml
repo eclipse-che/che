@@ -39,7 +39,7 @@ spec:
         image: ' '
         name: keycloak
         livenessProbe:
-          failureThreshold: 4
+          failureThreshold: 11
           initialDelaySeconds: 5
           periodSeconds: 5
           successThreshold: 1

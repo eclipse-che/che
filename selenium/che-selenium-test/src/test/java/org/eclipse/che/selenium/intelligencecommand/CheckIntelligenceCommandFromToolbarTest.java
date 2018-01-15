@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTIPLE;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -52,12 +53,12 @@ public class CheckIntelligenceCommandFromToolbarTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private NotificationsPopupPanel notificationsPanel;
 
-  @BeforeClass(groups = {TestGroup.DOCKER, TestGroup.OPENSHIFT})
+  @BeforeClass
   public void setUp() throws Exception {
     ide.open(testWorkspace);
   }
 
-  @Test(groups = {TestGroup.DOCKER, TestGroup.OPENSHIFT})
+  @Test
   public void launchClonedWepAppTest() throws Exception {
     String currentWindow = seleniumWebDriver.getWindowHandle();
     projectExplorer.waitProjectExplorer();
@@ -107,7 +108,13 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
     waitOnAvailablePreviewPage(currentWindow, "Enter your name:");
     Assert.assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
-    Assert.assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#2"));
+
+    try {
+      Assert.assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#2"));
+    } catch (AssertionError ex) {
+      // Remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8277");
+    }
 
     commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("dev-machine:tomcat8");
     checkTestAppAndReturnToIde(currentWindow, "Enter your name:");

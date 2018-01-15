@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ interface IEditorState {
  * @author Oleksii Orel
  */
 export class CheEditorController {
+  setEditorValue: (content: string) => void;
   /**
    * Editor options object.
    */
@@ -42,6 +43,10 @@ export class CheEditorController {
     mode?: string;
     onLoad: Function;
   };
+  /**
+   * Editor form controller.
+   */
+  private editorForm: ng.IFormController;
   /**
    * Editor state object.
    */
@@ -75,6 +80,9 @@ export class CheEditorController {
           editor.refresh();
         }, 500);
         const doc = editor.getDoc();
+        this.setEditorValue = (content: string) => {
+          doc.setValue(content);
+        };
         editor.on('change', () => {
           const {line, ch} = editor.getCursor();
           if (line === 0 && ch === 0) {
@@ -121,6 +129,8 @@ export class CheEditorController {
             if (angular.isFunction(this.onContentChange)) {
               this.onContentChange({editorState: this.editorState});
             }
+
+            this.editorForm.$setValidity('custom-validator', this.editorState.isValid, null);
           }, 1500);
         });
       }

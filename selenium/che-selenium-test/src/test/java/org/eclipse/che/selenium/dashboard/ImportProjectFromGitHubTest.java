@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEME
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GITHUB;
 import static org.testng.Assert.fail;
+import static org.testng.AssertJUnit.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -22,8 +23,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.pageobject.GitHub;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -35,7 +34,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class ImportProjectFromGitHubTest {
-  private final String WORKSPACE = NameGenerator.generate("ImtMvnPrjGitHub", 4);
+  private static final String WORKSPACE = NameGenerator.generate("ImtMvnPrjGitHub", 4);
   private static final String GITHUB_PROJECT_NAME = "AngularJS";
 
   private String projectName;
@@ -49,8 +48,6 @@ public class ImportProjectFromGitHubTest {
   @Named("github.password")
   private String gitHubPassword;
 
-  @Inject private Loader loader;
-  @Inject private GitHub gitHub;
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
   @Inject private TestUser defaultTestUser;
@@ -90,17 +87,12 @@ public class ImportProjectFromGitHubTest {
       connectGithubAccount();
     }
 
-    projectSourcePage.waitGithubProjectsList();
+    assertTrue(projectSourcePage.isGithubProjectsListDisplayed());
     projectSourcePage.selectProjectFromList(GITHUB_PROJECT_NAME);
     projectSourcePage.clickOnAddProjectButton();
     createWorkspace.clickOnCreateWorkspaceButton();
 
-    try {
-      seleniumWebDriver.switchFromDashboardIframeToIde(ELEMENT_TIMEOUT_SEC);
-    } catch (TimeoutException ex) {
-      // Remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/6323");
-    }
+    seleniumWebDriver.switchFromDashboardIframeToIde(ELEMENT_TIMEOUT_SEC);
 
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(projectName);
@@ -109,22 +101,25 @@ public class ImportProjectFromGitHubTest {
 
   private void connectGithubAccount() {
     projectSourcePage.clickOnConnectGithubAccountButton();
-
     seleniumWebDriver.switchToNoneCurrentWindow(ideWin);
 
-    gitHub.waitAuthorizationPageOpened();
-    gitHub.typeLogin(gitHubUsername);
-    gitHub.typePass(gitHubPassword);
-    gitHub.clickOnSignInButton();
-    loader.waitOnClosed();
-
-    // authorize on github.com
-    if (seleniumWebDriver.getWindowHandles().size() > 1) {
-      loader.waitOnClosed();
-      gitHub.waitAuthorizeBtn();
-      gitHub.clickOnAuthorizeBtn();
+    try {
+      projectSourcePage.waitAuthorizationPageOpened();
+    } catch (TimeoutException ex) {
+      // Remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8250");
     }
 
+    projectSourcePage.typeLogin(gitHubUsername);
+    projectSourcePage.typePassword(gitHubPassword);
+    projectSourcePage.clickOnSignInButton();
     seleniumWebDriver.switchTo().window(ideWin);
+
+    if (!projectSourcePage.isGithubProjectsListDisplayed()) {
+      seleniumWebDriver.switchToNoneCurrentWindow(ideWin);
+      projectSourcePage.waitAuthorizeBtn();
+      projectSourcePage.clickOnAuthorizeBtn();
+      seleniumWebDriver.switchTo().window(ideWin);
+    }
   }
 }

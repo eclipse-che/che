@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,8 +38,8 @@ import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
  * @author Alexander Garagatyi
  */
 public class ServersChecker {
-  // workaround to set correct paths for servers readiness checks
-  // TODO replace with checks set in server config
+  // Is used to define servers which will be checked by this server checker class.
+  // It is also a workaround to set correct paths for servers readiness checks.
   private static final Map<String, String> LIVENESS_CHECKS_PATHS =
       ImmutableMap.of(
           "wsagent/http", "/api/",
@@ -74,7 +74,8 @@ public class ServersChecker {
   }
 
   /**
-   * Asynchronously starts checking readiness of servers of a machine.
+   * Asynchronously starts checking readiness of servers of a machine. Method {@link #await()} waits
+   * the result of this asynchronous check.
    *
    * @param serverReadinessHandler consumer which will be called with server reference as the
    *     argument when server become available

@@ -68,7 +68,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/che-dev:nightly",
+            "content": "eclipse/che-dev:nightly",
             "type": "dockerimage"
           }
         }
@@ -78,7 +78,7 @@
       "description": null,
       "commands": [
         {
-          "commandLine": "cd ${current.project.path} && mvn clean install",
+          "commandLine": "cd ${current.project.path} && mvn clean install -Pnative",
           "name": "Build project",
           "type": "custom",
           "attributes": {

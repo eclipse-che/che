@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,10 +17,12 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.FAILED;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STARTING;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -65,13 +67,15 @@ import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
+import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
+import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbes;
+import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInternalRuntime.MachineLogsPublisher;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapper;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
@@ -126,6 +130,9 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private OpenShiftPods pods;
   @Mock private OpenShiftBootstrapper bootstrapper;
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
+  @Mock private WorkspaceProbesFactory workspaceProbesFactory;
+  @Mock private ProbeScheduler probesScheduler;
+  @Mock private WorkspaceProbes workspaceProbes;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
@@ -145,6 +152,8 @@ public class OpenShiftInternalRuntimeTest {
             bootstrapperFactory,
             serverCheckerFactory,
             volumesStrategy,
+            probesScheduler,
+            workspaceProbesFactory,
             context,
             project,
             emptyList());
@@ -156,7 +165,6 @@ public class OpenShiftInternalRuntimeTest {
     when(project.routes()).thenReturn(routes);
     when(project.pods()).thenReturn(pods);
     when(bootstrapperFactory.create(any(), anyList(), any())).thenReturn(bootstrapper);
-    when(context.getEnvironment()).thenReturn(osEnv);
     doReturn(
             ImmutableMap.of(
                 M1_NAME,
@@ -235,9 +243,12 @@ public class OpenShiftInternalRuntimeTest {
       verify(routes).create(any());
       verify(services).create(any());
       verify(bootstrapper).bootstrap();
-      verify(eventService, times(3)).publish(any());
+      verify(eventService, times(4)).publish(any());
       verifyEventsOrder(
-          newEvent(M1_NAME, STARTING), newEvent(M2_NAME, STARTING), newEvent(M1_NAME, FAILED));
+          newEvent(M1_NAME, STARTING),
+          newEvent(M2_NAME, STARTING),
+          newEvent(M1_NAME, RUNNING),
+          newEvent(M1_NAME, FAILED));
       throw rethrow;
     }
   }
@@ -272,7 +283,7 @@ public class OpenShiftInternalRuntimeTest {
       verify(routes).create(any());
       verify(services).create(any());
       verify(bootstrapper).bootstrap();
-      verifyEventsOrder(newEvent(M1_NAME, STARTING));
+      verifyEventsOrder(newEvent(M1_NAME, STARTING), newEvent(M1_NAME, RUNNING));
       throw rethrow;
     }
   }
@@ -321,8 +332,42 @@ public class OpenShiftInternalRuntimeTest {
     verify(eventService, never()).publish(any());
   }
 
+  @Test
+  public void cancelsWsProbesOnRuntimeStop() throws Exception {
+    doNothing().when(project).cleanUp();
+
+    internalRuntime.internalStop(emptyMap());
+
+    verify(probesScheduler).cancel(WORKSPACE_ID);
+  }
+
+  @Test
+  public void cancelsWsProbesWhenErrorOnRuntimeStartOccurs() throws Exception {
+    doNothing().when(project).cleanUp();
+    when(osEnv.getServices()).thenThrow(new RuntimeException());
+
+    try {
+      internalRuntime.internalStart(emptyMap());
+    } catch (Exception e) {
+      verify(probesScheduler).cancel(WORKSPACE_ID);
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void schedulesProbesOnRuntimeStart() throws Exception {
+    doNothing().when(project).cleanUp();
+    when(workspaceProbesFactory.getProbes(eq(WORKSPACE_ID), anyString(), any()))
+        .thenReturn(workspaceProbes);
+
+    internalRuntime.internalStart(emptyMap());
+
+    verify(probesScheduler).schedule(eq(workspaceProbes), any());
+  }
+
   private static MachineStatusEvent newEvent(String machineName, MachineStatus status) {
-    return DtoFactory.newDto(MachineStatusEvent.class)
+    return newDto(MachineStatusEvent.class)
         .withIdentity(DtoConverter.asDto(IDENTITY))
         .withMachineName(machineName)
         .withEventType(status);
@@ -426,7 +471,7 @@ public class OpenShiftInternalRuntimeTest {
   }
 
   private static MachineLogEvent asMachineLogEvent(ContainerEvent event) {
-    return DtoFactory.newDto(MachineLogEvent.class)
+    return newDto(MachineLogEvent.class)
         .withRuntimeId(DtoConverter.asDto(IDENTITY))
         .withText(event.getMessage())
         .withTime(event.getTime())

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,9 +79,15 @@ public abstract class RuntimeInfrastructure {
   }
 
   /**
-   * Making Runtime is a two phase process. On the first phase implementation MUST prepare
-   * RuntimeContext, this is supposedly "fast" method On the second phase Runtime is created with
-   * RuntimeContext.start() which is supposedly "long" method.
+   * Starting the Runtime is a two phase process:
+   *
+   * <pre>
+   * <ul>
+   *   <li>On the first phase implementation MUST prepare RuntimeContext;</li>
+   *   <li>On the second phase the Runtime that can be fetched from RuntimeContext
+   *   should be started with InternalRuntime.start().</li>
+   * </ul>
+   * </pre>
    *
    * @param id the RuntimeIdentity
    * @param environment incoming internal environment

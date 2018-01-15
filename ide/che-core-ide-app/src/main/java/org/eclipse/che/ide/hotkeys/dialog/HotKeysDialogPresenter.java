@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -191,7 +191,7 @@ public class HotKeysDialogPresenter implements HotKeysDialogView.ActionDelegate 
   }
 
   private static native void openWindowForPrinting(String htmlTemplate, JsoArray<Node> nodes) /*-{
-        var printWindow = $wnd.open("about:blank", "", "width=650,height=800");
+        var printWindow = window.open("about:blank", "", "width=650,height=800");
         printWindow.document.write(htmlTemplate);
         var container = printWindow.document.getElementById("key-bindings-container");
         for (var node in nodes) {

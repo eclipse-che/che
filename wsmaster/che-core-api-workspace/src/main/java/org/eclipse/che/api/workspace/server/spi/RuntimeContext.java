@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,14 +43,24 @@ public abstract class RuntimeContext<T extends InternalEnvironment> {
   public abstract InternalRuntime getRuntime() throws InfrastructureException;
 
   /**
-   * Infrastructure should assign channel (usual WebSocket) to push long lived processes messages
-   * Examples of such messages include: - Start/Stop logs output - Installers output etc It is
-   * expected that ones returning this URI implementation guarantees supporting and not changing it
-   * during the whole life time of Runtime. Repeating calls of this method should return the same
-   * URI If infrastructure implementation provides a channel it guarantees: - this endpoint is open
-   * and ready to use - this endpoint emits only messages of specified formats (TODO specify the
-   * formats) - high loaded infrastructure provides scaling of "messaging server" to avoid
-   * overloading
+   * Infrastructure should assign channel (usual WebSocket) to push long lived processes messages.
+   * Examples of such messages include:
+   *
+   * <ul>
+   *   <li>Start/Stop logs output
+   *   <li>Installers output
+   *   <li>etc
+   * </ul>
+   *
+   * It is expected that ones returning this URI implementation guarantees supporting and not
+   * changing it during the whole life time of Runtime. Repeating calls of this method should return
+   * the same URI If infrastructure implementation provides a channel it guarantees:
+   *
+   * <ul>
+   *   <li>this endpoint is open and ready to use
+   *   <li>this endpoint emits only messages of specified formats (TODO specify the formats)
+   *   <li>high loaded infrastructure provides scaling of "messaging server" to avoid overloading
+   * </ul>
    *
    * @return URI of the channels endpoint
    * @throws UnsupportedOperationException if implementation does not provide channel

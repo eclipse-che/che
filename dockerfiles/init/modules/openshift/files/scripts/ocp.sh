@@ -50,12 +50,14 @@ export DNS_PROVIDER=${DNS_PROVIDER:-${DEFAULT_DNS_PROVIDER}}
 
 export OPENSHIFT_ROUTING_SUFFIX="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
 
-export CHE_OPENSHIFT_PROJECT="eclipse-che"
+DEFAULT_CHE_OPENSHIFT_PROJECT="eclipse-che"
+export CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
 
 export OPENSHIFT_FLAVOR="ocp"
 
 DEFAULT_OPENSHIFT_ENDPOINT="https://${OC_PUBLIC_HOSTNAME}:8443"
 export OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
+export CHE_INFRA_OPENSHIFT_MASTER__URL=${CHE_INFRA_OPENSHIFT_MASTER__URL:-${OPENSHIFT_ENDPOINT}}
 
 DEFAULT_ENABLE_SSL="false"
 export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
@@ -69,8 +71,11 @@ export IMAGE_PULL_POLICY=${IMAGE_PULL_POLICY:-${DEFAULT_IMAGE_PULL_POLICY}}
 DEFAULT_CHE_IMAGE_REPO="eclipse/che-server"
 export CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
 
-DEFAULT_IMAGE_INIT="eclipse/che-init"
-export IMAGE_INIT=${IMAGE_INIT:-${DEFAULT_IMAGE_INIT}}:${CHE_IMAGE_TAG}
+DEFAULT_IMAGE_INIT="eclipse/che-init:${CHE_IMAGE_TAG}"
+export IMAGE_INIT=${IMAGE_INIT:-${DEFAULT_IMAGE_INIT}}
+
+DEFAULT_CHE_CLI_IMAGE="eclipse/che-cli:${CHE_IMAGE_TAG}"
+export CHE_CLI_IMAGE=${CHE_CLI_IMAGE:-${DEFAULT_CHE_CLI_IMAGE}}
 
 DEFAULT_CONFIG_DIR="/tmp/che-config"
 export CONFIG_DIR=${CONFIG_DIR:-${DEFAULT_CONFIG_DIR}}
@@ -192,12 +197,14 @@ server_is_booted() {
 
 wait_until_server_is_booted() {
   SERVER_BOOT_TIMEOUT=300
-  echo "[CHE] wait CHE pod booting..."
+  echo -n "[CHE] wait CHE pod booting..."
   ELAPSED=0
   until server_is_booted || [ ${ELAPSED} -eq "${SERVER_BOOT_TIMEOUT}" ]; do
+    echo -n "."
     sleep 2
     ELAPSED=$((ELAPSED+1))
   done
+  echo "Done!"
 }
 
 wait_until_kc_is_booted() {
@@ -248,6 +255,10 @@ parse_args() {
     ENV vars
     CHE_IMAGE_TAG - set CHE images tag, default: nightly
     CHE_MULTIUSER - set CHE multi user mode, default: false (single user) 
+    OC_PUBLIC_HOSTNAME - set ocp hostname to admin console, default: host ip
+    OC_PUBLIC_IP - set ocp hostname for routing suffix, default: host ip
+    DNS_PROVIDER - set ocp DNS provider for routing suffix, default: nip.io
+    OPENSHIFT_TOKEN - set ocp token for authentication
 "
 
     DEPLOY_SCRIPT_ARGS=""

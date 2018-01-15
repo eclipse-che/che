@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SIMPLE;
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -34,6 +35,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NavigateToFile;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
+import org.openqa.selenium.WebDriverException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -144,8 +146,16 @@ public class NavigateToFileTest {
     // in tabs)
     String openedFileNameInTheTab = openedFileWithExtension.replace(".java", "");
     launchNavigateToFileFromUIAndTypeValue(navigatingValue);
+    navigateToFile.waitSuggestedPanelIsDisplayed();
     waitExpectedItemsInNavigateToFileDropdawn(expectedItems);
-    navigateToFile.selectFileByName(dropdownVerificationPath);
+
+    try {
+      navigateToFile.selectFileByName(dropdownVerificationPath);
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8293");
+    }
+
     editor.waitActive();
     editor.getAssociatedPathFromTheTab(openedFileNameInTheTab);
     editor.closeFileByNameWithSaving(openedFileNameInTheTab);

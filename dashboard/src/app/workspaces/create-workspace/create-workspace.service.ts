@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -215,7 +215,6 @@ export class CreateWorkspaceSvc {
   redirectToIde(namespaceId: string, workspace: che.IWorkspace): void {
     const path = `/ide/${namespaceId}/${workspace.config.name}`;
     this.$location.path(path);
-    this.$location.search({'init': 'true'});
   }
 
   /**
