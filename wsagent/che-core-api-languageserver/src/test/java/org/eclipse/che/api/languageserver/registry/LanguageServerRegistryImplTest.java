@@ -95,7 +95,8 @@ public class LanguageServerRegistryImplTest {
     when(languageServer.getTextDocumentService()).thenReturn(mock(TextDocumentService.class));
     when(languageServer.initialize(any(InitializeParams.class))).thenReturn(completableFuture);
 
-    when(languageRecognizer.recognizeByPath(PREFIX + FILE_PATH)).thenReturn(languageDescription);
+    when(languageRecognizer.recognizeByPath(anyString())).thenReturn(languageDescription);
+    when(languageRecognizer.recognizeById(anyString())).thenReturn(languageDescription);
 
     when(pmp.get()).thenReturn(pm);
 
