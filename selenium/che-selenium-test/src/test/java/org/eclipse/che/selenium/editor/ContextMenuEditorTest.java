@@ -131,6 +131,7 @@ public class ContextMenuEditorTest {
     expectedTextBeforeDownloadSources = Joiner.on('\n').join(expectedText);
 
     ide.open(workspace);
+    projectExplorer.waitProjectExplorer();
     projectExplorer.waitVisibleItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();

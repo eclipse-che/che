@@ -10,12 +10,20 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard.account;
 
+import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPassword.PasswordLocators.ERROR_ALERT;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPassword.PasswordLocators.NEW_PASSWORD_CONFIRMATION_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPassword.PasswordLocators.NEW_PASSWORD_FIELD_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPassword.PasswordLocators.PASSWORD_FIELD_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPassword.PasswordLocators.SAVE_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPassword.PasswordLocators.SUCCESS_ALERT;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 
 @Singleton
 public class KeycloakPassword extends KeycloakAbstract {
@@ -29,22 +37,52 @@ public class KeycloakPassword extends KeycloakAbstract {
     String PASSWORD_FIELD_ID = "password";
     String NEW_PASSWORD_FIELD_ID = "password-new";
     String NEW_PASSWORD_CONFIRMATION_ID = "password-confirm";
+
     String SAVE_BUTTON = "//button[text()='Save']";
+
+    String ERROR_ALERT = "//div[@class='alert alert-error']";
+    String SUCCESS_ALERT = "//div[@class='alert alert-success']";
+  }
+
+  public void waitPasswordPageIsLoaded() {
+    waitAllHeaderButtonsIsVisible();
+    waitAllBodyFieldsAndButtonsIsVisible();
   }
 
   public void setPasswordFieldValue(String value) {
-    setFieldValue(By.id(PasswordLocators.PASSWORD_FIELD_ID), value);
+    setFieldValue(By.id(PASSWORD_FIELD_ID), value);
   }
 
   public void setNewPasswordFieldValue(String value) {
-    setFieldValue(By.id(PasswordLocators.NEW_PASSWORD_FIELD_ID), value);
+    setFieldValue(By.id(NEW_PASSWORD_FIELD_ID), value);
   }
 
   public void setNewPasswordConfirmationFieldValue(String value) {
-    setFieldValue(By.id(PasswordLocators.NEW_PASSWORD_CONFIRMATION_ID), value);
+    setFieldValue(By.id(NEW_PASSWORD_CONFIRMATION_ID), value);
   }
 
   public void clickOnSavePasswordButton() {
-    loadPageWait.until(visibilityOfElementLocated(By.xpath(PasswordLocators.SAVE_BUTTON))).click();
+    loadPageWait.until(visibilityOfElementLocated(By.xpath(SAVE_BUTTON))).click();
+  }
+
+  public void waitTextInErrorAlert(String expectedText) {
+    loadPageWait.until(
+        (ExpectedCondition<Boolean>)
+            driver -> waitAndGetElement(By.xpath(ERROR_ALERT)).getText().equals(expectedText));
+  }
+
+  public void waitTextInSuccessAlert(String expectedText) {
+    loadPageWait.until(
+        (ExpectedCondition<Boolean>)
+            driver -> waitAndGetElement(By.xpath(SUCCESS_ALERT)).getText().equals(expectedText));
+  }
+
+  private void waitAllBodyFieldsAndButtonsIsVisible() {
+    asList(
+            By.id(PASSWORD_FIELD_ID),
+            By.id(NEW_PASSWORD_FIELD_ID),
+            By.id(NEW_PASSWORD_CONFIRMATION_ID),
+            By.xpath(SAVE_BUTTON))
+        .forEach(locator -> waitElementIsVisible(locator));
   }
 }

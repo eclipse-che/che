@@ -80,6 +80,15 @@ public abstract class KeycloakAbstract {
         .forEach(locator -> waitElementIsVisible(locator));
   }
 
+  public void switchToNoneParentWindow(String parentWindow) {
+    seleniumWebDriver.switchToNoneCurrentWindow(parentWindow);
+  }
+
+  public void closeWindowAndSwitchToParent(String parentWindow) {
+    seleniumWebDriver.close();
+    seleniumWebDriver.switchTo().window(parentWindow);
+  }
+
   protected void setFieldValue(By fieldLocator, String value) {
     waitAndGetElement(fieldLocator).clear();
     waitFieldValue(fieldLocator, "");
@@ -95,7 +104,7 @@ public abstract class KeycloakAbstract {
     return waitAndGetElement(fieldLocator).getAttribute("value");
   }
 
-  private WebElement waitAndGetElement(By locator) {
+  public WebElement waitAndGetElement(By locator) {
     return loadPageWait.until(visibilityOfElementLocated(locator));
   }
 

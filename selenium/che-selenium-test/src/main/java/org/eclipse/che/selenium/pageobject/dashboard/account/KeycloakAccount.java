@@ -13,15 +13,18 @@ package org.eclipse.che.selenium.pageobject.dashboard.account;
 import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount.AccountPageLocators.CANCEL_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount.AccountPageLocators.EMAIL_FIELD_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount.AccountPageLocators.ERROR_ALERT;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount.AccountPageLocators.FIRST_NAME_FIELD_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount.AccountPageLocators.LAST_NAME_FIELD_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount.AccountPageLocators.SAVE_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount.AccountPageLocators.SUCCESS_ALERT;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount.AccountPageLocators.USERNAME_FIELD_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 
 @Singleton
 public class KeycloakAccount extends KeycloakAbstract {
@@ -39,19 +42,14 @@ public class KeycloakAccount extends KeycloakAbstract {
 
     String SAVE_BUTTON = "//button[text()='Save']";
     String CANCEL_BUTTON = "//button[text()='Cancel']";
+
+    String SUCCESS_ALERT = "//div[@class='alert alert-success']";
+    String ERROR_ALERT = "//div[@class='alert alert-error']";
   }
 
-  public void accountPageIsLoaded() {
-    asList(
-            By.xpath(SAVE_BUTTON),
-            By.xpath(CANCEL_BUTTON),
-            By.id(USERNAME_FIELD_ID),
-            By.id(EMAIL_FIELD_ID),
-            By.id(FIRST_NAME_FIELD_ID),
-            By.id(LAST_NAME_FIELD_ID))
-        .forEach(locator -> waitElementIsVisible(locator));
-
+  public void waitAccountPageIsLoaded() {
     waitAllHeaderButtonsIsVisible();
+    waitAllBodyFieldsAndButtonsIsVisible();
   }
 
   public AccountFields getAllFieldsValue() {
@@ -89,5 +87,40 @@ public class KeycloakAccount extends KeycloakAbstract {
 
   public void setLastNameValue(String value) {
     setFieldValue(By.id(AccountPageLocators.LAST_NAME_FIELD_ID), value);
+  }
+
+  public boolean usernameFieldIsDisabled() {
+    return waitAndGetElement(By.id(USERNAME_FIELD_ID)).getAttribute("disabled").equals("true");
+  }
+
+  public void clickOnSaveButton() {
+    waitAndGetElement(By.xpath(SAVE_BUTTON)).click();
+  }
+
+  public void clickOnCancelButton() {
+    waitAndGetElement(By.xpath(CANCEL_BUTTON)).click();
+  }
+
+  public void waitTextInErrorAlert(String expectedText) {
+    loadPageWait.until(
+        (ExpectedCondition<Boolean>)
+            driver -> waitAndGetElement(By.xpath(ERROR_ALERT)).getText().equals(expectedText));
+  }
+
+  public void waitTextInSuccessAlert(String expectedText) {
+    loadPageWait.until(
+        (ExpectedCondition<Boolean>)
+            driver -> waitAndGetElement(By.xpath(SUCCESS_ALERT)).getText().equals(expectedText));
+  }
+
+  private void waitAllBodyFieldsAndButtonsIsVisible() {
+    asList(
+            By.xpath(SAVE_BUTTON),
+            By.xpath(CANCEL_BUTTON),
+            By.id(USERNAME_FIELD_ID),
+            By.id(EMAIL_FIELD_ID),
+            By.id(FIRST_NAME_FIELD_ID),
+            By.id(LAST_NAME_FIELD_ID))
+        .forEach(locator -> waitElementIsVisible(locator));
   }
 }
