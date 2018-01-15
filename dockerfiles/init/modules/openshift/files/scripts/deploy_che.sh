@@ -290,13 +290,14 @@ if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
     echo "Project \"${CHE_OPENSHIFT_PROJECT}\" does not exist...trying to creating it."
     DEPLOYMENT_TIMEOUT_SEC=120
     POLLING_INTERVAL_SEC=2
-    end=$((POLLING_INTERVAL_SEC+DEPLOYMENT_TIMEOUT_SEC))  
+    timeout_in=$((POLLING_INTERVAL_SEC+DEPLOYMENT_TIMEOUT_SEC))  
     while $WAIT_FOR_PROJECT_TO_DELETE
     do
     { # try
-        timeout_in=$((end-POLLING_INTERVAL_SEC))
+        timeout_in=$((timeout_in-POLLING_INTERVAL_SEC))
         if [ "$timeout_in" -le "0" ] ; then
-            WAIT_FOR_PROJECT_TO_DELETE=false
+            echo "[CHE] **ERROR**: Timeout of $DEPLOYMENT_TIMEOUT_SEC waiting for project \"${CHE_OPENSHIFT_PROJECT}\" to be delete."
+            exit 1
         fi  
         oc new-project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null && \
         WAIT_FOR_PROJECT_TO_DELETE=false # Only excutes if project creation is successfully
@@ -304,16 +305,22 @@ if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
         echo -n $WAIT_FOR_PROJECT_TO_DELETE_MESSAGE
         WAIT_FOR_PROJECT_TO_DELETE_MESSAGE="."
         sleep $POLLING_INTERVAL_SEC
-  }
-  done
+    }
+    done
 fi
 echo "Project \"${CHE_OPENSHIFT_PROJECT}\" creation done!"
 
 echo -n "[CHE] Switching to \"${CHE_OPENSHIFT_PROJECT}\"..."
 WAIT_TO_SWITCH_TO_PROJECT=true
+timeout_in=$((POLLING_INTERVAL_SEC+DEPLOYMENT_TIMEOUT_SEC))
 while $WAIT_TO_SWITCH_TO_PROJECT
 do
 { # try
+    timeout_in=$((timeout_in-POLLING_INTERVAL_SEC))
+    if [ "$timeout_in" -le "0" ] ; then
+        echo "[CHE] **ERROR**: Timeout of $DEPLOYMENT_TIMEOUT_SEC waiting to switch to project \"${CHE_OPENSHIFT_PROJECT}\"."
+        exit 1
+    fi  
     oc project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null && \
     WAIT_TO_SWITCH_TO_PROJECT=false # Only excutes after project creation is successfully
 } || { # catch
