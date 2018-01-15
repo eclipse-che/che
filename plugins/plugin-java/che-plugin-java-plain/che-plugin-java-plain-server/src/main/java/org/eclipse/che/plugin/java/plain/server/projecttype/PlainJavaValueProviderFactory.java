@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.type.SettableValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
@@ -39,12 +40,16 @@ import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionSer
 public class PlainJavaValueProviderFactory implements ValueProviderFactory {
 
   private final ProjectManager projectManager;
+  private PathTransformer transformer;
   private final JavaLanguageServerExtensionService extensionService;
 
   @Inject
   public PlainJavaValueProviderFactory(
-      ProjectManager projectManager, JavaLanguageServerExtensionService extensionService) {
+      ProjectManager projectManager,
+      PathTransformer transformer,
+      JavaLanguageServerExtensionService extensionService) {
     this.projectManager = projectManager;
+    this.transformer = transformer;
     this.extensionService = extensionService;
   }
 
@@ -97,8 +102,9 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
             format("Failed to get '%s'. ", OUTPUT_FOLDER), e.getCause());
       }
 
-      return outputDir.startsWith(wsPath)
-          ? singletonList(outputDir.substring(wsPath.length() + 1))
+      String fsPath = transformer.transform(wsPath).toString();
+      return outputDir.startsWith(fsPath)
+          ? singletonList(outputDir.substring(fsPath.length() + 1))
           : singletonList(outputDir);
     }
 
