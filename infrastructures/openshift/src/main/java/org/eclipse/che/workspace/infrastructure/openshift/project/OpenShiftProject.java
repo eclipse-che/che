@@ -11,6 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
@@ -39,6 +40,7 @@ public class OpenShiftProject {
   private final OpenShiftServices services;
   private final OpenShiftRoutes routes;
   private final OpenShiftPersistentVolumeClaims pvcs;
+  private final KubernetesIngress ingress;
 
   @VisibleForTesting
   OpenShiftProject(
@@ -46,12 +48,14 @@ public class OpenShiftProject {
       OpenShiftPods pods,
       OpenShiftServices services,
       OpenShiftRoutes routes,
-      OpenShiftPersistentVolumeClaims pvcs) {
+      OpenShiftPersistentVolumeClaims pvcs,
+      KubernetesIngress kubernetesIngress) {
     this.workspaceId = workspaceId;
     this.pods = pods;
     this.services = services;
     this.routes = routes;
     this.pvcs = pvcs;
+    this.ingress = kubernetesIngress;
   }
 
   public OpenShiftProject(OpenShiftClientFactory clientFactory, String name, String workspaceId)
@@ -61,6 +65,7 @@ public class OpenShiftProject {
     this.services = new OpenShiftServices(name, workspaceId, clientFactory);
     this.routes = new OpenShiftRoutes(name, workspaceId, clientFactory);
     this.pvcs = new OpenShiftPersistentVolumeClaims(name, clientFactory);
+    this.ingress = new KubernetesIngress(name, workspaceId, clientFactory);
     final OpenShiftClient client = clientFactory.create();
     if (get(name, client) == null) {
       create(name, client);
@@ -87,6 +92,12 @@ public class OpenShiftProject {
     return pvcs;
   }
 
+  /** Returns object for managing {@link PersistentVolumeClaim} instances inside project. */
+  public KubernetesIngress kubernetesIngress() {
+    return ingress;
+  }
+
+  /** Removes all object except persistent volume claim inside project. */
   /** Removes all object except persistent volume claims inside project. */
   public void cleanUp() throws InfrastructureException {
     doRemove(pods::delete, services::delete, routes::delete);
@@ -120,21 +131,15 @@ public class OpenShiftProject {
 
   private void create(String projectName, OpenShiftClient client) throws InfrastructureException {
     try {
-      client
-          .projectrequests()
-          .createNew()
-          .withNewMetadata()
-          .withName(projectName)
-          .endMetadata()
-          .done();
+      client.namespaces().createNew().withNewMetadata().withName(projectName).endMetadata().done();
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
   }
 
-  private Project get(String projectName, OpenShiftClient client) throws InfrastructureException {
+  private Namespace get(String projectName, OpenShiftClient client) throws InfrastructureException {
     try {
-      return client.projects().withName(projectName).get();
+      return client.namespaces().withName(projectName).get();
     } catch (KubernetesClientException e) {
       if (e.getCode() == 403) {
         // project is foreign or doesn't exist

@@ -1,0 +1,317 @@
+---
+apiVersion: v1
+kind: List
+items:
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    labels:
+      app: che
+    name: che
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: che
+    name: che-host
+  spec:
+    ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: che
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      app: che
+    name: che-data-volume
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      app: che
+    name: claim-che-workspace
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    labels:
+      app: che
+    name: che
+  data:
+    CHE_MULTIUSER: "false"
+    CHE_INFRASTRUCTURE_ACTIVE: openshift
+    CHE_INFRA_OPENSHIFT_MASTER__URL: ""
+    CHE_INFRA_OPENSHIFT_USERNAME: ""
+    CHE_INFRA_OPENSHIFT_PASSWORD: ""
+    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN: ""
+    CHE_INFRA_OPENSHIFT_TRUST__CERTS: "false"
+    CHE_INFRA_OPENSHIFT_TLS__ENABLED: "false"
+    CHE_INFRA_OPENSHIFT_PVC_STRATEGY: "common"
+    CHE_INFRA_OPENSHIFT_PROJECT: ""
+    CHE_INFRA_OPENSHIFT_MACHINE__START__TIMEOUT__MIN: "5"
+    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL: http://192.168.99.100/agent-binaries/linux_amd64/bootstrapper/bootstrapper
+    CHE_API: http://192.168.99.100/api
+    CHE_HOST: 192.168.99.100
+    CHE_WEBSOCKET_ENDPOINT:  ws://192.168.99.100/api/websocket
+    CHE_PORT: "8080"
+    CHE_LOCAL_CONF_DIR: /etc/conf
+    CHE_LOGS_DIR: /data/logs
+    CHE_PREDEFINED_STACKS_RELOAD__ON__START: "true"
+    CHE_LOG_LEVEL: INFO
+    CHE_PORT: "8080"
+    CHE_DEBUG_SERVER: "false"
+    CHE_OAUTH_GITHUB_FORCEACTIVATION: "true"
+    CHE_WORKSPACE_AUTO_START: "false"
+    CHE_KEYCLOAK_OSO_ENDPOINT: ""
+    CHE_KEYCLOAK_GITHUB_ENDPOINT: ""
+    CHE_SERVER_JAVA_OPTS: -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:MaxRAM=700m -Xms256m
+    CHE_WORKSPACE_JAVA_OPTIONS: -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:MaxRAM=1300m -Xms256m
+    CHE_KEYCLOAK_AUTH__SERVER__URL: not-in-use
+    CHE_KEYCLOAK_REALM: ""
+    CHE_KEYCLOAK_CLIENT__ID: ""
+    CHE_OAUTH_GITHUB_CLIENTID: ""
+    CHE_OAUTH_GITHUB_CLIENTSECRET: ""
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    labels:
+      app: che
+    name: che
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 2
+    selector:
+      matchLabels:
+        app: che
+    template:
+      metadata:
+        labels:
+          app: che
+      spec:
+        containers:
+        - env:
+          - name: CHE_OAUTH_GITHUB_CLIENTID
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_OAUTH_GITHUB_CLIENTID
+                name: che
+          - name: CHE_OAUTH_GITHUB_CLIENTSECRET
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_OAUTH_GITHUB_CLIENTSECRET
+                name: che
+          - name: CHE_MULTIUSER
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_MULTIUSER
+                name: che
+          - name: CHE_KEYCLOAK_AUTH__SERVER__URL
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_KEYCLOAK_AUTH__SERVER__URL
+                name: che
+          - name: CHE_KEYCLOAK_REALM
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_KEYCLOAK_REALM
+                name: che
+          - name: CHE_KEYCLOAK_CLIENT__ID
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_KEYCLOAK_CLIENT__ID
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_MASTER__URL
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_MASTER__URL
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_USERNAME
+                name: che
+          - name: CHE_INFRASTRUCTURE_ACTIVE
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRASTRUCTURE_ACTIVE
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_PASSWORD
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_OAUTH__TOKEN
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_OAUTH__TOKEN
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_TRUST__CERTS
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_TRUST__CERTS
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_PVC_STRATEGY
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_PVC_STRATEGY
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_TLS__ENABLED
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_TLS__ENABLED
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_PROJECT
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_PROJECT
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_MACHINE__START__TIMEOUT__MIN
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_MACHINE__START__TIMEOUT__MIN
+                name: che
+          - name: CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL
+                name: che
+          - name: CHE_WEBSOCKET_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_WEBSOCKET_ENDPOINT
+                name: che
+          - name: CHE_LOGS_DIR
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_LOGS_DIR
+                name: che
+          - name: CHE_LOCAL_CONF_DIR
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_LOCAL_CONF_DIR
+                name: che
+          - name: CHE_PREDEFINED_STACKS_RELOAD__ON__START
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_PREDEFINED_STACKS_RELOAD__ON__START
+                name: che
+          - name: CHE_LOG_LEVEL
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_LOG_LEVEL
+                name: che
+          - name: CHE_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_PORT
+                name: che
+          - name: CHE_DEBUG_SERVER
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_DEBUG_SERVER
+                name: che
+          - name: CHE_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_HOST
+                name: che
+          - name: CHE_API
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_API
+                name: che
+          - name: CHE_OAUTH_GITHUB_FORCEACTIVATION
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_OAUTH_GITHUB_FORCEACTIVATION
+                name: che
+          - name: CHE_WORKSPACE_AUTO__START
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_WORKSPACE_AUTO_START
+                name: che
+          - name: JAVA_OPTS
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_SERVER_JAVA_OPTS
+                name: che
+          - name: CHE_WORKSPACE_JAVA_OPTIONS
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_WORKSPACE_JAVA_OPTIONS
+                name: che
+          - name: CHE_KEYCLOAK_OSO_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_KEYCLOAK_OSO_ENDPOINT
+                name: che
+          - name: CHE_KEYCLOAK_GITHUB_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_KEYCLOAK_GITHUB_ENDPOINT
+                name: che
+          - name: CHE_KEYCLOAK_AUTH__SERVER__URL
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_KEYCLOAK_AUTH__SERVER__URL
+                name: che
+          - name: CHE_KEYCLOAK_REALM
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_KEYCLOAK_REALM
+                name: che
+          - name: CHE_KEYCLOAK_CLIENT__ID
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_KEYCLOAK_CLIENT__ID
+                name: che
+          image: secure-registry.ingress.multi.devx-che.k8s.sapcloud.io/i31362/che6-k8s:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /api/system/state
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+          name: che
+          ports:
+          - containerPort: 8080
+            name: http
+          - containerPort: 8000
+            name: http-debug
+          readinessProbe:
+            httpGet:
+              path: /api/system/state
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 15
+            timeoutSeconds: 60
+          resources:
+            limits:
+              memory: 600Mi
+            requests:
+              memory: 256Mi
+          volumeMounts:
+          - mountPath: /data
+            name: che-data-volume
+        serviceAccountName: che
+        volumes:
+        - name: che-data-volume
+          persistentVolumeClaim:
+            claimName: che-data-volume

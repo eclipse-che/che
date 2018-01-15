@@ -179,12 +179,29 @@ public class ServersChecker {
     try {
       // TODO: ws -> http is workaround used for terminal websocket server,
       // should be removed after server checks added to model
+      //      url =
+      //          UriBuilder.fromUri(server.getUrl().replaceFirst("^ws", "http"))
+      //              .replacePath(livenessCheckPath)
+      //              .queryParam("token",
+      // machineTokenProvider.getToken(runtimeIdentity.getWorkspaceId()))
+      //              .build()
+      //              .toURL();
+      String relativeLivenessCheckPath = UriBuilder.fromUri(server.getUrl()).build().getPath();
+      if (relativeLivenessCheckPath.lastIndexOf("/") > 0) {
+        relativeLivenessCheckPath =
+            relativeLivenessCheckPath.substring(0, relativeLivenessCheckPath.lastIndexOf("/"));
+        relativeLivenessCheckPath = relativeLivenessCheckPath + livenessCheckPath;
+      } else {
+        relativeLivenessCheckPath = livenessCheckPath;
+      }
+
       url =
           UriBuilder.fromUri(server.getUrl().replaceFirst("^ws", "http"))
-              .replacePath(livenessCheckPath)
+              .replacePath(relativeLivenessCheckPath)
               .queryParam("token", machineTokenProvider.getToken(runtimeIdentity.getWorkspaceId()))
               .build()
               .toURL();
+      System.out.println("checking liveness for: " + url);
     } catch (MalformedURLException e) {
       throw new InternalInfrastructureException(
           "Server " + serverRef + " URL is invalid. Error: " + e.getMessage(), e);

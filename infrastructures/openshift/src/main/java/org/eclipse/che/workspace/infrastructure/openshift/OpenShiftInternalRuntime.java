@@ -18,19 +18,26 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.Watcher.Action;
 import io.fabric8.openshift.api.model.Route;
+import io.fabric8.openshift.api.model.RouteBuilder;
+import io.fabric8.openshift.api.model.RouteSpecBuilder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
@@ -53,6 +60,7 @@ import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.Annotations.Deserializer;
 import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
@@ -84,6 +92,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
   private final WorkspaceProbesFactory probesFactory;
   private final OpenShiftProject project;
   private final WorkspaceVolumesStrategy volumesStrategy;
+  private final String host;
 
   @Inject
   public OpenShiftInternalRuntime(
@@ -97,7 +106,8 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       WorkspaceProbesFactory probesFactory,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project,
-      @Assisted List<Warning> warnings) {
+      @Assisted List<Warning> warnings,
+      @Named("che.host") String host) {
     super(context, urlRewriter, warnings, false);
     this.eventService = eventService;
     this.bootstrapperFactory = bootstrapperFactory;
@@ -108,6 +118,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
     this.probesFactory = probesFactory;
     this.project = project;
     this.machines = new ConcurrentHashMap<>();
+    this.host = host;
   }
 
   @Override
@@ -123,13 +134,25 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
         createdServices.add(project.services().create(service));
       }
 
-      List<Route> createdRoutes = new ArrayList<>();
-      for (Route route : osEnv.getRoutes().values()) {
-        createdRoutes.add(project.routes().create(route));
-      }
+      //      List<Route> createdRoutes = new ArrayList<>();
+      //      for (Route route : osEnv.getRoutes().values()) {
+      //        createdRoutes.add(project.routes().create(route));
+      //      }
       // TODO https://github.com/eclipse/che/issues/7653
       // project.pods().watch(new AbnormalStopHandler());
       // project.pods().watchContainers(new MachineLogsPublisher());
+
+      // needed for resolution later on, even though nroutes are actually created by ingress
+      // /workspace{wsid}/server-{port} => service({wsid}):server-port => pod({wsid}):{port}
+      List<Route> createdRoutes =
+          osEnv
+              .getRoutes()
+              .values()
+              .stream()
+              .flatMap(r -> getRouteSteamByRouteServers(r))
+              .collect(Collectors.toList());
+      LOG.info("Creating Routes: " + createdRoutes);
+      project.kubernetesIngress().create(createdRoutes);
 
       createPods(createdServices, createdRoutes);
 
@@ -169,6 +192,48 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
         throw new InternalInfrastructureException(e.getMessage(), wrap);
       }
     }
+  }
+
+  // breaks down original route with multiple protocols and endpoints to a single protocol
+  // routes, annotated with only the releveant server
+  private Stream<Route> getRouteSteamByRouteServers(Route r) {
+
+    Deserializer deserializer = Annotations.newDeserializer(r.getMetadata().getAnnotations());
+    final String machineName = deserializer.machineName();
+    return deserializer
+        .servers()
+        .entrySet()
+        .stream()
+        .map(
+            entry -> {
+              ServerConfig server = entry.getValue();
+
+              String serverPath = "/" + getContext().getIdentity().getWorkspaceId();
+              String targetServer = r.getSpec().getPort().getTargetPort().getStrVal();
+
+              if (targetServer != null) {
+                serverPath = serverPath + "/" + targetServer;
+              }
+
+              if (server.getPath() != null) {
+                serverPath = serverPath + server.getPath();
+              }
+
+              Map<String, ServerConfig> severMap = new HashMap<String, ServerConfig>();
+              severMap.put(entry.getKey(), server);
+              return new RouteBuilder(r)
+                  .withSpec(
+                      new RouteSpecBuilder(r.getSpec()).withHost(host).withPath(serverPath).build())
+                  .withMetadata(
+                      new ObjectMetaBuilder()
+                          .withAnnotations(
+                              Annotations.newSerializer()
+                                  .servers(severMap)
+                                  .machineName(machineName)
+                                  .annotations())
+                          .build())
+                  .build();
+            });
   }
 
   @Override

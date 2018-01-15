@@ -156,7 +156,8 @@ public class OpenShiftInternalRuntimeTest {
             workspaceProbesFactory,
             context,
             project,
-            emptyList());
+            emptyList(),
+            "");
     when(context.getEnvironment()).thenReturn(osEnv);
     when(serverCheckerFactory.create(any(), anyString(), any())).thenReturn(serversChecker);
     when(context.getIdentity()).thenReturn(IDENTITY);
@@ -197,7 +198,7 @@ public class OpenShiftInternalRuntimeTest {
     internalRuntime.internalStart(emptyMap());
 
     verify(pods).create(any());
-    verify(routes).create(any());
+    // verify(routes).create(any());
     verify(services).create(any());
     verify(bootstrapper, times(2)).bootstrap();
     verify(eventService, times(4)).publish(any());
@@ -240,7 +241,7 @@ public class OpenShiftInternalRuntimeTest {
       internalRuntime.internalStart(emptyMap());
     } catch (Exception rethrow) {
       verify(pods).create(any());
-      verify(routes).create(any());
+      // verify(routes).create(any());
       verify(services).create(any());
       verify(bootstrapper).bootstrap();
       verify(eventService, times(4)).publish(any());
@@ -280,7 +281,7 @@ public class OpenShiftInternalRuntimeTest {
     } catch (Exception rethrow) {
       verify(project).cleanUp();
       verify(pods).create(any());
-      verify(routes).create(any());
+      // verify(routes).create(any());
       verify(services).create(any());
       verify(bootstrapper).bootstrap();
       verifyEventsOrder(newEvent(M1_NAME, STARTING), newEvent(M1_NAME, RUNNING));

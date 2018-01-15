@@ -52,6 +52,7 @@ public class OpenShiftProjectTest {
   @Mock private OpenShiftPersistentVolumeClaims pvcs;
   @Mock private OpenShiftClientFactory clientFactory;
   @Mock private OpenShiftClient openShiftClient;
+  @Mock private KubernetesIngress kubernetesIngress;
 
   private OpenShiftProject openShiftProject;
 
@@ -59,7 +60,8 @@ public class OpenShiftProjectTest {
   public void setUp() throws Exception {
     when(clientFactory.create()).thenReturn(openShiftClient);
 
-    openShiftProject = new OpenShiftProject(WORKSPACE_ID, pods, services, routes, pvcs);
+    openShiftProject =
+        new OpenShiftProject(WORKSPACE_ID, pods, services, routes, pvcs, kubernetesIngress);
   }
 
   @Test

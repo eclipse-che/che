@@ -96,7 +96,8 @@ public class ServerResolver {
                         config.getProtocol(),
                         route.getSpec().getHost(),
                         null,
-                        config.getPath(),
+                        // config.getPath(),
+                        route.getSpec().getPath(),
                         config.getAttributes())));
   }
 
