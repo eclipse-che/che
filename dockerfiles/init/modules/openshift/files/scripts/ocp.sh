@@ -37,7 +37,7 @@ export CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
 #Using local scripts is error prone and should only be used temporarly while developing Che.
 #If unsure leave the default value true set.
 DEFAULT_CHE_GENERATE_SCRIPTS=true
-export CHE_GENERATE_SCRIPTS=${CHE_GENERATE_SCRIPTS:-${DEFAULT_CHE_REMOVE_PROJECT}}
+export CHE_GENERATE_SCRIPTS=${CHE_GENERATE_SCRIPTS:-${DEFAULT_CHE_GENERATE_SCRIPTS}}
 
 DEFAULT_OPENSHIFT_USERNAME="developer"
 export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
@@ -158,17 +158,18 @@ run_ocp() {
 }
 
 deploy_che_to_ocp() {
+    OPENSHIFT_SCRIPTS_FOLDER="${CONFIG_DIR}/instance/config/openshift/scripts/"
     #Repull init image only if IMAGE_PULL_POLICY is set to Always
     if [ $IMAGE_PULL_POLICY == "Always" ]; then
         docker pull "$IMAGE_INIT"
     fi
     #Only generate scripts and config files if CHE_GENERATE_SCRIPTS=true
     if [ $CHE_GENERATE_SCRIPTS == true ]; then
-      echo "OCP generating temporary scripts and configuration files at ${CONFIG_DIR}/instance/config/openshift/scripts/ ."
+      echo "OCP generating temporary scripts and configuration files at ${OPENSHIFT_SCRIPTS_FOLDER} ."
       #wipeout config folder
       docker run -v "${CONFIG_DIR}":/to_remove alpine sh -c "rm -rf /to_remove/" || true
       docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} config --skip:pull --skip:nightly
-      cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
+      cd ${OPENSHIFT_SCRIPTS_FOLDER}
     else
       echo "OCP using existing scripts and configuration files in current folder."
     fi
