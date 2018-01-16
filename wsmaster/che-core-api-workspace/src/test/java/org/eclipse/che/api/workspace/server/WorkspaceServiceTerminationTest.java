@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.workspace.server;
 
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
@@ -21,9 +22,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.system.shared.event.service.SystemServiceItemStoppedEvent;
+import org.eclipse.che.api.system.shared.dto.SystemServiceItemStoppedEventDto;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -109,9 +109,27 @@ public class WorkspaceServiceTerminationTest {
 
     termination.terminate();
 
-    verify(eventService).publish(new SystemServiceItemStoppedEvent("workspace", "id1", 1, 3));
-    verify(eventService).publish(new SystemServiceItemStoppedEvent("workspace", "id2", 2, 3));
-    verify(eventService).publish(new SystemServiceItemStoppedEvent("workspace", "id3", 3, 3));
+    verify(eventService)
+        .publish(
+            newDto(SystemServiceItemStoppedEventDto.class)
+                .withService("workspace")
+                .withItem("id1")
+                .withCurrent(1)
+                .withTotal(3));
+    verify(eventService)
+        .publish(
+            newDto(SystemServiceItemStoppedEventDto.class)
+                .withService("workspace")
+                .withItem("id2")
+                .withCurrent(2)
+                .withTotal(3));
+    verify(eventService)
+        .publish(
+            newDto(SystemServiceItemStoppedEventDto.class)
+                .withService("workspace")
+                .withItem("id3")
+                .withCurrent(3)
+                .withTotal(3));
   }
 
   @DataProvider
@@ -121,8 +139,6 @@ public class WorkspaceServiceTerminationTest {
 
   private static WorkspaceStatusEvent newWorkspaceStatusEvent(
       WorkspaceStatus status, String workspaceId) {
-    return DtoFactory.newDto(WorkspaceStatusEvent.class)
-        .withStatus(status)
-        .withWorkspaceId(workspaceId);
+    return newDto(WorkspaceStatusEvent.class).withStatus(status).withWorkspaceId(workspaceId);
   }
 }
