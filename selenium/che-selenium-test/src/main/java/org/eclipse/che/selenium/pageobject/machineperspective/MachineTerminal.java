@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.pageobject.machineperspective;
 
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
@@ -73,7 +73,7 @@ public class MachineTerminal {
 
   /** waits default terminal tab */
   public void waitTerminalTab() {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC).until(visibilityOf(defaultTermTab));
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC).until(visibilityOf(defaultTermTab));
   }
 
   /**

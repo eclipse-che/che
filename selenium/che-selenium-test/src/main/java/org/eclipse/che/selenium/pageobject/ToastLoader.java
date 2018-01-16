@@ -12,7 +12,7 @@ package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
@@ -72,7 +72,7 @@ public class ToastLoader {
    * @param expText
    */
   public void waitExpectedTextInToastLoader(String expText) {
-    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
         .until(
             visibilityOfElementLocated(
                 By.xpath(format(Locators.MAINFORM_WITH_TEXT_CONTAINER, expText))));
