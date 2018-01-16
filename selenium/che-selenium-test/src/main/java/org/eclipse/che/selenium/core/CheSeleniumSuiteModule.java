@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.core;
 import static java.lang.Boolean.parseBoolean;
 import static org.eclipse.che.selenium.core.utils.PlatformUtils.isMac;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.DEFAULT;
+import static org.testng.Assert.fail;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -100,10 +101,22 @@ public class CheSeleniumSuiteModule extends AbstractModule {
   public TestWorkspace getWorkspace(
       TestWorkspaceProvider workspaceProvider,
       TestUser testUser,
-      @Named("workspace.default_memory_gb") int defaultMemoryGb)
+      @Named("workspace.default_memory_gb") int defaultMemoryGb,
+      @Named("che.infrastructure") String infrastructure)
       throws Exception {
     TestWorkspace ws = workspaceProvider.createWorkspace(testUser, defaultMemoryGb, DEFAULT);
-    ws.await();
+
+    try {
+      ws.await();
+    } catch (IllegalStateException ex) {
+      if ("openshift".equals(infrastructure)) {
+        // Remove try-catch block after issue has been resolved
+        fail("Known issue https://github.com/eclipse/che/issues/8031");
+      } else {
+        throw ex;
+      }
+    }
+
     return ws;
   }
 

@@ -12,7 +12,6 @@ package org.eclipse.che.selenium.core.workspace;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.workspace.MemoryMeasure.GB;
-import static org.testng.Assert.fail;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -82,12 +81,7 @@ public class TestWorkspaceImpl implements TestWorkspace {
 
   @Override
   public void await() throws InterruptedException, ExecutionException {
-    try {
-      future.get();
-    } catch (IllegalStateException ex) {
-      // Remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8031");
-    }
+    future.get();
   }
 
   @Override
