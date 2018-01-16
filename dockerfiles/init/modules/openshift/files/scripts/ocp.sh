@@ -225,7 +225,7 @@ remove_che_from_ocp() {
 	DELETE_OPENSHIFT_PROJECT_MESSAGE="[CHE] Removing Project \"${CHE_OPENSHIFT_PROJECT}\"."
 	if $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
 		echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" exists."
-		while $WAIT_FOR_PROJECT_TO_EXIT
+		while $WAIT_FOR_PROJECT_TO_DELETE
 		do
 		{ # try
 			echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
@@ -235,12 +235,12 @@ remove_che_from_ocp() {
 			fi
 			DELETE_OPENSHIFT_PROJECT_MESSAGE="."
 			if ! $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
-				WAIT_FOR_PROJECT_TO_EXIT=false
+				WAIT_FOR_PROJECT_TO_DELETE=false
 			fi
 			echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
 		} || { # catch
 			echo "[CHE] Could not find project \"${CHE_OPENSHIFT_PROJECT}\" to delete."
-			WAIT_FOR_PROJECT_TO_EXIT=false
+			WAIT_FOR_PROJECT_TO_DELETE=false
 		}
 		done
 		echo "Done!"
