@@ -308,27 +308,11 @@ if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
         sleep $POLLING_INTERVAL_SEC
     }
     done
+    echo "Project \"${CHE_OPENSHIFT_PROJECT}\" creation done!"
+else
+    echo "Project \"${CHE_OPENSHIFT_PROJECT}\" already exists. Please remove project before running this script."
+    exit 1
 fi
-echo "Project \"${CHE_OPENSHIFT_PROJECT}\" creation done!"
-
-echo -n "[CHE] Switching to \"${CHE_OPENSHIFT_PROJECT}\"..."
-WAIT_TO_SWITCH_TO_PROJECT=true
-timeout_in=$((POLLING_INTERVAL_SEC+DEPLOYMENT_TIMEOUT_SEC))
-while $WAIT_TO_SWITCH_TO_PROJECT
-do
-{ # try
-    timeout_in=$((timeout_in-POLLING_INTERVAL_SEC))
-    if [ "$timeout_in" -le "0" ] ; then
-        echo "[CHE] **ERROR**: Timeout of $DEPLOYMENT_TIMEOUT_SEC waiting to switch to project \"${CHE_OPENSHIFT_PROJECT}\"."
-        exit 1
-    fi  
-    oc project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null && \
-    WAIT_TO_SWITCH_TO_PROJECT=false # Only excutes after project creation is successfully
-} || { # catch
-    echo -n "."
-}
-done
-echo "done!"
 
 # -------------------------------------------------------------
 # Deploying secondary servers
