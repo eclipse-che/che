@@ -54,7 +54,6 @@ public class KeycloakTestAuthServiceClient implements TestAuthServiceClient {
   private static final String CLIENT_ID_PARAM = "client_id";
   private static final String PASSWORD_GRAND_TYPE = "password";
   private static final String REFRESH_TOKEN_GRAND_TYPE = "refresh_token";
-  private static final String CHE_CLIENT_ID = "che-public";
 
   private static final long MIN_TOKEN_LIFETIME_SEC = 30;
 
@@ -139,7 +138,7 @@ public class KeycloakTestAuthServiceClient implements TestAuthServiceClient {
           .append('&')
           .append(CLIENT_ID_PARAM)
           .append('=')
-          .append(CHE_CLIENT_ID);
+          .append(keycloakSettings.getKeycloakClientId());
       for (Pair<String, ?> param : params) {
         sb.append('&').append(param.first).append('=').append(param.second);
       }
