@@ -1,9 +1,9 @@
 <che-toolbar che-title="New Workspace">
-  <che-button-save-flat class="create-workspace-header-button"
-                        id="create-workspace-button"
-                        che-button-title="Create"
-                        ng-click="createWorkspaceController.createWorkspace()"
-                        ng-disabled="createWorkspaceController.isCreateButtonDisabled()"></che-button-save-flat>
+  <che-button-dropdown2 button-style="che-button-save-flat"
+                        button-disabled="createWorkspaceController.isCreateButtonDisabled()"
+                        main-action-config="createWorkspaceController.headerCreateButtonConfig.mainAction"
+                        other-actions-config="createWorkspaceController.headerCreateButtonConfig.otherActions"
+                        class="create-workspace-header-button"></che-button-dropdown2>
 </che-toolbar>
 
 <md-progress-linear md-mode="indeterminate"

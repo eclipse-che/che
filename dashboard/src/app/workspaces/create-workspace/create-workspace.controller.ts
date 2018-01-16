@@ -18,6 +18,10 @@ import {NamespaceSelectorSvc} from './namespace-selector/namespace-selector.serv
 import {StackSelectorSvc} from './stack-selector/stack-selector.service';
 import {RandomSvc} from '../../../components/utils/random.service';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
+import {
+  ICheButtonDropdownMainAction,
+  ICheButtonDropdownOtherAction
+} from '../../../components/widget/button-dropdown2/che-button-dropdown2.directive';
 
 /**
  * This class is handling the controller for workspace creation.
@@ -26,6 +30,12 @@ import {CheNotification} from '../../../components/notification/che-notification
  */
 export class CreateWorkspaceController {
   /**
+   * Dropdown button config.
+   */
+  headerCreateButtonConfig: {
+    mainAction: ICheButtonDropdownMainAction,
+    otherActions: Array<ICheButtonDropdownOtherAction>
+  };
    * Timeout service.
    */
   private $timeout: ng.ITimeoutService;
@@ -123,6 +133,30 @@ export class CreateWorkspaceController {
     // when stacks selector is rendered
     // and default stack is selected
     this.hideLoader = false;
+
+    // header toolbar
+    // dropdown button config
+    this.headerCreateButtonConfig = {
+      mainAction: {
+        title: 'Create',
+        type: 'button',
+        action: () => {
+          this.createWorkspace().then((workspace: che.IWorkspace) => {
+            this.createWorkspaceSvc.redirectToDetails(workspace);
+          });
+        }
+      },
+      otherActions: [{
+        title: 'Open in IDE',
+        type: 'button',
+        action: () => {
+          this.createWorkspace().then((workspace: che.IWorkspace) => {
+            this.createWorkspaceSvc.redirectToIDE(workspace);
+          });
+        },
+        orderNumber: 1
+      }]
+    };
   }
 
   /**
@@ -284,8 +318,10 @@ export class CreateWorkspaceController {
 
   /**
    * Creates workspace.
+   *
+   * @returns {angular.IPromise<che.IWorkspace>}
    */
-  createWorkspace(): void {
+  createWorkspace(): ng.IPromise<che.IWorkspace> {
     // update workspace name
     this.stack.workspaceConfig.name = this.workspaceName;
 
@@ -303,7 +339,9 @@ export class CreateWorkspaceController {
     }
     let attributes = {stackId: this.stack.id};
     let workspaceConfig = angular.copy(this.stack.workspaceConfig);
-    this.createWorkspaceSvc.createWorkspace(workspaceConfig, attributes);
+
+    return this.createWorkspaceSvc.createWorkspace(workspaceConfig, attributes);
+  }
   }
 
 }
