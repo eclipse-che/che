@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.eclipse.lsp4j.jsonrpc.messages.Either3;
 
 /**
  * This class generates property conversions from regular lsp4j classes to dto classes. Used to
@@ -90,6 +91,8 @@ public class ToDtoGenerator extends ConversionGenerator {
       generateListConversion(indent + INDENT, out, varName, valueAccess, paramType);
     } else if (Map.class.isAssignableFrom(rawClass)) {
       generateMapConversion(indent + INDENT, out, varName, valueAccess, paramType);
+    } else if (Either3.class.isAssignableFrom(getRawClass(paramType))) {
+      generateEither3Conversion(indent + INDENT, out, varName, valueAccess, paramType);
     } else if (Either.class.isAssignableFrom(rawClass)) {
       generateEitherConversion(indent + INDENT, out, varName, valueAccess, paramType);
     } else {
@@ -100,6 +103,41 @@ public class ToDtoGenerator extends ConversionGenerator {
               varName,
               dtoValueExpression(rawClass, valueAccess)));
     }
+  }
+
+  private void generateEither3Conversion(
+      String indent, PrintWriter out, String varName, String valueAccess, Type paramType) {
+    String innerName = varName + "e";
+
+    out.println(indent + String.format("%1$s %2$s;", paramType.getTypeName(), varName));
+    out.println(indent + String.format("if (%1$s.isFirst()) {", valueAccess));
+    generateToDto(
+        indent + INDENT,
+        out,
+        innerName,
+        valueAccess + ".getFirst()",
+        EitherUtil.getFirstDisjointType(paramType));
+    out.println(
+        indent + INDENT + String.format("%1$s= Either3.forFirst(%2$s);", varName, innerName));
+    out.println(indent + String.format("} else if (%1$s.isSecond()) {", valueAccess));
+    generateToDto(
+        indent + INDENT,
+        out,
+        innerName,
+        valueAccess + ".getSecond()",
+        EitherUtil.getSecondDisjointType(paramType));
+    out.println(
+        indent + INDENT + String.format("%1$s= Either3.forSecond(%2$s);", varName, innerName));
+    out.println(indent + "} else  {");
+    generateToDto(
+        indent + INDENT,
+        out,
+        innerName,
+        valueAccess + ".getThird()",
+        EitherUtil.getThirdDisjointType(paramType));
+    out.println(
+        indent + INDENT + String.format("%1$s= Either3.forThird(%2$s);", varName, innerName));
+    out.println(indent + "}");
   }
 
   private void generateEitherConversion(
@@ -129,6 +167,9 @@ public class ToDtoGenerator extends ConversionGenerator {
 
   private void generateMapConversion(
       String indent, PrintWriter out, String varName, String valueAccess, Type paramType) {
+    if (!(paramType instanceof ParameterizedType)) {
+      paramType = ((Class<?>) paramType).getGenericSuperclass();
+    }
     ParameterizedType genericType = (ParameterizedType) paramType;
     Type containedType = genericType.getActualTypeArguments()[1];
     Type valueType = genericType.getActualTypeArguments()[1];
