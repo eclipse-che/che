@@ -11,46 +11,29 @@
 package org.eclipse.che.ide.ext.java.client.navigation.openimplementation;
 
 import elemental.dom.Element;
-import elemental.dom.Node;
 import elemental.events.CustomEvent;
-import elemental.events.Event;
-import elemental.events.EventListener;
-import elemental.html.SpanElement;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ui.popup.PopupResources;
 import org.eclipse.che.ide.ui.popup.PopupWidget;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.lsp4j.SymbolInformation;
-import org.eclipse.lsp4j.SymbolKind;
-import org.vectomatic.dom.svg.ui.SVGImage;
-import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
- * Widget for displaying implementations.
+ * Widget for displaying popup with informing about no implementations found.
  *
- * @author Valeriy Svydenko
+ * @author Dmitrii Bocharov
  */
 public class NoImplementationWidget extends PopupWidget<SymbolInformation> {
 
   /** Custom event type. */
   private static final String CUSTOM_EVT_TYPE_VALIDATE = "itemvalidate";
 
-  private final JavaResources javaResources;
   private final JavaLocalizationConstant locale;
-  private final OpenImplementationPresenter openImplementationPresenter;
 
   public NoImplementationWidget(
-      PopupResources popupResources,
-      JavaResources javaResources,
-      JavaLocalizationConstant locale,
-      OpenImplementationPresenter openImplementationPresenter,
-      String title) {
+      PopupResources popupResources, JavaLocalizationConstant locale, String title) {
     super(popupResources, title);
-    this.javaResources = javaResources;
     this.locale = locale;
-    this.openImplementationPresenter = openImplementationPresenter;
-
     this.asElement().setId("implementationsId");
   }
 
@@ -61,32 +44,8 @@ public class NoImplementationWidget extends PopupWidget<SymbolInformation> {
 
   @Override
   public Element createItem(final SymbolInformation itemModel) {
-    final Element element = Elements.createLiElement(popupResources.popupStyle().item());
-    final Element iconElement = Elements.createDivElement(popupResources.popupStyle().icon());
-
-    if (itemModel.getKind() == null) {
-      element.setInnerText(getEmptyMessage());
-      return element;
-    }
-
-    SVGImage svgImage = getSvgImage(itemModel.getKind());
-    iconElement.appendChild((Node) svgImage.getElement());
-
-    element.appendChild(iconElement);
-    element.appendChild(createTitleOfElement(itemModel));
-
-    final EventListener validateListener =
-        new EventListener() {
-          @Override
-          public void handleEvent(final Event evt) {
-            openImplementationPresenter.openOneImplementation(itemModel);
-            hide();
-          }
-        };
-
-    element.addEventListener(Event.DBLCLICK, validateListener, false);
-    element.addEventListener(CUSTOM_EVT_TYPE_VALIDATE, validateListener, false);
-
+    Element element = Elements.createLiElement(popupResources.popupStyle().item());
+    element.setInnerText(getEmptyMessage());
     return element;
   }
 
@@ -101,34 +60,7 @@ public class NoImplementationWidget extends PopupWidget<SymbolInformation> {
     return true;
   }
 
-  private SpanElement createTitleOfElement(SymbolInformation symbolInformation) {
-    String path = symbolInformation.getLocation().getUri();
-    SpanElement texElement = Elements.createSpanElement();
-    SpanElement highlightElement =
-        Elements.createSpanElement(javaResources.css().disableTextColor());
-    highlightElement.setInnerText(" - (" + path + ')');
-    texElement.setInnerText(symbolInformation.getName());
-    texElement.appendChild(highlightElement);
-
-    return texElement;
-  }
-
   private native CustomEvent createValidateEvent(String eventType) /*-{
         return new CustomEvent(eventType);
     }-*/;
-
-  private SVGImage getSvgImage(SymbolKind symbolKind) {
-    SVGResource icon;
-    switch (symbolKind) {
-      case Interface:
-        icon = javaResources.interfaceItem();
-        break;
-      case Enum:
-        icon = javaResources.enumItem();
-        break;
-      default:
-        icon = javaResources.javaFile();
-    }
-    return new SVGImage(icon);
-  }
 }

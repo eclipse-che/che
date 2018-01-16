@@ -15,13 +15,10 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.TextDocumentPositionParamsDto;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.position.PositionConverter;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
@@ -53,12 +50,9 @@ public class OpenImplementationPresenter {
   @Inject
   public OpenImplementationPresenter(
       JavaLanguageExtensionServiceClient javaLanguageExtensionServiceClient,
-      AppContext context,
-      DtoFactory dtoFactory,
       JavaResources javaResources,
       PopupResources popupResources,
       JavaLocalizationConstant locale,
-      EditorAgent editorAgent,
       OpenFileInEditorHelper openHelper) {
     this.javaLanguageExtensionServiceClient = javaLanguageExtensionServiceClient;
     this.javaResources = javaResources;
@@ -94,20 +88,15 @@ public class OpenImplementationPresenter {
 
               String title =
                   locale.openImplementationWindowTitle(impls.getSearchedElement(), overridingSize);
-              NoImplementationWidget noImplementationWidget =
-                  new NoImplementationWidget(
-                      popupResources,
-                      javaResources,
-                      locale,
-                      OpenImplementationPresenter.this,
-                      title);
+              PositionConverter.PixelCoordinates coordinates =
+                  activeEditor.getPositionConverter().offsetToPixel(activeEditor.getCursorOffset());
               if (overridingSize == 1) {
                 openOneImplementation(impls.getImplementers().get(0));
               } else if (overridingSize > 1) {
-                openImplementations(
-                    impls, noImplementationWidget, (TextEditor) editorPartPresenter);
+                openImplementations(impls, title, coordinates);
               } else if (!isNullOrEmpty(impls.getSearchedElement()) && overridingSize == 0) {
-                showNoImplementations(noImplementationWidget, (TextEditor) editorPartPresenter);
+                new NoImplementationWidget(popupResources, locale, title)
+                    .show(coordinates.getX(), coordinates.getY());
               }
             });
   }
@@ -116,24 +105,13 @@ public class OpenImplementationPresenter {
     this.openHelper.openLocation(symbolInformation.getLocation());
   }
 
-  private void showNoImplementations(
-      NoImplementationWidget noImplementationWidget, TextEditor editorPartPresenter) {
-    int offset = editorPartPresenter.getCursorOffset();
-    PositionConverter.PixelCoordinates coordinates =
-        editorPartPresenter.getPositionConverter().offsetToPixel(offset);
-    SymbolInformation symbolInformation = new SymbolInformation();
-    symbolInformation.setKind(null);
-    noImplementationWidget.addItem(symbolInformation);
-    noImplementationWidget.show(coordinates.getX(), coordinates.getY());
-  }
-
   private void openImplementations(
       ImplementersResponse implementersResponse,
-      NoImplementationWidget implementationWidget,
-      TextEditor editorPartPresenter) {
-    int offset = editorPartPresenter.getCursorOffset();
-    PositionConverter.PixelCoordinates coordinates =
-        editorPartPresenter.getPositionConverter().offsetToPixel(offset);
+      String title,
+      PositionConverter.PixelCoordinates coordinates) {
+    ImplementationWidget implementationWidget =
+        new ImplementationWidget(
+            popupResources, javaResources, locale, OpenImplementationPresenter.this, title);
     for (SymbolInformation symbolInformation : implementersResponse.getImplementers()) {
       implementationWidget.addItem(symbolInformation);
     }

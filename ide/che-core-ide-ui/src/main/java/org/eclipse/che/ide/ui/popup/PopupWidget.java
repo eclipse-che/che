@@ -99,7 +99,6 @@ public abstract class PopupWidget<T> {
       Element emptyElement = Elements.createLiElement(popupResources.popupStyle().item());
       emptyElement.setTextContent(getEmptyMessage());
       listElement.appendChild(emptyElement);
-      return;
     }
 
     /* Reset popup dimensions and show. */
