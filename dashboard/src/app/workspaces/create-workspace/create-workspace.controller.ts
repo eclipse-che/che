@@ -36,6 +36,8 @@ export class CreateWorkspaceController {
     mainAction: ICheButtonDropdownMainAction,
     otherActions: Array<ICheButtonDropdownOtherAction>
   };
+  private $mdDialog: ng.material.IDialogService;
+  /**
    * Timeout service.
    */
   private $timeout: ng.ITimeoutService;
@@ -108,7 +110,16 @@ export class CreateWorkspaceController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($timeout: ng.ITimeoutService, cheEnvironmentRegistry: CheEnvironmentRegistry, createWorkspaceSvc: CreateWorkspaceSvc, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, randomSvc: RandomSvc, $log: ng.ILogService, cheNotification: CheNotification) {
+  constructor($mdDialog: ng.material.IDialogService,
+              $timeout: ng.ITimeoutService,
+              cheEnvironmentRegistry: CheEnvironmentRegistry,
+              createWorkspaceSvc: CreateWorkspaceSvc,
+              namespaceSelectorSvc: NamespaceSelectorSvc,
+              stackSelectorSvc: StackSelectorSvc,
+              randomSvc: RandomSvc,
+              $log: ng.ILogService,
+              cheNotification: CheNotification) {
+    this.$mdDialog = $mdDialog;
     this.$timeout = $timeout;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
     this.createWorkspaceSvc = createWorkspaceSvc;
@@ -342,6 +353,30 @@ export class CreateWorkspaceController {
 
     return this.createWorkspaceSvc.createWorkspace(workspaceConfig, attributes);
   }
+
+  /**
+   * Creates a workspace and shows a dialogue window for a user to select
+   * whether to open Workspace Details page or the IDE.
+   *
+   * @param {MouseEvent} $event
+   */
+  createWorkspaceAndShowDialog($event: MouseEvent): void {
+    this.createWorkspace().then((workspace: che.IWorkspace) => {
+      this.$mdDialog.show({
+        targetEvent: $event,
+        controller: 'AfterCreationDialogController',
+        controllerAs: 'afterCreationDialogController',
+        bindToController: true,
+        clickOutsideToClose: true,
+        templateUrl: 'app/workspaces/create-workspace/after-creation-dialog/after-creation-dialog.html'
+      }).then(() => {
+        // when promise is resolved then open workspace in IDE
+        this.createWorkspaceSvc.redirectToIDE(workspace);
+      }, () => {
+        // when promise is rejected then open Workspace Details page
+        this.createWorkspaceSvc.redirectToDetails(workspace);
+      });
+    });
   }
 
 }
