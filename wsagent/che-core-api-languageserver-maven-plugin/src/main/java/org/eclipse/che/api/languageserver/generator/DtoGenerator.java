@@ -130,8 +130,9 @@ public abstract class DtoGenerator {
                       @Override
                       public boolean apply(String input) {
                         for (String pkg : sourcePackages) {
-                          if (input.startsWith(pkg)) {
-                            return input.indexOf('.', pkg.length() + 1) == input.lastIndexOf('.');
+                          if (input.startsWith(pkg)
+                              && input.indexOf('.', pkg.length() + 1) == input.lastIndexOf('.')) {
+                            return true;
                           }
                         }
                         return false;
