@@ -48,20 +48,21 @@ public class KeycloakTestAuthServiceClient implements TestAuthServiceClient {
 
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakTestAuthServiceClient.class);
 
-  private static final String CONTENT_TYPE = "Content-Type";
-  private static final String FORM_MIME_TYPE = "application/x-www-form-urlencoded";
+  protected static final String CONTENT_TYPE = "Content-Type";
+  protected static final String FORM_MIME_TYPE = "application/x-www-form-urlencoded";
   private static final String GRANT_TYPE = "grant_type";
   private static final String CLIENT_ID_PARAM = "client_id";
-  private static final String PASSWORD_GRAND_TYPE = "password";
-  private static final String REFRESH_TOKEN_GRAND_TYPE = "refresh_token";
+  private static final String PASSWORD = "password";
+  protected static final String REFRESH_TOKEN = "refresh_token";
 
   private static final long MIN_TOKEN_LIFETIME_SEC = 30;
 
   private final String apiEndpoint;
-  private final KeycloakSettings keycloakSettings;
   private final DefaultHttpJsonRequestFactory requestFactory;
-  private final Gson gson;
-  private final ConcurrentMap<String, KeycloakToken> tokens;
+  protected final Gson gson;
+
+  protected final KeycloakSettings keycloakSettings;
+  protected final ConcurrentMap<String, KeycloakToken> tokens;
 
   @Inject
   public KeycloakTestAuthServiceClient(
@@ -105,14 +106,12 @@ public class KeycloakTestAuthServiceClient implements TestAuthServiceClient {
 
   private KeycloakToken loginRequest(String username, String password) {
     return requestToken(
-        PASSWORD_GRAND_TYPE,
-        ImmutableList.of(Pair.of("username", username), Pair.of("password", password)));
+        PASSWORD, ImmutableList.of(Pair.of("username", username), Pair.of("password", password)));
   }
 
   private KeycloakToken refreshRequest(KeycloakToken prevToken) {
     return requestToken(
-        REFRESH_TOKEN_GRAND_TYPE,
-        ImmutableList.of(Pair.of("refresh_token", prevToken.getRefreshToken())));
+        REFRESH_TOKEN, ImmutableList.of(Pair.of("refresh_token", prevToken.getRefreshToken())));
   }
 
   private KeycloakToken requestToken(String grandType, List<Pair<String, ?>> params) {
