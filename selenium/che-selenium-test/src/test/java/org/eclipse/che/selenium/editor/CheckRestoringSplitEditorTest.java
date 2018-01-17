@@ -100,7 +100,7 @@ public class CheckRestoringSplitEditorTest {
       projectExplorer.waitItemInVisibleArea(javaClassName);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7551 " + getPreferences(), ex);
+      fail("Known issue https://github.com/eclipse/che/issues/7551 " + "\n" + getPreferences(), ex);
     }
 
     notificationsPopupPanel.waitPopUpPanelsIsClosed();
