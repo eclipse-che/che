@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
@@ -216,7 +216,7 @@ public class WorkspaceDetailsSingleMachineTest {
     workspaceDetails.clickOpenInIdeWsBtn();
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab(LOADER_TIMEOUT_SEC);
+    terminal.waitTerminalTab(PREPARING_WS_TIMEOUT_SEC);
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME, PROJECT_FOLDER);
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(CONSOLE_JAVA_SIMPLE, PROJECT_FOLDER);

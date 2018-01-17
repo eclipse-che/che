@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.RUNNING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPED;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.ENV_VARIABLES;
@@ -141,6 +141,7 @@ public class WorkspaceDetailsComposeTest {
     workspaceMachines.clickOnEditMachineButton(machineName);
     workspaceMachines.checkEditTheMachineDialogIsOpen();
     workspaceMachines.setMachineNameInDialog("machine");
+    WaitUtils.sleepQuietly(2);
     workspaceMachines.clickOnSaveNameDialogButton();
     workspaceMachines.checkMachineExists("machine");
     clickOnSaveButton();
@@ -154,7 +155,7 @@ public class WorkspaceDetailsComposeTest {
     seleniumWebDriver.switchFromDashboardIframeToIde();
     projectExplorer.waitProjectExplorer();
 
-    terminal.waitTerminalTab(LOADER_TIMEOUT_SEC);
+    terminal.waitTerminalTab(PREPARING_WS_TIMEOUT_SEC);
     consoles.waitProcessInProcessConsoleTree("machine");
     consoles.waitTabNameProcessIsPresent("machine");
   }
@@ -180,7 +181,7 @@ public class WorkspaceDetailsComposeTest {
 
     seleniumWebDriver.switchFromDashboardIframeToIde(60);
     projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab(LOADER_TIMEOUT_SEC);
+    terminal.waitTerminalTab(PREPARING_WS_TIMEOUT_SEC);
 
     dashboard.open();
     dashboard.waitDashboardToolbarTitle();
