@@ -100,7 +100,7 @@ public abstract class DtoGenerator {
    * @param targetPackage the package name to use for the generated class
    * @param sourcePackages the source packages to use. THe packages must be on the class path at
    *     execution time.
-   * @param imports2
+   * @param imports
    * @throws IOException
    */
   public void generate(

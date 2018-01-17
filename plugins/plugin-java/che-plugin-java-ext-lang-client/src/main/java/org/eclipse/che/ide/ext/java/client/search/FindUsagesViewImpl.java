@@ -69,9 +69,6 @@ public class FindUsagesViewImpl extends BaseView<FindUsagesPresenter> implements
     tree.setFocus(true);
   }
 
-  /* (non-Javadoc)
-   * @see org.eclipse.che.ide.ext.java.client.search.FindUsagesView#showUsages(org.eclipse.che.jdt.ls.extension.api.dto.UsagesResponse)
-   */
   @Override
   public void showUsages(UsagesResponse response) {
     tree.getNodeStorage().clear();
@@ -146,7 +143,6 @@ public class FindUsagesViewImpl extends BaseView<FindUsagesPresenter> implements
       if (canExpand(node)) {
         return node;
       }
-      ;
       List<Node> children = tree.getNodeStorage().getChildren(node);
       for (Node child : children) {
         Node descendant = findExpandableInTree(child);

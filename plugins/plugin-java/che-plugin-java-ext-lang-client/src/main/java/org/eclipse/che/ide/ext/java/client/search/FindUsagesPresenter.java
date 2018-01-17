@@ -199,13 +199,13 @@ public class FindUsagesPresenter extends BasePresenter implements BaseActionDele
         .getSnippets(params)
         .then(
             (List<SnippetResult> results) -> {
-              Map<LinearRange, SnippetResult> snippets2 = new HashMap<>();
-              cache.put(element.getUri(), snippets2);
+              Map<LinearRange, SnippetResult> snippetMap = new HashMap<>();
+              cache.put(element.getUri(), snippets);
               results.forEach(
                   result -> {
-                    snippets2.put(result.getLinearRange(), result);
+                    snippetMap.put(result.getLinearRange(), result);
                   });
-              return snippets2;
+              return snippetMap;
             });
   }
 

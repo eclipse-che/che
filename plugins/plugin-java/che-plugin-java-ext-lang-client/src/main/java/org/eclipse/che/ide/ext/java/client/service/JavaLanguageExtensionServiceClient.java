@@ -26,6 +26,7 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REQUEST_TIMEOUT;
+import static org.eclipse.che.ide.ext.java.shared.Constants.USAGES;
 
 import com.google.gwt.jsonp.client.TimeoutException;
 import com.google.inject.Inject;
@@ -348,18 +349,12 @@ public class JavaLanguageExtensionServiceClient {
           requestTransmitter
               .newRequest()
               .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-              .methodName("java/usages")
+              .methodName(USAGES)
               .paramsAsDto(params)
-              .sendAndReceiveResultAsDto(UsagesResponse.class, 10000)
+              .sendAndReceiveResultAsDto(UsagesResponse.class, REQUEST_TIMEOUT)
               .onSuccess(resolve::apply)
-              .onTimeout(
-                  () -> {
-                    reject.apply(JsPromiseError.create(new TimeoutException("Timeout")));
-                  })
-              .onFailure(
-                  error -> {
-                    reject.apply(ServiceUtil.getPromiseError(error));
-                  });
+              .onTimeout(() -> reject.apply(JsPromiseError.create(new TimeoutException("Timeout"))))
+              .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error)));
         });
   }
 }

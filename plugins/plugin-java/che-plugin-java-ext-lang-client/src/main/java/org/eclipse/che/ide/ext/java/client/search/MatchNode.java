@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.ext.java.client.search;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gwt.dom.client.Element;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -111,7 +112,7 @@ public class MatchNode extends AbstractTreeNode implements HasNewPresentation, H
     openHelper.openLocation(uri, snippet.getLinearRange());
   }
 
-  // visible for testing
+  @VisibleForTesting
   SnippetResult getSnippet() {
     return snippet;
   }

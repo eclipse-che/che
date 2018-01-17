@@ -29,6 +29,7 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
+import static org.eclipse.che.ide.ext.java.shared.Constants.USAGES;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CREATE_SIMPLE_PROJECT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_IMPLEMENTERS_COMMAND;
@@ -50,6 +51,7 @@ import static org.eclipse.che.jdt.ls.extension.api.Commands.REIMPORT_MAVEN_PROJE
 import static org.eclipse.che.jdt.ls.extension.api.Commands.RESOLVE_CLASSPATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.TEST_DETECT_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.UPDATE_PROJECT_CLASSPATH;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.USAGES_COMMAND;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
@@ -60,7 +62,6 @@ import com.google.inject.Inject;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
@@ -229,7 +230,7 @@ public class JavaLanguageServerExtensionService {
         .withFunction(this::findImplementers);
     requestHandler
         .newConfiguration()
-        .methodName("java/usages")
+        .methodName(USAGES)
         .paramsAsDto(TextDocumentPositionParams.class)
         .resultAsDto(UsagesResponse.class)
         .withFunction(this::usages);
@@ -762,15 +763,8 @@ public class JavaLanguageServerExtensionService {
     parameters.setUri(uri);
     parameters.getTextDocument().setUri(uri);
     try {
-      CompletableFuture<Object> responses =
-          getLanguageServer()
-              .getWorkspaceService()
-              .executeCommand(
-                  new ExecuteCommandParams(
-                      Commands.USAGES_COMMAND, Collections.singletonList(parameters)));
       Type targetClassType = new TypeToken<ArrayList<UsagesResponse>>() {}.getType();
-      List<UsagesResponse> results =
-          gson.fromJson(gson.toJson(responses.get(10, TimeUnit.SECONDS)), targetClassType);
+      List<UsagesResponse> results = doGetList(USAGES_COMMAND, parameters, targetClassType);
       if (results.isEmpty()) {
         return null;
       }
@@ -787,7 +781,7 @@ public class JavaLanguageServerExtensionService {
                     });
               });
       return new DtoServerImpls.UsagesResponseDto(results.get(0));
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+    } catch (JsonSyntaxException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
   }
