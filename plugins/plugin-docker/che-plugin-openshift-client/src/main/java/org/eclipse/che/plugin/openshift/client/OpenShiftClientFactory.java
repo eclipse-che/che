@@ -19,7 +19,6 @@ import io.fabric8.openshift.client.OpenShiftConfigBuilder;
 import io.fabric8.openshift.client.internal.OpenShiftOAuthInterceptor;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -40,14 +39,17 @@ public class OpenShiftClientFactory {
   public OpenShiftClientFactory(
       OpenshiftWorkspaceEnvironmentProvider workspaceEnvironmentProvider,
       @Named("che.openshift.server.http.async_requests.max") int maxConcurrentRequests,
-      @Named("che.openshift.server.http.async_requests.max_per_host") int maxConcurrentRequestsPerHost,
+      @Named("che.openshift.server.http.async_requests.max_per_host")
+          int maxConcurrentRequestsPerHost,
       @Named("che.openshift.server.http.connection_pool.max_idle") int maxIdleConnections,
-      @Named("che.openshift.server.http.connection_pool.keep_alive.mins") int connectionPoolKeepAlive) {
+      @Named("che.openshift.server.http.connection_pool.keep_alive.mins")
+          int connectionPoolKeepAlive) {
     Config defaultOpenshiftConfig = workspaceEnvironmentProvider.getDefaultOpenshiftConfig();
     OkHttpClient temporary = HttpClientUtils.createHttpClient(defaultOpenshiftConfig);
     OkHttpClient.Builder builder = temporary.newBuilder();
     ConnectionPool oldPool = temporary.connectionPool();
-    builder.connectionPool(new ConnectionPool(maxIdleConnections, connectionPoolKeepAlive, TimeUnit.MINUTES));
+    builder.connectionPool(
+        new ConnectionPool(maxIdleConnections, connectionPoolKeepAlive, TimeUnit.MINUTES));
     oldPool.evictAll();
     this.httpClient = builder.build();
     httpClient.dispatcher().setMaxRequests(maxConcurrentRequests);
