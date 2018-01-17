@@ -34,6 +34,11 @@ export JQ_BINARY_DOWNLOAD_URL=${JQ_BINARY_DOWNLOAD_URL:-${DEFAULT_JQ_BINARY_DOWN
 DEFAULT_CHE_MULTIUSER="false"
 export CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
 
+#Using local scripts is error prone and should only be used temporarly while developing Che.
+#If unsure leave the default value true set.
+DEFAULT_CHE_OPENSHIFT_GENERATE_SCRIPTS=true
+export CHE_OPENSHIFT_GENERATE_SCRIPTS=${CHE_OPENSHIFT_GENERATE_SCRIPTS:-${DEFAULT_CHE_OPENSHIFT_GENERATE_SCRIPTS}}
+
 DEFAULT_OPENSHIFT_USERNAME="developer"
 export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
 
@@ -153,15 +158,28 @@ run_ocp() {
 }
 
 deploy_che_to_ocp() {
+    OPENSHIFT_SCRIPTS_FOLDER="${CONFIG_DIR}/instance/config/openshift/scripts/"
     #Repull init image only if IMAGE_PULL_POLICY is set to Always
     if [ $IMAGE_PULL_POLICY == "Always" ]; then
         docker pull "$IMAGE_INIT"
     fi
-    #wipeout config folder
-    docker run -v "${CONFIG_DIR}":/to_remove alpine sh -c "rm -rf /to_remove/" || true
-    docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" ${CHE_CLI_IMAGE} config --skip:pull --skip:nightly
-    cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
-    bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
+    #Only generate scripts and config files if CHE_OPENSHIFT_GENERATE_SCRIPTS=true
+    if [ $CHE_OPENSHIFT_GENERATE_SCRIPTS == true ]; then
+      echo "OCP generating temporary scripts and configuration files at ${OPENSHIFT_SCRIPTS_FOLDER} ."
+      #wipeout config folder
+      docker run -v "${CONFIG_DIR}":/to_remove alpine sh -c "rm -rf /to_remove/" || true
+      docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} config --skip:pull --skip:nightly
+      cd ${OPENSHIFT_SCRIPTS_FOLDER}
+    else
+      echo "OCP using existing scripts and configuration files in current folder."
+    fi
+    if [[ ! -f "deploy_che.sh" ]]; then
+      CURRENT_PWD=$(pwd)
+      echo "OCP script deploy_che.sh does not exist in ${CURRENT_PWD} ."
+      exit 1
+    else
+      bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
+    fi
     wait_until_server_is_booted
     if [ $CHE_MULTIUSER == true ]; then
         wait_until_kc_is_booted
