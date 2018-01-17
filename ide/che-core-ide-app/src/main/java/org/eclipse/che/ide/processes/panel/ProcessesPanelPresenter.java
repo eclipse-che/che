@@ -956,12 +956,32 @@ public class ProcessesPanelPresenter extends BasePresenter
       return false;
     }
 
-    Server terminalServer = machine.getServers().get(serverName);
-    if (terminalServer == null) {
+    Server server = machine.getServers().get(serverName);
+    if (server == null) {
       return false;
     }
 
-    return terminalServer.getStatus() == ServerStatus.RUNNING;
+    return server.getStatus() == ServerStatus.RUNNING;
+  }
+
+  private boolean isSshServerIsRunning(String machineName) {
+    Workspace workspace = appContext.getWorkspace();
+    Runtime runtime = workspace.getRuntime();
+    if (runtime == null) {
+      return false;
+    }
+
+    Machine machine = runtime.getMachines().get(machineName);
+    if (machine == null) {
+      return false;
+    }
+
+    Server server = machine.getServers().get(SERVER_SSH_REFERENCE);
+    if (server == null) {
+      return false;
+    }
+
+    return workspace.getStatus() == WorkspaceStatus.RUNNING;
   }
 
   /**
@@ -1005,9 +1025,7 @@ public class ProcessesPanelPresenter extends BasePresenter
 
     machineNode.setTerminalServerRunning(isServerRunning(machineName, SERVER_TERMINAL_REFERENCE));
 
-    // rely on "wsagent" server's status since "ssh" server's status is always UNKNOWN
-    String wsAgentServerRef = wsAgentServerUtil.getWsAgentHttpServerReference();
-    machineNode.setSshServerRunning(isServerRunning(machineName, wsAgentServerRef));
+    machineNode.setSshServerRunning(isSshServerIsRunning(machineName));
 
     for (ProcessTreeNode child : children) {
       child.setParent(machineNode);
@@ -1057,15 +1075,19 @@ public class ProcessesPanelPresenter extends BasePresenter
   }
 
   @Override
-  public void onWorkspaceRunning(WorkspaceRunningEvent event) {}
+  public void onWorkspaceRunning(WorkspaceRunningEvent event) {
+    List<MachineImpl> machines = getMachines();
+    for (MachineImpl machine: machines) {
+      provideMachineNode(machine.getName(), true, false);
+    }
+  }
 
   @Override
   public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
     try {
       for (ProcessTreeNode node : rootNode.getChildren()) {
         if (MACHINE_NODE == node.getType()) {
-          ArrayList<ProcessTreeNode> children = new ArrayList<>();
-          children.addAll(node.getChildren());
+          ArrayList<ProcessTreeNode> children = new ArrayList<>(node.getChildren());
 
           for (ProcessTreeNode child : children) {
             if (COMMAND_NODE == child.getType()) {
@@ -1078,6 +1100,9 @@ public class ProcessesPanelPresenter extends BasePresenter
             view.hideProcessOutput(child.getId());
             view.removeProcessNode(child);
           }
+
+          node.setTerminalServerRunning(false);
+          node.setSshServerRunning(false);
         }
       }
 
