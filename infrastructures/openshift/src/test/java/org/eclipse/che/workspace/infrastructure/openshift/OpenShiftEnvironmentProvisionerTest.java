@@ -18,6 +18,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.env.EnvVarsConverter;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.limits.ram.RamLimitProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.route.TlsRouteProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.server.ServersConverter;
@@ -44,6 +45,7 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private EnvVarsConverter envVarsProvisioner;
   @Mock private ServersConverter serversProvisioner;
   @Mock private RestartPolicyRewriter restartPolicyRewriter;
+  @Mock private RamLimitProvisioner ramLimitProvisioner;
 
   private OpenShiftEnvironmentProvisioner osInfraProvisioner;
 
@@ -59,7 +61,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             serversProvisioner,
             envVarsProvisioner,
             restartPolicyRewriter,
-            volumesStrategy);
+            volumesStrategy,
+            ramLimitProvisioner);
     provisionOrder =
         inOrder(
             volumesStrategy,
@@ -67,7 +70,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             tlsRouteProvisioner,
             serversProvisioner,
             envVarsProvisioner,
-            restartPolicyRewriter);
+            restartPolicyRewriter,
+            ramLimitProvisioner);
   }
 
   @Test
@@ -80,6 +84,7 @@ public class OpenShiftEnvironmentProvisionerTest {
     provisionOrder.verify(restartPolicyRewriter).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(uniqueNamesProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(tlsRouteProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(ramLimitProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }

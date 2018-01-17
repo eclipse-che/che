@@ -21,7 +21,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -220,22 +219,6 @@ public class CommonPVCStrategyTest {
             .get(PVC_NAME)
             .getAdditionalProperties()
             .containsKey(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID)));
-  }
-
-  @Test
-  public void testDoNotProvisioningWhenNoMachineWithWsAgentFound() throws Exception {
-    final Pod pod = mockName(mock(Pod.class), "testPod");
-    final PodSpec podSpec = mock(PodSpec.class);
-    final Container container = mock(Container.class);
-    when(pod.getSpec()).thenReturn(podSpec);
-    when(osEnv.getPods()).thenReturn(singletonMap("testPod", pod));
-    when(podSpec.getContainers()).thenReturn(singletonList(container));
-    when(container.getName()).thenReturn("container");
-
-    commonPVCStrategy.provision(osEnv, IDENTITY);
-
-    verify(container, never()).getVolumeMounts();
-    verify(podSpec, never()).getVolumes();
   }
 
   @Test

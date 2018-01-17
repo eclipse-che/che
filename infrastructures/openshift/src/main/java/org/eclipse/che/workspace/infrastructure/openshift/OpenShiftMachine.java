@@ -10,9 +10,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
-import static java.util.Collections.emptyMap;
-
-import java.util.HashMap;
+import com.google.common.collect.ImmutableMap;
+import java.util.Collections;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
@@ -31,6 +30,7 @@ public class OpenShiftMachine implements Machine {
   private final String machineName;
   private final String podName;
   private final String containerName;
+  private final Map<String, String> attributes;
   private final Map<String, ServerImpl> ref2Server;
   private final OpenShiftProject project;
 
@@ -42,13 +42,20 @@ public class OpenShiftMachine implements Machine {
       String containerName,
       Map<String, ServerImpl> ref2Server,
       OpenShiftProject project,
-      MachineStatus status) {
+      MachineStatus status,
+      Map<String, String> attributes) {
     this.machineName = machineName;
     this.podName = podName;
     this.containerName = containerName;
-    this.ref2Server = new HashMap<>();
     if (ref2Server != null) {
-      this.ref2Server.putAll(ref2Server);
+      this.ref2Server = ImmutableMap.copyOf(ref2Server);
+    } else {
+      this.ref2Server = Collections.emptyMap();
+    }
+    if (attributes != null) {
+      this.attributes = ImmutableMap.copyOf(attributes);
+    } else {
+      this.attributes = Collections.emptyMap();
     }
     this.project = project;
     this.status = status;
@@ -68,7 +75,7 @@ public class OpenShiftMachine implements Machine {
 
   @Override
   public Map<String, String> getAttributes() {
-    return emptyMap();
+    return attributes;
   }
 
   @Override
