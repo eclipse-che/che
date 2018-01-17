@@ -154,7 +154,7 @@ public class ChangeVariableWithEvaluatingTest {
     try {
       assertTrue(instToRequestThread.get().contains("Sorry, you failed. Try again later!"));
     } catch (AssertionError ex) {
-      LOG.error(
+      LOG.warn(
           ChangeVariableWithEvaluatingTest.class.getSimpleName()
               + " has next message: "
               + instToRequestThread.get());
