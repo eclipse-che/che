@@ -92,12 +92,15 @@ final class CompareViewImpl extends Window implements CompareView {
             locale.buttonSaveChanges(),
             "git-compare-save-changes-btn",
             event -> delegate.onSaveChangesClicked());
+    btnSaveChanges.addStyleName(resources.windowCss().primaryButton());
+
     btnNextDiff =
         createButton(
             locale.buttonNextDiff(),
             "git-compare-next-diff-btn",
             event -> delegate.onNextDiffClicked(),
             ButtonAlignment.LEFT);
+
     btnPrevDiff =
         createButton(
             locale.buttonPreviousDiff(),
@@ -105,9 +108,9 @@ final class CompareViewImpl extends Window implements CompareView {
             event -> delegate.onPreviousDiffClicked(),
             ButtonAlignment.LEFT);
 
-    addButtonToFooter(closeButton);
-    addButtonToFooter(refreshButton);
     addButtonToFooter(btnSaveChanges);
+    addButtonToFooter(refreshButton);
+    addButtonToFooter(closeButton);
 
     addButtonToFooter(btnPrevDiff);
     addButtonToFooter(btnNextDiff);

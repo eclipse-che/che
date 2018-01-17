@@ -14,7 +14,7 @@
 
 /* Global styles and external GWT styles. */
 
-body, td {
+body, td, th {
     font-size: 13px;
     font-family: mainFontFamily;
     color: mainFontColor;

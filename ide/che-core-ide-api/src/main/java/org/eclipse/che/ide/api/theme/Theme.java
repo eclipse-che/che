@@ -1631,6 +1631,8 @@ public interface Theme {
   String popupLoaderTextColor();
 
   /** Cell table */
+  String cellTableBackground();
+
   String cellTableHrefColor();
 
   String cellTableHeaderColor();
@@ -1642,6 +1644,10 @@ public interface Theme {
   String cellTableEvenRowBackground();
 
   String cellTableCellColor();
+
+  String cellTableHoveredBackground();
+
+  String cellTableSelectedBackground();
 
   /**
    * ******************************************************************************************

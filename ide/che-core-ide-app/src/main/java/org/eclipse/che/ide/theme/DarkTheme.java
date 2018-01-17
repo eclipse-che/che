@@ -714,12 +714,12 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getCellOddRowColor() {
-    return "#424242";
+    return "#1e2331";
   }
 
   @Override
   public String getCellOddEvenColor() {
-    return "#373737";
+    return "#242a3a";
   }
 
   @Override
@@ -1752,6 +1752,11 @@ public class DarkTheme implements Theme {
   }
 
   @Override
+  public String cellTableBackground() {
+    return "#1e2331";
+  }
+
+  @Override
   public String cellTableHrefColor() {
     return "rgb(97, 183, 239)";
   }
@@ -1768,17 +1773,27 @@ public class DarkTheme implements Theme {
 
   @Override
   public String cellTableOddRowBackground() {
-    return "#3D4750";
+    return "#1e2331";
   }
 
   @Override
   public String cellTableEvenRowBackground() {
-    return "#49525A";
+    return "#242a3a";
   }
 
   @Override
   public String cellTableCellColor() {
     return "#dbdbdb";
+  }
+
+  @Override
+  public String cellTableHoveredBackground() {
+    return "rgba(215, 215, 215, 0.1)";
+  }
+
+  @Override
+  public String cellTableSelectedBackground() {
+    return "rgba(215, 215, 215, 0.2)";
   }
 
   @Override
