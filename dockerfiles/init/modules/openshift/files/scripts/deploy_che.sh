@@ -277,17 +277,40 @@ echo "done!"
 echo -n "[CHE] Checking if project \"${CHE_OPENSHIFT_PROJECT}\" exists..."
 if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
 
-  if [ "${COMMAND}" == "cleanup" ] || [ "${COMMAND}" == "rollupdate" ]; then echo "**ERROR** project doesn't exist. Aborting"; exit 1; fi
-  if [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then echo "**ERROR** project doesn't exist on OSIO. Aborting"; exit 1; fi
+    if [ "${COMMAND}" == "cleanup" ] || [ "${COMMAND}" == "rollupdate" ]; then echo "**ERROR** project doesn't exist. Aborting"; exit 1; fi
+    if [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then echo "**ERROR** project doesn't exist on OSIO. Aborting"; exit 1; fi
 
-  echo -n "Project does not exist...creating it..."
-  oc new-project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
+    # OpenShift will not get project but project still exists for a period after being deleted.
+    # The following will loop until it can create successfully.
+
+    WAIT_FOR_PROJECT_TO_DELETE=true
+    WAIT_FOR_PROJECT_TO_DELETE_MESSAGE="Waiting for project to be deleted fully(~15 seconds)..."
+
+    echo "Project \"${CHE_OPENSHIFT_PROJECT}\" does not exist...trying to creating it."
+    DEPLOYMENT_TIMEOUT_SEC=120
+    POLLING_INTERVAL_SEC=2
+    timeout_in=$((POLLING_INTERVAL_SEC+DEPLOYMENT_TIMEOUT_SEC))  
+    while $WAIT_FOR_PROJECT_TO_DELETE
+    do
+    { # try
+        timeout_in=$((timeout_in-POLLING_INTERVAL_SEC))
+        if [ "$timeout_in" -le "0" ] ; then
+            echo "[CHE] **ERROR**: Timeout of $DEPLOYMENT_TIMEOUT_SEC waiting for project \"${CHE_OPENSHIFT_PROJECT}\" to be delete."
+            exit 1
+        fi  
+        oc new-project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null && \
+        WAIT_FOR_PROJECT_TO_DELETE=false # Only excutes if project creation is successfully
+    } || { # catch
+        echo -n $WAIT_FOR_PROJECT_TO_DELETE_MESSAGE
+        WAIT_FOR_PROJECT_TO_DELETE_MESSAGE="."
+        sleep $POLLING_INTERVAL_SEC
+    }
+    done
+    echo "Project \"${CHE_OPENSHIFT_PROJECT}\" creation done!"
+else
+    echo "Project \"${CHE_OPENSHIFT_PROJECT}\" already exists. Please remove project before running this script."
+    exit 1
 fi
-echo "done!"
-
-echo -n "[CHE] Switching to \"${CHE_OPENSHIFT_PROJECT}\"..."
-oc project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
-echo "done!"
 
 # -------------------------------------------------------------
 # Deploying secondary servers
