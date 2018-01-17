@@ -17,7 +17,6 @@ import org.eclipse.che.ide.ext.java.shared.Jar;
 import org.eclipse.che.ide.ext.java.shared.JarEntry;
 import org.eclipse.che.ide.ext.java.shared.OpenDeclarationDescriptor;
 import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
-import org.eclipse.che.ide.ext.java.shared.dto.ImplementationsDescriptorDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
 import org.eclipse.che.ide.ext.java.shared.dto.model.MethodParameters;
@@ -88,16 +87,6 @@ public interface JavaNavigationService {
    * @param showInherited <code>true</code> iff inherited members are shown
    */
   Promise<CompilationUnit> getCompilationUnit(Path project, String fqn, boolean showInherited);
-
-  /**
-   * Get implementations of the selected element.
-   *
-   * @param projectPath path to the project
-   * @param fqn fully qualified name of the java file
-   * @param offset cursor position
-   * @return descriptors of the implementations
-   */
-  Promise<ImplementationsDescriptorDTO> getImplementations(Path project, String fqn, int offset);
 
   Promise<List<JavaProject>> getProjectsAndPackages(boolean includePackage);
 

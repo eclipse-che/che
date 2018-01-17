@@ -45,6 +45,7 @@ public final class Constants {
   public static final String ORGANIZE_IMPORTS = "java/organizeImports";
   public static final String EFFECTIVE_POM = "java/effective-pom";
   public static final String REIMPORT_MAVEN_PROJECTS = "java/reimport-maven-projects";
+  public static final String IMPLEMENTERS = "java/implementers";
 
   private Constants() {
     throw new UnsupportedOperationException("Unused constructor.");
