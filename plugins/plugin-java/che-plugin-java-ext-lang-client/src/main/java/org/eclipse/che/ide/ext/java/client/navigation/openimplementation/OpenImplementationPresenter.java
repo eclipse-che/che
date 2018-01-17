@@ -92,11 +92,8 @@ public class OpenImplementationPresenter {
                   activeEditor.getPositionConverter().offsetToPixel(activeEditor.getCursorOffset());
               if (overridingSize == 1) {
                 openOneImplementation(impls.getImplementers().get(0));
-              } else if (overridingSize > 1) {
+              } else if (!isNullOrEmpty(impls.getSearchedElement())) {
                 openImplementations(impls, title, coordinates);
-              } else if (!isNullOrEmpty(impls.getSearchedElement()) && overridingSize == 0) {
-                new NoImplementationWidget(popupResources, locale, title)
-                    .show(coordinates.getX(), coordinates.getY());
               }
             });
   }
