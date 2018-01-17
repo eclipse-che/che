@@ -141,17 +141,17 @@ public class CheckIntelligenceCommandFromToolbarTest {
   private boolean clickOnPreviewUrlAndCheckTextIsPresentInPageBody(
       String currentWindow, String expectedText) {
     consoles.clickOnPreviewUrl();
-    seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
-    boolean result = getBodyText().contains(expectedText);
-    seleniumWebDriver.close();
-    seleniumWebDriver.switchTo().window(currentWindow);
-
-    return result;
+    return switchToOpenedWindowAndCheckTextIsPresent(currentWindow, expectedText);
   }
 
   private boolean clickOnPreviewButtonAndCheckTextIsPresentInPageBody(
       String currentWindow, String expectedText) {
     commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("dev-machine:tomcat8");
+    return switchToOpenedWindowAndCheckTextIsPresent(currentWindow, expectedText);
+  }
+
+  private boolean switchToOpenedWindowAndCheckTextIsPresent(
+      String currentWindow, String expectedText) {
     seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
     boolean result = getBodyText().contains(expectedText);
     seleniumWebDriver.close();
