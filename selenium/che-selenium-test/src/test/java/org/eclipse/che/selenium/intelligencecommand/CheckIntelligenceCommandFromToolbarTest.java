@@ -14,7 +14,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTIPLE;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -32,7 +32,6 @@ import org.eclipse.che.selenium.pageobject.intelligent.CommandsToolbar;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -40,8 +39,8 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class CheckIntelligenceCommandFromToolbarTest {
-
   private static final String PROJECT_NAME = NameGenerator.generate("project", 2);
+  private String currentWindow;
 
   @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
@@ -56,12 +55,12 @@ public class CheckIntelligenceCommandFromToolbarTest {
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(testWorkspace);
+    projectExplorer.waitProjectExplorer();
+    currentWindow = seleniumWebDriver.getWindowHandle();
   }
 
   @Test
   public void launchClonedWepAppTest() throws Exception {
-    String currentWindow = seleniumWebDriver.getWindowHandle();
-    projectExplorer.waitProjectExplorer();
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
     wizard.selectProjectAndCreate(Wizard.SamplesName.WEB_JAVA_SPRING, PROJECT_NAME);
     wizard.waitCreateProjectWizardFormIsClosed();
@@ -75,8 +74,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
     projectExplorer.waitProjectExplorer();
     consoles.selectProcessByTabName(PROJECT_NAME + ": build and run");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
-    consoles.clickOnPreviewUrl();
-    checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
+    checkTestAppByPreviewUrlAndReturnToIde(currentWindow, "Enter your name:");
   }
 
   @Test(
@@ -97,11 +95,10 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
   private void checkButtonsOnToolbar(String expectedText) {
     projectExplorer.waitProjectExplorer();
-    String currentWindow = seleniumWebDriver.getWindowHandle();
+    projectExplorer.waitItem(PROJECT_NAME);
     commandsToolbar.clickExecStopBtn();
 
-    consoles.clickOnPreviewUrl();
-    checkTestAppAndReturnToIde(currentWindow, expectedText);
+    checkTestAppByPreviewUrlAndReturnToIde(currentWindow, expectedText);
     commandsToolbar.clickExecRerunBtn();
     consoles.waitExpectedTextIntoConsole(" Server startup in");
     consoles.clickOnPreviewUrl();
@@ -116,22 +113,51 @@ public class CheckIntelligenceCommandFromToolbarTest {
       fail("Known issue https://github.com/eclipse/che/issues/8277");
     }
 
-    commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("dev-machine:tomcat8");
-    checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
+    checkTestAppByPreviewButtonAndReturnToIde(currentWindow, "Enter your name:");
     commandsToolbar.clickExecStopBtn();
     commandsToolbar.clickWithHoldAndLaunchDebuCmdFromList(PROJECT_NAME + ": debug");
     consoles.waitExpectedTextIntoConsole("Listening for transport dt_socket at address: 8000", 60);
     consoles.waitExpectedTextIntoConsole(" Server startup in", 30);
   }
 
-  private void checkTestAppAndReturnToIde(String currentWindow, String expectedTextOnTestAppPage) {
-    seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
-    new WebDriverWait(seleniumWebDriver, MULTIPLE)
+  private void checkTestAppByPreviewUrlAndReturnToIde(String currentWindow, String expectedText) {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.textToBePresentInElementLocated(
-                By.tagName("body"), expectedTextOnTestAppPage));
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    clickOnPreviewUrlAndCheckTextIsPresentInPageBody(currentWindow, expectedText));
+  }
+
+  private void checkTestAppByPreviewButtonAndReturnToIde(
+      String currentWindow, String expectedText) {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    clickOnPreviewButtonAndCheckTextIsPresentInPageBody(
+                        currentWindow, expectedText));
+  }
+
+  private boolean clickOnPreviewUrlAndCheckTextIsPresentInPageBody(
+      String currentWindow, String expectedText) {
+    consoles.clickOnPreviewUrl();
+    return switchToOpenedWindowAndCheckTextIsPresent(currentWindow, expectedText);
+  }
+
+  private boolean clickOnPreviewButtonAndCheckTextIsPresentInPageBody(
+      String currentWindow, String expectedText) {
+    commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("dev-machine:tomcat8");
+    return switchToOpenedWindowAndCheckTextIsPresent(currentWindow, expectedText);
+  }
+
+  private boolean switchToOpenedWindowAndCheckTextIsPresent(
+      String currentWindow, String expectedText) {
+    seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
+    boolean result = getBodyText().contains(expectedText);
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
+
+    return result;
   }
 
   private void waitOnAvailablePreviewPage(String currentWindow, String expectedTextOnPreviewPage) {
@@ -158,7 +184,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
   private WebElement getBody() {
     return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.tagName("body")));
+        .until(visibilityOfElementLocated(By.tagName("body")));
   }
 
   private String getBodyText() {

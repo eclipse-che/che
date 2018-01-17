@@ -15,10 +15,14 @@ import static org.testng.Assert.assertEquals;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.che.api.installer.server.InstallerRegistry;
+import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
+import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
-import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -30,7 +34,25 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class BuildContextTest {
 
-  @InjectMocks private ComposeEnvironmentFactory factory;
+  @Mock InstallerRegistry installerRegistry;
+  @Mock RecipeRetriever recipeRetriever;
+  @Mock MachineConfigsValidator machinesValidator;
+  @Mock ComposeEnvironmentValidator composeValidator;
+  @Mock ComposeServicesStartStrategy startStrategy;
+
+  private ComposeEnvironmentFactory factory;
+
+  @BeforeMethod
+  public void setup() {
+    factory =
+        new ComposeEnvironmentFactory(
+            installerRegistry,
+            recipeRetriever,
+            machinesValidator,
+            composeValidator,
+            startStrategy,
+            2048);
+  }
 
   @Test
   public void shouldParseBuildArgsWhenProvided() throws Exception {

@@ -104,7 +104,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
       PodSpec podSpec,
       Container container,
       InternalMachineConfig machineConfig) {
-    if (machineConfig == null || machineConfig.getVolumes().isEmpty()) {
+    if (machineConfig.getVolumes().isEmpty()) {
       return;
     }
     for (Entry<String, Volume> volumeEntry : machineConfig.getVolumes().entrySet()) {
