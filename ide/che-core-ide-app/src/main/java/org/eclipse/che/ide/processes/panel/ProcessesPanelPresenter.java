@@ -1077,7 +1077,7 @@ public class ProcessesPanelPresenter extends BasePresenter
   @Override
   public void onWorkspaceRunning(WorkspaceRunningEvent event) {
     List<MachineImpl> machines = getMachines();
-    for (MachineImpl machine: machines) {
+    for (MachineImpl machine : machines) {
       provideMachineNode(machine.getName(), true, false);
     }
   }
