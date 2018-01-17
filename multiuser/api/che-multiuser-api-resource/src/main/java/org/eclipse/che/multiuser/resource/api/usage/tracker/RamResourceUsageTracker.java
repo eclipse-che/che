@@ -36,6 +36,7 @@ import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
  * Tracks usage of {@link RamResourceType} resource.
  *
  * @author Sergii Leschenko
+ * @author Anton Korneta
  */
 @Singleton
 public class RamResourceUsageTracker implements ResourceUsageTracker {
@@ -70,21 +71,14 @@ public class RamResourceUsageTracker implements ResourceUsageTracker {
       if (WorkspaceStatus.STARTING.equals(activeWorkspace.getStatus())) {
         // starting workspace may not have all machine in runtime
         // it is need to calculate ram from environment config
-        EnvironmentImpl activeEnvironmentConfig =
+        final EnvironmentImpl startingEnvironment =
             activeWorkspace
                 .getConfig()
                 .getEnvironments()
                 .get(activeWorkspace.getRuntime().getActiveEnv());
-
-        currentlyUsedRamMB += environmentRamCalculator.calculate(activeEnvironmentConfig);
+        currentlyUsedRamMB += environmentRamCalculator.calculate(startingEnvironment);
       } else {
-        currentlyUsedRamMB += 0L;
-        //            activeWorkspace
-        //                .getRuntime()
-        //                .getMachines()
-        //                .stream()
-        //                .mapToInt(machine -> machine.getConfig().getLimits().getRam())
-        //                .sum();
+        currentlyUsedRamMB += environmentRamCalculator.calculate(activeWorkspace.getRuntime());
       }
     }
 

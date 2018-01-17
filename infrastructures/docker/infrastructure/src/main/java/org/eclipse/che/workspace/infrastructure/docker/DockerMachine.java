@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -54,6 +55,7 @@ public class DockerMachine implements Machine {
   private final DockerMachineStopDetector dockerMachineStopDetector;
   private final String registry;
   private final Map<String, ServerImpl> servers;
+  private final Map<String, String> attributes;
 
   private MachineStatus status;
 
@@ -64,19 +66,29 @@ public class DockerMachine implements Machine {
       Map<String, ServerImpl> servers,
       String registry,
       DockerMachineStopDetector dockerMachineStopDetector,
-      MachineStatus status) {
+      MachineStatus status,
+      Map<String, String> attributes) {
     this.container = containerId;
     this.docker = docker;
     this.image = image;
     this.registry = registry;
     this.dockerMachineStopDetector = dockerMachineStopDetector;
-    this.servers = servers;
+    if (servers != null) {
+      this.servers = ImmutableMap.copyOf(servers);
+    } else {
+      this.servers = Collections.emptyMap();
+    }
+    if (attributes != null) {
+      this.attributes = ImmutableMap.copyOf(attributes);
+    } else {
+      this.attributes = Collections.emptyMap();
+    }
     this.status = status;
   }
 
   @Override
   public Map<String, String> getAttributes() {
-    return Collections.emptyMap();
+    return attributes;
   }
 
   @Override
@@ -167,7 +179,7 @@ public class DockerMachine implements Machine {
   static class StartingDockerMachine extends DockerMachine {
 
     public StartingDockerMachine() {
-      super(null, null, null, null, null, null, MachineStatus.STARTING);
+      super(null, null, null, null, null, null, MachineStatus.STARTING, null);
     }
 
     @Override
