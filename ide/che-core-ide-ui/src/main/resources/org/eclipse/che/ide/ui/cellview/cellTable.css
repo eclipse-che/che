@@ -32,28 +32,28 @@
 
 .cellTableFooter {
     border-top: 1px solid cellTableHeaderBackground;
-    padding: 3px 15px;
     text-align: left;
-    color: mainFontColor;
+    color: cellTableHeaderColor;
     overflow: hidden;
     font-size: fontSize;
+    padding: 7px 10px;
 }
 
 .cellTableHeader {
     border-bottom: 1px solid cellTableHeaderBackground;
-    padding: 3px 15px;
     text-align: left;
-    color: mainFontColor;
+    color: cellTableHeaderColor;
     font-size: fontSize;
     overflow: hidden;
+    padding: 7px 10px;
 }
 
 .cellTableCell {
-    padding: 1px 5px;
     overflow: hidden;
     color: mainFontColor;
     font-size: fontSize;
     font-family: mainFontFamily;
+    padding: 7px 10px;
 }
 
 .cellTableCell input {
@@ -114,7 +114,7 @@
 }
 
 .cellTableEvenRowCell {
-    border: 1px solid cellEvenRow;
+    /*border: 1px solid cellEvenRow;*/
 }
 
 .cellTableOddRow {
@@ -122,7 +122,7 @@
 }
 
 .cellTableOddRowCell {
-    border: 1px solid cellOddRow;
+    /*border: 1px solid cellOddRow;*/
 }
 
 .cellTableHoveredRow {
