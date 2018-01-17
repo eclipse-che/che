@@ -27,5 +27,4 @@ export class WorkspaceStatus implements ng.IDirective {
     status: '=cheStatus',
     isSupported: '=cheIsSupported'
   };
-
 }

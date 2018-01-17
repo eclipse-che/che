@@ -20,7 +20,7 @@ import {StackController} from '../stack.controller';
  */
 export class SelectTemplateController {
   stack: che.IStack;
-  selectedTemplates: Array<che.IProject>;
+  selectedTemplates: Array<che.IProjectTemplate>;
   projectsOrderBy: string;
 
   private $mdDialog: ng.material.IDialogService;
@@ -53,10 +53,10 @@ export class SelectTemplateController {
 
   /**
    * Helper method used to get the length of keys of the given object
-   * @param projectTemplate {che.IProject}
+   * @param projectTemplate {che.IProjectTemplate}
    * @param isAdd {boolean}
    */
-  updateSelectedTemplates(projectTemplate: che.IProject, isAdd: boolean): void {
+  updateSelectedTemplates(projectTemplate: che.IProjectTemplate, isAdd: boolean): void {
     if (isAdd) {
       this.selectedTemplates.push(projectTemplate);
     } else {

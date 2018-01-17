@@ -14,7 +14,6 @@ import {ImportStackService} from '../../stack-details/import-stack.service';
 import {CheStack} from '../../../../components/api/che-stack.factory';
 import {IEnvironmentManagerMachine} from '../../../../components/api/environment/environment-manager-machine';
 import {CheBranding} from '../../../../components/branding/che-branding.factory';
-import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
 import {CheRecipeTypes} from '../../../../components/api/recipe/che-recipe-types';
 import {RecipeEditor} from './recipe-editor/recipe-editor';
 import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
@@ -68,7 +67,7 @@ export class BuildStackController {
    * It will hide the dialog box.
    */
   cancel(): void {
-    this.importStackService.setStack({});
+    this.importStackService.setStack({} as che.IStack);
     this.$mdDialog.cancel();
   }
 

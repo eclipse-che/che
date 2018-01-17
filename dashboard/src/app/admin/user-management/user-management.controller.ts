@@ -10,6 +10,10 @@
  */
 'use strict';
 
+import {CheUser} from '../../../components/api/che-user.factory';
+import {CheNotification} from '../../../components/notification/che-notification.factory';
+import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
+
 const MAX_ITEMS = 12;
 
 /**
@@ -21,16 +25,16 @@ export class AdminsUserManagementCtrl {
   $log: ng.ILogService;
   $mdDialog: ng.material.IDialogService;
   $location: ng.ILocationService;
-  cheUser: any;
-  cheNotification: any;
+  cheUser: CheUser;
+  cheNotification: CheNotification;
   pagesInfo: any;
-  users: Array<any>;
-  usersMap: Map<string, any>;
+  users: Array<che.IUser>;
+  usersMap: Map<string, che.IUser>;
   userFilter: {name: string};
   userOrderBy: string;
   isLoading: boolean;
 
-  private confirmDialogService: any;
+  private confirmDialogService: ConfirmDialogService;
   private cheOrganization: che.api.ICheOrganization;
   private userOrganizationCount: {[userId: string]: number} = {};
   private cheListHelper: che.widget.ICheListHelper;
@@ -43,10 +47,10 @@ export class AdminsUserManagementCtrl {
               $rootScope: che.IRootScopeService,
               $log: ng.ILogService,
               $mdDialog: ng.material.IDialogService,
-              cheUser: any,
+              cheUser: CheUser,
               $location: ng.ILocationService,
-              cheNotification: any,
-              confirmDialogService: any,
+              cheNotification: CheNotification,
+              confirmDialogService: ConfirmDialogService,
               cheOrganization: che.api.ICheOrganization,
               $scope: ng.IScope,
               cheListHelperFactory: che.widget.ICheListHelperFactory) {

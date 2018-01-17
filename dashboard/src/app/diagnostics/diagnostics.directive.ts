@@ -24,7 +24,7 @@
  *
  * @author Florent Benoit
  */
-export class Diagnostics {
+export class Diagnostics implements ng.IDirective {
 
   replace: boolean = false;
   restrict: string = 'E';

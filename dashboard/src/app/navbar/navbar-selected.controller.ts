@@ -18,11 +18,13 @@
  */
 export class NavBarSelectedCtrl {
 
+  $mdSidenav: ng.material.ISidenavService;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($mdSidenav) {
+  constructor ($mdSidenav: ng.material.ISidenavService) {
     this.$mdSidenav = $mdSidenav;
   }
 

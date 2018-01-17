@@ -11,7 +11,6 @@
 'use strict';
 
 import {EnvironmentManager} from '../../../../../components/api/environment/environment-manager';
-import {CheRecipeTypes} from '../../../../../components/api/recipe/che-recipe-types';
 
 export class RecipeEditor {
 

@@ -211,20 +211,9 @@ export class EditMachineDialogController {
   }
 
   /**
-   * Stringify machine recipe.
-   */
-  private stringifyMachineRecipe(): void {
-    try {
-      this.machineRecipeScript = this.environmentManager.stringifyRecipe(this.machine.recipe);
-    } catch (e) {
-      this.$log.error('Cannot parse machine\'s recipe, error: ', e);
-    }
-  }
-
-  /**
    * Parse machine recipe.
    */
-  private parseMachineRecipe(): void {
+  parseMachineRecipe(): void {
     try {
       this.machine.recipe = this.environmentManager.parseMachineRecipe(this.machineRecipeScript);
       // checks critical recipe changes
@@ -246,6 +235,17 @@ export class EditMachineDialogController {
       this.copyEnvironment = this.environmentManager.getEnvironment(this.copyEnvironment, machines);
     } catch (e) {
       this.$log.error('Cannot stringify machine\'s recipe, error: ', e);
+    }
+  }
+
+  /**
+   * Stringify machine recipe.
+   */
+  private stringifyMachineRecipe(): void {
+    try {
+      this.machineRecipeScript = this.environmentManager.stringifyRecipe(this.machine.recipe);
+    } catch (e) {
+      this.$log.error('Cannot parse machine\'s recipe, error: ', e);
     }
   }
 
