@@ -19,6 +19,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.env.EnvVarsConverter;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.limits.ram.RamLimitProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.route.TlsRouteProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.server.ServersConverter;
@@ -40,6 +41,7 @@ public class OpenShiftEnvironmentProvisioner {
   private final ServersConverter serversConverter;
   private final EnvVarsConverter envVarsConverter;
   private final RestartPolicyRewriter restartPolicyRewriter;
+  private final RamLimitProvisioner ramLimitProvisioner;
 
   @Inject
   public OpenShiftEnvironmentProvisioner(
@@ -49,7 +51,8 @@ public class OpenShiftEnvironmentProvisioner {
       ServersConverter serversConverter,
       EnvVarsConverter envVarsConverter,
       RestartPolicyRewriter restartPolicyRewriter,
-      WorkspaceVolumesStrategy volumesStrategy) {
+      WorkspaceVolumesStrategy volumesStrategy,
+      RamLimitProvisioner ramLimitProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -57,6 +60,7 @@ public class OpenShiftEnvironmentProvisioner {
     this.serversConverter = serversConverter;
     this.envVarsConverter = envVarsConverter;
     this.restartPolicyRewriter = restartPolicyRewriter;
+    this.ramLimitProvisioner = ramLimitProvisioner;
   }
 
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
@@ -72,7 +76,6 @@ public class OpenShiftEnvironmentProvisioner {
     restartPolicyRewriter.provision(osEnv, identity);
     uniqueNamesProvisioner.provision(osEnv, identity);
     tlsRouteProvisioner.provision(osEnv, identity);
+    ramLimitProvisioner.provision(osEnv, identity);
   }
-
-  // TODO memory attribute provisioner
 }

@@ -8,42 +8,37 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.infrastructure.openshift.provision.env;
+package org.eclipse.che.workspace.infrastructure.openshift.provision.limits.ram;
+
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.workspace.infrastructure.openshift.Names.machineName;
 
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
-import javax.inject.Singleton;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
-import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.ConfigurationProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.util.Containers;
 
 /**
- * Converts environment variables in {@link MachineConfig} to OpenShift environment variables.
+ * Sets Ram limit to OpenShift machine.
  *
- * @author Alexander Garagatyi
+ * @author Anton Korneta
  */
-@Singleton
-public class EnvVarsConverter implements ConfigurationProvisioner {
+public class RamLimitProvisioner implements ConfigurationProvisioner {
+
   @Override
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-
+    final Map<String, InternalMachineConfig> machines = osEnv.getMachines();
     for (Pod pod : osEnv.getPods().values()) {
       for (Container container : pod.getSpec().getContainers()) {
-        String machineName = Names.machineName(pod, container);
-        InternalMachineConfig machineConf = osEnv.getMachines().get(machineName);
-        machineConf
-            .getEnv()
-            .forEach(
-                (key, value) -> {
-                  container.getEnv().removeIf(env -> key.equals(env.getName()));
-                  container.getEnv().add(new EnvVar(key, value, null));
-                });
+        final Map<String, String> attributes =
+            machines.get(machineName(pod, container)).getAttributes();
+        Containers.addRamLimit(container, Long.parseLong(attributes.get(MEMORY_LIMIT_ATTRIBUTE)));
       }
     }
   }
