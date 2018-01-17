@@ -104,7 +104,7 @@ public class CheckRestoringSplitEditorTest {
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       LOG.info(getPreferences());
-      fail("Known issue https://github.com/eclipse/che/issues/7551 " + "\n" + getPreferences(), ex);
+      fail("Known issue https://github.com/eclipse/che/issues/7551 ", ex);
     }
 
     notificationsPopupPanel.waitPopUpPanelsIsClosed();
