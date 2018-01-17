@@ -83,7 +83,8 @@ initVariables() {
     unset TMP_SUITE_PATH
     unset ORIGIN_TESTS_SCOPE
     unset TMP_DIR
-    unset NEW_USER_ID
+    unset NEW_DEFAULT_USER_ID
+    unset NEW_SECOND_USER_ID
 }
 
 cleanUpEnvironment() {
@@ -92,8 +93,8 @@ cleanUpEnvironment() {
         stopSeleniumDockerContainers
     fi
 
-    if [[ -n ${NEW_USER_ID} ]]; then
-       removeTestUser
+    if [[ -n ${NEW_DEFAULT_USER_ID} ]]; then
+       removeTestUsers
     fi
 }
 
@@ -845,21 +846,23 @@ prepareToFirstRun() {
     initRunMode
 
     if [[ ${CHE_MULTIUSER} == false ]]; then
-      prepareTestUserForSingleuserChe
+      prepareTestUsersForSingleuserChe
     else
-      prepareTestUserForMultiuserChe
+      prepareTestUsersForMultiuserChe
     fi
 }
 
-prepareTestUserForSingleuserChe() {
+prepareTestUsersForSingleuserChe() {
+    export CHE_ADMIN_NAME=
     export CHE_ADMIN_EMAIL=
     export CHE_ADMIN_PASSWORD=
 
+    export CHE_TESTUSER_NAME=che
     export CHE_TESTUSER_EMAIL=che@eclipse.org
     export CHE_TESTUSER_PASSWORD=secret
 }
 
-prepareTestUserForMultiuserChe() {
+prepareTestUsersForMultiuserChe() {
     export CHE_ADMIN_NAME=${CHE_ADMIN_NAME:-admin}
     export CHE_ADMIN_EMAIL=${CHE_ADMIN_EMAIL:-admin@admin.com}
     export CHE_ADMIN_PASSWORD=${CHE_ADMIN_PASSWORD:-admin}
@@ -871,11 +874,11 @@ prepareTestUserForMultiuserChe() {
     # create test user by executing kcadm.sh commands inside keycloak docker container if there are no its credentials among environment variables
     if [[ "${PRODUCT_HOST}" == "$(detectDockerInterfaceIp)" ]] || [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
 
-        echo "[TEST] Creating test user..."
         local time=$(date +%s)
         export CHE_TESTUSER_NAME=${CHE_TESTUSER_NAME:-user${time}}
         export CHE_TESTUSER_EMAIL=${CHE_TESTUSER_EMAIL:-${CHE_TESTUSER_NAME}@1.com}
         export CHE_TESTUSER_PASSWORD=${CHE_TESTUSER_PASSWORD:-${time}}
+        echo "[TEST] Creating default test user with name '$CHE_TESTUSER_NAME'..."
 
         if [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
             local kc_container_id=$(docker ps | grep 'eclipse-che/keycloak' | cut -d ' ' -f1)
@@ -886,28 +889,62 @@ prepareTestUserForMultiuserChe() {
         local cli_auth="--no-config --server http://localhost:8080/auth --user ${CHE_ADMIN_NAME} --password ${CHE_ADMIN_PASSWORD} --realm master"
         local response=$(docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh create users -r che -s username=${CHE_TESTUSER_NAME} -s enabled=true $cli_auth 2>&1")
         if [[ "$response" =~ "Created new user with id" ]]; then
-           NEW_USER_ID=$(echo "$response" | grep "Created new user with id" | sed -e "s#Created new user with id ##" | sed -e "s#'##g")
+           NEW_DEFAULT_USER_ID=$(echo "$response" | grep "Created new user with id" | sed -e "s#Created new user with id ##" | sed -e "s#'##g")
            # set test user's permanent password
            docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh set-password -r che --username ${CHE_TESTUSER_NAME} --new-password ${CHE_TESTUSER_PASSWORD} $cli_auth"
            # set email of test user to ${cheTestUserEmail}
-           docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh update users/${NEW_USER_ID} -r che --set email=${CHE_TESTUSER_EMAIL} $cli_auth"
+           docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh update users/${NEW_DEFAULT_USER_ID} -r che --set email=${CHE_TESTUSER_EMAIL} $cli_auth"
            # add realm role "user" test user
            docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh add-roles -r che --uusername ${CHE_TESTUSER_NAME} --rolename user $cli_auth"
            # add role "read-token" of client "broker" to test user
            docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh add-roles -r che --uusername ${CHE_TESTUSER_NAME} --cclientid broker --rolename read-token $cli_auth"
         else
            # set test user credentials to be equal to admin ones in case of problem with creation of user
-           echo -e "${RED}[WARN] There is a problem with creation of test user in Keycloak server: '${response}'.${NO_COLOUR}"
-           echo -e "Admin user will be used as a test user."
+           echo -e "${RED}[WARN] There is a problem with creation of default test user in Keycloak server: '${response}'.${NO_COLOUR}"
+           echo -e "Admin user will be used as default test user."
            CHE_TESTUSER_NAME=${CHE_ADMIN_NAME}
            CHE_TESTUSER_EMAIL=${CHE_ADMIN_EMAIL}
            CHE_TESTUSER_PASSWORD=${CHE_ADMIN_PASSWORD}
         fi
+        
+        # create second test user
+        time=$(date +%s)
+        export CHE_SECOND_TESTUSER_NAME=${CHE_SECOND_TESTUSER_NAME:-user${time}}
+        export CHE_SECOND_TESTUSER_EMAIL=${CHE_SECOND_TESTUSER_EMAIL:-${CHE_SECOND_TESTUSER_NAME}@1.com}
+        export CHE_SECOND_TESTUSER_PASSWORD=${CHE_SECOND_TESTUSER_PASSWORD:-${time}}
+        echo "[TEST] Creating second test user with name '$CHE_SECOND_TESTUSER_NAME'..."
+
+        if [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
+            local kc_container_id=$(docker ps | grep 'eclipse-che/keycloak' | cut -d ' ' -f1)
+        else
+            local kc_container_id=$(docker ps | grep che_keycloak | cut -d ' ' -f1)
+        fi
+
+        local cli_auth="--no-config --server http://localhost:8080/auth --user ${CHE_ADMIN_NAME} --password ${CHE_ADMIN_PASSWORD} --realm master"
+        local response=$(docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh create users -r che -s username=${CHE_SECOND_TESTUSER_NAME} -s enabled=true $cli_auth 2>&1")
+        if [[ "$response" =~ "Created new user with id" ]]; then
+           NEW_SECOND_USER_ID=$(echo "$response" | grep "Created new user with id" | sed -e "s#Created new user with id ##" | sed -e "s#'##g")
+           # set test user's permanent password
+           docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh set-password -r che --username ${CHE_SECOND_TESTUSER_NAME} --new-password ${CHE_SECOND_TESTUSER_PASSWORD} $cli_auth"
+           # set email of test user to ${cheTestUserEmail}
+           docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh update users/${NEW_SECOND_USER_ID} -r che --set email=${CHE_SECOND_TESTUSER_EMAIL} $cli_auth"
+           # add realm role "user" test user
+           docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh add-roles -r che --uusername ${CHE_SECOND_TESTUSER_NAME} --rolename user $cli_auth"
+           # add role "read-token" of client "broker" to test user
+           docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh add-roles -r che --uusername ${CHE_SECOND_TESTUSER_NAME} --cclientid broker --rolename read-token $cli_auth"
+        else
+           # set test user credentials to be equal to admin ones in case of problem with creation of user
+           echo -e "${RED}[WARN] There is a problem with creation of second test user in Keycloak server: '${response}'.${NO_COLOUR}"
+           echo -e "Admin user will be used as a second test user."
+           CHE_SECOND_TESTUSER_NAME=${CHE_ADMIN_NAME}
+           CHE_SECOND_TESTUSER_EMAIL=${CHE_ADMIN_EMAIL}
+           CHE_SECOND_TESTUSER_PASSWORD=${CHE_ADMIN_PASSWORD}
+        fi
     fi
 }
 
-removeTestUser() {
-    echo "[TEST] Removing test user with name '${CHE_TESTUSER_NAME}'..."
+removeTestUsers() {
+    echo "[TEST] Removing default test user with name '${CHE_TESTUSER_NAME}'..."
     if [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
         local kc_container_id=$(docker ps | grep 'eclipse-che/keycloak' | cut -d ' ' -f1)
     else
@@ -915,7 +952,18 @@ removeTestUser() {
     fi
 
     local cli_auth="--no-config --server http://localhost:8080/auth --user ${CHE_ADMIN_NAME} --password ${CHE_ADMIN_PASSWORD} --realm master"
-    local response=$(docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh delete users/${NEW_USER_ID} -r che -s username=${CHE_TESTUSER_NAME} $cli_auth 2>&1")
+    local response=$(docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh delete users/${NEW_DEFAULT_USER_ID} -r che -s username=${CHE_TESTUSER_NAME} $cli_auth 2>&1")
+    
+    echo "[TEST] Removing second test user with name '${CHE_SECOND_TESTUSER_NAME}'..."
+    if [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
+        local kc_container_id=$(docker ps | grep 'eclipse-che/keycloak' | cut -d ' ' -f1)
+    else
+        local kc_container_id=$(docker ps | grep che_keycloak | cut -d ' ' -f1)
+    fi
+
+    local cli_auth="--no-config --server http://localhost:8080/auth --user ${CHE_ADMIN_NAME} --password ${CHE_ADMIN_PASSWORD} --realm master"
+    local response=$(docker exec -i $kc_container_id sh -c "keycloak/bin/kcadm.sh delete users/${NEW_SECOND_USER_ID} -r che -s username=${CHE_SECOND_TESTUSER_NAME} $cli_auth 2>&1")
+
 }
 
 testProduct() {
