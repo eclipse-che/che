@@ -19,20 +19,8 @@
 
     <absolute-ordering></absolute-ordering>
 
-    <context-param>
-        <param-name>org.eclipse.che.websocket.endpoint</param-name>
-        <param-value>/ws</param-value>
-    </context-param>
-    <context-param>
-        <param-name>org.eclipse.che.eventbus.endpoint</param-name>
-        <param-value>/eventbus/</param-value>
-    </context-param>
-
     <listener>
         <listener-class>org.eclipse.che.inject.CheBootstrap</listener-class>
-    </listener>
-    <listener>
-        <listener-class>org.eclipse.che.everrest.ServerContainerInitializeListener</listener-class>
     </listener>
 
     <filter>
