@@ -120,12 +120,17 @@
 }
 
 .tree {
-    display: inline-block;
-    min-width: 100%;
+    display: relative;
     font-size: 0.85em;
     outline: none;
-    overflow-y: auto;
+    overflow: auto;
     padding-bottom: 2px;
+}
+
+.contentTree {
+  position: absolute;
+  overflow: hidden;
+  left: 0;
 }
 
 .tree:focus {

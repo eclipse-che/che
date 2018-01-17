@@ -49,6 +49,8 @@ public interface TreeStyles extends ClientBundle {
 
     String tree();
 
+    String contentTree();
+
     String loading();
   }
 

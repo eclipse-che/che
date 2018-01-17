@@ -237,6 +237,8 @@ public class Tree extends FocusWidget
   /** @see FocusImpl#createFocusable() */
   private Element focusEl;
 
+  private Element contentEl;
+
   /** Delayed task to update visual state of specific node. */
   private DelayedTask updateTask;
 
@@ -1319,6 +1321,13 @@ public class Tree extends FocusWidget
   private void ensureTreeElement() {
     DivElement element = Document.get().createDivElement();
     element.addClassName(treeStyles.styles().tree());
+
+    DivElement contentTree = Document.get().createDivElement();
+    contentTree.addClassName(treeStyles.styles().contentTree());
+    contentTree.setId("content-Tree");
+
+    element.appendChild(contentTree);
+
     setElement(element);
   }
 
