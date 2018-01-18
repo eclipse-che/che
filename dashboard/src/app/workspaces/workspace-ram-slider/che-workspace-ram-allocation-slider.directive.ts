@@ -15,30 +15,25 @@
  * It will change upon width of the screen
  * @author Oleksii Kurinnyi
  */
-export class CheWorkspaceRamAllocationSlider {
+export class CheWorkspaceRamAllocationSlider implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor () {
-    this.restrict = 'E';
+  restrict = 'E';
 
-    this.replace = true;
-    this.templateUrl = 'app/workspaces/workspace-ram-slider/che-workspace-ram-allocation-slider.html';
+  replace = true;
+  templateUrl = 'app/workspaces/workspace-ram-slider/che-workspace-ram-allocation-slider.html';
 
-    // we require ngModel as we want to use it inside our directive
-    this.require = 'ngModel';
+  // we require ngModel as we want to use it inside our directive
+  require = 'ngModel';
 
-    this.bindToController = true;
+  bindToController = true;
 
-    this.controller = 'CheWorkspaceRamAllocationSliderController';
-    this.controllerAs = 'cheWorkspaceRamAllocationSliderController';
+  controller = 'CheWorkspaceRamAllocationSliderController';
+  controllerAs = 'cheWorkspaceRamAllocationSliderController';
 
-    // scope values
-    this.scope = {
-      ngModel: '=',
-      cheOnChange: '&'
-    };
-  }
+  // scope values
+  scope = {
+    ngModel: '=',
+    cheOnChange: '&'
+  };
+
 }

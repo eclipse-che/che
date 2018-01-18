@@ -33,10 +33,10 @@ export class ProfileController {
 
     this.profileUrl = cheKeycloak.getProfileUrl();
     let profile = cheProfile.getProfile();
-    this.firstName = <string>profile.attributes['firstName'];
-    this.lastName = <string>profile.attributes['lastName'];
+    this.firstName = <string>profile.attributes.firstName;
+    this.lastName = <string>profile.attributes.lastName;
     this.email = profile.email;
-    this.userName = <string>profile.attributes['preferred_username'];
+    this.userName = <string>(profile.attributes as any).preferred_username;
   }
 
   /**

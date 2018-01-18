@@ -51,7 +51,7 @@ export class FactoryFromFileCtrl {
 
     this.isImporting = this.uploader.isUploading;
 
-    var ctrl = this;
+    const ctrl = this;
 
     // filters
     this.uploader.filters.push({

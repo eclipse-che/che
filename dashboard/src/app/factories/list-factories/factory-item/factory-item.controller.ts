@@ -20,14 +20,17 @@ export class FactoryItemController {
   private $location: ng.ILocationService;
   private cheFactory: CheFactory;
   private cheEnvironmentRegistry: CheEnvironmentRegistry;
-  private lodash: _.LoDashStatic;
+  private lodash: any;
   private factory: che.IFactory;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, cheFactory: CheFactory, cheEnvironmentRegistry: CheEnvironmentRegistry, lodash: _.LoDashStatic) {
+  constructor($location: ng.ILocationService,
+              cheFactory: CheFactory,
+              cheEnvironmentRegistry: CheEnvironmentRegistry,
+              lodash: any) {
     this.$location = $location;
     this.cheFactory = cheFactory;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;

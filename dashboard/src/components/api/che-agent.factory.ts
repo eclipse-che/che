@@ -55,12 +55,12 @@ export class CheAgent {
       // reset global list
       this.agents.length = 0;
 
-      agents.forEach((agent: che.IAgent[]) => {
+      agents.forEach((agent: che.IAgent) => {
         this.agents.push(agent);
       });
       defer.resolve(this.agents);
     }, (error: any) => {
-      if (error.status != 304) {
+      if (error.status !== 304) {
         defer.reject(error);
       } else {
         defer.resolve(this.agents);

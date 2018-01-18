@@ -27,7 +27,9 @@ export class AddDeveloperController {
   /**
    * true if user owns the workspace.
    */
+  /* tslint:disable */
   private canShare: boolean;
+  /* tslint:enable */
   /**
    * List of users to share the workspace.
    */

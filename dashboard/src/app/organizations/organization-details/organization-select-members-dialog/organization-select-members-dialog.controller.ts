@@ -58,10 +58,6 @@ export class OrganizationSelectMembersDialogController {
    */
   private availableUsers: Array<IOrganizationMember>;
   /**
-   * The list of users, that are going to be added
-   */
-  private usersToAdd: Array<IOrganizationMember>;
-  /**
    * Current user.
    */
   private user: che.IUser;
@@ -122,7 +118,7 @@ export class OrganizationSelectMembersDialogController {
       map[member.id] = member;
       return map;
     }, {});
-    this.availableUsers = this.parentOrganizationMembers.filter((parentOrganizationMember: che.IUser) => {
+    this.availableUsers = <any>this.parentOrganizationMembers.filter((parentOrganizationMember: che.IUser) => {
       return !existingMembers[parentOrganizationMember.id] && parentOrganizationMember.id !== this.user.id;
     });
 
