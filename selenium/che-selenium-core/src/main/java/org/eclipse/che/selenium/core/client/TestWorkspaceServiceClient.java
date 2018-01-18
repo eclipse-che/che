@@ -37,7 +37,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.MemoryMeasure;
 import org.slf4j.Logger;
@@ -53,29 +52,21 @@ public class TestWorkspaceServiceClient {
 
   private final TestApiEndpointUrlProvider apiEndpointProvider;
   private final HttpJsonRequestFactory requestFactory;
-  private final TestUserNamespaceResolver userNamespaceResolver;
 
   @Inject
   public TestWorkspaceServiceClient(
-      TestApiEndpointUrlProvider apiEndpointProvider,
-      HttpJsonRequestFactory requestFactory,
-      TestUserNamespaceResolver userNamespaceResolver) {
+      TestApiEndpointUrlProvider apiEndpointProvider, HttpJsonRequestFactory requestFactory) {
     this.apiEndpointProvider = apiEndpointProvider;
     this.requestFactory = requestFactory;
-    this.userNamespaceResolver = userNamespaceResolver;
   }
 
   @AssistedInject
   public TestWorkspaceServiceClient(
       TestApiEndpointUrlProvider apiEndpointProvider,
-      TestUserNamespaceResolver userNamespaceResolver,
       TestUserHttpJsonRequestFactoryCreator userHttpJsonRequestFactoryCreator,
-      @Assisted("email") String email,
+      @Assisted("name") String name,
       @Assisted("password") String password) {
-    this(
-        apiEndpointProvider,
-        userHttpJsonRequestFactoryCreator.create(email, password),
-        userNamespaceResolver);
+    this(apiEndpointProvider, userHttpJsonRequestFactoryCreator.create(name, password));
   }
 
   private String getBaseUrl() {
@@ -289,7 +280,7 @@ public class TestWorkspaceServiceClient {
   }
 
   private String getNameBasedUrl(String workspaceName, String username) {
-    return getBaseUrl() + "/" + userNamespaceResolver.resolve(username) + "/" + workspaceName;
+    return getBaseUrl() + "/" + username + "/" + workspaceName;
   }
 
   private String getIdBasedUrl(String workspaceId) {

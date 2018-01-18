@@ -14,18 +14,22 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-/** @author Anatolii Bazko */
+/**
+ * Second {@link TestUser} that will be created before all tests and will be deleted after them.
+ *
+ * @author Dmytro Nochevnov
+ */
 @Singleton
-public class CheAdminTestUser implements AdminTestUser {
+public class CheSecondTestUser implements TestUser {
 
   private final TestUser delegate;
 
   @Inject
-  public CheAdminTestUser(
+  public CheSecondTestUser(
       TestUserFactory userFactory,
-      @Named("che.admin.name") String name,
-      @Named("che.admin.email") String email,
-      @Named("che.admin.password") String password)
+      @Named("che.second.testuser.name") String name,
+      @Named("che.second.testuser.email") String email,
+      @Named("che.second.testuser.password") String password)
       throws Exception {
     this.delegate = userFactory.create(name, email, password);
   }
