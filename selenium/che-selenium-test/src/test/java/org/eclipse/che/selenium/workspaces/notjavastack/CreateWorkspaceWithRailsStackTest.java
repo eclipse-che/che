@@ -65,7 +65,7 @@ public class CreateWorkspaceWithRailsStackTest {
     createWorkspace.typeWorkspaceName(WORKSPACE);
     createWorkspace.selectStack(TestStacksConstants.RAILS.getId());
     createWorkspace.setMachineRAM("2");
-    createWorkspace.clickOnCreateButtonAndStartWorkspace();
+    createWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     dashboard.waitNotificationIsClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();

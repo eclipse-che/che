@@ -182,6 +182,7 @@ public class WorkspaceDetails {
   }
 
   public void clickOnCancelChangesBtn() {
+    // this timeout is needed for the Cancel to appears after renaming of a workspace
     WaitUtils.sleepQuietly(3);
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOf(cancelBtn))

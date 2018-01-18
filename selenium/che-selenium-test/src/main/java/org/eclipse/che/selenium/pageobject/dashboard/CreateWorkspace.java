@@ -271,7 +271,7 @@ public class CreateWorkspace {
         .click();
   }
 
-  public void clickOnCreateButtonAndStartWorkspace() {
+  public void clickOnCreateButtonAndOpenInIDE() {
     createWorkspaceButton.click();
     waitWorkspaceIsCreatedDialogIsVisible();
     clickOnOpenInIDEButton();

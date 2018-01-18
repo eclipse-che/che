@@ -65,7 +65,7 @@ public class CreateWorkspaceWithCppStackTest {
     createWorkspace.typeWorkspaceName(WORKSPACE);
     createWorkspace.selectStack(TestStacksConstants.CPP.getId());
     createWorkspace.setMachineRAM("2");
-    createWorkspace.clickOnCreateButtonAndStartWorkspace();
+    createWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     dashboard.waitNotificationIsClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();
