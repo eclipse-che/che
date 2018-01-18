@@ -100,8 +100,7 @@ public class CheSeleniumSuiteModule extends AbstractModule {
   public TestWorkspace getWorkspace(
       TestWorkspaceProvider workspaceProvider,
       TestUser testUser,
-      @Named("workspace.default_memory_gb") int defaultMemoryGb,
-      @Named("che.infrastructure") String infrastructure)
+      @Named("workspace.default_memory_gb") int defaultMemoryGb)
       throws Exception {
     TestWorkspace ws = workspaceProvider.createWorkspace(testUser, defaultMemoryGb, DEFAULT);
     ws.await();
