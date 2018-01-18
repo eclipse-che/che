@@ -12,7 +12,6 @@ package org.eclipse.che.selenium.core.client;
 
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
@@ -42,6 +41,7 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.MemoryMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 
 /**
  * @author Musienko Maxim
@@ -219,7 +219,13 @@ public class TestWorkspaceServiceClient {
   public void start(String workspaceId, String workspaceName, TestUser workspaceOwner)
       throws Exception {
     sendStartRequest(workspaceId, workspaceName);
-    waitStatus(workspaceName, workspaceOwner.getName(), RUNNING);
+
+    try {
+      waitStatus(workspaceName, workspaceOwner.getName(), WorkspaceStatus.STOPPED);
+    } catch (IllegalStateException ex) {
+      // Remove try-catch block after issue has been resolved
+      Assert.fail("Known issue https://github.com/eclipse/che/issues/8031");
+    }
   }
 
   /** Gets workspace by its id. */
