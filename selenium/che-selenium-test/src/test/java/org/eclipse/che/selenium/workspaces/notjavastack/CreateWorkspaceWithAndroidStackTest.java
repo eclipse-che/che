@@ -65,7 +65,7 @@ public class CreateWorkspaceWithAndroidStackTest {
     createWorkspace.typeWorkspaceName(WORKSPACE);
     createWorkspace.selectStack(TestStacksConstants.ANDROID.getId());
     createWorkspace.setMachineRAM("2");
-    createWorkspace.clickOnCreateWorkspaceButton();
+    createWorkspace.clickOnCreateButtonAndStartWorkspace();
 
     dashboard.waitNotificationIsClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();

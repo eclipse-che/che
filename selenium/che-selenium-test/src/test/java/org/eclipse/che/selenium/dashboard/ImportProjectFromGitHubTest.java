@@ -90,7 +90,7 @@ public class ImportProjectFromGitHubTest {
     assertTrue(projectSourcePage.isGithubProjectsListDisplayed());
     projectSourcePage.selectProjectFromList(GITHUB_PROJECT_NAME);
     projectSourcePage.clickOnAddProjectButton();
-    createWorkspace.clickOnCreateWorkspaceButton();
+    createWorkspace.clickOnCreateButtonAndStartWorkspace();
 
     seleniumWebDriver.switchFromDashboardIframeToIde(ELEMENT_TIMEOUT_SEC);
 

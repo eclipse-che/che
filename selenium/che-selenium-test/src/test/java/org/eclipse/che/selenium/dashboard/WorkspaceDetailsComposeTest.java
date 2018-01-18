@@ -12,11 +12,9 @@ package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.RUNNING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPED;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.ENV_VARIABLES;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.MACHINES;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.OVERVIEW;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
@@ -177,21 +175,9 @@ public class WorkspaceDetailsComposeTest {
     loader.waitOnClosed();
     createWorkspace.selectStack(JAVA_MYSQL.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);
-    createWorkspace.clickOnCreateWorkspaceButton();
+    createWorkspace.clickOnCreateButtonAndEditWorkspace();
 
-    seleniumWebDriver.switchFromDashboardIframeToIde(60);
-    projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab(PREPARING_WS_TIMEOUT_SEC);
-
-    dashboard.open();
-    dashboard.waitDashboardToolbarTitle();
-    dashboard.selectWorkspacesItemOnDashboard();
-    dashboard.waitToolbarTitleName("Workspaces");
-    workspaces.selectWorkspaceItemName(WORKSPACE);
     workspaces.waitToolbarTitleName(WORKSPACE);
-    workspaceDetails.selectTabInWorkspaceMenu(OVERVIEW);
-    workspaceDetails.checkStateOfWorkspace(RUNNING);
-    workspaceDetails.clickOnStopWorkspace();
     workspaceDetails.checkStateOfWorkspace(STOPPED);
   }
 

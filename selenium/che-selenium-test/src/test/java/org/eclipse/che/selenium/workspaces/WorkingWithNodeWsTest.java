@@ -82,7 +82,7 @@ public class WorkingWithNodeWsTest {
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(PROJECT_NAME);
     projectSourcePage.clickOnAddProjectButton();
-    createWorkspace.clickOnCreateWorkspaceButton();
+    createWorkspace.clickOnCreateButtonAndStartWorkspace();
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
     currentWindow = seleniumWebDriver.getWindowHandle();
