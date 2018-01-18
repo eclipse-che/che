@@ -29,6 +29,18 @@ public class EitherUtil {
     return getDisjointType(type, 1);
   }
 
+  static Type getFirstDisjointType(Type type) {
+    return getDisjointType(type, 0);
+  }
+
+  static Type getSecondDisjointType(Type type) {
+    return getDisjointType(type, 1);
+  }
+
+  static Type getThirdDisjointType(Type type) {
+    return getDisjointType(type, 2);
+  }
+
   private static Type getDisjointType(Type type, int index) {
     if (type instanceof ParameterizedType) {
       final ParameterizedType parameterizedType = (ParameterizedType) type;

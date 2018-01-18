@@ -19,26 +19,26 @@ import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 /** @author Dmytro Nochevnov */
 public class TestUserHttpJsonRequestFactory extends TestHttpJsonRequestFactory {
 
-  private final String email;
+  private final String name;
   private final String password;
   private final TestAuthServiceClient authServiceClient;
 
   @AssistedInject
   public TestUserHttpJsonRequestFactory(
       TestAuthServiceClient authServiceClient,
-      @Assisted("email") String email,
+      @Assisted("name") String name,
       @Assisted("password") String password) {
     this.authServiceClient = authServiceClient;
-    this.email = email;
+    this.name = name;
     this.password = password;
   }
 
   @Override
   protected String getAuthToken() {
     try {
-      return authServiceClient.login(email, password);
+      return authServiceClient.login(name, password);
     } catch (Exception ex) {
-      throw new RuntimeException(format("Failed to get access token for user '%s'", email));
+      throw new RuntimeException(format("Failed to get access token for user '%s'", name));
     }
   }
 }

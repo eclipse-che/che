@@ -39,34 +39,34 @@ public class InternalMachineConfig {
   private final Map<String, String> attributes;
   private final Map<String, Volume> volumes;
 
-  InternalMachineConfig(
+  public InternalMachineConfig() {
+    this.servers = new HashMap<>();
+    this.installers = new ArrayList<>();
+    this.env = new HashMap<>();
+    this.attributes = new HashMap<>();
+    this.volumes = new HashMap<>();
+  }
+
+  public InternalMachineConfig(
       List<Installer> installers,
       Map<String, ? extends ServerConfig> servers,
       Map<String, String> env,
       Map<String, String> attributes,
       Map<String, ? extends Volume> volumes)
       throws InfrastructureException {
-    this.servers = new HashMap<>();
+    this();
     if (servers != null) {
       this.servers.putAll(servers);
     }
-
-    this.installers = new ArrayList<>();
     if (installers != null) {
       this.installers.addAll(installers);
     }
-
-    this.env = new HashMap<>();
     if (env != null) {
       this.env.putAll(env);
     }
-
-    this.attributes = new HashMap<>();
     if (attributes != null) {
       this.attributes.putAll(attributes);
     }
-
-    this.volumes = new HashMap<>();
     if (volumes != null) {
       this.volumes.putAll(volumes);
     }

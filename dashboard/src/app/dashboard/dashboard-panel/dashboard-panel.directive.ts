@@ -16,29 +16,23 @@
  * @description This class is handling the directive of the panel for displaying dashboard entries.
  * @author Oleksii Kurinnyi
  */
-export class DashboardPanel {
+export class DashboardPanel implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
-    this.transclude = true;
-    this.replace = true;
-  }
+  restrict = 'E';
+  transclude = true;
+  replace = true;
 
   /**
    * Template for the panel
-   * @param element
-   * @param attrs
+   * @param $element
+   * @param $attrs
    * @returns {string} the template
    */
-  template(element, attrs) {
+  template($element: ng.IAugmentedJQuery, $attrs: ng.IAttributes): string {
     return ''
       + '<div class="dashboard-panel">'
         + '<div class="dashboard-panel-title" layout="row" layout-align="start center">'
-          + '<span>' + attrs.panelTitle + '</span>'
+          + '<span>' + ($attrs as any).panelTitle + '</span>'
         + '</div>'
         + '<div class="dashboard-panel-content">'
           + '<ng-transclude></ng-transclude>'

@@ -18,7 +18,7 @@ import {StackValidationService} from './stack-validation.service';
  */
 export class ImportStackService {
   private stackValidationService: StackValidationService;
-  private stack: che.IStack | {};
+  private stack: che.IStack;
 
 
   /**
@@ -28,7 +28,7 @@ export class ImportStackService {
   constructor(stackValidationService: StackValidationService) {
     this.stackValidationService = stackValidationService;
 
-    this.stack = {};
+    this.stack = {} as che.IStack;
   }
 
   /**
@@ -36,7 +36,7 @@ export class ImportStackService {
    *
    * @param stack {che.IStack}
    */
-  setStack(stack: che.IStack | {}): void {
+  setStack(stack: che.IStack): void {
     this.stack = stack;
   }
 
@@ -45,7 +45,7 @@ export class ImportStackService {
    *
    * @returns {che.IStack}
    */
-  getStack(): che.IStack | {} {
+  getStack(): che.IStack {
     return this.stack;
   }
 

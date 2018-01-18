@@ -103,7 +103,7 @@ public class AddOrganization {
 
   public void clickCreateOrganizationButton() {
     redrawUiElementsTimeout
-        .until(ExpectedConditions.visibilityOf(createOrganizationButton))
+        .until(ExpectedConditions.elementToBeClickable(createOrganizationButton))
         .click();
   }
 

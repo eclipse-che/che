@@ -34,6 +34,6 @@ public interface TestUser {
   /** Return user's id. */
   String getId();
 
-  /** Deletes user and its stuff. */
-  void delete();
+  /** Clean up user's stuff. */
+  void cleanUp();
 }

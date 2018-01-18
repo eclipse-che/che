@@ -37,16 +37,13 @@ public class EnvVarsConverter implements ConfigurationProvisioner {
       for (Container container : pod.getSpec().getContainers()) {
         String machineName = Names.machineName(pod, container);
         InternalMachineConfig machineConf = osEnv.getMachines().get(machineName);
-
-        if (machineConf != null) {
-          machineConf
-              .getEnv()
-              .forEach(
-                  (key, value) -> {
-                    container.getEnv().removeIf(env -> key.equals(env.getName()));
-                    container.getEnv().add(new EnvVar(key, value, null));
-                  });
-        }
+        machineConf
+            .getEnv()
+            .forEach(
+                (key, value) -> {
+                  container.getEnv().removeIf(env -> key.equals(env.getName()));
+                  container.getEnv().add(new EnvVar(key, value, null));
+                });
       }
     }
   }

@@ -23,10 +23,11 @@ public class CheAdminTestUser implements AdminTestUser {
   @Inject
   public CheAdminTestUser(
       TestUserFactory userFactory,
+      @Named("che.admin.name") String name,
       @Named("che.admin.email") String email,
       @Named("che.admin.password") String password)
       throws Exception {
-    this.delegate = userFactory.create(email, password);
+    this.delegate = userFactory.create(name, email, password);
   }
 
   @Override
@@ -55,5 +56,5 @@ public class CheAdminTestUser implements AdminTestUser {
   }
 
   @Override
-  public void delete() {}
+  public void cleanUp() {}
 }

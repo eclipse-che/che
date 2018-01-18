@@ -97,6 +97,25 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
       </div>
     </md-tab>
 
+    <md-tab label="Dropdown Button"
+            md-on-select="demoComponentsController.onSelectTab(demoComponentsController.tab.Dropdown_button)">
+      <div layout="column"
+           style="padding-bottom: 100px;">
+
+        <label for="dropdownDisabled">The dropdown button is disabled:
+          <input id="dropdownDisabled" type="checkbox" ng-model="dropdownDisabled">
+        </label>
+
+        <textarea demo-source-render>
+          <che-button-dropdown button-style="che-button-primary"
+                               main-action-config="demoComponentsController.buttonDropdownConfig.mainAction"
+                               other-actions-config="demoComponentsController.buttonDropdownConfig.otherActions"
+                               button-disabled="dropdownDisabled"></che-button-dropdown>
+        </textarea>
+
+      </div>
+    </md-tab>
+
     <md-tab label="Buttons"
             md-on-select="demoComponentsController.onSelectTab(demoComponentsController.tab.Buttons)">
       <div layout="column">

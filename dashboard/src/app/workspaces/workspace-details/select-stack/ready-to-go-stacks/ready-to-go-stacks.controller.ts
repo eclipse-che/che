@@ -20,7 +20,7 @@ import {CheBranding} from '../../../../../components/branding/che-branding.facto
 export class ReadyToGoStacksController {
 
   private $scope: ng.IScope;
-  private lodash: _.LoDashStatic;
+  private lodash: any;
   private tabName: string;
   private selectedStackId: string;
   private allStackTags: Array<any> = [];
@@ -35,7 +35,10 @@ export class ReadyToGoStacksController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($scope: ng.IScope, lodash: _.LoDashStatic, cheStack: CheStack, cheBranding: CheBranding) {
+  constructor($scope: ng.IScope,
+              lodash: any,
+              cheStack: CheStack,
+              cheBranding: CheBranding) {
     this.$scope = $scope;
     this.lodash = lodash;
     this.priorityStacks = cheBranding.getWorkspace().priorityStacks;

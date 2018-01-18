@@ -72,7 +72,13 @@ export class WorkspaceDetailsSshCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($route : ng.route.IRouteService, cheSsh: CheSsh, cheWorkspace: CheWorkspace, cheNotification, $mdDialog : ng.material.IDialogService, $log : ng.ILogService, $q : ng.IQService, $timeout : ng.ITimeoutService) {
+  constructor($route: ng.route.IRouteService,
+              cheSsh: CheSsh,
+              cheWorkspace: CheWorkspace,
+              cheNotification: CheNotification,
+              $mdDialog: ng.material.IDialogService,
+              $log: ng.ILogService,
+              $q: ng.IQService) {
     this.cheWorkspace = cheWorkspace;
     this.cheSsh = cheSsh;
     this.cheNotification = cheNotification;
@@ -80,7 +86,7 @@ export class WorkspaceDetailsSshCtrl {
     this.$log = $log;
     this.$q = $q;
 
-    this.machineSshAgents = new Array<>();
+    this.machineSshAgents = [];
     this.namespace = $route.current.params.namespace;
     this.workspaceName = $route.current.params.workspaceName;
     this.workspaceKey = this.namespace + ':' + this.workspaceName;
@@ -121,15 +127,22 @@ export class WorkspaceDetailsSshCtrl {
    */
   removeDefaultKey() {
     this.cheSsh.removeKey('workspace', this.workspaceId).then(
-      () => {this.$timeout( this.updateData(), 3000)}
-    );
+      () => {
+        this.$timeout(() => {
+          this.updateData();
+        }, 3000);
+      });
   }
 
   /**
    * Generate a new default workspace keypair
    */
   generateDefaultKey() {
-    this.cheSsh.generateKey('workspace', this.workspaceId).then(() => {this.$timeout( this.updateData(), 3000)});
+    this.cheSsh.generateKey('workspace', this.workspaceId).then(() => {
+      this.$timeout(() => {
+        this.updateData();
+      }, 3000);
+    });
   }
 
 

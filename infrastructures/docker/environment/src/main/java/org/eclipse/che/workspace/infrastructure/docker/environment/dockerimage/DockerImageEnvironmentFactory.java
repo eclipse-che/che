@@ -16,6 +16,7 @@ import static java.lang.String.format;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
@@ -38,8 +39,9 @@ public class DockerImageEnvironmentFactory
   public DockerImageEnvironmentFactory(
       InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
-      MachineConfigsValidator machinesValidator) {
-    super(installerRegistry, recipeRetriever, machinesValidator);
+      MachineConfigsValidator machinesValidator,
+      @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
+    super(installerRegistry, recipeRetriever, machinesValidator, defaultMachineMemorySizeMB);
   }
 
   @Override
