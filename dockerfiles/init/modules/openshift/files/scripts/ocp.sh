@@ -86,7 +86,7 @@ test_dns_provider() {
     DNS_PROVIDERS=("$DNS_PROVIDER" "${DNS_PROVIDERS[@]}")
     for i in ${DNS_PROVIDERS[@]}
         do
-        if [[ $(dig +short 10.0.0.1.$i) = "10.0.0.1" ]]; then
+        if [[ $(dig +short +time=5 +tries=1 10.0.0.1.$i) = "10.0.0.1" ]]; then
             echo "Test $i - works OK, using it as DNS provider"
             export DNS_PROVIDER="$i"
             break;
