@@ -45,6 +45,10 @@ export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
 DEFAULT_OPENSHIFT_PASSWORD="developer"
 export OPENSHIFT_PASSWORD=${OPENSHIFT_PASSWORD:-${DEFAULT_OPENSHIFT_PASSWORD}}
 
+DNS_PROVIDERS=(
+xip.io
+nip.codenvy-stg.com
+)
 DEFAULT_DNS_PROVIDER="nip.io"
 export DNS_PROVIDER=${DNS_PROVIDER:-${DEFAULT_DNS_PROVIDER}}
 
@@ -80,6 +84,21 @@ export CHE_CLI_IMAGE=${CHE_CLI_IMAGE:-${DEFAULT_CHE_CLI_IMAGE}}
 DEFAULT_CONFIG_DIR="/tmp/che-config"
 export CONFIG_DIR=${CONFIG_DIR:-${DEFAULT_CONFIG_DIR}}
 
+}
+
+test_dns_provider() {
+    #add current $DNS_PROVIDER to the providers list to respect environment settings
+    DNS_PROVIDERS=("$DNS_PROVIDER" "${DNS_PROVIDERS[@]}")
+    for i in ${DNS_PROVIDERS[@]}
+        do
+        if [[ $(dig +short +time=5 +tries=1 10.0.0.1.$i) = "10.0.0.1" ]]; then
+            echo "Test $i - works OK, using it as DNS provider"
+            export DNS_PROVIDER="$i"
+            break;
+         else
+            echo "Test $i DNS provider failed, trying next one."
+        fi
+        done
 }
 
 get_tools() {
@@ -153,6 +172,7 @@ wait_ocp() {
 }
 
 run_ocp() {
+    test_dns_provider
     $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
     wait_ocp
 }
