@@ -221,7 +221,8 @@ public class TestWorkspaceServiceClient {
     sendStartRequest(workspaceId, workspaceName);
 
     try {
-      waitStatus(workspaceName, workspaceOwner.getName(), WorkspaceStatus.STOPPED);
+      System.out.println("===================>>>>>>>>>>>>>>");
+      waitStatus(workspaceName, workspaceOwner.getName(), WorkspaceStatus.STOPPING);
     } catch (IllegalStateException ex) {
       // Remove try-catch block after issue has been resolved
       Assert.fail("Known issue https://github.com/eclipse/che/issues/8031");
