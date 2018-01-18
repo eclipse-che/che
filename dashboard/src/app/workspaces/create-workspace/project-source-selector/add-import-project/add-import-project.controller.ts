@@ -39,7 +39,9 @@ export class AddImportProjectController {
    * Callback to check uniqueness of project name.
    * Provided by parent controller.
    */
+  /* tslint:disable */
   private isProjectNameUnique: (data: {name: string}) => boolean;
+  /* tslint:enable */
   /**
    * Callback provided by parent controller.
    */

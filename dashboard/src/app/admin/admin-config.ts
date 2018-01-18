@@ -10,7 +10,6 @@
  */
 'use strict';
 
-import {AdminsPluginsConfig} from './plugins/plugins-config';
 import {AdminsUserManagementConfig} from './user-management/user-management-config';
 
 /**
@@ -19,8 +18,9 @@ import {AdminsUserManagementConfig} from './user-management/user-management-conf
 export class AdminsConfig {
 
   constructor(register: che.IRegisterService) {
-    new AdminsPluginsConfig(register);
+    /* tslint:disable */
     new AdminsUserManagementConfig(register);
+    /* tslint:enable */
   }
 }
 

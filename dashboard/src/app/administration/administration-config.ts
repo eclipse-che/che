@@ -25,7 +25,7 @@ export class AdministrationConfig {
     register.controller('EditRegistryController', EditRegistryController);
 
     // config routes
-    register.app.config(($routeProvider: ng.route.IRouteProvider) => {
+    register.app.config(($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/administration', {
         title: 'Administration',
         templateUrl: 'app/administration/administration.html'

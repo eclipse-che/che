@@ -41,7 +41,9 @@ export class ProjectMetadataController {
    * Original template name provided from parent controller.
    * Provided by parent controller.
    */
+  /* tslint:disable */
   private templateName: string;
+  /* tslint:enable */
   /**
    * Callback to check uniqueness of project name.
    * Provided by parent controller.

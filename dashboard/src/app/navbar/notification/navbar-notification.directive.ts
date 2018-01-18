@@ -16,21 +16,14 @@
  * @description This class is handling the directive to handle the container with notifications
  * @author Ann Shumilova
  */
-export class NavbarNotification {
+export class NavbarNotification implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
-    this.bindToController = true;
-    this.templateUrl = 'app/navbar/notification/navbar-notification.html';
-    this.controller = 'NavbarNotificationController';
-    this.controllerAs = 'navbarNotificationController';
+  restrict = 'E';
+  bindToController = true;
+  templateUrl = 'app/navbar/notification/navbar-notification.html';
+  controller = 'NavbarNotificationController';
+  controllerAs = 'navbarNotificationController';
 
-    this.transclude = true;
-
-  }
+  transclude = true;
 
 }
