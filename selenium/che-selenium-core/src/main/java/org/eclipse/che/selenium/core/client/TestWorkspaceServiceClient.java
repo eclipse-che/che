@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.core.client;
 
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
@@ -160,7 +161,7 @@ public class TestWorkspaceServiceClient {
       throws Exception {
 
     WorkspaceStatus status = null;
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 120; i++) {
       status = getByName(workspaceName, userName).getStatus();
       if (status == expectedStatus) {
         return;
@@ -221,8 +222,7 @@ public class TestWorkspaceServiceClient {
     sendStartRequest(workspaceId, workspaceName);
 
     try {
-      System.out.println("===================>>>>>>>>>>>>>>");
-      waitStatus(workspaceName, workspaceOwner.getName(), WorkspaceStatus.STOPPING);
+      waitStatus(workspaceName, workspaceOwner.getName(), RUNNING);
     } catch (IllegalStateException ex) {
       // Remove try-catch block after issue has been resolved
       Assert.fail("Known issue https://github.com/eclipse/che/issues/8031");
