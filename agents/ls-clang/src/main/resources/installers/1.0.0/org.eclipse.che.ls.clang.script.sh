@@ -79,11 +79,11 @@ elif echo ${LINUX_TYPE} | grep -qi "ubuntu"; then
        {
            wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -;
            # Fingerprint: 6084 F3CF 814B 57C1 CF12 EFD5 15CF 4D18 AF4F 7421
-           ${SUDO} apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-5.0 main"; 
+           ${SUDO} apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main"; 
        };
 
        ${SUDO} apt-get update;
-       ${SUDO} apt-get install -y clang-tools-5.0;
+       ${SUDO} apt-get install -y clang-tools-6.0;
        # temporary workaround
     #    wget http://llvm-jenkins.debian.net/view/Ubuntu%20Xenial/job/llvm-toolchain-xenial-5.0-binaries/architecture=amd64,distribution=xenial/lastSuccessfulBuild/artifact/libllvm5.0_5.0.1~svn319952-1~exp1_amd64.deb;
     #    wget http://llvm-jenkins.debian.net/view/Ubuntu%20Xenial/job/llvm-toolchain-xenial-5.0-binaries/architecture=amd64,distribution=xenial/lastSuccessfulBuild/artifact/libclang1-5.0_5.0.1~svn319952-1~exp1_amd64.deb;
@@ -92,7 +92,7 @@ elif echo ${LINUX_TYPE} | grep -qi "ubuntu"; then
     #    wget http://llvm-jenkins.debian.net/view/Ubuntu%20Xenial/job/llvm-toolchain-xenial-5.0-binaries/architecture=amd64,distribution=xenial/lastSuccessfulBuild/artifact/clang-tools-5.0_5.0.1~svn319952-1~exp1_amd64.deb;
     #    ${SUDO} apt-get install -f libjsoncpp1 libobjc-5-dev libobjc4 gcc-5-base lib32gcc1 lib32stdc++6 libc6-i386;
     #    ${SUDO} dpkg -i dpkg -i clang-5.0_5.0.1~svn319952-1~exp1_amd64.deb clang-tools-5.0_5.0.1~svn319952-1~exp1_amd64.deb libclang1-5.0_5.0.1~svn319952-1~exp1_amd64.deb libclang-common-5.0-dev_5.0.1~svn319952-1~exp1_amd64.deb libllvm5.0_5.0.1~svn319952-1~exp1_amd64.deb;
-       ${SUDO} ln -s /usr/bin/clangd-5.0 /usr/bin/clangd
+       ${SUDO} ln -s /usr/bin/clangd-6.0 /usr/bin/clangd
    }
 
 
@@ -108,12 +108,12 @@ elif echo ${LINUX_TYPE} | grep -qi "debian"; then
        {
            wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -;
            # Fingerprint: 6084 F3CF 814B 57C1 CF12 EFD5 15CF 4D18 AF4F 7421
-           ${SUDO} apt-add-repository "deb http://apt.llvm.org/jessie/ llvm-toolchain-jessie-5.0 main"; 
+           ${SUDO} apt-add-repository "deb http://apt.llvm.org/jessie/ llvm-toolchain-jessie-6.0 main"; 
        };
 
        ${SUDO} apt-get update;
-       ${SUDO} apt-get install -y clang-tools-5.0;
-       ${SUDO} ln -s /usr/bin/clangd-5.0 /usr/bin/clangd
+       ${SUDO} apt-get install -y clang-tools-6.0;
+       ${SUDO} ln -s /usr/bin/clangd-6.0 /usr/bin/clangd
    }
 
 ## Fedora 23
@@ -169,4 +169,4 @@ fi
 
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}
-echo "tee -a /home/user/clangd-input.log | clangd | tee -a /home/user/clangd-output.log" > ${LS_LAUNCHER}
+echo "tee -a /home/user/clangd-input.log | clangd -disable-symbolication -pretty -resource-dir=/usr/include/ -enable-snippets | tee -a /home/user/clangd-output.log" > ${LS_LAUNCHER}

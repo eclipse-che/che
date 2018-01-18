@@ -39,11 +39,6 @@ import org.slf4j.LoggerFactory;
 public class ClangDLanguageServerLauncher extends LanguageServerLauncherTemplate
     implements ServerInitializerObserver {
 
-  // private static final String LANGUAGE_ID = "clangd";
-  // private static final LanguageDescription description;
-  // private static final String[] EXTENSIONS = new String[] {"c", "cpp", "h", "cc"}; // todo
-  // private static final String[] MIME_TYPES =
-  //     new String[] {"text/x-c", "text/x-c", "text/x-h", "text/x-c"}; // todo check it
   private static final LanguageServerDescription DESCRIPTION = createServerDescription();
   private static final String REGEX = ".*\\.(c|h|cc|hh|cpp|hpp|cxx|hxx|C|H|CC|HH|CPP|HPP|CXX|HXX)";
   private final Path launchScript;
@@ -59,11 +54,6 @@ public class ClangDLanguageServerLauncher extends LanguageServerLauncherTemplate
   public boolean isAbleToLaunch() {
     return Files.exists(launchScript);
   }
-
-  // @Override
-  // public LanguageDescription getLanguageDescription() {
-  //   return description;
-  // }
 
   @Override
   protected LanguageServer connectToLanguageServer(
@@ -83,19 +73,7 @@ public class ClangDLanguageServerLauncher extends LanguageServerLauncherTemplate
     ProcessBuilder processBuilder = new ProcessBuilder();
 
     processBuilder.directory(new File(LanguageServiceUtils.removeUriScheme(projectPath)));
-    processBuilder.command(
-        "/home/user/silexica/bin/clangd/clangd",
-        "-compile-commands-dir=" + projectPath.substring(7) + "/obj/",
-        "-input-mirror-file=/home/user/clangd-mirror-input.log",
-        "-disable-symbolication",
-        "-pretty",
-        "-resource-dir=/usr/include/",
-        "-enable-snippets"
-        // "-run-synchronously",
-        // "-include-ineligible-results",
-        // "-j5"
-        );
-    processBuilder.redirectErrorStream(true);
+    processBuilder.command(launchScript.toString()).inheritIO();
     processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
 
     processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
@@ -129,11 +107,4 @@ public class ClangDLanguageServerLauncher extends LanguageServerLauncherTemplate
             Arrays.asList(new DocumentFilter(ClangModule.LANGUAGE_ID, REGEX, null)));
     return description;
   }
-
-  // static {
-  //   description = new LanguageDescription();
-  //   description.setFileExtensions(asList(EXTENSIONS));
-  //   description.setLanguageId(LANGUAGE_ID);
-  //   description.setMimeTypes(Arrays.asList(MIME_TYPES));
-  // }
 }
