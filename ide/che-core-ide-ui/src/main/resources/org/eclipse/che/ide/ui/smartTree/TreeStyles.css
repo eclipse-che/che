@@ -128,6 +128,7 @@
 }
 
 .contentTree {
+  min-width: 100%;
   position: absolute;
   overflow: hidden;
   left: 0;
