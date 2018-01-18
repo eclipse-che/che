@@ -19,8 +19,7 @@ import {CheButtonNotice} from './button/che-button-notice.directive';
 import {CheButtonWarning} from './button/che-button-warning.directive';
 import {CheButtonSaveFlat} from './button/che-button-save-flat.directive';
 import {CheButtonCancelFlat} from './button/che-button-cancel-flat.directive';
-import {CheButtonDropdownCtrl} from './button-dropdown/che-button-dropdown.controller';
-import {CheButtonDropdown} from './button-dropdown/che-button-dropdown.directive';
+import {CheButtonDropdownDirective} from './button-dropdown/che-button-dropdown.directive';
 import {CheClipboard} from './copy-clipboard/che-clipboard.directive';
 import {CheCompile} from './compile/che-compile.directive';
 import {CheDescription} from './description/che-description.directive';
@@ -89,7 +88,6 @@ import {CheEditor} from './editor/che-editor.directive';
 import {CheEditorController} from './editor/che-editor.controller';
 import {PagingButtons} from './paging-button/paging-button.directive';
 import {CheRowToolbar} from './toolbar/che-row-toolbar.directive';
-import {CheButtonDropdown2Directive} from './button-dropdown2/che-button-dropdown2.directive';
 
 export class WidgetConfig {
 
@@ -110,10 +108,7 @@ export class WidgetConfig {
       // paging buttons
       .directive('chePagingButtons', PagingButtons)
       // dropdown
-      .controller('CheButtonDropdownCtrl', CheButtonDropdownCtrl)
-      .directive('cheButtonDropdown', CheButtonDropdown)
-      // dropdown2
-      .directive('cheButtonDropdown2', CheButtonDropdown2Directive)
+      .directive('cheButtonDropdown', CheButtonDropdownDirective)
       // clipboard
       .directive('cheClipboard', CheClipboard)
       .directive('cheCompile', CheCompile)

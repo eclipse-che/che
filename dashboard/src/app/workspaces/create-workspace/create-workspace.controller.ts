@@ -21,7 +21,7 @@ import {CheNotification} from '../../../components/notification/che-notification
 import {
   ICheButtonDropdownMainAction,
   ICheButtonDropdownOtherAction
-} from '../../../components/widget/button-dropdown2/che-button-dropdown2.directive';
+} from '../../../components/widget/button-dropdown/che-button-dropdown.directive';
 
 /**
  * This class is handling the controller for workspace creation.

@@ -13,7 +13,7 @@
 import {
   ICheButtonDropdownMainAction,
   ICheButtonDropdownOtherAction
-} from '../../components/widget/button-dropdown2/che-button-dropdown2.directive';
+} from '../../components/widget/button-dropdown/che-button-dropdown.directive';
 
 enum Tab {Font, Panel, Selecter, Icons, Dropdown_button, Buttons, Input, List, Label_container, Stack_selector, Popover}
 
@@ -43,8 +43,6 @@ export class DemoComponentsController {
 
   placement: any;
 
-  links: any[];
-  dropdownHref: string;
   buttonDropdownConfig: {
     mainAction: ICheButtonDropdownMainAction;
     otherActions: Array<ICheButtonDropdownOtherAction>;
@@ -80,14 +78,6 @@ export class DemoComponentsController {
       ],
       selected: 'top'
     };
-    this.dropdownHref = '#/';
-    this.links = [{
-      name: 'Stacks',
-      href: '#/stacks'
-    }, {
-      name: 'Workspaces',
-      href: '#/workspaces'
-    }];
     this.buttonDropdownConfig = {
       mainAction: {
         title: 'Main Action',

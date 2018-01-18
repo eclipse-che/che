@@ -11,7 +11,7 @@
 'use strict';
 
 import {CheHttpBackend} from '../../api/test/che-http-backend';
-import {ICheButtonDropdownMainAction, ICheButtonDropdownOtherAction} from './che-button-dropdown2.directive';
+import {ICheButtonDropdownMainAction, ICheButtonDropdownOtherAction} from './che-button-dropdown.directive';
 
 interface ITestScope extends ng.IScope {
   model: {
@@ -21,7 +21,7 @@ interface ITestScope extends ng.IScope {
   };
 }
 
-describe(`cheButtonDropdown2 >`, () => {
+describe(`cheButtonDropdown >`, () => {
 
   let $scope: ITestScope ;
 
@@ -77,10 +77,10 @@ describe(`cheButtonDropdown2 >`, () => {
 
   function compileDirective(): void {
     let buttonDropdownTemplate = `<div>
-      <che-button-dropdown2 button-style="che-button-default"
-                            main-action-config="model.mainActionConfig"
-                            other-actions-config="model.otherActionsConfig"
-                            button-disabled="model.disabled"></che-button-dropdown2>
+      <che-button-dropdown button-style="che-button-default"
+                           main-action-config="model.mainActionConfig"
+                           other-actions-config="model.otherActionsConfig"
+                           button-disabled="model.disabled"></che-button-dropdown>
     </div>`;
 
     compiledDirective = $compile(angular.element( buttonDropdownTemplate ))($scope);
@@ -91,7 +91,7 @@ describe(`cheButtonDropdown2 >`, () => {
   it(`directive compiled successfully >`, () => {
     compileDirective();
 
-    expect(compiledDirective.find('.che-button-dropdown2').length).toEqual(1);
+    expect(compiledDirective.find('.che-button-dropdown').length).toEqual(1);
   });
 
   describe(`the split button >`, () => {
