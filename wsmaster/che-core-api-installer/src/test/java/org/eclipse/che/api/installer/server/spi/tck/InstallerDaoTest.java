@@ -11,6 +11,7 @@
 package org.eclipse.che.api.installer.server.spi.tck;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
 import static org.testng.Assert.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 
@@ -23,6 +24,7 @@ import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException
 import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.installer.server.impl.TestInstallerFactory;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
+import org.eclipse.che.api.installer.server.model.impl.InstallerServerConfigImpl;
 import org.eclipse.che.api.installer.server.spi.InstallerDao;
 import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
@@ -180,12 +182,17 @@ public class InstallerDaoTest {
 
   @Test
   public void shouldUpdateInstaller() throws Exception {
-    InstallerImpl updatedInstaller =
-        TestInstallerFactory.createInstaller(installers[0].getId(), installers[0].getVersion());
+    InstallerImpl toUpdate = new InstallerImpl(installers[0]);
+    toUpdate.setDescription("new");
+    toUpdate.setScript("new");
+    toUpdate
+        .getServers()
+        .put("new-server", new InstallerServerConfigImpl("3012/tcp", "http", "/", emptyMap()));
 
-    installerDao.update(updatedInstaller);
+    installerDao.update(toUpdate);
 
-    assertEquals(installerDao.getByFqn(new InstallerFqn("id_0", "1.0.0")), updatedInstaller);
+    assertEquals(
+        installerDao.getByFqn(new InstallerFqn("id_0", "1.0.0")), new InstallerImpl(toUpdate));
   }
 
   @Test(expectedExceptions = InstallerNotFoundException.class)
