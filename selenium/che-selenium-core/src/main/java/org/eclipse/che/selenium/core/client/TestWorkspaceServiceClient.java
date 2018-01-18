@@ -160,7 +160,7 @@ public class TestWorkspaceServiceClient {
       throws Exception {
 
     WorkspaceStatus status = null;
-    for (int i = 0; i < 120; i++) {
+    for (int i = 0; i < 3; i++) {
       status = getByName(workspaceName, userName).getStatus();
       if (status == expectedStatus) {
         return;
