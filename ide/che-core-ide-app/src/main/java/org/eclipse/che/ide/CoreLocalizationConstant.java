@@ -645,6 +645,12 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("start.ws.button")
   String startWsButton();
 
+  @Key("restart.ws.agent.button")
+  String restartWsAgentButton();
+
+  @Key("ignore.ws.agent.button")
+  String ignoreWsAgentButton();
+
   @Key("placeholder.select.ws.to.start")
   String placeholderSelectWsToStart();
 
