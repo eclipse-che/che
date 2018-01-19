@@ -69,7 +69,7 @@ public class SystemService extends Service {
             getServiceContext()
                 .getBaseUriBuilder()
                 .scheme("https".equals(uriInfo.getBaseUri().getScheme()) ? "wss" : "ws")
-                .path("ws")
+                .path("websocket")
                 .build()
                 .toString(),
             "system.state.channel",

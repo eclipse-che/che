@@ -17,45 +17,33 @@ import {UUID} from "../../utils/index";
 export class MessageBuilder {
 
   method: string;
-  path: string;
-  TYPE: string;
-  message : any;
+  params: any;
+  message: any;
 
-  constructor(method? : string, path? : string) {
-    this.TYPE = 'x-everrest-websocket-message-type';
+  constructor(method? : string, params? : any) {
     if (method) {
       this.method = method;
-    } else {
-      this.method = 'POST';
     }
-    if (path) {
-      this.path = path;
+    if (params) {
+       this.params = params;
     } else {
-      this.path = null;
+       this.params = {};
     }
-
-
     this.message = {};
-    // add uuid
-    this.message.uuid = UUID.build();
-
+    this.message.jsonrpc = '2.0'
     this.message.method = this.method;
-    this.message.path = this.path;
-    this.message.headers = [];
-    this.message.body;
+    this.message.params = this.params;
   }
 
   subscribe(channel) {
-    var header = {name: this.TYPE, value: 'subscribe-channel'};
-    this.message.headers.push(header);
-    this.message.body = JSON.stringify({channel: channel});
+    this.message.method = 'subscribe';
+    this.message.params.method = channel;
     return this;
   }
 
   unsubscribe(channel) {
-    var header = {name:this.TYPE, value: 'unsubscribe-channel'};
-    this.message.headers.push(header);
-    this.message.body = JSON.stringify({channel: channel});
+    this.message.method = 'unSubscribe';
+    this.message.params.method = channel;
     return this;
   }
 
@@ -65,8 +53,6 @@ export class MessageBuilder {
    * @returns {MessageBuilder}
    */
   ping() {
-    var header = {name:this.TYPE, value: 'ping'};
-    this.message.headers.push(header);
     return this;
   }
 

@@ -15,7 +15,7 @@ import {Websocket} from "../../../spi/websocket/websocket";
 import {HttpJsonRequest} from "../../../spi/http/default-http-json-request";
 import {DefaultHttpJsonRequest} from "../../../spi/http/default-http-json-request";
 import {HttpJsonResponse} from "../../../spi/http/default-http-json-request";
-import {MessageBus} from "../../../spi/websocket/messagebus";
+import {JsonRpcBus} from "../../../spi/websocket/json-rpc-bus";
 import {SystemStopEventPromiseMessageBusSubscriber} from "./system-stop-event-promise-subscriber";
 
 /**
@@ -54,7 +54,7 @@ export class System {
    * @param systemStateDto the current DTO
    * @returns {Promise<MessageBus>}
    */
-  getMessageBus(systemStateDto : org.eclipse.che.api.system.shared.dto.SystemStateDto): Promise<MessageBus> {
+  getMessageBus(systemStateDto : org.eclipse.che.api.system.shared.dto.SystemStateDto): Promise<JsonRpcBus> {
 
     // get link for websocket
     let websocketLink: string;
@@ -63,7 +63,7 @@ export class System {
         websocketLink = stateLink.getHref();
       }
     });
-    return this.websocket.getMessageBus(websocketLink + '?token=' + this.authData.getToken());
+    return this.websocket.getJsonRpcBus(websocketLink + '?token=' + this.authData.getToken());
   }
 
 
@@ -103,7 +103,7 @@ export class System {
    */
   shutdown(systemStateDto: org.eclipse.che.api.system.shared.dto.SystemStateDto, callStop: boolean) : Promise<org.eclipse.che.api.system.shared.dto.SystemStateDto> {
     let callbackSubscriber : SystemStopEventPromiseMessageBusSubscriber;
-    return this.getMessageBus(systemStateDto).then((messageBus: MessageBus) => {
+    return this.getMessageBus(systemStateDto).then((messageBus: JsonRpcBus) => {
       callbackSubscriber = new SystemStopEventPromiseMessageBusSubscriber(messageBus);
       let channelToListen : string;
       systemStateDto.getLinks().forEach(stateLink => {
@@ -113,6 +113,8 @@ export class System {
       });
       return messageBus.subscribeAsync(channelToListen, callbackSubscriber);
     }).then((subscribed: string) => {
+         return this.delay(2000);
+    }).then(() => {
       if (callStop) {
         let jsonRequest: HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, null, '/api/system/stop', 204).setMethod('POST');
         return jsonRequest.request().then((jsonResponse: HttpJsonResponse) => {
@@ -127,6 +129,12 @@ export class System {
           return this.getState();
         });
       }
+    });
+  }
+
+  delay(ms: number) : Promise<void> {
+    return new Promise<void>(function(resolve) {
+        setTimeout(resolve, ms);
     });
   }
 
