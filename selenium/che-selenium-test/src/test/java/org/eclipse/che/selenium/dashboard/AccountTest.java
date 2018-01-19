@@ -15,6 +15,7 @@ import static org.testng.AssertJUnit.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.user.CheSecondTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount;
@@ -24,6 +25,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.account.TestTestKeycloakPas
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+@Test(groups = TestGroup.MULTIUSER)
 public class AccountTest {
 
   private static TestAccountFields changedFields;
@@ -53,7 +55,6 @@ public class AccountTest {
     parentWindow = seleniumWebDriver.getWindowHandle();
   }
 
-  @Test
   public void shouldChangeEmailFirstAndLastName() {
     dashboardAccount.getTitle().equals("Account");
     assertTrue(
@@ -87,7 +88,6 @@ public class AccountTest {
     assertTrue(dashboardAccount.getCurrentFieldsValue().isEquals(changedFields));
   }
 
-  @Test(priority = 1)
   public void shouldChangePasswordAndCheckIt() {
     dashboard.clickOnUsernameButton();
     dashboard.clickOnAccountItem();
