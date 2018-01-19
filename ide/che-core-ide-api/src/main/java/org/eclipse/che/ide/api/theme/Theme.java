@@ -1692,11 +1692,9 @@ public interface Theme {
    *
    * <p>******************************************************************************************
    */
-
   String projectExplorerPlaceholderBackground();
 
   String projectExplorerPlaceholderIconColor();
 
   String projectExplorerPlaceholderRowColor();
-
 }
