@@ -1659,4 +1659,42 @@ public interface Theme {
   String findResultsBackground();
 
   String findResultsTextColor();
+
+  /**
+   * ******************************************************************************************
+   *
+   * <p>Editor placeholder
+   *
+   * <p>******************************************************************************************
+   */
+  String editorPlaceholderTabsPanelBackground();
+
+  String editorPlaceholderTabsPanelBottomBorderColor();
+
+  String editorPlaceholderTabBackground();
+
+  String editorPlaceholderTabIconColor();
+
+  String editorPlaceholderTabLabelColor();
+
+  String editorPlaceholderTabsPanelPlusColor();
+
+  String editorPlaceholderContentBackground();
+
+  String editorPlaceholderLineNumbersColor();
+
+  String editorPlaceholderRowsColor();
+
+  /**
+   * ******************************************************************************************
+   *
+   * <p>Project explorer placeholder
+   *
+   * <p>******************************************************************************************
+   */
+  String projectExplorerPlaceholderBackground();
+
+  String projectExplorerPlaceholderIconColor();
+
+  String projectExplorerPlaceholderRowColor();
 }

@@ -1805,4 +1805,64 @@ public class DarkTheme implements Theme {
   public String findResultsTextColor() {
     return "#272727";
   }
+
+  @Override
+  public String editorPlaceholderTabsPanelBackground() {
+    return "#1e2331";
+  }
+
+  @Override
+  public String editorPlaceholderTabsPanelBottomBorderColor() {
+    return "#1b1e2b";
+  }
+
+  @Override
+  public String editorPlaceholderTabBackground() {
+    return "#242a3a";
+  }
+
+  @Override
+  public String editorPlaceholderTabIconColor() {
+    return "#313748";
+  }
+
+  @Override
+  public String editorPlaceholderTabLabelColor() {
+    return "#383e4e";
+  }
+
+  @Override
+  public String editorPlaceholderTabsPanelPlusColor() {
+    return "#454b5a";
+  }
+
+  @Override
+  public String editorPlaceholderContentBackground() {
+    return "#191c28";
+  }
+
+  @Override
+  public String editorPlaceholderLineNumbersColor() {
+    return "#272a35";
+  }
+
+  @Override
+  public String editorPlaceholderRowsColor() {
+    return "#2f323f";
+  }
+
+  @Override
+  public String projectExplorerPlaceholderBackground() {
+    return "#1e2331";
+  }
+
+  @Override
+  public String projectExplorerPlaceholderIconColor() {
+    return "#2b3140";
+  }
+
+  @Override
+  public String projectExplorerPlaceholderRowColor() {
+    return "#333846";
+  }
 }

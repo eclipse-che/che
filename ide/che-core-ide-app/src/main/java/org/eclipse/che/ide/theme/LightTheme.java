@@ -1777,4 +1777,64 @@ public class LightTheme implements Theme {
   public String findResultsTextColor() {
     return "#272727";
   }
+
+  @Override
+  public String editorPlaceholderTabsPanelBackground() {
+    return "#d6d6d9";
+  }
+
+  @Override
+  public String editorPlaceholderTabsPanelBottomBorderColor() {
+    return "#8e8e8e";
+  }
+
+  @Override
+  public String editorPlaceholderTabBackground() {
+    return "#ffffff";
+  }
+
+  @Override
+  public String editorPlaceholderTabIconColor() {
+    return "#aaaaaa";
+  }
+
+  @Override
+  public String editorPlaceholderTabLabelColor() {
+    return "#bfbfbf";
+  }
+
+  @Override
+  public String editorPlaceholderTabsPanelPlusColor() {
+    return "#777777";
+  }
+
+  @Override
+  public String editorPlaceholderContentBackground() {
+    return "#ffffff";
+  }
+
+  @Override
+  public String editorPlaceholderLineNumbersColor() {
+    return "#dfdfdf";
+  }
+
+  @Override
+  public String editorPlaceholderRowsColor() {
+    return "#bfbfbf";
+  }
+
+  @Override
+  public String projectExplorerPlaceholderBackground() {
+    return "#FFFFFF";
+  }
+
+  @Override
+  public String projectExplorerPlaceholderIconColor() {
+    return "#d0d0d0";
+  }
+
+  @Override
+  public String projectExplorerPlaceholderRowColor() {
+    return "#bfbfbf";
+  }
 }
