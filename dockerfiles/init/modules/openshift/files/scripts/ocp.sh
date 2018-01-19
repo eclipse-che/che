@@ -356,6 +356,9 @@ parse_args() {
            --update)
                shift
            ;;
+           --remove-che)
+               shift
+           ;;
            --help)
                echo -e "$HELP"
                exit 1
