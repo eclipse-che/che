@@ -14,10 +14,20 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
-    <ui:style>
+    <ui:style src="org/eclipse/che/ide/api/ui/style.css">
         @eval lineColor org.eclipse.che.ide.api.theme.Style.theme.iconColor();
         @eval fontColor org.eclipse.che.ide.api.theme.Style.getMainFontColor();
         @eval logoFill org.eclipse.che.ide.api.theme.Style.getLogoFill();
+
+        @eval editorPlaceholderTabsPanelBackground org.eclipse.che.ide.api.theme.Style.theme.editorPlaceholderTabsPanelBackground();
+        @eval editorPlaceholderTabsPanelBottomBorderColor org.eclipse.che.ide.api.theme.Style.theme.editorPlaceholderTabsPanelBottomBorderColor();
+        @eval editorPlaceholderTabBackground org.eclipse.che.ide.api.theme.Style.theme.editorPlaceholderTabBackground();
+        @eval editorPlaceholderTabIconColor org.eclipse.che.ide.api.theme.Style.theme.editorPlaceholderTabIconColor();
+        @eval editorPlaceholderTabLabelColor org.eclipse.che.ide.api.theme.Style.theme.editorPlaceholderTabLabelColor();
+        @eval editorPlaceholderTabsPanelPlusColor org.eclipse.che.ide.api.theme.Style.theme.editorPlaceholderTabsPanelPlusColor();
+        @eval editorPlaceholderContentBackground org.eclipse.che.ide.api.theme.Style.theme.editorPlaceholderContentBackground();
+        @eval editorPlaceholderLineNumbersColor org.eclipse.che.ide.api.theme.Style.theme.editorPlaceholderLineNumbersColor();
+        @eval editorPlaceholderRowsColor org.eclipse.che.ide.api.theme.Style.theme.editorPlaceholderRowsColor();
 
         .panel {
             position: absolute;
@@ -36,9 +46,9 @@
             top: 0px;
             height: 26px;
             overflow: hidden;
-            background-color: #1e2331;
+            background-color: editorPlaceholderTabsPanelBackground;
             box-sizing: border-box;
-            border-bottom: 1px solid #1b1e2b;
+            border-bottom: 1px solid editorPlaceholderTabsPanelBottomBorderColor;
         }
 
         .tab {
@@ -48,7 +58,7 @@
             top: 0px;
             width: 120px;
             height: 25px;
-            background-color: #242a3a;
+            background-color: editorPlaceholderTabBackground;
         }
 
         .tabIcon {
@@ -58,7 +68,7 @@
             width: 16px;
             height: 16px;
             border-radius: 2px;
-            background-color: #313748;
+            background-color: editorPlaceholderTabIconColor;
         }
 
         .tabLabel {
@@ -68,7 +78,7 @@
             width: 79px;
             height: 6px;
             border-radius: 2px;
-            background-color: #383e4e;
+            background-color: editorPlaceholderTabLabelColor;
         }
 
         .plus {
@@ -81,24 +91,24 @@
             text-align: center;
             line-height: 25px;
             font-size: 10px;
-            color: #454b5a;
+            color: editorPlaceholderTabsPanelPlusColor;
         }
 
-        .rows {
+        .content {
             position: absolute;
             left: 0px;
             right: 0px;
             bottom: 0px;
-            top: 30px;
+            top: 26px;
             overflow: hidden;
-            background-color: #191c28;
+            background-color: editorPlaceholderContentBackground;
         }
 
         .lineNumbers {
             position: absolute;
             overflow: hidden;
             left: 0px;
-            top: 0px;
+            top: 4px;
             width: 35px;
             bottom: 0px;
         }
@@ -112,14 +122,14 @@
             line-height: 15px;
             font-family: "DejaVu Sans Mono", "Helvetica Neue", "Myriad Pro", "open sans", arial, sans-serif;
             font-size: 11px;
-            color: #272a35;
+            color: editorPlaceholderLineNumbersColor;
         }
 
         .lines {
             position: absolute;
             overflow: hidden;
             left: 43px;
-            top: 0px;
+            top: 4px;
             right: 10px;
             bottom: 0px;
         }
@@ -150,7 +160,7 @@
             top: 4px;
             left: 0px;
             right: 0px;
-            background-color: #2f323f;
+            background-color: editorPlaceholderRowsColor;
             background-size: 800px 104px;
             background-repeat: no-repeat;
             background-position: 827px;
@@ -167,7 +177,7 @@
             <div class="{style.plus}"><i class="fa fa-plus" /></div>
         </div>
 
-        <div class="{style.rows}">
+        <div class="{style.content}">
             <div class="{style.lineNumbers}" ui:field="lineNumbers"></div>
             <div class="{style.lines}">
                 <div class="{style.line}" style="animation-delay: 0.00s;"><div /></div>
