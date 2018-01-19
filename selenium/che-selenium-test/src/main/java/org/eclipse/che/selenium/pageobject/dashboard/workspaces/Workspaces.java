@@ -48,7 +48,6 @@ public class Workspaces {
   }
 
   private interface Locators {
-    String WORKSPACES_LIST = "//ng-transclude[@class='che-list-content']";
     String TOOLBAR = "Workspaces";
     String DOCUMENTATION_LINK = "//a[@ng-href='/docs/devops/intro/index.html']";
     String ADD_WORKSPACE_BTN = "//che-button-primary[@che-button-title='Add Workspace']";
@@ -65,8 +64,6 @@ public class Workspaces {
     String WORKSPACE_ITEM_STACK = "//div[@id='ws-name-%s']//span[@name='workspaceStackName']";
     String WORKSPACE_ITEM_ACTIONS =
         "//div[@id='ws-name-%s']//*[@name='workspaceStopStartButton']/div";
-    String WORKSPACE_STATUS_INDICATOR =
-        "//div[@id='ws-name-%s']//span[contains(@class, 'workspace-status-indicator')]/span";
     String WORKSPACE_ITEM_CONFIGURE_BUTTON =
         "//div[@id='ws-name-%s']//a[@name='configureWorkspaceButton']";
     String WORKSPACE_ITEM_ADD_PROJECT_BUTTON =
@@ -80,9 +77,6 @@ public class Workspaces {
     String STOPPING = "STOPPING";
     String STOPPED = "STOPPED";
   }
-
-  @FindBy(xpath = Locators.WORKSPACES_LIST)
-  WebElement listOfWorkspaces;
 
   @FindBy(xpath = Locators.ADD_WORKSPACE_BTN)
   WebElement addWorkspaceBtn;
@@ -100,8 +94,8 @@ public class Workspaces {
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             visibilityOfElementLocated(
-                By.xpath(format(Locators.WORKSPACE_STATUS_INDICATOR, workspaceName))))
-        .getAttribute("ng-switch-when");
+                By.xpath(format(Locators.WORKSPACE_ITEM_NAME, workspaceName))))
+        .getAttribute("ws-status");
   }
 
   public void waitWorkspaceStatusIs(String workspaceName, String workspaceStatus) {
