@@ -97,7 +97,7 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
 
     btnReset =
         addButtonBarControl(
-            locale.buttonReset(), "git-reset-reset", event -> delegate.onResetClicked());
+            locale.buttonReset(), "git-reset-reset", event -> delegate.onResetClicked(), true);
   }
 
   @Override

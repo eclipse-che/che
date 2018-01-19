@@ -38,6 +38,7 @@
     font-size: windowTitleFontSize;
     color: windowTitleFontColor;
     margin-top: 3pt;
+    font-weight: normal;
 }
 
 .windowFrameCloseButton {

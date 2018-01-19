@@ -1120,11 +1120,14 @@ public interface Theme {
   String consolesToolbarToggledButtonColor();
 
   /**
-   * Text color for DEV label in process tree.
+   * Text color for DEV label in processes tree.
    *
    * @return color
    */
   String processTreeDevLabel();
+
+  /** Text color for machine name in processes tree. */
+  String processesTreeMachineNameColor();
 
   /**
    * Background color for console output area.
@@ -1628,6 +1631,8 @@ public interface Theme {
   String popupLoaderTextColor();
 
   /** Cell table */
+  String cellTableBackground();
+
   String cellTableHrefColor();
 
   String cellTableHeaderColor();
@@ -1640,6 +1645,10 @@ public interface Theme {
 
   String cellTableCellColor();
 
+  String cellTableHoveredBackground();
+
+  String cellTableSelectedBackground();
+
   /**
    * ******************************************************************************************
    *
@@ -1650,4 +1659,42 @@ public interface Theme {
   String findResultsBackground();
 
   String findResultsTextColor();
+
+  /**
+   * ******************************************************************************************
+   *
+   * <p>Editor placeholder
+   *
+   * <p>******************************************************************************************
+   */
+  String editorPlaceholderTabsPanelBackground();
+
+  String editorPlaceholderTabsPanelBottomBorderColor();
+
+  String editorPlaceholderTabBackground();
+
+  String editorPlaceholderTabIconColor();
+
+  String editorPlaceholderTabLabelColor();
+
+  String editorPlaceholderTabsPanelPlusColor();
+
+  String editorPlaceholderContentBackground();
+
+  String editorPlaceholderLineNumbersColor();
+
+  String editorPlaceholderRowsColor();
+
+  /**
+   * ******************************************************************************************
+   *
+   * <p>Project explorer placeholder
+   *
+   * <p>******************************************************************************************
+   */
+  String projectExplorerPlaceholderBackground();
+
+  String projectExplorerPlaceholderIconColor();
+
+  String projectExplorerPlaceholderRowColor();
 }

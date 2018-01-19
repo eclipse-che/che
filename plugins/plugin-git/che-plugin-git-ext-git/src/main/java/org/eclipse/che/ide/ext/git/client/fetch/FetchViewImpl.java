@@ -83,7 +83,7 @@ public class FetchViewImpl extends Window implements FetchView {
 
     btnFetch =
         addButtonBarControl(
-            locale.buttonFetch(), "git-remotes-fetch-fetch", event -> delegate.onFetchClicked());
+            locale.buttonFetch(), "git-remotes-fetch-fetch", event -> delegate.onFetchClicked(), true);
   }
 
   @Override

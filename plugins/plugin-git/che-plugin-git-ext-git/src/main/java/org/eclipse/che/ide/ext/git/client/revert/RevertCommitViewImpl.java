@@ -167,7 +167,7 @@ public class RevertCommitViewImpl extends Window implements RevertCommitView {
 
     btnRevert =
         addButtonBarControl(
-            locale.buttonRevert(), "git-revert", event -> delegate.onRevertClicked());
+            locale.buttonRevert(), "git-revert", event -> delegate.onRevertClicked(), true);
   }
 
   @UiHandler("revisionsPanel")

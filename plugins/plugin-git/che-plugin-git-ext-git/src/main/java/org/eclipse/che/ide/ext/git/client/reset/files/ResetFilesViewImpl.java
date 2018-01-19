@@ -85,7 +85,7 @@ public class ResetFilesViewImpl extends Window implements ResetFilesView {
 
     btnReset =
         addButtonBarControl(
-            locale.buttonReset(), "git-resetFiles-btnReset", event -> delegate.onResetClicked());
+            locale.buttonReset(), "git-resetFiles-btnReset", event -> delegate.onResetClicked(), true);
   }
 
   /** Initialize the columns of the grid. */

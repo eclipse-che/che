@@ -81,7 +81,7 @@ public class PullViewImpl extends Window implements PullView {
 
     btnPull =
         addButtonBarControl(
-            locale.buttonPull(), "git-remotes-pull-pull", event -> delegate.onPullClicked());
+            locale.buttonPull(), "git-remotes-pull-pull", event -> delegate.onPullClicked(), true);
   }
 
   @Override

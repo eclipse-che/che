@@ -91,7 +91,7 @@ public class RemoteViewImpl extends Window implements RemoteView {
 
     btnAdd =
         addButtonBarControl(
-            locale.buttonAdd(), "git-remotes-remotes-add", event -> delegate.onAddClicked());
+            locale.buttonAdd(), "git-remotes-remotes-add", event -> delegate.onAddClicked(), true);
 
     btnDelete =
         addButtonBarControl(

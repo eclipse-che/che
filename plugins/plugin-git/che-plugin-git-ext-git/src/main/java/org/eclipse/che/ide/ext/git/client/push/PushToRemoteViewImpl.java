@@ -77,7 +77,7 @@ public class PushToRemoteViewImpl extends Window implements PushToRemoteView {
 
     btnPush =
         addButtonBarControl(
-            locale.buttonPush(), "git-remotes-push-push", event -> delegate.onPushClicked());
+            locale.buttonPush(), "git-remotes-push-push", event -> delegate.onPushClicked(), true);
   }
 
   @Override

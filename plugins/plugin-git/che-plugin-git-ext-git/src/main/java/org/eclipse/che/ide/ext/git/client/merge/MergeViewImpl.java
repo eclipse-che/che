@@ -162,7 +162,7 @@ public class MergeViewImpl extends Window implements MergeView {
 
     btnMerge =
         addButtonBarControl(
-            locale.buttonMerge(), "git-merge-merge", event -> delegate.onMergeClicked());
+            locale.buttonMerge(), "git-merge-merge", event -> delegate.onMergeClicked(), true);
   }
 
   @Override

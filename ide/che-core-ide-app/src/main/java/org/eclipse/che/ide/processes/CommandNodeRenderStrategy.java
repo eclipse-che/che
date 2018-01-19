@@ -83,6 +83,7 @@ public class CommandNodeRenderStrategy
 
     Element nameElement = Elements.createSpanElement();
     nameElement.setTextContent(node.getName());
+    nameElement.setClassName(resources.getCss().processName());
     Tooltip.create(nameElement, BOTTOM, MIDDLE, node.getName());
     root.appendChild(nameElement);
 
