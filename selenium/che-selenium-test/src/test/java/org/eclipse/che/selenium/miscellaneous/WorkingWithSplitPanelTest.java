@@ -124,7 +124,8 @@ public class WorkingWithSplitPanelTest {
     multiSplitPanel.waitTabProcessIsPresent(1, BUILD_COMM);
     multiSplitPanel.waitTabNameProcessIsFocused(BUILD_COMM);
     multiSplitPanel.waitTabProcessIsNotPresent(3, BUILD_COMM);
-    consoles.openNewTerminalIntoProcesses();
+
+    consoles.startTerminalFromProcessesArea("dev-machine");
     multiSplitPanel.waitTabProcessIsPresent(1, "Terminal-2");
     multiSplitPanel.waitTabNameProcessIsFocused("Terminal-2");
     terminal.waitTerminalIsNotEmpty();
