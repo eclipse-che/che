@@ -188,7 +188,7 @@ deploy_che_to_ocp() {
       echo "OCP generating temporary scripts and configuration files at ${OPENSHIFT_SCRIPTS_FOLDER} ."
       #wipeout config folder
       docker run -v "${CONFIG_DIR}":/to_remove alpine sh -c "rm -rf /to_remove/" || true
-      docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} config --skip:pull --skip:nightly
+      docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" ${CHE_CLI_IMAGE} config --skip:pull --skip:nightly
       cd ${OPENSHIFT_SCRIPTS_FOLDER}
     else
       echo "OCP using existing scripts and configuration files in current folder."
@@ -354,6 +354,9 @@ parse_args() {
                shift
            ;;
            --update)
+               shift
+           ;;
+           --remove-che)
                shift
            ;;
            --help)

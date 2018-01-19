@@ -234,7 +234,7 @@ public class InstallerImpl implements Installer {
   }
 
   @Override
-  public Map<String, ? extends ServerConfig> getServers() {
+  public Map<String, InstallerServerConfigImpl> getServers() {
     if (servers == null) {
       servers = new HashMap<>();
     }

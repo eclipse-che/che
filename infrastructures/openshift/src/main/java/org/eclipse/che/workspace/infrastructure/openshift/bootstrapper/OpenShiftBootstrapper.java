@@ -42,7 +42,7 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
   private static final String CONFIG_FILE = "config.json";
 
   private final RuntimeIdentity runtimeIdentity;
-  private final List<Installer> installers;
+  private final List<? extends Installer> installers;
   private final int serverCheckPeriodSeconds;
   private final int installerTimeoutSeconds;
   private final OpenShiftMachine openShiftMachine;
@@ -51,7 +51,7 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
   @Inject
   public OpenShiftBootstrapper(
       @Assisted RuntimeIdentity runtimeIdentity,
-      @Assisted List<Installer> installers,
+      @Assisted List<? extends Installer> installers,
       @Assisted OpenShiftMachine openShiftMachine,
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       @Named("che.infra.openshift.bootstrapper.binary_url") String bootstrapperBinaryUrl,
