@@ -24,6 +24,5 @@ public class RuntimeInfoGinModule extends AbstractGinModule {
   protected void configure() {
     bind(RuntimeInfoProvider.class).to(ContextBasedRuntimeInfoProvider.class);
     bind(RuntimeInfoWidgetFactory.class).to(CellTableRuntimeInfoWidgetFactory.class);
-    bind(RuntimeInfoActionsModule.class).asEagerSingleton();
   }
 }

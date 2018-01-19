@@ -915,6 +915,11 @@ public class LightTheme implements Theme {
   }
 
   @Override
+  public String processesTreeMachineNameColor() {
+    return "#3aa461";
+  }
+
+  @Override
   public String outputBackgroundColor() {
     return "white";
   }
@@ -1719,6 +1724,11 @@ public class LightTheme implements Theme {
   }
 
   @Override
+  public String cellTableBackground() {
+    return "#ECECEC";
+  }
+
+  @Override
   public String cellTableHrefColor() {
     return "rgb(97, 183, 239)";
   }
@@ -1746,6 +1756,16 @@ public class LightTheme implements Theme {
   @Override
   public String cellTableCellColor() {
     return "#666666";
+  }
+
+  @Override
+  public String cellTableHoveredBackground() {
+    return "rgba(37, 108, 159, 0.1)";
+  }
+
+  @Override
+  public String cellTableSelectedBackground() {
+    return "#256c9f";
   }
 
   @Override

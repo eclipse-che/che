@@ -15,45 +15,34 @@ import static org.eclipse.che.ide.processes.ProcessTreeNode.ProcessNodeType.MACH
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.BaseAction;
 import org.eclipse.che.ide.machine.MachineResources;
-import org.eclipse.che.ide.processes.DisplayMachineOutputEvent;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 
-/**
- * Action to display machine output.
- *
- * @author Vlad Zhukovskyi
- * @since 6.0.0
- */
+/** Action to show preview SSH panel. */
 @Singleton
-public class DisplayMachineOutputAction extends BaseAction {
+public class PreviewSSHAction extends BaseAction {
 
   private final Provider<ProcessesPanelPresenter> processesPanelPresenter;
-  private final EventBus eventBus;
 
   @Inject
-  public DisplayMachineOutputAction(
+  public PreviewSSHAction(
       MachineResources resources,
       CoreLocalizationConstant constant,
-      Provider<ProcessesPanelPresenter> processesPanelPresenter,
-      EventBus eventBus) {
+      Provider<ProcessesPanelPresenter> processesPanelPresenter) {
     super(
-        constant.machineOutputActionTitle(),
-        constant.machineOutputActionDescription(),
+        constant.machineSSHActionTitle(),
+        constant.machineSSHActionDescription(),
         resources.output());
     this.processesPanelPresenter = processesPanelPresenter;
-    this.eventBus = eventBus;
   }
 
   @Override
   public void update(ActionEvent event) {
     ProcessTreeNode node = processesPanelPresenter.get().getContextTreeNode();
-
     event.getPresentation().setEnabledAndVisible(node != null && node.getType() == MACHINE_NODE);
   }
 
@@ -63,7 +52,7 @@ public class DisplayMachineOutputAction extends BaseAction {
 
     if (node != null && node.getType() == MACHINE_NODE) {
       String machineName = (String) node.getData();
-      eventBus.fireEvent(new DisplayMachineOutputEvent(machineName));
+      processesPanelPresenter.get().onPreviewSsh(machineName);
     }
   }
 }
