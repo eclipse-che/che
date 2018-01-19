@@ -27,7 +27,6 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.dns.DnsSettin
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.hosts.ExtraHostsProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.limits.cpu.CpuLimitsProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.limits.pids.PidLimitProvisioner;
-import org.eclipse.che.workspace.infrastructure.docker.provisioner.limits.ram.DefaultRAMProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.limits.swap.SwapLimitProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.priviliged.PrivilegedModeProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.proxy.ProxySettingsProvisioner;
@@ -46,7 +45,6 @@ public class DockerInfraModule extends AbstractModule {
     settingsProvisioners.addBinding().to(ProxySettingsProvisioner.class);
     settingsProvisioners.addBinding().to(ExtraVolumesProvisioner.class);
     settingsProvisioners.addBinding().to(SwapLimitProvisioner.class);
-    settingsProvisioners.addBinding().to(DefaultRAMProvisioner.class);
     settingsProvisioners.addBinding().to(PidLimitProvisioner.class);
     settingsProvisioners.addBinding().to(CGroupParentProvisioner.class);
     settingsProvisioners.addBinding().to(CpuLimitsProvisioner.class);

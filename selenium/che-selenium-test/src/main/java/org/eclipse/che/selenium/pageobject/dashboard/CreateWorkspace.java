@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.pageobject.dashboard;
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
@@ -48,7 +49,7 @@ public class CreateWorkspace {
     String WORKSPACE_NAME_INPUT = "workspace-name-input";
     String ERROR_MESSAGE = "new-workspace-error-message";
     String TOOLBAR_TITLE_ID = "New_Workspace";
-    String CREATE_BUTTON = "create-workspace-button";
+    String CREATE_BUTTON = "//che-button-save-flat[@name='saveButton']";
     String SELECT_ALL_STACKS_TAB = "all-stacks-button";
     String SELECT_QUICK_START_STACKS_TAB = "quick-start-button";
     String SELECT_SINGLE_MACHINE_STACKS_TAB = "single-machine-button";
@@ -72,6 +73,9 @@ public class CreateWorkspace {
     String INCREMENT_MEMORY_BUTTON =
         "//*[@id='machine-%s-ram']//button[@aria-label='Increment memory']";
     String MACHINE_RAM_VALUE = "//*[@id='machine-%s-ram']//input";
+    String WORKSPACE_CREATED_DIALOG = "//md-dialog/che-popup[@title='Workspace Is Created']";
+    String EDIT_WORKSPACE_DIALOG_BUTTON = "//che-button-primary//span[text()='Edit']";
+    String OPEN_IN_IDE_DIALOG_BUTTON = "//che-button-default//span[text()='Open In IDE']";
   }
 
   @FindBy(id = Locators.FILTERS_STACK_BUTTON)
@@ -86,7 +90,7 @@ public class CreateWorkspace {
   @FindBy(id = Locators.WORKSPACE_NAME_INPUT)
   WebElement workspaceNameInput;
 
-  @FindBy(id = Locators.CREATE_BUTTON)
+  @FindBy(xpath = Locators.CREATE_BUTTON)
   WebElement createWorkspaceButton;
 
   @FindBy(xpath = Locators.SEARCH_INPUT)
@@ -233,10 +237,6 @@ public class CreateWorkspace {
     return !Boolean.valueOf(createWorkspaceButton.getAttribute("aria-disabled"));
   }
 
-  public void clickOnCreateWorkspaceButton() {
-    createWorkspaceButton.click();
-  }
-
   public void clickOnAllStacksTab() {
     redrawUiElementsTimeout.until(visibilityOf(selectAllStacksTab)).click();
   }
@@ -251,5 +251,35 @@ public class CreateWorkspace {
 
   public void clickOnMultiMachineTab() {
     redrawUiElementsTimeout.until(visibilityOf(selectMultiMachineStacksTab)).click();
+  }
+
+  public void waitWorkspaceIsCreatedDialogIsVisible() {
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath(Locators.WORKSPACE_CREATED_DIALOG)));
+    WaitUtils.sleepQuietly(1);
+  }
+
+  public void clickOnEditWorkspaceButton() {
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        .until(elementToBeClickable(By.xpath(Locators.EDIT_WORKSPACE_DIALOG_BUTTON)))
+        .click();
+  }
+
+  public void clickOnOpenInIDEButton() {
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        .until(elementToBeClickable(By.xpath(Locators.OPEN_IN_IDE_DIALOG_BUTTON)))
+        .click();
+  }
+
+  public void clickOnCreateButtonAndOpenInIDE() {
+    createWorkspaceButton.click();
+    waitWorkspaceIsCreatedDialogIsVisible();
+    clickOnOpenInIDEButton();
+  }
+
+  public void clickOnCreateButtonAndEditWorkspace() {
+    createWorkspaceButton.click();
+    waitWorkspaceIsCreatedDialogIsVisible();
+    clickOnEditWorkspaceButton();
   }
 }

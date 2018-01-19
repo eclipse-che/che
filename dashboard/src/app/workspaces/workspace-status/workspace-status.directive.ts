@@ -15,21 +15,16 @@
  * both icon and text representation of current status
  * @author Oleksii Kurinnyi
  */
-export class WorkspaceStatus {
+export class WorkspaceStatus implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor () {
-    this.restrict = 'E';
+  restrict = 'E';
 
-    this.replace = true;
-    this.templateUrl = 'app/workspaces/workspace-status/workspace-status.html';
+  replace = true;
+  templateUrl = 'app/workspaces/workspace-status/workspace-status.html';
 
-    // scope values
-    this.scope = {
-      status : '=cheStatus'
-    };
-  }
+  // scope values
+  scope = {
+    status: '=cheStatus',
+    isSupported: '=cheIsSupported'
+  };
 }

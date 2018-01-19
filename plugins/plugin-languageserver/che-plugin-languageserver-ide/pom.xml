@@ -193,6 +193,7 @@
                     <excludes>
                         <exclude>**/org/eclipse/che/plugin/languageserver/ide/editor/codeassist/LatestCompletionResult.java</exclude>
                         <exclude>**/Either.java</exclude>
+                        <exclude>**/Either3.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>

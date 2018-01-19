@@ -14,7 +14,7 @@ import {CheKeycloak} from '../../components/api/che-keycloak.factory';
 import {CheService} from '../../components/api/che-service.factory';
 
 export class CheNavBarController {
-  private menuItemUrl = {
+  menuItemUrl = {
     dashboard: '#/',
     workspaces: '#/workspaces',
     administration: '#/administration',

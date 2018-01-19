@@ -11,12 +11,6 @@
 'use strict';
 import IWorkspaceEnvironment = che.IWorkspaceEnvironment;
 
-export interface IWorkspaceAttributes {
-  created: number;
-  updated?: number;
-  [propName: string]: string | number;
-}
-
 /**
  * This class is providing a builder for Workspace
  * @author Florent Benoit
@@ -44,7 +38,7 @@ export class CheWorkspaceBuilder {
     return this;
   }
 
-  withAttributes(attributes: IWorkspaceAttributes): CheWorkspaceBuilder {
+  withAttributes(attributes: che.IWorkspaceAttributes): CheWorkspaceBuilder {
     this.workspace.attributes = attributes;
     return this;
   }

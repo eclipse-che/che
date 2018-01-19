@@ -18,11 +18,15 @@ import static org.testng.Assert.fail;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.installer.server.InstallerRegistry;
+import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
+import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.EnvironmentDeserializer;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
-import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -35,7 +39,26 @@ import org.testng.annotations.Test;
  */
 @Listeners(MockitoTestNGListener.class)
 public class ComposeEnvironmentVariableTest {
-  @InjectMocks private ComposeEnvironmentFactory factory;
+
+  @Mock InstallerRegistry installerRegistry;
+  @Mock RecipeRetriever recipeRetriever;
+  @Mock MachineConfigsValidator machinesValidator;
+  @Mock ComposeEnvironmentValidator composeValidator;
+  @Mock ComposeServicesStartStrategy startStrategy;
+
+  private ComposeEnvironmentFactory factory;
+
+  @BeforeMethod
+  public void setup() {
+    factory =
+        new ComposeEnvironmentFactory(
+            installerRegistry,
+            recipeRetriever,
+            machinesValidator,
+            composeValidator,
+            startStrategy,
+            2048);
+  }
 
   @Test(dataProvider = "correctContentTestData")
   public void testCorrectContentParsing(String content, Map<String, String> expected)

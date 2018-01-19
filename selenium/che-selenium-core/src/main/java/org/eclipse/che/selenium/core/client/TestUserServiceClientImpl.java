@@ -8,12 +8,12 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.core.client.user;
+package org.eclipse.che.selenium.core.client;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import java.io.IOException;
 import java.net.URLEncoder;
 import org.eclipse.che.api.core.BadRequestException;
@@ -24,23 +24,31 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.shared.dto.UserDto;
-import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
+import org.eclipse.che.selenium.core.requestfactory.TestHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
+import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
 
 /** @author Musienko Maxim */
-@Singleton
 public class TestUserServiceClientImpl implements TestUserServiceClient {
 
   private final String userServiceEndpoint;
-  private final TestUserHttpJsonRequestFactory requestFactory;
+  private final TestHttpJsonRequestFactory requestFactory;
 
-  @Inject
   public TestUserServiceClientImpl(
       TestApiEndpointUrlProvider apiEndpointProvider,
-      TestUserHttpJsonRequestFactory testUserHttpJsonRequestFactory) {
+      TestUserHttpJsonRequestFactory userHttpJsonRequestFactory) {
     this.userServiceEndpoint = apiEndpointProvider.get().toString() + "user/";
-    this.requestFactory = testUserHttpJsonRequestFactory;
+    this.requestFactory = userHttpJsonRequestFactory;
+  }
+
+  @AssistedInject
+  public TestUserServiceClientImpl(
+      TestApiEndpointUrlProvider apiEndpointProvider,
+      TestUserHttpJsonRequestFactoryCreator userHttpJsonRequestFactoryCreator,
+      @Assisted("name") String name,
+      @Assisted("password") String password) {
+    this(apiEndpointProvider, userHttpJsonRequestFactoryCreator.create(name, password));
   }
 
   @Override

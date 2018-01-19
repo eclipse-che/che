@@ -47,6 +47,10 @@ class LsConfigurationExtractor {
     List<String> fileWatchPatterns = getFileWatchPatterns(configJsonObject);
     List<DocumentFilter> documentFilters = getDocumentFilters(configJsonObject);
 
+    if (languageIds.isEmpty()) {
+      throw new IllegalStateException(
+          "Language server is not properly configured in workspace configuration: language ids list is empty");
+    }
     return new LanguageServerDescription(id, languageIds, documentFilters, fileWatchPatterns);
   }
 

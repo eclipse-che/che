@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2015-2017 Red Hat, Inc.
+    Copyright (c) 2015-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -94,6 +94,25 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
         <md-icon md-font-icon="chefont cheico-cpp"></md-icon>
         <md-icon md-font-icon="chefont cheico-java"></md-icon>
       </che-html-source>
+      </div>
+    </md-tab>
+
+    <md-tab label="Dropdown Button"
+            md-on-select="demoComponentsController.onSelectTab(demoComponentsController.tab.Dropdown_button)">
+      <div layout="column"
+           style="padding-bottom: 100px;">
+
+        <label for="dropdownDisabled">The dropdown button is disabled:
+          <input id="dropdownDisabled" type="checkbox" ng-model="dropdownDisabled">
+        </label>
+
+        <textarea demo-source-render>
+          <che-button-dropdown button-style="che-button-primary"
+                               main-action-config="demoComponentsController.buttonDropdownConfig.mainAction"
+                               other-actions-config="demoComponentsController.buttonDropdownConfig.otherActions"
+                               button-disabled="dropdownDisabled"></che-button-dropdown>
+        </textarea>
+
       </div>
     </md-tab>
 

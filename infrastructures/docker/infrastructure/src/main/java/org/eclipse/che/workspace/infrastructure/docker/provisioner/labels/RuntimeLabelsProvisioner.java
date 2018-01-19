@@ -34,7 +34,12 @@ public class RuntimeLabelsProvisioner implements ConfigurationProvisioner {
       DockerContainerConfig container = internalEnv.getContainers().get(name);
       container
           .getLabels()
-          .putAll(Labels.newSerializer().machineName(name).runtimeId(identity).labels());
+          .putAll(
+              Labels.newSerializer()
+                  .machineName(name)
+                  .machineAttributes(entry.getValue().getAttributes())
+                  .runtimeId(identity)
+                  .labels());
     }
   }
 }

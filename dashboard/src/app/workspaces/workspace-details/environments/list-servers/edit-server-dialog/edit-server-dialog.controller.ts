@@ -20,7 +20,7 @@ import {IEnvironmentManagerMachineServer} from '../../../../../../components/api
  */
 export class EditServerDialogController {
   $mdDialog: ng.material.IDialogService;
-  lodash: _.LoDashStatic;
+  lodash: any;
 
   popupTitle: string;
 
@@ -44,7 +44,8 @@ export class EditServerDialogController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog: ng.material.IDialogService, lodash: _.LoDashStatic) {
+  constructor($mdDialog: ng.material.IDialogService,
+              lodash: any) {
     this.$mdDialog = $mdDialog;
     this.lodash = lodash;
 

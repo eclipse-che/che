@@ -15,7 +15,6 @@ import {CheHttpBackend} from '../../../components/api/test/che-http-backend';
 import IdeSvc from '../../ide/ide.service';
 import {CheBranding} from '../../../components/branding/che-branding.factory';
 
-
 /**
  * Test of the NavbarRecentWorkspacesController
  */
@@ -67,7 +66,7 @@ describe('NavbarRecentWorkspacesController', () => {
       let wrkspName = 'testName' + i;
       let wrkspCreateDate = new Date(2001, 1, 1, i, 1).toString();
       let wrkspUpdateDate = new Date(2001, 1, 1, i, 2).toString();
-      let wrkspAttr = {'created': Date.parse(wrkspCreateDate), 'updated': Date.parse(wrkspUpdateDate)};
+      let wrkspAttr = <che.IWorkspaceAttributes>{'created': Date.parse(wrkspCreateDate), 'updated': Date.parse(wrkspUpdateDate)};
       let workspace = apiBuilder.getWorkspaceBuilder().withId(wrkspId).withAttributes(wrkspAttr).withName(wrkspName).build();
       workspaces.push(workspace);
     }

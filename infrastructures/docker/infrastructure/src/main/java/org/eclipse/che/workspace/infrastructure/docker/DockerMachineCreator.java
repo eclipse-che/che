@@ -77,6 +77,7 @@ public class DockerMachineCreator {
             .map(networkSettings.getPorts(), configs),
         registry,
         dockerMachineStopDetector,
-        MachineStatus.RUNNING);
+        MachineStatus.RUNNING,
+        deserializer.machineAttributes());
   }
 }
