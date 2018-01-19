@@ -285,17 +285,19 @@ declare namespace che {
     temporary?: boolean;
     status?: string;
     namespace?: string;
-    attributes?: {
-      updated?: number;
-      created?: number;
-      stackId?: string;
-      errorMessage?: string;
-      [propName: string]: string | number;
-    };
+    attributes?: IWorkspaceAttributes;
     config: IWorkspaceConfig;
     runtime?: IWorkspaceRuntime;
     isLocked?: boolean;
     usedResources?: string;
+  }
+
+  export interface IWorkspaceAttributes {
+    created: number;
+    updated?: number;
+    stackId?: string;
+    errorMessage?: string;
+    [propName: string]: string | number;
   }
 
   export interface IWorkspaceConfig {

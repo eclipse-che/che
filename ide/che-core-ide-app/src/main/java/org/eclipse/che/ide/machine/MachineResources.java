@@ -83,7 +83,9 @@ public interface MachineResources extends ClientBundle {
 
     String machineStatusPausedRight();
 
-    String nameLabel();
+    String machineName();
+
+    String processName();
 
     String processIconPanel();
 

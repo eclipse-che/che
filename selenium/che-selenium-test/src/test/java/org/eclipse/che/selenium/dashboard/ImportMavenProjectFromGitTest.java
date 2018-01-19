@@ -74,7 +74,7 @@ public class ImportMavenProjectFromGitTest {
     projectSourcePage.typeGitRepositoryLocation("https://github.com/iedexmain1/guess-project.git");
     projectSourcePage.clickOnAddProjectButton();
 
-    createWorkspace.clickOnCreateWorkspaceButton();
+    createWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
 

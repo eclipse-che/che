@@ -17,6 +17,8 @@ import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsJsonRpcTransmitter;
 import org.eclipse.che.api.languageserver.messager.ShowMessageJsonRpcTransmitter;
 import org.eclipse.che.api.languageserver.registry.CheLanguageClientFactory;
+import org.eclipse.che.api.languageserver.registry.DefaultLanguageRecognizer;
+import org.eclipse.che.api.languageserver.registry.LanguageRecognizer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerFileWatcher;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
@@ -35,6 +37,7 @@ public class LanguageServerModule extends AbstractModule {
   protected void configure() {
     install(new LsRemoteModule());
 
+    bind(LanguageRecognizer.class).to(DefaultLanguageRecognizer.class);
     bind(LanguageServerRegistry.class).to(LanguageServerRegistryImpl.class);
     bind(ServerInitializer.class).to(ServerInitializerImpl.class);
     bind(LanguageRegistryService.class);

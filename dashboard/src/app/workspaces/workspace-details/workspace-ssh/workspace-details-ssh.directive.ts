@@ -24,8 +24,7 @@
  *
  * @author Florent Benoit
  */
-export class WorkspaceDetailsSsh {
-
+export class WorkspaceDetailsSsh implements ng.IDirective {
 
   restrict: string = 'E';
   templateUrl: string = 'app/workspaces/workspace-details/workspace-ssh/workspace-details-ssh.html';
@@ -33,14 +32,5 @@ export class WorkspaceDetailsSsh {
   controller: string = 'WorkspaceDetailsSshCtrl';
   controllerAs: string = 'workspaceDetailsSshCtrl';
   bindToController: boolean = true;
-
-
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor () {
-
-  }
 
 }

@@ -16,7 +16,7 @@ import {RouteHistory} from '../../../components/routing/route-history.service';
 import {CheJsonRpcApi} from '../../../components/api/json-rpc/che-json-rpc-api.factory';
 import {CheJsonRpcMasterApi} from '../../../components/api/json-rpc/che-json-rpc-master-api';
 
-const WS_AGENT_STEP: number = 3
+const WS_AGENT_STEP: number = 3;
 
 /**
  * This class is handling the controller for the factory loading.
@@ -27,7 +27,7 @@ export class LoadFactoryController {
   private $timeout: ng.ITimeoutService;
   private $mdDialog: ng.material.IDialogService;
   private loadFactoryService: LoadFactoryService;
-  private lodash: _.LoDashStatic;
+  private lodash: any;
   private cheNotification: CheNotification;
   private $location: ng.ILocationService;
   private routeHistory: RouteHistory;
@@ -46,9 +46,17 @@ export class LoadFactoryController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI: CheAPI, cheJsonRpcApi: CheJsonRpcApi, $route: ng.route.IRouteService, $timeout: ng.ITimeoutService,
-              $mdDialog: ng.material.IDialogService, loadFactoryService: LoadFactoryService, lodash: _.LoDashStatic, cheNotification: CheNotification,
-              $location: ng.ILocationService, routeHistory: RouteHistory, $window: ng.IWindowService) {
+  constructor(cheAPI: CheAPI,
+              cheJsonRpcApi: CheJsonRpcApi,
+              $route: ng.route.IRouteService,
+              $timeout: ng.ITimeoutService,
+              $mdDialog: ng.material.IDialogService,
+              loadFactoryService: LoadFactoryService,
+              lodash: any,
+              cheNotification: CheNotification,
+              $location: ng.ILocationService,
+              routeHistory: RouteHistory,
+              $window: ng.IWindowService) {
     this.cheAPI = cheAPI;
     this.$timeout = $timeout;
     this.$mdDialog = $mdDialog;
@@ -60,7 +68,7 @@ export class LoadFactoryController {
     this.$window = $window;
 
     this.workspaces = [];
-    this.workspace = {};
+    this.workspace = {} as che.IWorkspace;
     this.hideMenuAndFooter();
     this.jsonRpcMasterApi = cheJsonRpcApi.getJsonRpcMasterApi(cheAPI.getWorkspace().getJsonRpcApiLocation());
 
@@ -202,11 +210,11 @@ export class LoadFactoryController {
    */
   getWorkspaceToStart(): void {
     let createPolicy = (this.factory.policies) ? this.factory.policies.create : 'perClick';
-    var workspace = null;
+    let workspace = null;
     switch (createPolicy) {
       case 'perUser' :
         workspace = this.lodash.find(this.workspaces, (w: che.IWorkspace) => {
-          return this.factory.id === w.attributes.factoryId;
+          return this.factory.id === (w.attributes as any).factoryId;
         });
         break;
       case 'perAccount' :
@@ -465,7 +473,7 @@ export class LoadFactoryController {
   detectProjectsToImport(projects: Array<che.IProject>): void {
     this.projectsToImport = 0;
 
-    projects.forEach((project: che.IProject) => {
+    projects.forEach((project: che.IProjectTemplate) => {
       if (!this.isProjectOnFileSystem(project)) {
         this.projectsToImport++;
         this.importProject(this.workspace.id, project);
@@ -480,7 +488,7 @@ export class LoadFactoryController {
   /**
    * Project is on file system if there is no errors except code=9.
    */
-  isProjectOnFileSystem(project: che.IProject): boolean {
+  isProjectOnFileSystem(project: che.IProjectTemplate): boolean {
     let problems = project.problems;
     if (!problems || problems.length === 0) {
       return true;
@@ -557,7 +565,7 @@ export class LoadFactoryController {
       } else {
         // add every factory parameter by prefix
         Object.keys(this.routeParams).forEach((key: string) => {
-          ideParams.push('factory-' + key + ':' + this.$window.encodeURIComponent(this.routeParams[key]));
+          ideParams.push('factory-' + key + ':' + (this.$window as any).encodeURIComponent(this.routeParams[key]));
         });
       }
 
@@ -658,7 +666,7 @@ export class LoadFactoryController {
    */
   downloadLogs(): void {
     let logs = '';
-    this.getLoadingSteps().forEach((step) => {
+    this.getLoadingSteps().forEach((step: any) => {
       logs += step.logs + '\n';
     });
     window.open('data:text/csv,' + encodeURIComponent(logs));

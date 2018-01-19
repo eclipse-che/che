@@ -156,6 +156,20 @@ public class MergeViewImpl extends Window implements MergeView {
     branches.add(remoteBranch);
     root.setBranches(branches);
 
+    btnMerge =
+        createButton(
+            locale.buttonMerge(),
+            "git-merge-merge",
+            new ClickHandler() {
+
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onMergeClicked();
+              }
+            });
+    btnMerge.addStyleName(super.resources.windowCss().primaryButton());
+    addButtonToFooter(btnMerge);
+
     btnCancel =
         createButton(
             locale.buttonCancel(),
@@ -168,19 +182,6 @@ public class MergeViewImpl extends Window implements MergeView {
               }
             });
     addButtonToFooter(btnCancel);
-
-    btnMerge =
-        createButton(
-            locale.buttonMerge(),
-            "git-merge-merge",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onMergeClicked();
-              }
-            });
-    addButtonToFooter(btnMerge);
   }
 
   @Override

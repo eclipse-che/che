@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
-import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.shared.Constants;
@@ -211,7 +210,7 @@ public class MachineConfigsValidatorTest {
     return machineConfig;
   }
 
-  private static List<Installer> createInstallers(String... installers) {
+  private static List<InstallerImpl> createInstallers(String... installers) {
     return Arrays.stream(installers)
         .map(s -> new InstallerImpl().withId(s))
         .collect(Collectors.toList());

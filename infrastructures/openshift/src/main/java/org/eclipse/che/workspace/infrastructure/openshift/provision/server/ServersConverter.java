@@ -45,7 +45,7 @@ public class ServersConverter implements ConfigurationProvisioner {
       for (Container containerConfig : podSpec.getContainers()) {
         String machineName = Names.machineName(podConfig, containerConfig);
         InternalMachineConfig machineConfig = osEnv.getMachines().get(machineName);
-        if (machineConfig != null && !machineConfig.getServers().isEmpty()) {
+        if (!machineConfig.getServers().isEmpty()) {
           ServerExposer serverExposer =
               new ServerExposer(machineName, podConfig, containerConfig, osEnv);
           serverExposer.expose(machineConfig.getServers());

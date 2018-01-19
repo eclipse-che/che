@@ -83,6 +83,7 @@ public class TerminalNodeRenderStrategy
 
     Element nameElement = Elements.createSpanElement();
     nameElement.setTextContent(node.getName());
+    nameElement.setClassName(resources.getCss().processName());
     ensureDebugId(nameElement, "terminal-name-element");
 
     Tooltip.create(nameElement, BOTTOM, MIDDLE, node.getName());

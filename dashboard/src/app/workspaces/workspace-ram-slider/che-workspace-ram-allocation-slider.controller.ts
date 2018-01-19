@@ -26,7 +26,9 @@ export class CheWorkspaceRamAllocationSliderController {
    * @ngInject for Dependency injection
    */
   constructor ($timeout: ng.ITimeoutService, $scope: ng.IScope) {
-    "ngInject";
+    /* tslint:disable */
+    'ngInject';
+    /* tslint:enable */
     this.$timeout = $timeout;
 
     $scope.$watch(() => {

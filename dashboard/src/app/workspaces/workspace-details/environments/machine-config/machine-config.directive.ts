@@ -24,7 +24,7 @@
  *
  * @author Oleksii Kurinnyi
  */
-export class WorkspaceMachineConfig {
+export class WorkspaceMachineConfig implements ng.IDirective {
   restrict = 'E';
   templateUrl = 'app/workspaces/workspace-details/environments/machine-config/machine-config.html';
 
@@ -43,10 +43,5 @@ export class WorkspaceMachineConfig {
     machineIsOpened: '='
   };
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor () { }
 }
 

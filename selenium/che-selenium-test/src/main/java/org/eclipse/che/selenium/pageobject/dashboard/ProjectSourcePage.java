@@ -162,7 +162,8 @@ public class ProjectSourcePage {
    */
   public void selectSample(String name) {
     WebElement sample =
-        seleniumWebDriver.findElement(By.xpath(format(Locators.SAMPLE_CHECKBOX, name)));
+        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+            .until(visibilityOfElementLocated(By.xpath(format(Locators.SAMPLE_CHECKBOX, name))));
     sample.click();
   }
 

@@ -25,10 +25,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -37,6 +39,8 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.TimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -53,6 +57,7 @@ public class CheckRestoringSplitEditorTest {
   private Pair<Integer, Integer> cursorPositionForReadMeFile = new Pair<>(1, 10);
   private Pair<Integer, Integer> cursorPositionForPomFile = new Pair<>(31, 1);
   private List<String> expectedTextFromEditor;
+  private static final Logger LOG = LoggerFactory.getLogger(CheckRestoringSplitEditorTest.class);
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -63,6 +68,8 @@ public class CheckRestoringSplitEditorTest {
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
+  @Inject private TestApiEndpointUrlProvider testApiEndpointUrlProvider;
+  @Inject private HttpJsonRequestFactory httpJsonRequestFactory;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -80,7 +87,7 @@ public class CheckRestoringSplitEditorTest {
   }
 
   @Test
-  public void checkRestoringStateSplittedEditor() throws IOException {
+  public void checkRestoringStateSplittedEditor() throws IOException, Exception {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     splitEditorAndOpenFiles();
@@ -96,6 +103,7 @@ public class CheckRestoringSplitEditorTest {
       projectExplorer.waitItemInVisibleArea(javaClassName);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
+      LOG.info(getPreferences());
       fail("Known issue https://github.com/eclipse/che/issues/7551", ex);
     }
 
@@ -147,5 +155,13 @@ public class CheckRestoringSplitEditorTest {
     editor.goToPosition(cursorPositionForReadMeFile.first, cursorPositionForReadMeFile.second);
     editor.selectTabByName(pomFileTab);
     editor.goToPosition(cursorPositionForPomFile.first, cursorPositionForPomFile.second);
+  }
+
+  private String getPreferences() throws Exception {
+    return httpJsonRequestFactory
+        .fromUrl(testApiEndpointUrlProvider.get() + "preferences")
+        .useGetMethod()
+        .request()
+        .asString();
   }
 }

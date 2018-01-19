@@ -13,6 +13,7 @@ import {CheWorkspace, WorkspaceStatus} from '../../../components/api/workspace/c
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {WorkspaceDetailsService} from './workspace-details.service';
 import IdeSvc from '../../ide/ide.service';
+import {WorkspacesService} from '../workspaces.service';
 
 export  interface IInitData {
   namespaceId: string;
@@ -42,6 +43,7 @@ export class WorkspaceDetailsController {
   private cheWorkspace: CheWorkspace;
   private ideSvc: IdeSvc;
   private workspaceDetailsService: WorkspaceDetailsService;
+  private workspacesService: WorkspacesService;
   private loading: boolean = false;
   private selectedTabIndex: number;
   private namespaceId: string = '';
@@ -51,7 +53,7 @@ export class WorkspaceDetailsController {
   private workspaceDetails: che.IWorkspace;
   private originWorkspaceDetails: any = {};
   private editMode: boolean = false;
-  private showApplyMessage: boolean = false;
+  private showOverlayMessage: boolean = false;
   private workspaceImportedRecipe: che.IRecipe;
   private forms: Map<string, ng.IFormController> = new Map();
   private tab: { [key: string]: string } = {};
@@ -63,7 +65,16 @@ export class WorkspaceDetailsController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, $log: ng.ILogService, $scope: ng.IScope, cheNotification: CheNotification, cheWorkspace: CheWorkspace, ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService, initData: IInitData, $timeout: ng.ITimeoutService) {
+  constructor($location: ng.ILocationService,
+              $log: ng.ILogService,
+              $scope: ng.IScope,
+              cheNotification: CheNotification,
+              cheWorkspace: CheWorkspace,
+              ideSvc: IdeSvc,
+              workspaceDetailsService: WorkspaceDetailsService,
+              initData: IInitData,
+              $timeout: ng.ITimeoutService,
+              workspacesService: WorkspacesService) {
     this.$log = $log;
     this.$scope = $scope;
     this.$timeout = $timeout;
@@ -72,6 +83,7 @@ export class WorkspaceDetailsController {
     this.cheWorkspace = cheWorkspace;
     this.ideSvc = ideSvc;
     this.workspaceDetailsService = workspaceDetailsService;
+    this.workspacesService = workspacesService;
 
     if (!initData.workspaceDetails) {
       cheNotification.showError(`There is no workspace with name ${initData.workspaceName}`);
@@ -104,6 +116,21 @@ export class WorkspaceDetailsController {
       this.cheWorkspace.unsubscribeOnWorkspaceChange(this.workspaceId, action);
       searchDeRegistrationFn();
     });
+  }
+
+  /**
+   * Returns `true` if the recipe of default environment of the workspace has supported recipe type
+   *
+   * @returns {boolean}
+   */
+  get isSupported(): boolean {
+    const isSupported = this.workspacesService.isSupported(this.workspaceDetails);
+    if (!isSupported) {
+      this.showOverlayMessage = true;
+      this.editModeMessage = `Current infrastructure doesn't support this workspace recipe type.`;
+    }
+
+    return isSupported;
   }
 
   /**
@@ -234,17 +261,17 @@ export class WorkspaceDetailsController {
     this.editMode = !angular.equals(this.originWorkspaceDetails.config, this.workspaceDetails.config);
     if (this.editMode === false) {
       this.editModeMessage = '';
-      this.showApplyMessage = false;
+      this.showOverlayMessage = false;
       return;
     }
     this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
     this.editModeMessage = 'Changes will be applied and workspace restarted';
     const needRunningStatus = this.workspaceDetailsService.needRunningToUpdate();
     if (needRunningStatus) {
-      this.showApplyMessage = true;
+      this.showOverlayMessage = true;
     } else {
       const statusStr = this.getWorkspaceStatus();
-      this.showApplyMessage = [STOPPED, STOPPING].indexOf(statusStr) === -1;
+      this.showOverlayMessage = [STOPPED, STOPPING].indexOf(statusStr) === -1;
     }
     // check for fail tab.
     this.$timeout(() => {
@@ -264,7 +291,7 @@ export class WorkspaceDetailsController {
         this.editModeMessage += failTabs.map((tab: string) => {
           return `<a href='${url}?tab=${tab}'>${tab}</a>`;
         }).join(', ');
-        this.showApplyMessage = true;
+        this.showOverlayMessage = true;
         return;
       }
     }, 500);
@@ -275,7 +302,7 @@ export class WorkspaceDetailsController {
    */
   saveWorkspace(): void {
     this.editMode = false;
-    this.showApplyMessage = false;
+    this.showOverlayMessage = false;
 
     this.saving = true;
     this.loading = true;

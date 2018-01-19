@@ -18,8 +18,6 @@ import com.google.inject.name.Named;
  * Default {@link TestUser} that will be created before all tests and will be deleted after them.
  * All tests share the same default user.
  *
- * <p>To have more users per tests see {@link InjectTestUser}.
- *
  * @author Anatolii Bazko
  * @author Dmytro Nochevnov
  */
@@ -31,10 +29,11 @@ public class CheDefaultTestUser implements TestUser {
   @Inject
   public CheDefaultTestUser(
       TestUserFactory userFactory,
+      @Named("che.testuser.name") String name,
       @Named("che.testuser.email") String email,
       @Named("che.testuser.password") String password)
       throws Exception {
-    this.delegate = userFactory.create(email, password);
+    this.delegate = userFactory.create(name, email, password);
   }
 
   @Override
@@ -63,5 +62,5 @@ public class CheDefaultTestUser implements TestUser {
   }
 
   @Override
-  public void delete() {}
+  public void cleanUp() {}
 }

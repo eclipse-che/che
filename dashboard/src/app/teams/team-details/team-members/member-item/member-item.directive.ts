@@ -34,6 +34,4 @@ export class MemberItem implements ng.IDirective {
     isOwner: '=isOwner'
   };
 
-  constructor() {
-  }
 }

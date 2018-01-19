@@ -205,7 +205,8 @@ perform_database_migration() {
     echo "!!! Detected Che database, that is stored by an old path: ${CHE_DATA}/db/che.mv.db"
     echo "!!! In case if you want to use it, move it manually to the new path ${CHE_DATA}/storage/db/che.mv.db"
     echo "!!! It will be moved there automatically, if no database is present by the new path"
-    if [ ! -f ${CHE_DATA}/db/storage/che.mv.db ]; then
+    if [ ! -f ${CHE_DATA}/storage/db/che.mv.db ]; then
+      mkdir -p ${CHE_DATA}/storage/db
       mv ${CHE_DATA}/db/che.mv.db ${CHE_DATA}/storage/db/che.mv.db
       echo "Database has been successfully moved to the new path"
     fi
