@@ -14,6 +14,7 @@ import {WorkspaceStatus} from '../../../../components/api/workspace/che-workspac
 interface ITestScope extends ng.IRootScopeService {
   model: {
     workspaceStatus?: string;
+    buttonDisabled?: boolean;
     onStopWorkspace: Function;
     onRunWorkspace: Function;
   };
@@ -65,6 +66,7 @@ describe('WorkspaceStatusButton >', () => {
 
     const element = $compile(angular.element(
       `<workspace-status-button workspace-status="model.workspaceStatus"
+                                button-disabled="model.buttonDisabled"
                                 on-run-workspace="model.onRunWorkspace()"
                                 on-stop-workspace="model.onStopWorkspace()"></workspace-status-button>`
     ))($rootScope);
@@ -72,6 +74,30 @@ describe('WorkspaceStatusButton >', () => {
 
     return element;
   }
+
+  describe(`button is disabled >`, () => {
+    let jqRunButton: ng.IAugmentedJQuery;
+    let jqStopButton: ng.IAugmentedJQuery;
+
+    beforeEach(() => {
+      $rootScope.model.buttonDisabled = true;
+
+      const jqElement = getCompiledElement(WorkspaceStatus.STOPPED);
+      jqRunButton = jqElement.find('#run-workspace-button button');
+      jqStopButton = jqElement.find('#stop-workspace-button button');
+    });
+
+    it('should have "Run" button disabled', () => {
+      // timeout should be flashed
+      $timeout.flush();
+
+      expect(jqRunButton.get(0)).toBeTruthy();
+      expect(jqRunButton.attr('disabled')).toBeTruthy();
+
+      expect(jqStopButton.get(0)).toBeFalsy();
+    });
+
+  });
 
   describe('initially STOPPED >', () => {
     let jqRunButton: ng.IAugmentedJQuery;

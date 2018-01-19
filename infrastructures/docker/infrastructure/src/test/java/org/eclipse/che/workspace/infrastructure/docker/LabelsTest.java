@@ -33,7 +33,9 @@ import org.testng.annotations.Test;
 public class LabelsTest {
   static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
   static final Map<String, String> ATTRIBUTES = singletonMap("key", "value");
+  static final Map<String, String> MACHINE_ATTRIBUTES = singletonMap("memory", "2048mb");
   static final String STRING_ATTRIBUTES = GSON.toJson(ATTRIBUTES);
+  static final String STRING_MACHINE_ATTRIBUTES = GSON.toJson(MACHINE_ATTRIBUTES);
   static final String STRING_EMPTY_ATTRIBUTES = GSON.toJson(emptyMap());
 
   @Test
@@ -50,6 +52,7 @@ public class LabelsTest {
             .server(
                 "my.dot.separated.server",
                 new ServerConfigImpl("9090/tcp", "http", null, ATTRIBUTES))
+            .machineAttributes(MACHINE_ATTRIBUTES)
             .labels();
     Map<String, String> expected =
         ImmutableMap.<String, String>builder()
@@ -71,6 +74,7 @@ public class LabelsTest {
             .put("org.eclipse.che.server.my.dot.separated.server.port", "9090/tcp")
             .put("org.eclipse.che.server.my.dot.separated.server.protocol", "http")
             .put("org.eclipse.che.server.my.dot.separated.server.attributes", STRING_ATTRIBUTES)
+            .put("org.eclipse.che.machine.attributes", STRING_MACHINE_ATTRIBUTES)
             .build();
 
     assertEquals(serialized, expected);
@@ -99,6 +103,7 @@ public class LabelsTest {
             .put("org.eclipse.che.server.my-server3.attributes", STRING_ATTRIBUTES)
             .put("org.eclipse.che.server.my.dot.separated.server.port", "9090/tcp")
             .put("org.eclipse.che.server.my.dot.separated.server.protocol", "http")
+            .put("org.eclipse.che.machine.attributes", STRING_MACHINE_ATTRIBUTES)
             .build();
 
     Labels.Deserializer deserializer = Labels.newDeserializer(labels);
@@ -120,5 +125,8 @@ public class LabelsTest {
 
     Map<String, ServerConfig> servers = deserializer.servers();
     assertEquals(servers, expectedServers);
+
+    Map<String, String> machineAttributes = deserializer.machineAttributes();
+    assertEquals(machineAttributes, MACHINE_ATTRIBUTES);
   }
 }

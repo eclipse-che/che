@@ -14,15 +14,15 @@
  * Defines a directive for displaying factory from template widget.
  * @author Oleksii Orel
  */
-export class FactoryFromTemplate {
-  private restrict: string;
-  private templateUrl: string;
-  private controller: string;
-  private controllerAs: string;
-  private bindToController: boolean;
-  private replace: boolean;
+export class FactoryFromTemplate implements ng.IDirective {
+  restrict: string;
+  templateUrl: string;
+  controller: string;
+  controllerAs: string;
+  bindToController: boolean;
+  replace: boolean;
 
-  private scope: {
+  scope: {
     [propName: string]: string;
   };
 

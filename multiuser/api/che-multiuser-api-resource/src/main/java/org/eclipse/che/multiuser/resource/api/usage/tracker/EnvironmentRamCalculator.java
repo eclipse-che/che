@@ -10,31 +10,34 @@
  */
 package org.eclipse.che.multiuser.resource.api.usage.tracker;
 
+import static java.lang.String.format;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+
+import java.util.Map;
 import javax.inject.Inject;
-import javax.inject.Named;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
-//import org.eclipse.che.api.environment.server.EnvironmentParser;
-//import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
-import org.eclipse.che.commons.lang.Size;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 
 /**
  * Helps to calculate amount of RAM defined in {@link Environment environment}
  *
  * @author Sergii Leschenko
+ * @author Anton Korneta
  */
 public class EnvironmentRamCalculator {
   private static final long BYTES_TO_MEGABYTES_DIVIDER = 1024L * 1024L;
 
-//  private final EnvironmentParser environmentParser;
-  private final long defaultMachineMemorySizeBytes;
+  private final Map<String, InternalEnvironmentFactory> environmentFactories;
 
   @Inject
-  public EnvironmentRamCalculator(
-//      EnvironmentParser environmentParser,
-      @Named("che.workspace.default_memory_mb") int defaultMachineMemorySizeMB) {
-//    this.environmentParser = environmentParser;
-    this.defaultMachineMemorySizeBytes = Size.parseSize(defaultMachineMemorySizeMB + "MB");
+  public EnvironmentRamCalculator(Map<String, InternalEnvironmentFactory> environmentFactories) {
+    this.environmentFactories = environmentFactories;
   }
 
   /**
@@ -42,25 +45,42 @@ public class EnvironmentRamCalculator {
    * environment in megabytes.
    */
   public long calculate(Environment environment) throws ServerException {
-    /*
-    CheServicesEnvironmentImpl composeEnv = environmentParser.parse(environment);
+    try {
+      return getInternalEnvironment(environment)
+              .getMachines()
+              .values()
+              .stream()
+              .mapToLong(m -> Long.parseLong(m.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE)))
+              .sum()
+          / BYTES_TO_MEGABYTES_DIVIDER;
+    } catch (InfrastructureException | ValidationException | NotFoundException ex) {
+      throw new ServerException(ex.getMessage(), ex);
+    }
+  }
 
-    long sumBytes =
-        composeEnv
-            .getServices()
+  /**
+   * Calculates summary RAM of given {@link Runtime}.
+   *
+   * @return summary RAM of all machines in runtime in megabytes
+   */
+  public long calculate(Runtime runtime) {
+    return runtime
+            .getMachines()
             .values()
             .stream()
-            .mapToLong(
-                value -> {
-                  if (value.getMemLimit() == null || value.getMemLimit() == 0) {
-                    return defaultMachineMemorySizeBytes;
-                  } else {
-                    return value.getMemLimit();
-                  }
-                })
-            .sum();
-    return sumBytes / BYTES_TO_MEGABYTES_DIVIDER;
-    */
-    return 0L;
+            .mapToLong(m -> Long.parseLong(m.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE)))
+            .sum()
+        / BYTES_TO_MEGABYTES_DIVIDER;
+  }
+
+  private InternalEnvironment getInternalEnvironment(Environment environment)
+      throws InfrastructureException, ValidationException, NotFoundException {
+    final String recipeType = environment.getRecipe().getType();
+    final InternalEnvironmentFactory factory = environmentFactories.get(recipeType);
+    if (factory == null) {
+      throw new NotFoundException(
+          format("InternalEnvironmentFactory is not configured for recipe type: '%s'", recipeType));
+    }
+    return factory.create(environment);
   }
 }

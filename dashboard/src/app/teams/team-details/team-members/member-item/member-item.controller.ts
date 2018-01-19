@@ -98,7 +98,7 @@ export class MemberItemController {
 
     let roles = this.cheTeam.getRolesFromActions(this.member.permissions.actions);
     let titles = [];
-    let processedActions = []
+    let processedActions = [];
     roles.forEach((role: any) => {
       titles.push(role.title);
       processedActions = processedActions.concat(role.actions);

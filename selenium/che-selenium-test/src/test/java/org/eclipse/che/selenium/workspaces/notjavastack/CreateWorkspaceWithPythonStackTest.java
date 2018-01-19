@@ -65,7 +65,7 @@ public class CreateWorkspaceWithPythonStackTest {
     createWorkspace.typeWorkspaceName(WORKSPACE);
     createWorkspace.selectStack(TestStacksConstants.PYTHON.getId());
     createWorkspace.setMachineRAM("2");
-    createWorkspace.clickOnCreateWorkspaceButton();
+    createWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     dashboard.waitNotificationIsClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();

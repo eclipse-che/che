@@ -8,13 +8,12 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.core.user;
+package org.eclipse.che.selenium.core.client;
 
-/** @author Anatolii Bazko */
-public class CheTestUserNamespaceResolver implements TestUserNamespaceResolver {
+import com.google.inject.assistedinject.Assisted;
 
-  @Override
-  public String resolve(String username) {
-    return username.split("@")[0];
-  }
+/** @author Dmytro Nochevnov */
+public interface TestUserServiceClientFactory {
+  TestUserServiceClientImpl create(
+      @Assisted("name") String name, @Assisted("password") String password);
 }

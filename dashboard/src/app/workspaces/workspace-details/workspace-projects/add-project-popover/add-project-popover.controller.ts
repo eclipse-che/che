@@ -25,7 +25,9 @@ export class AddProjectPopoverController {
    * Callback to check uniqueness of project name.
    * Provided by parent controller.
    */
+  /* tslint:disable */
   private isProjectNameUnique: (data: {name: string}) => boolean;
+  /* tslint:enable */
   /**
    * Callback which is called when project templates are added to the list of ready-to-import projects.
    * Provided by parent controller.

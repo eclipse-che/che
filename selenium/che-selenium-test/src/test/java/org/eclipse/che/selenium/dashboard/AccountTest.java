@@ -16,14 +16,13 @@ import static org.testng.AssertJUnit.assertTrue;
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.entrance.Entrance;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.CheSecondTestUser;
 import org.eclipse.che.selenium.core.user.TestUserFactory;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.account.AccountFields;
 import org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount;
 import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount;
 import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPassword;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -34,7 +33,7 @@ public class AccountTest {
 
   @Inject private Dashboard dashboard;
   @Inject private DashboardAccount dashboardAccount;
-  @Inject private TestUser defaultTestUser;
+  @Inject private CheSecondTestUser secondTestUser;
   @Inject private KeycloakAccount keycloakAccount;
   @Inject private KeycloakPassword keycloakPassword;
   @Inject private SeleniumWebDriver seleniumWebDriver;
@@ -45,8 +44,8 @@ public class AccountTest {
   public void setup() {
     changedFields =
         new AccountFields(
-            defaultTestUser.getName(),
-            format("%s@testmail.ua", defaultTestUser.getName()),
+            secondTestUser.getName(),
+            format("%s@testmail.ua", secondTestUser.getName()),
             "UserFirstName",
             "UserLastName");
 
@@ -56,11 +55,6 @@ public class AccountTest {
     dashboard.clickOnAccountItem();
     dashboardAccount.waitPageIsLoaded();
     parentWindow = seleniumWebDriver.getWindowHandle();
-  }
-
-  @AfterClass
-  public void restoreDefaultUser() {
-    testUserFactory.create(defaultTestUser.getEmail(), defaultTestUser.getPassword());
   }
 
   @Test
@@ -116,7 +110,7 @@ public class AccountTest {
     keycloakPassword.clickOnSavePasswordButton();
 
     keycloakPassword.waitTextInErrorAlert("Invalid existing password.");
-    keycloakPassword.setPasswordFieldValue(defaultTestUser.getPassword());
+    keycloakPassword.setPasswordFieldValue(secondTestUser.getPassword());
     keycloakPassword.setNewPasswordFieldValue("changedPassword");
     keycloakPassword.setNewPasswordConfirmationFieldValue("changedPassword");
     keycloakPassword.clickOnSavePasswordButton();
@@ -128,7 +122,7 @@ public class AccountTest {
     dashboard.clickOnUsernameButton();
     dashboard.clickOnLogoutItem();
 
-    dashboard.open(defaultTestUser.getName(), "changedPassword");
+    dashboard.open(secondTestUser.getName(), "changedPassword");
 
     dashboard.waitDashboardToolbarTitle();
   }

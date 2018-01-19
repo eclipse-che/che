@@ -12,8 +12,10 @@ package org.eclipse.che.api.workspace.server.spi.environment;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -21,8 +23,10 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +56,8 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class InternalEnvironmentFactoryTest {
 
+  public static final long RAM_LIMIT = 3072;
+
   @Mock private InstallerRegistry installerRegistry;
   @Mock private RecipeRetriever recipeRetriever;
   @Mock private MachineConfigsValidator machinesValidator;
@@ -64,6 +70,9 @@ public class InternalEnvironmentFactoryTest {
   public void setUp() throws Exception {
     environmentFactory =
         spy(new TestEnvironmentFactory(installerRegistry, recipeRetriever, machinesValidator));
+    final InternalEnvironment internalEnv = mock(InternalEnvironment.class);
+    when(internalEnv.getMachines()).thenReturn(Collections.emptyMap());
+    when(environmentFactory.doCreate(any(), anyMap(), anyList())).thenReturn(internalEnv);
   }
 
   @Test
@@ -162,6 +171,35 @@ public class InternalEnvironmentFactoryTest {
         ImmutableMap.of("serverWithoutProtocol", normalizedServer, "udpServer", udpServer));
   }
 
+  @Test
+  public void testSetsDefaultRamLimitAttributeToMachineThatDoesNotContainIt() throws Exception {
+    final Map<String, String> attributes = new HashMap<>();
+    final InternalEnvironment internalEnv = mock(InternalEnvironment.class);
+    final InternalMachineConfig machine = mock(InternalMachineConfig.class);
+    when(environmentFactory.doCreate(any(), any(), any())).thenReturn(internalEnv);
+    when(internalEnv.getMachines()).thenReturn(ImmutableMap.of("testMachine", machine));
+    when(machine.getAttributes()).thenReturn(attributes);
+
+    environmentFactory.create(mock(Environment.class));
+
+    assertTrue(attributes.containsKey(MEMORY_LIMIT_ATTRIBUTE));
+    assertEquals(attributes.get(MEMORY_LIMIT_ATTRIBUTE), String.valueOf(RAM_LIMIT * 2 << 19));
+  }
+
+  @Test
+  public void testDoNotOverrideRamLimitAttributeWhenMachineAlreadyContainsIt() throws Exception {
+    final String ramLimit = "2147483648";
+    final InternalEnvironment internalEnv = mock(InternalEnvironment.class);
+    final InternalMachineConfig machine = mock(InternalMachineConfig.class);
+    when(environmentFactory.doCreate(any(), any(), any())).thenReturn(internalEnv);
+    when(internalEnv.getMachines()).thenReturn(ImmutableMap.of("testMachine", machine));
+    when(machine.getAttributes()).thenReturn(ImmutableMap.of(MEMORY_LIMIT_ATTRIBUTE, ramLimit));
+
+    environmentFactory.create(mock(Environment.class));
+
+    assertEquals(machine.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), ramLimit);
+  }
+
   private static class TestEnvironmentFactory
       extends InternalEnvironmentFactory<InternalEnvironment> {
 
@@ -169,7 +207,7 @@ public class InternalEnvironmentFactoryTest {
         InstallerRegistry installerRegistry,
         RecipeRetriever recipeRetriever,
         MachineConfigsValidator machinesValidator) {
-      super(installerRegistry, recipeRetriever, machinesValidator);
+      super(installerRegistry, recipeRetriever, machinesValidator, RAM_LIMIT);
     }
 
     @Override

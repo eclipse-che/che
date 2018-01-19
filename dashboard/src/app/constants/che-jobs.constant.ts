@@ -15,36 +15,36 @@
  */
 export class CheJobsConfig {
 
-    constructor(register) {
-        // Register this factory
-        register.app.constant('jsonJobs', JSON.stringify([{
-                name: 'Architect'
-            }, {
-                name: 'Team Lead'
-            }, {
-                name: 'DevOps'
-            }, {
-                name: 'Developer'
-            }, {
-                name: 'System Administrator'
-            }, {
-                name: 'Manager'
-            }, {
-                name: 'Director'
-            }, {
-                name: 'VP'
-            }, {
-                name: 'C-Level'
-            }, {
-                name: 'Freelance'
-            }, {
-                name: 'Educator'
-            }, {
-                name: 'Student'
-            }, {
-                name: 'Hobbyist'
-            }]
-        ));
+  constructor(register: che.IRegisterService) {
+    // register this factory
+    register.app.constant('jsonJobs', JSON.stringify([{
+        name: 'Architect'
+      }, {
+        name: 'Team Lead'
+      }, {
+        name: 'DevOps'
+      }, {
+        name: 'Developer'
+      }, {
+        name: 'System Administrator'
+      }, {
+        name: 'Manager'
+      }, {
+        name: 'Director'
+      }, {
+        name: 'VP'
+      }, {
+        name: 'C-Level'
+      }, {
+        name: 'Freelance'
+      }, {
+        name: 'Educator'
+      }, {
+        name: 'Student'
+      }, {
+        name: 'Hobbyist'
+      }]
+    ));
 
-    }
+  }
 }

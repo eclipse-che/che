@@ -21,25 +21,18 @@
  *
  * @author Florent Benoit
  */
-export class CreateProjectStackLibrary {
+export class CreateProjectStackLibrary implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/workspace-details/select-stack/stack-library/create-project-stack-library.html';
+  restrict = 'E';
+  templateUrl = 'app/workspaces/workspace-details/select-stack/stack-library/create-project-stack-library.html';
 
-    this.controller = 'CreateProjectStackLibraryController';
-    this.controllerAs = 'createProjectStackLibraryCtrl';
-    this.bindToController = true;
+  controller = 'CreateProjectStackLibraryController';
+  controllerAs = 'createProjectStackLibraryCtrl';
+  bindToController = true;
 
-    // scope values
-    this.scope = {
-      tabName: '@cheTabName'
-    };
-
-  }
+  // scope values
+  scope = {
+    tabName: '@cheTabName'
+  };
 
 }
