@@ -20,6 +20,6 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftMachine;
 public interface OpenShiftBootstrapperFactory {
   OpenShiftBootstrapper create(
       @Assisted RuntimeIdentity runtimeIdentity,
-      @Assisted List<Installer> agents,
+      @Assisted List<? extends Installer> agents,
       @Assisted OpenShiftMachine openShiftMachine);
 }
