@@ -91,7 +91,7 @@ public class WorkingWithJavaMySqlStackTest {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
-    workspaces.clickOnNewWorkspaceBtn();
+    workspaces.clickOnAddWorkspaceBtn();
     createWorkspace.waitToolbar();
     createWorkspace.selectStack(JAVA_MYSQL.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);

@@ -160,12 +160,6 @@ public class CreateWorkspace {
     return Double.parseDouble(s);
   }
 
-  public void setMachineRAM(String value) {
-    WebElement ramInput = seleniumWebDriver.findElement(By.xpath(Locators.MACHINE_RAM_VALUE));
-    ramInput.clear();
-    ramInput.sendKeys(value);
-  }
-
   public void setMachineRAM(String machineName, double value) {
     WebElement ramInput =
         seleniumWebDriver.findElement(By.xpath(format(Locators.MACHINE_RAM_VALUE, machineName)));

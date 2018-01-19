@@ -63,7 +63,7 @@ public class ImportMavenProjectFromGitTest {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
 
-    workspaces.clickOnNewWorkspaceBtn();
+    workspaces.clickOnAddWorkspaceBtn();
     createWorkspace.waitToolbar();
     createWorkspace.selectStack(TestStacksConstants.JAVA.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);

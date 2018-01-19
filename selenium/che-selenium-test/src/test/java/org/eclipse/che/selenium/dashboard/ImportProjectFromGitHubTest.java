@@ -75,7 +75,7 @@ public class ImportProjectFromGitHubTest {
 
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.clickOnNewWorkspaceBtn();
+    workspaces.clickOnAddWorkspaceBtn();
     createWorkspace.waitToolbar();
     createWorkspace.selectStack(JAVA.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);

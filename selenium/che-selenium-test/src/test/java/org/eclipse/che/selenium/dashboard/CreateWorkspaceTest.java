@@ -59,7 +59,7 @@ public class CreateWorkspaceTest {
 
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.clickOnNewWorkspaceBtn();
+    workspaces.clickOnAddWorkspaceBtn();
     createWorkspace.waitToolbar();
   }
 

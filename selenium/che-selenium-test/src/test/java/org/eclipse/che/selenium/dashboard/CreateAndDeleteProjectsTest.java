@@ -71,7 +71,7 @@ public class CreateAndDeleteProjectsTest {
   public void createAndDeleteProjectTest() throws ExecutionException, InterruptedException {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.clickOnNewWorkspaceBtn();
+    workspaces.clickOnAddWorkspaceBtn();
     createWorkspace.waitToolbar();
 
     createWorkspace.selectStack(TestStacksConstants.JAVA.getId());

@@ -75,7 +75,7 @@ public class WorkingWithNodeWsTest {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
-    workspaces.clickOnNewWorkspaceBtn();
+    workspaces.clickOnAddWorkspaceBtn();
     createWorkspace.waitToolbar();
     createWorkspace.selectStack(NODE.getId());
     createWorkspace.typeWorkspaceName(WORKSPACE);

@@ -59,12 +59,12 @@ public class CreateWorkspaceWithCppStackTest {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
-    workspaces.clickOnNewWorkspaceBtn();
+    workspaces.clickOnAddWorkspaceBtn();
 
     createWorkspace.waitToolbar();
     createWorkspace.typeWorkspaceName(WORKSPACE);
     createWorkspace.selectStack(TestStacksConstants.CPP.getId());
-    createWorkspace.setMachineRAM("2");
+    createWorkspace.setMachineRAM("dev-machine", 2.0);
     createWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     dashboard.waitNotificationIsClosed();
