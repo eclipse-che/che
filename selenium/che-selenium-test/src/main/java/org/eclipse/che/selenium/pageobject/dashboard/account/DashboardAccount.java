@@ -17,7 +17,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAcc
 import static org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount.Locators.FIRST_NAME_FIELD;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount.Locators.LAST_NAME_FIELD;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount.Locators.LOGIN_FIELD;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -32,12 +31,16 @@ public class DashboardAccount {
   private final SeleniumWebDriver seleniumWebDriver;
   private final CheSecondTestUser cheSecondTestUser;
   private final WebDriverWait loadPageWait;
+  private final SeleniumWebDriverUtils seleniumWebDriverUtils;
 
   @Inject
   public DashboardAccount(
-      SeleniumWebDriver seleniumWebDriver, CheSecondTestUser cheSecondTestUser) {
+      SeleniumWebDriver seleniumWebDriver,
+      CheSecondTestUser cheSecondTestUser,
+      SeleniumWebDriverUtils seleniumWebDriverUtils) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.cheSecondTestUser = cheSecondTestUser;
+    this.seleniumWebDriverUtils = seleniumWebDriverUtils;
     this.loadPageWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
   }
 
@@ -73,39 +76,31 @@ public class DashboardAccount {
   }
 
   public String getEmailFieldValue() {
-    return loadPageWait
-        .until(visibilityOfElementLocated(By.xpath(EMAIL_FIELD)))
-        .getAttribute("value");
+    return seleniumWebDriverUtils.getFieldValue(By.xpath(EMAIL_FIELD));
   }
 
   public String getLoginFieldValue() {
-    return loadPageWait
-        .until(visibilityOfElementLocated(By.xpath(LOGIN_FIELD)))
-        .getAttribute("value");
+    return seleniumWebDriverUtils.getFieldValue(By.xpath(LOGIN_FIELD));
   }
 
   public String getFirstNameFieldValue() {
-    return loadPageWait
-        .until(visibilityOfElementLocated(By.xpath(FIRST_NAME_FIELD)))
-        .getAttribute("value");
+    return seleniumWebDriverUtils.getFieldValue(By.xpath(FIRST_NAME_FIELD));
   }
 
   public String getLastNameFieldValue() {
-    return loadPageWait
-        .until(visibilityOfElementLocated(By.xpath(LAST_NAME_FIELD)))
-        .getAttribute("value");
+    return seleniumWebDriverUtils.getFieldValue(By.xpath(LAST_NAME_FIELD));
   }
 
   public String getTitle() {
-    return loadPageWait.until(visibilityOfElementLocated(By.id(Locators.TITLE_ID))).getText();
+    return seleniumWebDriverUtils.waitAndGetElement(By.id(Locators.TITLE_ID)).getText();
   }
 
   public void clickOnEditButton() {
-    loadPageWait.until(visibilityOfElementLocated(By.xpath(EDIT_BUTTON))).click();
+    seleniumWebDriverUtils.waitAndClickOnElement(By.xpath(EDIT_BUTTON));
   }
 
   public void waitPageIsLoaded() {
     asList(EMAIL_FIELD, LOGIN_FIELD, FIRST_NAME_FIELD, LAST_NAME_FIELD, EDIT_BUTTON)
-        .forEach(locator -> loadPageWait.until(visibilityOfElementLocated(By.xpath(locator))));
+        .forEach(locator -> seleniumWebDriverUtils.waitElementIsVisible(By.xpath(locator)));
   }
 }

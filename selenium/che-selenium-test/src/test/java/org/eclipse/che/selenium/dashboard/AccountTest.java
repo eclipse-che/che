@@ -21,6 +21,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.account.Account;
 import org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount;
 import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccountPage;
+import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakHeaderButtons;
 import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPasswordPage;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -35,8 +36,9 @@ public class AccountTest {
   @Inject private DashboardAccount dashboardAccount;
   @Inject private CheSecondTestUser secondTestUser;
   @Inject private KeycloakAccountPage keycloakAccount;
-  @Inject private KeycloakPasswordPage testKeycloakPasswordPage;
+  @Inject private KeycloakPasswordPage keycloakPasswordPage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private KeycloakHeaderButtons keycloakHeaderButtons;
 
   @BeforeClass
   public void setup() {
@@ -63,7 +65,7 @@ public class AccountTest {
             .isEquals(dashboardAccount.getCurrentFieldsValue()));
     dashboardAccount.clickOnEditButton();
 
-    keycloakAccount.switchToNoneParentWindow(parentWindow);
+    seleniumWebDriver.switchToNoneCurrentWindow(parentWindow);
 
     keycloakAccount.waitAccountPageIsLoaded();
 
@@ -79,7 +81,7 @@ public class AccountTest {
     keycloakAccount.clickOnSaveButton();
     keycloakAccount.waitTextInSuccessAlert("Your account has been updated.");
 
-    keycloakAccount.closeWindowAndSwitchToParent(parentWindow);
+    closeWindowAndSwitchToParent(parentWindow);
     dashboardAccount.waitPageIsLoaded();
 
     seleniumWebDriver.navigate().refresh();
@@ -94,26 +96,26 @@ public class AccountTest {
     dashboardAccount.waitPageIsLoaded();
     dashboardAccount.clickOnEditButton();
 
-    keycloakAccount.switchToNoneParentWindow(parentWindow);
+    seleniumWebDriver.switchToNoneCurrentWindow(parentWindow);
     keycloakAccount.waitAccountPageIsLoaded();
-    keycloakAccount.clickOnPasswordButton();
-    testKeycloakPasswordPage.waitPasswordPageIsLoaded();
-    testKeycloakPasswordPage.clickOnSavePasswordButton();
+    keycloakHeaderButtons.clickOnPasswordButton();
+    keycloakPasswordPage.waitPasswordPageIsLoaded();
+    keycloakPasswordPage.clickOnSavePasswordButton();
 
-    testKeycloakPasswordPage.waitTextInErrorAlert("Please specify password.");
+    keycloakPasswordPage.waitTextInErrorAlert("Please specify password.");
 
-    testKeycloakPasswordPage.setPasswordFieldValue("wrongPassword");
-    testKeycloakPasswordPage.clickOnSavePasswordButton();
+    keycloakPasswordPage.setPasswordFieldValue("wrongPassword");
+    keycloakPasswordPage.clickOnSavePasswordButton();
 
-    testKeycloakPasswordPage.waitTextInErrorAlert("Invalid existing password.");
-    testKeycloakPasswordPage.setPasswordFieldValue(secondTestUser.getPassword());
-    testKeycloakPasswordPage.setNewPasswordFieldValue("changedPassword");
-    testKeycloakPasswordPage.setNewPasswordConfirmationFieldValue("changedPassword");
-    testKeycloakPasswordPage.clickOnSavePasswordButton();
+    keycloakPasswordPage.waitTextInErrorAlert("Invalid existing password.");
+    keycloakPasswordPage.setPasswordFieldValue(secondTestUser.getPassword());
+    keycloakPasswordPage.setNewPasswordFieldValue("changedPassword");
+    keycloakPasswordPage.setNewPasswordConfirmationFieldValue("changedPassword");
+    keycloakPasswordPage.clickOnSavePasswordButton();
 
-    testKeycloakPasswordPage.waitTextInSuccessAlert("Your password has been updated.");
+    keycloakPasswordPage.waitTextInSuccessAlert("Your password has been updated.");
 
-    testKeycloakPasswordPage.closeWindowAndSwitchToParent(parentWindow);
+    closeWindowAndSwitchToParent(parentWindow);
 
     dashboard.clickOnUsernameButton();
     dashboard.clickOnLogoutItem();
@@ -121,5 +123,10 @@ public class AccountTest {
     dashboard.open(secondTestUser.getName(), "changedPassword");
 
     dashboard.waitDashboardToolbarTitle();
+  }
+
+  private void closeWindowAndSwitchToParent(String parentWindow) {
+    seleniumWebDriver.close();
+    seleniumWebDriver.switchTo().window(parentWindow);
   }
 }

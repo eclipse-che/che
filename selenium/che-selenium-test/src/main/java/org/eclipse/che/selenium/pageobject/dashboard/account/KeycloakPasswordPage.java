@@ -11,26 +11,37 @@
 package org.eclipse.che.selenium.pageobject.dashboard.account;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPasswordPage.PasswordLocators.ERROR_ALERT;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPasswordPage.PasswordLocators.NEW_PASSWORD_CONFIRMATION_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPasswordPage.PasswordLocators.NEW_PASSWORD_FIELD_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPasswordPage.PasswordLocators.PASSWORD_FIELD_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPasswordPage.PasswordLocators.SAVE_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPasswordPage.PasswordLocators.SUCCESS_ALERT;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 @Singleton
-public class KeycloakPasswordPage extends KeycloakAbstractPage {
+public class KeycloakPasswordPage {
+  private SeleniumWebDriver seleniumWebDriver;
+  private WebDriverWait loadPageWait;
+  private SeleniumWebDriverUtils seleniumWebDriverUtils;
+  private KeycloakHeaderButtons keycloakHeaderButtons;
 
   @Inject
-  public KeycloakPasswordPage(SeleniumWebDriver seleniumWebDriver) {
-    super(seleniumWebDriver);
+  public KeycloakPasswordPage(
+      SeleniumWebDriver seleniumWebDriver,
+      SeleniumWebDriverUtils seleniumWebDriverUtils,
+      KeycloakHeaderButtons keycloakHeaderButtons) {
+    this.seleniumWebDriver = seleniumWebDriver;
+    this.seleniumWebDriverUtils = seleniumWebDriverUtils;
+    this.keycloakHeaderButtons = keycloakHeaderButtons;
+    this.loadPageWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
   }
 
   protected interface PasswordLocators {
@@ -45,36 +56,44 @@ public class KeycloakPasswordPage extends KeycloakAbstractPage {
   }
 
   public void waitPasswordPageIsLoaded() {
-    waitAllHeaderButtonsIsVisible();
+    keycloakHeaderButtons.waitAllHeaderButtonsIsVisible();
     waitAllBodyFieldsAndButtonsIsVisible();
   }
 
   public void setPasswordFieldValue(String value) {
-    setFieldValue(By.id(PASSWORD_FIELD_ID), value);
+    seleniumWebDriverUtils.setFieldValue(By.id(PASSWORD_FIELD_ID), value);
   }
 
   public void setNewPasswordFieldValue(String value) {
-    setFieldValue(By.id(NEW_PASSWORD_FIELD_ID), value);
+    seleniumWebDriverUtils.setFieldValue(By.id(NEW_PASSWORD_FIELD_ID), value);
   }
 
   public void setNewPasswordConfirmationFieldValue(String value) {
-    setFieldValue(By.id(NEW_PASSWORD_CONFIRMATION_ID), value);
+    seleniumWebDriverUtils.setFieldValue(By.id(NEW_PASSWORD_CONFIRMATION_ID), value);
   }
 
   public void clickOnSavePasswordButton() {
-    loadPageWait.until(visibilityOfElementLocated(By.xpath(SAVE_BUTTON))).click();
+    seleniumWebDriverUtils.waitAndClickOnElement(By.xpath(SAVE_BUTTON));
   }
 
   public void waitTextInErrorAlert(String expectedText) {
     loadPageWait.until(
         (ExpectedCondition<Boolean>)
-            driver -> waitAndGetElement(By.xpath(ERROR_ALERT)).getText().equals(expectedText));
+            driver ->
+                seleniumWebDriverUtils
+                    .waitAndGetElement(By.xpath(ERROR_ALERT))
+                    .getText()
+                    .equals(expectedText));
   }
 
   public void waitTextInSuccessAlert(String expectedText) {
     loadPageWait.until(
         (ExpectedCondition<Boolean>)
-            driver -> waitAndGetElement(By.xpath(SUCCESS_ALERT)).getText().equals(expectedText));
+            driver ->
+                seleniumWebDriverUtils
+                    .waitAndGetElement(By.xpath(SUCCESS_ALERT))
+                    .getText()
+                    .equals(expectedText));
   }
 
   private void waitAllBodyFieldsAndButtonsIsVisible() {
@@ -83,6 +102,6 @@ public class KeycloakPasswordPage extends KeycloakAbstractPage {
             By.id(NEW_PASSWORD_FIELD_ID),
             By.id(NEW_PASSWORD_CONFIRMATION_ID),
             By.xpath(SAVE_BUTTON))
-        .forEach(locator -> waitElementIsVisible(locator));
+        .forEach(locator -> seleniumWebDriverUtils.waitElementIsVisible(locator));
   }
 }

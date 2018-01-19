@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.pageobject.dashboard.account;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccountPage.AccountPageLocators.CANCEL_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccountPage.AccountPageLocators.EMAIL_FIELD_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccountPage.AccountPageLocators.ERROR_ALERT;
@@ -25,13 +26,24 @@ import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 @Singleton
-public class KeycloakAccountPage extends KeycloakAbstractPage {
+public class KeycloakAccountPage {
+  private SeleniumWebDriver seleniumWebDriver;
+  private SeleniumWebDriverUtils seleniumWebDriverUtils;
+  private KeycloakHeaderButtons keycloakHeaderButtons;
+  private WebDriverWait loadPageWait;
 
   @Inject
-  protected KeycloakAccountPage(SeleniumWebDriver seleniumWebDriver) {
-    super(seleniumWebDriver);
+  protected KeycloakAccountPage(
+      SeleniumWebDriver seleniumWebDriver,
+      SeleniumWebDriverUtils seleniumWebDriverUtils,
+      KeycloakHeaderButtons keycloakHeaderButtons) {
+    this.seleniumWebDriver = seleniumWebDriver;
+    this.seleniumWebDriverUtils = seleniumWebDriverUtils;
+    this.keycloakHeaderButtons = keycloakHeaderButtons;
+    this.loadPageWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
   }
 
   protected interface AccountPageLocators {
@@ -48,7 +60,7 @@ public class KeycloakAccountPage extends KeycloakAbstractPage {
   }
 
   public void waitAccountPageIsLoaded() {
-    waitAllHeaderButtonsIsVisible();
+    keycloakHeaderButtons.waitAllHeaderButtonsIsVisible();
     waitAllBodyFieldsAndButtonsIsVisible();
   }
 
@@ -58,59 +70,70 @@ public class KeycloakAccountPage extends KeycloakAbstractPage {
   }
 
   public String getUserNameValue() {
-    return getFieldValue(By.id(AccountPageLocators.USERNAME_FIELD_ID));
+    return seleniumWebDriverUtils.getFieldValue(By.id(USERNAME_FIELD_ID));
   }
 
   public String getEmailValue() {
-    return getFieldValue(By.id(AccountPageLocators.EMAIL_FIELD_ID));
+    return seleniumWebDriverUtils.getFieldValue(By.id(EMAIL_FIELD_ID));
   }
 
   public String getFirstNameValue() {
-    return getFieldValue(By.id(AccountPageLocators.FIRST_NAME_FIELD_ID));
+    return seleniumWebDriverUtils.getFieldValue(By.id(FIRST_NAME_FIELD_ID));
   }
 
   public String getLastNameValue() {
-    return getFieldValue(By.id(AccountPageLocators.LAST_NAME_FIELD_ID));
+    return seleniumWebDriverUtils.getFieldValue(By.id(LAST_NAME_FIELD_ID));
   }
 
   public void setUserNameValue(String value) {
-    setFieldValue(By.id(AccountPageLocators.USERNAME_FIELD_ID), value);
+    seleniumWebDriverUtils.setFieldValue(By.id(USERNAME_FIELD_ID), value);
   }
 
   public void setEmailValue(String value) {
-    setFieldValue(By.id(AccountPageLocators.EMAIL_FIELD_ID), value);
+    seleniumWebDriverUtils.setFieldValue(By.id(EMAIL_FIELD_ID), value);
   }
 
   public void setFirstNameValue(String value) {
-    setFieldValue(By.id(AccountPageLocators.FIRST_NAME_FIELD_ID), value);
+    seleniumWebDriverUtils.setFieldValue(By.id(FIRST_NAME_FIELD_ID), value);
   }
 
   public void setLastNameValue(String value) {
-    setFieldValue(By.id(AccountPageLocators.LAST_NAME_FIELD_ID), value);
+    seleniumWebDriverUtils.setFieldValue(By.id(LAST_NAME_FIELD_ID), value);
   }
 
   public boolean usernameFieldIsDisabled() {
-    return waitAndGetElement(By.id(USERNAME_FIELD_ID)).getAttribute("disabled").equals("true");
+    return seleniumWebDriverUtils
+        .waitAndGetElement(By.id(USERNAME_FIELD_ID))
+        .getAttribute("disabled")
+        .equals("true");
   }
 
   public void clickOnSaveButton() {
-    waitAndGetElement(By.xpath(SAVE_BUTTON)).click();
+    seleniumWebDriverUtils.waitAndClickOnElement(By.xpath(SAVE_BUTTON));
   }
 
   public void clickOnCancelButton() {
-    waitAndGetElement(By.xpath(CANCEL_BUTTON)).click();
+    seleniumWebDriverUtils.waitAndClickOnElement(By.xpath(CANCEL_BUTTON));
   }
 
   public void waitTextInErrorAlert(String expectedText) {
     loadPageWait.until(
         (ExpectedCondition<Boolean>)
-            driver -> waitAndGetElement(By.xpath(ERROR_ALERT)).getText().equals(expectedText));
+            driver ->
+                seleniumWebDriverUtils
+                    .waitAndGetElement(By.xpath(ERROR_ALERT))
+                    .getText()
+                    .equals(expectedText));
   }
 
   public void waitTextInSuccessAlert(String expectedText) {
     loadPageWait.until(
         (ExpectedCondition<Boolean>)
-            driver -> waitAndGetElement(By.xpath(SUCCESS_ALERT)).getText().equals(expectedText));
+            driver ->
+                seleniumWebDriverUtils
+                    .waitAndGetElement(By.xpath(SUCCESS_ALERT))
+                    .getText()
+                    .equals(expectedText));
   }
 
   private void waitAllBodyFieldsAndButtonsIsVisible() {
@@ -121,6 +144,6 @@ public class KeycloakAccountPage extends KeycloakAbstractPage {
             By.id(EMAIL_FIELD_ID),
             By.id(FIRST_NAME_FIELD_ID),
             By.id(LAST_NAME_FIELD_ID))
-        .forEach(locator -> waitElementIsVisible(locator));
+        .forEach(locator -> seleniumWebDriverUtils.waitElementIsVisible(locator));
   }
 }
