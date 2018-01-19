@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.core;
 import com.google.inject.AbstractModule;
 import org.eclipse.che.selenium.core.client.CheTestMachineServiceClient;
 import org.eclipse.che.selenium.core.client.KeycloakTestAuthServiceClient;
-import org.eclipse.che.selenium.core.client.OfflineTokenTestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestMachineServiceClient;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -25,14 +24,7 @@ public class CheSeleniumMultiUserModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(AdminTestUser.class).to(CheAdminTestUser.class);
-
-    if (System.getenv("CHE_OFFLINE_TOKEN") != null
-        && !System.getenv("CHE_OFFLINE_TOKEN").isEmpty()) {
-      bind(TestAuthServiceClient.class).to(OfflineTokenTestAuthServiceClient.class);
-    } else {
-      bind(TestAuthServiceClient.class).to(KeycloakTestAuthServiceClient.class);
-    }
-
+    bind(TestAuthServiceClient.class).to(KeycloakTestAuthServiceClient.class);
     bind(TestMachineServiceClient.class).to(CheTestMachineServiceClient.class);
   }
 }

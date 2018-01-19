@@ -8,13 +8,14 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.core.client;
+package org.eclipse.che.selenium.core.provider;
 
-/** @author Anatolii Bazko */
-public interface TestAuthServiceClient {
+import com.google.inject.Provider;
+import java.net.URL;
 
-  /** Logs user into the system and returns auth token. */
-  String login(String username, String password, String offlineToken) throws Exception;
-
-  void logout(String token) throws Exception;
-}
+/**
+ * Endpoint of API to exchange offline token to access token.
+ *
+ * @author Dmytro Nochevnov
+ */
+public interface TestOfflineToAccessTokenExchangeApiEndpointUrlProvider extends Provider<URL> {}

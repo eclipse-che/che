@@ -36,6 +36,7 @@ import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.client.KeycloakToken.TokenDetails;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
+import org.eclipse.che.selenium.core.provider.TestOfflineToAccessTokenExchangeApiEndpointUrlProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,35 +49,42 @@ public class KeycloakTestAuthServiceClient implements TestAuthServiceClient {
 
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakTestAuthServiceClient.class);
 
-  protected static final String CONTENT_TYPE = "Content-Type";
-  protected static final String FORM_MIME_TYPE = "application/x-www-form-urlencoded";
+  private static final String CONTENT_TYPE = "Content-Type";
+  private static final String FORM_MIME_TYPE = "application/x-www-form-urlencoded";
   private static final String GRANT_TYPE = "grant_type";
   private static final String CLIENT_ID_PARAM = "client_id";
   private static final String PASSWORD = "password";
-  protected static final String REFRESH_TOKEN = "refresh_token";
+  private static final String REFRESH_TOKEN = "refresh_token";
 
   private static final long MIN_TOKEN_LIFETIME_SEC = 30;
 
   private final String apiEndpoint;
   private final DefaultHttpJsonRequestFactory requestFactory;
-  protected final Gson gson;
+  private final TestOfflineToAccessTokenExchangeApiEndpointUrlProvider
+      testOfflineToAccessTokenExchangeApiEndpointUrlProvider;
 
-  protected final KeycloakSettings keycloakSettings;
-  protected final ConcurrentMap<String, KeycloakToken> tokens;
+  private final Gson gson;
+
+  private final KeycloakSettings keycloakSettings;
+  private final ConcurrentMap<String, KeycloakToken> tokens;
 
   @Inject
   public KeycloakTestAuthServiceClient(
       TestApiEndpointUrlProvider cheApiEndpointProvider,
-      DefaultHttpJsonRequestFactory requestFactory) {
+      DefaultHttpJsonRequestFactory requestFactory,
+      TestOfflineToAccessTokenExchangeApiEndpointUrlProvider
+          testOfflineToAccessTokenExchangeApiEndpointUrlProvider) {
     this.apiEndpoint = cheApiEndpointProvider.get().toString();
     this.requestFactory = requestFactory;
     this.gson = new Gson();
     this.tokens = new ConcurrentHashMap<>();
     this.keycloakSettings = getKeycloakConfiguration();
+    this.testOfflineToAccessTokenExchangeApiEndpointUrlProvider =
+        testOfflineToAccessTokenExchangeApiEndpointUrlProvider;
   }
 
   @Override
-  public String login(String username, String password) throws Exception {
+  public String login(String username, String password, String offlineToken) throws Exception {
     final KeycloakToken token = tokens.get(username);
     if (token != null) {
       final long now = now().atZone(systemDefault()).toEpochSecond();
@@ -90,7 +98,14 @@ public class KeycloakTestAuthServiceClient implements TestAuthServiceClient {
         return token.getAccessToken();
       }
     }
-    final KeycloakToken newToken = loginRequest(username, password);
+
+    KeycloakToken newToken;
+    if (!offlineToken.isEmpty()) {
+      newToken = loginRequest(offlineToken);
+    } else {
+      newToken = loginRequest(username, password);
+    }
+
     tokens.put(username, newToken);
     return newToken.getAccessToken();
   }
@@ -107,6 +122,55 @@ public class KeycloakTestAuthServiceClient implements TestAuthServiceClient {
   private KeycloakToken loginRequest(String username, String password) {
     return requestToken(
         PASSWORD, ImmutableList.of(Pair.of("username", username), Pair.of("password", password)));
+  }
+
+  private KeycloakToken loginRequest(String offlineToken) {
+    KeycloakToken token = null;
+    HttpURLConnection http = null;
+    try {
+      http =
+          (HttpURLConnection)
+              new URL(testOfflineToAccessTokenExchangeApiEndpointUrlProvider.get().toString())
+                  .openConnection();
+      http.setRequestMethod(POST);
+      http.setAllowUserInteraction(false);
+      http.setRequestProperty(CONTENT_TYPE, FORM_MIME_TYPE);
+      http.setInstanceFollowRedirects(true);
+      http.setDoOutput(true);
+      OutputStream output = http.getOutputStream();
+      StringBuilder sb = new StringBuilder();
+      sb.append(REFRESH_TOKEN).append('=').append(offlineToken);
+      output.write(sb.toString().getBytes(UTF_8));
+      if (http.getResponseCode() != 200) {
+        throw new RuntimeException(
+            "Can not get access token using the "
+                + testOfflineToAccessTokenExchangeApiEndpointUrlProvider.get().toString()
+                + " REST API. Server response code: "
+                + http.getResponseCode()
+                + IoUtil.readStream(http.getErrorStream()));
+      }
+      output.close();
+
+      final BufferedReader response =
+          new BufferedReader(new InputStreamReader(http.getInputStream(), UTF_8));
+      KeycloakTokenContainer tokenContainer = gson.fromJson(response, KeycloakTokenContainer.class);
+      token = tokenContainer.getToken();
+      token.setAccessDetails(
+          gson.fromJson(
+              new String(base64().decode(token.getAccessToken().split("\\.")[1]), UTF_8),
+              TokenDetails.class));
+      token.setRefreshDetails(
+          gson.fromJson(
+              new String(base64().decode(token.getRefreshToken().split("\\.")[1]), UTF_8),
+              TokenDetails.class));
+    } catch (IOException | JsonSyntaxException ex) {
+      LOG.error(ex.getMessage(), ex);
+    } finally {
+      if (http != null) {
+        http.disconnect();
+      }
+    }
+    return token;
   }
 
   private KeycloakToken refreshRequest(KeycloakToken prevToken) {
