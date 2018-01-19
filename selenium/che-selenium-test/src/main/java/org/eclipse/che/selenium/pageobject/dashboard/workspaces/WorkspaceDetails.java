@@ -22,6 +22,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.By;
@@ -181,7 +182,8 @@ public class WorkspaceDetails {
   }
 
   public void clickOnCancelChangesBtn() {
-    loader.waitOnClosed();
+    // this timeout is needed for the Cancel to appears after renaming of a workspace
+    WaitUtils.sleepQuietly(3);
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOf(cancelBtn))
         .click();

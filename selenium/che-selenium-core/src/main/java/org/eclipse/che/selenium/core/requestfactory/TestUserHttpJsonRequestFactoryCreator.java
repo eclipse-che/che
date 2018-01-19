@@ -15,5 +15,5 @@ import com.google.inject.assistedinject.Assisted;
 /** @author Dmytro Nochevnov */
 public interface TestUserHttpJsonRequestFactoryCreator {
   TestUserHttpJsonRequestFactory create(
-      @Assisted("email") String email, @Assisted("password") String password);
+      @Assisted("name") String name, @Assisted("password") String password);
 }
