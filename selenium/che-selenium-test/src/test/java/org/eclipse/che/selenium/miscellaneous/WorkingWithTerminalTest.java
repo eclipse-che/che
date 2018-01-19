@@ -94,6 +94,7 @@ public class WorkingWithTerminalTest {
 
       consoles.clickOnPlusMenuButton();
       consoles.clickOnTerminalItemInContextMenu();
+
       terminal.selectTerminalTab();
       terminal.waitTerminalConsole();
       terminal.waitTerminalIsNotEmpty();
