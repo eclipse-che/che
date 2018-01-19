@@ -132,8 +132,4 @@ spec:
 
 EOF
 
-
-#########
-# TODO
-# - move wait KC boot from ocp to separate script like postgres
-# - test it all!
+"$COMMAND_DIR"/wait_until_keycloak_is_available.sh
