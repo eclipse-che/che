@@ -11,14 +11,14 @@
 package org.eclipse.che.selenium.pageobject.dashboard.account;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount.AccountPageLocators.CANCEL_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount.AccountPageLocators.EMAIL_FIELD_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount.AccountPageLocators.ERROR_ALERT;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount.AccountPageLocators.FIRST_NAME_FIELD_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount.AccountPageLocators.LAST_NAME_FIELD_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount.AccountPageLocators.SAVE_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount.AccountPageLocators.SUCCESS_ALERT;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount.AccountPageLocators.USERNAME_FIELD_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.TestKeycloakAccountPage.AccountPageLocators.CANCEL_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.TestKeycloakAccountPage.AccountPageLocators.EMAIL_FIELD_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.TestKeycloakAccountPage.AccountPageLocators.ERROR_ALERT;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.TestKeycloakAccountPage.AccountPageLocators.FIRST_NAME_FIELD_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.TestKeycloakAccountPage.AccountPageLocators.LAST_NAME_FIELD_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.TestKeycloakAccountPage.AccountPageLocators.SAVE_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.TestKeycloakAccountPage.AccountPageLocators.SUCCESS_ALERT;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.TestKeycloakAccountPage.AccountPageLocators.USERNAME_FIELD_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,10 +27,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
 @Singleton
-public class KeycloakAccount extends KeycloakAbstract {
+public class TestKeycloakAccountPage extends TestKeycloakAbstractPage {
 
   @Inject
-  protected KeycloakAccount(SeleniumWebDriver seleniumWebDriver) {
+  protected TestKeycloakAccountPage(SeleniumWebDriver seleniumWebDriver) {
     super(seleniumWebDriver);
   }
 
@@ -52,8 +52,8 @@ public class KeycloakAccount extends KeycloakAbstract {
     waitAllBodyFieldsAndButtonsIsVisible();
   }
 
-  public AccountFields getAllFieldsValue() {
-    return new AccountFields(
+  public TestAccountFields getAllFieldsValue() {
+    return new TestAccountFields(
         getUserNameValue(), getEmailValue(), getFirstNameValue(), getLastNameValue());
   }
 

@@ -11,12 +11,12 @@
 package org.eclipse.che.selenium.pageobject.dashboard.account;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPassword.PasswordLocators.ERROR_ALERT;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPassword.PasswordLocators.NEW_PASSWORD_CONFIRMATION_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPassword.PasswordLocators.NEW_PASSWORD_FIELD_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPassword.PasswordLocators.PASSWORD_FIELD_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPassword.PasswordLocators.SAVE_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPassword.PasswordLocators.SUCCESS_ALERT;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.TestTestKeycloakPasswordPagePage.PasswordLocators.ERROR_ALERT;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.TestTestKeycloakPasswordPagePage.PasswordLocators.NEW_PASSWORD_CONFIRMATION_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.TestTestKeycloakPasswordPagePage.PasswordLocators.NEW_PASSWORD_FIELD_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.TestTestKeycloakPasswordPagePage.PasswordLocators.PASSWORD_FIELD_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.TestTestKeycloakPasswordPagePage.PasswordLocators.SAVE_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.TestTestKeycloakPasswordPagePage.PasswordLocators.SUCCESS_ALERT;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
@@ -26,10 +26,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
 @Singleton
-public class KeycloakPassword extends KeycloakAbstract {
+public class TestTestKeycloakPasswordPagePage extends TestKeycloakAbstractPage {
 
   @Inject
-  public KeycloakPassword(SeleniumWebDriver seleniumWebDriver) {
+  public TestTestKeycloakPasswordPagePage(SeleniumWebDriver seleniumWebDriver) {
     super(seleniumWebDriver);
   }
 

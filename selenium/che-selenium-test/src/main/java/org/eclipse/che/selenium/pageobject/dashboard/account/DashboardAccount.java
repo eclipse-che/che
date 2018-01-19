@@ -22,7 +22,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.user.CheSecondTestUser;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -30,13 +30,14 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class DashboardAccount {
 
   private final SeleniumWebDriver seleniumWebDriver;
-  private final TestUser defaultTestUser;
+  private final CheSecondTestUser cheSecondTestUser;
   private final WebDriverWait loadPageWait;
 
   @Inject
-  public DashboardAccount(SeleniumWebDriver seleniumWebDriver, TestUser defaultTestUser) {
+  public DashboardAccount(
+      SeleniumWebDriver seleniumWebDriver, CheSecondTestUser cheSecondTestUser) {
     this.seleniumWebDriver = seleniumWebDriver;
-    this.defaultTestUser = defaultTestUser;
+    this.cheSecondTestUser = cheSecondTestUser;
     this.loadPageWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
   }
 
@@ -49,26 +50,26 @@ public class DashboardAccount {
     String TITLE_ID = "Account";
   }
 
-  public AccountFields getDefaultFieldsValue() {
-    AccountFields accountFields = new AccountFields();
+  public TestAccountFields getDefaultFieldsValue() {
+    TestAccountFields testAccountFields = new TestAccountFields();
 
-    accountFields.setEmail(defaultTestUser.getEmail());
-    accountFields.setLogin(defaultTestUser.getName());
-    accountFields.setFirstName("");
-    accountFields.setLastName("");
+    testAccountFields.setEmail(cheSecondTestUser.getEmail());
+    testAccountFields.setLogin(cheSecondTestUser.getName());
+    testAccountFields.setFirstName("");
+    testAccountFields.setLastName("");
 
-    return accountFields;
+    return testAccountFields;
   }
 
-  public AccountFields getCurrentFieldsValue() {
-    AccountFields accountFields = new AccountFields();
+  public TestAccountFields getCurrentFieldsValue() {
+    TestAccountFields testAccountFields = new TestAccountFields();
 
-    accountFields.setEmail(getEmailFieldValue());
-    accountFields.setLogin(getLoginFieldValue());
-    accountFields.setFirstName(getFirstNameFieldValue());
-    accountFields.setLastName(getLastNameFieldValue());
+    testAccountFields.setEmail(getEmailFieldValue());
+    testAccountFields.setLogin(getLoginFieldValue());
+    testAccountFields.setFirstName(getFirstNameFieldValue());
+    testAccountFields.setLastName(getLastNameFieldValue());
 
-    return accountFields;
+    return testAccountFields;
   }
 
   public String getEmailFieldValue() {

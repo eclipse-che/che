@@ -15,41 +15,37 @@ import static org.testng.AssertJUnit.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.user.CheSecondTestUser;
-import org.eclipse.che.selenium.core.user.TestUserFactory;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.account.AccountFields;
 import org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount;
-import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccount;
-import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPassword;
+import org.eclipse.che.selenium.pageobject.dashboard.account.TestAccountFields;
+import org.eclipse.che.selenium.pageobject.dashboard.account.TestKeycloakAccountPage;
+import org.eclipse.che.selenium.pageobject.dashboard.account.TestTestKeycloakPasswordPagePage;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class AccountTest {
 
-  private static AccountFields changedFields;
+  private static TestAccountFields changedFields;
   private static String parentWindow;
 
   @Inject private Dashboard dashboard;
   @Inject private DashboardAccount dashboardAccount;
   @Inject private CheSecondTestUser secondTestUser;
-  @Inject private KeycloakAccount keycloakAccount;
-  @Inject private KeycloakPassword keycloakPassword;
+  @Inject private TestKeycloakAccountPage keycloakAccount;
+  @Inject private TestTestKeycloakPasswordPagePage testKeycloakPasswordPage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
-  @Inject private Entrance entrance;
-  @Inject private TestUserFactory testUserFactory;
 
   @BeforeClass
   public void setup() {
     changedFields =
-        new AccountFields(
+        new TestAccountFields(
             secondTestUser.getName(),
             format("%s@testmail.ua", secondTestUser.getName()),
             "UserFirstName",
             "UserLastName");
 
-    dashboard.open();
+    dashboard.open(secondTestUser.getName(), secondTestUser.getPassword());
     dashboard.waitDashboardToolbarTitle();
     dashboard.clickOnUsernameButton();
     dashboard.clickOnAccountItem();
@@ -58,7 +54,7 @@ public class AccountTest {
   }
 
   @Test
-  public void test1() {
+  public void shouldChangeEmailFirstAndLastName() {
     dashboardAccount.getTitle().equals("Account");
     assertTrue(
         dashboardAccount
@@ -92,7 +88,7 @@ public class AccountTest {
   }
 
   @Test(priority = 1)
-  public void test2() {
+  public void shouldChangePasswordAndCheckIt() {
     dashboard.clickOnUsernameButton();
     dashboard.clickOnAccountItem();
     dashboardAccount.waitPageIsLoaded();
@@ -101,23 +97,23 @@ public class AccountTest {
     keycloakAccount.switchToNoneParentWindow(parentWindow);
     keycloakAccount.waitAccountPageIsLoaded();
     keycloakAccount.clickOnPasswordButton();
-    keycloakPassword.waitPasswordPageIsLoaded();
-    keycloakPassword.clickOnSavePasswordButton();
+    testKeycloakPasswordPage.waitPasswordPageIsLoaded();
+    testKeycloakPasswordPage.clickOnSavePasswordButton();
 
-    keycloakPassword.waitTextInErrorAlert("Please specify password.");
+    testKeycloakPasswordPage.waitTextInErrorAlert("Please specify password.");
 
-    keycloakPassword.setPasswordFieldValue("wrongPassword");
-    keycloakPassword.clickOnSavePasswordButton();
+    testKeycloakPasswordPage.setPasswordFieldValue("wrongPassword");
+    testKeycloakPasswordPage.clickOnSavePasswordButton();
 
-    keycloakPassword.waitTextInErrorAlert("Invalid existing password.");
-    keycloakPassword.setPasswordFieldValue(secondTestUser.getPassword());
-    keycloakPassword.setNewPasswordFieldValue("changedPassword");
-    keycloakPassword.setNewPasswordConfirmationFieldValue("changedPassword");
-    keycloakPassword.clickOnSavePasswordButton();
+    testKeycloakPasswordPage.waitTextInErrorAlert("Invalid existing password.");
+    testKeycloakPasswordPage.setPasswordFieldValue(secondTestUser.getPassword());
+    testKeycloakPasswordPage.setNewPasswordFieldValue("changedPassword");
+    testKeycloakPasswordPage.setNewPasswordConfirmationFieldValue("changedPassword");
+    testKeycloakPasswordPage.clickOnSavePasswordButton();
 
-    keycloakPassword.waitTextInSuccessAlert("Your password has been updated.");
+    testKeycloakPasswordPage.waitTextInSuccessAlert("Your password has been updated.");
 
-    keycloakPassword.closeWindowAndSwitchToParent(parentWindow);
+    testKeycloakPasswordPage.closeWindowAndSwitchToParent(parentWindow);
 
     dashboard.clickOnUsernameButton();
     dashboard.clickOnLogoutItem();
