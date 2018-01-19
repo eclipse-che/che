@@ -45,13 +45,16 @@ public class ResolveDependencyViewImpl extends Window implements ResolveDependen
   public ResolveDependencyViewImpl(MavenLocalizationConstant locale) {
     setTitle(locale.windowLoaderTitle());
     setWidget(uiBinder.createAndBindUi(this));
-
-    super.getFooter().setVisible(false);
   }
 
   @Override
-  public void show() {
+  public void showDialog() {
     super.show();
+  }
+
+  @Override
+  public void close() {
+    hide();
   }
 
   @Override

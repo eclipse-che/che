@@ -22,7 +22,7 @@ import org.eclipse.che.ide.api.mvp.View;
 public interface MacroChooserView extends View<MacroChooserView.ActionDelegate> {
 
   /** Show the view. */
-  void show();
+  void showDialog();
 
   /** Close the view. */
   void close();

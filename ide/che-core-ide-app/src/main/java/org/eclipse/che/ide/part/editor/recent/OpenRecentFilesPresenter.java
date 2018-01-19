@@ -46,7 +46,7 @@ public class OpenRecentFilesPresenter implements OpenRecentFilesView.ActionDeleg
 
   /** Show dialog. */
   public void show() {
-    view.show();
+    view.showDialog();
   }
 
   /**

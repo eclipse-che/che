@@ -114,7 +114,7 @@ public class FileStructurePresenterTest {
     presenter.show(editor);
 
     verify(loader).show();
-    verify(view).setTitle("A.java");
+    verify(view).setTitleCaption("A.java");
 
     verify(promise).then(operationSuccessCapture.capture());
     operationSuccessCapture.getValue().apply(compilationUnit);

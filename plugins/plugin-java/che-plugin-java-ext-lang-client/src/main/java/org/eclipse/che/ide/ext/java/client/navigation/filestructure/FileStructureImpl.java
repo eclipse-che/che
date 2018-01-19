@@ -17,7 +17,6 @@ import com.google.common.base.Predicate;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -26,7 +25,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
-import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.navigation.factory.NodeFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
@@ -36,7 +34,6 @@ import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
-import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
 import org.eclipse.che.ide.ui.window.Window;
 
 /**
@@ -45,7 +42,7 @@ import org.eclipse.che.ide.ui.window.Window;
  * @author Valeriy Svydenko
  */
 @Singleton
-final class FileStructureImpl extends Window implements FileStructure {
+public class FileStructureImpl extends Window implements FileStructure {
   interface FileStructureImplUiBinder extends UiBinder<Widget, FileStructureImpl> {}
 
   private static FileStructureImplUiBinder UI_BINDER = GWT.create(FileStructureImplUiBinder.class);
@@ -61,30 +58,17 @@ final class FileStructureImpl extends Window implements FileStructure {
   @UiField(provided = true)
   final JavaLocalizationConstant locale;
 
-  private Predicate<Node> LEAFS =
-      new Predicate<Node>() {
-        @Override
-        public boolean apply(Node input) {
-          return input.isLeaf();
-        }
-      };
+  private Predicate<Node> LEAFS = Node::isLeaf;
 
   @Inject
   public FileStructureImpl(NodeFactory nodeFactory, JavaLocalizationConstant locale) {
-    super(false);
     this.nodeFactory = nodeFactory;
     this.locale = locale;
     setWidget(UI_BINDER.createAndBindUi(this));
 
     NodeStorage storage =
-        new NodeStorage(
-            new NodeUniqueKeyProvider() {
-              @Override
-              public String getKey(@NotNull Node item) {
-                return String.valueOf(item.hashCode());
-              }
-            });
-    NodeLoader loader = new NodeLoader(Collections.<NodeInterceptor>emptySet());
+        new NodeStorage((NodeUniqueKeyProvider) item -> String.valueOf(item.hashCode()));
+    NodeLoader loader = new NodeLoader(Collections.emptySet());
     tree = new Tree(storage, loader);
     tree.setAutoExpand(false);
     tree.getSelectionModel().setSelectionMode(SINGLE);
@@ -97,12 +81,9 @@ final class FileStructureImpl extends Window implements FileStructure {
           }
         };
     tree.addDomHandler(
-        new DoubleClickHandler() {
-          @Override
-          public void onDoubleClick(DoubleClickEvent event) {
-            if (all(tree.getSelectionModel().getSelectedNodes(), LEAFS)) {
-              hide();
-            }
+        event -> {
+          if (all(tree.getSelectionModel().getSelectedNodes(), LEAFS)) {
+            hide();
           }
         },
         DoubleClickEvent.getType());
@@ -126,6 +107,11 @@ final class FileStructureImpl extends Window implements FileStructure {
                 compilationUnit.getTypes().get(0), compilationUnit, showInheritedMembers, false));
   }
 
+  @Override
+  public void setTitleCaption(String title) {
+    setTitle(title);
+  }
+
   /** {@inheritDoc} */
   @Override
   public void close() {
@@ -134,18 +120,20 @@ final class FileStructureImpl extends Window implements FileStructure {
 
   /** {@inheritDoc} */
   @Override
-  public void show() {
-    super.show(tree);
+  public void showDialog() {
+    show(tree);
+  }
+
+  @Override
+  protected void onShow() {
     if (!tree.getRootNodes().isEmpty()) {
       tree.getSelectionModel().select(tree.getRootNodes().get(0), false);
     }
     tree.expandAll();
   }
 
-  /** {@inheritDoc} */
   @Override
-  public void hide() {
-    super.hide();
+  protected void onHide() {
     delegate.onEscapeClicked();
   }
 
@@ -153,5 +141,10 @@ final class FileStructureImpl extends Window implements FileStructure {
   @Override
   public void setDelegate(ActionDelegate delegate) {
     this.delegate = delegate;
+  }
+
+  @Override
+  public Widget asWidget() {
+    return super.asWidget();
   }
 }

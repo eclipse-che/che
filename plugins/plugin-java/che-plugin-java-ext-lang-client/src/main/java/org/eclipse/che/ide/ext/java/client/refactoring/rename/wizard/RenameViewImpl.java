@@ -118,34 +118,29 @@ final class RenameViewImpl extends Window implements RenameView {
 
   private void createButtons(JavaLocalizationConstant locale) {
     preview =
-        createButton(
+        addButtonBarControl(
             locale.moveDialogButtonPreview(),
             "move-preview-button",
             event -> delegate.onPreviewButtonClicked());
 
-    Button cancel =
-        createButton(
-            locale.moveDialogButtonCancel(),
-            "move-cancel-button",
-            event -> {
-              hide();
-              delegate.onCancelButtonClicked();
-            });
+    addButtonBarControl(
+        locale.moveDialogButtonCancel(),
+        "move-cancel-button",
+        event -> {
+          hide();
+          delegate.onCancelButtonClicked();
+        });
 
     accept =
-        createButton(
+        addButtonBarControl(
             locale.moveDialogButtonOk(),
             "move-accept-button",
             event -> delegate.onAcceptButtonClicked());
-
-    addButtonToFooter(accept);
-    addButtonToFooter(cancel);
-    addButtonToFooter(preview);
   }
 
   /** {@inheritDoc} */
   @Override
-  public void show() {
+  public void showDialog() {
     newName.getElement().setAttribute("spellcheck", "false");
     newName.addStyleName(javaResources.css().errorBorder());
     updateDelegateUpdating.setValue(false);
@@ -153,21 +148,21 @@ final class RenameViewImpl extends Window implements RenameView {
     updateMarkDeprecated.setEnabled(false);
 
     super.show();
-
-    new Timer() {
-      @Override
-      public void run() {
-        setFocus();
-      }
-    }.schedule(100);
   }
 
-  /** {@inheritDoc} */
   @Override
-  protected void onClose() {
-    delegate.onCancelButtonClicked();
+  public void setTitleCaption(String title) {
+    setTitle(title);
+  }
 
-    super.onClose();
+  @Override
+  protected void onHide() {
+    delegate.onCancelButtonClicked();
+  }
+
+  @Override
+  public void close() {
+    hide();
   }
 
   /** {@inheritDoc} */

@@ -11,11 +11,11 @@
 package org.eclipse.che.ide.ext.git.client.branch;
 
 import static com.google.gwt.event.dom.client.KeyCodes.KEY_BACKSPACE;
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -147,6 +147,8 @@ public class BranchViewImpl extends Window implements BranchView {
     this.localRemoteFilter.addItem("Local", "local");
     this.localRemoteFilter.addItem("Remote", "remote");
 
+    setCloseOnEscape(false);
+
     createButtons();
   }
 
@@ -164,76 +166,61 @@ public class BranchViewImpl extends Window implements BranchView {
 
   private void createButtons() {
     btnClose =
-        createButton(locale.buttonClose(), "git-branches-close", event -> delegate.onClose());
-    addButtonToFooter(btnClose);
-
+        addButtonBarControl(
+            locale.buttonClose(),
+            "git-branches-close",
+            event -> delegate.onClose());
     btnRename =
-        createButton(
-            locale.buttonRename(), "git-branches-rename", event -> delegate.onRenameClicked());
-    addButtonToFooter(btnRename);
-
+        addButtonBarControl(
+            locale.buttonRename(),
+            "git-branches-rename",
+            event -> delegate.onRenameClicked());
     btnDelete =
-        createButton(
-            locale.buttonDelete(), "git-branches-delete", event -> delegate.onDeleteClicked());
-    addButtonToFooter(btnDelete);
-
+        addButtonBarControl(
+            locale.buttonDelete(),
+            "git-branches-delete",
+            event -> delegate.onDeleteClicked());
     btnCreate =
-        createButton(
-            locale.buttonCreate(), "git-branches-create", event -> delegate.onCreateClicked());
-    addButtonToFooter(btnCreate);
-
+        addButtonBarControl(
+            locale.buttonCreate(),
+            "git-branches-create",
+            event -> delegate.onCreateClicked());
     btnCheckout =
-        createButton(
+        addButtonBarControl(
             locale.buttonCheckout(),
             "git-branches-checkout",
             event -> delegate.onCheckoutClicked());
-    addButtonToFooter(btnCheckout);
   }
 
   @Override
-  protected void onKeyDownEvent(KeyDownEvent event) {
-    if (event.getNativeEvent().getKeyCode() == KEY_BACKSPACE) {
+  public void onKeyPress(NativeEvent evt) {
+    if (evt.getKeyCode() == KEY_BACKSPACE) {
       branchesList.removeLastCharacter();
+    } else {
+      branchesList.addCharacterToFilter(String.valueOf(evt.getCharCode()));
     }
   }
 
   @Override
-  protected void onKeyPressEvent(KeyPressEvent event) {
-    branchesList.addCharacterToFilter(String.valueOf(event.getCharCode()));
-  }
-
-  @Override
-  protected void onEscapeKey() {
+  public void onEscPress(NativeEvent evt) {
     if (branchesList.getFilter().isEmpty()) {
-      super.onEscapeKey();
+      hide();
     } else {
       branchesList.resetFilter();
     }
   }
 
   @Override
-  protected void onEnterClicked() {
-    if (isWidgetFocused(btnClose)) {
+  public void onEnterPress(NativeEvent evt) {
+    if (isWidgetOrChildFocused(btnClose)) {
       delegate.onClose();
-      return;
-    }
-
-    if (isWidgetFocused(btnRename)) {
+    } else if (isWidgetOrChildFocused(btnRename)) {
       delegate.onRenameClicked();
-      return;
-    }
-
-    if (isWidgetFocused(btnDelete)) {
+    } else if (isWidgetOrChildFocused(btnDelete)) {
       delegate.onDeleteClicked();
-      return;
-    }
-
-    if (isWidgetFocused(btnCreate)) {
+    } else if (isWidgetOrChildFocused(btnCreate)) {
       delegate.onCreateClicked();
-      return;
-    }
-
-    if (isWidgetFocused(btnCheckout)) {
+    } else if (isWidgetOrChildFocused(btnCheckout)) {
       delegate.onCheckoutClicked();
     }
   }
@@ -274,17 +261,13 @@ public class BranchViewImpl extends Window implements BranchView {
 
   @Override
   public void closeDialogIfShowing() {
-    if (super.isShowing()) {
-      this.hide();
-      delegate.onClose();
-    }
+    hide();
+    delegate.onClose();
   }
 
   @Override
   public void showDialogIfClosed() {
-    if (!super.isShowing()) {
-      this.show(btnCreate);
-    }
+    show(btnCreate);
   }
 
   @Override
@@ -300,10 +283,5 @@ public class BranchViewImpl extends Window implements BranchView {
   @Override
   public void setFocus() {
     super.focus();
-  }
-
-  @Override
-  public void onClose() {
-    closeDialogIfShowing();
   }
 }

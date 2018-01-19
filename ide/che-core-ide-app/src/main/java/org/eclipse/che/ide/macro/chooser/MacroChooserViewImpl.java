@@ -55,9 +55,6 @@ public class MacroChooserViewImpl extends Window implements MacroChooserView {
     setWidget(UI_BINDER.createAndBindUi(this));
 
     filterField.getElement().setAttribute("placeholder", "Search macro");
-
-    // hide footer
-    getFooter().removeFromParent();
   }
 
   private void initMacrosTable(org.eclipse.che.ide.Resources resources) {
@@ -114,11 +111,13 @@ public class MacroChooserViewImpl extends Window implements MacroChooserView {
   }
 
   @Override
-  public void show() {
-    super.show();
+  public void showDialog() {
+    show(filterField);
+  }
 
+  @Override
+  protected void onShow() {
     filterField.setValue("");
-    filterField.setFocus(true);
   }
 
   @Override

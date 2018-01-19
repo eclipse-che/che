@@ -59,7 +59,7 @@ public class ChangeValuePresenter implements TextAreaDialogView.ActionDelegate {
     view.focusInValueField();
     view.selectAllText();
     view.setEnableChangeButton(false);
-    view.show();
+    view.showDialog();
   }
 
   @Override

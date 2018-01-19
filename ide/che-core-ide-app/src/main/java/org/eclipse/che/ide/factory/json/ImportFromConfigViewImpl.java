@@ -36,7 +36,7 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
 
   @UiField FormPanel uploadForm;
   @UiField Label errorMessage;
-  FileUpload fileUpload;
+  private FileUpload fileUpload;
 
   private ActionDelegate delegate;
 
@@ -50,26 +50,18 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
     this.setTitle(locale.importFromConfigurationTitle());
     setWidget(importFromConfigViewBinder.createAndBindUi(this));
 
-    Button btnCancel =
-        createButton(
-            locale.cancelButton(),
-            "import-from-config-btn-cancel",
-            event -> delegate.onCancelClicked());
-    addButtonToFooter(btnCancel);
+    addButtonBarControl(
+        locale.cancelButton(),
+        "import-from-config-btn-cancel",
+        event -> delegate.onCancelClicked());
 
     buttonImport =
-        createButton(
+        addButtonBarControl(
             locale.importButton(),
             "import-from-config-btn-import",
-            event -> delegate.onImportClicked());
-    addButtonToFooter(buttonImport);
-  }
+            event -> delegate.onImportClicked(),
+            true);
 
-  /** {@inheritDoc} */
-  @Override
-  public void showDialog() {
-    errorMessage.setText("");
-    fileContent = null;
     fileUpload = new FileUpload();
     fileUpload.setHeight("22px");
     fileUpload.setWidth("100%");
@@ -80,6 +72,13 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
     fileUpload.addChangeHandler(event -> buttonImport.setEnabled(fileUpload.getFilename() != null));
 
     uploadForm.add(fileUpload);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void showDialog() {
+    errorMessage.setText("");
+    fileContent = null;
 
     this.show();
   }
@@ -88,7 +87,6 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
   @Override
   public void closeDialog() {
     hide();
-    onClose();
   }
 
   /** {@inheritDoc} */
@@ -105,13 +103,6 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
   @Override
   public String getFileContent() {
     return fileContent;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  protected void onClose() {
-    uploadForm.remove(fileUpload);
-    fileUpload = null;
   }
 
   private native void addHandler(Element element) /*-{

@@ -81,7 +81,7 @@ public class SelectPathPresenter implements SelectPathView.ActionDelegate {
 
     this.handler = handler;
 
-    view.show();
+    view.showDialog();
   }
 
   @Override

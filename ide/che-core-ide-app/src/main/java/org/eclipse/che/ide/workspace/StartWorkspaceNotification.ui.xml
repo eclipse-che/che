@@ -15,7 +15,7 @@
 
     <ui:with field="locale" type="org.eclipse.che.ide.CoreLocalizationConstant"/>
 
-    <ui:with field='res' type='org.eclipse.che.ide.ui.window.Window.Resources'/>
+    <!--<ui:with field='res' type='org.eclipse.che.ide.ui.window.Window.Resources'/>-->
 
     <ui:style>
 
@@ -40,7 +40,7 @@
     </ui:style>
 
     <g:FlowPanel addStyleNames="{style.main}">
-        <g:Button ui:field="button" addStyleNames="{res.windowCss.button} {res.windowCss.primaryButton} {style.button}" text="{locale.startWsButton}"></g:Button>
+        <g:Button ui:field="button" addStyleNames=" {style.button}" text="{locale.startWsButton}"></g:Button>
     </g:FlowPanel>
 
 </ui:UiBinder>

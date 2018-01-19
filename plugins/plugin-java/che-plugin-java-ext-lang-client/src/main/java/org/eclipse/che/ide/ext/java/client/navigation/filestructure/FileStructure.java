@@ -28,7 +28,7 @@ interface FileStructure extends View<FileStructure.ActionDelegate> {
    *
    * @param title new window's title
    */
-  void setTitle(String title);
+  void setTitleCaption(String title);
 
   /**
    * Show structure of the opened class.
@@ -42,7 +42,7 @@ interface FileStructure extends View<FileStructure.ActionDelegate> {
   void close();
 
   /** Show dialog. */
-  void show();
+  void showDialog();
 
   interface ActionDelegate {
     /**

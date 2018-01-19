@@ -82,7 +82,7 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
    */
   public void show(EditorPartPresenter editorPartPresenter) {
     loader.show();
-    view.setTitle(editorPartPresenter.getEditorInput().getFile().getName());
+    view.setTitleCaption(editorPartPresenter.getEditorInput().getFile().getName());
 
     if (!(editorPartPresenter instanceof TextEditor)) {
       Log.error(getClass(), "Open Declaration support only TextEditor as editor");
@@ -113,7 +113,7 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
                   view.setStructure(unit, showInheritedMembers);
                   showInheritedMembers = !showInheritedMembers;
                   loader.hide();
-                  view.show();
+                  view.showDialog();
                 }
               })
           .catchError(
