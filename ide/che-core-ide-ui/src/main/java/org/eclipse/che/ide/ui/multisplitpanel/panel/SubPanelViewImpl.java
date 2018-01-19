@@ -130,14 +130,16 @@ public class SubPanelViewImpl extends Composite
           public void onClick(ClickEvent clickEvent) {
             widgetsPanel.getElement().focus();
             delegate.onWidgetFocused(widgetsPanel.getVisibleWidget());
-            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                delegate.onAddTabButtonClicked(
-                    getAbsoluteLeft(plusPanel.getElement()) + POPUP_OFFSET,
-                    getAbsoluteTop(plusPanel.getElement()) + POPUP_OFFSET);
-              }
-            });
+            Scheduler.get()
+                .scheduleDeferred(
+                    new Scheduler.ScheduledCommand() {
+                      @Override
+                      public void execute() {
+                        delegate.onAddTabButtonClicked(
+                            getAbsoluteLeft(plusPanel.getElement()) + POPUP_OFFSET,
+                            getAbsoluteTop(plusPanel.getElement()) + POPUP_OFFSET);
+                      }
+                    });
           }
         },
         ClickEvent.getType());
