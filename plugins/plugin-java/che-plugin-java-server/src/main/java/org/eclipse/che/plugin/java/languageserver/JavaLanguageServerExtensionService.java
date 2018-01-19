@@ -27,6 +27,7 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.GET_JAVA_CORE_OPTION
 import static org.eclipse.che.ide.ext.java.shared.Constants.IMPLEMENTERS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
+import static org.eclipse.che.ide.ext.java.shared.Constants.RECOMPUTE_POM_DIAGNOSTICS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.UPDATE_JAVA_CORE_OPTIONS;
@@ -79,6 +80,8 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
+import org.eclipse.che.api.languageserver.registry.CheLanguageClient;
+import org.eclipse.che.api.languageserver.registry.CheLanguageClientFactory;
 import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
@@ -108,6 +111,7 @@ import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSym
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ImplementersResponseDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
 import org.eclipse.lsp4j.ExecuteCommandParams;
+import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.WorkspaceEdit;
@@ -128,6 +132,7 @@ public class JavaLanguageServerExtensionService {
   private static final int TIMEOUT = 10;
 
   private final Gson gson;
+  private CheLanguageClientFactory clientFactory;
   private final LanguageServerRegistry registry;
 
   private static final Logger LOG =
@@ -138,10 +143,12 @@ public class JavaLanguageServerExtensionService {
 
   @Inject
   public JavaLanguageServerExtensionService(
+      CheLanguageClientFactory clientFactory,
       LanguageServerRegistry registry,
       RequestHandlerConfigurator requestHandler,
       ProjectManager projectManager,
       EventService eventService) {
+    this.clientFactory = clientFactory;
     this.registry = registry;
     this.requestHandler = requestHandler;
     this.projectManager = projectManager;
@@ -162,6 +169,13 @@ public class JavaLanguageServerExtensionService {
         .paramsAsDto(FileStructureCommandParameters.class)
         .resultAsListOfDto(ExtendedSymbolInformationDto.class)
         .withFunction(this::executeFileStructure);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(RECOMPUTE_POM_DIAGNOSTICS)
+        .paramsAsString()
+        .noResult()
+        .withConsumer(this::reComputeDiagnostics);
 
     requestHandler
         .newConfiguration()
@@ -211,6 +225,7 @@ public class JavaLanguageServerExtensionService {
         .paramsAsString()
         .resultAsListOfDto(ClasspathEntry.class)
         .withFunction(this::getClasspathTree);
+
     requestHandler
         .newConfiguration()
         .methodName(ORGANIZE_IMPORTS)
@@ -551,6 +566,16 @@ public class JavaLanguageServerExtensionService {
       iterator.set(removePrefixUri(iterator.next()));
     }
     return result;
+  }
+
+  private void reComputeDiagnostics(String pomPath) {
+    String pomUri = prefixURI(pomPath);
+    Type type = new TypeToken<PublishDiagnosticsParams>() {}.getType();
+    PublishDiagnosticsParams result =
+        doGetOne(Commands.RECOMPUTE_POM_DIAGNOSTICS, singletonList(pomUri), type);
+    CheLanguageClient cheLanguageClient =
+        clientFactory.create(findInitializedLanguageServer().get().getId());
+    cheLanguageClient.publishDiagnostics(result);
   }
 
   private List<Jar> getProjectExternalLibraries(ExternalLibrariesParameters params) {
