@@ -115,22 +115,15 @@ public class HotKeysDialogViewImpl extends Window implements HotKeysDialogView {
 
     saveButton =
         addButtonBarControl(
-            locale.save(),
-            "keybindings-saveButton-btn",
-            event -> delegate.onSaveClicked(),
-            true);
+            locale.save(), "keybindings-saveButton-btn", event -> delegate.onSaveClicked(), true);
 
     closeButton =
         addButtonBarControl(
-            locale.close(),
-            "keybindings-closeButton-btn",
-            event -> delegate.onCloseClicked());
+            locale.close(), "keybindings-closeButton-btn", event -> delegate.onCloseClicked());
 
     printButton =
         addButtonBarControl(
-            locale.print(),
-            "keybindings-printButton-btn",
-            event -> delegate.onPrintClicked());
+            locale.print(), "keybindings-printButton-btn", event -> delegate.onPrintClicked());
 
     list = new CategoriesList(res);
     categoriesList = new ArrayList<>();

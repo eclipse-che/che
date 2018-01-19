@@ -61,9 +61,7 @@ public class UploadFolderFromZipViewImpl extends Window implements UploadFolderF
 
     btnCancel =
         addButtonBarControl(
-            locale.cancel(),
-            "file-uploadFolder-cancel",
-            event -> delegate.onCancelClicked());
+            locale.cancel(), "file-uploadFolder-cancel", event -> delegate.onCancelClicked());
     btnUpload =
         addButtonBarControl(
             locale.uploadButton(),

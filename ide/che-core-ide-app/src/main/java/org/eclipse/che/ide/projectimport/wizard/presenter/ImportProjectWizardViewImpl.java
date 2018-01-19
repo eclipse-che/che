@@ -60,9 +60,7 @@ public class ImportProjectWizardViewImpl extends Window implements ImportProject
 
     nextStepButton =
         addButtonBarControl(
-            locale.next(),
-            "importProjectWizard-nextStepButton",
-            event -> delegate.onNextClicked());
+            locale.next(), "importProjectWizard-nextStepButton", event -> delegate.onNextClicked());
 
     previousStepButton =
         addButtonBarControl(

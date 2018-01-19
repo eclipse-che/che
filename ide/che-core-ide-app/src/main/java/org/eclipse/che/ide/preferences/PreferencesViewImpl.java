@@ -122,9 +122,7 @@ public class PreferencesViewImpl extends Window implements PreferencesView {
             true);
     btnRefresh =
         addButtonBarControl(
-            locale.refresh(),
-            "window-preferences-refresh",
-            event -> delegate.onRefreshClicked());
+            locale.refresh(), "window-preferences-refresh", event -> delegate.onRefreshClicked());
     btnClose =
         addButtonBarControl(
             locale.close(),
