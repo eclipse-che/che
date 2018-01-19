@@ -19,8 +19,6 @@
 
     <ui:style>
 
-        @eval popupLoaderTextColor org.eclipse.che.ide.api.theme.Style.theme.popupLoaderTextColor();
-
         .main {
             width: 150px;
             height: 45px;

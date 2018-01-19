@@ -79,13 +79,13 @@ class StartWsAgentNotification {
 
     eventBus.addHandler(
         WorkspaceStoppedEvent.TYPE,
-        arg1 -> {
+        ignore -> {
           if (restartingStateHolder.isRestarting()) {
             currentWorkspaceManagerProvider
                 .get()
                 .startWorkspace()
                 .then(
-                    arg2 -> {
+                    ignoreAgain -> {
                       restartingStateHolder.setRestartingState(false);
                     });
           }
