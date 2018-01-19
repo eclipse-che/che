@@ -65,7 +65,7 @@ public class CreateWorkspaceWithNodeStackTest {
     createWorkspace.typeWorkspaceName(WORKSPACE);
     createWorkspace.selectStack(TestStacksConstants.NODE.getId());
     createWorkspace.setMachineRAM("2");
-    createWorkspace.clickOnCreateWorkspaceButton();
+    createWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     dashboard.waitNotificationIsClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();

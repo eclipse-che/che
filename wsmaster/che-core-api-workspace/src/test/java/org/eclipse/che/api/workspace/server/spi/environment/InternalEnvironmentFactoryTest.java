@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.api.workspace.server.spi.environment;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
@@ -25,6 +27,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,6 +37,7 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
+import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
@@ -95,10 +99,11 @@ public class InternalEnvironmentFactoryTest {
   @Test
   public void shouldUseRetrievedInstallerWhileInternalEnvironmentCreation() throws Exception {
     // given
-    List<Installer> installersToRetrieve = singletonList(mock(Installer.class));
+    List<Installer> installersToRetrieve =
+        ImmutableList.of(createInstaller("org.eclipse.che.terminal", "script"));
     doReturn(installersToRetrieve).when(installerRegistry).getOrderedInstallers(anyList());
 
-    List<String> sourceInstallers = singletonList("ws-agent");
+    List<String> sourceInstallers = singletonList("org.eclipse.che.terminal");
     MachineConfigImpl machineConfig = new MachineConfigImpl().withInstallers(sourceInstallers);
     EnvironmentImpl env = new EnvironmentImpl(null, ImmutableMap.of("machine", machineConfig));
 
@@ -198,6 +203,10 @@ public class InternalEnvironmentFactoryTest {
     environmentFactory.create(mock(Environment.class));
 
     assertEquals(machine.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), ramLimit);
+  }
+
+  private InstallerImpl createInstaller(String id, String script) {
+    return new InstallerImpl(id, "any", "any", "any", emptyList(), emptyMap(), script, emptyMap());
   }
 
   private static class TestEnvironmentFactory

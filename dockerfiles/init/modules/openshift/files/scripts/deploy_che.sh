@@ -271,6 +271,30 @@ else
 fi
 echo "done!"
 
+# -------------------------------------------------------------
+# If command == cleanup then delete all openshift objects
+# -------------------------------------------------------------
+if [ "${COMMAND}" == "cleanup" ]; then
+  echo "[CHE] Deleting all OpenShift objects..."
+  oc delete all --all
+  echo "[CHE] Cleanup successfully started. Use \"oc get all\" to verify that all resources have been deleted."
+  exit 0
+# -------------------------------------------------------------
+# If command == rollupdate then update Che
+# -------------------------------------------------------------
+elif [ "${COMMAND}" == "rollupdate" ]; then
+  echo "[CHE] Update CHE pod"
+  get_che_pod_config | oc apply -f -
+  echo "[CHE] Update successfully started"
+  exit 0
+# ----------------------------------------------------------------
+# At this point command should be "deploy" otherwise it's an error
+# ----------------------------------------------------------------
+elif [ "${COMMAND}" != "deploy" ]; then
+  echo "[CHE] **ERROR**: Command \"${COMMAND}\" is not a valid command. Aborting."
+  exit 1
+fi
+
 # --------------------------
 # Create project (if needed)
 # --------------------------
@@ -355,30 +379,6 @@ else
   CHE_KEYCLOAK_AUTH__SERVER__URL=${CHE_KEYCLOAK_AUTH__SERVER__URL:-"https://sso.openshift.io/auth"}
   CHE_KEYCLOAK_REALM=${CHE_KEYCLOAK_REALM:-"fabric8"}
   CHE_KEYCLOAK_CLIENT__ID=${CHE_KEYCLOAK_CLIENT__ID:-"openshiftio-public"}
-fi
-
-# -------------------------------------------------------------
-# If command == cleanup then delete all openshift objects
-# -------------------------------------------------------------
-if [ "${COMMAND}" == "cleanup" ]; then
-  echo "[CHE] Deleting all OpenShift objects..."
-  oc delete all --all
-  echo "[CHE] Cleanup successfully started. Use \"oc get all\" to verify that all resources have been deleted."
-  exit 0
-# -------------------------------------------------------------
-# If command == rollupdate then update Che
-# -------------------------------------------------------------
-elif [ "${COMMAND}" == "rollupdate" ]; then
-  echo "[CHE] Update CHE pod"
-  get_che_pod_config | oc apply -f -
-  echo "[CHE] Update successfully started"
-  exit 0
-# ----------------------------------------------------------------
-# At this point command should be "deploy" otherwise it's an error
-# ----------------------------------------------------------------
-elif [ "${COMMAND}" != "deploy" ]; then
-  echo "[CHE] **ERROR**: Command \"${COMMAND}\" is not a valid command. Aborting."
-  exit 1
 fi
 
 # -------------------------------------------------------------

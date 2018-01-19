@@ -423,7 +423,7 @@ public abstract class SeleniumTestHandler
     }
 
     if (defaultTestUser != null) {
-      defaultTestUser.delete();
+      defaultTestUser.cleanUp();
     }
 
     isCleanUpCompleted.set(true);

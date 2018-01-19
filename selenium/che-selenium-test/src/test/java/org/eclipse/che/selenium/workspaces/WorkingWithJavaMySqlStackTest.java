@@ -98,7 +98,7 @@ public class WorkingWithJavaMySqlStackTest {
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(PROJECT_NAME);
     projectSourcePage.clickOnAddProjectButton();
-    createWorkspace.clickOnCreateWorkspaceButton();
+    createWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     seleniumWebDriver.switchFromDashboardIframeToIde(LOADER_TIMEOUT_SEC);
     currentWindow = seleniumWebDriver.getWindowHandle();

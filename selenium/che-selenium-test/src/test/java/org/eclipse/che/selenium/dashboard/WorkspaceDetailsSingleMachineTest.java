@@ -10,9 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.RUNNING;
@@ -29,15 +27,12 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Loader;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
@@ -47,7 +42,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOvervie
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceServers;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -75,11 +69,9 @@ public class WorkspaceDetailsSingleMachineTest {
   private String workspaceName;
 
   @Inject private TestUser testUser;
-  @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private WorkspaceProjects workspaceProjects;
   @Inject private Workspaces workspaces;
@@ -88,10 +80,8 @@ public class WorkspaceDetailsSingleMachineTest {
   @Inject private WorkspaceServers workspaceServers;
   @Inject private WorkspaceInstallers workspaceInstallers;
   @Inject private WorkspaceOverview workspaceOverview;
-  @Inject private MachineTerminal terminal;
   @Inject private TestWorkspace testWorkspace;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -210,22 +200,6 @@ public class WorkspaceDetailsSingleMachineTest {
     workspaceProjects.waitProjectIsPresent(CONSOLE_JAVA_SIMPLE);
   }
 
-  @Test(priority = 1)
-  public void startWorkspaceAndCheckChanges() {
-    // start the workspace and check that the added projects exist
-    workspaceDetails.clickOpenInIdeWsBtn();
-    seleniumWebDriver.switchFromDashboardIframeToIde();
-    projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab(PREPARING_WS_TIMEOUT_SEC);
-    projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME, PROJECT_FOLDER);
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(CONSOLE_JAVA_SIMPLE, PROJECT_FOLDER);
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(WEB_JAVA_SPRING, PROJECT_FOLDER);
-
-    // check that the added "agent" server is existed in the Servers tab
-    checkServerInServersList("agent");
-  }
-
   private void addNewProject(String projectName) {
     workspaceProjects.clickOnAddNewProjectButton();
     projectSourcePage.selectSample(projectName);
@@ -248,14 +222,5 @@ public class WorkspaceDetailsSingleMachineTest {
     workspaceDetails.clickOnAddButtonInDialogWindow();
     clickOnSaveButton();
     workspaceServers.checkServerExists(serverName, serverPort);
-  }
-
-  private void checkServerInServersList(String serverName) {
-    loader.waitOnClosed();
-    consoles.openServersTabFromContextMenu("dev-machine");
-    consoles.waitProcessInProcessConsoleTree("Servers");
-    consoles.waitTabNameProcessIsPresent("Servers");
-    consoles.waitExpectedTextIntoServerTableCation("Servers of dev-machine:");
-    assertTrue(consoles.checkThatServerExists(serverName));
   }
 }
