@@ -50,26 +50,26 @@ public class DashboardAccount {
     String TITLE_ID = "Account";
   }
 
-  public AccountFields getDefaultFieldsValue() {
-    AccountFields accountFields = new AccountFields();
+  public Account getDefaultFieldsValue() {
+    Account account = new Account();
 
-    accountFields.setEmail(cheSecondTestUser.getEmail());
-    accountFields.setLogin(cheSecondTestUser.getName());
-    accountFields.setFirstName("");
-    accountFields.setLastName("");
+    account.setEmail(cheSecondTestUser.getEmail());
+    account.setLogin(cheSecondTestUser.getName());
+    account.setFirstName("");
+    account.setLastName("");
 
-    return accountFields;
+    return account;
   }
 
-  public AccountFields getCurrentFieldsValue() {
-    AccountFields accountFields = new AccountFields();
+  public Account getCurrentFieldsValue() {
+    Account account = new Account();
 
-    accountFields.setEmail(getEmailFieldValue());
-    accountFields.setLogin(getLoginFieldValue());
-    accountFields.setFirstName(getFirstNameFieldValue());
-    accountFields.setLastName(getLastNameFieldValue());
+    account.setEmail(getEmailFieldValue());
+    account.setLogin(getLoginFieldValue());
+    account.setFirstName(getFirstNameFieldValue());
+    account.setLastName(getLastNameFieldValue());
 
-    return accountFields;
+    return account;
   }
 
   public String getEmailFieldValue() {

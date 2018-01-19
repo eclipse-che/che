@@ -52,8 +52,8 @@ public class KeycloakAccountPage extends KeycloakAbstractPage {
     waitAllBodyFieldsAndButtonsIsVisible();
   }
 
-  public AccountFields getAllFieldsValue() {
-    return new AccountFields(
+  public Account getAllFieldsValue() {
+    return new Account(
         getUserNameValue(), getEmailValue(), getFirstNameValue(), getLastNameValue());
   }
 

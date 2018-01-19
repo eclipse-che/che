@@ -18,7 +18,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.user.CheSecondTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.account.AccountFields;
+import org.eclipse.che.selenium.pageobject.dashboard.account.Account;
 import org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount;
 import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccountPage;
 import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPasswordPage;
@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 @Test(groups = TestGroup.MULTIUSER)
 public class AccountTest {
 
-  private static AccountFields changedFields;
+  private static Account changedFields;
   private static String parentWindow;
 
   @Inject private Dashboard dashboard;
@@ -41,7 +41,7 @@ public class AccountTest {
   @BeforeClass
   public void setup() {
     changedFields =
-        new AccountFields(
+        new Account(
             secondTestUser.getName(),
             format("%s@testmail.ua", secondTestUser.getName()),
             "UserFirstName",
