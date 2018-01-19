@@ -18,30 +18,30 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.user.CheSecondTestUser;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.account.AccountFields;
 import org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount;
-import org.eclipse.che.selenium.pageobject.dashboard.account.TestAccountFields;
-import org.eclipse.che.selenium.pageobject.dashboard.account.TestKeycloakAccountPage;
-import org.eclipse.che.selenium.pageobject.dashboard.account.TestTestKeycloakPasswordPagePage;
+import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAccountPage;
+import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPasswordPage;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 @Test(groups = TestGroup.MULTIUSER)
 public class AccountTest {
 
-  private static TestAccountFields changedFields;
+  private static AccountFields changedFields;
   private static String parentWindow;
 
   @Inject private Dashboard dashboard;
   @Inject private DashboardAccount dashboardAccount;
   @Inject private CheSecondTestUser secondTestUser;
-  @Inject private TestKeycloakAccountPage keycloakAccount;
-  @Inject private TestTestKeycloakPasswordPagePage testKeycloakPasswordPage;
+  @Inject private KeycloakAccountPage keycloakAccount;
+  @Inject private KeycloakPasswordPage testKeycloakPasswordPage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void setup() {
     changedFields =
-        new TestAccountFields(
+        new AccountFields(
             secondTestUser.getName(),
             format("%s@testmail.ua", secondTestUser.getName()),
             "UserFirstName",

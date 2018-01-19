@@ -10,20 +10,20 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard.account;
 
-public class TestAccountFields {
+public class AccountFields {
   private String login;
   private String email;
   private String firstName;
   private String lastName;
 
-  public TestAccountFields() {
+  public AccountFields() {
     this.login = "";
     this.email = "";
     this.firstName = "";
     this.lastName = "";
   }
 
-  public TestAccountFields(String login, String email, String firstName, String lastName) {
+  public AccountFields(String login, String email, String firstName, String lastName) {
     this.login = login;
     this.email = email;
     this.firstName = firstName;
@@ -62,10 +62,10 @@ public class TestAccountFields {
     return this.lastName;
   }
 
-  public boolean isEquals(TestAccountFields testAccountFieldsForCompare) {
-    return this.login.equals(testAccountFieldsForCompare.getLogin())
-        && this.email.equals(testAccountFieldsForCompare.getEmail())
-        && this.firstName.equals(testAccountFieldsForCompare.getFirstName())
-        && this.lastName.equals(testAccountFieldsForCompare.getLastName());
+  public boolean isEquals(AccountFields accountFieldsForCompare) {
+    return this.login.equals(accountFieldsForCompare.getLogin())
+        && this.email.equals(accountFieldsForCompare.getEmail())
+        && this.firstName.equals(accountFieldsForCompare.getFirstName())
+        && this.lastName.equals(accountFieldsForCompare.getLastName());
   }
 }

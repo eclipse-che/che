@@ -11,11 +11,11 @@
 package org.eclipse.che.selenium.pageobject.dashboard.account;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.TestKeycloakAbstractPage.ButtonsLocators.ACCOUNT_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.TestKeycloakAbstractPage.ButtonsLocators.APPLICATIONS_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.TestKeycloakAbstractPage.ButtonsLocators.AUTHENTICATOR_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.TestKeycloakAbstractPage.ButtonsLocators.PASSWORD_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.TestKeycloakAbstractPage.ButtonsLocators.SESSIONS_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAbstractPage.ButtonsLocators.ACCOUNT_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAbstractPage.ButtonsLocators.APPLICATIONS_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAbstractPage.ButtonsLocators.AUTHENTICATOR_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAbstractPage.ButtonsLocators.PASSWORD_BUTTON;
+import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAbstractPage.ButtonsLocators.SESSIONS_BUTTON;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Singleton;
@@ -27,11 +27,11 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 @Singleton
-public abstract class TestKeycloakAbstractPage {
+public abstract class KeycloakAbstractPage {
   protected final SeleniumWebDriver seleniumWebDriver;
   protected final WebDriverWait loadPageWait;
 
-  protected TestKeycloakAbstractPage(SeleniumWebDriver seleniumWebDriver) {
+  protected KeycloakAbstractPage(SeleniumWebDriver seleniumWebDriver) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loadPageWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
   }

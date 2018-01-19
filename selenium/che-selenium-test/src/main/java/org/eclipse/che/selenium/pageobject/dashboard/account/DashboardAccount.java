@@ -50,26 +50,26 @@ public class DashboardAccount {
     String TITLE_ID = "Account";
   }
 
-  public TestAccountFields getDefaultFieldsValue() {
-    TestAccountFields testAccountFields = new TestAccountFields();
+  public AccountFields getDefaultFieldsValue() {
+    AccountFields accountFields = new AccountFields();
 
-    testAccountFields.setEmail(cheSecondTestUser.getEmail());
-    testAccountFields.setLogin(cheSecondTestUser.getName());
-    testAccountFields.setFirstName("");
-    testAccountFields.setLastName("");
+    accountFields.setEmail(cheSecondTestUser.getEmail());
+    accountFields.setLogin(cheSecondTestUser.getName());
+    accountFields.setFirstName("");
+    accountFields.setLastName("");
 
-    return testAccountFields;
+    return accountFields;
   }
 
-  public TestAccountFields getCurrentFieldsValue() {
-    TestAccountFields testAccountFields = new TestAccountFields();
+  public AccountFields getCurrentFieldsValue() {
+    AccountFields accountFields = new AccountFields();
 
-    testAccountFields.setEmail(getEmailFieldValue());
-    testAccountFields.setLogin(getLoginFieldValue());
-    testAccountFields.setFirstName(getFirstNameFieldValue());
-    testAccountFields.setLastName(getLastNameFieldValue());
+    accountFields.setEmail(getEmailFieldValue());
+    accountFields.setLogin(getLoginFieldValue());
+    accountFields.setFirstName(getFirstNameFieldValue());
+    accountFields.setLastName(getLastNameFieldValue());
 
-    return testAccountFields;
+    return accountFields;
   }
 
   public String getEmailFieldValue() {
