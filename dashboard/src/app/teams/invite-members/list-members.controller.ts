@@ -107,7 +107,7 @@ export class ListMembersController {
    * Handler for value changed in the list.
    * @param member
    */
-  onValueChanged(member): void {
+  onValueChanged(member: any): void {
     member.roles = [angular.fromJson(member.role)];
   }
 

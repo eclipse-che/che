@@ -74,6 +74,20 @@ public class PullViewImpl extends Window implements PullView {
     this.setTitle(locale.pullTitle());
     this.setWidget(widget);
 
+    btnPull =
+        createButton(
+            locale.buttonPull(),
+            "git-remotes-pull-pull",
+            new ClickHandler() {
+
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onPullClicked();
+              }
+            });
+    btnPull.addStyleName(super.resources.windowCss().primaryButton());
+    addButtonToFooter(btnPull);
+
     btnCancel =
         createButton(
             locale.buttonCancel(),
@@ -86,19 +100,6 @@ public class PullViewImpl extends Window implements PullView {
               }
             });
     addButtonToFooter(btnCancel);
-
-    btnPull =
-        createButton(
-            locale.buttonPull(),
-            "git-remotes-pull-pull",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onPullClicked();
-              }
-            });
-    addButtonToFooter(btnPull);
   }
 
   @Override

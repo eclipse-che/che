@@ -20,7 +20,7 @@
     <ui:with type="org.eclipse.che.plugin.pullrequest.client.ContributeResources" field="resources"/>
     <ui:style src="org/eclipse/che/ide/api/ui/style.css">
         .panel {
-            font-size: 11px;
+            font-size: 9pt;
             position: relative;
             overflow: hidden;
             white-space: nowrap;
@@ -44,7 +44,7 @@
         .section .title {
             position: relative;
             top: 0;
-            font-size: 12px;
+            font-size: 9pt;
             font-weight: bold;
             margin-bottom: 10px;
             color: mainFontColor;

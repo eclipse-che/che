@@ -34,7 +34,9 @@ public class LsConfigurationExtractorTest {
 
   @Test
   public void shouldExtractId() throws Exception {
-    Map<String, String> attributes = Collections.singletonMap("config", "{\"id\":\"testId\"}");
+    Map<String, String> attributes =
+        Collections.singletonMap(
+            "config", "{\"id\":\"testId\" ,\"languageIds\": [\"languageId\"]}");
 
     LanguageServerDescription languageServerDescription =
         lsConfigurationExtractor.extract(attributes);
@@ -44,7 +46,8 @@ public class LsConfigurationExtractorTest {
 
   @Test
   public void shouldExtractNullWhenIdIsNotMentioned() throws Exception {
-    Map<String, String> attributes = Collections.singletonMap("config", "{}");
+    Map<String, String> attributes =
+        Collections.singletonMap("config", "{\"languageIds\": [\"languageId\"]}");
 
     LanguageServerDescription languageServerDescription =
         lsConfigurationExtractor.extract(attributes);
@@ -64,8 +67,8 @@ public class LsConfigurationExtractorTest {
         languageServerDescription.getLanguageIds(), Collections.singletonList("languageId"));
   }
 
-  @Test
-  public void shouldExtractEmptyLanguageIdsForEmptyArray() throws Exception {
+  @Test(expectedExceptions = IllegalStateException.class)
+  public void shouldThrowExceptionWhenExtractEmptyLanguageIdsForEmptyArray() throws Exception {
     Map<String, String> attributes = Collections.singletonMap("config", "{\"languageIds\": [] }");
 
     LanguageServerDescription languageServerDescription =
@@ -74,8 +77,9 @@ public class LsConfigurationExtractorTest {
     assertTrue(languageServerDescription.getLanguageIds().isEmpty());
   }
 
-  @Test
-  public void shouldExtractEmptyLanguageIdsWhenLanguageIdsAreNotMentioned() throws Exception {
+  @Test(expectedExceptions = IllegalStateException.class)
+  public void shouldThrowExceptionWhenExtractEmptyLanguageIdsWhenLanguageIdsAreNotMentioned()
+      throws Exception {
     Map<String, String> attributes = Collections.singletonMap("config", "{ }");
 
     LanguageServerDescription languageServerDescription =
@@ -87,7 +91,9 @@ public class LsConfigurationExtractorTest {
   @Test
   public void shouldExtractFileWatchPatterns() throws Exception {
     Map<String, String> attributes =
-        Collections.singletonMap("config", "{\"fileWatchPatterns\": [\"fileWatchPattern\"] }");
+        Collections.singletonMap(
+            "config",
+            "{\"fileWatchPatterns\": [\"fileWatchPattern\"], \"languageIds\": [\"languageId\"] }");
 
     LanguageServerDescription languageServerDescription =
         lsConfigurationExtractor.extract(attributes);
@@ -100,7 +106,8 @@ public class LsConfigurationExtractorTest {
   @Test
   public void shouldExtractEmptyFileWatchPatternsForEmptyArray() throws Exception {
     Map<String, String> attributes =
-        Collections.singletonMap("config", "{\"fileWatchPatterns\": [] }");
+        Collections.singletonMap(
+            "config", "{\"fileWatchPatterns\": [] , \"languageIds\": [\"languageId\"]}");
 
     LanguageServerDescription languageServerDescription =
         lsConfigurationExtractor.extract(attributes);
@@ -109,9 +116,10 @@ public class LsConfigurationExtractorTest {
   }
 
   @Test
-  public void shouldExtractEmptyFileWatchPatternsWhenfileWatchPatternsAreNotMentioned()
+  public void shouldExtractEmptyFileWatchPatternsWhenFileWatchPatternsAreNotMentioned()
       throws Exception {
-    Map<String, String> attributes = Collections.singletonMap("config", "{ }");
+    Map<String, String> attributes =
+        Collections.singletonMap("config", "{\"languageIds\": [\"languageId\"] }");
 
     LanguageServerDescription languageServerDescription =
         lsConfigurationExtractor.extract(attributes);
@@ -122,7 +130,8 @@ public class LsConfigurationExtractorTest {
   @Test
   public void shouldExtractDocumentFilter() throws Exception {
     Map<String, String> attributes =
-        Collections.singletonMap("config", "{\"documentFilters\": [{}] }");
+        Collections.singletonMap(
+            "config", "{\"documentFilters\": [{}],\"languageIds\": [\"languageId\"] }");
 
     LanguageServerDescription languageServerDescription =
         lsConfigurationExtractor.extract(attributes);
@@ -133,7 +142,8 @@ public class LsConfigurationExtractorTest {
   @Test
   public void shouldExtractEmptyDocumentFilterForEmptyArray() throws Exception {
     Map<String, String> attributes =
-        Collections.singletonMap("config", "{\"documentFilters\": [] }");
+        Collections.singletonMap(
+            "config", "{\"documentFilters\": [] ,\"languageIds\": [\"languageId\"]}");
 
     LanguageServerDescription languageServerDescription =
         lsConfigurationExtractor.extract(attributes);
@@ -143,7 +153,8 @@ public class LsConfigurationExtractorTest {
 
   @Test
   public void shouldExtractDocumentFilterWhenDocumentFilterAreNotMentioned() throws Exception {
-    Map<String, String> attributes = Collections.singletonMap("config", "{ }");
+    Map<String, String> attributes =
+        Collections.singletonMap("config", "{ \"languageIds\": [\"languageId\"]}");
 
     LanguageServerDescription languageServerDescription =
         lsConfigurationExtractor.extract(attributes);
@@ -154,7 +165,9 @@ public class LsConfigurationExtractorTest {
   @Test
   public void shouldExtractDocumentFilterLanguageId() throws Exception {
     Map<String, String> attributes =
-        Collections.singletonMap("config", "{\"documentFilters\": [{\"languageId\":\"testId\"}] }");
+        Collections.singletonMap(
+            "config",
+            "{\"documentFilters\": [{\"languageId\":\"testId\"}] ,\"languageIds\": [\"languageId\"]}");
 
     LanguageServerDescription languageServerDescription =
         lsConfigurationExtractor.extract(attributes);
@@ -166,7 +179,9 @@ public class LsConfigurationExtractorTest {
   @Test
   public void shouldExtractDocumentFilterScheme() throws Exception {
     Map<String, String> attributes =
-        Collections.singletonMap("config", "{\"documentFilters\": [{\"scheme\":\"testScheme\"}] }");
+        Collections.singletonMap(
+            "config",
+            "{\"documentFilters\": [{\"scheme\":\"testScheme\"}],\"languageIds\": [\"languageId\"] }");
 
     LanguageServerDescription languageServerDescription =
         lsConfigurationExtractor.extract(attributes);
@@ -179,7 +194,8 @@ public class LsConfigurationExtractorTest {
   public void shouldExtractDocumentFilterPathRegex() throws Exception {
     Map<String, String> attributes =
         Collections.singletonMap(
-            "config", "{\"documentFilters\": [{\"pathRegex\":\"testPathRegex\"}] }");
+            "config",
+            "{\"documentFilters\": [{\"pathRegex\":\"testPathRegex\"}] ,\"languageIds\": [\"languageId\"]}");
 
     LanguageServerDescription languageServerDescription =
         lsConfigurationExtractor.extract(attributes);

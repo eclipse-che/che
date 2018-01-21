@@ -85,6 +85,7 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     final SubPanel subPanel = subPanelFactory.newPanel(this);
     subPanel.setFocusListener(focusListener);
     subPanel.setDoubleClickListener(doubleClickListener);
+    subPanel.setAddTabButtonClickListener(addTabButtonClickListener);
     view.splitHorizontally(subPanel.getView());
   }
 
@@ -93,6 +94,7 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     final SubPanel subPanel = subPanelFactory.newPanel(this);
     subPanel.setFocusListener(focusListener);
     subPanel.setDoubleClickListener(doubleClickListener);
+    subPanel.setAddTabButtonClickListener(addTabButtonClickListener);
     view.splitVertically(subPanel.getView());
   }
 

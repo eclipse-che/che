@@ -14,7 +14,7 @@
  * Defines a directive for factory item in list.
  * @author Oleksii Orel
  */
-export class CheFactoryItem {
+export class CheFactoryItem implements ng.IDirective {
   restrict: string = 'E';
 
   templateUrl: string = 'app/factories/list-factories/factory-item/factory-item.html';

@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.FontAwesome;
+import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.command.CommandGoal;
@@ -33,6 +34,7 @@ import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 public class ExecuteCommandButtonFactory {
 
   private final CommandResources resources;
+  private final Resources ideResources;
   private final AppContext appContext;
   private final MenuItemsFactory menuItemsFactory;
   private final ActionManager actionManager;
@@ -50,7 +52,8 @@ public class ExecuteCommandButtonFactory {
       RunGoal runGoal,
       DebugGoal debugGoal,
       ActionManager actionManager,
-      KeyBindingAgent keyBindingAgent) {
+      KeyBindingAgent keyBindingAgent,
+      Resources ideResources) {
     this.resources = resources;
     this.appContext = appContext;
     this.menuItemsFactory = menuItemsFactory;
@@ -59,6 +62,7 @@ public class ExecuteCommandButtonFactory {
     this.debugGoal = debugGoal;
     this.actionManager = actionManager;
     this.keyBindingAgent = keyBindingAgent;
+    this.ideResources = ideResources;
   }
 
   /**
@@ -114,9 +118,11 @@ public class ExecuteCommandButtonFactory {
     final SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
 
     if (goal.equals(runGoal)) {
-      safeHtmlBuilder.appendHtmlConstant(FontAwesome.PLAY);
+      safeHtmlBuilder.appendHtmlConstant(
+          "<img src=\"" + ideResources.run().getSafeUri().asString() + "\">");
     } else if (goal.equals(debugGoal)) {
-      safeHtmlBuilder.appendHtmlConstant(FontAwesome.BUG);
+      safeHtmlBuilder.appendHtmlConstant(
+          "<img src=\"" + ideResources.debug().getSafeUri().asString() + "\">");
     }
 
     return safeHtmlBuilder.toSafeHtml();

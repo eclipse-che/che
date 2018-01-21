@@ -10,8 +10,10 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -20,8 +22,10 @@ import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
@@ -33,6 +37,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
 import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeRecipe;
+import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 
 /** @author Sergii Leshchenko */
 @Singleton
@@ -52,8 +57,9 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
       RecipeRetriever recipeRetriever,
       MachineConfigsValidator machinesValidator,
       ComposeEnvironmentValidator composeValidator,
-      ComposeServicesStartStrategy startStrategy) {
-    super(installerRegistry, recipeRetriever, machinesValidator);
+      ComposeServicesStartStrategy startStrategy,
+      @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
+    super(installerRegistry, recipeRetriever, machinesValidator, defaultMachineMemorySizeMB);
     this.startStrategy = startStrategy;
     this.composeValidator = composeValidator;
   }
@@ -81,6 +87,8 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
     }
     ComposeRecipe composeRecipe = doParse(recipeContent);
 
+    addRamLimitAttribute(machines, composeRecipe.getServices());
+
     ComposeEnvironment composeEnvironment =
         new ComposeEnvironment(
             composeRecipe.getVersion(),
@@ -92,6 +100,26 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
     composeValidator.validate(composeEnvironment);
 
     return composeEnvironment;
+  }
+
+  @VisibleForTesting
+  void addRamLimitAttribute(
+      Map<String, InternalMachineConfig> machines, Map<String, ComposeService> services)
+      throws InfrastructureException {
+    for (Entry<String, ComposeService> entry : services.entrySet()) {
+      InternalMachineConfig machineConfig;
+      if ((machineConfig = machines.get(entry.getKey())) == null) {
+        machineConfig = new InternalMachineConfig();
+        machines.put(entry.getKey(), machineConfig);
+      }
+      final Map<String, String> attributes = machineConfig.getAttributes();
+      if (isNullOrEmpty(attributes.get(MEMORY_LIMIT_ATTRIBUTE))) {
+        final Long ramLimit = entry.getValue().getMemLimit();
+        if (ramLimit != null && ramLimit > 0) {
+          attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(ramLimit));
+        }
+      }
+    }
   }
 
   @VisibleForTesting

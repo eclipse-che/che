@@ -14,15 +14,15 @@
  * Defines a directive for displaying factory commands.
  * @author Florent Benoit
  */
-export class FactoryCommand {
-  private restrict: string;
-  private templateUrl: string;
-  private replace: boolean;
-  private controller: string;
-  private controllerAs: string;
-  private bindToController: boolean;
+export class FactoryCommand implements ng.IDirective {
+  restrict: string;
+  templateUrl: string;
+  replace: boolean;
+  controller: string;
+  controllerAs: string;
+  bindToController: boolean;
 
-  private scope: {
+  scope: {
     [propName: string]: string;
   };
 

@@ -84,8 +84,8 @@
         .titlePanel {
             float: left;
             height: 25px;
+            font-family: "Open Sans", sans-serif;
             font-size: 9pt;
-            font-family: "Helvetica Neue", "Myriad Pro", arial, Verdana, Verdana, sans-serif;
             line-height: 26px;
             max-width: 247px;
             overflow: hidden;

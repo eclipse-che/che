@@ -34,23 +34,34 @@ export JQ_BINARY_DOWNLOAD_URL=${JQ_BINARY_DOWNLOAD_URL:-${DEFAULT_JQ_BINARY_DOWN
 DEFAULT_CHE_MULTIUSER="false"
 export CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
 
+#Using local scripts is error prone and should only be used temporarly while developing Che.
+#If unsure leave the default value true set.
+DEFAULT_CHE_OPENSHIFT_GENERATE_SCRIPTS=true
+export CHE_OPENSHIFT_GENERATE_SCRIPTS=${CHE_OPENSHIFT_GENERATE_SCRIPTS:-${DEFAULT_CHE_OPENSHIFT_GENERATE_SCRIPTS}}
+
 DEFAULT_OPENSHIFT_USERNAME="developer"
 export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
 
 DEFAULT_OPENSHIFT_PASSWORD="developer"
 export OPENSHIFT_PASSWORD=${OPENSHIFT_PASSWORD:-${DEFAULT_OPENSHIFT_PASSWORD}}
 
+DNS_PROVIDERS=(
+xip.io
+nip.codenvy-stg.com
+)
 DEFAULT_DNS_PROVIDER="nip.io"
 export DNS_PROVIDER=${DNS_PROVIDER:-${DEFAULT_DNS_PROVIDER}}
 
 export OPENSHIFT_ROUTING_SUFFIX="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
 
-export CHE_OPENSHIFT_PROJECT="eclipse-che"
+DEFAULT_CHE_OPENSHIFT_PROJECT="eclipse-che"
+export CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
 
 export OPENSHIFT_FLAVOR="ocp"
 
 DEFAULT_OPENSHIFT_ENDPOINT="https://${OC_PUBLIC_HOSTNAME}:8443"
 export OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
+export CHE_INFRA_OPENSHIFT_MASTER__URL=${CHE_INFRA_OPENSHIFT_MASTER__URL:-${OPENSHIFT_ENDPOINT}}
 
 DEFAULT_ENABLE_SSL="false"
 export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
@@ -73,6 +84,21 @@ export CHE_CLI_IMAGE=${CHE_CLI_IMAGE:-${DEFAULT_CHE_CLI_IMAGE}}
 DEFAULT_CONFIG_DIR="/tmp/che-config"
 export CONFIG_DIR=${CONFIG_DIR:-${DEFAULT_CONFIG_DIR}}
 
+}
+
+test_dns_provider() {
+    #add current $DNS_PROVIDER to the providers list to respect environment settings
+    DNS_PROVIDERS=("$DNS_PROVIDER" "${DNS_PROVIDERS[@]}")
+    for i in ${DNS_PROVIDERS[@]}
+        do
+        if [[ $(dig +short +time=5 +tries=1 10.0.0.1.$i) = "10.0.0.1" ]]; then
+            echo "Test $i - works OK, using it as DNS provider"
+            export DNS_PROVIDER="$i"
+            break;
+         else
+            echo "Test $i DNS provider failed, trying next one."
+        fi
+        done
 }
 
 get_tools() {
@@ -146,20 +172,34 @@ wait_ocp() {
 }
 
 run_ocp() {
+    test_dns_provider
     $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
     wait_ocp
 }
 
 deploy_che_to_ocp() {
+    OPENSHIFT_SCRIPTS_FOLDER="${CONFIG_DIR}/instance/config/openshift/scripts/"
     #Repull init image only if IMAGE_PULL_POLICY is set to Always
     if [ $IMAGE_PULL_POLICY == "Always" ]; then
         docker pull "$IMAGE_INIT"
     fi
-    #wipeout config folder
-    docker run -v "${CONFIG_DIR}":/to_remove alpine sh -c "rm -rf /to_remove/" || true
-    docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" ${CHE_CLI_IMAGE} config --skip:pull --skip:nightly
-    cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
-    bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
+    #Only generate scripts and config files if CHE_OPENSHIFT_GENERATE_SCRIPTS=true
+    if [ $CHE_OPENSHIFT_GENERATE_SCRIPTS == true ]; then
+      echo "OCP generating temporary scripts and configuration files at ${OPENSHIFT_SCRIPTS_FOLDER} ."
+      #wipeout config folder
+      docker run -v "${CONFIG_DIR}":/to_remove alpine sh -c "rm -rf /to_remove/" || true
+      docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" ${CHE_CLI_IMAGE} config --skip:pull --skip:nightly
+      cd ${OPENSHIFT_SCRIPTS_FOLDER}
+    else
+      echo "OCP using existing scripts and configuration files in current folder."
+    fi
+    if [[ ! -f "deploy_che.sh" ]]; then
+      CURRENT_PWD=$(pwd)
+      echo "OCP script deploy_che.sh does not exist in ${CURRENT_PWD} ."
+      exit 1
+    else
+      bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
+    fi
     wait_until_server_is_booted
     if [ $CHE_MULTIUSER == true ]; then
         wait_until_kc_is_booted
@@ -221,6 +261,38 @@ destroy_ocp() {
     $OC_BINARY cluster down
 }
 
+remove_che_from_ocp() {
+	echo "[CHE] Checking if project \"${CHE_OPENSHIFT_PROJECT}\" exists before removing..."
+	WAIT_FOR_PROJECT_TO_DELETE=true
+	CHE_REMOVE_PROJECT=true
+	DELETE_OPENSHIFT_PROJECT_MESSAGE="[CHE] Removing Project \"${CHE_OPENSHIFT_PROJECT}\"."
+	if $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
+		echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" exists."
+		while $WAIT_FOR_PROJECT_TO_DELETE
+		do
+		{ # try
+			echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
+			if $CHE_REMOVE_PROJECT; then
+				$OC_BINARY delete project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
+				CHE_REMOVE_PROJECT=false
+			fi
+			DELETE_OPENSHIFT_PROJECT_MESSAGE="."
+			if ! $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
+				WAIT_FOR_PROJECT_TO_DELETE=false
+			fi
+			echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
+		} || { # catch
+			echo "[CHE] Could not find project \"${CHE_OPENSHIFT_PROJECT}\" to delete."
+			WAIT_FOR_PROJECT_TO_DELETE=false
+		}
+		done
+		echo "Done!"
+	else
+		echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" does NOT exists."
+	fi
+	
+}
+
 detectIP() {
     docker run --rm --net host eclipse/che-ip:nightly
 }
@@ -232,6 +304,7 @@ parse_args() {
     --destroy - destroy ocp cluster
     --deploy-che - deploy che to ocp
     --multiuser - deploy che in multiuser mode
+    --remove-che - remove existing che project
     ===================================
     ENV vars
     CHE_IMAGE_TAG - set CHE images tag, default: nightly
@@ -258,6 +331,10 @@ parse_args() {
       DEPLOY_SCRIPT_ARGS="-c rollupdate"
     fi
 
+    if [[ "$@" == *"--remove-che"* ]]; then
+      remove_che_from_ocp
+    fi
+
     for i in "${@}"
     do
         case $i in
@@ -277,6 +354,9 @@ parse_args() {
                shift
            ;;
            --update)
+               shift
+           ;;
+           --remove-che)
                shift
            ;;
            --help)

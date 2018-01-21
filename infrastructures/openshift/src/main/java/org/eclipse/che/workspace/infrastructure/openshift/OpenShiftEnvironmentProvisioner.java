@@ -17,8 +17,10 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.env.EnvVarsConverter;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.limits.ram.RamLimitProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.route.TlsRouteProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.server.ServersConverter;
@@ -40,6 +42,8 @@ public class OpenShiftEnvironmentProvisioner {
   private final ServersConverter serversConverter;
   private final EnvVarsConverter envVarsConverter;
   private final RestartPolicyRewriter restartPolicyRewriter;
+  private final RamLimitProvisioner ramLimitProvisioner;
+  private final InstallerServersPortProvisioner installerServersPortProvisioner;
 
   @Inject
   public OpenShiftEnvironmentProvisioner(
@@ -49,7 +53,9 @@ public class OpenShiftEnvironmentProvisioner {
       ServersConverter serversConverter,
       EnvVarsConverter envVarsConverter,
       RestartPolicyRewriter restartPolicyRewriter,
-      WorkspaceVolumesStrategy volumesStrategy) {
+      WorkspaceVolumesStrategy volumesStrategy,
+      RamLimitProvisioner ramLimitProvisioner,
+      InstallerServersPortProvisioner installerServersPortProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -57,10 +63,15 @@ public class OpenShiftEnvironmentProvisioner {
     this.serversConverter = serversConverter;
     this.envVarsConverter = envVarsConverter;
     this.restartPolicyRewriter = restartPolicyRewriter;
+    this.ramLimitProvisioner = ramLimitProvisioner;
+    this.installerServersPortProvisioner = installerServersPortProvisioner;
   }
 
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
+    // update environment according Infrastructure specific
+    installerServersPortProvisioner.provision(osEnv, identity);
+
     // 1 stage - converting Che model env to OpenShift env
     serversConverter.provision(osEnv, identity);
     envVarsConverter.provision(osEnv, identity);
@@ -72,7 +83,6 @@ public class OpenShiftEnvironmentProvisioner {
     restartPolicyRewriter.provision(osEnv, identity);
     uniqueNamesProvisioner.provision(osEnv, identity);
     tlsRouteProvisioner.provision(osEnv, identity);
+    ramLimitProvisioner.provision(osEnv, identity);
   }
-
-  // TODO memory attribute provisioner
 }

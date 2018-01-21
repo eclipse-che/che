@@ -53,7 +53,7 @@ public class OrganizationPage {
         "//che-button-primary[@che-button-title =  'Add Sub-Organization']/a";
     String MEMBERS_TAB = "//md-tab-item//span[contains(text(), 'Members')]";
     String MEMBERS_LIST = "//list-organization-members";
-    String ADD_MEMBER_BUTTON = "//button[@ng-click = 'onAdd()']";
+    String ADD_MEMBER_BUTTON = "//che-button-primary[@ng-click = 'onAdd()']";
     String DELETE_MEMBER_BUTTON = "//button[@ng-click = 'onDelete()']";
     String MEMBERS_HEADER_XPATH =
         "//md-content[contains(@class, 'organization-member-list')]//div[contains(@class, 'che-list-header-column')]//span";

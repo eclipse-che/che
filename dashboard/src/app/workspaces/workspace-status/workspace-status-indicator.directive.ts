@@ -14,7 +14,7 @@
  * Defines a directive for creating simple indicator of workspace's status.
  * @author Oleksii Kurinnyi
  */
-export class WorkspaceStatusIndicator {
+export class WorkspaceStatusIndicator implements ng.IDirective {
   restrict: string;
   replace: boolean;
   scope;
@@ -35,12 +35,12 @@ export class WorkspaceStatusIndicator {
 
   /**
    * Template for the simple indicator of workspace's status
-   * @param element
-   * @param attr
+   * @param $element
+   * @param $attrs
    * @returns {string} the template
    */
-  template (element, attr) {
-    let emptyCircleOnStopped = attr.cheEmptyCircle;
+  template ($element: ng.IAugmentedJQuery, $attrs: ng.IAttributes) {
+    let emptyCircleOnStopped = ($attrs as any).cheEmptyCircle;
 
     return '<span ng-switch="status" class="workspace-status-indicator">' +
       '<span ng-switch-when="STOPPED" class="fa ' + (emptyCircleOnStopped ? 'fa-circle-o' : 'fa-circle') + ' workspace-status-stopped"></span>' +

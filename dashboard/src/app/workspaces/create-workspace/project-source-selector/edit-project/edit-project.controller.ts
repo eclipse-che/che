@@ -25,7 +25,9 @@ export class EditProjectController {
    * Callback to check uniqueness of project name.
    * Provided by parent controller.
    */
+  /* tslint:disable */
   private isProjectNameUnique: (data: {name: string}) => boolean;
+  /* tslint:enable */
   /**
    * Callback which should be called for changes to be saved.
    * Provided by parent controller.

@@ -38,6 +38,4 @@ export class ListMembers implements ng.IDirective {
     owner: '='
   };
 
-  constructor () {
-  }
 }

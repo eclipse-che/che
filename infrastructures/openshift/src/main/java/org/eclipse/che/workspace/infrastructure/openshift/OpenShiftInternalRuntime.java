@@ -199,7 +199,7 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
       throws InfrastructureException, InterruptedException {
     InternalMachineConfig machineConfig =
         getContext().getEnvironment().getMachines().get(machine.getName());
-    if (machineConfig != null && !machineConfig.getInstallers().isEmpty())
+    if (!machineConfig.getInstallers().isEmpty())
       bootstrapperFactory
           .create(getContext().getIdentity(), machineConfig.getInstallers(), machine)
           .bootstrap();
@@ -236,7 +236,9 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
   @VisibleForTesting
   void createPods(List<Service> services, List<Route> routes) throws InfrastructureException {
     final ServerResolver serverResolver = ServerResolver.of(services, routes);
-    for (Pod toCreate : getContext().getEnvironment().getPods().values()) {
+    final OpenShiftEnvironment environment = getContext().getEnvironment();
+    final Map<String, InternalMachineConfig> machineConfigs = environment.getMachines();
+    for (Pod toCreate : environment.getPods().values()) {
       final Pod createdPod = project.pods().create(toCreate);
       final ObjectMeta podMetadata = createdPod.getMetadata();
       for (Container container : createdPod.getSpec().getContainers()) {
@@ -248,7 +250,8 @@ public class OpenShiftInternalRuntime extends InternalRuntime<OpenShiftRuntimeCo
                 container.getName(),
                 serverResolver.resolve(machineName),
                 project,
-                MachineStatus.STARTING);
+                MachineStatus.STARTING,
+                machineConfigs.get(machineName).getAttributes());
         machines.put(machine.getName(), machine);
         sendStartingEvent(machine.getName());
       }

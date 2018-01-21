@@ -37,7 +37,7 @@ export class FactoryInformationController {
   private factory: che.IFactory;
   private copyOriginFactory: che.IFactory;
   private factoryContent: string;
-  private workspaceImportedRecipe: any;
+  // private workspaceImportedRecipe: any;
   private environmentName: string;
   private workspaceName: string;
   private stackId: string;
@@ -49,8 +49,16 @@ export class FactoryInformationController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($scope: ng.IScope, cheAPI: CheAPI, cheNotification: CheNotification, $location: ng.ILocationService, $log: ng.ILogService,
-              $timeout: ng.ITimeoutService, lodash: any, $filter: ng.IFilterService, $q: ng.IQService, confirmDialogService: ConfirmDialogService) {
+  constructor($scope: ng.IScope,
+              cheAPI: CheAPI,
+              cheNotification: CheNotification,
+              $location: ng.ILocationService,
+              $log: ng.ILogService,
+              $timeout: ng.ITimeoutService,
+              lodash: any,
+              $filter: ng.IFilterService,
+              $q: ng.IQService,
+              confirmDialogService: ConfirmDialogService) {
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
     this.$location = $location;

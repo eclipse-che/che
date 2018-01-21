@@ -14,6 +14,9 @@ import {IParser} from './parser';
 
 export interface IComposeServiceRecipe {
   image: string;
+  environment: any;
+  depends_on: any[];
+  links: any[];
   [propName: string]: any;
 }
 

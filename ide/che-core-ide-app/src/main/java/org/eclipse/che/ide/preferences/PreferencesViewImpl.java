@@ -42,7 +42,7 @@ import org.eclipse.che.ide.util.loging.Log;
  * It has an area at the bottom containing OK, Apply and Close buttons, on the left hand side of
  * page is list of available preferences, on the right hand side of page is current preference page.
  *
- * @author <a href="mailto:aplotnikov@exoplatform.com">Andrey Plotnikov</a>
+ * @author Andrey Plotnikov
  */
 @Singleton
 public class PreferencesViewImpl extends Window implements PreferencesView {

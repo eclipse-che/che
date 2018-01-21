@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.api.workspace.server.spi.environment;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,14 +50,18 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
   private final InstallerRegistry installerRegistry;
   private final RecipeRetriever recipeRetriever;
   private final MachineConfigsValidator machinesValidator;
+  private final String defaultMachineMemorySizeAttribute;
 
   public InternalEnvironmentFactory(
       InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
-      MachineConfigsValidator machinesValidator) {
+      MachineConfigsValidator machinesValidator,
+      long defaultMachineMemorySizeMB) {
     this.installerRegistry = installerRegistry;
     this.recipeRetriever = recipeRetriever;
     this.machinesValidator = machinesValidator;
+    this.defaultMachineMemorySizeAttribute =
+        String.valueOf(defaultMachineMemorySizeMB * 1024 * 1024);
   }
 
   /**
@@ -106,11 +113,23 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
 
     machinesValidator.validate(machines);
 
-    return doCreate(recipe, machines, warnings);
+    final T environment = doCreate(recipe, machines, warnings);
+
+    // sets default ram limit attribute if not present
+    for (InternalMachineConfig machineConfig : environment.getMachines().values()) {
+      if (isNullOrEmpty(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE))) {
+        machineConfig
+            .getAttributes()
+            .put(MEMORY_LIMIT_ATTRIBUTE, defaultMachineMemorySizeAttribute);
+      }
+    }
+    return environment;
   }
 
   /**
-   * Implementation validates downloaded recipe and creates specific InternalEnvironment.
+   * Implementation validates downloaded recipe and creates specific InternalEnvironment. Returned
+   * InternalEnvironment must contains all machine that are defined in recipe and in source machine
+   * collection.
    *
    * @param recipe downloaded recipe
    * @param machines machines configuration

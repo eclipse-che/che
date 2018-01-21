@@ -25,7 +25,9 @@ export class FactoryDetailsController {
    * @ngInject for Dependency injection
    */
   constructor($route: ng.route.IRouteService, cheFactory: CheFactory, cheNotification: CheNotification) {
+    /* tslint:disable */
     'ngInject';
+    /* tslint:enable */
 
     this.cheFactory = cheFactory;
     let factoryId = $route.current.params.id;

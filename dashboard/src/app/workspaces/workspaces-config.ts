@@ -69,6 +69,7 @@ import {StackSelectorSearchFilter} from './create-workspace/stack-selector/stack
 import {StackSelectorTagsFilter} from './create-workspace/stack-selector/stack-selector-tags.filter';
 import {CreateWorkspaceController} from './create-workspace/create-workspace.controller';
 import {CreateWorkspaceSvc} from './create-workspace/create-workspace.service';
+import {AfterCreationDialogController} from './create-workspace/after-creation-dialog/after-creation-dialog.controller';
 import {ShareWorkspaceController} from './share-workspace/share-workspace.controller';
 import {ShareWorkspace} from './share-workspace/share-workspace.directive';
 import {AddDeveloperController} from './share-workspace/add-developers/add-developers.controller';
@@ -156,6 +157,7 @@ export class WorkspacesConfig {
     register.directive('cheStackLibraryFilter', CheStackLibraryFilter);
     register.controller('CreateWorkspaceController', CreateWorkspaceController);
     register.service('createWorkspaceSvc', CreateWorkspaceSvc);
+    register.controller('AfterCreationDialogController', AfterCreationDialogController);
     register.controller('ShareWorkspaceController', ShareWorkspaceController);
     register.directive('shareWorkspace', ShareWorkspace);
     register.controller('AddDeveloperController', AddDeveloperController);

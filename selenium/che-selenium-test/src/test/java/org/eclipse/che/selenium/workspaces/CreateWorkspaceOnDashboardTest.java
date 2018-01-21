@@ -63,7 +63,7 @@ public class CreateWorkspaceOnDashboardTest {
     createWorkspace.typeWorkspaceName(WORKSPACE);
     createWorkspace.selectStack(JAVA.getId());
     createWorkspace.setMachineRAM("dev-machine", 2.0);
-    createWorkspace.clickOnCreateWorkspaceButton();
+    createWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
 

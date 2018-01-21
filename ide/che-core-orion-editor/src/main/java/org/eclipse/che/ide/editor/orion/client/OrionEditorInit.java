@@ -13,7 +13,6 @@ package org.eclipse.che.ide.editor.orion.client;
 import elemental.events.KeyboardEvent.KeyCode;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.annotation.HasAnnotationRendering;
 import org.eclipse.che.ide.api.editor.annotation.QueryAnnotationsEvent;
@@ -55,9 +54,6 @@ import org.eclipse.che.ide.util.browser.UserAgent;
  * that depend on the document being ready.
  */
 public class OrionEditorInit {
-
-  /** The logger. */
-  private static final Logger LOG = Logger.getLogger(OrionEditorInit.class.getName());
 
   private static final String CONTENT_ASSIST = "Content assist";
   private static final String QUICK_FIX = "Quick fix";
@@ -193,8 +189,6 @@ public class OrionEditorInit {
         configuration.getContentAssistantProcessors();
 
     if (processors != null && !processors.isEmpty()) {
-      LOG.info("Creating code assistant.");
-
       final CodeAssistant codeAssistant =
           this.codeAssistantFactory.create(this.textEditor, this.configuration.getPartitioner());
       for (String key : processors.keySet()) {

@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.opendeclaration;
 
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.WARNING_MARKER;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -23,6 +24,7 @@ import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -57,7 +59,14 @@ public class Eclipse0093Test {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT_NAME + PATH_TO_PACKAGE_PREFIX + "Test.java");
     editor.waitActive();
-    editor.waitMarkerInPosition(WARNING_MARKER, 12);
+
+    try {
+      editor.waitMarkerInPosition(WARNING_MARKER, 12);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7161", ex);
+    }
+
     editor.goToCursorPositionVisible(17, 26);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("MyEnum");

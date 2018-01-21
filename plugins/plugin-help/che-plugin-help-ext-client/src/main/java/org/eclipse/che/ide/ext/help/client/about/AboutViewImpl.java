@@ -76,6 +76,7 @@ public class AboutViewImpl extends Window implements AboutView {
                 delegate.onOkClicked();
               }
             });
+    btnOk.addStyleName(resources.windowCss().primaryButton());
     addButtonToFooter(btnOk);
 
     final SVGResource logo = productInfoDataProvider.getLogo();

@@ -195,6 +195,19 @@ public class HistoryViewImpl extends Window implements HistoryView {
   }
 
   private void createButtons() {
+    btnCompare =
+        createButton(
+            locale.buttonCompare(),
+            "git-history-compare",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onCompareClicked();
+              }
+            });
+    btnCompare.addStyleName(resources.windowCss().primaryButton());
+    addButtonToFooter(btnCompare);
+
     btnClose =
         createButton(
             locale.buttonClose(),
@@ -206,18 +219,6 @@ public class HistoryViewImpl extends Window implements HistoryView {
               }
             });
     addButtonToFooter(btnClose);
-
-    btnCompare =
-        createButton(
-            locale.buttonCompare(),
-            "git-history-compare",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCompareClicked();
-              }
-            });
-    addButtonToFooter(btnCompare);
   }
 
   @UiHandler("revisionsPanel")
