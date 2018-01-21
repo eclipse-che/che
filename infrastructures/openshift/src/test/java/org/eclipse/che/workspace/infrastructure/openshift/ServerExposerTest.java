@@ -73,7 +73,7 @@ public class ServerExposerTest {
 
     openShiftEnvironment =
         OpenShiftEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
-    this.serverExposer = new ServerExposer(MACHINE_NAME, pod, container, openShiftEnvironment);
+    this.serverExposer = new ServerExposer(MACHINE_NAME, pod, container, openShiftEnvironment, "");
   }
 
   @Test

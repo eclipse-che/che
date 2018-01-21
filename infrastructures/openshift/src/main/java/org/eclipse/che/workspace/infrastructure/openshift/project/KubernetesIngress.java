@@ -10,26 +10,17 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
-import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
-import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPath;
-import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPathBuilder;
-import io.fabric8.kubernetes.api.model.extensions.HTTPIngressRuleValue;
-import io.fabric8.kubernetes.api.model.extensions.HTTPIngressRuleValueBuilder;
+import io.fabric8.kubernetes.api.model.extensions.DoneableIngress;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import io.fabric8.kubernetes.api.model.extensions.IngressBackend;
-import io.fabric8.kubernetes.api.model.extensions.IngressBackendBuilder;
-import io.fabric8.kubernetes.api.model.extensions.IngressBuilder;
-import io.fabric8.kubernetes.api.model.extensions.IngressRule;
-import io.fabric8.kubernetes.api.model.extensions.IngressRuleBuilder;
-import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
-import io.fabric8.kubernetes.api.model.extensions.IngressSpecBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.openshift.api.model.Route;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import io.fabric8.kubernetes.client.Watch;
+import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.Resource;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Predicate;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 
@@ -45,6 +36,73 @@ public class KubernetesIngress {
     this.clientFactory = clientFactory;
   }
 
+  public Ingress create(Ingress ingress) throws InfrastructureException {
+    try {
+      return clientFactory
+          .create()
+          .extensions()
+          .ingresses()
+          .inNamespace(namespace)
+          .withName(ingress.getMetadata().getName())
+          .create(ingress);
+    } catch (KubernetesClientException e) {
+      throw new InfrastructureException(e.getMessage(), e);
+    }
+  }
+
+  public Ingress wait(String name, int timeoutMin, Predicate<Ingress> predicate)
+      throws InfrastructureException {
+    CompletableFuture<Ingress> future = new CompletableFuture<>();
+    Watch watch = null;
+    try {
+
+      Resource<Ingress, DoneableIngress> ingressResource =
+          clientFactory.create().extensions().ingresses().inNamespace(namespace).withName(name);
+
+      watch =
+          ingressResource.watch(
+              new Watcher<Ingress>() {
+                @Override
+                public void eventReceived(Action action, Ingress ingress) {
+                  if (predicate.test(ingress)) {
+                    future.complete(ingress);
+                  }
+                }
+
+                @Override
+                public void onClose(KubernetesClientException cause) {
+                  future.completeExceptionally(
+                      new InfrastructureException(
+                          "Waiting for ingress '" + name + "' was interrupted"));
+                }
+              });
+
+      Ingress actualIngress = ingressResource.get();
+      if (actualIngress == null) {
+        throw new InfrastructureException("Specified ingress " + name + " doesn't exist");
+      }
+      if (predicate.test(actualIngress)) {
+        return actualIngress;
+      }
+      try {
+        return future.get(timeoutMin, TimeUnit.MINUTES);
+      } catch (ExecutionException e) {
+        throw new InfrastructureException(e.getCause().getMessage(), e);
+      } catch (TimeoutException e) {
+        throw new InfrastructureException("Waiting for ingress '" + name + "' reached timeout");
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new InfrastructureException("Waiting for ingress '" + name + "' was interrupted");
+      }
+    } catch (KubernetesClientException e) {
+      throw new InfrastructureException(e.getMessage(), e);
+    } finally {
+      if (watch != null) {
+        watch.close();
+      }
+    }
+  }
+
   /**
    * Creates specified route.
    *
@@ -52,60 +110,60 @@ public class KubernetesIngress {
    * @return created route
    * @throws InfrastructureException when any exception occurs
    */
-  public Ingress create(List<Route> routes) throws InfrastructureException {
-    try {
-      List<HTTPIngressPath> httpIngressPaths = new ArrayList<>();
-      HashSet<String> servers = new HashSet<>();
-      for (Route route : routes) {
-        String server = route.getSpec().getPort().getTargetPort().getStrVal();
-        if (!servers.contains(server)) {
-          IngressBackend ingressBackend =
-              new IngressBackendBuilder()
-                  .withServiceName(route.getSpec().getTo().getName())
-                  .withNewServicePort(server)
-                  .build();
-
-          String serverPath = "/" + workspaceId + "/" + server;
-
-          HTTPIngressPath httpIngressPath =
-              new HTTPIngressPathBuilder()
-                  // .withPath(route.getSpec().getPath())
-                  .withPath(serverPath)
-                  .withBackend(ingressBackend)
-                  .build();
-          servers.add(server);
-          httpIngressPaths.add(httpIngressPath);
-        }
-      }
-
-      HTTPIngressRuleValue httpIngressRuleValue =
-          new HTTPIngressRuleValueBuilder().withPaths(httpIngressPaths).build();
-      IngressRule ingressRule = new IngressRuleBuilder().withHttp(httpIngressRuleValue).build();
-      IngressSpec ingressSpec = new IngressSpecBuilder().withRules(ingressRule).build();
-      Map<String, String> ingressAnontations = new HashMap<>();
-      ingressAnontations.put("ingress.kubernetes.io/rewrite-target", "/");
-      ingressAnontations.put("ingress.kubernetes.io/ssl-redirect", "false");
-      ingressAnontations.put("kubernetes.io/ingress.class", "nginx");
-      Ingress ingress =
-          new IngressBuilder()
-              .withSpec(ingressSpec)
-              .withMetadata(
-                  new ObjectMetaBuilder()
-                      .withName(workspaceId + "-ingress")
-                      .withAnnotations(ingressAnontations)
-                      .build())
-              .build();
-      return clientFactory
-          .create()
-          .extensions()
-          .ingresses()
-          .inNamespace(namespace)
-          .withName(workspaceId + "-ingress")
-          .create(ingress);
-    } catch (KubernetesClientException e) {
-      throw new InfrastructureException(e.getMessage(), e);
-    }
-  }
+  //  public Ingress create(List<Route> routes) throws InfrastructureException {
+  //    try {
+  //      List<HTTPIngressPath> httpIngressPaths = new ArrayList<>();
+  //      HashSet<String> servers = new HashSet<>();
+  //      for (Route route : routes) {
+  //        String server = route.getSpec().getPort().getTargetPort().getStrVal();
+  //        if (!servers.contains(server)) {
+  //          IngressBackend ingressBackend =
+  //              new IngressBackendBuilder()
+  //                  .withServiceName(route.getSpec().getTo().getName())
+  //                  .withNewServicePort(server)
+  //                  .build();
+  //
+  //          String serverPath = "/" + workspaceId + "/" + server;
+  //
+  //          HTTPIngressPath httpIngressPath =
+  //              new HTTPIngressPathBuilder()
+  //                  // .withPath(route.getSpec().getPath())
+  //                  .withPath(serverPath)
+  //                  .withBackend(ingressBackend)
+  //                  .build();
+  //          servers.add(server);
+  //          httpIngressPaths.add(httpIngressPath);
+  //        }
+  //      }
+  //
+  //      HTTPIngressRuleValue httpIngressRuleValue =
+  //          new HTTPIngressRuleValueBuilder().withPaths(httpIngressPaths).build();
+  //      IngressRule ingressRule = new IngressRuleBuilder().withHttp(httpIngressRuleValue).build();
+  //      IngressSpec ingressSpec = new IngressSpecBuilder().withRules(ingressRule).build();
+  //      Map<String, String> ingressAnontations = new HashMap<>();
+  //      ingressAnontations.put("ingress.kubernetes.io/rewrite-target", "/");
+  //      ingressAnontations.put("ingress.kubernetes.io/ssl-redirect", "false");
+  //      ingressAnontations.put("kubernetes.io/ingress.class", "nginx");
+  //      Ingress ingress =
+  //          new IngressBuilder()
+  //              .withSpec(ingressSpec)
+  //              .withMetadata(
+  //                  new ObjectMetaBuilder()
+  //                      .withName(workspaceId + "-ingress")
+  //                      .withAnnotations(ingressAnontations)
+  //                      .build())
+  //              .build();
+  //      return clientFactory
+  //          .create()
+  //          .extensions()
+  //          .ingresses()
+  //          .inNamespace(namespace)
+  //          .withName(workspaceId + "-ingress")
+  //          .create(ingress);
+  //    } catch (KubernetesClientException e) {
+  //      throw new InfrastructureException(e.getMessage(), e);
+  //    }
+  //  }
 
   public void delete() throws InfrastructureException {
     clientFactory

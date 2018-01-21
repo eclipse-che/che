@@ -280,7 +280,7 @@ items:
               configMapKeyRef:
                 key: CHE_KEYCLOAK_CLIENT__ID
                 name: che
-          image: secure-registry.ingress.multi.devx-che.k8s.sapcloud.io/i31362/che6-k8s:latest
+          image:
           imagePullPolicy: Always
           livenessProbe:
             httpGet:

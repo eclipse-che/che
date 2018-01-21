@@ -20,10 +20,23 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.IntOrString;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
+import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPath;
+import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPathBuilder;
+import io.fabric8.kubernetes.api.model.extensions.HTTPIngressRuleValue;
+import io.fabric8.kubernetes.api.model.extensions.HTTPIngressRuleValueBuilder;
+import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import io.fabric8.kubernetes.api.model.extensions.IngressBackend;
+import io.fabric8.kubernetes.api.model.extensions.IngressBackendBuilder;
+import io.fabric8.kubernetes.api.model.extensions.IngressBuilder;
+import io.fabric8.kubernetes.api.model.extensions.IngressRule;
+import io.fabric8.kubernetes.api.model.extensions.IngressRuleBuilder;
+import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
+import io.fabric8.kubernetes.api.model.extensions.IngressSpecBuilder;
 import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -111,13 +124,19 @@ public class ServerExposer {
   private final Container container;
   private final Pod pod;
   private final OpenShiftEnvironment openShiftEnvironment;
+  private final String host;
 
   public ServerExposer(
-      String machineName, Pod pod, Container container, OpenShiftEnvironment openShiftEnvironment) {
+      String machineName,
+      Pod pod,
+      Container container,
+      OpenShiftEnvironment openShiftEnvironment,
+      String host) {
     this.machineName = machineName;
     this.pod = pod;
     this.container = container;
     this.openShiftEnvironment = openShiftEnvironment;
+    this.host = host;
   }
 
   /**
@@ -158,6 +177,7 @@ public class ServerExposer {
 
     for (ServicePort servicePort : portToServicePort.values()) {
       int port = servicePort.getTargetPort().getIntVal();
+
       Map<String, ServerConfig> routesServers =
           externalServers
               .entrySet()
@@ -165,15 +185,17 @@ public class ServerExposer {
               .filter(e -> parseInt(e.getValue().getPort().split("/")[0]) == port)
               .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-      Route route =
-          new RouteBuilder()
+      Ingress ingress =
+          new IngressBuilder()
               .withName(serviceName + '-' + servicePort.getName())
               .withMachineName(machineName)
               .withTargetPort(servicePort.getName())
               .withServers(routesServers)
               .withTo(serviceName)
+              .withHost(host)
               .build();
-      openShiftEnvironment.getRoutes().put(route.getMetadata().getName(), route);
+
+      openShiftEnvironment.getIngresses().put(ingress.getMetadata().getName(), ingress);
     }
   }
 
@@ -266,59 +288,79 @@ public class ServerExposer {
     }
   }
 
-  private static class RouteBuilder {
+  private static class IngressBuilder {
     private String name;
     private String serviceName;
     private IntOrString targetPort;
     private Map<String, ? extends ServerConfig> serversConfigs;
     private String machineName;
+    private String host;
 
-    private RouteBuilder withName(String name) {
+    private IngressBuilder withName(String name) {
       this.name = name;
       return this;
     }
 
-    private RouteBuilder withTo(String serviceName) {
+    private IngressBuilder withTo(String serviceName) {
       this.serviceName = serviceName;
       return this;
     }
 
-    private RouteBuilder withTargetPort(String targetPortName) {
+    private IngressBuilder withTargetPort(String targetPortName) {
       this.targetPort = new IntOrString(targetPortName);
       return this;
     }
 
-    private RouteBuilder withServers(Map<String, ? extends ServerConfig> serversConfigs) {
+    private IngressBuilder withServers(Map<String, ? extends ServerConfig> serversConfigs) {
       this.serversConfigs = serversConfigs;
       return this;
     }
 
-    public RouteBuilder withMachineName(String machineName) {
+    public IngressBuilder withMachineName(String machineName) {
       this.machineName = machineName;
       return this;
     }
 
-    private Route build() {
-      io.fabric8.openshift.api.model.RouteBuilder builder =
-          new io.fabric8.openshift.api.model.RouteBuilder();
+    public IngressBuilder withHost(String host) {
+      this.host = host;
+      return this;
+    }
 
-      return builder
-          .withNewMetadata()
-          .withName(name.replace("/", "-"))
-          .withAnnotations(
-              Annotations.newSerializer()
-                  .servers(serversConfigs)
-                  .machineName(machineName)
-                  .annotations())
-          .endMetadata()
-          .withNewSpec()
-          .withNewTo()
-          .withName(serviceName)
-          .endTo()
-          .withNewPort()
-          .withTargetPort(targetPort)
-          .endPort()
-          .endSpec()
+    private Ingress build() {
+
+      IngressBackend ingressBackend =
+          new IngressBackendBuilder()
+              .withServiceName(serviceName)
+              .withNewServicePort(targetPort.getStrVal())
+              .build();
+
+      String serverPath = "/" + serviceName + "/" + targetPort.getStrVal();
+      HTTPIngressPath httpIngressPath =
+          new HTTPIngressPathBuilder().withPath(serverPath).withBackend(ingressBackend).build();
+
+      HTTPIngressRuleValue httpIngressRuleValue =
+          new HTTPIngressRuleValueBuilder().withPaths(httpIngressPath).build();
+      IngressRule ingressRule = new IngressRuleBuilder().withHttp(httpIngressRuleValue).build();
+      //          new IngressRuleBuilder().withHttp(httpIngressRuleValue).withHost(host).build();
+      IngressSpec ingressSpec = new IngressSpecBuilder().withRules(ingressRule).build();
+
+      Map<String, String> ingressAnnotations = new HashMap<>();
+      ingressAnnotations.put("ingress.kubernetes.io/rewrite-target", "/");
+      ingressAnnotations.put("ingress.kubernetes.io/ssl-redirect", "false");
+      ingressAnnotations.put("kubernetes.io/ingress.class", "nginx");
+      ingressAnnotations.putAll(
+          Annotations.newSerializer()
+              .servers(serversConfigs)
+              .machineName(machineName)
+              .annotations());
+
+      return new io.fabric8.kubernetes.api.model.extensions.IngressBuilder()
+          .withSpec(ingressSpec)
+          .withMetadata(
+              new ObjectMetaBuilder()
+                  .withName(serviceName + targetPort.getStrVal() + "-ingress")
+                  .withAnnotations(ingressAnnotations)
+                  .build())
           .build();
     }
   }

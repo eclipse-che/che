@@ -150,6 +150,7 @@ public class OpenShiftPods {
     CompletableFuture<Pod> future = new CompletableFuture<>();
     Watch watch = null;
     try {
+
       PodResource<Pod, DoneablePod> podResource =
           clientFactory.create().pods().inNamespace(namespace).withName(name);
 

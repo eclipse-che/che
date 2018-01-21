@@ -14,6 +14,8 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import java.util.Map;
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -36,6 +38,13 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.Configuratio
 @Singleton
 public class ServersConverter implements ConfigurationProvisioner {
 
+  private final String host;
+
+  @Inject
+  public ServersConverter(@Named("che.host") String host) {
+    this.host = host;
+  }
+
   @Override
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
@@ -47,7 +56,7 @@ public class ServersConverter implements ConfigurationProvisioner {
         InternalMachineConfig machineConfig = osEnv.getMachines().get(machineName);
         if (!machineConfig.getServers().isEmpty()) {
           ServerExposer serverExposer =
-              new ServerExposer(machineName, podConfig, containerConfig, osEnv);
+              new ServerExposer(machineName, podConfig, containerConfig, osEnv, host);
           serverExposer.expose(machineConfig.getServers());
         }
       }

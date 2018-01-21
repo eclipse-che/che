@@ -13,6 +13,8 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import io.fabric8.kubernetes.api.model.extensions.IngressRule;
 import io.fabric8.openshift.api.model.Route;
 import java.util.HashMap;
 import java.util.List;
@@ -35,9 +37,11 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
  */
 public class ServerResolver {
   private final Multimap<String, Service> services;
-  private final Multimap<String, Route> routes;
+  //  private final Multimap<String, Route> routes;
+  private final Multimap<String, Ingress> ingresses;
 
-  private ServerResolver(List<Service> services, List<Route> routes) {
+  //  private ServerResolver(List<Service> services, List<Route> routes) {
+  private ServerResolver(List<Service> services, List<Ingress> ingresses) {
     this.services = ArrayListMultimap.create();
     for (Service service : services) {
       String machineName =
@@ -45,16 +49,24 @@ public class ServerResolver {
       this.services.put(machineName, service);
     }
 
-    this.routes = ArrayListMultimap.create();
-    for (Route route : routes) {
+    //    this.routes = ArrayListMultimap.create();
+    //    for (Route route : routes) {
+    //      String machineName =
+    //          Annotations.newDeserializer(route.getMetadata().getAnnotations()).machineName();
+    //      this.routes.put(machineName, route);
+    //    }
+
+    this.ingresses = ArrayListMultimap.create();
+    for (Ingress ingress : ingresses) {
       String machineName =
-          Annotations.newDeserializer(route.getMetadata().getAnnotations()).machineName();
-      this.routes.put(machineName, route);
+          Annotations.newDeserializer(ingress.getMetadata().getAnnotations()).machineName();
+      this.ingresses.put(machineName, ingress);
     }
   }
 
-  public static ServerResolver of(List<Service> services, List<Route> routes) {
-    return new ServerResolver(services, routes);
+  //  public static ServerResolver of(List<Service> services, List<Route> routes) {
+  public static ServerResolver of(List<Service> services, List<Ingress> ingresses) {
+    return new ServerResolver(services, ingresses);
   }
 
   /**
@@ -66,7 +78,8 @@ public class ServerResolver {
   public Map<String, ServerImpl> resolve(String machineName) {
     Map<String, ServerImpl> servers = new HashMap<>();
     services.get(machineName).forEach(service -> fillServiceServers(service, servers));
-    routes.get(machineName).forEach(route -> fillRouteServers(route, servers));
+    //    routes.get(machineName).forEach(route -> fillRouteServers(route, servers));
+    ingresses.get(machineName).forEach(ingress -> fillIngressServers(ingress, servers));
     return servers;
   }
 
@@ -98,6 +111,29 @@ public class ServerResolver {
                         null,
                         // config.getPath(),
                         route.getSpec().getPath(),
+                        config.getAttributes())));
+  }
+
+  private void fillIngressServers(Ingress ingress, Map<String, ServerImpl> servers) {
+    IngressRule ingressRule = ingress.getSpec().getRules().get(0);
+
+    // host either set by rule, or determined by LB ip
+    final String host =
+        ingressRule.getHost() != null
+            ? ingressRule.getHost()
+            : ingress.getStatus().getLoadBalancer().getIngress().get(0).getIp();
+
+    Annotations.newDeserializer(ingress.getMetadata().getAnnotations())
+        .servers()
+        .forEach(
+            (name, config) ->
+                servers.put(
+                    name,
+                    newServer(
+                        config.getProtocol(),
+                        host,
+                        null,
+                        ingressRule.getHttp().getPaths().get(0).getPath() + "/" + config.getPath(),
                         config.getAttributes())));
   }
 

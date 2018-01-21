@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.openshift.environment;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ public class OpenShiftEnvironment extends InternalEnvironment {
   private final Map<String, Pod> pods;
   private final Map<String, Service> services;
   private final Map<String, Route> routes;
+  private final Map<String, Ingress> ingresses;
   private final Map<String, PersistentVolumeClaim> persistentVolumeClaims;
 
   public static Builder builder() {
@@ -48,11 +50,13 @@ public class OpenShiftEnvironment extends InternalEnvironment {
       Map<String, Pod> pods,
       Map<String, Service> services,
       Map<String, Route> routes,
+      Map<String, Ingress> ingresses,
       Map<String, PersistentVolumeClaim> persistentVolumeClaims) {
     super(internalRecipe, machines, warnings);
     this.pods = pods;
     this.services = services;
     this.routes = routes;
+    this.ingresses = ingresses;
     this.persistentVolumeClaims = persistentVolumeClaims;
   }
 
@@ -71,6 +75,11 @@ public class OpenShiftEnvironment extends InternalEnvironment {
     return routes;
   }
 
+  /** Returns services that should be created when environment starts. */
+  public Map<String, Ingress> getIngresses() {
+    return ingresses;
+  }
+
   /** Returns PVCs that should be created when environment starts. */
   public Map<String, PersistentVolumeClaim> getPersistentVolumeClaims() {
     return persistentVolumeClaims;
@@ -83,6 +92,7 @@ public class OpenShiftEnvironment extends InternalEnvironment {
     private final Map<String, Pod> pods = new HashMap<>();
     private final Map<String, Service> services = new HashMap<>();
     private final Map<String, Route> routes = new HashMap<>();
+    private final Map<String, Ingress> ingresses = new HashMap<>();
     private final Map<String, PersistentVolumeClaim> persistentVolumeClaims = new HashMap<>();
 
     private Builder() {}
@@ -117,6 +127,11 @@ public class OpenShiftEnvironment extends InternalEnvironment {
       return this;
     }
 
+    public Builder setIngresses(Map<String, Ingress> ingresses) {
+      this.ingresses.putAll(ingresses);
+      return this;
+    }
+
     public Builder setPersistentVolumeClaims(Map<String, PersistentVolumeClaim> pvcs) {
       this.persistentVolumeClaims.putAll(pvcs);
       return this;
@@ -124,7 +139,14 @@ public class OpenShiftEnvironment extends InternalEnvironment {
 
     public OpenShiftEnvironment build() {
       return new OpenShiftEnvironment(
-          internalRecipe, machines, warnings, pods, services, routes, persistentVolumeClaims);
+          internalRecipe,
+          machines,
+          warnings,
+          pods,
+          services,
+          routes,
+          ingresses,
+          persistentVolumeClaims);
     }
   }
 }
