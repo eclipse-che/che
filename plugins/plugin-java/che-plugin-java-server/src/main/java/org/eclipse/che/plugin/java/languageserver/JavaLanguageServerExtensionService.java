@@ -573,12 +573,12 @@ public class JavaLanguageServerExtensionService {
     Type type = new TypeToken<PublishDiagnosticsParams>() {}.getType();
     PublishDiagnosticsParams diagnostics =
         doGetOne(Commands.RECOMPUTE_POM_DIAGNOSTICS, singletonList(pomUri), type);
-    Optional<InitializedLanguageServer> lServer = findInitializedLanguageServer();
-    if (!lServer.isPresent()) {
+    Optional<InitializedLanguageServer> languageServer = findInitializedLanguageServer();
+    if (!languageServer.isPresent()) {
       LOG.error("Language server not initialized.");
       return;
     }
-    String serverId = lServer.get().getId();
+    String serverId = languageServer.get().getId();
     eventService.publish(new ExtendedPublishDiagnosticsParams(serverId, diagnostics));
   }
 
