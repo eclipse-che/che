@@ -18,11 +18,11 @@ import java.util.List;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
-import org.eclipse.che.ide.console.linkifiers.JavaOutputLinkifier;
-import org.eclipse.che.ide.console.linkifiers.CppCompilationMsgOutputLinkifier;
-import org.eclipse.che.ide.console.linkifiers.CppLinkerMsgOutputLinkifier;
 import org.eclipse.che.ide.console.linkifiers.CSharpCompilationWarnErrOutputLinkifier;
 import org.eclipse.che.ide.console.linkifiers.CSharpLineAtOutputLinkifier;
+import org.eclipse.che.ide.console.linkifiers.CppCompilationMsgOutputLinkifier;
+import org.eclipse.che.ide.console.linkifiers.CppLinkerMsgOutputLinkifier;
+import org.eclipse.che.ide.console.linkifiers.JavaOutputLinkifier;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -38,8 +38,6 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
   private String title;
 
   private final List<ActionDelegate> actionDelegates = new ArrayList<>();
-
-  private OutputCustomizer customizer = null;
 
   @Inject
   public DefaultOutputConsole(
@@ -158,15 +156,5 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     for (ActionDelegate actionDelegate : actionDelegates) {
       actionDelegate.onDownloadOutput(this);
     }
-  }
-
-  @Override
-  public OutputCustomizer getCustomizer() {
-    return customizer;
-  }
-
-  /** Sets up the text output customizer */
-  public void setCustomizer(OutputCustomizer customizer) {
-    this.customizer = customizer;
   }
 }

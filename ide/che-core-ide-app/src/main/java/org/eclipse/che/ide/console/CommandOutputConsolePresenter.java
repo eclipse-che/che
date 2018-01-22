@@ -34,11 +34,11 @@ import org.eclipse.che.ide.api.command.exec.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.command.exec.ProcessStartedEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
-import org.eclipse.che.ide.console.linkifiers.JavaOutputLinkifier;
-import org.eclipse.che.ide.console.linkifiers.CppCompilationMsgOutputLinkifier;
-import org.eclipse.che.ide.console.linkifiers.CppLinkerMsgOutputLinkifier;
 import org.eclipse.che.ide.console.linkifiers.CSharpCompilationWarnErrOutputLinkifier;
 import org.eclipse.che.ide.console.linkifiers.CSharpLineAtOutputLinkifier;
+import org.eclipse.che.ide.console.linkifiers.CppCompilationMsgOutputLinkifier;
+import org.eclipse.che.ide.console.linkifiers.CppLinkerMsgOutputLinkifier;
+import org.eclipse.che.ide.console.linkifiers.JavaOutputLinkifier;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -61,15 +61,7 @@ public class CommandOutputConsolePresenter
   private int pid;
   private boolean finished;
 
-  /** Wrap text or not */
-  private boolean wrapText = false;
-
-  /** Follow output when printing text */
-  private boolean followOutput = true;
-
   private final List<ActionDelegate> actionDelegates = new ArrayList<>();
-
-  private OutputCustomizer outputCustomizer = null;
 
   @Inject
   public CommandOutputConsolePresenter(
@@ -250,15 +242,5 @@ public class CommandOutputConsolePresenter
    */
   public String getText() {
     return view.getText();
-  }
-
-  @Override
-  public OutputCustomizer getCustomizer() {
-    return outputCustomizer;
-  }
-
-  /** Sets up the text output customizer */
-  public void setCustomizer(OutputCustomizer customizer) {
-    this.outputCustomizer = customizer;
   }
 }

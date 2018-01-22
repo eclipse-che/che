@@ -22,6 +22,7 @@ public interface OutputConsoleView extends View<OutputConsoleView.ActionDelegate
 
   /**
    * Register linkifier to apply clickable link in the console output.
+   *
    * @param linkifier - output linkifier {@link OutputLinkifier}
    */
   void registerLinkifier(OutputLinkifier linkifier);
@@ -110,8 +111,5 @@ public interface OutputConsoleView extends View<OutputConsoleView.ActionDelegate
 
     /** Handle click on `Download outputs` button. */
     void downloadOutputsButtonClicked();
-
-    /** Returns the customizer for the console output */
-    OutputCustomizer getCustomizer();
   }
 }

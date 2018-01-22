@@ -345,17 +345,13 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
                     <excludes>
-                        <exclude>**/OutputCustomizer.java</exclude>
-                        <exclude>**/AbstractOutputCustomizer.java</exclude>
-                        <exclude>**/BaseOutputCustomizerTest.java</exclude>
-                        <exclude>**/JavaOutputCustomizer.java</exclude>
-                        <exclude>**/JavaOutputCustomizerTest.java</exclude>
-                        <exclude>**/CompoundOutputCustomizer.java</exclude>
-                        <exclude>**/CompoundOutputCustomizerTest.java</exclude>
-                        <exclude>**/CSharpOutputCustomizer.java</exclude>
-                        <exclude>**/CSharpOutputCustomizerTest.java</exclude>
-                        <exclude>**/CPPOutputCustomizer.java</exclude>
-                        <exclude>**/CPPOutputCustomizerTest.java</exclude>
+                        <exclude>**/AbstractOutputLinkifier.java</exclude>
+                        <exclude>**/JavaOutputLinkifier.java</exclude>
+                        <exclude>**/CppCompilationMsgOutputLinkifier.java</exclude>
+                        <exclude>**/CppLinkerMsgOutputLinkifier.java</exclude>
+                        <exclude>**/CSharpCompilationWarnErrOutputLinkifier.java</exclude>
+                        <exclude>**/CSharpLineAtOutputLinkifier.java</exclude>
+                        <exclude>**/JavaOutputLinkifier.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
