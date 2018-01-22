@@ -29,6 +29,7 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
+import static org.eclipse.che.ide.ext.java.shared.Constants.USAGES;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CREATE_SIMPLE_PROJECT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_IMPLEMENTERS_COMMAND;
@@ -50,6 +51,7 @@ import static org.eclipse.che.jdt.ls.extension.api.Commands.REIMPORT_MAVEN_PROJE
 import static org.eclipse.che.jdt.ls.extension.api.Commands.RESOLVE_CLASSPATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.TEST_DETECT_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.UPDATE_PROJECT_CLASSPATH;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.USAGES_COMMAND;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
@@ -67,6 +69,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
@@ -97,6 +101,8 @@ import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.UpdateClasspathParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.UpdateWorkspaceParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.UsagesResponse;
+import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSymbolInformationDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ImplementersResponseDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
@@ -223,6 +229,12 @@ public class JavaLanguageServerExtensionService {
         .paramsAsDto(TextDocumentPositionParams.class)
         .resultAsDto(ImplementersResponseDto.class)
         .withFunction(this::findImplementers);
+    requestHandler
+        .newConfiguration()
+        .methodName(USAGES)
+        .paramsAsDto(TextDocumentPositionParams.class)
+        .resultAsDto(UsagesResponse.class)
+        .withFunction(this::usages);
   }
 
   /**
@@ -728,6 +740,42 @@ public class JavaLanguageServerExtensionService {
     LanguageServiceUtils.fixLocation(symbol.getInfo().getLocation());
     for (ExtendedSymbolInformation child : symbol.getChildren()) {
       fixLocation(child);
+    }
+  }
+
+  private UsagesResponse usages(TextDocumentPositionParams parameters) {
+    String uri = LanguageServiceUtils.prefixURI(parameters.getUri());
+    parameters.setUri(uri);
+    parameters.getTextDocument().setUri(uri);
+    try {
+      Type targetClassType = new TypeToken<ArrayList<UsagesResponse>>() {}.getType();
+      List<UsagesResponse> results = doGetList(USAGES_COMMAND, parameters, targetClassType);
+      if (results.isEmpty()) {
+        return null;
+      }
+      results
+          .get(0)
+          .getSearchResults()
+          .forEach(
+              result -> {
+                iterate(
+                    result,
+                    r -> r.getChildren(),
+                    r -> {
+                      r.setUri(LanguageServiceUtils.fixUri(r.getUri()));
+                    });
+              });
+      return new DtoServerImpls.UsagesResponseDto(results.get(0));
+    } catch (JsonSyntaxException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  private <T> void iterate(
+      T root, Function<T, List<T>> childrenAccessor, Consumer<T> elementHandler) {
+    elementHandler.accept(root);
+    for (T child : childrenAccessor.apply(root)) {
+      iterate(child, childrenAccessor, elementHandler);
     }
   }
 }
