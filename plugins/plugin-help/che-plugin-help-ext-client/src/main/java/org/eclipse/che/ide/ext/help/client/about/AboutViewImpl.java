@@ -64,7 +64,9 @@ public class AboutViewImpl extends Window implements AboutView {
     this.setWidget(uiBinder.createAndBindUi(this));
     this.ensureDebugId("aboutView-window");
 
-    btnOk = addButtonBarControl(coreLocale.ok(), "help-about-ok", event -> delegate.onOkClicked(), true);
+    btnOk =
+        addButtonBarControl(
+            coreLocale.ok(), "help-about-ok", event -> delegate.onOkClicked(), true);
 
     final SVGResource logo = productInfoDataProvider.getLogo();
     if (nonNull(logo)) {

@@ -89,7 +89,8 @@ final class CompareViewImpl extends Window implements CompareView {
         addButtonBarControl(
             locale.buttonSaveChanges(),
             "git-compare-save-changes-btn",
-            event -> delegate.onSaveChangesClicked(), true);
+            event -> delegate.onSaveChangesClicked(),
+            true);
     btnNextDiff =
         addButtonBarControl(
             locale.buttonNextDiff(),

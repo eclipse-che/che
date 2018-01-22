@@ -58,7 +58,8 @@ public class CheckoutReferenceViewImpl extends Window implements CheckoutReferen
         addButtonBarControl(
             locale.buttonCheckout(),
             "git-checkoutReference-checkout",
-            event -> delegate.onCheckoutClicked(reference.getValue()), true);
+            event -> delegate.onCheckoutClicked(reference.getValue()),
+            true);
   }
 
   @Override
@@ -97,7 +98,7 @@ public class CheckoutReferenceViewImpl extends Window implements CheckoutReferen
     if (isWidgetOrChildFocused(btnCancel)) {
       delegate.onCancelClicked();
     } else {
-        delegate.onEnterClicked();
+      delegate.onEnterClicked();
     }
   }
 }

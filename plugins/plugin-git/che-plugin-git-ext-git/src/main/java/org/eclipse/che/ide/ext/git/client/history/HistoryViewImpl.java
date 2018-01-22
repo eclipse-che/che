@@ -187,7 +187,10 @@ public class HistoryViewImpl extends Window implements HistoryView {
 
     btnCompare =
         addButtonBarControl(
-            locale.buttonCompare(), "git-history-compare", event -> delegate.onCompareClicked(), true);
+            locale.buttonCompare(),
+            "git-history-compare",
+            event -> delegate.onCompareClicked(),
+            true);
   }
 
   @UiHandler("revisionsPanel")
