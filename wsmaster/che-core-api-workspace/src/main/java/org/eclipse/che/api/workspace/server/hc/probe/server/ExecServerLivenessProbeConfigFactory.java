@@ -29,7 +29,7 @@ public class ExecServerLivenessProbeConfigFactory implements HttpProbeConfigFact
     try {
       URL url = new URL(server.getUrl());
       return new HttpProbeConfig(
-          url.getPort() == -1 ? 80 : url.getPort(),
+          url.getPort() == -1 ? url.getDefaultPort() : url.getPort(),
           url.getHost(),
           url.getProtocol(),
           "/liveness",

@@ -34,9 +34,9 @@ public class TcpProbeConfig extends ProbeConfig {
       int port,
       String host) {
     super(successThreshold, failureThreshold, timeoutSeconds, periodSeconds, initialDelaySeconds);
-    if (port < 0) {
+    if (port < 1) {
       throw new IllegalArgumentException(
-          "Port '" + port + "' is illegal. Port should not be less than 0");
+          "Port '" + port + "' is illegal. Port should not be less than 1");
     }
     this.port = port;
     if (isNullOrEmpty(host)) {
