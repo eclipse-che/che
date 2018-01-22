@@ -50,8 +50,11 @@ public class Workspaces {
   private interface Locators {
     String TOOLBAR = "Workspaces";
     String DOCUMENTATION_LINK = "//a[@ng-href='/docs/devops/intro/index.html']";
-    String ADD_WORKSPACE_BTN = "//che-button-primary[@che-button-title='Add Workspace']";
-    String DELETE_WORKSPACE_BTN = "//che-button-primary[@che-button-title='Delete']";
+
+    String ADD_WORKSPACE_BTN = "add-workspace-button";
+
+    String DELETE_WORKSPACE_BTN = "delete-workspace-button";
+
     String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
     String BULK_CHECKBOX = "//md-checkbox[@aria-label='Workspace list']";
     String SEARCH_WORKSPACE_FIELD = "//input[@ng-placeholder='Search']";
@@ -78,10 +81,10 @@ public class Workspaces {
     String STOPPED = "STOPPED";
   }
 
-  @FindBy(xpath = Locators.ADD_WORKSPACE_BTN)
+  @FindBy(id = Locators.ADD_WORKSPACE_BTN)
   WebElement addWorkspaceBtn;
 
-  @FindBy(xpath = Locators.DELETE_WORKSPACE_BTN)
+  @FindBy(id = Locators.DELETE_WORKSPACE_BTN)
   WebElement deleleWorkspaceButton;
 
   @FindBy(xpath = Locators.DELETE_DIALOG_BUTTON)
@@ -95,7 +98,7 @@ public class Workspaces {
         .until(
             visibilityOfElementLocated(
                 By.xpath(format(Locators.WORKSPACE_ITEM_NAME, workspaceName))))
-        .getAttribute("ws-status");
+        .getAttribute("data-ws-status");
   }
 
   public void waitWorkspaceStatusIs(String workspaceName, String workspaceStatus) {
@@ -219,19 +222,19 @@ public class Workspaces {
         .click();
   }
 
-  public void waitWorkspaceIsPresent(String nameWorkspace) {
+  public void waitWorkspaceIsPresent(String workspaceName) {
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(
             visibilityOfElementLocated(
-                By.xpath(format(Locators.WORKSPACE_ITEM_NAME, nameWorkspace))));
+                By.xpath(format(Locators.WORKSPACE_ITEM_NAME, workspaceName))));
   }
 
   /** wait the workspace is not present on dashboard */
-  public void waitWorkspaceIsNotPresent(String nameWorkspace) {
+  public void waitWorkspaceIsNotPresent(String workspaceName) {
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(
             invisibilityOfElementLocated(
-                By.xpath(format(Locators.WORKSPACE_ITEM_NAME, nameWorkspace))));
+                By.xpath(format(Locators.WORKSPACE_ITEM_NAME, workspaceName))));
   }
 
   /** Wait toolbar name is present on dashboard */

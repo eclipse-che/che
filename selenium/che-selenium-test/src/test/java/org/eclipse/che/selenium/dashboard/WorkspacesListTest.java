@@ -121,15 +121,14 @@ public class WorkspacesListTest {
     workspaces.clickOnWorkspaceConfigureButton(workspaceName1);
     workspaceDetails.waitToolbarTitleName(workspaceName1);
     workspaceConfig.waitConfigForm();
-    seleniumWebDriver.navigate().back();
+    dashboard.selectWorkspacesItemOnDashboard();
     workspaces.waitWorkspaceIsPresent(workspaceName1);
 
     // open the Projects page of the test workspace
-    dashboard.selectWorkspacesItemOnDashboard();
     workspaces.clickOnWorkspaceAddProjectButton(workspaceName2);
     workspaceDetails.waitToolbarTitleName(workspaceName2);
     workspaceProjects.waitProjectIsPresent(WEB_JAVA_SPRING);
-    seleniumWebDriver.navigate().back();
+    dashboard.selectWorkspacesItemOnDashboard();
     workspaces.waitWorkspaceIsPresent(workspaceName1);
 
     // check statuses of the created workspaces
@@ -138,7 +137,6 @@ public class WorkspacesListTest {
     workspaces.waitWorkspaceStatusIs(workspaceName3, Statuses.STOPPED);
 
     // stop the workspace by the Actions button and check its status is RUNNING
-    dashboard.selectWorkspacesItemOnDashboard();
     Assert.assertEquals(workspaces.getWorkspaceStatus(workspaceName3), Statuses.STOPPED);
     workspaces.clickOnWorkspaceActionsButton(workspaceName3);
     workspaces.waitWorkspaceStatusIs(workspaceName3, Statuses.RUNNING);
