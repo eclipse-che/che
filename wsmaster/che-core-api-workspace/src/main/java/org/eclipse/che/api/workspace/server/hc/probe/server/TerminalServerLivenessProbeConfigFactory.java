@@ -39,17 +39,17 @@ public class TerminalServerLivenessProbeConfigFactory implements HttpProbeConfig
     } else {
       protocol = "http";
     }
+    int port;
+    if (uri.getPort() == -1) {
+      if ("http".equals(protocol)) {
+        port = 80;
+      } else {
+        port = 443;
+      }
+    } else {
+      port = uri.getPort();
+    }
 
-    return new HttpProbeConfig(
-        uri.getPort() == -1 ? 80 : uri.getPort(),
-        uri.getHost(),
-        protocol,
-        "/liveness",
-        null,
-        1,
-        3,
-        120,
-        10,
-        10);
+    return new HttpProbeConfig(port, uri.getHost(), protocol, "/liveness", null, 1, 3, 120, 10, 10);
   }
 }
