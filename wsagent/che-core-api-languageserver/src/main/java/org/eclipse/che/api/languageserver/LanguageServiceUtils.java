@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.api.languageserver;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
@@ -74,5 +76,21 @@ public class LanguageServiceUtils {
       o.setUri(Constants.CHE_WKSP_SCHEME + removePrefixUri(o.getUri()));
     }
     return o;
+  }
+
+  public static boolean isWorkspaceUri(String uri) {
+    return uri.startsWith(Constants.CHE_WKSP_SCHEME);
+  }
+
+  public static String workspaceURIToFileURI(String uri) throws LanguageServerException {
+    try {
+      return FILE_PROJECTS + new URI(uri).getPath();
+    } catch (URISyntaxException e) {
+      throw new LanguageServerException("malformed uri", e);
+    }
+  }
+
+  public static String fixUri(String uri) {
+    return isProjectUri(uri) ? Constants.CHE_WKSP_SCHEME + removePrefixUri(uri) : uri;
   }
 }

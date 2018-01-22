@@ -14,8 +14,12 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.function.Consumer;
 import org.eclipse.che.api.languageserver.shared.util.Constants;
-import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.api.promises.client.js.Executor;
+import org.eclipse.che.api.promises.client.js.JsPromiseError;
 import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -24,9 +28,9 @@ import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.jdt.ls.extension.api.dto.LinearRange;
 import org.eclipse.che.plugin.languageserver.ide.location.LanguageServerFile;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.lsp4j.Location;
@@ -43,32 +47,75 @@ public class OpenFileInEditorHelper {
   private final EditorAgent editorAgent;
   private final AppContext appContext;
   private final TextDocumentServiceClient textDocumentService;
+  private PromiseProvider promiseProvider;
 
   @Inject
   public OpenFileInEditorHelper(
       EditorAgent editorAgent,
       AppContext appContext,
-      TextDocumentServiceClient textDocumentService) {
+      TextDocumentServiceClient textDocumentService,
+      PromiseProvider promiseProvider) {
     this.editorAgent = editorAgent;
     this.appContext = appContext;
     this.textDocumentService = textDocumentService;
+    this.promiseProvider = promiseProvider;
   }
 
   public void openPath(final String filePath, final TextRange selectionRange) {
+    Consumer<TextEditor> selectRange = selectRange(selectionRange);
+    openPath(filePath, selectRange);
+  }
+
+  private void openPath(final String filePath, Consumer<TextEditor> selectRange) {
     doIfUnopened(
         filePath,
-        selectionRange,
-        () -> {
-          appContext.getWorkspaceRoot().getFile(filePath).then(openNode(selectionRange));
+        selectRange,
+        failIfNull(appContext.getWorkspaceRoot().getFile(filePath)).thenPromise(this::doOpenFile));
+  }
+
+  private <T> Promise<T> failIfNull(Promise<Optional<T>> optionalPromis) {
+    return optionalPromis.thenPromise(
+        (optional) -> {
+          return promiseProvider.create(
+              Executor.create(
+                  (resolve, reject) -> {
+                    if (optional.isPresent()) {
+                      resolve.apply(optional.get());
+                    } else {
+                      reject.apply(JsPromiseError.create("optional is null"));
+                    }
+                  }));
         });
   }
 
-  public void openFile(VirtualFile file, TextRange selectionRange) {
-    doIfUnopened(
-        file.getLocation().toString(), selectionRange, () -> doOpenFile(file, selectionRange));
+  private Consumer<TextEditor> selectRange(TextRange range) {
+    return (editor) -> {
+      editor.getDocument().setSelectedRange(range, true);
+    };
   }
 
-  private void doIfUnopened(final String filePath, final TextRange selectionRange, Runnable r) {
+  private Consumer<TextEditor> selectRange(LinearRange range) {
+    return (editor) -> {
+      editor
+          .getDocument()
+          .setSelectedRange(
+              org.eclipse.che.ide.api.editor.text.LinearRange.createWithStart(range.getOffset())
+                  .andLength(range.getLength()),
+              true);
+    };
+  }
+
+  public void openFile(VirtualFile file, TextRange selectionRange) {
+    Consumer<TextEditor> select = selectRange(selectionRange);
+    openFile(file, select);
+  }
+
+  private void openFile(VirtualFile file, Consumer<TextEditor> select) {
+    doIfUnopened(file.getLocation().toString(), select, doOpenFile(file));
+  }
+
+  private void doIfUnopened(
+      final String filePath, Consumer<TextEditor> onEditorOpened, Promise<TextEditor> openEditor) {
     if (Strings.isNullOrEmpty(filePath)) {
       return;
     }
@@ -76,62 +123,69 @@ public class OpenFileInEditorHelper {
     EditorPartPresenter editorPartPresenter = editorAgent.getOpenedEditor(Path.valueOf(filePath));
     if (editorPartPresenter != null) {
       editorAgent.activateEditor(editorPartPresenter);
-      fileOpened(editorPartPresenter, selectionRange);
-      return;
+      fileOpened(editorPartPresenter, onEditorOpened);
+    } else {
+      openEditor.then(
+          (editor) -> {
+            fileOpened(editor, onEditorOpened);
+          });
     }
-    r.run();
   }
 
-  public void openFile(String filePath) {
-    openPath(filePath, null);
+  private Promise<TextEditor> doOpenFile(VirtualFile result) {
+    return promiseProvider.create(
+        Executor.create(
+            (resolve, reject) -> {
+              editorAgent.openEditor(
+                  result,
+                  new OpenEditorCallbackImpl() {
+                    @Override
+                    public void onEditorOpened(EditorPartPresenter editor) {
+                      if (editor instanceof TextEditor) {
+                        resolve.apply((TextEditor) editor);
+                      } else {
+                        reject.apply(JsPromiseError.create("Editor is not a TextEditor"));
+                      }
+                    }
+                  });
+            }));
   }
 
-  private Function<Optional<File>, Optional<File>> openNode(final TextRange selectionRange) {
-    return new Function<Optional<File>, Optional<File>>() {
-      @Override
-      public Optional<File> apply(Optional<File> node) {
-        if (node.isPresent()) {
-          doOpenFile(node.get(), selectionRange);
-        }
-        return node;
-      }
-    };
-  }
-
-  private void doOpenFile(VirtualFile result, final TextRange selectionRange) {
-    editorAgent.openEditor(
-        result,
-        new OpenEditorCallbackImpl() {
-          @Override
-          public void onEditorOpened(EditorPartPresenter editor) {
-            fileOpened(editor, selectionRange);
-          }
-        });
-  }
-
-  private void fileOpened(final EditorPartPresenter editor, final TextRange selectionRange) {
-    if (editor instanceof TextEditor && selectionRange != null) {
+  private void fileOpened(final EditorPartPresenter editor, Consumer<TextEditor> onEditorOpened) {
+    if (editor instanceof TextEditor && onEditorOpened != null) {
       new DelayedTask() {
         @Override
         public void onExecute() {
-          ((TextEditor) editor).getDocument().setSelectedRange(selectionRange, true);
+          onEditorOpened.accept((TextEditor) editor);
           editor.activate(); // force set focus to the editor
         }
       }.delay(100);
     }
   }
 
+  public void openLocation(String uri, LinearRange range) {
+    Consumer<TextEditor> selectRange = selectRange(range);
+    if (uri.startsWith(Constants.CHE_WKSP_SCHEME)) {
+      openPath(uri.substring(Constants.CHE_WKSP_SCHEME.length()), selectRange);
+    } else {
+      openFile(new LanguageServerFile(textDocumentService, uri), selectRange);
+    }
+  }
+
   public void openLocation(Location location) {
     Range range = location.getRange();
     String uri = location.getUri();
-    TextRange selectionRange =
-        new TextRange(
-            new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()),
-            new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
+    TextRange selectionRange = toTextRange(range);
     if (uri.startsWith(Constants.CHE_WKSP_SCHEME)) {
       openPath(location.getUri().substring(Constants.CHE_WKSP_SCHEME.length()), selectionRange);
     } else {
-      openFile(new LanguageServerFile(textDocumentService, location), selectionRange);
+      openFile(new LanguageServerFile(textDocumentService, location.getUri()), selectionRange);
     }
+  }
+
+  private TextRange toTextRange(Range range) {
+    return new TextRange(
+        new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()),
+        new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
   }
 }

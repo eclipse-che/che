@@ -35,6 +35,7 @@ public class JavaLSWrapper {
         .thenApply(
             result -> {
               result.getCapabilities().setDocumentSymbolProvider(false);
+              result.getCapabilities().setReferencesProvider(false);
               return result;
             });
   }
