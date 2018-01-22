@@ -23,6 +23,7 @@ import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -45,14 +46,16 @@ public class CheMultiuserAdminDashboard extends Dashboard {
       TestIdeUrlProvider testIdeUrlProvider,
       TestDashboardUrlProvider testDashboardUrlProvider,
       Entrance entrance,
-      LoginPage loginPage) {
+      LoginPage loginPage,
+      TestWebElementRenderChecker testWebElementRenderChecker) {
     super(
         seleniumWebDriver,
         defaultUser,
         testIdeUrlProvider,
         testDashboardUrlProvider,
         entrance,
-        loginPage);
+        loginPage,
+        testWebElementRenderChecker);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 

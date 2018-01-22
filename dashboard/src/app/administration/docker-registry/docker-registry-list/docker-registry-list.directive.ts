@@ -24,24 +24,17 @@
  *
  * @author Oleksii Orel
  */
-export class DockerRegistryList {
+export class DockerRegistryList implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
-    this.templateUrl = 'app/administration/docker-registry/docker-registry-list/docker-registry-list.html';
-    this.replace = false;
+  restrict = 'E';
+  templateUrl = 'app/administration/docker-registry/docker-registry-list/docker-registry-list.html';
+  replace = false;
 
-    this.controller = 'DockerRegistryListController';
-    this.controllerAs = 'dockerRegistryListController';
+  controller = 'DockerRegistryListController';
+  controllerAs = 'dockerRegistryListController';
 
-    this.bindToController = true;
+  bindToController = true;
 
-    this.scope = true;
-
-  }
+  scope = true;
 
 }

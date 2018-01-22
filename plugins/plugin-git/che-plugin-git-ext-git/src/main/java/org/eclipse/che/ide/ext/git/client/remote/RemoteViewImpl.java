@@ -86,19 +86,6 @@ public class RemoteViewImpl extends Window implements RemoteView {
     this.setTitle(locale.remotesViewTitle());
     this.setWidget(widget);
 
-    btnClose =
-        createButton(
-            locale.buttonClose(),
-            "git-remotes-remotes-close",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCloseClicked();
-              }
-            });
-    addButtonToFooter(btnClose);
-
     btnAdd =
         createButton(
             locale.buttonAdd(),
@@ -110,6 +97,7 @@ public class RemoteViewImpl extends Window implements RemoteView {
                 delegate.onAddClicked();
               }
             });
+    btnAdd.addStyleName(super.resources.windowCss().primaryButton());
     addButtonToFooter(btnAdd);
 
     btnDelete =
@@ -124,6 +112,19 @@ public class RemoteViewImpl extends Window implements RemoteView {
               }
             });
     addButtonToFooter(btnDelete);
+
+    btnClose =
+        createButton(
+            locale.buttonClose(),
+            "git-remotes-remotes-close",
+            new ClickHandler() {
+
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onCloseClicked();
+              }
+            });
+    addButtonToFooter(btnClose);
   }
 
   @Override

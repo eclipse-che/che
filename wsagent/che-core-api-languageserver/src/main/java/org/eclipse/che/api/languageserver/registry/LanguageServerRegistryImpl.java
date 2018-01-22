@@ -12,6 +12,7 @@ package org.eclipse.che.api.languageserver.registry;
 
 import static javax.ws.rs.core.UriBuilder.fromUri;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+import static org.eclipse.che.api.languageserver.registry.LanguageRecognizer.UNIDENTIFIED;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,6 +73,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
   private final ServerInitializer initializer;
   private EventService eventService;
   private CheLanguageClientFactory clientFactory;
+  private LanguageRecognizer languageRecognizer;
   private Workspace workspace;
 
   @Inject
@@ -85,7 +87,8 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       Provider<ProjectManager> projectManagerProvider,
       ServerInitializer initializer,
       EventService eventService,
-      CheLanguageClientFactory clientFactory) {
+      CheLanguageClientFactory clientFactory,
+      LanguageRecognizer languageRecognizer) {
     this.workspaceId = workspaceId;
     this.apiEndpoint = apiEndpoint;
     this.httpJsonRequestFactory = httpJsonRequestFactory;
@@ -96,25 +99,9 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     this.initializer = initializer;
     this.eventService = eventService;
     this.clientFactory = clientFactory;
+    this.languageRecognizer = languageRecognizer;
     this.launchedServers = new HashMap<>();
     this.initializedServers = new HashMap<>();
-  }
-
-  private LanguageDescription findLanguage(String path) {
-    for (LanguageDescription language : languages) {
-      if (matchesFilenames(language, path) || matchesExtensions(language, path)) {
-        return language;
-      }
-    }
-    return null;
-  }
-
-  private boolean matchesExtensions(LanguageDescription language, String path) {
-    return language.getFileExtensions().stream().anyMatch(extension -> path.endsWith(extension));
-  }
-
-  private boolean matchesFilenames(LanguageDescription language, String path) {
-    return language.getFileNames().stream().anyMatch(name -> path.endsWith(name));
   }
 
   @Override
@@ -209,12 +196,13 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
   }
 
   private List<LanguageServerLauncher> findLaunchers(String projectPath, String fileUri) {
-    LanguageDescription language = findLanguage(fileUri);
+    String wsPath = absolutize(LanguageServiceUtils.removePrefixUri(fileUri));
+    LanguageDescription language = languageRecognizer.recognizeByPath(wsPath);
     if (language == null) {
       return Collections.emptyList();
     }
     List<LanguageServerLauncher> combinedLaunchers = new LinkedList<>(launchers);
-    Workspace workspace = getWorkspaceConfiguration();
+    initWorkspaceConfiguration();
     if (workspace != null) {
       for (RemoteLsLauncherProvider launcherProvider : launcherProviders) {
         combinedLaunchers.addAll(launcherProvider.getAll(workspace));
@@ -235,7 +223,27 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
   @Override
   public List<LanguageDescription> getSupportedLanguages() {
-    return Collections.unmodifiableList(languages);
+    initWorkspaceConfiguration();
+
+    if (workspace == null) {
+      return Collections.unmodifiableList(languages);
+    }
+
+    List<LanguageDescription> languageDescriptions = new LinkedList<>(languages);
+
+    for (RemoteLsLauncherProvider launcherProvider : launcherProviders) {
+      for (LanguageServerLauncher launcher : launcherProvider.getAll(workspace)) {
+        for (String languageId : launcher.getDescription().getLanguageIds()) {
+          LanguageDescription language = languageRecognizer.recognizeById(languageId);
+          if (language.equals(UNIDENTIFIED)) {
+            continue;
+          }
+          languageDescriptions.add(language);
+        }
+      }
+    }
+
+    return Collections.unmodifiableList(languageDescriptions);
   }
 
   protected String extractProjectPath(String filePath) throws LanguageServerException {
@@ -256,7 +264,8 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
   public List<Collection<InitializedLanguageServer>> getApplicableLanguageServers(String fileUri)
       throws LanguageServerException {
     String projectPath = extractProjectPath(fileUri);
-    LanguageDescription language = findLanguage(fileUri);
+    String wsPath = absolutize(LanguageServiceUtils.removePrefixUri(fileUri));
+    LanguageDescription language = languageRecognizer.recognizeByPath(wsPath);
     if (projectPath == null || language == null) {
       return Collections.emptyList();
     }
@@ -378,9 +387,9 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     return null;
   }
 
-  private Workspace getWorkspaceConfiguration() {
+  private void initWorkspaceConfiguration() {
     if (workspace != null) {
-      return workspace;
+      return;
     }
 
     String href =
@@ -391,11 +400,10 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
             .build(workspaceId)
             .toString();
     try {
-      return workspace =
+      workspace =
           httpJsonRequestFactory.fromUrl(href).useGetMethod().request().asDto(WorkspaceDto.class);
     } catch (IOException | ApiException e) {
       LOG.error("Did not manage to get workspace configuration: {}", workspaceId, e);
-      return null;
     }
   }
 }

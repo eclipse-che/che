@@ -26,7 +26,7 @@ export class NavbarNotificationController {
    */
   constructor(applicationNotifications: ApplicationNotifications, $scope: ng.IScope) {
     this.applicationNotifications = applicationNotifications;
-    $scope.$on("$mdMenuClose", () => {
+    $scope.$on('$mdMenuClose', () => {
       this.removeReadNotifications();
     });
   }
@@ -53,7 +53,7 @@ export class NavbarNotificationController {
    */
   removeReadNotifications(): void {
     let notificationsToRemove = [];
-    let notifications = this.applicationNotifications.getNotifications()
+    let notifications = this.applicationNotifications.getNotifications();
     notifications.forEach((notification: any) => {
       if (notification.removeOnRead) {
         notificationsToRemove.push(notification);

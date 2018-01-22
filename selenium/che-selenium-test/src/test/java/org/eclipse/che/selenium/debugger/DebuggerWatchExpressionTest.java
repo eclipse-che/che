@@ -84,8 +84,8 @@ public class DebuggerWatchExpressionTest {
     projectExplorer.openItemByPath(PROJECT + PATH_TO_CLASS);
 
     editor.waitActive();
-    editor.setCursorToLine(19);
-    editor.setBreakpoint(19);
+    editor.setCursorToLine(18);
+    editor.setBreakpoint(18);
 
     menu.runCommand(RUN_MENU, EDIT_DEBUG_CONFIGURATION);
     debugConfig.createConfig(PROJECT);
@@ -102,7 +102,7 @@ public class DebuggerWatchExpressionTest {
 
   @Test(priority = 1)
   public void addWatchExpression() {
-    editor.waitActiveBreakpoint(19);
+    editor.waitActiveBreakpoint(18);
     debugPanel.waitDebugHighlightedText("message.setLevel(\"WARN\");");
 
     debugPanel.clickOnButton(ADD_WATCH_EXPRESSION);

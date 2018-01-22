@@ -12,8 +12,8 @@
 
 export class CheColorsConfig {
 
-  constructor(register) {
-    // Register this factory
+  constructor(register: che.IRegisterService) {
+    // register this factory
     register.app.constant('jsonColors', JSON.stringify({
   '$che-navy-color': '#353E50',
   '$che-medium-blue-color': '#4A90E2',

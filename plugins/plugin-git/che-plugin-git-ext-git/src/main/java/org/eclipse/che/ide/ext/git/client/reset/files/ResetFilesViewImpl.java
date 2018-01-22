@@ -79,6 +79,20 @@ public class ResetFilesViewImpl extends Window implements ResetFilesView {
     this.setTitle(locale.resetFilesViewTitle());
     this.setWidget(widget);
 
+    btnReset =
+        createButton(
+            locale.buttonReset(),
+            "git-resetFiles-btnReset",
+            new ClickHandler() {
+
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onResetClicked();
+              }
+            });
+    btnReset.addStyleName(super.resources.windowCss().primaryButton());
+    addButtonToFooter(btnReset);
+
     btnCancel =
         createButton(
             locale.buttonCancel(),
@@ -91,19 +105,6 @@ public class ResetFilesViewImpl extends Window implements ResetFilesView {
               }
             });
     addButtonToFooter(btnCancel);
-
-    btnReset =
-        createButton(
-            locale.buttonReset(),
-            "git-resetFiles-btnReset",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onResetClicked();
-              }
-            });
-    addButtonToFooter(btnReset);
   }
 
   /** Initialize the columns of the grid. */

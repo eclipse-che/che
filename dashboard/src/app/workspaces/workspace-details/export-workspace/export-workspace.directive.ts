@@ -24,26 +24,20 @@
  *
  * @author Florent Benoit
  */
-export class ExportWorkspace {
+export class ExportWorkspace implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor () {
-    this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/workspace-details/export-workspace/export-workspace.html';
+  restrict = 'E';
+  templateUrl = 'app/workspaces/workspace-details/export-workspace/export-workspace.html';
 
-    this.controller = 'ExportWorkspaceController';
-    this.controllerAs = 'exportWorkspaceCtrl';
-    this.bindToController = true;
+  controller = 'ExportWorkspaceController';
+  controllerAs = 'exportWorkspaceCtrl';
+  bindToController = true;
 
-    // scope values
-    this.scope = {
-      workspaceId: '@workspaceId',
-      workspaceDetails: '=workspaceDetails',
-      workspaceExportDisabled: '='
-    };
-  }
+  // scope values
+  scope = {
+    workspaceId: '@workspaceId',
+    workspaceDetails: '=workspaceDetails',
+    workspaceExportDisabled: '='
+  };
 
 }

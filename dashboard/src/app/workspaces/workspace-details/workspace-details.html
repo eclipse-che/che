@@ -2,14 +2,18 @@
   che-title="{{workspaceDetailsController.workspaceName}}"
   link-href="#/workspaces" link-title="Workspaces" class="workspace-details-toolbar">
   <div layout="row" layout-align="start center" class="toolbar-info">
-    <workspace-status che-status="workspaceDetailsController.getWorkspaceStatus()"></workspace-status>
+    <!-- is environment supported -->
+    <workspace-status che-status="workspaceDetailsController.getWorkspaceStatus()"
+                      che-is-supported="workspaceDetailsController.isSupported === true"></workspace-status>
     <workspace-warnings workspace="workspaceDetailsController.workspaceDetails"></workspace-warnings>
   </div>
   <div flex layout="row" layout-align="end center">
     <workspace-status-button workspace-status="workspaceDetailsController.getWorkspaceStatus()"
+                             button-disabled="workspaceDetailsController.isSupported===false"
                              on-stop-workspace="workspaceDetailsController.stopWorkspace()"
                              on-run-workspace="workspaceDetailsController.runWorkspace()"></workspace-status-button>
     <che-button-default ng-if="workspaceDetailsController.editMode === false"
+                        ng-disabled="workspaceDetailsController.isSupported===false"
                         id="open-in-ide-button"
                         che-button-title="Open"
                         href="#/ide/{{workspaceDetailsController.namespaceId}}/{{workspaceDetailsController.workspaceName}}"></che-button-default>
@@ -174,7 +178,7 @@
 
 <workspace-edit-mode-overlay ng-if="workspaceDetailsController.workspaceDetails && workspaceDetailsController.editMode && !workspaceDetailsController.saving"
                              workspace-edit-mode-message="{{workspaceDetailsController.editModeMessage}}"
-                             workspace-edit-mode-show-message="workspaceDetailsController.showApplyMessage"
-                             workspace-edit-disable-save-button="workspaceDetailsController.isSaveButtonDisabled()"
+                             workspace-edit-mode-show-message="workspaceDetailsController.showOverlayMessage"
+                             workspace-edit-disable-save-button="workspaceDetailsController.isSupported===false || workspaceDetailsController.isSaveButtonDisabled()"
                              workspace-edit-mode-on-save="workspaceDetailsController.saveWorkspace()"
                              workspace-edit-mode-on-cancel="workspaceDetailsController.cancelConfigChanges()"></workspace-edit-mode-overlay>

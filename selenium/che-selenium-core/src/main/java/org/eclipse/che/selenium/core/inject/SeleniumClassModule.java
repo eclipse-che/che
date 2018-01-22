@@ -23,9 +23,6 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganizationInjector;
-import org.eclipse.che.selenium.core.user.InjectTestUser;
-import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.core.user.TestUserInjector;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceInjector;
@@ -40,29 +37,8 @@ public class SeleniumClassModule extends AbstractModule {
   public void configure() {
     bind(SeleniumWebDriver.class);
 
-    bindListener(any(), new UserTypeListener(binder().getProvider(Injector.class)));
     bindListener(any(), new WorkspaceTypeListener(binder().getProvider(Injector.class)));
     bindListener(any(), new OrganizationTypeListener(binder().getProvider(Injector.class)));
-  }
-
-  private class UserTypeListener implements TypeListener {
-    private final Provider<Injector> injectorProvider;
-
-    public UserTypeListener(Provider<Injector> injectorProvider) {
-      this.injectorProvider = injectorProvider;
-    }
-
-    @Override
-    public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
-      Class<?> clazz = type.getRawType();
-      for (Field field : clazz.getDeclaredFields()) {
-        if (field.getType() == TestUser.class && field.isAnnotationPresent(InjectTestUser.class)) {
-          encounter.register(
-              new TestUserInjector<>(
-                  field, field.getAnnotation(InjectTestUser.class), injectorProvider));
-        }
-      }
-    }
   }
 
   private class WorkspaceTypeListener implements TypeListener {

@@ -76,6 +76,20 @@ public class FetchViewImpl extends Window implements FetchView {
     this.setTitle(locale.fetchTitle());
     this.setWidget(widget);
 
+    btnFetch =
+        createButton(
+            locale.buttonFetch(),
+            "git-remotes-fetch-fetch",
+            new ClickHandler() {
+
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onFetchClicked();
+              }
+            });
+    btnFetch.addStyleName(super.resources.windowCss().primaryButton());
+    addButtonToFooter(btnFetch);
+
     btnCancel =
         createButton(
             locale.buttonCancel(),
@@ -88,19 +102,6 @@ public class FetchViewImpl extends Window implements FetchView {
               }
             });
     addButtonToFooter(btnCancel);
-
-    btnFetch =
-        createButton(
-            locale.buttonFetch(),
-            "git-remotes-fetch-fetch",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onFetchClicked();
-              }
-            });
-    addButtonToFooter(btnFetch);
   }
 
   @Override

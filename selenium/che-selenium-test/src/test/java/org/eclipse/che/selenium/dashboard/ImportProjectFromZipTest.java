@@ -75,7 +75,7 @@ public class ImportProjectFromZipTest {
     projectSourcePage.skipRootFolder();
     projectSourcePage.clickOnAddProjectButton();
 
-    createWorkspace.clickOnCreateWorkspaceButton();
+    createWorkspace.clickOnCreateButtonAndOpenInIDE();
     seleniumWebDriver.switchFromDashboardIframeToIde();
     loader.waitOnClosed();
     explorer.waitItem(PROJECT_NAME);

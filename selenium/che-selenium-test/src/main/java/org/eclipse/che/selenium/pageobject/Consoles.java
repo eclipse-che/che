@@ -11,6 +11,8 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -29,10 +31,14 @@ import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Aleksandr Shmaraev */
@@ -65,6 +71,7 @@ public class Consoles {
   public static final String COMMAND_CONSOLE_ID =
       "//div[@active]//div[@id='gwt-debug-commandConsoleLines']";
   public static final String PLUS_ICON = "gwt-debug-plusPanel";
+  public static final String TERMINAL_MENU_ITEM = "contextMenu/Terminal";
   public static final String SERVER_MENU_ITEM = "contextMenu/Servers";
   public static final String SERVER_INFO_TABLE_CAPTION = "gwt-debug-runtimeInfoCellTableCaption";
   public static final String SERVER_INFO_HIDE_INTERNAL_CHECK_BOX =
@@ -134,6 +141,9 @@ public class Consoles {
   @FindBy(id = SERVER_MENU_ITEM)
   WebElement serverMenuItem;
 
+  @FindBy(id = TERMINAL_MENU_ITEM)
+  WebElement terminalMenuItem;
+
   @FindBy(id = SERVER_INFO_TABLE_CAPTION)
   WebElement serverInfoTableCaption;
 
@@ -165,6 +175,10 @@ public class Consoles {
 
   public void clickOnServerItemInContextMenu() {
     redrawDriverWait.until(visibilityOf(serverMenuItem)).click();
+  }
+
+  public void clickOnTerminalItemInContextMenu() {
+    redrawDriverWait.until(visibilityOf(terminalMenuItem)).click();
   }
 
   public void clickOnPlusMenuButton() {
@@ -393,10 +407,15 @@ public class Consoles {
   }
 
   public void openServersTabFromContextMenu(String machineName) {
+    Wait<WebDriver> wait =
+        new FluentWait<WebDriver>(seleniumWebDriver)
+            .withTimeout(ELEMENT_TIMEOUT_SEC, SECONDS)
+            .pollingEvery(500, MILLISECONDS)
+            .ignoring(WebDriverException.class);
+
     WebElement machine =
-        redrawDriverWait.until(
-            visibilityOfElementLocated(By.xpath(format(MACHINE_NAME, machineName))));
-    machine.click();
+        wait.until(visibilityOfElementLocated(By.xpath(format(MACHINE_NAME, machineName))));
+    wait.until(visibilityOf(machine)).click();
 
     actionsFactory.createAction(seleniumWebDriver).moveToElement(machine).contextClick().perform();
     redrawDriverWait.until(visibilityOf(serversMenuItem)).click();
@@ -409,13 +428,21 @@ public class Consoles {
             visibilityOfElementLocated(By.xpath(format(MACHINE_NAME, machineName))));
     machine.click();
 
-    Actions action = new Actions(seleniumWebDriver);
-    action.moveToElement(machine).contextClick().perform();
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(machine).contextClick().perform();
     redrawDriverWait.until(visibilityOf(commandsMenuItem)).click();
 
     redrawDriverWait.until(visibilityOfElementLocated(By.id(commandGoal))).click();
     redrawDriverWait
         .until(visibilityOfElementLocated(By.xpath(format(COMMAND_NAME, commandName))))
         .click();
+  }
+
+  public void startTerminalFromProcessesArea(String machineName) {
+    WebElement machine =
+        redrawDriverWait.until(
+            visibilityOfElementLocated(By.xpath(format(MACHINE_NAME, machineName))));
+
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(machine).contextClick().perform();
+    clickOnTerminalItemInContextMenu();
   }
 }

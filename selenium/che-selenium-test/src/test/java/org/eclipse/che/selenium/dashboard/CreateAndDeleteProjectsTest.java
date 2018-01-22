@@ -80,7 +80,7 @@ public class CreateAndDeleteProjectsTest {
     projectSourcePage.selectSample(WEB_JAVA_SPRING);
     projectSourcePage.selectSample(CONSOLE_JAVA_SIMPLE);
     projectSourcePage.clickOnAddProjectButton();
-    createWorkspace.clickOnCreateWorkspaceButton();
+    createWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     String dashboardWindow = seleniumWebDriver.getWindowHandle();
     seleniumWebDriver.switchFromDashboardIframeToIde();

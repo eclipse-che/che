@@ -10,89 +10,94 @@
  */
 package org.eclipse.che.multiuser.resource.api.usage.tracker;
 
-/*
-import static org.mockito.ArgumentMatchers.anyObject;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.environment.server.EnvironmentParser;
-import org.eclipse.che.api.environment.server.model.CheServiceImpl;
-import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
+import com.google.common.collect.ImmutableMap;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.config.Recipe;
+import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.mockito.Mock;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-*/
-
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
 /**
- * Tests for {@link org.eclipse.che.multiuser.resource.api.usage.tracker.EnvironmentRamCalculator}
+ * Tests {@link EnvironmentRamCalculator}.
  *
  * @author Sergii Leschenko
+ * @author Anton Korneta
  */
 @Listeners(MockitoTestNGListener.class)
 public class EnvironmentRamCalculatorTest {
-  /*
-  private static final long MEGABYTES_TO_BYTES_MULTIPLIER = 1024L * 1024L;
 
-  @Mock private EnvironmentParser environmentParser;
+  public static final String RECIPE_TYPE = "compose";
+  public static final String MACHINE_NAME_1 = "web-app";
+  public static final String MACHINE_NAME_2 = "db";
+
+  @Mock private Recipe recipeMock;
+  @Mock private InternalEnvironmentFactory environmentFactory;
   @Mock private Environment environment;
+  @Mock private InternalEnvironment internalEnv;
+  @Mock private InternalMachineConfig machineConfig1;
+  @Mock private InternalMachineConfig machineConfig2;
+  @Mock private Runtime runtime;
+  @Mock private MachineImpl machine1;
+  @Mock private MachineImpl machine2;
 
-  private EnvironmentRamCalculator environmentRamCalculator;
+  private EnvironmentRamCalculator envRamCalculator;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    environmentRamCalculator = new EnvironmentRamCalculator(environmentParser, 2048);
+    envRamCalculator =
+        new EnvironmentRamCalculator(ImmutableMap.of(RECIPE_TYPE, environmentFactory));
+    when(environmentFactory.create(environment)).thenReturn(internalEnv);
+    when(internalEnv.getMachines())
+        .thenReturn(
+            ImmutableMap.of(
+                MACHINE_NAME_1, machineConfig1,
+                MACHINE_NAME_2, machineConfig2));
+    when(environment.getRecipe()).thenReturn(recipeMock);
+    doReturn(ImmutableMap.of(MACHINE_NAME_1, machine1, MACHINE_NAME_2, machine2))
+        .when(runtime)
+        .getMachines();
   }
 
   @Test
-  public void shouldCalculateRamOfEnvironmentWithMultipleMachines() throws Exception {
-    Map<String, CheServiceImpl> services = new HashMap<>();
-    services.put(
-        "service1", new CheServiceImpl().withMemLimit(1024 * MEGABYTES_TO_BYTES_MULTIPLIER));
-    services.put(
-        "service2", new CheServiceImpl().withMemLimit(512 * MEGABYTES_TO_BYTES_MULTIPLIER));
+  public void testCalculatesRamOfEnvironmentWithMultipleMachines() throws Exception {
+    when(machineConfig1.getAttributes())
+        .thenReturn(ImmutableMap.of(MEMORY_LIMIT_ATTRIBUTE, "2147483648"));
+    when(machineConfig2.getAttributes())
+        .thenReturn(ImmutableMap.of(MEMORY_LIMIT_ATTRIBUTE, "536870912"));
+    when(recipeMock.getType()).thenReturn(RECIPE_TYPE);
 
-    when(environmentParser.parse(anyObject()))
-        .thenReturn(new CheServicesEnvironmentImpl().withServices(services));
+    final long ram = envRamCalculator.calculate(environment);
 
-    long ram = environmentRamCalculator.calculate(environment);
+    assertEquals(ram, 2560);
+  }
 
-    assertEquals(ram, 1536L);
+  @Test(expectedExceptions = ServerException.class)
+  public void testThrowServerExceptionWhenNoEnvFactoryForGivenRecipeTypeFound() throws Exception {
+    when(recipeMock.getType()).thenReturn("unsupported");
+
+    envRamCalculator.calculate(environment);
   }
 
   @Test
-  public void
-      shouldUseDefaultMachineRamWhenCalculatingRamOfEnvironmentWithMultipleMachinesIncludingMachineWithoutLimit()
-          throws Exception {
-    Map<String, CheServiceImpl> services = new HashMap<>();
-    services.put("service1", new CheServiceImpl().withMemLimit(null));
+  public void testCalculatesRamOfRuntimeWithMultipleMachines() throws Exception {
+    when(machine1.getAttributes()).thenReturn(ImmutableMap.of(MEMORY_LIMIT_ATTRIBUTE, "805306368"));
+    when(machine2.getAttributes()).thenReturn(ImmutableMap.of(MEMORY_LIMIT_ATTRIBUTE, "805306368"));
 
-    when(environmentParser.parse(anyObject()))
-        .thenReturn(new CheServicesEnvironmentImpl().withServices(services));
+    final long ram = envRamCalculator.calculate(runtime);
 
-    long ram = environmentRamCalculator.calculate(environment);
-
-    assertEquals(ram, 2048L);
+    assertEquals(ram, 1536);
   }
-
-  @Test
-  public void
-      shouldUseDefaultMachineRamWhenCalculatingRamOfEnvironmentIncludingMachineWithZeroLimit()
-          throws Exception {
-    Map<String, CheServiceImpl> services = new HashMap<>();
-    services.put("service2", new CheServiceImpl().withMemLimit(0L));
-
-    when(environmentParser.parse(anyObject()))
-        .thenReturn(new CheServicesEnvironmentImpl().withServices(services));
-
-    long ram = environmentRamCalculator.calculate(environment);
-
-    assertEquals(ram, 2048L);
-  }
-  */
 }

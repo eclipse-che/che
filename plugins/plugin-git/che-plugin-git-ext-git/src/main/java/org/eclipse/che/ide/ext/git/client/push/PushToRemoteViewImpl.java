@@ -70,6 +70,20 @@ public class PushToRemoteViewImpl extends Window implements PushToRemoteView {
     this.setTitle(locale.pushViewTitle());
     this.setWidget(widget);
 
+    btnPush =
+        createButton(
+            locale.buttonPush(),
+            "git-remotes-push-push",
+            new ClickHandler() {
+
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onPushClicked();
+              }
+            });
+    btnPush.addStyleName(super.resources.windowCss().primaryButton());
+    addButtonToFooter(btnPush);
+
     btnCancel =
         createButton(
             locale.buttonCancel(),
@@ -82,19 +96,6 @@ public class PushToRemoteViewImpl extends Window implements PushToRemoteView {
               }
             });
     addButtonToFooter(btnCancel);
-
-    btnPush =
-        createButton(
-            locale.buttonPush(),
-            "git-remotes-push-push",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onPushClicked();
-              }
-            });
-    addButtonToFooter(btnPush);
   }
 
   @Override

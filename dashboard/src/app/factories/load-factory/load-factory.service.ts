@@ -90,7 +90,7 @@ export class LoadFactoryService {
    * Reset the loading progress.
    */
   resetLoadProgress(): void {
-    this.loadingSteps.forEach((step) => {
+    this.loadingSteps.forEach((step: any) => {
       step.logs = '';
     step.hasError = false;
   });
