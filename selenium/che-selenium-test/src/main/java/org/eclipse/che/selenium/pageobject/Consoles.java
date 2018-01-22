@@ -445,4 +445,10 @@ public class Consoles {
     actionsFactory.createAction(seleniumWebDriver).moveToElement(machine).contextClick().perform();
     clickOnTerminalItemInContextMenu();
   }
+
+  public void clickOnClearOutputButton() {
+    loadPageDriverWait
+        .until(visibilityOfElementLocated(By.id("gwt-debug-terminal_clear_output")))
+        .click();
+  }
 }
