@@ -66,27 +66,6 @@ public class KeycloakTokenProvider {
     return getAccessToken(gitHubEndpoint, keycloakToken);
   }
 
-  /**
-   * Return OpenShift online token based on Keycloak token
-   *
-   * <p>Note: valid response from keycloak endpoint:
-   * {"access_token":"token","expires_in":86400,"scope":"user:full","token_type":"Bearer"}
-   *
-   * @param keycloakToken
-   * @return OpenShift online token
-   * @throws BadRequestException
-   * @throws ConflictException
-   * @throws NotFoundException
-   * @throws ForbiddenException
-   * @throws UnauthorizedException
-   * @throws ServerException
-   */
-  public String obtainOsoToken(final String keycloakToken)
-      throws IOException, ServerException, UnauthorizedException, ForbiddenException,
-          NotFoundException, ConflictException, BadRequestException {
-    return getAccessToken(openShiftEndpoint, keycloakToken);
-  }
-
   private String getAccessToken(final String endpoint, final String keycloakToken)
       throws IOException, ForbiddenException, BadRequestException, ConflictException,
           NotFoundException, ServerException, UnauthorizedException {

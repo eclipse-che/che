@@ -88,19 +88,4 @@ public class TokenController {
     }
     return Response.ok(token).build();
   }
-
-  @GET
-  @Path("/oso")
-  public Response getOpenShiftToken(@HeaderParam(HttpHeaders.AUTHORIZATION) String keycloakToken)
-      throws ForbiddenException, NotFoundException, ConflictException, BadRequestException,
-          ServerException, UnauthorizedException, IOException {
-    String token = null;
-    try {
-      validator.validate(keycloakToken);
-      token = tokenProvider.obtainOsoToken(keycloakToken);
-    } catch (KeycloakException e) {
-      return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-    }
-    return Response.ok(token).build();
-  }
 }
