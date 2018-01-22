@@ -92,7 +92,9 @@ public class WorkingWithTerminalTest {
         terminal.waitTerminalIsNotPresent(1);
       }
 
-      consoles.openNewTerminalIntoProcesses();
+      consoles.clickOnPlusMenuButton();
+      consoles.clickOnTerminalItemInContextMenu();
+
       terminal.selectTerminalTab();
       terminal.waitTerminalConsole();
       terminal.waitTerminalIsNotEmpty();

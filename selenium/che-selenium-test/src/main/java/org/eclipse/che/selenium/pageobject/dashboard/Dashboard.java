@@ -32,6 +32,7 @@ import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -49,6 +50,7 @@ public class Dashboard {
   private final TestDashboardUrlProvider testDashboardUrlProvider;
   private final Entrance entrance;
   private final LoginPage loginPage;
+  private final TestWebElementRenderChecker testWebElementRenderChecker;
 
   @Inject
   public Dashboard(
@@ -57,13 +59,15 @@ public class Dashboard {
       TestIdeUrlProvider testIdeUrlProvider,
       TestDashboardUrlProvider testDashboardUrlProvider,
       Entrance entrance,
-      LoginPage loginPage) {
+      LoginPage loginPage,
+      TestWebElementRenderChecker testWebElementRenderChecker) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.defaultUser = defaultUser;
     this.testIdeUrlProvider = testIdeUrlProvider;
     this.testDashboardUrlProvider = testDashboardUrlProvider;
     this.entrance = entrance;
     this.loginPage = loginPage;
+    this.testWebElementRenderChecker = testWebElementRenderChecker;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -268,6 +272,28 @@ public class Dashboard {
     List<WebElement> workspaces =
         seleniumWebDriver.findElements(By.xpath(Locators.RESENT_WS_NAVBAR));
     return !(workspaces.size() == 0);
+  }
+
+  public void clickOnUsernameButton() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.id(Locators.USER_NAME)))
+        .click();
+  }
+
+  public void clickOnAccountItem() {
+    testWebElementRenderChecker.waitElementIsRendered(By.id("menu_container_1"));
+
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath("//span[text()=' Account']")))
+        .click();
+  }
+
+  public void clickOnLogoutItem() {
+    testWebElementRenderChecker.waitElementIsRendered(By.id("menu_container_1"));
+
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath("//span[text()=' Logout']")))
+        .click();
   }
 
   @PreDestroy
