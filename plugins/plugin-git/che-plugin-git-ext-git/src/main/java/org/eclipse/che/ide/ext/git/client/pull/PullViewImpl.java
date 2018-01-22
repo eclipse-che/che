@@ -76,11 +76,11 @@ public class PullViewImpl extends Window implements PullView {
     this.setWidget(widget);
 
     btnCancel =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonCancel(), "git-remotes-pull-cancel", event -> delegate.onCancelClicked());
 
     btnPull =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonPull(), "git-remotes-pull-pull", event -> delegate.onPullClicked(), true);
   }
 

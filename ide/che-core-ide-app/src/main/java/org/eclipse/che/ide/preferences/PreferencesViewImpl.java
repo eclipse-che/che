@@ -115,16 +115,16 @@ public class PreferencesViewImpl extends Window implements PreferencesView {
 
   private void createButtons() {
     btnSave =
-        addButtonBarControl(
+        addFooterButton(
             locale.save(),
             "window-preferences-storeChanges",
             event -> delegate.onSaveClicked(),
             true);
     btnRefresh =
-        addButtonBarControl(
+        addFooterButton(
             locale.refresh(), "window-preferences-refresh", event -> delegate.onRefreshClicked());
     btnClose =
-        addButtonBarControl(
+        addFooterButton(
             locale.close(),
             "window-preferences-close",
             event -> {

@@ -102,10 +102,10 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
     handler.bind(tree);
 
     cancelButton =
-        addButtonBarControl(locale.cancel(), "select-path-cancel-button", event -> hide());
+        addFooterButton(locale.cancel(), "select-path-cancel-button", event -> hide());
 
     acceptButton =
-        addButtonBarControl(
+        addFooterButton(
             locale.ok(), "select-path-ok-button", event -> acceptButtonClicked(), true);
   }
 

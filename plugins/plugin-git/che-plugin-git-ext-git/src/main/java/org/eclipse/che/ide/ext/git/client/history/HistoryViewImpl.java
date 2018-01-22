@@ -182,11 +182,11 @@ public class HistoryViewImpl extends Window implements HistoryView {
 
   private void createButtons() {
     btnClose =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonClose(), "git-history-close", event -> delegate.onCloseClicked());
 
     btnCompare =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonCompare(),
             "git-history-compare",
             event -> delegate.onCompareClicked(),

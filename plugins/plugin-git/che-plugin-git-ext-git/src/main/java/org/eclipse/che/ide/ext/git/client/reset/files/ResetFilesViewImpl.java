@@ -80,11 +80,11 @@ public class ResetFilesViewImpl extends Window implements ResetFilesView {
     this.setWidget(widget);
 
     btnCancel =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonCancel(), "git-resetFiles-btnCancel", event -> delegate.onCancelClicked());
 
     btnReset =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonReset(),
             "git-resetFiles-btnReset",
             event -> delegate.onResetClicked(),

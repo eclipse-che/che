@@ -70,14 +70,14 @@ public class RemoveFromIndexViewImpl extends Window implements RemoveFromIndexVi
     this.setWidget(widget);
 
     btnRemove =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonRemove(),
             "git-removeFromIndex-remove",
             event -> delegate.onRemoveClicked(),
             true);
 
     btnCancel =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonCancel(),
             "git-removeFromIndex-cancel",
             event -> delegate.onCancelClicked());

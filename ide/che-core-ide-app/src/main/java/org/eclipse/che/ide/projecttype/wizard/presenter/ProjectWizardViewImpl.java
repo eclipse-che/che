@@ -56,7 +56,7 @@ public class ProjectWizardViewImpl extends Window implements ProjectWizardView {
     setWidget(widget);
 
     saveButton =
-        addButtonBarControl(
+        addFooterButton(
             locale.projectWizardDefaultSaveButtonText(),
             "projectWizard-saveButton",
             event -> delegate.onSaveClicked(),
@@ -64,11 +64,11 @@ public class ProjectWizardViewImpl extends Window implements ProjectWizardView {
     saveButton.addStyleName(resources.Css().buttonLoader());
 
     nextStepButton =
-        addButtonBarControl(
+        addFooterButton(
             locale.next(), "projectWizard-nextStepButton", event -> delegate.onNextClicked());
 
     previousStepButton =
-        addButtonBarControl(
+        addFooterButton(
             locale.back(), "projectWizard-previousStepButton", event -> delegate.onBackClicked());
 
     ensureDebugId("projectWizard-window");

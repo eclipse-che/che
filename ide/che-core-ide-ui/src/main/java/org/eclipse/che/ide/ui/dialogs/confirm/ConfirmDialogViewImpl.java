@@ -46,7 +46,7 @@ public class ConfirmDialogViewImpl extends Window implements ConfirmDialogView {
     setWidget(widget);
 
     this.footer = footer;
-    addButtonBarWidget(footer);
+    addFooterWidget(footer);
   }
 
   @Override

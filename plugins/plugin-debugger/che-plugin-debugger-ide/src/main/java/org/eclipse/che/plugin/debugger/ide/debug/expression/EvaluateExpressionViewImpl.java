@@ -59,13 +59,13 @@ public class EvaluateExpressionViewImpl extends Window implements EvaluateExpres
     this.setTitle(this.locale.evaluateExpressionViewTitle());
     this.setWidget(widget);
 
-    addButtonBarControl(
+    addFooterButton(
         locale.evaluateExpressionViewCloseButtonTitle(),
         "debugger-close-btn",
         clickEvent -> delegate.onCloseClicked());
 
     evaluateButton =
-        addButtonBarControl(
+        addFooterButton(
             locale.evaluateExpressionViewEvaluateButtonTitle(),
             "debugger-evaluate-btn",
             clickEvent -> delegate.onEvaluateClicked(),

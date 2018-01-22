@@ -44,7 +44,7 @@ public class MessageDialogViewImpl extends Window implements MessageDialogView {
     setWidget(widget);
 
     this.footer = footer;
-    addButtonBarWidget(footer);
+    addFooterWidget(footer);
   }
 
   /** {@inheritDoc} */

@@ -208,10 +208,10 @@ public class BranchListViewImpl extends Window implements BranchListView {
 
   private void createButtons() {
     btnClose =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonClose(), "git-compare-branch-close", event -> delegate.onClose());
     btnCompare =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonCompare(),
             "git-compare-branch-compare",
             event -> delegate.onCompareClicked());

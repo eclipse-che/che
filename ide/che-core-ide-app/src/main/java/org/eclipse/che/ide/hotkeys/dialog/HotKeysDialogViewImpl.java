@@ -114,15 +114,15 @@ public class HotKeysDialogViewImpl extends Window implements HotKeysDialogView {
     this.setWidget(uiBinder.createAndBindUi(this));
 
     saveButton =
-        addButtonBarControl(
+        addFooterButton(
             locale.save(), "keybindings-saveButton-btn", event -> delegate.onSaveClicked(), true);
 
     closeButton =
-        addButtonBarControl(
+        addFooterButton(
             locale.close(), "keybindings-closeButton-btn", event -> delegate.onCloseClicked());
 
     printButton =
-        addButtonBarControl(
+        addFooterButton(
             locale.print(), "keybindings-printButton-btn", event -> delegate.onPrintClicked());
 
     list = new CategoriesList(res);

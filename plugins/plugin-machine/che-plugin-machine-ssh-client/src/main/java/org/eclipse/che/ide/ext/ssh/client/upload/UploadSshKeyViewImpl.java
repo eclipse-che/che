@@ -65,11 +65,11 @@ public class UploadSshKeyViewImpl extends Window implements UploadSshKeyView {
     file.addChangeHandler(event -> delegate.onFileNameChanged());
 
     btnCancel =
-        addButtonBarControl(
+        addFooterButton(
             coreLocale.cancelButton(), "sshKeys-cancel", event -> delegate.onCancelClicked());
 
     btnUpload =
-        addButtonBarControl(
+        addFooterButton(
             coreLocale.uploadButton(), "sshKeys-upload", event -> delegate.onUploadClicked());
   }
 

@@ -72,11 +72,11 @@ public class PushToRemoteViewImpl extends Window implements PushToRemoteView {
     this.setWidget(widget);
 
     btnCancel =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonCancel(), "git-remotes-push-cancel", event -> delegate.onCancelClicked());
 
     btnPush =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonPush(), "git-remotes-push-push", event -> delegate.onPushClicked(), true);
   }
 

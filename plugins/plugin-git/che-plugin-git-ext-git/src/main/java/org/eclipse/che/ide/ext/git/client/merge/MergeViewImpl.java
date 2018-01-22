@@ -157,11 +157,11 @@ public class MergeViewImpl extends Window implements MergeView {
     root.setBranches(branches);
 
     btnCancel =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonCancel(), "git-merge-cancel", event -> delegate.onCancelClicked());
 
     btnMerge =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonMerge(), "git-merge-merge", event -> delegate.onMergeClicked(), true);
   }
 

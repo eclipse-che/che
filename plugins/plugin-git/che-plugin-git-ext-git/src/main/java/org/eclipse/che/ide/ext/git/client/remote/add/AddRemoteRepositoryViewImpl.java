@@ -72,13 +72,13 @@ public class AddRemoteRepositoryViewImpl extends Window implements AddRemoteRepo
     this.setWidget(widget);
 
     btnCancel =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonCancel(),
             "git-addRemoteRepository-btnCancel",
             event -> delegate.onCancelClicked());
 
     btnOk =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonOk(), "git-addRemoteRepository-btnOk", event -> delegate.onOkClicked());
   }
 

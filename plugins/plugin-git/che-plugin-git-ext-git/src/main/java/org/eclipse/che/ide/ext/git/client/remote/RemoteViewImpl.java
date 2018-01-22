@@ -86,15 +86,15 @@ public class RemoteViewImpl extends Window implements RemoteView {
     this.setWidget(widget);
 
     btnClose =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonClose(), "git-remotes-remotes-close", event -> delegate.onCloseClicked());
 
     btnAdd =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonAdd(), "git-remotes-remotes-add", event -> delegate.onAddClicked(), true);
 
     btnDelete =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonRemove(), "git-remotes-remotes-remove", event -> onDeleteClicked());
   }
 

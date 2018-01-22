@@ -81,24 +81,24 @@ final class CompareViewImpl extends Window implements CompareView {
 
     setWidget(UI_BINDER.createAndBindUi(this));
 
-    addButtonBarControl(locale.buttonClose(), "git-compare-close-btn", event -> hide());
-    addButtonBarControl(
+    addFooterButton(locale.buttonClose(), "git-compare-close-btn", event -> hide());
+    addFooterButton(
         locale.buttonRefresh(), "git-compare-refresh-btn", event -> compareWidget.refresh());
 
     btnSaveChanges =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonSaveChanges(),
             "git-compare-save-changes-btn",
             event -> delegate.onSaveChangesClicked(),
             true);
     btnNextDiff =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonNextDiff(),
             "git-compare-next-diff-btn",
             event -> delegate.onNextDiffClicked(),
             ButtonAlignment.LEFT);
     btnPrevDiff =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonPreviousDiff(),
             "git-compare-prev-diff-btn",
             event -> delegate.onPreviousDiffClicked(),

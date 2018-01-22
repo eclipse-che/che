@@ -81,10 +81,10 @@ public class CommitViewImpl extends Window implements CommitView {
     this.setWidget(widget);
 
     btnCancel =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonCancel(), "git-commit-cancel", event -> delegate.onCancelClicked());
     btnCommit =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonCommit(), "git-commit-commit", event -> delegate.onCommitClicked(), true);
 
     remoteBranches = new ListBox();
@@ -97,8 +97,8 @@ public class CommitViewImpl extends Window implements CommitView {
     pushAfterCommit.addValueChangeHandler(event -> remoteBranches.setEnabled(event.getValue()));
 
     pushAfterCommit.addStyleName(res.gitCSS().spacing());
-    addButtonBarWidget(pushAfterCommit);
-    addButtonBarWidget(remoteBranches);
+    addFooterWidget(pushAfterCommit);
+    addFooterWidget(remoteBranches);
   }
 
   @Override

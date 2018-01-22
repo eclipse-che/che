@@ -92,11 +92,11 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
     prepareRadioButtons();
 
     btnCancel =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonCancel(), "git-reset-cancel", event -> delegate.onCancelClicked());
 
     btnReset =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonReset(), "git-reset-reset", event -> delegate.onResetClicked(), true);
   }
 

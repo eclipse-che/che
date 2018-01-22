@@ -78,11 +78,11 @@ public class FetchViewImpl extends Window implements FetchView {
     this.setWidget(widget);
 
     btnCancel =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonCancel(), "git-remotes-fetch-cancel", event -> delegate.onCancelClicked());
 
     btnFetch =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonFetch(),
             "git-remotes-fetch-fetch",
             event -> delegate.onFetchClicked(),

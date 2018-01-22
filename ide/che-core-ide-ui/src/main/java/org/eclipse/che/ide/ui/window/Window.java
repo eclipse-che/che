@@ -35,8 +35,8 @@ import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
  * <p>Frame bottom bar may include that resides below the content area and includes controls for
  * affecting the content of the window. Usually bar contains buttons to accept or perform specific
  * actions. To add a predefined type of control, e.g. button, method {@link
- * #addButtonBarControl(String, String, ClickHandler, boolean, ButtonAlignment)} should be called.
- * To place custom widget into button bar, method {@link #addButtonBarWidget(Widget)} should be
+ * #addFooterButton(String, String, ClickHandler, boolean, ButtonAlignment)} should be called.
+ * To place custom widget into button bar, method {@link #addFooterWidget(Widget)} should be
  * called. If button bar doesn't contain any control, it will be hidden automatically.
  *
  * <p>By default window listens to the keyPress event to be able to close itself when user press
@@ -110,7 +110,7 @@ public abstract class Window implements IsWidget {
    * @param alignment button alignment
    * @return created instance of {@link Button}
    */
-  protected final Button addButtonBarControl(
+  protected final Button addFooterButton(
       String text,
       String debugId,
       ClickHandler clickHandler,
@@ -129,9 +129,9 @@ public abstract class Window implements IsWidget {
    * @param primary mark button with different style
    * @return created instance of {@link Button}
    */
-  protected final Button addButtonBarControl(
+  protected final Button addFooterButton(
       String text, String debugId, ClickHandler clickHandler, boolean primary) {
-    return addButtonBarControl(text, debugId, clickHandler, primary, ButtonAlignment.RIGHT);
+    return addFooterButton(text, debugId, clickHandler, primary, ButtonAlignment.RIGHT);
   }
 
   /**
@@ -143,9 +143,9 @@ public abstract class Window implements IsWidget {
    * @param alignment button alignment
    * @return created instance of {@link Button}
    */
-  protected final Button addButtonBarControl(
+  protected final Button addFooterButton(
       String text, String debugId, ClickHandler clickHandler, ButtonAlignment alignment) {
-    return addButtonBarControl(text, debugId, clickHandler, false, alignment);
+    return addFooterButton(text, debugId, clickHandler, false, alignment);
   }
 
   /**
@@ -156,9 +156,9 @@ public abstract class Window implements IsWidget {
    * @param clickHandler handler to process click operation
    * @return created instance of {@link Button}
    */
-  protected final Button addButtonBarControl(
+  protected final Button addFooterButton(
       String text, String debugId, ClickHandler clickHandler) {
-    return addButtonBarControl(text, debugId, clickHandler, false, ButtonAlignment.RIGHT);
+    return addFooterButton(text, debugId, clickHandler, false, ButtonAlignment.RIGHT);
   }
 
   /**
@@ -169,7 +169,7 @@ public abstract class Window implements IsWidget {
    *
    * @param widget user defined widget
    */
-  protected final void addButtonBarWidget(Widget widget) {
+  protected final void addFooterWidget(Widget widget) {
     viewImp.addButtonBarWidget(widget);
   }
 
@@ -181,8 +181,8 @@ public abstract class Window implements IsWidget {
    *
    * @param widget user defined widget
    */
-  protected final void addButtonBarWidget(IsWidget widget) {
-    addButtonBarWidget(widget.asWidget());
+  protected final void addFooterWidget(IsWidget widget) {
+    addFooterWidget(widget.asWidget());
   }
 
   // Window control

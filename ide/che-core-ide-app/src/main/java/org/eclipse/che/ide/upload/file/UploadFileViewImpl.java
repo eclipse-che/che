@@ -57,11 +57,11 @@ public class UploadFileViewImpl extends Window implements UploadFileView {
     bind();
 
     btnCancel =
-        addButtonBarControl(
+        addFooterButton(
             locale.cancel(), "file-uploadFile-cancel", event -> delegate.onCancelClicked());
 
     btnUpload =
-        addButtonBarControl(
+        addFooterButton(
             locale.uploadButton(),
             "file-uploadFile-upload",
             event -> delegate.onUploadClicked(),

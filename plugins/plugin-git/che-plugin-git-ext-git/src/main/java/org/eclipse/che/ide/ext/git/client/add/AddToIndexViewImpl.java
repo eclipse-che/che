@@ -67,11 +67,11 @@ public class AddToIndexViewImpl extends Window implements AddToIndexView {
     setWidget(ourUiBinder.createAndBindUi(this));
 
     btnAdd =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonAdd(), "git-addToIndex-btnAdd", event -> delegate.onAddClicked());
 
     btnCancel =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonCancel(), "git-addToIndex-btnCancel", event -> delegate.onCancelClicked());
   }
 

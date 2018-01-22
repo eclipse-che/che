@@ -57,12 +57,12 @@ public class AskCredentialsDialogImpl extends Window implements AskCredentialsDi
     this.setWidget(uiBinder.createAndBindUi(this));
     this.setTitle(localizationConstant.authorizationDialogTitle());
     authenticateButton =
-        addButtonBarControl(
+        addFooterButton(
             localizationConstant.authenticationDialogAuthenticate(),
             "authentication-dialog-authenticate-button",
             event -> onAuthenticateClicked(),
             true);
-    addButtonBarControl(
+    addFooterButton(
         localizationConstant.cancel(),
         "authentication-dialog-cancel-button",
         event -> onCancelClicked());

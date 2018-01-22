@@ -177,10 +177,10 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
   }
 
   private void createButtons() {
-    cancelButton = addButtonBarControl(locale.cancel(), "search-cancel-button", event -> close());
+    cancelButton = addFooterButton(locale.cancel(), "search-cancel-button", event -> close());
 
     acceptButton =
-        addButtonBarControl(
+        addFooterButton(
             locale.search(), "search-button", event -> delegate.search(text.getText()), true);
   }
 

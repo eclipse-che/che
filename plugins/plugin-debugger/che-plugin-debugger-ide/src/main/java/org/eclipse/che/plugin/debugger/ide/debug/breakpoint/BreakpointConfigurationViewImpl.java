@@ -63,12 +63,12 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
     this.setTitle(locale.breakpointConfigurationTitle());
     ensureDebugId("breakpoint-configuration-window");
 
-    addButtonBarControl(
+    addFooterButton(
         locale.evaluateExpressionViewCloseButtonTitle(),
         UIObject.DEBUG_ID_PREFIX + "close-btn",
         clickEvent -> delegate.onCloseClicked());
 
-    addButtonBarControl(
+    addFooterButton(
         locale.viewBreakpointConfigurationApplyButton(),
         UIObject.DEBUG_ID_PREFIX + "apply-btn",
         clickEvent -> delegate.onApplyClicked(),

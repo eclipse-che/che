@@ -50,13 +50,13 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
     this.setTitle(locale.importFromConfigurationTitle());
     setWidget(importFromConfigViewBinder.createAndBindUi(this));
 
-    addButtonBarControl(
+    addFooterButton(
         locale.cancelButton(),
         "import-from-config-btn-cancel",
         event -> delegate.onCancelClicked());
 
     buttonImport =
-        addButtonBarControl(
+        addFooterButton(
             locale.importButton(),
             "import-from-config-btn-import",
             event -> delegate.onImportClicked(),

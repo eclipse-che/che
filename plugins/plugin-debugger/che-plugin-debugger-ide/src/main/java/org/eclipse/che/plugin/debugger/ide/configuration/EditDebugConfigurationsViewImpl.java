@@ -324,23 +324,23 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
 
   private void createButtons() {
     saveButton =
-        addButtonBarControl(
+        addFooterButton(
             coreLocale.save(),
             "window-edit-debug-configurations-save",
             event -> delegate.onSaveClicked(),
             true);
     cancelButton =
-        addButtonBarControl(
+        addFooterButton(
             coreLocale.cancel(),
             "window-edit-debug-configurations-cancel",
             event -> delegate.onCancelClicked());
     debugButton =
-        addButtonBarControl(
+        addFooterButton(
             coreLocale.debug(),
             "window-edit-debug-configurations-debug",
             event -> delegate.onDebugClicked());
     closeButton =
-        addButtonBarControl(
+        addFooterButton(
             coreLocale.close(),
             "window-edit-debug-configurations-close",
             event -> delegate.onCloseClicked());

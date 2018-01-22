@@ -83,7 +83,7 @@ final class SimilarNamesConfigurationViewImpl extends Window
   }
 
   private void createButtons(JavaLocalizationConstant locale) {
-    addButtonBarControl(
+    addFooterButton(
         locale.moveDialogButtonCancel(),
         "similar-cancel-button",
         event -> {
@@ -94,6 +94,6 @@ final class SimilarNamesConfigurationViewImpl extends Window
           hide();
         });
 
-    addButtonBarControl(locale.moveDialogButtonOk(), "similar-accept-button", event -> hide());
+    addFooterButton(locale.moveDialogButtonOk(), "similar-accept-button", event -> hide());
   }
 }

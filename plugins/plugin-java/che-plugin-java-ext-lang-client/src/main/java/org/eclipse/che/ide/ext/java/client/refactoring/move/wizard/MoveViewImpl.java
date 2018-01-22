@@ -95,12 +95,12 @@ final class MoveViewImpl extends Window implements MoveView {
 
   private void createButtons(JavaLocalizationConstant locale) {
     preview =
-        addButtonBarControl(
+        addFooterButton(
             locale.moveDialogButtonPreview(),
             "move-preview-button",
             event -> delegate.onPreviewButtonClicked());
 
-    addButtonBarControl(
+    addFooterButton(
         locale.moveDialogButtonCancel(),
         "move-cancel-button",
         event -> {
@@ -109,7 +109,7 @@ final class MoveViewImpl extends Window implements MoveView {
         });
 
     accept =
-        addButtonBarControl(
+        addFooterButton(
             locale.moveDialogButtonOk(),
             "move-accept-button",
             event -> delegate.onAcceptButtonClicked());

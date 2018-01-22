@@ -62,7 +62,7 @@ final class ShowReferenceViewImpl extends Window implements ShowReferenceView {
   }
 
   private void addButtons() {
-    addButtonBarControl(locale.cancel(), "copy-reference-cancel-button", event -> hide());
+    addFooterButton(locale.cancel(), "copy-reference-cancel-button", event -> hide());
   }
 
   @Override

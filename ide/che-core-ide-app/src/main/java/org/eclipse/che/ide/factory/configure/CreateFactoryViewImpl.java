@@ -80,7 +80,7 @@ public class CreateFactoryViewImpl extends Window implements CreateFactoryView {
     launch.addStyleName(style.launchIcon());
     configure.addStyleName(style.configureIcon());
     createFactoryButton.setEnabled(false);
-    addButtonBarControl(
+    addFooterButton(
         locale.createFactoryButtonClose(),
         "projectReadOnlyGitUrl-btnClose",
         event -> delegate.onCancelClicked());

@@ -51,15 +51,15 @@ public class CommitViewImpl extends Window implements CommitView {
     setTitle(messages.commitDialogTitle());
 
     ok =
-        addButtonBarControl(
+        addFooterButton(
             messages.commitDialogButtonOkText(), "commit-dialog-ok", event -> delegate.onOk());
 
-    addButtonBarControl(
+    addFooterButton(
         messages.commitDialogButtonContinueText(),
         "commit-dialog-continue-without-committing",
         event -> delegate.onContinue());
 
-    addButtonBarControl(
+    addFooterButton(
         messages.commitDialogButtonCancelText(),
         "commit-dialog-cancel",
         event -> delegate.onCancel());

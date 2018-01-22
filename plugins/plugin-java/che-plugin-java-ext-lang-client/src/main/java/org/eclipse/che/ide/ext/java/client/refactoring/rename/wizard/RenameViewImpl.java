@@ -118,12 +118,12 @@ final class RenameViewImpl extends Window implements RenameView {
 
   private void createButtons(JavaLocalizationConstant locale) {
     preview =
-        addButtonBarControl(
+        addFooterButton(
             locale.moveDialogButtonPreview(),
             "move-preview-button",
             event -> delegate.onPreviewButtonClicked());
 
-    addButtonBarControl(
+    addFooterButton(
         locale.moveDialogButtonCancel(),
         "move-cancel-button",
         event -> {
@@ -132,7 +132,7 @@ final class RenameViewImpl extends Window implements RenameView {
         });
 
     accept =
-        addButtonBarControl(
+        addFooterButton(
             locale.moveDialogButtonOk(),
             "move-accept-button",
             event -> delegate.onAcceptButtonClicked());

@@ -52,13 +52,13 @@ public class TextAreaDialogViewImpl extends Window implements TextAreaDialogView
     this.setWidget(widget);
     this.ensureDebugId("debugger-textarea-dialog");
 
-    addButtonBarControl(
+    addFooterButton(
         cancelBtnLabel,
         "debugger-textarea-dialog-cancel-btn",
         clickEvent -> delegate.onCancelClicked());
 
     agreeButton =
-        addButtonBarControl(
+        addFooterButton(
             agreeBtnLabel,
             "debugger-textarea-dialog-agree-btn",
             clickEvent -> delegate.onAgreeClicked(),

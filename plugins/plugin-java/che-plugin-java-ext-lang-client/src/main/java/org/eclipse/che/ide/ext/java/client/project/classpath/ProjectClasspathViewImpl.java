@@ -154,7 +154,7 @@ public class ProjectClasspathViewImpl extends Window implements ProjectClasspath
   private void createButtons() {
 
     doneButton =
-        addButtonBarControl(
+        addFooterButton(
             localization.buttonDone(),
             "window-edit-configurations-close",
             event -> delegate.onDoneClicked(),

@@ -183,11 +183,11 @@ public class RevisionListViewImpl extends Window implements RevisionListView {
 
   private void createButtons() {
     btnClose =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonClose(), "git-compare-revision-close", event -> delegate.onCloseClicked());
 
     btnCompare =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonCompare(),
             "git-compare-revision-compare",
             event -> delegate.onCompareClicked());

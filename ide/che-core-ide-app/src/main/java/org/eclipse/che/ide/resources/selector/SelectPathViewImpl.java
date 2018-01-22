@@ -146,7 +146,7 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
     handler.bind(tree);
 
     submitBtn =
-        addButtonBarControl(
+        addFooterButton(
             "Select",
             "select-path-submit-button",
             event -> {
@@ -156,7 +156,7 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
             true);
 
     cancelButton =
-        addButtonBarControl(
+        addFooterButton(
             "Cancel",
             "select-path-cancel-button",
             event -> {

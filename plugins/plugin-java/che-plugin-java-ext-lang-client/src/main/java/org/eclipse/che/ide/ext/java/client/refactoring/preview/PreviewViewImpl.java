@@ -100,12 +100,12 @@ final class PreviewViewImpl extends Window implements PreviewView {
 
     setWidget(UI_BINDER.createAndBindUi(this));
 
-    addButtonBarControl(
+    addFooterButton(
         locale.moveDialogButtonBack(),
         "preview-back-button",
         event -> delegate.onBackButtonClicked());
 
-    addButtonBarControl(
+    addFooterButton(
         locale.moveDialogButtonCancel(),
         "preview-cancel-button",
         event -> {
@@ -113,7 +113,7 @@ final class PreviewViewImpl extends Window implements PreviewView {
           delegate.onCancelButtonClicked();
         });
 
-    addButtonBarControl(
+    addFooterButton(
         locale.moveDialogButtonOk(),
         "preview-ok-button",
         event -> delegate.onAcceptButtonClicked());

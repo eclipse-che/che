@@ -136,18 +136,18 @@ final class OrganizeImportsViewImpl extends Window implements OrganizeImportsVie
 
   private void createButtons(JavaLocalizationConstant locale) {
     back =
-        addButtonBarControl(
+        addFooterButton(
             locale.organizeImportsButtonBack(),
             "imports-back-button",
             event -> delegate.onBackButtonClicked());
 
     next =
-        addButtonBarControl(
+        addFooterButton(
             locale.organizeImportsButtonNext(),
             "imports-next-button",
             event -> delegate.onNextButtonClicked());
 
-    addButtonBarControl(
+    addFooterButton(
         locale.organizeImportsButtonCancel(),
         "imports-cancel-button",
         event -> {
@@ -156,7 +156,7 @@ final class OrganizeImportsViewImpl extends Window implements OrganizeImportsVie
         });
 
     finish =
-        addButtonBarControl(
+        addFooterButton(
             locale.organizeImportsButtonFinish(),
             "imports-finish-button",
             event -> delegate.onFinishButtonClicked(),

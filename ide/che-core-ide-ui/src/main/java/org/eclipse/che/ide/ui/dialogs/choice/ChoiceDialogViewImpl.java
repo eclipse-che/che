@@ -46,7 +46,7 @@ public class ChoiceDialogViewImpl extends Window implements ChoiceDialogView {
     setWidget(widget);
 
     this.footer = footer;
-    addButtonBarWidget(footer);
+    addFooterWidget(footer);
   }
 
   @Override

@@ -49,13 +49,13 @@ public class CheckoutReferenceViewImpl extends Window implements CheckoutReferen
     this.setWidget(widget);
 
     btnCancel =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonCancel(),
             "git-checkoutReference-cancel",
             event -> delegate.onCancelClicked());
 
     btnCheckout =
-        addButtonBarControl(
+        addFooterButton(
             locale.buttonCheckout(),
             "git-checkoutReference-checkout",
             event -> delegate.onCheckoutClicked(reference.getValue()),

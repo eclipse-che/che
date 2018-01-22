@@ -58,7 +58,7 @@ public final class ShowSshKeyViewImpl extends Window implements ShowSshKeyView {
   }
 
   private void addButtons() {
-    addButtonBarControl(locale.cancel(), "copy-reference-cancel-button", event -> hide());
+    addFooterButton(locale.cancel(), "copy-reference-cancel-button", event -> hide());
   }
 
   @Override

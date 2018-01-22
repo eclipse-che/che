@@ -51,7 +51,7 @@ public class ImportProjectWizardViewImpl extends Window implements ImportProject
     setWidget(widget);
 
     importButton =
-        addButtonBarControl(
+        addFooterButton(
             locale.importProjectButton(),
             "importProjectWizard-importButton",
             event -> delegate.onImportClicked(),
@@ -59,11 +59,11 @@ public class ImportProjectWizardViewImpl extends Window implements ImportProject
     importButton.addStyleName(ideResources.Css().buttonLoader());
 
     nextStepButton =
-        addButtonBarControl(
+        addFooterButton(
             locale.next(), "importProjectWizard-nextStepButton", event -> delegate.onNextClicked());
 
     previousStepButton =
-        addButtonBarControl(
+        addFooterButton(
             locale.back(),
             "importProjectWizard-previousStepButton",
             event -> delegate.onBackClicked());

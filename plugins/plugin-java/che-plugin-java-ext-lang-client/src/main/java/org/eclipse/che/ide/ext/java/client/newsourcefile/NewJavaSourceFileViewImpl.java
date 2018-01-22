@@ -43,11 +43,11 @@ public class NewJavaSourceFileViewImpl extends Window implements NewJavaSourceFi
       AddToIndexViewImplUiBinder uiBinder, JavaLocalizationConstant constant) {
     setTitle(constant.title());
 
-    addButtonBarControl(
+    addFooterButton(
         constant.buttonCancel(), "newJavaClass-dialog-cancel", event -> delegate.onCancelClicked());
 
     btnOk =
-        addButtonBarControl(
+        addFooterButton(
             constant.buttonOk(), "newJavaClass-dialog-ok", event -> delegate.onOkClicked());
 
     Widget widget = uiBinder.createAndBindUi(this);
