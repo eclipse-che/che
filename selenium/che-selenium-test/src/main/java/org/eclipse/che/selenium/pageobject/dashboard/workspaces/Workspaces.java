@@ -58,16 +58,16 @@ public class Workspaces {
     String NO_WORKSPACE_FOUND = "//span[text()='No workspaces found.']";
     String WORKSPACE_ITEM_NAME = "//div[@id='ws-name-%s']";
     String WORKSPACE_ITEM_CHECKBOX = "//div[@id='ws-name-%s']//md-checkbox";
-    String WORKSPACE_ITEM_RAM = "//div[@id='ws-name-%s']//span[@name='workspaceRamValue']";
+    String WORKSPACE_ITEM_RAM = "//div[@id='ws-name-%s']//span[@name='workspace-ram-value']";
     String WORKSPACE_ITEM_PROJECTS =
-        "//div[@id='ws-name-%s']//span[@name='workspaceProjectsValue']";
-    String WORKSPACE_ITEM_STACK = "//div[@id='ws-name-%s']//span[@name='workspaceStackName']";
+        "//div[@id='ws-name-%s']//span[@name='workspace-projects-value']";
+    String WORKSPACE_ITEM_STACK = "//div[@id='ws-name-%s']//span[@name='workspace-stacks-name']";
     String WORKSPACE_ITEM_ACTIONS =
-        "//div[@id='ws-name-%s']//*[@name='workspaceStopStartButton']/div";
+        "//div[@id='ws-name-%s']//*[@name='workspace-stop-start-button']/div";
     String WORKSPACE_ITEM_CONFIGURE_BUTTON =
-        "//div[@id='ws-name-%s']//a[@name='configureWorkspaceButton']";
+        "//div[@id='ws-name-%s']//a[@name='configure-workspace-button']";
     String WORKSPACE_ITEM_ADD_PROJECT_BUTTON =
-        "//div[@id='ws-name-%s']//span[@name='addProjectButton']";
+        "//div[@id='ws-name-%s']//span[@name='add-project-button']";
     String WORKSPACE_LIST_HEADER = "//md-item[@class='noselect']//span";
   }
 
