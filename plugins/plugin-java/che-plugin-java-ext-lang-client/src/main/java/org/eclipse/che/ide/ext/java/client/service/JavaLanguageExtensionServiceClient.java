@@ -342,7 +342,7 @@ public class JavaLanguageExtensionServiceClient {
               }
             });
   }
-  
+
   public Promise<UsagesResponse> usages(TextDocumentPositionParams params) {
     return Promises.create(
         (resolve, reject) -> {

@@ -107,6 +107,7 @@ import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSym
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ImplementersResponseDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
 import org.eclipse.lsp4j.ExecuteCommandParams;
+import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.CollectionTypeAdapterFactory;
@@ -742,22 +743,6 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
-  public String identifyFqnInResource(String filePath, int lineNumber) {
-    CompletableFuture<Object> result =
-        getLanguageServer()
-            .getWorkspaceService()
-            .executeCommand(
-                new ExecuteCommandParams(
-                    Commands.IDENTIFY_FQN_IN_RESOURCE,
-                    ImmutableList.of(prefixURI(filePath), String.valueOf(lineNumber))));
-
-    try {
-      return (String) result.get(10, TimeUnit.SECONDS);
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
-      throw new JsonRpcException(-27000, e.getMessage());
-    }
-  }
-
   private UsagesResponse usages(TextDocumentPositionParams parameters) {
     String uri = LanguageServiceUtils.prefixURI(parameters.getUri());
     parameters.setUri(uri);
@@ -784,54 +769,6 @@ public class JavaLanguageServerExtensionService {
     } catch (JsonSyntaxException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
-  }
-
-  public Location findResourcesByFqn(String fqn, int lineNumber) {
-    Type type = new TypeToken<List<Either<String, ResourceLocation>>>() {}.getType();
-    List<Either<String, ResourceLocation>> location =
-        doGetList(
-            Commands.FIND_RESOURCES_BY_FQN,
-            ImmutableList.of(fqn, String.valueOf(lineNumber)),
-            type);
-
-    Either<String, ResourceLocation> l = location.get(0);
-
-    if (l.isLeft()) {
-      return new LocationImpl(l.getLeft(), lineNumber, null);
-    } else {
-      return new LocationImpl(
-          l.getRight().getFqn(), lineNumber, true, l.getRight().getLibId(), null);
-    }
-  }
-
-  /** Update jdt.ls workspace accordingly to added or removed projects. */
-  public JobResult updateWorkspace(UpdateWorkspaceParameters updateWorkspaceParameters) {
-    if (updateWorkspaceParameters.getAddedProjectsUri().isEmpty()) {
-      if (!findInitializedLanguageServer().isPresent()) {
-        return new JobResult(
-            Severity.OK,
-            0,
-            "Skipped. Language server not initialized. Workspace updating is not required.");
-      }
-    }
-
-    Type type = new TypeToken<JobResult>() {}.getType();
-    return doGetOne(
-        Commands.UPDATE_WORKSPACE,
-        singletonList(updateWorkspaceParameters),
-        type,
-        REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT,
-        TimeUnit.MILLISECONDS);
-  }
-
-  /**
-   * Organizes imports in a file or in a directory.
-   *
-   * @param path the path to the file or to the directory
-   */
-  public WorkspaceEdit organizeImports(String path) {
-    Type type = new TypeToken<WorkspaceEdit>() {}.getType();
-    return doGetOne("java.edit.organizeImports", singletonList(prefixURI(path)), type);
   }
 
   private <T> void iterate(

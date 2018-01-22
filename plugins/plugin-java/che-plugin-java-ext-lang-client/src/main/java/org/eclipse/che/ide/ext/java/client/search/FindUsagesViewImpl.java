@@ -10,9 +10,13 @@
  */
 package org.eclipse.che.ide.ext.java.client.search;
 
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
-
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
@@ -24,12 +28,6 @@ import org.eclipse.che.ide.ui.smartTree.event.ExpandNodeEvent;
 import org.eclipse.che.ide.ui.smartTree.event.LoadExceptionEvent;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.jdt.ls.extension.api.dto.UsagesResponse;
-
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Implementation for FindUsages view. Uses tree for presenting search results.
