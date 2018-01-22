@@ -80,11 +80,11 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
-import org.eclipse.che.api.languageserver.registry.CheLanguageClient;
 import org.eclipse.che.api.languageserver.registry.CheLanguageClientFactory;
 import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.jdt.ls.extension.api.Commands;
@@ -571,11 +571,15 @@ public class JavaLanguageServerExtensionService {
   private void reComputeDiagnostics(String pomPath) {
     String pomUri = prefixURI(pomPath);
     Type type = new TypeToken<PublishDiagnosticsParams>() {}.getType();
-    PublishDiagnosticsParams result =
+    PublishDiagnosticsParams diagnostics =
         doGetOne(Commands.RECOMPUTE_POM_DIAGNOSTICS, singletonList(pomUri), type);
-    CheLanguageClient cheLanguageClient =
-        clientFactory.create(findInitializedLanguageServer().get().getId());
-    cheLanguageClient.publishDiagnostics(result);
+    Optional<InitializedLanguageServer> lServer = findInitializedLanguageServer();
+    if (!lServer.isPresent()) {
+      LOG.error("Language server not initialized.");
+      return;
+    }
+    String serverId = lServer.get().getId();
+    eventService.publish(new ExtendedPublishDiagnosticsParams(serverId, diagnostics));
   }
 
   private List<Jar> getProjectExternalLibraries(ExternalLibrariesParameters params) {
