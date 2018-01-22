@@ -29,9 +29,10 @@ public class CheSecondTestUser implements TestUser {
       TestUserFactory userFactory,
       @Named("che.second.testuser.name") String name,
       @Named("che.second.testuser.email") String email,
-      @Named("che.second.testuser.password") String password)
+      @Named("che.second.testuser.password") String password,
+      @Named("che.second.testuser.offline_token") String offlineToken)
       throws Exception {
-    this.delegate = userFactory.create(name, email, password);
+    this.delegate = userFactory.create(name, email, password, offlineToken);
   }
 
   @Override
@@ -57,6 +58,11 @@ public class CheSecondTestUser implements TestUser {
   @Override
   public String getId() {
     return delegate.getId();
+  }
+
+  @Override
+  public String getOfflineToken() {
+    return delegate.getOfflineToken();
   }
 
   @Override

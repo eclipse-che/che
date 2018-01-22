@@ -48,6 +48,20 @@ public class CheckoutReferenceViewImpl extends Window implements CheckoutReferen
     this.setTitle(locale.checkoutReferenceTitle());
     this.setWidget(widget);
 
+    btnCheckout =
+        createButton(
+            locale.buttonCheckout(),
+            "git-checkoutReference-checkout",
+            new ClickHandler() {
+
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onCheckoutClicked(reference.getValue());
+              }
+            });
+    btnCheckout.addStyleName(resources.windowCss().primaryButton());
+    addButtonToFooter(btnCheckout);
+
     btnCancel =
         createButton(
             locale.buttonCancel(),
@@ -60,19 +74,6 @@ public class CheckoutReferenceViewImpl extends Window implements CheckoutReferen
               }
             });
     addButtonToFooter(btnCancel);
-
-    btnCheckout =
-        createButton(
-            locale.buttonCheckout(),
-            "git-checkoutReference-checkout",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCheckoutClicked(reference.getValue());
-              }
-            });
-    addButtonToFooter(btnCheckout);
   }
 
   @Override

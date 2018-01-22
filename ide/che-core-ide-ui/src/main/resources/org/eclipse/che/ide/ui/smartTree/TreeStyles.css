@@ -48,9 +48,10 @@
     vertical-align: middle;
     display: inline-block;
     margin-top: -10px;
-    font-size: 1em;
     padding-left: 2px;
     text-shadow: projectExplorerPresentableTextShadow;
+    font-family: "Open Sans", sans-serif;
+    font-size: 9pt;
 }
 
 .infoTextContainer {
@@ -69,11 +70,12 @@
     vertical-align: middle;
     display: inline-block;
     margin-top: -10px;
-    font-size: 1em;
     font-style: italic;
     padding-left: 2px;
     text-shadow: projectExplorerPresentableTextShadow;
     color: projectExplorerVcsHead;
+    font-family: "Open Sans", sans-serif;
+    font-size: 9pt;
 }
 
 .nodeContainer {

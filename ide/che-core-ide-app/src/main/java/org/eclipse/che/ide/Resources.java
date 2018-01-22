@@ -212,6 +212,12 @@ public interface Resources
   @Source("searchMatch.svg")
   SVGResource searchMatch();
 
+  @Source("run/run.svg")
+  SVGResource run();
+
+  @Source("run/debug.svg")
+  SVGResource debug();
+
   /** Interface for css resources. */
   interface CoreCss extends CssResource {
     String editorPaneMenuDelimiter();

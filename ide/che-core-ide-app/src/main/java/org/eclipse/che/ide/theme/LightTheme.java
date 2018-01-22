@@ -915,6 +915,11 @@ public class LightTheme implements Theme {
   }
 
   @Override
+  public String processesTreeMachineNameColor() {
+    return "#3aa461";
+  }
+
+  @Override
   public String outputBackgroundColor() {
     return "white";
   }
@@ -1719,6 +1724,11 @@ public class LightTheme implements Theme {
   }
 
   @Override
+  public String cellTableBackground() {
+    return "#ECECEC";
+  }
+
+  @Override
   public String cellTableHrefColor() {
     return "rgb(97, 183, 239)";
   }
@@ -1749,6 +1759,16 @@ public class LightTheme implements Theme {
   }
 
   @Override
+  public String cellTableHoveredBackground() {
+    return "rgba(37, 108, 159, 0.1)";
+  }
+
+  @Override
+  public String cellTableSelectedBackground() {
+    return "#256c9f";
+  }
+
+  @Override
   public String findResultsBackground() {
     return "#c1be9e";
   }
@@ -1756,5 +1776,65 @@ public class LightTheme implements Theme {
   @Override
   public String findResultsTextColor() {
     return "#272727";
+  }
+
+  @Override
+  public String editorPlaceholderTabsPanelBackground() {
+    return "#d6d6d9";
+  }
+
+  @Override
+  public String editorPlaceholderTabsPanelBottomBorderColor() {
+    return "#8e8e8e";
+  }
+
+  @Override
+  public String editorPlaceholderTabBackground() {
+    return "#ffffff";
+  }
+
+  @Override
+  public String editorPlaceholderTabIconColor() {
+    return "#aaaaaa";
+  }
+
+  @Override
+  public String editorPlaceholderTabLabelColor() {
+    return "#bfbfbf";
+  }
+
+  @Override
+  public String editorPlaceholderTabsPanelPlusColor() {
+    return "#777777";
+  }
+
+  @Override
+  public String editorPlaceholderContentBackground() {
+    return "#ffffff";
+  }
+
+  @Override
+  public String editorPlaceholderLineNumbersColor() {
+    return "#dfdfdf";
+  }
+
+  @Override
+  public String editorPlaceholderRowsColor() {
+    return "#bfbfbf";
+  }
+
+  @Override
+  public String projectExplorerPlaceholderBackground() {
+    return "#FFFFFF";
+  }
+
+  @Override
+  public String projectExplorerPlaceholderIconColor() {
+    return "#d0d0d0";
+  }
+
+  @Override
+  public String projectExplorerPlaceholderRowColor() {
+    return "#bfbfbf";
   }
 }

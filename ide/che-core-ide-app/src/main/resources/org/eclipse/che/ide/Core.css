@@ -14,7 +14,7 @@
 
 /* Global styles and external GWT styles. */
 
-body, td {
+body, td, th {
     font-size: 13px;
     font-family: mainFontFamily;
     color: mainFontColor;
@@ -259,6 +259,7 @@ input::selection {
     background: buttonBackground;
     border: 1px solid buttonBorderColor;
     color: buttonFontColor;
+    border-radius: 0px;
 }
 
 .gwt-Button:hover, button:hover {

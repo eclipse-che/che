@@ -444,6 +444,28 @@ public class PopupMenu extends Composite {
       }
     }
 
+    // determine whether popup menu has icons
+    boolean hasIcons = false;
+    for (int i = 0; i < list.size(); i++) {
+      Element cellElement = table.getCellFormatter().getElement(i, 0);
+      if (cellElement.hasChildNodes()) {
+        hasIcons = true;
+        break;
+      }
+    }
+
+    // hide first column if there are no icons
+    if (!hasIcons) {
+      for (int i = 0; i < list.size(); i++) {
+        Element cellElement = table.getCellFormatter().getElement(i, 0);
+        if (hasCheckedItems) {
+          cellElement.getStyle().setWidth(3, Unit.PX);
+        } else {
+          cellElement.getStyle().setWidth(7, Unit.PX);
+        }
+      }
+    }
+
     popupMenuPanel.add(table);
   }
 

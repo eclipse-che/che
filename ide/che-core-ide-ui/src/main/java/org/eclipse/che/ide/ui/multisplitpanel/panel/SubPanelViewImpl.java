@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ui.multisplitpanel.panel;
 import static com.google.gwt.user.client.ui.DockLayoutPanel.Direction.CENTER;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -127,9 +128,18 @@ public class SubPanelViewImpl extends Composite
         new ClickHandler() {
           @Override
           public void onClick(ClickEvent clickEvent) {
-            delegate.onAddTabButtonClicked(
-                getAbsoluteLeft(plusPanel.getElement()) + POPUP_OFFSET,
-                getAbsoluteTop(plusPanel.getElement()) + POPUP_OFFSET);
+            widgetsPanel.getElement().focus();
+            delegate.onWidgetFocused(widgetsPanel.getVisibleWidget());
+            Scheduler.get()
+                .scheduleDeferred(
+                    new Scheduler.ScheduledCommand() {
+                      @Override
+                      public void execute() {
+                        delegate.onAddTabButtonClicked(
+                            getAbsoluteLeft(plusPanel.getElement()) + POPUP_OFFSET,
+                            getAbsoluteTop(plusPanel.getElement()) + POPUP_OFFSET);
+                      }
+                    });
           }
         },
         ClickEvent.getType());

@@ -32,6 +32,9 @@ public class KeycloakSettings {
   @SerializedName("che.keycloak.realm")
   private String keycloakRealm;
 
+  @SerializedName("che.keycloak.client_id")
+  private String keycloakClientId;
+
   public String getKeycloakTokenEndpoint() {
     return keycloakTokenEndpoint;
   }
@@ -54,5 +57,9 @@ public class KeycloakSettings {
 
   public String getKeycloakRealm() {
     return keycloakRealm;
+  }
+
+  public String getKeycloakClientId() {
+    return keycloakClientId;
   }
 }
