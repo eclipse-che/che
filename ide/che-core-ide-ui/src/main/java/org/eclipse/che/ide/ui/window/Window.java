@@ -47,16 +47,16 @@ import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
  */
 public abstract class Window implements IsWidget {
 
-  private final WindowView viewImp;
+  private final WindowView view;
   private final WindowManager windowManager;
 
   protected Window() {
     windowManager = WindowManager.getInstance();
 
-    viewImp = new CompositeWindowView();
-    viewImp.addBrowserEventHandler(this::onBrowserEvent);
-    viewImp.addWindowCloseEventHandler(this::onWindowClose);
-    viewImp.addKeyboardNavigationHandler(new ViewKeyboardNavigationHandler());
+    view = new CompositeWindowView();
+    view.addBrowserEventHandler(this::onBrowserEvent);
+    view.addWindowCloseEventHandler(this::onWindowClose);
+    view.addKeyboardNavigationHandler(new ViewKeyboardNavigationHandler());
   }
 
   // Configuration section
@@ -67,7 +67,7 @@ public abstract class Window implements IsWidget {
    * @param title window title
    */
   protected final void setTitle(String title) {
-    viewImp.setTitle(title);
+    view.setTitle(title);
   }
 
   /**
@@ -76,7 +76,7 @@ public abstract class Window implements IsWidget {
    * @param widget widget to show
    */
   protected final void setWidget(Widget widget) {
-    viewImp.setContentWidget(widget);
+    view.setContentWidget(widget);
   }
 
   /**
@@ -86,7 +86,7 @@ public abstract class Window implements IsWidget {
    * @param id debug id
    */
   protected final void ensureDebugId(String id) {
-    viewImp.setDebugId(id);
+    view.setDebugId(id);
   }
 
   /**
@@ -96,7 +96,7 @@ public abstract class Window implements IsWidget {
    * @param closeOnEscape {@code true} if window is allowed to be closed by Escape key press
    */
   protected final void setCloseOnEscape(boolean closeOnEscape) {
-    viewImp.setCloseOnEscape(closeOnEscape);
+    view.setCloseOnEscape(closeOnEscape);
   }
 
   /**
@@ -116,7 +116,7 @@ public abstract class Window implements IsWidget {
       ClickHandler clickHandler,
       boolean primary,
       ButtonAlignment alignment) {
-    return viewImp.addButtonBarControl(text, debugId, clickHandler, primary, alignment);
+    return view.addButtonBarControl(text, debugId, clickHandler, primary, alignment);
   }
 
   /**
@@ -170,7 +170,7 @@ public abstract class Window implements IsWidget {
    * @param widget user defined widget
    */
   protected final void addFooterWidget(Widget widget) {
-    viewImp.addButtonBarWidget(widget);
+    view.addButtonBarWidget(widget);
   }
 
   /**
@@ -192,7 +192,7 @@ public abstract class Window implements IsWidget {
    * is called to allow user to perform some actions after hide.
    */
   protected final void hide() {
-    viewImp.detach();
+    view.detach();
     windowManager.unregister(this);
 
     onHide();
@@ -210,8 +210,8 @@ public abstract class Window implements IsWidget {
    */
   protected final void show(Widget focusOn) {
     windowManager.register(this);
-    viewImp.attach();
-    viewImp.setFocusWidget(focusOn);
+    view.attach();
+    view.setFocusWidget(focusOn);
 
     onShow();
 
@@ -236,7 +236,7 @@ public abstract class Window implements IsWidget {
 
   @Override
   public Widget asWidget() {
-    return viewImp.getContentWidget();
+    return view.getContentWidget();
   }
 
   private void doFocus() {
@@ -244,7 +244,7 @@ public abstract class Window implements IsWidget {
   }
 
   private Element getFocusEl() {
-    Widget focusWidget = viewImp.getFocusWidget();
+    Widget focusWidget = view.getFocusWidget();
 
     return focusWidget.getElement();
   }
@@ -265,11 +265,11 @@ public abstract class Window implements IsWidget {
   }
 
   protected final void setZIndex(int zIndex) {
-    viewImp.setZIndex(zIndex);
+    view.setZIndex(zIndex);
   }
 
   protected final void setActive(boolean active) {
-    viewImp.setActive(active);
+    view.setActive(active);
   }
 
   public void onAltPress(NativeEvent evt) {}
@@ -353,7 +353,7 @@ public abstract class Window implements IsWidget {
     public void onEsc(NativeEvent evt) {
       super.onEsc(evt);
 
-      if (viewImp.isCloseOnEscape()) {
+      if (view.isCloseOnEscape()) {
         hide();
       }
 
