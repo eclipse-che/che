@@ -21,8 +21,8 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceConfig;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
@@ -49,7 +49,7 @@ public class WorkspacesListTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestUser defaultTestUser;
   @Inject private Workspaces workspaces;
-  @Inject private CreateWorkspace createWorkspace;
+  @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
 
   @BeforeClass
@@ -186,13 +186,13 @@ public class WorkspacesListTest {
     dashboard.waitToolbarTitleName("Workspaces");
 
     workspaces.clickOnAddWorkspaceBtn();
-    createWorkspace.waitToolbar();
-    createWorkspace.selectStack(JAVA.getId());
-    createWorkspace.typeWorkspaceName(name);
+    newWorkspace.waitToolbar();
+    newWorkspace.selectStack(JAVA.getId());
+    newWorkspace.typeWorkspaceName(name);
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(WEB_JAVA_SPRING);
     projectSourcePage.clickOnAddProjectButton();
-    createWorkspace.clickOnCreateButtonAndEditWorkspace();
+    newWorkspace.clickOnCreateButtonAndEditWorkspace();
 
     workspaceDetails.waitToolbarTitleName(name);
     workspaceDetails.checkStateOfWorkspace(STOPPED);

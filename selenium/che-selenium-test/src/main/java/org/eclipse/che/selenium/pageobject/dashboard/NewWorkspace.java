@@ -30,14 +30,14 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Ann Shumilova */
 @Singleton
-public class CreateWorkspace {
+public class NewWorkspace {
 
   private final SeleniumWebDriver seleniumWebDriver;
   private final WebDriverWait redrawUiElementsTimeout;
   private final ActionsFactory actionsFactory;
 
   @Inject
-  public CreateWorkspace(SeleniumWebDriver seleniumWebDriver, ActionsFactory actionsFactory) {
+  public NewWorkspace(SeleniumWebDriver seleniumWebDriver, ActionsFactory actionsFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.actionsFactory = actionsFactory;
     this.redrawUiElementsTimeout =

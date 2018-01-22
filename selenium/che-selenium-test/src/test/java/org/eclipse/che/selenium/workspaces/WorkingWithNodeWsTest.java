@@ -27,9 +27,9 @@ import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
@@ -52,7 +52,7 @@ public class WorkingWithNodeWsTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Consoles consoles;
   @Inject private NavigationBar navigationBar;
-  @Inject private CreateWorkspace createWorkspace;
+  @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
@@ -76,13 +76,13 @@ public class WorkingWithNodeWsTest {
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
     workspaces.clickOnAddWorkspaceBtn();
-    createWorkspace.waitToolbar();
-    createWorkspace.selectStack(NODE.getId());
-    createWorkspace.typeWorkspaceName(WORKSPACE);
+    newWorkspace.waitToolbar();
+    newWorkspace.selectStack(NODE.getId());
+    newWorkspace.typeWorkspaceName(WORKSPACE);
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(PROJECT_NAME);
     projectSourcePage.clickOnAddProjectButton();
-    createWorkspace.clickOnCreateButtonAndOpenInIDE();
+    newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
     currentWindow = seleniumWebDriver.getWindowHandle();
