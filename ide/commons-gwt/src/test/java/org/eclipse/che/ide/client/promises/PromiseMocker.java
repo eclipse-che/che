@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.testing.ide;
+package org.eclipse.che.ide.client.promises;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -52,6 +52,21 @@ public class PromiseMocker<T> {
                     e.printStackTrace();
                   }
                   return null;
+                }));
+    return this;
+  }
+
+  public <B> PromiseMocker<T> applyOnThenFunction(T value) {
+    when(promise.then(org.mockito.ArgumentMatchers.<Function<T, B>>any()))
+        .then(
+            new FunctionAnswer<Function<T, B>, Promise<T>>(
+                function -> {
+                  try {
+                    function.apply(value);
+                  } catch (Exception e) {
+                    e.printStackTrace();
+                  }
+                  return promise;
                 }));
     return this;
   }

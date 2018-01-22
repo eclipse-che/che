@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.testing.ide;
+package org.eclipse.che.ide.client.promises;
 
 import java.util.Arrays;
 import org.mockito.Mock;
