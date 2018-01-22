@@ -14,6 +14,8 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.inject.name.Names;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
+import org.eclipse.che.ide.console.colorizer.DefaultOutPutConsoleColorizer;
+import org.eclipse.che.ide.console.colorizer.OutputConsoleColorizer;
 
 /** GIN module for configuring command consoles. */
 public class ConsoleGinModule extends AbstractGinModule {

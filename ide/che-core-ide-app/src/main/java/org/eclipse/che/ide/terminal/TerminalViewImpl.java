@@ -65,18 +65,7 @@ final class TerminalViewImpl extends Composite implements TerminalView, Focusabl
     terminalElement.getStyle().setProperty("opacity", "0");
 
     terminal.open(terminalPanel.getElement());
-    terminal.attachCustomKeyDownHandler(new TerminalCustomKeyDownHandlerImpl(terminal));
-
-    //    LinkMatcherOptions linkOptions = new LinkMatcherOptions();
-    //    linkOptions.setMatchIndex(1);
-    //    linkOptions.setPriority(0);
-    //    terminal.registerLinkMatcher(".*(Hello).*", new LinkMatcherHandler() {
-    //      @Override
-    //      public void onClick(Object event, String link) {
-    //        Log.info(getClass(), "!!!!!!!!!!!!!!!!!!! Hello linkifer!!!");
-    //      }
-    //    }, linkOptions);
-
+    terminal.attachCustomKeyDownHandler(new TerminalCustomKeyDownHandler(terminal));
     resizeTerminal();
 
     terminalElement.getFirstChildElement().getStyle().clearProperty("backgroundColor");

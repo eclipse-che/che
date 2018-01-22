@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.terminal;
+package org.eclipse.che.ide.terminal.linkifier;
 
 import jsinterop.annotations.JsFunction;
 
@@ -16,6 +16,5 @@ import jsinterop.annotations.JsFunction;
 @FunctionalInterface
 public interface LinkMatcherHandler {
 
-  // todo MouseEvent...
   void onClick(Object event, String link, String lineContent);
 }

@@ -14,9 +14,9 @@ import javax.inject.Inject;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.console.DefaultOutPutConsoleColorizer;
-import org.eclipse.che.ide.console.JavaOutputCustomizer;
 import org.eclipse.che.ide.console.OutputConsoleViewImpl;
+import org.eclipse.che.ide.console.colorizer.DefaultOutPutConsoleColorizer;
+import org.eclipse.che.ide.console.linkifiers.JavaOutputLinkifier;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.eclipse.che.plugin.testing.ide.model.Printable;
 import org.eclipse.che.plugin.testing.ide.model.Printer;
@@ -43,7 +43,7 @@ public class PrinterOutputConsole extends OutputConsoleViewImpl implements Print
     consolePanel.remove(commandPanel);
     consolePanel.remove(previewPanel);
 
-    registerLinkifier(new JavaOutputCustomizer(appContext, editorAgent));
+    registerLinkifier(new JavaOutputLinkifier(appContext, editorAgent));
   }
 
   @Override

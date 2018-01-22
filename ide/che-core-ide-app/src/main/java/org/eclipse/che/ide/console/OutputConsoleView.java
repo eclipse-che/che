@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.console;
 
 import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.console.linkifiers.OutputLinkifier;
 
 /**
  * View for output console.
@@ -19,6 +20,10 @@ import org.eclipse.che.ide.api.mvp.View;
  */
 public interface OutputConsoleView extends View<OutputConsoleView.ActionDelegate> {
 
+  /**
+   * Register linkifier to apply clickable link in the console output.
+   * @param linkifier - output linkifier {@link OutputLinkifier}
+   */
   void registerLinkifier(OutputLinkifier linkifier);
 
   /**

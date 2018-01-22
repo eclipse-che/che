@@ -20,6 +20,8 @@ import jsinterop.annotations.JsType;
 import org.eclipse.che.ide.terminal.helpers.CharMeasure;
 import org.eclipse.che.ide.terminal.helpers.ScrollBarMeasure;
 import org.eclipse.che.ide.terminal.helpers.TerminalGeometry;
+import org.eclipse.che.ide.terminal.linkifier.LinkMatcherHandler;
+import org.eclipse.che.ide.terminal.linkifier.LinkMatcherOptions;
 
 /**
  * GWT binding to term.js script

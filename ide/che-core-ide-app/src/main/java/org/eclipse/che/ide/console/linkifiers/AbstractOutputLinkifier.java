@@ -7,7 +7,7 @@
  * <p>Contributors: Red Hat, Inc. - initial API and implementation
  * *****************************************************************************
  */
-package org.eclipse.che.ide.console;
+package org.eclipse.che.ide.console.linkifiers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.nullToEmpty;
@@ -40,33 +40,15 @@ import org.eclipse.che.ide.resource.Path;
  *
  * @author Victor Rubezhny
  */
-public abstract class AbstractOutputCustomizer implements OutputLinkifier {
+public abstract class AbstractOutputLinkifier implements OutputLinkifier {
 
   protected AppContext appContext;
   protected EditorAgent editorAgent;
 
-  public AbstractOutputCustomizer(AppContext appContext, EditorAgent editorAgent) {
+  public AbstractOutputLinkifier(AppContext appContext, EditorAgent editorAgent) {
     this.appContext = appContext;
     this.editorAgent = editorAgent;
   }
-
-  /*
-  //   * (non-Javadoc)
-  //   *
-  //   * @see org.eclipse.che.ide.extension.machine.client.outputspanel.console.
-  //   * OutputCustomizer#canCustomize(java.lang.String)
-  //   */
-  //  @Override
-  //  public abstract boolean canCustomize(String text);
-  //
-  //  /*
-  //   * (non-Javadoc)
-  //   *
-  //   * @see org.eclipse.che.ide.extension.machine.client.outputspanel.console.
-  //   * OutputCustomizer#customize(java.lang.String)
-  //   */
-  //  @Override
-  //  public abstract String customize(String text);
 
   /*
    * Returns the list of workspace files filtered by a relative path

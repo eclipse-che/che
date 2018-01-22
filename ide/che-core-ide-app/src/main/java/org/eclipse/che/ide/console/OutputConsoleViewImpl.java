@@ -28,11 +28,13 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.FontAwesome;
+import org.eclipse.che.ide.console.colorizer.OutputConsoleColorizer;
+import org.eclipse.che.ide.console.linkifiers.OutputLinkifier;
 import org.eclipse.che.ide.machine.MachineResources;
-import org.eclipse.che.ide.terminal.LinkMatcherOptions;
 import org.eclipse.che.ide.terminal.Terminal;
 import org.eclipse.che.ide.terminal.TerminalOptions;
 import org.eclipse.che.ide.terminal.helpers.TerminalGeometry;
+import org.eclipse.che.ide.terminal.linkifier.LinkMatcherOptions;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.vectomatic.dom.svg.ui.SVGImage;
 

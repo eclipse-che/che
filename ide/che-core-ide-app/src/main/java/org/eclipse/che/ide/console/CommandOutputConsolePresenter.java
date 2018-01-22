@@ -34,6 +34,11 @@ import org.eclipse.che.ide.api.command.exec.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.command.exec.ProcessStartedEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
+import org.eclipse.che.ide.console.linkifiers.JavaOutputLinkifier;
+import org.eclipse.che.ide.console.linkifiers.CppCompilationMsgOutputLinkifier;
+import org.eclipse.che.ide.console.linkifiers.CppLinkerMsgOutputLinkifier;
+import org.eclipse.che.ide.console.linkifiers.CSharpCompilationWarnErrOutputLinkifier;
+import org.eclipse.che.ide.console.linkifiers.CSharpLineAtOutputLinkifier;
 import org.eclipse.che.ide.machine.MachineResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -86,12 +91,11 @@ public class CommandOutputConsolePresenter
     this.eventBus = eventBus;
     this.commandExecutor = commandExecutor;
 
-    //    setCustomizer(
-    //        new CompoundOutputCustomizer(
-    //            new JavaOutputCustomizer(appContext, editorAgent),
-    //            new CSharpOutputCustomizer(appContext, editorAgent),
-    //            new CPPOutputCustomizer(appContext, editorAgent)));
-    view.registerLinkifier(new JavaOutputCustomizer(appContext, editorAgent));
+    view.registerLinkifier(new JavaOutputLinkifier(appContext, editorAgent));
+    view.registerLinkifier(new CppCompilationMsgOutputLinkifier(appContext, editorAgent));
+    view.registerLinkifier(new CppLinkerMsgOutputLinkifier(appContext, editorAgent));
+    view.registerLinkifier(new CSharpCompilationWarnErrOutputLinkifier(appContext, editorAgent));
+    view.registerLinkifier(new CSharpLineAtOutputLinkifier(appContext, editorAgent));
 
     view.setDelegate(this);
 
