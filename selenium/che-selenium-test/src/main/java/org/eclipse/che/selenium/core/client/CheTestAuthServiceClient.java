@@ -32,7 +32,7 @@ public class CheTestAuthServiceClient implements TestAuthServiceClient {
   }
 
   @Override
-  public String login(String username, String password) throws Exception {
+  public String login(String username, String password, String offlineToken) throws Exception {
     return username;
   }
 
