@@ -10,19 +10,16 @@
  */
 package org.eclipse.che.selenium.pageobject.machineperspective;
 
-import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
-import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
+import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -32,6 +29,16 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.util.concurrent.ExecutionException;
+
+import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 @Singleton
 public class MachineTerminal {
@@ -298,5 +305,31 @@ public class MachineTerminal {
     return terminalNumber == 1
         ? format(Locators.TERMINAL_TAB_XPATH, "")
         : format(Locators.TERMINAL_TAB_XPATH, "-" + terminalNumber);
+  }
+
+  /** */
+  public void launchScriptAndGetInfo( TestWorkspace ws, String currentProject,
+          TestProjectServiceClient testProjectServiceClient,
+      TestCommandServiceClient testCommandServiceClient) throws Exception {
+    String bashFileName ="check-app-state.sh";
+    String bashCommand =
+        "#!/bin/bash\n"
+            + "\n"
+            + "URL=$1\n"
+            + "pid=$(pgrep -f \"user/tomcat8\")\n"
+            + "echo \"PID: $pid\"\n"
+            + "\n"
+            + "test() {\n"
+            + "    app_content=$(curl -s $1)\n"
+            + "    if [[ $app_content == *\"hello\"* ]];then\n"
+            + "        echo \"test passed with $1\"\n"
+            + "    else\n"
+            + "        echo \"test failed with $1\"\n"
+            + "    fi\n"
+            + "}";
+
+    String bashComandForChecling = "cd ${current.project.path} && ./check-app-state.sh";
+    testProjectServiceClient.createFileInProject(ws.getId(), currentProject, bashFileName, bashCommand);
+
   }
 }
