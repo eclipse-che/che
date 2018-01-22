@@ -18,7 +18,6 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.java.server.JdtException;
-import org.eclipse.che.plugin.java.server.search.SearchException;
 
 /**
  * Exception mapper for all JDT exceptions
@@ -30,15 +29,9 @@ import org.eclipse.che.plugin.java.server.search.SearchException;
 public class JdtExceptionMapper implements ExceptionMapper<JdtException> {
   @Override
   public Response toResponse(JdtException exception) {
-    if (exception instanceof SearchException) {
-      return Response.status(Response.Status.BAD_REQUEST)
-          .entity(DtoFactory.getInstance().toJson(exception.getServiceError()))
-          .type(MediaType.APPLICATION_JSON)
-          .build();
-    } else
-      return Response.serverError()
-          .entity(DtoFactory.getInstance().toJson(exception.getServiceError()))
-          .type(MediaType.APPLICATION_JSON)
-          .build();
+    return Response.serverError()
+        .entity(DtoFactory.getInstance().toJson(exception.getServiceError()))
+        .type(MediaType.APPLICATION_JSON)
+        .build();
   }
 }

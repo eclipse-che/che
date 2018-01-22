@@ -22,6 +22,8 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
 import org.eclipse.che.api.languageserver.shared.model.RenameResult;
+import org.eclipse.che.api.languageserver.shared.model.SnippetParameters;
+import org.eclipse.che.api.languageserver.shared.model.SnippetResult;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
@@ -214,6 +216,7 @@ public class TextDocumentServiceClient {
     return transmitDtoAndReceiveDtoList(
         params, "textDocument/documentHighlight", DocumentHighlight.class);
   }
+
   /**
    * GWT client implementation of {@link TextDocumentService#rename(RenameParams)}
    *
@@ -277,6 +280,20 @@ public class TextDocumentServiceClient {
         return new JsonRpcException(jsonRpcError.getCode(), jsonRpcError.getMessage());
       }
     };
+  }
+
+  public Promise<List<SnippetResult>> getSnippets(SnippetParameters params) {
+    return Promises.create(
+        (resolve, reject) -> {
+          requestTransmitter
+              .newRequest()
+              .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+              .methodName("textDocument/snippets")
+              .paramsAsDto(params)
+              .sendAndReceiveResultAsListOfDto(SnippetResult.class)
+              .onSuccess(resolve::apply)
+              .onFailure(error -> reject.apply(getPromiseError(error)));
+        });
   }
 
   public Promise<String> getFileContent(String uri) {
