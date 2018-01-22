@@ -21,7 +21,8 @@ public class TestCheAdminHttpJsonRequestFactory extends TestUserHttpJsonRequestF
   public TestCheAdminHttpJsonRequestFactory(
       TestAuthServiceClient authServiceClient,
       @Named("che.admin.name") String adminName,
-      @Named("che.admin.password") String adminPassword) {
-    super(authServiceClient, adminName, adminPassword);
+      @Named("che.admin.password") String adminPassword,
+      @Named("che.admin.offline_token") String adminOfflineToken) {
+    super(authServiceClient, adminName, adminPassword, adminOfflineToken);
   }
 }

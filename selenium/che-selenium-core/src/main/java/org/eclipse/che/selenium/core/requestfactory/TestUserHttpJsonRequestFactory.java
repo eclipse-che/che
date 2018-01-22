@@ -21,22 +21,25 @@ public class TestUserHttpJsonRequestFactory extends TestHttpJsonRequestFactory {
 
   private final String name;
   private final String password;
+  private final String offlineToken;
   private final TestAuthServiceClient authServiceClient;
 
   @AssistedInject
   public TestUserHttpJsonRequestFactory(
       TestAuthServiceClient authServiceClient,
       @Assisted("name") String name,
-      @Assisted("password") String password) {
+      @Assisted("password") String password,
+      @Assisted("offlineToken") String offlineToken) {
     this.authServiceClient = authServiceClient;
     this.name = name;
     this.password = password;
+    this.offlineToken = offlineToken;
   }
 
   @Override
   protected String getAuthToken() {
     try {
-      return authServiceClient.login(name, password);
+      return authServiceClient.login(name, password, offlineToken);
     } catch (Exception ex) {
       throw new RuntimeException(format("Failed to get access token for user '%s'", name));
     }

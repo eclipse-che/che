@@ -66,8 +66,11 @@ public class TestWorkspaceServiceClient {
       TestApiEndpointUrlProvider apiEndpointProvider,
       TestUserHttpJsonRequestFactoryCreator userHttpJsonRequestFactoryCreator,
       @Assisted("name") String name,
-      @Assisted("password") String password) {
-    this(apiEndpointProvider, userHttpJsonRequestFactoryCreator.create(name, password));
+      @Assisted("password") String password,
+      @Assisted("offlineToken") String offlineToken) {
+    this(
+        apiEndpointProvider,
+        userHttpJsonRequestFactoryCreator.create(name, password, offlineToken));
   }
 
   private String getBaseUrl() {

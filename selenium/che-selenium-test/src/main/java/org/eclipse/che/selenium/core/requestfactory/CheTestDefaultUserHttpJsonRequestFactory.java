@@ -21,7 +21,8 @@ public class CheTestDefaultUserHttpJsonRequestFactory extends TestUserHttpJsonRe
   public CheTestDefaultUserHttpJsonRequestFactory(
       TestAuthServiceClient authServiceClient,
       @Named("che.testuser.name") String name,
-      @Named("che.testuser.password") String password) {
-    super(authServiceClient, name, password);
+      @Named("che.testuser.password") String password,
+      @Named("che.testuser.offline_token") String offlineToken) {
+    super(authServiceClient, name, password, offlineToken);
   }
 }
