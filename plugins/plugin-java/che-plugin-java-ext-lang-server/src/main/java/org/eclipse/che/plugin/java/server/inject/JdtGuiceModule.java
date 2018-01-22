@@ -30,7 +30,6 @@ import org.eclipse.che.plugin.java.server.rest.JavadocService;
 import org.eclipse.che.plugin.java.server.rest.JavadocUrlProviderImpl;
 import org.eclipse.che.plugin.java.server.rest.JdtExceptionMapper;
 import org.eclipse.che.plugin.java.server.rest.RefactoringService;
-import org.eclipse.che.plugin.java.server.rest.SearchJsonRpcService;
 import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -54,7 +53,6 @@ public class JdtGuiceModule extends AbstractModule {
     bind(ProjectListeners.class).asEagerSingleton();
     bind(RefactoringManager.class).asEagerSingleton();
     bind(RefactoringService.class);
-    bind(SearchJsonRpcService.class).asEagerSingleton();
 
     bind(JavaReconcileRequestHandler.class).asEagerSingleton();
 
