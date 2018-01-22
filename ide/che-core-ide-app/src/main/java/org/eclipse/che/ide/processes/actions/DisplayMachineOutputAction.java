@@ -33,8 +33,6 @@ import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 @Singleton
 public class DisplayMachineOutputAction extends BaseAction {
 
-  public static final String ID = DisplayMachineOutputAction.class.getSimpleName();
-
   private final Provider<ProcessesPanelPresenter> processesPanelPresenter;
   private final EventBus eventBus;
 

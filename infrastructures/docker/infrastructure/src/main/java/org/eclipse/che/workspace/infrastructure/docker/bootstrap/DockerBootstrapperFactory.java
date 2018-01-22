@@ -21,6 +21,6 @@ public interface DockerBootstrapperFactory {
   DockerBootstrapper create(
       @Assisted String machineName,
       @Assisted RuntimeIdentity runtimeIdentity,
-      @Assisted List<Installer> installers,
+      @Assisted List<? extends Installer> installers,
       @Assisted DockerMachine dockerMachine);
 }

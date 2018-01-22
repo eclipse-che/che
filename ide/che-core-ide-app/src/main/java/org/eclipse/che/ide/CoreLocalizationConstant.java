@@ -1220,6 +1220,12 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("machine.output.action.description")
   String machineOutputActionDescription();
 
+  @Key("machine.ssh.action.title")
+  String machineSSHActionTitle();
+
+  @Key("machine.ssh.action.description")
+  String machineSSHActionDescription();
+
   @Key("control.connect.ssh")
   String connectViaSSH();
 

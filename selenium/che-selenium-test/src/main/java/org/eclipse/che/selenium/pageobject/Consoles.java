@@ -71,6 +71,7 @@ public class Consoles {
   public static final String COMMAND_CONSOLE_ID =
       "//div[@active]//div[@id='gwt-debug-commandConsoleLines']";
   public static final String PLUS_ICON = "gwt-debug-plusPanel";
+  public static final String TERMINAL_MENU_ITEM = "contextMenu/Terminal";
   public static final String SERVER_MENU_ITEM = "contextMenu/Servers";
   public static final String SERVER_INFO_TABLE_CAPTION = "gwt-debug-runtimeInfoCellTableCaption";
   public static final String SERVER_INFO_HIDE_INTERNAL_CHECK_BOX =
@@ -140,6 +141,9 @@ public class Consoles {
   @FindBy(id = SERVER_MENU_ITEM)
   WebElement serverMenuItem;
 
+  @FindBy(id = TERMINAL_MENU_ITEM)
+  WebElement terminalMenuItem;
+
   @FindBy(id = SERVER_INFO_TABLE_CAPTION)
   WebElement serverInfoTableCaption;
 
@@ -171,6 +175,10 @@ public class Consoles {
 
   public void clickOnServerItemInContextMenu() {
     redrawDriverWait.until(visibilityOf(serverMenuItem)).click();
+  }
+
+  public void clickOnTerminalItemInContextMenu() {
+    redrawDriverWait.until(visibilityOf(terminalMenuItem)).click();
   }
 
   public void clickOnPlusMenuButton() {
@@ -420,13 +428,21 @@ public class Consoles {
             visibilityOfElementLocated(By.xpath(format(MACHINE_NAME, machineName))));
     machine.click();
 
-    Actions action = new Actions(seleniumWebDriver);
-    action.moveToElement(machine).contextClick().perform();
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(machine).contextClick().perform();
     redrawDriverWait.until(visibilityOf(commandsMenuItem)).click();
 
     redrawDriverWait.until(visibilityOfElementLocated(By.id(commandGoal))).click();
     redrawDriverWait
         .until(visibilityOfElementLocated(By.xpath(format(COMMAND_NAME, commandName))))
         .click();
+  }
+
+  public void startTerminalFromProcessesArea(String machineName) {
+    WebElement machine =
+        redrawDriverWait.until(
+            visibilityOfElementLocated(By.xpath(format(MACHINE_NAME, machineName))));
+
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(machine).contextClick().perform();
+    clickOnTerminalItemInContextMenu();
   }
 }
