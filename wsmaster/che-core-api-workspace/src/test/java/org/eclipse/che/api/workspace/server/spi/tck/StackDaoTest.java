@@ -35,7 +35,6 @@ import org.eclipse.che.api.workspace.server.event.StackPersistedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackSourceImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.commons.test.tck.TckListener;
@@ -213,11 +212,6 @@ public class StackDaoTest {
     component.setName("new-name");
     component.setVersion("new-version");
 
-    // Updating source
-    final StackSourceImpl source = stack.getSource();
-    source.setType("new-type");
-    source.setOrigin("new-source");
-
     // Set a new icon
     stack.setStackIcon(new StackIcon("new-name", "new-media", "new-data".getBytes()));
 
@@ -302,7 +296,6 @@ public class StackDaoTest {
                 asList(
                     new StackComponentImpl(id + "-component1", id + "-component1-version"),
                     new StackComponentImpl(id + "-component2", id + "-component2-version")))
-            .setSource(new StackSourceImpl(id + "-type", id + "-origin"))
             .setStackIcon(
                 new StackIcon(id + "-icon", id + "-media-type", "0x1234567890abcdef".getBytes()))
             .build();
