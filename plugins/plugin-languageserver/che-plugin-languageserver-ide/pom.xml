@@ -221,6 +221,9 @@
                     </dependency>
                 </dependencies>
                 <configuration>
+                    <classes>
+                        <classe>org.eclipse.che.jdt.ls.extension.api.dto.LinearRange</classe>
+                    </classes>
                     <dtoPackages>
                         <package>org.eclipse.lsp4j</package>
                         <package>org.eclipse.che.api.languageserver.shared.event</package>
