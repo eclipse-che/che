@@ -21,6 +21,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -54,7 +55,7 @@ public class WorkingWithTerminalTest {
   private static final String WAR_NAME = "qa-spring-sample-1.0-SNAPSHOT.war";
 
   private static final String BASH_SCRIPT =
-      "for i in `seq 1 10`; do sleep 5; echo \"test=$i\"; done";
+      "for i in `seq 1 10`; do sleep 3; echo \"test=$i\"; done";
 
   private static final String MC_HELP_DIALOG =
       "This is the main help screen for GNU Midnight Commander.";
@@ -260,9 +261,15 @@ public class WorkingWithTerminalTest {
     // cancel script
     terminal.typeIntoTerminal(Keys.CONTROL + "c");
 
-    // wait 1 sec. If process was really stopped we should not get text "test=2"
-    Thread.sleep(1000);
-    terminal.waitExpectedTextNotPresentTerminal("test=2");
+    // wait 3 sec. If process was really stopped we should not get text "test=2"
+    WaitUtils.sleepQuietly(3);
+
+    try {
+      terminal.waitExpectedTextNotPresentTerminal("test=2");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8390");
+    }
   }
 
   @Test(priority = 7)
