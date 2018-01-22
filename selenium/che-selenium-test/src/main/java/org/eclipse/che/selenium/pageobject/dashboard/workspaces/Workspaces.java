@@ -50,11 +50,8 @@ public class Workspaces {
   private interface Locators {
     String TOOLBAR = "Workspaces";
     String DOCUMENTATION_LINK = "//a[@ng-href='/docs/devops/intro/index.html']";
-
-    String ADD_WORKSPACE_BTN = "add-workspace-button";
-
-    String DELETE_WORKSPACE_BTN = "delete-workspace-button";
-
+    String ADD_WORKSPACE_BTN = "add-item-button";
+    String DELETE_WORKSPACE_BTN = "delete-item-button";
     String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
     String BULK_CHECKBOX = "//md-checkbox[@aria-label='Workspace list']";
     String SEARCH_WORKSPACE_FIELD = "//input[@ng-placeholder='Search']";
