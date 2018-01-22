@@ -113,6 +113,8 @@ export class System {
       });
       return messageBus.subscribeAsync(channelToListen, callbackSubscriber);
     }).then((subscribed: string) => {
+         // to give some time for subscription request to finish, since
+         // it is no any response from the server for them
          return this.delay(2000);
     }).then(() => {
       if (callStop) {
