@@ -10,11 +10,16 @@
  */
 package org.eclipse.che.selenium.core.client;
 
-/** @author Anatolii Bazko */
-public interface TestAuthServiceClient {
+import com.google.gson.annotations.SerializedName;
 
-  /** Logs user into the system and returns auth token. */
-  String login(String username, String password, String offlineToken) throws Exception;
+/** @author Dmytro Nochevnov */
+public class KeycloakTokenContainer {
+  @SerializedName("token")
+  private KeycloakToken token;
 
-  void logout(String token) throws Exception;
+  public KeycloakTokenContainer() {}
+
+  public KeycloakToken getToken() {
+    return token;
+  }
 }

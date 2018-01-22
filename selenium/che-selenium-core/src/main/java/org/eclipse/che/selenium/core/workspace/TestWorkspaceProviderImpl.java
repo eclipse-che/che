@@ -89,7 +89,8 @@ public class TestWorkspaceProviderImpl implements TestWorkspaceProvider {
         owner,
         memoryGB,
         workspaceDtoDeserializer.deserializeWorkspaceTemplate(template),
-        testWorkspaceServiceClientFactory.create(owner.getEmail(), owner.getPassword()));
+        testWorkspaceServiceClientFactory.create(
+            owner.getEmail(), owner.getPassword(), owner.getOfflineToken()));
   }
 
   private boolean hasDefaultValues(TestUser testUser, int memoryGB, String template) {
