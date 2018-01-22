@@ -16,14 +16,12 @@ import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.cr
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.navigation.factory.NodeFactory;
 import org.eclipse.che.ide.ext.java.client.navigation.filestructure.FileStructurePresenter;
-import org.eclipse.che.ide.ext.java.client.search.node.NodeComparator;
 import org.eclipse.che.ide.ext.java.client.util.Flags;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Field;
@@ -82,7 +80,6 @@ public class TypeNode extends AbstractPresentationNode implements HasAction {
             }
           }
 
-          Collections.sort(child, new NodeComparator());
           callback.onSuccess(child);
         });
   }
