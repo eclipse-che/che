@@ -219,7 +219,7 @@ public class TestWorkspaceServiceClient {
       waitStatus(workspaceName, workspaceOwner.getName(), RUNNING);
     } catch (IllegalStateException ex) {
       // Remove try-catch block after issue has been resolved
-      Assert.fail("Known issue https://github.com/eclipse/che/issues/8031");
+      Assert.fail("Known issue https://github.com/eclipse/che/issues/8031", ex);
     }
   }
 
