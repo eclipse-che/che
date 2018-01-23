@@ -51,7 +51,6 @@ import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackComponentDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
-import org.eclipse.che.api.workspace.shared.dto.stack.StackSourceDto;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.eclipse.che.api.workspace.shared.stack.StackComponent;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -121,7 +120,6 @@ public class StackServiceTest {
   private List<StackComponent> componentsImpl;
   private StackIcon stackIcon;
 
-  private StackSourceDto stackSourceDto;
   private List<StackComponentDto> componentsDto;
 
   @Mock StackDao stackDao;
@@ -150,7 +148,6 @@ public class StackServiceTest {
             .setEnvironments(singletonMap(ENVIRONMENT_NAME, environment))
             .build();
 
-    stackSourceDto = newDto(StackSourceDto.class).withType(SOURCE_TYPE).withOrigin(SOURCE_ORIGIN);
     StackComponentDto stackComponentDto =
         newDto(StackComponentDto.class).withName(COMPONENT_NAME).withVersion(COMPONENT_VERSION);
     componentsDto = singletonList(stackComponentDto);
@@ -247,8 +244,6 @@ public class StackServiceTest {
   //    public void shouldThrowBadRequestExceptionOnCreateStackWithEmptyName() {
   //        StackComponentDto stackComponentDto =
   // newDto(StackComponentDto.class).withName("Java").withVersion("1.8.45");
-  //        StackSourceDto stackSourceDto =
-  // newDto(StackSourceDto.class).withType("image").withOrigin("codenvy/ubuntu_jdk8");
   //        StackDto stackDto = newDto(StackDto.class).withId(USER_ID)
   //                                                  .withDescription("")
   //                                                  .withScope("Simple java stack for generation
@@ -257,7 +252,6 @@ public class StackServiceTest {
   //                                                  .withCreator("che")
   //
   // .withComponents(singletonList(stackComponentDto))
-  //                                                  .withSource(stackSourceDto);
   //
   //        Response response = given().auth()
   //                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
