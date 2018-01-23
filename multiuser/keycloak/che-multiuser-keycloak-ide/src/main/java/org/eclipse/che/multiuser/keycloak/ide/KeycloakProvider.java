@@ -52,27 +52,27 @@ public class KeycloakProvider {
 
     keycloak =
         CallbackPromiseHelper.createFromCallback(
-            new CallbackPromiseHelper.Call<Void, Throwable>() {
-              @Override
-              public void makeCall(final Callback<Void, Throwable> callback) {
-                ScriptInjector.fromUrl(
-                    settings.get(AUTH_SERVER_URL_SETTING) + "/js/keycloak.js")
-                    .setCallback(
-                        new Callback<Void, Exception>() {
-                          @Override
-                          public void onSuccess(Void result) {
-                            callback.onSuccess(null);
-                          }
+                new CallbackPromiseHelper.Call<Void, Throwable>() {
+                  @Override
+                  public void makeCall(final Callback<Void, Throwable> callback) {
+                    ScriptInjector.fromUrl(
+                            settings.get(AUTH_SERVER_URL_SETTING) + "/js/keycloak.js")
+                        .setCallback(
+                            new Callback<Void, Exception>() {
+                              @Override
+                              public void onSuccess(Void result) {
+                                callback.onSuccess(null);
+                              }
 
-                          @Override
-                          public void onFailure(Exception reason) {
-                            callback.onFailure(reason);
-                          }
-                        })
-                    .setWindow(getWindow())
-                    .inject();
-              }
-            })
+                              @Override
+                              public void onFailure(Exception reason) {
+                                callback.onFailure(reason);
+                              }
+                            })
+                        .setWindow(getWindow())
+                        .inject();
+                  }
+                })
             .thenPromise(
                 (v) ->
                     Keycloak.init(
