@@ -24,6 +24,7 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.event.WsAgentServerStoppedEvent;
+import org.eclipse.che.ide.ui.window.WindowClientBundle;
 
 /** Notification to show that workspace agent is shut down and may be restarted */
 @Singleton
@@ -44,12 +45,16 @@ class StartWsAgentNotification {
       StartWsAgentNotificationUiBinder uiBinder,
       Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider,
       EventBus eventBus,
-      RestartingStateHolder restartingStateHolder) {
+      RestartingStateHolder restartingStateHolder,
+      WindowClientBundle windowClientBundle) {
     this.wsStatusNotification = wsStatusNotification;
     this.uiBinder = uiBinder;
     this.currentWorkspaceManagerProvider = currentWorkspaceManagerProvider;
     this.eventBus = eventBus;
     this.restartingStateHolder = restartingStateHolder;
+
+    ignoreButton.addStyleName(windowClientBundle.getStyle().windowFrameFooterButtonPrimary());
+    restartButton.addStyleName(windowClientBundle.getStyle().windowFrameFooterButtonPrimary());
 
     eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, e -> show());
   }
