@@ -50,6 +50,8 @@ public interface TreeStyles extends ClientBundle {
     String tree();
 
     String loading();
+
+    String searchMatch();
   }
 
   @Source("TreeStyles.css")
