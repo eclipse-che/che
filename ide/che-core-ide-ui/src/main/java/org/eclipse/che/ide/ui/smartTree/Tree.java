@@ -277,7 +277,6 @@ public class Tree extends FocusWidget
     checkNotNull(treeStyles);
 
     this.treeStyles = treeStyles;
-    this.treeStyles.styles().ensureInjected();
     this.nodesByDom = new HashMap<>();
     this.focusImpl = FocusImpl.getFocusImplForPanel();
     this.storeHandlers = new GroupingHandlerRegistration();
@@ -407,7 +406,7 @@ public class Tree extends FocusWidget
   public NodeDescriptor getNodeDescriptor(Element target) {
     checkNotNull(target);
 
-    Element nodeElement = getNearestParentElement(target, treeStyles.styles().rootContainer());
+    Element nodeElement = getNearestParentElement(target, treeStyles.treeStylesCss().rootContainer());
     if (!(nodeElement == null || isNullOrEmpty(nodeElement.getId()))) {
       return nodesByDom.get(nodeElement.getId());
     }
@@ -1337,10 +1336,10 @@ public class Tree extends FocusWidget
 
   private void ensureTreeElement() {
     DivElement element = Document.get().createDivElement();
-    element.addClassName(treeStyles.styles().tree());
+    element.addClassName(treeStyles.treeStylesCss().tree());
 
     rootContainer = Document.get().createDivElement();
-    rootContainer.addClassName(treeStyles.styles().contentTree());
+    rootContainer.addClassName(treeStyles.treeStylesCss().contentTree());
     rootContainer.setId("content-Tree");
 
     element.appendChild(rootContainer);
@@ -1353,9 +1352,9 @@ public class Tree extends FocusWidget
       focusEl.removeFromParent();
     }
     focusEl = getElement().appendChild(focusImpl.createFocusable());
-    focusEl.addClassName(treeStyles.styles().noFocusOutline());
+    focusEl.addClassName(treeStyles.treeStylesCss().noFocusOutline());
     if (focusEl.hasChildNodes()) {
-      focusEl.getFirstChildElement().addClassName(treeStyles.styles().noFocusOutline());
+      focusEl.getFirstChildElement().addClassName(treeStyles.treeStylesCss().noFocusOutline());
       Style focusElStyle = focusEl.getFirstChildElement().getStyle();
       focusElStyle.setBorderWidth(0, Style.Unit.PX);
       focusElStyle.setFontSize(1, Style.Unit.PX);

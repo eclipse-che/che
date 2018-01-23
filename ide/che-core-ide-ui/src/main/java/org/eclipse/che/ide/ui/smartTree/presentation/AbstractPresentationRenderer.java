@@ -42,7 +42,7 @@ public abstract class AbstractPresentationRenderer<N extends Node>
   public Element getRootContainer(String domID) {
     DivElement divElement = Document.get().createDivElement();
     divElement.setId(domID);
-    divElement.setClassName(treeStyles.styles().rootContainer());
+    divElement.setClassName(treeStyles.treeStylesCss().rootContainer());
     return divElement;
   }
 
@@ -50,7 +50,7 @@ public abstract class AbstractPresentationRenderer<N extends Node>
   @Override
   public Element getNodeContainer() {
     DivElement divElement = Document.get().createDivElement();
-    divElement.setClassName(treeStyles.styles().nodeContainer());
+    divElement.setClassName(treeStyles.treeStylesCss().nodeContainer());
     return divElement;
   }
 
@@ -62,21 +62,21 @@ public abstract class AbstractPresentationRenderer<N extends Node>
     switch (joint) {
       case COLLAPSED:
         OMSVGSVGElement svg = treeStyles.iconCollapsed().getSvg();
-        svg.addClassNameBaseVal(treeStyles.styles().jointContainer());
+        svg.addClassNameBaseVal(treeStyles.treeStylesCss().jointContainer());
         svg.setWidth(Style.Unit.PX, 16.f);
         svg.setHeight(Style.Unit.PX, 16.f);
         jointElement = svg.getElement();
         break;
       case EXPANDED:
         OMSVGSVGElement svg1 = treeStyles.iconExpanded().getSvg();
-        svg1.addClassNameBaseVal(treeStyles.styles().jointContainer());
+        svg1.addClassNameBaseVal(treeStyles.treeStylesCss().jointContainer());
         svg1.setWidth(Style.Unit.PX, 16.f);
         svg1.setHeight(Style.Unit.PX, 16.f);
         jointElement = svg1.getElement();
         break;
       default:
         OMSVGSVGElement svgsvgElement = OMSVGParser.currentDocument().createSVGSVGElement();
-        svgsvgElement.addClassNameBaseVal(treeStyles.styles().jointContainer());
+        svgsvgElement.addClassNameBaseVal(treeStyles.treeStylesCss().jointContainer());
         svgsvgElement.setWidth(Style.Unit.PX, 16.f);
         svgsvgElement.setHeight(Style.Unit.PX, 16.f);
         jointElement = svgsvgElement.getElement();
@@ -98,7 +98,7 @@ public abstract class AbstractPresentationRenderer<N extends Node>
   public Element getIconContainer(SVGResource icon) {
     if (icon != null) {
       OMSVGSVGElement svg = icon.getSvg();
-      svg.addClassNameBaseVal(treeStyles.styles().iconContainer());
+      svg.addClassNameBaseVal(treeStyles.treeStylesCss().iconContainer());
       svg.setWidth(Style.Unit.PX, 16);
       svg.setHeight(Style.Unit.PX, 16);
       return svg.getElement();
@@ -106,7 +106,7 @@ public abstract class AbstractPresentationRenderer<N extends Node>
 
     ImageElement emptyIcon = Document.get().createImageElement();
     emptyIcon.setSrc(TreeView.blankImageUrl);
-    emptyIcon.setClassName(treeStyles.styles().iconContainer());
+    emptyIcon.setClassName(treeStyles.treeStylesCss().iconContainer());
     return emptyIcon;
   }
 
@@ -114,7 +114,7 @@ public abstract class AbstractPresentationRenderer<N extends Node>
   @Override
   public Element getPresentableTextContainer(Element content) {
     DivElement divElement = Document.get().createDivElement();
-    divElement.setClassName(treeStyles.styles().presentableTextContainer());
+    divElement.setClassName(treeStyles.treeStylesCss().presentableTextContainer());
     divElement.appendChild(content);
     return divElement;
   }
@@ -123,7 +123,7 @@ public abstract class AbstractPresentationRenderer<N extends Node>
   @Override
   public Element getInfoTextContainer(Element content) {
     DivElement divElement = Document.get().createDivElement();
-    divElement.setClassName(treeStyles.styles().infoTextContainer());
+    divElement.setClassName(treeStyles.treeStylesCss().infoTextContainer());
     divElement.appendChild(content);
     return divElement;
   }
@@ -132,7 +132,7 @@ public abstract class AbstractPresentationRenderer<N extends Node>
   @Override
   public Element getDescendantsContainer() {
     DivElement divElement = Document.get().createDivElement();
-    divElement.setClassName(treeStyles.styles().descendantsContainer());
+    divElement.setClassName(treeStyles.treeStylesCss().descendantsContainer());
     return divElement;
   }
 }
