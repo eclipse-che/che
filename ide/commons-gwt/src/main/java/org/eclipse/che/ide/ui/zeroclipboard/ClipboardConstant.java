@@ -17,7 +17,7 @@ import com.google.gwt.i18n.client.Messages;
  *
  * @author Oleksii Orel
  */
-public interface ZeroClipboardConstant extends Messages {
+public interface ClipboardConstant extends Messages {
   /* Prompts */
   @Key("prompt.readyToCopy")
   String promptReadyToCopy();

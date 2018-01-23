@@ -113,13 +113,6 @@ public interface Theme {
   String activeTabTextShadow();
 
   /**
-   * Icon color in active (selected) tab.
-   *
-   * @return color for icon
-   */
-  String activeTabIconColor();
-
-  /**
    * Text color for part button.
    *
    * @return the color
@@ -292,6 +285,12 @@ public interface Theme {
 
   /** Background of the DropdownList widget. */
   String getDropdownListBackground();
+
+  /** Color of the ExecLabel for DropdownList  widget. */
+  String getDropdownListExecLabelColor();
+
+  /** Background of the ExecLabel for DropdownList  widget. */
+  String getDropdownListExecLabelBackground();
 
   /** Background of the hovered DropdownList widget. */
   String getHoveredDropdownListBackground();
@@ -1120,6 +1119,13 @@ public interface Theme {
   String consolesToolbarToggledButtonColor();
 
   /**
+   * Toggled button border on the consoles toolbar.
+   *
+   * @return color
+   */
+  String consolesToolbarToggledButtonBorderColor();
+
+  /**
    * Text color for DEV label in processes tree.
    *
    * @return color
@@ -1697,4 +1703,26 @@ public interface Theme {
   String projectExplorerPlaceholderIconColor();
 
   String projectExplorerPlaceholderRowColor();
+
+  /**
+   * ******************************************************************************************
+   *
+   * <p>Part switcher icons
+   *
+   * <p>******************************************************************************************
+   */
+  String tabIconColor();
+
+  String activeTabIconColor();
+
+  String hoveredTabIconColor();
+
+  /**
+   * ******************************************************************************************
+   *
+   * <p>Toolbar panel
+   *
+   * <p>******************************************************************************************
+   */
+  String noToolbarPanelColor();
 }

@@ -78,7 +78,7 @@ public class UploadFolderFromZipViewImpl extends Window implements UploadFolderF
             });
     btnUpload.addStyleName(resources.windowCss().primaryButton());
     btnUpload.addStyleName(resources.windowCss().buttonAlignRight());
-    btnUpload.addStyleName(resources.Css().buttonLoader());
+    btnUpload.addStyleName(resources.buttonLoaderCss().buttonLoader());
     addButtonToFooter(btnUpload);
 
     btnCancel =

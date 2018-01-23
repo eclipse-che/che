@@ -139,7 +139,7 @@ public class FoundOccurrenceNode extends AbstractTreeNode implements HasPresenta
   @Override
   // TODO
   public void updatePresentation(@NotNull NodePresentation presentation) {
-    SpanElement spanElement = createSpanElement(styles.styles().presentableTextContainer());
+    SpanElement spanElement = createSpanElement(styles.treeStylesCss().presentableTextContainer());
     spanElement.setAttribute("debugFilePath", itemPath);
     SpanElement lineNumberElement = createSpanElement();
     lineNumberElement.setInnerHTML(

@@ -8,22 +8,19 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-@external .zeroclipboard-is-hover;
 
-#global-zeroclipboard-html-bridge {
-    color: transparent;
-}
+@eval tabIconColor org.eclipse.che.ide.api.theme.Style.theme.tabIconColor();
 
 .clipboardButton {
+    position: relative;
     top: 0;
-    width: 16px;
     height: 24px;
+    min-width: 18px;
     border: none;
     float: left;
     color: inherit;
     cursor: pointer;
-    background: none;
-    position: relative;
+    background: inherit;
     display: inline-block;
 }
 
@@ -36,14 +33,15 @@
     display: none;
     position: absolute;
     cursor: default;
-    top: 28px;
+    top: 30px;
     left: 0;
-    padding: 8px;
+    padding: 6px;
     font-size: 8pt;
     font-weight: normal;
     white-space: nowrap;
-    background: #202020;
+    background: outputBackgroundColor;
     font-family: mainFontFamily;
+    color: outputFontColor;
     z-index: 9999999;
 }
 
@@ -52,24 +50,26 @@
     width: 0;
     height: 0;
     border: 9px solid;
-    border-color: transparent transparent #202020 transparent;
+    border-color: transparent transparent tooltipBackgroundColor transparent;
     position: absolute;
-    top: -15px;
-    left: 1px;
+    top: -16px;
+    left: 0;
 }
 
 div.clipboardButton {
     margin: 1px 0 0 0;
 }
 
-div.clipboardButton:hover,
-div.clipboardButton.zeroclipboard-is-hover {
-    background: #202020;
+div.clipboardButton svg,
+div.clipboardButton svg path {
+    fill: tabIconColor;
+}
+
+div.clipboardButton:hover {
+    background: tooltipBackgroundColor;
 }
 
 .clipboardButton:hover span,
-.clipboardButton.zeroclipboard-is-hover span,
-.clipboardButton:hover span:after,
-.clipboardButton.zeroclipboard-is-hover span:after {
+.clipboardButton:hover span:after {
     display: inline;
 }

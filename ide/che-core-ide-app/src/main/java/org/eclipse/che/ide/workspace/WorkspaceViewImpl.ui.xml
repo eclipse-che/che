@@ -16,6 +16,7 @@
     <ui:style src="org/eclipse/che/ide/api/ui/style.css">
 
         @eval statusPanelColor org.eclipse.che.ide.api.theme.Style.getStatusPanelColor();
+        @eval noToolbarPanelColor org.eclipse.che.ide.api.theme.Style.theme.noToolbarPanelColor();
 
         .toolbarPanel {
             margin-top: 0;
@@ -23,7 +24,7 @@
         }
 
         .noToolbarPanel {
-            background-color: tabBorderColor;
+            background-color: noToolbarPanelColor;
         }
 
         .statusPanel {

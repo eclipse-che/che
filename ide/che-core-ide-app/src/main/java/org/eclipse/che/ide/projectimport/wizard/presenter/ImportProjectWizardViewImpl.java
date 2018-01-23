@@ -67,7 +67,7 @@ public class ImportProjectWizardViewImpl extends Window implements ImportProject
                 delegate.onImportClicked();
               }
             });
-    importButton.addStyleName(ideResources.Css().buttonLoader());
+    importButton.addStyleName(ideResources.buttonLoaderCss().buttonLoader());
 
     addButtonToFooter(importButton);
 
