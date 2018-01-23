@@ -38,7 +38,7 @@
     </ui:style>
 
     <g:FlowPanel addStyleNames="{style.main}">
-        <g:Button ui:field="button" addStyleNames=" {style.button}" text="{locale.startWsButton}"></g:Button>
+        <g:Button ui:field="button" addStyleNames="{style.button}" text="{locale.startWsButton}"/>
     </g:FlowPanel>
 
 </ui:UiBinder>
