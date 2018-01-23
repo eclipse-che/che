@@ -268,8 +268,11 @@ public class CompositeWindowView extends Composite implements WindowView {
       button.addStyleName(clientBundle.getStyle().windowFrameFooterButton());
     }
 
-    windowFrameButtonBar.setVisible(true);
     windowFrameButtonBar.add(button);
+
+    if (!windowFrameButtonBar.isVisible()) {
+      windowFrameButtonBar.setVisible(true);
+    }
 
     return button;
   }
@@ -277,6 +280,10 @@ public class CompositeWindowView extends Composite implements WindowView {
   @Override
   public void addButtonBarWidget(Widget widget) {
     windowFrameButtonBar.add(widget);
+
+    if (!windowFrameButtonBar.isVisible()) {
+      windowFrameButtonBar.setVisible(true);
+    }
   }
 
   @Override

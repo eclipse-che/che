@@ -34,10 +34,10 @@ import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
  *
  * <p>Frame bottom bar may include that resides below the content area and includes controls for
  * affecting the content of the window. Usually bar contains buttons to accept or perform specific
- * actions. To add a predefined type of control, e.g. button, method {@link
- * #addFooterButton(String, String, ClickHandler, boolean, ButtonAlignment)} should be called.
- * To place custom widget into button bar, method {@link #addFooterWidget(Widget)} should be
- * called. If button bar doesn't contain any control, it will be hidden automatically.
+ * actions. To add a predefined type of control, e.g. button, method {@link #addFooterButton(String,
+ * String, ClickHandler, boolean, ButtonAlignment)} should be called. To place custom widget into
+ * button bar, method {@link #addFooterWidget(Widget)} should be called. If button bar doesn't
+ * contain any control, it will be hidden automatically.
  *
  * <p>By default window listens to the keyPress event to be able to close itself when user press
  * Escape key. To disable it method {@link #setCloseOnEscape(boolean)} should be called.
@@ -50,7 +50,7 @@ public abstract class Window implements IsWidget {
   private final WindowView view;
   private final WindowManager windowManager;
 
-  protected Window() {
+  public Window() {
     windowManager = WindowManager.getInstance();
 
     view = new CompositeWindowView();
@@ -156,8 +156,7 @@ public abstract class Window implements IsWidget {
    * @param clickHandler handler to process click operation
    * @return created instance of {@link Button}
    */
-  protected final Button addFooterButton(
-      String text, String debugId, ClickHandler clickHandler) {
+  protected final Button addFooterButton(String text, String debugId, ClickHandler clickHandler) {
     return addFooterButton(text, debugId, clickHandler, false, ButtonAlignment.RIGHT);
   }
 
@@ -191,7 +190,7 @@ public abstract class Window implements IsWidget {
    * Remove the current window from the DOM and hide it. After window hide, method {@link #onHide()}
    * is called to allow user to perform some actions after hide.
    */
-  protected final void hide() {
+  public final void hide() {
     view.detach();
     windowManager.unregister(this);
 
@@ -199,7 +198,7 @@ public abstract class Window implements IsWidget {
   }
 
   /** Display current window on the viewport. */
-  protected final void show() {
+  public final void show() {
     show(null);
   }
 
@@ -208,7 +207,7 @@ public abstract class Window implements IsWidget {
    *
    * @param focusOn widget to focus
    */
-  protected final void show(Widget focusOn) {
+  public final void show(Widget focusOn) {
     windowManager.register(this);
     view.attach();
     view.setFocusWidget(focusOn);

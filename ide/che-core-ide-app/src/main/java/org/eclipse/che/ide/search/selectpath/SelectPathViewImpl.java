@@ -80,12 +80,10 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
 
     handler.bind(tree);
 
-    cancelButton =
-        addFooterButton(locale.cancel(), "select-path-cancel-button", event -> hide());
+    cancelButton = addFooterButton(locale.cancel(), "select-path-cancel-button", event -> hide());
 
     acceptButton =
-        addFooterButton(
-            locale.ok(), "select-path-ok-button", event -> acceptButtonClicked(), true);
+        addFooterButton(locale.ok(), "select-path-ok-button", event -> acceptButtonClicked(), true);
   }
 
   @Override
