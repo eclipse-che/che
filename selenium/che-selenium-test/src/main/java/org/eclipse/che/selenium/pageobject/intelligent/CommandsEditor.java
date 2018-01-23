@@ -24,6 +24,7 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Loader;
+import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
@@ -46,8 +47,10 @@ public class CommandsEditor extends CodenvyEditor {
       SeleniumWebDriver seleniumWebDriver,
       Loader loader,
       ActionsFactory actionsFactory,
-      AskForValueDialog askForValueDialog) {
-    super(seleniumWebDriver, loader, actionsFactory, askForValueDialog);
+      AskForValueDialog askForValueDialog,
+      TestWebElementRenderChecker testWebElementRenderChecker) {
+    super(
+        seleniumWebDriver, loader, actionsFactory, askForValueDialog, testWebElementRenderChecker);
     PageFactory.initElements(seleniumWebDriver, this);
     redrawWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     elemDriverWait = new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC);

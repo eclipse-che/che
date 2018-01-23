@@ -31,6 +31,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
@@ -72,6 +73,12 @@ public class DeleteProjectsTest {
     waitAllProjectsInProjectExplorer();
     loader.waitOnClosed();
     consoles.selectProcessByTabName("dev-machine");
+  }
+
+  @BeforeMethod
+  public void clearTerminalOutput() {
+    consoles.clickOnClearOutputButton();
+    consoles.waitExpectedTextIntoConsole("", 20);
   }
 
   @Test
