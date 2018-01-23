@@ -65,8 +65,7 @@ public class AboutViewImpl extends Window implements AboutView {
     this.ensureDebugId("aboutView-window");
 
     btnOk =
-        addFooterButton(
-            coreLocale.ok(), "help-about-ok", event -> delegate.onOkClicked(), true);
+        addFooterButton(coreLocale.ok(), "help-about-ok", event -> delegate.onOkClicked(), true);
 
     final SVGResource logo = productInfoDataProvider.getLogo();
     if (nonNull(logo)) {

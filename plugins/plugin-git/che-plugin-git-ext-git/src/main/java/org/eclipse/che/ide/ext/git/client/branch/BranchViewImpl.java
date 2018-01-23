@@ -166,8 +166,7 @@ public class BranchViewImpl extends Window implements BranchView {
 
   private void createButtons() {
     btnClose =
-        addFooterButton(
-            locale.buttonClose(), "git-branches-close", event -> delegate.onClose());
+        addFooterButton(locale.buttonClose(), "git-branches-close", event -> delegate.onClose());
     btnRename =
         addFooterButton(
             locale.buttonRename(), "git-branches-rename", event -> delegate.onRenameClicked());
