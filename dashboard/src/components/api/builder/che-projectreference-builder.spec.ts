@@ -9,6 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheAPIBuilder} from './che-api-builder.factory';
 
 /**
  * Tests of the CheProjectReferenceBuilder
@@ -29,7 +30,7 @@ describe('CheProjectReferenceBuilder', function(){
   /**
    * Inject builder
    */
-  beforeEach(inject(function(cheAPIBuilder) {
+  beforeEach(inject(function(cheAPIBuilder: CheAPIBuilder) {
     apiBuilder = cheAPIBuilder;
   }));
 
