@@ -18,11 +18,13 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -84,7 +86,8 @@ public class ShowHintsCommandTest {
     editor.typeTextIntoEditor(Keys.TAB.toString());
     editor.typeTextIntoEditor("runCommand();");
     editor.waitTextIntoEditor("runCommand();");
-    editor.typeTextIntoEditor(Keys.HOME.toString());
+    waitErrorMarkerInPosition();
+    editor.goToCursorPositionVisible(32, 5);
     editor.callShowHintsPopUp();
     editor.waitShowHintsPopUpOpened();
     editor.waitExpTextIntoShowHintsPopUp(TEXT_IN_POP_UP_1);
@@ -104,5 +107,27 @@ public class ShowHintsCommandTest {
     editor.waitExpTextIntoShowHintsPopUp(TEXT_IN_POP_UP_2);
     editor.typeTextIntoEditor(Keys.ESCAPE.toString());
     editor.waitShowHintsPopUpClosed();
+  }
+
+  private void waitErrorMarkerInPosition() {
+    try {
+      editor.waitMarkerInPosition(MarkersType.ERROR_MARKER, 33);
+    } catch (TimeoutException ex) {
+      editor.setCursorToLine(33);
+      editor.waitCursorPosition(33, 1);
+      editor.typeTextIntoEditor(Keys.ENTER.toString());
+      editor.waitCursorPosition(34, 1);
+      editor.typeTextIntoEditor(Keys.ENTER.toString());
+      editor.waitCursorPosition(35, 1);
+      editor.typeTextIntoEditor(Keys.ENTER.toString());
+      editor.waitCursorPosition(36, 1);
+      editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
+      editor.waitCursorPosition(35, 1);
+      editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
+      editor.waitCursorPosition(34, 1);
+      editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
+      editor.waitCursorPosition(33, 1);
+      editor.waitMarkerInPosition(MarkersType.ERROR_MARKER, 33);
+    }
   }
 }

@@ -244,7 +244,7 @@ init() {
     sudo chown -R ${CHE_USER} ${CHE_LOGS_DIR}
   fi
 
-  [ -z "$CHE_DATABASE" ] && export CHE_DATABASE=${CHE_DATA}
+  [ -z "$CHE_DATABASE" ] && export CHE_DATABASE=${CHE_DATA}/storage
   [ -z "$CHE_TEMPLATE_STORAGE" ] && export CHE_TEMPLATE_STORAGE=${CHE_DATA}/templates
   [ -z "$CHE_WORKSPACE_AGENT_DEV" ] && export CHE_WORKSPACE_AGENT_DEV=${CHE_DATA_HOST}/lib/ws-agent.tar.gz
   [ -z "$CHE_WORKSPACE_TERMINAL__LINUX__AMD64" ] && export CHE_WORKSPACE_TERMINAL__LINUX__AMD64=${CHE_DATA_HOST}/lib/linux_amd64/terminal

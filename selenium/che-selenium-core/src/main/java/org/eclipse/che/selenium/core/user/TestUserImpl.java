@@ -39,11 +39,12 @@ public class TestUserImpl implements TestUser {
   private final String name;
   private final String id;
   private final String authToken;
+  private final String offlineToken;
 
   private final TestUserServiceClient userServiceClient;
   private final TestWorkspaceServiceClient workspaceServiceClient;
 
-  /** To instantiate user with specific name, e-mail and password. */
+  /** To instantiate user with specific name, e-mail, password and offline token. */
   @AssistedInject
   public TestUserImpl(
       TestUserServiceClientFactory testUserServiceClientFactory,
@@ -51,16 +52,18 @@ public class TestUserImpl implements TestUser {
       TestWorkspaceServiceClientFactory wsServiceClientFactory,
       @Assisted("name") String name,
       @Assisted("email") String email,
-      @Assisted("password") String password)
+      @Assisted("password") String password,
+      @Assisted("offlineToken") String offlineToken)
       throws Exception {
-    this.userServiceClient = testUserServiceClientFactory.create(name, password);
+    this.userServiceClient = testUserServiceClientFactory.create(name, password, offlineToken);
     this.email = email;
     this.password = password;
     this.name = name;
-    this.authToken = authServiceClient.login(name, password);
+    this.offlineToken = offlineToken;
+    this.authToken = authServiceClient.login(name, password, offlineToken);
     this.id = userServiceClient.findByEmail(email).getId();
     LOG.info("User name='{}', id='{}' is being used for testing", name, id);
-    this.workspaceServiceClient = wsServiceClientFactory.create(email, password);
+    this.workspaceServiceClient = wsServiceClientFactory.create(email, password, offlineToken);
   }
 
   @Override
@@ -86,6 +89,10 @@ public class TestUserImpl implements TestUser {
   @Override
   public String getId() {
     return id;
+  }
+
+  public String getOfflineToken() {
+    return offlineToken;
   }
 
   @Override

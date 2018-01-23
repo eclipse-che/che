@@ -28,6 +28,9 @@ public interface TestUser {
    */
   String getAuthToken();
 
+  /** Return user's offline token. */
+  String getOfflineToken();
+
   /** Return user's name. */
   String getName();
 

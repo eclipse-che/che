@@ -24,8 +24,8 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.openqa.selenium.TimeoutException;
@@ -52,7 +52,7 @@ public class ImportProjectFromGitHubTest {
   @Inject private Workspaces workspaces;
   @Inject private TestUser defaultTestUser;
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private CreateWorkspace createWorkspace;
+  @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
@@ -75,10 +75,10 @@ public class ImportProjectFromGitHubTest {
 
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.clickOnNewWorkspaceBtn();
-    createWorkspace.waitToolbar();
-    createWorkspace.selectStack(JAVA.getId());
-    createWorkspace.typeWorkspaceName(WORKSPACE);
+    workspaces.clickOnAddWorkspaceBtn();
+    newWorkspace.waitToolbar();
+    newWorkspace.selectStack(JAVA.getId());
+    newWorkspace.typeWorkspaceName(WORKSPACE);
 
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSourceTab(GITHUB);
@@ -90,7 +90,7 @@ public class ImportProjectFromGitHubTest {
     assertTrue(projectSourcePage.isGithubProjectsListDisplayed());
     projectSourcePage.selectProjectFromList(GITHUB_PROJECT_NAME);
     projectSourcePage.clickOnAddProjectButton();
-    createWorkspace.clickOnCreateButtonAndOpenInIDE();
+    newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     seleniumWebDriver.switchFromDashboardIframeToIde(ELEMENT_TIMEOUT_SEC);
 
