@@ -10,8 +10,7 @@
  */
 package org.eclipse.che.ide.workspace;
 
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
-import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.WORKSPACE_STOPPED;
+import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.WORKSPACE_AGENT_STOPPED;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -23,74 +22,75 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
+import org.eclipse.che.ide.api.workspace.event.WsAgentServerStoppedEvent;
 
-/**
- * Toast notification appearing on the top of the IDE and containing a proposal message to start
- * current workspace and the button to perform the operation.
- *
- * @author Vitaliy Guliy
- */
+/** Notification to show that workspace agent is shut down and may be restarted */
 @Singleton
-class StartWorkspaceNotification {
+class StartWsAgentNotification {
 
-  private final StartWorkspaceNotificationUiBinder uiBinder;
+  private final StartWsAgentNotificationUiBinder uiBinder;
   private final WorkspaceStatusNotification wsStatusNotification;
   private final Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider;
+  private final EventBus eventBus;
   private final RestartingStateHolder restartingStateHolder;
 
-  @UiField Button button;
+  @UiField Button ignoreButton;
+  @UiField Button restartButton;
 
   @Inject
-  StartWorkspaceNotification(
+  StartWsAgentNotification(
       WorkspaceStatusNotification wsStatusNotification,
-      StartWorkspaceNotificationUiBinder uiBinder,
+      StartWsAgentNotificationUiBinder uiBinder,
       Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider,
       EventBus eventBus,
-      AppContext appContext,
       RestartingStateHolder restartingStateHolder) {
     this.wsStatusNotification = wsStatusNotification;
     this.uiBinder = uiBinder;
     this.currentWorkspaceManagerProvider = currentWorkspaceManagerProvider;
+    this.eventBus = eventBus;
     this.restartingStateHolder = restartingStateHolder;
 
-    eventBus.addHandler(
-        BasicIDEInitializedEvent.TYPE,
-        e -> {
-          WorkspaceStatus status = appContext.getWorkspace().getStatus();
-
-          if (status == STOPPED) {
-            show();
-          }
-        });
-
-    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, e -> show());
+    eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, e -> show());
   }
 
-  /** Displays a notification with a proposal to start the current workspace. */
   void show() {
-    if (restartingStateHolder.isRestarting()) {
-      return;
-    }
-    Widget widget = uiBinder.createAndBindUi(StartWorkspaceNotification.this);
-    wsStatusNotification.show(WORKSPACE_STOPPED, widget);
+    Widget widget = uiBinder.createAndBindUi(StartWsAgentNotification.this);
+    wsStatusNotification.show(WORKSPACE_AGENT_STOPPED, widget);
   }
 
   /** Hides a notification. */
   private void hide() {
-    wsStatusNotification.setSuccess(WORKSPACE_STOPPED);
+    wsStatusNotification.setSuccess(WORKSPACE_AGENT_STOPPED);
   }
 
-  @UiHandler("button")
-  void startClicked(ClickEvent e) {
+  @UiHandler("ignoreButton")
+  void ignoreButtonClicked(ClickEvent e) {
+    hide();
+  }
+
+  @UiHandler("restartButton")
+  void restartButtonClicked(ClickEvent e) {
     hide();
 
-    currentWorkspaceManagerProvider.get().startWorkspace();
+    restartingStateHolder.setRestartingState(true);
+
+    currentWorkspaceManagerProvider.get().stopWorkspace();
+
+    eventBus.addHandler(
+        WorkspaceStoppedEvent.TYPE,
+        ignore -> {
+          if (restartingStateHolder.isRestarting()) {
+            currentWorkspaceManagerProvider
+                .get()
+                .startWorkspace()
+                .then(
+                    ignoreAgain -> {
+                      restartingStateHolder.setRestartingState(false);
+                    });
+          }
+        });
   }
 
-  interface StartWorkspaceNotificationUiBinder
-      extends UiBinder<Widget, StartWorkspaceNotification> {}
+  interface StartWsAgentNotificationUiBinder extends UiBinder<Widget, StartWsAgentNotification> {}
 }
