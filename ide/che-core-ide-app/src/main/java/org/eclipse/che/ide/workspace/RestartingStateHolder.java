@@ -10,16 +10,18 @@
  */
 package org.eclipse.che.ide.workspace;
 
-import com.google.gwt.inject.client.AbstractGinModule;
+import com.google.inject.Singleton;
 
-public class WorkspaceApiModule extends AbstractGinModule {
+/** Just a holder to track restarting of a workspace */
+@Singleton
+class RestartingStateHolder {
+  private boolean restarting;
 
-  @Override
-  protected void configure() {
-    bind(CurrentWorkspaceManager.class).asEagerSingleton();
+  void setRestartingState(boolean restarting) {
+    this.restarting = restarting;
+  }
 
-    bind(WorkspaceStatusNotification.class).asEagerSingleton();
-    bind(StartWorkspaceNotification.class).asEagerSingleton();
-    bind(StartWsAgentNotification.class).asEagerSingleton();
+  boolean isRestarting() {
+    return restarting;
   }
 }
