@@ -20,7 +20,7 @@
     "name" : "CHE"
   },
   "docs" : {
-    "stack" : "/docs/devops/runtime-stacks/index.html",
-    "workspace" : "/docs/devops/intro/index.html"
+    "stack" : "/docs/creating_starting_workspaces.html",
+    "workspace" : "/docs/what_are_workspaces.html"
   }
 }
