@@ -110,7 +110,8 @@ public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate
         new LanguageServerDescription(
             "org.eclipse.che.plugin.java.languageserver",
             Arrays.asList("javaSource", "javaClass"),
-            Collections.singletonList(new DocumentFilter(null, null, "jdt")),
+            Arrays.asList(
+                new DocumentFilter(null, null, "jdt"), new DocumentFilter(null, null, "chelib")),
             Arrays.asList(
                 "glob:**/*.java",
                 "glob:**/pom.xml",

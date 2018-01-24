@@ -51,6 +51,7 @@ import org.eclipse.che.plugin.languageserver.ide.rename.model.RenameProject;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
+import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.lsp4j.RenameParams;
 import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
@@ -67,6 +68,7 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
   private final LanguageServerLocalization localization;
   private final TextDocumentServiceClient client;
   private final DtoFactory dtoFactory;
+  private final DtoBuildHelper dtoHelper;
   private final Provider<RenameInputBox> renameInputBoxProvider;
   private final RenameView view;
   private final WorkspaceAgent workspaceAgent;
@@ -86,6 +88,7 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
       LanguageServerLocalization localization,
       TextDocumentServiceClient client,
       DtoFactory dtoFactory,
+      DtoBuildHelper dtoHelper,
       Provider<RenameInputBox> renameInputBoxProvider,
       RenameView view,
       WorkspaceAgent workspaceAgent,
@@ -97,6 +100,7 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
     this.localization = localization;
     this.client = client;
     this.dtoFactory = dtoFactory;
+    this.dtoHelper = dtoHelper;
     this.renameInputBoxProvider = renameInputBoxProvider;
     this.view = view;
     this.workspaceAgent = workspaceAgent;
@@ -246,8 +250,7 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
   private void callRename(String newName, TextPosition cursorPosition, TextEditor editor) {
     RenameParams dto = dtoFactory.createDto(RenameParams.class);
 
-    TextDocumentIdentifier identifier = dtoFactory.createDto(TextDocumentIdentifier.class);
-    identifier.setUri(editor.getEditorInput().getFile().getLocation().toString());
+    TextDocumentIdentifier identifier = dtoHelper.createTDI(editor.getEditorInput().getFile());
 
     dto.setNewName(newName);
     dto.setTextDocument(identifier);

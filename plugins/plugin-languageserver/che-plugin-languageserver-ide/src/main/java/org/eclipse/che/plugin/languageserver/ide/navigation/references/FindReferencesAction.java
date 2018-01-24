@@ -29,6 +29,7 @@ import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConf
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenter;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenterFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.ReferenceContext;
@@ -42,6 +43,7 @@ public class FindReferencesAction extends AbstractPerspectiveAction {
   private final EditorAgent editorAgent;
   private final TextDocumentServiceClient client;
   private final DtoFactory dtoFactory;
+  private final DtoBuildHelper dtoHelper;
   private final OpenLocationPresenter presenter;
 
   @Inject
@@ -49,11 +51,13 @@ public class FindReferencesAction extends AbstractPerspectiveAction {
       EditorAgent editorAgent,
       OpenLocationPresenterFactory presenterFactory,
       TextDocumentServiceClient client,
-      DtoFactory dtoFactory) {
+      DtoFactory dtoFactory,
+      DtoBuildHelper dtoHelper) {
     super(singletonList(PROJECT_PERSPECTIVE_ID), "Find References", "Find References");
     this.editorAgent = editorAgent;
     this.client = client;
     this.dtoFactory = dtoFactory;
+    this.dtoHelper = dtoHelper;
     presenter = presenterFactory.create("Find References");
   }
 
@@ -85,20 +89,19 @@ public class FindReferencesAction extends AbstractPerspectiveAction {
       return;
     }
     TextEditor textEditor = ((TextEditor) activeEditor);
-    String path = activeEditor.getEditorInput().getFile().getLocation().toString();
     ReferenceParams paramsDTO = dtoFactory.createDto(ReferenceParams.class);
 
     Position Position = dtoFactory.createDto(Position.class);
     Position.setLine(textEditor.getCursorPosition().getLine());
     Position.setCharacter(textEditor.getCursorPosition().getCharacter());
 
-    TextDocumentIdentifier identifierDTO = dtoFactory.createDto(TextDocumentIdentifier.class);
-    identifierDTO.setUri(path);
+    TextDocumentIdentifier identifierDTO =
+        dtoHelper.createTDI(activeEditor.getEditorInput().getFile());
 
     ReferenceContext contextDTO = dtoFactory.createDto(ReferenceContext.class);
     contextDTO.setIncludeDeclaration(true);
 
-    paramsDTO.setUri(path);
+    paramsDTO.setUri(identifierDTO.getUri());
     paramsDTO.setPosition(Position);
     paramsDTO.setTextDocument(identifierDTO);
     paramsDTO.setContext(contextDTO);
