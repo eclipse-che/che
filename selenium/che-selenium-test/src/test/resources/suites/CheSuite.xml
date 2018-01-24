@@ -57,6 +57,7 @@
           <class name="org.eclipse.che.selenium.dashboard.WorkspaceDetailsSingleMachineTest"/>
           <class name="org.eclipse.che.selenium.dashboard.WorkspaceDetailsComposeTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateWorkspaceTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.WorkspacesListTest"/>
           <class name="org.eclipse.che.selenium.debugger.ChangeVariableWithEvaluatingTest"/>
           <class name="org.eclipse.che.selenium.debugger.CheckBreakPointStateTest"/>
           <class name="org.eclipse.che.selenium.debugger.CppProjectDebuggingTest"/>
@@ -119,7 +120,6 @@
           <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest"/>
           <class name="org.eclipse.che.selenium.git.GitChangeMarkersTest"/>
           <class name="org.eclipse.che.selenium.git.GitColorsTest"/>
-          <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
           <class name="org.eclipse.che.selenium.git.InitializeAndDeleteLocalRepositoryTest"/>
           <class name="org.eclipse.che.selenium.git.SetGitCommitterTest"/>
           <class name="org.eclipse.che.selenium.gwt.CheckSimpleGwtAppTest"/>

@@ -10,17 +10,19 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.DELETE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
+import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
 
 import com.google.inject.Inject;
-import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
@@ -34,14 +36,11 @@ import org.testng.annotations.Test;
  * @author Aleksandr Shmaraev
  */
 public class ResolveDependencyAfterRecreateProjectTest {
-  private static final String NAME_OF_THE_PROJECT_1 =
-      NameGenerator.generate("ResolveDependencyAfterRecreateProject", 4);
-  private static final String NAME_OF_THE_PROJECT_2 =
-      NameGenerator.generate("ResolveDependencyAfterRecreateProject", 4);
+  private static final String PROJECT_NAME1 = generate("project1", 4);
+  private static final String PROJECT_NAME2 = generate("project2", 4);
   private static final String PATH_FOR_EXPAND =
       "/src/main/java/org/eclipse/che/examples/GreetingController.java";
 
-  @Inject private Loader loader;
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
@@ -60,31 +59,34 @@ public class ResolveDependencyAfterRecreateProjectTest {
   @Test
   public void updateDependencyWithInheritTest() throws InterruptedException {
     projectExplorer.waitProjectExplorer();
-    createProjectFromUI(NAME_OF_THE_PROJECT_1);
-    projectExplorer.waitItem(NAME_OF_THE_PROJECT_1);
+
+    createProjectFromUI(PROJECT_NAME1);
+    projectExplorer.waitItem(PROJECT_NAME1);
     mavenPluginStatusBar.waitClosingInfoPanel();
     notificationsPopupPanel.waitProgressPopupPanelClose();
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(NAME_OF_THE_PROJECT_1 + PATH_FOR_EXPAND);
+    projectExplorer.openItemByPath(PROJECT_NAME1 + PATH_FOR_EXPAND);
     editor.waitActive();
     editor.waitAllMarkersDisappear(ERROR_MARKER);
+
     removeProjectFromUI();
-    createProjectFromUI(NAME_OF_THE_PROJECT_2);
-    projectExplorer.waitItem(NAME_OF_THE_PROJECT_2);
-    projectExplorer.selectVisibleItem(NAME_OF_THE_PROJECT_2);
+    createProjectFromUI(PROJECT_NAME2);
+
+    projectExplorer.waitItem(PROJECT_NAME2);
+    projectExplorer.selectVisibleItem(PROJECT_NAME2);
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(NAME_OF_THE_PROJECT_2 + PATH_FOR_EXPAND);
+    projectExplorer.openItemByPath(PROJECT_NAME2 + PATH_FOR_EXPAND);
     editor.waitActive();
     editor.waitAllMarkersDisappear(ERROR_MARKER);
   }
 
   public void removeProjectFromUI() {
-    projectExplorer.openContextMenuByPathSelectedItem(NAME_OF_THE_PROJECT_1);
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.DELETE);
+    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME1);
+    projectExplorer.clickOnItemInContextMenu(DELETE);
     askDialog.waitFormToOpen();
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
-    projectExplorer.waitItemIsNotPresentVisibleArea(NAME_OF_THE_PROJECT_1);
+    projectExplorer.waitItemIsNotPresentVisibleArea(PROJECT_NAME1);
   }
 
   /**
@@ -93,11 +95,9 @@ public class ResolveDependencyAfterRecreateProjectTest {
    * @param nameOfTheProject name of created project
    */
   public void createProjectFromUI(String nameOfTheProject) {
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
-    wizard.selectTypeProject(Wizard.TypeProject.MAVEN);
-    wizard.selectSample(Wizard.SamplesName.WEB_JAVA_SPRING);
+    menu.runCommand(WORKSPACE, CREATE_PROJECT);
+    wizard.selectTypeProject(MAVEN);
+    wizard.selectSample(WEB_JAVA_SPRING);
     wizard.typeProjectNameOnWizard(nameOfTheProject);
     wizard.clickCreateButton();
     wizard.waitCloseProjectConfigForm();

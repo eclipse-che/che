@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
@@ -67,6 +68,8 @@ public class WorkspaceDetails {
     String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
     String UPDATE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Update']";
     String ADD_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Add']";
+    String TOOLBAR_TITLE_NAME =
+        "//div[contains(@class,'che-toolbar')]//span[contains(text(),'%s')]";
   }
 
   public enum StateWorkspace {
@@ -218,5 +221,16 @@ public class WorkspaceDetails {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(Locators.ADD_DIALOG_BUTTON)))
         .click();
+  }
+
+  /**
+   * Wait toolbar name is present on dashboard
+   *
+   * @param titleName name of user
+   */
+  public void waitToolbarTitleName(String titleName) {
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
+        .until(
+            visibilityOfElementLocated(By.xpath(format(Locators.TOOLBAR_TITLE_NAME, titleName))));
   }
 }

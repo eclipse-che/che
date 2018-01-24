@@ -60,6 +60,7 @@
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest"/>
             <class name="org.eclipse.che.selenium.git.FetchUpdatesAndMergeRemoteBranchIntoLocalTest"/>
             <class name="org.eclipse.che.selenium.git.GitPullTest"/>
+            <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
             <class name="org.eclipse.che.selenium.git.ImportProjectIntoSpecifiedBranchTest"/>
             <class name="org.eclipse.che.selenium.git.ImportRecursiveSubmoduleTest"/>
             <class name="org.eclipse.che.selenium.git.KeepDirectoryGitImportTest"/>

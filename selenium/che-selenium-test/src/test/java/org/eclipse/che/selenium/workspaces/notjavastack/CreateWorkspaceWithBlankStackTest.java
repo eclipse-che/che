@@ -18,9 +18,9 @@ import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
@@ -33,7 +33,7 @@ public class CreateWorkspaceWithBlankStackTest {
   private final String WORKSPACE = NameGenerator.generate("WsBlank", 4);
   @Inject private TestUser defaultTestUser;
   @Inject private NavigationBar navigationBar;
-  @Inject private CreateWorkspace createWorkspace;
+  @Inject private NewWorkspace newWorkspace;
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private ProjectExplorer projectExplorer;
@@ -58,13 +58,13 @@ public class CreateWorkspaceWithBlankStackTest {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
-    workspaces.clickOnNewWorkspaceBtn();
+    workspaces.clickOnAddWorkspaceBtn();
 
-    createWorkspace.waitToolbar();
-    createWorkspace.typeWorkspaceName(WORKSPACE);
-    createWorkspace.selectStack(TestStacksConstants.BLANK.getId());
-    createWorkspace.setMachineRAM("2");
-    createWorkspace.clickOnCreateButtonAndOpenInIDE();
+    newWorkspace.waitToolbar();
+    newWorkspace.typeWorkspaceName(WORKSPACE);
+    newWorkspace.selectStack(TestStacksConstants.BLANK.getId());
+    newWorkspace.setMachineRAM("dev-machine", 2.0);
+    newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     dashboard.waitNotificationIsClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();

@@ -28,8 +28,8 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceEnvVariables;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceMachines;
@@ -53,7 +53,7 @@ public class WorkspaceDetailsComposeTest {
   @Inject private TestUser testUser;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
-  @Inject private CreateWorkspace createWorkspace;
+  @Inject private NewWorkspace newWorkspace;
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private SeleniumWebDriver seleniumWebDriver;
@@ -170,14 +170,14 @@ public class WorkspaceDetailsComposeTest {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
-    workspaces.clickOnNewWorkspaceBtn();
-    createWorkspace.waitToolbar();
+    workspaces.clickOnAddWorkspaceBtn();
+    newWorkspace.waitToolbar();
     loader.waitOnClosed();
-    createWorkspace.selectStack(JAVA_MYSQL.getId());
-    createWorkspace.typeWorkspaceName(WORKSPACE);
-    createWorkspace.clickOnCreateButtonAndEditWorkspace();
+    newWorkspace.selectStack(JAVA_MYSQL.getId());
+    newWorkspace.typeWorkspaceName(WORKSPACE);
+    newWorkspace.clickOnCreateButtonAndEditWorkspace();
 
-    workspaces.waitToolbarTitleName(WORKSPACE);
+    workspaceDetails.waitToolbarTitleName(WORKSPACE);
     workspaceDetails.checkStateOfWorkspace(STOPPED);
   }
 
