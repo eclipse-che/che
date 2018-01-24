@@ -22,7 +22,6 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES_CHILDREN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHILDREN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
-import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_NODE_CONTENT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.GET_JAVA_CORE_OPTIONS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.IMPLEMENTERS;
@@ -46,7 +45,6 @@ import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EXTERNAL_LIBRARI
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_EXTERNAL_LIBRARIES_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_CHILDREN_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_ENTRY_COMMAND;
-import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_LIBRARY_NODE_CONTENT_BY_PATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_OUTPUT_DIR_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.GET_SOURCE_FOLDERS;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.REIMPORT_MAVEN_PROJECTS_COMMAND;
@@ -206,13 +204,6 @@ public class JavaLanguageServerExtensionService {
         .paramsAsDto(ExternalLibrariesParameters.class)
         .resultAsDto(JarEntry.class)
         .withFunction(this::getLibraryEntry);
-
-    requestHandler
-        .newConfiguration()
-        .methodName(EXTERNAL_NODE_CONTENT)
-        .paramsAsDto(ExternalLibrariesParameters.class)
-        .resultAsString()
-        .withFunction(this::getLibraryNodeContentByPath);
 
     requestHandler
         .newConfiguration()
@@ -590,12 +581,6 @@ public class JavaLanguageServerExtensionService {
     params.setProjectUri(prefixURI(params.getProjectUri()));
     Type type = new TypeToken<JarEntry>() {}.getType();
     return doGetOne(GET_LIBRARY_ENTRY_COMMAND, singletonList(params), type);
-  }
-
-  private String getLibraryNodeContentByPath(ExternalLibrariesParameters params) {
-    params.setProjectUri(prefixURI(params.getProjectUri()));
-    Type type = new TypeToken<String>() {}.getType();
-    return doGetOne(GET_LIBRARY_NODE_CONTENT_BY_PATH_COMMAND, singletonList(params), type);
   }
 
   private List<String> executeFindTestsCommand(
