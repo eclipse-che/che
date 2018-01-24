@@ -43,7 +43,7 @@ import org.eclipse.che.multiuser.resource.api.exception.NoEnoughResourcesExcepti
 import org.eclipse.che.multiuser.resource.api.type.RamResourceType;
 import org.eclipse.che.multiuser.resource.api.type.RuntimeResourceType;
 import org.eclipse.che.multiuser.resource.api.type.WorkspaceResourceType;
-import org.eclipse.che.multiuser.resource.api.usage.ResourceUsageManager;
+import org.eclipse.che.multiuser.resource.api.usage.ResourceManager;
 import org.eclipse.che.multiuser.resource.api.usage.ResourcesLocks;
 import org.eclipse.che.multiuser.resource.api.usage.tracker.EnvironmentRamCalculator;
 import org.eclipse.che.multiuser.resource.model.Resource;
@@ -62,7 +62,7 @@ import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
 public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
 
   private final EnvironmentRamCalculator environmentRamCalculator;
-  private final ResourceUsageManager resourceUsageManager;
+  private final ResourceManager resourceManager;
   private final ResourcesLocks resourcesLocks;
   private final AccountManager accountManager;
 
@@ -78,12 +78,12 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
       // own injects
       @Named("che.limits.workspace.env.ram") String maxRamPerEnv,
       EnvironmentRamCalculator environmentRamCalculator,
-      ResourceUsageManager resourceUsageManager,
+      ResourceManager resourceManager,
       ResourcesLocks resourcesLocks) {
     super(workspaceDao, runtimes, eventService, accountManager, workspaceValidator);
     this.environmentRamCalculator = environmentRamCalculator;
     this.maxRamPerEnvMB = "-1".equals(maxRamPerEnv) ? -1 : Size.parseSizeToMegabytes(maxRamPerEnv);
-    this.resourceUsageManager = resourceUsageManager;
+    this.resourceManager = resourceManager;
     this.resourcesLocks = resourcesLocks;
     this.accountManager = accountManager;
   }
@@ -188,7 +188,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
             environmentRamCalculator.calculate(environment),
             RamResourceType.UNIT);
     try {
-      resourceUsageManager.checkResourcesAvailability(accountId, singletonList(ramToUse));
+      resourceManager.checkResourcesAvailability(accountId, singletonList(ramToUse));
     } catch (NoEnoughResourcesException e) {
       final Resource requiredRam =
           e.getRequiredResources().get(0); // starting of workspace requires only RAM resource
@@ -197,7 +197,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
               e.getAvailableResources(), RamResourceType.ID, 0, RamResourceType.UNIT);
       final Resource usedRam =
           getResourceOrDefault(
-              resourceUsageManager.getUsedResources(accountId),
+              resourceManager.getUsedResources(accountId),
               RamResourceType.ID,
               0,
               RamResourceType.UNIT);
@@ -218,7 +218,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
   void checkWorkspaceResourceAvailability(String accountId)
       throws NotFoundException, ServerException {
     try {
-      resourceUsageManager.checkResourcesAvailability(
+      resourceManager.checkResourcesAvailability(
           accountId,
           singletonList(new ResourceImpl(WorkspaceResourceType.ID, 1, WorkspaceResourceType.UNIT)));
     } catch (NoEnoughResourcesException e) {
@@ -230,7 +230,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
   void checkRuntimeResourceAvailability(String accountId)
       throws NotFoundException, ServerException {
     try {
-      resourceUsageManager.checkResourcesAvailability(
+      resourceManager.checkResourcesAvailability(
           accountId,
           singletonList(new ResourceImpl(RuntimeResourceType.ID, 1, RuntimeResourceType.UNIT)));
     } catch (NoEnoughResourcesException e) {

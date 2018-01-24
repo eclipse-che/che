@@ -38,7 +38,7 @@ import org.eclipse.che.multiuser.resource.api.exception.NoEnoughResourcesExcepti
 import org.eclipse.che.multiuser.resource.api.type.RamResourceType;
 import org.eclipse.che.multiuser.resource.api.type.RuntimeResourceType;
 import org.eclipse.che.multiuser.resource.api.type.WorkspaceResourceType;
-import org.eclipse.che.multiuser.resource.api.usage.ResourceUsageManager;
+import org.eclipse.che.multiuser.resource.api.usage.ResourceManager;
 import org.eclipse.che.multiuser.resource.api.usage.ResourcesLocks;
 import org.eclipse.che.multiuser.resource.model.Resource;
 
@@ -52,7 +52,7 @@ public class OrganizationResourcesDistributor {
   private final OrganizationDistributedResourcesDao organizationDistributedResourcesDao;
   private final OrganizationManager organizationManager;
   private final ResourcesLocks resourcesLocks;
-  private final ResourceUsageManager usageManager;
+  private final ResourceManager resourceManager;
   private final ResourceAggregator resourceAggregator;
 
   @Inject
@@ -60,12 +60,12 @@ public class OrganizationResourcesDistributor {
       OrganizationDistributedResourcesDao organizationDistributedResourcesDao,
       OrganizationManager organizationManager,
       ResourcesLocks resourcesLocks,
-      ResourceUsageManager usageManager,
+      ResourceManager resourceManager,
       ResourceAggregator resourceAggregator) {
     this.organizationDistributedResourcesDao = organizationDistributedResourcesDao;
     this.organizationManager = organizationManager;
     this.resourcesLocks = resourcesLocks;
-    this.usageManager = usageManager;
+    this.resourceManager = resourceManager;
     this.resourceAggregator = resourceAggregator;
   }
 
@@ -181,7 +181,7 @@ public class OrganizationResourcesDistributor {
       String suborganizationId, List<? extends Resource> newResourcesCap)
       throws NotFoundException, ConflictException, ServerException {
     Map<String, Resource> usedResources =
-        usageManager
+        resourceManager
             .getUsedResources(suborganizationId)
             .stream()
             .collect(Collectors.toMap(Resource::getType, Function.identity()));

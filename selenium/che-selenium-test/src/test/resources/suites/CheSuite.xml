@@ -120,7 +120,6 @@
           <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest"/>
           <class name="org.eclipse.che.selenium.git.GitChangeMarkersTest"/>
           <class name="org.eclipse.che.selenium.git.GitColorsTest"/>
-          <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
           <class name="org.eclipse.che.selenium.git.InitializeAndDeleteLocalRepositoryTest"/>
           <class name="org.eclipse.che.selenium.git.SetGitCommitterTest"/>
           <class name="org.eclipse.che.selenium.gwt.CheckSimpleGwtAppTest"/>

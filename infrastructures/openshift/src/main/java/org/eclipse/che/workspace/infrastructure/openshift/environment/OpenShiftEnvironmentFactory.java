@@ -64,6 +64,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
 
   private final OpenShiftClientFactory clientFactory;
   private final OpenShiftEnvironmentValidator envValidator;
+  private final String defaultMachineMemorySizeAttribute;
 
   @Inject
   public OpenShiftEnvironmentFactory(
@@ -73,9 +74,11 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       OpenShiftClientFactory clientFactory,
       OpenShiftEnvironmentValidator envValidator,
       @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
-    super(installerRegistry, recipeRetriever, machinesValidator, defaultMachineMemorySizeMB);
+    super(installerRegistry, recipeRetriever, machinesValidator);
     this.clientFactory = clientFactory;
     this.envValidator = envValidator;
+    this.defaultMachineMemorySizeAttribute =
+        String.valueOf(defaultMachineMemorySizeMB * 1024 * 1024);
   }
 
   @Override
@@ -172,6 +175,8 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
           final long ramLimit = Containers.getRamLimit(container);
           if (ramLimit > 0) {
             attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(ramLimit));
+          } else {
+            attributes.put(MEMORY_LIMIT_ATTRIBUTE, defaultMachineMemorySizeAttribute);
           }
         }
       }

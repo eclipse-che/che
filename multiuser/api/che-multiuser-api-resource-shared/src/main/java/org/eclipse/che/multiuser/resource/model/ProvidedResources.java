@@ -29,13 +29,13 @@ public interface ProvidedResources {
   @Nullable
   String getId();
 
-  /** Returns owner of license. */
+  /** Returns owner of resources. */
   String getOwner();
 
-  /** Returns time when license became active. */
+  /** Returns time when resources became active. */
   Long getStartTime();
 
-  /** Returns time when license will be/became inactive. */
+  /** Returns time when resources will be/became inactive. */
   Long getEndTime();
 
   /** Returns list of resources which can be used by owner. */
