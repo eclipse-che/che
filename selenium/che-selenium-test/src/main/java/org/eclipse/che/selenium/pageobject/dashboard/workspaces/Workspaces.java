@@ -228,7 +228,7 @@ public class Workspaces {
 
   /** wait the workspace is not present on dashboard */
   public void waitWorkspaceIsNotPresent(String workspaceName) {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(
             invisibilityOfElementLocated(
                 By.xpath(format(Locators.WORKSPACE_ITEM_NAME, workspaceName))));
