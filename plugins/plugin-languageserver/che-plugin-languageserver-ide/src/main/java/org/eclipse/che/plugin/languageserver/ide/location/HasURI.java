@@ -8,8 +8,13 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.languageserver.shared.util;
+package org.eclipse.che.plugin.languageserver.ide.location;
 
-public class Constants {
-  public static final String CHE_WKSP_SCHEME = "chewsfile://";
+/**
+ * Objects that can be identified with a LSP URI.
+ *
+ * @author Thomas Mäder
+ */
+public interface HasURI {
+  String getURI();
 }
