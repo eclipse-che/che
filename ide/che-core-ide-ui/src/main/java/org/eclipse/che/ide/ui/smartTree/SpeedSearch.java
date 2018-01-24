@@ -110,18 +110,24 @@ class SpeedSearch {
         });
     this.tree.addExpandHandler(
         event -> {
-          Node expandedNode = event.getNode();
-          List<Node> visibleChildren = nodeStorage.getChildren(expandedNode);
           if (update) {
             savedNodes = new ArrayList<>(getVisibleNodes());
-            if (visibleChildren.stream().allMatch(Node::isLeaf)) {
+            if (getVisibleNodes()
+                .stream()
+                .filter(node -> !node.isLeaf())
+                .allMatch(tree::isExpanded)) {
               update = false;
               doSearch();
             }
           } else {
+            Node expandedNode = event.getNode();
+            List<Node> visibleChildren = nodeStorage.getChildren(expandedNode);
             updateSavedNodes(expandedNode, visibleChildren);
             if (visibleChildren.size() != getFilteredChildren(expandedNode).size()) {
-              doSearch();
+              visibleChildren
+                  .stream()
+                  .filter(node -> !matchesToSearchRequest().apply(node))
+                  .forEach(nodeStorage::remove);
             }
           }
         });
@@ -131,7 +137,7 @@ class SpeedSearch {
     initSearchPopUp();
   }
 
-  // Update saved nodes with nodes that was redrawn
+  // Update saved nodes with nodes that were redrawn
   private void updateSavedNodes(Node parent, List<Node> children) {
     List<Node> savedChildren =
         savedNodes
