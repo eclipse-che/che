@@ -28,6 +28,7 @@ import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryJsonRpcClient;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryServiceClient;
+import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.lsp4j.ServerCapabilities;
 
 /** @author Anatoliy Bazko */
@@ -39,6 +40,7 @@ public class LanguageServerRegistry {
 
   private final Map<FileType, LanguageDescription> registeredFileTypes = new ConcurrentHashMap<>();
   private final FileTypeRegistry fileTypeRegistry;
+  private final DtoBuildHelper dtoHelper;
 
   @Inject
   public LanguageServerRegistry(
@@ -47,12 +49,14 @@ public class LanguageServerRegistry {
       NotificationManager notificationManager,
       LanguageServerRegistryJsonRpcClient jsonRpcClient,
       LanguageServerRegistryServiceClient client,
-      FileTypeRegistry fileTypeRegistry) {
+      FileTypeRegistry fileTypeRegistry,
+      DtoBuildHelper dtoHelper) {
 
     this.loaderFactory = loaderFactory;
     this.notificationManager = notificationManager;
     this.jsonRpcClient = jsonRpcClient;
     this.fileTypeRegistry = fileTypeRegistry;
+    this.dtoHelper = dtoHelper;
   }
 
   public Promise<ServerCapabilities> getOrInitializeServer(VirtualFile file) {
@@ -61,7 +65,7 @@ public class LanguageServerRegistry {
         loaderFactory.newLoader("Initializing Language Server for " + file.getName());
     loader.show();
     return jsonRpcClient
-        .initializeServer(file.getLocation().toString())
+        .initializeServer(dtoHelper.getUri(file))
         .then(
             (ServerCapabilities arg) -> {
               loader.hide();

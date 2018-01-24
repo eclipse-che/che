@@ -25,9 +25,9 @@ import org.eclipse.che.ide.api.editor.events.FileEvent;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.workspace.event.WsAgentServerRunningEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
@@ -42,6 +42,7 @@ import org.eclipse.che.plugin.languageserver.ide.rename.LSRenameAction;
 import org.eclipse.che.plugin.languageserver.ide.service.PublishDiagnosticsReceiver;
 import org.eclipse.che.plugin.languageserver.ide.service.ShowMessageJsonRpcReceiver;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
@@ -151,20 +152,18 @@ public class LanguageServerExtension {
       final EventBus eventBus,
       final TextDocumentServiceClient serviceClient,
       final DtoFactory dtoFactory,
+      final DtoBuildHelper dtoHelper,
       final LanguageServerRegistry lsRegistry) {
     eventBus.addHandler(
         FileEvent.TYPE,
         event -> {
-          Path location = event.getFile().getLocation();
           if (lsRegistry.getLanguageDescription(event.getFile()) == null) {
             return;
           }
-          final TextDocumentIdentifier documentId =
-              dtoFactory.createDto(TextDocumentIdentifier.class);
-          documentId.setUri(location.toString());
+          final TextDocumentIdentifier documentId = dtoHelper.createTDI(event.getFile());
           switch (event.getOperationType()) {
             case OPEN:
-              onOpen(event, dtoFactory, serviceClient, lsRegistry);
+              onOpen(event.getFile(), dtoFactory, dtoHelper, serviceClient, lsRegistry);
               break;
             case CLOSE:
               onClose(documentId, dtoFactory, serviceClient);
@@ -195,26 +194,26 @@ public class LanguageServerExtension {
   }
 
   private void onOpen(
-      final FileEvent event,
+      final VirtualFile virtualFile,
       final DtoFactory dtoFactory,
+      final DtoBuildHelper dtoHelper,
       final TextDocumentServiceClient serviceClient,
       final LanguageServerRegistry lsRegistry) {
-    event
-        .getFile()
+    virtualFile
         .getContent()
         .then(
             text -> {
               TextDocumentItem documentItem = dtoFactory.createDto(TextDocumentItem.class);
-              documentItem.setUri(event.getFile().getLocation().toString());
+              documentItem.setUri(dtoHelper.getUri(virtualFile));
               documentItem.setVersion(LanguageServerEditorConfiguration.INITIAL_DOCUMENT_VERSION);
               documentItem.setText(text);
               documentItem.setLanguageId(
-                  lsRegistry.getLanguageDescription(event.getFile()).getLanguageId());
+                  lsRegistry.getLanguageDescription(virtualFile).getLanguageId());
 
               DidOpenTextDocumentParams openEvent =
                   dtoFactory.createDto(DidOpenTextDocumentParams.class);
               openEvent.setTextDocument(documentItem);
-              openEvent.getTextDocument().setUri(event.getFile().getLocation().toString());
+              openEvent.getTextDocument().setUri(virtualFile.getLocation().toString());
               openEvent.setText(text);
 
               serviceClient.didOpen(openEvent);
