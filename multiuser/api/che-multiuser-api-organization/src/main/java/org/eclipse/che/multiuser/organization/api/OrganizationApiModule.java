@@ -33,8 +33,8 @@ import org.eclipse.che.multiuser.organization.api.resource.SuborganizationResour
 import org.eclipse.che.multiuser.organization.spi.impl.OrganizationImpl;
 import org.eclipse.che.multiuser.resource.api.AvailableResourcesProvider;
 import org.eclipse.che.multiuser.resource.api.ResourceLockKeyProvider;
+import org.eclipse.che.multiuser.resource.api.ResourcesProvider;
 import org.eclipse.che.multiuser.resource.api.free.DefaultResourcesProvider;
-import org.eclipse.che.multiuser.resource.api.license.ResourcesProvider;
 
 /** @author Sergii Leschenko */
 public class OrganizationApiModule extends AbstractModule {
