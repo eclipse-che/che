@@ -38,7 +38,6 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
-import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.resource.Path;
@@ -48,6 +47,8 @@ import org.eclipse.che.ide.ui.smartTree.data.settings.NodeSettings;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
+import org.eclipse.che.plugin.languageserver.ide.location.HasURI;
+import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 
 /**
  * It might be used for any jar content.
@@ -56,11 +57,16 @@ import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
  */
 @Beta
 public class JarFileNode extends SyntheticNode<JarEntry>
-    implements VirtualFile, HasAction, FileEventHandler, ResourceChangedHandler, HasLocation {
+    implements VirtualFile,
+        HasAction,
+        FileEventHandler,
+        ResourceChangedHandler,
+        HasLocation,
+        HasURI {
 
   private final String libId;
   private final Path project;
-  private final JavaLanguageExtensionServiceClient service;
+  private final TextDocumentServiceClient service;
   private final DtoFactory dtoFactory;
   private final JavaResources javaResources;
   private final NodesResources nodesResources;
@@ -77,7 +83,7 @@ public class JarFileNode extends SyntheticNode<JarEntry>
       @Assisted String libId,
       @Assisted Path project,
       @Assisted NodeSettings nodeSettings,
-      JavaLanguageExtensionServiceClient service,
+      TextDocumentServiceClient service,
       DtoFactory dtoFactory,
       JavaResources javaResources,
       NodesResources nodesResources,
@@ -139,7 +145,7 @@ public class JarFileNode extends SyntheticNode<JarEntry>
 
   @Override
   public Path getLocation() {
-    return Path.valueOf(getData().getPath());
+    return Path.valueOf(getData().getUri());
   }
 
   /** {@inheritDoc} */
@@ -176,7 +182,7 @@ public class JarFileNode extends SyntheticNode<JarEntry>
     params.setNodePath(getData().getPath());
     params.setNodeId(libId);
     return service
-        .libraryNodeContentByPath(params)
+        .getFileContent(getData().getUri())
         .then((Function<String, String>) result -> result);
   }
 
@@ -261,5 +267,10 @@ public class JarFileNode extends SyntheticNode<JarEntry>
   public Location toLocation(int lineNumber) {
     return new LocationImpl(
         getLocation().toString(), lineNumber, true, libId, getProject().toString());
+  }
+
+  @Override
+  public String getURI() {
+    return getData().getUri();
   }
 }
