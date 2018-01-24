@@ -29,8 +29,8 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.multiuser.organization.api.OrganizationManager;
 import org.eclipse.che.multiuser.organization.spi.impl.OrganizationImpl;
-import org.eclipse.che.multiuser.resource.api.license.ResourcesProvider;
-import org.eclipse.che.multiuser.resource.api.usage.ResourceUsageManager;
+import org.eclipse.che.multiuser.resource.api.ResourcesProvider;
+import org.eclipse.che.multiuser.resource.api.usage.ResourceManager;
 import org.eclipse.che.multiuser.resource.model.ProvidedResources;
 import org.eclipse.che.multiuser.resource.model.Resource;
 import org.eclipse.che.multiuser.resource.spi.impl.ProvidedResourcesImpl;
@@ -51,18 +51,18 @@ public class SuborganizationResourcesProvider implements ResourcesProvider {
   private final AccountManager accountManager;
   private final OrganizationManager organizationManager;
   private final Provider<OrganizationResourcesDistributor> distributorProvider;
-  private final Provider<ResourceUsageManager> usageManagerProvider;
+  private final Provider<ResourceManager> resourceManagerProvider;
 
   @Inject
   public SuborganizationResourcesProvider(
       AccountManager accountManager,
       OrganizationManager organizationManager,
       Provider<OrganizationResourcesDistributor> distributorProvider,
-      Provider<ResourceUsageManager> usageManagerProvider) {
+      Provider<ResourceManager> resourceManagerProvider) {
     this.accountManager = accountManager;
     this.organizationManager = organizationManager;
     this.distributorProvider = distributorProvider;
-    this.usageManagerProvider = usageManagerProvider;
+    this.resourceManagerProvider = resourceManagerProvider;
   }
 
   @Override
@@ -78,7 +78,7 @@ public class SuborganizationResourcesProvider implements ResourcesProvider {
 
     // given account is suborganization's account and can have resources provided by parent
     List<? extends Resource> parentTotalResources =
-        usageManagerProvider.get().getTotalResources(parent);
+        resourceManagerProvider.get().getTotalResources(parent);
 
     if (!parentTotalResources.isEmpty()) {
       try {

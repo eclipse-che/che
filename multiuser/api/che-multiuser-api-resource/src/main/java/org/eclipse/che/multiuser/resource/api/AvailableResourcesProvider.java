@@ -19,7 +19,7 @@ import org.eclipse.che.multiuser.resource.model.Resource;
  * Provides resources which are available for usage by account.
  *
  * <p>It can be used for example for implementing resources sharing between accounts or resources
- * usage limitation when limit should be less than account's license has.
+ * usage limitation when limit should be less than resources provided to account.
  *
  * @author Sergii Leschenko
  */

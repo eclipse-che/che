@@ -19,8 +19,8 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.testng.annotations.AfterClass;
@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 public class CreateWorkspaceOnDashboardTest {
   private static final String WORKSPACE = NameGenerator.generate("WsDashboard", 4);
 
-  @Inject private CreateWorkspace createWorkspace;
+  @Inject private NewWorkspace newWorkspace;
   @Inject private TestUser defaultTestUser;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private MachineTerminal terminal;
@@ -51,13 +51,13 @@ public class CreateWorkspaceOnDashboardTest {
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
 
-    workspaces.clickOnNewWorkspaceBtn();
+    workspaces.clickOnAddWorkspaceBtn();
 
-    createWorkspace.waitToolbar();
-    createWorkspace.typeWorkspaceName(WORKSPACE);
-    createWorkspace.selectStack(JAVA.getId());
-    createWorkspace.setMachineRAM("dev-machine", 2.0);
-    createWorkspace.clickOnCreateButtonAndOpenInIDE();
+    newWorkspace.waitToolbar();
+    newWorkspace.typeWorkspaceName(WORKSPACE);
+    newWorkspace.selectStack(JAVA.getId());
+    newWorkspace.setMachineRAM("dev-machine", 2.0);
+    newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
 

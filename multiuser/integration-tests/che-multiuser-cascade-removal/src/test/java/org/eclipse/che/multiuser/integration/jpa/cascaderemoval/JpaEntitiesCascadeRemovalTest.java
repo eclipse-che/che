@@ -108,7 +108,7 @@ import org.eclipse.che.multiuser.permission.workspace.server.stack.StackPermissi
 import org.eclipse.che.multiuser.resource.api.AvailableResourcesProvider;
 import org.eclipse.che.multiuser.resource.api.ResourceLockKeyProvider;
 import org.eclipse.che.multiuser.resource.api.ResourceUsageTracker;
-import org.eclipse.che.multiuser.resource.api.license.ResourcesProvider;
+import org.eclipse.che.multiuser.resource.api.ResourcesProvider;
 import org.eclipse.che.multiuser.resource.api.type.RamResourceType;
 import org.eclipse.che.multiuser.resource.api.type.ResourceType;
 import org.eclipse.che.multiuser.resource.spi.FreeResourcesLimitDao;
