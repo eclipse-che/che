@@ -13,17 +13,25 @@ package org.eclipse.che.plugin.languageserver.ide.location;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.rest.UrlBuilder;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 
-public class LanguageServerFile implements VirtualFile {
-  private String uri;
+public class LanguageServerFile implements VirtualFile, HasURI {
+  private final String uri;
   private final Path path;
   private final TextDocumentServiceClient textDocumentService;
+  private String name;
 
   public LanguageServerFile(TextDocumentServiceClient textDocumentService, String uri) {
     this.textDocumentService = textDocumentService;
     this.uri = uri;
-    this.path = new Path(uri.substring("file://".length()));
+    this.path = new Path(uri);
+    this.name = extractName(uri);
+  }
+
+  private String extractName(String uri) {
+    String path = new UrlBuilder(uri).getPath();
+    return new Path(path).lastSegment();
   }
 
   @Override
@@ -33,12 +41,12 @@ public class LanguageServerFile implements VirtualFile {
 
   @Override
   public String getName() {
-    return path.lastSegment();
+    return name;
   }
 
   @Override
   public String getDisplayName() {
-    return path.lastSegment();
+    return name;
   }
 
   @Override
@@ -54,6 +62,10 @@ public class LanguageServerFile implements VirtualFile {
   @Override
   public Promise<String> getContent() {
     return textDocumentService.getFileContent(uri);
+  }
+
+  public String getURI() {
+    return uri;
   }
 
   @Override
