@@ -653,7 +653,11 @@ public class Tree extends FocusWidget
     if (container == null) {
       return;
     }
+
+    int scrollLeft = getElement().getScrollLeft();
     container.scrollIntoView();
+    getElement().setScrollLeft(scrollLeft);
+
     focusEl.getStyle().setLeft((nodeStorage.getDepth(node) - 1) * 16, Style.Unit.PX);
     focusEl.getStyle().setTop(container.getOffsetTop(), Style.Unit.PX);
 
@@ -1319,6 +1323,13 @@ public class Tree extends FocusWidget
   private void ensureTreeElement() {
     DivElement element = Document.get().createDivElement();
     element.addClassName(treeStyles.styles().tree());
+
+    rootContainer = Document.get().createDivElement();
+    rootContainer.addClassName(treeStyles.styles().contentTree());
+    rootContainer.setId("content-Tree");
+
+    element.appendChild(rootContainer);
+
     setElement(element);
   }
 
@@ -1381,7 +1392,7 @@ public class Tree extends FocusWidget
   }
 
   private Element getRootContainer() {
-    return getElement();
+    return rootContainer;
   }
 
   private void onAdd(StoreAddEvent event) {
@@ -1583,8 +1594,6 @@ public class Tree extends FocusWidget
   }
 
   private void onAfterFirstAttach() {
-    rootContainer = getRootContainer();
-
     getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
 
     renderChildren(null);
