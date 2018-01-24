@@ -69,8 +69,8 @@ class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
       AppContext appContext,
       CoreLocalizationConstant messages,
       Provider<NotificationManager> notificationManagerProvider,
-      DialogFactory dialogFactory) {
-
+      DialogFactory dialogFactory,
+      RestartingStateHolder restartingStateHolder) {
     eventBus.addHandler(
         BasicIDEInitializedEvent.TYPE,
         e -> {
@@ -87,6 +87,9 @@ class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
         WorkspaceStartingEvent.TYPE,
         e -> {
           setSuccess(WORKSPACE_STOPPED);
+          if (restartingStateHolder.isRestarting()) {
+            show(STARTING_WORKSPACE_RUNTIME);
+          }
         });
 
     eventBus.addHandler(WorkspaceRunningEvent.TYPE, e -> setSuccess(STARTING_WORKSPACE_RUNTIME));
@@ -176,6 +179,11 @@ class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
             popupLoaderFactory.getPopup(
                 locale.workspaceStopped(), locale.workspaceStoppedDescription(), widget);
         break;
+      case WORKSPACE_AGENT_STOPPED:
+        popup =
+            popupLoaderFactory.getPopup(
+                locale.wsAgentStopped(), locale.wsAgentStoppedDescription(), widget);
+        break;
     }
 
     popup.setDelegate(this);
@@ -221,6 +229,7 @@ class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
     STARTING_WORKSPACE_AGENT,
     CREATING_PROJECT,
     STOPPING_WORKSPACE,
-    WORKSPACE_STOPPED
+    WORKSPACE_STOPPED,
+    WORKSPACE_AGENT_STOPPED
   }
 }
