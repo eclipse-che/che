@@ -11,13 +11,23 @@
 package org.eclipse.che.multiuser.resource.api.workspace;
 
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.common.collect.ImmutableMap;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -31,52 +41,29 @@ import org.eclipse.che.commons.lang.NameGenerator;
 public final class TestObjects {
 
   private static final String DEFAULT_USER_NAME = "user123456";
-  private static final ObjectMapper YAML_PARSER = new ObjectMapper(new YAMLFactory());
 
-  public static EnvironmentImpl createEnvironment(String devMachineRam, String... machineRams)
-      throws Exception {
-    return null; /*
-                 Map<String, ExtendedMachineImpl> machines = new HashMap<>();
-                 machines.put(
-                     "dev-machine",
-                     new ExtendedMachineImpl(
-                         singletonList("org.eclipse.che.ws-agent"),
-                         emptyMap(),
-                         singletonMap("memoryLimitBytes", Long.toString(Size.parseSize(devMachineRam)))));
-                 HashMap<String, ComposeServiceImpl> services = new HashMap<>(1 + machineRams.length);
-                 services.put("dev-machine", createService());
-                 for (int i = 0; i < machineRams.length; i++) {
-                   services.put("machine" + i, createService());
-                   // null is allowed to reproduce situation with default RAM size
-                   if (machineRams[i] != null) {
-                     machines.put(
-                         "machine" + i,
-                         new ExtendedMachineImpl(
-                             null,
-                             null,
-                             singletonMap("memoryLimitBytes", Long.toString(Size.parseSize(machineRams[i])))));
-                   }
-                 }
-                 ComposeEnvironment composeEnvironment = new ComposeEnvironment();
-                 composeEnvironment.setServices(services);
-                 String yaml = YAML_PARSER.writeValueAsString(composeEnvironment);
-                 EnvironmentRecipeImpl recipe =
-                     new EnvironmentRecipeImpl("compose", "application/x-yaml", yaml, null);
-
-                 return new EnvironmentImpl(recipe, machines);*/
+  public static EnvironmentImpl createEnvironment(String... machineRams) throws Exception {
+    final Map<String, MachineConfig> machines = new HashMap<>();
+    for (String machineRam : machineRams) {
+      final MachineConfigImpl machineConfig = new MachineConfigImpl();
+      machineConfig.setAttributes(
+          ImmutableMap.of(MachineConfig.MEMORY_LIMIT_ATTRIBUTE, machineRam));
+      machines.put("dev-machine", machineConfig);
+    }
+    final RecipeImpl recipe = new RecipeImpl("compose", "application/x-yaml", "", null);
+    return new EnvironmentImpl(recipe, machines);
   }
 
   /** Creates users workspace object based on the owner and machines RAM. */
-  public static WorkspaceImpl createWorkspace(
-      String owner, String devMachineRam, String... machineRams) throws Exception {
+  public static WorkspaceImpl createWorkspace(String owner, String... machineRams)
+      throws Exception {
 
     return WorkspaceImpl.builder()
         .generateId()
         .setConfig(
             WorkspaceConfigImpl.builder()
                 .setName(NameGenerator.generate("workspace", 2))
-                .setEnvironments(
-                    singletonMap("dev-env", createEnvironment(devMachineRam, machineRams)))
+                .setEnvironments(singletonMap("dev-env", createEnvironment(machineRams)))
                 .setDefaultEnv("dev-env")
                 .build())
         .setAccount(new AccountImpl("accountId", owner, "test"))
@@ -86,80 +73,33 @@ public final class TestObjects {
   }
 
   /** Creates workspace config object based on the machines RAM. */
-  public static WorkspaceConfig createConfig(String devMachineRam, String... machineRams)
-      throws Exception {
-    return createWorkspace(DEFAULT_USER_NAME, devMachineRam, machineRams).getConfig();
+  public static WorkspaceConfig createConfig(String... machineRams) throws Exception {
+    return createWorkspace(DEFAULT_USER_NAME, machineRams).getConfig();
   }
 
   /** Creates runtime workspace object based on the machines RAM. */
-  public static WorkspaceImpl createRuntime(String devMachineRam, String... machineRams)
-      throws Exception {
-    /*
-    final WorkspaceImpl workspace = createWorkspace(DEFAULT_USER_NAME, devMachineRam, machineRams);
+  public static WorkspaceImpl createRuntime(String... machineRams) throws Exception {
+    final WorkspaceImpl workspace = createWorkspace(DEFAULT_USER_NAME, machineRams);
     final String envName = workspace.getConfig().getDefaultEnv();
-    EnvironmentImpl env = workspace.getConfig().getEnvironments().get(envName);
-    String devMachineName = getDevMachineName(env);
-    if (devMachineName == null) {
-      throw new Exception("ws-machine is not found");
+    final Map<String, MachineImpl> machines = new HashMap<>();
+    int i = 0;
+    for (String machineRam : machineRams) {
+      machines.put(
+          "machine" + i++,
+          createMachine(machineRam, Collections.emptyMap(), MachineStatus.RUNNING));
     }
-    ExtendedMachineImpl devMachine = env.getMachines().get(devMachineName);
-    final WorkspaceRuntimeImpl runtime =
-        new WorkspaceRuntimeImpl(
-            workspace.getConfig().getDefaultEnv(),
-            null,
-            env.getMachines()
-                .entrySet()
-                .stream()
-                .map(
-                    entry ->
-                        createMachine(
-                            workspace.getId(),
-                            envName,
-                            entry.getKey(),
-                            devMachineName.equals(entry.getKey()),
-                            entry.getValue().getAttributes().get("memoryLimitBytes")))
-                .collect(toList()),
-            createMachine(
-                workspace.getId(),
-                envName,
-                devMachineName,
-                true,
-                devMachine.getAttributes().get("memoryLimitBytes")));
+    RuntimeImpl runtime = new RuntimeImpl(envName, machines, DEFAULT_USER_NAME);
+
     workspace.setStatus(RUNNING);
     workspace.setRuntime(runtime);
     return workspace;
-    */
-    return null;
   }
-  /*
+
   private static MachineImpl createMachine(
-      String workspaceId, String envName, String machineName, boolean isDev, String memoryBytes) {
-
-    return MachineImpl.builder()
-        .setConfig(
-            MachineConfigImpl.builder()
-                .setDev(isDev)
-                .setName(machineName)
-                .setSource(new MachineSourceImpl("some-type").setContent("some-content"))
-                .setLimits(
-                    new MachineLimitsImpl((int) Size.parseSizeToMegabytes(memoryBytes + "b")))
-                .setType("someType")
-                .build())
-        .setId(NameGenerator.generate("machine", 10))
-        .setOwner(DEFAULT_USER_NAME)
-        .setStatus(MachineStatus.RUNNING)
-        .setWorkspaceId(workspaceId)
-        .setEnvName(envName)
-        .setRuntime(new MachineRuntimeInfoImpl(emptyMap(), emptyMap(), emptyMap()))
-        .build();
+      String memoryBytes, Map<String, ? extends Server> servers, MachineStatus status) {
+    return new MachineImpl(
+        ImmutableMap.of(MachineConfig.MEMORY_LIMIT_ATTRIBUTE, memoryBytes), servers, status);
   }
-
-  private static ComposeServiceImpl createService() {
-    ComposeServiceImpl service = new ComposeServiceImpl();
-    service.setImage("image");
-    return service;
-  }
-  */
 
   private TestObjects() {}
 }

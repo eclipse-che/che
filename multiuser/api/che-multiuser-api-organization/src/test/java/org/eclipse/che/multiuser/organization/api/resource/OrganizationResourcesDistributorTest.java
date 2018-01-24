@@ -38,7 +38,7 @@ import org.eclipse.che.multiuser.organization.spi.impl.OrganizationDistributedRe
 import org.eclipse.che.multiuser.organization.spi.impl.OrganizationImpl;
 import org.eclipse.che.multiuser.resource.api.ResourceAggregator;
 import org.eclipse.che.multiuser.resource.api.exception.NoEnoughResourcesException;
-import org.eclipse.che.multiuser.resource.api.usage.ResourceUsageManager;
+import org.eclipse.che.multiuser.resource.api.usage.ResourceManager;
 import org.eclipse.che.multiuser.resource.api.usage.ResourcesLocks;
 import org.eclipse.che.multiuser.resource.model.Resource;
 import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
@@ -51,8 +51,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Tests for {@link
- * org.eclipse.che.multiuser.organization.api.resource.OrganizationResourcesDistributor}
+ * Tests for {@link OrganizationResourcesDistributor}
  *
  * @author Sergii Leschenko
  */
@@ -64,7 +63,7 @@ public class OrganizationResourcesDistributorTest {
   @Mock private Unlocker lock;
   @Mock private OrganizationDistributedResourcesDao distributedResourcesDao;
   @Mock private ResourcesLocks resourcesLocks;
-  @Mock private ResourceUsageManager usageManager;
+  @Mock private ResourceManager resourceManager;
   @Mock private ResourceAggregator resourceAggregator;
   @Mock private OrganizationManager organizationManager;
 
@@ -198,7 +197,7 @@ public class OrganizationResourcesDistributorTest {
     doCallRealMethod().when(manager).checkResourcesAvailability(anyString(), any());
 
     ResourceImpl used = createTestResource(500);
-    doReturn(singletonList(used)).when(usageManager).getUsedResources(any());
+    doReturn(singletonList(used)).when(resourceManager).getUsedResources(any());
 
     ResourceImpl toCap = createTestResource(700);
     doReturn(createTestResource(200)).when(resourceAggregator).deduct((Resource) any(), any());
@@ -207,7 +206,7 @@ public class OrganizationResourcesDistributorTest {
     manager.checkResourcesAvailability(ORG_ID, singletonList(toCap));
 
     // then
-    verify(usageManager).getUsedResources(ORG_ID);
+    verify(resourceManager).getUsedResources(ORG_ID);
     verify(resourceAggregator).deduct(toCap, used);
   }
 
@@ -222,7 +221,7 @@ public class OrganizationResourcesDistributorTest {
     doReturn("Denied.").when(manager).getMessage(anyString());
 
     ResourceImpl used = createTestResource(1000);
-    doReturn(singletonList(used)).when(usageManager).getUsedResources(any());
+    doReturn(singletonList(used)).when(resourceManager).getUsedResources(any());
 
     ResourceImpl toCap = createTestResource(700);
     doThrow(new NoEnoughResourcesException(emptyList(), emptyList(), singletonList(toCap)))
@@ -233,7 +232,7 @@ public class OrganizationResourcesDistributorTest {
     manager.checkResourcesAvailability(ORG_ID, singletonList(toCap));
 
     // then
-    verify(usageManager).getUsedResources(ORG_ID);
+    verify(resourceManager).getUsedResources(ORG_ID);
     verify(resourceAggregator).deduct(toCap, used);
   }
 
