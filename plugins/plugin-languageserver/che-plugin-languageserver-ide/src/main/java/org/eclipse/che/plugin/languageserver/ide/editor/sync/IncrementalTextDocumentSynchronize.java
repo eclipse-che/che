@@ -18,6 +18,7 @@ import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
@@ -33,12 +34,16 @@ import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 class IncrementalTextDocumentSynchronize implements TextDocumentSynchronize {
 
   private final DtoFactory dtoFactory;
+  private final DtoBuildHelper dtoHelper;
   private final TextDocumentServiceClient textDocumentService;
 
   @Inject
   public IncrementalTextDocumentSynchronize(
-      DtoFactory dtoFactory, TextDocumentServiceClient textDocumentService) {
+      DtoFactory dtoFactory,
+      DtoBuildHelper dtoHelper,
+      TextDocumentServiceClient textDocumentService) {
     this.dtoFactory = dtoFactory;
+    this.dtoHelper = dtoHelper;
     this.textDocumentService = textDocumentService;
   }
 
@@ -51,7 +56,7 @@ class IncrementalTextDocumentSynchronize implements TextDocumentSynchronize {
       String insertedText,
       int version) {
     DidChangeTextDocumentParams changeDTO = dtoFactory.createDto(DidChangeTextDocumentParams.class);
-    String uri = document.getFile().getLocation().toString();
+    String uri = dtoHelper.getUri(document.getFile());
     changeDTO.setUri(uri);
     VersionedTextDocumentIdentifier versionedDocId =
         dtoFactory.createDto(VersionedTextDocumentIdentifier.class);

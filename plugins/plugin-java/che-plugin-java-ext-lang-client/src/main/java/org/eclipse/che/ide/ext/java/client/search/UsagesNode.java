@@ -128,7 +128,7 @@ public class UsagesNode extends AbstractTreeNode implements HasNewPresentation {
     }
   }
 
-  private static Path toPath(String uri) {
-    return new Path(new UrlBuilder(uri).getPath());
+  static Path toPath(String uri) {
+    return uri.startsWith("/") ? new Path(uri) : new Path(new UrlBuilder(uri).getPath());
   }
 }
