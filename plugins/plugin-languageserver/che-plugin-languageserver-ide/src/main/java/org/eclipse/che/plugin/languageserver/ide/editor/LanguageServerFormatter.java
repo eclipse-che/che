@@ -34,6 +34,7 @@ import org.eclipse.che.ide.editor.preferences.EditorPreferencesManager;
 import org.eclipse.che.ide.editor.preferences.editorproperties.EditorProperties;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.lsp4j.DocumentFormattingParams;
 import org.eclipse.lsp4j.DocumentOnTypeFormattingParams;
 import org.eclipse.lsp4j.DocumentRangeFormattingParams;
@@ -49,6 +50,7 @@ public class LanguageServerFormatter implements ContentFormatter {
 
   private final TextDocumentServiceClient client;
   private final DtoFactory dtoFactory;
+  private DtoBuildHelper dtoHelper;
   private final NotificationManager manager;
   private final ServerCapabilities capabilities;
   private final EditorPreferencesManager editorPreferencesManager;
@@ -59,12 +61,14 @@ public class LanguageServerFormatter implements ContentFormatter {
   public LanguageServerFormatter(
       TextDocumentServiceClient client,
       DtoFactory dtoFactory,
+      DtoBuildHelper dtoHelper,
       NotificationManager manager,
       @Assisted ServerCapabilities capabilities,
       EditorPreferencesManager editorPreferencesManager,
       PromiseProvider promiseProvider) {
     this.client = client;
     this.dtoFactory = dtoFactory;
+    this.dtoHelper = dtoHelper;
     this.manager = manager;
     this.capabilities = capabilities;
     this.editorPreferencesManager = editorPreferencesManager;
@@ -108,9 +112,7 @@ public class LanguageServerFormatter implements ContentFormatter {
 
                     DocumentOnTypeFormattingParams params =
                         dtoFactory.createDto(DocumentOnTypeFormattingParams.class);
-                    TextDocumentIdentifier identifier =
-                        dtoFactory.createDto(TextDocumentIdentifier.class);
-                    identifier.setUri(document.getFile().getLocation().toString());
+                    TextDocumentIdentifier identifier = dtoHelper.createTDI(document.getFile());
                     params.setTextDocument(identifier);
                     params.setOptions(getFormattingOptions());
                     params.setCh(event.getText());
@@ -133,8 +135,7 @@ public class LanguageServerFormatter implements ContentFormatter {
   private void formatFullDocument(Document document) {
     DocumentFormattingParams params = dtoFactory.createDto(DocumentFormattingParams.class);
 
-    TextDocumentIdentifier identifier = dtoFactory.createDto(TextDocumentIdentifier.class);
-    identifier.setUri(document.getFile().getLocation().toString());
+    TextDocumentIdentifier identifier = dtoHelper.createTDI(document.getFile());
 
     params.setTextDocument(identifier);
     params.setOptions(getFormattingOptions());
@@ -234,8 +235,7 @@ public class LanguageServerFormatter implements ContentFormatter {
     DocumentRangeFormattingParams params =
         dtoFactory.createDto(DocumentRangeFormattingParams.class);
 
-    TextDocumentIdentifier identifier = dtoFactory.createDto(TextDocumentIdentifier.class);
-    identifier.setUri(document.getFile().getLocation().toString());
+    TextDocumentIdentifier identifier = dtoHelper.createTDI(document.getFile());
 
     params.setTextDocument(identifier);
     params.setOptions(getFormattingOptions());
