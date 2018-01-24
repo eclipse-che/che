@@ -48,6 +48,11 @@ public final class Constants {
   public static final String IMPLEMENTERS = "java/implementers";
   public static final String USAGES = "java/usages";
 
+  public static final String GET_JAVA_CORE_OPTIONS = "java/getJavaCoreOptions";
+  public static final String UPDATE_JAVA_CORE_OPTIONS = "java/updateJavaCoreOptions";
+  public static final String GET_PREFERENCES = "java/getPreferences";
+  public static final String UPDATE_PREFERENCES = "java/updatePreferences";
+
   private Constants() {
     throw new UnsupportedOperationException("Unused constructor.");
   }
