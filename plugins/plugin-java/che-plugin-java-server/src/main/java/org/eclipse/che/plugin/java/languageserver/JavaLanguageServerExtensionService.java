@@ -24,11 +24,13 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHI
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_NODE_CONTENT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.GET_JAVA_CORE_OPTIONS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.IMPLEMENTERS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
+import static org.eclipse.che.ide.ext.java.shared.Constants.UPDATE_JAVA_CORE_OPTIONS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.USAGES;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CREATE_SIMPLE_PROJECT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
@@ -93,6 +95,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.ImplementersResponse;
 import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
+import org.eclipse.che.jdt.ls.extension.api.dto.JavaCoreOptions;
 import org.eclipse.che.jdt.ls.extension.api.dto.JobResult;
 import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocation;
@@ -223,18 +226,34 @@ public class JavaLanguageServerExtensionService {
         .paramsAsString()
         .resultAsDto(WorkspaceEdit.class)
         .withFunction(this::organizeImports);
+
     requestHandler
         .newConfiguration()
         .methodName(IMPLEMENTERS)
         .paramsAsDto(TextDocumentPositionParams.class)
         .resultAsDto(ImplementersResponseDto.class)
         .withFunction(this::findImplementers);
+
     requestHandler
         .newConfiguration()
         .methodName(USAGES)
         .paramsAsDto(TextDocumentPositionParams.class)
         .resultAsDto(UsagesResponse.class)
         .withFunction(this::usages);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(GET_JAVA_CORE_OPTIONS)
+        .paramsAsListOfString()
+        .resultAsDto(JavaCoreOptions.class)
+        .withFunction(this::getJavaCoreOptions);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(UPDATE_JAVA_CORE_OPTIONS)
+        .paramsAsDto(JavaCoreOptions.class)
+        .resultAsBoolean()
+        .withFunction(this::updateJavaCoreOptions);
   }
 
   /**
@@ -675,6 +694,25 @@ public class JavaLanguageServerExtensionService {
   public WorkspaceEdit organizeImports(String path) {
     Type type = new TypeToken<WorkspaceEdit>() {}.getType();
     return doGetOne("java.edit.organizeImports", singletonList(prefixURI(path)), type);
+  }
+
+  // configuration
+
+  /**
+   * Returns JDT LS java core options.
+   *
+   * @param filter list of the specific options to return.
+   */
+  public JavaCoreOptions getJavaCoreOptions(List<String> filter) {
+    Type type = new TypeToken<JavaCoreOptions>() {}.getType();
+    return doGetOne(Commands.GET_JAVA_CORE_OPTIONS_СOMMAND, new ArrayList<>(filter), type);
+  }
+
+  /** Updates JDT LS java core options. */
+  public Boolean updateJavaCoreOptions(JavaCoreOptions javaCoreOptions) {
+    Type type = new TypeToken<Boolean>() {}.getType();
+    return doGetOne(
+        Commands.UPDATE_JAVA_CORE_OPTIONS_СOMMAND, singletonList(javaCoreOptions), type);
   }
 
   private <T, P> List<T> doGetList(String command, P params, Type type) {
