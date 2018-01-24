@@ -19,7 +19,6 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARIES_CHILDREN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_CHILDREN;
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENTRY;
-import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_NODE_CONTENT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.GET_JAVA_CORE_OPTIONS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.IMPLEMENTERS;
@@ -259,26 +258,6 @@ public class JavaLanguageExtensionServiceClient {
                 .methodName(EXTERNAL_LIBRARY_ENTRY)
                 .paramsAsDto(params)
                 .sendAndReceiveResultAsDto(JarEntry.class, REQUEST_TIMEOUT)
-                .onSuccess(resolve::apply)
-                .onTimeout(() -> onTimeout(reject))
-                .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
-  }
-
-  /**
-   * Gets content of the file from the library by file path.
-   *
-   * @param params external libraries parameters {@link ExternalLibrariesParameters}
-   * @return content of the file
-   */
-  public Promise<String> libraryNodeContentByPath(ExternalLibrariesParameters params) {
-    return Promises.create(
-        (resolve, reject) ->
-            requestTransmitter
-                .newRequest()
-                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
-                .methodName(EXTERNAL_NODE_CONTENT)
-                .paramsAsDto(params)
-                .sendAndReceiveResultAsString(REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));

@@ -15,7 +15,6 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.function.Consumer;
-import org.eclipse.che.api.languageserver.shared.util.Constants;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.promises.client.js.Executor;
@@ -165,8 +164,8 @@ public class OpenFileInEditorHelper {
 
   public void openLocation(String uri, LinearRange range) {
     Consumer<TextEditor> selectRange = selectRange(range);
-    if (uri.startsWith(Constants.CHE_WKSP_SCHEME)) {
-      openPath(uri.substring(Constants.CHE_WKSP_SCHEME.length()), selectRange);
+    if (uri.startsWith("/")) {
+      openPath(uri, selectRange);
     } else {
       openFile(new LanguageServerFile(textDocumentService, uri), selectRange);
     }
@@ -175,17 +174,14 @@ public class OpenFileInEditorHelper {
   public void openLocation(Location location) {
     Range range = location.getRange();
     String uri = location.getUri();
-    TextRange selectionRange = toTextRange(range);
-    if (uri.startsWith(Constants.CHE_WKSP_SCHEME)) {
-      openPath(location.getUri().substring(Constants.CHE_WKSP_SCHEME.length()), selectionRange);
+    TextRange selectionRange =
+        new TextRange(
+            new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()),
+            new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
+    if (uri.startsWith("/")) {
+      openPath(location.getUri(), selectionRange);
     } else {
       openFile(new LanguageServerFile(textDocumentService, location.getUri()), selectionRange);
     }
-  }
-
-  private TextRange toTextRange(Range range) {
-    return new TextRange(
-        new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()),
-        new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
   }
 }
