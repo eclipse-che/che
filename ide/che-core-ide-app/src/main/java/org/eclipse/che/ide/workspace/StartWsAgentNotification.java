@@ -35,6 +35,7 @@ class StartWsAgentNotification {
   private final Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider;
   private final EventBus eventBus;
   private final RestartingStateHolder restartingStateHolder;
+  private final WindowClientBundle windowClientBundle;
 
   @UiField Button ignoreButton;
   @UiField Button restartButton;
@@ -52,15 +53,15 @@ class StartWsAgentNotification {
     this.currentWorkspaceManagerProvider = currentWorkspaceManagerProvider;
     this.eventBus = eventBus;
     this.restartingStateHolder = restartingStateHolder;
-
-    ignoreButton.addStyleName(windowClientBundle.getStyle().windowFrameFooterButtonPrimary());
-    restartButton.addStyleName(windowClientBundle.getStyle().windowFrameFooterButtonPrimary());
+    this.windowClientBundle = windowClientBundle;
 
     eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, e -> show());
   }
 
   void show() {
     Widget widget = uiBinder.createAndBindUi(StartWsAgentNotification.this);
+    ignoreButton.addStyleName(windowClientBundle.getStyle().windowFrameFooterButtonPrimary());
+    restartButton.addStyleName(windowClientBundle.getStyle().windowFrameFooterButtonPrimary());
     wsStatusNotification.show(WORKSPACE_AGENT_STOPPED, widget);
   }
 
