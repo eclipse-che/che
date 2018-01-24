@@ -38,6 +38,7 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
+import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 
 /**
  * @author Evgen Vidolob
@@ -49,7 +50,8 @@ public class OpenDeclarationFinder {
   private final EditorAgent editorAgent;
   private DtoFactory dtoFactory;
   private final JavaNavigationService navigationService;
-  private JavaLanguageExtensionServiceClient extensionService;
+  private final JavaLanguageExtensionServiceClient extensionService;
+  private final TextDocumentServiceClient textDocumentService;
   private final AppContext appContext;
   private JavaNodeFactory javaNodeFactory;
 
@@ -59,12 +61,14 @@ public class OpenDeclarationFinder {
       DtoFactory dtoFactory,
       JavaNavigationService navigationService,
       JavaLanguageExtensionServiceClient extensionService,
+      TextDocumentServiceClient textDocumentService,
       AppContext appContext,
       JavaNodeFactory javaNodeFactory) {
     this.editorAgent = editorAgent;
     this.dtoFactory = dtoFactory;
     this.navigationService = navigationService;
     this.extensionService = extensionService;
+    this.textDocumentService = textDocumentService;
     this.appContext = appContext;
     this.javaNodeFactory = javaNodeFactory;
   }
@@ -205,8 +209,8 @@ public class OpenDeclarationFinder {
     params.setNodeId(descriptor.getLibId());
     params.setNodePath(entry.getPath());
     params.setProjectUri(projectPath.toString());
-    extensionService
-        .libraryNodeContentByPath(params)
+    textDocumentService
+        .getFileContent(entry.getUri())
         .then(
             content -> {
               final VirtualFile file =
