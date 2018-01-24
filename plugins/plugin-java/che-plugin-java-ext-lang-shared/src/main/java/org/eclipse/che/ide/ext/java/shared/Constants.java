@@ -44,6 +44,8 @@ public final class Constants {
   public static final String ORGANIZE_IMPORTS = "java/organizeImports";
   public static final String EFFECTIVE_POM = "java/effective-pom";
   public static final String REIMPORT_MAVEN_PROJECTS = "java/reimport-maven-projects";
+  public static final String IMPLEMENTERS = "java/implementers";
+  public static final String USAGES = "java/usages";
 
   public static final String GET_JAVA_CORE_OPTIONS = "java/getJavaCoreOptions";
   public static final String UPDATE_JAVA_CORE_OPTIONS = "java/updateJavaCoreOptions";

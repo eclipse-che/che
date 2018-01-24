@@ -25,13 +25,16 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENT
 import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_NODE_CONTENT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.GET_JAVA_CORE_OPTIONS;
+import static org.eclipse.che.ide.ext.java.shared.Constants.IMPLEMENTERS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.UPDATE_JAVA_CORE_OPTIONS;
+import static org.eclipse.che.ide.ext.java.shared.Constants.USAGES;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.CREATE_SIMPLE_PROJECT;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FILE_STRUCTURE_COMMAND;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_IMPLEMENTERS_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_ENTRY_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_FOLDER_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.FIND_TESTS_FROM_PROJECT_COMMAND;
@@ -50,6 +53,7 @@ import static org.eclipse.che.jdt.ls.extension.api.Commands.REIMPORT_MAVEN_PROJE
 import static org.eclipse.che.jdt.ls.extension.api.Commands.RESOLVE_CLASSPATH_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.TEST_DETECT_COMMAND;
 import static org.eclipse.che.jdt.ls.extension.api.Commands.UPDATE_PROJECT_CLASSPATH;
+import static org.eclipse.che.jdt.ls.extension.api.Commands.USAGES_COMMAND;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
@@ -67,6 +71,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
@@ -86,6 +92,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.ImplementersResponse;
 import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.JavaCoreOptions;
@@ -98,9 +105,14 @@ import org.eclipse.che.jdt.ls.extension.api.dto.TestPosition;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestPositionParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.UpdateClasspathParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.UpdateWorkspaceParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.UsagesResponse;
+import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSymbolInformationDto;
+import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ImplementersResponseDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
 import org.eclipse.lsp4j.ExecuteCommandParams;
+import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.CollectionTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EitherTypeAdapterFactory;
@@ -209,13 +221,26 @@ public class JavaLanguageServerExtensionService {
         .paramsAsString()
         .resultAsListOfDto(ClasspathEntry.class)
         .withFunction(this::getClasspathTree);
-
     requestHandler
         .newConfiguration()
         .methodName(ORGANIZE_IMPORTS)
         .paramsAsString()
         .resultAsDto(WorkspaceEdit.class)
         .withFunction(this::organizeImports);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(IMPLEMENTERS)
+        .paramsAsDto(TextDocumentPositionParams.class)
+        .resultAsDto(ImplementersResponseDto.class)
+        .withFunction(this::findImplementers);
+
+    requestHandler
+        .newConfiguration()
+        .methodName(USAGES)
+        .paramsAsDto(TextDocumentPositionParams.class)
+        .resultAsDto(UsagesResponse.class)
+        .withFunction(this::usages);
 
     requestHandler
         .newConfiguration()
@@ -454,6 +479,27 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
+  public ImplementersResponseDto findImplementers(TextDocumentPositionParams params) {
+    params
+        .getTextDocument()
+        .setUri(LanguageServiceUtils.prefixURI(params.getTextDocument().getUri()));
+    CompletableFuture<Object> result =
+        executeCommand(FIND_IMPLEMENTERS_COMMAND, singletonList(params));
+
+    Type targetClassType = new TypeToken<ImplementersResponse>() {}.getType();
+    try {
+      ImplementersResponse implementersResponse =
+          gson.fromJson(gson.toJson(result.get(10, TimeUnit.SECONDS)), targetClassType);
+      for (SymbolInformation symbolInformation : implementersResponse.getImplementers()) {
+        symbolInformation.setLocation(
+            LanguageServiceUtils.fixLocation(symbolInformation.getLocation()));
+      }
+      return new ImplementersResponseDto(implementersResponse);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
   /**
    * Retrieves effective pom for specified project.
    *
@@ -663,22 +709,11 @@ public class JavaLanguageServerExtensionService {
     return doGetOne(Commands.GET_JAVA_CORE_OPTIONS_СOMMAND, new ArrayList<>(filter), type);
   }
 
-  /** Returns JDT LS preferences */
-  public JdtLsPreferences getJdtLsPreferences() {
-    Type type = new TypeToken<JdtLsPreferences>() {}.getType();
-    return doGetOne(Commands.GET_PREFERENCES_СOMMAND, emptyList(), type);
-  }
-
   /** Updates JDT LS java core options. */
   public Boolean updateJavaCoreOptions(JavaCoreOptions javaCoreOptions) {
     Type type = new TypeToken<Boolean>() {}.getType();
     return doGetOne(
         Commands.UPDATE_JAVA_CORE_OPTIONS_СOMMAND, singletonList(javaCoreOptions), type);
-  }
-  /** Updates JDT LS preferences. */
-  public Boolean updatePreferences(JdtLsPreferences preferences) {
-    Type type = new TypeToken<Boolean>() {}.getType();
-    return doGetOne(Commands.UPDATE_PREFERENCES_СOMMAND, singletonList(preferences), type);
   }
 
   private <T, P> List<T> doGetList(String command, P params, Type type) {
@@ -744,6 +779,42 @@ public class JavaLanguageServerExtensionService {
     LanguageServiceUtils.fixLocation(symbol.getInfo().getLocation());
     for (ExtendedSymbolInformation child : symbol.getChildren()) {
       fixLocation(child);
+    }
+  }
+
+  private UsagesResponse usages(TextDocumentPositionParams parameters) {
+    String uri = LanguageServiceUtils.prefixURI(parameters.getUri());
+    parameters.setUri(uri);
+    parameters.getTextDocument().setUri(uri);
+    try {
+      Type targetClassType = new TypeToken<ArrayList<UsagesResponse>>() {}.getType();
+      List<UsagesResponse> results = doGetList(USAGES_COMMAND, parameters, targetClassType);
+      if (results.isEmpty()) {
+        return null;
+      }
+      results
+          .get(0)
+          .getSearchResults()
+          .forEach(
+              result -> {
+                iterate(
+                    result,
+                    r -> r.getChildren(),
+                    r -> {
+                      r.setUri(LanguageServiceUtils.fixUri(r.getUri()));
+                    });
+              });
+      return new DtoServerImpls.UsagesResponseDto(results.get(0));
+    } catch (JsonSyntaxException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  private <T> void iterate(
+      T root, Function<T, List<T>> childrenAccessor, Consumer<T> elementHandler) {
+    elementHandler.accept(root);
+    for (T child : childrenAccessor.apply(root)) {
+      iterate(child, childrenAccessor, elementHandler);
     }
   }
 }
