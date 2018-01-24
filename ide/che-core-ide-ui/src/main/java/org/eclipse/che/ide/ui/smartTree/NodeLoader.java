@@ -132,7 +132,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
       }
 
       // Iterate on nested descendants to make additional load request
-      if (childRequested.remove(parent)) {
+      if (Boolean.TRUE.equals(childRequested.remove(parent))) {
         for (Node node : tree.getNodeStorage().getChildren(parent)) {
           if (tree.isExpanded(node) && !tree.getNodeDescriptor(node).getChildren().isEmpty()) {
             loadChildren(node, true);
@@ -367,6 +367,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
     return children -> {
       if (nodeInterceptors.isEmpty()) {
         onLoadSuccess(parent, children);
+        return;
       }
 
       LinkedList<NodeInterceptor> sortedByPriorityQueue = new LinkedList<>(nodeInterceptors);
