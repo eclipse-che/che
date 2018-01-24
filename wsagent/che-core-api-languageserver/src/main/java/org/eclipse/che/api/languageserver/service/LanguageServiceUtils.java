@@ -68,7 +68,7 @@ public class LanguageServiceUtils {
   }
 
   public static boolean isWorkspaceUri(String uri) {
-    return uri.startsWith(Constants.CHE_WKSP_SCHEME);
+    return uri.startsWith("/");
   }
 
   public static String workspaceURIToFileURI(String uri) throws LanguageServerException {
@@ -80,6 +80,6 @@ public class LanguageServiceUtils {
   }
 
   public static String fixUri(String uri) {
-    return isProjectUri(uri) ? Constants.CHE_WKSP_SCHEME + removePrefixUri(uri) : uri;
+    return isProjectUri(uri) ? removePrefixUri(uri) : uri;
   }
 }

@@ -31,7 +31,6 @@ public class LanguageServerFile implements VirtualFile, HasURI {
 
   private String extractName(String uri) {
     String path = new UrlBuilder(uri).getPath();
-    path = path.substring(1, path.length() - 1);
     return new Path(path).lastSegment();
   }
 
