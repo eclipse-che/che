@@ -1455,11 +1455,16 @@ public class CodenvyEditor {
   }
 
   /** launch the 'Refactor' form by keyboard */
-  public void launchRefactorFormFromEditor() {
+  public void launchLocalRefactor() {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     action.keyDown(Keys.SHIFT).sendKeys(Keys.F6).keyUp(Keys.SHIFT).perform();
     loader.waitOnClosed();
+  }
+
+  public void launchRefactorForm() {
+    launchLocalRefactor();
+    launchLocalRefactor();
   }
 
   /**

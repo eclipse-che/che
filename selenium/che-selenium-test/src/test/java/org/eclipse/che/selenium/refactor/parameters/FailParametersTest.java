@@ -86,8 +86,7 @@ public class FailParametersTest {
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(
         testParamObj.getStrCursorPosition(), testParamObj.getLineCursorPosition());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameParametersFormIsOpen();
     refactor.waitUpdateReferencesIsSelected();
     refactor.typeAndWaitNewName(testParamObj.getRefactorValue());
