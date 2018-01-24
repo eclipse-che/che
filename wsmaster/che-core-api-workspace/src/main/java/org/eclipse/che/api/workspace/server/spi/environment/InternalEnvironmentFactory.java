@@ -110,9 +110,12 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
   }
 
   /**
-   * Implementation validates downloaded recipe and creates specific InternalEnvironment. Returned
-   * InternalEnvironment must contains all machine that are defined in recipe and in source machine
-   * collection.
+   * Implementation validates downloaded recipe and creates specific InternalEnvironment.
+   *
+   * <p>Returned InternalEnvironment must contains all machine that are defined in recipe and in
+   * source machines collection. Also, if memory limitation is supported, it may add memory limit
+   * attribute {@link MachineConfig#MEMORY_LIMIT_ATTRIBUTE} from recipe or configured system-wide
+   * default value.
    *
    * @param recipe downloaded recipe
    * @param machines machines configuration
