@@ -40,7 +40,6 @@ public final class Constants {
   public static final String EXTERNAL_LIBRARIES_CHILDREN = "java/externalLibrariesChildren";
   public static final String EXTERNAL_LIBRARY_CHILDREN = "java/libraryChildren";
   public static final String EXTERNAL_LIBRARY_ENTRY = "java/libraryEntry";
-  public static final String EXTERNAL_NODE_CONTENT = "java/libraryNodeContentByPath";
   public static final String CLASS_PATH_TREE = "java/classpathTree";
   public static final String ORGANIZE_IMPORTS = "java/organizeImports";
   public static final String EFFECTIVE_POM = "java/effective-pom";

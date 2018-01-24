@@ -23,6 +23,7 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
 import org.eclipse.che.plugin.languageserver.ide.filestructure.ElementSelectionDelegate;
+import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
 
 /**
@@ -36,6 +37,7 @@ public class FileStructurePresenter2
   private final FileStructureWindow view;
   private final JavaLanguageExtensionServiceClient javaExtensionService;
   private final OpenFileInEditorHelper openHelper;
+  private final DtoBuildHelper dtoHelper;
   private final MessageLoader loader;
 
   private TextEditor activeEditor;
@@ -46,10 +48,12 @@ public class FileStructurePresenter2
       FileStructureWindow view,
       JavaLanguageExtensionServiceClient javaExtensionService,
       OpenFileInEditorHelper openHelper,
+      DtoBuildHelper dtoHelper,
       LoaderFactory loaderFactory) {
     this.view = view;
     this.javaExtensionService = javaExtensionService;
     this.openHelper = openHelper;
+    this.dtoHelper = dtoHelper;
     this.loader = loaderFactory.newLoader();
     this.view.setDelegate(this);
   }
@@ -68,8 +72,7 @@ public class FileStructurePresenter2
       javaExtensionService
           .fileStructure(
               new DtoClientImpls.FileStructureCommandParametersDto(
-                  new FileStructureCommandParameters(
-                      file.getLocation().toString(), showInheritedMembers)))
+                  new FileStructureCommandParameters(dtoHelper.getUri(file), showInheritedMembers)))
           .then(
               result -> {
                 loader.hide();
@@ -94,8 +97,7 @@ public class FileStructurePresenter2
       javaExtensionService
           .fileStructure(
               new DtoClientImpls.FileStructureCommandParametersDto(
-                  new FileStructureCommandParameters(
-                      file.getLocation().toString(), showInheritedMembers)))
+                  new FileStructureCommandParameters(dtoHelper.getUri(file), showInheritedMembers)))
           .then(
               result -> {
                 loader.hide();
