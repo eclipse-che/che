@@ -46,6 +46,7 @@ import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.SymbolKindHel
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenModel;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenPresenter;
 import org.eclipse.che.plugin.languageserver.ide.service.WorkspaceServiceClient;
+import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.Range;
@@ -70,6 +71,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction
   private final FuzzyMatches fuzzyMatches;
   private PromiseProvider promiseProvider;
   private final ThrottledDelayer<List<SymbolEntry>> delayer;
+  private DtoBuildHelper dtoHelper;
 
   @Inject
   public FindSymbolAction(
@@ -78,6 +80,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction
       QuickOpenPresenter presenter,
       WorkspaceServiceClient workspaceServiceClient,
       DtoFactory dtoFactory,
+      DtoBuildHelper dtoHelper,
       EditorAgent editorAgent,
       SymbolKindHelper symbolKindHelper,
       FuzzyMatches fuzzyMatches,
@@ -90,6 +93,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction
     this.presenter = presenter;
     this.workspaceServiceClient = workspaceServiceClient;
     this.dtoFactory = dtoFactory;
+    this.dtoHelper = dtoHelper;
     this.editorAgent = editorAgent;
     this.symbolKindHelper = symbolKindHelper;
     this.fuzzyMatches = fuzzyMatches;
@@ -143,8 +147,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction
     ExtendedWorkspaceSymbolParams params =
         dtoFactory.createDto(ExtendedWorkspaceSymbolParams.class);
     params.setQuery(value);
-    params.setFileUri(
-        editorAgent.getActiveEditor().getEditorInput().getFile().getLocation().toString());
+    params.setFileUri(dtoHelper.getUri(editorAgent.getActiveEditor().getEditorInput().getFile()));
     return workspaceServiceClient
         .symbol(params)
         .then(
