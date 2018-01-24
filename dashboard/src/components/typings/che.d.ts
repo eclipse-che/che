@@ -264,7 +264,6 @@ declare namespace che {
     scope?: string;
     components?: Array<any>;
     links?: Array<any>;
-    source?: any;
     workspaceConfig: IWorkspaceConfig;
   }
 

@@ -1794,7 +1794,7 @@
       "name": "default",
       "defaultEnv": "default",
       "description": null
-    },
+    }
   },
   {
     "id": "zend",
