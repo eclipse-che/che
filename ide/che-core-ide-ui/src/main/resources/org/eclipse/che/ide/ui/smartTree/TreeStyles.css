@@ -124,7 +124,7 @@
 .tree {
     font-size: 0.85em;
     outline: none;
-    overflow: auto;
+    overflow-y: auto;
     padding-bottom: 2px;
 }
 

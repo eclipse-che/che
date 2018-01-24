@@ -1594,8 +1594,6 @@ public class Tree extends FocusWidget
   }
 
   private void onAfterFirstAttach() {
-    rootContainer = getRootContainer();
-
     getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
 
     renderChildren(null);
