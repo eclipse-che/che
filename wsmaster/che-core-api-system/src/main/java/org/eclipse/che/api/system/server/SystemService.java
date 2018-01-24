@@ -12,7 +12,7 @@ package org.eclipse.che.api.system.server;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
-import static org.eclipse.che.api.system.server.SystemEventsWebsocketBroadcaster.SYSTEM_STATE_CHANNEL_NAME;
+import static org.eclipse.che.api.system.server.SystemEventsWebsocketBroadcaster.SYSTEM_STATE_METHOD_NAME;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -69,14 +69,14 @@ public class SystemService extends Service {
             getServiceContext()
                 .getBaseUriBuilder()
                 .scheme("https".equals(uriInfo.getBaseUri().getScheme()) ? "wss" : "ws")
-                .path("ws")
+                .path("websocket")
                 .build()
                 .toString(),
             "system.state.channel",
             singletonList(
                 DtoFactory.newDto(LinkParameter.class)
                     .withName("channel")
-                    .withDefaultValue(SYSTEM_STATE_CHANNEL_NAME)
+                    .withDefaultValue(SYSTEM_STATE_METHOD_NAME)
                     .withRequired(true)));
     return DtoFactory.newDto(SystemStateDto.class)
         .withStatus(manager.getSystemStatus())

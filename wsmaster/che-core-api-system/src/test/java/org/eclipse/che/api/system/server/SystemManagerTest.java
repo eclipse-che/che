@@ -13,6 +13,7 @@ package org.eclipse.che.api.system.server;
 import static org.eclipse.che.api.system.shared.SystemStatus.PREPARING_TO_SHUTDOWN;
 import static org.eclipse.che.api.system.shared.SystemStatus.READY_TO_SHUTDOWN;
 import static org.eclipse.che.api.system.shared.SystemStatus.RUNNING;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -21,7 +22,7 @@ import static org.testng.Assert.assertEquals;
 import java.util.Iterator;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.system.shared.event.SystemStatusChangedEvent;
+import org.eclipse.che.api.system.shared.dto.SystemStatusChangedEventDto;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -43,7 +44,7 @@ public class SystemManagerTest {
 
   @Mock private EventService eventService;
 
-  @Captor private ArgumentCaptor<SystemStatusChangedEvent> eventsCaptor;
+  @Captor private ArgumentCaptor<SystemStatusChangedEventDto> eventsCaptor;
 
   private SystemManager systemManager;
 
@@ -89,9 +90,16 @@ public class SystemManagerTest {
   private void verifyShutdownCompleted() throws InterruptedException {
     verify(terminator, timeout(2000)).terminateAll();
     verify(eventService, times(2)).publish(eventsCaptor.capture());
-    Iterator<SystemStatusChangedEvent> eventsIt = eventsCaptor.getAllValues().iterator();
-    assertEquals(eventsIt.next(), new SystemStatusChangedEvent(RUNNING, PREPARING_TO_SHUTDOWN));
+    Iterator<SystemStatusChangedEventDto> eventsIt = eventsCaptor.getAllValues().iterator();
     assertEquals(
-        eventsIt.next(), new SystemStatusChangedEvent(PREPARING_TO_SHUTDOWN, READY_TO_SHUTDOWN));
+        eventsIt.next(),
+        newDto(SystemStatusChangedEventDto.class)
+            .withPrevStatus(RUNNING)
+            .withStatus(PREPARING_TO_SHUTDOWN));
+    assertEquals(
+        eventsIt.next(),
+        newDto(SystemStatusChangedEventDto.class)
+            .withPrevStatus(PREPARING_TO_SHUTDOWN)
+            .withStatus(READY_TO_SHUTDOWN));
   }
 }
