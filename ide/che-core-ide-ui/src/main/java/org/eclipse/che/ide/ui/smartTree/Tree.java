@@ -653,7 +653,11 @@ public class Tree extends FocusWidget
     if (container == null) {
       return;
     }
+
+    int scrollLeft = getElement().getScrollLeft();
     container.scrollIntoView();
+    getElement().setScrollLeft(scrollLeft);
+
     focusEl.getStyle().setLeft((nodeStorage.getDepth(node) - 1) * 16, Style.Unit.PX);
     focusEl.getStyle().setTop(container.getOffsetTop(), Style.Unit.PX);
 
