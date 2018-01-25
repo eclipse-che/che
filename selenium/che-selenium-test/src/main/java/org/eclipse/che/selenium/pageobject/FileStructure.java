@@ -54,7 +54,7 @@ public class FileStructure {
   }
 
   private interface Locators {
-    String FILE_STRUCTURE_FORM = "//div[text()='%s.java']/ancestor::div[3]";
+    String FILE_STRUCTURE_FORM = "//table[@title='%s.java']";
     String FILE_STRUCTURE_CLOSE_ICON =
         "//div[@id='gwt-debug-file-structure-mainPanel']/parent::div/preceding-sibling::div//*[local-name() = 'svg']";
     String FILE_STRUCTURE_CONTENT = "gwt-debug-file-structure-mainPanel";

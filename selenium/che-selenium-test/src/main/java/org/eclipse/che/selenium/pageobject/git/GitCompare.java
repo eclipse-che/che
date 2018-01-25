@@ -62,7 +62,7 @@ public class GitCompare {
         "//div[@id='gwt-debug-git-compare-revision-window']//tr[@__gwt_row='%s']";
     String REVISION_COMPARE_BUTTON = "git-compare-revision-compare";
     String REVISION_CLOSE_BUTTON = "git-compare-revision-close";
-    String GROUP_GIT_COMPARE_FORM = "//div[text()='Git Compare']/ancestor::div[3]";
+    String GROUP_GIT_COMPARE_FORM = "//table[@title='Git Compare']";
     String PATH_TO_FILE_COMPARE =
         "//div[@id='gwt-debug-git-compare-window-changed-files']//div[text()='%s']";
     String GROUP_COMPARE_TEXT_AREA = "gwt-debug-git-compare-window-changed-files";
