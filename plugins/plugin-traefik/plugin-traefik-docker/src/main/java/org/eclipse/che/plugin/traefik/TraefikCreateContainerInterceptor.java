@@ -10,29 +10,24 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.traefik;
 
+import static java.lang.String.format;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.name.Named;
-
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.infrastructure.docker.client.json.ContainerConfig;
-import org.eclipse.che.infrastructure.docker.client.json.ImageInfo;
-import org.eclipse.che.infrastructure.docker.client.params.CreateContainerParams;
-import org.eclipse.che.infrastructure.docker.client.params.InspectImageParams;
-import org.eclipse.che.plugin.docker.machine.CustomServerEvaluationStrategy;
-import org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategy;
-import org.eclipse.che.plugin.docker.machine.ServerEvaluationStrategyProvider;
-
-import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
-
-import static java.lang.String.format;
+import javax.inject.Inject;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.infrastructure.docker.client.DockerConnector;
+import org.eclipse.che.infrastructure.docker.client.json.ContainerConfig;
+import org.eclipse.che.infrastructure.docker.client.json.ImageInfo;
+import org.eclipse.che.infrastructure.docker.client.params.CreateContainerParams;
+import org.eclipse.che.infrastructure.docker.client.params.InspectImageParams;
 
 /**
  * Traefik has a listener on Docker containers. Each time a container is added or removed, it checks if the container has specific Traefik

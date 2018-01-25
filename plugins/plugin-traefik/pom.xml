@@ -23,6 +23,6 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: Traefik :: Parent</name>
     <modules>
-        <!--<module>plugin-traefik-docker</module>-->
+        <!--module>plugin-traefik-docker</module-->
     </modules>
 </project>

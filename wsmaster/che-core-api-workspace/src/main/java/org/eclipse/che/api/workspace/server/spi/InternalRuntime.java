@@ -190,7 +190,7 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
         try {
           ServerImpl server =
               new ServerImpl(incomingServer)
-                  .withUrl(urlRewriter.rewriteURL(identity, name, incomingServer.getUrl()));
+                  .withUrl(urlRewriter.rewriteURL(identity, null, name, incomingServer.getUrl()));
           outgoing.put(name, server);
         } catch (InfrastructureException e) {
           warnings.add(new WarningImpl(101, "Malformed URL for " + name + " : " + e.getMessage()));

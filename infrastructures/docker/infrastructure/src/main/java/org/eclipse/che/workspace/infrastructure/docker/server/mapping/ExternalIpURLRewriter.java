@@ -47,7 +47,11 @@ public class ExternalIpURLRewriter implements URLRewriter {
   }
 
   @Override
-  public String rewriteURL(@Nullable RuntimeIdentity identity, @Nullable String name, String url)
+  public String rewriteURL(
+      @Nullable RuntimeIdentity identity,
+      @Nullable String machineName,
+      @Nullable String serverName,
+      String url)
       throws InfrastructureException {
 
     if (externalIpOfContainers != null) {
