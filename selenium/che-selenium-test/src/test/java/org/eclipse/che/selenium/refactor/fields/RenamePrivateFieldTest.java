@@ -91,8 +91,7 @@ public class RenamePrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     typeAndWaitNewName("g");
     loader.waitOnClosed();
@@ -113,8 +112,7 @@ public class RenamePrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     typeAndWaitNewName("g");
     loader.waitOnClosed();
@@ -135,8 +133,7 @@ public class RenamePrivateFieldTest {
     editor.setCursorToLine(14);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     typeAndWaitNewName("g");
     loader.waitOnClosed();
@@ -157,8 +154,7 @@ public class RenamePrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     typeAndWaitNewName("gg");
     loader.waitOnClosed();
@@ -182,8 +178,7 @@ public class RenamePrivateFieldTest {
     editor.setCursorToLine(18);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     typeAndWaitNewName("fYou");
     loader.waitOnClosed();
@@ -207,8 +202,7 @@ public class RenamePrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     typeAndWaitNewName("fYou");
     loader.waitOnClosed();
@@ -231,8 +225,7 @@ public class RenamePrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     typeAndWaitNewName("fYou");
     loader.waitOnClosed();
@@ -255,8 +248,7 @@ public class RenamePrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     typeAndWaitNewName("fSmall");
     loader.waitOnClosed();
@@ -279,8 +271,7 @@ public class RenamePrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     typeAndWaitNewName("g");
     loader.waitOnClosed();
@@ -301,8 +292,7 @@ public class RenamePrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     typeAndWaitNewName("fSmall");
     loader.waitOnClosed();
@@ -323,8 +313,7 @@ public class RenamePrivateFieldTest {
     editor.setCursorToLine(19);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     loader.waitOnClosed();
     typeAndWaitNewName("fElements");
@@ -349,8 +338,7 @@ public class RenamePrivateFieldTest {
     editor.setCursorToLine(21);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     loader.waitOnClosed();
     typeAndWaitNewName("fElements");
@@ -374,8 +362,7 @@ public class RenamePrivateFieldTest {
     editor.setCursorToLine(14);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     typeAndWaitNewName("feel");
     loader.waitOnClosed();

@@ -229,6 +229,7 @@ public class FileStructure {
   }
 
   public void type(String text) {
+    WaitUtils.sleepQuietly(1);
     actionsFactory.createAction(seleniumWebDriver).sendKeys(text).perform();
   }
 }
