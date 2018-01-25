@@ -65,12 +65,12 @@ public class SinglePortHostnameBuilder {
     return String.format("%s.%s", getExternalIp(localAddress), "nip.io");
   }
 
-  private String getExternalIp(String externalAddress) {
+  private String getExternalIp(String localAddress) {
     try {
-      return InetAddress.getByName(externalAddress).getHostAddress();
+      return InetAddress.getByName(localAddress).getHostAddress();
     } catch (UnknownHostException e) {
       throw new UnsupportedOperationException(
-          "Unable to find the IP for the address '" + externalAddress + "'", e);
+          "Unable to find the IP for the address '" + localAddress + "'", e);
     }
   }
 }
