@@ -82,6 +82,7 @@ public abstract class SeleniumTestHandler
 
   private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestHandler.class);
   private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
+  private static final AtomicBoolean isWebDriverSessionCreationChecked = new AtomicBoolean();
 
   @Inject
   @Named("tests.screenshot_dir")
@@ -170,18 +171,23 @@ public abstract class SeleniumTestHandler
 
   @Override
   public void onStart(ISuite suite) {
-    runningTests.clear();
     suite.setParentInjector(injector);
   }
 
   /** Check if webdriver session can be created without errors. */
   private void checkWebDriverSessionCreation() {
+    if (isWebDriverSessionCreationChecked.get()) {
+      return;
+    }
+
     SeleniumWebDriver seleniumWebDriver = null;
     try {
       seleniumWebDriver = new SeleniumWebDriver(browser, webDriverPort, gridMode, webDriverVersion);
     } finally {
       Optional.ofNullable(seleniumWebDriver)
           .ifPresent(SeleniumWebDriver::quit); // finish webdriver session
+
+      isWebDriverSessionCreationChecked.set(true);
     }
   }
 
