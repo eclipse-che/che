@@ -47,8 +47,6 @@ public class ThemeAgentImpl implements ThemeAgent {
     defaultTheme = darkTheme;
 
     themes = new HashMap<>();
-
-    Style.theme = defaultTheme;
   }
 
   @Inject

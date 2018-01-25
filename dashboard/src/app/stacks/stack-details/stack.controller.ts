@@ -197,15 +197,9 @@ export class StackController {
       this.loading = false;
       this.prepareStackData();
     }, (error: any) => {
-      if (error && error.status === 304) {
-        this.loading = false;
-        this.stack = this.cheStack.getStackById(this.stackId);
-        this.prepareStackData();
-      } else {
-        this.$log.error(error);
-        this.loading = false;
-        this.invalidStack = error.statusText + error.status;
-      }
+      this.$log.error(error);
+      this.loading = false;
+      this.invalidStack = `${error.statusText} ${error.status}`;
     });
   }
 
@@ -303,11 +297,13 @@ export class StackController {
       return;
     }
     const stack = angular.fromJson(this.stackJson);
-    this.cheStack.updateStack(this.stack.id, stack).then((stack: any) => {
-      this.cheNotification.showInfo('Stack is successfully updated.');
-      this.isLoading = false;
-      this.stack = stack;
-      this.prepareStackData();
+    this.cheStack.updateStack(this.stack.id, stack).then(() => {
+      this.cheStack.fetchStacks().finally(() => {
+        this.cheNotification.showInfo('Stack has been successfully updated.');
+        this.isLoading = false;
+        this.stack = this.cheStack.getStackById(this.stackId);
+        this.prepareStackData();
+      });
     }, (error: any) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Update stack failed.');

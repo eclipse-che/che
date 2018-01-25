@@ -26,7 +26,7 @@ import org.eclipse.che.multiuser.organization.shared.model.Organization;
 import org.eclipse.che.multiuser.resource.api.AvailableResourcesProvider;
 import org.eclipse.che.multiuser.resource.api.ResourceAggregator;
 import org.eclipse.che.multiuser.resource.api.exception.NoEnoughResourcesException;
-import org.eclipse.che.multiuser.resource.api.usage.ResourceUsageManager;
+import org.eclipse.che.multiuser.resource.api.usage.ResourceManager;
 import org.eclipse.che.multiuser.resource.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,16 +49,16 @@ public class OrganizationalAccountAvailableResourcesProvider implements Availabl
   private static final Logger LOG =
       LoggerFactory.getLogger(OrganizationalAccountAvailableResourcesProvider.class);
 
-  private final Provider<ResourceUsageManager> resourceUsageManagerProvider;
+  private final Provider<ResourceManager> resourceManagerProvider;
   private final ResourceAggregator resourceAggregator;
   private final OrganizationManager organizationManager;
 
   @Inject
   public OrganizationalAccountAvailableResourcesProvider(
-      Provider<ResourceUsageManager> resourceUsageManagerProvider,
+      Provider<ResourceManager> resourceManagerProvider,
       ResourceAggregator resourceAggregator,
       OrganizationManager organizationManager) {
-    this.resourceUsageManagerProvider = resourceUsageManagerProvider;
+    this.resourceManagerProvider = resourceManagerProvider;
     this.resourceAggregator = resourceAggregator;
     this.organizationManager = organizationManager;
   }
@@ -91,11 +91,10 @@ public class OrganizationalAccountAvailableResourcesProvider implements Availabl
   @VisibleForTesting
   List<? extends Resource> getAvailableOrganizationResources(Organization organization)
       throws NotFoundException, ServerException {
-    final ResourceUsageManager resourceUsageManager = resourceUsageManagerProvider.get();
-    final List<? extends Resource> total =
-        resourceUsageManager.getTotalResources(organization.getId());
+    final ResourceManager resourceManager = resourceManagerProvider.get();
+    final List<? extends Resource> total = resourceManager.getTotalResources(organization.getId());
     final List<Resource> unavailable =
-        new ArrayList<>(resourceUsageManager.getUsedResources(organization.getId()));
+        new ArrayList<>(resourceManager.getUsedResources(organization.getId()));
     unavailable.addAll(getUsedResourcesBySuborganizations(organization.getQualifiedName()));
     try {
       return resourceAggregator.deduct(total, unavailable);
@@ -121,14 +120,14 @@ public class OrganizationalAccountAvailableResourcesProvider implements Availabl
   @VisibleForTesting
   List<Resource> getUsedResourcesBySuborganizations(String parentQualifiedName)
       throws NotFoundException, ServerException {
-    ResourceUsageManager resourceUsageManager = resourceUsageManagerProvider.get();
+    ResourceManager resourceManager = resourceManagerProvider.get();
     List<Resource> usedResources = new ArrayList<>();
     for (Organization suborganization :
         Pages.iterate(
             (maxItems, skipCount) ->
                 organizationManager.getSuborganizations(
                     parentQualifiedName, maxItems, skipCount))) {
-      usedResources.addAll(resourceUsageManager.getUsedResources(suborganization.getId()));
+      usedResources.addAll(resourceManager.getUsedResources(suborganization.getId()));
     }
     return usedResources;
   }

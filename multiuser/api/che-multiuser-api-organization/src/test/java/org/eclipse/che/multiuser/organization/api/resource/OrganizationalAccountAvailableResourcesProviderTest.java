@@ -38,7 +38,7 @@ import org.eclipse.che.multiuser.organization.shared.model.Organization;
 import org.eclipse.che.multiuser.organization.spi.impl.OrganizationImpl;
 import org.eclipse.che.multiuser.resource.api.ResourceAggregator;
 import org.eclipse.che.multiuser.resource.api.exception.NoEnoughResourcesException;
-import org.eclipse.che.multiuser.resource.api.usage.ResourceUsageManager;
+import org.eclipse.che.multiuser.resource.api.usage.ResourceManager;
 import org.eclipse.che.multiuser.resource.model.Resource;
 import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
 import org.mockito.InjectMocks;
@@ -49,10 +49,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/**
- * Test for {@link
- * org.eclipse.che.multiuser.organization.api.resource.OrganizationalAccountAvailableResourcesProvider}
- */
+/** Test for {@link OrganizationalAccountAvailableResourcesProvider} */
 @Listeners(MockitoTestNGListener.class)
 public class OrganizationalAccountAvailableResourcesProviderTest {
   private static final String ROOT_ORG_NAME = "root";
@@ -60,8 +57,8 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
   private static final String SUBORG_ID = "organization321";
   private static final String SUBSUBORG_ID = "organization231";
 
-  @Mock private Provider<ResourceUsageManager> resourceUsageManagerProvider;
-  @Mock private ResourceUsageManager resourceUsageManager;
+  @Mock private Provider<ResourceManager> resourceManagerProvider;
+  @Mock private ResourceManager resourceManager;
   @Mock private ResourceAggregator resourceAggregator;
   @Mock private OrganizationManager organizationManager;
 
@@ -74,7 +71,7 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(resourceUsageManagerProvider.get()).thenReturn(resourceUsageManager);
+    when(resourceManagerProvider.get()).thenReturn(resourceManager);
 
     rootOrganization = new OrganizationImpl(ROOT_ORG_ID, ROOT_ORG_NAME, null);
     suborganization = new OrganizationImpl(SUBORG_ID, "root/suborg", ROOT_ORG_ID);
@@ -135,12 +132,10 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
       throws Exception {
     // given
     ResourceImpl totalResource = new ResourceImpl("test", 9000, "unit");
-    doReturn(singletonList(totalResource))
-        .when(resourceUsageManager)
-        .getTotalResources(anyString());
+    doReturn(singletonList(totalResource)).when(resourceManager).getTotalResources(anyString());
 
     ResourceImpl usedResource = new ResourceImpl("test", 3000, "unit");
-    doReturn(singletonList(usedResource)).when(resourceUsageManager).getUsedResources(anyString());
+    doReturn(singletonList(usedResource)).when(resourceManager).getUsedResources(anyString());
 
     ResourceImpl usedBySuborgResource = new ResourceImpl("test", 1500, "unit");
     ResourceImpl usedBySubsuborgResource = new ResourceImpl("test", 2000, "unit");
@@ -160,8 +155,8 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
     // then
     assertEquals(availableResources.size(), 1);
     assertEquals(availableResources.get(0), availableResource);
-    verify(resourceUsageManager).getTotalResources(ROOT_ORG_ID);
-    verify(resourceUsageManager).getUsedResources(ROOT_ORG_ID);
+    verify(resourceManager).getTotalResources(ROOT_ORG_ID);
+    verify(resourceManager).getUsedResources(ROOT_ORG_ID);
     verify(availableResourcesProvider).getUsedResourcesBySuborganizations(ROOT_ORG_NAME);
     verify(resourceAggregator)
         .deduct(
@@ -175,11 +170,11 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
     ResourceImpl totalResource = new ResourceImpl("test", 9000, "unit");
     ResourceImpl excessiveTotalResource = new ResourceImpl("test1", 1000, "unit");
     doReturn(asList(totalResource, excessiveTotalResource))
-        .when(resourceUsageManager)
+        .when(resourceManager)
         .getTotalResources(anyString());
 
     ResourceImpl usedResource = new ResourceImpl("test", 10000, "unit");
-    doReturn(singletonList(usedResource)).when(resourceUsageManager).getUsedResources(anyString());
+    doReturn(singletonList(usedResource)).when(resourceManager).getUsedResources(anyString());
 
     doReturn(emptyList())
         .when(availableResourcesProvider)
@@ -199,8 +194,8 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
     // then
     assertEquals(availableResources.size(), 1);
     assertEquals(availableResources.get(0), excessiveTotalResource);
-    verify(resourceUsageManager).getTotalResources(ROOT_ORG_ID);
-    verify(resourceUsageManager).getUsedResources(ROOT_ORG_ID);
+    verify(resourceManager).getTotalResources(ROOT_ORG_ID);
+    verify(resourceManager).getUsedResources(ROOT_ORG_ID);
     verify(availableResourcesProvider).getUsedResourcesBySuborganizations(ROOT_ORG_NAME);
     verify(resourceAggregator)
         .deduct(asList(totalResource, excessiveTotalResource), singletonList(usedResource));
@@ -216,12 +211,10 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
         .when(organizationManager)
         .getSuborganizations(anyString(), anyInt(), anyLong());
     ResourceImpl usedBySuborgResource = new ResourceImpl("test", 1500, "unit");
-    doReturn(singletonList(usedBySuborgResource))
-        .when(resourceUsageManager)
-        .getUsedResources(SUBORG_ID);
+    doReturn(singletonList(usedBySuborgResource)).when(resourceManager).getUsedResources(SUBORG_ID);
     ResourceImpl usedBySubsuborgResource = new ResourceImpl("test", 2000, "unit");
     doReturn(singletonList(usedBySubsuborgResource))
-        .when(resourceUsageManager)
+        .when(resourceManager)
         .getUsedResources(SUBSUBORG_ID);
 
     // when
@@ -234,8 +227,8 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
     assertTrue(usedResources.contains(usedBySubsuborgResource));
     verify(organizationManager, times(2))
         .getSuborganizations(eq(ROOT_ORG_NAME), anyInt(), anyLong());
-    verify(resourceUsageManager).getUsedResources(SUBORG_ID);
-    verify(resourceUsageManager).getUsedResources(SUBSUBORG_ID);
+    verify(resourceManager).getUsedResources(SUBORG_ID);
+    verify(resourceManager).getUsedResources(SUBSUBORG_ID);
   }
 
   private void prepareAvailableResource(String organizationId, ResourceImpl availableResource)

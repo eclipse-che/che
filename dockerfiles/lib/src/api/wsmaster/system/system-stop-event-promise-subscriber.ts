@@ -11,7 +11,7 @@
 
 import {org} from "../../../api/dto/che-dto"
 import {MessageBusSubscriber} from "../../../spi/websocket/messagebus-subscriber";
-import {MessageBus} from "../../../spi/websocket/messagebus";
+import {JsonRpcBus} from "../../../spi/websocket/json-rpc-bus";
 import {Log} from "../../../spi/log/log";
 /**
  * Handle a promise that will be resolved when system is stopped.
@@ -23,7 +23,7 @@ export class SystemStopEventPromiseMessageBusSubscriber implements MessageBusSub
   /**
    * Bus used to collect events
    */
-  messageBus : MessageBus;
+  messageBus : JsonRpcBus;
 
   /**
    * Resolve method to call when we're ready to shutdown the system.
@@ -40,7 +40,7 @@ export class SystemStopEventPromiseMessageBusSubscriber implements MessageBusSub
    */
   promise: Promise<string>;
 
-  constructor(messageBus : MessageBus) {
+  constructor(messageBus : JsonRpcBus) {
     this.messageBus = messageBus;
     this.promise = new Promise<string>((resolve, reject) => {
       this.resolve = resolve;
@@ -50,10 +50,10 @@ export class SystemStopEventPromiseMessageBusSubscriber implements MessageBusSub
 
   handleMessage(message: any) {
     // Ready to shutdown, it means we have finished the graceful stop and we can resolve the promise
-    if ('READY_TO_SHUTDOWN' === message.status) {
+    if ('READY_TO_SHUTDOWN' === message.params.status) {
       this.resolve();
       this.messageBus.close();
-    } else if ('ERROR' === message.status) {
+    } else if ('ERROR' === message.params.status) {
       try {
         let stringify: any = JSON.stringify(message);
         this.reject('Error when stopping the system ' + stringify);
@@ -63,7 +63,7 @@ export class SystemStopEventPromiseMessageBusSubscriber implements MessageBusSub
       this.messageBus.close();
     } else {
       // Changing the status, displaying it to the user
-      Log.getLogger().info("System going into status '" + message.status + "' (was '" + message.prevStatus + "')");
+      Log.getLogger().info("System going into status '" + message.params.status + "' (was '" + message.prevStatus + "')");
     }
 
   }

@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.Collections;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
@@ -84,6 +85,18 @@ public class EnvironmentRamCalculatorTest {
     assertEquals(ram, 2560);
   }
 
+  @Test
+  public void testCalculatesRamOfEnvironmentWhenSomeMachineConfigHasNoAttribute() throws Exception {
+    when(machineConfig1.getAttributes()).thenReturn(Collections.emptyMap());
+    when(machineConfig2.getAttributes())
+        .thenReturn(ImmutableMap.of(MEMORY_LIMIT_ATTRIBUTE, "536870912"));
+    when(recipeMock.getType()).thenReturn(RECIPE_TYPE);
+
+    final long ram = envRamCalculator.calculate(environment);
+
+    assertEquals(ram, 512);
+  }
+
   @Test(expectedExceptions = ServerException.class)
   public void testThrowServerExceptionWhenNoEnvFactoryForGivenRecipeTypeFound() throws Exception {
     when(recipeMock.getType()).thenReturn("unsupported");
@@ -99,5 +112,15 @@ public class EnvironmentRamCalculatorTest {
     final long ram = envRamCalculator.calculate(runtime);
 
     assertEquals(ram, 1536);
+  }
+
+  @Test
+  public void testCalculatesRamOfRuntimeWhenSomeMachineHasNoAttribute() throws Exception {
+    when(machine1.getAttributes()).thenReturn(ImmutableMap.of(MEMORY_LIMIT_ATTRIBUTE, "805306368"));
+    when(machine2.getAttributes()).thenReturn(Collections.emptyMap());
+
+    final long ram = envRamCalculator.calculate(runtime);
+
+    assertEquals(ram, 768);
   }
 }

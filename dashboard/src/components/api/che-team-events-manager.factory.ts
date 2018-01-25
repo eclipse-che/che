@@ -9,6 +9,9 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheAPI} from './che-api.factory';
+import {CheJsonRpcApi} from './json-rpc/che-json-rpc-api.factory';
+import {CheJsonRpcMasterApi} from './json-rpc/che-json-rpc-master-api';
 
 enum TEAM_EVENTS {
   MEMBER_ADDED,
@@ -24,11 +27,9 @@ enum TEAM_EVENTS {
  */
 export class CheTeamEventsManager implements che.api.ICheTeamEventsManager {
   cheUser: any;
+  cheJsonRpcMasterApi: CheJsonRpcMasterApi;
   $log: ng.ILogService;
-  cheWebsocket: any;
   applicationNotifications: any;
-  TEAM_CHANNEL: string = 'organization:';
-  TEAM_MEMBER_CHANNEL: string = 'organization:member:';
   subscribers: Array<string>;
   renameHandlers: Array<Function>;
   newTeamHandlers: Array<Function>;
@@ -38,16 +39,15 @@ export class CheTeamEventsManager implements che.api.ICheTeamEventsManager {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheWebsocket: any, applicationNotifications: any, $log: ng.ILogService, cheUser: any) {
+  constructor(cheAPI: CheAPI, cheJsonRpcApi: CheJsonRpcApi, applicationNotifications: any, $log: ng.ILogService, cheUser: any) {
     this.cheUser = cheUser;
-    this.cheWebsocket = cheWebsocket;
+    this.cheJsonRpcMasterApi = cheJsonRpcApi.getJsonRpcMasterApi(cheAPI.getWorkspace().getJsonRpcApiLocation());
     this.applicationNotifications = applicationNotifications;
     this.$log = $log;
     this.subscribers = [];
     this.renameHandlers = [];
     this.deleteHandlers = [];
     this.newTeamHandlers = [];
-    this.fetchUser();
   }
 
   /**
@@ -60,9 +60,7 @@ export class CheTeamEventsManager implements che.api.ICheTeamEventsManager {
       return;
     }
     this.subscribers.push(teamId);
-    let bus = this.cheWebsocket.getBus();
-    bus.subscribe(this.TEAM_CHANNEL + teamId, (message: any) => {
-      // todo
+    this.cheJsonRpcMasterApi.subscribeOrganizationStatus(teamId, (message: any) => {
       switch (message.type) {
         case TEAM_EVENTS[TEAM_EVENTS.ORGANIZATION_RENAMED]:
           this.processRenameTeam(message);
@@ -76,23 +74,12 @@ export class CheTeamEventsManager implements che.api.ICheTeamEventsManager {
     });
   }
 
-  fetchUser(): void {
-    this.cheUser.fetchUser().then(() => {
-      this.subscribeTeamMemberNotifications();
-    }, (error: any) => {
-      if (error.status === 304) {
-        this.subscribeTeamMemberNotifications();
-      }
-    });
-  }
-
   /**
    * Subscribe team member changing events.
    */
   subscribeTeamMemberNotifications(): void {
     let id = this.cheUser.getUser().id;
-    let bus = this.cheWebsocket.getBus();
-    bus.subscribe(this.TEAM_MEMBER_CHANNEL + id, (message: any) => {
+    this.cheJsonRpcMasterApi.subscribeOrganizationMembershipStatus(id, (message: any) => {
       switch (message.type) {
         case TEAM_EVENTS[TEAM_EVENTS.MEMBER_ADDED]:
           this.processAddedToTeam(message);
@@ -112,8 +99,7 @@ export class CheTeamEventsManager implements che.api.ICheTeamEventsManager {
    * @param teamId
    */
   unSubscribeTeamNotifications(teamId: string): void {
-    let bus = this.cheWebsocket.getBus();
-    bus.unsubscribe(this.TEAM_CHANNEL + teamId);
+    this.cheJsonRpcMasterApi.unSubscribeOrganizationStatus(teamId);
   }
 
   /**

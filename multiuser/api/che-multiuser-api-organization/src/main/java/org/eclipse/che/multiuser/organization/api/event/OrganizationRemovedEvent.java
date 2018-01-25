@@ -15,7 +15,6 @@ import static org.eclipse.che.multiuser.organization.shared.event.EventType.ORGA
 import java.util.List;
 import org.eclipse.che.multiuser.organization.shared.event.EventType;
 import org.eclipse.che.multiuser.organization.shared.event.OrganizationEvent;
-import org.eclipse.che.multiuser.organization.shared.model.Member;
 import org.eclipse.che.multiuser.organization.shared.model.Organization;
 
 /**
@@ -27,10 +26,10 @@ public class OrganizationRemovedEvent implements OrganizationEvent {
 
   private final String initiator;
   private final Organization organization;
-  private final List<? extends Member> members;
+  private final List<String> members;
 
   public OrganizationRemovedEvent(
-      String initiator, Organization organization, List<? extends Member> members) {
+      String initiator, Organization organization, List<String> members) {
     this.initiator = initiator;
     this.organization = organization;
     this.members = members;
@@ -46,7 +45,7 @@ public class OrganizationRemovedEvent implements OrganizationEvent {
     return organization;
   }
 
-  public List<? extends Member> getMembers() {
+  public List<String> getMembers() {
     return members;
   }
 

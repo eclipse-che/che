@@ -11,6 +11,7 @@
 @eval errorColor org.eclipse.che.ide.api.theme.Style.getErrorColor();
 @eval disableTextColor org.eclipse.che.ide.api.theme.Style.getEditorInfoTextColor();
 @eval findResultsTextColor org.eclipse.che.ide.api.theme.Style.theme.findResultsTextColor();
+@eval projectExplorerPresentableTextShadow org.eclipse.che.ide.api.theme.Style.theme.projectExplorerPresentableTextShadow();
 
 .exo-autocomplete-fqn {
     color: gray;
@@ -63,8 +64,14 @@
     border-bottom: 1px solid errorColor !important;
 }
 
-.disable-text-color {
-    color: disableTextColor;
+.presentable-text-container {
+    white-space: nowrap;
+    vertical-align: middle;
+    display: inline-block;
+    margin-top: -10px;
+    font-size: 1em;
+    padding-left: 2px;
+    text-shadow: projectExplorerPresentableTextShadow;
 }
 
 .search-match {
