@@ -1454,7 +1454,7 @@ public class CodenvyEditor {
             By.xpath(String.format(Locators.POSITION_CURSOR_NUMBER, lineAndChar))));
   }
 
-  /** launch the 'Refactor' form by keyboard */
+  /** launch refactor for local variables by keyboard */
   public void launchLocalRefactor() {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
@@ -1462,6 +1462,10 @@ public class CodenvyEditor {
     loader.waitOnClosed();
   }
 
+  /**
+   * the first invocation of launchLocalRefactor() runs local refactoring, the second invocation
+   * opens "Refactor" form
+   */
   public void launchRefactorForm() {
     launchLocalRefactor();
     launchLocalRefactor();
