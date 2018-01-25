@@ -27,6 +27,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Loader;
+import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
@@ -42,13 +43,15 @@ public class MachineTerminal {
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
   private final ActionsFactory actionsFactory;
+  private final CommandsPalette commandsPalette;
 
   @Inject
   public MachineTerminal(
-      SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory) {
+      SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory, CommandsPalette commandsPalette) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
+    this.commandsPalette = commandsPalette;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -307,8 +310,8 @@ public class MachineTerminal {
   public void launchScriptAndGetInfo(
       TestWorkspace ws,
       String currentProject,
-      TestProjectServiceClient testProjectServiceClient,
-      TestCommandServiceClient testCommandServiceClient)
+      TestProjectServiceClient testProjectServiceClient
+      )
       throws Exception {
     String bashFileName = "check-app-state.sh";
     String bashCommand =
@@ -330,5 +333,7 @@ public class MachineTerminal {
     String bashComandForChecling = "cd ${current.project.path} && ./check-app-state.sh";
     testProjectServiceClient.createFileInProject(
         ws.getId(), currentProject, bashFileName, bashCommand);
+    commandsPalette.openCommandPalette();
+    commandsPalette.startCommandByDoubleClick();
   }
 }
