@@ -490,7 +490,7 @@ public class InternalRuntimeTest {
     doReturn(internalMachines).when(internalRuntime).getInternalMachines();
     doThrow(new InfrastructureException(badServerRewritingExcMessage))
         .when(urlRewriter)
-        .rewriteURL(any(RuntimeIdentity.class), anyString(), anyString(), eq(badServerURL));
+        .rewriteURL(any(RuntimeIdentity.class), any(), anyString(), eq(badServerURL));
 
     // when
     Map<String, ? extends Machine> actualMachines = internalRuntime.getMachines();
