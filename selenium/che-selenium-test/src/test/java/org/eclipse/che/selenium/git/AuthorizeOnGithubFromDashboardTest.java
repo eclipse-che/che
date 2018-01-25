@@ -8,28 +8,34 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.authgithub;
+package org.eclipse.che.selenium.git;
 
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GITHUB;
+import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
+import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakFederatedIdentitiesPage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
-public class AuthorizeGithubFromDashboardTest {
-
-  private String projectName;
-  private String ideWin;
+public class AuthorizeOnGithubFromDashboardTest {
+  private static final Logger LOG =
+      LoggerFactory.getLogger(AuthorizeOnGithubFromDashboardTest.class);
 
   @Inject
   @Named("github.username")
@@ -39,28 +45,49 @@ public class AuthorizeGithubFromDashboardTest {
   @Named("github.password")
   private String gitHubPassword;
 
+  @Inject
+  @Named("che.multiuser")
+  private boolean isMultiuser;
+
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
   @Inject private TestUser defaultTestUser;
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private CreateWorkspace createWorkspace;
+  @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private TestGitHubServiceClient gitHubClientService;
+  @Inject private KeycloakFederatedIdentitiesPage keycloakFederatedIdentitiesPage;
+
+  @BeforeClass(groups = TestGroup.MULTIUSER)
+  @AfterClass(groups = TestGroup.MULTIUSER)
+  private void removeGitHubIdentity() {
+    dashboard.open(); // to login
+    keycloakFederatedIdentitiesPage.open();
+    keycloakFederatedIdentitiesPage.ensureGithubIdentityIsAbsent();
+    assertEquals(keycloakFederatedIdentitiesPage.getGitHubIdentityFieldValue(), "");
+  }
 
   @BeforeClass
-  public void setUp() {
-    dashboard.open();
+  private void revokeGithubOauthToken() {
+    try {
+      gitHubClientService.deleteAllGrants(gitHubUsername, gitHubPassword);
+    } catch (Exception e) {
+      LOG.warn("There was an error of revoking the github oauth token.", e);
+    }
   }
 
   @Test
-  public void checkAuthorizationGithubFromDashboard() {
-    ideWin = seleniumWebDriver.getWindowHandle();
+  public void checkAuthorizationOnGithubWhenLoadProjectList() {
+    dashboard.open();
+
+    String ideWin = seleniumWebDriver.getWindowHandle();
 
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.clickOnNewWorkspaceBtn();
-    createWorkspace.waitToolbar();
+    workspaces.clickOnAddWorkspaceBtn();
+    newWorkspace.waitToolbar();
 
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSourceTab(GITHUB);
@@ -80,12 +107,18 @@ public class AuthorizeGithubFromDashboardTest {
 
     projectSourcePage.waitGithubProjectList();
 
-    // check github projects list if an application is authorized
+    // check that repeat of getting of github projects list doesn't require authorization
     seleniumWebDriver.navigate().refresh();
-    createWorkspace.waitToolbar();
+    newWorkspace.waitToolbar();
 
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSourceTab(GITHUB);
     projectSourcePage.waitGithubProjectList();
+
+    // check GitHub identity is present in Keycloak account management page
+    if (isMultiuser) {
+      keycloakFederatedIdentitiesPage.open();
+      assertEquals(keycloakFederatedIdentitiesPage.getGitHubIdentityFieldValue(), gitHubUsername);
+    }
   }
 }

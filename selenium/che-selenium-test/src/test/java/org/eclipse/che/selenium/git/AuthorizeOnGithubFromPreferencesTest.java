@@ -8,11 +8,14 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.authgithub;
+package org.eclipse.che.selenium.git;
+
+import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -26,14 +29,20 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakFederatedIdentitiesPage;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
-public class AuthorizeGithubFromPreferencesTest {
-
+public class AuthorizeOnGithubFromPreferencesTest {
   private static final String GITHUB_COM = "github.com";
+  private static final Logger LOG =
+      LoggerFactory.getLogger(AuthorizeOnGithubFromPreferencesTest.class);
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
@@ -45,6 +54,10 @@ public class AuthorizeGithubFromPreferencesTest {
   @Inject
   @Named("github.password")
   private String gitHubPassword;
+
+  @Inject
+  @Named("che.multiuser")
+  private boolean isMultiuser;
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private MachineTerminal terminal;
@@ -58,21 +71,49 @@ public class AuthorizeGithubFromPreferencesTest {
   @Inject private Loader loader;
   @Inject private Events events;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+  @Inject private Dashboard dashboard;
+  @Inject private KeycloakFederatedIdentitiesPage keycloakFederatedIdentitiesPage;
+
+  @BeforeClass(groups = TestGroup.MULTIUSER)
+  @AfterClass(groups = TestGroup.MULTIUSER)
+  private void removeGitHubIdentity() {
+    dashboard.open(); // to login
+    keycloakFederatedIdentitiesPage.open();
+    keycloakFederatedIdentitiesPage.ensureGithubIdentityIsAbsent();
+    assertEquals(keycloakFederatedIdentitiesPage.getGitHubIdentityFieldValue(), "");
+  }
 
   @BeforeClass
-  public void prepare() throws Exception {
+  private void revokeGithubOauthToken() {
+    try {
+      gitHubClientService.deleteAllGrants(gitHubUsername, gitHubPassword);
+    } catch (Exception e) {
+      LOG.warn("There was an error of revoking the github oauth token.", e);
+    }
+  }
+
+  @BeforeClass
+  private void deletePrivateSshKey() throws Exception {
     ide.open(ws);
     projectExplorer.waitProjectExplorer();
     terminal.waitTerminalTab();
 
-    // delete github private ssh key if it exists
-    deletePrivateSshKey();
+    // open Preferences Vcs Form
+    openPreferencesVcsForm();
+    if (preferences.isSshKeyIsPresent(GITHUB_COM)) {
+      preferences.deleteSshKeyByHost(GITHUB_COM);
+    }
+
+    preferences.clickOnCloseBtn();
   }
 
   @Test
-  public void checkAuthorizationGithubFromPreferences() {
+  public void checkAuthorizationOnGithubWhenUploadSshKey() throws Exception {
     String ideWin = seleniumWebDriver.getWindowHandle();
-    preferences.waitPreferencesForm();
+
+    // generate and upload github ssh key
+    ide.open(ws);
+    openPreferencesVcsForm();
     preferences.clickOnGenerateAndUploadToGitHub();
 
     // login to github
@@ -93,20 +134,16 @@ public class AuthorizeGithubFromPreferencesTest {
     loader.waitOnClosed();
     preferences.waitSshKeyIsPresent(GITHUB_COM);
 
-    // check add ssh key if an application is authorized
-    preferences.waitSshKeyIsPresent(GITHUB_COM);
+    // check that repeat of upload of ssh-key doesn't require authorization
     preferences.deleteSshKeyByHost(GITHUB_COM);
-
     preferences.clickOnGenerateAndUploadToGitHub();
     loader.waitOnClosed();
     preferences.waitSshKeyIsPresent(GITHUB_COM);
-  }
 
-  private void deletePrivateSshKey() {
-    openPreferencesVcsForm();
-
-    if (preferences.isSshKeyIsPresent(GITHUB_COM)) {
-      preferences.deleteSshKeyByHost(GITHUB_COM);
+    // check GitHub identity is present in Keycloak account management page
+    if (isMultiuser) {
+      keycloakFederatedIdentitiesPage.open();
+      assertEquals(keycloakFederatedIdentitiesPage.getGitHubIdentityFieldValue(), gitHubUsername);
     }
   }
 

@@ -8,15 +8,15 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.authgithub;
+package org.eclipse.che.selenium.git;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.io.IOException;
-import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -30,14 +30,19 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakFederatedIdentitiesPage;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.TimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
 public class AuthorizeOnGithubFromImportTest {
-
+  private static final Logger LOG = LoggerFactory.getLogger(AuthorizeOnGithubFromImportTest.class);
   private static final String GITHUB_COM = "github.com";
 
   @Inject private TestWorkspace ws;
@@ -51,6 +56,10 @@ public class AuthorizeOnGithubFromImportTest {
   @Named("github.password")
   private String gitHubPassword;
 
+  @Inject
+  @Named("che.multiuser")
+  private boolean isMultiuser;
+
   @Inject private ProjectExplorer projectExplorer;
   @Inject private MachineTerminal terminal;
   @Inject private Menu menu;
@@ -63,19 +72,45 @@ public class AuthorizeOnGithubFromImportTest {
   @Inject private Loader loader;
   @Inject private Events events;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+  @Inject private Dashboard dashboard;
+  @Inject private KeycloakFederatedIdentitiesPage keycloakFederatedIdentitiesPage;
+
+  @BeforeClass(groups = TestGroup.MULTIUSER)
+  @AfterClass(groups = TestGroup.MULTIUSER)
+  private void removeGitHubIdentity() {
+    dashboard.open(); // to login
+    keycloakFederatedIdentitiesPage.open();
+    keycloakFederatedIdentitiesPage.ensureGithubIdentityIsAbsent();
+    assertEquals(keycloakFederatedIdentitiesPage.getGitHubIdentityFieldValue(), "");
+  }
 
   @BeforeClass
-  public void prepare() throws Exception {
+  private void revokeGithubOauthToken() {
+    try {
+      gitHubClientService.deleteAllGrants(gitHubUsername, gitHubPassword);
+    } catch (Exception e) {
+      LOG.warn("There was an error of revoking the github oauth token.", e);
+    }
+  }
+
+  @BeforeClass
+  private void deletePrivateSshKey() throws Exception {
     ide.open(ws);
     projectExplorer.waitProjectExplorer();
     terminal.waitTerminalTab();
 
-    // delete github private ssh key if it exists
-    deletePrivateSshKey();
+    openPreferencesVcsForm();
+
+    if (preferences.isSshKeyIsPresent(GITHUB_COM)) {
+      preferences.deleteSshKeyByHost(GITHUB_COM);
+    }
+
+    preferences.clickOnCloseBtn();
   }
 
   @Test
-  public void checkAuthorizationGitHubFromImport() throws IOException, ApiException {
+  public void checkAuthorizationOnGitHubWhenImportProject() throws Exception {
+    ide.open(ws);
     String ideWin = seleniumWebDriver.getWindowHandle();
 
     menu.runCommand(
@@ -138,16 +173,12 @@ public class AuthorizeOnGithubFromImportTest {
       events.waitExpectedMessage("Can't store ssh key. Unable get private ssh key");
       fail("Known issue https://github.com/eclipse/che/issues/6765", ex);
     }
-  }
 
-  private void deletePrivateSshKey() {
-    openPreferencesVcsForm();
-
-    if (preferences.isSshKeyIsPresent(GITHUB_COM)) {
-      preferences.deleteSshKeyByHost(GITHUB_COM);
+    // check GitHub identity is present in Keycloak account management page
+    if (isMultiuser) {
+      keycloakFederatedIdentitiesPage.open();
+      assertEquals(keycloakFederatedIdentitiesPage.getGitHubIdentityFieldValue(), gitHubUsername);
     }
-
-    preferences.clickOnCloseBtn();
   }
 
   private void openPreferencesVcsForm() {
@@ -155,9 +186,6 @@ public class AuthorizeOnGithubFromImportTest {
         TestMenuCommandsConstants.Profile.PROFILE_MENU,
         TestMenuCommandsConstants.Profile.PREFERENCES);
     preferences.waitPreferencesForm();
-    preferences.waitMenuInCollapsedDropdown(
-        Preferences.DropDownGitCommitterInformationMenu.COMMITTER);
-    preferences.selectDroppedMenuByName(Preferences.DropDownGitCommitterInformationMenu.COMMITTER);
     preferences.waitMenuInCollapsedDropdown(Preferences.DropDownSshKeysMenu.VCS);
     preferences.selectDroppedMenuByName(Preferences.DropDownSshKeysMenu.VCS);
   }
