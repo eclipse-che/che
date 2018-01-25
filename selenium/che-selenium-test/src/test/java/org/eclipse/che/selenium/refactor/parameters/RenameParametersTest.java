@@ -72,8 +72,7 @@ public class RenameParametersTest {
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(14, 17);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameParametersFormIsOpen();
     refactor.typeAndWaitNewName("j");
     refactor.clickOkButtonRefactorForm();
@@ -89,12 +88,12 @@ public class RenameParametersTest {
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(14, 15);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     loader.waitOnClosed();
     editor.goToCursorPositionVisible(14, 23);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j1");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -109,7 +108,7 @@ public class RenameParametersTest {
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(14, 17);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("k");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutA);
@@ -123,7 +122,7 @@ public class RenameParametersTest {
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(14, 17);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutA);
@@ -137,7 +136,7 @@ public class RenameParametersTest {
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(14, 23);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutA);
@@ -151,8 +150,7 @@ public class RenameParametersTest {
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(14, 15);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameParametersFormIsOpen();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     refactor.typeAndWaitNewName("j");
@@ -162,7 +160,7 @@ public class RenameParametersTest {
     refactor.waitRenameParametersFormIsClosed();
     editor.waitActive();
     editor.goToCursorPositionVisible(14, 23);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("i");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitMarkerDisappears(ERROR_MARKER, 14);
@@ -177,7 +175,7 @@ public class RenameParametersTest {
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(14, 20);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutA);
@@ -191,7 +189,7 @@ public class RenameParametersTest {
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(14, 17);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutA);
@@ -205,7 +203,7 @@ public class RenameParametersTest {
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(15, 16);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutA);
@@ -222,7 +220,7 @@ public class RenameParametersTest {
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("j");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutA);
@@ -236,7 +234,7 @@ public class RenameParametersTest {
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(14, 30);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("kk");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutA);
@@ -250,8 +248,7 @@ public class RenameParametersTest {
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(15, 12);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameParametersFormIsOpen();
     refactor.setAndWaitStateUpdateReferencesCheckbox(false);
     refactor.typeAndWaitNewName("b");
