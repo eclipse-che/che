@@ -15,27 +15,32 @@ import static java.lang.String.format;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
+import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ConfigurationProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.server.mapping.SinglePortHostnameBuilder;
 
 /**
- * Sets necessary container labels for the single-port proxy
+ * Sets necessary container labels for the single-port proxy.
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
 public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
 
-  private final URLRewriter urlRewriter;
+  private final SinglePortHostnameBuilder hostnameBuilder;
 
   @Inject
-  public SinglePortLabelsProvisioner(URLRewriter urlRewriter) {
-    this.urlRewriter = urlRewriter;
+  public SinglePortLabelsProvisioner(
+      @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
+                @Named("che.docker.ip") String internalIpOfContainers) {
+    this.hostnameBuilder = new SinglePortHostnameBuilder(externalIpOfContainers,
+        internalIpOfContainers);
   }
 
   @Override
@@ -50,8 +55,8 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
           machineEntry.getValue().getServers().entrySet()) {
 
         final String serverName = serverEntry.getKey().replace('/', '-');
-        // Host should be in form: Host:<serverName>.<machineName>.<workspaceId>.<wildcardNipDomain>
-        final String host = "Host:" + urlRewriter.rewriteURL(identity, machineName, serverName, "");
+        final String host =
+            "Host:" + hostnameBuilder.build(serverName, machineName, identity.getWorkspaceId());
         final String serviceName = machineName + "-" + serverName;
         final String port = serverEntry.getValue().getPort().split("/")[0];
 
