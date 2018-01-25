@@ -27,12 +27,10 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
-import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.launcher.PerWorkspaceLaunchingStrategy;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -40,7 +38,6 @@ import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -52,7 +49,6 @@ public class LanguageServerRegistryImplTest {
 
   private static final String PREFIX = "file://";
   private static final String FILE_PATH = "/projects/1/test.txt";
-  private static final String PROJECT_PATH = "file:///projects/1";
 
   @Mock private LanguageServerLauncher languageServerLauncher;
   @Mock private LanguageDescription languageDescription;
@@ -88,9 +84,9 @@ public class LanguageServerRegistryImplTest {
     when(languageServerLauncher.getDescription()).thenReturn(serverDescription);
     when(languageServerLauncher.isLocal()).thenReturn(true);
     when(languageServerLauncher.getLaunchingStrategy())
-            .thenReturn(PerWorkspaceLaunchingStrategy.INSTANCE);
+        .thenReturn(PerWorkspaceLaunchingStrategy.INSTANCE);
     when(languageServerLauncher.launch(anyString(), any(LanguageClient.class)))
-            .thenReturn(languageServer);
+        .thenReturn(languageServer);
     when(languageDescription.getLanguageId()).thenReturn("id");
     when(languageDescription.getFileExtensions()).thenReturn(Collections.singletonList("txt"));
     when(languageDescription.getMimeType()).thenReturn("plain/text");
@@ -122,12 +118,7 @@ public class LanguageServerRegistryImplTest {
                 pmp,
                 null,
                 clientFactory,
-                languageRecognizer) {
-              @Override
-              protected String extractProjectPath(String filePath) throws LanguageServerException {
-                return PROJECT_PATH;
-              }
-            });
+                languageRecognizer) {});
   }
 
   @Test
