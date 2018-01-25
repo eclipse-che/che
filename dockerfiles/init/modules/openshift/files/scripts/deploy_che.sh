@@ -245,8 +245,7 @@ CHE_CONFIG_FILE_PATH=${CHE_CONFIG_FILE_PATH:-${DEFAULT_CHE_CONFIG_FILE_PATH}}
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
-    inject_che_config "#CHE_MASTER_CONFIG" "${CHE_CONFIG_FILE_PATH}" | \
-    if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi #| \
+    inject_che_config "#CHE_MASTER_CONFIG" "${CHE_CONFIG_FILE_PATH}"
 }
 
 # ---------------------------------------
@@ -335,6 +334,49 @@ else
     echo "Project \"${CHE_OPENSHIFT_PROJECT}\" already exists. Please remove project before running this script."
     exit 1
 fi
+
+# -------------------------------------------------------------
+# create CHE service and route
+# -------------------------------------------------------------
+echo "[CHE] Creating serviceaccount, service and route for CHE pod"
+ echo "apiVersion: v1
+kind: List
+items:
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    labels:
+      app: che
+    name: che
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: che
+    name: che-host
+  spec:
+    ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: che
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      app: che
+    name: che
+  spec:
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+    to:
+      kind: Service
+      name: che-host" | \
+if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi | \
+oc apply -f -
 
 # -------------------------------------------------------------
 # Deploying secondary servers
@@ -428,10 +470,6 @@ echo
 echo "[CHE] Deploying Che on ${OPENSHIFT_FLAVOR} (image ${CHE_IMAGE})"
 get_che_pod_config | oc apply --force=true -f -
 echo
-
-if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
-  "${COMMAND_DIR}"/multi-user/configure_and_start_keycloak.sh
-fi
 
 # --------------------------------
 # Setup debugging routes if needed

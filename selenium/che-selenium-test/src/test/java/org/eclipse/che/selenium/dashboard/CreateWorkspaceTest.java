@@ -22,8 +22,8 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.BeforeClass;
@@ -49,7 +49,7 @@ public class CreateWorkspaceTest {
   private String newProjectDescription = "This is " + projectDescription;
 
   @Inject private Dashboard dashboard;
-  @Inject private CreateWorkspace createWorkspace;
+  @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private Workspaces workspaces;
 
@@ -59,27 +59,27 @@ public class CreateWorkspaceTest {
 
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.clickOnNewWorkspaceBtn();
-    createWorkspace.waitToolbar();
+    workspaces.clickOnAddWorkspaceBtn();
+    newWorkspace.waitToolbar();
   }
 
   @Test
   public void checkWorkspaceName() {
-    createWorkspace.typeWorkspaceName(TOO_SHORT_WORKSPACE_NAME);
-    assertTrue(createWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
-    assertFalse(createWorkspace.isCreateWorkspaceButtonEnabled());
+    newWorkspace.typeWorkspaceName(TOO_SHORT_WORKSPACE_NAME);
+    assertTrue(newWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
+    assertFalse(newWorkspace.isCreateWorkspaceButtonEnabled());
 
-    createWorkspace.typeWorkspaceName(TOO_LONG_WORKSPACE_NAME);
-    assertTrue(createWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
-    assertFalse(createWorkspace.isCreateWorkspaceButtonEnabled());
+    newWorkspace.typeWorkspaceName(TOO_LONG_WORKSPACE_NAME);
+    assertTrue(newWorkspace.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
+    assertFalse(newWorkspace.isCreateWorkspaceButtonEnabled());
 
     // type valid names and check that the Create button is enabled
-    createWorkspace.typeWorkspaceName(MIN_VALID_WORKSPACE_NAME);
-    assertTrue(createWorkspace.isCreateWorkspaceButtonEnabled());
-    createWorkspace.typeWorkspaceName(WORKSPACE_NAME);
-    assertTrue(createWorkspace.isCreateWorkspaceButtonEnabled());
-    createWorkspace.typeWorkspaceName(MAX_VALID_WORKSPACE_NAME);
-    assertTrue(createWorkspace.isCreateWorkspaceButtonEnabled());
+    newWorkspace.typeWorkspaceName(MIN_VALID_WORKSPACE_NAME);
+    assertTrue(newWorkspace.isCreateWorkspaceButtonEnabled());
+    newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
+    assertTrue(newWorkspace.isCreateWorkspaceButtonEnabled());
+    newWorkspace.typeWorkspaceName(MAX_VALID_WORKSPACE_NAME);
+    assertTrue(newWorkspace.isCreateWorkspaceButtonEnabled());
   }
 
   @Test
@@ -87,118 +87,118 @@ public class CreateWorkspaceTest {
     String machineName = "dev-machine";
 
     // change the RAM number by the increment and decrement buttons
-    createWorkspace.clickOnAllStacksTab();
-    createWorkspace.selectStack(JAVA.getId());
-    assertTrue(createWorkspace.isMachineExists(machineName));
-    assertEquals(createWorkspace.getRAM(machineName), 2.0);
-    createWorkspace.clickOnIncrementMemoryButton(machineName);
-    assertEquals(createWorkspace.getRAM(machineName), 2.5);
-    createWorkspace.clickOnDecrementMemoryButton(machineName);
-    createWorkspace.clickOnDecrementMemoryButton(machineName);
-    createWorkspace.clickOnDecrementMemoryButton(machineName);
-    assertEquals(createWorkspace.getRAM(machineName), 1.0);
+    newWorkspace.clickOnAllStacksTab();
+    newWorkspace.selectStack(JAVA.getId());
+    assertTrue(newWorkspace.isMachineExists(machineName));
+    assertEquals(newWorkspace.getRAM(machineName), 2.0);
+    newWorkspace.clickOnIncrementMemoryButton(machineName);
+    assertEquals(newWorkspace.getRAM(machineName), 2.5);
+    newWorkspace.clickOnDecrementMemoryButton(machineName);
+    newWorkspace.clickOnDecrementMemoryButton(machineName);
+    newWorkspace.clickOnDecrementMemoryButton(machineName);
+    assertEquals(newWorkspace.getRAM(machineName), 1.0);
 
     // type number of memory in the RAM field
-    createWorkspace.setMachineRAM(machineName, 5.0);
-    assertEquals(createWorkspace.getRAM(machineName), 5.0);
+    newWorkspace.setMachineRAM(machineName, 5.0);
+    assertEquals(newWorkspace.getRAM(machineName), 5.0);
 
     // check the RAM section of the Java-MySql stack(with two machines)
-    createWorkspace.selectStack(JAVA_MYSQL.getId());
-    assertTrue(createWorkspace.isMachineExists("db"));
-    assertTrue(createWorkspace.isMachineExists(machineName));
-    createWorkspace.clickOnDecrementMemoryButton(machineName);
-    createWorkspace.clickOnDecrementMemoryButton("db");
-    assertEquals(createWorkspace.getRAM(machineName), 1.5);
-    assertEquals(createWorkspace.getRAM("db"), 0.5);
-    createWorkspace.clickOnDecrementMemoryButton("db");
-    assertEquals(createWorkspace.getRAM("db"), 0.5);
-    createWorkspace.setMachineRAM(machineName, 100.0);
-    createWorkspace.clickOnIncrementMemoryButton(machineName);
-    assertEquals(createWorkspace.getRAM(machineName), 100.0);
+    newWorkspace.selectStack(JAVA_MYSQL.getId());
+    assertTrue(newWorkspace.isMachineExists("db"));
+    assertTrue(newWorkspace.isMachineExists(machineName));
+    newWorkspace.clickOnDecrementMemoryButton(machineName);
+    newWorkspace.clickOnDecrementMemoryButton("db");
+    assertEquals(newWorkspace.getRAM(machineName), 1.5);
+    assertEquals(newWorkspace.getRAM("db"), 0.5);
+    newWorkspace.clickOnDecrementMemoryButton("db");
+    assertEquals(newWorkspace.getRAM("db"), 0.5);
+    newWorkspace.setMachineRAM(machineName, 100.0);
+    newWorkspace.clickOnIncrementMemoryButton(machineName);
+    assertEquals(newWorkspace.getRAM(machineName), 100.0);
   }
 
   @Test
   public void checkFiltersStacksFeature() {
 
     // filter stacks by 'java' value and check filtered stacks list
-    createWorkspace.clickOnAllStacksTab();
-    createWorkspace.clickOnFiltersButton();
-    createWorkspace.typeToFiltersInput("java");
-    createWorkspace.selectFilterSuggestion("JAVA");
-    assertTrue(createWorkspace.isStackVisible(JAVA.getId()));
-    assertFalse(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
-    createWorkspace.clickOnMultiMachineTab();
-    assertFalse(createWorkspace.isStackVisible(JAVA.getId()));
+    newWorkspace.clickOnAllStacksTab();
+    newWorkspace.clickOnFiltersButton();
+    newWorkspace.typeToFiltersInput("java");
+    newWorkspace.selectFilterSuggestion("JAVA");
+    assertTrue(newWorkspace.isStackVisible(JAVA.getId()));
+    assertFalse(newWorkspace.isStackVisible(JAVA_MYSQL.getId()));
+    newWorkspace.clickOnMultiMachineTab();
+    assertFalse(newWorkspace.isStackVisible(JAVA.getId()));
 
     // filter stacks by 'php' value and check filtered stacks list
-    createWorkspace.clickOnSingleMachineTab();
-    createWorkspace.clickOnFiltersButton();
-    createWorkspace.clearSuggestions();
-    createWorkspace.typeToFiltersInput("php");
-    createWorkspace.selectFilterSuggestion("PHP");
-    assertTrue(createWorkspace.isStackVisible(PHP.getId()));
+    newWorkspace.clickOnSingleMachineTab();
+    newWorkspace.clickOnFiltersButton();
+    newWorkspace.clearSuggestions();
+    newWorkspace.typeToFiltersInput("php");
+    newWorkspace.selectFilterSuggestion("PHP");
+    assertTrue(newWorkspace.isStackVisible(PHP.getId()));
 
     // filter the Java-MySql stack
-    createWorkspace.clickOnAllStacksTab();
-    createWorkspace.clickOnFiltersButton();
-    createWorkspace.clearSuggestions();
-    createWorkspace.typeToFiltersInput("java 1");
-    createWorkspace.selectFilterSuggestion("JAVA 1.8, TOMCAT 8, MYSQL 5.7");
-    assertTrue(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
-    createWorkspace.clickOnSingleMachineTab();
-    assertFalse(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
+    newWorkspace.clickOnAllStacksTab();
+    newWorkspace.clickOnFiltersButton();
+    newWorkspace.clearSuggestions();
+    newWorkspace.typeToFiltersInput("java 1");
+    newWorkspace.selectFilterSuggestion("JAVA 1.8, TOMCAT 8, MYSQL 5.7");
+    assertTrue(newWorkspace.isStackVisible(JAVA_MYSQL.getId()));
+    newWorkspace.clickOnSingleMachineTab();
+    assertFalse(newWorkspace.isStackVisible(JAVA_MYSQL.getId()));
 
-    createWorkspace.clickOnFiltersButton();
-    createWorkspace.clearSuggestions();
+    newWorkspace.clickOnFiltersButton();
+    newWorkspace.clearSuggestions();
   }
 
   @Test
   public void checkSearchStackFeature() {
 
     // search stacks with 'java' value
-    createWorkspace.typeToSearchInput("java");
-    createWorkspace.clickOnSingleMachineTab();
-    assertTrue(createWorkspace.isStackVisible(JAVA.getId()));
-    assertTrue(createWorkspace.isStackVisible(ECLIPSE_CHE.getId()));
-    assertFalse(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
-    createWorkspace.clickOnAllStacksTab();
-    assertTrue(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
-    createWorkspace.clearTextInSearchInput();
+    newWorkspace.typeToSearchInput("java");
+    newWorkspace.clickOnSingleMachineTab();
+    assertTrue(newWorkspace.isStackVisible(JAVA.getId()));
+    assertTrue(newWorkspace.isStackVisible(ECLIPSE_CHE.getId()));
+    assertFalse(newWorkspace.isStackVisible(JAVA_MYSQL.getId()));
+    newWorkspace.clickOnAllStacksTab();
+    assertTrue(newWorkspace.isStackVisible(JAVA_MYSQL.getId()));
+    newWorkspace.clearTextInSearchInput();
 
     // search stacks with 'php' value
-    createWorkspace.typeToSearchInput("php");
-    createWorkspace.clickOnQuickStartTab();
-    assertTrue(createWorkspace.isStackVisible(PHP.getId()));
-    assertFalse(createWorkspace.isStackVisible("php-gae"));
-    createWorkspace.clickOnAllStacksTab();
-    assertTrue(createWorkspace.isStackVisible(PHP.getId()));
-    assertTrue(createWorkspace.isStackVisible("php-gae"));
-    createWorkspace.clearTextInSearchInput();
+    newWorkspace.typeToSearchInput("php");
+    newWorkspace.clickOnQuickStartTab();
+    assertTrue(newWorkspace.isStackVisible(PHP.getId()));
+    assertFalse(newWorkspace.isStackVisible("php-gae"));
+    newWorkspace.clickOnAllStacksTab();
+    assertTrue(newWorkspace.isStackVisible(PHP.getId()));
+    assertTrue(newWorkspace.isStackVisible("php-gae"));
+    newWorkspace.clearTextInSearchInput();
 
     // search stacks with 'mysql' value
-    createWorkspace.typeToSearchInput("mysql");
-    createWorkspace.clickOnMultiMachineTab();
-    assertTrue(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
-    assertFalse(createWorkspace.isStackVisible(PHP.getId()));
-    createWorkspace.clickOnAllStacksTab();
-    assertTrue(createWorkspace.isStackVisible(JAVA_MYSQL.getId()));
-    assertTrue(createWorkspace.isStackVisible(PHP.getId()));
+    newWorkspace.typeToSearchInput("mysql");
+    newWorkspace.clickOnMultiMachineTab();
+    assertTrue(newWorkspace.isStackVisible(JAVA_MYSQL.getId()));
+    assertFalse(newWorkspace.isStackVisible(PHP.getId()));
+    newWorkspace.clickOnAllStacksTab();
+    assertTrue(newWorkspace.isStackVisible(JAVA_MYSQL.getId()));
+    assertTrue(newWorkspace.isStackVisible(PHP.getId()));
 
     // search stacks with 'net' value
-    createWorkspace.typeToSearchInput("net");
-    assertTrue(createWorkspace.isStackVisible(DOTNET.getId()));
-    createWorkspace.clickOnMultiMachineTab();
-    assertFalse(createWorkspace.isStackVisible(DOTNET.getId()));
+    newWorkspace.typeToSearchInput("net");
+    assertTrue(newWorkspace.isStackVisible(DOTNET.getId()));
+    newWorkspace.clickOnMultiMachineTab();
+    assertFalse(newWorkspace.isStackVisible(DOTNET.getId()));
 
-    createWorkspace.clearTextInSearchInput();
+    newWorkspace.clearTextInSearchInput();
   }
 
   @Test
   public void checkProjectSourcePage() {
-    createWorkspace.clickOnQuickStartTab();
+    newWorkspace.clickOnQuickStartTab();
 
     // add a project from the 'web-java-spring' sample
-    createWorkspace.selectStack(JAVA.getId());
+    newWorkspace.selectStack(JAVA.getId());
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(projectName);
     projectSourcePage.clickOnAddProjectButton();

@@ -76,7 +76,7 @@ public class LightTheme implements Theme {
 
   @Override
   public String activeTabBackground() {
-    return "#ffffff";
+    return "#ececed";
   }
 
   @Override
@@ -95,8 +95,18 @@ public class LightTheme implements Theme {
   }
 
   @Override
+  public String tabIconColor() {
+    return "#9b9b9b";
+  }
+
+  @Override
   public String activeTabIconColor() {
-    return "#1A68AF";
+    return "#5b5b5b";
+  }
+
+  @Override
+  public String hoveredTabIconColor() {
+    return "#ffffff";
   }
 
   @Override
@@ -246,6 +256,16 @@ public class LightTheme implements Theme {
 
   @Override
   public String getDropdownListBackground() {
+    return "#ffffff";
+  }
+
+  @Override
+  public String getDropdownListExecLabelColor() {
+    return "inherit";
+  }
+
+  @Override
+  public String getDropdownListExecLabelBackground() {
     return "#ffffff";
   }
 
@@ -706,7 +726,7 @@ public class LightTheme implements Theme {
 
   @Override
   public String getMainMenuBkgColor() {
-    return "#cacacc";
+    return "#ffffff";
   }
 
   @Override
@@ -716,7 +736,7 @@ public class LightTheme implements Theme {
 
   @Override
   public String getMainMenuSelectedBkgColor() {
-    return "#ffffff";
+    return "#ececed";
   }
 
   @Override
@@ -906,7 +926,12 @@ public class LightTheme implements Theme {
 
   @Override
   public String consolesToolbarToggledButtonColor() {
-    return "rgba(0, 0, 0, 0.6)";
+    return "#ffffff";
+  }
+
+  @Override
+  public String consolesToolbarToggledButtonBorderColor() {
+    return "#bcbdbc";
   }
 
   @Override
@@ -1361,12 +1386,12 @@ public class LightTheme implements Theme {
 
   @Override
   public String projectExplorerJointContainerFill() {
-    return "#5D5D5D";
+    return "#181b1f";
   }
 
   @Override
   public String projectExplorerJointContainerShadow() {
-    return "drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.1))";
+    return "none";
   }
 
   @Override
@@ -1381,7 +1406,7 @@ public class LightTheme implements Theme {
 
   @Override
   public String projectExplorerSelectedRowBackground() {
-    return "rgba(0, 0, 0, 0.2)";
+    return "#eaeaea";
   }
 
   @Override
@@ -1836,5 +1861,10 @@ public class LightTheme implements Theme {
   @Override
   public String projectExplorerPlaceholderRowColor() {
     return "#bfbfbf";
+  }
+
+  @Override
+  public String noToolbarPanelColor() {
+    return "#c8c8c8";
   }
 }

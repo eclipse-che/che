@@ -48,7 +48,7 @@ describe('ComposeEnvironmentManager', () => {
               '1025/tcp': {'port': '1025', 'properties': {}, 'protocol': 'http', 'path': ''}
             },
             'volumes': {
-              'volume1': {'path': '/some/path'},
+              'volume1': {'path': '/some/path'}
             },
             'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
           }

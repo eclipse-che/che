@@ -103,7 +103,6 @@ declare namespace che {
 
     export interface ICheTeamEventsManager {
       subscribeTeamNotifications(teamId: string): void;
-      fetchUser(): void;
       subscribeTeamMemberNotifications(): void;
       unSubscribeTeamNotifications(teamId: string): void;
       addRenameHandler(handler: Function): void;

@@ -154,7 +154,6 @@ public class WsMasterModule extends AbstractModule {
     envVarProviders.addBinding().to(WorkspaceMavenServerJavaOptsEnvVariableProvider.class);
 
     bind(org.eclipse.che.api.workspace.server.bootstrap.InstallerService.class);
-    bind(org.eclipse.che.api.workspace.server.event.WorkspaceMessenger.class).asEagerSingleton();
     bind(org.eclipse.che.api.workspace.server.event.WorkspaceJsonRpcMessenger.class)
         .asEagerSingleton();
     bind(org.eclipse.che.everrest.EverrestDownloadFileResponseFilter.class);
@@ -280,7 +279,7 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.plugin.activity.ActivityPermissionsFilter.class);
     bind(AdminPermissionInitializer.class).asEagerSingleton();
     bind(
-        org.eclipse.che.multiuser.permission.resource.filters.ResourceUsageServicePermissionsFilter
+        org.eclipse.che.multiuser.permission.resource.filters.ResourceServicePermissionsFilter
             .class);
     bind(
         org.eclipse.che.multiuser.permission.resource.filters

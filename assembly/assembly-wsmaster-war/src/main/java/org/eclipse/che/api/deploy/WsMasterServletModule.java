@@ -26,8 +26,6 @@ import org.everrest.guice.servlet.GuiceEverrestServlet;
 public class WsMasterServletModule extends ServletModule {
   @Override
   protected void configureServlets() {
-    getServletContext().addListener(new org.everrest.websockets.WSConnectionTracker());
-
     final Map<String, String> corsFilterParams = new HashMap<>();
     corsFilterParams.put("cors.allowed.origins", "*");
     corsFilterParams.put(

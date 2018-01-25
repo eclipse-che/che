@@ -50,6 +50,7 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
 
   private final ComposeServicesStartStrategy startStrategy;
   private final ComposeEnvironmentValidator composeValidator;
+  private final String defaultMachineMemorySizeAttribute;
 
   @Inject
   public ComposeEnvironmentFactory(
@@ -59,9 +60,11 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
       ComposeEnvironmentValidator composeValidator,
       ComposeServicesStartStrategy startStrategy,
       @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
-    super(installerRegistry, recipeRetriever, machinesValidator, defaultMachineMemorySizeMB);
+    super(installerRegistry, recipeRetriever, machinesValidator);
     this.startStrategy = startStrategy;
     this.composeValidator = composeValidator;
+    this.defaultMachineMemorySizeAttribute =
+        String.valueOf(defaultMachineMemorySizeMB * 1024 * 1024);
   }
 
   @Override
@@ -117,6 +120,8 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
         final Long ramLimit = entry.getValue().getMemLimit();
         if (ramLimit != null && ramLimit > 0) {
           attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(ramLimit));
+        } else {
+          attributes.put(MEMORY_LIMIT_ATTRIBUTE, defaultMachineMemorySizeAttribute);
         }
       }
     }

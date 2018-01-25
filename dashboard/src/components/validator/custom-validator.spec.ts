@@ -9,6 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheHttpBackend} from '../api/test/che-http-backend';
 
 /**
  * Test the custom validation directive
@@ -25,7 +26,7 @@ describe('custom-validator', () => {
 
   beforeEach(angular.mock.module('userDashboard'));
 
-  beforeEach(inject((_$compile_, $rootScope, cheHttpBackend) => {
+  beforeEach(inject((_$compile_: ng.ICompileService, $rootScope: ng.IRootScopeService, cheHttpBackend: CheHttpBackend) => {
     $scope = $rootScope;
     $compile = _$compile_;
 
@@ -34,7 +35,7 @@ describe('custom-validator', () => {
     httpBackend.whenGET(/.*/).respond(200, '');
     httpBackend.when('OPTIONS', '/api/').respond({});
 
-    $scope.validateFn = (value) => {
+    $scope.validateFn = (value: number) => {
       return value % 2 === 0;
     };
   }));

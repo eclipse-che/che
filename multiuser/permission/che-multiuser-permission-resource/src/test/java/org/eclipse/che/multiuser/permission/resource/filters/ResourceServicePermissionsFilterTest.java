@@ -15,6 +15,7 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -24,6 +25,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableSet;
+import com.jayway.restassured.response.Response;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
@@ -39,7 +41,7 @@ import org.eclipse.che.multiuser.api.permission.server.SystemDomain;
 import org.eclipse.che.multiuser.api.permission.server.account.AccountOperation;
 import org.eclipse.che.multiuser.api.permission.server.account.AccountPermissionsChecker;
 import org.eclipse.che.multiuser.resource.api.free.FreeResourcesLimitService;
-import org.eclipse.che.multiuser.resource.api.usage.ResourceUsageService;
+import org.eclipse.che.multiuser.resource.api.usage.ResourceService;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.core.Filter;
 import org.everrest.core.GenericContainerRequest;
@@ -52,31 +54,31 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Tests for {@link ResourceUsageServicePermissionsFilter}
+ * Tests for {@link ResourceServicePermissionsFilter}
  *
  * @author Sergii Leschenko
  */
 @Listeners(value = {MockitoTestNGListener.class, EverrestJetty.class})
-public class ResourceUsageServicePermissionsFilterTest {
+public class ResourceServicePermissionsFilterTest {
   @SuppressWarnings("unused")
   private static final ApiExceptionMapper MAPPER = new ApiExceptionMapper();
 
   @SuppressWarnings("unused")
-  private static final EnvironmentFilter FILTER = new EnvironmentFilter();
+  private final EnvironmentFilter FILTER = new EnvironmentFilter();
 
   @Mock private AccountManager accountManager;
 
   @Mock private Account account;
 
-  @Mock private ResourceUsageService service;
+  @Mock private ResourceService service;
 
   @Mock private FreeResourcesLimitService freeResourcesLimitService;
 
-  @Mock private static Subject subject;
+  @Mock private Subject subject;
 
   @Mock private AccountPermissionsChecker checker;
 
-  private ResourceUsageServicePermissionsFilter filter;
+  private ResourceServicePermissionsFilter filter;
 
   @BeforeMethod
   public void setUp() throws Exception {
@@ -85,24 +87,24 @@ public class ResourceUsageServicePermissionsFilterTest {
     when(account.getType()).thenReturn("test");
     when(checker.getAccountType()).thenReturn("test");
 
-    filter = new ResourceUsageServicePermissionsFilter(accountManager, ImmutableSet.of(checker));
+    filter = new ResourceServicePermissionsFilter(accountManager, ImmutableSet.of(checker));
   }
 
   @Test
   public void shouldTestThatAllPublicMethodsAreCoveredByPermissionsFilter() throws Exception {
     // given
     final List<String> collect =
-        Stream.of(ResourceUsageService.class.getDeclaredMethods())
+        Stream.of(ResourceService.class.getDeclaredMethods())
             .filter(method -> Modifier.isPublic(method.getModifiers()))
             .map(Method::getName)
             .collect(Collectors.toList());
 
     // then
-    assertEquals(collect.size(), 3);
-    assertTrue(collect.contains(ResourceUsageServicePermissionsFilter.GET_TOTAL_RESOURCES_METHOD));
-    assertTrue(
-        collect.contains(ResourceUsageServicePermissionsFilter.GET_AVAILABLE_RESOURCES_METHOD));
-    assertTrue(collect.contains(ResourceUsageServicePermissionsFilter.GET_USED_RESOURCES_METHOD));
+    assertEquals(collect.size(), 4);
+    assertTrue(collect.contains(ResourceServicePermissionsFilter.GET_TOTAL_RESOURCES_METHOD));
+    assertTrue(collect.contains(ResourceServicePermissionsFilter.GET_AVAILABLE_RESOURCES_METHOD));
+    assertTrue(collect.contains(ResourceServicePermissionsFilter.GET_USED_RESOURCES_METHOD));
+    assertTrue(collect.contains(ResourceServicePermissionsFilter.GET_RESOURCES_DETAILS_METHOD));
   }
 
   @Test
@@ -181,18 +183,12 @@ public class ResourceUsageServicePermissionsFilterTest {
   @Test(dataProvider = "coveredPaths")
   public void shouldNotCheckPermissionsOnAccountLevelWhenUserHasManageCodenvyPermission(String path)
       throws Exception {
-    when(subject.hasPermission(
-            nullable(String.class), nullable(String.class), nullable(String.class)))
-        .thenReturn(true);
+    when(subject.hasPermission(any(), any(), any())).thenReturn(true);
 
-    given()
-        .auth()
-        .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-        .expect()
-        .statusCode(200)
-        .when()
-        .get(SECURE_PATH + path);
+    final Response response =
+        given().auth().basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD).when().get(SECURE_PATH + path);
 
+    assertEquals(response.getStatusCode() / 100, 2);
     verify(subject).hasPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
     verify(checker, never())
         .checkPermissions("account123", AccountOperation.SEE_RESOURCE_INFORMATION);
@@ -213,15 +209,62 @@ public class ResourceUsageServicePermissionsFilterTest {
         .get(SECURE_PATH + path);
   }
 
+  @Test
+  public void testChecksPermissionsOnGettingResourcesDetails() throws Exception {
+    given()
+        .auth()
+        .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+        .expect()
+        .statusCode(204)
+        .when()
+        .get(SECURE_PATH + "/resource/account123/details");
+
+    verify(checker).checkPermissions("account123", AccountOperation.SEE_RESOURCE_INFORMATION);
+    verify(service).getResourceDetails("account123");
+  }
+
+  @Test(dataProvider = "coveredPaths")
+  public void testDeniesRequestWhenUserDoesNotHasPermissionsToSeeResourcesDetails(String path)
+      throws Exception {
+    doThrow(new ForbiddenException("Forbidden")).when(checker).checkPermissions(anyString(), any());
+
+    given()
+        .auth()
+        .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+        .expect()
+        .statusCode(403)
+        .when()
+        .get(SECURE_PATH + path);
+
+    verify(checker).checkPermissions("account123", AccountOperation.SEE_RESOURCE_INFORMATION);
+  }
+
+  @Test(dataProvider = "coveredPaths")
+  public void testDeniesRequestWhenUserDoesNotHasPermissionsToSeeResourceDetails(String path)
+      throws Exception {
+    when(account.getType()).thenReturn("unknown");
+
+    given()
+        .auth()
+        .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+        .expect()
+        .statusCode(403)
+        .when()
+        .get(SECURE_PATH + path);
+  }
+
   @DataProvider(name = "coveredPaths")
   public Object[][] pathsProvider() {
     return new Object[][] {
-      {"/resource/account123"}, {"/resource/account123/available"}, {"/resource/account123/used"},
+      {"/resource/account123"},
+      {"/resource/account123/available"},
+      {"/resource/account123/used"},
+      {"/resource/account123/details"}
     };
   }
 
   @Filter
-  public static class EnvironmentFilter implements RequestFilter {
+  public class EnvironmentFilter implements RequestFilter {
     public void doFilter(GenericContainerRequest request) {
       EnvironmentContext.getCurrent().setSubject(subject);
     }

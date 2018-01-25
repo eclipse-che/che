@@ -54,7 +54,7 @@ public class OrganizationPage {
     String MEMBERS_TAB = "//md-tab-item//span[contains(text(), 'Members')]";
     String MEMBERS_LIST = "//list-organization-members";
     String ADD_MEMBER_BUTTON = "//che-button-primary[@ng-click = 'onAdd()']";
-    String DELETE_MEMBER_BUTTON = "//button[@ng-click = 'onDelete()']";
+    String DELETE_MEMBER_BUTTON_ID = "delete-item-button";
     String MEMBERS_HEADER_XPATH =
         "//md-content[contains(@class, 'organization-member-list')]//div[contains(@class, 'che-list-header-column')]//span";
     String MEMBERS_LIST_ITEM_XPATH =
@@ -115,7 +115,7 @@ public class OrganizationPage {
   @FindBy(xpath = Locators.ADD_MEMBER_BUTTON)
   WebElement addMemberButton;
 
-  @FindBy(xpath = Locators.DELETE_MEMBER_BUTTON)
+  @FindBy(id = Locators.DELETE_MEMBER_BUTTON_ID)
   WebElement deleteMemberButton;
 
   @FindBy(xpath = Locators.DELETE_MEMBER_WIDGET_BUTTON)

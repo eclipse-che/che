@@ -31,7 +31,7 @@
         .toolbarButton {
             width: 14px;
             height: 14px;
-            margin-left: 2px;
+            margin-left: 1px;
             margin-top: 4px;
             cursor: pointer;
             font-size: 9px;
@@ -76,7 +76,7 @@
         .toolbarButton[toggled] {
             opacity: 1;
             background: consolesToolbarToggledButtonColor;
-            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+            border: 1px solid consolesToolbarToggledButtonBorderColor;
         }
 
         .toolbarButton[disabled],
@@ -191,7 +191,7 @@
             <g:FlowPanel styleName="{style.toolbar}">
                 <g:FlowPanel ui:field="reRunProcessButton" styleName="{style.toolbarButton}" />
                 <g:FlowPanel ui:field="stopProcessButton" styleName="{style.toolbarButton}" />
-                <g:FlowPanel ui:field="clearOutputsButton" styleName="{style.toolbarButton}" />
+                <g:FlowPanel ui:field="clearOutputsButton" styleName="{style.toolbarButton}" debugId="terminal_clear_output"/>
                 <g:FlowPanel ui:field="downloadOutputsButton" styleName="{style.toolbarButton}" />
                 <g:FlowPanel ui:field="wrapTextButton" styleName="{style.toolbarButton}" addStyleNames="{style.wrapTextButton}" />
                 <g:FlowPanel ui:field="scrollToBottomButton" styleName="{style.toolbarButton}" addStyleNames="{style.scrollToEndButton}" />

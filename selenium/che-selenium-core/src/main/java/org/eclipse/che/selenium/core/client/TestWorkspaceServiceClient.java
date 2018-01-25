@@ -14,6 +14,7 @@ import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
 
@@ -137,7 +138,9 @@ public class TestWorkspaceServiceClient {
     }
 
     Workspace workspace = getByName(workspaceName, userName);
-    if (workspace.getStatus() != STOPPED) {
+    if (workspace.getStatus() == STOPPING) {
+      waitStatus(workspaceName, userName, STOPPED);
+    } else if (workspace.getStatus() != STOPPED) {
       stop(workspaceName, userName);
     }
 
@@ -219,7 +222,7 @@ public class TestWorkspaceServiceClient {
       waitStatus(workspaceName, workspaceOwner.getName(), RUNNING);
     } catch (IllegalStateException ex) {
       // Remove try-catch block after issue has been resolved
-      Assert.fail("Known issue https://github.com/eclipse/che/issues/8031");
+      Assert.fail("Known issue https://github.com/eclipse/che/issues/8031", ex);
     }
   }
 

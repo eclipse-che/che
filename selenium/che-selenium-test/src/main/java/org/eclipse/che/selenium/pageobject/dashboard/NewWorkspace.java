@@ -30,14 +30,14 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Ann Shumilova */
 @Singleton
-public class CreateWorkspace {
+public class NewWorkspace {
 
   private final SeleniumWebDriver seleniumWebDriver;
   private final WebDriverWait redrawUiElementsTimeout;
   private final ActionsFactory actionsFactory;
 
   @Inject
-  public CreateWorkspace(SeleniumWebDriver seleniumWebDriver, ActionsFactory actionsFactory) {
+  public NewWorkspace(SeleniumWebDriver seleniumWebDriver, ActionsFactory actionsFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.actionsFactory = actionsFactory;
     this.redrawUiElementsTimeout =
@@ -158,12 +158,6 @@ public class CreateWorkspace {
             .findElement(By.xpath(format(Locators.MACHINE_RAM_VALUE, machineName)))
             .getAttribute("value");
     return Double.parseDouble(s);
-  }
-
-  public void setMachineRAM(String value) {
-    WebElement ramInput = seleniumWebDriver.findElement(By.xpath(Locators.MACHINE_RAM_VALUE));
-    ramInput.clear();
-    ramInput.sendKeys(value);
   }
 
   public void setMachineRAM(String machineName, double value) {

@@ -227,4 +227,8 @@ public class FileStructure {
       }
     }
   }
+
+  public void type(String text) {
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(text).perform();
+  }
 }

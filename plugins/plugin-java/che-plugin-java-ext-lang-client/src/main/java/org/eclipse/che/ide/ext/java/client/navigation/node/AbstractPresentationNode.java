@@ -55,7 +55,8 @@ public abstract class AbstractPresentationNode extends AbstractTreeNode implemen
       String presentableName,
       JavaResources resources) {
     if (isFromSuper) {
-      SpanElement highlightElement = Elements.createSpanElement(resources.css().disableTextColor());
+      SpanElement highlightElement =
+          Elements.createSpanElement(resources.css().presentableTextContainer());
       highlightElement.setInnerText(presentableName);
       presentation.setUserElement((Element) highlightElement);
     } else {

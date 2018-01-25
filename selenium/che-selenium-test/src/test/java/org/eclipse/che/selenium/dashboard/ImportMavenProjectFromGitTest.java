@@ -21,9 +21,9 @@ import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
@@ -41,7 +41,7 @@ public class ImportMavenProjectFromGitTest {
   @Inject private Loader loader;
   @Inject private ProjectExplorer explorer;
   @Inject private NavigationBar navigationBar;
-  @Inject private CreateWorkspace createWorkspace;
+  @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
@@ -63,10 +63,10 @@ public class ImportMavenProjectFromGitTest {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
 
-    workspaces.clickOnNewWorkspaceBtn();
-    createWorkspace.waitToolbar();
-    createWorkspace.selectStack(TestStacksConstants.JAVA.getId());
-    createWorkspace.typeWorkspaceName(WORKSPACE);
+    workspaces.clickOnAddWorkspaceBtn();
+    newWorkspace.waitToolbar();
+    newWorkspace.selectStack(TestStacksConstants.JAVA.getId());
+    newWorkspace.typeWorkspaceName(WORKSPACE);
 
     projectSourcePage.clickOnAddOrImportProjectButton();
 
@@ -74,7 +74,7 @@ public class ImportMavenProjectFromGitTest {
     projectSourcePage.typeGitRepositoryLocation("https://github.com/iedexmain1/guess-project.git");
     projectSourcePage.clickOnAddProjectButton();
 
-    createWorkspace.clickOnCreateButtonAndOpenInIDE();
+    newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
