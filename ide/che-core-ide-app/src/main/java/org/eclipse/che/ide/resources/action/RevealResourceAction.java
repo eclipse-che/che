@@ -25,7 +25,11 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.parts.ActivePartChangedHandler;
+import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 
@@ -37,12 +41,14 @@ import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
  */
 @Beta
 @Singleton
-public class RevealResourceAction extends AbstractPerspectiveAction {
+public class RevealResourceAction extends AbstractPerspectiveAction
+    implements ActivePartChangedHandler {
 
   private static final String PATH = "path";
 
   private final AppContext appContext;
   private final EventBus eventBus;
+  private PartPresenter activePart;
 
   @Inject
   public RevealResourceAction(
@@ -53,11 +59,23 @@ public class RevealResourceAction extends AbstractPerspectiveAction {
         localizedConstant.actionRevealResourceDescription());
     this.appContext = appContext;
     this.eventBus = eventBus;
+
+    eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
+  }
+
+  @Override
+  public void onActivePartChanged(ActivePartChangedEvent event) {
+    activePart = event.getActivePart();
   }
 
   /** {@inheritDoc} */
   @Override
   public void updateInPerspective(@NotNull ActionEvent event) {
+    if (!(activePart instanceof ProjectExplorerPresenter)) {
+      event.getPresentation().setEnabledAndVisible(false);
+      return;
+    }
+
     final Resource[] resources = appContext.getResources();
 
     event.getPresentation().setVisible(true);

@@ -21,11 +21,10 @@
         @eval openedFilesDropdownListTextColor org.eclipse.che.ide.api.theme.Style.theme.openedFilesDropdownListTextColor();
         @eval openedFilesDropdownListCloseButtonColor org.eclipse.che.ide.api.theme.Style.theme.openedFilesDropdownListCloseButtonColor();
         @eval openedFilesDropdownListHoverBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.openedFilesDropdownListHoverBackgroundColor();
-        @eval openedFilesDropdownListHoverTextColor org.eclipse.che.ide.api.theme.Style.theme.openedFilesDropdownListHoverTextColor();
 
         .main {
-            height: 20px;
-            line-height: 20px;
+            height: 24px;
+            line-height: 24px;
             color: openedFilesDropdownListTextColor;
             position: relative;
             font-family: "Open Sans", sans-serif;
@@ -38,7 +37,7 @@
             overflow: hidden;
             position: absolute;
             left: 0px;
-            top: 0px;
+            top: 2px;
         }
 
         .icon svg {
@@ -57,14 +56,13 @@
             position: absolute;
             left: 22px;
             top: 0px;
-            height: 20px;
-            line-height: 20px;
+            height: 24px;
+            line-height: 24px;
             white-space: nowrap;
         }
 
         .main:HOVER {
             background-color: openedFilesDropdownListHoverBackgroundColor;
-            color: openedFilesDropdownListHoverTextColor;
         }
     </ui:style>
 
