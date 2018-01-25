@@ -286,10 +286,10 @@ public interface Theme {
   /** Background of the DropdownList widget. */
   String getDropdownListBackground();
 
-  /** Color of the ExecLabel for DropdownList  widget. */
+  /** Color of the ExecLabel for DropdownList widget. */
   String getDropdownListExecLabelColor();
 
-  /** Background of the ExecLabel for DropdownList  widget. */
+  /** Background of the ExecLabel for DropdownList widget. */
   String getDropdownListExecLabelBackground();
 
   /** Background of the hovered DropdownList widget. */
