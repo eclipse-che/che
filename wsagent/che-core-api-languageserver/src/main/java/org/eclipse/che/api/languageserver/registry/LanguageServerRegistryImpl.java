@@ -14,12 +14,12 @@ import static javax.ws.rs.core.UriBuilder.fromUri;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.languageserver.registry.LanguageRecognizer.UNIDENTIFIED;
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,7 +42,6 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
@@ -51,6 +50,10 @@ import org.eclipse.che.api.languageserver.launcher.LaunchingStrategy;
 import org.eclipse.che.api.languageserver.remote.RemoteLsLauncherProvider;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.workspace.server.WorkspaceService;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.CodeActionCapabilities;
 import org.eclipse.lsp4j.CodeLensCapabilities;
@@ -67,10 +70,6 @@ import org.eclipse.lsp4j.FormattingCapabilities;
 import org.eclipse.lsp4j.HoverCapabilities;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
-import org.eclipse.che.api.workspace.server.WorkspaceService;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.OnTypeFormattingCapabilities;
@@ -117,20 +116,20 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
   private final List<ServerInitializerObserver> observers = new ArrayList<>();
 
-    private static int getProcessId() {
-        String name = ManagementFactory.getRuntimeMXBean().getName();
-        int prefixEnd = name.indexOf('@');
-        if (prefixEnd != -1) {
-            String prefix = name.substring(0, prefixEnd);
-            try {
-                return Integer.parseInt(prefix);
-            } catch (NumberFormatException ignored) {
-            }
-        }
-
-        LOG.error("Failed to recognize the pid of the process");
-        return -1;
+  private static int getProcessId() {
+    String name = ManagementFactory.getRuntimeMXBean().getName();
+    int prefixEnd = name.indexOf('@');
+    if (prefixEnd != -1) {
+      String prefix = name.substring(0, prefixEnd);
+      try {
+        return Integer.parseInt(prefix);
+      } catch (NumberFormatException ignored) {
+      }
     }
+
+    LOG.error("Failed to recognize the pid of the process");
+    return -1;
+  }
 
   @Inject
   public LanguageServerRegistryImpl(
@@ -322,51 +321,35 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
   @Override
   public List<LanguageDescription> getSupportedLanguages() {
-      initWorkspaceConfiguration();
+    initWorkspaceConfiguration();
 
-      if (workspace == null) {
-          return Collections.unmodifiableList(languages);
-      }
-
-      List<LanguageDescription> languageDescriptions = new LinkedList<>(languages);
-
-      for (RemoteLsLauncherProvider launcherProvider : launcherProviders) {
-          for (LanguageServerLauncher launcher : launcherProvider.getAll(workspace)) {
-              for (String languageId : launcher.getDescription().getLanguageIds()) {
-                  LanguageDescription language = languageRecognizer.recognizeById(languageId);
-                  if (language.equals(UNIDENTIFIED)) {
-                      continue;
-                  }
-                  languageDescriptions.add(language);
-              }
-          }
-      }
-
-      return Collections.unmodifiableList(languageDescriptions);
-  }
-
-  protected String extractProjectPath(String filePath) throws LanguageServerException {
-    if (!LanguageServiceUtils.isProjectUri(filePath)) {
-      throw new LanguageServerException("Project not found for " + filePath);
+    if (workspace == null) {
+      return Collections.unmodifiableList(languages);
     }
 
-    String wsPath = absolutize(LanguageServiceUtils.removePrefixUri(filePath));
-    RegisteredProject project =
-        projectManagerProvider
-            .get()
-            .getClosest(wsPath)
-            .orElseThrow(() -> new LanguageServerException("Project not found for " + filePath));
+    List<LanguageDescription> languageDescriptions = new LinkedList<>(languages);
 
-    return LanguageServiceUtils.prefixURI(project.getPath());
+    for (RemoteLsLauncherProvider launcherProvider : launcherProviders) {
+      for (LanguageServerLauncher launcher : launcherProvider.getAll(workspace)) {
+        for (String languageId : launcher.getDescription().getLanguageIds()) {
+          LanguageDescription language = languageRecognizer.recognizeById(languageId);
+          if (language.equals(UNIDENTIFIED)) {
+            continue;
+          }
+          languageDescriptions.add(language);
+        }
+      }
+    }
+
+    return Collections.unmodifiableList(languageDescriptions);
   }
 
   public List<Collection<InitializedLanguageServer>> getApplicableLanguageServers(String fileUri)
       throws LanguageServerException {
-    String projectPath = extractProjectPath(fileUri);
     String wsPath = absolutize(LanguageServiceUtils.removePrefixUri(fileUri));
     LanguageDescription language = languageRecognizer.recognizeByPath(wsPath);
     String languageId = language == null ? null : language.getLanguageId();
-    if (projectPath == null || language == null) {
+    if (language == null) {
       return Collections.emptyList();
     }
 
