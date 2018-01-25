@@ -32,6 +32,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
+import org.eclipse.che.api.languageserver.launcher.LaunchingStrategy;
+import org.eclipse.che.api.languageserver.launcher.PerWorkspaceLaunchingStrategy;
 import org.eclipse.che.api.languageserver.registry.LanguageServerDescription;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -132,6 +134,11 @@ class SocketLsLauncherProvider implements RemoteLsLauncherProvider {
         throw new LanguageServerException(
             "Can't launch language server for project: " + projectPath, e);
       }
+    }
+
+    @Override
+    public LaunchingStrategy getLaunchingStrategy() {
+      return PerWorkspaceLaunchingStrategy.INSTANCE;
     }
 
     @Override
