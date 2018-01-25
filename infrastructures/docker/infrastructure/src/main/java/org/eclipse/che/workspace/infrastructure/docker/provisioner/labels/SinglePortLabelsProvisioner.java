@@ -27,7 +27,7 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.Configuration
 import org.eclipse.che.workspace.infrastructure.docker.server.mapping.SinglePortHostnameBuilder;
 
 /**
- * Sets necessary container labels for the single-port proxy.
+ * Sets necessary container labels for the single-port proxy (Traefik).
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */

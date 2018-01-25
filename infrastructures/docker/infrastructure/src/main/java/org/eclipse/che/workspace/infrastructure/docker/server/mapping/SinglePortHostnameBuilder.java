@@ -13,10 +13,9 @@ package org.eclipse.che.workspace.infrastructure.docker.server.mapping;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.StringJoiner;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
 /**
- * Produces hostnames in form:
+ * Produces host names in form:
  * server-<serverName>.<machineName>.<workspaceId>.<external_or_internal_address>.nip.io
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
@@ -31,8 +30,15 @@ public class SinglePortHostnameBuilder {
     this.internalAddress = internalAddress;
   }
 
-  public String build(String serverName, String machineName, String workspaceID)
-      throws InfrastructureException {
+  /**
+   * Constructs hostname from given params.
+   *
+   * @param serverName optional server name
+   * @param machineName optional machine name
+   * @param workspaceID optional workspace ID
+   * @return composite hostname
+   */
+  public String build(String serverName, String machineName, String workspaceID) {
     StringJoiner joiner = new StringJoiner(".");
     if (serverName != null) {
       joiner.add("server-" + serverName.replace('/', '-'));
