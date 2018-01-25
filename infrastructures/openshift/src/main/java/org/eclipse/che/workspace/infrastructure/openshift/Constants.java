@@ -30,6 +30,9 @@ public final class Constants {
   /** The label that contains a value with workspace id to which object belongs to. */
   public static final String CHE_WORKSPACE_ID_LABEL = "che.workspace_id";
 
+  /** The label that contains a value with volume name. */
+  public static final String CHE_VOLUME_NAME_LABEL = "che.workspace.volume_name";
+
   /**
    * The annotation with the wildcard reserved for container name. Formatted annotation with the
    * real container name is used to get machine name.

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
+import static org.eclipse.che.workspace.infrastructure.openshift.Names.ROUTE_NAME_PREFIX;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.putLabel;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -32,7 +33,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
  *
  * @author Anton Korneta
  * @see Names#uniquePodName(String, String)
- * @see Names#uniqueRouteName()
+ * @see Names#generateName(String)
  */
 @Singleton
 public class UniqueNamesProvisioner implements ConfigurationProvisioner {
@@ -55,7 +56,7 @@ public class UniqueNamesProvisioner implements ConfigurationProvisioner {
     for (Route route : routes) {
       final ObjectMeta routeMeta = route.getMetadata();
       putLabel(route, Constants.CHE_ORIGINAL_NAME_LABEL, routeMeta.getName());
-      final String routeName = Names.uniqueRouteName();
+      final String routeName = Names.generateName(ROUTE_NAME_PREFIX);
       routeMeta.setName(routeName);
       osEnv.getRoutes().put(routeName, route);
     }
