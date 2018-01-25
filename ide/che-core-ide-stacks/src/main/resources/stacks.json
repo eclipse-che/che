@@ -2405,14 +2405,18 @@
         {
           "name": "build",
           "type": "mvn",
-          "attributes": {},
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Build"
+          },
           "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'"
         },
         {
           "name": "run",
           "type": "custom",
           "attributes": {
-            "previewUrl": "${server.wildfly}"
+            "previewUrl": "${server.wildfly}",
+            "goal": "Run"
           },
           "commandLine": "cd ${current.project.path} && scl enable rh-maven33 'java -jar target/*-swarm.jar'"
         }
