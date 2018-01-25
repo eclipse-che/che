@@ -250,6 +250,7 @@ public class Menu {
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(String.format(Locators.ENABLED_ITEM, command))))
         .click();
+
     loader.waitOnClosed();
   }
 
