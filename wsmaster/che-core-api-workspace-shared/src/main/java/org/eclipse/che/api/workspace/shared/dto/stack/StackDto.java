@@ -52,12 +52,6 @@ public interface StackDto extends Stack, Hyperlinks {
 
   StackDto withWorkspaceConfig(WorkspaceConfigDto workspaceConfigDto);
 
-  StackSourceDto getSource();
-
-  void setSource(StackSourceDto source);
-
-  StackDto withSource(StackSourceDto source);
-
   @Override
   List<StackComponentDto> getComponents();
 

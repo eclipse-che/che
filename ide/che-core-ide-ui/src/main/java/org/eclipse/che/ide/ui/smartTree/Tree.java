@@ -406,7 +406,8 @@ public class Tree extends FocusWidget
   public NodeDescriptor getNodeDescriptor(Element target) {
     checkNotNull(target);
 
-    Element nodeElement = getNearestParentElement(target, treeStyles.treeStylesCss().rootContainer());
+    Element nodeElement =
+        getNearestParentElement(target, treeStyles.treeStylesCss().rootContainer());
     if (!(nodeElement == null || isNullOrEmpty(nodeElement.getId()))) {
       return nodesByDom.get(nodeElement.getId());
     }
@@ -999,7 +1000,8 @@ public class Tree extends FocusWidget
 
   /** Enable searching @see {@link SpeedSearch#SpeedSearch(Tree, String, NodeConverter, boolean)} */
   public void enableSpeedSearch(boolean filterElements) {
-    speedSearch = new SpeedSearch(this, treeStyles.styles().searchMatch(), null, filterElements);
+    speedSearch =
+        new SpeedSearch(this, treeStyles.treeStylesCss().searchMatch(), null, filterElements);
   }
 
   /** Close searching pop-up enabled by {@link #enableSpeedSearch(boolean)}. */
