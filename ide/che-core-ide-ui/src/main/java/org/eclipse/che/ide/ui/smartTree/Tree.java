@@ -406,7 +406,8 @@ public class Tree extends FocusWidget
   public NodeDescriptor getNodeDescriptor(Element target) {
     checkNotNull(target);
 
-    Element nodeElement = getNearestParentElement(target, treeStyles.treeStylesCss().rootContainer());
+    Element nodeElement =
+        getNearestParentElement(target, treeStyles.treeStylesCss().rootContainer());
     if (!(nodeElement == null || isNullOrEmpty(nodeElement.getId()))) {
       return nodesByDom.get(nodeElement.getId());
     }
