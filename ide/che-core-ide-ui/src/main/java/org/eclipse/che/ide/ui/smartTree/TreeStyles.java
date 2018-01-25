@@ -52,6 +52,8 @@ public interface TreeStyles extends ClientBundle {
     String contentTree();
 
     String loading();
+
+    String searchMatch();
   }
 
   @Source("TreeStyles.css")

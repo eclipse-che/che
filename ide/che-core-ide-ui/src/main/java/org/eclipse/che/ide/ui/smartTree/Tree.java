@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.DelayedTask;
+import org.eclipse.che.ide.ui.smartTree.converter.NodeConverter;
 import org.eclipse.che.ide.ui.smartTree.data.HasAction;
 import org.eclipse.che.ide.ui.smartTree.data.MutableNode;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
@@ -251,6 +252,8 @@ public class Tree extends FocusWidget
   private boolean focusConstrainScheduled = false;
 
   protected boolean focused = false;
+
+  private SpeedSearch speedSearch;
 
   public Tree(NodeStorage nodeStorage, NodeLoader nodeLoader) {
     this(nodeStorage, nodeLoader, GWT.<TreeStyles>create(TreeStyles.class));
@@ -993,6 +996,18 @@ public class Tree extends FocusWidget
    */
   public GoInto getGoInto() {
     return goInto;
+  }
+
+  /** Enable searching @see {@link SpeedSearch#SpeedSearch(Tree, String, NodeConverter, boolean)} */
+  public void enableSpeedSearch(boolean filterElements) {
+    speedSearch = new SpeedSearch(this, treeStyles.styles().searchMatch(), null, filterElements);
+  }
+
+  /** Close searching pop-up enabled by {@link #enableSpeedSearch(boolean)}. */
+  public void closeSpeedSearchPopup() {
+    if (speedSearch != null) {
+      speedSearch.closePopUp();
+    }
   }
 
   /** {@inheritDoc} */
