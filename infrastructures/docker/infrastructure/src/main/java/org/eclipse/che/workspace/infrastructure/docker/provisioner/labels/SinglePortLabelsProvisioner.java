@@ -38,9 +38,9 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
   @Inject
   public SinglePortLabelsProvisioner(
       @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
-                @Named("che.docker.ip") String internalIpOfContainers) {
-    this.hostnameBuilder = new SinglePortHostnameBuilder(externalIpOfContainers,
-        internalIpOfContainers);
+      @Named("che.docker.ip") String internalIpOfContainers) {
+    this.hostnameBuilder =
+        new SinglePortHostnameBuilder(externalIpOfContainers, internalIpOfContainers);
   }
 
   @Override

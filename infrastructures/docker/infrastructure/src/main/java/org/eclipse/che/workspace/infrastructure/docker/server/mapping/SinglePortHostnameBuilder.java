@@ -17,7 +17,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
 /**
  * Produces hostnames in form:
- * server-<serverName>.<machineName>.<workspaceId>.<external_address>.nip.io
+ * server-<serverName>.<machineName>.<workspaceId>.<external_or_internal_address>.nip.io
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */

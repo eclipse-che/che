@@ -36,9 +36,9 @@ public class SinglePortUrlRewriter implements URLRewriter {
   @Inject
   public SinglePortUrlRewriter(
       @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
-                @Named("che.docker.ip") String internalIpOfContainers) {
-    this.hostnameBuilder = new SinglePortHostnameBuilder(externalIpOfContainers,
-        internalIpOfContainers);
+      @Named("che.docker.ip") String internalIpOfContainers) {
+    this.hostnameBuilder =
+        new SinglePortHostnameBuilder(externalIpOfContainers, internalIpOfContainers);
   }
 
   @Override
@@ -55,8 +55,7 @@ public class SinglePortUrlRewriter implements URLRewriter {
     } catch (UriBuilderException | IllegalArgumentException e) {
       throw new InternalInfrastructureException(
           format(
-              "Rewriting of host '%s' in URL '%s' failed. Error: %s",
-              host, url, e.getMessage()));
+              "Rewriting of host '%s' in URL '%s' failed. Error: %s", host, url, e.getMessage()));
     }
     return url;
   }
