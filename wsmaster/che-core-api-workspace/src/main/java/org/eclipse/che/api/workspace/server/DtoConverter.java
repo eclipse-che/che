@@ -49,9 +49,7 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackComponentDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
-import org.eclipse.che.api.workspace.shared.dto.stack.StackSourceDto;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
-import org.eclipse.che.api.workspace.shared.stack.StackSource;
 
 /**
  * Helps to convert to/from DTOs related to workspace.
@@ -117,13 +115,6 @@ public final class DtoConverter {
       workspaceConfigDto = asDto(stack.getWorkspaceConfig());
     }
 
-    StackSourceDto stackSourceDto = null;
-    StackSource source = stack.getSource();
-    if (source != null) {
-      stackSourceDto =
-          newDto(StackSourceDto.class).withType(source.getType()).withOrigin(source.getOrigin());
-    }
-
     List<StackComponentDto> componentsDto = null;
     if (stack.getComponents() != null) {
       componentsDto =
@@ -146,8 +137,7 @@ public final class DtoConverter {
         .withScope(stack.getScope())
         .withTags(stack.getTags())
         .withComponents(componentsDto)
-        .withWorkspaceConfig(workspaceConfigDto)
-        .withSource(stackSourceDto);
+        .withWorkspaceConfig(workspaceConfigDto);
   }
 
   /** Converts {@link ProjectConfig} to {@link ProjectConfigDto}. */
