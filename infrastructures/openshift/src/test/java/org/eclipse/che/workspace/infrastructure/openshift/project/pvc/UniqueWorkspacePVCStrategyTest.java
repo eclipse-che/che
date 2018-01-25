@@ -13,20 +13,23 @@ package org.eclipse.che.workspace.infrastructure.openshift.project.pvc;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_VOLUME_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.pvc.CommonPVCStrategyTest.mockName;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
@@ -65,7 +68,6 @@ public class UniqueWorkspacePVCStrategyTest {
   private static final String WORKSPACE_ID = "workspace123";
   private static final String PROJECT_NAME = "che";
   private static final String PVC_NAME_PREFIX = "che-claim";
-  private static final String PVC_UNIQUE_NAME = PVC_NAME_PREFIX + '-' + WORKSPACE_ID;
   private static final String POD_NAME = "main";
   private static final String POD_NAME_2 = "second";
   private static final String CONTAINER_NAME = "app";
@@ -150,20 +152,7 @@ public class UniqueWorkspacePVCStrategyTest {
   }
 
   @Test
-  public void testReplacePVCWhenItsAlreadyInOpenShiftEnvironment() throws Exception {
-    final Map<String, PersistentVolumeClaim> claims = new HashMap<>();
-    final PersistentVolumeClaim provisioned = mock(PersistentVolumeClaim.class);
-    claims.put(PVC_UNIQUE_NAME + '-' + VOLUME_1_NAME, provisioned);
-    when(osEnv.getPersistentVolumeClaims()).thenReturn(claims);
-
-    strategy.provision(osEnv, IDENTITY);
-
-    assertNotEquals(
-        osEnv.getPersistentVolumeClaims().get(PVC_UNIQUE_NAME + '-' + VOLUME_1_NAME), provisioned);
-  }
-
-  @Test
-  public void testProvisionPVCWithUniqueName() throws Exception {
+  public void testProvisionPVCsForEachVolumeWithUniqueName() throws Exception {
     when(osEnv.getPersistentVolumeClaims()).thenReturn(new HashMap<>());
 
     strategy.provision(osEnv, IDENTITY);
@@ -174,32 +163,74 @@ public class UniqueWorkspacePVCStrategyTest {
     assertEquals(container2.getVolumeMounts().size(), 1);
     assertEquals(container3.getVolumeMounts().size(), 1);
     assertEquals(osEnv.getPersistentVolumeClaims().size(), 2);
-    PersistentVolumeClaim pvc1 =
-        osEnv.getPersistentVolumeClaims().get(PVC_UNIQUE_NAME + '-' + VOLUME_1_NAME);
-    assertNotNull(pvc1);
-    assertEquals(pvc1.getMetadata().getLabels().get(CHE_WORKSPACE_ID_LABEL), WORKSPACE_ID);
-    PersistentVolumeClaim pvc2 =
-        osEnv.getPersistentVolumeClaims().get(PVC_UNIQUE_NAME + '-' + VOLUME_2_NAME);
-    assertNotNull(pvc2);
-    assertEquals(pvc2.getMetadata().getLabels().get(CHE_WORKSPACE_ID_LABEL), WORKSPACE_ID);
+    for (PersistentVolumeClaim pvc : osEnv.getPersistentVolumeClaims().values()) {
+      String volumeName = pvc.getMetadata().getLabels().get(CHE_VOLUME_NAME_LABEL);
+      assertNotNull(volumeName);
+      assertTrue(volumeName.equals(VOLUME_1_NAME) || volumeName.equals(VOLUME_2_NAME));
+    }
   }
 
   @Test
-  public void testCreatesPVCsOnPrepare() throws Exception {
-    final PersistentVolumeClaim pvc = mockName(mock(PersistentVolumeClaim.class), PVC_NAME_PREFIX);
-    when(osEnv.getPersistentVolumeClaims()).thenReturn(singletonMap(PVC_NAME_PREFIX, pvc));
-    doNothing().when(pvcs).createIfNotExist(any());
+  public void testDoNotProvisionPVCsWhenItIsAlreadyProvisionedForGivenVolumeAndWorkspace()
+      throws Exception {
+    final String pvcUniqueName1 = PVC_NAME_PREFIX + "-3121";
+    PersistentVolumeClaim pvc1 =
+        mockPVC(ImmutableMap.of(CHE_VOLUME_NAME_LABEL, VOLUME_1_NAME), pvcUniqueName1);
+    final String pvcUniqueName2 = PVC_NAME_PREFIX + "-71333";
+    PersistentVolumeClaim pvc2 =
+        mockPVC(ImmutableMap.of(CHE_VOLUME_NAME_LABEL, VOLUME_2_NAME), pvcUniqueName2);
+    when(osEnv.getPersistentVolumeClaims())
+        .thenReturn(ImmutableMap.of(pvcUniqueName1, pvc1, pvcUniqueName2, pvc2));
+
+    strategy.provision(osEnv, IDENTITY);
+
+    assertEquals(podSpec.getVolumes().size(), 2);
+    assertEquals(podSpec2.getVolumes().size(), 1);
+    assertEquals(container.getVolumeMounts().size(), 2);
+    assertEquals(container2.getVolumeMounts().size(), 1);
+    assertEquals(container3.getVolumeMounts().size(), 1);
+    assertEquals(osEnv.getPersistentVolumeClaims().size(), 2);
+  }
+
+  @Test
+  public void testDoNotProvisionPVCsWhenItIsAlreadyExistsForGivenVolumeAndWorkspace()
+      throws Exception {
+    final String pvcUniqueName1 = PVC_NAME_PREFIX + "-3121";
+    PersistentVolumeClaim pvc1 =
+        mockPVC(ImmutableMap.of(CHE_VOLUME_NAME_LABEL, VOLUME_1_NAME), pvcUniqueName1);
+    final String pvcUniqueName2 = PVC_NAME_PREFIX + "-71333";
+    PersistentVolumeClaim pvc2 =
+        mockPVC(ImmutableMap.of(CHE_VOLUME_NAME_LABEL, VOLUME_2_NAME), pvcUniqueName2);
+    when(pvcs.getByLabel(CHE_WORKSPACE_ID_LABEL, WORKSPACE_ID))
+        .thenReturn(ImmutableList.of(pvc1, pvc2));
+
+    strategy.provision(osEnv, IDENTITY);
+
+    assertEquals(podSpec.getVolumes().size(), 2);
+    assertEquals(podSpec2.getVolumes().size(), 1);
+    assertEquals(container.getVolumeMounts().size(), 2);
+    assertEquals(container2.getVolumeMounts().size(), 1);
+    assertEquals(container3.getVolumeMounts().size(), 1);
+    assertTrue(osEnv.getPersistentVolumeClaims().isEmpty());
+  }
+
+  @Test
+  public void testCreatesProvisionedPVCsOnPrepare() throws Exception {
+    final String uniqueName = PVC_NAME_PREFIX + "-3121";
+    final PersistentVolumeClaim pvc = mockName(mock(PersistentVolumeClaim.class), uniqueName);
+    when(osEnv.getPersistentVolumeClaims()).thenReturn(singletonMap(uniqueName, pvc));
+    doReturn(pvc).when(pvcs).create(any());
 
     strategy.prepare(osEnv, WORKSPACE_ID);
 
-    verify(pvcs).createIfNotExist(any());
+    verify(pvcs).create(any());
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void throwsInfrastructureExceptionWhenFailedToCreatePVCs() throws Exception {
-    final PersistentVolumeClaim pvc = mockName(mock(PersistentVolumeClaim.class), PVC_NAME_PREFIX);
+    final PersistentVolumeClaim pvc = mock(PersistentVolumeClaim.class);
     when(osEnv.getPersistentVolumeClaims()).thenReturn(singletonMap(PVC_NAME_PREFIX, pvc));
-    doThrow(InfrastructureException.class).when(pvcs).createIfNotExist(any());
+    doThrow(InfrastructureException.class).when(pvcs).create(any(PersistentVolumeClaim.class));
 
     strategy.prepare(osEnv, WORKSPACE_ID);
   }
@@ -232,5 +263,14 @@ public class UniqueWorkspacePVCStrategyTest {
     strategy.cleanup(WORKSPACE_ID);
 
     verify(filterList).delete();
+  }
+
+  private static PersistentVolumeClaim mockPVC(Map<String, String> labels, String name) {
+    final PersistentVolumeClaim pvc = mock(PersistentVolumeClaim.class);
+    final ObjectMeta metadata = mock(ObjectMeta.class);
+    when(pvc.getMetadata()).thenReturn(metadata);
+    when(metadata.getLabels()).thenReturn(labels);
+    when(metadata.getName()).thenReturn(name);
+    return pvc;
   }
 }
