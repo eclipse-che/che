@@ -160,6 +160,10 @@ public class MacrosCommandsEditorTest {
     commandsEditor.waitTabIsPresent(JAVA_NAME);
   }
 
+  /**
+   * in very rare cases on the OCP platform we have a situation when after command start, the macros
+   * output is not displayed
+   */
   private void runCommandWithCheckResult() {
     commandsEditor.clickOnRunButton();
     try {
