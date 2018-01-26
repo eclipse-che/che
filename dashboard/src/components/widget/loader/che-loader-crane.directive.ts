@@ -62,10 +62,10 @@ export class CheLoaderCrane implements ng.IDirective {
       animationRunning = false;
 
     let applyScale = (element: any, scale: number) => {
-        let jqElement;
-        if (element.nodeType) {
-          jqElement = angular.element(element);
+        if (!element.nodeType) {
+          return;
         }
+        let jqElement = angular.element(element);
         jqElement.css('transform', 'scale(' + scale + ')');
         jqElement.css('height', craneHeight * scale);
         jqElement.css('width', craneWidth * scale);
