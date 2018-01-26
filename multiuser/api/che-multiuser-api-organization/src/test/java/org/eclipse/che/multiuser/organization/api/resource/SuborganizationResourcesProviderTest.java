@@ -28,7 +28,7 @@ import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.multiuser.organization.api.OrganizationManager;
 import org.eclipse.che.multiuser.organization.shared.model.Organization;
 import org.eclipse.che.multiuser.organization.spi.impl.OrganizationImpl;
-import org.eclipse.che.multiuser.resource.api.usage.ResourceUsageManager;
+import org.eclipse.che.multiuser.resource.api.usage.ResourceManager;
 import org.eclipse.che.multiuser.resource.model.ProvidedResources;
 import org.eclipse.che.multiuser.resource.spi.impl.ProvidedResourcesImpl;
 import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
@@ -53,8 +53,8 @@ public class SuborganizationResourcesProviderTest {
   @Mock private OrganizationManager organizationManager;
   @Mock private OrganizationResourcesDistributor resourcesDistributor;
   @Mock private Provider<OrganizationResourcesDistributor> distributorProvider;
-  @Mock private Provider<ResourceUsageManager> usageManagerProvider;
-  @Mock private ResourceUsageManager resourceUsageManager;
+  @Mock private Provider<ResourceManager> resourceManagerProvider;
+  @Mock private ResourceManager resourceManager;
 
   private SuborganizationResourcesProvider suborganizationResourcesProvider;
 
@@ -65,11 +65,11 @@ public class SuborganizationResourcesProviderTest {
 
     when(distributorProvider.get()).thenReturn(resourcesDistributor);
 
-    when(usageManagerProvider.get()).thenReturn(resourceUsageManager);
+    when(resourceManagerProvider.get()).thenReturn(resourceManager);
 
     suborganizationResourcesProvider =
         new SuborganizationResourcesProvider(
-            accountManager, organizationManager, distributorProvider, usageManagerProvider);
+            accountManager, organizationManager, distributorProvider, resourceManagerProvider);
   }
 
   @Test
@@ -111,7 +111,7 @@ public class SuborganizationResourcesProviderTest {
     final ResourceImpl parentCapedResource = new ResourceImpl("caped", 20, "unit");
     final ResourceImpl parentUnlimitedCapedResource = new ResourceImpl("unlimited", -1, "unit");
     doReturn(asList(parentNotCapedResource, parentCapedResource, parentUnlimitedCapedResource))
-        .when(resourceUsageManager)
+        .when(resourceManager)
         .getTotalResources(anyString());
 
     final ResourceImpl capedResourceCap = new ResourceImpl("caped", 10, "unit");
@@ -138,7 +138,7 @@ public class SuborganizationResourcesProviderTest {
     verify(accountManager).getById("organization123");
     verify(organizationManager).getById("organization123");
     verify(resourcesDistributor).getResourcesCaps("organization123");
-    verify(resourceUsageManager).getTotalResources("parentOrg");
+    verify(resourceManager).getTotalResources("parentOrg");
   }
 
   @Test
@@ -148,7 +148,7 @@ public class SuborganizationResourcesProviderTest {
     when(account.getType()).thenReturn(OrganizationImpl.ORGANIZATIONAL_ACCOUNT);
     when(organization.getParent()).thenReturn("parentOrg");
     doReturn(emptyList()).when(resourcesDistributor).getResourcesCaps(any());
-    doReturn(emptyList()).when(resourceUsageManager).getAvailableResources(anyString());
+    doReturn(emptyList()).when(resourceManager).getAvailableResources(anyString());
 
     // when
     final List<ProvidedResources> providedResources =
@@ -159,6 +159,6 @@ public class SuborganizationResourcesProviderTest {
     verify(accountManager).getById("organization123");
     verify(organizationManager).getById("organization123");
     verify(resourcesDistributor, never()).getResourcesCaps("organization123");
-    verify(resourceUsageManager).getTotalResources("parentOrg");
+    verify(resourceManager).getTotalResources("parentOrg");
   }
 }

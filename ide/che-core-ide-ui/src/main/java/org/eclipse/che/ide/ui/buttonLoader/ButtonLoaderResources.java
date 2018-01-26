@@ -22,7 +22,7 @@ import com.google.gwt.resources.client.DataResource.MimeType;
  */
 public interface ButtonLoaderResources extends ClientBundle {
 
-  public interface ButtonLoaderCss extends CssResource {
+  interface ButtonLoaderCss extends CssResource {
     String buttonLoader();
   }
 
@@ -31,5 +31,5 @@ public interface ButtonLoaderResources extends ClientBundle {
   DataResource loader();
 
   @Source({"buttonLoader.css", "org/eclipse/che/ide/api/ui/style.css"})
-  ButtonLoaderCss Css();
+  ButtonLoaderCss buttonLoaderCss();
 }

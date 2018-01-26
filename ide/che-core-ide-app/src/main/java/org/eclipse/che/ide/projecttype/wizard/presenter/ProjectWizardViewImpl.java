@@ -61,7 +61,7 @@ public class ProjectWizardViewImpl extends Window implements ProjectWizardView {
             "projectWizard-saveButton",
             event -> delegate.onSaveClicked(),
             true);
-    saveButton.addStyleName(resources.Css().buttonLoader());
+    saveButton.addStyleName(resources.buttonLoaderCss().buttonLoader());
 
     nextStepButton =
         addFooterButton(

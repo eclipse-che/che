@@ -20,58 +20,75 @@ public final class Keycloak extends JavaScriptObject {
     super();
   }
 
+  public static native boolean isConfigured() /*-{
+    if ($wnd['_keycloak']) {
+      return true;
+    }
+
+    return false;
+  }-*/;
+
+  public static native Promise<Keycloak> get() /*-{
+    return new Promise(function (resolve, reject) {
+      if ($wnd['_keycloak']) {
+        resolve($wnd['_keycloak']);
+      } else {
+        reject();
+      }
+    });
+  }-*/;
+
   public static native Promise<Keycloak> init(
       String theUrl, String theRealm, String theClientId) /*-{
-        return new Promise(function (resolve, reject) {
-            try {
-                console.log('[Keycloak] Initializing');
-                var keycloak = $wnd.Keycloak({
-                    url: theUrl,
-                    realm: theRealm,
-                    clientId: theClientId
-                });
-                $wnd['_keycloak'] = keycloak;
-                keycloak.init({onLoad: 'login-required', checkLoginIframe: false})
-                    .success(function (authenticated) {
-                        resolve(keycloak);
-                    })
-                    .error(function () {
-                        console.log('[Keycloak] Failed to initialize Keycloak');
-                        reject();
-                    });
-                console.log('[Keycloak] Initializing complete');
-            } catch (ex) {
-                console.log('[Keycloak] Failed to initialize Keycloak with exception: ', ex);
-                reject();
-            }
+    return new Promise(function (resolve, reject) {
+      try {
+        console.log('[Keycloak] Initializing');
+        var keycloak = $wnd.Keycloak({
+          url: theUrl,
+          realm: theRealm,
+          clientId: theClientId
         });
-    }-*/;
+        $wnd['_keycloak'] = keycloak;
+        keycloak.init({onLoad: 'login-required', checkLoginIframe: false})
+            .success(function (authenticated) {
+              resolve(keycloak);
+            })
+            .error(function () {
+              console.log('[Keycloak] Failed to initialize Keycloak');
+              reject();
+            });
+        console.log('[Keycloak] Initializing complete');
+      } catch (ex) {
+        console.log('[Keycloak] Failed to initialize Keycloak with exception: ', ex);
+        reject();
+      }
+    });
+  }-*/;
 
   public native Promise<Boolean> updateToken(int minValidity) /*-{
-        var theKeycloak = this;
-        return new Promise(function (resolve, reject) {
-            try {
-                theKeycloak.updateToken(minValidity)
-                    .success(function (refreshed) {
-                        resolve(refreshed);
-                    })
-                    .error(function () {
-                        console.log('[Keycloak] Failed updating Keycloak token');
-                        reject();
-                        theKeycloak.login();
-                    });
-            } catch (ex) {
-                console.log('[Keycloak] Failed updating Keycloak token with exception: ', ex);
-                reject();
-                theKeycloak.login();
-            }
-        });
+    var theKeycloak = this;
+    return new Promise(function (resolve, reject) {
+      try {
+        theKeycloak.updateToken(minValidity)
+            .success(function (refreshed) {
+              resolve(refreshed);
+            })
+            .error(function () {
+              console.log('[Keycloak] Failed updating Keycloak token');
+              reject();
+              theKeycloak.login();
+            });
+      } catch (ex) {
+        console.log('[Keycloak] Failed updating Keycloak token with exception: ', ex);
+        reject();
+        theKeycloak.login();
+      }
+    });
 
-
-        return updatePromise;
-    }-*/;
+    return updatePromise;
+  }-*/;
 
   public native String getToken() /*-{
-        return this.token;
-    }-*/;
+    return this.token;
+  }-*/;
 }

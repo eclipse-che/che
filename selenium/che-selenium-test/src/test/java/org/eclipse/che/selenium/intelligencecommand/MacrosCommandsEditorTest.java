@@ -32,6 +32,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -39,6 +40,7 @@ import org.testng.annotations.Test;
 public class MacrosCommandsEditorTest {
   private static final String PROJ_NAME = NameGenerator.generate("MacrosCommandsEditorTest-", 4);
   private static final String PATH_TO_FILE = PROJ_NAME + "/src/Main.java";
+  private static final String PATH_TO_ROOT_FOLDER = "/projects/" + PROJ_NAME;
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
@@ -102,8 +104,7 @@ public class MacrosCommandsEditorTest {
     commandsEditor.waitMacroCommandIsSelected("${current.project.path}");
     commandsEditor.enterMacroCommandByDoubleClick("${current.project.path}");
     commandsEditor.waitTextIntoEditor("echo ${current.project.path}");
-    commandsEditor.clickOnRunButton();
-    consoles.waitExpectedTextIntoConsole("/projects/" + PROJ_NAME);
+    runCommandWithCheckResult();
   }
 
   @Test(priority = 2)
@@ -157,5 +158,19 @@ public class MacrosCommandsEditorTest {
     loader.waitOnClosed();
     commandsExplorer.waitCommandInExplorerByName(JAVA_NAME);
     commandsEditor.waitTabIsPresent(JAVA_NAME);
+  }
+
+  /**
+   * in very rare cases on the OCP platform we have a situation when after command start, the macros
+   * output is not displayed
+   */
+  private void runCommandWithCheckResult() {
+    commandsEditor.clickOnRunButton();
+    try {
+      consoles.waitExpectedTextIntoConsole(PATH_TO_ROOT_FOLDER);
+    } catch (TimeoutException ex) {
+      commandsEditor.clickOnRunButton();
+      consoles.waitExpectedTextIntoConsole(PATH_TO_ROOT_FOLDER);
+    }
   }
 }

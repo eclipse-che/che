@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.multiuser.resource.api.license;
+package org.eclipse.che.multiuser.resource.api;
 
 import java.util.List;
 import org.eclipse.che.api.core.NotFoundException;
@@ -16,7 +16,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.multiuser.resource.model.ProvidedResources;
 
 /**
- * Bridge class that link license and resources granting mechanisms.
+ * Bridge class that link resources details and resources granting mechanisms.
  *
  * @author Sergii Leschenko
  */

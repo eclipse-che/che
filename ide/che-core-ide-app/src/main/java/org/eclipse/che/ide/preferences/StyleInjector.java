@@ -39,7 +39,7 @@ public class StyleInjector {
     resources.dataGridStyle().ensureInjected();
     resources.cellTableStyle().ensureInjected();
     resources.defaultCategoriesListCss().ensureInjected();
-    resources.Css().ensureInjected();
+    resources.buttonLoaderCss().ensureInjected();
     resources.menuCss().ensureInjected();
 
     resources.commandsExplorerCss().ensureInjected();
@@ -47,5 +47,6 @@ public class StyleInjector {
     resources.commandToolbarCss().ensureInjected();
     resources.editorCss().ensureInjected();
     resources.commandTypeChooserCss().ensureInjected();
+    resources.treeStylesCss().ensureInjected();
   }
 }

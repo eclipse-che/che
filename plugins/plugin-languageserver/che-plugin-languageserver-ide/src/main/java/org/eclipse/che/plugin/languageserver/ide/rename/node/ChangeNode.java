@@ -76,7 +76,7 @@ public class ChangeNode extends AbstractPresentationNode implements HasAction {
   @Override
   public void updatePresentation(NodePresentation presentation) {
     SpanElement spanElement =
-        Elements.createSpanElement(styles.styles().presentableTextContainer());
+        Elements.createSpanElement(styles.treeStylesCss().presentableTextContainer());
 
     SpanElement lineNumberElement = Elements.createSpanElement();
     lineNumberElement.setInnerHTML(

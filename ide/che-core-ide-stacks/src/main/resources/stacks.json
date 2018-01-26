@@ -22,10 +22,6 @@
         "version": "8.0.24"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/centos_jdk8"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -110,10 +106,6 @@
         "version": "8.0.24"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/ubuntu_jdk8"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -203,10 +195,6 @@
         "version": "8.0.24"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/ubuntu_jdk8"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -273,10 +261,6 @@
       "Subversion"
     ],
     "components": [],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/ubuntu_jdk8"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -344,10 +328,6 @@
         "version": "3.2.3"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/ubuntu_android"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -420,10 +400,6 @@
         "version": "3.81"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/cpp_gcc"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -485,10 +461,6 @@
         "version": "2.0.0-preview2-006497"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/dotnet_core"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -563,10 +535,6 @@
         "version": "1.6.2"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/ubuntu_go"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -638,10 +606,6 @@
         "name": "Hadoop"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/hadoop-dev"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -728,10 +692,6 @@
         "version": "1.8.5"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/node"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -811,10 +771,6 @@
         "version": "---"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/php"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -941,10 +897,6 @@
         "version": "---"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/php:5.6"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -1056,10 +1008,6 @@
         "version": "8.1.1"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/ubuntu_python:latest"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -1136,10 +1084,6 @@
         "version": "1.11.2"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/ruby_rails"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -1209,10 +1153,6 @@
         "version": "Jessie"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/debian_jdk8"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -1254,10 +1194,6 @@
         "version": "Jessie"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/debian_jdk8"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -1320,10 +1256,6 @@
         "version": "8.0.24"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/centos_jdk8"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -1405,10 +1337,6 @@
         "version": "8.0.24"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/debian_jdk8"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -1484,10 +1412,6 @@
         "version": "---"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/php:gae"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -1559,10 +1483,6 @@
         "version": "8.1.1"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/ubuntu_python:2.7"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -1631,10 +1551,6 @@
         "version": "1.9.37"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/ubuntu_python:gae_python2.7"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -1722,10 +1638,6 @@
         "version": "---"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/selenium"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -1795,10 +1707,6 @@
         "version": "1.7.3"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "tomitribe/ubuntu_tomee_173_jdk8"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -1886,10 +1794,6 @@
       "name": "default",
       "defaultEnv": "default",
       "description": null
-    },
-    "source": {
-      "type": "image",
-      "origin": "eclipse/ubuntu_jdk8"
     }
   },
   {
@@ -1920,10 +1824,6 @@
         "version": "---"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "kaloyanraev/che-zendserver"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -2044,10 +1944,6 @@
         "version": "3.2.0"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "code/pio:latest"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -2158,10 +2054,6 @@
       "name": "Maven",
       "version": "3.2.2"
     }],
-    "source": {
-      "type": "image",
-      "origin": "registry.centos.org/che-stacks/vertx"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -2263,10 +2155,6 @@
         "version": "3.3"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "registry.centos.org/che-stacks/spring-boot"
-    },
     "workspaceConfig": {
       "name": "default",
       "defaultEnv": "default",
@@ -2354,10 +2242,6 @@
     "creator": "Dharmit Shah",
     "description": "Eclipse WildFly Swarm Stack on CentOS.",
     "scope": "advanced",
-    "source": {
-      "type": "image",
-      "origin": "registry.centos.org/che-stacks/wildfly-swarm"
-    },
     "tags": [
       "Java",
       "JDK",
@@ -2440,10 +2324,6 @@
     "name": "CentOS nodejs",
     "id": "nodejs4",
     "scope": "advanced",
-    "source": {
-      "type": "image",
-      "origin": "registry.centos.org/che-stacks/centos-nodejs"
-    },
     "description": "CentOS Node Stack",
     "tags": [
       "CentOS",
@@ -2551,10 +2431,6 @@
       "Git"
     ],
     "components": [],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/kotlin"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -2600,10 +2476,6 @@
         "version": "1.6.2"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "registry.centos.org/che-stacks/centos-go"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -2662,10 +2534,6 @@
     "Subversion"
   ],
   "components": [],
-  "source": {
-    "type": "image",
-    "origin": "registry.centos.org/che-stacks/centos-stack-base"
-  },
   "workspaceConfig": {
     "environments": {
       "default": {
@@ -2702,10 +2570,6 @@
     "scope": "advanced",
     "name": "Ceylon with Java JavaScript Dart on CentOS",
     "id": "ceylon-java-javascript-dart-centos",
-    "source": {
-      "origin": "registry.centos.org/che-stacks/centos-ceylon-nodejs-dart",
-      "type": "image"
-    },
     "components": [
       {
         "version": "---",

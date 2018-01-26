@@ -14,8 +14,6 @@ import static java.lang.String.format;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
@@ -97,23 +95,7 @@ public class TestUserImpl implements TestUser {
 
   @Override
   @PreDestroy
-  public void cleanUp() {
-    List<String> workspaces = new ArrayList<>();
-    try {
-      workspaces = workspaceServiceClient.getAll();
-    } catch (Exception e) {
-      LOG.error("Failed to get all workspaces.", e);
-    }
-
-    for (String workspace : workspaces) {
-      try {
-        workspaceServiceClient.delete(workspace, name);
-      } catch (Exception e) {
-        LOG.error(
-            format("User name='%s' failed to remove workspace name='%s'", workspace, name), e);
-      }
-    }
-  }
+  public void cleanUp() {}
 
   @Override
   public String toString() {

@@ -56,7 +56,7 @@ public class ImportProjectWizardViewImpl extends Window implements ImportProject
             "importProjectWizard-importButton",
             event -> delegate.onImportClicked(),
             true);
-    importButton.addStyleName(ideResources.Css().buttonLoader());
+    importButton.addStyleName(ideResources.buttonLoaderCss().buttonLoader());
 
     nextStepButton =
         addFooterButton(

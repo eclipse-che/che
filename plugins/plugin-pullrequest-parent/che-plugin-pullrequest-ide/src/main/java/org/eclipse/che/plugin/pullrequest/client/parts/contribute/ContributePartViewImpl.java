@@ -129,7 +129,7 @@ public class ContributePartViewImpl extends BaseView<ContributePartView.ActionDe
     setTitle(messages.contributePartTitle());
 
     this.contributeButtonText = contributeButton.getText();
-    this.contributeButton.addStyleName(buttonLoaderResources.Css().buttonLoader());
+    this.contributeButton.addStyleName(buttonLoaderResources.buttonLoaderCss().buttonLoader());
 
     this.refreshContributionBranchNameListButton.getElement().getStyle().setWidth(23, PX);
     this.refreshContributionBranchNameListButton.getElement().getStyle().setHeight(20, PX);

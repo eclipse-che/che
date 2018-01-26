@@ -128,8 +128,7 @@ public class PreviewRefactoringTest {
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     editor.waitActive();
     editor.goToCursorPositionVisible(26, 17);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactorPanel.waitRenameParametersFormIsOpen();
     refactorPanel.typeAndWaitNewName("a");
     refactorPanel.clickPreviewButtonRefactorForm();

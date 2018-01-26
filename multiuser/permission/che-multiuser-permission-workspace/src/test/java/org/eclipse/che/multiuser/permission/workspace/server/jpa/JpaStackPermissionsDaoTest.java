@@ -64,8 +64,8 @@ public class JpaStackPermissionsDaoTest {
 
     stacks =
         new StackImpl[] {
-          new StackImpl("stack1", "st1", null, null, null, null, null, null, null, null),
-          new StackImpl("stack2", "st2", null, null, null, null, null, null, null, null)
+          new StackImpl("stack1", "st1", null, null, null, null, null, null, null),
+          new StackImpl("stack2", "st2", null, null, null, null, null, null, null)
         };
 
     Injector injector = Guice.createInjector(new WorkspaceTckModule());

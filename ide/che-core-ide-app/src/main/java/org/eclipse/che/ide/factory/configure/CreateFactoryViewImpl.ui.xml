@@ -82,7 +82,7 @@
     </ui:style>
 
     <g:FlowPanel width="340px" ui:field="createFactoryPanel">
-        <g:FlowPanel ui:field="upperPanel" addStyleNames="{style.topPanel} {style.border}">
+        <g:FlowPanel ui:field="upperPanel" addStyleNames="{style.topPanel}">
             <g:Label ui:field="factoryNameLabel" addStyleNames="{res.factoryCSS.label}"/>
             <g:TextBox ui:field="factoryName" addStyleNames="{style.input}"/>
             <g:Button ui:field="createFactoryButton" text="{locale.createFactoryButton}"

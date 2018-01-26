@@ -10,15 +10,12 @@
  */
 package org.eclipse.che.api.system.server;
 
+import com.google.common.annotations.VisibleForTesting;
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.core.util.WebsocketLineConsumer;
+import org.eclipse.che.api.core.notification.RemoteSubscriptionManager;
 import org.eclipse.che.api.system.shared.event.SystemEvent;
-import org.eclipse.che.dto.server.DtoFactory;
-import org.slf4j.LoggerFactory;
 
 /**
  * Broadcasts system status events to the websocket channel.
@@ -26,31 +23,21 @@ import org.slf4j.LoggerFactory;
  * @author Yevhenii Voevodin
  */
 @Singleton
-public class SystemEventsWebsocketBroadcaster implements EventSubscriber<SystemEvent> {
+public class SystemEventsWebsocketBroadcaster {
 
-  public static final String SYSTEM_STATE_CHANNEL_NAME = "system:state";
+  public static final String SYSTEM_STATE_METHOD_NAME = "system/state";
 
-  private final LineConsumer messageConsumer;
-
-  public SystemEventsWebsocketBroadcaster() {
-    this(new WebsocketLineConsumer(SYSTEM_STATE_CHANNEL_NAME));
-  }
-
-  public SystemEventsWebsocketBroadcaster(WebsocketLineConsumer messageConsumer) {
-    this.messageConsumer = messageConsumer;
-  }
+  private final RemoteSubscriptionManager remoteSubscriptionManager;
 
   @Inject
-  public void subscribe(EventService eventService) {
-    eventService.subscribe(this);
+  public SystemEventsWebsocketBroadcaster(RemoteSubscriptionManager remoteSubscriptionManager) {
+    this.remoteSubscriptionManager = remoteSubscriptionManager;
   }
 
-  @Override
-  public void onEvent(SystemEvent event) {
-    try {
-      messageConsumer.writeLine(DtoFactory.getInstance().toJson(DtoConverter.asDto(event)));
-    } catch (Exception x) {
-      LoggerFactory.getLogger(getClass()).error(x.getMessage(), x);
-    }
+  @PostConstruct
+  @VisibleForTesting
+  void subscribe() {
+    remoteSubscriptionManager.register(
+        SYSTEM_STATE_METHOD_NAME, SystemEvent.class, (systemEvent, stringStringMap) -> true);
   }
 }

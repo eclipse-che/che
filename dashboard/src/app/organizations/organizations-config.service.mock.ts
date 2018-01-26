@@ -61,7 +61,6 @@ export class OrganizationsConfigServiceMock {
     const org1 = this.addAndGetOrganization(1);
     // add children organizations
     const org2 = this.addAndGetOrganization(2, org1);
-    const org3 = this.addAndGetOrganization(3, org1);
 
     // for root organization
 

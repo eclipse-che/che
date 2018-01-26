@@ -22,29 +22,29 @@ import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakPass
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+/** @author Igor Ohrimenko */
 @Singleton
 public class KeycloakPasswordPage {
-  private SeleniumWebDriver seleniumWebDriver;
-  private WebDriverWait loadPageWait;
-  private SeleniumWebDriverUtils seleniumWebDriverUtils;
-  private KeycloakHeaderButtons keycloakHeaderButtons;
+  private final WebDriverWait loadPageWait;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final KeycloakHeaderButtons keycloakHeaderButtons;
 
   @Inject
   public KeycloakPasswordPage(
       SeleniumWebDriver seleniumWebDriver,
-      SeleniumWebDriverUtils seleniumWebDriverUtils,
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
       KeycloakHeaderButtons keycloakHeaderButtons) {
-    this.seleniumWebDriver = seleniumWebDriver;
-    this.seleniumWebDriverUtils = seleniumWebDriverUtils;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.keycloakHeaderButtons = keycloakHeaderButtons;
     this.loadPageWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
   }
 
-  protected interface PasswordLocators {
+  interface PasswordLocators {
     String PASSWORD_FIELD_ID = "password";
     String NEW_PASSWORD_FIELD_ID = "password-new";
     String NEW_PASSWORD_CONFIRMATION_ID = "password-confirm";
@@ -56,31 +56,31 @@ public class KeycloakPasswordPage {
   }
 
   public void waitPasswordPageIsLoaded() {
-    keycloakHeaderButtons.waitAllHeaderButtonsIsVisible();
+    keycloakHeaderButtons.waitAllHeaderButtonsAreVisible();
     waitAllBodyFieldsAndButtonsIsVisible();
   }
 
   public void setPasswordFieldValue(String value) {
-    seleniumWebDriverUtils.setFieldValue(By.id(PASSWORD_FIELD_ID), value);
+    seleniumWebDriverHelper.setFieldValue(By.id(PASSWORD_FIELD_ID), value);
   }
 
   public void setNewPasswordFieldValue(String value) {
-    seleniumWebDriverUtils.setFieldValue(By.id(NEW_PASSWORD_FIELD_ID), value);
+    seleniumWebDriverHelper.setFieldValue(By.id(NEW_PASSWORD_FIELD_ID), value);
   }
 
   public void setNewPasswordConfirmationFieldValue(String value) {
-    seleniumWebDriverUtils.setFieldValue(By.id(NEW_PASSWORD_CONFIRMATION_ID), value);
+    seleniumWebDriverHelper.setFieldValue(By.id(NEW_PASSWORD_CONFIRMATION_ID), value);
   }
 
   public void clickOnSavePasswordButton() {
-    seleniumWebDriverUtils.waitAndClickOnElement(By.xpath(SAVE_BUTTON));
+    seleniumWebDriverHelper.waitAndClickOnElement(By.xpath(SAVE_BUTTON));
   }
 
   public void waitTextInErrorAlert(String expectedText) {
     loadPageWait.until(
         (ExpectedCondition<Boolean>)
             driver ->
-                seleniumWebDriverUtils
+                seleniumWebDriverHelper
                     .waitAndGetElement(By.xpath(ERROR_ALERT))
                     .getText()
                     .equals(expectedText));
@@ -90,7 +90,7 @@ public class KeycloakPasswordPage {
     loadPageWait.until(
         (ExpectedCondition<Boolean>)
             driver ->
-                seleniumWebDriverUtils
+                seleniumWebDriverHelper
                     .waitAndGetElement(By.xpath(SUCCESS_ALERT))
                     .getText()
                     .equals(expectedText));
@@ -102,6 +102,6 @@ public class KeycloakPasswordPage {
             By.id(NEW_PASSWORD_FIELD_ID),
             By.id(NEW_PASSWORD_CONFIRMATION_ID),
             By.xpath(SAVE_BUTTON))
-        .forEach(locator -> seleniumWebDriverUtils.waitElementIsVisible(locator));
+        .forEach(locator -> seleniumWebDriverHelper.waitElementIsVisible(locator));
   }
 }

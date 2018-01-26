@@ -142,7 +142,7 @@ public class RenameVirtualMethodsTest {
   private void doRefactoringWithKeys(
       int cursorPositionLine, int cursorPositionChar, String newName) {
     prepareProjectForRefactor(cursorPositionLine, cursorPositionChar);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor(newName);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutA);
@@ -150,8 +150,7 @@ public class RenameVirtualMethodsTest {
 
   private void doRefactorByWizard(int cursorPositionLine, int cursorPositionChar, String newName) {
     prepareProjectForRefactor(cursorPositionLine, cursorPositionChar);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameMethodFormIsOpen();
     typeAndWaitNewName(newName);
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
@@ -165,8 +164,7 @@ public class RenameVirtualMethodsTest {
   private void doRefactorByWizardWithClosingWarnMess(
       int cursorPositionLine, int cursorPositionChar, String newName) {
     prepareProjectForRefactor(cursorPositionLine, cursorPositionChar);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameMethodFormIsOpen();
     typeAndWaitNewName(newName);
     refactor.clickOkButtonRefactorForm();

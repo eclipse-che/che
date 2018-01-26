@@ -149,7 +149,7 @@ public class TreeView {
 
   public void onDropChange(NodeDescriptor nodeDescriptor, boolean drop) {
     Element e = tree.getView().getNodeContainer(nodeDescriptor);
-    setClassName(e, tree.getTreeStyles().styles().dragOver(), drop);
+    setClassName(e, tree.getTreeStyles().treeStylesCss().dragOver(), drop);
   }
 
   public void onEvent(Event ce) {
@@ -217,15 +217,15 @@ public class TreeView {
     }
 
     if (loading) {
-      rootContainer.addClassName(tree.getTreeStyles().styles().loading());
+      rootContainer.addClassName(tree.getTreeStyles().treeStylesCss().loading());
     } else {
-      rootContainer.removeClassName(tree.getTreeStyles().styles().loading());
+      rootContainer.removeClassName(tree.getTreeStyles().treeStylesCss().loading());
     }
   }
 
   public void onOverChange(NodeDescriptor node, boolean over) {
     if (tree.focused) {
-      setClassName(getNodeContainer(node), tree.getTreeStyles().styles().hover(), over);
+      setClassName(getNodeContainer(node), tree.getTreeStyles().treeStylesCss().hover(), over);
     }
   }
 
@@ -240,15 +240,15 @@ public class TreeView {
     if (nodeDescriptor != null) {
       Element e = getNodeContainer(nodeDescriptor);
       if (e != null) {
-        setClassName(e, tree.getTreeStyles().styles().hover(), false);
-        setClassName(e, tree.getTreeStyles().styles().selected(), false);
+        setClassName(e, tree.getTreeStyles().treeStylesCss().hover(), false);
+        setClassName(e, tree.getTreeStyles().treeStylesCss().selected(), false);
 
         if (select) {
           setClassName(
               e,
               tree.focused
-                  ? tree.getTreeStyles().styles().selected()
-                  : tree.getTreeStyles().styles().hover(),
+                  ? tree.getTreeStyles().treeStylesCss().selected()
+                  : tree.getTreeStyles().treeStylesCss().hover(),
               true);
         }
       }
@@ -328,7 +328,7 @@ public class TreeView {
   private boolean isJointElement(Element element) {
     if (element instanceof SVGSVGElement) {
       SVGSVGElement joint = (SVGSVGElement) element;
-      return joint.getClassList().contains(tree.getTreeStyles().styles().joint());
+      return joint.getClassList().contains(tree.getTreeStyles().treeStylesCss().joint());
     }
 
     return false;

@@ -49,7 +49,7 @@ public class Workspaces {
 
   private interface Locators {
     String TOOLBAR = "Workspaces";
-    String DOCUMENTATION_LINK = "//a[@ng-href='/docs/devops/intro/index.html']";
+    String DOCUMENTATION_LINK = "//div[@che-link-title='Learn more.']/a";
     String ADD_WORKSPACE_BTN = "add-item-button";
     String DELETE_WORKSPACE_BTN = "delete-item-button";
     String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
@@ -228,7 +228,7 @@ public class Workspaces {
 
   /** wait the workspace is not present on dashboard */
   public void waitWorkspaceIsNotPresent(String workspaceName) {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(
             invisibilityOfElementLocated(
                 By.xpath(format(Locators.WORKSPACE_ITEM_NAME, workspaceName))));

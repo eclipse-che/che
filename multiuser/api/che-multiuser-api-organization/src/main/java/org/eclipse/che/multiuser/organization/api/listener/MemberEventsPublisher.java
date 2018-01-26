@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.multiuser.organization.api.listener;
 
+import static org.eclipse.che.multiuser.organization.api.DtoConverter.asDto;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -63,7 +65,7 @@ public class MemberEventsPublisher implements EventSubscriber<PermissionsEvent> 
               final String initiator = event.getInitiator();
               final User addedMember = userManager.getById(permissions.getUserId());
               final Organization org = organizationManager.getById(permissions.getInstanceId());
-              eventService.publish(new MemberAddedEvent(initiator, addedMember, org));
+              eventService.publish(asDto(new MemberAddedEvent(initiator, addedMember, org)));
               break;
             }
           case PERMISSIONS_REMOVED:
@@ -71,7 +73,7 @@ public class MemberEventsPublisher implements EventSubscriber<PermissionsEvent> 
               final String initiator = event.getInitiator();
               final User removedMember = userManager.getById(permissions.getUserId());
               final Organization org = organizationManager.getById(permissions.getInstanceId());
-              eventService.publish(new MemberRemovedEvent(initiator, removedMember, org));
+              eventService.publish(asDto(new MemberRemovedEvent(initiator, removedMember, org)));
               break;
             }
           default:

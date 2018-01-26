@@ -91,6 +91,8 @@ public class FileStructureImpl extends Window implements FileStructure {
     handler.bind(tree);
 
     treeContainer.add(tree);
+
+    tree.enableSpeedSearch(true);
   }
 
   /** {@inheritDoc} */
@@ -134,6 +136,7 @@ public class FileStructureImpl extends Window implements FileStructure {
 
   @Override
   protected void onHide() {
+    tree.closeSpeedSearchPopup();
     delegate.onEscapeClicked();
   }
 
