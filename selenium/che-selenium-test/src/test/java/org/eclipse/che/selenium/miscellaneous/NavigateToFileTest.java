@@ -153,7 +153,7 @@ public class NavigateToFileTest {
       navigateToFile.selectFileByName(dropdownVerificationPath);
     } catch (WebDriverException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8293");
+      fail("Known issue https://github.com/eclipse/che/issues/8465");
     }
 
     editor.waitActive();
