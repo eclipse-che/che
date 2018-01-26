@@ -36,7 +36,8 @@ import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class CreateWorkspaceOnDashboardTest {
-  private static final String WS_NAME = generate("WsDashboard", 4);
+
+  private static final String WS_NAME = generate("workspace", 4);
   private static final String PROJECT_NAME = "web-java-spring";
   private static final String PATH_JAVA_FILE =
       PROJECT_NAME + "/src/main/java/org/eclipse/che/examples/GreetingController.java";
@@ -66,6 +67,7 @@ public class CreateWorkspaceOnDashboardTest {
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
 
+    // create and start a new workspace
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
     newWorkspace.typeWorkspaceName(WS_NAME);
@@ -75,6 +77,7 @@ public class CreateWorkspaceOnDashboardTest {
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
+    // wait that the workspace is started
     projectExplorer.waitProjectExplorer();
     terminal.waitTerminalTab(EXPECTED_MESS_IN_CONSOLE_SEC);
 
