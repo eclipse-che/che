@@ -31,7 +31,7 @@ public class ConfigureClasspath {
 
   public static final String CONFIGURE_CLASSPATH_FORM = "//table[@title='Configure Classpath']";
   public static final String CONFIGURE_CLASSPATH_CLOSE_ICON =
-      "//table[@title='Configure Classpath']/following::div[1]";
+      "//table[@title='Configure Classpath']/tbody/tr[1]/td/table/tbody/tr/td[2]//*[local-name() = 'svg']";
   public static final String JAVA_BUILD_PATH = "gwt-debug-categoryHeader-Java Build Path";
   public static final String LIBRARIES_CATEGORY = "gwt-debug-projectWizard-Libraries";
   public static final String SOURCE_CATEGORY = "gwt-debug-projectWizard-Source";

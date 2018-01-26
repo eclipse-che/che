@@ -121,10 +121,9 @@ public class Refactor {
     String NAME_PATTERNS_FIELD = "//div[text()='File name patterns:']/following-sibling::input";
     String ERROR_CONTAINER_OF_COMPILATION_FORM =
         "//div[@style[contains(.,'color: rgb(195, 77, 77)')]]";
-    String TEXT_MESSAGE_MOVE_FORM =
-        "//div[text()='Move item']/parent::div/parent::div/parent::div//div[text()='%s']";
+    String TEXT_MESSAGE_MOVE_FORM = "//table[@title='Move item']//div[text()='%s']";
     String ITEM_CHANGES_TO_BE_PERFORMED =
-        "//div[contains(text(),'Rename')]/ancestor::div[3]//div[contains(text(),'%s')]";
+        "//table[@title='Rename Item']//div[contains(text(),'%s')]";
     String EXPAND_ITEM_ICON =
         "//div[@id='tree-of-changes']//div[contains(text(),'%s')]//preceding::td[1]";
     String FLAG_ITEM =
