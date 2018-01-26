@@ -26,7 +26,6 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -267,12 +266,17 @@ public class ProjectSourcePage {
 
   public boolean isGithubProjectsListDisplayed() {
     try {
-      return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-          .until(visibilityOfElementLocated(By.xpath(Locators.GITHUB_PROJECTS_LIST)))
-          .isDisplayed();
+      waitGithubProjectList();
+      return true;
     } catch (TimeoutException ex) {
       return false;
     }
+  }
+
+  public void waitGithubProjectList() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath(Locators.GITHUB_PROJECTS_LIST)))
+        .isDisplayed();
   }
 
   public void selectProjectFromList(String projectName) {
@@ -287,14 +291,9 @@ public class ProjectSourcePage {
   public void waitAuthorizationPageOpened() {
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(
-            new ExpectedCondition<Boolean>() {
-              @Override
-              public Boolean apply(WebDriver elem) {
-                return loginField.isDisplayed()
-                    && passField.isDisplayed()
-                    && signInBtn.isDisplayed();
-              }
-            });
+            (ExpectedCondition<Boolean>)
+                elem ->
+                    loginField.isDisplayed() && passField.isDisplayed() && signInBtn.isDisplayed());
   }
 
   /**
