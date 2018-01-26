@@ -51,7 +51,6 @@ import org.eclipse.che.api.languageserver.remote.RemoteLsLauncherProvider;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.lsp4j.ClientCapabilities;
