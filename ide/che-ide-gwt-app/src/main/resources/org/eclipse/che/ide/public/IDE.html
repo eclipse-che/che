@@ -57,6 +57,81 @@
         var Loader = new function() {
 
             /*
+             * Load keycloak settings
+             */
+            this.loadKeycloakSettings = function() {
+                var msg = "Cannot load keycloak settings. This is normal for single-user mode.";
+                
+                try {
+                    var request = new XMLHttpRequest();
+
+                    request.onerror = request.onabort = function() {
+                        console.error(msg);
+                        Loader.startLoading();
+                    };
+
+                    request.onload = function() {
+                        if (request.status == 200) {
+                            Loader.injectKeycloakScript(JSON.parse(this.responseText));
+                        } else {
+                            console.error(msg);
+                            Loader.startLoading();
+                        }
+                    };
+
+                    var url = "/api/keycloak/settings";
+                    request.open("GET", url, true);
+                    request.send();
+                } catch (e) {
+                    console.error(msg, e);
+                    Loader.startLoading();
+                }
+            };
+            
+            /*
+             * Injects keycloak javascript
+             */
+            this.injectKeycloakScript = function(keycloakSettings) {
+                var script = document.createElement("script");
+                script.type = "text/javascript";
+                script.language = "javascript";
+                script.async = true;
+                script.src = keycloakSettings['che.keycloak.auth_server_url'] + '/js/keycloak.js';
+
+                script.onload = function() {
+                    Loader.initKeycloak(keycloakSettings);
+                };
+                
+                script.onerror = script.onabort = function() {
+                    console.error("Cannot load " + script.src);
+                };
+                                    
+                document.head.appendChild(script);
+            };
+
+            /*
+             * Initialize keycloak and load the IDE
+             */
+            this.initKeycloak = function(keycloakSettings) {
+                var keycloak = Keycloak({
+                    url: keycloakSettings['che.keycloak.auth_server_url'],
+                    realm: keycloakSettings['che.keycloak.realm'],
+                    clientId: keycloakSettings['che.keycloak.client_id']
+                });
+                
+                window['_keycloak'] = keycloak;
+                
+                keycloak
+                    .init({onLoad: 'login-required', checkLoginIframe: false})
+                    .success(function(authenticated) {
+                        Loader.startLoading();
+                    })
+                    .error(function () {
+                        console.log('[Keycloak] Failed to initialize Keycloak');
+                    });
+            };
+
+            /*
              * Show loader and load compilation-mapping.txt file to determine which IDE JavaScript file will be loaded
              */
             this.startLoading = function() {
@@ -107,7 +182,7 @@
                 } else if (userAgent.includes('webkit')) {
                     return 'safari';
                 } else if (userAgent.includes('msie')) {
-                    if ($doc.documentMode >= 8) {
+                    if (document.documentMode >= 8) {
                         return 'ie8';
                     } else {
                         var result = /msie ([0-9]+)\\.([0-9]+)/.exec(userAgent);
@@ -283,12 +358,12 @@
                 script.language = "javascript";
                 script.async = true;
                 script.src = "/_app/_app.nocache.js";
-                document.getElementsByTagName("head")[0].appendChild(script);
+                document.head.appendChild(script);
             };
         };
 
         setTimeout(function() {
-            Loader.startLoading();
+            Loader.loadKeycloakSettings();
             window.parent.postMessage("show-ide", "*");
         }, 1);
 
