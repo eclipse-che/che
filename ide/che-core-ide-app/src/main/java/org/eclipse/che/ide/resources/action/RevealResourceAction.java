@@ -103,12 +103,13 @@ public class RevealResourceAction extends AbstractPerspectiveAction {
   private void ensureProjectExplorerPart() {
     PartStack navigationPartStack = workspaceAgent.getPartStack(NAVIGATION);
     PartPresenter activePart = navigationPartStack.getActivePart();
+    ProjectExplorerPresenter projectExplorerPresenter = projectExplorerPresenterProvider.get();
+
+    if (activePart == null) {
+      workspaceAgent.openPart(projectExplorerPresenter, NAVIGATION);
+    }
 
     if (!(activePart instanceof ProjectExplorerPresenter)) {
-      ProjectExplorerPresenter projectExplorerPresenter = projectExplorerPresenterProvider.get();
-      if (activePart == null) {
-        workspaceAgent.openPart(projectExplorerPresenter, NAVIGATION);
-      }
       workspaceAgent.setActivePart(projectExplorerPresenter);
     }
   }
