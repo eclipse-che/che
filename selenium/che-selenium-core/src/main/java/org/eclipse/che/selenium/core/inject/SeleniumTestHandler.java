@@ -127,6 +127,7 @@ public abstract class SeleniumTestHandler
     getRuntime().addShutdownHook(new Thread(this::shutdown));
 
     revokeGithubOauthToken();
+    checkWebDriverSessionCreation();
   }
 
   private void revokeGithubOauthToken() {
@@ -170,7 +171,6 @@ public abstract class SeleniumTestHandler
 
   @Override
   public void onStart(ISuite suite) {
-    runningTests.clear();
     suite.setParentInjector(injector);
   }
 

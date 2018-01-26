@@ -42,7 +42,6 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.MemoryMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 
 /**
  * @author Musienko Maxim
@@ -217,13 +216,7 @@ public class TestWorkspaceServiceClient {
   public void start(String workspaceId, String workspaceName, TestUser workspaceOwner)
       throws Exception {
     sendStartRequest(workspaceId, workspaceName);
-
-    try {
-      waitStatus(workspaceName, workspaceOwner.getName(), RUNNING);
-    } catch (IllegalStateException ex) {
-      // Remove try-catch block after issue has been resolved
-      Assert.fail("Known issue https://github.com/eclipse/che/issues/8031", ex);
-    }
+    waitStatus(workspaceName, workspaceOwner.getName(), RUNNING);
   }
 
   /** Gets workspace by its id. */

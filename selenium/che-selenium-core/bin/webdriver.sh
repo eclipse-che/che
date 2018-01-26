@@ -876,6 +876,9 @@ prepareTestUsersForMultiuserChe() {
     export CHE_ADMIN_PASSWORD=${CHE_ADMIN_PASSWORD:-admin}
     export CHE_ADMIN_OFFLINE__TOKEN=${CHE_ADMIN_OFFLINE__TOKEN}
 
+    export CHE_TESTUSER_OFFLINE__TOKEN=${CHE_TESTUSER_OFFLINE__TOKEN}
+    export CHE_SECOND_TESTUSER_OFFLINE__TOKEN=${CHE_SECOND_TESTUSER_OFFLINE__TOKEN}
+
     if [[ -n ${CHE_TESTUSER_EMAIL+x} ]] && [[ -n ${CHE_TESTUSER_PASSWORD+x} ]]; then
         return
     fi
@@ -898,8 +901,6 @@ prepareTestUsersForMultiuserChe() {
            CHE_TESTUSER_PASSWORD=${CHE_ADMIN_PASSWORD}
         fi
 
-        export CHE_TESTUSER_OFFLINE__TOKEN=${CHE_TESTUSER_OFFLINE__TOKEN}
-
         # create second test user
         time=$(date +%s)
         export CHE_SECOND_TESTUSER_NAME=${CHE_SECOND_TESTUSER_NAME:-user${time}}
@@ -916,7 +917,6 @@ prepareTestUsersForMultiuserChe() {
            CHE_SECOND_TESTUSER_PASSWORD=${CHE_ADMIN_PASSWORD}
         fi
 
-        export CHE_SECOND_TESTUSER_OFFLINE__TOKEN=${CHE_SECOND_TESTUSER_OFFLINE__TOKEN}
     fi
 }
 
