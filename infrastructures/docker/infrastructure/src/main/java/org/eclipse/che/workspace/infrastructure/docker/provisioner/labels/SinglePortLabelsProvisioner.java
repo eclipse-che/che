@@ -48,12 +48,10 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
       throws InfrastructureException {
     for (Map.Entry<String, InternalMachineConfig> machineEntry :
         internalEnv.getMachines().entrySet()) {
-      String machineName = machineEntry.getKey();
-      DockerContainerConfig dockerConfig = internalEnv.getContainers().get(machineName);
+      final String machineName = machineEntry.getKey();
       Map<String, String> containerLabels = new HashMap<>();
       for (Map.Entry<String, ServerConfig> serverEntry :
           machineEntry.getValue().getServers().entrySet()) {
-
         final String serverName = serverEntry.getKey().replace('/', '-');
         final String host =
             "Host:" + hostnameBuilder.build(serverName, machineName, identity.getWorkspaceId());
@@ -66,6 +64,7 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
         // Needed to activate per-service rules
         containerLabels.put("traefik.frontend.rule", machineName);
       }
+      DockerContainerConfig dockerConfig = internalEnv.getContainers().get(machineName);
       dockerConfig.getLabels().putAll(containerLabels);
     }
   }
