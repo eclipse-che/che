@@ -24,8 +24,8 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
- * {@link URLRewriter} used in case when single port mode is on.
- * Rewrites host in original URL as provided by {@link SinglePortHostnameBuilder}
+ * {@link URLRewriter} used in case when single port mode is on. Rewrites host in original URL as
+ * provided by {@link SinglePortHostnameBuilder}
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
