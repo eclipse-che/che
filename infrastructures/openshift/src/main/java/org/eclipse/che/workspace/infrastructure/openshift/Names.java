@@ -28,8 +28,8 @@ public class Names {
 
   static final char WORKSPACE_ID_PREFIX_SEPARATOR = '.';
 
-  static final String ROUTE_PREFIX = "route";
-  static final int ROUTE_PREFIX_SIZE = 8;
+  public static final String ROUTE_NAME_PREFIX = "route";
+  static final int GENERATED_PART_SIZE = 8;
 
   /**
    * Returns machine name for the specified container in the specified pod.
@@ -67,8 +67,8 @@ public class Names {
     return workspaceId + WORKSPACE_ID_PREFIX_SEPARATOR + originalPodName;
   }
 
-  /** Returns route name that will be unique whole a namespace. */
-  public static String uniqueRouteName() {
-    return NameGenerator.generate(ROUTE_PREFIX, ROUTE_PREFIX_SIZE);
+  /** Returns randomly generated name with given prefix. */
+  public static String generateName(String prefix) {
+    return NameGenerator.generate(prefix, GENERATED_PART_SIZE);
   }
 }

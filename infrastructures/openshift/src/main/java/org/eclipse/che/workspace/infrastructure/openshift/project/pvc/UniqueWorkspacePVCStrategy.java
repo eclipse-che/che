@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project.pvc;
 
+import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_VOLUME_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.openshift.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.newPVC;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.newVolume;
@@ -17,9 +18,12 @@ import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShi
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.putLabel;
 
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.inject.Inject;
@@ -27,21 +31,21 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.openshift.Names;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftPersistentVolumeClaims;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 
 /**
  * Provides a unique PVC for each workspace.
  *
- * <p>Name for PVCs are evaluated as: '{configuredPVCName}' + '-' +'{workspaceId}' to avoid naming
- * collisions inside of one OpenShift project. Note that for this strategy count of simultaneously
- * running workspaces and workspaces with backed up data is always the same and equal to the count
- * of available PVCs in OpenShift project. Cleanup of backed up data is performed by removing of PVC
- * related to the workspace.
+ * <p>Name for PVCs are evaluated as: '{configured_prefix}' + '-' +'{generated_8_chars}' to avoid
+ * naming collisions inside of one OpenShift project. Note that for this strategy count of
+ * simultaneously running workspaces and workspaces with backed up data is always the same and equal
+ * to the count of available PVCs in OpenShift project. Cleanup of backed up data is performed by
+ * removing of PVC related to the workspace.
  *
  * @author Anton Korneta
  * @author Alexander Garagatyi
@@ -77,12 +81,20 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     final Map<String, PersistentVolumeClaim> claims = osEnv.getPersistentVolumeClaims();
+    final String workspaceId = identity.getWorkspaceId();
+    // fetches all existing PVCs related to given workspace and groups them by volume name
+    final Map<String, PersistentVolumeClaim> volumeName2PVC =
+        groupByVolumeName(
+            factory
+                .create(workspaceId)
+                .persistentVolumeClaims()
+                .getByLabel(CHE_WORKSPACE_ID_LABEL, workspaceId));
     for (Pod pod : osEnv.getPods().values()) {
       final PodSpec podSpec = pod.getSpec();
       for (Container container : podSpec.getContainers()) {
         final String machineName = Names.machineName(pod, container);
-        InternalMachineConfig machineConfig = osEnv.getMachines().get(machineName);
-        addMachineVolumes(identity.getWorkspaceId(), claims, podSpec, container, machineConfig);
+        Map<String, Volume> volumes = osEnv.getMachines().get(machineName).getVolumes();
+        addMachineVolumes(workspaceId, claims, volumeName2PVC, podSpec, container, volumes);
       }
     }
   }
@@ -91,35 +103,55 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   public void prepare(OpenShiftEnvironment osEnv, String workspaceId)
       throws InfrastructureException {
     if (!osEnv.getPersistentVolumeClaims().isEmpty()) {
-      factory
-          .create(workspaceId)
-          .persistentVolumeClaims()
-          .createIfNotExist(osEnv.getPersistentVolumeClaims().values());
+      final OpenShiftPersistentVolumeClaims osClaims =
+          factory.create(workspaceId).persistentVolumeClaims();
+      for (PersistentVolumeClaim pvc : osEnv.getPersistentVolumeClaims().values()) {
+        osClaims.create(pvc);
+      }
     }
   }
 
   private void addMachineVolumes(
       String workspaceId,
-      Map<String, PersistentVolumeClaim> claims,
+      Map<String, PersistentVolumeClaim> provisionedClaims,
+      Map<String, PersistentVolumeClaim> existingVolumeName2PVC,
       PodSpec podSpec,
       Container container,
-      InternalMachineConfig machineConfig) {
-    if (machineConfig.getVolumes().isEmpty()) {
+      Map<String, Volume> volumes)
+      throws InfrastructureException {
+    if (volumes.isEmpty()) {
       return;
     }
-    for (Entry<String, Volume> volumeEntry : machineConfig.getVolumes().entrySet()) {
-      String volumeName = volumeEntry.getKey();
-      String volumePath = volumeEntry.getValue().getPath();
-      String subPath = workspaceId + '/' + volumeName;
-      String pvcUniqueName = pvcNamePrefix + '-' + workspaceId + '-' + volumeName;
+    final Map<String, PersistentVolumeClaim> provisionedVolumeName2PVC =
+        groupByVolumeName(provisionedClaims.values());
 
-      PersistentVolumeClaim newPVC = newPVC(pvcUniqueName, pvcAccessMode, pvcQuantity);
-      putLabel(newPVC, CHE_WORKSPACE_ID_LABEL, workspaceId);
-      claims.put(pvcUniqueName, newPVC);
+    for (Entry<String, Volume> volumeEntry : volumes.entrySet()) {
+      final String volumeName = volumeEntry.getKey();
+      final String volumePath = volumeEntry.getValue().getPath();
+      final String subPath = workspaceId + '/' + volumeName;
+      final PersistentVolumeClaim pvc;
+      // checks whether PVC for given workspace and volume exists on remote
+      if (existingVolumeName2PVC.containsKey(volumeName)) {
+        pvc = existingVolumeName2PVC.get(volumeName);
+      }
+      // checks whether PVC for given volume provisioned previously
+      else if (provisionedVolumeName2PVC.containsKey(volumeName)) {
+        pvc = provisionedVolumeName2PVC.get(volumeName);
+      }
+      // when no existing and provisioned PVC found then create new one
+      else {
+        final String uniqueName = Names.generateName(pvcNamePrefix + '-');
+        pvc = newPVC(uniqueName, pvcAccessMode, pvcQuantity);
+        putLabel(pvc, CHE_WORKSPACE_ID_LABEL, workspaceId);
+        putLabel(pvc, CHE_VOLUME_NAME_LABEL, volumeName);
+        provisionedClaims.put(uniqueName, pvc);
+      }
 
-      container.getVolumeMounts().add(newVolumeMount(pvcUniqueName, volumePath, subPath));
-
-      addVolumeIfAbsent(podSpec, pvcUniqueName);
+      // binds pvc to pod and container
+      container
+          .getVolumeMounts()
+          .add(newVolumeMount(pvc.getMetadata().getName(), volumePath, subPath));
+      addVolumeIfAbsent(podSpec, pvc.getMetadata().getName());
     }
   }
 
@@ -137,5 +169,21 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
     if (podSpec.getVolumes().stream().noneMatch(volume -> volume.getName().equals(pvcUniqueName))) {
       podSpec.getVolumes().add(newVolume(pvcUniqueName, pvcUniqueName));
     }
+  }
+
+  /** Groups list of given PVCs by volume name */
+  private Map<String, PersistentVolumeClaim> groupByVolumeName(
+      Collection<PersistentVolumeClaim> pvcs) throws InfrastructureException {
+    final Map<String, PersistentVolumeClaim> grouped = new HashMap<>();
+    for (PersistentVolumeClaim pvc : pvcs) {
+      final ObjectMeta metadata = pvc.getMetadata();
+      final String volumeName;
+      if (metadata != null
+          && metadata.getLabels() != null
+          && (volumeName = metadata.getLabels().get(CHE_VOLUME_NAME_LABEL)) != null) {
+        grouped.put(volumeName, pvc);
+      }
+    }
+    return grouped;
   }
 }
