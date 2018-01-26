@@ -105,7 +105,7 @@ public class NoImplementationWidget extends PopupWidget<Type> {
     String path = type.getRootPath();
     SpanElement texElement = Elements.createSpanElement();
     SpanElement highlightElement =
-        Elements.createSpanElement(javaResources.css().disableTextColor());
+        Elements.createSpanElement(javaResources.css().presentableTextContainer());
     highlightElement.setInnerText(" - (" + path + ')');
     texElement.setInnerText(type.getElementName());
     texElement.appendChild(highlightElement);

@@ -18,10 +18,11 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestKeycloakSettingsServiceClient;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
-import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
@@ -43,19 +44,21 @@ public class CheMultiuserAdminDashboard extends Dashboard {
   public CheMultiuserAdminDashboard(
       SeleniumWebDriver seleniumWebDriver,
       TestUser defaultUser,
-      TestIdeUrlProvider testIdeUrlProvider,
       TestDashboardUrlProvider testDashboardUrlProvider,
       Entrance entrance,
       LoginPage loginPage,
-      TestWebElementRenderChecker testWebElementRenderChecker) {
+      TestWebElementRenderChecker testWebElementRenderChecker,
+      TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient,
+      @Named("che.multiuser") boolean isMultiuser) {
     super(
         seleniumWebDriver,
         defaultUser,
-        testIdeUrlProvider,
         testDashboardUrlProvider,
         entrance,
         loginPage,
-        testWebElementRenderChecker);
+        testWebElementRenderChecker,
+        testKeycloakSettingsServiceClient,
+        isMultiuser);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 

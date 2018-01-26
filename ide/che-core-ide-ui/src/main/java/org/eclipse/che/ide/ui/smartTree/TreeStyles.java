@@ -20,7 +20,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  * @author Vlad Zhukovskiy
  */
 public interface TreeStyles extends ClientBundle {
-  interface CSS extends CssResource {
+  interface TreeStylesCSS extends CssResource {
     String noFocusOutline();
 
     String rootContainer();
@@ -49,11 +49,15 @@ public interface TreeStyles extends ClientBundle {
 
     String tree();
 
+    String contentTree();
+
     String loading();
+
+    String searchMatch();
   }
 
   @Source("TreeStyles.css")
-  CSS styles();
+  TreeStylesCSS treeStylesCss();
 
   @Source("iconCollapsed.svg")
   SVGResource iconCollapsed();

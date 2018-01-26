@@ -49,7 +49,7 @@ public class Workspaces {
 
   private interface Locators {
     String TOOLBAR = "Workspaces";
-    String DOCUMENTATION_LINK = "//a[@ng-href='/docs/devops/intro/index.html']";
+    String DOCUMENTATION_LINK = "//div[@che-link-title='Learn more.']/a";
     String ADD_WORKSPACE_BTN = "add-item-button";
     String DELETE_WORKSPACE_BTN = "delete-item-button";
     String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";

@@ -86,8 +86,6 @@ public class StackImpl implements Stack {
   @JoinColumn(name = "workspaceconfig_id")
   private WorkspaceConfigImpl workspaceConfig;
 
-  @Embedded private StackSourceImpl source;
-
   @ElementCollection
   @CollectionTable(name = "stack_components", joinColumns = @JoinColumn(name = "stack_id"))
   private List<StackComponentImpl> components;
@@ -105,7 +103,6 @@ public class StackImpl implements Stack {
         stack.getCreator(),
         stack.getTags(),
         stack.getWorkspaceConfig(),
-        stack.getSource(),
         stack.getComponents(),
         stack.getStackIcon());
   }
@@ -119,7 +116,6 @@ public class StackImpl implements Stack {
         stack.getCreator(),
         stack.getTags(),
         stack.getWorkspaceConfig(),
-        stack.getSource(),
         stack.getComponents(),
         null);
   }
@@ -132,7 +128,6 @@ public class StackImpl implements Stack {
       String creator,
       List<String> tags,
       WorkspaceConfig workspaceConfig,
-      StackSource source,
       List<? extends StackComponent> components,
       StackIcon stackIcon) {
     this.id = id;
@@ -148,9 +143,6 @@ public class StackImpl implements Stack {
     }
     if (workspaceConfig != null) {
       this.workspaceConfig = new WorkspaceConfigImpl(workspaceConfig);
-    }
-    if (source != null) {
-      this.source = new StackSourceImpl(source);
     }
     if (components != null) {
       this.components = components.stream().map(StackComponentImpl::new).collect(toList());
@@ -224,15 +216,6 @@ public class StackImpl implements Stack {
   }
 
   @Override
-  public StackSourceImpl getSource() {
-    return source;
-  }
-
-  public void setSource(StackSourceImpl source) {
-    this.source = source;
-  }
-
-  @Override
   public List<StackComponentImpl> getComponents() {
     if (components == null) {
       return new ArrayList<>();
@@ -268,7 +251,6 @@ public class StackImpl implements Stack {
         && Objects.equals(creator, that.creator)
         && getTags().equals(that.getTags())
         && Objects.equals(workspaceConfig, that.workspaceConfig)
-        && Objects.equals(source, that.source)
         && getComponents().equals(that.getComponents())
         && Objects.equals(stackIcon, that.stackIcon);
   }
@@ -283,7 +265,6 @@ public class StackImpl implements Stack {
     hash = 31 * hash + Objects.hashCode(creator);
     hash = 31 * hash + getTags().hashCode();
     hash = 31 * hash + Objects.hashCode(workspaceConfig);
-    hash = 31 * hash + Objects.hashCode(source);
     hash = 31 * hash + getComponents().hashCode();
     hash = 31 * hash + Objects.hashCode(stackIcon);
     return hash;
@@ -311,8 +292,6 @@ public class StackImpl implements Stack {
         + tags
         + ", workspaceConfig="
         + workspaceConfig
-        + ", source="
-        + source
         + ", components="
         + components
         + ", stackIcon="
@@ -390,16 +369,7 @@ public class StackImpl implements Stack {
 
     public StackImpl build() {
       return new StackImpl(
-          id,
-          name,
-          description,
-          scope,
-          creator,
-          tags,
-          workspaceConfig,
-          source,
-          components,
-          stackIcon);
+          id, name, description, scope, creator, tags, workspaceConfig, components, stackIcon);
     }
   }
 }

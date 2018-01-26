@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.pageobject.dashboard.account;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount.Locators.EDIT_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount.Locators.EMAIL_FIELD;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount.Locators.FIRST_NAME_FIELD;
@@ -20,31 +19,25 @@ import static org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAcc
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.user.CheSecondTestUser;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
+/** @author Igor Ohrimenko */
 @Singleton
 public class DashboardAccount {
 
-  private final SeleniumWebDriver seleniumWebDriver;
   private final CheSecondTestUser cheSecondTestUser;
-  private final WebDriverWait loadPageWait;
-  private final SeleniumWebDriverUtils seleniumWebDriverUtils;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
   public DashboardAccount(
-      SeleniumWebDriver seleniumWebDriver,
-      CheSecondTestUser cheSecondTestUser,
-      SeleniumWebDriverUtils seleniumWebDriverUtils) {
-    this.seleniumWebDriver = seleniumWebDriver;
+      CheSecondTestUser cheSecondTestUser, SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.cheSecondTestUser = cheSecondTestUser;
-    this.seleniumWebDriverUtils = seleniumWebDriverUtils;
-    this.loadPageWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
   }
 
-  protected interface Locators {
+  interface Locators {
     String EMAIL_FIELD = "//input[@name='email']";
     String LOGIN_FIELD = "//input[@name='login_name']";
     String FIRST_NAME_FIELD = "//input[@name='first_name']";
@@ -76,31 +69,31 @@ public class DashboardAccount {
   }
 
   public String getEmailFieldValue() {
-    return seleniumWebDriverUtils.getFieldValue(By.xpath(EMAIL_FIELD));
+    return seleniumWebDriverHelper.getFieldValue(By.xpath(EMAIL_FIELD));
   }
 
   public String getLoginFieldValue() {
-    return seleniumWebDriverUtils.getFieldValue(By.xpath(LOGIN_FIELD));
+    return seleniumWebDriverHelper.getFieldValue(By.xpath(LOGIN_FIELD));
   }
 
   public String getFirstNameFieldValue() {
-    return seleniumWebDriverUtils.getFieldValue(By.xpath(FIRST_NAME_FIELD));
+    return seleniumWebDriverHelper.getFieldValue(By.xpath(FIRST_NAME_FIELD));
   }
 
   public String getLastNameFieldValue() {
-    return seleniumWebDriverUtils.getFieldValue(By.xpath(LAST_NAME_FIELD));
+    return seleniumWebDriverHelper.getFieldValue(By.xpath(LAST_NAME_FIELD));
   }
 
   public String getTitle() {
-    return seleniumWebDriverUtils.waitAndGetElement(By.id(Locators.TITLE_ID)).getText();
+    return seleniumWebDriverHelper.waitAndGetElement(By.id(Locators.TITLE_ID)).getText();
   }
 
   public void clickOnEditButton() {
-    seleniumWebDriverUtils.waitAndClickOnElement(By.xpath(EDIT_BUTTON));
+    seleniumWebDriverHelper.waitAndClickOnElement(By.xpath(EDIT_BUTTON));
   }
 
   public void waitPageIsLoaded() {
     asList(EMAIL_FIELD, LOGIN_FIELD, FIRST_NAME_FIELD, LAST_NAME_FIELD, EDIT_BUTTON)
-        .forEach(locator -> seleniumWebDriverUtils.waitElementIsVisible(By.xpath(locator)));
+        .forEach(locator -> seleniumWebDriverHelper.waitElementIsVisible(By.xpath(locator)));
   }
 }

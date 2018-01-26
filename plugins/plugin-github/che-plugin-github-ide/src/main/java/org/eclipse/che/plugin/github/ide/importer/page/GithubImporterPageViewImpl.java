@@ -108,7 +108,7 @@ public class GithubImporterPageViewImpl extends Composite implements GithubImpor
     projectDescription.getElement().setAttribute("maxlength", "256");
     closeGithubPanel();
 
-    loadRepo.addStyleName(ideResources.Css().buttonLoader());
+    loadRepo.addStyleName(ideResources.buttonLoaderCss().buttonLoader());
     loadRepo.sinkEvents(Event.ONCLICK);
     loadRepo.addHandler(
         new ClickHandler() {

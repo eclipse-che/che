@@ -36,8 +36,8 @@ public interface JavaCss extends CssResource {
   @ClassName("error-border")
   String errorBorder();
 
-  @ClassName("disable-text-color")
-  String disableTextColor();
+  @ClassName("presentable-text-container")
+  String presentableTextContainer();
 
   @ClassName("search-match")
   String searchMatch();

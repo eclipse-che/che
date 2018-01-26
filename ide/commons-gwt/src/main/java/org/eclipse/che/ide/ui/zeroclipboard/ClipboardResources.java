@@ -15,12 +15,12 @@ import com.google.gwt.resources.client.CssResource;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /** @author Oleksii Orel */
-public interface ZeroClipboardResources extends ClientBundle {
+public interface ClipboardResources extends ClientBundle {
   interface Css extends CssResource {
     String clipboardButton();
   }
 
-  @Source({"ZeroClipboard.css", "org/eclipse/che/ide/api/ui/style.css"})
+  @Source({"Clipboard.css", "org/eclipse/che/ide/api/ui/style.css"})
   Css clipboardCss();
 
   @Source("clipboard.svg")

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.multiuser.organization.shared.dto;
 
+import java.util.List;
 import org.eclipse.che.api.core.notification.EventOrigin;
 import org.eclipse.che.dto.shared.DTO;
 import org.eclipse.che.multiuser.organization.shared.event.EventType;
@@ -35,4 +36,10 @@ public interface OrganizationRemovedEventDto extends OrganizationEventDto {
   void setInitiator(String initiator);
 
   OrganizationRemovedEventDto withInitiator(String initiator);
+
+  List<String> getMembers();
+
+  void setMembers(List<String> members);
+
+  OrganizationRemovedEventDto withMembers(List<String> members);
 }

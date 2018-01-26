@@ -23,10 +23,10 @@ import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.mail.EmailBean;
 import org.eclipse.che.mail.MailSender;
 import org.eclipse.che.multiuser.organization.api.OrganizationManager;
-import org.eclipse.che.multiuser.organization.api.event.MemberAddedEvent;
-import org.eclipse.che.multiuser.organization.api.event.MemberRemovedEvent;
-import org.eclipse.che.multiuser.organization.api.event.OrganizationRemovedEvent;
-import org.eclipse.che.multiuser.organization.api.event.OrganizationRenamedEvent;
+import org.eclipse.che.multiuser.organization.shared.dto.MemberAddedEventDto;
+import org.eclipse.che.multiuser.organization.shared.dto.MemberRemovedEventDto;
+import org.eclipse.che.multiuser.organization.shared.dto.OrganizationRemovedEventDto;
+import org.eclipse.che.multiuser.organization.shared.dto.OrganizationRenamedEventDto;
 import org.eclipse.che.multiuser.organization.shared.event.OrganizationEvent;
 import org.eclipse.che.multiuser.organization.shared.model.Member;
 import org.slf4j.Logger;
@@ -83,16 +83,16 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
         }
         switch (event.getType()) {
           case MEMBER_ADDED:
-            send((MemberAddedEvent) event);
+            send((MemberAddedEventDto) event);
             break;
           case MEMBER_REMOVED:
-            send((MemberRemovedEvent) event);
+            send((MemberRemovedEventDto) event);
             break;
           case ORGANIZATION_REMOVED:
-            send((OrganizationRemovedEvent) event);
+            send((OrganizationRemovedEventDto) event);
             break;
           case ORGANIZATION_RENAMED:
-            send((OrganizationRenamedEvent) event);
+            send((OrganizationRenamedEventDto) event);
         }
       }
     } catch (Exception ex) {
@@ -100,7 +100,7 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
     }
   }
 
-  private void send(MemberAddedEvent event) throws ServerException {
+  private void send(MemberAddedEventDto event) throws ServerException {
     final String orgName = event.getOrganization().getName();
     final String emailTo = event.getMember().getEmail();
     final String initiator = event.getInitiator();
@@ -111,7 +111,7 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
     mailSender.sendAsync(memberAddedEmail.withTo(emailTo));
   }
 
-  private void send(MemberRemovedEvent event) throws ServerException {
+  private void send(MemberRemovedEventDto event) throws ServerException {
     final String organizationName = event.getOrganization().getName();
     final String initiator = event.getInitiator();
     final String emailTo = event.getMember().getEmail();
@@ -120,19 +120,19 @@ public class OrganizationNotificationEmailSender implements EventSubscriber<Orga
     mailSender.sendAsync(memberRemovedEmail.withTo(emailTo));
   }
 
-  private void send(OrganizationRemovedEvent event) throws ServerException, NotFoundException {
+  private void send(OrganizationRemovedEventDto event) throws ServerException, NotFoundException {
     String organizationName = event.getOrganization().getName();
     EmailBean orgRemovedEmail = emails.organizationRemoved(organizationName);
-    for (Member member : event.getMembers()) {
+    for (String member : event.getMembers()) {
       try {
-        final String emailTo = userManager.getById(member.getUserId()).getEmail();
+        final String emailTo = userManager.getById(member).getEmail();
         mailSender.sendAsync(new EmailBean(orgRemovedEmail).withTo(emailTo));
       } catch (Exception ignore) {
       }
     }
   }
 
-  private void send(OrganizationRenamedEvent event) throws ServerException, NotFoundException {
+  private void send(OrganizationRenamedEventDto event) throws ServerException, NotFoundException {
     EmailBean orgRenamedEmail = emails.organizationRenamed(event.getOldName(), event.getNewName());
     for (Member member :
         iterate(

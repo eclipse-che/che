@@ -117,7 +117,7 @@ public class ProjectExplorer {
 
   protected interface Locators {
     String PROJECT_EXPLORER_TREE_ITEMS = "gwt-debug-projectTree";
-    String EXPLORER_RIGHT_TAB_ID = "gwt-debug-partButton-Explorer";
+    String EXPLORER_RIGHT_TAB_ID = "gwt-debug-partButton-Projects";
     String CONTEXT_MENU_ID = "gwt-debug-contextMenu/newGroup";
     String GO_BACK_BUTTON = "gwt-debug-goBackButton";
     String COLLAPSE_ALL_BUTTON = "gwt-debug-collapseAllButton";

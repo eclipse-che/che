@@ -9,6 +9,7 @@
  *   Red Hat, Inc.- initial API and implementation
  */
 import {MessageBusSubscriber} from './messagebus-subscriber';
+import {MessageBuilder} from './messagebuilder';
 import {Log} from "../log/log";
 import {Websocket} from "./websocket";
 
@@ -107,7 +108,9 @@ export class JsonRpcBus {
         if (existingSubscriberIndex === -1) {
             // register callback
             this.subscribers.push(callback);
-        }
+            var subscribeOrder = new MessageBuilder().subscribe(channel).build();
+            this.send(subscribeOrder);
+          }
         return Promise.resolve("true");
     }
 

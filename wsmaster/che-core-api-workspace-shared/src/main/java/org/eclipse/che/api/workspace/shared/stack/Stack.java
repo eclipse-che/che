@@ -61,15 +61,6 @@ public interface Stack {
   WorkspaceConfig getWorkspaceConfig();
 
   /**
-   * Return the source for the stack. (e.g. "type:recipe, origin: recipeLink", "type:script,
-   * origin:recipeScript")
-   *
-   * @see StackSource
-   */
-  @Nullable
-  StackSource getSource();
-
-  /**
    * Return the list of the components that stack consist of.
    *
    * @see StackComponent

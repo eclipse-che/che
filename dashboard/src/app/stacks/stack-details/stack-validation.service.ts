@@ -26,7 +26,7 @@ export class StackValidationService {
    */
   getStackValidation(stack: che.IStack | {}): che.IValidation {
     let mandatoryKeys: Array<string> = ['name', 'workspaceConfig'];
-    let additionalKeys: Array<string> = ['description', 'projects', 'tags', 'creator', 'scope', 'components', 'source'];
+    let additionalKeys: Array<string> = ['description', 'projects', 'tags', 'creator', 'scope', 'components'];
     let validKeys: Array<string> = mandatoryKeys.concat(additionalKeys);
     let errors: Array<string> = [];
     let isValid: boolean = true;

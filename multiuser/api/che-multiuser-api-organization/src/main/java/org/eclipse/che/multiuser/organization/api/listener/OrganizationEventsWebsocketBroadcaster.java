@@ -13,18 +13,14 @@ package org.eclipse.che.multiuser.organization.api.listener;
 import static org.eclipse.che.multiuser.organization.shared.event.EventType.MEMBER_ADDED;
 import static org.eclipse.che.multiuser.organization.shared.event.EventType.MEMBER_REMOVED;
 
+import java.util.Map;
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.multiuser.organization.api.DtoConverter;
-import org.eclipse.che.multiuser.organization.shared.event.MemberEvent;
+import org.eclipse.che.api.core.notification.RemoteSubscriptionManager;
+import org.eclipse.che.multiuser.organization.shared.dto.MemberAddedEventDto;
+import org.eclipse.che.multiuser.organization.shared.dto.MemberRemovedEventDto;
 import org.eclipse.che.multiuser.organization.shared.event.OrganizationEvent;
-import org.everrest.websockets.WSConnectionContext;
-import org.everrest.websockets.message.ChannelBroadcastMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Broadcasts organization events through websocket connection.
@@ -32,33 +28,35 @@ import org.slf4j.LoggerFactory;
  * @author Anton Korneta
  */
 @Singleton
-public class OrganizationEventsWebsocketBroadcaster implements EventSubscriber<OrganizationEvent> {
+public class OrganizationEventsWebsocketBroadcaster {
 
-  public static final String ORGANIZATION_CHANNEL_NAME = "organization:%s";
-  public static final String ORGANIZATION_MEMBER_CHANNEL_NAME = "organization:member:%s";
+  private final RemoteSubscriptionManager remoteSubscriptionManager;
 
-  private static final Logger LOG =
-      LoggerFactory.getLogger(OrganizationEventsWebsocketBroadcaster.class);
+  private static final String ORGANIZATION_MEMBERSHIP_METHOD_NAME =
+      "organization/membershipChanged";
+  private static final String ORGANIZATION_CHANGED_METHOD_NAME = "organization/statusChanged";
 
   @Inject
-  private void subscribe(EventService eventService) {
-    eventService.subscribe(this);
+  public OrganizationEventsWebsocketBroadcaster(
+      RemoteSubscriptionManager remoteSubscriptionManager) {
+    this.remoteSubscriptionManager = remoteSubscriptionManager;
   }
 
-  @Override
-  public void onEvent(OrganizationEvent event) {
-    try {
-      final ChannelBroadcastMessage msg = new ChannelBroadcastMessage();
-      if (MEMBER_ADDED == event.getType() || MEMBER_REMOVED == event.getType()) {
-        final String userId = ((MemberEvent) event).getMember().getId();
-        msg.setChannel(String.format(ORGANIZATION_MEMBER_CHANNEL_NAME, userId));
-      } else {
-        msg.setChannel(String.format(ORGANIZATION_CHANNEL_NAME, event.getOrganization().getId()));
-      }
-      msg.setBody(DtoFactory.getInstance().toJson(DtoConverter.asDto(event)));
-      WSConnectionContext.sendMessage(msg);
-    } catch (Exception x) {
-      LOG.error(x.getMessage(), x);
+  @PostConstruct
+  private void subscribe() {
+    remoteSubscriptionManager.register(
+        ORGANIZATION_MEMBERSHIP_METHOD_NAME, OrganizationEvent.class, this::predicate);
+    remoteSubscriptionManager.register(
+        ORGANIZATION_CHANGED_METHOD_NAME, OrganizationEvent.class, this::predicate);
+  }
+
+  private boolean predicate(OrganizationEvent event, Map<String, String> scope) {
+    if (MEMBER_ADDED == event.getType()) {
+      return ((MemberAddedEventDto) event).getMember().getId().equals(scope.get("userId"));
+    } else if (MEMBER_REMOVED == event.getType()) {
+      return ((MemberRemovedEventDto) event).getMember().getId().equals(scope.get("userId"));
+    } else {
+      return event.getOrganization().getId().equals(scope.get("organizationId"));
     }
   }
 }

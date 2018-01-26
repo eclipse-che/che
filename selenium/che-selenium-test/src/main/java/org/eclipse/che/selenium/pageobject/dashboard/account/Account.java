@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard.account;
 
+/** @author Igor Ohrimenko */
 public class Account {
   private String login;
   private String email;

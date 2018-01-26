@@ -79,7 +79,7 @@ public class RenameNotPrivateFieldTest {
     editor.setCursorToLine(21);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("g");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -98,7 +98,7 @@ public class RenameNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("g");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -114,7 +114,7 @@ public class RenameNotPrivateFieldTest {
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(13, 9);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("g");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -132,7 +132,7 @@ public class RenameNotPrivateFieldTest {
     editor.setCursorToLine(19);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("g");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -153,7 +153,7 @@ public class RenameNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("g");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -174,7 +174,7 @@ public class RenameNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("g");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -195,7 +195,7 @@ public class RenameNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("g");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -217,8 +217,7 @@ public class RenameNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     refactor.waitUpdateReferencesIsSelected();
     refactor.typeAndWaitNewName("g");
@@ -242,8 +241,7 @@ public class RenameNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     refactor.waitUpdateReferencesIsSelected();
     refactor.typeAndWaitNewName("g");
@@ -267,7 +265,7 @@ public class RenameNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("g");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -285,7 +283,7 @@ public class RenameNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("g");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -301,7 +299,7 @@ public class RenameNotPrivateFieldTest {
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(14, 9);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("ZORRO");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -318,7 +316,7 @@ public class RenameNotPrivateFieldTest {
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(16, 14);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("ZORRO");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -334,7 +332,7 @@ public class RenameNotPrivateFieldTest {
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(13, 17);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("test1");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -352,7 +350,7 @@ public class RenameNotPrivateFieldTest {
     editor.setCursorToLine(15);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("g");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -373,7 +371,7 @@ public class RenameNotPrivateFieldTest {
     editor.setCursorToLine(15);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("other");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -394,7 +392,7 @@ public class RenameNotPrivateFieldTest {
     editor.setCursorToLine(14);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("g");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -415,7 +413,7 @@ public class RenameNotPrivateFieldTest {
     editor.setCursorToLine(14);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("g");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -436,7 +434,7 @@ public class RenameNotPrivateFieldTest {
     editor.setCursorToLine(16);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("g");
     loader.waitOnClosed();
     editor.typeTextIntoEditor(Keys.ENTER.toString());

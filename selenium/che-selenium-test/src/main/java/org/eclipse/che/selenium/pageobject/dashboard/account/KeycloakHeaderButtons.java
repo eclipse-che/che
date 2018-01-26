@@ -10,67 +10,88 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard.account;
 
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakHeaderButtons.ButtonsLocators.ACCOUNT_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakHeaderButtons.ButtonsLocators.APPLICATIONS_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakHeaderButtons.ButtonsLocators.AUTHENTICATOR_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakHeaderButtons.ButtonsLocators.PASSWORD_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakHeaderButtons.ButtonsLocators.SESSIONS_BUTTON;
+import static org.openqa.selenium.By.xpath;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Arrays;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 
+/** @author Igor Ohrimenko */
 @Singleton
 public class KeycloakHeaderButtons {
-  private SeleniumWebDriverUtils seleniumWebDriverUtils;
+  private enum Button {
+    ACCOUNT("Account"),
+    PASSWORD("Password"),
+    AUTHENTICATOR("Authenticator"),
+    FEDERATED_IDENTITIES("Federated Identity"),
+    SESSIONS("Sessions"),
+    APPLICATIONS("Applications");
 
-  @Inject
-  public KeycloakHeaderButtons(SeleniumWebDriverUtils seleniumWebDriverUtils) {
-    this.seleniumWebDriverUtils = seleniumWebDriverUtils;
+    private static final String BUTTON_XPATH_TEMPLATE = "//div[@id='tabs-menu']//a[text()='%s']";
+
+    private String text;
+
+    Button(String text) {
+      this.text = text;
+    }
+
+    private By getXpath() {
+      return xpath(String.format(BUTTON_XPATH_TEMPLATE, text));
+    }
   }
 
-  protected interface ButtonsLocators {
-    String ACCOUNT_BUTTON = "//div[@id='tabs-menu']//a[text()='Account']";
-    String PASSWORD_BUTTON = "//div[@id='tabs-menu']//a[text()='Password']";
-    String AUTHENTICATOR_BUTTON = "//div[@id='tabs-menu']//a[text()='Authenticator']";
-    String SESSIONS_BUTTON = "//div[@id='tabs-menu']//a[text()='Sessions']";
-    String APPLICATIONS_BUTTON = "//div[@id='tabs-menu']//a[text()='Applications']";
+  private SeleniumWebDriverHelper seleniumWebDriverHelper;
+
+  @Inject
+  public KeycloakHeaderButtons(SeleniumWebDriverHelper seleniumWebDriverHelper) {
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
   }
 
   /** click on the "Account" button in the header oh the page */
   public void clickOnAccountButton() {
-    seleniumWebDriverUtils.waitAndClickOnElement(By.xpath(ACCOUNT_BUTTON));
+    clickOnButton(Button.ACCOUNT);
   }
 
   /** click on the "Password" button in the header oh the page */
   public void clickOnPasswordButton() {
-    seleniumWebDriverUtils.waitAndClickOnElement(By.xpath(PASSWORD_BUTTON));
+    clickOnButton(Button.PASSWORD);
   }
 
   /** click on the "Authenticator" button in the header oh the page */
   public void clickOnAuthenticatorButton() {
-    seleniumWebDriverUtils.waitAndClickOnElement(By.xpath(AUTHENTICATOR_BUTTON));
+    clickOnButton(Button.AUTHENTICATOR);
+  }
+
+  /** click on the "Federated Identity" button in the header oh the page */
+  public void clickOnFederatedIdentitiesButton() {
+    clickOnButton(Button.FEDERATED_IDENTITIES);
   }
 
   /** click on the "Session" button in the header oh the page */
   public void clickOnSessionsButton() {
-    seleniumWebDriverUtils.waitAndClickOnElement(By.xpath(SESSIONS_BUTTON));
+    clickOnButton(Button.SESSIONS);
   }
 
   /** click on the "Application" button in the header oh the page */
   public void clickOnApplicationsButton() {
-    seleniumWebDriverUtils.waitAndClickOnElement(By.xpath(APPLICATIONS_BUTTON));
+    clickOnButton(Button.APPLICATIONS);
+  }
+
+  private void clickOnButton(Button button) {
+    seleniumWebDriverHelper.waitAndClickOnElement(button.getXpath());
   }
 
   /** wait until all buttons which placed in the header of the page will be visible */
-  public void waitAllHeaderButtonsIsVisible() {
+  public void waitAllHeaderButtonsAreVisible() {
     Arrays.asList(
-            By.xpath(ACCOUNT_BUTTON),
-            By.xpath(PASSWORD_BUTTON),
-            By.xpath(AUTHENTICATOR_BUTTON),
-            By.xpath(SESSIONS_BUTTON),
-            By.xpath(APPLICATIONS_BUTTON))
-        .forEach(locator -> seleniumWebDriverUtils.waitElementIsVisible(locator));
+            Button.ACCOUNT.getXpath(),
+            Button.PASSWORD.getXpath(),
+            Button.AUTHENTICATOR.getXpath(),
+            Button.FEDERATED_IDENTITIES.getXpath(),
+            Button.SESSIONS.getXpath(),
+            Button.APPLICATIONS.getXpath())
+        .forEach(locator -> seleniumWebDriverHelper.waitElementIsVisible(locator));
   }
 }
