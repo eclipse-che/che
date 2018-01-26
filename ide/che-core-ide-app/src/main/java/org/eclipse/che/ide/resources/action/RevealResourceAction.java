@@ -84,7 +84,7 @@ public class RevealResourceAction extends AbstractPerspectiveAction
   @Override
   public void updateInPerspective(@NotNull ActionEvent event) {
     if (!(activePart instanceof ProjectExplorerPresenter)) {
-      event.getPresentation().setEnabledAndVisible(false);
+      event.getPresentation().setVisible(false);
       return;
     }
 
