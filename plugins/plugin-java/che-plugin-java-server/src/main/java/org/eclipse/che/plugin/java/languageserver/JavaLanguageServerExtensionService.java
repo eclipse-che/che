@@ -80,11 +80,9 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
-import org.eclipse.che.api.languageserver.registry.CheLanguageClientFactory;
 import org.eclipse.che.api.languageserver.registry.InitializedLanguageServer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
-import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.jdt.ls.extension.api.Commands;
@@ -111,7 +109,6 @@ import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ExtendedSym
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.ImplementersResponseDto;
 import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositionDto;
 import org.eclipse.lsp4j.ExecuteCommandParams;
-import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.WorkspaceEdit;
@@ -132,7 +129,6 @@ public class JavaLanguageServerExtensionService {
   private static final int TIMEOUT = 10;
 
   private final Gson gson;
-  private CheLanguageClientFactory clientFactory;
   private final LanguageServerRegistry registry;
 
   private static final Logger LOG =
@@ -143,12 +139,10 @@ public class JavaLanguageServerExtensionService {
 
   @Inject
   public JavaLanguageServerExtensionService(
-      CheLanguageClientFactory clientFactory,
       LanguageServerRegistry registry,
       RequestHandlerConfigurator requestHandler,
       ProjectManager projectManager,
       EventService eventService) {
-    this.clientFactory = clientFactory;
     this.registry = registry;
     this.requestHandler = requestHandler;
     this.projectManager = projectManager;
@@ -570,16 +564,7 @@ public class JavaLanguageServerExtensionService {
 
   private void reComputeDiagnostics(String pomPath) {
     String pomUri = prefixURI(pomPath);
-    Type type = new TypeToken<PublishDiagnosticsParams>() {}.getType();
-    PublishDiagnosticsParams diagnostics =
-        doGetOne(Commands.RECOMPUTE_POM_DIAGNOSTICS, singletonList(pomUri), type);
-    Optional<InitializedLanguageServer> languageServer = findInitializedLanguageServer();
-    if (!languageServer.isPresent()) {
-      LOG.error("Language server not initialized.");
-      return;
-    }
-    String serverId = languageServer.get().getId();
-    eventService.publish(new ExtendedPublishDiagnosticsParams(serverId, diagnostics));
+    executeCommand(RECOMPUTE_POM_DIAGNOSTICS, singletonList(pomUri));
   }
 
   private List<Jar> getProjectExternalLibraries(ExternalLibrariesParameters params) {

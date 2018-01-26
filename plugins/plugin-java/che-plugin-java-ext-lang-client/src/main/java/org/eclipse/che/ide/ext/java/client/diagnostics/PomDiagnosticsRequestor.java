@@ -17,7 +17,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
 import org.eclipse.che.ide.api.editor.EditorOpenedEventHandler;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
-import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 
 /**
  * Asks JDT.LS to get diagnostics for opened pom.xml file.
@@ -31,26 +31,28 @@ public class PomDiagnosticsRequestor {
 
   @Inject
   public PomDiagnosticsRequestor(
-      final EventBus eventBus, final JavaLanguageExtensionServiceClient service) {
+      final EventBus eventBus,
+      DtoBuildHelper buildHelper,
+      final JavaLanguageExtensionServiceClient service) {
     eventBus.addHandler(
         EditorOpenedEvent.TYPE,
         new EditorOpenedEventHandler() {
           @Override
           public void onEditorOpened(EditorOpenedEvent event) {
-            Path path = event.getFile().getLocation();
-            if (!POM_FILE.equals(path.lastSegment())) {
+            String uri = buildHelper.getUri(event.getFile());
+            if (uri.endsWith(POM_FILE)) {
               return;
             }
             new Timer() {
               @Override
               public void run() {
-                processEditorOpened(path);
+                processEditorOpened(uri);
               }
             }.schedule(300);
           }
 
-          private void processEditorOpened(Path path) {
-            service.reComputePomDiagnostics(path.toString());
+          private void processEditorOpened(String uri) {
+            service.reComputePomDiagnostics(uri);
           }
         });
   }
