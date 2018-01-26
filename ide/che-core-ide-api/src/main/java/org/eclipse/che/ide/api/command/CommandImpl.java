@@ -149,7 +149,7 @@ public class CommandImpl implements Command {
   public Set<String> getOutputRenderers() {
     String renderers = getAttributes().get(COMMAND_OUTPUT_RENDERERS_ATTRIBUTE_NAME);
 
-    if (renderers != null) {
+    if (renderers != null && !renderers.isEmpty()) {
       return JsonHelper.toSet(renderers);
     }
 
