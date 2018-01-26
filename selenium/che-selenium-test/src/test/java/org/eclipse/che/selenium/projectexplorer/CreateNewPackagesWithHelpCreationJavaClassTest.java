@@ -27,8 +27,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.TimeoutException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -103,5 +101,4 @@ public class CreateNewPackagesWithHelpCreationJavaClassTest {
       fail("Known issue https://github.com/eclipse/che/issues/8122");
     }
   }
-
 }
