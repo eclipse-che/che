@@ -278,7 +278,9 @@ parse_args() {
     --remove-che - remove existing che project
     ===================================
     ENV vars
-    CHE_IMAGE_TAG - set CHE images tag, default: nightly
+    CHE_IMAGE_TAG - set che-server image tag, default: nightly
+    CHE_CLI_IMAGE - set che-cli image, default: eclipse/che-cli:nightly 
+    IMAGE_INIT - set che-cli image, default: eclipse/che-init:nightly
     CHE_MULTIUSER - set CHE multi user mode, default: false (single user) 
     OC_PUBLIC_HOSTNAME - set ocp hostname to admin console, default: host ip
     OC_PUBLIC_IP - set ocp hostname for routing suffix, default: host ip
