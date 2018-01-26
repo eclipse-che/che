@@ -155,6 +155,13 @@ public class FileStructureNodesTest {
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
 
+    try {
+      fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8300");
+    }
+
     fileStructure.type("get");
     fileStructure.waitExpectedTextInFileStructure(ITEMS_FILTERED_GET);
     fileStructure.type(ESCAPE.toString());
@@ -167,14 +174,7 @@ public class FileStructureNodesTest {
   @Test(priority = 1)
   public void checkFileStructureNodes() {
     // check work nodes in the 'file structure' by double click
-
-    try {
-      fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
-    } catch (WebDriverException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8300");
-    }
-
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);

@@ -46,10 +46,6 @@ public class StackValidator {
         || !stack.getScope().equals("general") && !stack.getScope().equals("advanced")) {
       throw new BadRequestException("Required non-null scope value: 'general' or 'advanced'");
     }
-    if (stack.getSource() == null && stack.getWorkspaceConfig() == null) {
-      throw new BadRequestException(
-          "Stack source required. You must specify either 'workspaceConfig' or 'stackSource'");
-    }
     if (stack.getWorkspaceConfig() == null) {
       throw new BadRequestException("Workspace config required");
     }
