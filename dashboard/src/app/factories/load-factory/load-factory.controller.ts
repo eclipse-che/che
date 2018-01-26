@@ -366,7 +366,7 @@ export class LoadFactoryController {
             .ok('OK')
         );
       }
-      if (message.eventType === 'ERROR' && message.workspaceId === data.id) {
+      if (message.eventType === 'FAILED' && message.workspaceId === workspaceId && message.error) {
         this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
         // need to show the error
         this.$mdDialog.show(
@@ -398,7 +398,7 @@ export class LoadFactoryController {
     this.jsonRpcMasterApi.subscribeEnvironmentOutput(workspaceId, environmentOutputHandler);
 
     let workspaceStatusHandler = (message: any) => {
-      if (message.status === 'ERROR' && message.workspaceId === workspaceId) {
+      if (message.status === 'STOPPED' && message.workspaceId === workspaceId && message.error) {
         // need to show the error
         this.$mdDialog.show(
           this.$mdDialog.alert()
