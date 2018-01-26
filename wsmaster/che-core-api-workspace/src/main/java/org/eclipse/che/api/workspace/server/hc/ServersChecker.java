@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
@@ -49,6 +50,7 @@ public class ServersChecker {
   private final String machineName;
   private final Map<String, ? extends Server> servers;
   private final MachineTokenProvider machineTokenProvider;
+  private final int serverPingSuccessThreshold;
 
   private Timer timer;
   private long resultTimeoutSeconds;
@@ -65,12 +67,14 @@ public class ServersChecker {
       @Assisted RuntimeIdentity runtimeIdentity,
       @Assisted String machineName,
       @Assisted Map<String, ? extends Server> servers,
-      MachineTokenProvider machineTokenProvider) {
+      MachineTokenProvider machineTokenProvider,
+      @Named("che.workspace.server.ping_success_threshold") int serverPingSuccessThreshold) {
     this.runtimeIdentity = runtimeIdentity;
     this.machineName = machineName;
     this.servers = servers;
     this.timer = new Timer("ServersChecker", true);
     this.machineTokenProvider = machineTokenProvider;
+    this.serverPingSuccessThreshold = serverPingSuccessThreshold;
   }
 
   /**
@@ -195,10 +199,10 @@ public class ServersChecker {
     // workaround needed because terminal server doesn't have endpoint to check it readiness
     if ("terminal".equals(serverRef)) {
       return new TerminalHttpConnectionServerChecker(
-          url, machineName, serverRef, 3, 180, TimeUnit.SECONDS, timer);
+          url, machineName, serverRef, 3, 180, serverPingSuccessThreshold, TimeUnit.SECONDS, timer);
     }
     // TODO do not hardcode timeouts, use server conf instead
     return new HttpConnectionServerChecker(
-        url, machineName, serverRef, 3, 180, TimeUnit.SECONDS, timer);
+        url, machineName, serverRef, 3, 180, serverPingSuccessThreshold, TimeUnit.SECONDS, timer);
   }
 }

@@ -37,6 +37,7 @@ public class WorkspaceProbesFactoryTest {
   private static final String WORKSPACE_ID = "wsId";
   private static final String MACHINE_NAME = "machine1";
   private static final String TOKEN = "token1";
+  private static final int SERVER_PING_SUCCESS_THRESHOLD = 1;
   private static final ServerImpl SERVER = new ServerImpl().withUrl("https://localhost:4040/path1");
 
   @Mock private MachineTokenProvider tokenProvider;
@@ -47,7 +48,7 @@ public class WorkspaceProbesFactoryTest {
   public void setUp() throws Exception {
     when(tokenProvider.getToken(WORKSPACE_ID)).thenReturn(TOKEN);
 
-    probesFactory = new WorkspaceProbesFactory(tokenProvider);
+    probesFactory = new WorkspaceProbesFactory(tokenProvider, SERVER_PING_SUCCESS_THRESHOLD);
   }
 
   @Test

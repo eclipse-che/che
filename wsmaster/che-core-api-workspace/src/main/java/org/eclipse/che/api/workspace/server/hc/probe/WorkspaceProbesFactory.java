@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.inject.Inject;
+import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
@@ -41,15 +42,18 @@ public class WorkspaceProbesFactory {
   private final Map<String, HttpProbeConfigFactory> probeConfigFactories;
 
   @Inject
-  public WorkspaceProbesFactory(MachineTokenProvider machineTokenProvider) {
+  public WorkspaceProbesFactory(
+      MachineTokenProvider machineTokenProvider,
+      @Named("che.workspace.server.ping_success_threshold") int serverPingSuccessThreshold) {
     probeConfigFactories =
         ImmutableMap.of(
             Constants.SERVER_WS_AGENT_HTTP_REFERENCE,
-            new WsAgentServerLivenessProbeConfigFactory(machineTokenProvider),
+            new WsAgentServerLivenessProbeConfigFactory(
+                machineTokenProvider, serverPingSuccessThreshold),
             Constants.SERVER_EXEC_AGENT_HTTP_REFERENCE,
-            new ExecServerLivenessProbeConfigFactory(),
+            new ExecServerLivenessProbeConfigFactory(serverPingSuccessThreshold),
             Constants.SERVER_TERMINAL_REFERENCE,
-            new TerminalServerLivenessProbeConfigFactory());
+            new TerminalServerLivenessProbeConfigFactory(serverPingSuccessThreshold));
   }
 
   /**
