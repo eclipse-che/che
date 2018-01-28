@@ -46,7 +46,7 @@ public class GitHistory {
     String CLOSE_BUTTON_HISTORY = "git-history-close";
     String COMPARE_BUTTON_HISTORY = "git-history-compare";
     String COMMIT_INTO_HISTORY_FORM =
-        "//div[@id='gwt-debug-git-history-window']//following::div[contains(text(), '%s')]";
+        "//table[@id='gwt-debug-git-history-window']//following::div[contains(text(), '%s')]";
   }
 
   @FindBy(id = Locators.HISTORY_FORM_ID)

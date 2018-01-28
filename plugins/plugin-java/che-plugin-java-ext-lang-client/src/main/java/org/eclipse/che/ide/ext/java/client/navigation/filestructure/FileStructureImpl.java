@@ -93,6 +93,7 @@ public class FileStructureImpl extends Window implements FileStructure {
     treeContainer.add(tree);
 
     tree.enableSpeedSearch(true);
+    ensureDebugId("file-structure");
   }
 
   /** {@inheritDoc} */

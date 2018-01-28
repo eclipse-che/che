@@ -35,7 +35,7 @@ public class RecentFiles {
   }
 
   private interface Locators {
-    String RECENT_FILES = "//table[@title='Recent Files']/";
+    String RECENT_FILES = "//table[@title='Recent Files']";
     String RECENT_FILES_ITEM = "//table[@title='Recent Files']//div[text()='%s']";
   }
 
