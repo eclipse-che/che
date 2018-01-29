@@ -22,7 +22,6 @@ import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
 import org.openqa.selenium.TimeoutException;
-import org.testng.Assert;
 
 /**
  * @author Vitaliy Gulyy
