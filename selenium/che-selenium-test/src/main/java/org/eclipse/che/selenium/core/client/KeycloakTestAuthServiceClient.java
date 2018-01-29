@@ -35,7 +35,6 @@ import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.client.KeycloakToken.TokenDetails;
-import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestOfflineToAccessTokenExchangeApiEndpointUrlProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +57,6 @@ public class KeycloakTestAuthServiceClient implements TestAuthServiceClient {
 
   private static final long MIN_TOKEN_LIFETIME_SEC = 30;
 
-  private final String apiEndpoint;
   private final DefaultHttpJsonRequestFactory requestFactory;
   private final TestOfflineToAccessTokenExchangeApiEndpointUrlProvider
       testOfflineToAccessTokenExchangeApiEndpointUrlProvider;
@@ -70,15 +68,14 @@ public class KeycloakTestAuthServiceClient implements TestAuthServiceClient {
 
   @Inject
   public KeycloakTestAuthServiceClient(
-      TestApiEndpointUrlProvider cheApiEndpointProvider,
       DefaultHttpJsonRequestFactory requestFactory,
       TestOfflineToAccessTokenExchangeApiEndpointUrlProvider
-          testOfflineToAccessTokenExchangeApiEndpointUrlProvider) {
-    this.apiEndpoint = cheApiEndpointProvider.get().toString();
+          testOfflineToAccessTokenExchangeApiEndpointUrlProvider,
+      TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient) {
     this.requestFactory = requestFactory;
     this.gson = new Gson();
     this.tokens = new ConcurrentHashMap<>();
-    this.keycloakSettings = getKeycloakConfiguration();
+    this.keycloakSettings = testKeycloakSettingsServiceClient.read();
     this.testOfflineToAccessTokenExchangeApiEndpointUrlProvider =
         testOfflineToAccessTokenExchangeApiEndpointUrlProvider;
   }
@@ -235,19 +232,5 @@ public class KeycloakTestAuthServiceClient implements TestAuthServiceClient {
       }
     }
     return token;
-  }
-
-  private KeycloakSettings getKeycloakConfiguration() {
-    try {
-      return gson.fromJson(
-          requestFactory
-              .fromUrl(apiEndpoint + "keycloak/settings/")
-              .useGetMethod()
-              .request()
-              .asString(),
-          KeycloakSettings.class);
-    } catch (ApiException | IOException | JsonSyntaxException ex) {
-      throw new RuntimeException("Error during retrieving Che Keycloak configuration: ", ex);
-    }
   }
 }

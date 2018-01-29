@@ -69,6 +69,29 @@ public class OpenShiftPersistentVolumeClaims {
   }
 
   /**
+   * Returns all existing persistent volume claims with given label.
+   *
+   * @param labelName name of provided label
+   * @param labelValue value of provided label
+   * @return list of matched PVCs
+   * @throws InfrastructureException when any exception occurs while fetching the pvcs
+   */
+  public List<PersistentVolumeClaim> getByLabel(String labelName, String labelValue)
+      throws InfrastructureException {
+    try {
+      return clientFactory
+          .create()
+          .persistentVolumeClaims()
+          .inNamespace(namespace)
+          .withLabel(labelName, labelValue)
+          .list()
+          .getItems();
+    } catch (KubernetesClientException e) {
+      throw new InfrastructureException(e.getMessage(), e);
+    }
+  }
+
+  /**
    * Creates all PVCs which are not present in current OpenShift project.
    *
    * @param toCreate collection of PVCs to create

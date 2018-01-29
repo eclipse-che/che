@@ -22,7 +22,7 @@
                 <script language="beanshell">
                     <![CDATA[
     boolean isTestGroupsAgreedWithRequestedGroups() {
-     String testGroupsVal = System.getProperty("testGroups");
+      String testGroupsVal = System.getProperty("testGroups");
       if (testGroupsVal == null || testGroupsVal.trim().isEmpty() || groups.isEmpty()){
         return true;
       }

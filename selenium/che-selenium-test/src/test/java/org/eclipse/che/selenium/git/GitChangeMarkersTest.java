@@ -92,6 +92,7 @@ public class GitChangeMarkersTest {
     loader.waitOnClosed();
 
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company/Main.java");
+    editor.waitActive();
     editor.waitNoGitChangeMarkers();
     editor.typeTextIntoEditor("//", 11);
     editor.typeTextIntoEditor(Keys.END.toString());

@@ -24,29 +24,29 @@ import static org.eclipse.che.selenium.pageobject.dashboard.account.KeycloakAcco
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+/** @author Igor Ohrimenko */
 @Singleton
 public class KeycloakAccountPage {
-  private SeleniumWebDriver seleniumWebDriver;
-  private SeleniumWebDriverUtils seleniumWebDriverUtils;
-  private KeycloakHeaderButtons keycloakHeaderButtons;
-  private WebDriverWait loadPageWait;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final KeycloakHeaderButtons keycloakHeaderButtons;
+  private final WebDriverWait loadPageWait;
 
   @Inject
   protected KeycloakAccountPage(
       SeleniumWebDriver seleniumWebDriver,
-      SeleniumWebDriverUtils seleniumWebDriverUtils,
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
       KeycloakHeaderButtons keycloakHeaderButtons) {
-    this.seleniumWebDriver = seleniumWebDriver;
-    this.seleniumWebDriverUtils = seleniumWebDriverUtils;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.keycloakHeaderButtons = keycloakHeaderButtons;
     this.loadPageWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
   }
 
-  protected interface AccountPageLocators {
+  interface AccountPageLocators {
     String USERNAME_FIELD_ID = "username";
     String EMAIL_FIELD_ID = "email";
     String FIRST_NAME_FIELD_ID = "firstName";
@@ -60,7 +60,7 @@ public class KeycloakAccountPage {
   }
 
   public void waitAccountPageIsLoaded() {
-    keycloakHeaderButtons.waitAllHeaderButtonsIsVisible();
+    keycloakHeaderButtons.waitAllHeaderButtonsAreVisible();
     waitAllBodyFieldsAndButtonsIsVisible();
   }
 
@@ -70,57 +70,57 @@ public class KeycloakAccountPage {
   }
 
   public String getUserNameValue() {
-    return seleniumWebDriverUtils.getFieldValue(By.id(USERNAME_FIELD_ID));
+    return seleniumWebDriverHelper.getFieldValue(By.id(USERNAME_FIELD_ID));
   }
 
   public String getEmailValue() {
-    return seleniumWebDriverUtils.getFieldValue(By.id(EMAIL_FIELD_ID));
+    return seleniumWebDriverHelper.getFieldValue(By.id(EMAIL_FIELD_ID));
   }
 
   public String getFirstNameValue() {
-    return seleniumWebDriverUtils.getFieldValue(By.id(FIRST_NAME_FIELD_ID));
+    return seleniumWebDriverHelper.getFieldValue(By.id(FIRST_NAME_FIELD_ID));
   }
 
   public String getLastNameValue() {
-    return seleniumWebDriverUtils.getFieldValue(By.id(LAST_NAME_FIELD_ID));
+    return seleniumWebDriverHelper.getFieldValue(By.id(LAST_NAME_FIELD_ID));
   }
 
   public void setUserNameValue(String value) {
-    seleniumWebDriverUtils.setFieldValue(By.id(USERNAME_FIELD_ID), value);
+    seleniumWebDriverHelper.setFieldValue(By.id(USERNAME_FIELD_ID), value);
   }
 
   public void setEmailValue(String value) {
-    seleniumWebDriverUtils.setFieldValue(By.id(EMAIL_FIELD_ID), value);
+    seleniumWebDriverHelper.setFieldValue(By.id(EMAIL_FIELD_ID), value);
   }
 
   public void setFirstNameValue(String value) {
-    seleniumWebDriverUtils.setFieldValue(By.id(FIRST_NAME_FIELD_ID), value);
+    seleniumWebDriverHelper.setFieldValue(By.id(FIRST_NAME_FIELD_ID), value);
   }
 
   public void setLastNameValue(String value) {
-    seleniumWebDriverUtils.setFieldValue(By.id(LAST_NAME_FIELD_ID), value);
+    seleniumWebDriverHelper.setFieldValue(By.id(LAST_NAME_FIELD_ID), value);
   }
 
   public boolean usernameFieldIsDisabled() {
-    return seleniumWebDriverUtils
+    return seleniumWebDriverHelper
         .waitAndGetElement(By.id(USERNAME_FIELD_ID))
         .getAttribute("disabled")
         .equals("true");
   }
 
   public void clickOnSaveButton() {
-    seleniumWebDriverUtils.waitAndClickOnElement(By.xpath(SAVE_BUTTON));
+    seleniumWebDriverHelper.waitAndClickOnElement(By.xpath(SAVE_BUTTON));
   }
 
   public void clickOnCancelButton() {
-    seleniumWebDriverUtils.waitAndClickOnElement(By.xpath(CANCEL_BUTTON));
+    seleniumWebDriverHelper.waitAndClickOnElement(By.xpath(CANCEL_BUTTON));
   }
 
   public void waitTextInErrorAlert(String expectedText) {
     loadPageWait.until(
         (ExpectedCondition<Boolean>)
             driver ->
-                seleniumWebDriverUtils
+                seleniumWebDriverHelper
                     .waitAndGetElement(By.xpath(ERROR_ALERT))
                     .getText()
                     .equals(expectedText));
@@ -130,7 +130,7 @@ public class KeycloakAccountPage {
     loadPageWait.until(
         (ExpectedCondition<Boolean>)
             driver ->
-                seleniumWebDriverUtils
+                seleniumWebDriverHelper
                     .waitAndGetElement(By.xpath(SUCCESS_ALERT))
                     .getText()
                     .equals(expectedText));
@@ -144,6 +144,6 @@ public class KeycloakAccountPage {
             By.id(EMAIL_FIELD_ID),
             By.id(FIRST_NAME_FIELD_ID),
             By.id(LAST_NAME_FIELD_ID))
-        .forEach(locator -> seleniumWebDriverUtils.waitElementIsVisible(locator));
+        .forEach(locator -> seleniumWebDriverHelper.waitElementIsVisible(locator));
   }
 }
