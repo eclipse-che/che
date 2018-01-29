@@ -84,8 +84,12 @@ public abstract class SeleniumTestHandler
   private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
 
   @Inject
-  @Named("tests.screenshot_dir")
-  private String screenshotDir;
+  @Named("tests.screenshots_dir")
+  private String screenshotsDir;
+
+  @Inject
+  @Named("tests.htmldumps_dir")
+  private String htmldumpsDir;
 
   @Inject private PageObjectsInjector pageObjectsInjector;
 
@@ -371,7 +375,7 @@ public abstract class SeleniumTestHandler
     String filename = NameGenerator.generate(testName + "_", 8) + ".png";
     try {
       byte[] data = webDriver.getScreenshotAs(OutputType.BYTES);
-      Path screenshot = Paths.get(screenshotDir, filename);
+      Path screenshot = Paths.get(screenshotsDir, filename);
       Files.createDirectories(screenshot.getParent());
       Files.copy(new ByteArrayInputStream(data), screenshot);
     } catch (WebDriverException | IOException e) {
@@ -395,7 +399,7 @@ public abstract class SeleniumTestHandler
     String filename = NameGenerator.generate(testName + "_", 8) + ".html";
     try {
       String pageSource = webDriver.getPageSource();
-      Path dumpDirectory = Paths.get("target/htmldumps", filename);
+      Path dumpDirectory = Paths.get(htmldumpsDir, filename);
       Files.createDirectories(dumpDirectory.getParent());
       Files.write(
           dumpDirectory, pageSource.getBytes(Charset.forName("UTF-8")), StandardOpenOption.CREATE);
