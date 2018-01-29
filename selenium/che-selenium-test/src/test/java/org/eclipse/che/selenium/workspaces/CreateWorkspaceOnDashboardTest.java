@@ -15,7 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.STOP_WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
 
@@ -81,8 +81,8 @@ public class CreateWorkspaceOnDashboardTest {
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
     // wait that the workspace is started
-    projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab(EXPECTED_MESS_IN_CONSOLE_SEC);
+    projectExplorer.waitProjectExplorer(PREPARING_WS_TIMEOUT_SEC); // we need long timeout for OSIO
+    terminal.waitTerminalTab(PREPARING_WS_TIMEOUT_SEC); // we need long timeout for OSIO
 
     // Import the "web-java-spring" project
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
