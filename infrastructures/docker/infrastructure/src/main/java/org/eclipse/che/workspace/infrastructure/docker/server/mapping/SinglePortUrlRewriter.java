@@ -33,15 +33,18 @@ public class SinglePortUrlRewriter implements URLRewriter {
 
   private final SinglePortHostnameBuilder hostnameBuilder;
   private final String wildcartPort;
+  private final int chePort;
 
   @Inject
   public SinglePortUrlRewriter(
       @Named("che.docker.ip") String internalIpOfContainers,
+      @Named("che.port") int chePort,
       @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
       @Nullable @Named("che.singleport.wildcard_domain.host") String wildcardHost,
       @Nullable @Named("che.singleport.wildcard_domain.port") String wildcardPort) {
     this.hostnameBuilder =
         new SinglePortHostnameBuilder(externalIpOfContainers, internalIpOfContainers, wildcardHost);
+    this.chePort = chePort;
     this.wildcartPort = wildcardPort;
   }
 
@@ -54,8 +57,8 @@ public class SinglePortUrlRewriter implements URLRewriter {
       throws InfrastructureException {
     final String host = hostnameBuilder.build(serverName, machineName, identity.getWorkspaceId());
     try {
-      int wildcardPort = wildcartPort != null ? Integer.parseInt(wildcartPort) : 80;
-      URI uri = UriBuilder.fromUri(url).host(host).port(wildcardPort).build();
+      int port = wildcartPort != null ? Integer.parseInt(wildcartPort) : chePort;
+      URI uri = UriBuilder.fromUri(url).host(host).port(port).build();
       url = uri.toString();
     } catch (UriBuilderException | IllegalArgumentException e) {
       throw new InternalInfrastructureException(

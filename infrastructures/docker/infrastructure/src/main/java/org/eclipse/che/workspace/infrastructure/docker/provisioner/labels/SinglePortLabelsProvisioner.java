@@ -75,14 +75,14 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
 
   /**
    * Constructs unique traefik service name - contains server, machine names and workspace ID. Dots
-   * are not allowed and replaced by dashes. Result is like:
+   * is not allowed and replaced by dashes. Result is like:
    * exec-agent-http-dev-machine-workspaceao6k83hkdav975g5
    */
   private String getServiceName(String host) {
     int idx =
-        host.contains(externalIpOfContainers)
+        (externalIpOfContainers != null && host.contains(externalIpOfContainers))
             ? host.indexOf(externalIpOfContainers)
             : host.indexOf(internalIpOfContainers);
-    return host.substring(idx).replaceAll("\\.", "-");
+    return host.substring(0, idx - 1).replaceAll("\\.", "-");
   }
 }

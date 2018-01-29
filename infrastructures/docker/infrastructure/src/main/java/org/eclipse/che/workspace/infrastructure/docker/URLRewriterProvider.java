@@ -23,7 +23,7 @@ public class URLRewriterProvider implements Provider<URLRewriter> {
 
   private URLRewriter instance;
   private String rewriterValue;
-  private final String PROPERTY_NAME = "che.docker.url_rewriter";
+  private final String PROPERTY_NAME = "che.infra.docker.url_rewriter";
 
   @Inject
   public URLRewriterProvider(
