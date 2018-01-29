@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.pageobject.machineperspective;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
@@ -44,14 +45,20 @@ public class MachineTerminal {
   private final Loader loader;
   private final ActionsFactory actionsFactory;
   private final CommandsPalette commandsPalette;
+  private final TestCommandServiceClient commandServiceClient;
 
   @Inject
   public MachineTerminal(
-      SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory, CommandsPalette commandsPalette) {
+      SeleniumWebDriver seleniumWebDriver,
+      Loader loader,
+      ActionsFactory actionsFactory,
+      CommandsPalette commandsPalette,
+      TestCommandServiceClient commandServiceClient) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
     this.commandsPalette = commandsPalette;
+    this.commandServiceClient = commandServiceClient;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -308,13 +315,14 @@ public class MachineTerminal {
 
   /** */
   public void launchScriptAndGetInfo(
-      TestWorkspace ws,
-      String currentProject,
-      TestProjectServiceClient testProjectServiceClient
-      )
+      TestWorkspace ws, String currentProject, TestProjectServiceClient testProjectServiceClient)
       throws Exception {
+    String ideCommnandName = "checkApp";
     String bashFileName = "check-app-state.sh";
-    String bashCommand =
+    String terminalCommandForCheckResult = "cd ${current.project.path} && ./check-app-state.sh";
+    commandServiceClient.createCommand(
+        terminalCommandForCheckResult, ideCommnandName, CUSTOM, ws.getId());
+    String bashScript =
         "#!/bin/bash\n"
             + "\n"
             + "URL=$1\n"
@@ -330,10 +338,9 @@ public class MachineTerminal {
             + "    fi\n"
             + "}";
 
-    String bashComandForChecling = "cd ${current.project.path} && ./check-app-state.sh";
     testProjectServiceClient.createFileInProject(
-        ws.getId(), currentProject, bashFileName, bashCommand);
+        ws.getId(), currentProject, bashFileName, bashScript);
     commandsPalette.openCommandPalette();
-    commandsPalette.startCommandByDoubleClick();
+    commandsPalette.startCommandByDoubleClick(CUSTOM);
   }
 }

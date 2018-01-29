@@ -64,7 +64,7 @@ public class PreviewUrlIntoCommandsEditorTest {
   }
 
   @Test
-  public void checkSavePreviewUrlIntoCommand() throws InterruptedException {
+  public void checkSavePreviewUrlIntoCommand() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJ_NAME);
     String currentWindow = seleniumWebDriver.getWindowHandle();
