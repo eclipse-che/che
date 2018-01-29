@@ -77,6 +77,6 @@ public class DockerInfraModule extends AbstractModule {
     rewriters.addBinding("default").to(ExternalIpURLRewriter.class);
     rewriters.addBinding("singleport").to(SinglePortUrlRewriter.class);
 
-    bind(URLRewriter.class).toProvider(URLRewriterProvider.class);
+    bind(URLRewriter.class).toProvider(UrlRewriterProvider.class);
   }
 }

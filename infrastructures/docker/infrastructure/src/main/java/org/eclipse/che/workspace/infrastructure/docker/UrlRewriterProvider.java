@@ -19,18 +19,18 @@ import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /** @author Max Shaposhnik (mshaposh@redhat.com) */
-public class URLRewriterProvider implements Provider<URLRewriter> {
+public class UrlRewriterProvider implements Provider<URLRewriter> {
 
   private URLRewriter instance;
   private String rewriterValue;
   private final String PROPERTY_NAME = "che.infra.docker.url_rewriter";
 
   @Inject
-  public URLRewriterProvider(
+  public UrlRewriterProvider(
       Map<String, URLRewriter> rewriters, @Nullable @Named(PROPERTY_NAME) String rewriter) {
-    if (rewriter != null && rewriters.containsKey(rewriter)) {
-      this.instance = rewriters.get(rewriter);
+    if (rewriter != null) {
       rewriterValue = rewriter;
+      this.instance = rewriters.get(rewriter);
     } else {
       this.instance = rewriters.get("default");
     }
