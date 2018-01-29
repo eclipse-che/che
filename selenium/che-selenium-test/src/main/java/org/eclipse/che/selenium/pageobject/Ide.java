@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -54,7 +55,7 @@ public class Ide {
     seleniumWebDriver.get(workspaceUrl.toString());
     entrance.login(testWorkspace.getOwner());
     try {
-      projectExplorer.waitProjectExplorer(60);
+      projectExplorer.waitProjectExplorer(LOADER_TIMEOUT_SEC);
     } catch (TimeoutException ex) {
       browserLogsUtil.appendBrowserLogs();
       // Remove try-catch block after issue has been resolved

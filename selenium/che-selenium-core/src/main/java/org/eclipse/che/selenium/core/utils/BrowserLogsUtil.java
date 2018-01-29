@@ -58,6 +58,6 @@ public class BrowserLogsUtil {
   /** append browser logs to the test logs */
   public void appendBrowserLogs() {
     getBrowserLogs()
-        .forEach(logEntry -> LOG.info(format("%s %s", logEntry.getLevel(), logEntry.getMessage())));
+        .forEach(logEntry -> LOG.info("{} {}", logEntry.getLevel(), logEntry.getMessage()));
   }
 }
