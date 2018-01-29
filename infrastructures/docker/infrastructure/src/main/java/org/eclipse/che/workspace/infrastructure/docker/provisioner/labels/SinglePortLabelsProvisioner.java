@@ -34,13 +34,18 @@ import org.eclipse.che.workspace.infrastructure.docker.server.mapping.SinglePort
 public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
 
   private final SinglePortHostnameBuilder hostnameBuilder;
+  private final String internalIpOfContainers;
+  private final String externalIpOfContainers;
 
   @Inject
   public SinglePortLabelsProvisioner(
+      @Named("che.docker.ip") String internalIpOfContainers,
       @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
-      @Named("che.docker.ip") String internalIpOfContainers) {
+      @Nullable @Named("che.singleport.wildcard_domain.host") String wildcardHost) {
     this.hostnameBuilder =
-        new SinglePortHostnameBuilder(externalIpOfContainers, internalIpOfContainers);
+        new SinglePortHostnameBuilder(externalIpOfContainers, internalIpOfContainers, wildcardHost);
+    this.internalIpOfContainers = internalIpOfContainers;
+    this.externalIpOfContainers = externalIpOfContainers;
   }
 
   @Override
@@ -52,20 +57,32 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
       Map<String, String> containerLabels = new HashMap<>();
       for (Map.Entry<String, ServerConfig> serverEntry :
           machineEntry.getValue().getServers().entrySet()) {
-        final String serverName = serverEntry.getKey().replace('/', '-');
         final String host =
-            "Host:" + hostnameBuilder.build(serverName, machineName, identity.getWorkspaceId());
-        final String serviceName = machineName + "-" + serverName;
+            hostnameBuilder.build(serverEntry.getKey(), machineName, identity.getWorkspaceId());
+        final String serviceName = getServiceName(host);
         final String port = serverEntry.getValue().getPort().split("/")[0];
 
         containerLabels.put(format("traefik.%s.port", serviceName), port);
         containerLabels.put(format("traefik.%s.frontend.entryPoints", serviceName), "http");
-        containerLabels.put(format("traefik.%s.frontend.rule", serviceName), host);
+        containerLabels.put(format("traefik.%s.frontend.rule", serviceName), "Host:" + host);
         // Needed to activate per-service rules
         containerLabels.put("traefik.frontend.rule", machineName);
       }
       DockerContainerConfig dockerConfig = internalEnv.getContainers().get(machineName);
       dockerConfig.getLabels().putAll(containerLabels);
     }
+  }
+
+  /**
+   * Constructs unique traefik service name - contains server, machine names and workspace ID. Dots
+   * are not allowed and replaced by dashes. Result is like:
+   * exec-agent-http-dev-machine-workspaceao6k83hkdav975g5
+   */
+  private String getServiceName(String host) {
+    int idx =
+        host.contains(externalIpOfContainers)
+            ? host.indexOf(externalIpOfContainers)
+            : host.indexOf(internalIpOfContainers);
+    return host.substring(idx).replaceAll("\\.", "-");
   }
 }

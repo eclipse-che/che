@@ -13,10 +13,11 @@ package org.eclipse.che.workspace.infrastructure.docker.server.mapping;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.StringJoiner;
+import java.util.regex.Pattern;
 
 /**
  * Produces host names in form:
- * server-<serverName>.<machineName>.<workspaceId>.<external_or_internal_address>.nip.io
+ * [serverName].[machineName].[workspaceId].<external_or_internal_address>.<wildcardNipDomain>
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
@@ -24,10 +25,19 @@ public class SinglePortHostnameBuilder {
 
   private final String externalAddress;
   private final String internalAddress;
+  private final String wildcardHost;
 
-  public SinglePortHostnameBuilder(String externalAddress, String internalAddress) {
+  /**
+   * hostname labels may contain only the ASCII letters 'a' through 'z' (in a case-insensitive
+   * manner), the digits '0' through '9', and the hyphen ('-').
+   */
+  private final Pattern pattern = Pattern.compile("[^a-zA-Z0-9\\-]");
+
+  public SinglePortHostnameBuilder(
+      String externalAddress, String internalAddress, String wildcardHost) {
     this.externalAddress = externalAddress;
     this.internalAddress = internalAddress;
+    this.wildcardHost = wildcardHost;
   }
 
   /**
@@ -41,28 +51,29 @@ public class SinglePortHostnameBuilder {
   public String build(String serverName, String machineName, String workspaceID) {
     StringJoiner joiner = new StringJoiner(".");
     if (serverName != null) {
-      joiner.add("server-" + serverName.replace('/', '-'));
+      joiner.add(normalize(serverName));
     }
     if (machineName != null) {
-      joiner.add(machineName);
+      joiner.add(normalize(machineName));
     }
     if (workspaceID != null) {
-      joiner.add(workspaceID);
+      joiner.add(normalize(workspaceID));
     }
     joiner.add(
         externalAddress != null
-            ? getWildcardNipDomain(externalAddress)
-            : getWildcardNipDomain(internalAddress));
+            ? getWildcardDomain(externalAddress)
+            : getWildcardDomain(internalAddress));
     return joiner.toString();
   }
 
   /**
-   * Gets a Wildcard domain based on the ip using an external provider nip.io
+   * Gets a Wildcard domain based on the ip using an external provider like nip.io
    *
    * @return wildcard domain
    */
-  private String getWildcardNipDomain(String localAddress) {
-    return String.format("%s.%s", getExternalIp(localAddress), "nip.io");
+  private String getWildcardDomain(String localAddress) {
+    return String.format(
+        "%s.%s", getExternalIp(localAddress), wildcardHost == null ? "nip.io" : wildcardHost);
   }
 
   private String getExternalIp(String localAddress) {
@@ -72,5 +83,9 @@ public class SinglePortHostnameBuilder {
       throw new UnsupportedOperationException(
           "Unable to find the IP for the address '" + localAddress + "'", e);
     }
+  }
+
+  private String normalize(String input) {
+    return pattern.matcher(input).replaceAll("-");
   }
 }

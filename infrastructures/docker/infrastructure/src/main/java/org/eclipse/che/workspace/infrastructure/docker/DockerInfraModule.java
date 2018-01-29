@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -71,10 +72,11 @@ public class DockerInfraModule extends AbstractModule {
         org.eclipse.che.workspace.infrastructure.docker.monit.DockerAbandonedResourcesCleaner
             .class);
 
-    if (Boolean.parseBoolean(System.getenv("CHE_SINGLE_PORT"))) {
-      bind(URLRewriter.class).to(SinglePortUrlRewriter.class);
-    } else {
-      bind(URLRewriter.class).to(ExternalIpURLRewriter.class);
-    }
+    MapBinder<String, URLRewriter> rewriters =
+        MapBinder.newMapBinder(binder(), String.class, URLRewriter.class);
+    rewriters.addBinding("default").to(ExternalIpURLRewriter.class);
+    rewriters.addBinding("singleport").to(SinglePortUrlRewriter.class);
+
+    bind(URLRewriter.class).toProvider(URLRewriterProvider.class);
   }
 }

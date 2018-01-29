@@ -32,13 +32,17 @@ import org.eclipse.che.commons.annotation.Nullable;
 public class SinglePortUrlRewriter implements URLRewriter {
 
   private final SinglePortHostnameBuilder hostnameBuilder;
+  private final String wildcartPort;
 
   @Inject
   public SinglePortUrlRewriter(
+      @Named("che.docker.ip") String internalIpOfContainers,
       @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
-      @Named("che.docker.ip") String internalIpOfContainers) {
+      @Nullable @Named("che.singleport.wildcard_domain.host") String wildcardHost,
+      @Nullable @Named("che.singleport.wildcard_domain.port") String wildcardPort) {
     this.hostnameBuilder =
-        new SinglePortHostnameBuilder(externalIpOfContainers, internalIpOfContainers);
+        new SinglePortHostnameBuilder(externalIpOfContainers, internalIpOfContainers, wildcardHost);
+    this.wildcartPort = wildcardPort;
   }
 
   @Override
@@ -50,7 +54,8 @@ public class SinglePortUrlRewriter implements URLRewriter {
       throws InfrastructureException {
     final String host = hostnameBuilder.build(serverName, machineName, identity.getWorkspaceId());
     try {
-      URI uri = UriBuilder.fromUri(url).host(host).build();
+      int wildcardPort = wildcartPort != null ? Integer.parseInt(wildcartPort) : 80;
+      URI uri = UriBuilder.fromUri(url).host(host).port(wildcardPort).build();
       url = uri.toString();
     } catch (UriBuilderException | IllegalArgumentException e) {
       throw new InternalInfrastructureException(
