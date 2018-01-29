@@ -637,6 +637,7 @@ public class CodenvyEditor {
   public void waitNoGitChangeMarkers() {
 
     List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
+    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(VCS_RULER)));
 
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
@@ -655,8 +656,8 @@ public class CodenvyEditor {
    */
   public void waitGitInsertionMarkerInPosition(int startLine, int endLine) {
 
-    List<WebElement> rulerVcsElements =
-        seleniumWebDriver.findElements(By.xpath("//div[@class='ruler vcs']/div"));
+    List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
+    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(VCS_RULER)));
 
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
@@ -680,8 +681,8 @@ public class CodenvyEditor {
    */
   public void waitGitModificationMarkerInPosition(int startLine, int endLine) {
 
-    List<WebElement> rulerVcsElements =
-        seleniumWebDriver.findElements(By.xpath("//div[@class='ruler vcs']/div"));
+    List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
+    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(VCS_RULER)));
 
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
@@ -704,8 +705,8 @@ public class CodenvyEditor {
    */
   public void waitGitDeletionMarkerInPosition(int line) {
 
-    List<WebElement> rulerVcsElements =
-        seleniumWebDriver.findElements(By.xpath("//div[@class='ruler vcs']/div"));
+    List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
+    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(VCS_RULER)));
 
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(

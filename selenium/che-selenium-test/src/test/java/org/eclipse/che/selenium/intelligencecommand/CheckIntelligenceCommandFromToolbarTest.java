@@ -15,7 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -33,7 +33,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -104,14 +103,8 @@ public class CheckIntelligenceCommandFromToolbarTest {
     consoles.clickOnPreviewUrl();
 
     waitOnAvailablePreviewPage(currentWindow, "Enter your name:");
-    Assert.assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
-
-    try {
-      Assert.assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#2"));
-    } catch (AssertionError ex) {
-      // Remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8277");
-    }
+    assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
+    assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#3"));
 
     checkTestAppByPreviewButtonAndReturnToIde(currentWindow, "Enter your name:");
     commandsToolbar.clickExecStopBtn();

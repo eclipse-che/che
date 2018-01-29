@@ -12,11 +12,13 @@ package org.eclipse.che.ide.resources.action;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 import static org.eclipse.che.ide.resource.Path.valueOf;
 
 import com.google.common.annotations.Beta;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.Map;
@@ -25,7 +27,11 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.parts.PartPresenter;
+import org.eclipse.che.ide.api.parts.PartStack;
+import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 
@@ -43,16 +49,24 @@ public class RevealResourceAction extends AbstractPerspectiveAction {
 
   private final AppContext appContext;
   private final EventBus eventBus;
+  private final Provider<ProjectExplorerPresenter> projectExplorerPresenterProvider;
+  private final WorkspaceAgent workspaceAgent;
 
   @Inject
   public RevealResourceAction(
-      AppContext appContext, EventBus eventBus, CoreLocalizationConstant localizedConstant) {
+      AppContext appContext,
+      EventBus eventBus,
+      CoreLocalizationConstant localizedConstant,
+      Provider<ProjectExplorerPresenter> projectExplorerPresenterProvider,
+      WorkspaceAgent workspaceAgent) {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         localizedConstant.actionRevealResourceText(),
         localizedConstant.actionRevealResourceDescription());
     this.appContext = appContext;
     this.eventBus = eventBus;
+    this.projectExplorerPresenterProvider = projectExplorerPresenterProvider;
+    this.workspaceAgent = workspaceAgent;
   }
 
   /** {@inheritDoc} */
@@ -74,13 +88,29 @@ public class RevealResourceAction extends AbstractPerspectiveAction {
 
       checkState(!path.isEmpty());
 
+      ensureProjectExplorerPart();
       eventBus.fireEvent(new RevealResourceEvent(path));
     } else {
       final Resource[] resources = appContext.getResources();
 
       checkState(resources != null && resources.length == 1);
 
+      ensureProjectExplorerPart();
       eventBus.fireEvent(new RevealResourceEvent(resources[0]));
+    }
+  }
+
+  private void ensureProjectExplorerPart() {
+    PartStack navigationPartStack = workspaceAgent.getPartStack(NAVIGATION);
+    PartPresenter activePart = navigationPartStack.getActivePart();
+    ProjectExplorerPresenter projectExplorerPresenter = projectExplorerPresenterProvider.get();
+
+    if (activePart == null) {
+      workspaceAgent.openPart(projectExplorerPresenter, NAVIGATION);
+    }
+
+    if (!(activePart instanceof ProjectExplorerPresenter)) {
+      workspaceAgent.setActivePart(projectExplorerPresenter);
     }
   }
 }

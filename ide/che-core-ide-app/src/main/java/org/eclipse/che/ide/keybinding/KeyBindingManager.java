@@ -55,6 +55,7 @@ public class KeyBindingManager implements KeyBindingAgent {
 
   private String activeScheme;
   private ActionManager actionManager;
+  private boolean disabled;
 
   @Inject
   public KeyBindingManager(ActionManager actionManager) {
@@ -74,6 +75,11 @@ public class KeyBindingManager implements KeyBindingAgent {
         new EventListener() {
           @Override
           public void handleEvent(Event event) {
+
+            if (disabled) {
+              return;
+            }
+
             SignalEvent signalEvent = SignalEventUtils.create(event, false);
             if (signalEvent == null) {
               return;
@@ -205,5 +211,15 @@ public class KeyBindingManager implements KeyBindingAgent {
     else {
       return getGlobal().getKeyBinding(actionId);
     }
+  }
+
+  @Override
+  public void disable() {
+    disabled = true;
+  }
+
+  @Override
+  public void enable() {
+    disabled = false;
   }
 }
