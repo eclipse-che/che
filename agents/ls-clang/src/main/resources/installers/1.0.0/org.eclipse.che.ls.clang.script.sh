@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012-2017 Red Hat, Inc.
+# Copyright (c) 2012-2018 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -20,6 +20,8 @@ AGENT_BINARIES_URI=https://codenvy.com/update/repository/public/download/org.ecl
 CHE_DIR=$HOME/che
 LS_DIR=${CHE_DIR}/ls-clangd
 LS_LAUNCHER=${LS_DIR}/launch.sh
+CLANGD_VERSION=6.0
+CLANGD_BINARY=clangd-${CLANGD_VERSION}
 
 if [ -f /etc/centos-release ]; then
     FILE="/etc/centos-release"
@@ -49,8 +51,8 @@ if echo ${LINUX_TYPE} | grep -qi "rhel"; then
        ${SUDO} yum install ${PACKAGES};
    }
 
-   command -v nodejs >/dev/null 2>&1 || {
-       echo "LLVM / Clang 5.0 not supported on Red Hat Enterprise Linux 7.";
+   command -v ${CLANGD_BINARY} >/dev/null 2>&1 || {
+       echo "LLVM / Clang ${CLANGD_VERSION} not supported on Red Hat Enterprise Linux 7.";
        exit 1;
    }
 
@@ -61,8 +63,8 @@ elif echo ${LINUX_TYPE} | grep -qi "Red Hat"; then
        ${SUDO} yum install ${PACKAGES};
    }
 
-   command -v nodejs >/dev/null 2>&1 || {
-       echo "LLVM / Clang 5.0 not supported on Red Hat Enterprise Linux 6.";
+   command -v ${CLANGD_BINARY} >/dev/null 2>&1 || {
+       echo "LLVM / Clang ${CLANGD_VERSION} not supported on Red Hat Enterprise Linux 6.";
        exit 1;
    }
 
@@ -75,24 +77,16 @@ elif echo ${LINUX_TYPE} | grep -qi "ubuntu"; then
        ${SUDO} apt-get -y install ${PACKAGES};
    }
 
-   command -v clangd-5.0 >/dev/null 2>&1 || {
+   command -v ${CLANGD_BINARY} >/dev/null 2>&1 || {
        {
            wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -;
            # Fingerprint: 6084 F3CF 814B 57C1 CF12 EFD5 15CF 4D18 AF4F 7421
-           ${SUDO} apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main"; 
+           ${SUDO} apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-${CLANGD_VERSION} main"; 
        };
 
        ${SUDO} apt-get update;
-       ${SUDO} apt-get install -y clang-tools-6.0;
-       # temporary workaround
-    #    wget http://llvm-jenkins.debian.net/view/Ubuntu%20Xenial/job/llvm-toolchain-xenial-5.0-binaries/architecture=amd64,distribution=xenial/lastSuccessfulBuild/artifact/libllvm5.0_5.0.1~svn319952-1~exp1_amd64.deb;
-    #    wget http://llvm-jenkins.debian.net/view/Ubuntu%20Xenial/job/llvm-toolchain-xenial-5.0-binaries/architecture=amd64,distribution=xenial/lastSuccessfulBuild/artifact/libclang1-5.0_5.0.1~svn319952-1~exp1_amd64.deb;
-    #    wget http://llvm-jenkins.debian.net/view/Ubuntu%20Xenial/job/llvm-toolchain-xenial-5.0-binaries/architecture=amd64,distribution=xenial/lastSuccessfulBuild/artifact/libclang-common-5.0-dev_5.0.1~svn319952-1~exp1_amd64.deb;
-    #    wget http://llvm-jenkins.debian.net/view/Ubuntu%20Xenial/job/llvm-toolchain-xenial-5.0-binaries/architecture=amd64,distribution=xenial/lastSuccessfulBuild/artifact/clang-5.0_5.0.1~svn319952-1~exp1_amd64.deb;
-    #    wget http://llvm-jenkins.debian.net/view/Ubuntu%20Xenial/job/llvm-toolchain-xenial-5.0-binaries/architecture=amd64,distribution=xenial/lastSuccessfulBuild/artifact/clang-tools-5.0_5.0.1~svn319952-1~exp1_amd64.deb;
-    #    ${SUDO} apt-get install -f libjsoncpp1 libobjc-5-dev libobjc4 gcc-5-base lib32gcc1 lib32stdc++6 libc6-i386;
-    #    ${SUDO} dpkg -i dpkg -i clang-5.0_5.0.1~svn319952-1~exp1_amd64.deb clang-tools-5.0_5.0.1~svn319952-1~exp1_amd64.deb libclang1-5.0_5.0.1~svn319952-1~exp1_amd64.deb libclang-common-5.0-dev_5.0.1~svn319952-1~exp1_amd64.deb libllvm5.0_5.0.1~svn319952-1~exp1_amd64.deb;
-       ${SUDO} ln -s /usr/bin/clangd-6.0 /usr/bin/clangd
+       ${SUDO} apt-get install -y clang-tools-${CLANGD_VERSION};
+       ${SUDO} ln -s /usr/bin/clangd-${CLANGD_VERSION} /usr/bin/clangd
    }
 
 
@@ -104,56 +98,54 @@ elif echo ${LINUX_TYPE} | grep -qi "debian"; then
        ${SUDO} apt-get -y install ${PACKAGES};
    }
 
-   command -v nodejs >/dev/null 2>&1 || {
+   command -v ${CLANGD_BINARY} >/dev/null 2>&1 || {
        {
            wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -;
            # Fingerprint: 6084 F3CF 814B 57C1 CF12 EFD5 15CF 4D18 AF4F 7421
-           ${SUDO} apt-add-repository "deb http://apt.llvm.org/jessie/ llvm-toolchain-jessie-6.0 main"; 
+           ${SUDO} apt-add-repository "deb http://apt.llvm.org/jessie/ llvm-toolchain-jessie-${CLANGD_VERSION} main"; 
        };
 
        ${SUDO} apt-get update;
-       ${SUDO} apt-get install -y clang-tools-6.0;
-       ${SUDO} ln -s /usr/bin/clangd-6.0 /usr/bin/clangd
+       ${SUDO} apt-get install -y clang-tools-${CLANGD_VERSION};
+       ${SUDO} ln -s /usr/bin/clangd-${CLANGD_VERSION} /usr/bin/clangd
    }
 
 ## Fedora 23
 ############
-#elif echo ${LINUX_TYPE} | grep -qi "fedora"; then
-#    command -v ps >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" procps-ng"; }
-#    test "${PACKAGES}" = "" || {
-#        ${SUDO} dnf -y install ${PACKAGES};
-#    }
-#
-#    command -v nodejs >/dev/null 2>&1 || {
-#        curl --silent --location https://rpm.nodesource.com/setup_6.x | ${SUDO} bash -;
-#        ${SUDO} dnf -y install nodejs;
-#    }
-#
-#
+elif echo ${LINUX_TYPE} | grep -qi "fedora"; then
+    test "${PACKAGES}" = "" || {
+        ${SUDO} dnf -y install ${PACKAGES};
+    }
+
+    command -v ${CLANGD_BINARY} >/dev/null 2>&1 || {
+       echo "LLVM / Clang ${CLANGD_VERSION} not supported on Fedora 23.";
+       exit 1;
+    }
+
 ## CentOS 7.1 & Oracle Linux 7.1
 ################################
-#elif echo ${LINUX_TYPE} | grep -qi "centos"; then
-#    test "${PACKAGES}" = "" || {
-#        ${SUDO} yum -y install ${PACKAGES};
-#    }
-#
-#    command -v nodejs >/dev/null 2>&1 || {
-#        curl --silent --location https://rpm.nodesource.com/setup_6.x | ${SUDO} bash -;
-#        ${SUDO} yum -y install nodejs;
-#    }
-#
+elif echo ${LINUX_TYPE} | grep -qi "centos"; then
+    test "${PACKAGES}" = "" || {
+        ${SUDO} yum -y install ${PACKAGES};
+    }
+
+    command -v ${CLANGD_BINARY} >/dev/null 2>&1 || {
+       echo "LLVM / Clang ${CLANGD_VERSION} not supported on CentOS.";
+       exit 1;
+    }
+
 ## openSUSE 13.2
 ################
-#elif echo ${LINUX_TYPE} | grep -qi "opensuse"; then
-#    test "${PACKAGES}" = "" || {
-#        ${SUDO} zypper install -y ${PACKAGES};
-#    }
-#
-#    command -v nodejs >/dev/null 2>&1 || {
-#        ${SUDO} zypper ar http://download.opensuse.org/repositories/devel:/languages:/nodejs/openSUSE_13.1/ Node.js
-#        ${SUDO} zypper in nodejs
-#    }
-#
+elif echo ${LINUX_TYPE} | grep -qi "opensuse"; then
+   test "${PACKAGES}" = "" || {
+       ${SUDO} zypper install -y ${PACKAGES};
+   }
+
+   command -v ${CLANGD_BINARY} >/dev/null 2>&1 || {
+       echo "LLVM / Clang ${CLANGD_VERSION} not supported on OpenSUSE 13.2.";
+       exit 1;
+   }
+
 else
    >&2 echo "Unrecognized Linux Type"
    >&2 cat $FILE
@@ -164,8 +156,6 @@ fi
 #########################
 ### Install Clangd LS ###
 #########################
-
-#curl -s ${AGENT_BINARIES_URI} | tar xzf - -C ${LS_DIR}
 
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}

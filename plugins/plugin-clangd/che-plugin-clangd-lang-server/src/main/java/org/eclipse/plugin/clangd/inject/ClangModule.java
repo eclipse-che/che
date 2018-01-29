@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.che.plugin.cpp.projecttype.CppProjectType;
 import org.eclipse.plugin.clangd.languageserver.ClangDLanguageServerLauncher;
 
 /** @author Alexander Andrienko */
+/** @author Hanno Kolvenbach */
 @DynaModule
 public class ClangModule extends AbstractModule {
   public static final String LANGUAGE_ID = "clangd";
@@ -32,13 +33,6 @@ public class ClangModule extends AbstractModule {
         "HXX"
       };
   private static final String MIME_TYPE = "text/x-cpp";
-
-  // @Override
-  // protected void configure() {
-  //   Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
-  //       .addBinding()
-  //       .to(ClangDLanguageServerLauncher.class);
-  // }
 
   @Override
   protected void configure() {
