@@ -16,6 +16,7 @@ import {RandomSvc} from '../../../../components/utils/random.service';
 import {WorkspaceDetailsProjectsService} from './workspace-details-projects.service';
 import {WorkspaceDetailsService} from '../workspace-details.service';
 import {CreateWorkspaceSvc} from '../../create-workspace/create-workspace.service';
+import {WorkspaceStatus} from '../../../../components/api/workspace/che-workspace.factory';
 
 /**
  * @ngdoc controller
@@ -54,6 +55,10 @@ export class WorkspaceDetailsProjectsCtrl {
    * Workspace creation service.
    */
   private createWorkspaceSvc: CreateWorkspaceSvc;
+  /**
+   * Workspace details service.
+   */
+  private workspaceDetailsService: WorkspaceDetailsService;
 
   private projectFilter: any;
   private profileCreationDate: any;
@@ -79,6 +84,7 @@ export class WorkspaceDetailsProjectsCtrl {
               stackSelectorSvc: StackSelectorSvc,
               randomSvc: RandomSvc,
               createWorkspaceSvc: CreateWorkspaceSvc,
+              workspaceDetailsService: WorkspaceDetailsService,
               workspaceDetailsProjectsService: WorkspaceDetailsProjectsService) {
     this.$mdDialog = $mdDialog;
     this.confirmDialogService = confirmDialogService;
@@ -86,6 +92,7 @@ export class WorkspaceDetailsProjectsCtrl {
     this.randomSvc = randomSvc;
     this.workspaceDetailsProjectsService = workspaceDetailsProjectsService;
     this.createWorkspaceSvc = createWorkspaceSvc;
+    this.workspaceDetailsService = workspaceDetailsService;
 
     const helperId = 'workspace-details-projects';
     this.cheListHelper = cheListHelperFactory.getHelper(helperId);
@@ -248,6 +255,10 @@ export class WorkspaceDetailsProjectsCtrl {
     }
 
     return this.confirmDialogService.showConfirmDialog('Remove projects', content, 'Delete');
+  }
+
+  workspaceIsRunning(): boolean {
+    return this.workspaceDetailsService.getWorkspaceStatus(this.workspaceDetails.id) === WorkspaceStatus[WorkspaceStatus.RUNNING];
   }
 
 }
