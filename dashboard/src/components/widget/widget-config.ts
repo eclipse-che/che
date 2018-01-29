@@ -88,6 +88,7 @@ import {CheEditor} from './editor/che-editor.directive';
 import {CheEditorController} from './editor/che-editor.controller';
 import {PagingButtons} from './paging-button/paging-button.directive';
 import {CheRowToolbar} from './toolbar/che-row-toolbar.directive';
+import {CheEditModeOverlay} from './edit-mode-overlay/che-edit-mode-overlay.directive';
 
 export class WidgetConfig {
 
@@ -199,5 +200,7 @@ export class WidgetConfig {
     // popover
     register.directive('cheTogglePopover', CheTogglePopover);
     register.directive('toggleButtonPopover', CheToggleButtonPopover);
+    // edit overlay
+    register.directive('cheEditModeOverlay', CheEditModeOverlay);
   }
 }
