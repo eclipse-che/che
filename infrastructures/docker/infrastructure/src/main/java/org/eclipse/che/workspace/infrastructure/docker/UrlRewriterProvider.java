@@ -23,11 +23,12 @@ public class UrlRewriterProvider implements Provider<URLRewriter> {
 
   private URLRewriter instance;
   private String rewriterValue;
-  private final String PROPERTY_NAME = "che.infra.docker.url_rewriter";
+  private final String REWRITER_PROPERTY_NAME = "che.infra.docker.url_rewriter";
 
   @Inject
   public UrlRewriterProvider(
-      Map<String, URLRewriter> rewriters, @Nullable @Named(PROPERTY_NAME) String rewriter) {
+      Map<String, URLRewriter> rewriters,
+      @Nullable @Named(REWRITER_PROPERTY_NAME) String rewriter) {
     if (rewriter != null) {
       rewriterValue = rewriter;
       this.instance = rewriters.get(rewriter);
@@ -42,7 +43,7 @@ public class UrlRewriterProvider implements Provider<URLRewriter> {
       throw new IllegalStateException(
           String.format(
               "Value of the property %s=%s doesn't match any installed URL rewriters.",
-              PROPERTY_NAME, rewriterValue));
+              REWRITER_PROPERTY_NAME, rewriterValue));
     }
   }
 
