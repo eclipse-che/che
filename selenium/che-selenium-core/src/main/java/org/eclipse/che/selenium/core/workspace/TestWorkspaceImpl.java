@@ -23,6 +23,7 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 
 /** @author Anatolii Bazko */
 public class TestWorkspaceImpl implements TestWorkspace {
@@ -74,7 +75,11 @@ public class TestWorkspaceImpl implements TestWorkspace {
                       e);
                 }
 
-                throw new IllegalStateException(errorMessage, e);
+                if (e instanceof IllegalStateException) {
+                  Assert.fail("Known issue https://github.com/eclipse/che/issues/8031", e);
+                } else {
+                  throw new IllegalStateException(errorMessage, e);
+                }
               }
             });
   }

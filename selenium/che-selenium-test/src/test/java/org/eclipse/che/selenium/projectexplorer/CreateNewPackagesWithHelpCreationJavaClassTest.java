@@ -27,8 +27,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.TimeoutException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -37,9 +35,6 @@ import org.testng.annotations.Test;
  * @author Andrey Chizhikov
  */
 public class CreateNewPackagesWithHelpCreationJavaClassTest {
-
-  private static final Logger LOG =
-      LoggerFactory.getLogger(CreateNewPackagesWithHelpCreationJavaClassTest.class);
   private static final String PROJECT_NAME =
       CreateNewPackagesWithHelpCreationJavaClassTest.class.getSimpleName();
   private static final String NEW_PACKAGE_NAME1 = "tu";
@@ -102,17 +97,8 @@ public class CreateNewPackagesWithHelpCreationJavaClassTest {
     try {
       projectExplorer.waitItemInVisibleArea("TestClass2.java");
     } catch (TimeoutException ex) {
-      LOG.info(getPreferences());
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/8122");
     }
-  }
-
-  private String getPreferences() throws Exception {
-    return httpJsonRequestFactory
-        .fromUrl(testApiEndpointUrlProvider.get() + "preferences")
-        .useGetMethod()
-        .request()
-        .asString();
   }
 }

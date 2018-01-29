@@ -61,29 +61,11 @@ public class JpaStackDaoTest {
     stacks =
         new StackImpl[] {
           new StackImpl(
-              "stack1",
-              "st1",
-              null,
-              null,
-              null,
-              Arrays.asList("tag1", "tag2"),
-              null,
-              null,
-              null,
-              null),
-          new StackImpl("stack2", "st2", null, null, null, null, null, null, null, null),
+              "stack1", "st1", null, null, null, Arrays.asList("tag1", "tag2"), null, null, null),
+          new StackImpl("stack2", "st2", null, null, null, null, null, null, null),
           new StackImpl(
-              "stack3",
-              "st3",
-              null,
-              null,
-              null,
-              Arrays.asList("tag1", "tag2"),
-              null,
-              null,
-              null,
-              null),
-          new StackImpl("stack4", "st4", null, null, null, null, null, null, null, null)
+              "stack3", "st3", null, null, null, Arrays.asList("tag1", "tag2"), null, null, null),
+          new StackImpl("stack4", "st4", null, null, null, null, null, null, null)
         };
 
     Injector injector = Guice.createInjector(new WorkspaceTckModule());

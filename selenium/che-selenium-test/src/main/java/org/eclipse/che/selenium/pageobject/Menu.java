@@ -135,6 +135,7 @@ public class Menu {
     }
     redrawMenuItemsWait.until(
         ExpectedConditions.invisibilityOfElementLocated(By.id(idCommandName)));
+    loader.waitOnClosed();
   }
 
   /**
@@ -172,6 +173,8 @@ public class Menu {
     seleniumWebDriver.findElement(By.id(idSubCommandName)).click();
     redrawMenuItemsWait.until(
         ExpectedConditions.invisibilityOfElementLocated(By.id(idCommandName)));
+
+    loader.waitOnClosed();
   }
 
   /**
@@ -212,6 +215,8 @@ public class Menu {
     seleniumWebDriver.findElement(By.xpath(xpathSubCommandName)).click();
     redrawMenuItemsWait.until(
         ExpectedConditions.invisibilityOfElementLocated(By.id(idCommandName)));
+
+    loader.waitOnClosed();
   }
 
   /**
@@ -245,6 +250,8 @@ public class Menu {
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(String.format(Locators.ENABLED_ITEM, command))))
         .click();
+
+    loader.waitOnClosed();
   }
 
   /** wait a command is not present in the menu */
