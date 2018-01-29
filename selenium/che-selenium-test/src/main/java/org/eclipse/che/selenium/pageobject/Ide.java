@@ -10,13 +10,15 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.net.URL;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.entrance.Entrance;
-import org.eclipse.che.selenium.core.utils.BrowserLogsUtils;
+import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
 import org.openqa.selenium.TimeoutException;
@@ -32,7 +34,7 @@ public class Ide {
   private final TestWorkspaceUrlResolver testWorkspaceUrlResolver;
   private final Entrance entrance;
   private final ProjectExplorer projectExplorer;
-  private final BrowserLogsUtils browserLogsUtils;
+  private final BrowserLogsUtil browserLogsUtil;
 
   @Inject
   public Ide(
@@ -40,12 +42,12 @@ public class Ide {
       TestWorkspaceUrlResolver testWorkspaceUrlResolver,
       Entrance entrance,
       ProjectExplorer projectExplorer,
-      BrowserLogsUtils browserLogsUtils) {
+      BrowserLogsUtil browserLogsUtil) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.testWorkspaceUrlResolver = testWorkspaceUrlResolver;
     this.entrance = entrance;
     this.projectExplorer = projectExplorer;
-    this.browserLogsUtils = browserLogsUtils;
+    this.browserLogsUtil = browserLogsUtil;
   }
 
   public void open(TestWorkspace testWorkspace) throws Exception {
@@ -55,9 +57,9 @@ public class Ide {
     try {
       projectExplorer.waitProjectExplorer(60);
     } catch (TimeoutException ex) {
-      browserLogsUtils.addBrowserLogsToTheTestLogs();
+      browserLogsUtil.appendBrowserLogs();
       // Remove try-catch block after issue has been resolved
-      Assert.fail("Known issue https://github.com/eclipse/che/issues/8468", ex);
+      fail("Known issue https://github.com/eclipse/che/issues/8468", ex);
     }
   }
 
