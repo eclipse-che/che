@@ -280,19 +280,17 @@ public class SubPanelViewImpl extends Composite
         menu.removeListItem(listItemWidget);
       }
 
-      if (tab == selectedTab) {
-        if (tabsPanel.getWidgetCount() > 1) {
-          Widget widgetToSelect;
-          if (removedTabIndex < tabsPanel.getWidgetCount() - 1) {
-            widgetToSelect = tabsPanel.getWidget(removedTabIndex);
-          } else {
-            widgetToSelect = tabsPanel.getWidget(tabsPanel.getWidgetCount() - 2);
-          }
+      if (tab == selectedTab && tabsPanel.getWidgetCount() > 1) {
+        Widget widgetToSelect;
+        if (removedTabIndex < tabsPanel.getWidgetCount() - 1) {
+          widgetToSelect = tabsPanel.getWidget(removedTabIndex);
+        } else {
+          widgetToSelect = tabsPanel.getWidget(tabsPanel.getWidgetCount() - 2);
+        }
 
-          if (widgetToSelect instanceof Tab) {
-            selectTab((Tab) widgetToSelect);
-            onTabClicked((Tab) widgetToSelect);
-          }
+        if (widgetToSelect instanceof Tab) {
+          selectTab((Tab) widgetToSelect);
+          onTabClicked((Tab) widgetToSelect);
         }
       }
     }
