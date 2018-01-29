@@ -21,7 +21,7 @@ import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -76,7 +76,7 @@ public class NavigationBar {
     try {
       new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
           .until(visibilityOf(navigationBar));
-    } catch (WebDriverException ex) {
+    } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/8490");
     }
