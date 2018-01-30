@@ -100,6 +100,13 @@ public interface WindowView {
   void setActive(boolean active);
 
   /**
+   * Provide property to set up current window as modal. By default, window is modal.
+   *
+   * @param modal {@code true} if window has to be modal
+   */
+  void setModal(boolean modal);
+
+  /**
    * Provide a proxy browser event handler to be able to pass browser event to implementor's of the
    * {@link Window}.
    *

@@ -108,6 +108,15 @@ public abstract class Window implements IsWidget {
   }
 
   /**
+   * Provide property to set up current window as modal. By default, window is modal.
+   *
+   * @param modal {@code true} if window has to be modal
+   */
+  protected final void setModal(boolean modal) {
+    view.setModal(modal);
+  }
+
+  /**
    * Create a button in button bar. Button can be a primary. Primary flag set the different style
    * for the button to mark it from other ones.
    *

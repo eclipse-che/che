@@ -147,7 +147,12 @@ final class RenameViewImpl extends Window implements RenameView {
     updateMarkDeprecated.setValue(false);
     updateMarkDeprecated.setEnabled(false);
 
-    super.show();
+    super.show(newName);
+  }
+
+  @Override
+  protected void onShow() {
+    newName.selectAll();
   }
 
   @Override
@@ -236,10 +241,7 @@ final class RenameViewImpl extends Window implements RenameView {
   }
 
   @Override
-  public void setFocus() {
-    newName.selectAll();
-    newName.setFocus(true);
-  }
+  public void setFocus() {}
 
   /** {@inheritDoc} */
   @Override

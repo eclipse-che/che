@@ -12,12 +12,16 @@ package org.eclipse.che.ide.ui.window;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.gwt.dom.client.Style.Position.ABSOLUTE;
+import static com.google.gwt.dom.client.Style.Position.FIXED;
+import static com.google.gwt.dom.client.Style.Unit.PCT;
 import static com.google.gwt.dom.client.Style.Unit.PX;
 import static com.google.gwt.user.client.Window.getClientWidth;
+import static org.eclipse.che.ide.util.dom.DomUtils.incrementAndGetTopZIndex;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
@@ -61,6 +65,9 @@ public class CompositeWindowView extends Composite implements WindowView {
   private int dragStartX;
   private int dragStartY;
   private String transition;
+
+  private boolean windowFrameModal = true;
+  private HTMLPanel windowFrameGlassPanel = null;
 
   private List<BrowserEventHandler> browserEventHandlers = null;
   private List<WindowCloseEventHandler> windowCloseEventHandlers = null;
@@ -112,6 +119,18 @@ public class CompositeWindowView extends Composite implements WindowView {
   }
 
   @Override
+  protected void onLoad() {
+    if (windowFrameModal) {
+      addModality();
+    }
+  }
+
+  @Override
+  protected void onUnload() {
+    removeModality();
+  }
+
+  @Override
   public void setDebugId(String debugId) {
     ensureDebugId(debugId);
 
@@ -142,7 +161,10 @@ public class CompositeWindowView extends Composite implements WindowView {
 
   @Override
   public void setZIndex(int zIndex) {
-    windowFrame.getElement().getStyle().setZIndex(zIndex);
+    if (windowFrameModal && windowFrameGlassPanel != null) {
+      windowFrameGlassPanel.getElement().getStyle().setZIndex(zIndex);
+    }
+    windowFrame.getElement().getStyle().setZIndex(incrementAndGetTopZIndex(zIndex));
   }
 
   @Override
@@ -203,6 +225,17 @@ public class CompositeWindowView extends Composite implements WindowView {
     super.setTitle(title);
 
     windowFrameHeaderTitle.setText(title);
+  }
+
+  @Override
+  public void setModal(boolean modal) {
+    windowFrameModal = modal;
+
+    if (modal && windowFrameGlassPanel == null) {
+      addModality();
+    } else if (!modal && windowFrameGlassPanel != null) {
+      removeModality();
+    }
   }
 
   private void initEventHandlers() {
@@ -323,6 +356,26 @@ public class CompositeWindowView extends Composite implements WindowView {
       getElement().getStyle().setProperty("MozTransform", "scale(1.0)");
       getElement().getStyle().setProperty("WebkitTransform", "scale(1.0)");
       getElement().getStyle().setProperty("transform", "scale(1.0)");
+    }
+  }
+
+  private void addModality() {
+    windowFrameGlassPanel = new HTMLPanel("div", "");
+
+    Style style = windowFrameGlassPanel.getElement().getStyle();
+    style.setPosition(FIXED);
+    style.setWidth(100., PCT);
+    style.setHeight(100., PCT);
+    style.setTop(0., PX);
+    style.setLeft(0., PX);
+
+    RootPanel.get().add(windowFrameGlassPanel);
+  }
+
+  private void removeModality() {
+    if (windowFrameGlassPanel != null) {
+      windowFrameGlassPanel.removeFromParent();
+      windowFrameGlassPanel = null;
     }
   }
 

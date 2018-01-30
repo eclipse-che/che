@@ -12,6 +12,7 @@ package org.eclipse.che.ide.ext.git.client.branch;
 
 import static com.google.gwt.event.dom.client.KeyCodes.KEY_BACKSPACE;
 import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
+import static org.eclipse.che.ide.util.input.SignalEventImpl.getKeyIdentifier;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
@@ -20,6 +21,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -187,8 +189,13 @@ public class BranchViewImpl extends Window implements BranchView {
   public void onKeyPress(NativeEvent evt) {
     if (evt.getKeyCode() == KEY_BACKSPACE) {
       branchesList.removeLastCharacter();
-    } else {
-      branchesList.addCharacterToFilter(String.valueOf(evt.getCharCode()));
+      return;
+    }
+
+    String keyIdentifier = getKeyIdentifier((Event) evt);
+
+    if (keyIdentifier.length() == 1) {
+      branchesList.addCharacterToFilter(keyIdentifier);
     }
   }
 
