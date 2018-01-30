@@ -64,4 +64,9 @@ public class FrameItemRender extends SimpleList.ListItemRenderer<StackFrameDump>
     label.setInnerHTML(sb.toSafeHtml().asString());
     itemElement.appendChild(label);
   }
+
+  @Override
+  public Element createElement() {
+    return Elements.createTRElement();
+  }
 }
