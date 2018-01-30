@@ -17,14 +17,19 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.constant.TestBuildConstants;
+import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.intelligent.CommandsExplorer;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -35,6 +40,8 @@ public class AutocompleteWithInheritTest {
       NameGenerator.generate(AutocompleteWithInheritTest.class.getSimpleName(), 4);
   private static final String BASE_CLASS = "AppController";
   private static final String EXTENDED_CLASS = "InheritClass";
+  private static final String BUILD_COMMAND = "mvn clean install -f ${current.project.path}";
+  private static final String BUILD_COMMAND_NAME = "build";
 
   private static final String contentAfterFix =
       "public class InheritClass extends AppController {\n"
@@ -53,6 +60,9 @@ public class AutocompleteWithInheritTest {
   @Inject private CodenvyEditor editor;
   @Inject private MavenPluginStatusBar mavenPluginStatusBar;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private TestCommandServiceClient testCommandServiceClient;
+  @Inject private CommandsExplorer commandsExplorer;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -62,6 +72,10 @@ public class AutocompleteWithInheritTest {
         Paths.get(resource.toURI()),
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
+
+    testCommandServiceClient.createCommand(
+        BUILD_COMMAND, BUILD_COMMAND_NAME, TestCommandsConstants.MAVEN, workspace.getId());
+
     ide.open(workspace);
   }
 
@@ -70,6 +84,8 @@ public class AutocompleteWithInheritTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     mavenPluginStatusBar.waitClosingInfoPanel();
+
+    buildProject();
 
     projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
@@ -109,5 +125,16 @@ public class AutocompleteWithInheritTest {
     editor.waitTextIntoFixErrorProposition("Change type of 'testString' to 'int'");
     editor.selectFirstItemIntoFixErrorPropByDoubleClick();
     editor.waitAllMarkersDisappear(ERROR_MARKER);
+  }
+
+  private void buildProject() {
+    commandsExplorer.openCommandsExplorer();
+    commandsExplorer.waitCommandExplorerIsOpened();
+    commandsExplorer.runCommandByName(BUILD_COMMAND_NAME);
+    consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_FAILED);
+
+    projectExplorer.clickOnProjectExplorerTab();
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
   }
 }
