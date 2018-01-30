@@ -10,9 +10,8 @@
  */
 .listItemPanel {
     background-color: openedFilesDropdownListBackgroundColor;
-    border: 1px solid openedFilesDropdownListBorderColor;
+    border: none;
     box-shadow: 0 2px 2px 0 openedFilesDropdownListShadowColor;
-    border-radius: 0 0 3px 3px;
     max-height: 300px;
     overflow-y: auto;
     width: 200px;

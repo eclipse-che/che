@@ -29,7 +29,9 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import elemental.js.dom.JsElement;
+import javax.inject.Inject;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.ui.button.ButtonAlignment;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -52,6 +54,7 @@ public abstract class Window implements IsWidget {
 
   private boolean isShowing;
   private View view;
+  private KeyBindingAgent keyBinding;
 
   protected Window() {
     this(true);
@@ -61,13 +64,18 @@ public abstract class Window implements IsWidget {
     view = new View(resources, showBottomPanel);
   }
 
-  public void setWidget(Widget widget) {
-    view.addContentWidget(widget);
-    handleViewEvents();
+  @Inject
+  protected void setKeyBinding(KeyBindingAgent keyBinding) {
+    this.keyBinding = keyBinding;
   }
 
   public Widget getWidget() {
     return view.getContent();
+  }
+
+  public void setWidget(Widget widget) {
+    view.addContentWidget(widget);
+    handleViewEvents();
   }
 
   /**
@@ -106,6 +114,10 @@ public abstract class Window implements IsWidget {
 
     if (!isShowing) {
       return;
+    }
+
+    if (keyBinding != null) {
+      keyBinding.enable();
     }
 
     isShowing = false;
@@ -224,6 +236,10 @@ public abstract class Window implements IsWidget {
       setFocusOn(
           selectAndFocusElement); // the window is displayed but focus for the element may be lost
       return;
+    }
+
+    if (keyBinding != null) {
+      keyBinding.disable();
     }
 
     isShowing = true;

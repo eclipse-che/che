@@ -1357,8 +1357,6 @@ public interface Theme {
 
   String openedFilesDropdownListBackgroundColor();
 
-  String openedFilesDropdownListBorderColor();
-
   String openedFilesDropdownListShadowColor();
 
   String openedFilesDropdownListTextColor();
@@ -1366,8 +1364,6 @@ public interface Theme {
   String openedFilesDropdownListCloseButtonColor();
 
   String openedFilesDropdownListHoverBackgroundColor();
-
-  String openedFilesDropdownListHoverTextColor();
 
   /**
    * ******************************************************************************************
