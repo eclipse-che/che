@@ -136,7 +136,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     CompletableFuture<String> instToRequestThread =
         debugUtils.gotoDebugAppAndSendRequest(
             appUrl, requestMess, APPLICATION_FORM_URLENCODED, 200);
-    editor.waitActiveBreakpoint(38);
+    editor.waitActiveBreakpoint(34);
     try {
       debugPanel.waitDebugHighlightedText("result = \"Sorry, you failed. Try again later!\";");
     } catch (TimeoutException ex) {

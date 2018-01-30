@@ -27,6 +27,7 @@ import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.openqa.selenium.By;
@@ -37,15 +38,18 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class MachineTerminal {
-
+  private static final Logger LOG = LoggerFactory.getLogger(MachineTerminal.class);
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
   private final ActionsFactory actionsFactory;
   private final CommandsPalette commandsPalette;
   private final TestCommandServiceClient commandServiceClient;
+  private final Consoles consoles;
 
   @Inject
   public MachineTerminal(
@@ -53,12 +57,14 @@ public class MachineTerminal {
       Loader loader,
       ActionsFactory actionsFactory,
       CommandsPalette commandsPalette,
-      TestCommandServiceClient commandServiceClient) {
+      TestCommandServiceClient commandServiceClient,
+      Consoles consoles) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
     this.commandsPalette = commandsPalette;
     this.commandServiceClient = commandServiceClient;
+    this.consoles = consoles;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -313,13 +319,15 @@ public class MachineTerminal {
         : format(Locators.TERMINAL_TAB_XPATH, "-" + terminalNumber);
   }
 
-  /** */
+  // this auxiliary method for investigate problem that was described in the issue: https://github.com/eclipse/che/issues/8105
   public void launchScriptAndGetInfo(
       TestWorkspace ws, String currentProject, TestProjectServiceClient testProjectServiceClient)
       throws Exception {
     String ideCommnandName = "checkApp";
     String bashFileName = "check-app-state.sh";
-    String terminalCommandForCheckResult = "cd ${current.project.path} && ./check-app-state.sh";
+    String terminalCommandForCheckResult =
+        String.format(
+            "cd /projects/%s && chmod +x %s && ./%s", currentProject, bashFileName, bashFileName);
     commandServiceClient.createCommand(
         terminalCommandForCheckResult, ideCommnandName, CUSTOM, ws.getId());
     String bashScript =
@@ -340,7 +348,11 @@ public class MachineTerminal {
 
     testProjectServiceClient.createFileInProject(
         ws.getId(), currentProject, bashFileName, bashScript);
+    seleniumWebDriver.navigate().refresh();
     commandsPalette.openCommandPalette();
-    commandsPalette.startCommandByDoubleClick(CUSTOM);
+    commandsPalette.startCommandByDoubleClick(ideCommnandName);
+    consoles.waitExpectedTextIntoConsole("PID");
+    String webAppPIDs = consoles.getVisibleTextFromCommandConsole();
+    LOG.warn("@@@ The PID list from run Web application is: " + webAppPIDs);
   }
 }
