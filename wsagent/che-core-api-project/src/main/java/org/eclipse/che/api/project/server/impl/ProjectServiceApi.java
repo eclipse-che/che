@@ -97,6 +97,7 @@ public class ProjectServiceApi {
 
   private final ServiceContext serviceContext;
 
+  private final ProjectConfigRegistry projectConfigRegistry;
   private final ProjectManager projectManager;
   private final FsManager fsManager;
   private final FsDtoConverter fsDtoConverter;
@@ -109,6 +110,7 @@ public class ProjectServiceApi {
   @AssistedInject
   public ProjectServiceApi(
       @Assisted ServiceContext serviceContext,
+      ProjectConfigRegistry projectConfigRegistry,
       Searcher searcher,
       ProjectManager projectManager,
       FsManager fsManager,
@@ -118,6 +120,7 @@ public class ProjectServiceApi {
       ProjectServiceVcsStatusInjector vcsStatusInjector,
       RequestTransmitter transmitter) {
     this.serviceContext = serviceContext;
+    this.projectConfigRegistry = projectConfigRegistry;
     this.projectManager = projectManager;
     this.fsManager = fsManager;
     this.fsDtoConverter = fsDtoConverter;
@@ -527,6 +530,8 @@ public class ProjectServiceApi {
     wsPath = absolutize(wsPath);
 
     fsManager.unzip(wsPath, zip, skipFirstLevel);
+
+    projectConfigRegistry.put(wsPath, true, true);
 
     eventService.publish(new ProjectCreatedEvent(wsPath));
 

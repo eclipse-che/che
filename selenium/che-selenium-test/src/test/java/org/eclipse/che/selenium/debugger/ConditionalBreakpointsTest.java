@@ -10,6 +10,11 @@
  */
 package org.eclipse.che.selenium.debugger;
 
+import static java.lang.String.format;
+import static java.nio.file.Files.createFile;
+import static java.nio.file.Files.write;
+import static org.eclipse.che.selenium.core.constant.FileContentConstants.CLASSPATH_FILE;
+import static org.eclipse.che.selenium.core.constant.FileContentConstants.PROJECT_FILE;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.RUN_MENU;
@@ -19,6 +24,7 @@ import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerActio
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointConfigurationImpl;
@@ -60,11 +66,11 @@ public class ConditionalBreakpointsTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    testProjectServiceClient.importProject(
-        ws.getId(),
-        Paths.get(getClass().getResource("/projects/plugins/DebuggerPlugin/hello-world").toURI()),
-        PROJECT,
-        PLAIN_JAVA);
+    Path sourceFolder =
+        Paths.get(getClass().getResource("/projects/plugins/DebuggerPlugin/hello-world").toURI());
+    write(createFile(sourceFolder.resolve(".project")), format(PROJECT_FILE, PROJECT).getBytes());
+    write(createFile(sourceFolder.resolve(".classpath")), CLASSPATH_FILE.getBytes());
+    testProjectServiceClient.importProject(ws.getId(), sourceFolder, PROJECT, PLAIN_JAVA);
 
     testCommandServiceClient.createCommand(
         "cd ${current.project.path}/src/ && javac -g HelloWorld.java", "build", CUSTOM, ws.getId());

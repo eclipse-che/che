@@ -10,8 +10,13 @@
  */
 package org.eclipse.che.selenium.debugger;
 
+import static java.lang.String.format;
+import static java.nio.file.Files.createFile;
+import static java.nio.file.Files.write;
 import static java.nio.file.Paths.get;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.constant.FileContentConstants.CLASSPATH_FILE;
+import static org.eclipse.che.selenium.core.constant.FileContentConstants.PROJECT_FILE;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.RUN_MENU;
@@ -24,6 +29,7 @@ import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerActio
 
 import com.google.inject.Inject;
 import java.net.URL;
+import java.nio.file.Path;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
@@ -71,7 +77,10 @@ public class DebuggerWatchExpressionTest {
   @BeforeClass
   public void prepare() throws Exception {
     URL resource = getClass().getResource(PROJECT_PATH);
-    prjServiceClient.importProject(ws.getId(), get(resource.toURI()), PROJECT, PLAIN_JAVA);
+    Path sourceFolder = get(resource.toURI());
+    write(createFile(sourceFolder.resolve(".project")), format(PROJECT_FILE, PROJECT).getBytes());
+    write(createFile(sourceFolder.resolve(".classpath")), CLASSPATH_FILE.getBytes());
+    prjServiceClient.importProject(ws.getId(), sourceFolder, PROJECT, PLAIN_JAVA);
 
     cmdClient.createCommand(DEBUG_APP, START_DEBUG, CUSTOM, ws.getId());
 

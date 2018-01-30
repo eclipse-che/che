@@ -53,7 +53,7 @@ public class CheckMavenPluginTest {
   @Inject private AskForValueDialog askDialog;
   @Inject private Git git;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-
+  @Inject private Consoles consoles;
   @Inject private TestCommandServiceClient commandServiceClient;
 
   @BeforeClass
@@ -62,6 +62,7 @@ public class CheckMavenPluginTest {
     testProjectServiceClient.importProject(
         workspace.getId(), get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
   }
