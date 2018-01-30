@@ -18,7 +18,7 @@
     <ui:style>
         .condition {
             margin-left: 5px;
-            width: 310px;
+            width: 300px;
         }
 
         .hitCount {
