@@ -162,9 +162,7 @@ public abstract class SeleniumTestHandler
   }
 
   @Override
-  public void onStart(ITestContext context) {
-    checkWebDriverSessionCreation();
-  }
+  public void onStart(ITestContext context) {}
 
   @Override
   public void onFinish(ITestContext context) {}

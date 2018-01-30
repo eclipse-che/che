@@ -10,13 +10,16 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FILE_STRUCTURE;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.FileStructure;
@@ -24,12 +27,13 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 11.12.15 */
 public class FileStructureBaseOperationTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("FileStructureProject", 4);
+  private static final String PROJECT_NAME = generate("project", 4);
 
   private static final String CLASS_MEMBERS_1 =
       "AppController\n"
@@ -69,10 +73,7 @@ public class FileStructureBaseOperationTest {
   public void setUp() throws Exception {
     URL resource = getClass().getResource("/projects/guess-project");
     testProjectServiceClient.importProject(
-        workspace.getId(),
-        Paths.get(resource.toURI()),
-        PROJECT_NAME,
-        ProjectTemplates.MAVEN_SPRING);
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
 
     ide.open(workspace);
   }
@@ -87,9 +88,7 @@ public class FileStructureBaseOperationTest {
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     editor.waitActive();
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.FILE_STRUCTURE);
+    menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen("AppController");
     fileStructure.launchFileStructureFormByKeyboard();
     fileStructure.closeFileStructureFormByEscape();
@@ -105,15 +104,20 @@ public class FileStructureBaseOperationTest {
     fileStructure.waitFileStructureFormIsClosed();
 
     // Show inherited members
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.FILE_STRUCTURE);
+    menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     loader.waitOnClosed();
     fileStructure.waitFileStructureFormIsOpen("AppController");
     fileStructure.waitExpectedTextInFileStructure(CLASS_MEMBERS_1);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(INHERITED_MEMBERS);
     fileStructure.launchFileStructureFormByKeyboard();
-    fileStructure.waitExpectedTextInFileStructure(CLASS_MEMBERS_2);
+
+    try {
+      fileStructure.waitExpectedTextInFileStructure(CLASS_MEMBERS_2);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8509");
+    }
+
     fileStructure.waitExpectedTextInFileStructure(INHERITED_MEMBERS);
     fileStructure.launchFileStructureFormByKeyboard();
     fileStructure.waitExpectedTextInFileStructure(CLASS_MEMBERS_1);
@@ -125,7 +129,7 @@ public class FileStructureBaseOperationTest {
     // Check the the 'file structure' is not present in the menu
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
     editor.waitActive();
-    menu.runCommand(TestMenuCommandsConstants.Assistant.ASSISTANT);
-    menu.waitCommandIsNotPresentInMenu(TestMenuCommandsConstants.Assistant.FILE_STRUCTURE);
+    menu.runCommand(ASSISTANT);
+    menu.waitCommandIsNotPresentInMenu(FILE_STRUCTURE);
   }
 }
