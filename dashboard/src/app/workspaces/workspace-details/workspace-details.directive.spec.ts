@@ -162,10 +162,26 @@ describe(`WorkspaceDetailsController >`, () => {
           return workspace;
         };
         this.startWorkspace = (workspaceId: string): ng.IPromise<any> => {
-          return $q.when();
+          const startingPromise = $q.when().then(() => {
+            workspace.status = WorkspaceStatus[WorkspaceStatus.STARTING];
+          });
+          startingPromise.then(() => {
+            return $timeout(() => {
+              workspace.status = WorkspaceStatus[WorkspaceStatus.RUNNING];
+            });
+          });
+          return startingPromise;
         };
         this.stopWorkspace = (workspaceId: string): ng.IPromise<any> => {
-          return $q.when();
+          const stoppingPromise = $q.when().then(() => {
+            workspace.status = WorkspaceStatus[WorkspaceStatus.STOPPING];
+          });
+          stoppingPromise.then(() => {
+            return $timeout(() => {
+              workspace.status = WorkspaceStatus[WorkspaceStatus.STOPPED];
+            });
+          });
+          return stoppingPromise;
         };
         this.fetchStatusChange = (workspaceId: string, status: string): ng.IPromise<any> => {
           workspace.status = status;
@@ -332,7 +348,7 @@ describe(`WorkspaceDetailsController >`, () => {
               $timeout.flush();
             });
 
-            it (`the overlay panel should be hidden >`, () => {
+            it(`the overlay panel should be hidden >`, () => {
               expect(getOverlayPanelEl().length).toEqual(0);
             });
 
@@ -389,7 +405,7 @@ describe(`WorkspaceDetailsController >`, () => {
               $timeout.flush();
             });
 
-            it (`the overlay panel should remain visible >`, () => {
+            it(`the overlay panel should remain visible >`, () => {
               expect(getOverlayPanelEl().length).toEqual(1);
             });
 
@@ -433,7 +449,7 @@ describe(`WorkspaceDetailsController >`, () => {
         beforeEach(() => {
           compileDirective();
 
-          controller.workspaceDetails.status = WorkspaceStatus[WorkspaceStatus.STOPPED];
+          controller.stopWorkspace();
           controller.workspaceDetails.config.name = 'wksp-new-name';
         });
 
@@ -486,7 +502,7 @@ describe(`WorkspaceDetailsController >`, () => {
               $timeout.flush();
             });
 
-            it (`the overlay panel should be hidden >`, () => {
+            it(`the overlay panel should be hidden >`, () => {
               expect(getOverlayPanelEl().length).toEqual(0);
             });
 
@@ -510,8 +526,8 @@ describe(`WorkspaceDetailsController >`, () => {
             expect(getSaveButton().attr('disabled')).toBeFalsy();
           });
 
-          it(`the applyButton should be enabled >`, () => {
-            expect(getApplyButton().attr('disabled')).toBeFalsy();
+          it(`the applyButton should be disabled >`, () => {
+            expect(getApplyButton().attr('disabled')).toBeTruthy();
           });
 
           it(`the cancelButton should be enabled >`, () => {
@@ -539,35 +555,6 @@ describe(`WorkspaceDetailsController >`, () => {
               newWorkspace = angular.copy(controller.workspaceDetails);
 
               getSaveButton().click();
-              $scope.$digest();
-              $timeout.flush();
-            });
-
-            it (`the overlay panel should remain visible >`, () => {
-              expect(getOverlayPanelEl().length).toEqual(1);
-            });
-
-            it(`the saveButton should be disabled >`, () => {
-              expect(getSaveButton().attr('disabled')).toBeTruthy();
-            });
-
-            it(`the applyButton should be enabled >`, () => {
-              expect(getApplyButton().attr('disabled')).toBeFalsy();
-            });
-
-            it(`the cancelButton should be disabled >`, () => {
-              expect(getCancelButton().attr('disabled')).toBeTruthy();
-            });
-
-          });
-
-          describe(`and applyButton is clicked >`, () => {
-
-            beforeEach(() => {
-              // set new workspace to publish
-              newWorkspace = angular.copy(controller.workspaceDetails);
-
-              getApplyButton().click();
               $scope.$digest();
               $timeout.flush();
             });

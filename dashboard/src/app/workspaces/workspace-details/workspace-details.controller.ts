@@ -9,7 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
+import {CheWorkspace, WorkspaceStatus} from '../../../components/api/workspace/che-workspace.factory';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {WorkspaceDetailsService} from './workspace-details.service';
 import IdeSvc from '../../ide/ide.service';
@@ -104,17 +104,16 @@ export class WorkspaceDetailsController {
       }
 
       this.originWorkspaceDetails = angular.copy(newWorkspaceDetails);
-      this.checkEditMode().then(() => {
-        if (this.unsavedChangesToApply) {
-          return;
-        }
+      if (this.unsavedChangesToApply === false) {
         this.workspaceDetails = angular.copy(newWorkspaceDetails);
-      });
+      }
+      this.checkEditMode();
     };
     this.cheWorkspace.subscribeOnWorkspaceChange(initData.workspaceDetails.id, action);
 
     this.originWorkspaceDetails = angular.copy(initData.workspaceDetails);
     this.workspaceDetails = angular.copy(initData.workspaceDetails);
+    this.checkEditMode();
 
     this.updateTabs();
 
@@ -317,7 +316,7 @@ export class WorkspaceDetailsController {
       return message;
     }
 
-    return 'Your workspace will be restarted if you apply changes.';
+    return 'Your workspace will be restarted if you click Apply button.';
   }
 
   /**
@@ -368,7 +367,12 @@ export class WorkspaceDetailsController {
     return this.tabsValidationTimeout = this.$timeout(() => {
       const configIsDiffer = !angular.equals(this.originWorkspaceDetails.config, this.workspaceDetails.config);
 
-      this.unsavedChangesToApply = configIsDiffer && (this.unsavedChangesToApply || !!restartToApply);
+      // the workspace should be restarted only if its status is STARTING or RUNNING
+      if (this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.STARTING] || this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.RUNNING]) {
+        this.unsavedChangesToApply = configIsDiffer && (this.unsavedChangesToApply || !!restartToApply);
+      } else {
+        this.unsavedChangesToApply = false;
+      }
 
       // check for failed tabs
       const failedTabs = this.checkForFailedTabs();
