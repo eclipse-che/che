@@ -12,8 +12,8 @@ package org.eclipse.che.selenium.core.provider;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import java.net.URL;
-import javax.inject.Named;
 import org.eclipse.che.selenium.core.UrlUtil;
 
 /** @author Anatolii Bazko */
