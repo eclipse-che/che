@@ -21,11 +21,13 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -62,6 +64,7 @@ public class AutocompleteWithInheritTest {
         Paths.get(resource.toURI()),
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
+
     ide.open(workspace);
   }
 
@@ -70,7 +73,6 @@ public class AutocompleteWithInheritTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     mavenPluginStatusBar.waitClosingInfoPanel();
-
     projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
 
@@ -79,7 +81,7 @@ public class AutocompleteWithInheritTest {
 
     projectExplorer.openItemByVisibleNameInExplorer(EXTENDED_CLASS + ".java");
     editor.returnFocusInCurrentLine();
-    editor.waitMarkerInPosition(ERROR_MARKER, 13);
+    waitErrorMarkerInPosition();
     editor.setCursorToLine(13);
     editor.launchPropositionAssistPanel();
     editor.waitTextIntoFixErrorProposition("Add constructor 'InheritClass(int,String)'");
@@ -109,5 +111,27 @@ public class AutocompleteWithInheritTest {
     editor.waitTextIntoFixErrorProposition("Change type of 'testString' to 'int'");
     editor.selectFirstItemIntoFixErrorPropByDoubleClick();
     editor.waitAllMarkersDisappear(ERROR_MARKER);
+  }
+
+  private void waitErrorMarkerInPosition() {
+    try {
+      editor.waitMarkerInPosition(MarkersType.ERROR_MARKER, 13);
+    } catch (TimeoutException ex) {
+      editor.setCursorToLine(13);
+      editor.waitCursorPosition(13, 1);
+      editor.typeTextIntoEditor(Keys.ENTER.toString());
+      editor.waitCursorPosition(14, 1);
+      editor.typeTextIntoEditor(Keys.ENTER.toString());
+      editor.waitCursorPosition(15, 1);
+      editor.typeTextIntoEditor(Keys.ENTER.toString());
+      editor.waitCursorPosition(16, 1);
+      editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
+      editor.waitCursorPosition(15, 1);
+      editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
+      editor.waitCursorPosition(14, 1);
+      editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
+      editor.waitCursorPosition(13, 1);
+      editor.waitMarkerInPosition(MarkersType.ERROR_MARKER, 13);
+    }
   }
 }
