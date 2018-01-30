@@ -93,11 +93,11 @@ public class DebuggerWatchExpressionTest {
     cmdPalette.openCommandPalette();
     cmdPalette.startCommandByDoubleClick(START_DEBUG);
 
+    consoles.waitExpectedTextIntoConsole(TestBuildConstants.LISTENING_AT_ADDRESS_8000);
     menu.runCommandByXpath(
         TestMenuCommandsConstants.Run.RUN_MENU,
         TestMenuCommandsConstants.Run.DEBUG,
         debugConfig.getXpathToІRunDebugCommand(PROJECT));
-    consoles.waitExpectedTextIntoConsole(TestBuildConstants.LISTENING_AT_ADDRESS_8000);
   }
 
   @Test(priority = 1)

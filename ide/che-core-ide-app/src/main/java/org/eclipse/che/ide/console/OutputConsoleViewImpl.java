@@ -218,6 +218,8 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
         BOTTOM,
         MIDDLE,
         localization.consolesAutoScrollButtonTooltip());
+
+    toggleScrollToEndButton(followOutput);
   }
 
   @Override

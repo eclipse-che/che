@@ -17,8 +17,11 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.impl.FocusImpl;
+import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.ui.button.ButtonAlignment;
 import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
+
+import javax.inject.Inject;
 
 /**
  * Base class to create a window based panel with user defined widgets. In general, window contains
@@ -49,6 +52,7 @@ public abstract class Window implements IsWidget {
 
   private final WindowView view;
   private final WindowManager windowManager;
+    private KeyBindingAgent keyBinding;
 
   public Window() {
     windowManager = WindowManager.getInstance();
@@ -58,6 +62,11 @@ public abstract class Window implements IsWidget {
     view.addWindowCloseEventHandler(this::onWindowClose);
     view.addKeyboardNavigationHandler(new ViewKeyboardNavigationHandler());
   }
+
+    @Inject
+    protected void setKeyBinding(KeyBindingAgent keyBinding) {
+        this.keyBinding = keyBinding;
+    }
 
   // Configuration section
 
@@ -194,6 +203,10 @@ public abstract class Window implements IsWidget {
     view.detach();
     windowManager.unregister(this);
 
+      if (keyBinding != null) {
+          keyBinding.enable();
+      }
+
     onHide();
   }
 
@@ -211,6 +224,10 @@ public abstract class Window implements IsWidget {
     windowManager.register(this);
     view.attach();
     view.setFocusWidget(focusOn);
+
+      if (keyBinding != null) {
+          keyBinding.disable();
+      }
 
     onShow();
 
