@@ -1270,11 +1270,6 @@ public class LightTheme implements Theme {
   }
 
   @Override
-  public String openedFilesDropdownListBorderColor() {
-    return "#A4A4A4";
-  }
-
-  @Override
   public String openedFilesDropdownListShadowColor() {
     return "rgba(0, 0, 0, 0.30)";
   }
@@ -1292,11 +1287,6 @@ public class LightTheme implements Theme {
   @Override
   public String openedFilesDropdownListHoverBackgroundColor() {
     return "rgba(0, 0, 0, 0.12)";
-  }
-
-  @Override
-  public String openedFilesDropdownListHoverTextColor() {
-    return "#8E8E8E";
   }
 
   @Override
