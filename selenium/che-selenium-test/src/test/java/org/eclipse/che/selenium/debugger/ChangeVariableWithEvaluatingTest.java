@@ -109,6 +109,7 @@ public class ChangeVariableWithEvaluatingTest {
         TestCommandsConstants.CUSTOM,
         ws.getId());
     ide.open(ws);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME_CHANGE_VARIABLE);
   }
 
   @Test
