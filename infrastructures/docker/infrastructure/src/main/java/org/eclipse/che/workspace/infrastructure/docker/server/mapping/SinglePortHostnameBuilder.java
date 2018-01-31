@@ -17,15 +17,14 @@ import java.util.regex.Pattern;
 
 /**
  * Produces host names in form:
- * [serverName].[machineName].[workspaceId].<external_or_internal_address>.<wildcardNipDomain>
+ * [serverName].[machineName].[workspaceId].<external_or_internal_address>.<wildcardNipDomain> If
+ * some of the server name or machine name or workspace id is null, they will be not included.
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
 public class SinglePortHostnameBuilder {
 
-  private final String externalAddress;
-  private final String internalAddress;
-  private final String wildcardHost;
+  private final String wildcardDomain;
 
   /**
    * hostname labels may contain only the ASCII letters 'a' through 'z' (in a case-insensitive
@@ -35,9 +34,10 @@ public class SinglePortHostnameBuilder {
 
   public SinglePortHostnameBuilder(
       String externalAddress, String internalAddress, String wildcardHost) {
-    this.externalAddress = externalAddress;
-    this.internalAddress = internalAddress;
-    this.wildcardHost = wildcardHost;
+    this.wildcardDomain =
+        externalAddress != null
+            ? getWildcardDomain(externalAddress, wildcardHost)
+            : getWildcardDomain(internalAddress, wildcardHost);
   }
 
   /**
@@ -59,10 +59,7 @@ public class SinglePortHostnameBuilder {
     if (workspaceID != null) {
       joiner.add(normalize(workspaceID));
     }
-    joiner.add(
-        externalAddress != null
-            ? getWildcardDomain(externalAddress)
-            : getWildcardDomain(internalAddress));
+    joiner.add(wildcardDomain);
     return joiner.toString();
   }
 
@@ -71,7 +68,7 @@ public class SinglePortHostnameBuilder {
    *
    * @return wildcard domain
    */
-  private String getWildcardDomain(String localAddress) {
+  private String getWildcardDomain(String localAddress, String wildcardHost) {
     return String.format(
         "%s.%s", getExternalIp(localAddress), wildcardHost == null ? "nip.io" : wildcardHost);
   }
@@ -86,6 +83,14 @@ public class SinglePortHostnameBuilder {
   }
 
   private String normalize(String input) {
-    return pattern.matcher(input).replaceAll("-");
+    String normalized = pattern.matcher(input).replaceAll("-");
+    // Check not starts or ends with hyphen
+    while (normalized.startsWith("-")) {
+      normalized = normalized.substring(1);
+    }
+    while (normalized.endsWith("-")) {
+      normalized = normalized.substring(0, normalized.length() - 1);
+    }
+    return normalized;
   }
 }

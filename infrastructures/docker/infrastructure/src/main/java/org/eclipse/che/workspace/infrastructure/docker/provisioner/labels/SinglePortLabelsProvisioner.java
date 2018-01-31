@@ -10,7 +10,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.provisioner.labels;
 
+import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
+import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.INTERNAL_SERVER_ATTRIBUTE;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,6 +59,10 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
       Map<String, String> containerLabels = new HashMap<>();
       for (Map.Entry<String, ServerConfig> serverEntry :
           machineEntry.getValue().getServers().entrySet()) {
+        // skip internal servers
+        if (parseBoolean(serverEntry.getValue().getAttributes().get(INTERNAL_SERVER_ATTRIBUTE))) {
+          continue;
+        }
         final String host =
             hostnameBuilder.build(serverEntry.getKey(), machineName, identity.getWorkspaceId());
         final String serviceName = getServiceName(host);

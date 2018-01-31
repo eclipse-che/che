@@ -11,7 +11,6 @@
 package org.eclipse.che.workspace.infrastructure.docker;
 
 import java.util.Map;
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -22,7 +21,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 public class UrlRewriterProvider implements Provider<URLRewriter> {
 
   private URLRewriter instance;
-  private String rewriterValue;
   private final String REWRITER_PROPERTY_NAME = "che.infra.docker.url_rewriter";
 
   @Inject
@@ -30,20 +28,16 @@ public class UrlRewriterProvider implements Provider<URLRewriter> {
       Map<String, URLRewriter> rewriters,
       @Nullable @Named(REWRITER_PROPERTY_NAME) String rewriter) {
     if (rewriter != null) {
-      rewriterValue = rewriter;
       this.instance = rewriters.get(rewriter);
     } else {
       this.instance = rewriters.get("default");
     }
-  }
 
-  @PostConstruct
-  private void checkRewriterIsPresent() throws Exception {
     if (instance == null) {
       throw new IllegalStateException(
           String.format(
               "Value of the property %s=%s doesn't match any installed URL rewriters.",
-              REWRITER_PROPERTY_NAME, rewriterValue));
+              REWRITER_PROPERTY_NAME, rewriter));
     }
   }
 

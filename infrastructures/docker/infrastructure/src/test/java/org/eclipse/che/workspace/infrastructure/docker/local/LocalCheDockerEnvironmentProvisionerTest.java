@@ -59,7 +59,7 @@ public class LocalCheDockerEnvironmentProvisionerTest {
   public void setUp() throws Exception {
     provisioner =
         new LocalCheDockerEnvironmentProvisioner(
-            false,
+            true,
             settingsProvisioners,
             projectsVolumeProvisioner,
             installerConfigProvisioner,
@@ -83,7 +83,8 @@ public class LocalCheDockerEnvironmentProvisionerTest {
           serversConverter,
           envVarsConverter,
           memoryAttributeConverter,
-          volumesConverter
+          volumesConverter,
+          singlePortLabelsProvisioner
         };
   }
 
@@ -108,6 +109,9 @@ public class LocalCheDockerEnvironmentProvisionerTest {
         .provision(eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder.verify(settingsProvisioners).provision(eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder.verify(dockerApiEnvProvisioner).provision(eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder
+        .verify(singlePortLabelsProvisioner)
+        .provision(eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder.verifyNoMoreInteractions();
   }
 }
