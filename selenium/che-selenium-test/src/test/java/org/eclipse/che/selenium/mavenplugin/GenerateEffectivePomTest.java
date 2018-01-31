@@ -23,6 +23,7 @@ import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -44,6 +45,7 @@ public class GenerateEffectivePomTest {
   @Inject private Ide ide;
   @Inject private Menu menu;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -60,6 +62,7 @@ public class GenerateEffectivePomTest {
           "add additional try/catch block for workaround problem in https://github.com/eclipse/che/issues/2877")
   public void generateEffectivePomTest() throws Exception {
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     URL mainEffectivePomPath = GenerateEffectivePomTest.class.getResource("main");
     URL jarModuleEffectivePomPath = GenerateEffectivePomTest.class.getResource("jar-module");
     URL warModuleEffectivePomPath = GenerateEffectivePomTest.class.getResource("war-module");
