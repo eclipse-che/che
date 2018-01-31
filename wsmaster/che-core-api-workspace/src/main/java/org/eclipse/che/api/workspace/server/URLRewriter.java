@@ -21,23 +21,34 @@ import org.eclipse.che.commons.annotation.Nullable;
  * @author gazarenkov
  */
 public interface URLRewriter {
+
   /**
    * Rewrites URL according to URL rewriting strategy rules. May depend on
    * RuntimeIdentityImpl(workspace, owner,..) and name (some id) of this particular URL
    *
    * @param identity RuntimeIdentityImpl
-   * @param name symbolic name of the server
+   * @param machineName symbolic name of the machine
+   * @param serverName symbolic name of the server
    * @param url URL to rewrite
    * @return rewritten URL (may be unchanged)
    * @throws InfrastructureException if URL rewriting failed
    */
-  String rewriteURL(@Nullable RuntimeIdentity identity, @Nullable String name, String url)
+  String rewriteURL(
+      @Nullable RuntimeIdentity identity,
+      @Nullable String machineName,
+      @Nullable String serverName,
+      String url)
       throws InfrastructureException;
 
   /** No rewriting, just pass URL back */
   class NoOpURLRewriter implements URLRewriter {
+
     @Override
-    public String rewriteURL(@Nullable RuntimeIdentity identity, @Nullable String name, String url)
+    public String rewriteURL(
+        @Nullable RuntimeIdentity identity,
+        @Nullable String machineName,
+        @Nullable String serverName,
+        String url)
         throws InfrastructureException {
 
       return url;
