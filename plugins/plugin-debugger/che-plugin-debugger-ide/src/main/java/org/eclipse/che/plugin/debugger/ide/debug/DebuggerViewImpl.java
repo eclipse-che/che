@@ -339,7 +339,7 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
 
   private SimpleList<ActiveBreakpointWrapper> createBreakpointList() {
     TableElement breakPointsElement = Elements.createTableElement();
-    breakPointsElement.setAttribute("style", "width: 100%");
+    breakPointsElement.setAttribute("style", "width: 100%; border: none;");
 
     SimpleList.ListEventDelegate<ActiveBreakpointWrapper> breakpointListEventDelegate =
         new SimpleList.ListEventDelegate<ActiveBreakpointWrapper>() {
@@ -369,7 +369,7 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate>
 
   private SimpleList<StackFrameDump> createFramesList() {
     TableElement frameElement = Elements.createTableElement();
-    frameElement.setAttribute("style", "width: 100%");
+    frameElement.setAttribute("style", "width: 100%; border: none;");
 
     SimpleList.ListEventDelegate<StackFrameDump> frameListEventDelegate =
         new SimpleList.ListEventDelegate<StackFrameDump>() {

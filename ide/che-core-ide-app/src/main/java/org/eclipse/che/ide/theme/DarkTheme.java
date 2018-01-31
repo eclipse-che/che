@@ -1259,7 +1259,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String openedFilesDropdownButtonBackground() {
-    return "rgba(51,55,59,0.50)";
+    return "#242a3a";
   }
 
   @Override
@@ -1294,12 +1294,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String openedFilesDropdownListBackgroundColor() {
-    return "#292C2f";
-  }
-
-  @Override
-  public String openedFilesDropdownListBorderColor() {
-    return "#121416";
+    return "#383f53";
   }
 
   @Override
@@ -1309,7 +1304,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String openedFilesDropdownListTextColor() {
-    return "#AAAAAA";
+    return "#e4e4e4";
   }
 
   @Override
@@ -1320,11 +1315,6 @@ public class DarkTheme implements Theme {
   @Override
   public String openedFilesDropdownListHoverBackgroundColor() {
     return "rgba(215, 215, 215, 0.12)";
-  }
-
-  @Override
-  public String openedFilesDropdownListHoverTextColor() {
-    return "#FFFFFF";
   }
 
   @Override
