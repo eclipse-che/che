@@ -73,6 +73,7 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
         BUILD_COMMAND, BUILD_COMMAND_NAME, TestCommandsConstants.MAVEN, workspace.getId());
 
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test

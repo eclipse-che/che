@@ -69,6 +69,7 @@ public class CheckErrorsWarningsTabTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
+    consoles.waitExpectedTextIntoConsole(PROJECT_NAME);
   }
 
   @Test

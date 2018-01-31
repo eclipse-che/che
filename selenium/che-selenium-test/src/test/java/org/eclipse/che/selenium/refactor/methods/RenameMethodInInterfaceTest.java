@@ -76,6 +76,7 @@ public class RenameMethodInInterfaceTest {
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
     ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(nameOfProject);
     projectExplorer.waitVisibleItem(nameOfProject);
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
