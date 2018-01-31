@@ -62,6 +62,7 @@ public class CSharpFileEditingTest {
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
