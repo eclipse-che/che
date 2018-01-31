@@ -12,7 +12,6 @@ package org.eclipse.che.selenium.miscellaneous;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.DialogAbout;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -28,16 +27,12 @@ public class DialogAboutTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
   @Inject private DialogAbout dialogAbout;
-  @Inject private BrowserLogsUtil browserLogsUtil;
 
   @Test
   public void dialogAboutTest() throws Exception {
     ide.open(testWorkspace);
 
     projectExplorer.waitProjectExplorer();
-
-    browserLogsUtil.appendLogs();
-
     menu.runCommand(TestMenuCommandsConstants.Help.HELP, TestMenuCommandsConstants.Help.ABOUT);
 
     dialogAbout.waitVerifyTextElements("About");

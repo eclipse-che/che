@@ -44,8 +44,8 @@ public class BrowserLogsUtil {
     return seleniumWebDriver.manage().logs().get(BROWSER).getAll();
   }
 
-  /** append browser logs to the test logs */
-  public void appendLogs() {
+  /** store browser logs to the test logs */
+  public void storeLogs() {
     getLogs().forEach(logEntry -> LOG.info("{} {}", logEntry.getLevel(), logEntry.getMessage()));
   }
 }
