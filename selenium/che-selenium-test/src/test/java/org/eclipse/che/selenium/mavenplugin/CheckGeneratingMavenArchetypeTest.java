@@ -37,6 +37,7 @@ public class CheckGeneratingMavenArchetypeTest {
   @Inject private CodenvyEditor editor;
   @Inject private Ide ide;
   @Inject private TestWorkspace workspace;
+  @Inject private Consoles consoles;
 
   @Test
   public void createMavenArchetypeStartProjectByWizard() throws Exception {
@@ -53,6 +54,7 @@ public class CheckGeneratingMavenArchetypeTest {
             PROJECT_NAME + "/src/test/java/" + GROUP_ID + "/AppTest.java",
             PROJECT_NAME + "/pom.xml");
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(NAME_OF_ARTIFACT);
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
         TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
