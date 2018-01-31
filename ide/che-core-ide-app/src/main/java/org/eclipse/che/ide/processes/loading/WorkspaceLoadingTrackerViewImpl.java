@@ -86,6 +86,12 @@ public class WorkspaceLoadingTrackerViewImpl extends Composite
     // Row containing error message
     Element errorSection;
 
+    /**
+     * Creates installer section.
+     *
+     * @param installerName installer name
+     * @param installerDescription installer description
+     */
     public Installer(String installerName, String installerDescription) {
       // Clone installerTemplate node
       section = installerTemplate.cloneNode(true).cast();
@@ -121,6 +127,25 @@ public class WorkspaceLoadingTrackerViewImpl extends Composite
       description.setInnerText(installerDescription);
     }
 
+    /**
+     * Sets installer name.
+     *
+     * @param installerName installer name
+     */
+    void setName(String installerName) {
+      name.setInnerText(installerName);
+    }
+
+    /**
+     * Sets installer description.
+     *
+     * @param installerDescription installer description
+     */
+    void setDescription(String installerDescription) {
+      description.setInnerText(installerDescription);
+    }
+
+    /** Changes installer state to STARTING. */
     void setStarting() {
       state.setAttribute("rel", "starting");
       state.setInnerText("Starting");
@@ -131,6 +156,7 @@ public class WorkspaceLoadingTrackerViewImpl extends Composite
       animatedElements.add(status);
     }
 
+    /** Changes installer state to RUNNING. */
     void setRunning() {
       state.setAttribute("rel", "running");
       state.setInnerText("Running");
@@ -141,6 +167,7 @@ public class WorkspaceLoadingTrackerViewImpl extends Composite
       animatedElements.remove(status);
     }
 
+    /** Changes installer state to STOPPED. */
     void setStopped() {
       state.setAttribute("rel", "stopped");
       state.setInnerText("Stopped");
@@ -186,6 +213,7 @@ public class WorkspaceLoadingTrackerViewImpl extends Composite
       tableBody.insertAfter(errorSection, section);
     }
 
+    /** Resets installer state. */
     void reset() {
       state.setAttribute("rel", "");
       state.setInnerText("");
@@ -325,12 +353,15 @@ public class WorkspaceLoadingTrackerViewImpl extends Composite
      * @param installerDescription installer description
      */
     void addInstaller(String installerId, String installerName, String installerDescription) {
-      if (installers.containsKey(installerId)) {
+      Installer installer = installers.get(installerId);
+
+      if (installer != null) {
+        installer.setName(installerName);
+        installer.setDescription(installerDescription);
         return;
       }
 
-      Installer installer = new Installer(installerName, installerDescription);
-
+      installer = new Installer(installerName, installerDescription);
       installers.put(installerId, installer);
 
       tableBody.insertBefore(installer.section, machinesDelimiter);
