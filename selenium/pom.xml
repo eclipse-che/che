@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.0.0-M5-SNAPSHOT</version>
+        <version>6.0.0</version>
     </parent>
     <groupId>org.eclipse.che.selenium</groupId>
     <artifactId>che-selenium-parent</artifactId>
