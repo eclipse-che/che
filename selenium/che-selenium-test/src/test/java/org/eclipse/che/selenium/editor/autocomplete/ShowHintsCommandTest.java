@@ -73,6 +73,7 @@ public class ShowHintsCommandTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
+    console.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test

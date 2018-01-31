@@ -24,6 +24,7 @@ import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
@@ -61,6 +62,7 @@ public class AutocompleteWithInheritTest {
   @Inject private MavenPluginStatusBar mavenPluginStatusBar;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private BrowserLogsUtil browserLogsUtil;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -72,6 +74,7 @@ public class AutocompleteWithInheritTest {
         ProjectTemplates.MAVEN_SPRING);
 
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test

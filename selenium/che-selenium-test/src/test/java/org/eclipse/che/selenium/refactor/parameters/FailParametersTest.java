@@ -59,6 +59,7 @@ public class FailParametersTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
