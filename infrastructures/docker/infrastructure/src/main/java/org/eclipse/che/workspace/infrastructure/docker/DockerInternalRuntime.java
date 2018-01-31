@@ -54,7 +54,6 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConf
 import org.eclipse.che.workspace.infrastructure.docker.monit.AbnormalMachineStopHandler;
 import org.eclipse.che.workspace.infrastructure.docker.monit.DockerMachineStopDetector;
 import org.eclipse.che.workspace.infrastructure.docker.network.NetworkLifecycle;
-import org.eclipse.che.workspace.infrastructure.docker.server.mapping.ExternalIpURLRewriter;
 import org.slf4j.Logger;
 
 /**
@@ -86,7 +85,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
   public DockerInternalRuntime(
       @Assisted DockerRuntimeContext context,
       @Assisted List<Warning> warnings,
-      ExternalIpURLRewriter urlRewriter,
+      URLRewriter urlRewriter,
       NetworkLifecycle networks,
       DockerMachineStarter machineStarter,
       EventService eventService,
@@ -119,7 +118,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       @Assisted DockerRuntimeContext context,
       @Assisted List<ContainerListEntry> containers,
       @Assisted List<Warning> warnings,
-      ExternalIpURLRewriter urlRewriter,
+      URLRewriter urlRewriter,
       NetworkLifecycle networks,
       DockerMachineStarter machineStarter,
       EventService eventService,

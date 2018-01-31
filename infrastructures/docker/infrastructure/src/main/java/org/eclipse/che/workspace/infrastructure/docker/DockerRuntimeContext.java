@@ -18,13 +18,13 @@ import java.util.List;
 import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerListEntry;
 import org.eclipse.che.workspace.infrastructure.docker.container.DockerContainers;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
-import org.eclipse.che.workspace.infrastructure.docker.server.mapping.ExternalIpURLRewriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ public class DockerRuntimeContext extends RuntimeContext<DockerEnvironment> {
 
   private static final Logger LOG = LoggerFactory.getLogger(DockerRuntimeContext.class);
 
-  private final ExternalIpURLRewriter urlRewriter;
+  private final URLRewriter urlRewriter;
   private final String websocketOutputEndpoint;
   private final DockerRuntimeFactory runtimeFactory;
   private final DockerContainers containers;
@@ -54,7 +54,7 @@ public class DockerRuntimeContext extends RuntimeContext<DockerEnvironment> {
       DockerContainers containers,
       DockerSharedPool sharedPool,
       RuntimeConsistencyChecker consistencyChecker,
-      ExternalIpURLRewriter urlRewriter,
+      URLRewriter urlRewriter,
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint)
       throws InfrastructureException, ValidationException {
 
@@ -70,7 +70,7 @@ public class DockerRuntimeContext extends RuntimeContext<DockerEnvironment> {
   @Override
   public URI getOutputChannel() throws InfrastructureException {
     try {
-      return URI.create(urlRewriter.rewriteURL(getIdentity(), null, websocketOutputEndpoint));
+      return URI.create(urlRewriter.rewriteURL(getIdentity(), null, null, websocketOutputEndpoint));
     } catch (IllegalArgumentException ex) {
       throw new InternalInfrastructureException(
           "Failed to get the output channel because: " + ex.getLocalizedMessage());

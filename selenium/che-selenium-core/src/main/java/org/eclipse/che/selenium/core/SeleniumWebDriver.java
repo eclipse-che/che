@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.logging.Level;
 import javax.inject.Named;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.selenium.core.constant.TestBrowser;
@@ -38,6 +39,9 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.HasInputDevices;
 import org.openqa.selenium.interactions.Keyboard;
 import org.openqa.selenium.interactions.Mouse;
+import org.openqa.selenium.logging.LogType;
+import org.openqa.selenium.logging.LoggingPreferences;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -250,12 +254,16 @@ public class SeleniumWebDriver
 
     switch (browser) {
       case GOOGLE_CHROME:
+        LoggingPreferences loggingPreferences = new LoggingPreferences();
+        loggingPreferences.enable(LogType.BROWSER, Level.SEVERE);
+
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--no-sandbox");
         options.addArguments("--dns-prefetch-disable");
 
         capability = DesiredCapabilities.chrome();
         capability.setCapability(ChromeOptions.CAPABILITY, options);
+        capability.setCapability(CapabilityType.LOGGING_PREFS, loggingPreferences);
         break;
 
       default:

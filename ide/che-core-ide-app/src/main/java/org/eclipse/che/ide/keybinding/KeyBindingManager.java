@@ -143,7 +143,7 @@ public class KeyBindingManager implements KeyBindingAgent {
       ActionEvent e = new ActionEvent(presentationFactory.getPresentation(action), actionManager);
       action.update(e);
 
-      if (e.getPresentation().isEnabled() && e.getPresentation().isVisible()) {
+      if (e.getPresentation().isEnabled()) {
         /** Stop handling the key event */
         keyEvent.preventDefault();
         keyEvent.stopPropagation();
