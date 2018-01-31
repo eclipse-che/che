@@ -11,10 +11,13 @@
 package org.eclipse.che.selenium.core.client;
 
 import static java.lang.String.format;
+import static java.nio.file.Files.createFile;
+import static java.nio.file.Files.write;
 import static java.util.Optional.ofNullable;
 import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.dto.server.DtoFactory.getInstance;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.PLAIN_JAVA;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -41,6 +44,27 @@ import org.eclipse.che.commons.lang.ZipUtils;
 @Singleton
 public class TestProjectServiceClient {
   private static final int WS_AGENT_PORT = 4401;
+
+  public static final String PROJECT_FILE =
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+          + "<projectDescription>\n"
+          + "        <name>%s</name>\n"
+          + "        <comment></comment>\n"
+          + "        <projects>\n"
+          + "        </projects>\n"
+          + "        <buildSpec>\n"
+          + "        </buildSpec>\n"
+          + "        <natures>\n"
+          + "                <nature>org.eclipse.jdt.core.javanature</nature>\n"
+          + "        </natures>\n"
+          + "</projectDescription>";
+  public static final String CLASSPATH_FILE =
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+          + "<classpath>\n"
+          + "        <classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>\n"
+          + "        <classpathentry kind=\"src\" path=\"src\"/>\n"
+          + "        <classpathentry kind=\"output\" path=\"bin\"/>\n"
+          + "</classpath>";
 
   private final TestMachineServiceClient machineServiceClient;
   private final TestWorkspaceServiceClient workspaceServiceClient;
@@ -137,6 +161,13 @@ public class TestProjectServiceClient {
 
     if (!Files.isDirectory(sourceFolder)) {
       throw new IOException(format("%s not a directory", sourceFolder));
+    }
+
+    if (PLAIN_JAVA.equals(template)) {
+      write(
+          createFile(sourceFolder.resolve(".project")),
+          format(PROJECT_FILE, projectName).getBytes());
+      write(createFile(sourceFolder.resolve(".classpath")), CLASSPATH_FILE.getBytes());
     }
 
     Path zip = Files.createTempFile("project", projectName);

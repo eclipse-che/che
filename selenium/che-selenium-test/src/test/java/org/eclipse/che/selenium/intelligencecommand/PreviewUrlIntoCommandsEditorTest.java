@@ -10,11 +10,6 @@
  */
 package org.eclipse.che.selenium.intelligencecommand;
 
-import static java.lang.String.format;
-import static java.nio.file.Files.createFile;
-import static java.nio.file.Files.write;
-import static org.eclipse.che.selenium.core.constant.FileContentConstants.CLASSPATH_FILE;
-import static org.eclipse.che.selenium.core.constant.FileContentConstants.PROJECT_FILE;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.MAVEN_NAME;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.COMMON_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.MAVEN_TYPE;
@@ -22,7 +17,6 @@ import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.Com
 
 import com.google.inject.Inject;
 import java.net.URL;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -64,11 +58,8 @@ public class PreviewUrlIntoCommandsEditorTest {
   @BeforeClass
   public void prepare() throws Exception {
     URL resource = getClass().getResource("/projects/default-spring-project");
-    Path sourceFolder = Paths.get(resource.toURI());
-    write(createFile(sourceFolder.resolve(".project")), format(PROJECT_FILE, PROJ_NAME).getBytes());
-    write(createFile(sourceFolder.resolve(".classpath")), CLASSPATH_FILE.getBytes());
     testProjectServiceClient.importProject(
-        testWorkspace.getId(), sourceFolder, PROJ_NAME, ProjectTemplates.PLAIN_JAVA);
+        testWorkspace.getId(), Paths.get(resource.toURI()), PROJ_NAME, ProjectTemplates.PLAIN_JAVA);
     ide.open(testWorkspace);
   }
 

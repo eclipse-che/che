@@ -10,18 +10,12 @@
  */
 package org.eclipse.che.selenium.debugger;
 
-import static java.lang.String.format;
-import static java.nio.file.Files.createFile;
-import static java.nio.file.Files.write;
-import static org.eclipse.che.selenium.core.constant.FileContentConstants.CLASSPATH_FILE;
-import static org.eclipse.che.selenium.core.constant.FileContentConstants.PROJECT_FILE;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.EDIT_DEBUG_CONFIGURATION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.RUN_MENU;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.PLAIN_JAVA;
 
 import com.google.inject.Inject;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
@@ -55,12 +49,12 @@ public class RunToCursorTest {
 
   @BeforeClass
   public void setup() throws Exception {
-    Path sourceFolder =
+    testProjectServiceClient.importProject(
+        ws.getId(),
         Paths.get(
-            getClass().getResource("/projects/plugins/DebuggerPlugin/java-run-to-cursor").toURI());
-    write(createFile(sourceFolder.resolve(".project")), format(PROJECT_FILE, PROJECT).getBytes());
-    write(createFile(sourceFolder.resolve(".classpath")), CLASSPATH_FILE.getBytes());
-    testProjectServiceClient.importProject(ws.getId(), sourceFolder, PROJECT, PLAIN_JAVA);
+            getClass().getResource("/projects/plugins/DebuggerPlugin/java-run-to-cursor").toURI()),
+        PROJECT,
+        PLAIN_JAVA);
 
     testCommandServiceClient.createCommand(
         "cd ${current.project.path}/src/ && javac -g App.java", "build", CUSTOM, ws.getId());

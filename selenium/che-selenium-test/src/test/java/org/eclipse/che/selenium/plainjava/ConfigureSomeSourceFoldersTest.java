@@ -10,11 +10,6 @@
  */
 package org.eclipse.che.selenium.plainjava;
 
-import static java.lang.String.format;
-import static java.nio.file.Files.createFile;
-import static java.nio.file.Files.write;
-import static org.eclipse.che.selenium.core.constant.FileContentConstants.CLASSPATH_FILE;
-import static org.eclipse.che.selenium.core.constant.FileContentConstants.PROJECT_FILE;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.JAVA_TYPE;
@@ -25,7 +20,6 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERRO
 
 import com.google.inject.Inject;
 import java.net.URL;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
@@ -66,13 +60,8 @@ public class ConfigureSomeSourceFoldersTest {
   @BeforeClass
   public void prepare() throws Exception {
     URL resource = getClass().getResource("/projects/java-project-with-additional-source-folder");
-    Path sourceFolder = Paths.get(resource.toURI());
-    write(
-        createFile(sourceFolder.resolve(".project")),
-        format(PROJECT_FILE, PROJECT_NAME).getBytes());
-    write(createFile(sourceFolder.resolve(".classpath")), CLASSPATH_FILE.getBytes());
     testProjectServiceClient.importProject(
-        ws.getId(), sourceFolder, PROJECT_NAME, ProjectTemplates.PLAIN_JAVA);
+        ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.PLAIN_JAVA);
     ide.open(ws);
   }
 
