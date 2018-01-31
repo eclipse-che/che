@@ -106,6 +106,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
         ws.getId());
 
     ide.open(ws);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT);
   }
 
   @AfterMethod
