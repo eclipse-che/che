@@ -14,6 +14,7 @@ import static org.openqa.selenium.logging.LogType.BROWSER;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.net.URL;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.logging.LogEntry;
@@ -21,10 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * read and store browser logs to the test logs for change of logs level
- *
- * @see SeleniumWebDriver method "doCreateDriver"
- * @see java.util.logging.Level
+ * Read and store browser logs to the test logs. Log level and type are defined in {@link
+ * org.eclipse.che.selenium.core.SeleniumWebDriver#doCreateDriver(URL)}
  */
 @Singleton
 public class BrowserLogsUtil {
