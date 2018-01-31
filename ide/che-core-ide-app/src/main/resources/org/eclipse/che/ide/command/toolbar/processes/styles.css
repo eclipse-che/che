@@ -9,6 +9,8 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 @eval dropdownListBackground org.eclipse.che.ide.api.theme.Style.getDropdownListBackground();
+@eval dropdownListExecLabelColor org.eclipse.che.ide.api.theme.Style.theme.getDropdownListExecLabelColor();
+@eval dropdownListExecLabelBackground org.eclipse.che.ide.api.theme.Style.theme.getDropdownListExecLabelBackground();
 
 .toolbarButton {
     float: left;
@@ -28,11 +30,11 @@
     font-style: normal;
     font-stretch: normal;
     text-align: center;
-    color: #4eabff;
+    color: dropdownListExecLabelColor;
     width: 44px;
     height: 22px;
     line-height: 22px;
-    background: commandsToolbarProcessesLabelBackground;
+    background: dropdownListExecLabelBackground;
     cursor: default;
 }
 

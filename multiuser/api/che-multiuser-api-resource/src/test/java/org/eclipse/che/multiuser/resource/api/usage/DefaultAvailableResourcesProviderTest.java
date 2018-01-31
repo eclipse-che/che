@@ -40,24 +40,24 @@ import org.testng.annotations.Test;
  */
 @Listeners(MockitoTestNGListener.class)
 public class DefaultAvailableResourcesProviderTest {
-  @Mock private Provider<ResourceUsageManager> resourceUsageManagerProvider;
-  @Mock private ResourceUsageManager resourceUsageManager;
+  @Mock private Provider<ResourceManager> resourceManagerProvider;
+  @Mock private ResourceManager resourceManager;
   @Mock private ResourceAggregator resourceAggregator;
 
   @InjectMocks private DefaultAvailableResourcesProvider defaultAvailableResourcesProvider;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(resourceUsageManagerProvider.get()).thenReturn(resourceUsageManager);
+    when(resourceManagerProvider.get()).thenReturn(resourceManager);
   }
 
   @Test
   public void shouldReturnAvailableResourcesWhenNotAllTotalResourcesAreUsed() throws Exception {
     // given
     List<ResourceImpl> totalResources = singletonList(new ResourceImpl("test", 5000, "unit"));
-    doReturn(totalResources).when(resourceUsageManager).getTotalResources(anyString());
+    doReturn(totalResources).when(resourceManager).getTotalResources(anyString());
     List<ResourceImpl> usedResources = singletonList(new ResourceImpl("test", 2000, "unit"));
-    doReturn(usedResources).when(resourceUsageManager).getUsedResources(anyString());
+    doReturn(usedResources).when(resourceManager).getUsedResources(anyString());
     ResourceImpl availableResource = new ResourceImpl("test", 3000, "unit");
     doReturn(singletonList(availableResource))
         .when(resourceAggregator)
@@ -70,8 +70,8 @@ public class DefaultAvailableResourcesProviderTest {
     // then
     assertEquals(availableResources.size(), 1);
     assertEquals(availableResources.get(0), availableResource);
-    verify(resourceUsageManager).getTotalResources("account123");
-    verify(resourceUsageManager).getUsedResources("account123");
+    verify(resourceManager).getTotalResources("account123");
+    verify(resourceManager).getUsedResources("account123");
     verify(resourceAggregator).deduct(totalResources, usedResources);
     verify(resourceAggregator, never()).excess(anyList(), anyList());
   }
@@ -81,10 +81,10 @@ public class DefaultAvailableResourcesProviderTest {
       throws Exception {
     // given
     List<ResourceImpl> totalResources = singletonList(new ResourceImpl("test", 5000, "unit"));
-    doReturn(totalResources).when(resourceUsageManager).getTotalResources(anyString());
+    doReturn(totalResources).when(resourceManager).getTotalResources(anyString());
     List<ResourceImpl> usedResources =
         Arrays.asList(new ResourceImpl("test", 2000, "unit"), new ResourceImpl("test2", 5, "unit"));
-    doReturn(usedResources).when(resourceUsageManager).getUsedResources(anyString());
+    doReturn(usedResources).when(resourceManager).getUsedResources(anyString());
     doThrow(new NoEnoughResourcesException(emptyList(), emptyList(), emptyList()))
         .when(resourceAggregator)
         .deduct(anyList(), anyList());
@@ -100,8 +100,8 @@ public class DefaultAvailableResourcesProviderTest {
     // then
     assertEquals(availableResources.size(), 1);
     assertEquals(availableResources.get(0), excessiveResource);
-    verify(resourceUsageManager).getTotalResources("account123");
-    verify(resourceUsageManager).getUsedResources("account123");
+    verify(resourceManager).getTotalResources("account123");
+    verify(resourceManager).getUsedResources("account123");
     verify(resourceAggregator).deduct(totalResources, usedResources);
     verify(resourceAggregator).excess(totalResources, usedResources);
   }

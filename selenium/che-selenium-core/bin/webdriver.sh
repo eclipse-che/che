@@ -862,16 +862,22 @@ prepareTestUsersForSingleuserChe() {
     export CHE_ADMIN_NAME=
     export CHE_ADMIN_EMAIL=
     export CHE_ADMIN_PASSWORD=
+    export CHE_ADMIN_OFFLINE__TOKEN=
 
     export CHE_TESTUSER_NAME=che
     export CHE_TESTUSER_EMAIL=che@eclipse.org
     export CHE_TESTUSER_PASSWORD=secret
+    export CHE_TESTUSER_OFFLINE__TOKEN=
 }
 
 prepareTestUsersForMultiuserChe() {
     export CHE_ADMIN_NAME=${CHE_ADMIN_NAME:-admin}
     export CHE_ADMIN_EMAIL=${CHE_ADMIN_EMAIL:-admin@admin.com}
     export CHE_ADMIN_PASSWORD=${CHE_ADMIN_PASSWORD:-admin}
+    export CHE_ADMIN_OFFLINE__TOKEN=${CHE_ADMIN_OFFLINE__TOKEN}
+
+    export CHE_TESTUSER_OFFLINE__TOKEN=${CHE_TESTUSER_OFFLINE__TOKEN}
+    export CHE_SECOND_TESTUSER_OFFLINE__TOKEN=${CHE_SECOND_TESTUSER_OFFLINE__TOKEN}
 
     if [[ -n ${CHE_TESTUSER_EMAIL+x} ]] && [[ -n ${CHE_TESTUSER_PASSWORD+x} ]]; then
         return
@@ -894,7 +900,7 @@ prepareTestUsersForMultiuserChe() {
            CHE_TESTUSER_EMAIL=${CHE_ADMIN_EMAIL}
            CHE_TESTUSER_PASSWORD=${CHE_ADMIN_PASSWORD}
         fi
-        
+
         # create second test user
         time=$(date +%s)
         export CHE_SECOND_TESTUSER_NAME=${CHE_SECOND_TESTUSER_NAME:-user${time}}
@@ -910,6 +916,7 @@ prepareTestUsersForMultiuserChe() {
            CHE_SECOND_TESTUSER_EMAIL=${CHE_ADMIN_EMAIL}
            CHE_SECOND_TESTUSER_PASSWORD=${CHE_ADMIN_PASSWORD}
         fi
+
     fi
 }
 

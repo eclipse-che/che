@@ -87,7 +87,14 @@ public class ProjectStateAfterRefreshTest {
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running");
     toastLoader.clickOnStartButton();
     projectExplorer.waitProjectExplorer();
-    checkFilesAreOpened();
+
+    try {
+      checkFilesAreOpened();
+    } catch (TimeoutException ex) {
+      // Remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7551");
+    }
+
     editor.closeAllTabsByContextMenu();
   }
 

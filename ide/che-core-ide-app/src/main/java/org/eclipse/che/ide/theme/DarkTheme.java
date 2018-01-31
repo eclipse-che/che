@@ -134,7 +134,17 @@ public class DarkTheme implements Theme {
   }
 
   @Override
+  public String tabIconColor() {
+    return "#AAAAAA";
+  }
+
+  @Override
   public String activeTabIconColor() {
+    return "#FFFFFF";
+  }
+
+  @Override
+  public String hoveredTabIconColor() {
     return "#FFFFFF";
   }
 
@@ -269,6 +279,16 @@ public class DarkTheme implements Theme {
 
   @Override
   public String getDropdownListBackground() {
+    return "#242a3a";
+  }
+
+  @Override
+  public String getDropdownListExecLabelColor() {
+    return "#4eabff";
+  }
+
+  @Override
+  public String getDropdownListExecLabelBackground() {
     return "#242a3a";
   }
 
@@ -938,6 +958,11 @@ public class DarkTheme implements Theme {
   }
 
   @Override
+  public String consolesToolbarToggledButtonBorderColor() {
+    return "rgba(0, 0, 0, 0.5)";
+  }
+
+  @Override
   public String processTreeDevLabel() {
     return "white";
   }
@@ -1234,7 +1259,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String openedFilesDropdownButtonBackground() {
-    return "rgba(51,55,59,0.50)";
+    return "#242a3a";
   }
 
   @Override
@@ -1269,12 +1294,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String openedFilesDropdownListBackgroundColor() {
-    return "#292C2f";
-  }
-
-  @Override
-  public String openedFilesDropdownListBorderColor() {
-    return "#121416";
+    return "#383f53";
   }
 
   @Override
@@ -1284,7 +1304,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String openedFilesDropdownListTextColor() {
-    return "#AAAAAA";
+    return "#e4e4e4";
   }
 
   @Override
@@ -1295,11 +1315,6 @@ public class DarkTheme implements Theme {
   @Override
   public String openedFilesDropdownListHoverBackgroundColor() {
     return "rgba(215, 215, 215, 0.12)";
-  }
-
-  @Override
-  public String openedFilesDropdownListHoverTextColor() {
-    return "#FFFFFF";
   }
 
   @Override
@@ -1409,7 +1424,7 @@ public class DarkTheme implements Theme {
 
   @Override
   public String projectExplorerSelectedRowBackground() {
-    return "rgba(215, 215, 215, 0.2)";
+    return "rgba(84, 92, 101, 0.2)";
   }
 
   @Override
@@ -1864,5 +1879,10 @@ public class DarkTheme implements Theme {
   @Override
   public String projectExplorerPlaceholderRowColor() {
     return "#333846";
+  }
+
+  @Override
+  public String noToolbarPanelColor() {
+    return "#1b1e2b";
   }
 }

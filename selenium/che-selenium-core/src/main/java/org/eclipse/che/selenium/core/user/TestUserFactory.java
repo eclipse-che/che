@@ -18,9 +18,10 @@ import com.google.inject.assistedinject.Assisted;
  */
 public interface TestUserFactory {
 
-  /** Creates new test user with given name, e-mail and password */
+  /** Creates new test user with given name, e-mail, password and offline token */
   TestUserImpl create(
       @Assisted("name") String name,
       @Assisted("email") String email,
-      @Assisted("password") String password);
+      @Assisted("password") String password,
+      @Assisted("offlineToken") String offlineToken);
 }

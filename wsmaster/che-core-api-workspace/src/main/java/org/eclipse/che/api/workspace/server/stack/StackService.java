@@ -115,7 +115,6 @@ public class StackService extends Service {
             .setCreator(userId)
             .setTags(stackDto.getTags())
             .setWorkspaceConfig(stackDto.getWorkspaceConfig())
-            .setSource(stackDto.getSource())
             .setComponents(stackDto.getComponents())
             .build();
     stackDao.create(newStack);
@@ -180,7 +179,6 @@ public class StackService extends Service {
             .setCreator(stack.getCreator())
             .setTags(updateDto.getTags())
             .setWorkspaceConfig(updateDto.getWorkspaceConfig())
-            .setSource(updateDto.getSource())
             .setComponents(updateDto.getComponents())
             .build();
 

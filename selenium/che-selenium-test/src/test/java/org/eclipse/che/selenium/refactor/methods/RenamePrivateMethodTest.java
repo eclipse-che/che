@@ -100,7 +100,7 @@ public class RenamePrivateMethodTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(14, 18);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("k");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutB);
@@ -112,7 +112,7 @@ public class RenamePrivateMethodTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(14, 18);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("fred");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutB);
@@ -124,7 +124,7 @@ public class RenamePrivateMethodTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(13, 18);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("k");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutB);
@@ -136,7 +136,7 @@ public class RenamePrivateMethodTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(13, 18);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("k");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutB);
@@ -148,7 +148,7 @@ public class RenamePrivateMethodTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(13, 18);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("k");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutB);
@@ -160,7 +160,7 @@ public class RenamePrivateMethodTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(13, 18);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("k");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutB);
@@ -172,7 +172,7 @@ public class RenamePrivateMethodTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(13, 18);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("k");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutB);
@@ -184,8 +184,7 @@ public class RenamePrivateMethodTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(13, 18);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameMethodFormIsOpen();
     refactor.typeAndWaitNewName("k");
     refactor.clickOkButtonRefactorForm();

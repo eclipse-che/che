@@ -22,10 +22,6 @@
         "version": "3.3.9"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/che-dev:nightly"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {

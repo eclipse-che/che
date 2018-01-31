@@ -18,6 +18,7 @@
 @eval projectExplorerHoverRowBackground org.eclipse.che.ide.api.theme.Style.theme.projectExplorerHoverRowBackground();
 @eval projectExplorerHoverRowBorder org.eclipse.che.ide.api.theme.Style.theme.projectExplorerHoverRowBorder();
 @eval projectExplorerVcsHead org.eclipse.che.ide.api.theme.Style.theme.projectExplorerVcsHead();
+@eval findResultsTextColor org.eclipse.che.ide.api.theme.Style.theme.findResultsTextColor();
 
 
 .noFocusOutline {
@@ -122,12 +123,17 @@
 }
 
 .tree {
-    display: inline-block;
-    min-width: 100%;
     font-size: 0.85em;
     outline: none;
     overflow-y: auto;
     padding-bottom: 2px;
+}
+
+.contentTree {
+  min-width: 100%;
+  position: absolute;
+  overflow: hidden;
+  left: 0;
 }
 
 .tree:focus {
@@ -141,6 +147,14 @@
     rgba(255, 255, 255, 0.05) 50%,
     rgba(255, 255, 255, .05) 75%, transparent 75%, transparent);
     -webkit-animation: animate-stripes 1s linear infinite;
+}
+
+.searchMatch {
+    background: linear-gradient(to bottom, #c1be9e 6%, #B89C07 64%);
+    color: findResultsTextColor;
+    border-radius: 2px;
+    padding-right: 2px;
+    padding-left: 2px;
 }
 
 @-webkit-keyframes animate-stripes {

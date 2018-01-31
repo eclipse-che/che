@@ -21,9 +21,9 @@ import java.util.Map;
 public interface MachineConfig {
 
   /**
-   * Name of the attribute from {@link #getAttributes()} which if present sets memory limit of the
-   * machine in bytes. If memory limit is set in environment specific recipe this attribute should
-   * override value from recipe.
+   * Name of the attribute from {@link #getAttributes()} which if present defines memory limit of
+   * the machine in bytes. If memory limit is set in environment specific recipe this attribute used
+   * in {@code MachineConfig} should override value from recipe.
    */
   String MEMORY_LIMIT_ATTRIBUTE = "memoryLimitBytes";
 

@@ -14,8 +14,6 @@ import static java.lang.String.format;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
@@ -39,11 +37,12 @@ public class TestUserImpl implements TestUser {
   private final String name;
   private final String id;
   private final String authToken;
+  private final String offlineToken;
 
   private final TestUserServiceClient userServiceClient;
   private final TestWorkspaceServiceClient workspaceServiceClient;
 
-  /** To instantiate user with specific name, e-mail and password. */
+  /** To instantiate user with specific name, e-mail, password and offline token. */
   @AssistedInject
   public TestUserImpl(
       TestUserServiceClientFactory testUserServiceClientFactory,
@@ -51,16 +50,18 @@ public class TestUserImpl implements TestUser {
       TestWorkspaceServiceClientFactory wsServiceClientFactory,
       @Assisted("name") String name,
       @Assisted("email") String email,
-      @Assisted("password") String password)
+      @Assisted("password") String password,
+      @Assisted("offlineToken") String offlineToken)
       throws Exception {
-    this.userServiceClient = testUserServiceClientFactory.create(name, password);
+    this.userServiceClient = testUserServiceClientFactory.create(name, password, offlineToken);
     this.email = email;
     this.password = password;
     this.name = name;
-    this.authToken = authServiceClient.login(name, password);
+    this.offlineToken = offlineToken;
+    this.authToken = authServiceClient.login(name, password, offlineToken);
     this.id = userServiceClient.findByEmail(email).getId();
     LOG.info("User name='{}', id='{}' is being used for testing", name, id);
-    this.workspaceServiceClient = wsServiceClientFactory.create(email, password);
+    this.workspaceServiceClient = wsServiceClientFactory.create(email, password, offlineToken);
   }
 
   @Override
@@ -88,25 +89,13 @@ public class TestUserImpl implements TestUser {
     return id;
   }
 
+  public String getOfflineToken() {
+    return offlineToken;
+  }
+
   @Override
   @PreDestroy
-  public void cleanUp() {
-    List<String> workspaces = new ArrayList<>();
-    try {
-      workspaces = workspaceServiceClient.getAll();
-    } catch (Exception e) {
-      LOG.error("Failed to get all workspaces.", e);
-    }
-
-    for (String workspace : workspaces) {
-      try {
-        workspaceServiceClient.delete(workspace, name);
-      } catch (Exception e) {
-        LOG.error(
-            format("User name='%s' failed to remove workspace name='%s'", workspace, name), e);
-      }
-    }
-  }
+  public void cleanUp() {}
 
   @Override
   public String toString() {

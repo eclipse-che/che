@@ -114,17 +114,20 @@ public class CodenvyEditor {
   private final WebDriverWait loadPageDriverWait;
   private final WebDriverWait attachElemDriverWait;
   private final WebDriverWait loaderDriverWait;
+  private final TestWebElementRenderChecker testWebElementRenderChecker;
 
   @Inject
   public CodenvyEditor(
       SeleniumWebDriver seleniumWebDriver,
       Loader loader,
       ActionsFactory actionsFactory,
-      AskForValueDialog askForValueDialog) {
+      AskForValueDialog askForValueDialog,
+      TestWebElementRenderChecker testWebElementRenderChecker) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
     this.askForValueDialog = askForValueDialog;
+    this.testWebElementRenderChecker = testWebElementRenderChecker;
     redrawDriverWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     elemDriverWait = new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC);
     loadPageDriverWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
@@ -634,6 +637,7 @@ public class CodenvyEditor {
   public void waitNoGitChangeMarkers() {
 
     List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
+    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(VCS_RULER)));
 
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
@@ -652,8 +656,8 @@ public class CodenvyEditor {
    */
   public void waitGitInsertionMarkerInPosition(int startLine, int endLine) {
 
-    List<WebElement> rulerVcsElements =
-        seleniumWebDriver.findElements(By.xpath("//div[@class='ruler vcs']/div"));
+    List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
+    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(VCS_RULER)));
 
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
@@ -677,8 +681,8 @@ public class CodenvyEditor {
    */
   public void waitGitModificationMarkerInPosition(int startLine, int endLine) {
 
-    List<WebElement> rulerVcsElements =
-        seleniumWebDriver.findElements(By.xpath("//div[@class='ruler vcs']/div"));
+    List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
+    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(VCS_RULER)));
 
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
@@ -701,8 +705,8 @@ public class CodenvyEditor {
    */
   public void waitGitDeletionMarkerInPosition(int line) {
 
-    List<WebElement> rulerVcsElements =
-        seleniumWebDriver.findElements(By.xpath("//div[@class='ruler vcs']/div"));
+    List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
+    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(VCS_RULER)));
 
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
@@ -966,13 +970,13 @@ public class CodenvyEditor {
 
   /** invoke the 'Show hints' to all parameters on the overloaded constructor or method */
   public void callShowHintsPopUp() {
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
     loader.waitOnClosed();
-    actionsFactory
-        .createAction(seleniumWebDriver)
-        .keyDown(Keys.CONTROL)
-        .sendKeys("p")
-        .keyUp(Keys.CONTROL)
-        .perform();
+    action.keyDown(Keys.CONTROL).sendKeys("p").perform();
+
+    testWebElementRenderChecker.waitElementIsRendered(By.xpath("//div[@class='gwt-PopupPanel']"));
+
+    action.keyUp(Keys.CONTROL).perform();
     loader.waitOnClosed();
   }
 
@@ -1451,12 +1455,21 @@ public class CodenvyEditor {
             By.xpath(String.format(Locators.POSITION_CURSOR_NUMBER, lineAndChar))));
   }
 
-  /** launch the 'Refactor' form by keyboard */
-  public void launchRefactorFormFromEditor() {
+  /** launch refactor for local variables by keyboard */
+  public void launchLocalRefactor() {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     action.keyDown(Keys.SHIFT).sendKeys(Keys.F6).keyUp(Keys.SHIFT).perform();
     loader.waitOnClosed();
+  }
+
+  /**
+   * the first invocation of launchLocalRefactor() runs local refactoring, the second invocation
+   * opens "Refactor" form
+   */
+  public void launchRefactorForm() {
+    launchLocalRefactor();
+    launchLocalRefactor();
   }
 
   /**

@@ -46,8 +46,14 @@ public interface PopupLoaderMessages extends Messages {
   @Key("workspaceStopped.title")
   String workspaceStopped();
 
+  @Key("wsAgentStopped.title")
+  String wsAgentStopped();
+
   @Key("workspaceStopped.description")
   String workspaceStoppedDescription();
+
+  @Key("wsAgentStopped.description")
+  String wsAgentStoppedDescription();
 
   @Key("downloadOutputs")
   String downloadOutputs();

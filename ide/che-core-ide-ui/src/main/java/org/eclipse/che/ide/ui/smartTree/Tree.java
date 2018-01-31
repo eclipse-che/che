@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.DelayedTask;
+import org.eclipse.che.ide.ui.smartTree.converter.NodeConverter;
 import org.eclipse.che.ide.ui.smartTree.data.HasAction;
 import org.eclipse.che.ide.ui.smartTree.data.MutableNode;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
@@ -252,6 +253,8 @@ public class Tree extends FocusWidget
 
   protected boolean focused = false;
 
+  private SpeedSearch speedSearch;
+
   public Tree(NodeStorage nodeStorage, NodeLoader nodeLoader) {
     this(nodeStorage, nodeLoader, GWT.<TreeStyles>create(TreeStyles.class));
   }
@@ -274,7 +277,6 @@ public class Tree extends FocusWidget
     checkNotNull(treeStyles);
 
     this.treeStyles = treeStyles;
-    this.treeStyles.styles().ensureInjected();
     this.nodesByDom = new HashMap<>();
     this.focusImpl = FocusImpl.getFocusImplForPanel();
     this.storeHandlers = new GroupingHandlerRegistration();
@@ -404,7 +406,8 @@ public class Tree extends FocusWidget
   public NodeDescriptor getNodeDescriptor(Element target) {
     checkNotNull(target);
 
-    Element nodeElement = getNearestParentElement(target, treeStyles.styles().rootContainer());
+    Element nodeElement =
+        getNearestParentElement(target, treeStyles.treeStylesCss().rootContainer());
     if (!(nodeElement == null || isNullOrEmpty(nodeElement.getId()))) {
       return nodesByDom.get(nodeElement.getId());
     }
@@ -653,7 +656,11 @@ public class Tree extends FocusWidget
     if (container == null) {
       return;
     }
+
+    int scrollLeft = getElement().getScrollLeft();
     container.scrollIntoView();
+    getElement().setScrollLeft(scrollLeft);
+
     focusEl.getStyle().setLeft((nodeStorage.getDepth(node) - 1) * 16, Style.Unit.PX);
     focusEl.getStyle().setTop(container.getOffsetTop(), Style.Unit.PX);
 
@@ -991,6 +998,19 @@ public class Tree extends FocusWidget
     return goInto;
   }
 
+  /** Enable searching @see {@link SpeedSearch#SpeedSearch(Tree, String, NodeConverter, boolean)} */
+  public void enableSpeedSearch(boolean filterElements) {
+    speedSearch =
+        new SpeedSearch(this, treeStyles.treeStylesCss().searchMatch(), null, filterElements);
+  }
+
+  /** Close searching pop-up enabled by {@link #enableSpeedSearch(boolean)}. */
+  public void closeSpeedSearchPopup() {
+    if (speedSearch != null) {
+      speedSearch.closePopUp();
+    }
+  }
+
   /** {@inheritDoc} */
   @Override
   protected void onAttach() {
@@ -1318,7 +1338,14 @@ public class Tree extends FocusWidget
 
   private void ensureTreeElement() {
     DivElement element = Document.get().createDivElement();
-    element.addClassName(treeStyles.styles().tree());
+    element.addClassName(treeStyles.treeStylesCss().tree());
+
+    rootContainer = Document.get().createDivElement();
+    rootContainer.addClassName(treeStyles.treeStylesCss().contentTree());
+    rootContainer.setId("content-Tree");
+
+    element.appendChild(rootContainer);
+
     setElement(element);
   }
 
@@ -1327,9 +1354,9 @@ public class Tree extends FocusWidget
       focusEl.removeFromParent();
     }
     focusEl = getElement().appendChild(focusImpl.createFocusable());
-    focusEl.addClassName(treeStyles.styles().noFocusOutline());
+    focusEl.addClassName(treeStyles.treeStylesCss().noFocusOutline());
     if (focusEl.hasChildNodes()) {
-      focusEl.getFirstChildElement().addClassName(treeStyles.styles().noFocusOutline());
+      focusEl.getFirstChildElement().addClassName(treeStyles.treeStylesCss().noFocusOutline());
       Style focusElStyle = focusEl.getFirstChildElement().getStyle();
       focusElStyle.setBorderWidth(0, Style.Unit.PX);
       focusElStyle.setFontSize(1, Style.Unit.PX);
@@ -1381,7 +1408,7 @@ public class Tree extends FocusWidget
   }
 
   private Element getRootContainer() {
-    return getElement();
+    return rootContainer;
   }
 
   private void onAdd(StoreAddEvent event) {
@@ -1583,8 +1610,6 @@ public class Tree extends FocusWidget
   }
 
   private void onAfterFirstAttach() {
-    rootContainer = getRootContainer();
-
     getElement().getStyle().setVisibility(Style.Visibility.VISIBLE);
 
     renderChildren(null);

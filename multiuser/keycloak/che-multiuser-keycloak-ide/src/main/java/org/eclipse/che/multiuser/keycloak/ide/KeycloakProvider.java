@@ -22,7 +22,6 @@ import com.google.inject.Singleton;
 import java.util.Map;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.json.JsonHelper;
@@ -32,20 +31,22 @@ import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
 /** KeycloakProvider */
 @Singleton
 public class KeycloakProvider {
-  private AppContext appContext;
-  private boolean keycloakDisabled = false;
+
   private Promise<Keycloak> keycloak;
 
   @Inject
-  public KeycloakProvider(AppContext appContext, PromiseProvider promiseProvider) {
-    this.appContext = appContext;
+  public KeycloakProvider(AppContext appContext) {
+    if (Keycloak.isConfigured()) {
+      keycloak = Keycloak.get();
+      return;
+    }
+
     String keycloakSettings =
         getKeycloakSettings(KeycloakConstants.getEndpoint(appContext.getMasterApiEndpoint()));
     Map<String, String> settings;
     try {
       settings = JsonHelper.toMap(keycloakSettings);
     } catch (Exception e) {
-      keycloakDisabled = true;
       return;
     }
 
@@ -82,19 +83,15 @@ public class KeycloakProvider {
   }
 
   public static native String getKeycloakSettings(String keycloakSettingsEndpoint) /*-{
-      var myReq = new XMLHttpRequest();
-      myReq.open('GET', '' + keycloakSettingsEndpoint, false);
-      myReq.send(null);
-      return myReq.responseText;
-    }-*/;
+    var myReq = new XMLHttpRequest();
+    myReq.open('GET', '' + keycloakSettingsEndpoint, false);
+    myReq.send(null);
+    return myReq.responseText;
+  }-*/;
 
   public static native JavaScriptObject getWindow() /*-{
-      return $wnd;
-    }-*/;
-
-  public Promise<Keycloak> getKeycloak() {
-    return keycloak;
-  }
+    return $wnd;
+  }-*/;
 
   public Promise<String> getUpdatedToken(int minValidity) {
     return keycloak.thenPromise(
@@ -129,6 +126,6 @@ public class KeycloakProvider {
   }
 
   public boolean isKeycloakDisabled() {
-    return keycloakDisabled;
+    return keycloak == null;
   }
 }

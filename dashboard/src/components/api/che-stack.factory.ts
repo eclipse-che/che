@@ -30,15 +30,20 @@ export class CheStack {
   stacks: Array<any>;
   usedStackNames: Array<string>;
   remoteStackAPI: IRemoteStackAPI<any>;
+  /**
+   * Angular promise service.
+   */
+  private $q: ng.IQService;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($resource: ng.resource.IResourceService) {
+  constructor($resource: ng.resource.IResourceService, $q: ng.IQService) {
 
     // keep resource
     this.$resource = $resource;
+    this.$q = $q;
 
     // stacks per id
     this.stacksById = {};
@@ -142,6 +147,12 @@ export class CheStack {
         this.stacksById[stack.id] = stack;
         this.stacks.push(stack);
       });
+      return this.$q.when(this.stacks);
+    }, (error: any) => {
+      if (error && error.status === 304) {
+        return this.$q.when(this.stacks);
+      }
+      return this.$q.reject(error);
     });
 
     return updatedPromise;

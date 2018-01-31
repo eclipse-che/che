@@ -160,6 +160,7 @@ export class CheTeam implements che.api.ICheTeam {
       // display personal account as "personal" on UI, namespace(id) stays the same for API interactions:
       this.cheNamespaceRegistry.getNamespaces().push({id: this.personalAccount.qualifiedName, label: 'personal', location: '/billing'});
       this.cheNamespaceRegistry.setCaption('Team');
+      this.teamEventsManager.subscribeTeamMemberNotifications();
     } else {
       this.cheNamespaceRegistry.setCaption('Organization');
       // todo add back, when API is ready: this.cheNamespaceRegistry.setEmptyMessage('You are not member of any organization and not able to create workspace. Please, contact your administrator.');

@@ -21,7 +21,6 @@ import org.eclipse.che.api.workspace.server.WorkspaceValidator;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackComponentDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
-import org.eclipse.che.api.workspace.shared.dto.stack.StackSourceDto;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -101,26 +100,12 @@ public class StackValidatorTest {
     validator.check(createStack().withScope("not-valid"));
   }
 
-  @Test
-  public void shouldValidateIfSourceIsWorkspaceConfigAndStackSourceIsNull() throws Exception {
-    validator.check(createStack().withSource(null));
-  }
-
   @Test(
     expectedExceptions = BadRequestException.class,
     expectedExceptionsMessageRegExp = "Workspace config required"
   )
   public void shouldValidateIfSourceIsStackSourceAndWorkspaceConfigIsNull() throws Exception {
     validator.check(createStack().withWorkspaceConfig(null));
-  }
-
-  @Test(
-    expectedExceptions = BadRequestException.class,
-    expectedExceptionsMessageRegExp =
-        "Stack source required. You must specify either 'workspaceConfig' or 'stackSource'"
-  )
-  public void shouldNotValidateIfWorkspaceConfigAndSourceAreNull() throws Exception {
-    validator.check(createStack().withSource(null).withWorkspaceConfig(null));
   }
 
   @Test
@@ -137,8 +122,6 @@ public class StackValidatorTest {
         .withCreator("user123")
         .withTags(new ArrayList<>(Collections.singletonList("latest")))
         .withWorkspaceConfig(newDto(WorkspaceConfigDto.class))
-        .withSource(
-            newDto(StackSourceDto.class).withType("recipe").withOrigin("FROM codenvy/ubuntu_jdk8"))
         .withComponents(
             new ArrayList<>(
                 Collections.singletonList(

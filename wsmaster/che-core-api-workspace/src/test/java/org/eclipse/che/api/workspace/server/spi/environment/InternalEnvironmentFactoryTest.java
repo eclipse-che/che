@@ -25,7 +25,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -177,21 +176,6 @@ public class InternalEnvironmentFactoryTest {
   }
 
   @Test
-  public void testSetsDefaultRamLimitAttributeToMachineThatDoesNotContainIt() throws Exception {
-    final Map<String, String> attributes = new HashMap<>();
-    final InternalEnvironment internalEnv = mock(InternalEnvironment.class);
-    final InternalMachineConfig machine = mock(InternalMachineConfig.class);
-    when(environmentFactory.doCreate(any(), any(), any())).thenReturn(internalEnv);
-    when(internalEnv.getMachines()).thenReturn(ImmutableMap.of("testMachine", machine));
-    when(machine.getAttributes()).thenReturn(attributes);
-
-    environmentFactory.create(mock(Environment.class));
-
-    assertTrue(attributes.containsKey(MEMORY_LIMIT_ATTRIBUTE));
-    assertEquals(attributes.get(MEMORY_LIMIT_ATTRIBUTE), String.valueOf(RAM_LIMIT * 2 << 19));
-  }
-
-  @Test
   public void testDoNotOverrideRamLimitAttributeWhenMachineAlreadyContainsIt() throws Exception {
     final String ramLimit = "2147483648";
     final InternalEnvironment internalEnv = mock(InternalEnvironment.class);
@@ -216,7 +200,7 @@ public class InternalEnvironmentFactoryTest {
         InstallerRegistry installerRegistry,
         RecipeRetriever recipeRetriever,
         MachineConfigsValidator machinesValidator) {
-      super(installerRegistry, recipeRetriever, machinesValidator, RAM_LIMIT);
+      super(installerRegistry, recipeRetriever, machinesValidator);
     }
 
     @Override

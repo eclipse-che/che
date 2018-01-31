@@ -13,8 +13,8 @@ package org.eclipse.che.selenium.core.client;
 /** @author Anatolii Bazko */
 public interface TestAuthServiceClient {
 
-  /** Logs user into the system and returns authentication token. */
-  String login(String username, String password) throws Exception;
+  /** Logs user into the system and returns auth token. */
+  String login(String username, String password, String offlineToken) throws Exception;
 
   void logout(String token) throws Exception;
 }

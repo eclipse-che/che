@@ -48,7 +48,6 @@
 @eval inactiveTabBorderColor org.eclipse.che.ide.api.theme.Style.theme.inactiveTabBorderColor();
 
 @eval openedFilesDropdownListBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.openedFilesDropdownListBackgroundColor();
-@eval openedFilesDropdownListBorderColor org.eclipse.che.ide.api.theme.Style.theme.openedFilesDropdownListBorderColor();
 @eval openedFilesDropdownListShadowColor org.eclipse.che.ide.api.theme.Style.theme.openedFilesDropdownListShadowColor();
 
 @eval partBackground org.eclipse.che.ide.api.theme.Style.theme.partBackground();
@@ -67,6 +66,7 @@
 @eval consolesToolbarHoveredButtonColor org.eclipse.che.ide.api.theme.Style.theme.consolesToolbarHoveredButtonColor();
 @eval consolesToolbarDisabledButtonColor org.eclipse.che.ide.api.theme.Style.theme.consolesToolbarDisabledButtonColor();
 @eval consolesToolbarToggledButtonColor org.eclipse.che.ide.api.theme.Style.theme.consolesToolbarToggledButtonColor();
+@eval consolesToolbarToggledButtonBorderColor org.eclipse.che.ide.api.theme.Style.theme.consolesToolbarToggledButtonBorderColor();
 
 @eval tabBorderShadow org.eclipse.che.ide.api.theme.Style.theme.tabBorderShadow();
 

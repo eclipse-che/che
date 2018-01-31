@@ -18,15 +18,12 @@ import org.eclipse.che.multiuser.api.permission.server.account.AccountPermission
 import org.eclipse.che.multiuser.resource.api.free.DefaultResourcesProvider;
 import org.eclipse.che.multiuser.resource.api.free.FreeResourcesLimitService;
 import org.eclipse.che.multiuser.resource.api.free.FreeResourcesProvider;
-import org.eclipse.che.multiuser.resource.api.license.AccountLicenseService;
-import org.eclipse.che.multiuser.resource.api.license.LicenseServicePermissionsFilter;
-import org.eclipse.che.multiuser.resource.api.license.ResourcesProvider;
 import org.eclipse.che.multiuser.resource.api.type.RamResourceType;
 import org.eclipse.che.multiuser.resource.api.type.ResourceType;
 import org.eclipse.che.multiuser.resource.api.type.RuntimeResourceType;
 import org.eclipse.che.multiuser.resource.api.type.TimeoutResourceType;
 import org.eclipse.che.multiuser.resource.api.type.WorkspaceResourceType;
-import org.eclipse.che.multiuser.resource.api.usage.ResourceUsageService;
+import org.eclipse.che.multiuser.resource.api.usage.ResourceService;
 import org.eclipse.che.multiuser.resource.api.usage.tracker.RamResourceUsageTracker;
 import org.eclipse.che.multiuser.resource.api.usage.tracker.RuntimeResourceUsageTracker;
 import org.eclipse.che.multiuser.resource.api.usage.tracker.WorkspaceResourceUsageTracker;
@@ -38,10 +35,7 @@ import org.eclipse.che.multiuser.resource.spi.jpa.JpaFreeResourcesLimitDao;
 public class ResourceModule extends AbstractModule {
   @Override
   protected void configure() {
-    bind(ResourceUsageService.class);
-
-    bind(AccountLicenseService.class);
-    bind(LicenseServicePermissionsFilter.class);
+    bind(ResourceService.class);
 
     bind(FreeResourcesLimitService.class);
     bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);

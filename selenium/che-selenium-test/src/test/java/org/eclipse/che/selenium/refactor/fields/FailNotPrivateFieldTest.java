@@ -84,8 +84,7 @@ public class FailNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     refactor.waitUpdateReferencesIsSelected();
     refactor.typeAndWaitNewName("g");
@@ -104,8 +103,7 @@ public class FailNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     refactor.waitUpdateReferencesIsSelected();
     refactor.typeAndWaitNewName("g");
@@ -124,8 +122,7 @@ public class FailNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     refactor.waitUpdateReferencesIsSelected();
     refactor.typeAndWaitNewName("g");
@@ -145,8 +142,7 @@ public class FailNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     refactor.waitUpdateReferencesIsSelected();
     refactor.typeAndWaitNewName("g");
@@ -166,8 +162,7 @@ public class FailNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     refactor.waitUpdateReferencesIsSelected();
     refactor.typeAndWaitNewName("g");

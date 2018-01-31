@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.api.workspace.server;
 
+import static org.eclipse.che.api.system.server.DtoConverter.asDto;
+
 import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.Timer;
@@ -113,11 +115,12 @@ public class WorkspaceServiceTermination implements ServiceTermination {
     public void onEvent(WorkspaceStatusEvent event) {
       if (event.getStatus() == WorkspaceStatus.STOPPED) {
         eventService.publish(
-            new SystemServiceItemStoppedEvent(
-                getServiceName(),
-                event.getWorkspaceId(),
-                currentlyStopped.incrementAndGet(),
-                totalRunning));
+            asDto(
+                new SystemServiceItemStoppedEvent(
+                    getServiceName(),
+                    event.getWorkspaceId(),
+                    currentlyStopped.incrementAndGet(),
+                    totalRunning)));
       }
     }
   }
