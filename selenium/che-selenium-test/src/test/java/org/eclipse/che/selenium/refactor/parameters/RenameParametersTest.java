@@ -63,6 +63,7 @@ public class RenameParametersTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME);
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();

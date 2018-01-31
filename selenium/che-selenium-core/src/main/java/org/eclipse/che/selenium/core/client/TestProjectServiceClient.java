@@ -11,10 +11,17 @@
  */
 package org.eclipse.che.selenium.core.client;
 
+import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.io.Resources.getResource;
+import static com.google.common.io.Resources.toByteArray;
 import static java.lang.String.format;
+import static java.nio.file.Files.createFile;
+import static java.nio.file.Files.write;
 import static java.util.Optional.ofNullable;
 import static org.eclipse.che.dto.server.DtoFactory.getInstance;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.PLAIN_JAVA;
 
+import com.google.common.io.Resources;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -141,6 +148,18 @@ public class TestProjectServiceClient {
 
     if (!Files.isDirectory(sourceFolder)) {
       throw new IOException(format("%s not a directory", sourceFolder));
+    }
+
+    if (PLAIN_JAVA.equals(template)) {
+      write(
+          createFile(sourceFolder.resolve(".project")),
+          format(
+                  Resources.toString(getResource("projects/jdt-ls-project-files/project"), UTF_8),
+                  projectName)
+              .getBytes());
+      write(
+          createFile(sourceFolder.resolve(".classpath")),
+          toByteArray(getResource("projects/jdt-ls-project-files/classpath")));
     }
 
     Path zip = Files.createTempFile("project", projectName);
