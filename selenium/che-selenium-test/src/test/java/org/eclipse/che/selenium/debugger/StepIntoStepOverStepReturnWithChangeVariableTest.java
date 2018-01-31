@@ -137,6 +137,9 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
         debugUtils.gotoDebugAppAndSendRequest(
             appUrl, requestMess, APPLICATION_FORM_URLENCODED, 200);
     editor.waitActiveBreakpoint(34);
+    // TODO try/catch should be removed after fixing: https://github.com/eclipse/che/issues/8105
+    // this auxiliary method for investigate problem that was described in the issue:
+    // https://github.com/eclipse/che/issues/8105
     try {
       debugPanel.waitDebugHighlightedText("result = \"Sorry, you failed. Try again later!\";");
     } catch (TimeoutException ex) {

@@ -318,41 +318,45 @@ public class MachineTerminal {
         ? format(Locators.TERMINAL_TAB_XPATH, "")
         : format(Locators.TERMINAL_TAB_XPATH, "-" + terminalNumber);
   }
-
-  // this auxiliary method for investigate problem that was described in the issue: https://github.com/eclipse/che/issues/8105
+  // TODO should be removed after fixing: https://github.com/eclipse/che/issues/8105
+  // this auxiliary method for investigate problem that was described in the issue:
+  // https://github.com/eclipse/che/issues/8105
   public void launchScriptAndGetInfo(
-      TestWorkspace ws, String currentProject, TestProjectServiceClient testProjectServiceClient)
-      throws Exception {
-    String ideCommnandName = "checkApp";
-    String bashFileName = "check-app-state.sh";
-    String terminalCommandForCheckResult =
-        String.format(
-            "cd /projects/%s && chmod +x %s && ./%s", currentProject, bashFileName, bashFileName);
-    commandServiceClient.createCommand(
-        terminalCommandForCheckResult, ideCommnandName, CUSTOM, ws.getId());
-    String bashScript =
-        "#!/bin/bash\n"
-            + "\n"
-            + "URL=$1\n"
-            + "pid=$(pgrep -f \"user/tomcat8\")\n"
-            + "echo \"PID: $pid\"\n"
-            + "\n"
-            + "test() {\n"
-            + "    app_content=$(curl -s $1)\n"
-            + "    if [[ $app_content == *\"hello\"* ]];then\n"
-            + "        echo \"test passed with $1\"\n"
-            + "    else\n"
-            + "        echo \"test failed with $1\"\n"
-            + "    fi\n"
-            + "}";
+      TestWorkspace ws, String currentProject, TestProjectServiceClient testProjectServiceClient) {
+    try {
+      String ideCommnandName = "checkApp";
+      String bashFileName = "check-app-state.sh";
+      String terminalCommandForCheckResult =
+          String.format(
+              "cd /projects/%s && chmod +x %s && ./%s", currentProject, bashFileName, bashFileName);
+      commandServiceClient.createCommand(
+          terminalCommandForCheckResult, ideCommnandName, CUSTOM, ws.getId());
+      String bashScript =
+          "#!/bin/bash\n"
+              + "\n"
+              + "URL=$1\n"
+              + "pid=$(pgrep -f \"user/tomcat8\")\n"
+              + "echo \"PID: $pid\"\n"
+              + "\n"
+              + "test() {\n"
+              + "    app_content=$(curl -s $1)\n"
+              + "    if [[ $app_content == *\"hello\"* ]];then\n"
+              + "        echo \"test passed with $1\"\n"
+              + "    else\n"
+              + "        echo \"test failed with $1\"\n"
+              + "    fi\n"
+              + "}";
 
-    testProjectServiceClient.createFileInProject(
-        ws.getId(), currentProject, bashFileName, bashScript);
-    seleniumWebDriver.navigate().refresh();
-    commandsPalette.openCommandPalette();
-    commandsPalette.startCommandByDoubleClick(ideCommnandName);
-    consoles.waitExpectedTextIntoConsole("PID");
-    String webAppPIDs = consoles.getVisibleTextFromCommandConsole();
-    LOG.warn("@@@ The PID list from run Web application is: " + webAppPIDs);
+      testProjectServiceClient.createFileInProject(
+          ws.getId(), currentProject, bashFileName, bashScript);
+      seleniumWebDriver.navigate().refresh();
+      commandsPalette.openCommandPalette();
+      commandsPalette.startCommandByDoubleClick(ideCommnandName);
+      consoles.waitExpectedTextIntoConsole("PID");
+      String webAppPIDs = consoles.getVisibleTextFromCommandConsole();
+      LOG.warn("@@@ The PID list from run Web application is: " + webAppPIDs);
+    } catch (Exception ex) {
+      LOG.error("@@@ Cannot catch the info about PID", ex);
+    }
   }
 }
