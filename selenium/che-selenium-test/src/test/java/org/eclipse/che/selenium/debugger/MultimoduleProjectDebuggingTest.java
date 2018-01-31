@@ -70,7 +70,7 @@ public class MultimoduleProjectDebuggingTest {
   public void setup() throws Exception {
     URL resource = getClass().getResource("/projects/plugins/DebuggerPlugin/java-multimodule");
     testProjectServiceClient.importProject(
-        ws.getId(), Paths.get(resource.toURI()), PROJECT, ProjectTemplates.CONSOLE_JAVA_SIMPLE);
+        ws.getId(), Paths.get(resource.toURI()), PROJECT, ProjectTemplates.MAVEN_JAVA_MULTIMODULE);
 
     testCommandServiceClient.createCommand(
         BUILD_AND_DEBUG_CONSOLE_APPLICATION_COMMAND,
@@ -80,6 +80,7 @@ public class MultimoduleProjectDebuggingTest {
 
     // open IDE
     ide.open(ws);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT);
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT);
     notificationPopup.waitProgressPopupPanelClose();
