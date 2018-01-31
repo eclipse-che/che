@@ -16,7 +16,6 @@ import static com.google.gwt.dom.client.Style.Position.FIXED;
 import static com.google.gwt.dom.client.Style.Unit.PCT;
 import static com.google.gwt.dom.client.Style.Unit.PX;
 import static com.google.gwt.user.client.Window.getClientWidth;
-import static org.eclipse.che.ide.util.dom.DomUtils.incrementAndGetTopZIndex;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
