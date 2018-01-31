@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.miscellaneous;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.DialogAbout;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -27,6 +28,7 @@ public class DialogAboutTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
   @Inject private DialogAbout dialogAbout;
+  @Inject private BrowserLogsUtil browserLogsUtil;
 
   @Test
   public void dialogAboutTest() throws Exception {
@@ -40,5 +42,7 @@ public class DialogAboutTest {
     dialogAbout.waitVerifyTextElements("Revision :");
     dialogAbout.waitVerifyTextElements("Build Time :");
     dialogAbout.closeAboutDialog();
+
+    browserLogsUtil.appendBrowserLogs();
   }
 }

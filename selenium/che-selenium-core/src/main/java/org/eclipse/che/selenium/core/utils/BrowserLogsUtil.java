@@ -105,9 +105,9 @@ public class BrowserLogsUtil {
    *
    * @return log messages from browser console
    */
-  public String getBrowserLogsAsString() {
+  public String getLogsAsString(String logType) {
     StringBuilder result = new StringBuilder();
-    getBrowserLogs()
+    getLogs(logType)
         .forEach(
             logEntry ->
                 result.append(format("%s %s\n", logEntry.getLevel(), logEntry.getMessage())));
@@ -115,9 +115,14 @@ public class BrowserLogsUtil {
     return result.toString();
   }
 
+  /** append provided type of logs to the test logs */
+  public void appendLogs(String logType) {
+    getLogs(logType)
+        .forEach(logEntry -> LOG.info("{} {}", logEntry.getLevel(), logEntry.getMessage()));
+  }
+
   /** append browser logs to the test logs */
   public void appendBrowserLogs() {
-    getBrowserLogs()
-        .forEach(logEntry -> LOG.info("{} {}", logEntry.getLevel(), logEntry.getMessage()));
+    appendLogs(BROWSER);
   }
 }

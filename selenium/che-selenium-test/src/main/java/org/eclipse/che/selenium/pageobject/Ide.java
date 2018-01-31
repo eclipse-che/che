@@ -10,19 +10,14 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
-import static org.testng.Assert.fail;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.net.URL;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.entrance.Entrance;
-import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceUrlResolver;
-import org.openqa.selenium.TimeoutException;
 
 /**
  * @author Vitaliy Gulyy
@@ -33,34 +28,21 @@ public class Ide {
   private final SeleniumWebDriver seleniumWebDriver;
   private final TestWorkspaceUrlResolver testWorkspaceUrlResolver;
   private final Entrance entrance;
-  private final ProjectExplorer projectExplorer;
-  private final BrowserLogsUtil browserLogsUtil;
 
   @Inject
   public Ide(
       SeleniumWebDriver seleniumWebDriver,
       TestWorkspaceUrlResolver testWorkspaceUrlResolver,
-      Entrance entrance,
-      ProjectExplorer projectExplorer,
-      BrowserLogsUtil browserLogsUtil) {
+      Entrance entrance) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.testWorkspaceUrlResolver = testWorkspaceUrlResolver;
     this.entrance = entrance;
-    this.projectExplorer = projectExplorer;
-    this.browserLogsUtil = browserLogsUtil;
   }
 
   public void open(TestWorkspace testWorkspace) throws Exception {
     URL workspaceUrl = testWorkspaceUrlResolver.resolve(testWorkspace);
     seleniumWebDriver.get(workspaceUrl.toString());
     entrance.login(testWorkspace.getOwner());
-    try {
-      projectExplorer.waitProjectExplorer(LOADER_TIMEOUT_SEC);
-    } catch (TimeoutException ex) {
-      browserLogsUtil.appendBrowserLogs();
-      // Remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8468", ex);
-    }
   }
 
   @PreDestroy
