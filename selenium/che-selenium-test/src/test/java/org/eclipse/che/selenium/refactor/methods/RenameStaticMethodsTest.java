@@ -76,6 +76,7 @@ public class RenameStaticMethodsTest {
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(NAME_OFP_ROJECT);
     projectExplorer.quickExpandWithJavaScript();
+    consoles.waitJDTLSProjectResolveFinishedMessage(NAME_OFP_ROJECT);
     consoles.closeProcessesArea();
   }
 
