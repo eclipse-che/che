@@ -42,7 +42,7 @@ public final class DomUtils {
     }
 
     int incrementAndGetTopZIndex(int i) {
-      zIndexId += i + 1;
+      zIndexId = zIndexId + i + 1;
       return zIndexId;
     }
   }
