@@ -97,7 +97,7 @@ final class WindowManager {
           }
         });
     window.setActive(true);
-    window.setZIndex(DomUtils.incrementAndGetTopZIndex());
+    window.setZIndex(DomUtils.incrementAndGetTopZIndex(1));
 
     focus(window);
   }

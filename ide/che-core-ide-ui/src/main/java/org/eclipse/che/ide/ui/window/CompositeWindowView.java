@@ -162,9 +162,9 @@ public class CompositeWindowView extends Composite implements WindowView {
   @Override
   public void setZIndex(int zIndex) {
     if (windowFrameModal && windowFrameGlassPanel != null) {
-      windowFrameGlassPanel.getElement().getStyle().setZIndex(zIndex);
+      windowFrameGlassPanel.getElement().getStyle().setZIndex(zIndex - 1);
     }
-    windowFrame.getElement().getStyle().setZIndex(incrementAndGetTopZIndex(zIndex));
+    windowFrame.getElement().getStyle().setZIndex(zIndex);
   }
 
   @Override
