@@ -20,6 +20,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
@@ -36,6 +37,7 @@ public class BreakpointReorderingTest {
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
+  @Inject private Consoles consoles;
   @Inject private DebugPanel debugPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private SeleniumWebDriver seleniumWebDriver;
@@ -50,6 +52,7 @@ public class BreakpointReorderingTest {
         ProjectTemplates.MAVEN_SPRING);
 
     ide.open(ws);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     debugPanel.openDebugPanel();

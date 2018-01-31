@@ -98,6 +98,8 @@ public class Consoles {
   public static final String COMMANDS_MENU_ITEM = "gwt-debug-contextMenu/commandsActionGroup";
   public static final String SERVERS_MENU_ITEM = "contextMenu/Servers";
   public static final String COMMAND_NAME = "//tr[contains(@id,'command_%s')]";
+  public static final String LANGUAGE_SERVER_UPDATE_MESSAGE =
+      "Workspace updated. Result code: '0', message: 'OK'. Added projects: '[file:///projects/%s]', removed projects: '[]'";
 
   public interface CommandsGoal {
     String COMMON = "gwt-debug-contextMenu/Commands/goal_Common";
@@ -406,6 +408,11 @@ public class Consoles {
   /** wait expected text into 'Command console' */
   public void waitExpectedTextIntoConsole(String expectedText) {
     updateProjDriverWait.until(textToBePresentInElement(consoleContainer, expectedText));
+  }
+
+  /** wait JDT LS message about project is updated */
+  public void waitJDTLSProjectResolveFinishedMessage(String project) {
+    waitExpectedTextIntoConsole(String.format(LANGUAGE_SERVER_UPDATE_MESSAGE, project));
   }
 
   /** get visible text from command console */

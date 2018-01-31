@@ -23,6 +23,7 @@ import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -57,6 +58,9 @@ public class RefactoringFeatureTest {
   @InjectPageObject(driverId = 1)
   private Menu menu1;
 
+  @InjectPageObject(driverId = 1)
+  private Consoles consoles;
+
   @InjectPageObject(driverId = 2)
   private Ide ide2;
 
@@ -75,6 +79,9 @@ public class RefactoringFeatureTest {
   @InjectPageObject(driverId = 2)
   private Menu menu2;
 
+  @InjectPageObject(driverId = 2)
+  private Consoles consoles2;
+
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @BeforeClass
@@ -84,6 +91,8 @@ public class RefactoringFeatureTest {
         ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING);
     ide1.open(ws);
     ide2.open(ws);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
+    consoles2.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     events1.clickEventLogBtn();
     events2.clickEventLogBtn();
   }

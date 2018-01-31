@@ -81,6 +81,7 @@ public class InnerClassAndLambdaDebuggingTest {
 
     // open IDE
     ide.open(ws);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT);
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT);
     notificationPopup.waitProgressPopupPanelClose();
