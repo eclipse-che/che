@@ -35,6 +35,7 @@ public class DialogAboutTest {
     ide.open(testWorkspace);
 
     projectExplorer.waitProjectExplorer();
+    browserLogsUtil.appendBrowserLogs();
     menu.runCommand(TestMenuCommandsConstants.Help.HELP, TestMenuCommandsConstants.Help.ABOUT);
 
     dialogAbout.waitVerifyTextElements("About");
@@ -42,7 +43,5 @@ public class DialogAboutTest {
     dialogAbout.waitVerifyTextElements("Revision :");
     dialogAbout.waitVerifyTextElements("Build Time :");
     dialogAbout.closeAboutDialog();
-
-    browserLogsUtil.appendBrowserLogs();
   }
 }
