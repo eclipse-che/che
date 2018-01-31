@@ -76,6 +76,7 @@ public class RenameStaticMethodsTest {
         nameOfProject,
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(nameOfProject);
     new Services(projectExplorer, notificationsPopupPanel, refactor)
         .expandRenamePrivateMethodProject(nameOfProject, "renameStaticMethods");
     consoles.closeProcessesArea();
