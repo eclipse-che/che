@@ -12,9 +12,7 @@
 #   curl -fsSL ${DEPLOY_SCRIPT_URL} -o get-che.sh
 #   WAIT_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/dockerfiles/cli/scripts/openshift/wait_until_che_is_available.sh
 #   curl -fsSL ${WAIT_SCRIPT_URL} -o wait-che.sh
-#   STACKS_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/dockerfiles/cli/scripts/openshift/replace_stacks.sh
-#   curl -fsSL ${STACKS_SCRIPT_URL} -o stacks-che.sh
-#   bash get-che.sh && wait-che.sh && stacks-che.sh
+#   bash get-che.sh && wait-che.sh
 #   ```
 #
 # For more deployment options: https://www.eclipse.org/che/docs/setup/openshift/index.html
