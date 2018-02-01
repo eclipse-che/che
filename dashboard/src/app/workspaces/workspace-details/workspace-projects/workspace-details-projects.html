@@ -20,6 +20,8 @@
     <div che-multi-transclude-part="che-list-delete-button">
       <che-list-header-delete-button ng-if="workspaceDetailsProjectsCtrl.cheListHelper.isNoItemSelected === false"
                                      title="Delete"
+                                     disabled="workspaceDetailsProjectsCtrl.workspaceIsRunning() === false"
+                                     disabled-message="Projects cannot be removed in stopped workspace."
                                      on-delete="workspaceDetailsProjectsCtrl.deleteSelectedProjects()"></che-list-header-delete-button>
     </div>
     <div che-multi-transclude-part="che-list-search">
