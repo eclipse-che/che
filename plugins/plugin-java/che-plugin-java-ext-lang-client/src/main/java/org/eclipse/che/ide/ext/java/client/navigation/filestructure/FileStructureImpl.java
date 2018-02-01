@@ -17,7 +17,9 @@ import com.google.common.base.Predicate;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyEvent;
+import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -25,8 +27,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import elemental.events.Event;
 import java.util.Collections;
-import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
+import org.eclipse.che.ide.ext.java.client.JavaExtension;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.navigation.factory.NodeFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
@@ -36,8 +43,11 @@ import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
-import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
+import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 import org.eclipse.che.ide.ui.window.Window;
+import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
+import org.eclipse.che.ide.util.input.SignalEvent;
+import org.eclipse.che.ide.util.input.SignalEventUtils;
 
 /**
  * Implementation of {@link FileStructure} view.
@@ -46,45 +56,42 @@ import org.eclipse.che.ide.ui.window.Window;
  */
 @Singleton
 final class FileStructureImpl extends Window implements FileStructure {
-  interface FileStructureImplUiBinder extends UiBinder<Widget, FileStructureImpl> {}
 
   private static FileStructureImplUiBinder UI_BINDER = GWT.create(FileStructureImplUiBinder.class);
-
-  private final NodeFactory nodeFactory;
-  private final Tree tree;
-
-  private ActionDelegate delegate;
-
-  @UiField DockLayoutPanel treeContainer;
-  @UiField Label showInheritedLabel;
 
   @UiField(provided = true)
   final JavaLocalizationConstant locale;
 
-  private Predicate<Node> LEAFS =
-      new Predicate<Node>() {
-        @Override
-        public boolean apply(Node input) {
-          return input.isLeaf();
-        }
-      };
+  private final ActionManager actionManager;
+  private final PresentationFactory presentationFactory;
+
+  private final NodeFactory nodeFactory;
+  private final Tree tree;
+  private final KeyBindingAgent keyBindingAgent;
+  @UiField DockLayoutPanel treeContainer;
+  @UiField Label showInheritedLabel;
+  private ActionDelegate delegate;
+  private Predicate<Node> LEAFS = input -> input.isLeaf();
 
   @Inject
-  public FileStructureImpl(NodeFactory nodeFactory, JavaLocalizationConstant locale) {
+  public FileStructureImpl(
+      NodeFactory nodeFactory,
+      JavaLocalizationConstant locale,
+      KeyBindingAgent keyBindingAgent,
+      ActionManager actionManager,
+      PresentationFactory presentationFactory) {
     super(false);
     this.nodeFactory = nodeFactory;
     this.locale = locale;
+    this.actionManager = actionManager;
+    this.presentationFactory = presentationFactory;
+    this.keyBindingAgent = keyBindingAgent;
+
     setWidget(UI_BINDER.createAndBindUi(this));
 
     NodeStorage storage =
-        new NodeStorage(
-            new NodeUniqueKeyProvider() {
-              @Override
-              public String getKey(@NotNull Node item) {
-                return String.valueOf(item.hashCode());
-              }
-            });
-    NodeLoader loader = new NodeLoader(Collections.<NodeInterceptor>emptySet());
+        new NodeStorage((NodeUniqueKeyProvider) item -> String.valueOf(item.hashCode()));
+    NodeLoader loader = new NodeLoader(Collections.emptySet());
     tree = new Tree(storage, loader);
     tree.setAutoExpand(false);
     tree.getSelectionModel().setSelectionMode(SINGLE);
@@ -97,12 +104,9 @@ final class FileStructureImpl extends Window implements FileStructure {
           }
         };
     tree.addDomHandler(
-        new DoubleClickHandler() {
-          @Override
-          public void onDoubleClick(DoubleClickEvent event) {
-            if (all(tree.getSelectionModel().getSelectedNodes(), LEAFS)) {
-              hide();
-            }
+        event -> {
+          if (all(tree.getSelectionModel().getSelectedNodes(), LEAFS)) {
+            hide();
           }
         },
         DoubleClickEvent.getType());
@@ -162,4 +166,39 @@ final class FileStructureImpl extends Window implements FileStructure {
   public void setDelegate(ActionDelegate delegate) {
     this.delegate = delegate;
   }
+
+  @Override
+  protected void onKeyDownEvent(KeyDownEvent event) {
+    handleKey(event);
+  }
+
+  @Override
+  protected void onKeyPressEvent(KeyPressEvent event) {
+    handleKey(event);
+  }
+
+  private void handleKey(KeyEvent<?> event) {
+    SignalEvent signalEvent = SignalEventUtils.create((Event) event.getNativeEvent(), false);
+    CharCodeWithModifiers keyBinding =
+        keyBindingAgent.getKeyBinding(JavaExtension.JAVA_CLASS_STRUCTURE);
+    if (signalEvent == null || keyBinding == null) {
+      return;
+    }
+    int digest = CharCodeWithModifiers.computeKeyDigest(signalEvent);
+    if (digest == keyBinding.getKeyDigest()) {
+      Action action = actionManager.getAction(JavaExtension.JAVA_CLASS_STRUCTURE);
+      if (action != null) {
+        ActionEvent e = new ActionEvent(presentationFactory.getPresentation(action), actionManager);
+        action.update(e);
+
+        if (e.getPresentation().isEnabled()) {
+          event.preventDefault();
+          event.stopPropagation();
+          action.actionPerformed(e);
+        }
+      }
+    }
+  }
+
+  interface FileStructureImplUiBinder extends UiBinder<Widget, FileStructureImpl> {}
 }

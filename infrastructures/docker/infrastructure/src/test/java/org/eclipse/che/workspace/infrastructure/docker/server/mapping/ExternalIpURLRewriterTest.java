@@ -23,7 +23,7 @@ public class ExternalIpURLRewriterTest {
       throws Exception {
     ExternalIpURLRewriter rewriter = new ExternalIpURLRewriter(externalIP);
 
-    String rewrittenURL = rewriter.rewriteURL(null, null, incomeURL);
+    String rewrittenURL = rewriter.rewriteURL(null, null, null, incomeURL);
 
     assertEquals(rewrittenURL, expectedURL);
   }
@@ -51,7 +51,7 @@ public class ExternalIpURLRewriterTest {
     String toRewrite = "https://google.com:8080/some/path?param=value";
     ExternalIpURLRewriter rewriter = new ExternalIpURLRewriter(null);
 
-    String rewrittenURL = rewriter.rewriteURL(null, null, toRewrite);
+    String rewrittenURL = rewriter.rewriteURL(null, null, null, toRewrite);
 
     assertEquals(rewrittenURL, toRewrite);
   }
@@ -64,6 +64,6 @@ public class ExternalIpURLRewriterTest {
     String toRewrite = ":";
     ExternalIpURLRewriter rewriter = new ExternalIpURLRewriter("localhost");
 
-    rewriter.rewriteURL(null, null, toRewrite);
+    rewriter.rewriteURL(null, null, null, toRewrite);
   }
 }
