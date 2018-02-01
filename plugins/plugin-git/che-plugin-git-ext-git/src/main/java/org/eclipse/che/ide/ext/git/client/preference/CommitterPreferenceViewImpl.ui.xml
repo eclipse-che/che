@@ -21,18 +21,22 @@
         .inherit {
             margin-top: 5px;
         }
+
+        .preferencesInputs {
+            width: 100%;
+        }
     </ui:style>
 
     <g:FlowPanel styleName="{style.main}">
 
         <g:FlowPanel styleName="{style.inherit}">
             <g:Label>Name:</g:Label>
-            <g:TextBox ui:field="name" debugId="committer-preferences-name"/>
+            <g:TextBox ui:field="name" debugId="committer-preferences-name" addStyleNames="{style.preferencesInputs}"/>
         </g:FlowPanel>
 
         <g:FlowPanel styleName="{style.inherit}">
             <g:Label>Email:</g:Label>
-            <g:TextBox ui:field="email" debugId="committer-preferences-email"/>
+            <g:TextBox ui:field="email" debugId="committer-preferences-email" addStyleNames="{style.preferencesInputs}"/>
         </g:FlowPanel>
 
     </g:FlowPanel>

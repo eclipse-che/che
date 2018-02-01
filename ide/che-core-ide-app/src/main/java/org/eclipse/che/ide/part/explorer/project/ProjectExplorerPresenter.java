@@ -230,6 +230,12 @@ public class ProjectExplorerPresenter extends BasePresenter
   }
 
   /* Expose Project Explorer's internal API to the world, to allow automated Selenium scripts expand all projects tree. */
+  /*
+  Notice that the reference to the exported method has been wrapped in a call to the $entry function.
+  This implicitly-defined function ensures that the Java-derived method is executed with the uncaught
+  exception handler installed and pumps a number of other utility services. The $entry function is
+  reentrant-safe and should be used anywhere that GWT-derived JavaScript may be called into from a non-GWT context.
+   */
   private native void registerNative() /*-{
         var that = this;
 
