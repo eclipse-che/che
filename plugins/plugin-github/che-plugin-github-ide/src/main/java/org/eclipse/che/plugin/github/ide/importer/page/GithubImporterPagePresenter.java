@@ -10,10 +10,12 @@
  */
 package org.eclipse.che.plugin.github.ide.importer.page;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.plugin.ssh.key.client.manage.SshKeyManagerPresenter.GITHUB_HOST;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.JsArrayMixed;
 import com.google.gwt.regexp.shared.RegExp;
@@ -38,12 +40,15 @@ import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.NameUtils;
 import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
 import org.eclipse.che.plugin.github.ide.GitHubServiceClient;
 import org.eclipse.che.plugin.github.ide.load.ProjectData;
 import org.eclipse.che.plugin.github.shared.GitHubRepository;
 import org.eclipse.che.plugin.github.shared.GitHubUser;
+import org.eclipse.che.plugin.ssh.key.client.SshKeyGenerationInfo;
+import org.eclipse.che.plugin.ssh.key.client.SshKeyManager;
 import org.eclipse.che.security.oauth.OAuthStatus;
 
 /** @author Roman Nikitenko */
@@ -70,11 +75,14 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
   private Map<String, List<GitHubRepository>> repositories;
   private GitHubLocalizationConstant locale;
   private GithubImporterPageView view;
+  private DialogFactory dialogFactory;
   private final String baseUrl;
   private final AppContext appContext;
   private OAuth2Authenticator gitHubAuthenticator;
-  private final OAuthServiceClient oAuthServiceClient;
-  private final NotificationManager notificationManager;
+  private SshKeyManager sshKeyManager;
+  private OAuthServiceClient oAuthServiceClient;
+  private NotificationManager notificationManager;
+  private SshKeyGenerationInfo sshKeyGenerationInfo;
 
   private boolean ignoreChanges;
 
@@ -84,20 +92,25 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
       OAuth2AuthenticatorRegistry gitHubAuthenticatorRegistry,
       GitHubServiceClient gitHubClientService,
       DtoFactory dtoFactory,
+      DialogFactory dialogFactory,
       AppContext appContext,
       GitHubLocalizationConstant locale,
+      SshKeyManager sshKeyManager,
       OAuthServiceClient oAuthServiceClient,
       NotificationManager notificationManager) {
     this.view = view;
+    this.dialogFactory = dialogFactory;
     this.baseUrl = appContext.getMasterApiEndpoint();
     this.appContext = appContext;
     this.gitHubAuthenticator = gitHubAuthenticatorRegistry.getAuthenticator("github");
     this.gitHubClientService = gitHubClientService;
     this.dtoFactory = dtoFactory;
+    this.sshKeyManager = sshKeyManager;
     this.oAuthServiceClient = oAuthServiceClient;
     this.notificationManager = notificationManager;
     this.view.setDelegate(this);
     this.locale = locale;
+    this.sshKeyGenerationInfo = new SshKeyGenerationInfo(GITHUB_HOST, false, false);
   }
 
   @Override
@@ -231,8 +244,8 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
   public void go(@NotNull AcceptsOneWidget container) {
     container.setWidget(view);
 
-    if (Strings.isNullOrEmpty(dataObject.getName())
-        && Strings.isNullOrEmpty(dataObject.getSource().getLocation())) {
+    if (isNullOrEmpty(dataObject.getName())
+        && isNullOrEmpty(dataObject.getSource().getLocation())) {
       ignoreChanges = true;
 
       view.unmarkURL();
@@ -279,9 +292,15 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
         .catchError(this::onFailRequest);
   }
 
-  protected void onSuccessRequest(JsArrayMixed arg) {
-    onListLoaded(toOrgList(arg), toRepoList(arg));
-    showProcessing(false);
+  protected void onSuccessRequest(JsArrayMixed result) {
+    sshKeyManager
+        .isSshKeyAvailable(GITHUB_HOST)
+        .then(
+            isSshAvailable -> {
+              sshKeyGenerationInfo.setSshAvailable(isSshAvailable);
+              onListLoaded(toOrgList(result), toRepoList(result));
+              showProcessing(false);
+            });
   }
 
   protected List<GitHubRepository> toRepoList(JsArrayMixed arg) {
@@ -329,15 +348,55 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
 
   @Override
   public void onRepositorySelected(@NotNull ProjectData repository) {
-    dataObject.setName(repository.getName());
-    dataObject.setDescription(repository.getDescription());
-    dataObject.getSource().setLocation(repository.getRepositoryUrl());
+    fillUpData(repository);
 
-    view.setProjectName(repository.getName());
-    view.setProjectDescription(repository.getDescription());
-    view.setProjectUrl(repository.getRepositoryUrl());
+    if (!sshKeyGenerationInfo.isCanceled()
+        && !sshKeyGenerationInfo.isSshAvailable()
+        && repository.isPrivateRepo()) {
+      dialogFactory
+          .createConfirmDialog(
+              locale.authorizationDialogTitle(),
+              locale.messageSshKeyGenerationPromt(),
+              () -> onSshKeyGenerationAccepted(repository),
+              () -> sshKeyGenerationInfo.setCanceled(true))
+          .show();
+    }
+  }
+
+  private void fillUpData(ProjectData repository) {
+    String url =
+        sshKeyGenerationInfo.isSshAvailable()
+            ? repository.getRepositoryUrl()
+            : repository.getHttpTransportUrl();
+    String name = repository.getName();
+    String description = repository.getDescription();
+
+    dataObject.setName(name);
+    dataObject.setDescription(description);
+    dataObject.getSource().setLocation(url);
+
+    view.setProjectName(name);
+    view.setProjectDescription(description);
+    view.setProjectUrl(url);
 
     updateDelegate.updateControls();
+  }
+
+  private void onSshKeyGenerationAccepted(ProjectData repository) {
+    sshKeyManager
+        .generateSshKey(appContext.getCurrentUser().getId(), GITHUB_HOST)
+        .then(
+            arg -> {
+              notificationManager.notify(locale.authMessageKeyUploadSuccess(), SUCCESS, FLOAT_MODE);
+
+              sshKeyGenerationInfo.setSshAvailable(true);
+              fillUpData(repository);
+            })
+        .catchError(
+            arg -> {
+              notificationManager.notify(locale.authMessageUnableCreateSshKey(), FAIL, FLOAT_MODE);
+              sshKeyGenerationInfo.setSshAvailable(false);
+            });
   }
 
   @Override
@@ -399,7 +458,9 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<MutableProje
                 null,
                 null,
                 repository.getSshUrl(),
-                repository.getGitUrl());
+                repository.getGitUrl(),
+                repository.getHtmlUrl(),
+                repository.isPrivateRepo());
         projectsData.add(projectData);
       }
 
