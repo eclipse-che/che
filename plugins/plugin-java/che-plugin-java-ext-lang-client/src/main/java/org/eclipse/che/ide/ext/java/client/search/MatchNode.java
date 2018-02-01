@@ -69,7 +69,7 @@ public class MatchNode extends AbstractTreeNode implements HasNewPresentation, H
   @Override
   public NewNodePresentation getPresentation() {
     SpanElement spanElement =
-        Elements.createSpanElement(styles.styles().presentableTextContainer());
+        Elements.createSpanElement(styles.treeStylesCss().presentableTextContainer());
 
     SpanElement lineNumberElement = Elements.createSpanElement();
     lineNumberElement.setInnerHTML(
