@@ -16,10 +16,8 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
-import org.eclipse.che.ide.ext.java.client.navigation.filestructure.FileStructurePresenter;
 import org.eclipse.che.ide.ext.java.client.util.Flags;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Initializer;
-import org.eclipse.che.ide.ui.smartTree.data.HasAction;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -29,10 +27,9 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  *
  * @author Valeriy Svydenko
  */
-public class InitializerNode extends AbstractPresentationNode implements HasAction {
+public class InitializerNode extends AbstractPresentationNode {
   private final JavaResources resources;
   private final boolean isFromSuper;
-  private final FileStructurePresenter fileStructurePresenter;
   private final Initializer initializer;
 
   @Inject
@@ -40,12 +37,10 @@ public class InitializerNode extends AbstractPresentationNode implements HasActi
       JavaResources resources,
       @Assisted Initializer initializer,
       @Assisted("showInheritedMembers") boolean showInheritedMembers,
-      @Assisted("isFromSuper") boolean isFromSuper,
-      FileStructurePresenter fileStructurePresenter) {
+      @Assisted("isFromSuper") boolean isFromSuper) {
     this.initializer = initializer;
     this.resources = resources;
     this.isFromSuper = isFromSuper;
-    this.fileStructurePresenter = fileStructurePresenter;
   }
 
   /** {@inheritDoc} */
@@ -83,11 +78,5 @@ public class InitializerNode extends AbstractPresentationNode implements HasActi
   @Override
   public boolean isLeaf() {
     return true;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void actionPerformed() {
-    fileStructurePresenter.actionPerformed(initializer);
   }
 }

@@ -17,7 +17,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
-import org.eclipse.che.ide.ext.java.client.navigation.filestructure.FileStructurePresenter;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Initializer;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.junit.Before;
@@ -30,7 +29,6 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 @RunWith(GwtMockitoTestRunner.class)
 public class InitializerNodeTest {
   @Mock private JavaResources resources;
-  @Mock private FileStructurePresenter fileStructurePresenter;
   @Mock private Initializer initializer;
   @Mock private NodePresentation presentation;
   @Mock private SVGResource svgResource;
@@ -42,8 +40,7 @@ public class InitializerNodeTest {
     when(initializer.getFlags()).thenReturn(1);
     when(resources.publicMethod()).thenReturn(svgResource);
 
-    initializerNode =
-        new InitializerNode(resources, initializer, true, false, fileStructurePresenter);
+    initializerNode = new InitializerNode(resources, initializer, true, false);
   }
 
   @Test
@@ -53,8 +50,7 @@ public class InitializerNodeTest {
 
   @Test
   public void presentationNameShouldBeUpdatedIfInheritedMemberHide() throws Exception {
-    initializerNode =
-        new InitializerNode(resources, initializer, false, false, fileStructurePresenter);
+    initializerNode = new InitializerNode(resources, initializer, false, false);
 
     initializerNode.updatePresentation(presentation);
 
@@ -70,12 +66,5 @@ public class InitializerNodeTest {
   @Test
   public void fieldIsLeaf() throws Exception {
     assertTrue(initializerNode.isLeaf());
-  }
-
-  @Test
-  public void actionShouldBePerformed() throws Exception {
-    initializerNode.actionPerformed();
-
-    verify(fileStructurePresenter).actionPerformed(initializer);
   }
 }

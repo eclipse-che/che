@@ -16,10 +16,8 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
-import org.eclipse.che.ide.ext.java.client.navigation.filestructure.FileStructurePresenter;
 import org.eclipse.che.ide.ext.java.client.util.Flags;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Field;
-import org.eclipse.che.ide.ui.smartTree.data.HasAction;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -29,11 +27,10 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  *
  * @author Valeriy Svydenko
  */
-public class FieldNode extends AbstractPresentationNode implements HasAction {
+public class FieldNode extends AbstractPresentationNode {
   private final JavaResources resources;
   private final Field field;
   private final boolean isFromSuper;
-  private final FileStructurePresenter fileStructurePresenter;
 
   private boolean isShowInheritedMembers;
 
@@ -42,12 +39,10 @@ public class FieldNode extends AbstractPresentationNode implements HasAction {
       JavaResources resources,
       @Assisted Field field,
       @Assisted("showInheritedMembers") boolean showInheritedMembers,
-      @Assisted("isFromSuper") boolean isFromSuper,
-      FileStructurePresenter fileStructurePresenter) {
+      @Assisted("isFromSuper") boolean isFromSuper) {
     this.resources = resources;
     this.field = field;
     this.isFromSuper = isFromSuper;
-    this.fileStructurePresenter = fileStructurePresenter;
     this.isShowInheritedMembers = showInheritedMembers;
   }
 
@@ -96,11 +91,5 @@ public class FieldNode extends AbstractPresentationNode implements HasAction {
   @Override
   public boolean isLeaf() {
     return true;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void actionPerformed() {
-    fileStructurePresenter.actionPerformed(field);
   }
 }

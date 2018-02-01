@@ -16,10 +16,8 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
-import org.eclipse.che.ide.ext.java.client.navigation.filestructure.FileStructurePresenter;
 import org.eclipse.che.ide.ext.java.client.util.Flags;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Method;
-import org.eclipse.che.ide.ui.smartTree.data.HasAction;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -29,11 +27,10 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  *
  * @author Valeriy Svydenko
  */
-public class MethodNode extends AbstractPresentationNode implements HasAction {
+public class MethodNode extends AbstractPresentationNode {
   private final JavaResources resources;
   private final Method method;
   private final boolean isFromSuper;
-  private final FileStructurePresenter fileStructurePresenter;
 
   private boolean showingInheritedMembers;
 
@@ -42,12 +39,10 @@ public class MethodNode extends AbstractPresentationNode implements HasAction {
       JavaResources resources,
       @Assisted Method method,
       @Assisted("showInheritedMembers") boolean showInheritedMembers,
-      @Assisted("isFromSuper") boolean isFromSuper,
-      FileStructurePresenter fileStructurePresenter) {
+      @Assisted("isFromSuper") boolean isFromSuper) {
     this.resources = resources;
     this.method = method;
     this.isFromSuper = isFromSuper;
-    this.fileStructurePresenter = fileStructurePresenter;
     this.showingInheritedMembers = showInheritedMembers;
   }
 
@@ -86,12 +81,6 @@ public class MethodNode extends AbstractPresentationNode implements HasAction {
       icon = resources.publicMethod();
     }
     presentation.setPresentableIcon(icon);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void actionPerformed() {
-    fileStructurePresenter.actionPerformed(method);
   }
 
   /** {@inheritDoc} */

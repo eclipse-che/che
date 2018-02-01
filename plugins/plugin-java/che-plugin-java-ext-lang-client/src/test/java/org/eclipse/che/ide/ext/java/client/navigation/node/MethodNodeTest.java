@@ -18,7 +18,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
-import org.eclipse.che.ide.ext.java.client.navigation.filestructure.FileStructurePresenter;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Method;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.junit.Before;
@@ -36,7 +35,6 @@ public class MethodNodeTest {
   private static final String RETURN_TYPE = "returned";
 
   @Mock private JavaResources resources;
-  @Mock private FileStructurePresenter fileStructurePresenter;
   @Mock private Method method;
   @Mock private NodePresentation presentation;
   @Mock private SVGResource svgResource;
@@ -52,7 +50,7 @@ public class MethodNodeTest {
     when(method.getElementName()).thenReturn(NAME);
     when(method.getLabel()).thenReturn(NAME);
 
-    methodNode = new MethodNode(resources, method, true, false, fileStructurePresenter);
+    methodNode = new MethodNode(resources, method, true, false);
   }
 
   @Test
@@ -84,7 +82,7 @@ public class MethodNodeTest {
 
   @Test
   public void presentationNameShouldBeUpdatedIfInheritedMemberHide() throws Exception {
-    methodNode = new MethodNode(resources, method, false, false, fileStructurePresenter);
+    methodNode = new MethodNode(resources, method, false, false);
 
     methodNode.updatePresentation(presentation);
 
@@ -103,12 +101,5 @@ public class MethodNodeTest {
   @Test
   public void fieldIsLeaf() throws Exception {
     assertTrue(methodNode.isLeaf());
-  }
-
-  @Test
-  public void actionShouldBePerformed() throws Exception {
-    methodNode.actionPerformed();
-
-    verify(fileStructurePresenter).actionPerformed(method);
   }
 }

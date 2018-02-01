@@ -20,14 +20,12 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.navigation.factory.NodeFactory;
-import org.eclipse.che.ide.ext.java.client.navigation.filestructure.FileStructurePresenter;
 import org.eclipse.che.ide.ext.java.client.util.Flags;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Field;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Initializer;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Method;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Type;
-import org.eclipse.che.ide.ui.smartTree.data.HasAction;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -37,10 +35,9 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  *
  * @author Valeriy Svydenko
  */
-public class TypeNode extends AbstractPresentationNode implements HasAction {
+public class TypeNode extends AbstractPresentationNode {
   private final JavaResources resources;
   private final NodeFactory nodeFactory;
-  private final FileStructurePresenter fileStructurePresenter;
   private final Type type;
   private final CompilationUnit compilationUnit;
   private final boolean isShowInheritedMembers;
@@ -50,14 +47,12 @@ public class TypeNode extends AbstractPresentationNode implements HasAction {
   public TypeNode(
       JavaResources resources,
       NodeFactory nodeFactory,
-      FileStructurePresenter fileStructurePresenter,
       @Assisted Type type,
       @Assisted CompilationUnit compilationUnit,
       @Assisted("showInheritedMembers") boolean showInheritedMembers,
       @Assisted("isFromSuper") boolean isFromSuper) {
     this.resources = resources;
     this.nodeFactory = nodeFactory;
-    this.fileStructurePresenter = fileStructurePresenter;
     this.type = type;
     this.compilationUnit = compilationUnit;
     this.isShowInheritedMembers = showInheritedMembers;
@@ -126,12 +121,6 @@ public class TypeNode extends AbstractPresentationNode implements HasAction {
         && type.getTypes().isEmpty()
         && type.getMethods().isEmpty()
         && type.getInitializers().isEmpty();
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void actionPerformed() {
-    fileStructurePresenter.actionPerformed(type);
   }
 
   private void createTypeChildren(List<Node> child, Type type, boolean isFromSuper) {

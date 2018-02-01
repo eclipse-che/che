@@ -21,7 +21,6 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.navigation.factory.NodeFactory;
-import org.eclipse.che.ide.ext.java.client.navigation.filestructure.FileStructurePresenter;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Type;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
@@ -42,7 +41,6 @@ public class TypeNodeTest {
   private static final String NAME = "name";
 
   @Mock private JavaResources resources;
-  @Mock private FileStructurePresenter fileStructurePresenter;
   @Mock private CompilationUnit compilationUnit;
   @Mock private Type type;
   @Mock private NodePresentation presentation;
@@ -63,9 +61,7 @@ public class TypeNodeTest {
     when(type.getElementName()).thenReturn(NAME);
     when(type.getLabel()).thenReturn(NAME);
 
-    typeNode =
-        new TypeNode(
-            resources, nodeFactory, fileStructurePresenter, type, compilationUnit, true, false);
+    typeNode = new TypeNode(resources, nodeFactory, type, compilationUnit, true, false);
   }
 
   @Test
@@ -92,9 +88,7 @@ public class TypeNodeTest {
 
   @Test
   public void presentationNameShouldBeUpdatedIfInheritedMemberHide() throws Exception {
-    typeNode =
-        new TypeNode(
-            resources, nodeFactory, fileStructurePresenter, type, compilationUnit, false, false);
+    typeNode = new TypeNode(resources, nodeFactory, type, compilationUnit, false, false);
 
     typeNode.updatePresentation(presentation);
 
@@ -113,12 +107,5 @@ public class TypeNodeTest {
   @Test
   public void fieldIsLeaf() throws Exception {
     assertTrue(typeNode.isLeaf());
-  }
-
-  @Test
-  public void actionShouldBePerformed() throws Exception {
-    typeNode.actionPerformed();
-
-    verify(fileStructurePresenter).actionPerformed(type);
   }
 }
