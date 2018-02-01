@@ -266,13 +266,14 @@ public class NewWorkspace {
   }
 
   public void clickOnCreateButtonAndOpenInIDE() {
-    WaitUtils.sleepQuietly(3);
+    WaitUtils.sleepQuietly(1);
     redrawUiElementsTimeout.until(visibilityOf(createWorkspaceButton)).click();
     waitWorkspaceIsCreatedDialogIsVisible();
     clickOnOpenInIDEButton();
   }
 
   public void clickOnCreateButtonAndEditWorkspace() {
+    WaitUtils.sleepQuietly(1);
     redrawUiElementsTimeout.until(visibilityOf(createWorkspaceButton)).click();
     waitWorkspaceIsCreatedDialogIsVisible();
     clickOnEditWorkspaceButton();
