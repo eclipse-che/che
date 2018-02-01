@@ -35,57 +35,51 @@ items:
       requests:
         storage: 1Gi
 - apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    labels:
-      app: che
-    name: claim-che-workspace
-  spec:
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: 1Gi
-- apiVersion: v1
   kind: ConfigMap
   metadata:
     labels:
       app: che
     name: che
   data:
-    CHE_MULTIUSER: "false"
-    CHE_INFRASTRUCTURE_ACTIVE: openshift
-    CHE_INFRA_OPENSHIFT_MASTER__URL: ""
-    CHE_INFRA_OPENSHIFT_USERNAME: ""
-    CHE_INFRA_OPENSHIFT_PASSWORD: ""
-    CHE_INFRA_OPENSHIFT_OAUTH__TOKEN: ""
-    CHE_INFRA_OPENSHIFT_TRUST__CERTS: "false"
-    CHE_INFRA_OPENSHIFT_TLS__ENABLED: "false"
-    CHE_INFRA_OPENSHIFT_PVC_STRATEGY: "common"
-    CHE_INFRA_OPENSHIFT_PROJECT: ""
-    CHE_INFRA_OPENSHIFT_MACHINE__START__TIMEOUT__MIN: "5"
-    CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL: http://192.168.99.100/agent-binaries/linux_amd64/bootstrapper/bootstrapper
-    CHE_API: http://192.168.99.100/api
-    CHE_HOST: 192.168.99.100
-    CHE_WEBSOCKET_ENDPOINT:  ws://192.168.99.100/api/websocket
+    CHE_HOST: "192.168.99.100.nip.io"
     CHE_PORT: "8080"
+    CHE_API: "http://192.168.99.100.nip.io/api"
+    CHE_WEBSOCKET_ENDPOINT:  ws://192.168.99.100.nip.io/api/websocket
+    CHE_DEBUG_SERVER: "true"
+    CHE_INFRASTRUCTURE_ACTIVE: kubernetes
+    CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL: http://192.168.99.100.nip.io/agent-binaries/linux_amd64/bootstrapper/bootstrapper
+    CHE_INFRA_KUBERNETES_MACHINE__START__TIMEOUT__MIN: "5"
+    CHE_INFRA_KUBERNETES_MASTER__URL: ""
+    CHE_INFRA_KUBERNETES_OAUTH__TOKEN: ""
+    CHE_INFRA_KUBERNETES_PASSWORD: ""
+    CHE_INFRA_KUBERNETES_PVC_STRATEGY: "common"
+    CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS: "true"
+    CHE_INFRA_KUBERNETES_TLS__ENABLED: "false"
+    CHE_INFRA_KUBERNETES_TRUST__CERTS: "false"
+    CHE_INFRA_KUBERNETES_USERNAME: ""
     CHE_LOCAL_CONF_DIR: /etc/conf
     CHE_LOGS_DIR: /data/logs
-    CHE_PREDEFINED_STACKS_RELOAD__ON__START: "true"
-    CHE_LOG_LEVEL: INFO
-    CHE_PORT: "8080"
-    CHE_DEBUG_SERVER: "false"
-    CHE_OAUTH_GITHUB_FORCEACTIVATION: "true"
-    CHE_WORKSPACE_AUTO_START: "false"
-    CHE_KEYCLOAK_OSO_ENDPOINT: ""
-    CHE_KEYCLOAK_GITHUB_ENDPOINT: ""
-    CHE_SERVER_JAVA_OPTS: -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:MaxRAM=700m -Xms256m
-    CHE_WORKSPACE_JAVA_OPTIONS: -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:MaxRAM=1300m -Xms256m
-    CHE_KEYCLOAK_AUTH__SERVER__URL: not-in-use
-    CHE_KEYCLOAK_REALM: ""
-    CHE_KEYCLOAK_CLIENT__ID: ""
+    CHE_LOG_LEVEL: "INFO"
+    CHE_MULTIUSER: "false"
     CHE_OAUTH_GITHUB_CLIENTID: ""
     CHE_OAUTH_GITHUB_CLIENTSECRET: ""
+    CHE_PREDEFINED_STACKS_RELOAD__ON__START: "false"
+    JAVA_OPTS: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true -Xms20m "
+    CHE_WORKSPACE_AUTO_START: "false"
+- apiVersion: extensions/v1beta1
+  kind: Ingress
+  metadata:
+    name: che-ingress
+    annotations:
+      ingress.kubernetes.io/rewrite-target: /
+  spec:
+    rules:
+    - host: 192.168.99.100.nip.io
+      http:
+        paths:
+        - backend:
+            serviceName: che-host
+            servicePort: 8080
 - apiVersion: extensions/v1beta1
   kind: Deployment
   metadata:
@@ -98,13 +92,117 @@ items:
     selector:
       matchLabels:
         app: che
+    strategy:
+      type: Recreate
     template:
       metadata:
+        annotations:
+          pod.alpha.kubernetes.io/init-containers: '[{"image":"busybox","imagePullPolicy":"IfNotPresent","name":"fmp-volume-permission","command":["chmod","777","/data"],"volumeMounts":[{"mountPath":"/data","name":"che-data-volume"}]}]'
         labels:
           app: che
       spec:
         containers:
         - env:
+          - name: CHE_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_HOST
+                name: che
+          - name: CHE_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_PORT
+                name: che
+          - name: CHE_API
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_API
+                name: che
+          - name: CHE_WEBSOCKET_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_WEBSOCKET_ENDPOINT
+                name: che
+          - name: CHE_DEBUG_SERVER
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_DEBUG_SERVER
+                name: che
+          - name: CHE_INFRASTRUCTURE_ACTIVE
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRASTRUCTURE_ACTIVE
+                name: che
+          - name: CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL
+                name: che
+          - name: CHE_INFRA_KUBERNETES_MACHINE__START__TIMEOUT__MIN
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_KUBERNETES_MACHINE__START__TIMEOUT__MIN
+                name: che
+          - name: CHE_INFRA_KUBERNETES_MASTER__URL
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_KUBERNETES_MASTER__URL
+                name: che
+          - name: CHE_INFRA_KUBERNETES_OAUTH__TOKEN
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_KUBERNETES_OAUTH__TOKEN
+                name: che
+          - name: CHE_INFRA_KUBERNETES_PVC_STRATEGY
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_KUBERNETES_PVC_STRATEGY
+                name: che
+          - name: CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS
+                name: che
+          - name: JAVA_OPTS
+            valueFrom:
+              configMapKeyRef:
+                key: JAVA_OPTS
+                name: che
+          - name: CHE_INFRA_KUBERNETES_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_KUBERNETES_PASSWORD
+                name: che
+          - name: CHE_INFRA_KUBERNETES_TRUST__CERTS
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_KUBERNETES_TRUST__CERTS
+                name: che
+          - name: CHE_INFRA_KUBERNETES_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_KUBERNETES_USERNAME
+                name: che
+          - name: CHE_LOCAL_CONF_DIR
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_LOCAL_CONF_DIR
+                name: che
+          - name: CHE_LOGS_DIR
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_LOGS_DIR
+                name: che
+          - name: CHE_LOG_LEVEL
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_LOG_LEVEL
+                name: che
+          - name: CHE_MULTIUSER
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_MULTIUSER
+                name: che
           - name: CHE_OAUTH_GITHUB_CLIENTID
             valueFrom:
               configMapKeyRef:
@@ -115,172 +213,17 @@ items:
               configMapKeyRef:
                 key: CHE_OAUTH_GITHUB_CLIENTSECRET
                 name: che
-          - name: CHE_MULTIUSER
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_MULTIUSER
-                name: che
-          - name: CHE_KEYCLOAK_AUTH__SERVER__URL
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_KEYCLOAK_AUTH__SERVER__URL
-                name: che
-          - name: CHE_KEYCLOAK_REALM
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_KEYCLOAK_REALM
-                name: che
-          - name: CHE_KEYCLOAK_CLIENT__ID
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_KEYCLOAK_CLIENT__ID
-                name: che
-          - name: CHE_INFRA_OPENSHIFT_MASTER__URL
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_INFRA_OPENSHIFT_MASTER__URL
-                name: che
-          - name: CHE_INFRA_OPENSHIFT_USERNAME
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_INFRA_OPENSHIFT_USERNAME
-                name: che
-          - name: CHE_INFRASTRUCTURE_ACTIVE
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_INFRASTRUCTURE_ACTIVE
-                name: che
-          - name: CHE_INFRA_OPENSHIFT_PASSWORD
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_INFRA_OPENSHIFT_PASSWORD
-                name: che
-          - name: CHE_INFRA_OPENSHIFT_OAUTH__TOKEN
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_INFRA_OPENSHIFT_OAUTH__TOKEN
-                name: che
-          - name: CHE_INFRA_OPENSHIFT_TRUST__CERTS
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_INFRA_OPENSHIFT_TRUST__CERTS
-                name: che
-          - name: CHE_INFRA_OPENSHIFT_PVC_STRATEGY
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_INFRA_OPENSHIFT_PVC_STRATEGY
-                name: che
-          - name: CHE_INFRA_OPENSHIFT_TLS__ENABLED
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_INFRA_OPENSHIFT_TLS__ENABLED
-                name: che
-          - name: CHE_INFRA_OPENSHIFT_PROJECT
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_INFRA_OPENSHIFT_PROJECT
-                name: che
-          - name: CHE_INFRA_OPENSHIFT_MACHINE__START__TIMEOUT__MIN
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_INFRA_OPENSHIFT_MACHINE__START__TIMEOUT__MIN
-                name: che
-          - name: CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_INFRA_OPENSHIFT_BOOTSTRAPPER_BINARY__URL
-                name: che
-          - name: CHE_WEBSOCKET_ENDPOINT
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_WEBSOCKET_ENDPOINT
-                name: che
-          - name: CHE_LOGS_DIR
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_LOGS_DIR
-                name: che
-          - name: CHE_LOCAL_CONF_DIR
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_LOCAL_CONF_DIR
-                name: che
           - name: CHE_PREDEFINED_STACKS_RELOAD__ON__START
             valueFrom:
               configMapKeyRef:
                 key: CHE_PREDEFINED_STACKS_RELOAD__ON__START
                 name: che
-          - name: CHE_LOG_LEVEL
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_LOG_LEVEL
-                name: che
-          - name: CHE_PORT
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_PORT
-                name: che
-          - name: CHE_DEBUG_SERVER
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_DEBUG_SERVER
-                name: che
-          - name: CHE_HOST
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_HOST
-                name: che
-          - name: CHE_API
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_API
-                name: che
-          - name: CHE_OAUTH_GITHUB_FORCEACTIVATION
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_OAUTH_GITHUB_FORCEACTIVATION
-                name: che
-          - name: CHE_WORKSPACE_AUTO__START
+          - name: CHE_WORKSPACE_AUTO_START
             valueFrom:
               configMapKeyRef:
                 key: CHE_WORKSPACE_AUTO_START
                 name: che
-          - name: JAVA_OPTS
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_SERVER_JAVA_OPTS
-                name: che
-          - name: CHE_WORKSPACE_JAVA_OPTIONS
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_WORKSPACE_JAVA_OPTIONS
-                name: che
-          - name: CHE_KEYCLOAK_OSO_ENDPOINT
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_KEYCLOAK_OSO_ENDPOINT
-                name: che
-          - name: CHE_KEYCLOAK_GITHUB_ENDPOINT
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_KEYCLOAK_GITHUB_ENDPOINT
-                name: che
-          - name: CHE_KEYCLOAK_AUTH__SERVER__URL
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_KEYCLOAK_AUTH__SERVER__URL
-                name: che
-          - name: CHE_KEYCLOAK_REALM
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_KEYCLOAK_REALM
-                name: che
-          - name: CHE_KEYCLOAK_CLIENT__ID
-            valueFrom:
-              configMapKeyRef:
-                key: CHE_KEYCLOAK_CLIENT__ID
-                name: che
-          image:
+          image: eclipse/che-server:nightly
           imagePullPolicy: Always
           livenessProbe:
             httpGet:
