@@ -63,7 +63,7 @@ services:
       traefik.che.port: "<%= scope.lookupvar('che::che_port') -%>"
       traefik.che.frontend.rule: "PathPrefix:/"
 <% if scope.lookupvar('che::che_multiuser') == 'true' -%>
-      traefik.che.docker.network: "che_default"
+      traefik.che.docker.network: "che_che-network"
 <% end -%>
 <% end -%>
     restart: always
@@ -149,6 +149,13 @@ services:
       - POSTGRES_PASSWORD=keycloak
     links:
       - postgres:postgres
+<% if scope.lookupvar('che::che_single_port') == 'true' -%>
+    labels:
+      traefik.keycloak.frontend.entryPoints: "http"
+      traefik.keycloak.port: "8080"
+      traefik.keycloak.frontend.rule: "Host:keycloak.172.19.20.29.nip.io"
+      traefik.keycloak.docker.network: "che_default"
+<% end -%>
     volumes:
       - '<%= scope.lookupvar('che::che_instance') -%>/config/keycloak/che:/opt/jboss/keycloak/themes/che'
       - '<%= scope.lookupvar('che::che_instance') -%>/config/keycloak/:/opt/jboss/keycloak/realms/'
