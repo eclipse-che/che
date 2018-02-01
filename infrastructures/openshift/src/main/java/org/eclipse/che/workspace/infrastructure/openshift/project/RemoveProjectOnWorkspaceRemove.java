@@ -39,7 +39,7 @@ public class RemoveProjectOnWorkspaceRemove implements EventSubscriber<Workspace
 
   @Inject
   public RemoveProjectOnWorkspaceRemove(
-      @Nullable @Named("che.infra.openshift.project") String projectName,
+      @Nullable @Named("che.infra.kubernetes.namespace") String projectName,
       OpenShiftClientFactory clientFactory) {
     this.projectName = projectName;
     this.clientFactory = clientFactory;

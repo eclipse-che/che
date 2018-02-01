@@ -11,13 +11,14 @@
 package org.eclipse.che.api.workspace.server.hc;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -40,12 +41,8 @@ import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
  */
 public class ServersChecker {
   // Is used to define servers which will be checked by this server checker class.
-  // It is also a workaround to set correct paths for servers readiness checks.
-  private static final Map<String, String> LIVENESS_CHECKS_PATHS =
-      ImmutableMap.of(
-          "wsagent/http", "/api/",
-          "exec-agent/http", "/process",
-          "terminal", "/");
+  private static final Set<String> LIVENESS_SERVERS =
+      ImmutableSet.of("wsagent/http", "exec-agent/http", "terminal");
   private final RuntimeIdentity runtimeIdentity;
   private final String machineName;
   private final Map<String, ? extends Server> servers;
@@ -163,7 +160,7 @@ public class ServersChecker {
     for (Map.Entry<String, ? extends Server> serverEntry : servers.entrySet()) {
       // TODO replace with correct behaviour
       // workaround needed because we don't have server readiness check in the model
-      if (LIVENESS_CHECKS_PATHS.containsKey(serverEntry.getKey())) {
+      if (LIVENESS_SERVERS.contains(serverEntry.getKey())) {
         checkers.add(getChecker(serverEntry.getKey(), serverEntry.getValue()));
       }
     }
@@ -173,35 +170,25 @@ public class ServersChecker {
   private ServerChecker getChecker(String serverRef, Server server) throws InfrastructureException {
     // TODO replace with correct behaviour
     // workaround needed because we don't have server readiness check in the model
-    String livenessCheckPath = LIVENESS_CHECKS_PATHS.get(serverRef);
     // Create server readiness endpoint URL
     URL url;
     try {
-      // TODO: ws -> http is workaround used for terminal websocket server,
-      // should be removed after server checks added to model
-      //      url =
-      //          UriBuilder.fromUri(server.getUrl().replaceFirst("^ws", "http"))
-      //              .replacePath(livenessCheckPath)
-      //              .queryParam("token",
-      // machineTokenProvider.getToken(runtimeIdentity.getWorkspaceId()))
-      //              .build()
-      //              .toURL();
-      String relativeLivenessCheckPath = UriBuilder.fromUri(server.getUrl()).build().getPath();
-      if (relativeLivenessCheckPath.lastIndexOf("/") > 0) {
-        relativeLivenessCheckPath =
-            relativeLivenessCheckPath.substring(0, relativeLivenessCheckPath.lastIndexOf("/"));
-        relativeLivenessCheckPath = relativeLivenessCheckPath + livenessCheckPath;
-      } else {
-        relativeLivenessCheckPath = livenessCheckPath;
+      String serverUrl = server.getUrl();
+
+      if ("terminal".equals(serverRef)) {
+        serverUrl = serverUrl.replaceFirst("^ws", "http").replaceFirst("/pty$", "/");
+      }
+
+      if ("wsagent/http".equals(serverRef)) {
+        // add trailing slash
+        serverUrl = serverUrl + '/';
       }
 
       url =
-          UriBuilder.fromUri(server.getUrl().replaceFirst("^ws", "http"))
-              .replacePath(relativeLivenessCheckPath)
+          UriBuilder.fromUri(serverUrl)
               .queryParam("token", machineTokenProvider.getToken(runtimeIdentity.getWorkspaceId()))
               .build()
               .toURL();
-      System.out.println("checking liveness for: " + url);
     } catch (MalformedURLException e) {
       throw new InternalInfrastructureException(
           "Server " + serverRef + " URL is invalid. Error: " + e.getMessage(), e);
