@@ -20,9 +20,6 @@
     </parent>
     <artifactId>che-multiuser-permission-installer</artifactId>
     <name>Che Multiuser :: Installer Permissions</name>
-    <properties>
-        <findbugs.failonerror>false</findbugs.failonerror>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>javax.ws.rs</groupId>
