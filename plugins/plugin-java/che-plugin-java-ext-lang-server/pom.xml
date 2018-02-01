@@ -129,7 +129,6 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>org.eclipse.search</artifactId>
-            <version>6.0.0-M5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.text</groupId>
