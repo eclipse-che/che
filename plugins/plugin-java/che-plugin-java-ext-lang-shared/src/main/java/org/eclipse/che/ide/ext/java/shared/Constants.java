@@ -51,6 +51,7 @@ public final class Constants {
   public static final String UPDATE_JAVA_CORE_OPTIONS = "java/updateJavaCoreOptions";
   public static final String GET_PREFERENCES = "java/getPreferences";
   public static final String UPDATE_PREFERENCES = "java/updatePreferences";
+  public static final String RECOMPUTE_POM_DIAGNOSTICS = "java/recomputePomDiagnostics";
 
   private Constants() {
     throw new UnsupportedOperationException("Unused constructor.");

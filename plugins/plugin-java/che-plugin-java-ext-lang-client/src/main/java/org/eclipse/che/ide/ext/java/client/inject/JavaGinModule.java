@@ -39,6 +39,7 @@ import org.eclipse.che.ide.ext.java.client.command.valueproviders.ClasspathMacro
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.MainClassMacro;
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.OutputDirMacro;
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.SourcepathMacro;
+import org.eclipse.che.ide.ext.java.client.diagnostics.PomDiagnosticsRequestor;
 import org.eclipse.che.ide.ext.java.client.documentation.QuickDocPresenter;
 import org.eclipse.che.ide.ext.java.client.documentation.QuickDocumentation;
 import org.eclipse.che.ide.ext.java.client.inject.factories.PropertyWidgetFactory;
@@ -87,6 +88,8 @@ public class JavaGinModule extends AbstractGinModule {
     bind(NewJavaSourceFileView.class).to(NewJavaSourceFileViewImpl.class).in(Singleton.class);
     bind(QuickDocumentation.class).to(QuickDocPresenter.class).in(Singleton.class);
     bind(JavaNavigationService.class).to(JavaNavigationServiceImpl.class);
+
+    bind(PomDiagnosticsRequestor.class).asEagerSingleton();
 
     GinMultibinder.newSetBinder(binder(), NodeInterceptor.class)
         .addBinding()
