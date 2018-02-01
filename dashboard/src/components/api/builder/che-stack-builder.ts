@@ -22,10 +22,6 @@ export class CheStackBuilder {
    */
   constructor() {
     this.stack = {} as che.IStack;
-    this.stack.source = {
-      origin: '',
-      type: ''
-    };
     this.stack.components = [];
     this.stack.tags = [];
     this.stack.workspaceConfig = {} as che.IWorkspaceConfig;
