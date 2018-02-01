@@ -46,7 +46,7 @@ import org.testng.annotations.Test;
 /**
  * Tests for {@link InstallerRegistryServicePermissionsFilter}.
  *
- * @author Yevhenii Voevodin
+ * @author Max Shaposhnyk
  */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class InstallerRegistryServicePermissionsFilterTest {
