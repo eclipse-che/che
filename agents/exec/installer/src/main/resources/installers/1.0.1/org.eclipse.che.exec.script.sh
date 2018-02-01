@@ -218,4 +218,13 @@ fi
 
 EXEC_AGENT_PORT=${CHE_SERVER_EXEC_AGENT_HTTP_PORT:-4412}
 
-$HOME/che/exec-agent/che-exec-agent -addr :${EXEC_AGENT_PORT} -cmd ${SHELL_INTERPRETER} -logs-dir $HOME/che/exec-agent/logs
+
+LOGS_DIR=''
+## Checks whether workspace logs root exists if it does override exec-agent logs directory otherwise default folder would be used
+if [ -d "${CHE_WORKSPACE_LOGS_ROOT__DIR}" ]; then
+   LOGS_DIR=$CHE_WORKSPACE_LOGS_ROOT__DIR/exec-agent
+else
+   LOGS_DIR=$HOME/che/exec-agent/logs
+fi
+
+$HOME/che/exec-agent/che-exec-agent -addr :${EXEC_AGENT_PORT} -cmd ${SHELL_INTERPRETER} -logs-dir $LOGS_DIR
