@@ -17,7 +17,6 @@ import com.google.common.base.Predicate;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.KeyEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -27,8 +26,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import elemental.events.Event;
 import java.util.Collections;
-
-import elemental.events.Event;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -63,9 +60,9 @@ final class FileStructureImpl extends Window implements FileStructure {
   private final NodeFactory nodeFactory;
   private final Tree tree;
 
-    private final ActionManager actionManager;
-    private final PresentationFactory presentationFactory;
-    private final KeyBindingAgent keyBindingAgent;
+  private final ActionManager actionManager;
+  private final PresentationFactory presentationFactory;
+  private final KeyBindingAgent keyBindingAgent;
 
   private ActionDelegate delegate;
 
@@ -78,7 +75,12 @@ final class FileStructureImpl extends Window implements FileStructure {
   private Predicate<Node> LEAFS = Node::isLeaf;
 
   @Inject
-  public FileStructureImpl(NodeFactory nodeFactory, JavaLocalizationConstant locale) {
+  public FileStructureImpl(
+      NodeFactory nodeFactory,
+      JavaLocalizationConstant locale,
+      ActionManager actionManager,
+      PresentationFactory presentationFactory,
+      KeyBindingAgent keyBindingAgent) {
     this.nodeFactory = nodeFactory;
     this.locale = locale;
     this.actionManager = actionManager;
@@ -173,26 +175,31 @@ final class FileStructureImpl extends Window implements FileStructure {
     return super.asWidget();
   }
 
-    private void handleKey(KeyEvent<?> event) {
-        SignalEvent signalEvent = SignalEventUtils.create((Event) event.getNativeEvent(), false);
-        CharCodeWithModifiers keyBinding =
-                keyBindingAgent.getKeyBinding(JavaExtension.JAVA_CLASS_STRUCTURE);
-        if (signalEvent == null || keyBinding == null) {
-            return;
-        }
-        int digest = CharCodeWithModifiers.computeKeyDigest(signalEvent);
-        if (digest == keyBinding.getKeyDigest()) {
-            Action action = actionManager.getAction(JavaExtension.JAVA_CLASS_STRUCTURE);
-            if (action != null) {
-                ActionEvent e = new ActionEvent(presentationFactory.getPresentation(action), actionManager);
-                action.update(e);
+  @Override
+  public void onKeyPress(NativeEvent evt) {
+    handleKey(evt);
+  }
 
-                if (e.getPresentation().isEnabled()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    action.actionPerformed(e);
-                }
-            }
-        }
+  private void handleKey(NativeEvent event) {
+    SignalEvent signalEvent = SignalEventUtils.create((Event) event, false);
+    CharCodeWithModifiers keyBinding =
+        keyBindingAgent.getKeyBinding(JavaExtension.JAVA_CLASS_STRUCTURE);
+    if (signalEvent == null || keyBinding == null) {
+      return;
     }
+    int digest = CharCodeWithModifiers.computeKeyDigest(signalEvent);
+    if (digest == keyBinding.getKeyDigest()) {
+      Action action = actionManager.getAction(JavaExtension.JAVA_CLASS_STRUCTURE);
+      if (action != null) {
+        ActionEvent e = new ActionEvent(presentationFactory.getPresentation(action), actionManager);
+        action.update(e);
+
+        if (e.getPresentation().isEnabled()) {
+          event.preventDefault();
+          event.stopPropagation();
+          action.actionPerformed(e);
+        }
+      }
+    }
+  }
 }
