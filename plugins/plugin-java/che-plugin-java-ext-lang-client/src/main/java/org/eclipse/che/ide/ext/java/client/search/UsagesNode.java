@@ -69,7 +69,7 @@ public class UsagesNode extends AbstractTreeNode implements HasNewPresentation {
   @Override
   public NewNodePresentation getPresentation() {
     SpanElement spanElement =
-        Elements.createSpanElement(styles.styles().presentableTextContainer());
+        Elements.createSpanElement(styles.treeStylesCss().presentableTextContainer());
     spanElement.setInnerHTML(
         "Usages of <span class=\""
             + resources.css().searchMatch()
