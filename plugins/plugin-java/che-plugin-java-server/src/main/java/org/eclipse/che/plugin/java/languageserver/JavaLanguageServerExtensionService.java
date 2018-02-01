@@ -27,6 +27,7 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.GET_JAVA_CORE_OPTION
 import static org.eclipse.che.ide.ext.java.shared.Constants.IMPLEMENTERS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
+import static org.eclipse.che.ide.ext.java.shared.Constants.RECOMPUTE_POM_DIAGNOSTICS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT;
 import static org.eclipse.che.ide.ext.java.shared.Constants.UPDATE_JAVA_CORE_OPTIONS;
@@ -165,6 +166,13 @@ public class JavaLanguageServerExtensionService {
 
     requestHandler
         .newConfiguration()
+        .methodName(RECOMPUTE_POM_DIAGNOSTICS)
+        .paramsAsString()
+        .noResult()
+        .withConsumer(this::reComputeDiagnostics);
+
+    requestHandler
+        .newConfiguration()
         .methodName(EFFECTIVE_POM)
         .paramsAsString()
         .resultAsString()
@@ -211,6 +219,7 @@ public class JavaLanguageServerExtensionService {
         .paramsAsString()
         .resultAsListOfDto(ClasspathEntry.class)
         .withFunction(this::getClasspathTree);
+
     requestHandler
         .newConfiguration()
         .methodName(ORGANIZE_IMPORTS)
@@ -551,6 +560,11 @@ public class JavaLanguageServerExtensionService {
       iterator.set(removePrefixUri(iterator.next()));
     }
     return result;
+  }
+
+  private void reComputeDiagnostics(String pomPath) {
+    String pomUri = prefixURI(pomPath);
+    executeCommand(RECOMPUTE_POM_DIAGNOSTICS, singletonList(pomUri));
   }
 
   private List<Jar> getProjectExternalLibraries(ExternalLibrariesParameters params) {
