@@ -44,8 +44,8 @@ public class SinglePortUrlRewriter implements URLRewriter {
       @Nullable @Named("che.singleport.wildcard_domain.port") String wildcardPort) {
     if (internalIpOfContainers == null && externalIpOfContainers == null) {
       throw new IllegalStateException(
-          "Value of both of the properties 'che.docker.ip' and 'che.docker.ip.external' is null," +
-              " which is unsuitable for the single-port mode");
+          "Value of both of the properties 'che.docker.ip' and 'che.docker.ip.external' is null,"
+              + " which is unsuitable for the single-port mode");
     }
     this.hostnameBuilder =
         new SinglePortHostnameBuilder(externalIpOfContainers, internalIpOfContainers, wildcardHost);

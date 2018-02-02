@@ -15,6 +15,7 @@ node default {
   $che_user = getValue("CHE_USER","root")
   $che_server_url = getValue("CHE_SERVER_URL", "${che_protocol}://${che_ip}:${che_port}")
   $che_master_container_ram = getValue("CHE_MASTER_CONTAINER_RAM", "750m")
+  $che_docker_ip_external = getValue("CHE_DOCKER_IP_EXTERNAL","")
 
   ###############################
   # Http proxy configuration

@@ -63,7 +63,7 @@ services:
       traefik.che.port: "<%= scope.lookupvar('che::che_port') -%>"
       traefik.che.frontend.rule: "PathPrefix:/"
 <% if scope.lookupvar('che::che_multiuser') == 'true' -%>
-      traefik.che.docker.network: "che_che-network"
+      traefik.docker.network: "che_default"
 <% end -%>
 <% end -%>
     restart: always
@@ -115,8 +115,10 @@ services:
       - '<%= scope.lookupvar('che::che_instance') -%>/data/postgres:/var/lib/pgsql/data'
       - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/init-che-user.sh:/var/lib/pgsql/init-che-user.sh'
       - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/init-che-user-and-run.sh:/var/lib/pgsql/init-che-user-and-run.sh'
+<% if scope.lookupvar('che::che_single_port') == 'false' -%>
     ports:
       - '5432:5432'
+<% end -%>
     restart: always
     healthcheck:
         test: [ "CMD", "/bin/sh", "-i", "-c", "psql -h 127.0.0.1 -U keycloak -q -d keycloak -c 'SELECT 1'" ]
@@ -132,8 +134,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+<% if scope.lookupvar('che::che_single_port') == 'false' -%>
     ports:
       - '5050:8080'
+<% end -%>
     entrypoint:
       - start-keycloak.sh
       - -Dkeycloak.migration.action=import
@@ -153,8 +157,12 @@ services:
     labels:
       traefik.keycloak.frontend.entryPoints: "http"
       traefik.keycloak.port: "8080"
-      traefik.keycloak.frontend.rule: "Host:keycloak.172.19.20.29.nip.io"
-      traefik.keycloak.docker.network: "che_default"
+<% if ! @che_docker_ip_external.empty? -%>
+      traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::che_docker_ip_external') -%>.nip.io"
+<% else -%>
+      traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::docker_ip') -%>.nip.io"
+<% end -%>
+      traefik.docker.network: "che_default"
 <% end -%>
     volumes:
       - '<%= scope.lookupvar('che::che_instance') -%>/config/keycloak/che:/opt/jboss/keycloak/themes/che'

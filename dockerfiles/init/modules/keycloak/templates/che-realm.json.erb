@@ -58,8 +58,18 @@
     "enabled" : true,
     "clientAuthenticatorType" : "client-secret",
     "secret" : "56abc663-1c41-4ab2-81d1-d4b704249221",
+<% if scope.lookupvar('che::che_single_port') == "true" -%>
+<% if ! @che_docker_ip_external.empty? -%>
+     "redirectUris" : [ "http://<%= scope.lookupvar('che::che_docker_ip_external') -%>:<%= scope.lookupvar('che::che_port') -%>/*" ],
+     "webOrigins" : [ "http://<%= scope.lookupvar('che::che_docker_ip_external') -%>:<%= scope.lookupvar('che::che_port') -%>" ],
+<% else -%>
+     "redirectUris" : [ "http://<%= scope.lookupvar('che::docker_ip') %>:<%= scope.lookupvar('che::che_port') -%>/*" ],
+     "webOrigins" : [ "http://<%= scope.lookupvar('che::docker_ip') %>:<%= scope.lookupvar('che::che_port') -%>" ],
+<% end -%>
+<% else -%>
     "redirectUris" : [ "<%= scope.lookupvar('che::che_server_url') %>/*" ],
     "webOrigins" : [ "<%= scope.lookupvar('che::che_server_url') %>" ],
+<% end -%>
     "notBefore" : 0,
     "bearerOnly" : false,
     "consentRequired" : false,
