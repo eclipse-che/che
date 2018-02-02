@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
-import javax.inject.Named;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -25,6 +24,7 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.multiuser.keycloak.server.KeycloakSettings;
 import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,12 +43,10 @@ public class KeycloakProfileDao implements ProfileDao {
 
   @Inject
   public KeycloakProfileDao(
-      @Named(KeycloakConstants.AUTH_SERVER_URL_SETTING) String authServerUrl,
-      @Named(KeycloakConstants.REALM_SETTING) String realm,
-      HttpJsonRequestFactory requestFactory) {
+      KeycloakSettings keycloakSettings, HttpJsonRequestFactory requestFactory) {
     this.requestFactory = requestFactory;
     this.keyclockCurrentUserInfoUrl =
-        authServerUrl + "/realms/" + realm + "/protocol/openid-connect/userinfo";
+        keycloakSettings.get().get(KeycloakConstants.USERINFO_ENDPOINT_SETTING);
   }
 
   @Override

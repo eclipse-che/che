@@ -13,6 +13,9 @@ package org.eclipse.che.multiuser.keycloak.ide;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.CLIENT_ID_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.OIDC_PROVIDER_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USE_NONCE_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.JS_ADAPTER_URL_SETTING;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -43,14 +46,16 @@ public class KeycloakProvider {
         getKeycloakSettings(KeycloakConstants.getEndpoint(appContext.getMasterEndpoint()));
     Map<String, String> settings = JsonHelper.toMap(keycloakSettings);
     Log.info(getClass(), "Keycloak settings: ", settings);
-
+    
+    String keycloakServerUrl = settings.get(AUTH_SERVER_URL_SETTING);
+    String jsAdapterUrl = settings.get(JS_ADAPTER_URL_SETTING);
+    
     keycloak =
         CallbackPromiseHelper.createFromCallback(
                 new CallbackPromiseHelper.Call<Void, Throwable>() {
                   @Override
                   public void makeCall(final Callback<Void, Throwable> callback) {
-                    ScriptInjector.fromUrl(
-                            settings.get(AUTH_SERVER_URL_SETTING) + "/js/keycloak.js")
+                    ScriptInjector.fromUrl(jsAdapterUrl)
                         .setCallback(
                             new Callback<Void, Exception>() {
                               @Override
@@ -70,9 +75,11 @@ public class KeycloakProvider {
             .thenPromise(
                 (v) ->
                     Keycloak.init(
-                        settings.get(AUTH_SERVER_URL_SETTING),
+                        keycloakServerUrl,
                         settings.get(REALM_SETTING),
-                        settings.get(CLIENT_ID_SETTING)));
+                        settings.get(CLIENT_ID_SETTING),
+                        settings.get(OIDC_PROVIDER_SETTING),
+                        Boolean.valueOf(settings.get(USE_NONCE_SETTING)).booleanValue()));
     Log.info(getClass(), "Keycloak init complete: ", this);
   }
 

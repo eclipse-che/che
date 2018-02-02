@@ -49,11 +49,19 @@ window.name = 'NG_DEFER_BOOTSTRAP!';
 
 declare const Keycloak: Function;
 function buildKeycloakConfig(keycloakSettings: any) {
-  return {
-    url: keycloakSettings['che.keycloak.auth_server_url'],
-    realm: keycloakSettings['che.keycloak.realm'],
-    clientId: keycloakSettings['che.keycloak.client_id']
-  };
+  const theOidcProvider = keycloakSettings['che.keycloak.oidc_provider'];
+  if(!theOidcProvider) {
+    return {
+      url: keycloakSettings['che.keycloak.auth_server_url'],
+      realm: keycloakSettings['che.keycloak.realm'],
+      clientId: keycloakSettings['che.keycloak.client_id']
+    };
+  } else {
+    return {
+      oidcProvider: theOidcProvider,
+      clientId: keycloakSettings['che.keycloak.client_id']
+    };
+  }
 }
 interface IResolveFn<T> {
   (value: T | PromiseLike<T>): Promise<T>;
@@ -65,18 +73,18 @@ function keycloakLoad(keycloakSettings: any) {
   return new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
     const script = document.createElement('script');
     script.async = true;
-    script.src = keycloakSettings['che.keycloak.auth_server_url'] + '/js/keycloak.js';
+    script.src = keycloakSettings['che.keycloak.js_adapter_url'];
     script.addEventListener('load', resolve);
     script.addEventListener('error', () => reject('Error loading script.'));
     script.addEventListener('abort', () => reject('Script loading aborted.'));
     document.head.appendChild(script);
   });
 }
-function keycloakInit(keycloakConfig: any) {
+function keycloakInit(keycloakConfig: any, theUseNonce: boolean) {
   return new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
     const keycloak = Keycloak(keycloakConfig);
     keycloak.init({
-      onLoad: 'login-required', checkLoginIframe: false
+      onLoad: 'login-required', checkLoginIframe: false, responseMode: 'query', useNonce: theUseNonce
     }).success(() => {
       resolve(keycloak);
     }).error((error: any) => {
@@ -102,7 +110,11 @@ angular.element(document).ready(() => {
     // load Keycloak
     return keycloakLoad(keycloakSettings).then(() => {
       // init Keycloak
-      return keycloakInit(keycloakAuth.config);
+      var useNonce: boolean;
+      if (typeof keycloakSettings['che.keycloak.use_nonce'] == 'string') {
+        useNonce = keycloakSettings['che.keycloak.use_nonce'].toLowerCase() == 'true';
+      }
+      return keycloakInit(keycloakAuth.config, useNonce);
     }).then((keycloak: any) => {
       keycloakAuth.isPresent = true;
       keycloakAuth.keycloak = keycloak;

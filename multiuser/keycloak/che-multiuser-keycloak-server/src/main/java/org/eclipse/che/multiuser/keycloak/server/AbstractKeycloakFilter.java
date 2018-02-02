@@ -24,7 +24,11 @@ import javax.servlet.http.HttpServletRequest;
 public abstract class AbstractKeycloakFilter implements Filter {
 
   protected boolean shouldSkipAuthentication(HttpServletRequest request, String token) {
-    return request.getScheme().startsWith("ws") || (token != null && token.startsWith("machine"));
+    return request.getScheme().startsWith("ws")
+        || (token != null && token.startsWith("machine"))
+        || request.getRequestURL().toString().endsWith("wsmaster/keycloak/OIDCKeycloak.js")
+        || request.getRequestURL().toString().endsWith("wsmaster/oidcIdeCallback.html")
+        || request.getRequestURL().toString().endsWith("wsmaster/oidcDashboardCallback.html");
   }
 
   @Override
