@@ -10,16 +10,18 @@
 #  ``` bash
 #   DEPLOY_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/dockerfiles/cli/scripts/openshift/deploy_che.sh
 #   curl -fsSL ${DEPLOY_SCRIPT_URL} -o get-che.sh
-#   WAIT_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/dockerfiles/cli/scripts/openshift/wait_until_che_is_available.sh
-#   curl -fsSL ${WAIT_SCRIPT_URL} -o wait-che.sh
-#   STACKS_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/dockerfiles/cli/scripts/openshift/replace_stacks.sh
-#   curl -fsSL ${STACKS_SCRIPT_URL} -o stacks-che.sh
-#   bash get-che.sh && wait-che.sh && stacks-che.sh
+#   bash get-che.sh --wait-che
 #   ```
 #
 # For more deployment options: https://www.eclipse.org/che/docs/setup/openshift/index.html
 
 set -e
+
+# --------------------------------------------------------
+# Check pre-requisites
+# --------------------------------------------------------
+command -v oc >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool oc (https://docs.openshift.org/latest/cli_reference/get_started_cli.html) is required but it's not installed. Aborting."; exit 1; }
+command -v jq >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool jq (https://stedolan.github.io/jq) is required but it's not installed. Aborting."; exit 1; }
 
 # ----------------
 # helper functions
@@ -45,6 +47,49 @@ inject_che_config() {
           done <$2
       fi
     done < /dev/stdin
+}
+
+wait_until_che_is_available() {
+    if [ -z "${CHE_API_ENDPOINT+x}" ]; then
+        echo -n "[CHE] Inferring \$CHE_API_ENDPOINT..."
+        che_host=$(oc get route che -o jsonpath='{.spec.host}')
+        if [ -z "${che_host}" ]; then echo >&2 "[CHE] [ERROR] Failed to infer environment variable \$CHE_API_ENDPOINT. Aborting. Please set it and run ${0} script again."; exit 1; fi
+        if [[ $(oc get route che -o jsonpath='{.spec.tls}') ]]; then protocol="https" ; else protocol="http"; fi
+        CHE_API_ENDPOINT="${protocol}://${che_host}/api"
+        echo "done (${CHE_API_ENDPOINT})"
+    fi
+
+    available=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
+    progressing=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
+
+    DEPLOYMENT_TIMEOUT_SEC=120
+    POLLING_INTERVAL_SEC=5
+    end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
+    while [ "${available}" != "\"True\"" ] && [ ${SECONDS} -lt ${end} ]; do
+      available=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
+      progressing=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
+      timeout_in=$((end-SECONDS))
+      echo "[CHE] Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, Timeout in ${timeout_in}s)"
+      sleep ${POLLING_INTERVAL_SEC}
+    done
+
+    if [ "${progressing}" == "\"True\"" ]; then
+      echo "[CHE] Che deployed successfully"
+    elif [ "${progressing}" == "False" ]; then
+      echo "[CHE] [ERROR] Che deployment failed. Aborting. Run command 'oc rollout status che' to get more details."
+      exit 1
+    elif [ ${SECONDS} -lt ${end} ]; then
+      echo "[CHE] [ERROR] Deployment timeout. Aborting."
+      exit 1
+    fi
+
+    che_http_status=$(curl -s -o /dev/null -I -w "%{http_code}" "${CHE_API_ENDPOINT}/system/state")
+    if [ "${che_http_status}" == "200" ]; then
+      echo "[CHE] Che is up and running"
+    else
+      echo "[CHE] [ERROR] Che is not responding (HTTP status= ${che_http_status})"
+      exit 1
+    fi
 }
 
 # --------------
@@ -76,26 +121,23 @@ EOF
 echo
 
 # --------------------------------------------------------
-# Check pre-requisites
-# --------------------------------------------------------
-command -v oc >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool oc (https://docs.openshift.org/latest/cli_reference/get_started_cli.html) is required but it's not installed. Aborting."; exit 1; }
-
-# --------------------------------------------------------
 # Parse options
 # --------------------------------------------------------
-while [[ $# -gt 1 ]]
+for key in "$@"
 do
-key="$1"
 case $key in
     -c | --command)
     COMMAND="$2"
+    shift
+    ;;
+    --wait-che)
+    WAIT_FOR_CHE=true
     shift
     ;;
     *)
             # unknown option
     ;;
 esac
-shift
 done
 
 # OPENSHIFT_FLAVOR can be minishift or osio or ocp
@@ -185,6 +227,7 @@ DEFAULT_CHE_KEYCLOAK_OSO_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/
 DEFAULT_KEYCLOAK_GITHUB_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/github/token"
 
 COMMAND=${COMMAND:-${DEFAULT_COMMAND}}
+WAIT_FOR_CHE=${WAIT_FOR_CHE:-"false"}
 CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
 if [ "${CHE_MULTIUSER}" == "true" ]; then
   CHE_DEDICATED_KEYCLOAK=${CHE_DEDICATED_KEYCLOAK:-"true"}
@@ -486,6 +529,10 @@ if [ "${CHE_DEBUG_SERVER}" == "true" ]; then
   oc expose dc che --name=che-debug --target-port=http-debug --port=8000 --type=NodePort
   NodePort=$(oc get service che-debug -o jsonpath='{.spec.ports[0].nodePort}')
   echo "[CHE] Remote wsmaster debugging URL: ${MINISHIFT_IP}:${NodePort}"
+fi
+
+if [ "${WAIT_FOR_CHE}" == "true" ]; then
+  wait_until_che_is_available
 fi
 
 che_route=$(oc get route che -o jsonpath='{.spec.host}')
