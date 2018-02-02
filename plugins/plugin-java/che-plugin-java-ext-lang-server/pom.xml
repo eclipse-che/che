@@ -115,10 +115,6 @@
             <artifactId>org.eclipse.ltk.core.refactoring</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.search</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.text</groupId>
             <artifactId>org.eclipse.text</artifactId>
             <exclusions>

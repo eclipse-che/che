@@ -24,10 +24,8 @@ import org.eclipse.che.plugin.java.server.refactoring.RefactoringManager;
 import org.eclipse.che.plugin.java.server.rest.CodeAssistService;
 import org.eclipse.che.plugin.java.server.rest.JavaFormatterService;
 import org.eclipse.che.plugin.java.server.rest.JavaNavigationService;
-import org.eclipse.che.plugin.java.server.rest.JavaReconcileService;
 import org.eclipse.che.plugin.java.server.rest.JavadocService;
 import org.eclipse.che.plugin.java.server.rest.JavadocUrlProviderImpl;
-import org.eclipse.che.plugin.java.server.rest.JdtExceptionMapper;
 import org.eclipse.che.plugin.java.server.rest.RefactoringService;
 import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -41,10 +39,8 @@ public class JdtGuiceModule extends AbstractModule {
   protected void configure() {
     bind(JavadocService.class);
     bind(JavaNavigationService.class);
-    bind(JavaReconcileService.class);
     bind(CodeAssistService.class);
     bind(JavaFormatterService.class);
-    bind(JdtExceptionMapper.class);
     bind(ResourcesPlugin.class).asEagerSingleton();
     bind(JavaPlugin.class).asEagerSingleton();
     bind(FileBuffersPlugin.class).asEagerSingleton();
