@@ -11,18 +11,29 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.Preferences.Locators.EDITOR_CHECKBOX_SPAN_XPATH;
+import static org.eclipse.che.selenium.pageobject.Preferences.Locators.EDITOR_INPUT;
+import static org.eclipse.che.selenium.pageobject.Preferences.Locators.ERRORS_WARNINGS_RADIO_BUTTON;
+import static org.eclipse.che.selenium.pageobject.Preferences.Locators.ERRORS_WARNINGS_RADIO_BUTTON_BLOCK;
+import static org.eclipse.che.selenium.pageobject.Preferences.Locators.MENU_IN_EXPANDED_DROPDOWN_XPATH_WITH_PARAM;
+import static org.eclipse.che.selenium.pageobject.Preferences.Locators.SSH_DELETE_BUTTON_FOR_HOST;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
@@ -36,7 +47,6 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +85,7 @@ public class Preferences {
 
   private static final Logger LOG = LoggerFactory.getLogger(Preferences.class);
 
-  private interface Locators {
+  protected interface Locators {
     String PREFERENCES_FORM_ID = "gwt-debug-window-preferences-scrollPanel-preferences";
     String DROP_DOWN_HEADER_XPATH_WITH_PARAM =
         "//div[@id='gwt-debug-window-preferences-scrollPanel-preferences']//span[text()='%s']";
@@ -195,8 +205,7 @@ public class Preferences {
   /** wait closing of the preferences form */
   public void waitPreferencesFormIsClosed() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.PREFERENCES_FORM_ID)));
+        .until(invisibilityOfElementLocated(By.id(Locators.PREFERENCES_FORM_ID)));
   }
 
   /**
@@ -207,7 +216,7 @@ public class Preferences {
   public void waitDropDownHeaderMenu(String nameMenu) {
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.visibilityOfAllElementsLocatedBy(
+            visibilityOfAllElementsLocatedBy(
                 By.xpath(format(Locators.DROP_DOWN_HEADER_XPATH_WITH_PARAM, nameMenu))));
   }
 
@@ -219,8 +228,8 @@ public class Preferences {
   public void waitMenuInCollapsedDropdown(String menu) {
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(
-            ExpectedConditions.visibilityOfAllElementsLocatedBy(
-                By.xpath(format(Locators.MENU_IN_EXPANDED_DROPDOWN_XPATH_WITH_PARAM, menu))));
+            visibilityOfAllElementsLocatedBy(
+                By.xpath(format(MENU_IN_EXPANDED_DROPDOWN_XPATH_WITH_PARAM, menu))));
   }
 
   /**
@@ -232,8 +241,7 @@ public class Preferences {
     loader.waitOnClosed();
     waitMenuInCollapsedDropdown(nameMenu);
     seleniumWebDriver
-        .findElement(
-            By.xpath(format(Locators.MENU_IN_EXPANDED_DROPDOWN_XPATH_WITH_PARAM, nameMenu)))
+        .findElement(By.xpath(format(MENU_IN_EXPANDED_DROPDOWN_XPATH_WITH_PARAM, nameMenu)))
         .click();
   }
 
@@ -266,7 +274,7 @@ public class Preferences {
   public boolean isSshKeyIsPresent(String host) {
     try {
       new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-          .until(ExpectedConditions.presenceOfElementLocated(By.xpath(Locators.SSH_KEYS_TABLE)));
+          .until(presenceOfElementLocated(By.xpath(Locators.SSH_KEYS_TABLE)));
       return sshKeysTable.getText().contains(host);
     } catch (TimeoutException e) {
       return false;
@@ -282,7 +290,7 @@ public class Preferences {
   public void deleteSshKeyByHost(String host) {
     WebElement element =
         seleniumWebDriver.findElement(
-            By.xpath("//div[text()='" + host + "']" + Locators.SSH_DELETE_BUTTON_FOR_HOST));
+            By.xpath("//div[text()='" + host + "']" + SSH_DELETE_BUTTON_FOR_HOST));
     try {
       new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
           .until(visibilityOf(element))
@@ -369,7 +377,7 @@ public class Preferences {
    */
   public List<String> getItemsFromErrorWarningsWidget() {
     List<String> itemList =
-        Arrays.asList(
+        asList(
             new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
                 .until(visibilityOf(errorsWarningsTab))
                 .getText()
@@ -389,13 +397,13 @@ public class Preferences {
       List<WebElement> dropDownList =
           new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
               .until(
-                  ExpectedConditions.presenceOfAllElementsLocatedBy(
-                      By.xpath(format(Locators.ERRORS_WARNINGS_RADIO_BUTTON, settingsText))));
+                  presenceOfAllElementsLocatedBy(
+                      By.xpath(format(ERRORS_WARNINGS_RADIO_BUTTON, settingsText))));
 
       new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
           .until(
-              ExpectedConditions.visibilityOfElementLocated(
-                  By.xpath(format(Locators.ERRORS_WARNINGS_RADIO_BUTTON_BLOCK, settingsText))))
+              visibilityOfElementLocated(
+                  By.xpath(format(ERRORS_WARNINGS_RADIO_BUTTON_BLOCK, settingsText))))
           .click();
 
       switch (valueOfDropDown) {
@@ -421,12 +429,12 @@ public class Preferences {
   public List<String> getAllSettingsFromEditorWidget(String[] headerSettings) {
     List<String> settingList =
         new ArrayList<>(
-            Arrays.asList(
+            asList(
                 new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
                     .until(visibilityOf(editorProperties))
                     .getText()
                     .split("\n")));
-    settingList.removeAll(Arrays.asList(headerSettings));
+    settingList.removeAll(asList(headerSettings));
     return settingList;
   }
 
@@ -440,21 +448,17 @@ public class Preferences {
       FlagForEditorWidget valueOfFlag, List<String> settingsList) {
     for (String settingsItem : settingsList) {
       if (new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-          .until(
-              ExpectedConditions.presenceOfElementLocated(
-                  By.xpath(format(Locators.EDITOR_INPUT, settingsItem))))
+          .until(presenceOfElementLocated(By.xpath(format(EDITOR_INPUT, settingsItem))))
           .getAttribute("type")
           .equals("checkbox")) {
         WebElement checkbox =
             new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-                .until(
-                    ExpectedConditions.presenceOfElementLocated(
-                        By.xpath(format(Locators.EDITOR_INPUT, settingsItem))));
+                .until(presenceOfElementLocated(By.xpath(format(EDITOR_INPUT, settingsItem))));
         WebElement spanCheckbox =
             new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
                 .until(
-                    ExpectedConditions.presenceOfElementLocated(
-                        By.xpath(format(Locators.EDITOR_CHECKBOX_SPAN_XPATH, settingsItem))));
+                    presenceOfElementLocated(
+                        By.xpath(format(EDITOR_CHECKBOX_SPAN_XPATH, settingsItem))));
         switch (valueOfFlag) {
           case CHECK:
             if (!checkbox.isSelected()) {
@@ -483,20 +487,19 @@ public class Preferences {
     File file = new File(filePath);
     LOG.info("Absolute path to private SSH key: {}", file.getAbsolutePath());
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(Locators.SSH_UPLOAD_KEY)))
+        .until(visibilityOfElementLocated(By.xpath(Locators.SSH_UPLOAD_KEY)))
         .click();
     WebElement hostInput =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(
-                ExpectedConditions.visibilityOfElementLocated(By.xpath(UploadSSHKey.HOST_INPUT)));
+            .until(visibilityOfElementLocated(By.xpath(UploadSSHKey.HOST_INPUT)));
     hostInput.clear();
     hostInput.sendKeys(host);
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(UploadSSHKey.FILE_INPUT)))
+        .until(visibilityOfElementLocated(By.xpath(UploadSSHKey.FILE_INPUT)))
         .sendKeys(file.getAbsolutePath());
     WaitUtils.sleepQuietly(3);
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(UploadSSHKey.UPLOAD_BUTTON)))
+        .until(visibilityOfElementLocated(By.xpath(UploadSSHKey.UPLOAD_BUTTON)))
         .click();
   }
 
