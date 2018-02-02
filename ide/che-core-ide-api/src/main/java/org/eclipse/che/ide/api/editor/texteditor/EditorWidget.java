@@ -215,4 +215,7 @@ public interface EditorWidget
   interface WidgetInitializedCallback {
     void initialized(EditorWidget editorWidget);
   }
+
+  /** Hide opened tooltip. */
+  void hideTooltip();
 }
