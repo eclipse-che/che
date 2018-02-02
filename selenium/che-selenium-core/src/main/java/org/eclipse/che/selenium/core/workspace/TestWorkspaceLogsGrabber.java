@@ -56,14 +56,14 @@ public class TestWorkspaceLogsGrabber {
     APACHE("/var/log/apache2"),
     TRAEFIK("/home/user/che/traefik/log.txt");
 
-    private final Path workspacePath;
+    private final String workspacePath;
 
     WorkspaceLog(String workspacePathStr) {
-      this.workspacePath = Paths.get(workspacePathStr);
+      this.workspacePath = workspacePathStr;
     }
 
     public Path getWorkspacePath() {
-      return workspacePath;
+      return Paths.get(workspacePath);
     }
   }
 

@@ -89,6 +89,7 @@ public class TestUserImpl implements TestUser {
     return id;
   }
 
+  @Override
   public String getOfflineToken() {
     return offlineToken;
   }

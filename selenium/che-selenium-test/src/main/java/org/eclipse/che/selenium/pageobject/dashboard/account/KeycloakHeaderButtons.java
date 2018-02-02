@@ -31,7 +31,7 @@ public class KeycloakHeaderButtons {
 
     private static final String BUTTON_XPATH_TEMPLATE = "//div[@id='tabs-menu']//a[text()='%s']";
 
-    private String text;
+    private final String text;
 
     Button(String text) {
       this.text = text;
