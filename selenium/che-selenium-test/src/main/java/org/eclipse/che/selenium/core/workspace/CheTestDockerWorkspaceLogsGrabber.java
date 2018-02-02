@@ -15,6 +15,7 @@ import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.utils.FileUtil.removeEmptyDirectory;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -42,7 +43,6 @@ public class CheTestDockerWorkspaceLogsGrabber implements TestWorkspaceLogsGrabb
 
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private DockerUtil dockerUtil;
-  @Inject private FileUtil fileUtil;
 
   @Inject
   @Named("che.infrastructure")
@@ -138,7 +138,7 @@ public class CheTestDockerWorkspaceLogsGrabber implements TestWorkspaceLogsGrabb
           e);
     } finally {
       try {
-        fileUtil.removeEmptyDirectory(testLogsDirectory);
+        removeEmptyDirectory(testLogsDirectory);
       } catch (IOException e) {
         CheTestDockerWorkspaceLogsGrabber.LOG.warn(
             "Error of removal of empty log directory {}.", testLogsDirectory, e);

@@ -18,10 +18,9 @@ import java.nio.file.Path;
 import javax.inject.Singleton;
 
 /** @author Dmytro Nochevnov */
-@Singleton
 public class FileUtil {
 
-  public void removeEmptyDirectory(Path directory) throws IOException {
+  public static void removeEmptyDirectory(Path directory) throws IOException {
     if (Files.exists(directory)
         && Files.isDirectory(directory)
         && Files.list(directory).collect(toList()).isEmpty()) {
