@@ -90,12 +90,15 @@ public class CommandManagerImpl implements CommandManager {
     registerNative();
 
     eventBus.addHandler(WorkspaceReadyEvent.getType(), e -> fetchCommands());
-    eventBus.addHandler(ResourceChangedEvent.getType(), event -> {
-        if (ResourceDelta.REMOVED == event.getDelta().getKind() && event.getDelta().getResource().isProject()) {
-          commands.clear();
-          fetchCommands();
-      }
-    });
+    eventBus.addHandler(
+        ResourceChangedEvent.getType(),
+        event -> {
+          if (ResourceDelta.REMOVED == event.getDelta().getKind()
+              && event.getDelta().getResource().isProject()) {
+            commands.clear();
+            fetchCommands();
+          }
+        });
     eventBus.addHandler(
         WorkspaceStoppedEvent.TYPE,
         e -> {
