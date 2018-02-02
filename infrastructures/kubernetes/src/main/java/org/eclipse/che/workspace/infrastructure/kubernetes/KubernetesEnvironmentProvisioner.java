@@ -19,6 +19,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
@@ -44,6 +45,7 @@ public class KubernetesEnvironmentProvisioner {
   private final RamLimitProvisioner ramLimitProvisioner;
   private final InstallerServersPortProvisioner installerServersPortProvisioner;
   private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
+  private final SecurityContextProvisioner securityContextProvisioner;
 
   @Inject
   public KubernetesEnvironmentProvisioner(
@@ -55,7 +57,8 @@ public class KubernetesEnvironmentProvisioner {
       WorkspaceVolumesStrategy volumesStrategy,
       RamLimitProvisioner ramLimitProvisioner,
       InstallerServersPortProvisioner installerServersPortProvisioner,
-      LogsVolumeMachineProvisioner logsVolumeMachineProvisioner) {
+      LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
+      SecurityContextProvisioner securityContextProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -65,6 +68,7 @@ public class KubernetesEnvironmentProvisioner {
     this.ramLimitProvisioner = ramLimitProvisioner;
     this.installerServersPortProvisioner = installerServersPortProvisioner;
     this.logsVolumeMachineProvisioner = logsVolumeMachineProvisioner;
+    this.securityContextProvisioner = securityContextProvisioner;
   }
 
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
@@ -86,5 +90,6 @@ public class KubernetesEnvironmentProvisioner {
     restartPolicyRewriter.provision(k8sEnv, identity);
     uniqueNamesProvisioner.provision(k8sEnv, identity);
     ramLimitProvisioner.provision(k8sEnv, identity);
+    securityContextProvisioner.provision(k8sEnv, identity);
   }
 }

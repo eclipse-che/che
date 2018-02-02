@@ -37,6 +37,7 @@ import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,16 +77,20 @@ public class PVCSubPathHelper {
   private final KubernetesNamespaceFactory factory;
   private final ExecutorService executor;
 
+  private final SecurityContextProvisioner securityContextProvisioner;
+
   @Inject
   PVCSubPathHelper(
       @Named("che.infra.kubernetes.pvc.name") String pvcName,
       @Named("che.infra.kubernetes.pvc.jobs.memorylimit") String jobMemoryLimit,
       @Named("che.infra.kubernetes.pvc.jobs.image") String jobImage,
-      KubernetesNamespaceFactory factory) {
+      KubernetesNamespaceFactory factory,
+      SecurityContextProvisioner securityContextProvisioner) {
     this.pvcName = pvcName;
     this.jobMemoryLimit = jobMemoryLimit;
     this.jobImage = jobImage;
     this.factory = factory;
+    this.securityContextProvisioner = securityContextProvisioner;
     this.executor =
         Executors.newFixedThreadPool(
             COUNT_THREADS,
@@ -130,6 +135,8 @@ public class PVCSubPathHelper {
     final String podName = jobName + '-' + workspaceId;
     final String[] command = buildCommand(commandBase, arguments);
     final Pod pod = newPod(podName, command);
+    securityContextProvisioner.provision(pod);
+
     KubernetesPods pods = null;
     try {
       pods = factory.create(workspaceId).pods();

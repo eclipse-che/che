@@ -118,6 +118,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
 
   private void injectBootstrapper() throws InfrastructureException {
     String machineName = kubernetesMachine.getName();
+
     LOG.debug(
         "Bootstrapping {}:{}. Creating folder for bootstrapper", runtimeIdentity, machineName);
     kubernetesMachine.exec("mkdir", "-p", BOOTSTRAPPER_DIR, bootstrapperLogsFolder);

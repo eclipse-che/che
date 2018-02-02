@@ -52,11 +52,12 @@ items:
     CHE_INFRA_KUBERNETES_MASTER__URL: ""
     CHE_INFRA_KUBERNETES_OAUTH__TOKEN: ""
     CHE_INFRA_KUBERNETES_PASSWORD: ""
+    CHE_INFRA_KUBERNETES_USERNAME: ""
+    CHE_INFRA_KUBERNETES_TRUST__CERTS: "false"
     CHE_INFRA_KUBERNETES_PVC_STRATEGY: "common"
     CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS: "true"
-    CHE_INFRA_KUBERNETES_TLS__ENABLED: "false"
-    CHE_INFRA_KUBERNETES_TRUST__CERTS: "false"
-    CHE_INFRA_KUBERNETES_USERNAME: ""
+    CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_RUN__AS__USER: "0"
+    CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_FS__GROUP: "0"
     CHE_LOCAL_CONF_DIR: /etc/conf
     CHE_LOGS_DIR: /data/logs
     CHE_LOG_LEVEL: "INFO"
@@ -162,6 +163,16 @@ items:
             valueFrom:
               configMapKeyRef:
                 key: CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS
+                name: che
+          - name: CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_RUN__AS__USER
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_RUN__AS__USER
+                name: che
+          - name: CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_FS__GROUP
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_FS__GROUP
                 name: che
           - name: JAVA_OPTS
             valueFrom:

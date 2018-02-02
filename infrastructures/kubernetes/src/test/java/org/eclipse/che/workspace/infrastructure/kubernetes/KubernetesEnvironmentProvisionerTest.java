@@ -18,6 +18,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
@@ -48,6 +49,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private RestartPolicyRewriter restartPolicyRewriter;
   @Mock private RamLimitProvisioner ramLimitProvisioner;
   @Mock private LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
+  @Mock private SecurityContextProvisioner securityContextProvisioner;
 
   private KubernetesEnvironmentProvisioner osInfraProvisioner;
 
@@ -65,7 +67,8 @@ public class KubernetesEnvironmentProvisionerTest {
             volumesStrategy,
             ramLimitProvisioner,
             installerServersPortProvisioner,
-            logsVolumeMachineProvisioner);
+            logsVolumeMachineProvisioner,
+            securityContextProvisioner);
     provisionOrder =
         inOrder(
             installerServersPortProvisioner,
@@ -75,7 +78,8 @@ public class KubernetesEnvironmentProvisionerTest {
             serversProvisioner,
             envVarsProvisioner,
             restartPolicyRewriter,
-            ramLimitProvisioner);
+            ramLimitProvisioner,
+            securityContextProvisioner);
   }
 
   @Test
@@ -92,6 +96,7 @@ public class KubernetesEnvironmentProvisionerTest {
     provisionOrder.verify(restartPolicyRewriter).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(uniqueNamesProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(ramLimitProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(securityContextProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }

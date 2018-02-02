@@ -34,6 +34,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -57,6 +58,7 @@ public class PVCSubPathHelperTest {
   private static final String PROJECTS_PATH = "/projects";
   private static final String M2_PATH = "/.m2";
 
+  @Mock private SecurityContextProvisioner securityContextProvisioner;
   @Mock private KubernetesNamespaceFactory k8sNamespaceFactory;
   @Mock private KubernetesNamespace k8sNamespace;
   @Mock private KubernetesPods osPods;
@@ -70,7 +72,8 @@ public class PVCSubPathHelperTest {
   @BeforeMethod
   public void setup() throws Exception {
     pvcSubPathHelper =
-        new PVCSubPathHelper(PVC_NAME, jobMemoryLimit, jobImage, k8sNamespaceFactory);
+        new PVCSubPathHelper(
+            PVC_NAME, jobMemoryLimit, jobImage, k8sNamespaceFactory, securityContextProvisioner);
     when(k8sNamespaceFactory.create(anyString())).thenReturn(k8sNamespace);
     when(k8sNamespace.pods()).thenReturn(osPods);
     when(pod.getStatus()).thenReturn(podStatus);
@@ -109,6 +112,7 @@ public class PVCSubPathHelperTest {
     verify(osPods).wait(anyString(), anyInt(), any());
     verify(podStatus).getPhase();
     verify(osPods).delete(anyString());
+    verify(securityContextProvisioner).provision(any());
   }
 
   @Test
