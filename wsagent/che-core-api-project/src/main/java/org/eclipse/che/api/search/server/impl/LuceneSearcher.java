@@ -171,7 +171,6 @@ public class LuceneSearcher implements Searcher {
     return initialIndexingLatch;
   }
 
-
   @ScheduleRate(period = 30, initialDelay = 30)
   private void commitIndex() throws IOException {
     luceneIndexWriter.commit();
