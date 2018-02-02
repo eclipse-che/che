@@ -40,8 +40,8 @@ import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestOfflineToAccessTokenExchangeApiEndpointUrlProvider;
+import org.eclipse.che.selenium.core.requestfactory.CheTestAdminHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.CheTestDefaultUserHttpJsonRequestFactory;
-import org.eclipse.che.selenium.core.requestfactory.TestCheAdminHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
 import org.eclipse.che.selenium.core.user.CheDefaultTestUser;
@@ -133,7 +133,7 @@ public class CheSeleniumSuiteModule extends AbstractModule {
   @Named("admin")
   public TestOrganizationServiceClient getAdminOrganizationServiceClient(
       TestApiEndpointUrlProvider apiEndpointUrlProvider,
-      TestCheAdminHttpJsonRequestFactory requestFactory) {
+      CheTestAdminHttpJsonRequestFactory requestFactory) {
     return new TestOrganizationServiceClient(apiEndpointUrlProvider, requestFactory);
   }
 

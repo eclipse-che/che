@@ -15,10 +15,10 @@ import javax.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 
 /** @author Dmytro Nochevnov */
-public class TestCheAdminHttpJsonRequestFactory extends TestUserHttpJsonRequestFactory {
+public class CheTestAdminHttpJsonRequestFactory extends TestUserHttpJsonRequestFactory {
 
   @Inject
-  public TestCheAdminHttpJsonRequestFactory(
+  public CheTestAdminHttpJsonRequestFactory(
       TestAuthServiceClient authServiceClient,
       @Named("che.admin.name") String adminName,
       @Named("che.admin.password") String adminPassword,
