@@ -80,6 +80,8 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 import org.eclipse.che.ide.ui.smartTree.data.HasDataObject;
+import org.eclipse.che.ide.ui.window.event.WindowOpenedEvent;
+import org.eclipse.che.ide.ui.window.event.WindowOpenedEvent.WindowOpenedHandler;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
@@ -94,7 +96,8 @@ public class EditorAgentImpl
         ActivePartChangedHandler,
         SelectionChangedHandler,
         StateComponent,
-        WorkspaceStoppedEvent.Handler {
+        WorkspaceStoppedEvent.Handler,
+        WindowOpenedHandler {
 
   private final EventBus eventBus;
   private final WorkspaceAgent workspaceAgent;
@@ -146,6 +149,7 @@ public class EditorAgentImpl
     eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
     eventBus.addHandler(SelectionChangedEvent.TYPE, this);
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
+    eventBus.addHandler(WindowOpenedEvent.TYPE, this);
   }
 
   @Override
@@ -802,6 +806,14 @@ public class EditorAgentImpl
     for (EditorPartPresenter editor : getOpenedEditors()) {
       closeEditor(editor);
     }
+  }
+
+  @Override
+  public void onWindowOpened(WindowOpenedEvent event) {
+    if (activeEditor == null || !(activeEditor instanceof TextEditor)) {
+      return;
+    }
+    ((TextEditor) activeEditor).getEditorWidget().hideTooltip();
   }
 
   private static class RestoreStateEditorCallBack extends OpenEditorCallbackImpl {
