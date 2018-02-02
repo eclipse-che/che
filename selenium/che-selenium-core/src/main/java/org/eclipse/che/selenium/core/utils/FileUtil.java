@@ -15,7 +15,6 @@ import static java.util.stream.Collectors.toList;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import javax.inject.Singleton;
 
 /** @author Dmytro Nochevnov */
 public class FileUtil {

@@ -10,13 +10,37 @@
  */
 package org.eclipse.che.selenium.core.workspace;
 
+import static java.lang.String.format;
+
+import com.google.common.collect.ImmutableList;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 /** @author Dmytro Nochevnov */
-public class CheTestOpenshiftWorkspaceLogsGrabber implements TestWorkspaceLogsGrabber {
+public class CheTestOpenshiftWorkspaceLogsGrabber extends TestWorkspaceLogsGrabber {
+
+  private final List<WorkspaceLog> workspaceLogs =
+      ImmutableList.of(
+          new WorkspaceLog("bootstrapper", Paths.get("/workspace_logs/bootstrapper")),
+          new WorkspaceLog("exec-agent", Paths.get("/workspace_logs/exec-agent")),
+          new WorkspaceLog("ws-agent", Paths.get("/workspace_logs/ws-agent")));
 
   @Override
-  public void grabLogs(TestWorkspace workspace, Path pathToStore) {
-    // TODO
+  String getGrabLogsCommand(
+      String workspaceId, Path testLogsDirectory, Path logDestinationInsideWorkspace) {
+    return format(
+        "docker cp $(docker ps -q -f name=k8s_container_%s):%s %s",
+        workspaceId, logDestinationInsideWorkspace, testLogsDirectory);
+  }
+
+  @Override
+  List<WorkspaceLog> getLogs() {
+    return workspaceLogs;
+  }
+
+  @Override
+  boolean canLogsBeGrabbed() {
+    return true;
   }
 }
