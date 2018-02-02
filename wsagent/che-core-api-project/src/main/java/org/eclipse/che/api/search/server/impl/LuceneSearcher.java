@@ -81,6 +81,7 @@ import org.eclipse.che.api.search.server.QueryExecutionException;
 import org.eclipse.che.api.search.server.QueryExpression;
 import org.eclipse.che.api.search.server.SearchResult;
 import org.eclipse.che.api.search.server.Searcher;
+import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,6 +169,12 @@ public class LuceneSearcher implements Searcher {
   @VisibleForTesting
   CountDownLatch getInitialIndexingLatch() {
     return initialIndexingLatch;
+  }
+
+
+  @ScheduleRate(period = 30, initialDelay = 30)
+  private void commitIndex() throws IOException {
+    luceneIndexWriter.commit();
   }
 
   @Override
@@ -371,7 +378,6 @@ public class LuceneSearcher implements Searcher {
       } else {
         addFile(fsPath);
       }
-      luceneIndexWriter.commit();
       printStatistic();
     } catch (IOException e) {
       LOG.warn(
@@ -424,7 +430,6 @@ public class LuceneSearcher implements Searcher {
       deleteFileOrFolder.add(new TermQuery(new Term(PATH_FIELD, wsPath)), Occur.SHOULD);
       deleteFileOrFolder.add(new PrefixQuery(new Term(PATH_FIELD, wsPath + "/")), Occur.SHOULD);
       luceneIndexWriter.deleteDocuments(deleteFileOrFolder.build());
-      luceneIndexWriter.commit();
       printStatistic();
     } catch (IOException e) {
       LOG.warn("Can't delete index for file: {}", wsPath);
