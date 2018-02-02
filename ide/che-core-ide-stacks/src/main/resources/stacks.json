@@ -83,7 +83,7 @@
               "attributes": {},
 
               "servers": {
-                "theia": {
+                "ws/theia": {
                   "protocol": "http",
                   "port": "3000",
                   "attributes": {
@@ -99,7 +99,7 @@
               "installers": [],
               "env": {}
             },
-            "dev-machine": {
+            "ws/dev": {
               "attributes": {},
               "servers": {
                 "theia-dev": {
