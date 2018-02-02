@@ -67,6 +67,73 @@
     }
   },
   {
+    "id": "java-theia-openshift",
+    "creator": "ide",
+    "name": "Java Theia (openshift)",
+    "description": "Java + Theia in a sidecar container (openshift)",
+    "scope": "general",
+    "tags": [
+      "Java 1.8, Theia"
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "theia": {
+              "attributes": {},
+
+              "servers": {
+                "theia": {
+                  "protocol": "http",
+                  "port": "3000",
+                  "attributes": {
+                    "type": "ide"
+                  }
+                }
+              },
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "env": {}
+            },
+            "dev-machine": {
+              "attributes": {},
+              "servers": {
+                "theia-dev": {
+                  "protocol": "http",
+                  "port": "3030"
+                }
+              },
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "env": {}
+            }
+          },
+          "recipe": {
+            "type": "openshift",
+            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: theiaide/theia\n        command:\n          - yarn\n        args:\n          - theia\n          - start\n          - /projects\n          - --hostname=0.0.0.0\n        name: theia\n      -\n        image: eclipse/che-dev:nightly\n        name: dev",
+            "contentType": "application/x-yaml"
+          }
+        }
+      },
+      "defaultEnv": "default",
+      "name": "theia",
+      "projects": [],
+      "commands": []
+    },
+    "stackIcon": {
+      "name": "type-java.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "java-centos-mysql",
     "creator": "ide",
     "name": "Java-MySQL CentOS",
