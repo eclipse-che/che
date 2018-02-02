@@ -79,11 +79,11 @@
       "environments": {
         "default": {
           "machines": {
-            "theia": {
+            "ws/theia": {
               "attributes": {},
 
               "servers": {
-                "ws/theia": {
+                "theia": {
                   "protocol": "http",
                   "port": "3000",
                   "attributes": {
