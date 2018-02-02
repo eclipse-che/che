@@ -10,7 +10,7 @@
 #  ``` bash
 #   DEPLOY_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/dockerfiles/cli/scripts/openshift/deploy_che.sh
 #   curl -fsSL ${DEPLOY_SCRIPT_URL} -o get-che.sh
-#   bash get-che.sh && wait-che.sh --wait-che
+#   bash get-che.sh --wait-che
 #   ```
 #
 # For more deployment options: https://www.eclipse.org/che/docs/setup/openshift/index.html
