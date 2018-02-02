@@ -46,7 +46,8 @@ public class WsMasterServletModule extends ServletModule {
     filter("/*").through(CorsFilter.class, corsFilterParams);
     filter("/*").through(RequestIdLoggerFilter.class);
 
-    serveRegex("^/(?!ws$|ws/|websocket.?)(.*)").with(GuiceEverrestServlet.class);
+    // Matching group SHOULD contain forward slash.
+    serveRegex("^(?!/websocket.?)(.*)").with(GuiceEverrestServlet.class);
     install(new org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule());
 
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {

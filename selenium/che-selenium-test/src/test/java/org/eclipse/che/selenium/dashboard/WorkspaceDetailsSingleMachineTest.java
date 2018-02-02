@@ -213,6 +213,12 @@ public class WorkspaceDetailsSingleMachineTest {
     dashboard.waitNotificationIsClosed();
   }
 
+  private void clickOnApplyButton() {
+    workspaceDetails.clickOnApplyChangesBtn();
+    dashboard.waitNotificationMessage("Workspace updated");
+    dashboard.waitNotificationIsClosed();
+  }
+
   private void createServer(String serverName, String serverPort, String serverProtocol) {
     workspaceServers.clickOnAddServerButton();
     workspaceServers.waitAddServerDialogIsOpen();

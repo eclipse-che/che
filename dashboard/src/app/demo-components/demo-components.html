@@ -421,5 +421,59 @@ Ultima Syriarum est Palaestina per intervalla magna protenta, cultis abundans te
                 class="btn btn-default">HTML Popover (inline)</button>
       </textarea>
     </md-tab>
+
+    <md-tab label="Edit Mode Overlay"
+            md-on-select="demoComponentsController.onSelectTab(demoComponentsController.tab.Edit_mode_overlay)">
+
+      <div class="demo-edit-overlay">
+        <form>
+          <label for="panel-visible">Panel Is Visible</label>
+          <input id="panel-visible" type="checkbox" ng-model="demoComponentsController.overlayConfig.visible">
+          <br/>
+          <label for="panel-disabled">Panel Is Visible</label>
+          <input id="panel-disabled" type="checkbox" ng-model="demoComponentsController.overlayConfig.disabled">
+
+          <fieldset>
+            <legend>Message</legend>
+            <label for="message-content">Content</label>
+            <input id="message-content" type="text" ng-model="demoComponentsController.overlayConfig.message.content">
+            <br/>
+            <label for="message-visible">Visible</label>
+            <input id="message-visible" type="checkbox" ng-model="demoComponentsController.overlayConfig.message.visible">
+          </fieldset>
+          <fieldset>
+            <legend>SAVE button</legend>
+            <label for="save-button-title">Title</label>
+            <input id="save-button-title" type="text" ng-model="demoComponentsController.overlayConfig.saveButton.title">
+            <br/>
+            <label for="save-button-disabled">Disabled</label>
+            <input id="save-button-disabled" type="checkbox" ng-model="demoComponentsController.overlayConfig.saveButton.disabled">
+          </fieldset>
+          <fieldset>
+            <legend>APPLY button</legend>
+            <label for="apply-button-title">Title</label>
+            <input id="apply-button-title" type="text" ng-model="demoComponentsController.overlayConfig.applyButton.title">
+            <br/>
+            <label for="apply-button-disabled">Disabled</label>
+            <input id="apply-button-disabled" type="checkbox" ng-model="demoComponentsController.overlayConfig.applyButton.disabled">
+          </fieldset>
+          <fieldset>
+            <legend>CANCEL button</legend>
+            <label for="cancel-button-title">Title</label>
+            <input id="cancel-button-title" type="text" ng-model="demoComponentsController.overlayConfig.cancelButton.title">
+            <br/>
+            <label for="cancel-button-disabled">Disabled</label>
+            <input id="cancel-button-disabled" type="checkbox" ng-model="demoComponentsController.overlayConfig.cancelButton.disabled">
+          </fieldset>
+        </form>
+      </div>
+
+      <textarea demo-source-render>
+        <che-edit-mode-overlay config="demoComponentsController.overlayConfig"></che-edit-mode-overlay>
+      </textarea>
+
+    </md-tab>
+
   </md-tabs>
+
 </md-content>
