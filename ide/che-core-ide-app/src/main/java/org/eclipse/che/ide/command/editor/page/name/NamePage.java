@@ -72,4 +72,9 @@ public class NamePage extends AbstractCommandEditorPage implements NamePageView.
   public void onCommandRun() {
     commandExecutor.executeCommand(editedCommand);
   }
+
+  @Override
+  public void focus() {
+    view.setFocusOnName();
+  }
 }

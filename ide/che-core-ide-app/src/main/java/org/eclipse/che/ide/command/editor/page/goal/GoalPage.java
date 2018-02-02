@@ -143,4 +143,9 @@ public class GoalPage extends AbstractCommandEditorPage implements GoalPageView.
 
     notifyDirtyStateChanged();
   }
+
+  @Override
+  public void focus() {
+    view.setFocusOnGoal();
+  }
 }
