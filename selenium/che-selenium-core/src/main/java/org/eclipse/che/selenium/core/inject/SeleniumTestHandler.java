@@ -272,11 +272,11 @@ public abstract class SeleniumTestHandler
       }
       captureScreenshot(result);
       captureHtmlSource(result);
-      storeTestWorkspaceLogs(result);
+      captureTestWorkspaceLogs(result);
     }
   }
 
-  private void storeTestWorkspaceLogs(ITestResult result) {
+  private void captureTestWorkspaceLogs(ITestResult result) {
     Object testInstance = result.getInstance();
     for (Field field : testInstance.getClass().getDeclaredFields()) {
       field.setAccessible(true);

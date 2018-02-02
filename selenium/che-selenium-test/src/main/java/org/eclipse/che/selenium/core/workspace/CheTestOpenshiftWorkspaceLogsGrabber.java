@@ -13,7 +13,10 @@ package org.eclipse.che.selenium.core.workspace;
 import java.nio.file.Path;
 
 /** @author Dmytro Nochevnov */
-public interface TestWorkspaceLogsGrabber {
+public class CheTestOpenshiftWorkspaceLogsGrabber implements TestWorkspaceLogsGrabber {
 
-  void grabLogs(TestWorkspace workspace, Path pathToStore);
+  @Override
+  public void grabLogs(TestWorkspace workspace, Path pathToStore) {
+    // TODO
+  }
 }

@@ -187,9 +187,6 @@
                         <exclude>**/.keep</exclude>
                         <exclude>**/*.txt</exclude>
                         <exclude>**/*.zip</exclude>
-                        <exclude>**/*.zip</exclude>
-                        <exclude>**/resources/**/.gitkeep</exclude>
-                        <exclude>**/resources/**/.keep</exclude>
                         <exclude>**/resources/**/another</exclude>
                         <exclude>**/resources/**/classpath</exclude>
                         <exclude>**/resources/**/editor</exclude>
