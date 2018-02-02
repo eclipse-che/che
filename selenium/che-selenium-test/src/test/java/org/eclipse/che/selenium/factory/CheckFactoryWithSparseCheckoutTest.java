@@ -20,6 +20,7 @@ import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -33,6 +34,7 @@ public class CheckFactoryWithSparseCheckoutTest {
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private Events events;
   @Inject private Dashboard dashboard;
+  @Inject private PullRequestPanel pullRequestPanel;
 
   @Inject
   @Named("github.username")
@@ -70,7 +72,7 @@ public class CheckFactoryWithSparseCheckoutTest {
     events.clickEventLogBtn();
     events.waitOpened();
     events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
-
+    pullRequestPanel.waitOpenPanel();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME + "/my-lib");
