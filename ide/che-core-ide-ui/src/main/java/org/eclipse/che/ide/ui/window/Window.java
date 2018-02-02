@@ -28,11 +28,13 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.web.bindery.event.shared.EventBus;
 import elemental.js.dom.JsElement;
 import javax.inject.Inject;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.ui.button.ButtonAlignment;
+import org.eclipse.che.ide.ui.window.event.WindowOpenedEvent;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -51,10 +53,10 @@ public abstract class Window implements IsWidget {
   private boolean blocked = false;
 
   private boolean hideOnEscapeEnabled = true;
-
   private boolean isShowing;
   private View view;
   private KeyBindingAgent keyBinding;
+  private EventBus eventBus;
 
   protected Window() {
     this(true);
@@ -67,6 +69,11 @@ public abstract class Window implements IsWidget {
   @Inject
   protected void setKeyBinding(KeyBindingAgent keyBinding) {
     this.keyBinding = keyBinding;
+  }
+
+  @Inject
+  protected void setEventBus(EventBus eventBus) {
+    this.eventBus = eventBus;
   }
 
   public Widget getWidget() {
@@ -265,6 +272,7 @@ public abstract class Window implements IsWidget {
                   // The popup may have been hidden before this timer executes.
                   view.setShowing(true);
                   setFocusOn(selectAndFocusElement);
+                  eventBus.fireEvent(new WindowOpenedEvent());
                 }
               });
     }
