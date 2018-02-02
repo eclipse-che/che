@@ -42,7 +42,7 @@ public class DashboardAccount {
     String LOGIN_FIELD = "//input[@name='login_name']";
     String FIRST_NAME_FIELD = "//input[@name='first_name']";
     String LAST_NAME_FIELD = "//input[@name='last_name']";
-    String EDIT_BUTTON = "//che-button-default[@name='editButton']/button";
+    String EDIT_BUTTON = "//button[@name='editButton']";
     String TITLE_ID = "Account";
   }
 
