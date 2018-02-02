@@ -43,6 +43,8 @@ import org.eclipse.che.ide.api.command.CommandUpdatedEvent;
 import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
+import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
@@ -88,6 +90,12 @@ public class CommandManagerImpl implements CommandManager {
     registerNative();
 
     eventBus.addHandler(WorkspaceReadyEvent.getType(), e -> fetchCommands());
+    eventBus.addHandler(ResourceChangedEvent.getType(), event -> {
+        if (ResourceDelta.REMOVED == event.getDelta().getKind() && event.getDelta().getResource().isProject()) {
+          commands.clear();
+          fetchCommands();
+      }
+    });
     eventBus.addHandler(
         WorkspaceStoppedEvent.TYPE,
         e -> {
