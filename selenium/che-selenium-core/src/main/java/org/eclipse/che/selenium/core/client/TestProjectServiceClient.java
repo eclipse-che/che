@@ -16,6 +16,9 @@ import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.cont
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.dto.server.DtoFactory.getInstance;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -25,11 +28,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ZipUtils;
@@ -211,6 +217,59 @@ public class TestProjectServiceClient {
     } finally {
       ofNullable(httpConnection).ifPresent(HttpURLConnection::disconnect);
     }
+  }
+
+  public boolean checkProjectType(String wokspaceId, String projectName, String projectType)
+      throws Exception {
+    return getProjectParameters(wokspaceId, projectName)
+        .get("type")
+        .getAsString()
+        .equals(projectType);
+  }
+
+  public boolean checkProjectLanguage(String wokspaceId, String projectName, String projectLanguage)
+      throws Exception {
+    return getProjectParameters(wokspaceId, projectName)
+        .getAsJsonObject("attributes")
+        .get("language")
+        .getAsString()
+        .equals(projectLanguage);
+  }
+
+  public List<String> getExternalLibraries(String workspaceId, String projectName)
+      throws Exception {
+    List<String> result = new ArrayList<>();
+    HttpJsonResponse response =
+        requestFactory
+            .fromUrl(
+                getWsAgentUrl(workspaceId).replace("/project", "") + "/java/navigation/libraries")
+            .useGetMethod()
+            .addQueryParam("projectpath", "/" + projectName)
+            .request();
+
+    parseResponseAsArray(response)
+        .forEach(
+            jsonElement -> result.add(jsonElement.getAsJsonObject().get("name").getAsString()));
+
+    return result;
+  }
+
+  private JsonObject parseResponseAsJsonObject(HttpJsonResponse response) {
+    return new JsonParser().parse(response.asString()).getAsJsonObject();
+  }
+
+  private JsonArray parseResponseAsArray(HttpJsonResponse response) {
+    return new JsonParser().parse(response.asString()).getAsJsonArray();
+  }
+
+  private JsonObject getProjectParameters(String workspaceId, String projectName) throws Exception {
+    HttpJsonResponse response =
+        requestFactory
+            .fromUrl(getWsAgentUrl(workspaceId) + "/" + projectName)
+            .useGetMethod()
+            .request();
+
+    return parseResponseAsJsonObject(response);
   }
 
   private String getWsAgentUrl(String workspaceId) throws Exception {
