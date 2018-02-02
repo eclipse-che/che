@@ -575,7 +575,6 @@ public class Preferences {
 
     // authorize on github.com
     if (seleniumWebDriver.getWindowHandles().size() > 1) {
-      loader.waitOnClosed();
       gitHub.waitAuthorizeBtn();
       gitHub.clickOnAuthorizeBtn();
       seleniumWebDriver.switchTo().window(ideWin);
