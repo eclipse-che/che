@@ -12,8 +12,6 @@ package org.eclipse.che.selenium.core.client;
 
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
-import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.dto.server.DtoFactory.getInstance;
 
 import com.google.gson.JsonArray;
@@ -30,15 +28,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
-import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ZipUtils;
+import org.eclipse.che.selenium.core.provider.TestWorkspaceAgentApiEndpoint;
 
 /**
  * @author Musienko Maxim
@@ -49,17 +44,17 @@ public class TestProjectServiceClient {
   private static final int WS_AGENT_PORT = 4401;
 
   private final TestMachineServiceClient machineServiceClient;
-  private final TestWorkspaceServiceClient workspaceServiceClient;
   private final HttpJsonRequestFactory requestFactory;
+  private final TestWorkspaceAgentApiEndpoint workspaceAgentApiEndpoint;
 
   @Inject
   public TestProjectServiceClient(
       TestMachineServiceClient machineServiceClient,
-      TestWorkspaceServiceClient workspaceServiceClient,
-      HttpJsonRequestFactory requestFactory) {
+      HttpJsonRequestFactory requestFactory,
+      TestWorkspaceAgentApiEndpoint workspaceAgentApiEndpoint) {
     this.machineServiceClient = machineServiceClient;
-    this.workspaceServiceClient = workspaceServiceClient;
     this.requestFactory = requestFactory;
+    this.workspaceAgentApiEndpoint = workspaceAgentApiEndpoint;
   }
 
   /** Set type for existing project on vfs */
@@ -71,9 +66,9 @@ public class TestProjectServiceClient {
     ProjectConfigDto project = getInstance().createDtoFromJson(json, ProjectConfigDto.class);
     project.setName(projectName);
 
-    String url = getWsAgentUrl(workspaceId);
+    String url = workspaceAgentApiEndpoint.get(workspaceId);
     requestFactory
-        .fromUrl(url + "/" + projectName)
+        .fromUrl(url + "project/" + projectName)
         .usePutMethod()
         .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
         .setBody(project)
@@ -82,16 +77,16 @@ public class TestProjectServiceClient {
 
   /** Delete resource. */
   public void deleteResource(String workspaceId, String path) throws Exception {
-    String wsAgentUrl = getWsAgentUrl(workspaceId);
+    String wsAgentUrl = workspaceAgentApiEndpoint.get(workspaceId);
     requestFactory
-        .fromUrl(wsAgentUrl + "/" + path)
+        .fromUrl(wsAgentUrl + "project/" + path)
         .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
         .useDeleteMethod()
         .request();
   }
 
   public void createFolder(String workspaceId, String folder) throws Exception {
-    String url = getWsAgentUrl(workspaceId) + "/folder/" + folder;
+    String url = workspaceAgentApiEndpoint.get(workspaceId) + "project/folder/" + folder;
     requestFactory
         .fromUrl(url)
         .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
@@ -102,7 +97,7 @@ public class TestProjectServiceClient {
   /** Import zip project from file system into user workspace. */
   public void importZipProject(
       String workspaceId, Path zipFile, String projectName, String template) throws Exception {
-    String url = getWsAgentUrl(workspaceId) + "/import/" + projectName;
+    String url = workspaceAgentApiEndpoint.get(workspaceId) + "project/import/" + projectName;
     //    createFolder(workspaceId, projectName);
 
     HttpURLConnection httpConnection = null;
@@ -154,7 +149,12 @@ public class TestProjectServiceClient {
   /** Creates file in the project. */
   public void createFileInProject(
       String workspaceId, String parentFolder, String fileName, String content) throws Exception {
-    String apiRESTUrl = getWsAgentUrl(workspaceId) + "/file/" + parentFolder + "?name=" + fileName;
+    String apiRESTUrl =
+        workspaceAgentApiEndpoint.get(workspaceId)
+            + "project/file/"
+            + parentFolder
+            + "?name="
+            + fileName;
 
     HttpURLConnection httpConnection = null;
     try {
@@ -181,7 +181,7 @@ public class TestProjectServiceClient {
   }
 
   public ProjectConfigDto getFirstProject(String workspaceId) throws Exception {
-    String apiUrl = getWsAgentUrl(workspaceId);
+    String apiUrl = workspaceAgentApiEndpoint.get(workspaceId) + "project";
     return requestFactory
         .fromUrl(apiUrl)
         .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
@@ -192,7 +192,7 @@ public class TestProjectServiceClient {
 
   /** Updates file content. */
   public void updateFile(String workspaceId, String pathToFile, String content) throws Exception {
-    String url = getWsAgentUrl(workspaceId) + "/file/" + pathToFile;
+    String url = workspaceAgentApiEndpoint.get(workspaceId) + "project/file/" + pathToFile;
 
     HttpURLConnection httpConnection = null;
     try {
@@ -241,8 +241,7 @@ public class TestProjectServiceClient {
     List<String> result = new ArrayList<>();
     HttpJsonResponse response =
         requestFactory
-            .fromUrl(
-                getWsAgentUrl(workspaceId).replace("/project", "") + "/java/navigation/libraries")
+            .fromUrl(workspaceAgentApiEndpoint.get(workspaceId) + "java/navigation/libraries")
             .useGetMethod()
             .addQueryParam("projectpath", "/" + projectName)
             .request();
@@ -265,29 +264,10 @@ public class TestProjectServiceClient {
   private JsonObject getProjectParameters(String workspaceId, String projectName) throws Exception {
     HttpJsonResponse response =
         requestFactory
-            .fromUrl(getWsAgentUrl(workspaceId) + "/" + projectName)
+            .fromUrl(workspaceAgentApiEndpoint.get(workspaceId) + "project/" + projectName)
             .useGetMethod()
             .request();
 
     return parseResponseAsJsonObject(response);
-  }
-
-  private String getWsAgentUrl(String workspaceId) throws Exception {
-    Workspace workspace = workspaceServiceClient.getById(workspaceId);
-    workspaceServiceClient.ensureRunningStatus(workspace);
-
-    Map<String, ? extends Machine> machines =
-        workspaceServiceClient.getById(workspaceId).getRuntime().getMachines();
-    for (Machine machine : machines.values()) {
-      if (containsWsAgentServer(machine)) {
-        Server wsAgentServer = machine.getServers().get(SERVER_WS_AGENT_HTTP_REFERENCE);
-        if (wsAgentServer != null) {
-          return wsAgentServer.getUrl() + "/project";
-        } else {
-          throw new RuntimeException("Workspace agent server is null");
-        }
-      }
-    }
-    throw new RuntimeException("Cannot find dev machine on workspace");
   }
 }

@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.WARN
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -28,6 +29,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -61,9 +63,17 @@ public class EditorValidationTest {
   }
 
   @Test
-  public void autoCompleteClassInTheSamePackage() {
+  public void autoCompleteClassInTheSamePackage() throws Exception {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
+
+    Assert.assertTrue(
+        testProjectServiceClient.checkProjectType(workspace.getId(), PROJECT_NAME, "maven"));
+    Assert.assertTrue(
+        testProjectServiceClient.checkProjectLanguage(workspace.getId(), PROJECT_NAME, "java"));
+    List<String> listOfLibraries =
+        testProjectServiceClient.getExternalLibraries(workspace.getId(), PROJECT_NAME);
+
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
     mavenPluginStatusBar.waitClosingInfoPanel();

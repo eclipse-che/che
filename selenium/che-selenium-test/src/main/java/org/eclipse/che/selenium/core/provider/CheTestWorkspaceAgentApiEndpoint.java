@@ -10,37 +10,44 @@
  */
 package org.eclipse.che.selenium.core.provider;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.inject.Inject;
-import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.core.rest.HttpJsonResponse;
-import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
+import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 
-public class CheTestWorkspaceAgentApiEndpoint {
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+
+@Singleton
+public class CheTestWorkspaceAgentApiEndpoint implements TestWorkspaceAgentApiEndpoint {
 
   @Inject private HttpJsonRequestFactory httpJsonRequestFactory;
+  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
-  public String getWorkspaceAgentApiEndpoint(TestWorkspace workspace) throws Exception {
-    HttpJsonResponse response =
-        httpJsonRequestFactory
-            .fromUrl("http://172.19.20.13:8080/api/workspace/" + workspace.getId())
-            .useGetMethod()
-            .request();
+  @Override
+  public String get(String workspaceId) throws Exception {
+    workspaceServiceClient.ensureRunningStatus(getWorkspaceById(workspaceId));
 
-    return parseResponseAsJsonObject(response)
-            .getAsJsonObject()
-            .getAsJsonObject("runtime")
-            .getAsJsonObject("machines")
-            .getAsJsonObject("dev-machine")
-            .getAsJsonObject("servers")
-            .getAsJsonObject("wsagent/http")
-            .get("url")
-            .getAsString()
-        + "/";
+    Map<String, ? extends Machine> machines =
+        getWorkspaceById(workspaceId).getRuntime().getMachines();
+    for (Machine machine : machines.values()) {
+      if (containsWsAgentServer(machine)) {
+        Server wsAgentServer = machine.getServers().get(SERVER_WS_AGENT_HTTP_REFERENCE);
+        if (wsAgentServer != null) {
+          return wsAgentServer.getUrl() + "/";
+        } else {
+          throw new RuntimeException("Workspace agent server is null");
+        }
+      }
+    }
+    throw new RuntimeException("Cannot find dev machine on workspace");
   }
 
-  private JsonObject parseResponseAsJsonObject(HttpJsonResponse response) {
-    return new JsonParser().parse(response.asString()).getAsJsonObject();
+  private Workspace getWorkspaceById(String workspaceId) throws Exception {
+    return workspaceServiceClient.getById(workspaceId);
   }
 }
