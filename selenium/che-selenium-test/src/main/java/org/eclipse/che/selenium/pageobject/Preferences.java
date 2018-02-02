@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -187,12 +188,13 @@ public class Preferences {
 
   /** wait preferences form */
   public void waitPreferencesForm() {
-    new WebDriverWait(seleniumWebDriver, 10).until(visibilityOf(preferencesForm));
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOf(preferencesForm));
   }
 
   /** wait closing of the preferences form */
   public void waitPreferencesFormIsClosed() {
-    new WebDriverWait(seleniumWebDriver, 10)
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.PREFERENCES_FORM_ID)));
   }
@@ -203,7 +205,7 @@ public class Preferences {
    * @param nameMenu name of header (all names describe in public interface )
    */
   public void waitDropDownHeaderMenu(String nameMenu) {
-    new WebDriverWait(seleniumWebDriver, 20)
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfAllElementsLocatedBy(
                 By.xpath(format(Locators.DROP_DOWN_HEADER_XPATH_WITH_PARAM, nameMenu))));
@@ -215,7 +217,7 @@ public class Preferences {
    * @param menu (all menus describe in public interface )
    */
   public void waitMenuInCollapsedDropdown(String menu) {
-    new WebDriverWait(seleniumWebDriver, 20)
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfAllElementsLocatedBy(
                 By.xpath(format(Locators.MENU_IN_EXPANDED_DROPDOWN_XPATH_WITH_PARAM, menu))));
@@ -237,24 +239,28 @@ public class Preferences {
 
   /** wait ok button click and wait closing the form */
   public void clickOnOkBtn() {
-    new WebDriverWait(seleniumWebDriver, 10).until(visibilityOf(okBtn));
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(visibilityOf(okBtn));
     okBtn.click();
     loader.waitOnClosed();
   }
 
   /** wait close button click and wait closing the form */
   public void clickOnCloseBtn() {
-    new WebDriverWait(seleniumWebDriver, 10).until(visibilityOf(closeBtn));
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(visibilityOf(closeBtn));
     closeBtn.click();
     waitPreferencesFormIsClosed();
   }
 
   public void clickOnGenerateKeyButton() {
-    new WebDriverWait(seleniumWebDriver, 10).until(visibilityOf(generateKeyBtn)).click();
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOf(generateKeyBtn))
+        .click();
   }
 
   public void clickOnGenerateAndUploadToGitHub() {
-    new WebDriverWait(seleniumWebDriver, 10).until(visibilityOf(generateAndUploadBtn)).click();
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOf(generateAndUploadBtn))
+        .click();
   }
 
   public boolean isSshKeyIsPresent(String host) {
@@ -308,7 +314,7 @@ public class Preferences {
    * @param nameCommitter is a name of the committer
    */
   public void waitInputNameCommitter(final String nameCommitter) {
-    new WebDriverWait(seleniumWebDriver, 3)
+    new WebDriverWait(seleniumWebDriver, ATTACHING_ELEM_TO_DOM_SEC)
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver -> nameCommitterInput.getAttribute("value").contains(nameCommitter));
@@ -340,7 +346,7 @@ public class Preferences {
    * @param emailCommitter is an email of the committer
    */
   public void waitInputEmailCommitter(final String emailCommitter) {
-    new WebDriverWait(seleniumWebDriver, 3)
+    new WebDriverWait(seleniumWebDriver, ATTACHING_ELEM_TO_DOM_SEC)
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver -> emailCommitterInput.getAttribute("value").contains(emailCommitter));
