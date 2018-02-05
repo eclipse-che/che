@@ -84,12 +84,9 @@ public class DirectUrlFactoryWithRootFolder {
             "tslint.json",
             "typings.json",
             "wallaby.js");
-    try {
-      testFactoryWithRootFolder.authenticateAndOpen();
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7555", ex);
-    }
+
+    testFactoryWithRootFolder.authenticateAndOpen();
+
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(EXPECTED_PROJECT);
     notificationsPopupPanel.waitProgressPopupPanelClose();
