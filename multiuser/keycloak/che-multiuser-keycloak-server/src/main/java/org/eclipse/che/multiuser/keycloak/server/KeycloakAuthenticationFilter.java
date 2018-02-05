@@ -60,7 +60,7 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
     this.allowedClockSkewSec = allowedClockSkewSec;
     this.tokenExtractor = tokenExtractor;
     if (jwksUrl != null) {
-        this.jwkProvider = new GuavaCachedJwkProvider(new UrlJwkProvider(new URL(jwksUrl)));
+      this.jwkProvider = new GuavaCachedJwkProvider(new UrlJwkProvider(new URL(jwksUrl)));
     }
   }
 
@@ -129,10 +129,10 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
     }
 
     if (jwkProvider == null) {
-        LOG.warn(
-            "JWK provider is not available: This is not possible to validate the token with OIDC provider keys.\n"
-            + "Please look into the startup logs to find out the root cause");
-        return null;
+      LOG.warn(
+          "JWK provider is not available: This is not possible to validate the token with OIDC provider keys.\n"
+              + "Please look into the startup logs to find out the root cause");
+      return null;
     }
     Jwk jwk = jwkProvider.get(kid);
     return jwk.getPublicKey();

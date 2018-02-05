@@ -32,7 +32,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
@@ -63,13 +62,13 @@ public class KeycloakSettings {
       @Nullable @Named(GITHUB_ENDPOINT_SETTING) String gitHubEndpoint) {
 
     String wellKnownEndpoint = oidcProvider != null ? oidcProvider : serverURL + "/realms/" + realm;
-    if (! wellKnownEndpoint.endsWith("/")) {
-        wellKnownEndpoint = wellKnownEndpoint + "/";
+    if (!wellKnownEndpoint.endsWith("/")) {
+      wellKnownEndpoint = wellKnownEndpoint + "/";
     }
     wellKnownEndpoint += ".well-known/openid-configuration";
-    
+
     LOG.info("Retrieving OpenId configuration from endpoint: {}", wellKnownEndpoint);
-    
+
     URL url;
     Map<String, Object> openIdConfiguration;
     try {
@@ -81,13 +80,14 @@ public class KeycloakSettings {
           new TypeReference<Map<String, Object>>() {};
       openIdConfiguration = new ObjectMapper().reader().readValue(parser, typeReference);
     } catch (IOException e) {
-        LOG.error("Exception while retrieving OpenId configuration from endpoint: " + wellKnownEndpoint, e);
-        this.settings = Collections.unmodifiableMap(new HashMap<>());
-        return;
+      LOG.error(
+          "Exception while retrieving OpenId configuration from endpoint: " + wellKnownEndpoint, e);
+      this.settings = Collections.unmodifiableMap(new HashMap<>());
+      return;
     }
 
     LOG.info("openid configuration = {}", openIdConfiguration);
-    
+
     Map<String, String> settings = Maps.newHashMap();
     settings.put(AUTH_SERVER_URL_SETTING, serverURL);
     settings.put(CLIENT_ID_SETTING, clientId);
