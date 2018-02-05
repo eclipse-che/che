@@ -16,7 +16,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -35,11 +34,9 @@ import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.shared.JarEntry;
 import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
 import org.eclipse.che.ide.ext.java.shared.dto.Region;
-import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Member;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
-import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
@@ -54,7 +51,6 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
   private final JavaNavigationService javaNavigationService;
   private final AppContext context;
   private final EditorAgent editorAgent;
-  private final MessageLoader loader;
 
   private TextEditor activeEditor;
   private boolean showInheritedMembers;
@@ -71,7 +67,6 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
     this.javaNavigationService = javaNavigationService;
     this.context = context;
     this.editorAgent = editorAgent;
-    this.loader = loaderFactory.newLoader();
     this.view.setDelegate(this);
   }
 
@@ -81,8 +76,8 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
    * @param editorPartPresenter the active editor
    */
   public void show(EditorPartPresenter editorPartPresenter) {
-    loader.show();
     view.setTitle(editorPartPresenter.getEditorInput().getFile().getName());
+    view.show();
 
     if (!(editorPartPresenter instanceof TextEditor)) {
       Log.error(getClass(), "Open Declaration support only TextEditor as editor");
@@ -103,26 +98,16 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
       }
 
       final String fqn = JavaUtil.resolveFQN((Container) srcFolder.get(), (Resource) file);
-
       javaNavigationService
           .getCompilationUnit(project.get().getLocation(), fqn, showInheritedMembers)
           .then(
-              new Operation<CompilationUnit>() {
-                @Override
-                public void apply(CompilationUnit unit) throws OperationException {
-                  view.setStructure(unit, showInheritedMembers);
-                  showInheritedMembers = !showInheritedMembers;
-                  loader.hide();
-                  view.show();
-                }
+              unit -> {
+                view.setStructure(unit, showInheritedMembers);
+                showInheritedMembers = !showInheritedMembers;
               })
           .catchError(
-              new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError arg) throws OperationException {
-                  Log.error(FileStructurePresenter.class, arg.getMessage());
-                  loader.hide();
-                }
+              arg -> {
+                Log.error(FileStructurePresenter.class, arg.getMessage());
               });
     }
   }
