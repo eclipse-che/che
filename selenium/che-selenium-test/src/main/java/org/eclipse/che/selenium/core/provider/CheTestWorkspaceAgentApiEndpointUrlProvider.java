@@ -15,39 +15,40 @@ import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTT
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.net.URL;
 import java.util.Map;
-import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 
 @Singleton
-public class CheTestWorkspaceAgentApiEndpoint implements TestWorkspaceAgentApiEndpoint {
+public class CheTestWorkspaceAgentApiEndpointUrlProvider
+    implements TestWorkspaceAgentApiEndpointUrlProvider {
 
   @Inject private HttpJsonRequestFactory httpJsonRequestFactory;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
   @Override
-  public String get(String workspaceId) throws Exception {
-    workspaceServiceClient.ensureRunningStatus(getWorkspaceById(workspaceId));
+  public URL get(String workspaceId) throws Exception {
+    checkWorkspaceIsRunning(workspaceId);
 
     Map<String, ? extends Machine> machines =
-        getWorkspaceById(workspaceId).getRuntime().getMachines();
+        workspaceServiceClient.getById(workspaceId).getRuntime().getMachines();
     for (Machine machine : machines.values()) {
       if (containsWsAgentServer(machine)) {
         Server wsAgentServer = machine.getServers().get(SERVER_WS_AGENT_HTTP_REFERENCE);
         if (wsAgentServer != null) {
-          return wsAgentServer.getUrl() + "/";
+          return new URL(wsAgentServer.getUrl() + "/");
         } else {
           throw new RuntimeException("Workspace agent server is null");
         }
       }
     }
-    throw new RuntimeException("Cannot find dev machine on workspace");
+    throw new RuntimeException("Cannot find dev machine on workspace with id " + workspaceId);
   }
 
-  private Workspace getWorkspaceById(String workspaceId) throws Exception {
-    return workspaceServiceClient.getById(workspaceId);
+  private void checkWorkspaceIsRunning(String workspaceId) throws Exception {
+    workspaceServiceClient.ensureRunningStatus(workspaceServiceClient.getById(workspaceId));
   }
 }

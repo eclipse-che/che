@@ -14,9 +14,6 @@ import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static org.eclipse.che.dto.server.DtoFactory.getInstance;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -26,14 +23,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ZipUtils;
-import org.eclipse.che.selenium.core.provider.TestWorkspaceAgentApiEndpoint;
+import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.selenium.core.provider.TestWorkspaceAgentApiEndpointUrlProvider;
 
 /**
  * @author Musienko Maxim
@@ -41,17 +39,15 @@ import org.eclipse.che.selenium.core.provider.TestWorkspaceAgentApiEndpoint;
  */
 @Singleton
 public class TestProjectServiceClient {
-  private static final int WS_AGENT_PORT = 4401;
-
   private final TestMachineServiceClient machineServiceClient;
   private final HttpJsonRequestFactory requestFactory;
-  private final TestWorkspaceAgentApiEndpoint workspaceAgentApiEndpoint;
+  private final TestWorkspaceAgentApiEndpointUrlProvider workspaceAgentApiEndpoint;
 
   @Inject
   public TestProjectServiceClient(
       TestMachineServiceClient machineServiceClient,
       HttpJsonRequestFactory requestFactory,
-      TestWorkspaceAgentApiEndpoint workspaceAgentApiEndpoint) {
+      TestWorkspaceAgentApiEndpointUrlProvider workspaceAgentApiEndpoint) {
     this.machineServiceClient = machineServiceClient;
     this.requestFactory = requestFactory;
     this.workspaceAgentApiEndpoint = workspaceAgentApiEndpoint;
@@ -66,9 +62,8 @@ public class TestProjectServiceClient {
     ProjectConfigDto project = getInstance().createDtoFromJson(json, ProjectConfigDto.class);
     project.setName(projectName);
 
-    String url = workspaceAgentApiEndpoint.get(workspaceId);
     requestFactory
-        .fromUrl(url + "project/" + projectName)
+        .fromUrl(workspaceAgentApiEndpoint.get(workspaceId) + "project/" + projectName)
         .usePutMethod()
         .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
         .setBody(project)
@@ -77,9 +72,8 @@ public class TestProjectServiceClient {
 
   /** Delete resource. */
   public void deleteResource(String workspaceId, String path) throws Exception {
-    String wsAgentUrl = workspaceAgentApiEndpoint.get(workspaceId);
     requestFactory
-        .fromUrl(wsAgentUrl + "project/" + path)
+        .fromUrl(workspaceAgentApiEndpoint.get(workspaceId) + "project/" + path)
         .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
         .useDeleteMethod()
         .request();
@@ -221,24 +215,29 @@ public class TestProjectServiceClient {
 
   public boolean checkProjectType(String wokspaceId, String projectName, String projectType)
       throws Exception {
-    return getProjectParameters(wokspaceId, projectName)
-        .get("type")
-        .getAsString()
-        .equals(projectType);
+    return getProjectConfig(wokspaceId, projectName).getType().equals(projectType);
   }
 
-  public boolean checkProjectLanguage(String wokspaceId, String projectName, String projectLanguage)
+  public boolean checkProjectLanguage(String workspaceId, String projectName, String language)
       throws Exception {
-    return getProjectParameters(wokspaceId, projectName)
-        .getAsJsonObject("attributes")
+
+    return getProjectConfig(workspaceId, projectName)
+        .getAttributes()
         .get("language")
-        .getAsString()
-        .equals(projectLanguage);
+        .contains(language);
+  }
+
+  public boolean checkProjectLanguage(
+      String workspaceId, String projectName, List<String> languages) throws Exception {
+
+    return getProjectConfig(workspaceId, projectName)
+        .getAttributes()
+        .get("language")
+        .containsAll(languages);
   }
 
   public List<String> getExternalLibraries(String workspaceId, String projectName)
       throws Exception {
-    List<String> result = new ArrayList<>();
     HttpJsonResponse response =
         requestFactory
             .fromUrl(workspaceAgentApiEndpoint.get(workspaceId) + "java/navigation/libraries")
@@ -246,28 +245,21 @@ public class TestProjectServiceClient {
             .addQueryParam("projectpath", "/" + projectName)
             .request();
 
-    parseResponseAsArray(response)
-        .forEach(
-            jsonElement -> result.add(jsonElement.getAsJsonObject().get("name").getAsString()));
-
-    return result;
+    return DtoFactory.getInstance()
+        .createListDtoFromJson(response.asString(), ProjectConfigDto.class)
+        .stream()
+        .map(e -> e.getName())
+        .collect(Collectors.toList());
   }
 
-  private JsonObject parseResponseAsJsonObject(HttpJsonResponse response) {
-    return new JsonParser().parse(response.asString()).getAsJsonObject();
-  }
-
-  private JsonArray parseResponseAsArray(HttpJsonResponse response) {
-    return new JsonParser().parse(response.asString()).getAsJsonArray();
-  }
-
-  private JsonObject getProjectParameters(String workspaceId, String projectName) throws Exception {
+  private ProjectConfigDto getProjectConfig(String workspaceId, String projectName)
+      throws Exception {
     HttpJsonResponse response =
         requestFactory
             .fromUrl(workspaceAgentApiEndpoint.get(workspaceId) + "project/" + projectName)
             .useGetMethod()
             .request();
 
-    return parseResponseAsJsonObject(response);
+    return DtoFactory.getInstance().createDtoFromJson(response.asString(), ProjectConfigDto.class);
   }
 }

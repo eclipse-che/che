@@ -10,15 +10,17 @@
  */
 package org.eclipse.che.selenium.core.provider;
 
+import java.net.URL;
+
 /** Workspace agent API endpoint */
-public interface TestWorkspaceAgentApiEndpoint {
+public interface TestWorkspaceAgentApiEndpointUrlProvider {
 
   /**
    * get workspace agent API endpoint
    *
    * @param workspaceId
-   * @return
+   * @return workspace agent api endpoint URL
    * @throws Exception
    */
-  String get(String workspaceId) throws Exception;
+  URL get(String workspaceId) throws Exception;
 }
