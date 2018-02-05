@@ -181,16 +181,19 @@ export class ListOrganizationsController {
       const promises = [];
       this.isLoading = true;
 
-      const organizations = this.organizations.filter((organization: che.IOrganization) => {
-        if (this.userServices.hasInstallationManagerService === false) {
-          return true;
-        }
+      let organizations = [];
+      if (this.userServices.hasInstallationManagerService === false) {
+        // show all organizations for a regular user
+        organizations = angular.copy(this.organizations);
+      } else {
+        // show only root organizations for a system admin
+        organizations = this.organizations.filter((organization: che.IOrganization) => {
+          if (this.parentId  || !organization.parent) {
+            return true;
+          }
+        });
+      }
 
-        // system admin
-        if (this.parentId  || !organization.parent) {
-          return true;
-        }
-      });
       organizations.forEach((organization: che.IOrganization) => {
         const promiseMembers = this.chePermissions.fetchOrganizationPermissions(organization.id).then(() => {
           this.organizationMembers.set(organization.id, this.chePermissions.getOrganizationPermissions(organization.id).length);
