@@ -626,10 +626,13 @@ public class JavaLanguageServerExtensionService {
             ImmutableList.of(fqn, String.valueOf(lineNumber)),
             type);
 
-    Either<String, ResourceLocation> l = location.get(0);
+    if (location.isEmpty()) {
+      throw new RuntimeException("Type with fully qualified name: " + fqn + " was not found");
+    }
+    Either<String, ResourceLocation> l = location.get(0); // TODO let user choose sources
 
     if (l.isLeft()) {
-      return new LocationImpl(l.getLeft(), lineNumber, null);
+      return new LocationImpl(removePrefixUri(l.getLeft()), lineNumber, null);
     } else {
       return new LocationImpl(
           l.getRight().getFqn(), lineNumber, true, l.getRight().getLibId(), null);
