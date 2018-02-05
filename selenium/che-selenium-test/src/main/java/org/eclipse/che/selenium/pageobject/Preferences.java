@@ -578,6 +578,8 @@ public class Preferences {
     gitHub.typePass(githubPassword);
     gitHub.clickOnSignInButton();
 
+    WaitUtils.sleepQuietly(2);
+
     // authorize on github.com
     if (seleniumWebDriver.getWindowHandles().size() > 1) {
       gitHub.waitAuthorizeBtn();
