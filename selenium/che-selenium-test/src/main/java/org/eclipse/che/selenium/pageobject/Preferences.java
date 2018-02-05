@@ -578,6 +578,7 @@ public class Preferences {
     gitHub.typePass(githubPassword);
     gitHub.clickOnSignInButton();
 
+    // it is needed for specified case when the github authorize page is not appear
     WaitUtils.sleepQuietly(2);
 
     // authorize on github.com
