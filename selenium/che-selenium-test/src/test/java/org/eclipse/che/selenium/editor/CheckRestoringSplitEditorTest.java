@@ -39,8 +39,6 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.TimeoutException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -57,7 +55,6 @@ public class CheckRestoringSplitEditorTest {
   private Pair<Integer, Integer> cursorPositionForReadMeFile = new Pair<>(1, 10);
   private Pair<Integer, Integer> cursorPositionForPomFile = new Pair<>(31, 1);
   private List<String> expectedTextFromEditor;
-  private static final Logger LOG = LoggerFactory.getLogger(CheckRestoringSplitEditorTest.class);
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -103,7 +100,6 @@ public class CheckRestoringSplitEditorTest {
       projectExplorer.waitItemInVisibleArea(javaClassName);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      LOG.info(getPreferences());
       fail("Known issue https://github.com/eclipse/che/issues/7551", ex);
     }
 

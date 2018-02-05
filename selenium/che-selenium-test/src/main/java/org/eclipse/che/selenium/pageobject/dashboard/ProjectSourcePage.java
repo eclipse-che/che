@@ -134,7 +134,9 @@ public class ProjectSourcePage {
   WebElement authorizeBtn;
 
   public void clickOnAddOrImportProjectButton() {
-    addOrImportProjectButton.click();
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOf(addOrImportProjectButton))
+        .click();
   }
 
   // wait that the Project Source Selector visible

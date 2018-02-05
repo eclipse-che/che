@@ -38,11 +38,11 @@ public class DashboardAccount {
   }
 
   interface Locators {
-    String EMAIL_FIELD = "//input[@name='email']";
-    String LOGIN_FIELD = "//input[@name='login_name']";
-    String FIRST_NAME_FIELD = "//input[@name='first_name']";
-    String LAST_NAME_FIELD = "//input[@name='last_name']";
-    String EDIT_BUTTON = "//che-button-default[@name='editButton']/button";
+    String EMAIL_FIELD = "email";
+    String LOGIN_FIELD = "login_name";
+    String FIRST_NAME_FIELD = "first_name";
+    String LAST_NAME_FIELD = "last_name";
+    String EDIT_BUTTON = "editButton";
     String TITLE_ID = "Account";
   }
 
@@ -69,19 +69,19 @@ public class DashboardAccount {
   }
 
   public String getEmailFieldValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.xpath(EMAIL_FIELD));
+    return seleniumWebDriverHelper.getFieldValue(By.name(EMAIL_FIELD));
   }
 
   public String getLoginFieldValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.xpath(LOGIN_FIELD));
+    return seleniumWebDriverHelper.getFieldValue(By.name(LOGIN_FIELD));
   }
 
   public String getFirstNameFieldValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.xpath(FIRST_NAME_FIELD));
+    return seleniumWebDriverHelper.getFieldValue(By.name(FIRST_NAME_FIELD));
   }
 
   public String getLastNameFieldValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.xpath(LAST_NAME_FIELD));
+    return seleniumWebDriverHelper.getFieldValue(By.name(LAST_NAME_FIELD));
   }
 
   public String getTitle() {
@@ -89,11 +89,11 @@ public class DashboardAccount {
   }
 
   public void clickOnEditButton() {
-    seleniumWebDriverHelper.waitAndClickOnElement(By.xpath(EDIT_BUTTON));
+    seleniumWebDriverHelper.waitAndClickOnElement(By.name(EDIT_BUTTON));
   }
 
   public void waitPageIsLoaded() {
     asList(EMAIL_FIELD, LOGIN_FIELD, FIRST_NAME_FIELD, LAST_NAME_FIELD, EDIT_BUTTON)
-        .forEach(locator -> seleniumWebDriverHelper.waitElementIsVisible(By.xpath(locator)));
+        .forEach(locator -> seleniumWebDriverHelper.waitElementIsVisible(By.name(locator)));
   }
 }

@@ -38,6 +38,7 @@ import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
 import org.eclipse.che.selenium.pageobject.debug.JavaDebugConfig;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
+import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
@@ -66,7 +67,6 @@ public class ChangeVariableWithEvaluatingTest {
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
-
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Consoles consoles;
   @Inject private CodenvyEditor editor;
@@ -78,6 +78,7 @@ public class ChangeVariableWithEvaluatingTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private CommandsPalette commandsPalette;
+  @Inject private MachineTerminal machineTerminal;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -151,13 +152,14 @@ public class ChangeVariableWithEvaluatingTest {
     debugPanel.waitExpectedResultInEvaluateExpression("false");
     debugPanel.clickCloseEvaluateBtn();
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RESUME_BTN_ID);
+    // TODO try/catch should be removed after fixing: https://github.com/eclipse/che/issues/8105
+    // this auxiliary method for investigate problem that was described in the issue:
+    // https://github.com/eclipse/che/issues/8105
     try {
       assertTrue(instToRequestThread.get().contains("Sorry, you failed. Try again later!"));
     } catch (AssertionError ex) {
-      LOG.warn(
-          ChangeVariableWithEvaluatingTest.class.getSimpleName()
-              + " has next message: "
-              + instToRequestThread.get());
+      machineTerminal.launchScriptAndGetInfo(
+          ws, PROJECT_NAME_CHANGE_VARIABLE, testProjectServiceClient);
       fail("Known issue: https://github.com/eclipse/che/issues/8105");
     }
   }

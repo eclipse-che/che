@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
@@ -59,5 +60,9 @@ public class SeleniumWebDriverHelper {
 
   public void waitAndClickOnElement(By elementLocator) {
     loadPageWait.until(visibilityOfElementLocated(elementLocator)).click();
+  }
+
+  public void waitAndClickOnElement(WebElement webElement) {
+    loadPageWait.until(visibilityOf(webElement)).click();
   }
 }

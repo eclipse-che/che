@@ -38,7 +38,6 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
   private static final String BOOTSTRAPPER_BASE_DIR = "/tmp/";
   private static final String BOOTSTRAPPER_DIR = BOOTSTRAPPER_BASE_DIR + "bootstrapper/";
   private static final String BOOTSTRAPPER_FILE = "bootstrapper";
-  private static final String BOOTSTRAPPER_LOG_FILE = "bootstrapper.log";
   private static final String CONFIG_FILE = "config.json";
 
   private final RuntimeIdentity runtimeIdentity;
@@ -47,6 +46,8 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
   private final int installerTimeoutSeconds;
   private final OpenShiftMachine openShiftMachine;
   private final String bootstrapperBinaryUrl;
+  private final String bootstrapperLogsFolder;
+  private final String bootstrapperLogsFile;
 
   @Inject
   public OpenShiftBootstrapper(
@@ -59,6 +60,7 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
       @Named("che.infra.openshift.bootstrapper.installer_timeout_sec") int installerTimeoutSeconds,
       @Named("che.infra.openshift.bootstrapper.server_check_period_sec")
           int serverCheckPeriodSeconds,
+      @Named("che.workspace.logs.root_dir") String logsRootPath,
       EventService eventService) {
     super(
         openShiftMachine.getName(),
@@ -73,6 +75,8 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
     this.serverCheckPeriodSeconds = serverCheckPeriodSeconds;
     this.installerTimeoutSeconds = installerTimeoutSeconds;
     this.openShiftMachine = openShiftMachine;
+    this.bootstrapperLogsFolder = logsRootPath + "/bootstrapper";
+    this.bootstrapperLogsFile = bootstrapperLogsFolder + "/bootstrapper.log";
   }
 
   @Override
@@ -108,8 +112,7 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
             // redirects command output and makes the bootstrapping process detached,
             // to avoid the holding of the socket connection for exec watcher.
             + " > "
-            + BOOTSTRAPPER_DIR
-            + BOOTSTRAPPER_LOG_FILE
+            + bootstrapperLogsFile
             + " 2>&1 &");
   }
 
@@ -117,7 +120,7 @@ public class OpenShiftBootstrapper extends AbstractBootstrapper {
     String machineName = openShiftMachine.getName();
     LOG.debug(
         "Bootstrapping {}:{}. Creating folder for bootstrapper", runtimeIdentity, machineName);
-    openShiftMachine.exec("mkdir", "-p", BOOTSTRAPPER_DIR);
+    openShiftMachine.exec("mkdir", "-p", BOOTSTRAPPER_DIR, bootstrapperLogsFolder);
     LOG.debug("Bootstrapping {}:{}. Downloading bootstrapper binary", runtimeIdentity, machineName);
     openShiftMachine.exec(
         "curl", "-o", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE, bootstrapperBinaryUrl);

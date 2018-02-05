@@ -11,13 +11,10 @@
 package org.eclipse.che.api.search.server.impl;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.concurrent.Executors.newSingleThreadExecutor;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
-import static org.eclipse.che.commons.lang.IoUtil.deleteRecursive;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.CharStreams;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,17 +22,19 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.MalformedInputException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.CountDownLatch;
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -48,6 +47,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexReader;
@@ -57,6 +57,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.PrefixQuery;
@@ -64,23 +65,23 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.SearcherFactory;
 import org.apache.lucene.search.SearcherManager;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.highlight.QueryScorer;
 import org.apache.lucene.search.highlight.TokenSources;
-import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.SingleInstanceLockFactory;
-import org.apache.lucene.util.IOUtils;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.util.FileCleaner;
+import org.apache.lucene.util.BytesRef;
 import org.eclipse.che.api.fs.server.PathTransformer;
+import org.eclipse.che.api.search.server.InvalidQueryException;
+import org.eclipse.che.api.search.server.OffsetData;
+import org.eclipse.che.api.search.server.QueryExecutionException;
+import org.eclipse.che.api.search.server.QueryExpression;
 import org.eclipse.che.api.search.server.SearchResult;
 import org.eclipse.che.api.search.server.Searcher;
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
+import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,6 +89,7 @@ import org.slf4j.LoggerFactory;
  * Lucene based searcher.
  *
  * @author andrew00x
+ * @author Sergii Kabashniuk
  */
 @Singleton
 public class LuceneSearcher implements Searcher {
@@ -100,107 +102,83 @@ public class LuceneSearcher implements Searcher {
   private static final String TEXT_FIELD = "text";
 
   private final Set<PathMatcher> excludePatterns;
-  private final ExecutorService executor;
   private final File indexDirectory;
   private final PathTransformer pathTransformer;
 
-  private File root;
-  private IndexWriter luceneIndexWriter;
-  private SearcherManager searcherManager;
-
-  private boolean closed = true;
+  private final File root;
+  private final IndexWriter luceneIndexWriter;
+  private final SearcherManager searcherManager;
+  private final Analyzer analyzer;
+  private final CountDownLatch initialIndexingLatch = new CountDownLatch(1);
+  private final Sort sort;
 
   @Inject
-  protected LuceneSearcher(
+  public LuceneSearcher(
       @Named("vfs.index_filter_matcher") Set<PathMatcher> excludePatterns,
       @Named("vfs.local.fs_index_root_dir") File indexDirectory,
       @Named("che.user.workspaces.storage") File root,
-      PathTransformer pathTransformer) {
+      PathTransformer pathTransformer)
+      throws IOException {
+
+    if (indexDirectory.exists()) {
+      if (indexDirectory.isFile()) {
+        throw new IOException("Wrong configuration `vfs.local.fs_index_root_dir` is a file");
+      }
+    } else {
+      Files.createDirectories(indexDirectory.toPath());
+    }
+
     this.indexDirectory = indexDirectory;
     this.root = root;
     this.excludePatterns = excludePatterns;
     this.pathTransformer = pathTransformer;
-
-    executor =
-        newSingleThreadExecutor(
-            new ThreadFactoryBuilder()
-                .setDaemon(true)
-                .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
-                .setNameFormat("LuceneSearcherInitThread")
-                .build());
+    this.analyzer =
+        CustomAnalyzer.builder()
+            .withTokenizer(WhitespaceTokenizerFactory.class)
+            .addTokenFilter(LowerCaseFilterFactory.class)
+            .build();
+    this.luceneIndexWriter =
+        new IndexWriter(
+            FSDirectory.open(indexDirectory.toPath(), new SingleInstanceLockFactory()),
+            new IndexWriterConfig(analyzer));
+    this.searcherManager =
+        new SearcherManager(luceneIndexWriter, true, true, new SearcherFactory());
+    this.sort = new Sort(SortField.FIELD_SCORE, new SortField(PATH_FIELD, SortField.Type.STRING));
   }
 
   @PostConstruct
-  private void initialize() throws ServerException {
-    doInitialize();
-    if (!executor.isShutdown()) {
-      executor.execute(
-          () -> {
-            try {
-              addDirectory(root.toPath());
-            } catch (ServerException e) {
-              LOG.error(e.getMessage());
-            }
-          });
-    }
+  @VisibleForTesting
+  void initialize() {
+    Thread initializer =
+        new Thread(
+            () -> {
+              try {
+                long start = System.currentTimeMillis();
+                add(root.toPath());
+                LOG.info(
+                    "Initial indexing complete after {} msec ", System.currentTimeMillis() - start);
+              } finally {
+                initialIndexingLatch.countDown();
+              }
+            });
+    initializer.setName("LuceneSearcherInitThread");
+    initializer.setDaemon(true);
+    initializer.start();
   }
 
-  @PreDestroy
-  private void terminate() {
-    doTerminate();
-    executor.shutdown();
-    try {
-      if (!executor.awaitTermination(5, SECONDS)) {
-        executor.shutdownNow();
-      }
-    } catch (InterruptedException ie) {
-      executor.shutdownNow();
-    }
+  @VisibleForTesting
+  CountDownLatch getInitialIndexingLatch() {
+    return initialIndexingLatch;
   }
 
-  private Analyzer makeAnalyzer() throws IOException {
-    return CustomAnalyzer.builder()
-        .withTokenizer(WhitespaceTokenizerFactory.class)
-        .addTokenFilter(LowerCaseFilterFactory.class)
-        .build();
-  }
-
-  private Directory makeDirectory() throws ServerException {
-    try {
-      Files.createDirectories(indexDirectory.toPath());
-      return FSDirectory.open(indexDirectory.toPath(), new SingleInstanceLockFactory());
-    } catch (IOException e) {
-      throw new ServerException(e);
-    }
-  }
-
-  private void doInitialize() throws ServerException {
-    try {
-      luceneIndexWriter = new IndexWriter(makeDirectory(), new IndexWriterConfig(makeAnalyzer()));
-      searcherManager = new SearcherManager(luceneIndexWriter, true, true, new SearcherFactory());
-      closed = false;
-    } catch (IOException e) {
-      throw new ServerException(e);
-    }
-  }
-
-  private void doTerminate() {
-    if (!closed) {
-      try {
-        IOUtils.close(luceneIndexWriter, luceneIndexWriter.getDirectory(), searcherManager);
-        if (!deleteRecursive(indexDirectory)) {
-          LOG.warn("Unable delete index directory '{}', add it in FileCleaner", indexDirectory);
-          FileCleaner.addFile(indexDirectory);
-        }
-      } catch (IOException e) {
-        LOG.error(e.getMessage(), e);
-      }
-      closed = true;
-    }
+  @ScheduleRate(period = 30, initialDelay = 30)
+  private void commitIndex() throws IOException {
+    luceneIndexWriter.commit();
   }
 
   @Override
-  public SearchResult search(QueryExpression query) throws ServerException {
+  public SearchResult search(QueryExpression query)
+      throws InvalidQueryException, QueryExecutionException {
     IndexSearcher luceneSearcher = null;
     try {
       final long startTime = System.currentTimeMillis();
@@ -217,7 +195,7 @@ public class LuceneSearcher implements Searcher {
 
       final int numDocs =
           query.getMaxItems() > 0 ? Math.min(query.getMaxItems(), RESULT_LIMIT) : RESULT_LIMIT;
-      TopDocs topDocs = luceneSearcher.searchAfter(after, luceneQuery, numDocs);
+      TopDocs topDocs = luceneSearcher.searchAfter(after, luceneQuery, numDocs, sort, true, true);
       final long totalHitsNum = topDocs.totalHits;
 
       List<SearchResultEntry> results = newArrayList();
@@ -263,7 +241,7 @@ public class LuceneSearcher implements Searcher {
               endOffset = offsetAtt.endOffset();
 
               if ((endOffset > txt.length()) || (startOffset > txt.length())) {
-                throw new ServerException(
+                throw new QueryExecutionException(
                     "Token "
                         + termAtt.toString()
                         + " exceeds length of provided text size "
@@ -272,25 +250,29 @@ public class LuceneSearcher implements Searcher {
 
               float res = queryScorer.getTokenScore();
               if (res > 0.0F && startOffset <= endOffset) {
-                try {
-                  IDocument document = new org.eclipse.jface.text.Document(txt);
-                  int lineNum = document.getLineOfOffset(startOffset);
-                  IRegion lineInfo = document.getLineInformation(lineNum);
-                  String foundLine = document.get(lineInfo.getOffset(), lineInfo.getLength());
-                  String tokenText = document.get(startOffset, endOffset - startOffset);
+                String tokenText = txt.substring(startOffset, endOffset);
+                Scanner sc = new Scanner(txt);
+                int lineNum = 1;
+                long len = 0;
+                String foundLine = "";
+                while (sc.hasNextLine()) {
+                  foundLine = sc.nextLine();
 
-                  offsetData.add(
-                      new OffsetData(
-                          tokenText, startOffset, endOffset, docId, res, lineNum, foundLine));
-                } catch (BadLocationException e) {
-                  LOG.error(e.getLocalizedMessage(), e);
-                  throw new ServerException("Can not provide data for token " + termAtt.toString());
+                  len += foundLine.length();
+                  if (len > startOffset) {
+                    break;
+                  }
+                  lineNum++;
                 }
+                offsetData.add(
+                    new OffsetData(tokenText, startOffset, endOffset, res, lineNum, foundLine));
               }
             }
           }
         }
+
         String filePath = doc.getField(PATH_FIELD).stringValue();
+        LOG.debug("Doc {} path {} score {} ", docId, filePath, scoreDoc.score);
         results.add(new SearchResultEntry(filePath, offsetData));
       }
 
@@ -309,8 +291,10 @@ public class LuceneSearcher implements Searcher {
           .withNextPageQueryExpression(nextPageQueryExpression)
           .withElapsedTimeMillis(elapsedTimeMillis)
           .build();
-    } catch (IOException | ParseException e) {
-      throw new ServerException(e.getMessage(), e);
+    } catch (ParseException e) {
+      throw new InvalidQueryException(e.getMessage(), e);
+    } catch (IOException e) {
+      throw new QueryExecutionException(e.getMessage(), e);
     } finally {
       try {
         searcherManager.release(luceneSearcher);
@@ -329,12 +313,12 @@ public class LuceneSearcher implements Searcher {
       luceneQueryBuilder.add(new PrefixQuery(new Term(PATH_FIELD, path)), BooleanClause.Occur.MUST);
     }
     if (name != null) {
-      QueryParser qParser = new QueryParser(NAME_FIELD, makeAnalyzer());
+      QueryParser qParser = new QueryParser(NAME_FIELD, analyzer);
       qParser.setAllowLeadingWildcard(true);
       luceneQueryBuilder.add(qParser.parse(name), BooleanClause.Occur.MUST);
     }
     if (text != null) {
-      QueryParser qParser = new QueryParser(TEXT_FIELD, makeAnalyzer());
+      QueryParser qParser = new QueryParser(TEXT_FIELD, analyzer);
       qParser.setAllowLeadingWildcard(true);
       luceneQueryBuilder.add(qParser.parse(text), BooleanClause.Occur.MUST);
     }
@@ -348,7 +332,7 @@ public class LuceneSearcher implements Searcher {
     int retrievedDocs = 0;
     TopDocs topDocs;
     do {
-      topDocs = luceneSearcher.searchAfter(scoreDoc, luceneQuery, readFrameSize);
+      topDocs = luceneSearcher.searchAfter(scoreDoc, luceneQuery, readFrameSize, sort, true, true);
       if (topDocs.scoreDocs.length > 0) {
         scoreDoc = topDocs.scoreDocs[topDocs.scoreDocs.length - 1];
       }
@@ -373,90 +357,36 @@ public class LuceneSearcher implements Searcher {
   }
 
   @Override
-  public final void add(Path fsPath) throws ServerException, NotFoundException {
-    if (fsPath.toFile().isDirectory()) {
-      addDirectory(fsPath);
-    } else {
-      addFile(fsPath);
-    }
-  }
+  public final void add(Path fsPath) {
 
-  private void addDirectory(Path fsPath) throws ServerException {
-    long start = System.currentTimeMillis();
-    LinkedList<File> queue = new LinkedList<>();
-    queue.add(fsPath.toFile());
-    int indexedFiles = 0;
-    while (!queue.isEmpty()) {
-      File folder = queue.pop();
-      if (folder.exists() && folder.isDirectory()) {
-        File[] files = folder.listFiles();
-        if (files == null) {
-          continue;
-        }
-        for (File child : files) {
-          if (child.isDirectory()) {
-            queue.push(child);
-          } else {
-            addFile(child.toPath());
-            indexedFiles++;
-          }
-        }
-      }
-    }
-
-    long end = System.currentTimeMillis();
-    LOG.debug("Indexed {} files from {}, time: {} ms", indexedFiles, fsPath, (end - start));
-  }
-
-  private void addFile(Path fsPath) throws ServerException {
-    if (!fsPath.toFile().exists()) {
-      return;
-    }
-
-    if (!isNotExcluded(fsPath)) {
-      return;
-    }
-
-    String wsPath = pathTransformer.transform(fsPath);
-
-    try (Reader reader =
-        new BufferedReader(new InputStreamReader(new FileInputStream(fsPath.toFile()), "utf-8"))) {
-      luceneIndexWriter.updateDocument(
-          new Term(PATH_FIELD, wsPath), createDocument(wsPath, reader));
-    } catch (OutOfMemoryError oome) {
-      doTerminate();
-      throw oome;
-    } catch (IOException e) {
-      throw new ServerException(e.getMessage(), e);
-    }
-  }
-
-  @Override
-  public final void delete(Path fsPath) throws ServerException {
-    String wsPath = pathTransformer.transform(fsPath);
     try {
-      if (fsPath.toFile().isFile()) {
-        Term term = new Term(PATH_FIELD, wsPath);
-        luceneIndexWriter.deleteDocuments(term);
+      if (fsPath.toFile().isDirectory()) {
+        try {
+          Files.walkFileTree(
+              fsPath,
+              new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                  addFile(file);
+                  return FileVisitResult.CONTINUE;
+                }
+              });
+        } catch (IOException ignore) {
+          LOG.warn("Not able to index {} because {} ", fsPath.toString(), ignore.getMessage());
+        }
       } else {
-        Term term = new Term(PATH_FIELD, wsPath + '/');
-        luceneIndexWriter.deleteDocuments(new PrefixQuery(term));
+        addFile(fsPath);
       }
-    } catch (OutOfMemoryError oome) {
-      doTerminate();
-      throw oome;
+      printStatistic();
     } catch (IOException e) {
-      throw new ServerException(e.getMessage(), e);
+      LOG.warn(
+          "Can't commit changes to index for: {} because {} ",
+          fsPath.toAbsolutePath().toString(),
+          e.getMessage());
     }
   }
 
-  @Override
-  public final void update(Path fsPath) throws ServerException {
-    String wsPath = pathTransformer.transform(fsPath);
-    doUpdate(new Term(PATH_FIELD, wsPath), fsPath);
-  }
-
-  private void doUpdate(Term deleteTerm, Path fsPath) throws ServerException {
+  private void addFile(Path fsPath) {
     if (!fsPath.toFile().exists()) {
       return;
     }
@@ -464,34 +394,74 @@ public class LuceneSearcher implements Searcher {
     if (!isNotExcluded(fsPath)) {
       return;
     }
-
     String wsPath = pathTransformer.transform(fsPath);
+    LOG.debug("Adding file {} ", wsPath);
 
     try (Reader reader =
         new BufferedReader(new InputStreamReader(new FileInputStream(fsPath.toFile()), "utf-8"))) {
-      luceneIndexWriter.updateDocument(deleteTerm, createDocument(wsPath, reader));
-    } catch (OutOfMemoryError oome) {
-      doTerminate();
-      throw oome;
-    } catch (IOException e) {
-      throw new ServerException(e.getMessage(), e);
+      String name = nameOf(wsPath);
+      Document doc = new Document();
+      doc.add(new StringField(PATH_FIELD, wsPath, Field.Store.YES));
+      doc.add(new SortedDocValuesField(PATH_FIELD, new BytesRef(wsPath)));
+      doc.add(new TextField(NAME_FIELD, name, Field.Store.YES));
+      try {
+        doc.add(new TextField(TEXT_FIELD, CharStreams.toString(reader), Field.Store.YES));
+      } catch (MalformedInputException e) {
+        LOG.warn("Can't index file: {}", wsPath);
+      }
+      luceneIndexWriter.updateDocument(new Term(PATH_FIELD, wsPath), doc);
+
+    } catch (IOException oome) {
+      LOG.warn("Can't index file: {}", wsPath);
     }
   }
 
-  private Document createDocument(String wsPath, Reader reader) throws ServerException {
-    String name = nameOf(wsPath);
-    Document doc = new Document();
-    doc.add(new StringField(PATH_FIELD, wsPath, Field.Store.YES));
-    doc.add(new TextField(NAME_FIELD, name, Field.Store.YES));
+  @Override
+  public final void delete(Path fsPath) {
+
+    String wsPath = pathTransformer.transform(fsPath);
     try {
-      doc.add(new TextField(TEXT_FIELD, CharStreams.toString(reader), Field.Store.YES));
-    } catch (MalformedInputException e) {
-      LOG.warn("Can't index file: {}", wsPath);
+
+      // Since in most cases this is post action there is no way to find out is this a file
+      // or directory. Lets try to delete both
+      BooleanQuery.Builder deleteFileOrFolder = new BooleanQuery.Builder();
+      deleteFileOrFolder.setMinimumNumberShouldMatch(1);
+      deleteFileOrFolder.add(new TermQuery(new Term(PATH_FIELD, wsPath)), Occur.SHOULD);
+      deleteFileOrFolder.add(new PrefixQuery(new Term(PATH_FIELD, wsPath + "/")), Occur.SHOULD);
+      luceneIndexWriter.deleteDocuments(deleteFileOrFolder.build());
+      printStatistic();
     } catch (IOException e) {
-      LOG.error("Can't index file: {}", wsPath);
-      throw new ServerException(e.getLocalizedMessage(), e);
+      LOG.warn("Can't delete index for file: {}", wsPath);
     }
-    return doc;
+  }
+
+  private void printStatistic() throws IOException {
+    if (LOG.isDebugEnabled()) {
+      IndexSearcher luceneSearcher = null;
+      try {
+        searcherManager.maybeRefresh();
+        luceneSearcher = searcherManager.acquire();
+        IndexReader reader = luceneSearcher.getIndexReader();
+        LOG.debug(
+            "IndexReader numDocs={} numDeletedDocs={} maxDoc={} hasDeletions={}. Writer numDocs={} numRamDocs={} hasPendingMerges={}  hasUncommittedChanges={} hasDeletions={}",
+            reader.numDocs(),
+            reader.numDeletedDocs(),
+            reader.maxDoc(),
+            reader.hasDeletions(),
+            luceneIndexWriter.numDocs(),
+            luceneIndexWriter.numRamDocs(),
+            luceneIndexWriter.hasPendingMerges(),
+            luceneIndexWriter.hasUncommittedChanges(),
+            luceneIndexWriter.hasDeletions());
+      } finally {
+        searcherManager.release(luceneSearcher);
+      }
+    }
+  }
+
+  @Override
+  public final void update(Path fsPath) {
+    addFile(fsPath);
   }
 
   private boolean isNotExcluded(Path fsPath) {
@@ -501,33 +471,5 @@ public class LuceneSearcher implements Searcher {
       }
     }
     return true;
-  }
-
-  public static class OffsetData {
-
-    public String phrase;
-    public int startOffset;
-    public int endOffset;
-    public int docId;
-    public float score;
-    public int lineNum;
-    public String line;
-
-    public OffsetData(
-        String phrase,
-        int startOffset,
-        int endOffset,
-        int docId,
-        float score,
-        int lineNum,
-        String line) {
-      this.phrase = phrase;
-      this.startOffset = startOffset;
-      this.endOffset = endOffset;
-      this.docId = docId;
-      this.score = score;
-      this.lineNum = lineNum;
-      this.line = line;
-    }
   }
 }

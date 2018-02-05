@@ -36,6 +36,7 @@ public class ServerCheckerTest {
   private static final String SERVER_REF = "ref1";
   private static final long PERIOD_MS = 10;
   private static final long TIMEOUT_MS = 500;
+  private static final int SUCCESS_THRESHOLD = 1;
 
   private Timer timer;
   private TestServerChecker checker;
@@ -46,7 +47,13 @@ public class ServerCheckerTest {
     checker =
         spy(
             new TestServerChecker(
-                MACHINE_NAME, SERVER_REF, PERIOD_MS, TIMEOUT_MS, TimeUnit.MILLISECONDS, timer));
+                MACHINE_NAME,
+                SERVER_REF,
+                PERIOD_MS,
+                TIMEOUT_MS,
+                SUCCESS_THRESHOLD,
+                TimeUnit.MILLISECONDS,
+                timer));
   }
 
   @AfterMethod
@@ -80,7 +87,13 @@ public class ServerCheckerTest {
     checker =
         spy(
             new TestServerChecker(
-                MACHINE_NAME, SERVER_REF, PERIOD_MS, PERIOD_MS * 2, TimeUnit.MILLISECONDS, timer));
+                MACHINE_NAME,
+                SERVER_REF,
+                PERIOD_MS,
+                PERIOD_MS * 2,
+                SUCCESS_THRESHOLD,
+                TimeUnit.MILLISECONDS,
+                timer));
 
     // ensure server not available before start
     when(checker.isAvailable()).thenReturn(false);
@@ -100,7 +113,7 @@ public class ServerCheckerTest {
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void checkOnceThrowsExceptionIfServerIsNotAvailable() throws InfrastructureException {
-    new TestServerChecker("test", "test", 1, 1, TimeUnit.SECONDS, null).checkOnce(ref -> {});
+    new TestServerChecker("test", "test", 1, 1, 1, TimeUnit.SECONDS, null).checkOnce(ref -> {});
   }
 
   private static class TestServerChecker extends ServerChecker {
@@ -109,9 +122,10 @@ public class ServerCheckerTest {
         String serverRef,
         long period,
         long timeout,
+        int successThreshold,
         TimeUnit timeUnit,
         Timer timer) {
-      super(machineName, serverRef, period, timeout, timeUnit, timer);
+      super(machineName, serverRef, period, timeout, successThreshold, timeUnit, timer);
     }
 
     @Override

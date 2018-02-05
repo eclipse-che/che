@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.server.hc.probe.server;
 import static java.util.Collections.singletonMap;
 
 import java.net.URI;
+import javax.inject.Inject;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
@@ -29,9 +30,13 @@ import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
  */
 public class WsAgentServerLivenessProbeConfigFactory implements HttpProbeConfigFactory {
   private final MachineTokenProvider machineTokenProvider;
+  private final int successThreshold;
 
-  public WsAgentServerLivenessProbeConfigFactory(MachineTokenProvider machineTokenProvider) {
+  @Inject
+  public WsAgentServerLivenessProbeConfigFactory(
+      MachineTokenProvider machineTokenProvider, int successThreshold) {
     this.machineTokenProvider = machineTokenProvider;
+    this.successThreshold = successThreshold;
   }
 
   @Override
@@ -59,7 +64,7 @@ public class WsAgentServerLivenessProbeConfigFactory implements HttpProbeConfigF
           uri.getScheme(),
           uri.getPath(),
           singletonMap(HttpHeaders.AUTHORIZATION, machineTokenProvider.getToken(workspaceId)),
-          1,
+          successThreshold,
           3,
           120,
           10,

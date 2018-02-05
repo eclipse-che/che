@@ -55,6 +55,9 @@ public interface GitHubLocalizationConstant extends Messages {
   @Key("authorization.message.keyUploadSuccess")
   String authMessageKeyUploadSuccess();
 
+  @Key("message.sshKey.generation.promt")
+  String messageSshKeyGenerationPromt();
+
   /*
    * SamplesListGrid
    */
