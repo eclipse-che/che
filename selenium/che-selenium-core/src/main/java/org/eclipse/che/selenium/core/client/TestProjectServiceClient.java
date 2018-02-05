@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -41,16 +42,16 @@ import org.eclipse.che.selenium.core.provider.TestWorkspaceAgentApiEndpointUrlPr
 public class TestProjectServiceClient {
   private final TestMachineServiceClient machineServiceClient;
   private final HttpJsonRequestFactory requestFactory;
-  private final TestWorkspaceAgentApiEndpointUrlProvider workspaceAgentApiEndpoint;
+  private final TestWorkspaceAgentApiEndpointUrlProvider workspaceAgentApiEndpointUrlProvider;
 
   @Inject
   public TestProjectServiceClient(
       TestMachineServiceClient machineServiceClient,
       HttpJsonRequestFactory requestFactory,
-      TestWorkspaceAgentApiEndpointUrlProvider workspaceAgentApiEndpoint) {
+      TestWorkspaceAgentApiEndpointUrlProvider workspaceAgentApiEndpointUrlProvider) {
     this.machineServiceClient = machineServiceClient;
     this.requestFactory = requestFactory;
-    this.workspaceAgentApiEndpoint = workspaceAgentApiEndpoint;
+    this.workspaceAgentApiEndpointUrlProvider = workspaceAgentApiEndpointUrlProvider;
   }
 
   /** Set type for existing project on vfs */
@@ -63,7 +64,7 @@ public class TestProjectServiceClient {
     project.setName(projectName);
 
     requestFactory
-        .fromUrl(workspaceAgentApiEndpoint.get(workspaceId) + "project/" + projectName)
+        .fromUrl(workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project/" + projectName)
         .usePutMethod()
         .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
         .setBody(project)
@@ -73,14 +74,14 @@ public class TestProjectServiceClient {
   /** Delete resource. */
   public void deleteResource(String workspaceId, String path) throws Exception {
     requestFactory
-        .fromUrl(workspaceAgentApiEndpoint.get(workspaceId) + "project/" + path)
+        .fromUrl(workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project/" + path)
         .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
         .useDeleteMethod()
         .request();
   }
 
   public void createFolder(String workspaceId, String folder) throws Exception {
-    String url = workspaceAgentApiEndpoint.get(workspaceId) + "project/folder/" + folder;
+    String url = workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project/folder/" + folder;
     requestFactory
         .fromUrl(url)
         .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
@@ -91,7 +92,8 @@ public class TestProjectServiceClient {
   /** Import zip project from file system into user workspace. */
   public void importZipProject(
       String workspaceId, Path zipFile, String projectName, String template) throws Exception {
-    String url = workspaceAgentApiEndpoint.get(workspaceId) + "project/import/" + projectName;
+    String url =
+        workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project/import/" + projectName;
     //    createFolder(workspaceId, projectName);
 
     HttpURLConnection httpConnection = null;
@@ -144,7 +146,7 @@ public class TestProjectServiceClient {
   public void createFileInProject(
       String workspaceId, String parentFolder, String fileName, String content) throws Exception {
     String apiRESTUrl =
-        workspaceAgentApiEndpoint.get(workspaceId)
+        workspaceAgentApiEndpointUrlProvider.get(workspaceId)
             + "project/file/"
             + parentFolder
             + "?name="
@@ -175,7 +177,7 @@ public class TestProjectServiceClient {
   }
 
   public ProjectConfigDto getFirstProject(String workspaceId) throws Exception {
-    String apiUrl = workspaceAgentApiEndpoint.get(workspaceId) + "project";
+    String apiUrl = workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project";
     return requestFactory
         .fromUrl(apiUrl)
         .setAuthorizationHeader(machineServiceClient.getMachineApiToken(workspaceId))
@@ -186,7 +188,8 @@ public class TestProjectServiceClient {
 
   /** Updates file content. */
   public void updateFile(String workspaceId, String pathToFile, String content) throws Exception {
-    String url = workspaceAgentApiEndpoint.get(workspaceId) + "project/file/" + pathToFile;
+    String url =
+        workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project/file/" + pathToFile;
 
     HttpURLConnection httpConnection = null;
     try {
@@ -215,22 +218,19 @@ public class TestProjectServiceClient {
 
   public boolean checkProjectType(String wokspaceId, String projectName, String projectType)
       throws Exception {
-    return getProjectConfig(wokspaceId, projectName).getType().equals(projectType);
+    return getProject(wokspaceId, projectName).getType().equals(projectType);
   }
 
   public boolean checkProjectLanguage(String workspaceId, String projectName, String language)
       throws Exception {
 
-    return getProjectConfig(workspaceId, projectName)
-        .getAttributes()
-        .get("language")
-        .contains(language);
+    return getProject(workspaceId, projectName).getAttributes().get("language").contains(language);
   }
 
   public boolean checkProjectLanguage(
       String workspaceId, String projectName, List<String> languages) throws Exception {
 
-    return getProjectConfig(workspaceId, projectName)
+    return getProject(workspaceId, projectName)
         .getAttributes()
         .get("language")
         .containsAll(languages);
@@ -240,7 +240,8 @@ public class TestProjectServiceClient {
       throws Exception {
     HttpJsonResponse response =
         requestFactory
-            .fromUrl(workspaceAgentApiEndpoint.get(workspaceId) + "java/navigation/libraries")
+            .fromUrl(
+                workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "java/navigation/libraries")
             .useGetMethod()
             .addQueryParam("projectpath", "/" + projectName)
             .request();
@@ -252,11 +253,11 @@ public class TestProjectServiceClient {
         .collect(Collectors.toList());
   }
 
-  private ProjectConfigDto getProjectConfig(String workspaceId, String projectName)
-      throws Exception {
+  private ProjectConfig getProject(String workspaceId, String projectName) throws Exception {
     HttpJsonResponse response =
         requestFactory
-            .fromUrl(workspaceAgentApiEndpoint.get(workspaceId) + "project/" + projectName)
+            .fromUrl(
+                workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project/" + projectName)
             .useGetMethod()
             .request();
 

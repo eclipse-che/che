@@ -31,7 +31,7 @@ public class CheTestWorkspaceAgentApiEndpointUrlProvider
 
   @Override
   public URL get(String workspaceId) throws Exception {
-    checkWorkspaceIsRunning(workspaceId);
+    workspaceServiceClient.ensureRunningStatus(workspaceServiceClient.getById(workspaceId));
 
     Map<String, ? extends Machine> machines =
         workspaceServiceClient.getById(workspaceId).getRuntime().getMachines();
@@ -46,9 +46,5 @@ public class CheTestWorkspaceAgentApiEndpointUrlProvider
       }
     }
     throw new RuntimeException("Cannot find dev machine on workspace with id " + workspaceId);
-  }
-
-  private void checkWorkspaceIsRunning(String workspaceId) throws Exception {
-    workspaceServiceClient.ensureRunningStatus(workspaceServiceClient.getById(workspaceId));
   }
 }
