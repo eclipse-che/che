@@ -50,7 +50,7 @@ window.name = 'NG_DEFER_BOOTSTRAP!';
 declare const Keycloak: Function;
 function buildKeycloakConfig(keycloakSettings: any) {
   const theOidcProvider = keycloakSettings['che.keycloak.oidc_provider'];
-  if(!theOidcProvider) {
+  if (!theOidcProvider) {
     return {
       url: keycloakSettings['che.keycloak.auth_server_url'],
       realm: keycloakSettings['che.keycloak.realm'],
@@ -111,8 +111,8 @@ angular.element(document).ready(() => {
     return keycloakLoad(keycloakSettings).then(() => {
       // init Keycloak
       var useNonce: boolean;
-      if (typeof keycloakSettings['che.keycloak.use_nonce'] == 'string') {
-        useNonce = keycloakSettings['che.keycloak.use_nonce'].toLowerCase() == 'true';
+      if (typeof keycloakSettings['che.keycloak.use_nonce'] === 'string') {
+        useNonce = keycloakSettings['che.keycloak.use_nonce'].toLowerCase() === 'true';
       }
       return keycloakInit(keycloakAuth.config, useNonce);
     }).then((keycloak: any) => {
