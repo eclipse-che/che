@@ -134,15 +134,6 @@ public class ProcessesListViewImpl implements ProcessesListView {
   }
 
   @Override
-  public void showAnimation(boolean animation) {
-    if (animation) {
-      loadAnimation.getElement().setAttribute("animation", "true");
-    } else {
-      loadAnimation.getElement().removeAttribute("animation");
-    }
-  }
-
-  @Override
   public void setExecMode() {
     execLabel.getElement().getStyle().clearDisplay();
     dropdownList.getElement().getStyle().clearDisplay();

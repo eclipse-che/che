@@ -30,13 +30,6 @@ public interface ProcessesListView extends View<ProcessesListView.ActionDelegate
   /** Switches widget into loading mode. */
   void setLoadMode();
 
-  /**
-   * Show the animating bars.
-   *
-   * @param animation <b>true</b> shows the animation
-   */
-  void showAnimation(boolean animation);
-
   /** Sets new value of progress bar for loading mode. */
   void setLoadingProgress(int percents);
 

@@ -129,7 +129,6 @@ public class WorkspaceLoadingTrackerImpl
     addMachines();
 
     processesListView.setLoadMode();
-    processesListView.showAnimation(true);
     processesListView.setLoadingMessage(localizationConstant.menuLoaderWaitingWorkspace());
     processesListView.setLoadingProgress(0);
   }
@@ -265,7 +264,6 @@ public class WorkspaceLoadingTrackerImpl
     showInstallers();
 
     processesListView.setLoadMode();
-    processesListView.showAnimation(true);
     processesListView.setLoadingMessage(localizationConstant.menuLoaderWaitingWorkspace());
   }
 
@@ -288,7 +286,6 @@ public class WorkspaceLoadingTrackerImpl
     new Timer() {
       @Override
       public void run() {
-        processesListView.showAnimation(false);
         processesListView.setExecMode();
       }
     }.schedule(3000);
@@ -302,7 +299,6 @@ public class WorkspaceLoadingTrackerImpl
     view.showWorkspaceStopping();
 
     processesListView.setLoadMode();
-    processesListView.showAnimation(true);
     processesListView.setLoadingMessage(localizationConstant.menuLoaderWorkspaceStopping());
     processesListView.setLoadingProgress(100);
   }
@@ -310,7 +306,6 @@ public class WorkspaceLoadingTrackerImpl
   @Override
   public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
     processesListView.setLoadMode();
-    processesListView.showAnimation(false);
     processesListView.setLoadingMessage(localizationConstant.menuLoaderWorkspaceStopped());
     processesListView.setLoadingProgress(0);
 
