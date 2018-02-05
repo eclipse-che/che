@@ -61,6 +61,7 @@
     </che-list>
   </div>
   <div class="che-list-empty">
-    <span ng-show="listOrganizationsController.cheListHelper.visibleItemsNumber === 0">There are no  {{listOrganizationsController.parentName ? 'sub-organizations' : 'organizations'}}.</span>
+    <span ng-class="{'list-empty-no-sub-organizations': listOrganizationsController.parentName, 'list-empty-no-organizations': !listOrganizationsController.parentName}"
+          ng-show="listOrganizationsController.cheListHelper.visibleItemsNumber === 0">There are no {{listOrganizationsController.parentName ? 'sub-organizations' : 'organizations'}}.</span>
   </div>
 </md-content>
