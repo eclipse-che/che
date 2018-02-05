@@ -57,9 +57,11 @@ public class CppExtension {
     actionManager.registerAction("newCFile", newCSourceFileAction);
     actionManager.registerAction("newCppFile", newCppSourceFileAction);
     actionManager.registerAction("newHFile", newHeadSourceFileAction);
-    newGroup.add(newCSourceFileAction, Constraints.FIRST);
-    newGroup.add(newHeadSourceFileAction, Constraints.FIRST);
-    newGroup.add(newCppSourceFileAction, Constraints.FIRST);
+    newGroup.addSeparator();
+    newGroup.add(newCSourceFileAction);
+    newGroup.add(newHeadSourceFileAction);
+    newGroup.add(newCppSourceFileAction);
+    newGroup.addSeparator();
     iconRegistry.registerIcon(
         new Icon(C_CATEGORY + ".samples.category.icon", resources.category()));
   }

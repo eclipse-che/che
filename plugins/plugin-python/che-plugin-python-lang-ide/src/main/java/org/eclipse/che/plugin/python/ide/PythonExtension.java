@@ -44,7 +44,7 @@ public class PythonExtension {
 
     DefaultActionGroup newGroup = (DefaultActionGroup) actionManager.getAction(GROUP_FILE_NEW);
     actionManager.registerAction("pythonFile", createPythonFileAction);
-    newGroup.add(createPythonFileAction, Constraints.FIRST);
+    newGroup.add(createPythonFileAction);
 
     iconRegistry.registerIcon(
         new Icon(PYTHON_CATEGORY + ".samples.category.icon", pythonResources.category()));

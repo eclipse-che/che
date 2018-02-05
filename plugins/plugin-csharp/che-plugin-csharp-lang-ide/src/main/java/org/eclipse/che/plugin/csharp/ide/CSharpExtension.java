@@ -46,7 +46,9 @@ public class CSharpExtension {
     DefaultActionGroup newGroup = (DefaultActionGroup) actionManager.getAction(GROUP_FILE_NEW);
 
     actionManager.registerAction("newCSharpFile", csharpSourceFileAction);
-    newGroup.add(csharpSourceFileAction, Constraints.FIRST);
+    newGroup.addSeparator();
+    newGroup.add(csharpSourceFileAction);
+    newGroup.addSeparator();
     iconRegistry.registerIcon(
         new Icon(CSHARP_CATEGORY + ".samples.category.icon", resources.category()));
   }

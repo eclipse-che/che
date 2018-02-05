@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.xml;
+package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

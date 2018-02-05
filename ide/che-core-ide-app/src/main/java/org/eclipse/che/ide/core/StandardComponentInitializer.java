@@ -159,7 +159,7 @@ import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.ide.workspace.StopWorkspaceAction;
-import org.eclipse.che.ide.xml.NewXmlFileAction;
+import org.eclipse.che.ide.actions.NewXmlFileAction;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -536,10 +536,10 @@ public class StandardComponentInitializer {
     newGroup.addSeparator();
 
     actionManager.registerAction(NEW_FILE, newFileAction);
-    newGroup.addAction(newFileAction);
+    newGroup.addAction(newFileAction, Constraints.FIRST);
 
     actionManager.registerAction("newFolder", newFolderAction);
-    newGroup.addAction(newFolderAction);
+    newGroup.addAction(newFolderAction, new Constraints(AFTER, NEW_FILE));
 
     newGroup.addSeparator();
 

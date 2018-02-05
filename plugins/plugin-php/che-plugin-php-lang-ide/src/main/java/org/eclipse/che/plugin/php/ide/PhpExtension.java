@@ -44,7 +44,7 @@ public class PhpExtension {
     DefaultActionGroup newGroup = (DefaultActionGroup) actionManager.getAction(GROUP_FILE_NEW);
 
     actionManager.registerAction("newPhpFile", phpSourceFileAction);
-    newGroup.add(phpSourceFileAction, Constraints.FIRST);
+    newGroup.add(phpSourceFileAction);
     iconRegistry.registerIcon(
         new Icon(PHP_CATEGORY + ".samples.category.icon", resources.category()));
   }
