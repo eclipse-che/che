@@ -158,6 +158,7 @@ import org.eclipse.che.ide.ui.toolbar.MainToolbar;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
+import org.eclipse.che.ide.workspace.StartWorkspaceAction;
 import org.eclipse.che.ide.workspace.StopWorkspaceAction;
 import org.eclipse.che.ide.xml.NewXmlFileAction;
 import org.vectomatic.dom.svg.ui.SVGImage;
@@ -347,6 +348,8 @@ public class StandardComponentInitializer {
 
   @Inject private SoftWrapAction softWrapAction;
 
+  @Inject private StartWorkspaceAction startWorkspaceAction;
+
   @Inject private StopWorkspaceAction stopWorkspaceAction;
 
   @Inject private ShowWorkspaceStatusAction showWorkspaceStatusAction;
@@ -519,6 +522,7 @@ public class StandardComponentInitializer {
     workspaceGroup.add(downloadWsAction);
 
     workspaceGroup.addSeparator();
+    workspaceGroup.add(startWorkspaceAction);
     workspaceGroup.add(stopWorkspaceAction);
     workspaceGroup.add(showWorkspaceStatusAction);
 
@@ -690,6 +694,7 @@ public class StandardComponentInitializer {
     helpGroup.addSeparator();
 
     // Processes panel actions
+    actionManager.registerAction("startWorkspace", startWorkspaceAction);
     actionManager.registerAction("stopWorkspace", stopWorkspaceAction);
     actionManager.registerAction("showWorkspaceStatus", showWorkspaceStatusAction);
     actionManager.registerAction("runCommand", runCommandAction);

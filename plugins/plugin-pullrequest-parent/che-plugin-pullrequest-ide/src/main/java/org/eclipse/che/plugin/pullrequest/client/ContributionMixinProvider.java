@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -113,6 +114,10 @@ public class ContributionMixinProvider {
   }
 
   private void processCurrentProject(Selection<?> selection) {
+    if (WorkspaceStatus.RUNNING != appContext.getWorkspace().getStatus()) {
+      return;
+    }
+
     if (!isSupportedSelection(selection)) {
       return;
     }
