@@ -84,7 +84,7 @@ function keycloakInit(keycloakConfig: any, theUseNonce: boolean) {
   return new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
     const keycloak = Keycloak(keycloakConfig);
     keycloak.init({
-      onLoad: 'login-required', checkLoginIframe: false, responseMode: 'query', useNonce: theUseNonce
+      onLoad: 'login-required', checkLoginIframe: false, useNonce: theUseNonce
     }).success(() => {
       resolve(keycloak);
     }).error((error: any) => {
