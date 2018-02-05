@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
-import org.eclipse.che.selenium.core.client.TestSshServiceClient;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -62,7 +61,7 @@ public class Preferences {
   private final AskForValueDialog askForValueDialog;
   private final GitHub gitHub;
   private final SeleniumWebDriver seleniumWebDriver;
-  private final TestSshServiceClient testSshServiceClient;
+  private final SeleniumWebDriverHelper webDriverHelper;
 
   @Inject
   public Preferences(
@@ -72,14 +71,14 @@ public class Preferences {
       AskDialog askDialog,
       AskForValueDialog askForValueDialog,
       GitHub github,
-      TestSshServiceClient testSshServiceClient) {
+      SeleniumWebDriverHelper webDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
     this.askDialog = askDialog;
     this.askForValueDialog = askForValueDialog;
     this.gitHub = github;
-    this.testSshServiceClient = testSshServiceClient;
+    this.webDriverHelper = webDriverHelper;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -408,13 +407,13 @@ public class Preferences {
 
       switch (valueOfDropDown) {
         case IGNORE:
-          waitAndClickOnElement(dropDownList.get(0));
+          webDriverHelper.waitAndClickOnElement(dropDownList.get(0));
           break;
         case WARNING:
-          waitAndClickOnElement(dropDownList.get(1));
+          webDriverHelper.waitAndClickOnElement(dropDownList.get(1));
           break;
         default:
-          waitAndClickOnElement(dropDownList.get(2));
+          webDriverHelper.waitAndClickOnElement(dropDownList.get(2));
           break;
       }
     }
@@ -597,11 +596,5 @@ public class Preferences {
   public void clickOnShowArtifactCheckBox() {
     Actions actions = new Actions(seleniumWebDriver);
     actions.click(showArtifactCheckBox).build().perform();
-  }
-
-  private void waitAndClickOnElement(WebElement element) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(visibilityOf(element))
-        .click();
   }
 }
