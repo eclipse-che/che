@@ -3,7 +3,7 @@
     "id": "java-theia-docker",
     "creator": "ide",
     "name": "Java Theia (docker)",
-    "description": "Java + Theia in a sidecar container (docker)",
+    "description": "Che development + Theia in a sidecar container (docker)",
     "scope": "general",
     "tags": [
       "Java 1.8, Theia"
@@ -70,7 +70,7 @@
     "id": "java-theia-openshift",
     "creator": "ide",
     "name": "Java Theia (openshift)",
-    "description": "Java + Theia in a sidecar container (openshift)",
+    "description": "Che development + Theia in a sidecar container (openshift)",
     "scope": "general",
     "tags": [
       "Java 1.8, Theia"
