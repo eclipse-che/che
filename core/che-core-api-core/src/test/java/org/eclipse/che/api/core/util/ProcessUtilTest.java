@@ -32,7 +32,7 @@ public class ProcessUtilTest {
     new Thread() {
       public void run() {
         try {
-          ProcessUtil.process(
+          ProcessUtil.readOutput(
               p,
               new LineConsumer() {
                 @Override

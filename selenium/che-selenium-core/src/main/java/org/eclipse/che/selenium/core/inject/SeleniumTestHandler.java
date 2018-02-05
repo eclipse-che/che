@@ -52,7 +52,7 @@ import org.eclipse.che.selenium.core.user.InjectTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsGrabber;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
@@ -126,7 +126,7 @@ public abstract class SeleniumTestHandler
   @Inject private TestUser defaultTestUser;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
   @Inject private TestGitHubServiceClient gitHubClientService;
-  @Inject private TestWorkspaceLogsGrabber testWorkspaceLogsGrabber;
+  @Inject private TestWorkspaceLogsReader testWorkspaceLogsReader;
 
   private final Injector injector;
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
@@ -295,7 +295,7 @@ public abstract class SeleniumTestHandler
       }
 
       Path pathToStoreWorkspaceLogs = Paths.get(workspaceLogsDir, getTestName(result));
-      testWorkspaceLogsGrabber.grabLogs((TestWorkspace) obj, pathToStoreWorkspaceLogs);
+      testWorkspaceLogsReader.read((TestWorkspace) obj, pathToStoreWorkspaceLogs);
     }
   }
 

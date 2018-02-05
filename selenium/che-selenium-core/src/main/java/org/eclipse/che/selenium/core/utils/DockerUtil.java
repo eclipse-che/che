@@ -33,7 +33,7 @@ public class DockerUtil {
   private String cheHost;
 
   public boolean isCheRunLocally() {
-    ListLineConsumer outputConsumer = new ListLineConsumer();
+    ListLineConsumer stdoutConsumer = new ListLineConsumer();
     String[] commandLine = {
       "bash",
       "-c",
@@ -43,12 +43,13 @@ public class DockerUtil {
     };
 
     try {
-      ProcessUtil.executeAndWait(commandLine, PREPARING_WS_TIMEOUT_SEC, SECONDS, outputConsumer);
-      if (outputConsumer.getText().equals("true")) {
+      ProcessUtil.executeAndWait(
+          commandLine, PREPARING_WS_TIMEOUT_SEC, SECONDS, stdoutConsumer, new ListLineConsumer());
+      if (stdoutConsumer.getText().equals("true")) {
         return true;
       }
-    } catch (InterruptedException | IOException | TimeoutException e) {
-      LOG.warn("Can't check if Eclipse Che run locally. Error: {}", outputConsumer.getText(), e);
+    } catch (InterruptedException | IOException | TimeoutException | RuntimeException e) {
+      LOG.warn("Can't check if Eclipse Che run locally.", e);
     }
 
     return false;

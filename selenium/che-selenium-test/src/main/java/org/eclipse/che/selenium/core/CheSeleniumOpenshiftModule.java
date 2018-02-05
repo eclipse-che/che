@@ -11,14 +11,14 @@
 package org.eclipse.che.selenium.core;
 
 import com.google.inject.AbstractModule;
-import org.eclipse.che.selenium.core.workspace.CheTestOpenshiftWorkspaceLogsGrabber;
-import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsGrabber;
+import org.eclipse.che.selenium.core.workspace.CheTestOpenshiftWorkspaceLogsReader;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader;
 
 /** @author Dmytro Nochevnov */
 public class CheSeleniumOpenshiftModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(TestWorkspaceLogsGrabber.class).to(CheTestOpenshiftWorkspaceLogsGrabber.class);
+    bind(TestWorkspaceLogsReader.class).to(CheTestOpenshiftWorkspaceLogsReader.class);
   }
 }

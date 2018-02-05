@@ -16,6 +16,7 @@ import com.google.common.base.Joiner;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -42,7 +43,7 @@ public final class ProcessUtil {
    * @param stderr a consumer where stderr will be redirected
    * @throws IOException
    */
-  public static void process(Process p, LineConsumer stdout, LineConsumer stderr)
+  public static void readOutput(Process p, LineConsumer stdout, LineConsumer stderr)
       throws IOException {
     try (BufferedReader inputReader =
             new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -66,7 +67,7 @@ public final class ProcessUtil {
    * @param stdout a consumer where stdout will be redirected
    * @throws IOException
    */
-  public static void process(Process p, LineConsumer stdout) throws IOException {
+  public static void readOutput(Process p, LineConsumer stdout) throws IOException {
     try (BufferedReader inputReader =
         new BufferedReader(new InputStreamReader(p.getInputStream()))) {
       String line;
@@ -101,7 +102,7 @@ public final class ProcessUtil {
         () -> {
           try {
             // consume logs until process ends
-            process(process, outputConsumer);
+            readOutput(process, outputConsumer);
           } catch (IOException e) {
             LOG.error(
                 format(
@@ -127,6 +128,70 @@ public final class ProcessUtil {
   }
 
   /**
+   * Start the process, writing the stdout of process to {@code stdout}, stderr of process to {@code
+   * stderr}, and terminate process by {@code timeout}.<br>
+   *
+   * @param commandLine arguments of process command
+   * @param timeout timeout for process. If process duration > {@code timeout} than kill process and
+   *     throw {@link TimeoutException}.
+   * @param timeUnit timeUnit of the {@code timeout}.
+   * @param stdout a consumer where stdout will be redirected
+   * @param stderr a consumer where stderr will be redirected
+   * @return the started process
+   * @throws InterruptedException in case terminate process
+   * @throws IOException in case I/O error
+   * @throws TimeoutException if process gets more time then defined by {@code timeout}
+   * @throws RuntimeException if stderr is not empty after the command execution
+   */
+  public static Process executeAndWait(
+      String[] commandLine,
+      int timeout,
+      TimeUnit timeUnit,
+      ListLineConsumer stdout,
+      ListLineConsumer stderr)
+      throws TimeoutException, IOException, InterruptedException {
+    ProcessBuilder pb = new ProcessBuilder(commandLine);
+
+    Process process = pb.start();
+
+    CompletableFuture.runAsync(
+        () -> {
+          try {
+            // consume logs until process ends
+            readOutput(process, stdout, stderr);
+          } catch (IOException e) {
+            LOG.error(
+                format(
+                    "Failed to complete reading of the process '%s' output due to occurred error",
+                    Joiner.on(" ").join(commandLine)),
+                e);
+          }
+        });
+
+    if (!process.waitFor(timeout, timeUnit)) {
+      try {
+        ProcessUtil.kill(process);
+      } catch (RuntimeException x) {
+        LOG.error("An error occurred while killing process '{}'", Joiner.on(" ").join(commandLine));
+      }
+      throw new TimeoutException(
+          format(
+              "Process '%s' was terminated by timeout %s %s.",
+              Joiner.on(" ").join(commandLine), timeout, timeUnit.name().toLowerCase()));
+    }
+
+    String errorMessage = stderr.getText();
+    if (!errorMessage.isEmpty()) {
+      throw new RuntimeException(
+          format(
+              "Failed to execute command '%s' due to occurred error: %s",
+              Arrays.toString(commandLine), errorMessage));
+    }
+
+    return process;
+  }
+
+  /**
    * Start the process, writing the stdout and stderr to consumer.
    *
    * @param pb process builder to start
@@ -138,7 +203,24 @@ public final class ProcessUtil {
     pb.redirectErrorStream(true);
     Process process = pb.start();
 
-    process(process, consumer);
+    readOutput(process, consumer);
+
+    return process;
+  }
+
+  /**
+   * Start the process.
+   *
+   * @param pb process builder to start
+   * @param stdout a consumer for stdout of process
+   * @param stderr a consumer for stderr of process
+   * @return the started process
+   * @throws IOException
+   */
+  public static Process execute(ProcessBuilder pb, LineConsumer stdout, LineConsumer stderr)
+      throws IOException {
+    Process process = pb.start();
+    readOutput(process, stdout, stderr);
 
     return process;
   }

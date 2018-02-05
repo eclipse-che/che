@@ -11,14 +11,14 @@
 package org.eclipse.che.selenium.core;
 
 import com.google.inject.AbstractModule;
-import org.eclipse.che.selenium.core.workspace.CheTestDockerWorkspaceLogsGrabber;
-import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsGrabber;
+import org.eclipse.che.selenium.core.workspace.CheTestDockerWorkspaceLogsReader;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader;
 
 /** @author Dmytro Nochevnov */
 public class CheSeleniumDockerModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(TestWorkspaceLogsGrabber.class).to(CheTestDockerWorkspaceLogsGrabber.class);
+    bind(TestWorkspaceLogsReader.class).to(CheTestDockerWorkspaceLogsReader.class);
   }
 }

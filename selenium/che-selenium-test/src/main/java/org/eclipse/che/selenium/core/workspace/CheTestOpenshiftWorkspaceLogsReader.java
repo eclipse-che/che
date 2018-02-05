@@ -18,29 +18,29 @@ import java.nio.file.Paths;
 import java.util.List;
 
 /** @author Dmytro Nochevnov */
-public class CheTestOpenshiftWorkspaceLogsGrabber extends TestWorkspaceLogsGrabber {
+public class CheTestOpenshiftWorkspaceLogsReader extends TestWorkspaceLogsReader {
 
-  private final List<WorkspaceLog> workspaceLogs =
+  private final List<WorkspaceLogProvider> workspaceLogProviders =
       ImmutableList.of(
-          new WorkspaceLog("bootstrapper", Paths.get("/workspace_logs/bootstrapper")),
-          new WorkspaceLog("exec-agent", Paths.get("/workspace_logs/exec-agent")),
-          new WorkspaceLog("ws-agent", Paths.get("/workspace_logs/ws-agent")));
+          new WorkspaceLogProvider("bootstrapper", Paths.get("/workspace_logs/bootstrapper")),
+          new WorkspaceLogProvider("exec-agent", Paths.get("/workspace_logs/exec-agent")),
+          new WorkspaceLogProvider("ws-agent", Paths.get("/workspace_logs/ws-agent")));
 
   @Override
-  String getGrabLogsCommand(
-      String workspaceId, Path testLogsDirectory, Path logDestinationInsideWorkspace) {
+  String getReadLogsCommand(
+      String workspaceId, Path testLogsDirectory, Path logLocationInsideWorkspace) {
     return format(
         "docker cp $(docker ps -q -f name=k8s_container_%s):%s %s",
-        workspaceId, logDestinationInsideWorkspace, testLogsDirectory);
+        workspaceId, logLocationInsideWorkspace, testLogsDirectory);
   }
 
   @Override
-  List<WorkspaceLog> getLogs() {
-    return workspaceLogs;
+  List<WorkspaceLogProvider> getLogProviders() {
+    return workspaceLogProviders;
   }
 
   @Override
-  boolean canLogsBeGrabbed() {
+  boolean canWorkspaceLogsBeRead() {
     return true;
   }
 }
