@@ -11,6 +11,8 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.valueOf;
+import static org.openqa.selenium.Keys.PAGE_DOWN;
+import static org.openqa.selenium.Keys.PAGE_UP;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -170,10 +172,18 @@ public class WorkingWithTerminalTest {
       fail("Known issue https://github.com/eclipse/che-lib/issues/57", ex);
     }
 
+    // check scrolling by the END and HOME buttons
     terminal.moveDownListTerminal(".dockerenv");
     terminal.waitExpectedTextIntoTerminal(".dockerenv");
-    terminal.movePageUpListTerminal("projects");
     terminal.moveUpListTerminal("bin");
+    terminal.waitExpectedTextIntoTerminal("bin");
+
+    // check scrolling by the Page Up and the Page Down buttons
+    terminal.typeIntoTerminal(PAGE_DOWN.toString());
+    terminal.typeIntoTerminal(PAGE_DOWN.toString());
+    terminal.waitExpectedTextIntoTerminal(".dockerenv");
+    terminal.typeIntoTerminal(PAGE_UP.toString());
+    terminal.typeIntoTerminal(PAGE_UP.toString());
     terminal.waitExpectedTextIntoTerminal("bin");
   }
 

@@ -8,12 +8,12 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.multiuser.permission.system;
+package org.eclipse.che.multiuser.permission.installer;
 
 import javax.ws.rs.Path;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.system.server.SystemService;
+import org.eclipse.che.api.installer.server.InstallerRegistryService;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
 import org.eclipse.che.multiuser.api.permission.server.SystemDomain;
@@ -21,18 +21,25 @@ import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericResourceMethod;
 
 /**
- * Rejects/allows access to the methods of {@link SystemService}
+ * Protect access to the modifying methods of {@link InstallerRegistryService}
  *
- * @author Yevhenii Voevodin
+ * @author Max Shaposhnyk
  */
 @Filter
-@Path("/system{path:.*}")
-public class SystemServicePermissionsFilter extends CheMethodInvokerFilter {
+@Path("/installer{path:.*}")
+public class InstallerRegistryServicePermissionsFilter extends CheMethodInvokerFilter {
   @Override
   protected void filter(GenericResourceMethod resource, Object[] args) throws ApiException {
     switch (resource.getMethod().getName()) {
-      case "stop":
-      case "getState":
+        // Public methods
+      case "getInstaller":
+      case "getVersions":
+      case "getInstallers":
+      case "getOrderedInstallers":
+        break;
+      case "add":
+      case "remove":
+      case "update":
         EnvironmentContext.getCurrent()
             .getSubject()
             .checkPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);

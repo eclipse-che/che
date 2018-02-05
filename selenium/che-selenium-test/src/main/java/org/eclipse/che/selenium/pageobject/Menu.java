@@ -10,9 +10,14 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -28,7 +33,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +69,7 @@ public class Menu {
    * @param idCommand
    */
   public void runCommand(String idCommand) {
-    redrawMenuItemsWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(idCommand)));
+    redrawMenuItemsWait.until(visibilityOfElementLocated(By.id(idCommand)));
     clickOnCommand(idCommand);
     loader.waitOnClosed();
   }
@@ -77,7 +81,7 @@ public class Menu {
    * @param userDelay delay for waiting active state menu defined by user
    */
   public void runCommand(String idCommand, int userDelay) {
-    redrawMenuItemsWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(idCommand)));
+    redrawMenuItemsWait.until(visibilityOfElementLocated(By.id(idCommand)));
     clickOnCommand(idCommand);
     loader.waitOnClosed();
   }
@@ -99,8 +103,7 @@ public class Menu {
           }
         });
     seleniumWebDriver.findElement(By.id(idCommandName)).click();
-    redrawMenuItemsWait.until(
-        ExpectedConditions.invisibilityOfElementLocated(By.id(idCommandName)));
+    redrawMenuItemsWait.until(invisibilityOfElementLocated(By.id(idCommandName)));
   }
 
   /**
@@ -112,29 +115,20 @@ public class Menu {
   public void runCommand(final String idTopMenuCommand, final String idCommandName) {
     loader.waitOnClosed();
     try {
-      redrawMenuItemsWait
-          .until(ExpectedConditions.visibilityOfElementLocated(By.id(idTopMenuCommand)))
-          .click();
+      redrawMenuItemsWait.until(visibilityOfElementLocated(By.id(idTopMenuCommand))).click();
 
     } catch (WebDriverException ex) {
       LOG.warn(ex.getLocalizedMessage());
       WaitUtils.sleepQuietly(REDRAW_UI_ELEMENTS_TIMEOUT_SEC, TimeUnit.MILLISECONDS);
-      redrawMenuItemsWait
-          .until(ExpectedConditions.visibilityOfElementLocated(By.id(idTopMenuCommand)))
-          .click();
+      redrawMenuItemsWait.until(visibilityOfElementLocated(By.id(idTopMenuCommand))).click();
     }
     try {
-      redrawMenuItemsWait
-          .until(ExpectedConditions.visibilityOfElementLocated(By.id(idCommandName)))
-          .click();
+      redrawMenuItemsWait.until(visibilityOfElementLocated(By.id(idCommandName))).click();
     } catch (TimeoutException e) {
       seleniumWebDriver.findElement(By.id(idTopMenuCommand)).click();
-      redrawMenuItemsWait
-          .until(ExpectedConditions.visibilityOfElementLocated(By.id(idCommandName)))
-          .click();
+      redrawMenuItemsWait.until(visibilityOfElementLocated(By.id(idCommandName))).click();
     }
-    redrawMenuItemsWait.until(
-        ExpectedConditions.invisibilityOfElementLocated(By.id(idCommandName)));
+    redrawMenuItemsWait.until(invisibilityOfElementLocated(By.id(idCommandName)));
     loader.waitOnClosed();
   }
 
@@ -149,30 +143,26 @@ public class Menu {
     loader.waitOnClosed();
     clickOnCommand(idTopMenuCommand);
     try {
-      redrawMenuItemsWait.until(
-          ExpectedConditions.visibilityOfElementLocated(By.id(idCommandName)));
+      redrawMenuItemsWait.until(visibilityOfElementLocated(By.id(idCommandName)));
     } catch (TimeoutException e) {
       LOG.error(e.getLocalizedMessage(), e);
       clickOnCommand(idTopMenuCommand);
     }
-    redrawMenuItemsWait.until(ExpectedConditions.elementToBeClickable(By.id(idCommandName)));
+    redrawMenuItemsWait.until(elementToBeClickable(By.id(idCommandName)));
     actionsFactory
         .createAction(seleniumWebDriver)
         .moveToElement(seleniumWebDriver.findElement(By.id(idCommandName)))
         .perform();
     // if element If the element is not drawn in time, in the catch block call submenu again
     try {
-      redrawMenuItemsWait.until(
-          ExpectedConditions.visibilityOfElementLocated(By.id(idSubCommandName)));
+      redrawMenuItemsWait.until(visibilityOfElementLocated(By.id(idSubCommandName)));
     } catch (TimeoutException e) {
       WaitUtils.sleepQuietly(1);
       seleniumWebDriver.findElement(By.id(idCommandName)).click();
-      redrawMenuItemsWait.until(
-          ExpectedConditions.visibilityOfElementLocated(By.id(idSubCommandName)));
+      redrawMenuItemsWait.until(visibilityOfElementLocated(By.id(idSubCommandName)));
     }
     seleniumWebDriver.findElement(By.id(idSubCommandName)).click();
-    redrawMenuItemsWait.until(
-        ExpectedConditions.invisibilityOfElementLocated(By.id(idCommandName)));
+    redrawMenuItemsWait.until(invisibilityOfElementLocated(By.id(idCommandName)));
 
     loader.waitOnClosed();
   }
@@ -190,31 +180,27 @@ public class Menu {
     loader.waitOnClosed();
     clickOnCommand(idTopMenuCommand);
     try {
-      redrawMenuItemsWait.until(
-          ExpectedConditions.visibilityOfElementLocated(By.id(idCommandName)));
+      redrawMenuItemsWait.until(visibilityOfElementLocated(By.id(idCommandName)));
     } catch (TimeoutException e) {
       LOG.error(e.getLocalizedMessage(), e);
       clickOnCommand(idTopMenuCommand);
     }
-    redrawMenuItemsWait.until(ExpectedConditions.elementToBeClickable(By.id(idCommandName)));
+    redrawMenuItemsWait.until(elementToBeClickable(By.id(idCommandName)));
     actionsFactory
         .createAction(seleniumWebDriver)
         .moveToElement(seleniumWebDriver.findElement(By.id(idCommandName)))
         .perform();
     // if element If the element is not drawn in time, in the catch block call submenu again
     try {
-      redrawMenuItemsWait.until(
-          ExpectedConditions.visibilityOfElementLocated(By.xpath(xpathSubCommandName)));
+      redrawMenuItemsWait.until(visibilityOfElementLocated(By.xpath(xpathSubCommandName)));
     } catch (TimeoutException e) {
       LOG.error(e.getLocalizedMessage(), e);
       WaitUtils.sleepQuietly(MINIMUM_SEC);
       seleniumWebDriver.findElement(By.id(idCommandName)).click();
-      redrawMenuItemsWait.until(
-          ExpectedConditions.visibilityOfElementLocated(By.xpath(xpathSubCommandName)));
+      redrawMenuItemsWait.until(visibilityOfElementLocated(By.xpath(xpathSubCommandName)));
     }
     seleniumWebDriver.findElement(By.xpath(xpathSubCommandName)).click();
-    redrawMenuItemsWait.until(
-        ExpectedConditions.invisibilityOfElementLocated(By.id(idCommandName)));
+    redrawMenuItemsWait.until(invisibilityOfElementLocated(By.id(idCommandName)));
 
     loader.waitOnClosed();
   }
@@ -246,9 +232,7 @@ public class Menu {
    */
   public void runCommandByXpath(String command) {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.ENABLED_ITEM, command))))
+        .until(visibilityOfElementLocated(By.xpath(format(Locators.ENABLED_ITEM, command))))
         .click();
 
     loader.waitOnClosed();
@@ -257,7 +241,7 @@ public class Menu {
   /** wait a command is not present in the menu */
   public void waitCommandIsNotPresentInMenu(String menuCommand) {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(menuCommand)));
+        .until(invisibilityOfElementLocated(By.id(menuCommand)));
   }
 
   /**
@@ -267,8 +251,16 @@ public class Menu {
    */
   public void waitCommandIsDisabledInMenu(String idCommand) {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(String.format(Locators.DISABLED_ITEM, idCommand))));
+        .until(visibilityOfElementLocated(By.xpath(format(Locators.DISABLED_ITEM, idCommand))));
+  }
+
+  /**
+   * wait a menu item is enabled
+   *
+   * @param idCommand is name of command in the menu
+   */
+  public void waitMenuItemIsEnabled(String idCommand) {
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.id(idCommand)));
   }
 }
