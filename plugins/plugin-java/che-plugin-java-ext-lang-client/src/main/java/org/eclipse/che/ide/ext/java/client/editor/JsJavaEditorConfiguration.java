@@ -15,7 +15,6 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.changeintercept.ChangeInterceptorProvider;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
 import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
@@ -30,7 +29,6 @@ public class JsJavaEditorConfiguration extends DefaultTextEditorConfiguration {
   private final Map<String, CodeAssistProcessor> codeAssistProcessors;
   private final DocumentPartitioner partitioner;
   private final DocumentPositionMap documentPositionMap;
-  private final AnnotationModel annotationModel;
   private final ChangeInterceptorProvider changeInterceptors;
   private final ContentFormatter contentFormatter;
 
@@ -39,14 +37,12 @@ public class JsJavaEditorConfiguration extends DefaultTextEditorConfiguration {
       @Assisted final TextEditor editor,
       final JavaPartitionerFactory partitionerFactory,
       final Provider<DocumentPositionMap> docPositionMapProvider,
-      final JavaAnnotationModelFactory javaAnnotationModelFactory,
       final ContentFormatter contentFormatter) {
     this.contentFormatter = contentFormatter;
 
     this.codeAssistProcessors = new HashMap<>();
 
     this.documentPositionMap = docPositionMapProvider.get();
-    this.annotationModel = javaAnnotationModelFactory.create(this.documentPositionMap);
 
     this.partitioner = partitionerFactory.create(this.documentPositionMap);
 
@@ -61,11 +57,6 @@ public class JsJavaEditorConfiguration extends DefaultTextEditorConfiguration {
   @Override
   public DocumentPositionMap getDocumentPositionMap() {
     return this.documentPositionMap;
-  }
-
-  @Override
-  public AnnotationModel getAnnotationModel() {
-    return this.annotationModel;
   }
 
   @Override
