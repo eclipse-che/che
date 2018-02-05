@@ -61,8 +61,9 @@ public class WorkspaceDetails {
     String STOP_WORKSPACE_BTN = "stop-workspace-button";
     String OPEN_IN_IDE_WS_BTN = "open-in-ide-button";
     String TAB_NAMES_IN_WS = "//md-pagination-wrapper//span[text()='%s']";
-    String SAVE_CHANGED_BUTTON = "//che-button-save-flat//span[text()='Save']";
-    String CANCEL_CHANGES_BUTTON = "//che-button-cancel-flat//span[text()='Cancel']";
+    String SAVE_CHANGED_BUTTON = "//button[@name='save-button']";
+    String APPLY_CHANGES_BUTTON = "//che-button-save-flat[@class='apply-button']";
+    String CANCEL_CHANGES_BUTTON = "//button[@name='cancel-button']";
     String CANCEL_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Cancel']";
     String CLOSE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Close']";
     String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
@@ -111,6 +112,9 @@ public class WorkspaceDetails {
 
   @FindBy(xpath = Locators.SAVE_CHANGED_BUTTON)
   WebElement saveBtn;
+
+  @FindBy(xpath = Locators.APPLY_CHANGES_BUTTON)
+  WebElement applyButton;
 
   @FindBy(xpath = Locators.CANCEL_CHANGES_BUTTON)
   WebElement cancelBtn;
@@ -181,6 +185,13 @@ public class WorkspaceDetails {
     loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOf(saveBtn))
+        .click();
+  }
+
+  public void clickOnApplyChangesBtn() {
+    loader.waitOnClosed();
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(applyButton))
         .click();
   }
 

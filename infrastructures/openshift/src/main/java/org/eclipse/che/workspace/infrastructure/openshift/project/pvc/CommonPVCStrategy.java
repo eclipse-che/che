@@ -15,6 +15,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.newPVC;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.newVolume;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.newVolumeMount;
+import static org.eclipse.che.workspace.infrastructure.openshift.provision.LogsVolumeMachineProvisioner.LOGS_VOLUME_NAME;
 
 import com.google.inject.Inject;
 import io.fabric8.kubernetes.api.model.Container;
@@ -23,6 +24,7 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import javax.inject.Named;
@@ -39,12 +41,16 @@ import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProje
 /**
  * Provides common PVC for each workspace in one OpenShift project.
  *
- * <p>Note that subpaths are used for resolving of backed up data path collisions. Subpaths
- * evaluated as following: '{workspaceId}/{workspace data folder}'. Workspace data folder it's a
- * configured path where workspace projects, logs or any other data located. The number of
- * workspaces that can simultaneously store backups in one PV is limited only by the storage
- * capacity. The number of workspaces that can be running simultaneously depends on access mode
- * configuration and Che configuration limits.
+ * <p>This strategy uses subpaths for resolving backed up data paths collisions. <br>
+ * Subpaths evaluated as following: '{workspaceId}/{workspace data folder}'. Workspace data folder
+ * it's a configured path where workspace projects, logs or any other data located, this path may
+ * contain a machine name when conflicts can occur e.g. two identical agents inside different
+ * machines produce the same log file.
+ *
+ * <p>This strategy indirectly affects the workspace limits. <br>
+ * The number of workspaces that can simultaneously store backups in one PV is limited only by the
+ * storage capacity. The number of workspaces that can be running simultaneously depends on access
+ * mode configuration and Che configuration limits.
  *
  * @author Anton Korneta
  * @author Alexander Garagatyi
@@ -96,7 +102,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       for (Container container : podSpec.getContainers()) {
         String machineName = Names.machineName(pod, container);
         InternalMachineConfig machineConfig = osEnv.getMachines().get(machineName);
-        addMachineVolumes(workspaceId, subPaths, podSpec, container, machineConfig);
+        addMachineVolumes(workspaceId, subPaths, pod, container, machineConfig.getVolumes());
       }
     }
     if (preCreateDirs && !subPaths.isEmpty()) {
@@ -137,19 +143,20 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   private void addMachineVolumes(
       String workspaceId,
       Set<String> subPaths,
-      PodSpec podSpec,
+      Pod pod,
       Container container,
-      InternalMachineConfig machineConfig) {
-    if (machineConfig.getVolumes().isEmpty()) {
+      Map<String, Volume> volumes) {
+    if (volumes.isEmpty()) {
       return;
     }
-    for (Entry<String, Volume> volumeEntry : machineConfig.getVolumes().entrySet()) {
+    for (Entry<String, Volume> volumeEntry : volumes.entrySet()) {
       String volumePath = volumeEntry.getValue().getPath();
-      String subPath = getVolumeSubPath(workspaceId, volumeEntry.getKey());
+      String subPath =
+          getVolumeSubPath(workspaceId, volumeEntry.getKey(), Names.machineName(pod, container));
       subPaths.add(subPath);
 
       container.getVolumeMounts().add(newVolumeMount(pvcName, volumePath, subPath));
-      addVolumeIfNeeded(podSpec);
+      addVolumeIfNeeded(pod.getSpec());
     }
   }
 
@@ -166,7 +173,12 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   }
 
   /** Get sub-path for particular volume in a particular workspace */
-  private String getVolumeSubPath(String workspaceId, String volumeName) {
+  private String getVolumeSubPath(String workspaceId, String volumeName, String machineName) {
+    // logs must be located inside the folder related to the machine because few machines can
+    // contain the identical agents and in this case, a conflict is possible.
+    if (LOGS_VOLUME_NAME.equals(volumeName)) {
+      return getWorkspaceSubPath(workspaceId) + '/' + volumeName + '/' + machineName;
+    }
     // this path should correlate with path returned by method getWorkspaceSubPath
     // because this logic is used to correctly cleanup sub-paths related to a workspace
     return getWorkspaceSubPath(workspaceId) + '/' + volumeName;

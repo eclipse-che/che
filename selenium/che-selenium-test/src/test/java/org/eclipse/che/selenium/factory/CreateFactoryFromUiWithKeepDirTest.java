@@ -153,7 +153,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
           "GreetingController.java");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7959");
+      fail("Known issue https://github.com/eclipse/che/issues/8458");
     }
 
     mavenPluginStatusBar.waitClosingInfoPanel(UPDATING_PROJECT_TIMEOUT_SEC);

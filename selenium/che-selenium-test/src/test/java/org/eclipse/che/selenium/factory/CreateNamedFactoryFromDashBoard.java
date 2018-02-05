@@ -101,7 +101,7 @@ public class CreateNamedFactoryFromDashBoard {
       projectExplorer.openItemByPath(PROJECT_NAME);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7959");
+      fail("Known issue https://github.com/eclipse/che/issues/8458");
     }
 
     mavenPluginStatusBar.waitClosingInfoPanel();
