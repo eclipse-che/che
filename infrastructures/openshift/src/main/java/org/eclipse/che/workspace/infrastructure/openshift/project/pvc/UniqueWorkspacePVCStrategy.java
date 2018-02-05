@@ -16,6 +16,7 @@ import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShi
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.newVolume;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.newVolumeMount;
 import static org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftObjectUtil.putLabel;
+import static org.eclipse.che.workspace.infrastructure.openshift.provision.LogsVolumeMachineProvisioner.LOGS_VOLUME_NAME;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -41,11 +42,19 @@ import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProje
 /**
  * Provides a unique PVC for each workspace.
  *
- * <p>Name for PVCs are evaluated as: '{configured_prefix}' + '-' +'{generated_8_chars}' to avoid
- * naming collisions inside of one OpenShift project. Note that for this strategy count of
- * simultaneously running workspaces and workspaces with backed up data is always the same and equal
- * to the count of available PVCs in OpenShift project. Cleanup of backed up data is performed by
- * removing of PVC related to the workspace.
+ * <p>Names for PVCs are evaluated as: '{configured_prefix}' + '-' +'{generated_8_chars}' to avoid
+ * naming collisions inside of one OpenShift project.
+ *
+ * <p>Note that for this strategy count of simultaneously running workspaces and workspaces with
+ * backed up data is always the same and equal to the count of available PVCs in OpenShift project.
+ *
+ * <p>The usage of PVCs for this strategy is next: one PVC per volume, but for volumes that are
+ * provided by Che there a small exception: <br>
+ * - when the workspace contains few machines that are placed in separated pods and relies on the
+ * same volume then, for each of the pods' the separate PVC would be provided.
+ *
+ * <p>Cleanup of backed up data is performed by removing of PVC related to the workspace but when
+ * the volume or machine name is changed then related PVC would not be removed.
  *
  * @author Anton Korneta
  * @author Alexander Garagatyi
@@ -94,7 +103,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
       for (Container container : podSpec.getContainers()) {
         final String machineName = Names.machineName(pod, container);
         Map<String, Volume> volumes = osEnv.getMachines().get(machineName).getVolumes();
-        addMachineVolumes(workspaceId, claims, volumeName2PVC, podSpec, container, volumes);
+        addMachineVolumes(workspaceId, claims, volumeName2PVC, pod, container, volumes);
       }
     }
   }
@@ -115,7 +124,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
       String workspaceId,
       Map<String, PersistentVolumeClaim> provisionedClaims,
       Map<String, PersistentVolumeClaim> existingVolumeName2PVC,
-      PodSpec podSpec,
+      Pod pod,
       Container container,
       Map<String, Volume> volumes)
       throws InfrastructureException {
@@ -126,9 +135,11 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
         groupByVolumeName(provisionedClaims.values());
 
     for (Entry<String, Volume> volumeEntry : volumes.entrySet()) {
-      final String volumeName = volumeEntry.getKey();
       final String volumePath = volumeEntry.getValue().getPath();
-      final String subPath = workspaceId + '/' + volumeName;
+      final String volumeName =
+          LOGS_VOLUME_NAME.equals(volumeEntry.getKey())
+              ? volumeEntry.getKey() + '-' + pod.getMetadata().getName()
+              : volumeEntry.getKey();
       final PersistentVolumeClaim pvc;
       // checks whether PVC for given workspace and volume exists on remote
       if (existingVolumeName2PVC.containsKey(volumeName)) {
@@ -150,8 +161,12 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
       // binds pvc to pod and container
       container
           .getVolumeMounts()
-          .add(newVolumeMount(pvc.getMetadata().getName(), volumePath, subPath));
-      addVolumeIfAbsent(podSpec, pvc.getMetadata().getName());
+          .add(
+              newVolumeMount(
+                  pvc.getMetadata().getName(),
+                  volumePath,
+                  getSubPath(workspaceId, volumeName, Names.machineName(pod, container))));
+      addVolumeIfAbsent(pod.getSpec(), pvc.getMetadata().getName());
     }
   }
 
@@ -169,6 +184,15 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
     if (podSpec.getVolumes().stream().noneMatch(volume -> volume.getName().equals(pvcUniqueName))) {
       podSpec.getVolumes().add(newVolume(pvcUniqueName, pvcUniqueName));
     }
+  }
+
+  private String getSubPath(String workspaceId, String volumeName, String machineName) {
+    // logs must be located inside the folder related to the machine because few machines can
+    // contain the identical agents and in this case, a conflict is possible.
+    if (LOGS_VOLUME_NAME.equals(volumeName)) {
+      return workspaceId + '/' + volumeName + '/' + machineName;
+    }
+    return workspaceId + '/' + volumeName;
   }
 
   /** Groups list of given PVCs by volume name */

@@ -67,7 +67,6 @@ public class SystemServicePermissionsFilterTest {
   @Test
   public void allPublicMethodsAreFiltered() {
     Set<String> existingMethods = getDeclaredPublicMethods(SystemService.class);
-    existingMethods.addAll(getDeclaredPublicMethods(SystemService.class));
 
     if (!existingMethods.equals(TEST_HANDLED_METHODS)) {
       Set<String> existingMinusExpected = Sets.difference(existingMethods, TEST_HANDLED_METHODS);
@@ -138,18 +137,6 @@ public class SystemServicePermissionsFilterTest {
 
     verify(systemService, never()).getState();
   }
-
-  //    @Test
-  //    public void allowsToGetSystemRamForAnyone() throws Exception {
-  //        permitSubject("nothing");
-  //
-  //        given().auth()
-  //               .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-  //               .when()
-  //               .get(SECURE_PATH + "/system/ram/limit");
-  //
-  //        verify(systemService).getSystemRamLimitStatus();
-  //    }
 
   private static void permitSubject(String... allowedActions) throws ForbiddenException {
     doAnswer(

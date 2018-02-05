@@ -24,7 +24,6 @@ import java.util.Set;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.installer.server.exception.InstallerAlreadyExistsException;
 import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.server.exception.InstallerNotFoundException;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
@@ -60,14 +59,23 @@ public class LocalInstallerRegistry implements InstallerRegistry {
   }
 
   private void doInit(InstallerDao installerDao, Installer i) throws InstallerException {
-    String installerKey = InstallerFqn.of(i).toKey();
-    installerValidator.validate(i);
+    InstallerImpl installer = new InstallerImpl(i);
+    InstallerFqn installerFqn = InstallerFqn.of(i);
+    String installerKey = installerFqn.toKey();
 
+    installerValidator.validate(i);
     try {
-      installerDao.create(new InstallerImpl(i));
+      InstallerImpl existing = installerDao.getByFqn(installerFqn);
+      if (existing.equals(installer)) {
+        LOG.info(
+            format("Latest version of installer '%s' is already in the registry.", installerKey));
+      } else {
+        installerDao.update(installer);
+        LOG.info(format("Installer '%s' updated in the registry.", installerKey));
+      }
+    } catch (InstallerNotFoundException e) {
+      installerDao.create(installer);
       LOG.info(format("Installer '%s' added to the registry.", installerKey));
-    } catch (InstallerAlreadyExistsException e) {
-      LOG.info(format("Installer '%s' already exists in the registry.", installerKey));
     }
   }
 

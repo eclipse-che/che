@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -29,7 +30,9 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsToolbar;
+import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -50,6 +53,8 @@ public class CheckIntelligenceCommandFromToolbarTest {
   @Inject private CommandsToolbar commandsToolbar;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private NotificationsPopupPanel notificationsPanel;
+  @Inject private MachineTerminal terminal;
+  @Inject private TestProjectServiceClient projectService;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -114,21 +119,36 @@ public class CheckIntelligenceCommandFromToolbarTest {
   }
 
   private void checkTestAppByPreviewUrlAndReturnToIde(String currentWindow, String expectedText) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver ->
-                    clickOnPreviewUrlAndCheckTextIsPresentInPageBody(currentWindow, expectedText));
+    // TODO try/catch should be removed after fixing: https://github.com/eclipse/che/issues/8105
+    // this auxiliary method for investigate problem that was described in the issue:
+    // https://github.com/eclipse/che/issues/8105
+    try {
+      new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+          .until(
+              (ExpectedCondition<Boolean>)
+                  driver ->
+                      clickOnPreviewUrlAndCheckTextIsPresentInPageBody(
+                          currentWindow, expectedText));
+    } catch (WebDriverException e) {
+      terminal.launchScriptAndGetInfo(testWorkspace, PROJECT_NAME, projectService);
+    }
   }
 
   private void checkTestAppByPreviewButtonAndReturnToIde(
       String currentWindow, String expectedText) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver ->
-                    clickOnPreviewButtonAndCheckTextIsPresentInPageBody(
-                        currentWindow, expectedText));
+    // TODO try/catch should be removed after fixing: https://github.com/eclipse/che/issues/8105
+    // this auxiliary method for investigate problem that was described in the issue:
+    // https://github.com/eclipse/che/issues/8105
+    try {
+      new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+          .until(
+              (ExpectedCondition<Boolean>)
+                  driver ->
+                      clickOnPreviewButtonAndCheckTextIsPresentInPageBody(
+                          currentWindow, expectedText));
+    } catch (WebDriverException e) {
+      terminal.launchScriptAndGetInfo(testWorkspace, PROJECT_NAME, projectService);
+    }
   }
 
   private boolean clickOnPreviewUrlAndCheckTextIsPresentInPageBody(

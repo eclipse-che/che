@@ -12,7 +12,9 @@ package org.eclipse.che.workspace.infrastructure.docker;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
+import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
 import org.eclipse.che.infrastructure.docker.client.DockerRegistryDynamicAuthResolver;
@@ -32,6 +34,8 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.priviliged.Pr
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.proxy.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.securityopt.SecurityOptProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.volume.ExtraVolumesProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.server.mapping.ExternalIpURLRewriter;
+import org.eclipse.che.workspace.infrastructure.docker.server.mapping.SinglePortUrlRewriter;
 
 /** @author Alexander Garagatyi */
 public class DockerInfraModule extends AbstractModule {
@@ -67,5 +71,12 @@ public class DockerInfraModule extends AbstractModule {
     bind(
         org.eclipse.che.workspace.infrastructure.docker.monit.DockerAbandonedResourcesCleaner
             .class);
+
+    MapBinder<String, URLRewriter> rewriters =
+        MapBinder.newMapBinder(binder(), String.class, URLRewriter.class);
+    rewriters.addBinding("default").to(ExternalIpURLRewriter.class);
+    rewriters.addBinding("singleport").to(SinglePortUrlRewriter.class);
+
+    bind(URLRewriter.class).toProvider(UrlRewriterProvider.class);
   }
 }

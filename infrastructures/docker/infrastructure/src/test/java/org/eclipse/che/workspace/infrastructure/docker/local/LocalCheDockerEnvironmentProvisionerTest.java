@@ -21,6 +21,7 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.ContainerSystemSettingsProvisionersApplier;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.labels.RuntimeLabelsProvisioner;
+import org.eclipse.che.workspace.infrastructure.docker.provisioner.labels.SinglePortLabelsProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.memory.MemoryAttributeConverter;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.volume.VolumesConverter;
@@ -48,6 +49,7 @@ public class LocalCheDockerEnvironmentProvisionerTest {
   @Mock private EnvVarsConverter envVarsConverter;
   @Mock private MemoryAttributeConverter memoryAttributeConverter;
   @Mock private VolumesConverter volumesConverter;
+  @Mock private SinglePortLabelsProvisioner singlePortLabelsProvisioner;
 
   private LocalCheDockerEnvironmentProvisioner provisioner;
 
@@ -57,12 +59,14 @@ public class LocalCheDockerEnvironmentProvisionerTest {
   public void setUp() throws Exception {
     provisioner =
         new LocalCheDockerEnvironmentProvisioner(
+            true,
             settingsProvisioners,
             projectsVolumeProvisioner,
             installerConfigProvisioner,
             labelsProvisioner,
             dockerApiEnvProvisioner,
             wsAgentServerConfigProvisioner,
+            singlePortLabelsProvisioner,
             serversConverter,
             envVarsConverter,
             memoryAttributeConverter,
@@ -79,7 +83,8 @@ public class LocalCheDockerEnvironmentProvisionerTest {
           serversConverter,
           envVarsConverter,
           memoryAttributeConverter,
-          volumesConverter
+          volumesConverter,
+          singlePortLabelsProvisioner
         };
   }
 
@@ -104,6 +109,9 @@ public class LocalCheDockerEnvironmentProvisionerTest {
         .provision(eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder.verify(settingsProvisioners).provision(eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder.verify(dockerApiEnvProvisioner).provision(eq(dockerEnvironment), eq(runtimeIdentity));
+    inOrder
+        .verify(singlePortLabelsProvisioner)
+        .provision(eq(dockerEnvironment), eq(runtimeIdentity));
     inOrder.verifyNoMoreInteractions();
   }
 }

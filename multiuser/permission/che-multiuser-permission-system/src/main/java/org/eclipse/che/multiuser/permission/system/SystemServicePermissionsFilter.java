@@ -37,8 +37,6 @@ public class SystemServicePermissionsFilter extends CheMethodInvokerFilter {
             .getSubject()
             .checkPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
         break;
-      case "getSystemRamLimitStatus":
-        break;
       default:
         throw new ForbiddenException("The user does not have permission to perform this operation");
     }

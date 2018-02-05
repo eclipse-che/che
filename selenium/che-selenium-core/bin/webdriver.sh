@@ -531,14 +531,12 @@ fetchActualResults() {
     unset ACTUAL_RESULTS
     unset ACTUAL_RESULTS_URL
 
-    # define the URL of CI job to compare result with result on it
-    if [[ ${CHE_MULTIUSER} == true ]]; then
-      local nameOfCIJob=che-multiuser-integration-tests
-    else
-      local nameOfCIJob=che-integration-tests
-    fi
+    # define the URL of CI job to compare local result with result on CI
+    local multiuserToken=$([[ "$CHE_MULTIUSER" == true ]] && echo "-multiuser")
+    local infrastructureToken=$([[ "$CHE_INFRASTRUCTURE" == "openshift" ]] && echo "-ocp" || echo "-$CHE_INFRASTRUCTURE")
+    local nameOfCIJob="che-integration-tests${multiuserToken}-master${infrastructureToken}"
 
-    [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/$nameOfCIJob/"; }
+    [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/${nameOfCIJob}/"; }
 
     local build=$(echo $@ | sed 's/.*--compare-with-ci\W\+\([0-9]\+\).*/\1/')
     if [[ ! ${build} =~ ^[0-9]+$ ]]; then
