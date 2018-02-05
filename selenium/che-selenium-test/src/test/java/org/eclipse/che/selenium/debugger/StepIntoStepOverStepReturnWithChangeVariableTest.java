@@ -36,6 +36,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
 import org.eclipse.che.selenium.pageobject.debug.JavaDebugConfig;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
+import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterMethod;
@@ -66,6 +67,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
   @Inject private Loader loader;
   @Inject private CommandsPalette commandsPalette;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private MachineTerminal machineTerminal;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -135,10 +137,14 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
         debugUtils.gotoDebugAppAndSendRequest(
             appUrl, requestMess, APPLICATION_FORM_URLENCODED, 200);
     editor.waitActiveBreakpoint(34);
+    // TODO try/catch should be removed after fixing: https://github.com/eclipse/che/issues/8105
+    // this auxiliary method for investigate problem that was described in the issue:
+    // https://github.com/eclipse/che/issues/8105
     try {
       debugPanel.waitDebugHighlightedText("result = \"Sorry, you failed. Try again later!\";");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
+      machineTerminal.launchScriptAndGetInfo(ws, PROJECT, testProjectServiceClient);
       fail("Known issue: https://github.com/eclipse/che/issues/8105", ex);
     }
 

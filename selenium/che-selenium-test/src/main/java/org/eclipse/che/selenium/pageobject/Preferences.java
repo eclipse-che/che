@@ -573,11 +573,8 @@ public class Preferences {
     gitHub.typePass(githubPassword);
     gitHub.clickOnSignInButton();
 
-    loader.waitOnClosed();
-
     // authorize on github.com
     if (seleniumWebDriver.getWindowHandles().size() > 1) {
-      loader.waitOnClosed();
       gitHub.waitAuthorizeBtn();
       gitHub.clickOnAuthorizeBtn();
       seleniumWebDriver.switchTo().window(ideWin);

@@ -30,9 +30,10 @@ class TerminalHttpConnectionServerChecker extends HttpConnectionServerChecker {
       String serverRef,
       long period,
       long timeout,
+      int successThreshold,
       TimeUnit timeUnit,
       Timer timer) {
-    super(url, machineName, serverRef, period, timeout, timeUnit, timer);
+    super(url, machineName, serverRef, period, timeout, successThreshold, timeUnit, timer);
   }
 
   @Override

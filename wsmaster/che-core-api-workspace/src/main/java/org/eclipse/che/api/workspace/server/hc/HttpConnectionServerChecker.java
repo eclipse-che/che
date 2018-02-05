@@ -34,9 +34,10 @@ public class HttpConnectionServerChecker extends ServerChecker {
       String serverRef,
       long period,
       long timeout,
+      int successThreshold,
       TimeUnit timeUnit,
       Timer timer) {
-    super(machineName, serverRef, period, timeout, timeUnit, timer);
+    super(machineName, serverRef, period, timeout, successThreshold, timeUnit, timer);
     this.url = url;
   }
 

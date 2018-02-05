@@ -283,4 +283,9 @@ else
    export JAVA_OPTS="${CHE_WORKSPACE_WSAGENT__JAVA__OPTIONS}"
 fi
 
+## Checks whether workspace logs root exists if it does then overrides ws-agent logs directory
+if [ -d "${CHE_WORKSPACE_LOGS_ROOT__DIR}" ]; then
+  export CHE_LOGS_DIR=$CHE_WORKSPACE_LOGS_ROOT__DIR/ws-agent
+fi
+
 export JPDA_ADDRESS="4403" && ~/che/ws-agent/bin/catalina.sh jpda run

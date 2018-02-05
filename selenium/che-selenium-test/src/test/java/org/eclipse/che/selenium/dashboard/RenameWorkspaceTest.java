@@ -11,10 +11,8 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.RUNNING;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.OVERVIEW;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Statuses.STOPPED;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -69,6 +67,8 @@ public class RenameWorkspaceTest {
   public void renameNameWorkspaceTest() throws IOException {
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
+    workspaces.clickOnWorkspaceActionsButton(workspaceName);
+    workspaces.waitWorkspaceStatusIs(workspaceName, STOPPED);
     workspaces.selectWorkspaceItemName(workspaceName);
     workspaceDetails.waitToolbarTitleName(workspaceName);
     workspaceDetails.selectTabInWorkspaceMenu(OVERVIEW);
@@ -102,7 +102,7 @@ public class RenameWorkspaceTest {
 
   private void saveAndWaitWorkspaceRestarted() {
     workspaceDetails.clickOnSaveChangesBtn();
-    workspaceDetails.checkStateOfWorkspace(STOPPING);
-    workspaceDetails.checkStateOfWorkspace(RUNNING, UPDATING_PROJECT_TIMEOUT_SEC);
+    dashboard.waitNotificationMessage("Workspace updated");
+    dashboard.waitNotificationIsClosed();
   }
 }
