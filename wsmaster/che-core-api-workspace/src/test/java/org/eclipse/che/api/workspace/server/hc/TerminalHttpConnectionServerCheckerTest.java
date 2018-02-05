@@ -39,7 +39,14 @@ public class TerminalHttpConnectionServerCheckerTest {
   public void setUp() throws Exception {
     checker =
         new TerminalHttpConnectionServerChecker(
-            new URL("http://localhost"), MACHINE_NAME, SERVER_REF, 1, 10, TimeUnit.SECONDS, timer);
+            new URL("http://localhost"),
+            MACHINE_NAME,
+            SERVER_REF,
+            1,
+            10,
+            1,
+            TimeUnit.SECONDS,
+            timer);
   }
 
   @Test

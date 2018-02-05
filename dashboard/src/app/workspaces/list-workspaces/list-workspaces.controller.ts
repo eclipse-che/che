@@ -158,6 +158,9 @@ export class ListWorkspacesCtrl {
           let userWorkspace = this.cheAPI.getWorkspace().getWorkspaceById(workspace.id);
           this.getWorkspaceInfo(userWorkspace);
           this.userWorkspaces.push(userWorkspace);
+        }).catch((error) => {
+          let message = error.data && error.data.message ? ' Reason: ' + error.data.message : '';
+          this.cheNotification.showError('Failed to retrieve workspace ' + workspace.config.name + ' data.' + message) ;
         });
         promises.push(promise);
       } else {

@@ -49,6 +49,7 @@ public class ServersCheckerTest {
   private static final String MACHINE_NAME = "mach1";
   private static final String MACHINE_TOKEN = "machineToken";
   private static final String WORKSPACE_ID = "ws123";
+  private static final int SERVER_PING_SUCCESS_THRESHOLD = 1;
 
   @Mock private Consumer<String> readinessHandler;
   @Mock private MachineTokenProvider machineTokenProvider;
@@ -74,7 +75,14 @@ public class ServersCheckerTest {
 
     when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
-    checker = spy(new ServersChecker(runtimeIdentity, MACHINE_NAME, servers, machineTokenProvider));
+    checker =
+        spy(
+            new ServersChecker(
+                runtimeIdentity,
+                MACHINE_NAME,
+                servers,
+                machineTokenProvider,
+                SERVER_PING_SUCCESS_THRESHOLD));
     when(checker.doCreateChecker(any(URL.class), anyString())).thenReturn(connectionChecker);
     when(machineTokenProvider.getToken(anyString())).thenReturn(MACHINE_TOKEN);
   }
