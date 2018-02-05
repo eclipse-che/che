@@ -39,6 +39,7 @@ node default {
   # Single port configuration
   #
   $che_single_port = getValue("CHE_SINGLE_PORT","false")
+  $che_single_port_wildcard_domain_host = getValue("CHE_SINGLEPORT_WILDCARD__DOMAIN_HOST","nip.io")
 
   ###############################
   # Che multiuser

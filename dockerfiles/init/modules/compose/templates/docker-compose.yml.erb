@@ -84,6 +84,11 @@ services:
     command: --logLevel=DEBUG
     links:
       - che:che
+<% if scope.lookupvar('che::che_multiuser') == 'true' -%>
+    networks:
+      - default
+      - che-network
+<% end -%>
     labels:
       traefik.enable: "false"
     ports:
@@ -158,9 +163,9 @@ services:
       traefik.keycloak.frontend.entryPoints: "http"
       traefik.keycloak.port: "8080"
 <% if ! @che_docker_ip_external.empty? -%>
-      traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::che_docker_ip_external') -%>.nip.io"
+      traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::che_docker_ip_external') -%>.<%= scope.lookupvar('che::che_single_port_wildcard_domain_host') -%>"
 <% else -%>
-      traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::docker_ip') -%>.nip.io"
+      traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::docker_ip') -%>.<%= scope.lookupvar('che::che_single_port_wildcard_domain_host') -%>"
 <% end -%>
       traefik.docker.network: "che_default"
 <% end -%>
