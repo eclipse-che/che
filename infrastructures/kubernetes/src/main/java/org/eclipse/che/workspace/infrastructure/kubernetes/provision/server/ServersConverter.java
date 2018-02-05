@@ -14,6 +14,8 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import java.util.Map;
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -36,6 +38,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServ
 @Singleton
 public class ServersConverter implements ConfigurationProvisioner {
 
+  private final Map<String, String> ingressAnnotations;
+
+  @Inject
+  public ServersConverter(
+      @Named("infra.kubernetes.ingress.annotations") Map<String, String> ingressAnnotations) {
+    this.ingressAnnotations = ingressAnnotations;
+  }
+
   @Override
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
@@ -47,7 +57,8 @@ public class ServersConverter implements ConfigurationProvisioner {
         InternalMachineConfig machineConfig = k8sEnv.getMachines().get(machineName);
         if (!machineConfig.getServers().isEmpty()) {
           KubernetesServerExposer kubernetesServerExposer =
-              new KubernetesServerExposer<>(machineName, podConfig, containerConfig, k8sEnv);
+              new KubernetesServerExposer<>(
+                  ingressAnnotations, machineName, podConfig, containerConfig, k8sEnv);
           kubernetesServerExposer.expose(machineConfig.getServers());
         }
       }

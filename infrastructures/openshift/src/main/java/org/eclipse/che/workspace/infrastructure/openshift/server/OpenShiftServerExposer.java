@@ -19,6 +19,7 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.Route;
+import java.util.Collections;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
@@ -94,7 +95,7 @@ public class OpenShiftServerExposer extends KubernetesServerExposer<OpenShiftEnv
 
   public OpenShiftServerExposer(
       String machineName, Pod pod, Container container, OpenShiftEnvironment openShiftEnvironment) {
-    super(machineName, pod, container, openShiftEnvironment);
+    super(Collections.emptyMap(), machineName, pod, container, openShiftEnvironment);
     this.openShiftEnvironment = openShiftEnvironment;
   }
 

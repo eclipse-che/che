@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
@@ -125,13 +126,19 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
   public static final int SERVER_UNIQUE_PART_SIZE = 8;
   public static final String SERVER_PREFIX = "server";
 
+  private final Map<String, String> ingressAnnotations;
   protected final String machineName;
   protected final Container container;
   protected final Pod pod;
   protected final T kubernetesEnvironment;
 
   public KubernetesServerExposer(
-      String machineName, Pod pod, Container container, T kubernetesEnvironment) {
+      @Named("infra.kubernetes.ingress.annotations") Map<String, String> ingressAnnotations,
+      String machineName,
+      Pod pod,
+      Container container,
+      T kubernetesEnvironment) {
+    this.ingressAnnotations = ingressAnnotations;
     this.machineName = machineName;
     this.pod = pod;
     this.container = container;
@@ -196,6 +203,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
               .withName(serviceName + '-' + servicePort.getName())
               .withMachineName(machineName)
               .withServiceName(serviceName)
+              .withAnnotations(ingressAnnotations)
               .withServicePort(servicePort.getName())
               .withServers(ingressesServers)
               .build();
@@ -299,6 +307,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
     private IntOrString servicePort;
     private Map<String, ? extends ServerConfig> serversConfigs;
     private String machineName;
+    private Map<String, String> annotations;
 
     private IngressBuilder withName(String name) {
       this.name = name;
@@ -307,6 +316,11 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
 
     private IngressBuilder withServiceName(String serviceName) {
       this.serviceName = serviceName;
+      return this;
+    }
+
+    private IngressBuilder withAnnotations(Map<String, String> annotations) {
+      this.annotations = annotations;
       return this;
     }
 
@@ -342,10 +356,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
       IngressRule ingressRule = new IngressRuleBuilder().withHttp(httpIngressRuleValue).build();
       IngressSpec ingressSpec = new IngressSpecBuilder().withRules(ingressRule).build();
 
-      Map<String, String> ingressAnnotations = new HashMap<>();
-      ingressAnnotations.put("ingress.kubernetes.io/rewrite-target", "/");
-      ingressAnnotations.put("ingress.kubernetes.io/ssl-redirect", "false");
-      ingressAnnotations.put("kubernetes.io/ingress.class", "nginx");
+      Map<String, String> ingressAnnotations = new HashMap<>(annotations);
       ingressAnnotations.putAll(
           Annotations.newSerializer()
               .servers(serversConfigs)

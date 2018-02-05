@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
@@ -38,7 +39,9 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
@@ -46,6 +49,7 @@ import org.testng.annotations.Test;
  *
  * @author Sergii Leshchenko
  */
+@Listeners(MockitoTestNGListener.class)
 public class KubernetesServerExposerTest {
 
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
@@ -76,7 +80,8 @@ public class KubernetesServerExposerTest {
     kubernetesEnvironment =
         KubernetesEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
     this.serverExposer =
-        new KubernetesServerExposer<>(MACHINE_NAME, pod, container, kubernetesEnvironment);
+        new KubernetesServerExposer<>(
+            emptyMap(), MACHINE_NAME, pod, container, kubernetesEnvironment);
   }
 
   @Test
