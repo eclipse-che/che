@@ -157,8 +157,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
     editor.waitAllMarkersDisappear(ERROR_MARKER);
   }
 
-  private void makeKeepDirectoryFromGitUrl(String url, String projectName, String folderName)
-      throws Exception {
+  private void makeKeepDirectoryFromGitUrl(String url, String projectName, String folderName) {
     menu.runCommand(WORKSPACE, IMPORT_PROJECT);
     importProjectFromLocation.waitMainForm();
     loader.waitOnClosed();
