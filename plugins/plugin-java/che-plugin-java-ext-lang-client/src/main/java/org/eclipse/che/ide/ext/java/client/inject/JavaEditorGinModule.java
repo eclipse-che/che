@@ -18,7 +18,6 @@ import org.eclipse.che.ide.ext.java.client.editor.JavaAnnotationModelFactory;
 import org.eclipse.che.ide.ext.java.client.editor.JavaFormatter;
 import org.eclipse.che.ide.ext.java.client.editor.JavaPartitionScanner;
 import org.eclipse.che.ide.ext.java.client.editor.JavaPartitionerFactory;
-import org.eclipse.che.ide.ext.java.client.editor.JavaReconcileUpdateOperation;
 import org.eclipse.che.ide.ext.java.client.editor.JsJavaEditorConfigurationFactory;
 
 @ExtensionGinModule
@@ -31,6 +30,5 @@ public class JavaEditorGinModule extends AbstractGinModule {
     bind(ContentFormatter.class).to(JavaFormatter.class);
     bind(JavaPartitionScanner.class);
     bind(JavaPartitionerFactory.class);
-    bind(JavaReconcileUpdateOperation.class).asEagerSingleton();
   }
 }
