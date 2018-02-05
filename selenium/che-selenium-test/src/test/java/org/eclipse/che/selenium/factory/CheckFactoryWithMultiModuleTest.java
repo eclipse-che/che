@@ -74,8 +74,8 @@ public class CheckFactoryWithMultiModuleTest {
     projectExplorer.waitProjectExplorer();
     notifications.waitExpectedMessageOnProgressPanelAndClosed(
         "Project " + PROJECT_NAME + " imported");
-    pullRequestPanel.waitOpenPanel();
     projectExplorer.selectItem(PROJECT_NAME);
+    pullRequestPanel.waitOpenPanel();
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", PROJECT_FOLDER);
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(
