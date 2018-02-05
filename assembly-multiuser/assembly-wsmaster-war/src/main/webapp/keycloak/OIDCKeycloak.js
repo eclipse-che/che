@@ -9,6 +9,15 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 
+/*
+ * This is a modified version of the Keycloak Javascript Adapter whose 
+ * original sources can be found there: 
+ * https://github.com/keycloak/keycloak/blob/master/adapters/oidc/js/src/main/resources/keycloak.js
+ * 
+ * Modifications allow using the Keycloak Javascript Adapter library with alternate OIDC-compliant providers,
+ * provided that they produce access tokens as JWT tokens with `iat` and `exp` claims.
+ */
+
 (function( window, undefined ) {
 
     var Keycloak = function (config) {
