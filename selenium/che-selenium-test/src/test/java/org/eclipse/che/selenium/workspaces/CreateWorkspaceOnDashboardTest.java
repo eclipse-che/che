@@ -83,6 +83,7 @@ public class CreateWorkspaceOnDashboardTest {
     // wait that the workspace is started
     projectExplorer.waitProjectExplorer(PREPARING_WS_TIMEOUT_SEC); // we need long timeout for OSIO
     terminal.waitTerminalTab(PREPARING_WS_TIMEOUT_SEC); // we need long timeout for OSIO
+    menu.waitMenuItemIsEnabled(WORKSPACE);
 
     // Import the "web-java-spring" project
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
