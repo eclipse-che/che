@@ -46,3 +46,5 @@ wsagent/che-core-api-languageserver*/** @evidolob @dkuleshov
 wsagent/che-core-api-testing*/** @evidolob
 wsagent/che-wsagent-core/** @skabashnyuk
 wsagent/wsagent-local/** @skabashnyuk
+wsagent/che-core-api-project/src/main/java/org/eclipse/che/api/search/server/** @skabashnyuk
+wsagent/che-core-api-project/src/test/java/org/eclipse/che/api/search/** @skabashnyuk
