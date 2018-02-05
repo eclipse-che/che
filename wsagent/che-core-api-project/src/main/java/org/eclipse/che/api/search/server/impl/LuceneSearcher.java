@@ -439,7 +439,6 @@ public class LuceneSearcher implements Searcher {
     if (LOG.isDebugEnabled()) {
       IndexSearcher luceneSearcher = null;
       try {
-        final long startTime = System.currentTimeMillis();
         searcherManager.maybeRefresh();
         luceneSearcher = searcherManager.acquire();
         IndexReader reader = luceneSearcher.getIndexReader();
