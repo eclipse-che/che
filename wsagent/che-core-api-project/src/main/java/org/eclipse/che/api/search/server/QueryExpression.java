@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.search.server.impl;
+package org.eclipse.che.api.search.server;
 
 /** Container for parameters of query that executed by Searcher. */
 public class QueryExpression {

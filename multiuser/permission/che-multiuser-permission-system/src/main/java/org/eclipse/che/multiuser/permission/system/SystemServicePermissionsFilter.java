@@ -32,10 +32,11 @@ public class SystemServicePermissionsFilter extends CheMethodInvokerFilter {
   protected void filter(GenericResourceMethod resource, Object[] args) throws ApiException {
     switch (resource.getMethod().getName()) {
       case "stop":
-      case "getState":
         EnvironmentContext.getCurrent()
             .getSubject()
             .checkPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
+        break;
+      case "getState":
         break;
       default:
         throw new ForbiddenException("The user does not have permission to perform this operation");

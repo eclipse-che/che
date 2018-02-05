@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.projectimport.wizard.presenter;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import java.util.HashMap;
@@ -18,7 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
-import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
 import org.eclipse.che.ide.api.wizard.Wizard;
@@ -27,7 +28,7 @@ import org.eclipse.che.ide.projectimport.wizard.ImportWizard;
 import org.eclipse.che.ide.projectimport.wizard.ImportWizardFactory;
 import org.eclipse.che.ide.projectimport.wizard.ImportWizardRegistry;
 import org.eclipse.che.ide.projectimport.wizard.mainpage.MainPagePresenter;
-import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * Presenter for import project wizard dialog.
@@ -41,12 +42,11 @@ public class ImportProjectWizardPresenter
         ImportProjectWizardView.EnterPressedDelegate,
         MainPagePresenter.ImporterSelectionListener {
 
-  private final DialogFactory dialogFactory;
-  private final ImportWizardFactory importWizardFactory;
-  private final ImportProjectWizardView view;
-  private final Provider<MainPagePresenter> mainPageProvider;
-  private final CoreLocalizationConstant locale;
-  private final ImportWizardRegistry wizardRegistry;
+  private ImportWizardFactory importWizardFactory;
+  private ImportProjectWizardView view;
+  private Provider<MainPagePresenter> mainPageProvider;
+  private ImportWizardRegistry wizardRegistry;
+
   private final Map<ProjectImporterDescriptor, ImportWizard> wizardsCache;
 
   private MainPagePresenter mainPage;
@@ -57,17 +57,13 @@ public class ImportProjectWizardPresenter
   public ImportProjectWizardPresenter(
       ImportProjectWizardView view,
       MainPagePresenter mainPage,
-      CoreLocalizationConstant locale,
       Provider<MainPagePresenter> mainPageProvider,
       ImportWizardRegistry wizardRegistry,
-      DialogFactory dialogFactory,
       ImportWizardFactory importWizardFactory) {
     this.view = view;
-    this.locale = locale;
     this.wizardRegistry = wizardRegistry;
     this.mainPage = mainPage;
     this.mainPageProvider = mainPageProvider;
-    this.dialogFactory = dialogFactory;
     this.importWizardFactory = importWizardFactory;
     wizardsCache = new HashMap<>();
     view.setDelegate(this);
@@ -102,9 +98,10 @@ public class ImportProjectWizardPresenter
           @Override
           public void onFailure(Throwable e) {
             view.setLoaderVisibility(false);
-            dialogFactory
-                .createMessageDialog(locale.importProjectViewTitle(), e.getMessage(), null)
-                .show();
+
+            if (e != null && !isNullOrEmpty(e.getLocalizedMessage())) {
+              Log.error(getClass(), e.getLocalizedMessage());
+            }
           }
         });
   }
