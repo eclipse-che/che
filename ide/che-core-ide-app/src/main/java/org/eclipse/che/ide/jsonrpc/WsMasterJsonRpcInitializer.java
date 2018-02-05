@@ -89,12 +89,6 @@ public class WsMasterJsonRpcInitializer {
 
     eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> initialize());
     eventBus.addHandler(WorkspaceStartingEvent.TYPE, e -> initialize());
-    eventBus.addHandler(
-        WorkspaceStoppedEvent.TYPE,
-        e -> {
-          //          unsubscribeFromEvents();
-          //          terminate();
-        });
   }
 
   private void initialize() {
