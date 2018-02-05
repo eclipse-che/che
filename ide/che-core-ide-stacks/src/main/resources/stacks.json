@@ -62,7 +62,7 @@
       "commands": []
     },
     "stackIcon": {
-      "name": "type-java.svg",
+      "name": "type-theia.svg",
       "mediaType": "image/svg+xml"
     }
   },
@@ -129,7 +129,7 @@
       "commands": []
     },
     "stackIcon": {
-      "name": "type-java.svg",
+      "name": "type-theia.svg",
       "mediaType": "image/svg+xml"
     }
   },
