@@ -93,6 +93,7 @@ public class DirectUrlFactoryWithSpecificBranch {
     try {
       projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");
     } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/8616");
     }
     projectExplorer.waitItem("gitPullTest/my-lib/pom.xml");

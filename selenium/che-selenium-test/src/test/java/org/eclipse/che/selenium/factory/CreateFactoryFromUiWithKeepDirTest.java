@@ -151,8 +151,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
     projectExplorer.selectItem(PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        PROJECT_NAME + "/" + KEEPED_DIR + "/src" + "/main" + "/java/hello",
-        "GreetingController.java");
+        PROJECT_NAME + "/" + KEEPED_DIR + "/src/main/java/hello", "GreetingController.java");
 
     mavenPluginStatusBar.waitClosingInfoPanel(UPDATING_PROJECT_TIMEOUT_SEC);
     editor.waitAllMarkersDisappear(ERROR_MARKER);
