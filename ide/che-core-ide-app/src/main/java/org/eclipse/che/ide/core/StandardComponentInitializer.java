@@ -71,6 +71,7 @@ import org.eclipse.che.ide.actions.HotKeysListAction;
 import org.eclipse.che.ide.actions.ImportProjectAction;
 import org.eclipse.che.ide.actions.LinkWithEditorAction;
 import org.eclipse.che.ide.actions.NavigateToFileAction;
+import org.eclipse.che.ide.actions.NewXmlFileAction;
 import org.eclipse.che.ide.actions.OpenFileAction;
 import org.eclipse.che.ide.actions.ProjectConfigurationAction;
 import org.eclipse.che.ide.actions.RedoAction;
@@ -159,7 +160,6 @@ import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.ide.workspace.StopWorkspaceAction;
-import org.eclipse.che.ide.actions.NewXmlFileAction;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
