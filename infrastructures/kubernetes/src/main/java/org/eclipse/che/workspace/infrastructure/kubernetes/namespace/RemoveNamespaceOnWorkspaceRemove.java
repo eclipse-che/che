@@ -15,6 +15,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import javax.inject.Named;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
@@ -66,6 +67,13 @@ public class RemoveNamespaceOnWorkspaceRemove implements EventSubscriber<Workspa
 
   @VisibleForTesting
   void doRemoveNamespace(String namespaceName) throws InfrastructureException {
-    clientFactory.create().namespaces().withName(namespaceName).delete();
+    try {
+      clientFactory.create().namespaces().withName(namespaceName).delete();
+    } catch (KubernetesClientException e) {
+      if (!(e.getCode() == 403)) {
+        throw new InfrastructureException(e.getMessage(), e);
+      }
+      // namespace doesn't exist
+    }
   }
 }
