@@ -15,8 +15,6 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPA
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.core.util.ProcessUtil;
@@ -48,7 +46,7 @@ public class DockerUtil {
       if (stdoutConsumer.getText().equals("true")) {
         return true;
       }
-    } catch (InterruptedException | IOException | TimeoutException | RuntimeException e) {
+    } catch (Exception e) {
       LOG.warn("Can't check if Eclipse Che run locally.", e);
     }
 

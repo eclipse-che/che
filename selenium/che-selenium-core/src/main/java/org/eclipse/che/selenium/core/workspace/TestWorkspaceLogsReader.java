@@ -29,8 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Reads and stores the workspace logs by using command line operations.
- * It ignores absent or empty logs directory.
+ * Reads and stores the workspace logs by using command line operations. It ignores absent or empty
+ * logs directory.
  *
  * @author Dmytro Nochevnov
  */

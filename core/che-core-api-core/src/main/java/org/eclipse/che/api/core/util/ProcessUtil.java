@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author andrew00x
  * @author Alexander Garagatyi
+ * @author Dmytro Nochevnov
  */
 public final class ProcessUtil {
 
@@ -139,9 +140,9 @@ public final class ProcessUtil {
    * @param stderr a consumer where stderr will be redirected
    * @return the started process
    * @throws InterruptedException in case terminate process
-   * @throws IOException in case I/O error
+   * @throws IOException in case I/O error, or command execution error, or stderr is not empty after
+   *     the command execution
    * @throws TimeoutException if process gets more time then defined by {@code timeout}
-   * @throws RuntimeException if stderr is not empty after the command execution
    */
   public static Process executeAndWait(
       String[] commandLine,
@@ -154,19 +155,20 @@ public final class ProcessUtil {
 
     Process process = pb.start();
 
-    CompletableFuture.runAsync(
-        () -> {
-          try {
-            // consume logs until process ends
-            readOutput(process, stdout, stderr);
-          } catch (IOException e) {
-            LOG.error(
-                format(
-                    "Failed to complete reading of the process '%s' output due to occurred error",
-                    Joiner.on(" ").join(commandLine)),
-                e);
-          }
-        });
+    CompletableFuture<Void> future =
+        CompletableFuture.runAsync(
+            () -> {
+              try {
+                // consume logs until process ends
+                readOutput(process, stdout, stderr);
+              } catch (IOException e) {
+                LOG.error(
+                    format(
+                        "Failed to complete reading of the process '%s' output due to occurred error",
+                        Joiner.on(" ").join(commandLine)),
+                    e);
+              }
+            });
 
     if (!process.waitFor(timeout, timeUnit)) {
       try {
@@ -180,9 +182,11 @@ public final class ProcessUtil {
               Joiner.on(" ").join(commandLine), timeout, timeUnit.name().toLowerCase()));
     }
 
+    future.join(); // wait until process output is read
+
     String errorMessage = stderr.getText();
     if (!errorMessage.isEmpty()) {
-      throw new RuntimeException(
+      throw new IOException(
           format(
               "Failed to execute command '%s' due to occurred error: %s",
               Arrays.toString(commandLine), errorMessage));

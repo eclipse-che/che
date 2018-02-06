@@ -10,16 +10,27 @@
  */
 package org.eclipse.che.api.core.util;
 
+import static org.eclipse.che.api.core.util.ProcessUtil.executeAndWait;
+import static org.testng.Assert.assertEquals;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-/** @author andrew00x */
+/**
+ * @author andrew00x
+ * @author Dmytro Nochevnov
+ */
 public class ProcessUtilTest {
+
+  private static final String TEST_MESSAGE = "123";
+  private static final String UNKNOWN_COMMAND = "command-65asdfax3a532v1zc32v1";
+  private static final String PRINT_TO_STDERR_COMMAND = ">&2 echo " + TEST_MESSAGE;
 
   @Test
   public void testKill() throws Exception {
@@ -29,36 +40,34 @@ public class ProcessUtilTest {
     final IOException[] processError = new IOException[1];
     final CountDownLatch latch = new CountDownLatch(1);
     final long start = System.currentTimeMillis();
-    new Thread() {
-      public void run() {
-        try {
-          ProcessUtil.readOutput(
-              p,
-              new LineConsumer() {
-                @Override
-                public void writeLine(String line) throws IOException {
-                  stdout.add(line);
-                }
+    new Thread(() -> {
+      try {
+        ProcessUtil.readOutput(
+            p,
+            new LineConsumer() {
+              @Override
+              public void writeLine(String line) throws IOException {
+                stdout.add(line);
+              }
 
-                @Override
-                public void close() throws IOException {}
-              },
-              new LineConsumer() {
-                @Override
-                public void writeLine(String line) throws IOException {
-                  stderr.add(line);
-                }
+              @Override
+              public void close() throws IOException {}
+            },
+            new LineConsumer() {
+              @Override
+              public void writeLine(String line) throws IOException {
+                stderr.add(line);
+              }
 
-                @Override
-                public void close() throws IOException {}
-              });
-        } catch (IOException e) {
-          processError[0] = e; // throw when kill process
-        } finally {
-          latch.countDown();
-        }
+              @Override
+              public void close() throws IOException {}
+            });
+      } catch (IOException e) {
+        processError[0] = e; // throw when kill process
+      } finally {
+        latch.countDown();
       }
-    }.start();
+    }).start();
 
     Thread.sleep(1000); // give time to start process
     Assert.assertTrue(ProcessUtil.isAlive(p), "Process is not started.");
@@ -78,5 +87,50 @@ public class ProcessUtilTest {
     // processError[0].printStackTrace();
     System.out.println(stdout);
     System.out.println(stderr);
+  }
+
+  @Test
+  public void testExecuteAndWaitSuccessfully()
+      throws TimeoutException, InterruptedException, IOException {
+    // given
+    final ListLineConsumer stdout = new ListLineConsumer();
+    final ListLineConsumer stderr = new ListLineConsumer();
+
+    // when
+    executeAndWait(new String[] {"echo", TEST_MESSAGE}, 5, TimeUnit.SECONDS, stdout, stderr);
+
+    // then
+    assertEquals(stdout.getText(), TEST_MESSAGE);
+    assertEquals(stderr.getText(), "");
+  }
+
+  @Test(
+    expectedExceptions = IOException.class,
+    expectedExceptionsMessageRegExp = ".*" + UNKNOWN_COMMAND + ".*"
+  )
+  public void testExecuteAndWaitCommandError()
+      throws InterruptedException, IOException, TimeoutException {
+    // when
+    executeAndWait(
+        new String[] {UNKNOWN_COMMAND},
+        5,
+        TimeUnit.SECONDS,
+        new ListLineConsumer(),
+        new ListLineConsumer());
+  }
+
+  @Test(
+    expectedExceptions = IOException.class,
+    expectedExceptionsMessageRegExp = ".*" + TEST_MESSAGE + ".*"
+  )
+  public void testExecuteAndWaitCommandErrorInSTDERR()
+      throws InterruptedException, IOException, TimeoutException {
+    // when
+    executeAndWait(
+        new String[] {PRINT_TO_STDERR_COMMAND},
+        5,
+        TimeUnit.SECONDS,
+        new ListLineConsumer(),
+        new ListLineConsumer());
   }
 }
