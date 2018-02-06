@@ -20,6 +20,7 @@ import static org.eclipse.che.ide.actions.EditorActions.SPLIT_HORIZONTALLY;
 import static org.eclipse.che.ide.actions.EditorActions.SPLIT_VERTICALLY;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_COMMAND_EXPLORER_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDIT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDITOR_CONTEXT_MENU;
@@ -116,6 +117,8 @@ import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
+import org.eclipse.che.ide.command.actions.MoveCommandAction;
+import org.eclipse.che.ide.command.actions.RenameCommandAction;
 import org.eclipse.che.ide.command.editor.CommandEditorProvider;
 import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
 import org.eclipse.che.ide.devmode.DevModeOffAction;
@@ -392,6 +395,10 @@ public class StandardComponentInitializer {
   @Inject private EditorDisplayingModeAction editorDisplayingModeAction;
 
   @Inject private TerminalDisplayingModeAction terminalDisplayingModeAction;
+
+  @Inject private RenameCommandAction renameCommandAction;
+
+  @Inject private MoveCommandAction moveCommandAction;
 
   @Inject
   @Named("XMLFileType")
@@ -850,6 +857,14 @@ public class StandardComponentInitializer {
 
     editorContextMenuGroup.addSeparator();
     editorContextMenuGroup.add(revealResourceAction);
+
+    DefaultActionGroup commandExplorerMenuGroup = new DefaultActionGroup(actionManager);
+    actionManager.registerAction(GROUP_COMMAND_EXPLORER_CONTEXT_MENU, commandExplorerMenuGroup);
+
+    actionManager.registerAction("renameCommand", renameCommandAction);
+    commandExplorerMenuGroup.add(renameCommandAction);
+    actionManager.registerAction("moveCommand", moveCommandAction);
+    commandExplorerMenuGroup.add(moveCommandAction);
 
     // Define hot-keys
     keyBinding
