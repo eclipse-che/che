@@ -10,27 +10,35 @@
  */
 package org.eclipse.che.commons.lang.concurrent;
 
+import java.util.Map;
 import java.util.concurrent.Callable;
+import org.slf4j.MDC;
 
 /** @author andrew00x */
 class CopyThreadLocalCallable<T> implements Callable<T> {
   private final Callable<? extends T> wrapped;
   private final ThreadLocalPropagateContext.ThreadLocalState threadLocalState;
+  private Map<String, String> currentMdcState;
 
   CopyThreadLocalCallable(Callable<? extends T> wrapped) {
     // Called from main thread. Copy the current values of all the ThreadLocal variables which
     // registered in ThreadLocalPropagateContext.
     this.wrapped = wrapped;
     this.threadLocalState = ThreadLocalPropagateContext.currentThreadState();
+    this.currentMdcState = MDC.getCopyOfContextMap();
   }
 
   @Override
   public T call() throws Exception {
     try {
       threadLocalState.propagate();
+      if (currentMdcState != null) {
+        MDC.setContextMap(currentMdcState);
+      }
       return wrapped.call();
     } finally {
       threadLocalState.cleanup();
+      MDC.clear();
     }
   }
 
