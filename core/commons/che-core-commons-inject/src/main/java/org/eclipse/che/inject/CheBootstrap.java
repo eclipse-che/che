@@ -32,8 +32,10 @@ import java.nio.charset.Charset;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
@@ -319,10 +321,18 @@ public class CheBootstrap extends EverrestGuiceContextListener {
       Pattern.compile("\\$\\{[^\\}^\\$\\{]+\\}");
 
   abstract static class AbstractConfigurationModule extends AbstractModule {
-    final Map<String, Set<String>> aliases;
+    final Map<String, Set<String>> bindMap;
 
     AbstractConfigurationModule(Map<String, Set<String>> aliases) {
-      this.aliases = aliases;
+      this.bindMap = new HashMap<>(aliases);
+      for (Entry<String, Set<String>> entry : aliases.entrySet()) {
+        for (String alias : entry.getValue()) {
+          Set<String> newAliases = new HashSet<>(entry.getValue());
+          newAliases.remove(alias);
+          newAliases.add(entry.getKey());
+          bindMap.put(alias, newAliases);
+        }
+      }
     }
 
     protected void bindConf(File confDir) {
@@ -410,7 +420,7 @@ public class CheBootstrap extends EverrestGuiceContextListener {
 
     private void bindProperty(String prefix, String name, String value) {
       String key = prefix == null ? name : (prefix + name);
-      Set<String> aliasesForName = aliases.get(name);
+      Set<String> aliasesForName = bindMap.get(name);
       if (value == null) {
         bind(String.class).annotatedWith(Names.named(key)).toProvider(Providers.<String>of(null));
         if (aliasesForName != null) {
