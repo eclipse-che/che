@@ -100,9 +100,21 @@ import org.slf4j.LoggerFactory;
  * <tr><td>${root_data}/input/</td><td>&nbsp;</td><td>&nbsp;</td><td>${root_data}/input/</td></tr>
  * </table>
  *
+ * During code evolution might be the case then someone will want to rename some property. This
+ * brings a couple of problems like support of old property name in external plugins and support old
+ * configuration values in code with the new property name.
+ *
+ * <p>To cover this cases there is a file che_aliases.properties that contains old names of all
+ * existed properties. It has such format current_name =old_name, very_old_name. In this case will
+ * be such binding. Always current_name = current_value if old_name property exist it will be binded
+ * to old_value and current_name = old_value and very_old_name = old_value if very_old_name property
+ * exist it will be binded to very_old_value, and current_name = very_old_value and old_name =
+ * very_old_value
+ *
  * @author gazarenkov
  * @author andrew00x
  * @author Florent Benoit
+ * @author Sergii Kabashniuk
  */
 public class CheBootstrap extends EverrestGuiceContextListener {
   private static final Logger LOG = LoggerFactory.getLogger(CheBootstrap.class);
