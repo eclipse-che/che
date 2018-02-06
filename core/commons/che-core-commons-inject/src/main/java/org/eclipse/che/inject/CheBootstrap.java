@@ -110,6 +110,10 @@ import org.slf4j.LoggerFactory;
  * and current_name = old_value and very_old_name = old_value if very_old_name property exist it
  * will be binded to very_old_value, and current_name = very_old_value and old_name = very_old_value
  *
+ * <p>NOTE: its prohibited to use a different name for same property on the same level. From the
+ * example above - you can use environment property CHE_CURRENT_NAME and CHE_OLD_NAME. But you can
+ * use it on a different level, for instance, environment property and system property.
+ *
  * @author gazarenkov
  * @author andrew00x
  * @author Florent Benoit
