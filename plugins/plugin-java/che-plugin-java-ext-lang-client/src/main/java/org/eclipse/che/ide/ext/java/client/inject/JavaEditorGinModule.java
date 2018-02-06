@@ -15,8 +15,6 @@ import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import org.eclipse.che.ide.api.editor.formatter.ContentFormatter;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.ext.java.client.editor.JavaFormatter;
-import org.eclipse.che.ide.ext.java.client.editor.JavaPartitionScanner;
-import org.eclipse.che.ide.ext.java.client.editor.JavaPartitionerFactory;
 import org.eclipse.che.ide.ext.java.client.editor.JsJavaEditorConfigurationFactory;
 
 @ExtensionGinModule
@@ -26,7 +24,5 @@ public class JavaEditorGinModule extends AbstractGinModule {
   protected void configure() {
     install(new GinFactoryModuleBuilder().build(JsJavaEditorConfigurationFactory.class));
     bind(ContentFormatter.class).to(JavaFormatter.class);
-    bind(JavaPartitionScanner.class);
-    bind(JavaPartitionerFactory.class);
   }
 }

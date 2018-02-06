@@ -15,11 +15,9 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.ide.api.editor.changeintercept.ChangeInterceptorProvider;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
 import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.formatter.ContentFormatter;
-import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
@@ -27,15 +25,12 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 public class JsJavaEditorConfiguration extends DefaultTextEditorConfiguration {
 
   private final Map<String, CodeAssistProcessor> codeAssistProcessors;
-  private final DocumentPartitioner partitioner;
   private final DocumentPositionMap documentPositionMap;
-  private final ChangeInterceptorProvider changeInterceptors;
   private final ContentFormatter contentFormatter;
 
   @AssistedInject
   public JsJavaEditorConfiguration(
       @Assisted final TextEditor editor,
-      final JavaPartitionerFactory partitionerFactory,
       final Provider<DocumentPositionMap> docPositionMapProvider,
       final ContentFormatter contentFormatter) {
     this.contentFormatter = contentFormatter;
@@ -43,10 +38,6 @@ public class JsJavaEditorConfiguration extends DefaultTextEditorConfiguration {
     this.codeAssistProcessors = new HashMap<>();
 
     this.documentPositionMap = docPositionMapProvider.get();
-
-    this.partitioner = partitionerFactory.create(this.documentPositionMap);
-
-    this.changeInterceptors = new JavaChangeInterceptorProvider();
   }
 
   @Override
@@ -62,10 +53,5 @@ public class JsJavaEditorConfiguration extends DefaultTextEditorConfiguration {
   @Override
   public ContentFormatter getContentFormatter() {
     return contentFormatter;
-  }
-
-  @Override
-  public ChangeInterceptorProvider getChangeInterceptorProvider() {
-    return this.changeInterceptors;
   }
 }
