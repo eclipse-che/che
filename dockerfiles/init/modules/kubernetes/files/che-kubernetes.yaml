@@ -53,6 +53,7 @@ items:
     CHE_INFRA_KUBERNETES_OAUTH__TOKEN: ""
     CHE_INFRA_KUBERNETES_PASSWORD: ""
     CHE_INFRA_KUBERNETES_USERNAME: ""
+    CHE_INFRA_KUBERNETES_NAMESPACE: ""
     CHE_INFRA_KUBERNETES_TRUST__CERTS: "false"
     CHE_INFRA_KUBERNETES_PVC_STRATEGY: "common"
     CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS: "true"
@@ -196,6 +197,11 @@ items:
             valueFrom:
               configMapKeyRef:
                 key: CHE_INFRA_KUBERNETES_USERNAME
+                name: che
+          - name: CHE_INFRA_KUBERNETES_NAMESPACE
+            valueFrom:
+              configMapKeyRef:
+                key: CHE_INFRA_KUBERNETES_NAMESPACE
                 name: che
           - name: CHE_LOCAL_CONF_DIR
             valueFrom:
