@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.core.workspace;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader.LogInfo.create;
 
 import com.google.common.collect.ImmutableList;
 import java.nio.file.Path;
@@ -20,11 +21,11 @@ import java.util.List;
 /** @author Dmytro Nochevnov */
 public class CheTestOpenshiftWorkspaceLogsReader extends TestWorkspaceLogsReader {
 
-  private final List<WorkspaceLogProvider> workspaceLogProviders =
+  private final List<LogInfo> logInfos =
       ImmutableList.of(
-          new WorkspaceLogProvider("bootstrapper", Paths.get("/workspace_logs/bootstrapper")),
-          new WorkspaceLogProvider("exec-agent", Paths.get("/workspace_logs/exec-agent")),
-          new WorkspaceLogProvider("ws-agent", Paths.get("/workspace_logs/ws-agent")));
+          create("bootstrapper", Paths.get("/workspace_logs/bootstrapper")),
+          create("exec-agent", Paths.get("/workspace_logs/exec-agent")),
+          create("ws-agent", Paths.get("/workspace_logs/ws-agent")));
 
   @Override
   String getReadLogsCommand(
@@ -35,8 +36,8 @@ public class CheTestOpenshiftWorkspaceLogsReader extends TestWorkspaceLogsReader
   }
 
   @Override
-  List<WorkspaceLogProvider> getLogProviders() {
-    return workspaceLogProviders;
+  List<LogInfo> getLogProviders() {
+    return logInfos;
   }
 
   @Override

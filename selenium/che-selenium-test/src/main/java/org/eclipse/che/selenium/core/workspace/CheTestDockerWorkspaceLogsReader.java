@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.core.workspace;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader.LogInfo.create;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
@@ -26,13 +27,13 @@ public class CheTestDockerWorkspaceLogsReader extends TestWorkspaceLogsReader {
 
   @Inject private DockerUtil dockerUtil;
 
-  private final List<WorkspaceLogProvider> workspaceLogProviders =
+  private final List<LogInfo> logInfos =
       ImmutableList.of(
-          new WorkspaceLogProvider("ws-agent", Paths.get("/home/user/che/ws-agent/logs")),
-          new WorkspaceLogProvider("exec-agent", Paths.get("/home/user/che/exec-agent/logs")),
-          new WorkspaceLogProvider("tomcat", Paths.get("/home/user/tomcat8/logs")),
-          new WorkspaceLogProvider("apache", Paths.get("/var/log/apache2")),
-          new WorkspaceLogProvider("traefik", Paths.get("/home/user/che/traefik/log.txt")));
+          create("ws-agent", Paths.get("/home/user/che/ws-agent/logs")),
+          create("exec-agent", Paths.get("/home/user/che/exec-agent/logs")),
+          create("tomcat", Paths.get("/home/user/tomcat8/logs")),
+          create("apache", Paths.get("/var/log/apache2")),
+          create("traefik", Paths.get("/home/user/che/traefik/log.txt")));
 
   @Override
   String getReadLogsCommand(
@@ -44,8 +45,8 @@ public class CheTestDockerWorkspaceLogsReader extends TestWorkspaceLogsReader {
   }
 
   @Override
-  List<WorkspaceLogProvider> getLogProviders() {
-    return workspaceLogProviders;
+  List<LogInfo> getLogProviders() {
+    return logInfos;
   }
 
   @Override

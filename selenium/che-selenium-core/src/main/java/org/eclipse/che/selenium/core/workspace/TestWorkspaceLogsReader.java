@@ -12,23 +12,25 @@ package org.eclipse.che.selenium.core.workspace;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.core.util.ProcessUtil.executeAndWait;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.utils.FileUtil.removeEmptyDirectory;
 
 import com.google.inject.Inject;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.util.ListLineConsumer;
-import org.eclipse.che.api.core.util.ProcessUtil;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Read and store the workspace logs. Uses command line operations to obtain the logs from workspace
- * container.
+ * Reads and stores the workspace logs by using command line operations.
+ * It ignores absent or empty logs directory.
  *
  * @author Dmytro Nochevnov
  */
@@ -39,7 +41,7 @@ public abstract class TestWorkspaceLogsReader {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
   /**
-   * Read logs from workspace.
+   * Read logs from workspace. It ignores absent or empty logs directory.
    *
    * @param workspace workspace which logs should be read.
    * @param pathToStore location of directory where logs should be stored.
@@ -72,8 +74,42 @@ public abstract class TestWorkspaceLogsReader {
       return;
     }
 
-    getLogProviders()
-        .forEach(workspaceLogProvider -> workspaceLogProvider.readLog(workspaceId, pathToStore));
+    getLogProviders().forEach(logInfo -> readLog(logInfo, workspaceId, pathToStore));
+  }
+
+  private void readLog(LogInfo logInfo, String workspaceId, Path pathToStore) {
+    Path testLogsDirectory = pathToStore.resolve(workspaceId).resolve(logInfo.getName());
+
+    try {
+      Files.createDirectories(testLogsDirectory.getParent());
+
+      // execute command to copy logs from workspace container to the workspaceLogsDir
+      String[] commandLine = {
+        "bash",
+        "-c",
+        getReadLogsCommand(workspaceId, testLogsDirectory, logInfo.getLocationInsideWorkspace())
+      };
+
+      executeAndWait(
+          commandLine,
+          PREPARING_WS_TIMEOUT_SEC,
+          SECONDS,
+          getListLineConsumer(),
+          getListLineConsumer());
+    } catch (Exception e) {
+      LOG.warn(
+          "Can't obtain '{}' logs from workspace with id='{}' from directory '{}'.",
+          logInfo.getName(),
+          workspaceId,
+          logInfo.getLocationInsideWorkspace(),
+          e);
+    } finally {
+      try {
+        removeEmptyDirectory(testLogsDirectory);
+      } catch (IOException e) {
+        LOG.warn("Error of removal of empty log directory {}.", testLogsDirectory, e);
+      }
+    }
   }
 
   /**
@@ -92,7 +128,7 @@ public abstract class TestWorkspaceLogsReader {
    *
    * @return list of log providers
    */
-  abstract List<WorkspaceLogProvider> getLogProviders();
+  abstract List<LogInfo> getLogProviders();
 
   /**
    * Checks if it is possible to read logs from workspace.
@@ -101,55 +137,30 @@ public abstract class TestWorkspaceLogsReader {
    */
   abstract boolean canWorkspaceLogsBeRead();
 
-  /** Represents provider which is aimed to read logs from certain location inside workspace. */
-  class WorkspaceLogProvider {
-    private final String logName;
-    private final Path logLocationInsideWorkspace;
+  private ListLineConsumer getListLineConsumer() {
+    return new ListLineConsumer();
+  }
 
-    WorkspaceLogProvider(String logName, Path logLocationInsideWorkspace) {
-      this.logName = logName;
-      this.logLocationInsideWorkspace = logLocationInsideWorkspace;
+  /** Holds information about log to read. */
+  static class LogInfo {
+    private final String name;
+    private final Path locationInsideWorkspace;
+
+    private LogInfo(String name, Path locationInsideWorkspace) {
+      this.name = name;
+      this.locationInsideWorkspace = locationInsideWorkspace;
     }
 
-    String getLogName() {
-      return logName;
+    String getName() {
+      return name;
     }
 
-    Path getLogLocationInsideWorkspace() {
-      return logLocationInsideWorkspace;
+    Path getLocationInsideWorkspace() {
+      return locationInsideWorkspace;
     }
 
-    private void readLog(String workspaceId, Path pathToStore) {
-      Path testLogsDirectory = pathToStore.resolve(workspaceId).resolve(getLogName());
-
-      try {
-        Files.createDirectories(testLogsDirectory.getParent());
-
-        // execute command to copy logs from workspace container to the workspaceLogsDir
-        String[] commandLine = {
-          "bash",
-          "-c",
-          getReadLogsCommand(workspaceId, testLogsDirectory, getLogLocationInsideWorkspace())
-        };
-
-        ProcessUtil.executeAndWait(
-            commandLine,
-            PREPARING_WS_TIMEOUT_SEC,
-            SECONDS,
-            getListLineConsumer(),
-            getListLineConsumer());
-      } catch (Exception e) {
-        LOG.warn(
-            "Can't obtain '{}' logs from workspace with id='{}' from directory '{}'.",
-            getLogName(),
-            workspaceId,
-            getLogLocationInsideWorkspace(),
-            e);
-      }
-    }
-
-    private ListLineConsumer getListLineConsumer() {
-      return new ListLineConsumer();
+    static LogInfo create(String name, Path locationInsideWorkspace) {
+      return new LogInfo(name, locationInsideWorkspace);
     }
   }
 }
