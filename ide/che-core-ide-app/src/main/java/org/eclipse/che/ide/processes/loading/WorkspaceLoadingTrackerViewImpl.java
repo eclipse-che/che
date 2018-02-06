@@ -368,6 +368,8 @@ public class WorkspaceLoadingTrackerViewImpl extends Composite
 
       // Update `rowspan` attribute of machine icon cell
       icon.setAttribute("rowspan", "" + (2 + installers.size()));
+
+      inlineDelimiter.getStyle().setProperty("height", "10px");
     }
 
     void setInstallerFailed(String installerId, String errorMessage) {
