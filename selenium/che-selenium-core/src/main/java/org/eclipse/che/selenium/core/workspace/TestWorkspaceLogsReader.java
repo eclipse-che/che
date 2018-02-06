@@ -16,6 +16,7 @@ import static org.eclipse.che.api.core.util.ProcessUtil.executeAndWait;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.utils.FileUtil.removeEmptyDirectory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,9 +37,9 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class TestWorkspaceLogsReader {
 
-  private final Logger LOG = LoggerFactory.getLogger(this.getClass());
+  @VisibleForTesting Logger log = LoggerFactory.getLogger(this.getClass());
 
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject @VisibleForTesting TestWorkspaceServiceClient workspaceServiceClient;
 
   /**
    * Read logs from workspace. It ignores absent or empty logs directory.
@@ -55,7 +56,7 @@ public abstract class TestWorkspaceLogsReader {
     try {
       workspaceId = workspace.getId();
     } catch (ExecutionException | InterruptedException e) {
-      LOG.warn("It's impossible to get id of test workspace.", e);
+      log.warn("It's impossible to get id of test workspace.", e);
       return;
     }
 
@@ -63,18 +64,18 @@ public abstract class TestWorkspaceLogsReader {
     try {
       WorkspaceStatus status = workspaceServiceClient.getStatus(workspaceId);
       if (status != RUNNING) {
-        LOG.warn(
+        log.warn(
             "It's impossible to get logs of workspace with id='{}' because of improper status '{}'",
             workspaceId,
             status);
         return;
       }
     } catch (Exception e) {
-      LOG.warn("It's impossible to get status of workspace with id='{}'", workspaceId, e);
+      log.warn("It's impossible to get status of workspace with id='{}'", workspaceId, e);
       return;
     }
 
-    getLogProviders().forEach(logInfo -> readLog(logInfo, workspaceId, pathToStore));
+    getLogInfos().forEach(logInfo -> readLog(logInfo, workspaceId, pathToStore));
   }
 
   private void readLog(LogInfo logInfo, String workspaceId, Path pathToStore) {
@@ -91,13 +92,9 @@ public abstract class TestWorkspaceLogsReader {
       };
 
       executeAndWait(
-          commandLine,
-          PREPARING_WS_TIMEOUT_SEC,
-          SECONDS,
-          getListLineConsumer(),
-          getListLineConsumer());
+          commandLine, PREPARING_WS_TIMEOUT_SEC, SECONDS, getStdoutConsumer(), getStderrConsumer());
     } catch (Exception e) {
-      LOG.warn(
+      log.warn(
           "Can't obtain '{}' logs from workspace with id='{}' from directory '{}'.",
           logInfo.getName(),
           workspaceId,
@@ -107,7 +104,7 @@ public abstract class TestWorkspaceLogsReader {
       try {
         removeEmptyDirectory(testLogsDirectory);
       } catch (IOException e) {
-        LOG.warn("Error of removal of empty log directory {}.", testLogsDirectory, e);
+        log.warn("Error of removal of empty log directory {}.", testLogsDirectory, e);
       }
     }
   }
@@ -128,7 +125,7 @@ public abstract class TestWorkspaceLogsReader {
    *
    * @return list of log providers
    */
-  abstract List<LogInfo> getLogProviders();
+  abstract List<LogInfo> getLogInfos();
 
   /**
    * Checks if it is possible to read logs from workspace.
@@ -137,7 +134,13 @@ public abstract class TestWorkspaceLogsReader {
    */
   abstract boolean canWorkspaceLogsBeRead();
 
-  private ListLineConsumer getListLineConsumer() {
+  @VisibleForTesting
+  ListLineConsumer getStdoutConsumer() {
+    return new ListLineConsumer();
+  }
+
+  @VisibleForTesting
+  ListLineConsumer getStderrConsumer() {
     return new ListLineConsumer();
   }
 

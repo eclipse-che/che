@@ -92,6 +92,7 @@ public final class ProcessUtil {
    * @throws IOException in case I/O error
    * @throws TimeoutException if process gets more time then defined by {@code timeout}
    */
+  @SuppressWarnings("FutureReturnValueIgnored")
   public static Process executeAndWait(
       String[] commandLine, int timeout, TimeUnit timeUnit, LineConsumer outputConsumer)
       throws TimeoutException, IOException, InterruptedException {

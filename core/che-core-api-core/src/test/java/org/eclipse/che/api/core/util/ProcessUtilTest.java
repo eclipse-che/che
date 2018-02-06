@@ -40,34 +40,36 @@ public class ProcessUtilTest {
     final IOException[] processError = new IOException[1];
     final CountDownLatch latch = new CountDownLatch(1);
     final long start = System.currentTimeMillis();
-    new Thread(() -> {
-      try {
-        ProcessUtil.readOutput(
-            p,
-            new LineConsumer() {
-              @Override
-              public void writeLine(String line) throws IOException {
-                stdout.add(line);
-              }
+    new Thread(
+            () -> {
+              try {
+                ProcessUtil.readOutput(
+                    p,
+                    new LineConsumer() {
+                      @Override
+                      public void writeLine(String line) throws IOException {
+                        stdout.add(line);
+                      }
 
-              @Override
-              public void close() throws IOException {}
-            },
-            new LineConsumer() {
-              @Override
-              public void writeLine(String line) throws IOException {
-                stderr.add(line);
-              }
+                      @Override
+                      public void close() throws IOException {}
+                    },
+                    new LineConsumer() {
+                      @Override
+                      public void writeLine(String line) throws IOException {
+                        stderr.add(line);
+                      }
 
-              @Override
-              public void close() throws IOException {}
-            });
-      } catch (IOException e) {
-        processError[0] = e; // throw when kill process
-      } finally {
-        latch.countDown();
-      }
-    }).start();
+                      @Override
+                      public void close() throws IOException {}
+                    });
+              } catch (IOException e) {
+                processError[0] = e; // throw when kill process
+              } finally {
+                latch.countDown();
+              }
+            })
+        .start();
 
     Thread.sleep(1000); // give time to start process
     Assert.assertTrue(ProcessUtil.isAlive(p), "Process is not started.");

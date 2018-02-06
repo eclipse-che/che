@@ -36,7 +36,7 @@ public class CheTestOpenshiftWorkspaceLogsReader extends TestWorkspaceLogsReader
   }
 
   @Override
-  List<LogInfo> getLogProviders() {
+  List<LogInfo> getLogInfos() {
     return logInfos;
   }
 

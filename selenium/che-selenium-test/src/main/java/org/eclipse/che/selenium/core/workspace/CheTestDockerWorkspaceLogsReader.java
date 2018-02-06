@@ -45,7 +45,7 @@ public class CheTestDockerWorkspaceLogsReader extends TestWorkspaceLogsReader {
   }
 
   @Override
-  List<LogInfo> getLogProviders() {
+  List<LogInfo> getLogInfos() {
     return logInfos;
   }
 
