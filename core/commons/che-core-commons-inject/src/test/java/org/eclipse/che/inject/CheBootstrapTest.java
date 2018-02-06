@@ -297,8 +297,6 @@ public class CheBootstrapTest {
     assertEquals(testComponent.otherOtherString, "some_value");
   }
 
-
-
   @Test
   public void processesOld2NewPropertyAliases() throws Exception {
     Properties cheProperties = new Properties();
