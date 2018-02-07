@@ -11,13 +11,24 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.Watch;
+import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.dsl.Resource;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Predicate;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -32,6 +43,15 @@ import org.slf4j.LoggerFactory;
 public class KubernetesNamespace {
 
   private static final Logger LOG = LoggerFactory.getLogger(KubernetesNamespace.class);
+
+  /** An experimental value used to determine how long to wait for the 'default' service account. */
+  private static final int SERVICE_ACCOUNT_READINESS_TIMEOUT_SEC = 3;
+  /**
+   * Default service account is used to get access to the API server so we need to be sure that it
+   * is accessible, more detailed information about service accounts by default you can find here:
+   * https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+   */
+  private static final String DEFAULT_SERVICE_ACCOUNT_NAME = "default";
 
   private final String workspaceId;
 
@@ -132,8 +152,67 @@ public class KubernetesNamespace {
           .withName(namespaceName)
           .endMetadata()
           .done();
+      waitDefaultServiceAccount(namespaceName, client);
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Waits few seconds until 'default' service account become available otherwise an infrastructure
+   * exception will be thrown.
+   */
+  protected void waitDefaultServiceAccount(String namespaceName, KubernetesClient client)
+      throws InfrastructureException {
+    final Predicate<ServiceAccount> predicate = Objects::nonNull;
+    final CompletableFuture<ServiceAccount> future = new CompletableFuture<>();
+    Watch watch = null;
+    try {
+      final Resource<ServiceAccount, DoneableServiceAccount> saResource =
+          client
+              .serviceAccounts()
+              .inNamespace(namespaceName)
+              .withName(DEFAULT_SERVICE_ACCOUNT_NAME);
+      watch =
+          saResource.watch(
+              new Watcher<ServiceAccount>() {
+                @Override
+                public void eventReceived(Action action, ServiceAccount serviceAccount) {
+                  if (predicate.test(serviceAccount)) {
+                    future.complete(serviceAccount);
+                  }
+                }
+
+                @Override
+                public void onClose(KubernetesClientException cause) {
+                  future.completeExceptionally(
+                      new InfrastructureException(
+                          "Waiting for service account '"
+                              + DEFAULT_SERVICE_ACCOUNT_NAME
+                              + "' was interrupted"));
+                }
+              });
+      if (predicate.test(saResource.get())) {
+        return;
+      }
+      try {
+        future.get(SERVICE_ACCOUNT_READINESS_TIMEOUT_SEC, TimeUnit.SECONDS);
+      } catch (ExecutionException ex) {
+        throw new InfrastructureException(ex.getCause().getMessage(), ex);
+      } catch (TimeoutException ex) {
+        throw new InfrastructureException(
+            "Waiting for service account '" + DEFAULT_SERVICE_ACCOUNT_NAME + "' reached timeout");
+      } catch (InterruptedException ex) {
+        Thread.currentThread().interrupt();
+        throw new InfrastructureException(
+            "Waiting for service account '" + DEFAULT_SERVICE_ACCOUNT_NAME + "' was interrupted");
+      }
+    } catch (KubernetesClientException ex) {
+      throw new InfrastructureException(ex.getMessage());
+    } finally {
+      if (watch != null) {
+        watch.close();
+      }
     }
   }
 

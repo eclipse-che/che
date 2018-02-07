@@ -19,7 +19,10 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
+import io.fabric8.kubernetes.api.model.ServiceAccount;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.openshift.api.model.DoneableProjectRequest;
@@ -57,6 +60,7 @@ public class OpenShiftProjectTest {
   @Mock private KubernetesIngresses ingresses;
   @Mock private OpenShiftClientFactory clientFactory;
   @Mock private OpenShiftClient openShiftClient;
+  @Mock private Resource<ServiceAccount, DoneableServiceAccount> serviceAccountResource;
 
   private OpenShiftProject openShiftProject;
 
@@ -64,6 +68,13 @@ public class OpenShiftProjectTest {
   public void setUp() throws Exception {
     when(clientFactory.create()).thenReturn(openShiftClient);
     when(openShiftClient.adapt(OpenShiftClient.class)).thenReturn(openShiftClient);
+
+    final MixedOperation mixedOperation = mock(MixedOperation.class);
+    final NonNamespaceOperation namespaceOperation = mock(NonNamespaceOperation.class);
+    doReturn(mixedOperation).when(openShiftClient).serviceAccounts();
+    when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
+    when(namespaceOperation.withName(anyString())).thenReturn(serviceAccountResource);
+    when(serviceAccountResource.get()).thenReturn(mock(ServiceAccount.class));
 
     openShiftProject = new OpenShiftProject(WORKSPACE_ID, pods, services, routes, pvcs, ingresses);
   }
