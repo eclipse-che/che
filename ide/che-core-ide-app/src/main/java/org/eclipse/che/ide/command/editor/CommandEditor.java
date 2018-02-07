@@ -168,6 +168,10 @@ public class CommandEditor extends AbstractEditorPresenter
     return false;
   }
 
+  public List<CommandEditorPage> getPages() {
+    return pages;
+  }
+
   @Nullable
   @Override
   public SVGResource getTitleImage() {

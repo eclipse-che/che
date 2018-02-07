@@ -12,7 +12,6 @@ package org.eclipse.che.workspace.infrastructure.docker.server.mapping;
 
 import static java.lang.String.format;
 
-import java.net.URI;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
@@ -32,20 +31,22 @@ import org.eclipse.che.commons.annotation.Nullable;
 public class SinglePortUrlRewriter implements URLRewriter {
 
   private final SinglePortHostnameBuilder hostnameBuilder;
-  private final String wildcartPort;
   private final int chePort;
 
   @Inject
   public SinglePortUrlRewriter(
-      @Named("che.docker.ip") String internalIpOfContainers,
+      @Nullable @Named("che.docker.ip") String internalIpOfContainers,
       @Named("che.port") int chePort,
       @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
-      @Nullable @Named("che.singleport.wildcard_domain.host") String wildcardHost,
-      @Nullable @Named("che.singleport.wildcard_domain.port") String wildcardPort) {
+      @Nullable @Named("che.singleport.wildcard_domain.host") String wildcardHost) {
+    if (internalIpOfContainers == null && externalIpOfContainers == null) {
+      throw new IllegalStateException(
+          "Value of both of the properties 'che.docker.ip' and 'che.docker.ip.external' is null,"
+              + " which is unsuitable for the single-port mode");
+    }
     this.hostnameBuilder =
         new SinglePortHostnameBuilder(externalIpOfContainers, internalIpOfContainers, wildcardHost);
     this.chePort = chePort;
-    this.wildcartPort = wildcardPort;
   }
 
   @Override
@@ -57,9 +58,11 @@ public class SinglePortUrlRewriter implements URLRewriter {
       throws InfrastructureException {
     final String host = hostnameBuilder.build(serverName, machineName, identity.getWorkspaceId());
     try {
-      int port = wildcartPort != null ? Integer.parseInt(wildcartPort) : chePort;
-      URI uri = UriBuilder.fromUri(url).host(host).port(port).build();
-      url = uri.toString();
+      UriBuilder uriBUilder = UriBuilder.fromUri(url).host(host);
+      if (chePort != 80 && chePort != 443) {
+        uriBUilder.port(chePort);
+      }
+      url = uriBUilder.build().toString();
     } catch (UriBuilderException | IllegalArgumentException e) {
       throw new InternalInfrastructureException(
           format(

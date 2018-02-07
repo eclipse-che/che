@@ -17,7 +17,6 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
-import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
@@ -44,7 +43,7 @@ public class PythonExtension {
 
     DefaultActionGroup newGroup = (DefaultActionGroup) actionManager.getAction(GROUP_FILE_NEW);
     actionManager.registerAction("pythonFile", createPythonFileAction);
-    newGroup.add(createPythonFileAction, Constraints.FIRST);
+    newGroup.add(createPythonFileAction);
 
     iconRegistry.registerIcon(
         new Icon(PYTHON_CATEGORY + ".samples.category.icon", pythonResources.category()));

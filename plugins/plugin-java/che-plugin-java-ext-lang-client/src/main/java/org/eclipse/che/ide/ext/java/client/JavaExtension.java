@@ -19,6 +19,7 @@ import com.google.inject.name.Named;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
+import org.eclipse.che.ide.api.action.Separator;
 import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
@@ -108,6 +109,8 @@ public class JavaExtension {
 
     actionManager.registerAction("newJavaPackage", newPackageAction);
     newGroup.add(newPackageAction, new Constraints(Anchor.AFTER, "newJavaClass"));
+
+    newGroup.add(Separator.getInstance(), new Constraints(Anchor.AFTER, "newJavaPackage"));
 
     DefaultActionGroup refactorGroup =
         (DefaultActionGroup) actionManager.getAction(GROUP_ASSISTANT_REFACTORING);

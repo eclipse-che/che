@@ -27,11 +27,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ZipUtils;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.provider.TestWorkspaceAgentApiEndpointUrlProvider;
 
 /**
@@ -238,29 +236,23 @@ public class TestProjectServiceClient {
 
   public List<String> getExternalLibraries(String workspaceId, String projectName)
       throws Exception {
-    HttpJsonResponse response =
-        requestFactory
-            .fromUrl(
-                workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "java/navigation/libraries")
-            .useGetMethod()
-            .addQueryParam("projectpath", "/" + projectName)
-            .request();
-
-    return DtoFactory.getInstance()
-        .createListDtoFromJson(response.asString(), ProjectConfigDto.class)
+    return requestFactory
+        .fromUrl(
+            workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "java/navigation/libraries")
+        .useGetMethod()
+        .addQueryParam("projectpath", "/" + projectName)
+        .request()
+        .asList(ProjectConfigDto.class)
         .stream()
         .map(e -> e.getName())
         .collect(Collectors.toList());
   }
 
   private ProjectConfig getProject(String workspaceId, String projectName) throws Exception {
-    HttpJsonResponse response =
-        requestFactory
-            .fromUrl(
-                workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project/" + projectName)
-            .useGetMethod()
-            .request();
-
-    return DtoFactory.getInstance().createDtoFromJson(response.asString(), ProjectConfigDto.class);
+    return requestFactory
+        .fromUrl(workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project/" + projectName)
+        .useGetMethod()
+        .request()
+        .asDto(ProjectConfigDto.class);
   }
 }

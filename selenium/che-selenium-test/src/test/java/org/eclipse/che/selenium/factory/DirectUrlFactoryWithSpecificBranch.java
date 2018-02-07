@@ -28,7 +28,8 @@ import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.openqa.selenium.TimeoutException;
+import org.eclipse.che.selenium.pageobject.PullRequestPanel;
+import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -47,6 +48,7 @@ public class DirectUrlFactoryWithSpecificBranch {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private PullRequestPanel pullRequestPanel;
 
   private TestFactory testFactoryWithSpecificBranch;
 
@@ -79,14 +81,15 @@ public class DirectUrlFactoryWithSpecificBranch {
     events.waitExpectedMessage(
         "Project: gitPullTest | cloned from: gitPullTest | remote branch: refs/remotes/origin/contrib-12092015 | local branch: contrib-12092015",
         UPDATING_PROJECT_TIMEOUT_SEC);
+    projectExplorer.selectItem("gitPullTest");
+    pullRequestPanel.waitOpenPanel();
 
     try {
       projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");
-    } catch (TimeoutException ex) {
+    } catch (WebDriverException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8458");
+      fail("Known issue https://github.com/eclipse/che/issues/8616");
     }
-
     projectExplorer.waitItem("gitPullTest/my-lib/pom.xml");
 
     String wsId =
