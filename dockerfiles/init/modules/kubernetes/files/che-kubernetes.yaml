@@ -68,15 +68,15 @@ items:
     CHE_PREDEFINED_STACKS_RELOAD__ON__START: "false"
     JAVA_OPTS: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true -Xms20m "
     CHE_WORKSPACE_AUTO_START: "false"
-    CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON: '{"ingress.kubernetes.io/rewrite-target": "/","ingress.kubernetes.io/ssl-redirect": "false","ingress.kubernetes.io/proxy-connect-timeout": "3600","ingress.kubernetes.io/proxy-read-timeout": "3600"}'
+    CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON: '{"nginx.ingress.kubernetes.io/rewrite-target": "/","nginx.ingress.kubernetes.io/ssl-redirect": "false","nginx.ingress.kubernetes.io/proxy-connect-timeout": "3600","nginx.ingress.kubernetes.io/proxy-read-timeout": "3600"}'
 - apiVersion: extensions/v1beta1
   kind: Ingress
   metadata:
     name: che-ingress
     annotations:
-      ingress.kubernetes.io/rewrite-target: /
-      ingress.kubernetes.io/proxy-read-timeout: "3600"
-      ingress.kubernetes.io/proxy-connect-timeout: "3600"
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
   spec:
     rules:
     - host: 192.168.99.100.nip.io
