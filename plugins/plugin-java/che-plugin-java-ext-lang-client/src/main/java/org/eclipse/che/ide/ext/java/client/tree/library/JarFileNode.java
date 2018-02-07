@@ -145,7 +145,7 @@ public class JarFileNode extends SyntheticNode<JarEntry>
 
   @Override
   public Path getLocation() {
-    return Path.valueOf(getData().getUri());
+    return Path.valueOf(getData().getPath());
   }
 
   /** {@inheritDoc} */
