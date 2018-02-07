@@ -99,15 +99,12 @@ public class FileStructurePresenterTest {
     when(promise.catchError(org.mockito.ArgumentMatchers.<Operation<PromiseError>>anyObject()))
         .thenReturn(promise);
 
-    presenter =
-        new FileStructurePresenter(
-            view, javaNavigationService, context, editorAgent);
+    presenter = new FileStructurePresenter(view, javaNavigationService, context, editorAgent);
   }
 
   @Test
   public void fileStructureShouldBeShow() throws Exception {
     presenter.show(editor);
-
 
     verify(promise).then(operationSuccessCapture.capture());
     operationSuccessCapture.getValue().apply(compilationUnit);
