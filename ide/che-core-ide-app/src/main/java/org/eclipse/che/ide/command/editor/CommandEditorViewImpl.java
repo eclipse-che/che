@@ -35,7 +35,6 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
 
   private static final CommandEditorViewImplUiBinder UI_BINDER =
       GWT.create(CommandEditorViewImplUiBinder.class);
-  //  private static final Window.Resources WINDOW_RESOURCES = GWT.create(Window.Resources.class);
 
   private final CommandResources resources;
 
@@ -56,7 +55,6 @@ public class CommandEditorViewImpl extends Composite implements CommandEditorVie
 
     initWidget(UI_BINDER.createAndBindUi(this));
     setSaveEnabled(false);
-    //    saveButton.addStyleName(WINDOW_RESOURCES.windowCss().primaryButton());
   }
 
   @Override
