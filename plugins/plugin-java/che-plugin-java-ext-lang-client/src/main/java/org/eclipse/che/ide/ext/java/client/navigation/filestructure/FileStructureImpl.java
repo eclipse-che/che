@@ -34,7 +34,6 @@ import org.eclipse.che.ide.ext.java.client.JavaExtension;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.navigation.factory.NodeFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
-import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
@@ -96,13 +95,6 @@ final class FileStructureImpl extends Window implements FileStructure {
     tree.setAutoExpand(false);
     tree.getSelectionModel().setSelectionMode(SINGLE);
 
-    KeyboardNavigationHandler handler =
-        new KeyboardNavigationHandler() {
-          @Override
-          public void onEnter(NativeEvent evt) {
-            hide();
-          }
-        };
     tree.addDomHandler(
         event -> {
           if (all(tree.getSelectionModel().getSelectedNodes(), LEAFS)) {
@@ -110,8 +102,6 @@ final class FileStructureImpl extends Window implements FileStructure {
           }
         },
         DoubleClickEvent.getType());
-
-    handler.bind(tree);
 
     treeContainer.add(tree);
 
@@ -161,7 +151,6 @@ final class FileStructureImpl extends Window implements FileStructure {
   @Override
   protected void onHide() {
     tree.closeSpeedSearchPopup();
-    delegate.onEscapeClicked();
   }
 
   /** {@inheritDoc} */
@@ -178,6 +167,11 @@ final class FileStructureImpl extends Window implements FileStructure {
   @Override
   public void onKeyPress(NativeEvent evt) {
     handleKey(evt);
+  }
+
+  @Override
+  public void onEscPress(NativeEvent evt) {
+    delegate.onEscapeClicked();
   }
 
   private void handleKey(NativeEvent event) {

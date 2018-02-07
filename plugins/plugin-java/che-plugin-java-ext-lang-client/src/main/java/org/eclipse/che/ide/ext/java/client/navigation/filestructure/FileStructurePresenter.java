@@ -130,6 +130,7 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
   /** {@inheritDoc} */
   @Override
   public void actionPerformed(final Member member) {
+    view.close();
     if (member.isBinary()) {
 
       final Resource resource = context.getResource();
