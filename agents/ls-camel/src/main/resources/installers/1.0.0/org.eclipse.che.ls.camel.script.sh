@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012-2017 Red Hat, Inc.
+# Copyright (c) 2012-2018 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
 #
+
 
 is_current_user_root() {
     test "$(id -u)" = 0
@@ -26,7 +27,7 @@ unset PACKAGES
 command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
 
-AGENT_BINARIES_URI=https://github.com/lhein/camel-language-server/releases/download/untagged-aecb49a7c48f97ea3925/camel-lsp-server-1.0.0-SNAPSHOT.jar
+AGENT_BINARIES_URI=https://github.com/lhein/camel-language-server/releases/download/untagged-d42064681113e838bd59/camel-lsp-server-1.0.0-SNAPSHOT.jar
 CHE_DIR=$HOME/che
 LS_DIR=${CHE_DIR}/ls-camel
 LS_LAUNCHER=${LS_DIR}/launch.sh
@@ -53,8 +54,8 @@ mkdir -p ${LS_DIR}
 ### Install Apache Camel LS ###
 ###############################
 
-curl -s ${AGENT_BINARIES_URI} -C ${LS_DIR}
+curl -L -s ${AGENT_BINARIES_URI} -o ${LS_DIR}/camel-lsp-server.jar
 
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}
-echo "java -jar ${LS_DIR}/camel-lsp-server-1.0.0-SNAPSHOT.jar" > ${LS_LAUNCHER}
+echo "java -jar ${LS_DIR}/camel-lsp-server.jar" > ${LS_LAUNCHER}

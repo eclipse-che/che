@@ -86,6 +86,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
+            <artifactId>ls-camel-agent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
             <artifactId>ls-csharp-agent</artifactId>
         </dependency>
         <dependency>
