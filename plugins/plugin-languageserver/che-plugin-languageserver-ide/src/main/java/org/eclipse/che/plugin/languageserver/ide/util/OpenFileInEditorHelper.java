@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.plugin.languageserver.ide.util;
 
+import static org.eclipse.che.ide.api.editor.text.LinearRange.createWithStart;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
@@ -35,8 +37,6 @@ import org.eclipse.che.plugin.languageserver.ide.location.LanguageServerFile;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.Range;
-
-import static org.eclipse.che.ide.api.editor.text.LinearRange.createWithStart;
 
 /**
  * Util class, helps to open file by path in editor
