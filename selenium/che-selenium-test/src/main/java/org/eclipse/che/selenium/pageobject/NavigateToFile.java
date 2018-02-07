@@ -31,7 +31,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** Created by aleksandr shmaraev on 12.12.14. */
@@ -127,13 +126,8 @@ public class NavigateToFile {
     return suggestionPanel.getText().contains(text);
   }
 
-  public void waitSuggestedPanelIsDisplayed() {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                webDriver -> {
-                  return suggestionPanel.isDisplayed();
-                });
+  public void waitSuggestedPanel() {
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC).until(visibilityOf(suggestionPanel));
   }
 
   public String getText() {
