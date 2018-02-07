@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -35,7 +36,7 @@ import org.eclipse.che.workspace.infrastructure.docker.server.mapping.SinglePort
  */
 public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
 
-  private final SinglePortHostnameBuilder hostnameBuilder;
+  private final Provider<SinglePortHostnameBuilder> hostnameBuilderProvider;
   private final String internalIpOfContainers;
   private final String externalIpOfContainers;
   private final String dockerNetwork;
@@ -45,8 +46,8 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
       @Nullable @Named("che.docker.ip") String internalIpOfContainers,
       @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
       @Nullable @Named("che.docker.network") String dockerNetwork,
-      SinglePortHostnameBuilder hostnameBuilder) {
-    this.hostnameBuilder = hostnameBuilder;
+      Provider<SinglePortHostnameBuilder> hostnameBuilderProvider) {
+    this.hostnameBuilderProvider = hostnameBuilderProvider;
     this.internalIpOfContainers = internalIpOfContainers;
     this.externalIpOfContainers = externalIpOfContainers;
     this.dockerNetwork = dockerNetwork;
@@ -66,7 +67,9 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
           continue;
         }
         final String host =
-            hostnameBuilder.build(serverEntry.getKey(), machineName, identity.getWorkspaceId());
+            hostnameBuilderProvider
+                .get()
+                .build(serverEntry.getKey(), machineName, identity.getWorkspaceId());
         final String serviceName = getServiceName(host);
         final String port = serverEntry.getValue().getPort().split("/")[0];
 

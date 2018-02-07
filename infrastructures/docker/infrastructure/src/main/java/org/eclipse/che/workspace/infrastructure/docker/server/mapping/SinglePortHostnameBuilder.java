@@ -14,6 +14,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -103,6 +104,7 @@ public class SinglePortHostnameBuilder {
 
     private final SinglePortHostnameBuilder instance;
 
+    @Inject
     public SinglePortHostnameBuilderProvider(
         @Named("che.single.port") boolean isSinglePortEnabled,
         @Nullable @Named("che.docker.ip") String internalIpOfContainers,
