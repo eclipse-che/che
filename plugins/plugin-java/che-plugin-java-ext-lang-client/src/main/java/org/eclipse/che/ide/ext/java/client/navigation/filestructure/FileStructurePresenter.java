@@ -14,8 +14,6 @@ import com.google.common.base.Optional;
 import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -23,7 +21,6 @@ import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.Container;
-import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.SyntheticFile;
@@ -31,12 +28,9 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
-import org.eclipse.che.ide.ext.java.shared.JarEntry;
-import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
 import org.eclipse.che.ide.ext.java.shared.dto.Region;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Member;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
@@ -61,8 +55,7 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
       FileStructure view,
       JavaNavigationService javaNavigationService,
       AppContext context,
-      EditorAgent editorAgent,
-      LoaderFactory loaderFactory) {
+      EditorAgent editorAgent) {
     this.view = view;
     this.javaNavigationService = javaNavigationService;
     this.context = context;
@@ -76,9 +69,6 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
    * @param editorPartPresenter the active editor
    */
   public void show(EditorPartPresenter editorPartPresenter) {
-    view.setTitle(editorPartPresenter.getEditorInput().getFile().getName());
-    view.show();
-
     if (!(editorPartPresenter instanceof TextEditor)) {
       Log.error(getClass(), "Open Declaration support only TextEditor as editor");
       return;
@@ -102,7 +92,9 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
           .getCompilationUnit(project.get().getLocation(), fqn, showInheritedMembers)
           .then(
               unit -> {
+                view.setTitle(editorPartPresenter.getEditorInput().getFile().getName());
                 view.setStructure(unit, showInheritedMembers);
+                view.show();
                 showInheritedMembers = !showInheritedMembers;
               })
           .catchError(
@@ -128,52 +120,43 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
       javaNavigationService
           .getEntry(project.get().getLocation(), member.getLibId(), member.getRootPath())
           .then(
-              new Operation<JarEntry>() {
-                @Override
-                public void apply(final JarEntry entry) throws OperationException {
-                  javaNavigationService
-                      .getContent(
-                          project.get().getLocation(),
-                          member.getLibId(),
-                          Path.valueOf(entry.getPath()))
-                      .then(
-                          new Operation<ClassContent>() {
-                            @Override
-                            public void apply(ClassContent content) throws OperationException {
-                              final String clazz =
-                                  entry.getName().substring(0, entry.getName().indexOf('.'));
-                              final VirtualFile file =
-                                  new SyntheticFile(entry.getName(), clazz, content.getContent());
-                              editorAgent.openEditor(
-                                  file,
-                                  new OpenEditorCallbackImpl() {
-                                    @Override
-                                    public void onEditorOpened(EditorPartPresenter editor) {
-                                      setCursor(editor, member.getFileRegion().getOffset());
-                                    }
-                                  });
-                            }
-                          });
-                }
+              entry -> {
+                javaNavigationService
+                    .getContent(
+                        project.get().getLocation(),
+                        member.getLibId(),
+                        Path.valueOf(entry.getPath()))
+                    .then(
+                        content -> {
+                          final String clazz =
+                              entry.getName().substring(0, entry.getName().indexOf('.'));
+                          final VirtualFile file =
+                              new SyntheticFile(entry.getName(), clazz, content.getContent());
+                          editorAgent.openEditor(
+                              file,
+                              new OpenEditorCallbackImpl() {
+                                @Override
+                                public void onEditorOpened(EditorPartPresenter editor) {
+                                  setCursor(editor, member.getFileRegion().getOffset());
+                                }
+                              });
+                        });
               });
     } else {
       context
           .getWorkspaceRoot()
           .getFile(member.getRootPath())
           .then(
-              new Operation<Optional<File>>() {
-                @Override
-                public void apply(Optional<File> file) throws OperationException {
-                  if (file.isPresent()) {
-                    editorAgent.openEditor(
-                        file.get(),
-                        new OpenEditorCallbackImpl() {
-                          @Override
-                          public void onEditorOpened(EditorPartPresenter editor) {
-                            setCursor(editor, member.getFileRegion().getOffset());
-                          }
-                        });
-                  }
+              file -> {
+                if (file.isPresent()) {
+                  editorAgent.openEditor(
+                      file.get(),
+                      new OpenEditorCallbackImpl() {
+                        @Override
+                        public void onEditorOpened(EditorPartPresenter editor) {
+                          setCursor(editor, member.getFileRegion().getOffset());
+                        }
+                      });
                 }
               });
     }
