@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack",
-    "start": "webpack-dev-server --open"
+    "build": "webpack --config webpack.prod.js",
+    "start": "webpack-dev-server --open --config webpack.dev.js"
   },
   "author": "",
   "license": "EPL-1.0",
@@ -19,8 +19,10 @@
     "style-loader": "^0.20.1",
     "ts-loader": "^3.4.0",
     "typescript": "^2.7.1",
+    "uglifyjs-webpack-plugin": "^1.1.8",
     "webpack": "^3.10.0",
-    "webpack-dev-server": "^2.11.1"
+    "webpack-dev-server": "^2.11.1",
+    "webpack-merge": "^4.1.1"
   },
   "dependencies": {}
 }

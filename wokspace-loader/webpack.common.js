@@ -23,24 +23,6 @@ module.exports = {
             }
         ]
     },
-    devtool: 'inline-source-map',
-    devServer: {
-        contentBase: './dist',
-        port: 3050,
-        index: 'index.html',
-        historyApiFallback: true,
-        // historyApiFallback: {
-        //     index: 'index.html'
-        // },
-        proxy: {
-            //"/api": "http://localhost:8080",
-            '/api/websocket': {
-                target: 'http://localhost:8080',
-                ws: true,
-            },
-            '/api/workspace' : "http://localhost:8080",
-          }
-    },
     resolve: {
         extensions: ['.tsx', '.ts', '.js']
     },
