@@ -100,7 +100,7 @@ import org.slf4j.LoggerFactory;
  * <tr><td>${root_data}/input/</td><td>&nbsp;</td><td>&nbsp;</td><td>${root_data}/input/</td></tr>
  * </table>
  *
- * During code evolution might be the case then someone will want to rename some property. This
+ * During code evolution might be the case when someone will want to rename some property. This
  * brings a couple of problems like support of old property name in external plugins and support old
  * configuration values in code with the new property name. To cover these cases there is a file
  * che_aliases.properties that contains old names of all existed properties. It has such format
@@ -110,7 +110,7 @@ import org.slf4j.LoggerFactory;
  * and current_name = old_value and very_old_name = old_value if very_old_name property exist it
  * will be binded to very_old_value, and current_name = very_old_value and old_name = very_old_value
  *
- * <p>NOTE: its prohibited to use a different name for same property on the same level. From the
+ * <p>NOTE: it's prohibited to use a different name for same property on the same level. From the
  * example above - you can use environment property CHE_CURRENT_NAME and CHE_OLD_NAME. But you can
  * use it on a different level, for instance, environment property and system property.
  *
