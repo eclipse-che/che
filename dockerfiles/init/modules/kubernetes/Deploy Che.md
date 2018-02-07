@@ -12,6 +12,7 @@ not to break websocket connections.
 In particular testing environment was setup with NginX ingress controller 0.9.0-beta.17.
 So we added annotations specific to this implementation and version:
 - ingress.kubernetes.io/rewrite-target: /
+- ingress.kubernetes.io/ssl-redirect": "false"
 - ingress.kubernetes.io/proxy-read-timeout: "3600"
 - ingress.kubernetes.io/proxy-connect-timeout: "3600"
 

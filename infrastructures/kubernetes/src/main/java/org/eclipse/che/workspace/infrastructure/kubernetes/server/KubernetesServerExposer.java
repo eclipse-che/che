@@ -52,6 +52,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helps to modify {@link KubernetesEnvironment} to make servers that are configured by {@link
@@ -123,6 +125,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNames
  */
 public class KubernetesServerExposer<T extends KubernetesEnvironment> {
 
+  private static final Logger LOG = LoggerFactory.getLogger(KubernetesServerExposer.class);
+
   public static final int SERVER_UNIQUE_PART_SIZE = 8;
   public static final String SERVER_PREFIX = "server";
 
@@ -138,6 +142,11 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
       Pod pod,
       Container container,
       T kubernetesEnvironment) {
+    if (ingressAnnotations == null) {
+      LOG.warn(
+          "Ingresses annotations are absent. Make sure that workspace ingresses don't need "
+              + "to be configured according to ingress controller.");
+    }
     this.ingressAnnotations = ingressAnnotations;
     this.machineName = machineName;
     this.pod = pod;
