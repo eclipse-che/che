@@ -10,29 +10,23 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PROFILE_MENU;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.STOP_WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
-import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class CheckStopStartWsTest {
   @Inject private TestWorkspace testWorkspace;
-  @Inject private Ide ide;
-  @Inject private ProjectExplorer projectExplorer;
-  @Inject private MachineTerminal terminal;
   @Inject private ToastLoader toastLoader;
   @Inject private Menu menu;
+  @Inject private Ide ide;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -41,16 +35,12 @@ public class CheckStopStartWsTest {
 
   @Test
   public void checkStopStartWorkspaceTest() {
-    projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab(EXPECTED_MESS_IN_CONSOLE_SEC);
-    menu.waitMenuItemIsEnabled(PROFILE_MENU);
+    ide.waitOpenedWorkspaceIsReadyToUse();
 
     menu.runCommand(WORKSPACE, STOP_WORKSPACE);
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running");
 
     toastLoader.clickOnStartButton();
-    projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab(EXPECTED_MESS_IN_CONSOLE_SEC);
-    menu.waitMenuItemIsEnabled(PROFILE_MENU);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 }
