@@ -123,7 +123,8 @@ public class SinglePortHostnameBuilder {
     @Override
     public SinglePortHostnameBuilder get() {
       if (instance == null) {
-        throw new IllegalStateException("");
+        throw new IllegalStateException(
+            "This class may not be used other than in single-port mode.");
       }
       return instance;
     }
