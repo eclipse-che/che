@@ -35,22 +35,9 @@ public class SinglePortUrlRewriter implements URLRewriter {
 
   @Inject
   public SinglePortUrlRewriter(
-      @Named("che.single.port") boolean isSinglePortEnabled,
-      @Nullable @Named("che.docker.ip") String internalIpOfContainers,
-      @Named("che.port") int chePort,
-      @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
-      @Nullable @Named("che.singleport.wildcard_domain.host") String wildcardHost) {
-    if (isSinglePortEnabled && internalIpOfContainers == null && externalIpOfContainers == null) {
-      throw new IllegalStateException(
-          "Value of both of the properties 'che.docker.ip' and 'che.docker.ip.external' is null,"
-              + " which is unsuitable for the single-port mode");
-    }
-    this.hostnameBuilder =
-        isSinglePortEnabled
-            ? new SinglePortHostnameBuilder(
-                externalIpOfContainers, internalIpOfContainers, wildcardHost)
-            : null;
+      @Named("che.port") int chePort, SinglePortHostnameBuilder hostnameBuilder) {
     this.chePort = chePort;
+    this.hostnameBuilder = hostnameBuilder;
   }
 
   @Override

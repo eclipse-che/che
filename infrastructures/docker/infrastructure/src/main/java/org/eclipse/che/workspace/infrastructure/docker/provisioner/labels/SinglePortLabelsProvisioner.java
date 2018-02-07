@@ -42,21 +42,11 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
 
   @Inject
   public SinglePortLabelsProvisioner(
-      @Named("che.single.port") boolean isSinglePortEnabled,
       @Nullable @Named("che.docker.ip") String internalIpOfContainers,
       @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
       @Nullable @Named("che.docker.network") String dockerNetwork,
-      @Nullable @Named("che.singleport.wildcard_domain.host") String wildcardHost) {
-    if (isSinglePortEnabled && internalIpOfContainers == null && externalIpOfContainers == null) {
-      throw new IllegalStateException(
-          "Value of both of the properties 'che.docker.ip' and 'che.docker.ip.external' is null,"
-              + " which is unsuitable for the single-port mode");
-    }
-    this.hostnameBuilder =
-        isSinglePortEnabled
-            ? new SinglePortHostnameBuilder(
-                externalIpOfContainers, internalIpOfContainers, wildcardHost)
-            : null;
+      SinglePortHostnameBuilder hostnameBuilder) {
+    this.hostnameBuilder = hostnameBuilder;
     this.internalIpOfContainers = internalIpOfContainers;
     this.externalIpOfContainers = externalIpOfContainers;
     this.dockerNetwork = dockerNetwork;

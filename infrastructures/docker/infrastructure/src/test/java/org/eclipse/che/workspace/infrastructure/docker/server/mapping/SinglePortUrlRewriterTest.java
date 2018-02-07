@@ -33,7 +33,8 @@ public class SinglePortUrlRewriterTest {
       String expectedURL)
       throws Exception {
     SinglePortUrlRewriter rewriter =
-        new SinglePortUrlRewriter(true, externalIP, 8080, internalIp, nioHost);
+        new SinglePortUrlRewriter(
+            8080, new SinglePortHostnameBuilder(externalIP, internalIp, nioHost));
 
     String rewrittenURL = rewriter.rewriteURL(identity, machineName, serverName, incomeURL);
 
@@ -46,8 +47,8 @@ public class SinglePortUrlRewriterTest {
       // External IP
       {
         new RuntimeIdentityImpl("ws123", null, null),
-        "127.0.0.1",
         "172.12.0.2",
+        "127.0.0.1",
         "machine1",
         "exec/http",
         "my.io",
@@ -97,7 +98,8 @@ public class SinglePortUrlRewriterTest {
   )
   public void shouldThrowExceptionWhenRewritingFails() throws Exception {
     SinglePortUrlRewriter rewriter =
-        new SinglePortUrlRewriter(true, "127.0.0.1", 8080, "172.12.0.2", null);
+        new SinglePortUrlRewriter(
+            8080, new SinglePortHostnameBuilder("172.12.0.2", "127.0.0.1", null));
     rewriter.rewriteURL(new RuntimeIdentityImpl("ws123", null, null), "machine1", "server", ":");
   }
 }
