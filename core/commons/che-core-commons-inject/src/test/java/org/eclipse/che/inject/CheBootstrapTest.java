@@ -297,6 +297,28 @@ public class CheBootstrapTest {
     assertEquals(testComponent.otherOtherString, "some_value");
   }
 
+  @Test
+  public void processesOld2NewPropertyAliases() throws Exception {
+    Properties cheProperties = new Properties();
+    cheProperties.put("che.some.name", "some_value");
+    writePropertiesFile(che, "che.properties", cheProperties);
+
+    Properties aliases = new Properties();
+    aliases.put("very.new.some.name", "new.some.name, che.some.name");
+    writePropertiesFile(che.getParentFile(), PROPERTIES_ALIASES_CONFIG_FILE, aliases);
+
+    ModuleScanner.modules.add(binder -> binder.bind(TestConfAliasComponent.class));
+
+    cheBootstrap.contextInitialized(new ServletContextEvent(servletContext));
+
+    Injector injector = retrieveComponentFromServletContext(Injector.class);
+
+    TestConfAliasComponent testComponent = injector.getInstance(TestConfAliasComponent.class);
+    assertEquals(testComponent.string, "some_value");
+    assertEquals(testComponent.otherString, "some_value");
+    assertEquals(testComponent.otherOtherString, "some_value");
+  }
+
   static class TestChePropertiesComponent {
     @Named("test_int")
     @Inject

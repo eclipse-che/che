@@ -15,7 +15,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuIt
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -69,13 +68,7 @@ public class FilterOrganizationTest {
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), initialOrgNumber);
-    try {
-      assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
-    } catch (AssertionError a) {
-      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7279", a);
-    }
-
+    assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
     assertTrue(organizationListPage.getValues(NAME).contains(organization.getName()));
 
     // Tests filter the organization by full organization name
@@ -100,11 +93,6 @@ public class FilterOrganizationTest {
 
     organizationListPage.clearSearchInput();
 
-    try {
-      assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
-    } catch (AssertionError a) {
-      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7279", a);
-    }
+    assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
   }
 }

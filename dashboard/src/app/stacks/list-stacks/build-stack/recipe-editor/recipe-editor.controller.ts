@@ -90,6 +90,9 @@ export class RecipeEditorController implements IRecipeEditorControllerScope {
       onLoad: (editor: any) => {
         this.setEditor(editor);
         editor.focus();
+        $timeout(() => {
+          editor.refresh();
+        }, 100);
       }
     };
 

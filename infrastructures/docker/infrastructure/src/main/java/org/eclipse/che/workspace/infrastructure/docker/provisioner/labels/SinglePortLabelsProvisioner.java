@@ -38,16 +38,24 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
   private final SinglePortHostnameBuilder hostnameBuilder;
   private final String internalIpOfContainers;
   private final String externalIpOfContainers;
+  private final String dockerNetwork;
 
   @Inject
   public SinglePortLabelsProvisioner(
-      @Named("che.docker.ip") String internalIpOfContainers,
+      @Nullable @Named("che.docker.ip") String internalIpOfContainers,
       @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
+      @Nullable @Named("che.docker.network") String dockerNetwork,
       @Nullable @Named("che.singleport.wildcard_domain.host") String wildcardHost) {
+    if (internalIpOfContainers == null && externalIpOfContainers == null) {
+      throw new IllegalStateException(
+          "Value of both of the properties 'che.docker.ip' and 'che.docker.ip.external' is null,"
+              + " which is unsuitable for the single-port mode");
+    }
     this.hostnameBuilder =
         new SinglePortHostnameBuilder(externalIpOfContainers, internalIpOfContainers, wildcardHost);
     this.internalIpOfContainers = internalIpOfContainers;
     this.externalIpOfContainers = externalIpOfContainers;
+    this.dockerNetwork = dockerNetwork;
   }
 
   @Override
@@ -73,6 +81,10 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
         containerLabels.put(format("traefik.%s.frontend.rule", serviceName), "Host:" + host);
         // Needed to activate per-service rules
         containerLabels.put("traefik.frontend.rule", machineName);
+      }
+      // To prevent gateway timeouts in multiuser mode
+      if (dockerNetwork != null) {
+        containerLabels.put("traefik.docker.network", dockerNetwork);
       }
       DockerContainerConfig dockerConfig = internalEnv.getContainers().get(machineName);
       dockerConfig.getLabels().putAll(containerLabels);

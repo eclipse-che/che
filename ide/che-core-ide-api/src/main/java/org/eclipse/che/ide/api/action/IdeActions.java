@@ -39,6 +39,7 @@ public interface IdeActions {
   String GROUP_PROJECT_EXPLORER_CONTEXT_MENU = "projectExplorerContextMenu";
   String GROUP_EDITOR_TAB_CONTEXT_MENU = "editorTabContextMenu";
   String GROUP_CONSOLES_TREE_CONTEXT_MENU = "consolesTreeContextMenu";
+  String GROUP_COMMAND_EXPLORER_CONTEXT_MENU = "commandExplorerContextMenu";
   String GROUP_EDITOR_CONTEXT_MENU = "editorContextMenu";
 
   String GROUP_PART_MENU = "partMenu";

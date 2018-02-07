@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.selenium.core.constant.TestGitConstants.CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.concurrent.ExecutionException;
@@ -30,10 +29,10 @@ import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -59,6 +58,7 @@ public class CreateNamedFactoryFromDashBoard {
   @Inject private Menu menu;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestFactoryServiceClient factoryServiceClient;
+  @Inject private PullRequestPanel pullRequestPanel;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -96,14 +96,9 @@ public class CreateNamedFactoryFromDashBoard {
     events.waitExpectedMessage(CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE);
     events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
     notificationsPopupPanel.waitPopUpPanelsIsClosed();
-
-    try {
-      projectExplorer.openItemByPath(PROJECT_NAME);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8458");
-    }
-
+    projectExplorer.selectItem(PROJECT_NAME);
+    pullRequestPanel.waitOpenPanel();
+    projectExplorer.openItemByPath(PROJECT_NAME);
     mavenPluginStatusBar.waitClosingInfoPanel();
   }
 }

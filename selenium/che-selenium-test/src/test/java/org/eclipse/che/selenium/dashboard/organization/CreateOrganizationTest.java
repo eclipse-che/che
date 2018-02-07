@@ -15,7 +15,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuIt
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -87,13 +86,7 @@ public class CreateOrganizationTest {
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
 
-    try {
-      assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber + 1);
-    } catch (AssertionError a) {
-      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7279", a);
-    }
-
+    assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber + 1);
     assertTrue(organizationListPage.getValues(NAME).contains(PARENT_ORG_NAME));
     organizationListPage.clickOnOrganization(PARENT_ORG_NAME);
     organizationPage.waitOrganizationName(PARENT_ORG_NAME);
