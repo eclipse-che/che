@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -147,6 +148,9 @@ public class NavigateToFileTest {
     String openedFileNameInTheTab = openedFileWithExtension.replace(".java", "");
     launchNavigateToFileFromUIAndTypeValue(navigatingValue);
     navigateToFile.waitSuggestedPanelIsDisplayed();
+
+    // wait for the found files list in the suggested panel
+    WaitUtils.sleepQuietly(3);
     waitExpectedItemsInNavigateToFileDropdawn(expectedItems);
 
     try {
