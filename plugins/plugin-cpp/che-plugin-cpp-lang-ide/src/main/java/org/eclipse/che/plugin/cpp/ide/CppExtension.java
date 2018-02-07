@@ -16,7 +16,6 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
-import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
@@ -57,9 +56,9 @@ public class CppExtension {
     actionManager.registerAction("newCFile", newCSourceFileAction);
     actionManager.registerAction("newCppFile", newCppSourceFileAction);
     actionManager.registerAction("newHFile", newHeadSourceFileAction);
-    newGroup.add(newCSourceFileAction, Constraints.FIRST);
-    newGroup.add(newHeadSourceFileAction, Constraints.FIRST);
-    newGroup.add(newCppSourceFileAction, Constraints.FIRST);
+    newGroup.add(newCSourceFileAction);
+    newGroup.add(newHeadSourceFileAction);
+    newGroup.add(newCppSourceFileAction);
     iconRegistry.registerIcon(
         new Icon(C_CATEGORY + ".samples.category.icon", resources.category()));
   }

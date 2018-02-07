@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.editor.autocomplete;
 
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.TASK_MARKER_OVERVIEW;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -28,6 +29,8 @@ import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -37,6 +40,7 @@ public class AutocompleteWithInheritTest {
       NameGenerator.generate(AutocompleteWithInheritTest.class.getSimpleName(), 4);
   private static final String BASE_CLASS = "AppController";
   private static final String EXTENDED_CLASS = "InheritClass";
+  private static final Logger LOG = LoggerFactory.getLogger(AutocompleteWithInheritTest.class);
 
   private static final String contentAfterFix =
       "public class InheritClass extends AppController {\n"
@@ -69,7 +73,7 @@ public class AutocompleteWithInheritTest {
   }
 
   @Test
-  public void updateDependencyWithInheritTest() {
+  public void updateDependencyWithInheritTest() throws Exception {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     mavenPluginStatusBar.waitClosingInfoPanel();
@@ -113,25 +117,36 @@ public class AutocompleteWithInheritTest {
     editor.waitAllMarkersDisappear(ERROR_MARKER);
   }
 
-  private void waitErrorMarkerInPosition() {
+  private void waitErrorMarkerInPosition() throws Exception {
     try {
       editor.waitMarkerInPosition(MarkersType.ERROR_MARKER, 13);
     } catch (TimeoutException ex) {
-      editor.setCursorToLine(13);
-      editor.waitCursorPosition(13, 1);
-      editor.typeTextIntoEditor(Keys.ENTER.toString());
-      editor.waitCursorPosition(14, 1);
-      editor.typeTextIntoEditor(Keys.ENTER.toString());
-      editor.waitCursorPosition(15, 1);
-      editor.typeTextIntoEditor(Keys.ENTER.toString());
-      editor.waitCursorPosition(16, 1);
-      editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
-      editor.waitCursorPosition(15, 1);
-      editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
-      editor.waitCursorPosition(14, 1);
-      editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
-      editor.waitCursorPosition(13, 1);
-      editor.waitMarkerInPosition(MarkersType.ERROR_MARKER, 13);
+      logExternalLibraries();
+      logProjectTypeChecking();
+      logProjectLanguageChecking();
+
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7161", ex);
     }
+  }
+
+  private void logExternalLibraries() throws Exception {
+    testProjectServiceClient
+        .getExternalLibraries(workspace.getId(), PROJECT_NAME)
+        .forEach(library -> LOG.info("project external library:  {}", library));
+  }
+
+  private void logProjectTypeChecking() throws Exception {
+    LOG.info(
+        "Project type of the {} project is \"maven\" - {}",
+        PROJECT_NAME,
+        testProjectServiceClient.checkProjectType(workspace.getId(), PROJECT_NAME, "maven"));
+  }
+
+  private void logProjectLanguageChecking() throws Exception {
+    LOG.info(
+        "Project language of the {} project is \"java\" - {}",
+        PROJECT_NAME,
+        testProjectServiceClient.checkProjectLanguage(workspace.getId(), PROJECT_NAME, "java"));
   }
 }

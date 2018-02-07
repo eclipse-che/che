@@ -27,6 +27,9 @@ public interface GoalPageView extends View<GoalPageView.ActionDelegate> {
   /** Sets the command's goal value. */
   void setGoal(String goalId);
 
+  /** Sets the focus on goal field. */
+  void setFocusOnGoal();
+
   /** The action delegate for this view. */
   interface ActionDelegate {
 

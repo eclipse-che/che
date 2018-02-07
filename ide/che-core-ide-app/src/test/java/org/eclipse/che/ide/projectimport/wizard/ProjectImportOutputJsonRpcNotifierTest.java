@@ -24,7 +24,6 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.function.Consumer;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.eclipse.che.api.core.jsonrpc.commons.reception.ConsumerConfiguratorOneToNone;
 import org.eclipse.che.api.core.jsonrpc.commons.reception.MethodNameConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.reception.ParamsConfigurator;
@@ -50,10 +49,10 @@ import org.mockito.Mock;
 public class ProjectImportOutputJsonRpcNotifierTest {
 
   @Mock NotificationManager notificationManager;
-  @Mock CoreLocalizationConstant constant;
+  @Mock CoreLocalizationConstant locale;
   @Mock EventBus eventBus;
   @Mock RequestHandlerConfigurator configurator;
-  @Mock RequestHandlerManager manager;
+  @Mock ImportProgressJsonRpcHandler importProgressJsonRpcHandler;
 
   private ProjectImportOutputJsonRpcNotifier notifier;
 
@@ -61,7 +60,7 @@ public class ProjectImportOutputJsonRpcNotifierTest {
   public void setUp() throws Exception {
     notifier =
         new ProjectImportOutputJsonRpcNotifier(
-            notificationManager, constant, eventBus, configurator, manager);
+            notificationManager, locale, eventBus, importProgressJsonRpcHandler);
   }
 
   @Test
@@ -76,7 +75,7 @@ public class ProjectImportOutputJsonRpcNotifierTest {
     final StatusNotification statusNotification = mock(StatusNotification.class);
     when(notificationManager.notify(anyString(), any(Status.class), any(DisplayMode.class)))
         .thenReturn(statusNotification);
-    when(constant.importingProject(anyString())).thenReturn("message");
+    when(locale.importingProject(anyString())).thenReturn("message");
     final MethodNameConfigurator methodNameConfigurator = mock(MethodNameConfigurator.class);
     when(configurator.newConfiguration()).thenReturn(methodNameConfigurator);
     final ParamsConfigurator paramsConfigurator = mock(ParamsConfigurator.class);
@@ -92,7 +91,7 @@ public class ProjectImportOutputJsonRpcNotifierTest {
     notifier.subscribe("project");
 
     // then
-    verify(constant).importingProject(eq("project"));
+    verify(locale).importingProject(eq("project"));
     verify(consumerConfiguratorOneToNone).withConsumer(argumentCaptor.capture());
     argumentCaptor.getValue().accept(dto);
     verify(statusNotification).setTitle(eq("message"));
@@ -102,7 +101,7 @@ public class ProjectImportOutputJsonRpcNotifierTest {
   @Test
   public void testShouldUnSubscribeFromDisplayingNotification() throws Exception {
     // given
-    when(constant.importProjectMessageSuccess(nullable(String.class))).thenReturn("message");
+    when(locale.importProjectMessageSuccess(nullable(String.class))).thenReturn("message");
     final StatusNotification statusNotification = mock(StatusNotification.class);
     when(notificationManager.notify(
             nullable(String.class), nullable(Status.class), nullable(DisplayMode.class)))

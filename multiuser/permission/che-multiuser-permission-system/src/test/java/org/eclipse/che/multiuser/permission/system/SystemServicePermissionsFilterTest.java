@@ -131,11 +131,9 @@ public class SystemServicePermissionsFilterTest {
         .auth()
         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
         .when()
-        .get(SECURE_PATH + "/system/state")
-        .then()
-        .statusCode(403);
+        .get(SECURE_PATH + "/system/state");
 
-    verify(systemService, never()).getState();
+    verify(systemService).getState();
   }
 
   private static void permitSubject(String... allowedActions) throws ForbiddenException {

@@ -20,7 +20,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.organization.Organiz
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -83,13 +82,7 @@ public class AdminOfParentOrganizationTest {
     assertEquals(organizationListPage.getOrganizationsToolbarTitle(), "Organizations");
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), initialOrgCount);
 
-    try {
-      assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgCount);
-    } catch (AssertionError a) {
-      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7279", a);
-    }
-
+    assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgCount);
     assertFalse(organizationListPage.isAddOrganizationButtonVisible());
     assertTrue(organizationListPage.isSearchInputVisible());
 

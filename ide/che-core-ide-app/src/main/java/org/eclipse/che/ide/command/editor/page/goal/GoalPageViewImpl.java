@@ -77,5 +77,10 @@ public class GoalPageViewImpl extends Composite implements GoalPageView {
     }
   }
 
+  @Override
+  public void setFocusOnGoal() {
+    goalsList.setFocus(true);
+  }
+
   interface GoalPageViewImplUiBinder extends UiBinder<Widget, GoalPageViewImpl> {}
 }

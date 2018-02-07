@@ -14,6 +14,7 @@ import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPED;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Statuses;
+import org.openqa.selenium.WebDriverException;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -81,7 +83,13 @@ public class WorkspacesListTest {
     workspaces.waitDocumentationLink();
     workspaces.waitAddWorkspaceButton();
     workspaces.waitSearchWorkspaceByNameField();
-    workspaces.waitBulkCheckbox();
+
+    try {
+      workspaces.waitBulkCheckbox();
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8594");
+    }
 
     // check all headers are present
     ArrayList<String> headers = workspaces.getWorkspaceListHeaders();
@@ -100,7 +108,13 @@ public class WorkspacesListTest {
   @Test
   public void checkWorkspaceSelectingByCheckbox() {
     // select the test workspace by checkbox and select it is checked
-    workspaces.selectWorkspaceByCheckbox(workspaceName1);
+    try {
+      workspaces.selectWorkspaceByCheckbox(workspaceName1);
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8594");
+    }
+
     assertTrue(workspaces.isWorkspaceChecked(workspaceName1));
     workspaces.selectWorkspaceByCheckbox(workspaceName1);
     Assert.assertFalse(workspaces.isWorkspaceChecked(workspaceName1));
@@ -118,7 +132,13 @@ public class WorkspacesListTest {
   @Test
   public void checkWorkspaceActions() {
     // open the Config page of the test workspace
-    workspaces.clickOnWorkspaceConfigureButton(workspaceName1);
+    try {
+      workspaces.clickOnWorkspaceConfigureButton(workspaceName1);
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8594");
+    }
+
     workspaceDetails.waitToolbarTitleName(workspaceName1);
     workspaceConfig.waitConfigForm();
     dashboard.selectWorkspacesItemOnDashboard();
@@ -150,7 +170,13 @@ public class WorkspacesListTest {
     workspaces.waitNoWorkspacesFound();
 
     workspaces.typeToSearchInput("wksp");
-    workspaces.waitWorkspaceIsPresent(workspaceName1);
+    try {
+      workspaces.waitWorkspaceIsPresent(workspaceName1);
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8594");
+    }
+
     workspaces.waitWorkspaceIsPresent(workspaceName2);
     workspaces.waitWorkspaceIsPresent(workspaceName3);
 
@@ -166,7 +192,13 @@ public class WorkspacesListTest {
   @Test(priority = 1)
   public void checkWorkspaceDeleting() {
     // delete all created test workspaces
-    workspaces.selectWorkspaceByCheckbox(workspaceName1);
+    try {
+      workspaces.selectWorkspaceByCheckbox(workspaceName1);
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8594");
+    }
+
     workspaces.selectWorkspaceByCheckbox(workspaceName2);
     workspaces.selectWorkspaceByCheckbox(workspaceName3);
 

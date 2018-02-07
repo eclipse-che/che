@@ -94,6 +94,9 @@ public class CheckRestoringSplitEditorTest {
       popupDialogsBrowser.acceptAlert();
     }
 
+    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitItemIsSelected(PROJECT_NAME);
+
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitItem(PROJECT_NAME);
     try {

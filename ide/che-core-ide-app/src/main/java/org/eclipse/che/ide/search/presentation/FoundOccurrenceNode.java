@@ -143,7 +143,7 @@ public class FoundOccurrenceNode extends AbstractTreeNode implements HasPresenta
     spanElement.setAttribute("debugFilePath", itemPath);
     SpanElement lineNumberElement = createSpanElement();
     lineNumberElement.setInnerHTML(
-        String.valueOf(searchOccurrence.getLineNumber() + 1) + ":&nbsp;&nbsp;&nbsp;");
+        String.valueOf(searchOccurrence.getLineNumber()) + ":&nbsp;&nbsp;&nbsp;");
     spanElement.appendChild(lineNumberElement);
     SpanElement textElement = createSpanElement();
     String phrase = searchOccurrence.getPhrase();
