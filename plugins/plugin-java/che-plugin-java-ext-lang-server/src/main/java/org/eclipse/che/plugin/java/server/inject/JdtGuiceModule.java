@@ -19,7 +19,6 @@ import org.eclipse.che.JavadocUrlProvider;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.jdt.rest.UrlContextProvider;
 import org.eclipse.che.plugin.java.server.JavaReconcileRequestHandler;
-import org.eclipse.che.plugin.java.server.ProjectListeners;
 import org.eclipse.che.plugin.java.server.refactoring.RefactoringManager;
 import org.eclipse.che.plugin.java.server.rest.CodeAssistService;
 import org.eclipse.che.plugin.java.server.rest.CompilerSetupService;
@@ -50,7 +49,6 @@ public class JdtGuiceModule extends AbstractModule {
     bind(ResourcesPlugin.class).asEagerSingleton();
     bind(JavaPlugin.class).asEagerSingleton();
     bind(FileBuffersPlugin.class).asEagerSingleton();
-    bind(ProjectListeners.class).asEagerSingleton();
     bind(RefactoringManager.class).asEagerSingleton();
     bind(RefactoringService.class);
 

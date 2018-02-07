@@ -14,6 +14,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.lsp4j.Location;
 
@@ -29,6 +31,14 @@ public class LanguageServiceUtils {
 
   public static String removePrefixUri(String uri) {
     return uri.startsWith(FILE_PROJECTS) ? uri.substring(FILE_PROJECTS.length()) : uri;
+  }
+
+  public static List<String> removePrefixUri(List<String> uris) {
+    for (int i = 0; i < uris.size(); i++) {
+      uris.set(i, removePrefixUri(uris.get(i)));
+    }
+
+    return uris;
   }
 
   public static String removeUriScheme(String uri) {

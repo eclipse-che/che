@@ -182,16 +182,6 @@ public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePrese
                   createAndAddWidget(option);
                 }
               }
-            })
-        .catchError(
-            new Operation<PromiseError>() {
-              @Override
-              public void apply(PromiseError arg) throws OperationException {
-                notificationManagerProvider
-                    .get()
-                    .notify(
-                        locale.unableToLoadJavaCompilerErrorsWarningsSettings(), FAIL, FLOAT_MODE);
-              }
             });
   }
 

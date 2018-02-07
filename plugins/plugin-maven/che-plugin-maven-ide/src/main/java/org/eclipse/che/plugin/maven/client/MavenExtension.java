@@ -51,7 +51,7 @@ public class MavenExtension {
   @Inject
   public MavenExtension(
       PreSelectedProjectTypeManager preSelectedProjectManager,
-      MavenMessagesHandler messagesHandler,
+//      MavenMessagesHandler messagesHandler,
       ClassFileSourcesDownloader downloader,
       MavenModelImporter importMavenModelHandler,
       MavenResources resources,

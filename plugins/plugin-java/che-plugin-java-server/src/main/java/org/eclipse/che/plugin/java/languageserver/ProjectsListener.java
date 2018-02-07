@@ -13,16 +13,21 @@ package org.eclipse.che.plugin.java.languageserver;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removePrefixUri;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.annotation.PostConstruct;
+
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.server.notification.PreProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectInitializedEvent;
@@ -45,15 +50,18 @@ public class ProjectsListener {
   private final EventService eventService;
   private final ExecutorService executorService;
   private final ProjectManager projectManager;
+  private final ProjectsSynchronizer projectsSynchronizer;
 
   @Inject
   public ProjectsListener(
       JavaLanguageServerExtensionService service,
       EventService eventService,
-      ProjectManager projectManager) {
+      ProjectManager projectManager,
+      ProjectsSynchronizer projectsSynchronizer) {
     this.service = service;
     this.eventService = eventService;
     this.projectManager = projectManager;
+    this.projectsSynchronizer = projectsSynchronizer;
     this.executorService =
         Executors.newSingleThreadExecutor(
             new ThreadFactoryBuilder()
@@ -132,6 +140,14 @@ public class ProjectsListener {
         (Runnable)
             () -> {
               JobResult jobResult = service.updateWorkspace(updateWorkspaceParameters);
+
+              updateWorkspaceParameters
+                  .getAddedProjectsUri()
+                  .forEach(
+                      projectUri -> {
+                        String projectPath = removePrefixUri(projectUri);
+                        projectsSynchronizer.synchronize(projectPath);
+                      });
 
               switch (jobResult.getSeverity()) {
                 case ERROR:
