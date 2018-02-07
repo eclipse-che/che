@@ -294,7 +294,7 @@ public abstract class SeleniumTestHandler
         continue;
       }
 
-      Path pathToStoreWorkspaceLogs = Paths.get(workspaceLogsDir, getTestName(result));
+      Path pathToStoreWorkspaceLogs = Paths.get(workspaceLogsDir, getTestDefinition(result));
       testWorkspaceLogsReader.read((TestWorkspace) obj, pathToStoreWorkspaceLogs);
     }
   }
@@ -408,7 +408,7 @@ public abstract class SeleniumTestHandler
   }
 
   private void captureScreenshotFromWindow(ITestResult result, SeleniumWebDriver webDriver) {
-    String testName = getTestName(result);
+    String testName = getTestDefinition(result);
     String filename = NameGenerator.generate(testName + "_", 8) + ".png";
     try {
       byte[] data = webDriver.getScreenshotAs(OutputType.BYTES);
@@ -420,7 +420,7 @@ public abstract class SeleniumTestHandler
     }
   }
 
-  private String getTestName(ITestResult result) {
+  private String getTestDefinition(ITestResult result) {
     return result.getTestClass().getName() + "." + result.getMethod().getMethodName();
   }
 
@@ -436,7 +436,7 @@ public abstract class SeleniumTestHandler
   }
 
   private void dumpHtmlCodeFromTheCurrentPage(ITestResult result, SeleniumWebDriver webDriver) {
-    String testName = getTestName(result);
+    String testName = getTestDefinition(result);
     String filename = NameGenerator.generate(testName + "_", 8) + ".html";
     try {
       String pageSource = webDriver.getPageSource();
