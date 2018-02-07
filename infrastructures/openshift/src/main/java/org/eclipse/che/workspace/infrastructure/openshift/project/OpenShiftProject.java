@@ -78,6 +78,7 @@ public class OpenShiftProject extends KubernetesNamespace {
           .withName(projectName)
           .endMetadata()
           .done();
+      waitDefaultServiceAccount(projectName, client);
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
