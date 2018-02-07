@@ -14,7 +14,6 @@ import { CheJsonRpcMasterApi } from './json-rpc/che-json-rpc-master-api';
 import { getWorkspace, startWorkspace } from './workspace';
 
 const DEFAULT_WEBSOCKET_CONTEXT = '/api/websocket';
-const NAMESPACE_START_SEGMENT = 1;
 
 let wsClient = new WebsocketClient();
 let wsUrl = formJsonRpcApiLocation(document.location) + DEFAULT_WEBSOCKET_CONTEXT;
