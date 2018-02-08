@@ -18,7 +18,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
-import org.eclipse.che.ide.ext.java.client.navigation.filestructure.FileStructurePresenter2;
+import org.eclipse.che.ide.ext.java.client.navigation.filestructure.FileStructurePresenter;
 
 /**
  * Action for open file structure window.
@@ -28,12 +28,12 @@ import org.eclipse.che.ide.ext.java.client.navigation.filestructure.FileStructur
 @Singleton
 public class FileStructureAction extends JavaEditorAction {
 
-  private final FileStructurePresenter2 fileStructurePresenter;
+  private final FileStructurePresenter fileStructurePresenter;
   private final EditorAgent editorAgent;
 
   @Inject
   public FileStructureAction(
-      FileStructurePresenter2 fileStructurePresenter,
+      FileStructurePresenter fileStructurePresenter,
       JavaLocalizationConstant locale,
       EditorAgent editorAgent,
       JavaResources resources,

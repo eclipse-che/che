@@ -16,7 +16,6 @@ import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.java.server.projecttype.JavaProjectType;
-import org.eclipse.che.plugin.java.server.rest.ClasspathService;
 
 /**
  * @author Vitaly Parfonov
@@ -29,7 +28,5 @@ public class JavaModule extends AbstractModule {
     Multibinder<ProjectTypeDef> projectTypeMultibinder =
         Multibinder.newSetBinder(binder(), ProjectTypeDef.class);
     projectTypeMultibinder.addBinding().to(JavaProjectType.class);
-
-    bind(ClasspathService.class);
   }
 }
