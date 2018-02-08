@@ -147,6 +147,7 @@ public class NavigateToFileTest {
     String openedFileNameInTheTab = openedFileWithExtension.replace(".java", "");
     launchNavigateToFileFromUIAndTypeValue(navigatingValue);
     navigateToFile.waitSuggestedPanel();
+
     waitExpectedItemsInNavigateToFileDropdown(expectedItems);
 
     try {

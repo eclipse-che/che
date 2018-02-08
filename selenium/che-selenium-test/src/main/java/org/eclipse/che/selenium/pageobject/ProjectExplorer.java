@@ -19,7 +19,6 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.ALL_PROJECTS_XPATH;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.CONTEXT_MENU_ID;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.EXPLORER_RIGHT_TAB_ID;
@@ -923,7 +922,7 @@ public class ProjectExplorer {
    * Finds a file by name using Navigate to file feature. Expand the tree using Reveal resource
    * feature
    *
-   * @param file file for serch with Navigate to file feature.
+   * @param file file for search with Navigate to file feature.
    * @param pathToFile
    */
   public void expandToFileWithRevealResource(String file, String pathToFile) {
@@ -931,11 +930,7 @@ public class ProjectExplorer {
     navigateToFile.waitFormToOpen();
     loader.waitOnClosed();
     navigateToFile.typeSymbolInFileNameField(file);
-    try {
-      navigateToFile.waitFileNamePopUp();
-    } catch (StaleElementReferenceException ex) {
-      sleepQuietly(1);
-    }
+    navigateToFile.waitSuggestedPanel();
     navigateToFile.isFilenameSuggested(file);
     navigateToFile.selectFileByName(file);
     navigateToFile.waitFormToClose();
