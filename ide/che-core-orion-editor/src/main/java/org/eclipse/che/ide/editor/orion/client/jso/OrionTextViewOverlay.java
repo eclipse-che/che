@@ -211,7 +211,14 @@ public class OrionTextViewOverlay extends JavaScriptObject {
     addEventListener(type, handler, false);
   }
 
-  public interface EventHandlerNoParameter {
+  /**
+   * Destroy widget. Uses to widget resource utilization.
+   */
+    public final native void destroy() /*-{
+        this.destroy();
+    }-*/;
+
+    public interface EventHandlerNoParameter {
     void onEvent();
   }
 
