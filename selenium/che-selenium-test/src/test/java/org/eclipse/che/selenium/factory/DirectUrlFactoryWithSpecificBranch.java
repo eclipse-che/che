@@ -69,10 +69,9 @@ public class DirectUrlFactoryWithSpecificBranch {
 
   @Test
   public void factoryWithDirectUrlWithSpecificBranch() throws Exception {
-    try{
+    try {
       testFactoryWithSpecificBranch.authenticateAndOpen();
-    }
-    catch (NoSuchElementException ex){
+    } catch (NoSuchElementException ex) {
       // remove try-catch block after issue has been resolved
       fail("https://github.com/eclipse/che/issues/8671");
     }
