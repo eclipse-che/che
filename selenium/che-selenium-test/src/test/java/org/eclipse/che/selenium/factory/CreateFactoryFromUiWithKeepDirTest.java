@@ -30,7 +30,6 @@ import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.CreateFactoryWidget;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -80,12 +79,10 @@ public class CreateFactoryFromUiWithKeepDirTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestFactoryServiceClient factoryServiceClient;
-  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(testWorkspace);
-    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @AfterClass
