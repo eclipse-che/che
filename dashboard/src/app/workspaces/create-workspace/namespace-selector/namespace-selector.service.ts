@@ -82,8 +82,7 @@ export class NamespaceSelectorSvc {
       this.namespaceLabels = namespaces.map((namespace: che.INamespace) => {
         return namespace.label;
       });
-
-      return this.$q.when();
+      return this.fetchNamespaceInfoById(this.namespaceId);
     }
 
     return this.cheNamespaceRegistry.fetchNamespaces().then(() => {
