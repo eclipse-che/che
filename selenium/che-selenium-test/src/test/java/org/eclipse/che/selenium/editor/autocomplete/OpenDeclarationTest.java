@@ -105,53 +105,52 @@ public class OpenDeclarationTest {
 
     editor.goToCursorPositionVisible(27, 10);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("DNSNameServiceDescriptor");
+    editor.waitTabIsPresent("DNSNameServiceDescriptor.class");
     editor.waitActive();
-    editor.setCursorToLine(5);
+    editor.setCursorToLine(4);
     editor.waitTextElementsActiveLine("DNSNameServiceDescriptor");
-    editor.closeFileByNameWithSaving("DNSNameServiceDescriptor");
+    editor.closeFileByNameWithSaving("DNSNameServiceDescriptor.class");
     editor.waitTabIsNotPresent("DNSNameServiceDescriptor");
     editor.selectTabByName("AppController");
     editor.goToCursorPositionVisible(28, 39);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("DNSNameServiceDescriptor");
-    editor.setCursorToLine(11);
+    editor.waitTabIsPresent("DNSNameServiceDescriptor.class");
+    editor.setCursorToLine(13);
     editor.waitTextElementsActiveLine("getProviderName");
-    editor.closeFileByNameWithSaving("DNSNameServiceDescriptor");
+    editor.closeFileByNameWithSaving("DNSNameServiceDescriptor.class");
 
     // check an ability to download source
     editor.selectTabByName("AppController");
     editor.goToCursorPositionVisible(31, 12);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("ModelAndView");
+    editor.waitTabIsPresent("ModelAndView.class");
     // editor.waitTextIntoEditor(expectedTextBeforeDownloadSources);
-    editor.clickOnDownloadSourcesLink();
     loader.waitOnClosed();
     // editor.waitTextIntoEditor(expectedTextAfterDownloadSources);
 
-    editor.closeFileByNameWithSaving("ModelAndView");
+    editor.closeFileByNameWithSaving("ModelAndView.class");
 
     // check go to class
     editor.selectTabByName("AppController");
     editor.goToCursorPositionVisible(31, 12);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("ModelAndView");
+    editor.waitTabIsPresent("ModelAndView.class");
     editor.waitTextElementsActiveLine("ModelAndView");
     editor.waitSpecifiedValueForLineAndChar(44, 14);
-    editor.closeFileByNameWithSaving("ModelAndView");
+    editor.closeFileByNameWithSaving("ModelAndView.class");
 
     // Check go to method
     editor.selectTabByName("AppController");
     editor.goToCursorPositionVisible(44, 16);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("ModelAndView");
+    editor.waitTabIsPresent("ModelAndView.class");
     editor.waitTextElementsActiveLine("addObject");
     editor.waitSpecifiedValueForLineAndChar(226, 22);
 
     // Check go to inner method
     editor.goToCursorPositionVisible(227, 9);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("ModelAndView");
+    editor.waitTabIsPresent("ModelAndView.class");
     editor.waitTextElementsActiveLine("getModelMap()");
     editor.waitSpecifiedValueForLineAndChar(203, 18);
   }
