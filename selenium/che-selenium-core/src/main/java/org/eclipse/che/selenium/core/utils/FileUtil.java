@@ -19,12 +19,18 @@ import java.nio.file.Path;
 /** @author Dmytro Nochevnov */
 public class FileUtil {
 
-  public static void removeEmptyDirectory(Path directory) throws IOException {
-    if (Files.exists(directory)
-        && Files.isDirectory(directory)
-        && Files.list(directory).collect(toList()).isEmpty()) {
+  /**
+   * Checks if directoryToRemove is empty itself and remove it if it is empty only.
+   *
+   * @param directoryToRemove directory which is verified for emptiness
+   * @throws IOException
+   */
+  public static void removeDirectoryIfItIsEmpty(Path directoryToRemove) throws IOException {
+    if (Files.exists(directoryToRemove)
+        && Files.isDirectory(directoryToRemove)
+        && Files.list(directoryToRemove).collect(toList()).isEmpty()) {
 
-      Files.delete(directory);
+      Files.delete(directoryToRemove);
     }
   }
 }

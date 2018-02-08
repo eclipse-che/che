@@ -14,7 +14,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.util.ProcessUtil.executeAndWait;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.utils.FileUtil.removeEmptyDirectory;
+import static org.eclipse.che.selenium.core.utils.FileUtil.removeDirectoryIfItIsEmpty;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
@@ -102,7 +102,7 @@ public abstract class TestWorkspaceLogsReader {
           e);
     } finally {
       try {
-        removeEmptyDirectory(testLogsDirectory);
+        removeDirectoryIfItIsEmpty(testLogsDirectory);
       } catch (IOException e) {
         log.warn("Error of removal of empty log directory {}.", testLogsDirectory, e);
       }

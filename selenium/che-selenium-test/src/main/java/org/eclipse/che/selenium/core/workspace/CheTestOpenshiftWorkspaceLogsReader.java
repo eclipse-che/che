@@ -31,7 +31,7 @@ public class CheTestOpenshiftWorkspaceLogsReader extends TestWorkspaceLogsReader
   String getReadLogsCommand(
       String workspaceId, Path testLogsDirectory, Path logLocationInsideWorkspace) {
     return format(
-        "docker cp $(docker ps -q -f name=k8s_container_%s):%s %s",
+        "docker cp $(docker ps -q -f name=k8s_container_%s | head -1):%s %s",
         workspaceId, logLocationInsideWorkspace, testLogsDirectory);
   }
 

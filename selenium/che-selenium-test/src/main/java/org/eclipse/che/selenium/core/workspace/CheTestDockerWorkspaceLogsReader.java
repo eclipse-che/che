@@ -40,7 +40,7 @@ public class CheTestDockerWorkspaceLogsReader extends TestWorkspaceLogsReader {
       String workspaceId, Path testLogsDirectory, Path logLocationInsideWorkspace) {
     return format(
         "[[ $(docker exec -i $(docker ps -q -f name=%1$s) bash -c '[ -d %2$s ] && echo true || echo false') == true ]] "
-            + "&& docker cp $(docker ps -q -f name=%1$s):%2$s %3$s",
+            + "&& docker cp $(docker ps -q -f name=%1$s | head -1):%2$s %3$s",
         workspaceId, logLocationInsideWorkspace, testLogsDirectory);
   }
 
