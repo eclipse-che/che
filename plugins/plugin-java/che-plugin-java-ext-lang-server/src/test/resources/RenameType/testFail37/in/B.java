@@ -1,2 +1,0 @@
-package p;
-class B{}

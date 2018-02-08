@@ -17,33 +17,15 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.OrganizeImportResult;
-import org.eclipse.che.ide.ext.java.shared.dto.Problem;
-import org.eclipse.che.ide.ext.java.shared.dto.ProposalApplyResult;
-import org.eclipse.che.ide.ext.java.shared.dto.ProposalPresentation;
-import org.eclipse.che.ide.ext.java.shared.dto.Proposals;
-import org.eclipse.che.ide.ext.java.shared.dto.Region;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeInfo;
-import org.eclipse.che.jdt.JavadocFinder;
-import org.eclipse.che.jdt.javadoc.HTMLPrinter;
-import org.eclipse.che.jdt.javaeditor.HasLinkedModel;
 import org.eclipse.che.jdt.javaeditor.TextViewer;
-import org.eclipse.che.jdt.ui.CheActionAcces;
 import org.eclipse.che.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.che.jface.text.contentassist.ICompletionProposalExtension;
-import org.eclipse.che.jface.text.contentassist.ICompletionProposalExtension2;
-import org.eclipse.che.jface.text.contentassist.ICompletionProposalExtension4;
-import org.eclipse.che.jface.text.contentassist.ICompletionProposalExtension5;
 import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -53,32 +35,15 @@ import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.search.TypeNameMatch;
-import org.eclipse.jdt.internal.core.CompilationUnit;
-import org.eclipse.jdt.internal.core.DocumentAdapter;
 import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.format.DocumentChangeListener;
-import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
-import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
-import org.eclipse.jdt.internal.ui.text.java.JavaAllCompletionProposalComputer;
-import org.eclipse.jdt.internal.ui.text.java.RelevanceSorter;
-import org.eclipse.jdt.internal.ui.text.java.TemplateCompletionProposalComputer;
-import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
-import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentListener;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,144 +70,6 @@ public class CodeAssist {
                   }
                 })
             .build();
-  }
-
-  public Proposals computeProposals(
-      IJavaProject project, String fqn, int offset, final String content)
-      throws JavaModelException {
-
-    WorkingCopyOwner copyOwner =
-        new WorkingCopyOwner() {
-          @Override
-          public IBuffer createBuffer(ICompilationUnit workingCopy) {
-            return new org.eclipse.jdt.internal.ui.javaeditor.DocumentAdapter(
-                workingCopy, workingCopy.getPath(), content);
-          }
-        };
-    ICompilationUnit compilationUnit;
-
-    IType type = project.findType(fqn);
-    if (type == null) {
-      return null;
-    }
-    if (type.isBinary()) {
-      compilationUnit = type.getClassFile().getWorkingCopy(copyOwner, null);
-    } else {
-      compilationUnit = type.getCompilationUnit().getWorkingCopy(copyOwner, null);
-    }
-
-    IBuffer buffer = compilationUnit.getBuffer();
-    IDocument document;
-    if (buffer instanceof org.eclipse.jdt.internal.ui.javaeditor.DocumentAdapter) {
-      document = ((org.eclipse.jdt.internal.ui.javaeditor.DocumentAdapter) buffer).getDocument();
-    } else {
-      document = new DocumentAdapter(buffer);
-    }
-    TextViewer viewer = new TextViewer(document, new Point(offset, 0));
-    JavaContentAssistInvocationContext context =
-        new JavaContentAssistInvocationContext(viewer, offset, compilationUnit);
-
-    List<ICompletionProposal> proposals = new ArrayList<>();
-    proposals.addAll(
-        new JavaAllCompletionProposalComputer().computeCompletionProposals(context, null));
-    proposals.addAll(
-        new TemplateCompletionProposalComputer().computeCompletionProposals(context, null));
-
-    Collections.sort(proposals, new RelevanceSorter());
-
-    return convertProposals(offset, compilationUnit, viewer, proposals);
-  }
-
-  private Proposals convertProposals(
-      int offset,
-      ICompilationUnit compilationUnit,
-      TextViewer viewer,
-      List<ICompletionProposal> proposals) {
-    Proposals result = DtoFactory.getInstance().createDto(Proposals.class);
-    String sessionId = UUID.randomUUID().toString();
-    result.setSessionId(sessionId);
-
-    ArrayList<ProposalPresentation> presentations = new ArrayList<>();
-    for (int i = 0; i < proposals.size(); i++) {
-      ProposalPresentation presentation =
-          DtoFactory.getInstance().createDto(ProposalPresentation.class);
-      ICompletionProposal proposal = proposals.get(i);
-      presentation.setIndex(i);
-      presentation.setDisplayString(proposal.getDisplayString());
-      String image = proposal.getImage() == null ? null : proposal.getImage().getImg();
-      presentation.setImage(image);
-      if (proposal instanceof ICompletionProposalExtension4) {
-        presentation.setAutoInsertable(
-            ((ICompletionProposalExtension4) proposal).isAutoInsertable());
-      }
-      if (proposal instanceof CheActionAcces) {
-        String actionId = ((CheActionAcces) proposal).getActionId();
-        if (actionId != null) {
-          presentation.setActionId(actionId);
-        }
-      }
-      presentations.add(presentation);
-    }
-    result.setProposals(presentations);
-    cache.put(sessionId, new CodeAssistContext(viewer, offset, proposals, compilationUnit));
-    return result;
-  }
-
-  public ProposalApplyResult applyCompletion(String sessionId, int index, boolean insert) {
-    CodeAssistContext context = cache.getIfPresent(sessionId);
-    if (context != null) {
-      try {
-        return context.apply(index, insert);
-      } finally {
-        cache.invalidate(sessionId);
-      }
-    } else {
-      throw new IllegalArgumentException(
-          "CodeAssist context doesn't exist or time of completion was expired");
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  public Proposals computeAssistProposals(
-      IJavaProject project, String fqn, int offset, List<Problem> problems) throws CoreException {
-    ICompilationUnit compilationUnit;
-
-    IType type = project.findType(fqn);
-    if (type == null) {
-      return null;
-    }
-    if (type.isBinary()) {
-      throw new JavaModelException(
-          new JavaModelStatus(
-              IJavaModelStatusConstants.CORE_EXCEPTION,
-              "Can't calculate Quick Assist on binary file"));
-    } else {
-      compilationUnit = type.getCompilationUnit();
-    }
-
-    IBuffer buffer = compilationUnit.getBuffer();
-
-    ITextFileBufferManager bufferManager = FileBuffers.getTextFileBufferManager();
-    bufferManager.connect(compilationUnit.getPath(), LocationKind.IFILE, new NullProgressMonitor());
-    ITextFileBuffer textFileBuffer =
-        bufferManager.getTextFileBuffer(compilationUnit.getPath(), LocationKind.IFILE);
-    IDocument document = textFileBuffer.getDocument();
-    TextViewer viewer = new TextViewer(document, new Point(offset, 0));
-    AssistContext context = new AssistContext(compilationUnit, offset, 0);
-    ArrayList proposals = new ArrayList<>();
-    JavaCorrectionProcessor.collectProposals(context, problems, true, true, proposals);
-    return convertProposals(offset, compilationUnit, viewer, proposals);
-  }
-
-  public String getJavaDoc(String sessionId, int index) {
-    CodeAssistContext context = cache.getIfPresent(sessionId);
-    if (context != null) {
-      return context.getJavadoc(index);
-    } else {
-
-      throw new IllegalArgumentException(
-          "CodeAssist context doesn't exist or time of completion was expired");
-    }
   }
 
   /**
@@ -375,124 +202,6 @@ public class CodeAssist {
           LOG.error("Can't disconnect from file buffer: " + cUnit.getPath(), e);
         }
       }
-    }
-
-    public ProposalApplyResult apply(int index, boolean insert) {
-      IDocument document = viewer.getDocument();
-      final List<Change> changes = new ArrayList<>();
-      document.addDocumentListener(
-          new IDocumentListener() {
-            @Override
-            public void documentAboutToBeChanged(DocumentEvent event) {}
-
-            @Override
-            public void documentChanged(DocumentEvent event) {
-              changes.add(
-                  DtoFactory.newDto(Change.class)
-                      .withLength(event.getLength())
-                      .withOffset(event.getOffset())
-                      .withText(event.getText()));
-            }
-          });
-      try {
-        char trigger = (char) 0;
-        int stateMask = insert ? 0 : SWT.CTRL;
-        ICompletionProposal completionProposal = proposals.get(index);
-        ProposalApplyResult result = DtoFactory.newDto(ProposalApplyResult.class);
-        if (completionProposal instanceof ChangeCorrectionProposal) {
-          result.setChangeInfo(prepareChangeInfo((ChangeCorrectionProposal) completionProposal));
-        }
-        if (completionProposal instanceof ICompletionProposalExtension2) {
-          ICompletionProposalExtension2 completionProposalExtension2 =
-              (ICompletionProposalExtension2) completionProposal;
-          completionProposalExtension2.apply(viewer, trigger, stateMask, offset);
-        } else if (completionProposal instanceof ICompletionProposalExtension) {
-          ICompletionProposalExtension completionProposalExtension =
-              (ICompletionProposalExtension) completionProposal;
-          completionProposalExtension.apply(document, trigger, offset);
-        } else {
-          completionProposal.apply(document);
-        }
-
-        result.setChanges(changes);
-        Point selection = completionProposal.getSelection(document);
-        if (selection != null) {
-          result.setSelection(
-              DtoFactory.newDto(Region.class).withOffset(selection.x).withLength(selection.y));
-        }
-        if (completionProposal instanceof HasLinkedModel) {
-          result.setLinkedModeModel(((HasLinkedModel) completionProposal).getLinkedModel());
-        }
-        return result;
-
-      } catch (IndexOutOfBoundsException | CoreException e) {
-        throw new IllegalArgumentException("Can't find completion: " + index, e);
-      }
-    }
-
-    public String getJavadoc(int index) {
-      ICompletionProposal proposal = proposals.get(index);
-      String result;
-      if (proposal instanceof ICompletionProposalExtension5) {
-        Object info = ((ICompletionProposalExtension5) proposal).getAdditionalProposalInfo(null);
-        if (info != null) {
-          result = info.toString();
-        } else {
-          StringBuffer buffer = new StringBuffer();
-          HTMLPrinter.insertPageProlog(buffer, 0, JavadocFinder.getStyleSheet());
-          HTMLPrinter.addParagraph(buffer, "No documentation found.");
-          HTMLPrinter.addPageEpilog(buffer);
-          result = buffer.toString();
-        }
-      } else {
-        result = proposal.getAdditionalProposalInfo();
-      }
-      return result;
-    }
-
-    private ChangeInfo prepareChangeInfo(ChangeCorrectionProposal changeCorrectionProposal)
-        throws CoreException {
-      org.eclipse.ltk.core.refactoring.Change change = changeCorrectionProposal.getChange();
-      if (change == null) {
-        return null;
-      }
-      ChangeInfo changeInfo = DtoFactory.newDto(ChangeInfo.class);
-      String changeName = change.getName();
-      if (changeName.startsWith("Rename") && change instanceof RenameCompilationUnitChange) {
-        prepareRenameCompilationUnitChange(changeInfo, change);
-      } else if (changeName.startsWith("Move")) {
-        prepareMoveChange(changeInfo, change);
-      }
-
-      return changeInfo;
-    }
-
-    private void prepareMoveChange(
-        ChangeInfo changeInfo, org.eclipse.ltk.core.refactoring.Change ch) {
-      changeInfo.setName(ChangeInfo.ChangeName.MOVE);
-      for (org.eclipse.ltk.core.refactoring.Change change : ((CompositeChange) ch).getChildren()) {
-        if (change instanceof MoveCompilationUnitChange) {
-          MoveCompilationUnitChange moveChange = (MoveCompilationUnitChange) change;
-          String className = moveChange.getCu().getPath().lastSegment();
-          changeInfo.setPath(
-              moveChange.getDestinationPackage().getPath().append(className).toString());
-          changeInfo.setOldPath(
-              ((CompilationUnit) change.getModifiedElement()).getPath().toString());
-        }
-      }
-    }
-
-    private void prepareRenameCompilationUnitChange(
-        ChangeInfo changeInfo, org.eclipse.ltk.core.refactoring.Change change) {
-      changeInfo.setName(ChangeInfo.ChangeName.RENAME_COMPILATION_UNIT);
-      RenameCompilationUnitChange renameChange = (RenameCompilationUnitChange) change;
-      changeInfo.setPath(
-          renameChange
-              .getResourcePath()
-              .removeLastSegments(1)
-              .append(renameChange.getNewName())
-              .toString());
-      changeInfo.setOldPath(renameChange.getResourcePath().toString());
     }
   }
 }
