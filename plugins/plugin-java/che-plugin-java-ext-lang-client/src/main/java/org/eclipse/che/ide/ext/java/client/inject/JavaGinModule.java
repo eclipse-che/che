@@ -123,10 +123,6 @@ public class JavaGinModule extends AbstractGinModule {
         new GinFactoryModuleBuilder()
             .implement(PropertyWidget.class, PropertyWidgetImpl.class)
             .build(PropertyWidgetFactory.class));
-
-    install(
-        new GinFactoryModuleBuilder()
-            .build(org.eclipse.che.ide.ext.java.client.navigation.factory.NodeFactory.class));
     install(
         new GinFactoryModuleBuilder()
             .build(org.eclipse.che.ide.ext.java.client.search.NodeFactory.class));
