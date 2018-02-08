@@ -11,7 +11,6 @@
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.api.model.Route;
@@ -47,13 +46,12 @@ public class OpenShiftProject extends KubernetesNamespace {
 
   public OpenShiftProject(OpenShiftClientFactory clientFactory, String name, String workspaceId)
       throws InfrastructureException {
-    super(clientFactory, name, workspaceId);
+    super(clientFactory, name, workspaceId, false);
     this.routes = new OpenShiftRoutes(name, workspaceId, clientFactory);
+    doPrepare(name, clientFactory.create());
   }
 
-  @Override
-  protected void doPrepare(String name, KubernetesClient client) throws InfrastructureException {
-    OpenShiftClient osClient = client.adapt(OpenShiftClient.class);
+  private void doPrepare(String name, OpenShiftClient osClient) throws InfrastructureException {
     if (get(name, osClient) == null) {
       create(name, osClient);
     }

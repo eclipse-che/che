@@ -76,16 +76,23 @@ public class KubernetesNamespace {
 
   public KubernetesNamespace(KubernetesClientFactory clientFactory, String name, String workspaceId)
       throws InfrastructureException {
+    this(clientFactory, name, workspaceId, true);
+  }
+
+  protected KubernetesNamespace(
+      KubernetesClientFactory clientFactory, String name, String workspaceId, boolean doPrepare)
+      throws InfrastructureException {
     this.workspaceId = workspaceId;
     this.pods = new KubernetesPods(name, workspaceId, clientFactory);
     this.services = new KubernetesServices(name, workspaceId, clientFactory);
     this.pvcs = new KubernetesPersistentVolumeClaims(name, clientFactory);
     this.ingresses = new KubernetesIngresses(name, workspaceId, clientFactory);
-    final KubernetesClient client = clientFactory.create();
-    doPrepare(name, client);
+    if (doPrepare) {
+      doPrepare(name, clientFactory.create());
+    }
   }
 
-  protected void doPrepare(String name, KubernetesClient client) throws InfrastructureException {
+  private void doPrepare(String name, KubernetesClient client) throws InfrastructureException {
     if (get(name, client) == null) {
       create(name, client);
     }
