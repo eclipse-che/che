@@ -101,7 +101,8 @@ public class Workspaces {
         .getAttribute("data-ws-status");
   }
 
-  public void waitWorkspaceStatusIs(String workspaceName, String workspaceStatus) {
+  public void waitWorkspaceStatus(String workspaceName, String workspaceStatus) {
+    // we need long timeout for OCP
     new WebDriverWait(seleniumWebDriver, PREPARING_WS_TIMEOUT_SEC)
         .until(
             new ExpectedCondition<Boolean>() {
@@ -241,6 +242,7 @@ public class Workspaces {
 
   /** wait the workspace is not present on dashboard */
   public void waitWorkspaceIsNotPresent(String workspaceName) {
+    // we need long timeout for OCP
     new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
         .until(
             invisibilityOfElementLocated(
