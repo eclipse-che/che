@@ -34,6 +34,7 @@ public final class ProcessUtil {
 
   private static final Logger LOG = LoggerFactory.getLogger(ProcessUtil.class);
   private static final ProcessManager PROCESS_MANAGER = ProcessManager.newInstance();
+  private static final int MAX_SIZE_OF_ERROR_MESSAGE = 1000;
 
   /**
    * Writes stdout and stderr of the process to consumers.<br>
@@ -185,8 +186,18 @@ public final class ProcessUtil {
 
     future.join(); // wait until process output is read
 
+    if (process.exitValue() == 0) {
+      return process;
+    }
+
     String errorMessage = stderr.getText();
     if (!errorMessage.isEmpty()) {
+      // trim error message to have size <= MAX_SIZE_OF_ERROR_MESSAGE
+      if (errorMessage.length() > MAX_SIZE_OF_ERROR_MESSAGE) {
+        errorMessage = errorMessage.substring(0, MAX_SIZE_OF_ERROR_MESSAGE);
+        errorMessage += "...";
+      }
+
       throw new IOException(
           format(
               "Failed to execute command '%s' due to occurred error: %s",

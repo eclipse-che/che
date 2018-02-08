@@ -11,13 +11,13 @@
 package org.eclipse.che.selenium.core.utils;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.eclipse.che.api.core.util.ProcessUtil.executeAndWait;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.util.ListLineConsumer;
-import org.eclipse.che.api.core.util.ProcessUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +41,7 @@ public class DockerUtil {
     };
 
     try {
-      ProcessUtil.executeAndWait(
+      executeAndWait(
           commandLine, PREPARING_WS_TIMEOUT_SEC, SECONDS, stdoutConsumer, new ListLineConsumer());
       if (stdoutConsumer.getText().equals("true")) {
         return true;

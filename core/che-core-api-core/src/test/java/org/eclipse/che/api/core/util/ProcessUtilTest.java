@@ -10,16 +10,22 @@
  */
 package org.eclipse.che.api.core.util;
 
+import static java.lang.String.format;
 import static org.eclipse.che.api.core.util.ProcessUtil.executeAndWait;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -29,8 +35,13 @@ import org.testng.annotations.Test;
 public class ProcessUtilTest {
 
   private static final String TEST_MESSAGE = "123";
+  private static final String[] SIMPLE_COMMAND = new String[] {"echo", TEST_MESSAGE};
+
   private static final String UNKNOWN_COMMAND = "command-65asdfax3a532v1zc32v1";
-  private static final String PRINT_TO_STDERR_COMMAND = ">&2 echo " + TEST_MESSAGE;
+  private static final String[] UNKNOWN_COMMAND_ARRAY = new String[] {UNKNOWN_COMMAND};
+
+  /** {@link ProcessBuilder#start} method doesn't catch error of this command */
+  private static final String[] BASH_UNKNOWN_COMMAND = new String[] {"bash", "-c", UNKNOWN_COMMAND};
 
   @Test
   public void testKill() throws Exception {
@@ -72,7 +83,7 @@ public class ProcessUtilTest {
         .start();
 
     Thread.sleep(1000); // give time to start process
-    Assert.assertTrue(ProcessUtil.isAlive(p), "Process is not started.");
+    assertTrue(ProcessUtil.isAlive(p), "Process is not started.");
 
     ProcessUtil.kill(p); // kill process
 
@@ -83,7 +94,7 @@ public class ProcessUtilTest {
 
     // System process sleeps 10 seconds. It is safety to check we done in less then 3 sec.
     Assert.assertFalse(ProcessUtil.isAlive(p));
-    Assert.assertTrue((end - start) < 3000, "Fail kill process");
+    assertTrue((end - start) < 3000, "Fail kill process");
 
     System.out.println(processError[0]);
     // processError[0].printStackTrace();
@@ -91,48 +102,49 @@ public class ProcessUtilTest {
     System.out.println(stderr);
   }
 
-  @Test
-  public void testExecuteAndWaitSuccessfully()
-      throws TimeoutException, InterruptedException, IOException {
-    // given
-    final ListLineConsumer stdout = new ListLineConsumer();
-    final ListLineConsumer stderr = new ListLineConsumer();
-
+  @Test(dataProvider = "dataForTestingExecuteAndWaitCommandHandleStderr")
+  public void testExecuteAndWaitCommandHandleStderr(
+      String[] commandLine,
+      String expectedErrorMessageFragment,
+      String expectedStdout,
+      String expectedStderr)
+      throws TimeoutException, InterruptedException {
     // when
-    executeAndWait(new String[] {"echo", TEST_MESSAGE}, 5, TimeUnit.SECONDS, stdout, stderr);
+    ListLineConsumer stdout = new ListLineConsumer();
+    ListLineConsumer stderr = new ListLineConsumer();
+
+    try {
+      executeAndWait(commandLine, 5, TimeUnit.SECONDS, stdout, stderr);
+    } catch (IOException e) {
+      // then
+      assertNotNull(expectedErrorMessageFragment, format("Unexpected error '%s'.", e));
+
+      String errorMessagePattern = format(".*%s.*", expectedErrorMessageFragment);
+      assertTrue(
+          e.getMessage().matches(errorMessagePattern),
+          format("Error message doesn't contain '%s'.", expectedErrorMessageFragment));
+
+      return;
+    }
 
     // then
-    assertEquals(stdout.getText(), TEST_MESSAGE);
-    assertEquals(stderr.getText(), "");
+    if (expectedErrorMessageFragment != null) {
+      fail(
+          format(
+              "Command '%s' should cause IOException with error message which contains '%s'.",
+              Arrays.toString(commandLine), expectedErrorMessageFragment));
+    }
+
+    assertEquals(stdout.getText(), expectedStdout);
+    assertEquals(stderr.getText(), expectedStderr);
   }
 
-  @Test(
-    expectedExceptions = IOException.class,
-    expectedExceptionsMessageRegExp = ".*" + UNKNOWN_COMMAND + ".*"
-  )
-  public void testExecuteAndWaitCommandError()
-      throws InterruptedException, IOException, TimeoutException {
-    // when
-    executeAndWait(
-        new String[] {UNKNOWN_COMMAND},
-        5,
-        TimeUnit.SECONDS,
-        new ListLineConsumer(),
-        new ListLineConsumer());
-  }
-
-  @Test(
-    expectedExceptions = IOException.class,
-    expectedExceptionsMessageRegExp = ".*" + TEST_MESSAGE + ".*"
-  )
-  public void testExecuteAndWaitCommandErrorInSTDERR()
-      throws InterruptedException, IOException, TimeoutException {
-    // when
-    executeAndWait(
-        new String[] {PRINT_TO_STDERR_COMMAND},
-        5,
-        TimeUnit.SECONDS,
-        new ListLineConsumer(),
-        new ListLineConsumer());
+  @DataProvider
+  public Object[][] dataForTestingExecuteAndWaitCommandHandleStderr() {
+    return new Object[][] {
+      {SIMPLE_COMMAND, null, TEST_MESSAGE, ""},
+      {UNKNOWN_COMMAND_ARRAY, UNKNOWN_COMMAND, "", ""},
+      {BASH_UNKNOWN_COMMAND, UNKNOWN_COMMAND, "", UNKNOWN_COMMAND}
+    };
   }
 }
