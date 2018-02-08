@@ -12,11 +12,30 @@
 const merge = require('webpack-merge');
 const common = require('./webpack.common.js');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+
 module.exports = merge(common, {
     devtool: 'source-map',
+    module: {
+        rules: [
+            {
+                test: /\.less$/i,
+                use: ExtractTextPlugin.extract(['css-loader', 'less-loader'])
+            },
+        ],
+    },
     plugins: [
         new UglifyJSPlugin({
             sourceMap: true
-        })
+        }),
+        new HtmlWebpackPlugin({
+            inject: false,
+            template: 'src/index.html',
+            title: 'Che Workspace Loader',
+            urlPrefix: '/workspace-loader/loader/',
+            cssName: 'style.css'
+        }),
+        new ExtractTextPlugin('style.css')
     ]
 });

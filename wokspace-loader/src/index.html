@@ -14,11 +14,14 @@
 <html>
 
 <head>
-    
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <% if(htmlWebpackPlugin.options.cssName) { %>
+    <link href="<%= htmlWebpackPlugin.options.urlPrefix %><%= htmlWebpackPlugin.options.cssName %>" rel="stylesheet">
+    <% } %>
+    <script src="<%= htmlWebpackPlugin.options.urlPrefix %><%= htmlWebpackPlugin.files.js %>" type="text/javascript"></script>
 </head>
 
 <body>
-    <script src="/bundle.js"></script>
     <main>
         <div id="output"></div>
     </main>

@@ -11,8 +11,24 @@
 
 const merge = require('webpack-merge');
 const common = require('./webpack.common.js');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
 module.exports = merge(common, {
     devtool: 'inline-source-map',
+    module:{
+        rules:[
+            {
+                test: /\.less$/,
+                use: [{
+                    loader: "style-loader" // creates style nodes from JS strings
+                }, {
+                    loader: "css-loader" // translates CSS into CommonJS
+                }, {
+                    loader: "less-loader" // compiles Less to CSS
+                }]
+            }
+        ]
+    },
     devServer: {
         contentBase: './dist',
         port: 3050,
@@ -25,5 +41,13 @@ module.exports = merge(common, {
             },
             '/api/workspace': "http://localhost:8080",
         }
-    }
+    },
+    plugins:[
+        new HtmlWebpackPlugin({
+            inject: false,
+            title: "Che Workspace Loader",
+            template:"src/index.html",
+            urlPrefix:"/"
+        })
+    ]
 });
