@@ -11,56 +11,47 @@
  */
 package org.eclipse.che.ide.ext.java.client.navigation.filestructure;
 
-import com.google.common.base.Optional;
-import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
-import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.resources.Container;
-import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.api.resources.SyntheticFile;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
-import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
-import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
-import org.eclipse.che.ide.ext.java.shared.dto.Region;
-import org.eclipse.che.ide.ext.java.shared.dto.model.Member;
-import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
+import org.eclipse.che.ide.ext.java.dto.DtoClientImpls;
+import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
+import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
+import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
+import org.eclipse.che.plugin.languageserver.ide.filestructure.ElementSelectionDelegate;
+import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
+import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
 
 /**
- * The class that manages class structure window.
+ * Manages jdt.ls based file structure view
  *
- * @author Valeriy Svydenko
- * @author Vlad Zhukovskyi
+ * @author Thomas Mäder
  */
 @Singleton
-public class FileStructurePresenter implements FileStructure.ActionDelegate {
-  private final FileStructure view;
-  private final JavaNavigationService javaNavigationService;
-  private final AppContext context;
-  private final EditorAgent editorAgent;
+public class FileStructurePresenter implements ElementSelectionDelegate<ExtendedSymbolInformation> {
+  private final FileStructureWindow view;
+  private final JavaLanguageExtensionServiceClient javaExtensionService;
+  private final OpenFileInEditorHelper openHelper;
+  private final DtoBuildHelper dtoHelper;
 
   private TextEditor activeEditor;
   private boolean showInheritedMembers;
-  private int cursorOffset;
 
   @Inject
   public FileStructurePresenter(
-      FileStructure view,
-      JavaNavigationService javaNavigationService,
-      AppContext context,
-      EditorAgent editorAgent) {
+      FileStructureWindow view,
+      JavaLanguageExtensionServiceClient javaExtensionService,
+      OpenFileInEditorHelper openHelper,
+      DtoBuildHelper dtoHelper) {
     this.view = view;
-    this.javaNavigationService = javaNavigationService;
-    this.context = context;
-    this.editorAgent = editorAgent;
+    this.javaExtensionService = javaExtensionService;
+    this.openHelper = openHelper;
+    this.dtoHelper = dtoHelper;
     this.view.setDelegate(this);
   }
 
@@ -70,128 +61,63 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
    * @param editorPartPresenter the active editor
    */
   public void show(EditorPartPresenter editorPartPresenter) {
-    if (!(editorPartPresenter instanceof TextEditor)) {
-      Log.error(getClass(), "Open Declaration support only TextEditor as editor");
-      return;
-    }
-    activeEditor = ((TextEditor) editorPartPresenter);
-    cursorOffset = activeEditor.getCursorOffset();
-    VirtualFile file = activeEditor.getEditorInput().getFile();
-
-    if (file instanceof Resource) {
-      final Optional<Project> project = ((Resource) file).getRelatedProject();
-
-      final Optional<Resource> srcFolder =
-          ((Resource) file).getParentWithMarker(SourceFolderMarker.ID);
-
-      if (!srcFolder.isPresent()) {
-        return;
-      }
-
-      final String fqn = JavaUtil.resolveFQN((Container) srcFolder.get(), (Resource) file);
-      javaNavigationService
-          .getCompilationUnit(project.get().getLocation(), fqn, showInheritedMembers)
+    if (view.isShowing()) {
+      showInheritedMembers = !showInheritedMembers;
+      view.setShowInherited(showInheritedMembers);
+      VirtualFile file = activeEditor.getEditorInput().getFile();
+      javaExtensionService
+          .fileStructure(
+              new DtoClientImpls.FileStructureCommandParametersDto(
+                  new FileStructureCommandParameters(dtoHelper.getUri(file), showInheritedMembers)))
           .then(
-              unit -> {
-                view.setTitleCaption(editorPartPresenter.getEditorInput().getFile().getName());
-                view.setStructure(unit, showInheritedMembers);
-                view.showDialog();
-                showInheritedMembers = !showInheritedMembers;
+              result -> {
+                loader.hide();
+                view.setInput(result);
+                view.show();
               })
           .catchError(
-              arg -> {
-                Log.error(FileStructurePresenter.class, arg.getMessage());
-              });
-    }
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void actionPerformed(final Member member) {
-    view.close();
-    showInheritedMembers = false;
-    if (member.isBinary()) {
-
-      final Resource resource = context.getResource();
-
-      if (resource == null) {
-        return;
-      }
-
-      final Optional<Project> project = resource.getRelatedProject();
-
-      javaNavigationService
-          .getEntry(project.get().getLocation(), member.getLibId(), member.getRootPath())
-          .then(
-              entry -> {
-                javaNavigationService
-                    .getContent(
-                        project.get().getLocation(),
-                        member.getLibId(),
-                        Path.valueOf(entry.getPath()))
-                    .then(
-                        content -> {
-                          final String clazz =
-                              entry.getName().substring(0, entry.getName().indexOf('.'));
-                          final VirtualFile file =
-                              new SyntheticFile(entry.getName(), clazz, content.getContent());
-                          editorAgent.openEditor(
-                              file,
-                              new OpenEditorCallbackImpl() {
-                                @Override
-                                public void onEditorOpened(EditorPartPresenter editor) {
-                                  setCursor(editor, member.getFileRegion().getOffset());
-                                }
-                              });
-                        });
+              e -> {
+                loader.hide();
               });
     } else {
-      context
-          .getWorkspaceRoot()
-          .getFile(member.getRootPath())
+      showInheritedMembers = false;
+      view.setTitle(editorPartPresenter.getEditorInput().getFile().getName());
+      view.setShowInherited(showInheritedMembers);
+
+      if (!(editorPartPresenter instanceof TextEditor)) {
+        Log.error(getClass(), "Open Declaration support only TextEditor as editor");
+        return;
+      }
+      activeEditor = ((TextEditor) editorPartPresenter);
+      VirtualFile file = activeEditor.getEditorInput().getFile();
+      javaExtensionService
+          .fileStructure(
+              new DtoClientImpls.FileStructureCommandParametersDto(
+                  new FileStructureCommandParameters(dtoHelper.getUri(file), showInheritedMembers)))
           .then(
-              file -> {
-                if (file.isPresent()) {
-                  editorAgent.openEditor(
-                      file.get(),
-                      new OpenEditorCallbackImpl() {
-                        @Override
-                        public void onEditorOpened(EditorPartPresenter editor) {
-                          setCursor(editor, member.getFileRegion().getOffset());
-                        }
-                      });
-                }
+              result -> {
+                loader.hide();
+                view.setInput(result);
+                view.show();
+              })
+          .catchError(
+              e -> {
+                loader.hide();
+                Log.error(getClass(), e);
               });
     }
-    Scheduler.get()
-        .scheduleDeferred(
-            new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                setCursorPosition(member.getFileRegion());
-              }
-            });
-    showInheritedMembers = false;
   }
 
   @Override
-  public void onEscapeClicked() {
-    activeEditor.setFocus();
-    setCursor(activeEditor, cursorOffset);
+  public void onSelect(ExtendedSymbolInformation element) {
+    view.hide();
+    showInheritedMembers = false;
+    openHelper.openLocation(element.getInfo().getLocation());
   }
 
-  private void setCursorPosition(Region region) {
-    LinearRange linearRange =
-        LinearRange.createWithStart(region.getOffset()).andLength(region.getLength());
+  @Override
+  public void onCancel() {
+    view.hide();
     activeEditor.setFocus();
-    activeEditor.getDocument().setSelectedRange(linearRange, true);
-  }
-
-  private void setCursor(EditorPartPresenter editor, int offset) {
-    if (editor instanceof TextEditor) {
-      ((TextEditor) editor)
-          .getDocument()
-          .setSelectedRange(LinearRange.createWithStart(offset).andLength(0), true);
-    }
   }
 }

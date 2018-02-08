@@ -1,2 +1,0 @@
-package fred;
-class A{}
