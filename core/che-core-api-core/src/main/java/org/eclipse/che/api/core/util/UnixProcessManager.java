@@ -155,7 +155,7 @@ class UnixProcessManager extends ProcessManager {
         };
 
     try {
-      ProcessUtil.readOutput(Runtime.getRuntime().exec(ps), stdout, stderr);
+      ProcessUtil.process(Runtime.getRuntime().exec(ps), stdout, stderr);
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }

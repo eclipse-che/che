@@ -44,7 +44,7 @@ public final class ProcessUtil {
    * @param stderr a consumer where stderr will be redirected
    * @throws IOException
    */
-  public static void readOutput(Process p, LineConsumer stdout, LineConsumer stderr)
+  public static void process(Process p, LineConsumer stdout, LineConsumer stderr)
       throws IOException {
     try (BufferedReader inputReader =
             new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -68,7 +68,7 @@ public final class ProcessUtil {
    * @param stdout a consumer where stdout will be redirected
    * @throws IOException
    */
-  public static void readOutput(Process p, LineConsumer stdout) throws IOException {
+  public static void process(Process p, LineConsumer stdout) throws IOException {
     try (BufferedReader inputReader =
         new BufferedReader(new InputStreamReader(p.getInputStream()))) {
       String line;
@@ -104,7 +104,7 @@ public final class ProcessUtil {
         () -> {
           try {
             // consume logs until process ends
-            readOutput(process, outputConsumer);
+            process(process, outputConsumer);
           } catch (IOException e) {
             LOG.error(
                 format(
@@ -161,7 +161,7 @@ public final class ProcessUtil {
             () -> {
               try {
                 // consume logs until process ends
-                readOutput(process, stdout, stderr);
+                process(process, stdout, stderr);
               } catch (IOException e) {
                 LOG.error(
                     format(
@@ -208,7 +208,7 @@ public final class ProcessUtil {
     pb.redirectErrorStream(true);
     Process process = pb.start();
 
-    readOutput(process, consumer);
+    process(process, consumer);
 
     return process;
   }
@@ -225,7 +225,7 @@ public final class ProcessUtil {
   public static Process execute(ProcessBuilder pb, LineConsumer stdout, LineConsumer stderr)
       throws IOException {
     Process process = pb.start();
-    readOutput(process, stdout, stderr);
+    process(process, stdout, stderr);
 
     return process;
   }
