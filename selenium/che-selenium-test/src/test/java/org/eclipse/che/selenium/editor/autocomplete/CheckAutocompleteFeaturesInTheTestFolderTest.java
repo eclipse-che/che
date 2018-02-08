@@ -104,22 +104,28 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
     editor.waitActive();
     editor.waitSpecifiedValueForLineAndChar(36, 21);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("Test");
+    editor.waitTabIsPresent("Test.class");
     String expectedContent =
-        "\n"
-            + " // Failed to get sources. Instead, stub sources have been generated.\n"
-            + " // Implementation of methods is unavailable.\n"
-            + "package junit.framework;\n"
+        "package junit.framework;\n"
+            + "\n"
+            + "/**\n"
+            + " * A <em>Test</em> can be run and collect its results.\n"
+            + " *\n"
+            + " * @see TestResult\n"
+            + " */\n"
             + "public interface Test {\n"
-            + "\n"
-            + "    public int countTestCases();\n"
-            + "\n"
-            + "    public void run(junit.framework.TestResult arg0);\n"
-            + "\n"
-            + "}\n";
+            + " /**\n"
+            + "  * Counts the number of test cases that will be run by this test.\n"
+            + "  */\n"
+            + " public abstract int countTestCases();\n"
+            + " /**\n"
+            + "  * Runs a test and collects its result in a TestResult instance.\n"
+            + "  */\n"
+            + " public abstract void run(TestResult result);\n"
+            + "}";
 
     editor.waitTextIntoEditor(expectedContent);
-    editor.closeFileByNameWithSaving("Test");
+    editor.closeFileByNameWithSaving("Test.class");
   }
 
   private void checkAutocompletion() {
@@ -134,7 +140,7 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
     for (String autocompleteItem : autocompleteItems) {
       editor.waitProposalIntoAutocompleteContainer(autocompleteItem);
     }
-    editor.enterAutocompleteProposal("TestCase");
+    editor.enterAutocompleteProposal("Case - junit.framework");
     editor.waitTextIntoEditor(
         "    public AppTest(String testName) {\n"
             + "        super(testName);\n"

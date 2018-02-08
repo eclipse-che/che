@@ -38,67 +38,129 @@ public class AutocompleteFeaturesInEditorTest {
   private static final String[] autocompleteContentAfterFirst = {
     "request : HttpServletRequest",
     "response : HttpServletResponse",
+    "numGuessByUser : String",
     "result : String",
-    "handleRequest(HttpServletRequest request, HttpServletResponse response) : ModelAndView",
-    "wait(long timeout, int nanos) : void - Object",
-    "wait(long timeout) : void - Object",
-    "wait() : void - Object",
-    "toString() : String - Object",
-    "notifyAll() : void - Object",
-    "notify() : void - Object"
+    "view : ModelAndView",
+    "secretNum : String AppController",
+    "handleRequest(HttpServletRequest request, HttpServletResponse response) : ModelAndView AppController",
+    "wait(long timeout, int nanos) : void Object",
+    "wait(long timeout) : void Object",
+    "wait() : void Object",
+    "toString() : String Object",
+    "notifyAll() : void Object",
+    "notify() : void Object",
+    "hashCode() : int Object",
+    "getClass() : Class<?> Object",
+    "finalize() : void Object",
+    "equals(Object obj) : boolean Object",
+    "clone() : Object Object",
+    "AppController - org.eclipse.qa.examples"
   };
 
-  private static final String[] autocompleteContentAfterSecond = {
-    "charAt(int index) : char - String",
-    "chars() : IntStream - CharSequence",
-    "codePointAt(int index) : int - String",
-    "codePointBefore(int index) : int - String",
-    "codePointCount(int beginIndex, int endIndex) : int - String",
-    "codePoints() : IntStream - CharSequence",
-    "compareTo(String anotherString) : int - String",
-    "compareToIgnoreCase(String str) : int - String",
-    "concat(String str) : String - String",
-    "contains(CharSequence s) : boolean - String",
-    "contentEquals(CharSequence cs) : boolean - String",
-    "contentEquals(StringBuffer sb) : boolean - String",
-    "endsWith(String suffix) : boolean - String",
-    "equals(Object anObject) : boolean - String",
-    "equalsIgnoreCase(String anotherString) : boolean - String",
-    "getBytes() : byte[] - String",
-    "getBytes(Charset charset) : byte[] - String",
-    "getBytes(String charsetName) : byte[] - String",
-    "getBytes(int srcBegin, int srcEnd, byte[] dst, int dstBegin) : void - String",
-    "getChars(int srcBegin, int srcEnd, char[] dst, int dstBegin) : void - String",
-    "getClass() : Class<?> - Object",
-    "hashCode() : int - String",
-    "indexOf(int ch) : int - String",
-    "indexOf(String str) : int - String",
-    "indexOf(int ch, int fromIndex) : int - String",
-    "indexOf(String str, int fromIndex) : int - String",
-    "intern() : String - String",
-    "isEmpty() : boolean - String",
-    "lastIndexOf(int ch) : int - String",
-    "lastIndexOf(String str) : int - String",
-    "lastIndexOf(int ch, int fromIndex) : int - String",
-    "lastIndexOf(String str, int fromIndex) : int - String",
-    "length() : int - String",
-    "matches(String regex) : boolean - String",
-    "notify() : void - Object",
-    "notifyAll() : void - Object",
-    "offsetByCodePoints(int index, int codePointOffset) : int - String",
-    "regionMatches(int toffset, String other, int ooffset, int len) : boolean - String",
-    "regionMatches(boolean ignoreCase, int toffset, String other, int ooffset, int len) : boolean - String",
-    "replace(char oldChar, char newChar) : String - String",
-    "replace(CharSequence target, CharSequence replacement) : String - String",
-    "replaceAll(String regex, String replacement) : String - String",
-    "replaceFirst(String regex, String replacement) : String - String",
-    "split(String regex) : String[] - String",
-    "split(String regex, int limit) : String[] - String",
-    "startsWith(String prefix) : boolean - String",
-    "startsWith(String prefix, int toffset) : boolean - String",
-    "subSequence(int beginIndex, int endIndex) : CharSequence - String",
-    "substring(int beginIndex) : String - String",
-    "substring(int beginIndex, int endIndex) : String - String"
+  private static final String[] autocompleteContentAfterSecondBeforeScroll = {
+    "CASE_INSENSITIVE_ORDER : Comparator<java.lang.String> String",
+    "valueOf(char[] data, int offset, int count) : String String",
+    "valueOf(double d) : String String",
+    "valueOf(float f) : String String",
+    "valueOf(long l) : String String",
+    "valueOf(int i) : String String",
+    "valueOf(char c) : String String",
+    "valueOf(boolean b) : String String",
+    "valueOf(char[] data) : String String",
+    "valueOf(Object obj) : String String",
+    "trim() : String String",
+    "toUpperCase(Locale locale) : String String",
+    "toUpperCase() : String String",
+    "toString() : String String",
+    "toLowerCase(Locale locale) : String String",
+    "toLowerCase() : String String",
+    "toCharArray() : char[] String",
+    "substring(int beginIndex, int endIndex) : String String",
+    "substring(int beginIndex) : String String",
+    "subSequence(int beginIndex, int endIndex) : CharSequence String",
+    "startsWith(String prefix, int toffset) : boolean String",
+    "startsWith(String prefix) : boolean String",
+    "split(String regex, int limit) : String[] String",
+    "split(String regex) : String[] String",
+    "replaceFirst(String regex, String replacement) : String String",
+    "replaceAll(String regex, String replacement) : String String",
+    "replace(CharSequence target, CharSequence replacement) : String String",
+    "replace(char oldChar, char newChar) : String String",
+    "regionMatches(boolean ignoreCase, int toffset, String other, int ooffset, int len) : boolean String",
+    "regionMatches(int toffset, String other, int ooffset, int len) : boolean String",
+    "offsetByCodePoints(int index, int codePointOffset) : int String",
+    "matches(String regex) : boolean String",
+    "length() : int String",
+    "lastIndexOf(String str, int fromIndex) : int String",
+    "lastIndexOf(int ch, int fromIndex) : int String",
+    "lastIndexOf(String str) : int String",
+    "lastIndexOf(int ch) : int String",
+    "join(CharSequence delimiter, Iterable<? extends CharSequence> elements) : String String",
+    "join(CharSequence delimiter, CharSequence... elements) : String String",
+    "isEmpty() : boolean String",
+    "intern() : String String",
+    "indexOf(String str, int fromIndex) : int String",
+    "indexOf(int ch, int fromIndex) : int String",
+    "indexOf(String str) : int String",
+    "indexOf(int ch) : int String",
+    "hashCode() : int String",
+    "getChars(int srcBegin, int srcEnd, char[] dst, int dstBegin) : void String",
+    "getBytes(int srcBegin, int srcEnd, byte[] dst, int dstBegin) : void String",
+    "getBytes(Charset charset) : byte[] String",
+    "getBytes(String charsetName) : byte[] String"
+  };
+
+  private static final String[] autocompleteContentAfterSecondAfterScroll = {
+    "replaceFirst(String regex, String replacement) : String String",
+    "replaceAll(String regex, String replacement) : String String",
+    "replace(CharSequence target, CharSequence replacement) : String String",
+    "replace(char oldChar, char newChar) : String String",
+    "regionMatches(boolean ignoreCase, int toffset, String other, int ooffset, int len) : boolean String",
+    "regionMatches(int toffset, String other, int ooffset, int len) : boolean String",
+    "offsetByCodePoints(int index, int codePointOffset) : int String",
+    "matches(String regex) : boolean String",
+    "length() : int String",
+    "lastIndexOf(String str, int fromIndex) : int String",
+    "lastIndexOf(int ch, int fromIndex) : int String",
+    "lastIndexOf(String str) : int String",
+    "lastIndexOf(int ch) : int String",
+    "join(CharSequence delimiter, Iterable<? extends CharSequence> elements) : String String",
+    "join(CharSequence delimiter, CharSequence... elements) : String String",
+    "isEmpty() : boolean String",
+    "intern() : String String",
+    "indexOf(String str, int fromIndex) : int String",
+    "indexOf(int ch, int fromIndex) : int String",
+    "indexOf(String str) : int String",
+    "indexOf(int ch) : int String",
+    "hashCode() : int String",
+    "getChars(int srcBegin, int srcEnd, char[] dst, int dstBegin) : void String",
+    "getBytes(int srcBegin, int srcEnd, byte[] dst, int dstBegin) : void String",
+    "getBytes(Charset charset) : byte[] String",
+    "getBytes(String charsetName) : byte[] String",
+    "getBytes() : byte[] String",
+    "format(Locale l, String format, Object... args) : String String",
+    "format(String format, Object... args) : String String",
+    "equalsIgnoreCase(String anotherString) : boolean String",
+    "equals(Object anObject) : boolean String",
+    "endsWith(String suffix) : boolean String",
+    "copyValueOf(char[] data, int offset, int count) : String String",
+    "copyValueOf(char[] data) : String String",
+    "contentEquals(CharSequence cs) : boolean String",
+    "contentEquals(StringBuffer sb) : boolean String",
+    "contains(CharSequence s) : boolean String",
+    "concat(String str) : String String",
+    "compareToIgnoreCase(String str) : int String",
+    "compareTo(String anotherString) : int String",
+    "codePointCount(int beginIndex, int endIndex) : int String",
+    "codePointBefore(int index) : int String",
+    "codePointAt(int index) : int String",
+    "charAt(int index) : char String",
+    "wait(long timeout, int nanos) : void Object",
+    "wait(long timeout) : void Object",
+    "wait() : void Object",
+    "notifyAll() : void Object",
+    "notify() : void Object",
+    "getClass() : Class<?> Object"
   };
 
   private static final String contentAfterEditing =
@@ -170,13 +232,21 @@ public class AutocompleteFeaturesInEditorTest {
     editor.typeTextIntoEditor(".");
     editor.launchAutocompleteAndWaitContainer();
     String textFromEditorAfterSecondCall = editor.getAllVisibleTextFromAutocomplete();
-    for (String content : autocompleteContentAfterSecond) {
+    for (String content : autocompleteContentAfterSecondBeforeScroll) {
       assertTrue(textFromEditorAfterSecondCall.contains(content));
     }
-    editor.enterAutocompleteProposal("getBytes() : byte[]");
+
+    editor.scrollAutocompleteFormToBottom();
+
+    textFromEditorAfterSecondCall = editor.getAllVisibleTextFromAutocomplete();
+    for (String content : autocompleteContentAfterSecondAfterScroll) {
+      assertTrue(textFromEditorAfterSecondCall.contains(content));
+    }
+
+    editor.enterAutocompleteProposal("getBytes() : byte[] ");
     editor.typeTextIntoEditor(".");
     editor.launchAutocompleteAndWaitContainer();
-    editor.enterAutocompleteProposal("toString() : String");
+    editor.enterAutocompleteProposal("toString() : String ");
     editor.typeTextIntoEditor(";");
     consoles.closeProcessesArea();
     editor.waitTextIntoEditor(contentAfterEditing);

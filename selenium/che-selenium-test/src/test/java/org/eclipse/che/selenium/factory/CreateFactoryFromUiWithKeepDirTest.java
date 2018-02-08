@@ -92,7 +92,6 @@ public class CreateFactoryFromUiWithKeepDirTest {
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(testWorkspace);
-    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @AfterClass
