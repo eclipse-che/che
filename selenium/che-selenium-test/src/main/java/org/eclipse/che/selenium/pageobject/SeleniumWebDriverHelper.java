@@ -29,9 +29,10 @@ public class SeleniumWebDriverHelper {
   protected final WebDriverWait loadPageWait;
 
   @Inject
-  protected SeleniumWebDriverHelper(SeleniumWebDriver seleniumWebDriver) {
+  protected SeleniumWebDriverHelper(
+      SeleniumWebDriver seleniumWebDriver, WebDriverWaitFactory webDriverWaitFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
-    this.loadPageWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
+    this.loadPageWait = webDriverWaitFactory.get(LOAD_PAGE_TIMEOUT_SEC);
   }
 
   public void setFieldValue(By fieldLocator, String value) {
