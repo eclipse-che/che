@@ -21,6 +21,7 @@ import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -57,6 +58,7 @@ public class SplitEditorFeatureTest {
   @Inject private Menu menu;
   @Inject private Refactor refactor;
   @Inject private Wizard wizard;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -64,6 +66,7 @@ public class SplitEditorFeatureTest {
     String javaFileName = "GreetingController.java";
     ide.open(workspace);
     createProject(PROJECT_NAME);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.expandPathInProjectExplorerAndOpenFile(pathToFile, javaFileName);
     loader.waitOnClosed();
