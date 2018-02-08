@@ -91,6 +91,7 @@ public class CreateAndDeleteProjectsTest {
     mavenPluginStatusBar.waitClosingInfoPanel();
     explorer.waitFolderDefinedTypeOfFolderByPath(CONSOLE_JAVA_SIMPLE, PROJECT_FOLDER);
     explorer.waitFolderDefinedTypeOfFolderByPath(WEB_JAVA_SPRING, PROJECT_FOLDER);
+    notificationsPopupPanel.waitPopUpPanelsIsClosed();
 
     switchToWindow(dashboardWindow);
     dashboard.selectWorkspacesItemOnDashboard();
