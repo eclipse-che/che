@@ -508,7 +508,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     TextDocumentClientCapabilities textDocument = new TextDocumentClientCapabilities();
     textDocument.setCodeAction(new CodeActionCapabilities(false));
     textDocument.setCodeLens(new CodeLensCapabilities(false));
-    textDocument.setCompletion(new CompletionCapabilities(new CompletionItemCapabilities(false)));
+    textDocument.setCompletion(new CompletionCapabilities(new CompletionItemCapabilities(true)));
     textDocument.setDefinition(new DefinitionCapabilities(false));
     textDocument.setDocumentHighlight(new DocumentHighlightCapabilities(false));
     textDocument.setDocumentLink(new DocumentLinkCapabilities(false));
