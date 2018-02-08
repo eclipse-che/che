@@ -72,7 +72,6 @@ public class CheckReplaceFeatureInEditorTest {
         ProjectTemplates.MAVEN_SPRING);
 
     ide.open(workspace);
-    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test(priority = 0)
