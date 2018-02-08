@@ -112,7 +112,7 @@ public class InheritClassTest {
     loader.waitOnClosed();
     editor.launchAutocompleteAndWaitContainer();
     editor.waitTextIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
-    editor.enterAutocompleteProposal("CodenvyTest");
+    editor.enterAutocompleteProposal("nvyTest - org.eclipse.qa.examples");
     editor.waitAutocompleteContainerIsClosed();
     editor.waitTextIntoEditor("CodenvyTestInherite extends CodenvyTest");
     loader.waitOnClosed();
@@ -125,22 +125,22 @@ public class InheritClassTest {
     editor.launchAutocompleteAndWaitContainer();
     editor.waitTextIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
     editor.waitTextIntoAutocompleteContainer("CodenvyTestInherite - org.eclipse.qa.examples");
-    editor.enterAutocompleteProposal("CodenvyTest");
+    editor.enterAutocompleteProposal("nvyTest - org.eclipse.qa.examples");
     editor.waitAutocompleteContainerIsClosed();
 
     editor.waitTextIntoEditor("CodenvyTest");
     editor.typeTextIntoEditor(" codenvyTest = n");
     editor.launchAutocompleteAndWaitContainer();
     editor.waitAutocompleteContainer();
-    editor.waitTextIntoAutocompleteContainer("new");
-    editor.typeTextIntoEditor(Keys.ENTER.toString());
+    editor.waitTextIntoAutocompleteContainer("numGuessByUser : String");
+    editor.enterAutocompleteProposal("umGuessByUser : String");
 
     editor.typeTextIntoEditor(" Code");
     editor.waitCodeAssistMarkers(ERROR);
     editor.launchAutocompleteAndWaitContainer();
     editor.waitTextIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
     editor.waitTextIntoAutocompleteContainer("CodenvyTestInherite - org.eclipse.qa.examples");
-    editor.enterAutocompleteProposal("CodenvyTestInherite");
+    editor.enterAutocompleteProposal("nvyTestInherite - org.eclipse.qa.examples");
     editor.waitAutocompleteContainerIsClosed();
     editor.typeTextIntoEditor(";");
     editor.waitTextIntoEditor(

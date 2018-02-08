@@ -124,7 +124,7 @@ public class AutocompleteProposalJavaDocTest {
     loader.waitOnClosed();
     editor.goToCursorPositionVisible(24, 20);
     editor.launchAutocompleteAndWaitContainer();
-    editor.selectAutocompleteProposal("isEquals(Object o) : boolean");
+    editor.selectAutocompleteProposal("isEquals(Object o) : boolean ");
 
     // then
     editor.waitContextMenuJavaDocText(
