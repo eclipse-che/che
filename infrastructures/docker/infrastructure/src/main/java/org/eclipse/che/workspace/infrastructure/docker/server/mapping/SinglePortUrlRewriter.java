@@ -14,6 +14,7 @@ import static java.lang.String.format;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -30,23 +31,14 @@ import org.eclipse.che.commons.annotation.Nullable;
  */
 public class SinglePortUrlRewriter implements URLRewriter {
 
-  private final SinglePortHostnameBuilder hostnameBuilder;
+  private final Provider<SinglePortHostnameBuilder> hostnameBuilderprovider;
   private final int chePort;
 
   @Inject
   public SinglePortUrlRewriter(
-      @Nullable @Named("che.docker.ip") String internalIpOfContainers,
-      @Named("che.port") int chePort,
-      @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
-      @Nullable @Named("che.singleport.wildcard_domain.host") String wildcardHost) {
-    if (internalIpOfContainers == null && externalIpOfContainers == null) {
-      throw new IllegalStateException(
-          "Value of both of the properties 'che.docker.ip' and 'che.docker.ip.external' is null,"
-              + " which is unsuitable for the single-port mode");
-    }
-    this.hostnameBuilder =
-        new SinglePortHostnameBuilder(externalIpOfContainers, internalIpOfContainers, wildcardHost);
+      @Named("che.port") int chePort, Provider<SinglePortHostnameBuilder> hostnameBuilderProvider) {
     this.chePort = chePort;
+    this.hostnameBuilderprovider = hostnameBuilderProvider;
   }
 
   @Override
@@ -56,7 +48,8 @@ public class SinglePortUrlRewriter implements URLRewriter {
       @Nullable String serverName,
       String url)
       throws InfrastructureException {
-    final String host = hostnameBuilder.build(serverName, machineName, identity.getWorkspaceId());
+    final String host =
+        hostnameBuilderprovider.get().build(serverName, machineName, identity.getWorkspaceId());
     try {
       UriBuilder uriBUilder = UriBuilder.fromUri(url).host(host);
       if (chePort != 80 && chePort != 443) {
