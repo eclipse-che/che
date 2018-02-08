@@ -142,7 +142,7 @@ public class Position {
       return rangeOffset <= this.offset && this.offset < end;
     }
 
-    if (this.length > 0) return this.offset <= rangeOffset && rangeOffset < thisEnd;
+    if (this.length > 0) return this.offset <= rangeOffset && rangeOffset <= thisEnd;
     return this.offset == rangeOffset;
   }
 
