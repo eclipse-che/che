@@ -135,7 +135,7 @@ public class NotificationsPopupPanel {
   }
 
   /** wait disappearance of notification popups */
-  public void waitPopUpPanelsIsClosed() {
+  public void waitPopupPanelsAreClosed() {
     new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(By.id(PROGRESS_POPUP_PANEL_ID)));
   }

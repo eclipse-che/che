@@ -152,14 +152,14 @@ public class WorkspacesListTest {
     workspaces.waitWorkspaceIsPresent(workspaceName1);
 
     // check statuses of the created workspaces
-    workspaces.waitWorkspaceStatusIs(workspaceName1, Statuses.STOPPED);
-    workspaces.waitWorkspaceStatusIs(workspaceName2, Statuses.STOPPED);
-    workspaces.waitWorkspaceStatusIs(workspaceName3, Statuses.STOPPED);
+    workspaces.waitWorkspaceStatus(workspaceName1, Statuses.STOPPED);
+    workspaces.waitWorkspaceStatus(workspaceName2, Statuses.STOPPED);
+    workspaces.waitWorkspaceStatus(workspaceName3, Statuses.STOPPED);
 
     // stop the workspace by the Actions button and check its status is RUNNING
     Assert.assertEquals(workspaces.getWorkspaceStatus(workspaceName3), Statuses.STOPPED);
     workspaces.clickOnWorkspaceActionsButton(workspaceName3);
-    workspaces.waitWorkspaceStatusIs(workspaceName3, Statuses.RUNNING);
+    workspaces.waitWorkspaceStatus(workspaceName3, Statuses.RUNNING);
   }
 
   @Test

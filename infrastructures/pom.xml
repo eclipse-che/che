@@ -26,5 +26,6 @@
     <modules>
         <module>docker</module>
         <module>openshift</module>
+        <module>kubernetes</module>
     </modules>
 </project>

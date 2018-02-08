@@ -87,10 +87,11 @@ public class CreateAndDeleteProjectsTest {
     loader.waitOnClosed();
     explorer.waitProjectExplorer();
     explorer.waitItem(CONSOLE_JAVA_SIMPLE);
-    notificationsPopupPanel.waitPopUpPanelsIsClosed();
+    notificationsPopupPanel.waitPopupPanelsAreClosed();
     mavenPluginStatusBar.waitClosingInfoPanel();
     explorer.waitFolderDefinedTypeOfFolderByPath(CONSOLE_JAVA_SIMPLE, PROJECT_FOLDER);
     explorer.waitFolderDefinedTypeOfFolderByPath(WEB_JAVA_SPRING, PROJECT_FOLDER);
+    notificationsPopupPanel.waitPopupPanelsAreClosed();
 
     switchToWindow(dashboardWindow);
     dashboard.selectWorkspacesItemOnDashboard();
