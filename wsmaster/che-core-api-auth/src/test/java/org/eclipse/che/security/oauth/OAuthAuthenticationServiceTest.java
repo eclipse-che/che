@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,7 +75,7 @@ public class OAuthAuthenticationServiceTest {
             .queryParam("oauth_provider", "unknown")
             .get(SECURE_PATH + "/oauth/token");
 
-    assertEquals(response.getStatusCode(), 400);
+    assertEquals(response.getStatusCode(), 404);
     assertEquals(
         DtoFactory.getInstance()
             .createDtoFromJson(response.getBody().asInputStream(), ServiceError.class)

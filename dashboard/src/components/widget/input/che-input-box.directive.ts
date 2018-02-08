@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,7 +50,7 @@ export class CheInputBox {
   };
 
 
-  compile(element: ng.IRootElementService, attrs: ng.IAttributes) {
+  compile(element: ng.IAugmentedJQuery, attrs: ng.IAttributes): ng.IDirectivePrePost {
     const avoidAttrs = ['ng-model'];
     const avoidStartWithAttrs: Array<string> = ['$', 'che-'];
 
@@ -87,6 +87,8 @@ export class CheInputBox {
     if (!tabIndex) {
       inputJqEl.attr('tabindex', 0);
     }
+
+    return;
   }
 
   /**

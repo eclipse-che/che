@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,11 @@ import {CreateWorkspaceSvc} from './create-workspace.service';
 import {NamespaceSelectorSvc} from './namespace-selector/namespace-selector.service';
 import {StackSelectorSvc} from './stack-selector/stack-selector.service';
 import {RandomSvc} from '../../../components/utils/random.service';
+import {CheNotification} from '../../../components/notification/che-notification.factory';
+import {
+  ICheButtonDropdownMainAction,
+  ICheButtonDropdownOtherAction
+} from '../../../components/widget/button-dropdown/che-button-dropdown.directive';
 
 /**
  * This class is handling the controller for workspace creation.
@@ -24,6 +29,14 @@ import {RandomSvc} from '../../../components/utils/random.service';
  * @author Oleksii Kurinnyi
  */
 export class CreateWorkspaceController {
+  /**
+   * Dropdown button config.
+   */
+  headerCreateButtonConfig: {
+    mainAction: ICheButtonDropdownMainAction,
+    otherActions: Array<ICheButtonDropdownOtherAction>
+  };
+  private $mdDialog: ng.material.IDialogService;
   /**
    * Timeout service.
    */
@@ -48,6 +61,14 @@ export class CreateWorkspaceController {
    * Generator for random strings.
    */
   private randomSvc: RandomSvc;
+  /**
+   * Logging service.
+   */
+  private $log: ng.ILogService;
+  /**
+   * Notification factory.
+   */
+  private cheNotification: CheNotification;
   /**
    * The environment manager.
    */
@@ -89,13 +110,24 @@ export class CreateWorkspaceController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($timeout: ng.ITimeoutService, cheEnvironmentRegistry: CheEnvironmentRegistry, createWorkspaceSvc: CreateWorkspaceSvc, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, randomSvc: RandomSvc) {
+  constructor($mdDialog: ng.material.IDialogService,
+              $timeout: ng.ITimeoutService,
+              cheEnvironmentRegistry: CheEnvironmentRegistry,
+              createWorkspaceSvc: CreateWorkspaceSvc,
+              namespaceSelectorSvc: NamespaceSelectorSvc,
+              stackSelectorSvc: StackSelectorSvc,
+              randomSvc: RandomSvc,
+              $log: ng.ILogService,
+              cheNotification: CheNotification) {
+    this.$mdDialog = $mdDialog;
     this.$timeout = $timeout;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
     this.createWorkspaceSvc = createWorkspaceSvc;
     this.namespaceSelectorSvc = namespaceSelectorSvc;
     this.stackSelectorSvc = stackSelectorSvc;
     this.randomSvc = randomSvc;
+    this.$log = $log;
+    this.cheNotification = cheNotification;
 
     this.usedNamesList = [];
     this.stackMachines = [];
@@ -112,6 +144,30 @@ export class CreateWorkspaceController {
     // when stacks selector is rendered
     // and default stack is selected
     this.hideLoader = false;
+
+    // header toolbar
+    // dropdown button config
+    this.headerCreateButtonConfig = {
+      mainAction: {
+        title: 'Create',
+        type: 'button',
+        action: () => {
+          this.createWorkspace().then((workspace: che.IWorkspace) => {
+            this.createWorkspaceSvc.redirectToDetails(workspace);
+          });
+        }
+      },
+      otherActions: [{
+        title: 'Open in IDE',
+        type: 'button',
+        action: () => {
+          this.createWorkspace().then((workspace: che.IWorkspace) => {
+            this.createWorkspaceSvc.redirectToIDE(workspace);
+          });
+        },
+        orderNumber: 1
+      }]
+    };
   }
 
   /**
@@ -137,7 +193,12 @@ export class CreateWorkspaceController {
     const environment = this.stack.workspaceConfig.environments[environmentName];
     const recipeType = environment.recipe.type;
     this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
-
+    if (!this.environmentManager) {
+      const errorMessage = `Unsupported recipe type '${recipeType}'`;
+      this.$log.error(errorMessage);
+      this.cheNotification.showError(errorMessage);
+      return;
+    }
     this.memoryByMachine = {};
     this.stackMachines = this.environmentManager.getMachines(environment);
   }
@@ -268,8 +329,10 @@ export class CreateWorkspaceController {
 
   /**
    * Creates workspace.
+   *
+   * @returns {angular.IPromise<che.IWorkspace>}
    */
-  createWorkspace(): void {
+  createWorkspace(): ng.IPromise<che.IWorkspace> {
     // update workspace name
     this.stack.workspaceConfig.name = this.workspaceName;
 
@@ -287,7 +350,33 @@ export class CreateWorkspaceController {
     }
     let attributes = {stackId: this.stack.id};
     let workspaceConfig = angular.copy(this.stack.workspaceConfig);
-    this.createWorkspaceSvc.createWorkspace(workspaceConfig, attributes);
+
+    return this.createWorkspaceSvc.createWorkspace(workspaceConfig, attributes);
+  }
+
+  /**
+   * Creates a workspace and shows a dialogue window for a user to select
+   * whether to open Workspace Details page or the IDE.
+   *
+   * @param {MouseEvent} $event
+   */
+  createWorkspaceAndShowDialog($event: MouseEvent): void {
+    this.createWorkspace().then((workspace: che.IWorkspace) => {
+      this.$mdDialog.show({
+        targetEvent: $event,
+        controller: 'AfterCreationDialogController',
+        controllerAs: 'afterCreationDialogController',
+        bindToController: true,
+        clickOutsideToClose: true,
+        templateUrl: 'app/workspaces/create-workspace/after-creation-dialog/after-creation-dialog.html'
+      }).then(() => {
+        // when promise is resolved then open workspace in IDE
+        this.createWorkspaceSvc.redirectToIDE(workspace);
+      }, () => {
+        // when promise is rejected then open Workspace Details page
+        this.createWorkspaceSvc.redirectToDetails(workspace);
+      });
+    });
   }
 
 }

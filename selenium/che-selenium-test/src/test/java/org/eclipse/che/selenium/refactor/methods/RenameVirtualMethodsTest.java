@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.selenium.refactor.methods;
+
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.lang.reflect.Method;
@@ -30,6 +32,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -139,7 +142,7 @@ public class RenameVirtualMethodsTest {
   private void doRefactoringWithKeys(
       int cursorPositionLine, int cursorPositionChar, String newName) {
     prepareProjectForRefactor(cursorPositionLine, cursorPositionChar);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor(newName);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutA);
@@ -147,10 +150,9 @@ public class RenameVirtualMethodsTest {
 
   private void doRefactorByWizard(int cursorPositionLine, int cursorPositionChar, String newName) {
     prepareProjectForRefactor(cursorPositionLine, cursorPositionChar);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameMethodFormIsOpen();
-    refactor.typeNewName(newName);
+    typeAndWaitNewName(newName);
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     // need for validation on server side
@@ -162,10 +164,9 @@ public class RenameVirtualMethodsTest {
   private void doRefactorByWizardWithClosingWarnMess(
       int cursorPositionLine, int cursorPositionChar, String newName) {
     prepareProjectForRefactor(cursorPositionLine, cursorPositionChar);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameMethodFormIsOpen();
-    refactor.typeNewName(newName);
+    typeAndWaitNewName(newName);
     refactor.clickOkButtonRefactorForm();
     askDialog.waitFormToOpen();
     askDialog.clickOkBtn();
@@ -209,5 +210,14 @@ public class RenameVirtualMethodsTest {
     }
 
     return result;
+  }
+
+  private void typeAndWaitNewName(String newName) {
+    try {
+      refactor.typeAndWaitNewName(newName);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7500");
+    }
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,11 +11,14 @@
 package org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
@@ -34,12 +37,17 @@ import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
 public class DockerImageEnvironmentFactory
     extends InternalEnvironmentFactory<DockerImageEnvironment> {
 
+  private final String defaultMachineMemorySizeAttribute;
+
   @Inject
   public DockerImageEnvironmentFactory(
       InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
-      MachineConfigsValidator machinesValidator) {
+      MachineConfigsValidator machinesValidator,
+      @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
     super(installerRegistry, recipeRetriever, machinesValidator);
+    this.defaultMachineMemorySizeAttribute =
+        String.valueOf(defaultMachineMemorySizeMB * 1024 * 1024);
   }
 
   @Override
@@ -70,6 +78,19 @@ public class DockerImageEnvironmentFactory
 
     checkArgument(dockerImage != null, "Docker image should not be null.");
 
+    addRamLimitAttribute(machines);
+
     return new DockerImageEnvironment(dockerImage, recipe, machines, warnings);
+  }
+
+  private void addRamLimitAttribute(Map<String, InternalMachineConfig> machines) {
+    // sets default ram limit attribute if not present
+    for (InternalMachineConfig machineConfig : machines.values()) {
+      if (isNullOrEmpty(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE))) {
+        machineConfig
+            .getAttributes()
+            .put(MEMORY_LIMIT_ATTRIBUTE, defaultMachineMemorySizeAttribute);
+      }
+    }
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,12 +12,16 @@ package org.eclipse.che.selenium.intelligencecommand;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MULTIPLE;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -26,17 +30,19 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsToolbar;
+import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.By;
-import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class CheckIntelligenceCommandFromToolbarTest {
-
   private static final String PROJECT_NAME = NameGenerator.generate("project", 2);
+  private String currentWindow;
 
   @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
@@ -47,16 +53,18 @@ public class CheckIntelligenceCommandFromToolbarTest {
   @Inject private CommandsToolbar commandsToolbar;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private NotificationsPopupPanel notificationsPanel;
+  @Inject private MachineTerminal terminal;
+  @Inject private TestProjectServiceClient projectService;
 
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(testWorkspace);
+    projectExplorer.waitProjectExplorer();
+    currentWindow = seleniumWebDriver.getWindowHandle();
   }
 
-  @Test(priority = 1)
+  @Test
   public void launchClonedWepAppTest() throws Exception {
-    String currentWindow = seleniumWebDriver.getWindowHandle();
-    projectExplorer.waitProjectExplorer();
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
     wizard.selectProjectAndCreate(Wizard.SamplesName.WEB_JAVA_SPRING, PROJECT_NAME);
     wizard.waitCreateProjectWizardFormIsClosed();
@@ -64,65 +72,136 @@ public class CheckIntelligenceCommandFromToolbarTest {
     commandsToolbar.clickWithHoldAndLaunchCommandFromList(PROJECT_NAME + ": build and run");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
 
-    // it needs when the test is running on the che6-ocp platform
-    String previewUrl = consoles.getPreviewUrl();
-    if (previewUrl.contains("route")) {
-      WaitUtils.sleepQuietly(10);
-    }
-
-    consoles.clickOnPreviewUrl();
-    checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
+    waitOnAvailablePreviewPage(currentWindow, "Enter your name");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitProjectExplorer();
     consoles.selectProcessByTabName(PROJECT_NAME + ": build and run");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
-    consoles.clickOnPreviewUrl();
-    checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
+    checkTestAppByPreviewUrlAndReturnToIde(currentWindow, "Enter your name:");
   }
 
-  @Test(priority = 2)
-  public void checkButtonsOnToolbar() {
+  @Test(
+    priority = 1,
+    groups = {TestGroup.DOCKER}
+  )
+  public void checkButtonsOnToolbarOnDocker() {
+    checkButtonsOnToolbar("This site can’t be reached");
+  }
+
+  @Test(
+    priority = 1,
+    groups = {TestGroup.OPENSHIFT}
+  )
+  public void checkButtonsOnToolbarOnOpenshift() {
+    checkButtonsOnToolbar("Application is not available");
+  }
+
+  private void checkButtonsOnToolbar(String expectedText) {
     projectExplorer.waitProjectExplorer();
-    String currentWindow = seleniumWebDriver.getWindowHandle();
+    projectExplorer.waitItem(PROJECT_NAME);
     commandsToolbar.clickExecStopBtn();
 
-    // it needs when the test is running on the che6-ocp platform
-    String previewUrl = consoles.getPreviewUrl();
-    String expectedText =
-        previewUrl.contains("route")
-            ? "Application is not available"
-            : "This site can’t be reached";
-
-    consoles.clickOnPreviewUrl();
-    checkTestAppAndReturnToIde(currentWindow, expectedText);
+    checkTestAppByPreviewUrlAndReturnToIde(currentWindow, expectedText);
     commandsToolbar.clickExecRerunBtn();
     consoles.waitExpectedTextIntoConsole(" Server startup in");
     consoles.clickOnPreviewUrl();
-    checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
-    Assert.assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
-    Assert.assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#2"));
 
-    // it needs when the test is running on the che6-ocp platform
-    if (previewUrl.contains("route")) {
-      WaitUtils.sleepQuietly(10);
-    }
+    waitOnAvailablePreviewPage(currentWindow, "Enter your name:");
+    assertTrue(commandsToolbar.getTimerValue().matches("\\d\\d:\\d\\d"));
+    assertTrue(commandsToolbar.getNumOfProcessCounter().equals("#3"));
 
-    commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("dev-machine:tomcat8");
-    checkTestAppAndReturnToIde(currentWindow, "Enter your name:");
+    checkTestAppByPreviewButtonAndReturnToIde(currentWindow, "Enter your name:");
     commandsToolbar.clickExecStopBtn();
     commandsToolbar.clickWithHoldAndLaunchDebuCmdFromList(PROJECT_NAME + ": debug");
     consoles.waitExpectedTextIntoConsole("Listening for transport dt_socket at address: 8000", 60);
     consoles.waitExpectedTextIntoConsole(" Server startup in", 30);
   }
 
-  private void checkTestAppAndReturnToIde(String currentWindow, String expectedTextOnTestAppPage) {
+  private void checkTestAppByPreviewUrlAndReturnToIde(String currentWindow, String expectedText) {
+    // TODO try/catch should be removed after fixing: https://github.com/eclipse/che/issues/8105
+    // this auxiliary method for investigate problem that was described in the issue:
+    // https://github.com/eclipse/che/issues/8105
+    try {
+      new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+          .until(
+              (ExpectedCondition<Boolean>)
+                  driver ->
+                      clickOnPreviewUrlAndCheckTextIsPresentInPageBody(
+                          currentWindow, expectedText));
+    } catch (WebDriverException e) {
+      terminal.launchScriptAndGetInfo(testWorkspace, PROJECT_NAME, projectService);
+    }
+  }
+
+  private void checkTestAppByPreviewButtonAndReturnToIde(
+      String currentWindow, String expectedText) {
+    // TODO try/catch should be removed after fixing: https://github.com/eclipse/che/issues/8105
+    // this auxiliary method for investigate problem that was described in the issue:
+    // https://github.com/eclipse/che/issues/8105
+    try {
+      new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+          .until(
+              (ExpectedCondition<Boolean>)
+                  driver ->
+                      clickOnPreviewButtonAndCheckTextIsPresentInPageBody(
+                          currentWindow, expectedText));
+    } catch (WebDriverException e) {
+      terminal.launchScriptAndGetInfo(testWorkspace, PROJECT_NAME, projectService);
+    }
+  }
+
+  private boolean clickOnPreviewUrlAndCheckTextIsPresentInPageBody(
+      String currentWindow, String expectedText) {
+    consoles.clickOnPreviewUrl();
+    return switchToOpenedWindowAndCheckTextIsPresent(currentWindow, expectedText);
+  }
+
+  private boolean clickOnPreviewButtonAndCheckTextIsPresentInPageBody(
+      String currentWindow, String expectedText) {
+    commandsToolbar.clickOnPreviewCommandBtnAndSelectUrl("dev-machine:tomcat8");
+    return switchToOpenedWindowAndCheckTextIsPresent(currentWindow, expectedText);
+  }
+
+  private boolean switchToOpenedWindowAndCheckTextIsPresent(
+      String currentWindow, String expectedText) {
     seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
-    new WebDriverWait(seleniumWebDriver, MULTIPLE)
-        .until(
-            ExpectedConditions.textToBePresentInElementLocated(
-                By.tagName("body"), expectedTextOnTestAppPage));
+    boolean result = getBodyText().contains(expectedText);
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
+
+    return result;
+  }
+
+  private void waitOnAvailablePreviewPage(String currentWindow, String expectedTextOnPreviewPage) {
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> isPreviewPageAvailable(currentWindow, expectedTextOnPreviewPage));
+  }
+
+  private Boolean isPreviewPageAvailable(String currentWindow, String expectedText) {
+    consoles.clickOnPreviewUrl();
+    seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
+
+    if (getBodyText().contains(expectedText)) {
+      seleniumWebDriver.close();
+      seleniumWebDriver.switchTo().window(currentWindow);
+      return true;
+    }
+
+    seleniumWebDriver.close();
+    seleniumWebDriver.switchTo().window(currentWindow);
+    return false;
+  }
+
+  private WebElement getBody() {
+    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.tagName("body")));
+  }
+
+  private String getBodyText() {
+    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until((ExpectedCondition<String>) driver -> getBody().getText());
   }
 }

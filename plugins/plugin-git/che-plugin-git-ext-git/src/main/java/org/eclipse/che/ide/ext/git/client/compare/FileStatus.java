@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.DELET
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.MODIFIED;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.RENAMED;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.UNMODIFIED;
+import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.UNTRACKED;
 
 /**
  * Class for determining git status of given changed file.
@@ -52,6 +53,8 @@ public class FileStatus {
         return RENAMED;
       case "C":
         return COPIED;
+      case "U":
+        return UNTRACKED;
     }
     return UNMODIFIED;
   }

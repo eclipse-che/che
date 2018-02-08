@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,37 +8,83 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
+@eval dropdownListBackground org.eclipse.che.ide.api.theme.Style.getDropdownListBackground();
+@eval dropdownListExecLabelColor org.eclipse.che.ide.api.theme.Style.theme.getDropdownListExecLabelColor();
+@eval dropdownListExecLabelBackground org.eclipse.che.ide.api.theme.Style.theme.getDropdownListExecLabelBackground();
+
 .toolbarButton {
     float: left;
     line-height: 20px;
     margin-left: 15px;
 }
 
-.processesListExecLabel,
-.processesListLoadLabel {
+.processesListExecLabel {
     float: left;
     border-left: commandsToolbarProcessesLabelBorder;
     border-top: commandsToolbarProcessesLabelBorder;
     border-bottom: commandsToolbarProcessesLabelBorder;
     border-right: 0;
     font-family: mainFontFamily;
-    font-size: 9px;
+    font-size: 9pt;
     font-weight: normal;
     font-style: normal;
     font-stretch: normal;
     text-align: center;
-    color: #4eabff;
+    color: dropdownListExecLabelColor;
     width: 44px;
     height: 22px;
     line-height: 22px;
-    background: commandsToolbarProcessesLabelBackground;
+    background: dropdownListExecLabelBackground;
     cursor: default;
 }
 
-.processesListLoadLabel {
+.processesListLoader {
+    float: left;
+    border-left: commandsToolbarProcessesLabelBorder;
+    border-top: commandsToolbarProcessesLabelBorder;
+    border-bottom: commandsToolbarProcessesLabelBorder;
+    border-right: 0;
+    width: 44px;
+    height: 22px;
+    cursor: default;
     display: none;
-    background-color: #191d28;
-    font-size: 11px;
+    background: commandsToolbarProcessesLabelBackground;
+}
+
+.processesListLoaderBar1,
+.processesListLoaderBar2,
+.processesListLoaderBar3 {
+    background-color: #4a90e2;
+    width: 2px;
+    height: literal("calc(100% - 4px)");
+    display: inline-block;
+    margin-left: 2px;
+    margin-top: 2px;
+    animation: stretchAnimation 1.2s infinite ease-in-out;
+}
+
+.processesListLoaderBar1 {
+    margin-left: 16px;
+}
+
+.processesListLoaderBar2 {
+    animation-delay: 0.1s;
+}
+
+.processesListLoaderBar3 {
+    animation-delay: 0.2s;
+}
+
+@keyframes stretchAnimation {
+    0%, 40%, 100% {
+        -webkit-transform: scaleY(0.4);
+        transform: scaleY(0.4);
+    }
+
+    20% {
+        -webkit-transform: scaleY(1.0);
+        transform: scaleY(1.0);
+    }
 }
 
 .processWidgetText {
@@ -90,7 +136,7 @@
     top: 0px;
     width: 100%;
     height: 22px;
-    background-color: #242a3a;
+    background-color: dropdownListBackground;
     border: solid 1px #2b3242;
     overflow: hidden;
 }

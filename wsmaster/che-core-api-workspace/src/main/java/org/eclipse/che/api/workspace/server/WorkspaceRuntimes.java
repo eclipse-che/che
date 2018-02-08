@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,11 +12,15 @@ package org.eclipse.che.api.workspace.server;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
+import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
+import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -44,6 +48,7 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
@@ -85,6 +90,7 @@ public class WorkspaceRuntimes {
   private final AtomicBoolean isStartRefused;
   private final Map<String, InternalEnvironmentFactory> environmentFactories;
   private final RuntimeInfrastructure infrastructure;
+  private final ProbeScheduler probeScheduler;
 
   @Inject
   public WorkspaceRuntimes(
@@ -93,7 +99,9 @@ public class WorkspaceRuntimes {
       RuntimeInfrastructure infra,
       WorkspaceSharedPool sharedPool,
       WorkspaceDao workspaceDao,
-      @SuppressWarnings("unused") DBInitializer ignored) {
+      @SuppressWarnings("unused") DBInitializer ignored,
+      ProbeScheduler probeScheduler) {
+    this.probeScheduler = probeScheduler;
     this.runtimes = new ConcurrentHashMap<>();
     this.eventService = eventService;
     this.sharedPool = sharedPool;
@@ -114,8 +122,8 @@ public class WorkspaceRuntimes {
   }
 
   @PostConstruct
-  private void init() {
-    subscribeCleanupOnAbnormalRuntimeStopEvent();
+  void init() {
+    subscribeAbnormalRuntimeStopListener();
     recover();
   }
 
@@ -203,13 +211,8 @@ public class WorkspaceRuntimes {
     try {
       InternalEnvironment internalEnv = createInternalEnvironment(environment);
       RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv);
-
       InternalRuntime runtime = runtimeContext.getRuntime();
-      if (runtime == null) {
-        throw new IllegalStateException(
-            "SPI contract violated. RuntimeInfrastructure.start(...) must not return null: "
-                + RuntimeInfrastructure.class);
-      }
+
       RuntimeState state = new RuntimeState(runtime, STARTING);
       if (isStartRefused.get()) {
         throw new ConflictException(
@@ -271,6 +274,9 @@ public class WorkspaceRuntimes {
         publishWorkspaceStatusEvent(workspaceId, RUNNING, STARTING, null);
       } catch (InfrastructureException e) {
         runtimes.remove(workspaceId);
+        // Cancels workspace servers probes if any
+        probeScheduler.cancel(workspaceId);
+
         String failureCause = "failed";
         if (e instanceof RuntimeStartInterruptedException) {
           failureCause = "interrupted";
@@ -359,6 +365,8 @@ public class WorkspaceRuntimes {
     @Override
     public void run() {
       String workspaceId = workspace.getId();
+      // Cancels workspace servers probes if any
+      probeScheduler.cancel(workspaceId);
       try {
         state.runtime.stop(options);
 
@@ -484,8 +492,8 @@ public class WorkspaceRuntimes {
     }
   }
 
-  private void subscribeCleanupOnAbnormalRuntimeStopEvent() {
-    eventService.subscribe(new CleanupRuntimeOnAbnormalRuntimeStop());
+  private void subscribeAbnormalRuntimeStopListener() {
+    eventService.subscribe(new AbnormalRuntimeStopListener());
   }
 
   private void publishWorkspaceStatusEvent(
@@ -553,6 +561,10 @@ public class WorkspaceRuntimes {
     return Optional.of(state.runtime.getContext());
   }
 
+  public Set<String> getSupportedRecipes() {
+    return environmentFactories.keySet();
+  }
+
   private InternalEnvironment createInternalEnvironment(Environment environment)
       throws InfrastructureException, ValidationException, NotFoundException {
     String recipeType = environment.getRecipe().getType();
@@ -572,18 +584,36 @@ public class WorkspaceRuntimes {
     return nameIfNoUser;
   }
 
-  private class CleanupRuntimeOnAbnormalRuntimeStop implements EventSubscriber<RuntimeStatusEvent> {
+  private class AbnormalRuntimeStopListener implements EventSubscriber<RuntimeStatusEvent> {
     @Override
     public void onEvent(RuntimeStatusEvent event) {
       if (event.isFailed()) {
-        RuntimeState state = runtimes.remove(event.getIdentity().getWorkspaceId());
+        String workspaceId = event.getIdentity().getWorkspaceId();
+        // Cancels workspace servers probes if any
+        probeScheduler.cancel(workspaceId);
+        RuntimeState state = runtimes.remove(workspaceId);
         if (state != null) {
           publishWorkspaceStatusEvent(
-              state.runtime.getContext().getIdentity().getWorkspaceId(),
+              workspaceId,
               STOPPED,
               RUNNING,
               "Error occurs on workspace runtime stop. Error: " + event.getError());
+          setAbnormalStopAttributes(workspaceId, event.getError());
         }
+      }
+    }
+
+    private void setAbnormalStopAttributes(String workspaceId, String error) {
+      try {
+        WorkspaceImpl workspace = workspaceDao.get(workspaceId);
+        workspace.getAttributes().put(ERROR_MESSAGE_ATTRIBUTE_NAME, error);
+        workspace.getAttributes().put(STOPPED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
+        workspace.getAttributes().put(STOPPED_ABNORMALLY_ATTRIBUTE_NAME, Boolean.toString(true));
+        workspaceDao.update(workspace);
+      } catch (NotFoundException | ServerException | ConflictException e) {
+        LOG.warn(
+            String.format(
+                "Cannot set error status of the workspace %s. Error is: %s", workspaceId, error));
       }
     }
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-
 package org.eclipse.che.ide.ui;
 
 import com.google.gwt.dom.client.DivElement;
@@ -33,7 +32,6 @@ public class SplitterFancyUtil {
         com.google.gwt.dom.client.Element el = node.getFirstChild().cast();
         if ("gwt-SplitLayoutPanel-HDragger".equals(el.getClassName())) {
           tuneSplitter(el);
-          return;
         }
       }
     }
@@ -53,7 +51,7 @@ public class SplitterFancyUtil {
     el.getStyle().setProperty("boxSizing", "border-box");
     el.getStyle().setProperty("width", "5px");
     el.getStyle().setProperty("overflow", "hidden");
-    el.getStyle().setProperty("marginLeft", "-3px");
+    el.getStyle().setProperty("marginLeft", "-2px");
     el.getStyle().setProperty("backgroundColor", "transparent");
 
     /** Add small border */
@@ -61,20 +59,9 @@ public class SplitterFancyUtil {
     smallBorder.getStyle().setProperty("position", "absolute");
     smallBorder.getStyle().setProperty("width", "1px");
     smallBorder.getStyle().setProperty("height", "100%");
-    smallBorder.getStyle().setProperty("left", "3px");
+    smallBorder.getStyle().setProperty("left", "2px");
     smallBorder.getStyle().setProperty("top", "0px");
     smallBorder.getStyle().setProperty("backgroundColor", Style.getSplitterSmallBorderColor());
     el.appendChild(smallBorder);
-
-    /** Add large border */
-    DivElement largeBorder = Document.get().createDivElement();
-    largeBorder.getStyle().setProperty("position", "absolute");
-    largeBorder.getStyle().setProperty("width", "2px");
-    largeBorder.getStyle().setProperty("height", "100%");
-    largeBorder.getStyle().setProperty("left", "1px");
-    largeBorder.getStyle().setProperty("top", "0px");
-    largeBorder.getStyle().setProperty("opacity", "0.4");
-    largeBorder.getStyle().setProperty("backgroundColor", Style.getSplitterLargeBorderColor());
-    el.appendChild(largeBorder);
   }
 }

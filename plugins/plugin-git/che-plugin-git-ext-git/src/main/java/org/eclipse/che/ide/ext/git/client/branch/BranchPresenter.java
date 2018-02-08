@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -88,7 +88,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
 
   @Override
   public void onClose() {
-    view.close();
+    view.closeDialogIfShowing();
     view.setTextToSearchFilterLabel("");
     view.clearSearchFilter();
   }
@@ -128,6 +128,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
         .then(
             ignored -> {
               getBranches();
+              view.setFocus();
             })
         .catchError(
             error -> {
@@ -146,17 +147,24 @@ public class BranchPresenter implements BranchView.ActionDelegate {
 
   @Override
   public void onDeleteClicked() {
-
-    service
-        .branchDelete(project.getLocation(), selectedBranch.getName(), true)
-        .then(
-            ignored -> {
-              getBranches();
-            })
-        .catchError(
-            error -> {
-              handleError(error.getCause(), BRANCH_DELETE_COMMAND_NAME);
-            });
+    dialogFactory
+        .createConfirmDialog(
+            constant.branchDelete(),
+            constant.branchDeleteAsk(getSelectedBranchName()),
+            () ->
+                service
+                    .branchDelete(project.getLocation(), selectedBranch.getName(), true)
+                    .then(
+                        ignored -> {
+                          getBranches();
+                          view.setFocus();
+                        })
+                    .catchError(
+                        error -> {
+                          handleError(error.getCause(), BRANCH_DELETE_COMMAND_NAME);
+                        }),
+            null)
+        .show();
   }
 
   @Override
@@ -172,7 +180,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
         .checkout(project.getLocation(), checkoutRequest)
         .then(
             ignored -> {
-              view.close();
+              view.closeDialogIfShowing();
             })
         .catchError(
             error -> {
@@ -218,6 +226,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
                   .then(
                       branch -> {
                         getBranches();
+                        view.setFocus();
                       })
                   .catchError(
                       error -> {

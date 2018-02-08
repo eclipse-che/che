@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -124,7 +124,8 @@ public class WorkingWithSplitPanelTest {
     multiSplitPanel.waitTabProcessIsPresent(1, BUILD_COMM);
     multiSplitPanel.waitTabNameProcessIsFocused(BUILD_COMM);
     multiSplitPanel.waitTabProcessIsNotPresent(3, BUILD_COMM);
-    consoles.openNewTerminalIntoProcesses();
+
+    consoles.startTerminalFromProcessesArea("dev-machine");
     multiSplitPanel.waitTabProcessIsPresent(1, "Terminal-2");
     multiSplitPanel.waitTabNameProcessIsFocused("Terminal-2");
     terminal.waitTerminalIsNotEmpty();

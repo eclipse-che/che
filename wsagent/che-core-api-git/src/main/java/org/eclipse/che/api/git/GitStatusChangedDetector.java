@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.fs.server.PathTransformer;
+import org.eclipse.che.api.git.exception.GitCheckoutInProgressException;
 import org.eclipse.che.api.git.exception.GitCommitInProgressException;
 import org.eclipse.che.api.git.exception.GitInvalidRepositoryException;
 import org.eclipse.che.api.git.shared.EditedRegion;
@@ -169,6 +170,9 @@ public class GitStatusChangedDetector implements EventSubscriber<StatusChangedEv
         for (String file : status.getChanged()) {
           modifiedFiles.put(file, connection.getEditedRegions(file));
         }
+        for (String file : status.getModified()) {
+          modifiedFiles.put(file, connection.getEditedRegions(file));
+        }
 
         StatusChangedEventDto statusChangeEventDto =
             newDto(StatusChangedEventDto.class)
@@ -177,7 +181,9 @@ public class GitStatusChangedDetector implements EventSubscriber<StatusChangedEv
                 .withModifiedFiles(modifiedFiles);
 
         transmit(statusChangeEventDto, id);
-      } catch (GitCommitInProgressException | GitInvalidRepositoryException e) {
+      } catch (GitCommitInProgressException
+          | GitCheckoutInProgressException
+          | GitInvalidRepositoryException e) {
         // Silent ignore
       } catch (ServerException | NotFoundException e) {
         LOG.error(e.getMessage());

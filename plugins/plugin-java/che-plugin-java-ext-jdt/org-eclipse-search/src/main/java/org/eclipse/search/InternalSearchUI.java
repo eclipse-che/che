@@ -23,7 +23,6 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.search.ui.IQueryListener;
 import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.ISearchResultViewPart;
 
 public class InternalSearchUI {
 
@@ -85,7 +84,7 @@ public class InternalSearchUI {
     }
 
     public boolean belongsTo(Object family) {
-      return family == org.eclipse.search2.internal.ui.InternalSearchUI.FAMILY_SEARCH;
+      return family == new Object();
     }
   }
 
@@ -134,7 +133,7 @@ public class InternalSearchUI {
   //		return null;
   //	}
 
-  public boolean runSearchInBackground(ISearchQuery query, ISearchResultViewPart view) {
+  public boolean runSearchInBackground(ISearchQuery query, Object view) {
     if (isQueryRunning(query)) return false;
 
     //		// prepare view
@@ -169,7 +168,7 @@ public class InternalSearchUI {
   }
 
   public IStatus runSearchInForeground(
-      IRunnableContext context, final ISearchQuery query, ISearchResultViewPart view) {
+      IRunnableContext context, final ISearchQuery query, Object view) {
     if (isQueryRunning(query)) {
       return Status.CANCEL_STATUS;
     }

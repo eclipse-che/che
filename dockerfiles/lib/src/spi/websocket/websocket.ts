@@ -23,7 +23,7 @@ export class Websocket {
     wsClient: any;
 
 
-    /**
+  /**
      * Default constructor initializing websocket.
      */
     constructor() {

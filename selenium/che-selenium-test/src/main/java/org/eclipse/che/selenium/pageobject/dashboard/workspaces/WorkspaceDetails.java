@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.By;
@@ -60,13 +61,16 @@ public class WorkspaceDetails {
     String STOP_WORKSPACE_BTN = "stop-workspace-button";
     String OPEN_IN_IDE_WS_BTN = "open-in-ide-button";
     String TAB_NAMES_IN_WS = "//md-pagination-wrapper//span[text()='%s']";
-    String SAVE_CHANGED_BUTTON = "//che-button-save-flat//span[text()='Save']";
-    String CANCEL_CHANGES_BUTTON = "//che-button-cancel-flat//span[text()='Cancel']";
+    String SAVE_CHANGED_BUTTON = "//button[@name='save-button']";
+    String APPLY_CHANGES_BUTTON = "//che-button-save-flat[@class='apply-button']";
+    String CANCEL_CHANGES_BUTTON = "//button[@name='cancel-button']";
     String CANCEL_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Cancel']";
     String CLOSE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Close']";
     String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
     String UPDATE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Update']";
     String ADD_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Add']";
+    String TOOLBAR_TITLE_NAME =
+        "//div[contains(@class,'che-toolbar')]//span[contains(text(),'%s')]";
   }
 
   public enum StateWorkspace {
@@ -109,6 +113,9 @@ public class WorkspaceDetails {
   @FindBy(xpath = Locators.SAVE_CHANGED_BUTTON)
   WebElement saveBtn;
 
+  @FindBy(xpath = Locators.APPLY_CHANGES_BUTTON)
+  WebElement applyButton;
+
   @FindBy(xpath = Locators.CANCEL_CHANGES_BUTTON)
   WebElement cancelBtn;
 
@@ -124,7 +131,12 @@ public class WorkspaceDetails {
    * @param stateWorkspace expected state of workspace
    */
   public void checkStateOfWorkspace(StateWorkspace stateWorkspace) {
-    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+        .until(textToBePresentInElement(workspaceState, stateWorkspace.getStatus()));
+  }
+
+  public void checkStateOfWorkspace(StateWorkspace stateWorkspace, int timeout) {
+    new WebDriverWait(seleniumWebDriver, timeout)
         .until(textToBePresentInElement(workspaceState, stateWorkspace.getStatus()));
   }
 
@@ -176,8 +188,16 @@ public class WorkspaceDetails {
         .click();
   }
 
-  public void clickOnCancelChangesBtn() {
+  public void clickOnApplyChangesBtn() {
     loader.waitOnClosed();
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(applyButton))
+        .click();
+  }
+
+  public void clickOnCancelChangesBtn() {
+    // this timeout is needed for the Cancel to appears after renaming of a workspace
+    WaitUtils.sleepQuietly(3);
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOf(cancelBtn))
         .click();
@@ -212,5 +232,16 @@ public class WorkspaceDetails {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(Locators.ADD_DIALOG_BUTTON)))
         .click();
+  }
+
+  /**
+   * Wait toolbar name is present on dashboard
+   *
+   * @param titleName name of user
+   */
+  public void waitToolbarTitleName(String titleName) {
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
+        .until(
+            visibilityOfElementLocated(By.xpath(format(Locators.TOOLBAR_TITLE_NAME, titleName))));
   }
 }

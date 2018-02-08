@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,8 +42,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import org.eclipse.che.agent.exec.shared.dto.GetProcessLogsResponseDto;
+import org.eclipse.che.agent.exec.shared.dto.GetProcessesResponseDto;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
@@ -62,8 +65,6 @@ import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.command.CommandsLoadedEvent;
 import org.eclipse.che.ide.api.command.exec.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.command.exec.ProcessFinishedEvent;
-import org.eclipse.che.ide.api.command.exec.dto.GetProcessLogsResponseDto;
-import org.eclipse.che.ide.api.command.exec.dto.GetProcessesResponseDto;
 import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
@@ -93,6 +94,7 @@ import org.eclipse.che.ide.console.CommandOutputConsolePresenter;
 import org.eclipse.che.ide.console.CompositeOutputConsole;
 import org.eclipse.che.ide.console.DefaultOutputConsole;
 import org.eclipse.che.ide.machine.MachineResources;
+import org.eclipse.che.ide.processes.DisplayMachineOutputEvent;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
 import org.eclipse.che.ide.processes.ProcessTreeNode.ProcessNodeType;
 import org.eclipse.che.ide.processes.ProcessTreeNodeSelectedEvent;
@@ -233,10 +235,32 @@ public class ProcessesPanelPresenter extends BasePresenter
     eventBus.addHandler(
         ActivateProcessOutputEvent.TYPE, event -> setActiveProcessOutput(event.getPid()));
     eventBus.addHandler(BasicIDEInitializedEvent.TYPE, this);
+    eventBus.addHandler(DisplayMachineOutputEvent.TYPE, this::displayMachineOutput);
 
     Scheduler.get().scheduleDeferred(() -> workspaceLoadingTrackerProvider.get().startTracking());
 
     Scheduler.get().scheduleDeferred(this::updateMachineList);
+  }
+
+  protected void displayMachineOutput(DisplayMachineOutputEvent event) {
+    String machineName = event.getMachineName();
+    OutputConsole outputConsole = consoles.get(machineName);
+
+    if (outputConsole == null) {
+      return;
+    }
+
+    outputConsole.go(
+        widget -> {
+          String title = outputConsole.getTitle();
+          SVGResource icon = outputConsole.getTitleIcon();
+          view.addWidget(machineName, title, icon, widget, true);
+          ProcessTreeNode node = view.getNodeById(machineName);
+          view.selectNode(node);
+          notifyTreeNodeSelected(node);
+        });
+
+    outputConsole.addActionDelegate(this);
   }
 
   /** Updates list of the machines from application context. */
@@ -262,10 +286,11 @@ public class ProcessesPanelPresenter extends BasePresenter
       provideMachineNode(machine.getName(), true, false);
     }
 
-    ProcessTreeNode machineToSelect = machineNodes.entrySet().iterator().next().getValue();
-
-    view.selectNode(machineToSelect);
-    notifyTreeNodeSelected(machineToSelect);
+    if (WorkspaceStatus.RUNNING == appContext.getWorkspace().getStatus()) {
+      ProcessTreeNode machineToSelect = machineNodes.entrySet().iterator().next().getValue();
+      view.selectNode(machineToSelect);
+      notifyTreeNodeSelected(machineToSelect);
+    }
   }
 
   /** determines whether process tree is visible. */
@@ -490,7 +515,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     terminals.put(terminalId, newTerminal);
     view.addProcessNode(terminalNode);
     terminalWidget.asWidget().ensureDebugId(terminalName);
-    view.addWidget(terminalId, terminalName, terminalNode.getTitleIcon(), terminalWidget, false);
+    view.addWidget(terminalId, terminalName, terminalNode.getTitleIcon(), terminalWidget, true);
     refreshStopButtonState(terminalId);
 
     workspaceAgentProvider.get().setActivePart(this);
@@ -526,8 +551,8 @@ public class ProcessesPanelPresenter extends BasePresenter
     final String sshPort;
     if (sshServiceAddress != null) {
       String[] parts = sshServiceAddress.split(":");
-      machineHost = parts[0];
-      sshPort = (parts.length == 2) ? parts[1] : SSH_PORT;
+      machineHost = parts[1].substring(2);
+      sshPort = (parts.length == 3) ? parts[2] : SSH_PORT;
     } else {
       sshPort = SSH_PORT;
       machineHost = "";
@@ -702,7 +727,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     commandId = commandNode.getId();
     addChildToMachineNode(commandNode, machineTreeNode, activate);
 
-    addOutputConsole(commandId, commandNode, outputConsole, false, activate);
+    addOutputConsole(commandId, commandNode, outputConsole, true, activate);
 
     refreshStopButtonState(commandId);
     workspaceAgentProvider.get().setActivePart(this);
@@ -727,7 +752,7 @@ public class ProcessesPanelPresenter extends BasePresenter
       final String id,
       final ProcessTreeNode processNode,
       final OutputConsole outputConsole,
-      final boolean machineConsole,
+      final boolean removable,
       final boolean activate) {
     consoles.put(id, outputConsole);
     consoleCommands.put(outputConsole, id);
@@ -738,7 +763,7 @@ public class ProcessesPanelPresenter extends BasePresenter
           public void setWidget(final IsWidget widget) {
             view.addProcessNode(processNode);
             view.addWidget(
-                id, outputConsole.getTitle(), outputConsole.getTitleIcon(), widget, machineConsole);
+                id, outputConsole.getTitle(), outputConsole.getTitleIcon(), widget, removable);
             if (!MACHINE_NODE.equals(processNode.getType())) {
               ProcessTreeNode node = view.getNodeById(id);
               if (activate) {
@@ -851,7 +876,6 @@ public class ProcessesPanelPresenter extends BasePresenter
     }
 
     removeChildFromMachineNode(node, parentNode);
-    view.selectNode(neighborNode);
     notifyTreeNodeSelected(neighborNode);
   }
 
@@ -932,12 +956,32 @@ public class ProcessesPanelPresenter extends BasePresenter
       return false;
     }
 
-    Server terminalServer = machine.getServers().get(serverName);
-    if (terminalServer == null) {
+    Server server = machine.getServers().get(serverName);
+    if (server == null) {
       return false;
     }
 
-    return terminalServer.getStatus() == ServerStatus.RUNNING;
+    return server.getStatus() == ServerStatus.RUNNING;
+  }
+
+  private boolean isSshServerIsRunning(String machineName) {
+    Workspace workspace = appContext.getWorkspace();
+    Runtime runtime = workspace.getRuntime();
+    if (runtime == null) {
+      return false;
+    }
+
+    Machine machine = runtime.getMachines().get(machineName);
+    if (machine == null) {
+      return false;
+    }
+
+    Server server = machine.getServers().get(SERVER_SSH_REFERENCE);
+    if (server == null) {
+      return false;
+    }
+
+    return workspace.getStatus() == WorkspaceStatus.RUNNING;
   }
 
   /**
@@ -981,9 +1025,7 @@ public class ProcessesPanelPresenter extends BasePresenter
 
     machineNode.setTerminalServerRunning(isServerRunning(machineName, SERVER_TERMINAL_REFERENCE));
 
-    // rely on "wsagent" server's status since "ssh" server's status is always UNKNOWN
-    String wsAgentServerRef = wsAgentServerUtil.getWsAgentHttpServerReference();
-    machineNode.setSshServerRunning(isServerRunning(machineName, wsAgentServerRef));
+    machineNode.setSshServerRunning(isSshServerIsRunning(machineName));
 
     for (ProcessTreeNode child : children) {
       child.setParent(machineNode);
@@ -1033,15 +1075,19 @@ public class ProcessesPanelPresenter extends BasePresenter
   }
 
   @Override
-  public void onWorkspaceRunning(WorkspaceRunningEvent event) {}
+  public void onWorkspaceRunning(WorkspaceRunningEvent event) {
+    List<MachineImpl> machines = getMachines();
+    for (MachineImpl machine : machines) {
+      provideMachineNode(machine.getName(), true, false);
+    }
+  }
 
   @Override
   public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
     try {
       for (ProcessTreeNode node : rootNode.getChildren()) {
         if (MACHINE_NODE == node.getType()) {
-          ArrayList<ProcessTreeNode> children = new ArrayList<>();
-          children.addAll(node.getChildren());
+          ArrayList<ProcessTreeNode> children = new ArrayList<>(node.getChildren());
 
           for (ProcessTreeNode child : children) {
             if (COMMAND_NODE == child.getType()) {
@@ -1054,6 +1100,9 @@ public class ProcessesPanelPresenter extends BasePresenter
             view.hideProcessOutput(child.getId());
             view.removeProcessNode(child);
           }
+
+          node.setTerminalServerRunning(false);
+          node.setSshServerRunning(false);
         }
       }
 
@@ -1062,7 +1111,6 @@ public class ProcessesPanelPresenter extends BasePresenter
     }
 
     view.setProcessesData(rootNode);
-    selectDevMachine();
   }
 
   @Override
@@ -1147,7 +1195,7 @@ public class ProcessesPanelPresenter extends BasePresenter
                       getAndPrintProcessLogs(console, pid);
                       subscribeToProcess(console, pid);
 
-                      addCommandOutput(machineName, console, false);
+                      addCommandOutput(machineName, console, true);
                     } else {
                       final CommandImpl commandByName = commandOptional.get();
                       macroProcessorProvider
@@ -1171,7 +1219,7 @@ public class ProcessesPanelPresenter extends BasePresenter
                                   getAndPrintProcessLogs(console, pid);
                                   subscribeToProcess(console, pid);
 
-                                  addCommandOutput(machineName, console, false);
+                                  addCommandOutput(machineName, console, true);
                                 }
                               });
                     }

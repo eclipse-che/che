@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -231,7 +231,7 @@ export class ProjectDetailsController {
        this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspace.namespace + ':' + this.workspace.config.name).finally(() => {
          this.$location.path('/workspace/' + this.workspace.namespace + '/' + this.workspace.config.name).search({tab: 'Projects'});
        });
-      }, (error) => {
+      }, (error: any) => {
         this.$log.log('error', error);
       });
     });
@@ -243,7 +243,9 @@ export class ProjectDetailsController {
    */
   getWorkspaceProjects(): Array<che.IProject> {
     let projects = this.cheAPI.getWorkspace().getWorkspaceProjects()[this.workspace.id];
-    let _projects = this.lodash.filter(projects, (project) => { return project.name !== this.projectName});
+    let _projects = this.lodash.filter(projects, (project: che.IProject) => {
+      return project.name !== this.projectName;
+    });
     return _projects;
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  * @author Vlad Zhukovskiy
  */
 public interface TreeStyles extends ClientBundle {
-  interface CSS extends CssResource {
+  interface TreeStylesCSS extends CssResource {
     String noFocusOutline();
 
     String rootContainer();
@@ -49,11 +49,15 @@ public interface TreeStyles extends ClientBundle {
 
     String tree();
 
+    String contentTree();
+
     String loading();
+
+    String searchMatch();
   }
 
   @Source("TreeStyles.css")
-  CSS styles();
+  TreeStylesCSS treeStylesCss();
 
   @Source("iconCollapsed.svg")
   SVGResource iconCollapsed();

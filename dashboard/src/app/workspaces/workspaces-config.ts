@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,6 +69,7 @@ import {StackSelectorSearchFilter} from './create-workspace/stack-selector/stack
 import {StackSelectorTagsFilter} from './create-workspace/stack-selector/stack-selector-tags.filter';
 import {CreateWorkspaceController} from './create-workspace/create-workspace.controller';
 import {CreateWorkspaceSvc} from './create-workspace/create-workspace.service';
+import {AfterCreationDialogController} from './create-workspace/after-creation-dialog/after-creation-dialog.controller';
 import {ShareWorkspaceController} from './share-workspace/share-workspace.controller';
 import {ShareWorkspace} from './share-workspace/share-workspace.directive';
 import {AddDeveloperController} from './share-workspace/add-developers/add-developers.controller';
@@ -77,7 +78,9 @@ import {UserItemController} from './share-workspace/user-item/user-item.controll
 import {UserItem} from './share-workspace/user-item/user-item.directive';
 import {WorkspaceConfigService} from './workspace-config.service';
 import {WorkspaceDetailsConfig} from './workspace-details/workspace-details-config';
-
+import {WorkspaceWarnings} from './workspace-details/warnings/workspace-warnings.directive';
+import {WorkspaceWarningsController} from './workspace-details/warnings/workspace-warnings.controller';
+import {WorkspacesService} from './workspaces.service';
 
 /**
  * @ngdoc controller
@@ -108,6 +111,8 @@ export class WorkspacesConfig {
     register.directive('cheWorkspaceRamAllocationSlider', CheWorkspaceRamAllocationSlider);
     register.directive('workspaceStatus', WorkspaceStatus);
     register.directive('workspaceStatusIndicator', WorkspaceStatusIndicator);
+    register.directive('workspaceWarnings', WorkspaceWarnings);
+    register.controller('WorkspaceWarningsController', WorkspaceWarningsController);
     register.controller('StackSelectorController', StackSelectorController);
     register.service('stackSelectorSvc', StackSelectorSvc);
     register.directive('stackSelector', StackSelector);
@@ -152,6 +157,7 @@ export class WorkspacesConfig {
     register.directive('cheStackLibraryFilter', CheStackLibraryFilter);
     register.controller('CreateWorkspaceController', CreateWorkspaceController);
     register.service('createWorkspaceSvc', CreateWorkspaceSvc);
+    register.controller('AfterCreationDialogController', AfterCreationDialogController);
     register.controller('ShareWorkspaceController', ShareWorkspaceController);
     register.directive('shareWorkspace', ShareWorkspace);
     register.controller('AddDeveloperController', AddDeveloperController);
@@ -159,6 +165,8 @@ export class WorkspacesConfig {
     register.controller('UserItemController', UserItemController);
     register.directive('userItem', UserItem);
     register.service('workspaceConfigService', WorkspaceConfigService);
+    register.service('workspacesService', WorkspacesService);
+
     // config routes
     register.app.config(($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/workspaces', {

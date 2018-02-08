@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -180,7 +180,21 @@ export class ListOrganizationsController {
       this.organizationAvailableResources = new Map();
       const promises = [];
       this.isLoading = true;
-      this.organizations.forEach((organization: che.IOrganization) => {
+
+      let organizations = [];
+      if (this.userServices.hasInstallationManagerService === false) {
+        // show all organizations for a regular user
+        organizations = angular.copy(this.organizations);
+      } else {
+        // show only root organizations for a system admin
+        organizations = this.organizations.filter((organization: che.IOrganization) => {
+          if (this.parentId  || !organization.parent) {
+            return true;
+          }
+        });
+      }
+
+      organizations.forEach((organization: che.IOrganization) => {
         const promiseMembers = this.chePermissions.fetchOrganizationPermissions(organization.id).then(() => {
           this.organizationMembers.set(organization.id, this.chePermissions.getOrganizationPermissions(organization.id).length);
         });
@@ -197,10 +211,10 @@ export class ListOrganizationsController {
       });
       this.$q.all(promises).finally(() => {
         this.isLoading = false;
-        this.cheListHelper.setList(this.organizations, 'id');
+        this.cheListHelper.setList(organizations, 'id');
       });
     } else {
-      this.cheListHelper.setList(this.organizations, 'id');
+      this.cheListHelper.setList([], 'id');
     }
   }
 

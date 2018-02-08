@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -112,12 +112,8 @@ public class FileStructure {
     loader.waitOnClosed();
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
-            new ExpectedCondition<Boolean>() {
-              @Override
-              public Boolean apply(WebDriver driver) {
-                return getTextFromFileStructurePanel().contains(expText);
-              }
-            });
+            (ExpectedCondition<Boolean>)
+                driver -> getTextFromFileStructurePanel().contains(expText));
   }
 
   /**
@@ -165,12 +161,12 @@ public class FileStructure {
    * @param item is the name of the item
    */
   public void selectItemInFileStructureByDoubleClick(String item) {
-    WebElement fileStructureItem =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(
-                visibilityOfElementLocated(By.xpath(format(Locators.FILE_STRUCTURE_ITEM, item))));
-    fileStructureItem.click();
-    actionsFactory.createAction(seleniumWebDriver).doubleClick(fileStructureItem).perform();
+    selectItemInFileStructure(item);
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .moveToElement(getFileStructureItem(item))
+        .doubleClick()
+        .perform();
   }
 
   /**
@@ -189,9 +185,16 @@ public class FileStructure {
    * @param item is the name of the item
    */
   public void selectItemInFileStructure(String item) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(format(Locators.FILE_STRUCTURE_ITEM, item))))
-        .click();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .moveToElement(getFileStructureItem(item))
+        .click()
+        .perform();
+  }
+
+  private WebElement getFileStructureItem(String item) {
+    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath(format(Locators.FILE_STRUCTURE_ITEM, item))));
   }
 
   /**
@@ -223,5 +226,10 @@ public class FileStructure {
         break;
       }
     }
+  }
+
+  public void type(String text) {
+    WaitUtils.sleepQuietly(1);
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(text).perform();
   }
 }

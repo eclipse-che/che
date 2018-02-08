@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -114,7 +114,7 @@ export class WorkspaceSelectStackController {
     let type = this.workspaceImportedRecipe.type || 'compose';
     if (type === 'dockerimage') {
       type = 'dockerfile';
-      this.recipeScript = 'FROM ' + this.workspaceImportedRecipe.location;
+      this.recipeScript = 'FROM ' + this.workspaceImportedRecipe.content;
       this.tabName = 'stack-authoring';
     } else  if (angular.isDefined(this.workspaceImportedRecipe.location)) {
       this.tabName = 'stack-import';

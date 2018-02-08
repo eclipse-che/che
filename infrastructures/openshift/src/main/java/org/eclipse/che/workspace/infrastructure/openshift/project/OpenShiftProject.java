@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,14 +10,18 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.Service;
+import com.google.common.annotations.VisibleForTesting;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 
 /**
@@ -25,33 +29,34 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory
  *
  * @author Sergii Leshchenko
  */
-public class OpenShiftProject {
+public class OpenShiftProject extends KubernetesNamespace {
 
-  private final OpenShiftPods pods;
-  private final OpenShiftServices services;
   private final OpenShiftRoutes routes;
-  private final OpenShiftPersistentVolumeClaims pvcs;
+
+  @VisibleForTesting
+  OpenShiftProject(
+      String workspaceId,
+      KubernetesPods pods,
+      KubernetesServices services,
+      OpenShiftRoutes routes,
+      KubernetesPersistentVolumeClaims pvcs,
+      KubernetesIngresses ingresses) {
+    super(workspaceId, pods, services, pvcs, ingresses);
+    this.routes = routes;
+  }
 
   public OpenShiftProject(OpenShiftClientFactory clientFactory, String name, String workspaceId)
       throws InfrastructureException {
-    this.pods = new OpenShiftPods(name, workspaceId, clientFactory);
-    this.services = new OpenShiftServices(name, workspaceId, clientFactory);
+    super(clientFactory, name, workspaceId);
     this.routes = new OpenShiftRoutes(name, workspaceId, clientFactory);
-    this.pvcs = new OpenShiftPersistentVolumeClaims(name, clientFactory);
-    final OpenShiftClient client = clientFactory.create();
-    if (get(name, client) == null) {
-      create(name, client);
+  }
+
+  @Override
+  protected void doPrepare(String name, KubernetesClient client) throws InfrastructureException {
+    OpenShiftClient osClient = client.adapt(OpenShiftClient.class);
+    if (get(name, osClient) == null) {
+      create(name, osClient);
     }
-  }
-
-  /** Returns object for managing {@link Pod} instances inside project. */
-  public OpenShiftPods pods() {
-    return pods;
-  }
-
-  /** Returns object for managing {@link Service} instances inside project. */
-  public OpenShiftServices services() {
-    return services;
   }
 
   /** Returns object for managing {@link Route} instances inside project. */
@@ -59,16 +64,9 @@ public class OpenShiftProject {
     return routes;
   }
 
-  /** Returns object for managing {@link PersistentVolumeClaim} instances inside project. */
-  public OpenShiftPersistentVolumeClaims persistentVolumeClaims() {
-    return pvcs;
-  }
-
-  /** Removes all object except persistent volume claim inside project. */
+  /** Removes all object except persistent volume claims inside project. */
   public void cleanUp() throws InfrastructureException {
-    pods.delete();
-    services.delete();
-    routes.delete();
+    doRemove(routes::delete, services()::delete, pods()::delete);
   }
 
   private void create(String projectName, OpenShiftClient client) throws InfrastructureException {

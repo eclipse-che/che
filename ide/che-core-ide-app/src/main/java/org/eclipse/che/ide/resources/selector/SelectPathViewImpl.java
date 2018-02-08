@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -153,6 +153,8 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
             hide();
           }
         });
+    submitBtn.addStyleName(resources.windowCss().primaryButton());
+    submitBtn.addStyleName(resources.windowCss().buttonAlignRight());
     addButtonToFooter(submitBtn);
 
     cancelButton = new Button("Cancel");
@@ -164,12 +166,12 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
             hide();
           }
         });
+    cancelButton.addStyleName(resources.windowCss().buttonAlignRight());
     addButtonToFooter(cancelButton);
 
     setHideOnEscapeEnabled(false);
     setTitle("Select Path");
     getWidget().setStyleName(styles.css().window());
-    hideCrossButton();
   }
 
   @Override

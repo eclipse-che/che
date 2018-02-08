@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ exports.listStacksTheeEntries = function () {
                     'installers': ['org.eclipse.che.exec', 'org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh'],
                     'attributes': {'memoryLimitBytes': '2147483648'}
                   }
-                }, 'recipe': {'location': 'codenvy/node', 'type': 'dockerimage'}
+                }, 'recipe': {'content': 'codenvy/node', 'type': 'dockerimage'}
               }
             }, 'commands': [], 'projects': [], 'defaultEnv': 'default', 'name': 'default', 'links': []
           };

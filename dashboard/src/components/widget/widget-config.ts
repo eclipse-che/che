@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,8 +19,7 @@ import {CheButtonNotice} from './button/che-button-notice.directive';
 import {CheButtonWarning} from './button/che-button-warning.directive';
 import {CheButtonSaveFlat} from './button/che-button-save-flat.directive';
 import {CheButtonCancelFlat} from './button/che-button-cancel-flat.directive';
-import {CheButtonDropdownCtrl} from './button-dropdown/che-button-dropdown.controller';
-import {CheButtonDropdown} from './button-dropdown/che-button-dropdown.directive';
+import {CheButtonDropdownDirective} from './button-dropdown/che-button-dropdown.directive';
 import {CheClipboard} from './copy-clipboard/che-clipboard.directive';
 import {CheCompile} from './compile/che-compile.directive';
 import {CheDescription} from './description/che-description.directive';
@@ -89,117 +88,119 @@ import {CheEditor} from './editor/che-editor.directive';
 import {CheEditorController} from './editor/che-editor.controller';
 import {PagingButtons} from './paging-button/paging-button.directive';
 import {CheRowToolbar} from './toolbar/che-row-toolbar.directive';
+import {CheEditModeOverlay} from './edit-mode-overlay/che-edit-mode-overlay.directive';
 
 export class WidgetConfig {
 
   constructor(register: che.IRegisterService) {
 
     // accordion
-    register.directive('cheAccordion', CheAccordion)
+    register.directive('cheAccordion', CheAccordion);
 
     // button
-      .directive('cheButtonPrimary', CheButtonPrimary)
-      .directive('cheButtonPrimaryFlat', CheButtonPrimaryFlat)
-      .directive('cheButtonDanger', CheButtonDanger)
-      .directive('cheButtonDefault', CheButtonDefault)
-      .directive('cheButtonNotice', CheButtonNotice)
-      .directive('cheButtonWarning', CheButtonWarning)
-      .directive('cheButtonSaveFlat', CheButtonSaveFlat)
-      .directive('cheButtonCancelFlat', CheButtonCancelFlat)
-      // paging buttons
-      .directive('chePagingButtons', PagingButtons)
-      // dropdown
-      .controller('CheButtonDropdownCtrl', CheButtonDropdownCtrl)
-      .directive('cheButtonDropdown', CheButtonDropdown)
-      // clipboard
-      .directive('cheClipboard', CheClipboard)
-      .directive('cheCompile', CheCompile)
-      .directive('cheDescription', CheDescription)
-      // dropzone
-      .controller('CheDropZoneCtrl', CheDropZoneCtrl)
-      .directive('cheDropzone', CheDropZone)
-      .directive('cheEmptyState', CheEmptyState)
-      .directive('cheFilterSelector', CheFilterSelector)
-      .controller('CheFilterSelectorController', CheFilterSelectorController)
-      .directive('cheFrame', CheFrame)
-      .directive('cheFooter', CheFooter)
-      .controller('CheFooterController', CheFooterController)
-      .directive('cheHtmlSource', CheHtmlSource)
-      .directive('demoSourceRender', DemoSourceRender)
-      .directive('cheInput', CheInput)
-      .directive('cheInputBox', CheInputBox)
-      .directive('cheTextarea', CheTextarea)
-      .directive('cheNumberSpinner', CheNumberSpinner)
-      .directive('cheLabel', CheLabel)
-      .directive('cheLabelContainer', CheLabelContainer)
+    register.directive('cheButtonPrimary', CheButtonPrimary);
+    register.directive('cheButtonPrimaryFlat', CheButtonPrimaryFlat);
+    register.directive('cheButtonDanger', CheButtonDanger);
+    register.directive('cheButtonDefault', CheButtonDefault);
+    register.directive('cheButtonNotice', CheButtonNotice);
+    register.directive('cheButtonWarning', CheButtonWarning);
+    register.directive('cheButtonSaveFlat', CheButtonSaveFlat);
+    register.directive('cheButtonCancelFlat', CheButtonCancelFlat);
+    // paging buttons
+    register.directive('chePagingButtons', PagingButtons);
+    // dropdown
+    register.directive('cheButtonDropdown', CheButtonDropdownDirective);
+    // clipboard
+    register.directive('cheClipboard', CheClipboard);
+    register.directive('cheCompile', CheCompile);
+    register.directive('cheDescription', CheDescription);
+    // dropzone
+    register.controller('CheDropZoneCtrl', CheDropZoneCtrl);
+    register.directive('cheDropzone', CheDropZone);
+    register.directive('cheEmptyState', CheEmptyState);
+    register.directive('cheFilterSelector', CheFilterSelector);
+    register.controller('CheFilterSelectorController', CheFilterSelectorController);
+    register.directive('cheFrame', CheFrame);
+    register.directive('cheFooter', CheFooter);
+    register.controller('CheFooterController', CheFooterController);
+    register.directive('cheHtmlSource', CheHtmlSource);
+    register.directive('demoSourceRender', DemoSourceRender);
+    register.directive('cheInput', CheInput);
+    register.directive('cheInputBox', CheInputBox);
+    register.directive('cheTextarea', CheTextarea);
+    register.directive('cheNumberSpinner', CheNumberSpinner);
+    register.directive('cheLabel', CheLabel);
+    register.directive('cheLabelContainer', CheLabelContainer);
 
-      .controller('CheLearnMoreCtrl', CheLearnMoreCtrl)
-      .directive('cheLearnMore', CheLearnMore)
-      .directive('cheLearnMoreItem', CheLearnMoreItem)
-      .directive('cheLearnMoreTemplate', CheLearnMoreTemplate)
+    register.controller('CheLearnMoreCtrl', CheLearnMoreCtrl);
+    register.directive('cheLearnMore', CheLearnMore);
+    register.directive('cheLearnMoreItem', CheLearnMoreItem);
+    register.directive('cheLearnMoreTemplate', CheLearnMoreTemplate);
 
-      .directive('cheLink', CheLink)
+    register.directive('cheLink', CheLink);
 
-      .directive('cheListItemChecked', CheListItemChecked)
-      .directive('cheListTitle', CheListTitle)
-      .directive('cheList', CheList)
-      .directive('cheListItem', CheListItem)
-      .directive('cheListHeader', CheListHeader)
-      .directive('cheListHeaderColumn', CheListHeaderColumn)
-      .factory('cheListHelperFactory', CheListHelperFactory)
+    register.directive('cheListItemChecked', CheListItemChecked);
+    register.directive('cheListTitle', CheListTitle);
+    register.directive('cheList', CheList);
+    register.directive('cheListItem', CheListItem);
+    register.directive('cheListHeader', CheListHeader);
+    register.directive('cheListHeaderColumn', CheListHeaderColumn);
+    register.factory('cheListHelperFactory', CheListHelperFactory);
 
-      .directive('cheListHeaderAdditionalParts', CheListHeaderAdditionalParts)
-      .directive('cheListHeaderAddButton', CheListHeaderAddButton)
-      .directive('cheListHeaderImportButton', CheListHeaderImportButton)
-      .directive('cheListHeaderDeleteButton', CheListHeaderDeleteButton)
-      .directive('cheListHeaderSearch', CheListHeaderSearch)
-      .directive('cheListHeaderFilter', CheListHeaderFilter)
+    register.directive('cheListHeaderAdditionalParts', CheListHeaderAdditionalParts);
+    register.directive('cheListHeaderAddButton', CheListHeaderAddButton);
+    register.directive('cheListHeaderImportButton', CheListHeaderImportButton);
+    register.directive('cheListHeaderDeleteButton', CheListHeaderDeleteButton);
+    register.directive('cheListHeaderSearch', CheListHeaderSearch);
+    register.directive('cheListHeaderFilter', CheListHeaderFilter);
 
-      .directive('cheLoader', CheLoader)
-      .directive('cheLoaderCrane', CheLoaderCrane)
+    register.directive('cheLoader', CheLoader);
+    register.directive('cheLoaderCrane', CheLoaderCrane);
 
-      .controller('ChePanelCtrl', ChePanelCtrl)
-      .directive('chePanel', ChePanel)
+    register.controller('ChePanelCtrl', ChePanelCtrl);
+    register.directive('chePanel', ChePanel);
 
-      .directive('cheSearch', CheSearch)
-      .directive('searchInput', SearchInput)
+    register.directive('cheSearch', CheSearch);
+    register.directive('searchInput', SearchInput);
 
-      .directive('cheSelect', CheSelect)
+    register.directive('cheSelect', CheSelect);
 
-      .controller('CheSelecterCtrl', CheSelecterCtrl)
-      .directive('cheSelecter', CheSelecter)
+    register.controller('CheSelecterCtrl', CheSelecterCtrl);
+    register.directive('cheSelecter', CheSelecter);
 
-      .directive('cheSlider', CheSlider)
+    register.directive('cheSlider', CheSlider);
 
-      .directive('cheLogsOutput', CheLogsOutput)
+    register.directive('cheLogsOutput', CheLogsOutput);
 
-      .directive('cheTextInfo', CheTextInfo)
+    register.directive('cheTextInfo', CheTextInfo);
 
-      .controller('CheToggleController', CheToggleController)
-      .directive('cheToggleButton', CheToggleButton)
-      .directive('cheToggle', CheToggle)
-      .directive('cheToggleJoined', CheToggleJoined)
-      .directive('cheToggleJoinedButton', CheToggleJoinedButton)
-      .directive('toggleSingleButton', ToggleSingleButton)
+    register.controller('CheToggleController', CheToggleController);
+    register.directive('cheToggleButton', CheToggleButton);
+    register.directive('cheToggle', CheToggle);
+    register.directive('cheToggleJoined', CheToggleJoined);
+    register.directive('cheToggleJoinedButton', CheToggleJoinedButton);
+    register.directive('toggleSingleButton', ToggleSingleButton);
 
-      .directive('cheToolbar', CheToolbar)
-      // notifications
-      .directive('cheErrorNotification', CheErrorNotification)
-      .directive('cheInfoNotification', CheInfoNotification)
-      // wrapper for popup
-      .directive('chePopup', ChePopup)
-      .directive('cheModalPopup', CheModalPopup)
-      // show area
-      .directive('cheShowArea', CheShowArea)
-      // tags
-      .directive('cheChipsList', CheChipsList)
-      // editor
-      .controller('CheEditorController', CheEditorController)
-      .directive('cheEditor', CheEditor)
-      // row toolbar
-      .directive('cheRowToolbar', CheRowToolbar)
-      // popover
-      .directive('cheTogglePopover', CheTogglePopover)
-      .directive('toggleButtonPopover', CheToggleButtonPopover);
+    register.directive('cheToolbar', CheToolbar);
+    // notifications
+    register.directive('cheErrorNotification', CheErrorNotification);
+    register.directive('cheInfoNotification', CheInfoNotification);
+    // wrapper for popup
+    register.directive('chePopup', ChePopup);
+    register.directive('cheModalPopup', CheModalPopup);
+    // show area
+    register.directive('cheShowArea', CheShowArea);
+    // tags
+    register.directive('cheChipsList', CheChipsList);
+    // editor
+    register.controller('CheEditorController', CheEditorController);
+    register.directive('cheEditor', CheEditor);
+    // row toolbar
+    register.directive('cheRowToolbar', CheRowToolbar);
+    // popover
+    register.directive('cheTogglePopover', CheTogglePopover);
+    register.directive('toggleButtonPopover', CheToggleButtonPopover);
+    // edit overlay
+    register.directive('cheEditModeOverlay', CheEditModeOverlay);
   }
 }

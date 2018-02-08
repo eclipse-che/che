@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.valueOf;
+import static org.openqa.selenium.Keys.PAGE_DOWN;
+import static org.openqa.selenium.Keys.PAGE_UP;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -21,6 +23,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -54,12 +57,12 @@ public class WorkingWithTerminalTest {
   private static final String WAR_NAME = "qa-spring-sample-1.0-SNAPSHOT.war";
 
   private static final String BASH_SCRIPT =
-      "for i in `seq 1 10`; do sleep 5; echo \"test=$i\"; done";
+      "for i in `seq 1 10`; do sleep 3; echo \"test=$i\"; done";
 
   private static final String MC_HELP_DIALOG =
       "This is the main help screen for GNU Midnight Commander.";
   private static final String MC_USER_MENU_DIALOG = "User menu";
-  private static final String[] VIEW_BIN_FOLDER = {"bash", "bunzip2", "bzcat"};
+  private static final String[] VIEW_BIN_FOLDER = {"bash", "chmod", "date"};
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -92,7 +95,9 @@ public class WorkingWithTerminalTest {
         terminal.waitTerminalIsNotPresent(1);
       }
 
-      consoles.openNewTerminalIntoProcesses();
+      consoles.clickOnPlusMenuButton();
+      consoles.clickOnTerminalItemInContextMenu();
+
       terminal.selectTerminalTab();
       terminal.waitTerminalConsole();
       terminal.waitTerminalIsNotEmpty();
@@ -164,13 +169,21 @@ public class WorkingWithTerminalTest {
 
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7592", ex);
+      fail("Known issue https://github.com/eclipse/che-lib/issues/57", ex);
     }
 
+    // check scrolling by the END and HOME buttons
     terminal.moveDownListTerminal(".dockerenv");
     terminal.waitExpectedTextIntoTerminal(".dockerenv");
-    terminal.movePageUpListTerminal("projects");
     terminal.moveUpListTerminal("bin");
+    terminal.waitExpectedTextIntoTerminal("bin");
+
+    // check scrolling by the Page Up and the Page Down buttons
+    terminal.typeIntoTerminal(PAGE_DOWN.toString());
+    terminal.typeIntoTerminal(PAGE_DOWN.toString());
+    terminal.waitExpectedTextIntoTerminal(".dockerenv");
+    terminal.typeIntoTerminal(PAGE_UP.toString());
+    terminal.typeIntoTerminal(PAGE_UP.toString());
     terminal.waitExpectedTextIntoTerminal("bin");
   }
 
@@ -185,7 +198,7 @@ public class WorkingWithTerminalTest {
       }
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7592", ex);
+      fail("Known issue https://github.com/eclipse/che-lib/issues/57", ex);
     }
 
     terminal.waitExpectedTextNotPresentTerminal(".dockerenv");
@@ -226,7 +239,7 @@ public class WorkingWithTerminalTest {
       }
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7592", ex);
+      fail("Known issue https://github.com/eclipse/che-lib/issues/57", ex);
     }
 
     terminal.typeIntoTerminal(Keys.F10.toString());
@@ -258,9 +271,15 @@ public class WorkingWithTerminalTest {
     // cancel script
     terminal.typeIntoTerminal(Keys.CONTROL + "c");
 
-    // wait 1 sec. If process was really stopped we should not get text "test=2"
-    Thread.sleep(1000);
-    terminal.waitExpectedTextNotPresentTerminal("test=2");
+    // wait 3 sec. If process was really stopped we should not get text "test=2"
+    WaitUtils.sleepQuietly(3);
+
+    try {
+      terminal.waitExpectedTextNotPresentTerminal("test=2");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8390");
+    }
   }
 
   @Test(priority = 7)
@@ -342,6 +361,7 @@ public class WorkingWithTerminalTest {
 
   @Test(priority = 12)
   public void closeTerminalByExitCommand() {
+    terminal.waitTerminalConsole();
     terminal.typeIntoTerminal("exit" + Keys.ENTER);
     terminal.waitTerminalIsNotPresent(1);
   }

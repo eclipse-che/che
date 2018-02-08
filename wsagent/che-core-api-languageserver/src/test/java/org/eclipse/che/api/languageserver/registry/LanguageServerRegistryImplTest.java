@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,8 +21,13 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.concurrent.CompletableFuture;
 import javax.inject.Provider;
+import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.rest.HttpJsonRequest;
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
@@ -57,6 +62,11 @@ public class LanguageServerRegistryImplTest {
   @Mock private ProjectManager pm;
   @Mock private CheLanguageClientFactory clientFactory;
   @Mock private CheLanguageClient languageClient;
+  @Mock private HttpJsonRequestFactory httpJsonRequestFactory;
+  @Mock private HttpJsonRequest httpJsonRequest;
+  @Mock private HttpJsonResponse httpJsonResponse;
+  @Mock private Workspace workspace;
+  @Mock private LanguageRecognizer languageRecognizer;
 
   private LanguageServerRegistryImpl registry;
   private LanguageServerDescription serverDescription;
@@ -66,6 +76,7 @@ public class LanguageServerRegistryImplTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
+
     this.serverCapabilities = new ServerCapabilities();
     serverDescription =
         new LanguageServerDescription(
@@ -76,6 +87,7 @@ public class LanguageServerRegistryImplTest {
 
     when(languageServerLauncher.isAbleToLaunch()).thenReturn(true);
     when(languageServerLauncher.getDescription()).thenReturn(serverDescription);
+    when(languageServerLauncher.isLocal()).thenReturn(true);
     when(languageDescription.getLanguageId()).thenReturn("id");
     when(languageDescription.getFileExtensions()).thenReturn(Collections.singletonList("txt"));
     when(languageDescription.getMimeType()).thenReturn("plain/text");
@@ -83,19 +95,32 @@ public class LanguageServerRegistryImplTest {
     when(languageServer.getTextDocumentService()).thenReturn(mock(TextDocumentService.class));
     when(languageServer.initialize(any(InitializeParams.class))).thenReturn(completableFuture);
 
+    when(languageRecognizer.recognizeByPath(anyString())).thenReturn(languageDescription);
+    when(languageRecognizer.recognizeById(anyString())).thenReturn(languageDescription);
+
     when(pmp.get()).thenReturn(pm);
 
     when(clientFactory.create(anyString())).thenReturn(languageClient);
 
+    when(httpJsonRequestFactory.fromUrl(any(String.class))).thenReturn(httpJsonRequest);
+    when(httpJsonRequest.useGetMethod()).thenReturn(httpJsonRequest);
+    when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
+    when(httpJsonResponse.asDto(any())).thenReturn(workspace);
+
     registry =
         spy(
             new LanguageServerRegistryImpl(
+                "",
+                "",
+                httpJsonRequestFactory,
+                new HashSet<>(),
                 Collections.singleton(languageServerLauncher),
                 Collections.singleton(languageDescription),
                 pmp,
                 initializer,
                 null,
-                clientFactory) {
+                clientFactory,
+                languageRecognizer) {
               @Override
               protected String extractProjectPath(String filePath) throws LanguageServerException {
                 return PROJECT_PATH;

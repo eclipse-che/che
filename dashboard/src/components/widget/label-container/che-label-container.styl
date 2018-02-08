@@ -3,19 +3,22 @@
   padding 25px 0
   border-bottom 1px solid $list-separator-color
 
+  .che-input-box
+    min-height 50px
+
   &:not(.che-label-container-not-last):last-child, &.che-label-container-last
     border-bottom none
 
   .che-label-container-label
+    white-space normal
     line-height 36px
-    min-width 250px
-    width 250px
+    width 200px
 
   .che-label-container-label-name
     color $label-secondary-color
     font-weight 700 !important
     letter-spacing 1.3px
-    margin-right 10px
+    margin-right 5px
 
   .che-label-container-description
     display inline-block
@@ -23,7 +26,6 @@
     width 20px
     height 20px
     line-height 20px
-    margin-left 15px
     text-align center
     color $white-color
     border-radius 3px

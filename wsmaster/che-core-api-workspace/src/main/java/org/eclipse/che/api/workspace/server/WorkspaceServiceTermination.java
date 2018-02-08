@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.api.workspace.server;
+
+import static org.eclipse.che.api.system.server.DtoConverter.asDto;
 
 import com.google.common.base.Preconditions;
 import java.util.Collections;
@@ -113,11 +115,12 @@ public class WorkspaceServiceTermination implements ServiceTermination {
     public void onEvent(WorkspaceStatusEvent event) {
       if (event.getStatus() == WorkspaceStatus.STOPPED) {
         eventService.publish(
-            new SystemServiceItemStoppedEvent(
-                getServiceName(),
-                event.getWorkspaceId(),
-                currentlyStopped.incrementAndGet(),
-                totalRunning));
+            asDto(
+                new SystemServiceItemStoppedEvent(
+                    getServiceName(),
+                    event.getWorkspaceId(),
+                    currentlyStopped.incrementAndGet(),
+                    totalRunning)));
       }
     }
   }

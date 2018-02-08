@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,8 @@ import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -45,6 +47,7 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
@@ -56,6 +59,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.token.MachineTokenException;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineDto;
@@ -222,10 +226,14 @@ public class WorkspaceService extends Service {
           Integer maxItems,
       @ApiParam("Workspace status") @QueryParam("status") String status)
       throws ServerException, BadRequestException {
-    // TODO add maxItems & skipCount to manager
     return withLinks(
         workspaceManager
-            .getWorkspaces(EnvironmentContext.getCurrent().getSubject().getUserId(), false)
+            .getWorkspaces(
+                EnvironmentContext.getCurrent().getSubject().getUserId(),
+                false,
+                maxItems,
+                skipCount)
+            .getItems()
             .stream()
             .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
             .map(DtoConverter::asDto)
@@ -250,9 +258,9 @@ public class WorkspaceService extends Service {
       @ApiParam("The namespace") @PathParam("namespace") String namespace)
       throws ServerException, BadRequestException {
     return withLinks(
-        workspaceManager
-            .getByNamespace(namespace, false)
-            .stream()
+        Pages.stream(
+                (maxItems, skipCount) ->
+                    workspaceManager.getByNamespace(namespace, false, maxItems, skipCount))
             .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
             .map(DtoConverter::asDto)
             .collect(toList()));
@@ -675,7 +683,9 @@ public class WorkspaceService extends Service {
   @ApiOperation(value = "Get workspace server configuration values")
   @ApiResponses({@ApiResponse(code = 200, message = "The response contains server settings")})
   public Map<String, String> getSettings() {
-    return new HashMap<>();
+    return ImmutableMap.of(
+        Constants.SUPPORTED_RECIPE_TYPES,
+        Joiner.on(",").join(workspaceManager.getSupportedRecipes()));
   }
 
   private static Map<String, String> parseAttrs(List<String> attributes)

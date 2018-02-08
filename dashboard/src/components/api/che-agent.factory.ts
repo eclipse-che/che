@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,12 +55,12 @@ export class CheAgent {
       // reset global list
       this.agents.length = 0;
 
-      agents.forEach((agent: che.IAgent[]) => {
+      agents.forEach((agent: che.IAgent) => {
         this.agents.push(agent);
       });
       defer.resolve(this.agents);
     }, (error: any) => {
-      if (error.status != 304) {
+      if (error.status !== 304) {
         defer.reject(error);
       } else {
         defer.resolve(this.agents);

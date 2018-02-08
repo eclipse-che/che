@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2012-2017 Red Hat, Inc.
+    Copyright (c) 2012-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -17,7 +17,33 @@
        thread-count="4">
 
     <test name="all">
-        <classes>
+        <method-selectors>
+            <method-selector>
+                <script language="beanshell">
+                    <![CDATA[
+    boolean isTestGroupsAgreedWithRequestedGroups() {
+      String testGroupsVal = System.getProperty("testGroups");
+      if (testGroupsVal == null || testGroupsVal.trim().isEmpty() || groups.isEmpty()){
+        return true;
+      }
+
+      String[] testGroups = testGroupsVal.split(",");
+      for (String group: groups.keySet()) {
+        if (!Arrays.asList(testGroups).contains(group)) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    isTestGroupsAgreedWithRequestedGroups();
+]]>
+                </script>
+            </method-selector>
+        </method-selectors>
+
+      <classes>
           <class name="org.eclipse.che.selenium.assistant.CheckFindActionFeatureInCheTest"/>
           <class name="org.eclipse.che.selenium.assistant.KeyBindingsTest"/>
           <class name="org.eclipse.che.selenium.assistant.OrganizeImportsTest"/>
@@ -25,10 +51,13 @@
           <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest"/>
           <class name="org.eclipse.che.selenium.dashboard.DeleteRunningWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.DeleteStoppingWorkspaceTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.ImportMavenProjectFromGitHubTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.ImportMavenProjectFromGitTest"/>
           <class name="org.eclipse.che.selenium.dashboard.ImportProjectFromZipTest"/>
           <class name="org.eclipse.che.selenium.dashboard.RenameWorkspaceTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.WorkspaceDetailsTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.WorkspaceDetailsSingleMachineTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.WorkspaceDetailsComposeTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.CreateWorkspaceTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.WorkspacesListTest"/>
           <class name="org.eclipse.che.selenium.debugger.ChangeVariableWithEvaluatingTest"/>
           <class name="org.eclipse.che.selenium.debugger.CheckBreakPointStateTest"/>
           <class name="org.eclipse.che.selenium.debugger.CppProjectDebuggingTest"/>
@@ -91,7 +120,6 @@
           <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest"/>
           <class name="org.eclipse.che.selenium.git.GitChangeMarkersTest"/>
           <class name="org.eclipse.che.selenium.git.GitColorsTest"/>
-          <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
           <class name="org.eclipse.che.selenium.git.InitializeAndDeleteLocalRepositoryTest"/>
           <class name="org.eclipse.che.selenium.git.SetGitCommitterTest"/>
           <class name="org.eclipse.che.selenium.gwt.CheckSimpleGwtAppTest"/>
@@ -120,6 +148,7 @@
           <class name="org.eclipse.che.selenium.miscellaneous.ImplementationBaseOperationsTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.NavigateToFileTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.ResolveDependencyAfterRecreateProjectTest"/>
+          <class name="org.eclipse.che.selenium.miscellaneous.ServerRuntimeInfoTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.TerminalTypingTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.WorkingWithSplitPanelTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.WorkingWithTerminalTest"/>
@@ -218,7 +247,7 @@
           <class name="org.eclipse.che.selenium.workspaces.WorkingWithJavaMySqlStackTest"/>
           <class name="org.eclipse.che.selenium.workspaces.WorkingWithNodeWsTest"/>
           <class name="org.eclipse.che.selenium.workspaces.WorkspaceFromOfficialUbuntuImageStartTest"/>
-          <class name="org.eclipse.che.selenium.consoles.ServerRuntimeInfoTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.AccountTest"/>
         </classes>
     </test>
 

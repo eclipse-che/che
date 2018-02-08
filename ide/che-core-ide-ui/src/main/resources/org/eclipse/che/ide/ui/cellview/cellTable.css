@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,41 +9,49 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 @def selectionBorderWidth 2px;
+
+@eval cellTableHeaderBackground org.eclipse.che.ide.api.theme.Style.theme.cellTableHeaderBackground();
+@eval cellTableHeaderColor org.eclipse.che.ide.api.theme.Style.theme.cellTableHeaderColor();
+
+@eval cellTableOddRowBackground org.eclipse.che.ide.api.theme.Style.theme.cellTableOddRowBackground();
+@eval cellTableEvenRowBackground org.eclipse.che.ide.api.theme.Style.theme.cellTableEvenRowBackground();
+
+@eval cellTableHoveredBackground org.eclipse.che.ide.api.theme.Style.theme.cellTableHoveredBackground();
+@eval cellTableSelectedBackground org.eclipse.che.ide.api.theme.Style.theme.cellTableSelectedBackground();
+
 .cellTableWidget {
 }
 
 .cellTableFirstColumn {
-
 }
 
 .cellTableLastColumn {
-
 }
 
 .cellTableFooter {
-    border-top: 2px solid #6f7277;
-    padding: 3px 15px;
+    border-top: 1px solid cellTableHeaderBackground;
     text-align: left;
-    color: mainFontColor;
+    color: cellTableHeaderColor;
     overflow: hidden;
     font-size: fontSize;
+    padding: 7px 10px;
 }
 
 .cellTableHeader {
-    border-bottom: 2px solid #6f7277;
-    padding: 3px 15px;
+    border-bottom: 1px solid cellTableHeaderBackground;
     text-align: left;
-    color: mainFontColor;
+    color: cellTableHeaderColor;
     font-size: fontSize;
     overflow: hidden;
+    padding: 7px 10px;
 }
 
 .cellTableCell {
-    padding: 1px 5px;
     overflow: hidden;
     color: mainFontColor;
     font-size: fontSize;
     font-family: mainFontFamily;
+    padding: 7px 10px;
 }
 
 .cellTableCell input {
@@ -60,6 +68,10 @@
     padding: 0 5px 0 5px;
     width: 100%;
     box-sizing: border-box;
+}
+
+.cellTableCell div {
+    outline: none;
 }
 
 .cellTableFirstColumnFooter {
@@ -100,7 +112,6 @@
 }
 
 .cellTableEvenRowCell {
-    border: 1px solid cellEvenRow;
 }
 
 .cellTableOddRow {
@@ -108,15 +119,12 @@
 }
 
 .cellTableOddRowCell {
-    border: 1px solid cellOddRow;
 }
 
 .cellTableHoveredRow {
-    /*background: cellHoveredRow;*/
 }
 
 .cellTableHoveredRowCell {
-    /*border: selectionBorderWidth solid cellHoveredRow;*/
 }
 
 .cellTableKeyboardSelectedRow {
@@ -124,25 +132,22 @@
 }
 
 .cellTableKeyboardSelectedRowCell {
-    border: selectionBorderWidth solid cellKeyboardSelectedRow;
 }
 
 .cellTableSelectedRow {
-    background: selectionBackground;
+    background: cellTableSelectedBackground;
     color: white;
     height: auto;
     overflow: auto;
 }
 
 .cellTableSelectedRowCell {
-    border: selectionBorderWidth solid selectionBackground;
 }
 
 /**
  * The keyboard selected cell is visible over selection.
  */
 .cellTableKeyboardSelectedCell {
-    border: selectionBorderWidth solid cellKeyboardSelectedRow;
 }
 
 .cellTableLoading {

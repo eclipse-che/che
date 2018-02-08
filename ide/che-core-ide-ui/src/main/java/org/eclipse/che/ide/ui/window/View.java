@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,11 +17,8 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -138,38 +135,33 @@ class View extends Composite {
   }
 
   private void handleEvents() {
-    KeyDownHandler handler =
-        new KeyDownHandler() {
-
-          @Override
-          public void onKeyDown(KeyDownEvent event) {
-            if (KeyboardEvent.KeyCode.ESC == event.getNativeEvent().getKeyCode()) {
-              event.stopPropagation();
-              event.preventDefault();
-              if (delegate != null) {
-                delegate.onEscapeKey();
-              }
-            } else if (KeyboardEvent.KeyCode.ENTER == event.getNativeEvent().getKeyCode()) {
-              event.stopPropagation();
-              event.preventDefault();
-              if (delegate != null) {
-                delegate.onEnterKey();
-              }
+    focusPanel.addKeyDownHandler(
+        event -> {
+          if (KeyboardEvent.KeyCode.ESC == event.getNativeEvent().getKeyCode()) {
+            event.stopPropagation();
+            event.preventDefault();
+            if (delegate != null) {
+              delegate.onEscapeKey();
             }
+          } else if (KeyboardEvent.KeyCode.ENTER == event.getNativeEvent().getKeyCode()) {
+            event.stopPropagation();
+            event.preventDefault();
+            if (delegate != null) {
+              delegate.onEnterKey();
+            }
+          } else {
+            delegate.onKeyDownEvent(event);
           }
-        };
+        });
 
-    focusPanel.addDomHandler(handler, KeyDownEvent.getType());
+    focusPanel.addKeyPressHandler(event -> delegate.onKeyPressEvent(event));
 
     closeButton.addDomHandler(
-        new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            if (delegate != null) {
-              delegate.onClose();
-            }
-            event.stopPropagation();
+        event -> {
+          if (delegate != null) {
+            delegate.onClose();
           }
+          event.stopPropagation();
         },
         ClickEvent.getType());
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -154,11 +154,21 @@ export class ListWorkspacesCtrl {
     workspaces.forEach((workspace: che.IWorkspace) => {
       // first check the list of already received workspace info:
       if (!this.workspacesById.get(workspace.id)) {
-        const promise = this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id).then(() => {
-          let userWorkspace = this.cheAPI.getWorkspace().getWorkspaceById(workspace.id);
-          this.getWorkspaceInfo(userWorkspace);
-          this.userWorkspaces.push(userWorkspace);
-        });
+        const promise = this.cheWorkspace.fetchWorkspaceDetails(workspace.id)
+          .catch((error: any) => {
+            if (error && error.status === 304) {
+              return this.$q.when();
+            }
+            let message = error.data && error.data.message ? ' Reason: ' + error.data.message : '';
+            this.cheNotification.showError('Failed to retrieve workspace ' + workspace.config.name + ' data.' + message) ;
+            return this.$q.reject(error);
+          })
+          .then(() => {
+            let userWorkspace = this.cheAPI.getWorkspace().getWorkspaceById(workspace.id);
+            this.getWorkspaceInfo(userWorkspace);
+            this.userWorkspaces.push(userWorkspace);
+            return this.$q.when();
+          });
         promises.push(promise);
       } else {
         let userWorkspace = this.workspacesById.get(workspace.id);

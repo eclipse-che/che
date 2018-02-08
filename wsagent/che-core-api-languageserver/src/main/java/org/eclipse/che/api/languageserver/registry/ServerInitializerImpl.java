@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,7 +92,7 @@ public class ServerInitializerImpl implements ServerInitializer {
   public CompletableFuture<Pair<LanguageServer, InitializeResult>> initialize(
       LanguageServerLauncher launcher, LanguageClient client, String projectPath)
       throws LanguageServerException {
-    InitializeParams initializeParams = prepareInitializeParams(projectPath);
+    InitializeParams initializeParams = prepareInitializeParams(launcher, projectPath);
     String launcherId = launcher.getDescription().getId();
     CompletableFuture<Pair<LanguageServer, InitializeResult>> result =
         new CompletableFuture<Pair<LanguageServer, InitializeResult>>();
@@ -142,9 +142,16 @@ public class ServerInitializerImpl implements ServerInitializer {
     }
   }
 
-  private InitializeParams prepareInitializeParams(String projectPath) {
+  private InitializeParams prepareInitializeParams(
+      LanguageServerLauncher launcher, String projectPath) {
     InitializeParams initializeParams = new InitializeParams();
-    initializeParams.setProcessId(PROCESS_ID);
+
+    if (launcher.isLocal()) {
+      initializeParams.setProcessId(PROCESS_ID);
+    } else {
+      initializeParams.setProcessId(null);
+    }
+
     initializeParams.setRootPath(LanguageServiceUtils.removeUriScheme(projectPath));
     initializeParams.setRootUri(projectPath);
 

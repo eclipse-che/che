@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -129,7 +129,7 @@ public class CommitFilesByMultiSelectTest {
     // Check the 'Cancel' button
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitCommitMainFormIsOpened();
-    git.clickOnCancelBtnComitForm();
+    git.clickOnCancelBtnCommitForm();
 
     // perform init commit
     projectExplorer.selectItem(PROJECT_NAME);

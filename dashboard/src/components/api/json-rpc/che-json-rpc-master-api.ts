@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,8 +16,17 @@ enum MasterChannels {
   ENVIRONMENT_OUTPUT = <any>'machine/log',
   ENVIRONMENT_STATUS = <any>'machine/statusChanged',
   WS_AGENT_OUTPUT = <any>'installer/log',
-  WORKSPACE_STATUS = <any>'workspace/statusChanged'
+  WORKSPACE_STATUS = <any>'workspace/statusChanged',
+  ORGANIZATION_STATUS = <any>'organization/statusChanged',
+  ORGANIZATION_MEMBERSHIP_STATUS = <any>'organization/membershipChanged'
 }
+
+enum MasterScopes {
+  ORGANIZATION = <any>'organizationId',
+  USER = <any>'userId',
+  WORKSPACE = <any>'workspaceId'
+}
+
 const SUBSCRIBE: string = 'subscribe';
 const UNSUBSCRIBE: string = 'unsubscribe';
 
@@ -55,7 +64,7 @@ export class CheJsonRpcMasterApi {
    * @param callback callback to process event
    */
   subscribeEnvironmentOutput(workspaceId: string, callback: Function): void {
-    this.subscribe(MasterChannels.ENVIRONMENT_OUTPUT, workspaceId, callback);
+    this.subscribe(MasterChannels.ENVIRONMENT_OUTPUT, MasterScopes.WORKSPACE, workspaceId, callback);
   }
 
   /**
@@ -66,7 +75,7 @@ export class CheJsonRpcMasterApi {
    * @param callback callback to process event
    */
   unSubscribeEnvironmentOutput(workspaceId: string, callback: Function): void {
-    this.unsubscribe(MasterChannels.ENVIRONMENT_OUTPUT, workspaceId, callback);
+    this.unsubscribe(MasterChannels.ENVIRONMENT_OUTPUT, MasterScopes.WORKSPACE, workspaceId, callback);
   }
 
   /**
@@ -76,7 +85,7 @@ export class CheJsonRpcMasterApi {
    * @param callback callback to process event
    */
   subscribeEnvironmentStatus(workspaceId: string, callback: Function): void {
-    this.subscribe(MasterChannels.ENVIRONMENT_STATUS, workspaceId, callback);
+    this.subscribe(MasterChannels.ENVIRONMENT_STATUS, MasterScopes.WORKSPACE, workspaceId, callback);
   }
 
   /**
@@ -86,7 +95,7 @@ export class CheJsonRpcMasterApi {
    * @param callback callback to process event
    */
   unSubscribeEnvironmentStatus(workspaceId: string, callback: Function): void {
-    this.unsubscribe(MasterChannels.ENVIRONMENT_STATUS, workspaceId, callback);
+    this.unsubscribe(MasterChannels.ENVIRONMENT_STATUS, MasterScopes.WORKSPACE, workspaceId, callback);
   }
 
   /**
@@ -96,7 +105,7 @@ export class CheJsonRpcMasterApi {
    * @param callback callback to process event
    */
   subscribeWsAgentOutput(workspaceId: string, callback: Function): void {
-    this.subscribe(MasterChannels.WS_AGENT_OUTPUT, workspaceId, callback);
+    this.subscribe(MasterChannels.WS_AGENT_OUTPUT, MasterScopes.WORKSPACE, workspaceId, callback);
   }
 
   /**
@@ -106,7 +115,7 @@ export class CheJsonRpcMasterApi {
    * @param callback callback to process event
    */
   unSubscribeWsAgentOutput(workspaceId: string, callback: Function): void {
-    this.unsubscribe(MasterChannels.WS_AGENT_OUTPUT, workspaceId, callback);
+    this.unsubscribe(MasterChannels.WS_AGENT_OUTPUT, MasterScopes.WORKSPACE, workspaceId, callback);
   }
 
   /**
@@ -121,7 +130,7 @@ export class CheJsonRpcMasterApi {
         callback(message);
       }
     };
-    this.subscribe(MasterChannels.WORKSPACE_STATUS, workspaceId, statusHandler);
+    this.subscribe(MasterChannels.WORKSPACE_STATUS, MasterScopes.WORKSPACE, workspaceId, statusHandler);
   }
 
   /**
@@ -131,7 +140,47 @@ export class CheJsonRpcMasterApi {
    * @param callback
    */
   unSubscribeWorkspaceStatus(workspaceId: string, callback: Function): void {
-    this.unsubscribe(MasterChannels.WORKSPACE_STATUS, workspaceId, callback);
+    this.unsubscribe(MasterChannels.WORKSPACE_STATUS, MasterScopes.WORKSPACE, workspaceId, callback);
+  }
+
+  /**
+   * Subscribe to organization statuses.
+   *
+   * @param {string} organizationId organization's id
+   * @param {Function} callback handler
+   */
+  subscribeOrganizationStatus(organizationId: string, callback: Function): void {
+    this.subscribe(MasterChannels.ORGANIZATION_STATUS, MasterScopes.ORGANIZATION, organizationId, callback);
+  }
+
+  /**
+   * Un-subscribe from organization status changes.
+   *
+   * @param {string} organizationId organization's id
+   * @param {Function} callback handler
+   */
+  unSubscribeOrganizationStatus(organizationId: string, callback?: Function): void {
+    this.unsubscribe(MasterChannels.ORGANIZATION_STATUS, MasterScopes.ORGANIZATION, organizationId, callback);
+  }
+
+  /**
+   * Subscribe to organization membership changes.
+   *
+   * @param {string} userId user's id to track changes
+   * @param {Function} callback handler
+   */
+  subscribeOrganizationMembershipStatus(userId: string, callback: Function): void {
+    this.subscribe(MasterChannels.ORGANIZATION_MEMBERSHIP_STATUS, MasterScopes.USER, userId, callback);
+  }
+
+  /**
+   * Un-subscribe from organization membership changes.
+   *
+   * @param {string} userId user's id to untrack changes
+   * @param {Function} callback handler
+   */
+  unSubscribeOrganizationMembershipStatus(userId: string, callback: Function): void {
+    this.unsubscribe(MasterChannels.ORGANIZATION_MEMBERSHIP_STATUS, MasterScopes.USER, userId, callback);
   }
 
   /**
@@ -158,12 +207,15 @@ export class CheJsonRpcMasterApi {
    * Performs subscribe to the pointed channel for pointed workspace's ID and callback.
    *
    * @param channel channel to un-subscribe
-   * @param workspaceId workspace's id
+   * @param _scope the scope of the request
+   * @param id instance's id (scope value)
    * @param callback callback
    */
-  private subscribe(channel: MasterChannels, workspaceId: string, callback: Function): void {
+  private subscribe(channel: MasterChannels, _scope: MasterScopes, id: string, callback: Function): void {
     let method: string = channel.toString();
-    let params = {method: method, scope: {workspaceId: workspaceId}};
+    let masterScope: string = _scope.toString();
+    let params = {method: method, scope: {}};
+    params.scope[masterScope] = id;
     this.cheJsonRpcApi.subscribe(SUBSCRIBE, method, callback, params);
   }
 
@@ -171,12 +223,15 @@ export class CheJsonRpcMasterApi {
    * Performs un-subscribe of the pointed channel by pointed workspace's ID and callback.
    *
    * @param channel channel to un-subscribe
-   * @param workspaceId workspace's id
+   * @param _scope the scope of the request
+   * @param id instance's id (scope value)
    * @param callback callback
    */
-  private unsubscribe(channel: MasterChannels, workspaceId: string, callback: Function): void {
+  private unsubscribe(channel: MasterChannels, _scope: MasterScopes, id: string, callback: Function): void {
     let method: string = channel.toString();
-    let params = {method: method, scope: {workspaceId: workspaceId}};
+    let masterScope: string = _scope.toString();
+    let params = {method: method, scope: {}};
+    params.scope[masterScope] = id;
     this.cheJsonRpcApi.unsubscribe(UNSUBSCRIBE, method, callback, params);
   }
 }

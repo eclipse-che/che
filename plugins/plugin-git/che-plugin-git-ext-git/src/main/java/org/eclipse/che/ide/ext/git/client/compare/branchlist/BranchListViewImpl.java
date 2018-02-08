@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,11 @@
  */
 package org.eclipse.che.ide.ext.git.client.compare.branchlist;
 
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_BACKSPACE;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -132,7 +136,6 @@ public class BranchListViewImpl extends Window implements BranchListView {
             listBranchesDelegate,
             this::onFilterChanged);
     branchesPanel.add(branchesList);
-    searchFilterLabel.addClickHandler(event -> branchesList.setFocus(true));
 
     createButtons();
   }
@@ -164,14 +167,38 @@ public class BranchListViewImpl extends Window implements BranchListView {
   }
 
   @Override
-  public void close() {
-    this.hide();
+  public void closeDialogIfShowing() {
+    if (super.isShowing()) {
+      this.hide();
+      delegate.onClose();
+    }
   }
 
   @Override
   public void showDialog() {
     this.show();
-    branchesList.setFocus(true);
+    super.focus();
+  }
+
+  @Override
+  protected void onKeyDownEvent(KeyDownEvent event) {
+    if (event.getNativeEvent().getKeyCode() == KEY_BACKSPACE) {
+      branchesList.removeLastCharacter();
+    }
+  }
+
+  @Override
+  protected void onKeyPressEvent(KeyPressEvent event) {
+    branchesList.addCharacterToFilter(String.valueOf(event.getCharCode()));
+  }
+
+  @Override
+  protected void onEscapeKey() {
+    if (branchesList.getFilter().isEmpty()) {
+      super.onEscapeKey();
+    } else {
+      branchesList.resetFilter();
+    }
   }
 
   @Override
@@ -187,7 +214,7 @@ public class BranchListViewImpl extends Window implements BranchListView {
 
   @Override
   public void onClose() {
-    delegate.onClose();
+    closeDialogIfShowing();
   }
 
   private void createButtons() {

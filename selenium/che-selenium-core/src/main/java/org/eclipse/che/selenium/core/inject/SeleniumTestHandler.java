@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.name.Named;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.AccessibleObject;
@@ -39,10 +40,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import javax.annotation.PreDestroy;
-import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.constant.TestBrowser;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
@@ -56,7 +57,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.IAnnotationTransformer;
 import org.testng.IConfigurationListener;
 import org.testng.IExecutionListener;
 import org.testng.IInvokedMethod;
@@ -78,11 +78,7 @@ import org.testng.TestException;
  * @author Dmytro Nochevnov
  */
 public abstract class SeleniumTestHandler
-    implements ITestListener,
-        ISuiteListener,
-        IInvokedMethodListener,
-        IAnnotationTransformer,
-        IExecutionListener {
+    implements ITestListener, ISuiteListener, IInvokedMethodListener, IExecutionListener {
 
   private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestHandler.class);
   private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
@@ -109,8 +105,17 @@ public abstract class SeleniumTestHandler
   @Named("sys.driver.version")
   private String webDriverVersion;
 
+  @Inject
+  @Named("github.username")
+  private String gitHubUsername;
+
+  @Inject
+  @Named("github.password")
+  private String gitHubPassword;
+
   @Inject private TestUser defaultTestUser;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
+  @Inject private TestGitHubServiceClient gitHubClientService;
 
   private final Injector injector;
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
@@ -120,6 +125,17 @@ public abstract class SeleniumTestHandler
     injector.injectMembers(this);
 
     getRuntime().addShutdownHook(new Thread(this::shutdown));
+
+    revokeGithubOauthToken();
+    checkWebDriverSessionCreation();
+  }
+
+  private void revokeGithubOauthToken() {
+    try {
+      gitHubClientService.deleteAllGrants(gitHubUsername, gitHubPassword);
+    } catch (Exception e) {
+      LOG.warn("There was an error of revoking the github oauth token.", e);
+    }
   }
 
   @Override
@@ -146,16 +162,13 @@ public abstract class SeleniumTestHandler
   }
 
   @Override
-  public void onStart(ITestContext context) {
-    checkWebDriverSessionCreation();
-  }
+  public void onStart(ITestContext context) {}
 
   @Override
   public void onFinish(ITestContext context) {}
 
   @Override
   public void onStart(ISuite suite) {
-    runningTests.clear();
     suite.setParentInjector(injector);
   }
 
@@ -301,7 +314,7 @@ public abstract class SeleniumTestHandler
     Object testInstance = result.getInstance();
 
     collectInjectedWebDrivers(testInstance, webDrivers);
-    webDrivers.forEach(webDriver -> captureScreenshot(result, webDriver));
+    webDrivers.forEach(webDriver -> captureScreenshotsFromOpenedWindows(result, webDriver));
   }
 
   private void captureHtmlSource(ITestResult result) {
@@ -353,10 +366,9 @@ public abstract class SeleniumTestHandler
     }
   }
 
-  private void captureScreenshot(ITestResult result, SeleniumWebDriver webDriver) {
+  private void captureScreenshotFromWindow(ITestResult result, SeleniumWebDriver webDriver) {
     String testName = result.getTestClass().getName() + "." + result.getMethod().getMethodName();
     String filename = NameGenerator.generate(testName + "_", 8) + ".png";
-
     try {
       byte[] data = webDriver.getScreenshotAs(OutputType.BYTES);
       Path screenshot = Paths.get(screenshotDir, filename);
@@ -365,6 +377,17 @@ public abstract class SeleniumTestHandler
     } catch (WebDriverException | IOException e) {
       LOG.error(format("Can't capture screenshot for test %s", testName), e);
     }
+  }
+
+  private void captureScreenshotsFromOpenedWindows(
+      ITestResult result, SeleniumWebDriver webDriver) {
+    webDriver
+        .getWindowHandles()
+        .forEach(
+            currentWin -> {
+              webDriver.switchTo().window(currentWin);
+              captureScreenshotFromWindow(result, webDriver);
+            });
   }
 
   private void dumpHtmlCodeFromTheCurrentPage(ITestResult result, SeleniumWebDriver webDriver) {
@@ -398,7 +421,7 @@ public abstract class SeleniumTestHandler
     }
 
     if (defaultTestUser != null) {
-      defaultTestUser.delete();
+      defaultTestUser.cleanUp();
     }
 
     isCleanUpCompleted.set(true);

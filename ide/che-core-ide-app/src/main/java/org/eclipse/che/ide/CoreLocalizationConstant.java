@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,11 +50,11 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("navigateToFile.searchIsCaseSensitive")
   String navigateToFileSearchIsCaseSensitive();
 
-  @Key("appearance.title")
-  String appearanceTitle();
+  @Key("general.title")
+  String generalTitle();
 
-  @Key("appearance.category")
-  String appearanceCategory();
+  @Key("general.category")
+  String generalCategory();
 
   /* Add resources to File Watcher excludes */
   @Key("action.fileWatcher.add.excludes.text")
@@ -493,6 +493,9 @@ public interface CoreLocalizationConstant extends Messages {
   String invalidName();
 
   /* Messages */
+  @Key("messages.closeTabConfirmation")
+  String closeTabConfirmation();
+
   @Key("messages.changesMayBeLost")
   String changesMayBeLost();
 
@@ -642,6 +645,12 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("start.ws.button")
   String startWsButton();
 
+  @Key("restart.ws.agent.button")
+  String restartWsAgentButton();
+
+  @Key("ignore.ws.agent.button")
+  String ignoreWsAgentButton();
+
   @Key("placeholder.select.ws.to.start")
   String placeholderSelectWsToStart();
 
@@ -689,6 +698,9 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("workspace.not.running")
   String workspaceNotRunning();
+
+  @Key("workspace.status.title")
+  String workspaceStatusTitle();
 
   @Key("start.ws.error.title")
   String startWsErrorTitle();
@@ -1208,6 +1220,18 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("control.terminal.create.description")
   String newTerminalDescription();
 
+  @Key("machine.output.action.title")
+  String machineOutputActionTitle();
+
+  @Key("machine.output.action.description")
+  String machineOutputActionDescription();
+
+  @Key("machine.ssh.action.title")
+  String machineSSHActionTitle();
+
+  @Key("machine.ssh.action.description")
+  String machineSSHActionDescription();
+
   @Key("control.connect.ssh")
   String connectViaSSH();
 
@@ -1279,4 +1303,19 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("menu.loader.pullingImage")
   String menuLoaderPullingImage(String image);
+
+  @Key("gwt_recompile.action.setup.title")
+  String gwtDevModeSetUpActionTitle();
+
+  @Key("gwt_recompile.action.off.title")
+  String gwtDevModeOffActionTitle();
+
+  @Key("gwt_recompile.dialog.title")
+  String gwtRecompileDialogTitle();
+
+  @Key("gwt_recompile.dialog.message.recompiling")
+  String gwtRecompileDialogRecompilingMessage(String host);
+
+  @Key("gwt_recompile.dialog.message.no_server")
+  String gwtRecompileDialogNoServerMessage();
 }

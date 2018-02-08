@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2015-2017 Red Hat, Inc.
+    Copyright (c) 2015-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -63,9 +63,10 @@
                    che-name="dev"
                    type="hidden"
                    ng-model="workspaceEnvironmentsController.devMachineName"
-                   ng-required>
+                   required>
           <che-error-messages che-message-scope="workspace-details-environment"
                               che-message-name="Dev machine">
+            <div ng-message></div>
             <div ng-message="required">The environment should contain exactly one dev machine. Switch on Dev property to have terminal, SSH and IDE tooling injected to the machine.</div>
           </che-error-messages>
         </che-input>
@@ -102,9 +103,9 @@
   </che-label-container>
   <che-button-default class="add-machine-button"
                       che-button-title="Add" name="addButton"
-                      ng-disabled="workspaceEnvironmentsController.recipe.type !== 'compose' || !workspaceEnvironmentsController.recipe.content"
+                      ng-disabled="!workspaceEnvironmentsController.isMultiMachine()"
                       ng-click="workspaceEnvironmentsController.addMachine()"></che-button-default>
-  <div class="recipe-warning-container" ng-show="workspaceEnvironmentsController.recipe.type !== 'compose' || !workspaceEnvironmentsController.recipe.content">
+  <div class="recipe-warning-container" ng-hide="workspaceEnvironmentsController.isMultiMachine()">
     Add another machine by changing the environment type to <b>compose</b> or <b>openshift</b>
   </div>
 </div>

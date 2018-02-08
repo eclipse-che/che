@@ -22,10 +22,6 @@
         "version": "3.3.9"
       }
     ],
-    "source": {
-      "type": "image",
-      "origin": "eclipse/che-dev:che6"
-    },
     "workspaceConfig": {
       "environments": {
         "default": {
@@ -68,7 +64,7 @@
             }
           },
           "recipe": {
-            "location": "eclipse/che-dev:che6",
+            "content": "eclipse/che-dev:nightly",
             "type": "dockerimage"
           }
         }
@@ -78,7 +74,7 @@
       "description": null,
       "commands": [
         {
-          "commandLine": "cd ${current.project.path} && mvn clean install",
+          "commandLine": "cd ${current.project.path} && mvn clean install -Pnative",
           "name": "Build project",
           "type": "custom",
           "attributes": {

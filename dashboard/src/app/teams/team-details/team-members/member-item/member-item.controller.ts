@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,7 +98,7 @@ export class MemberItemController {
 
     let roles = this.cheTeam.getRolesFromActions(this.member.permissions.actions);
     let titles = [];
-    let processedActions = []
+    let processedActions = [];
     roles.forEach((role: any) => {
       titles.push(role.title);
       processedActions = processedActions.concat(role.actions);

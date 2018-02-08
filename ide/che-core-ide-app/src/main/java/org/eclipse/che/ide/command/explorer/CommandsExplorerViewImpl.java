@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ import org.eclipse.che.ide.api.command.CommandGoal;
 import org.eclipse.che.ide.api.command.CommandImpl;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.command.CommandResources;
+import org.eclipse.che.ide.command.actions.CommandExplorerContextMenu;
 import org.eclipse.che.ide.command.node.CommandFileNode;
 import org.eclipse.che.ide.command.node.CommandGoalNode;
 import org.eclipse.che.ide.command.node.NodeFactory;
@@ -60,7 +61,10 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
 
   @Inject
   public CommandsExplorerViewImpl(
-      ExplorerMessages messages, CommandResources resources, NodeFactory nodeFactory) {
+      ExplorerMessages messages,
+      CommandResources resources,
+      NodeFactory nodeFactory,
+      CommandExplorerContextMenu contextMenu) {
     this.nodeFactory = nodeFactory;
     commandNodes = new HashMap<>();
 
@@ -90,6 +94,8 @@ public class CommandsExplorerViewImpl extends BaseView<CommandsExplorerView.Acti
                   .getNodeContainerElement()
                   .setAttribute("selected", "selected");
             });
+
+    tree.setContextMenuInvocationHandler(contextMenu::show);
 
     setContentWidget(UI_BINDER.createAndBindUi(this));
   }

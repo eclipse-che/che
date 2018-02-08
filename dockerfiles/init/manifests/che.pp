@@ -15,6 +15,7 @@ node default {
   $che_user = getValue("CHE_USER","root")
   $che_server_url = getValue("CHE_SERVER_URL", "${che_protocol}://${che_ip}:${che_port}")
   $che_master_container_ram = getValue("CHE_MASTER_CONTAINER_RAM", "750m")
+  $che_docker_ip_external = getValue("CHE_DOCKER_IP_EXTERNAL","")
 
   ###############################
   # Http proxy configuration
@@ -38,6 +39,7 @@ node default {
   # Single port configuration
   #
   $che_single_port = getValue("CHE_SINGLE_PORT","false")
+  $che_single_port_wildcard_domain_host = getValue("CHE_SINGLEPORT_WILDCARD__DOMAIN_HOST","nip.io")
 
   ###############################
   # Che multiuser
@@ -50,8 +52,6 @@ node default {
 
   ###############################
   # Workspace configuration
-  #
-  $workspace_java_options = getValue("CHE_WORKSPACE_JAVA_OPTIONS", "-Xms256m -Xmx2048m -Djava.security.egd=file:/dev/./urandom")
 
   $che_jmx_enabled = getValue("CHE_JMX_ENABLED", "false")
   $che_jmx_username = getValue("CHE_JMX_USERNAME", "admin")

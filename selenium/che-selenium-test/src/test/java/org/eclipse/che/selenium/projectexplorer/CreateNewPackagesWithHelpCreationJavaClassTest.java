@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,18 +10,23 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
+import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -30,7 +35,6 @@ import org.testng.annotations.Test;
  * @author Andrey Chizhikov
  */
 public class CreateNewPackagesWithHelpCreationJavaClassTest {
-
   private static final String PROJECT_NAME =
       CreateNewPackagesWithHelpCreationJavaClassTest.class.getSimpleName();
   private static final String NEW_PACKAGE_NAME1 = "tu";
@@ -45,6 +49,8 @@ public class CreateNewPackagesWithHelpCreationJavaClassTest {
   @Inject private Menu menu;
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private HttpJsonRequestFactory httpJsonRequestFactory;
+  @Inject private TestApiEndpointUrlProvider testApiEndpointUrlProvider;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -87,6 +93,12 @@ public class CreateNewPackagesWithHelpCreationJavaClassTest {
     editor.waitActive();
     editor.waitTabIsPresent("TestClass2");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test/ua");
-    projectExplorer.waitItemInVisibleArea("TestClass2.java");
+
+    try {
+      projectExplorer.waitItemInVisibleArea("TestClass2.java");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8122");
+    }
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.system.server;
 
+import static org.eclipse.che.api.system.server.DtoConverter.asDto;
 import static org.eclipse.che.api.system.shared.SystemStatus.PREPARING_TO_SHUTDOWN;
 import static org.eclipse.che.api.system.shared.SystemStatus.READY_TO_SHUTDOWN;
 import static org.eclipse.che.api.system.shared.SystemStatus.RUNNING;
@@ -89,11 +90,12 @@ public class SystemManager {
   /** Synchronously stops corresponding services. */
   private void doStopServices() {
     LOG.info("Preparing system to shutdown");
-    eventService.publish(new SystemStatusChangedEvent(RUNNING, PREPARING_TO_SHUTDOWN));
+    eventService.publish(asDto(new SystemStatusChangedEvent(RUNNING, PREPARING_TO_SHUTDOWN)));
     try {
       terminator.terminateAll();
       statusRef.set(READY_TO_SHUTDOWN);
-      eventService.publish(new SystemStatusChangedEvent(PREPARING_TO_SHUTDOWN, READY_TO_SHUTDOWN));
+      eventService.publish(
+          asDto(new SystemStatusChangedEvent(PREPARING_TO_SHUTDOWN, READY_TO_SHUTDOWN)));
       LOG.info("System is ready to shutdown");
     } catch (InterruptedException x) {
       LOG.error("Interrupted while waiting for system service to shutdown components");

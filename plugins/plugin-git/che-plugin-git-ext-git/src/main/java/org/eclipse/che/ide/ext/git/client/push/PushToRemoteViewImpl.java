@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,6 +70,20 @@ public class PushToRemoteViewImpl extends Window implements PushToRemoteView {
     this.setTitle(locale.pushViewTitle());
     this.setWidget(widget);
 
+    btnPush =
+        createButton(
+            locale.buttonPush(),
+            "git-remotes-push-push",
+            new ClickHandler() {
+
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onPushClicked();
+              }
+            });
+    btnPush.addStyleName(super.resources.windowCss().primaryButton());
+    addButtonToFooter(btnPush);
+
     btnCancel =
         createButton(
             locale.buttonCancel(),
@@ -82,19 +96,6 @@ public class PushToRemoteViewImpl extends Window implements PushToRemoteView {
               }
             });
     addButtonToFooter(btnCancel);
-
-    btnPush =
-        createButton(
-            locale.buttonPush(),
-            "git-remotes-push-push",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onPushClicked();
-              }
-            });
-    addButtonToFooter(btnPush);
   }
 
   @Override

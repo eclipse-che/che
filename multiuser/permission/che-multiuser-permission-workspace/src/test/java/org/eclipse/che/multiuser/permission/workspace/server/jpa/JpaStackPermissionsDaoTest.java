@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,8 +64,8 @@ public class JpaStackPermissionsDaoTest {
 
     stacks =
         new StackImpl[] {
-          new StackImpl("stack1", "st1", null, null, null, null, null, null, null, null),
-          new StackImpl("stack2", "st2", null, null, null, null, null, null, null, null)
+          new StackImpl("stack1", "st1", null, null, null, null, null, null, null),
+          new StackImpl("stack2", "st2", null, null, null, null, null, null, null)
         };
 
     Injector injector = Guice.createInjector(new WorkspaceTckModule());

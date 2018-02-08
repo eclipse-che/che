@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,7 +79,8 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
                 e ->
                     new MachineImpl(
                         e.getValue().getAttributes(),
-                        rewriteExternalServers(e.getValue().getServers()))));
+                        rewriteExternalServers(e.getKey(), e.getValue().getServers()),
+                        e.getValue().getStatus())));
   }
 
   /**
@@ -177,7 +178,8 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
    * @param incoming servers
    * @return rewritten Map of Servers (name -> Server)
    */
-  private Map<String, Server> rewriteExternalServers(Map<String, ? extends Server> incoming) {
+  private Map<String, Server> rewriteExternalServers(
+      String machineName, Map<String, ? extends Server> incoming) {
     Map<String, Server> outgoing = new HashMap<>();
     RuntimeIdentity identity = context.getIdentity();
     for (Map.Entry<String, ? extends Server> entry : incoming.entrySet()) {
@@ -189,7 +191,8 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
         try {
           ServerImpl server =
               new ServerImpl(incomingServer)
-                  .withUrl(urlRewriter.rewriteURL(identity, name, incomingServer.getUrl()));
+                  .withUrl(
+                      urlRewriter.rewriteURL(identity, machineName, name, incomingServer.getUrl()));
           outgoing.put(name, server);
         } catch (InfrastructureException e) {
           warnings.add(new WarningImpl(101, "Malformed URL for " + name + " : " + e.getMessage()));

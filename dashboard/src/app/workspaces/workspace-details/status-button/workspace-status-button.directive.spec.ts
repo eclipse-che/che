@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import {WorkspaceStatus} from '../../../../components/api/workspace/che-workspac
 interface ITestScope extends ng.IRootScopeService {
   model: {
     workspaceStatus?: string;
+    buttonDisabled?: boolean;
     onStopWorkspace: Function;
     onRunWorkspace: Function;
   };
@@ -65,6 +66,7 @@ describe('WorkspaceStatusButton >', () => {
 
     const element = $compile(angular.element(
       `<workspace-status-button workspace-status="model.workspaceStatus"
+                                button-disabled="model.buttonDisabled"
                                 on-run-workspace="model.onRunWorkspace()"
                                 on-stop-workspace="model.onStopWorkspace()"></workspace-status-button>`
     ))($rootScope);
@@ -73,14 +75,38 @@ describe('WorkspaceStatusButton >', () => {
     return element;
   }
 
+  describe(`button is disabled >`, () => {
+    let jqRunButton: ng.IAugmentedJQuery;
+    let jqStopButton: ng.IAugmentedJQuery;
+
+    beforeEach(() => {
+      $rootScope.model.buttonDisabled = true;
+
+      const jqElement = getCompiledElement(WorkspaceStatus.STOPPED);
+      jqRunButton = jqElement.find('#run-workspace-button button');
+      jqStopButton = jqElement.find('#stop-workspace-button button');
+    });
+
+    it('should have "Run" button disabled', () => {
+      // timeout should be flashed
+      $timeout.flush();
+
+      expect(jqRunButton.get(0)).toBeTruthy();
+      expect(jqRunButton.attr('disabled')).toBeTruthy();
+
+      expect(jqStopButton.get(0)).toBeFalsy();
+    });
+
+  });
+
   describe('initially STOPPED >', () => {
     let jqRunButton: ng.IAugmentedJQuery;
     let jqStopButton: ng.IAugmentedJQuery;
 
     beforeEach(() => {
       const jqElement = getCompiledElement(WorkspaceStatus.STOPPED);
-      jqRunButton = jqElement.find('#runButton button');
-      jqStopButton = jqElement.find('#stopButton button');
+      jqRunButton = jqElement.find('#run-workspace-button button');
+      jqStopButton = jqElement.find('#stop-workspace-button button');
     });
 
     it('should have "Run" button enabled', () => {
@@ -113,8 +139,8 @@ describe('WorkspaceStatusButton >', () => {
 
     beforeEach(() => {
       const jqElement = getCompiledElement(WorkspaceStatus.STOPPING);
-      jqRunButton = jqElement.find('#runButton button');
-      jqStopButton = jqElement.find('#stopButton button');
+      jqRunButton = jqElement.find('#run-workspace-button button');
+      jqStopButton = jqElement.find('#stop-workspace-button button');
     });
 
     it('should have "Stop" button disabled', () => {
@@ -134,8 +160,8 @@ describe('WorkspaceStatusButton >', () => {
 
     beforeEach(() => {
       const jqElement = getCompiledElement(WorkspaceStatus.STARTING);
-      jqRunButton = jqElement.find('#runButton button');
-      jqStopButton = jqElement.find('#stopButton button');
+      jqRunButton = jqElement.find('#run-workspace-button button');
+      jqStopButton = jqElement.find('#stop-workspace-button button');
     });
 
     it('should have "Stop" button enabled', () => {
@@ -168,8 +194,8 @@ describe('WorkspaceStatusButton >', () => {
 
     beforeEach(() => {
       const jqElement = getCompiledElement(WorkspaceStatus.RUNNING);
-      jqRunButton = jqElement.find('#runButton button');
-      jqStopButton = jqElement.find('#stopButton button');
+      jqRunButton = jqElement.find('#run-workspace-button button');
+      jqStopButton = jqElement.find('#stop-workspace-button button');
     });
 
     it('should have "Stop" button enabled', () => {

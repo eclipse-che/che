@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,22 @@ package org.eclipse.che.ide.editor.orion.client.jso;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class OrionTextViewShowOptionsOverlay extends JavaScriptObject {
+
+  public enum ViewAnchorValue {
+    TOP("top"),
+    BOTTOM("bottom"),
+    CENTER("center");
+
+    private final String value;
+
+    ViewAnchorValue(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return value;
+    }
+  }
 
   protected OrionTextViewShowOptionsOverlay() {}
 
@@ -46,5 +62,9 @@ public class OrionTextViewShowOptionsOverlay extends JavaScriptObject {
 
   public final native void setViewAnchorOffset(final String newValue) /*-{
         this.viewAnchorOffset = newValue;
+    }-*/;
+
+  public static native OrionTextViewShowOptionsOverlay create() /*-{
+        return {};
     }-*/;
 }

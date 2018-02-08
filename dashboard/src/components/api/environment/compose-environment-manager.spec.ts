@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,7 +48,7 @@ describe('ComposeEnvironmentManager', () => {
               '1025/tcp': {'port': '1025', 'properties': {}, 'protocol': 'http', 'path': ''}
             },
             'volumes': {
-              'volume1': {'path': '/some/path'},
+              'volume1': {'path': '/some/path'}
             },
             'installers': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
           }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,12 @@ public class RuntimeLabelsProvisioner implements ConfigurationProvisioner {
       DockerContainerConfig container = internalEnv.getContainers().get(name);
       container
           .getLabels()
-          .putAll(Labels.newSerializer().machineName(name).runtimeId(identity).labels());
+          .putAll(
+              Labels.newSerializer()
+                  .machineName(name)
+                  .machineAttributes(entry.getValue().getAttributes())
+                  .runtimeId(identity)
+                  .labels());
     }
   }
 }

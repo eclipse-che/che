@@ -1,0 +1,36 @@
+.build-stack-recipe-editor
+
+  .error-message
+    height 40px
+
+  ui-codemirror
+    display block
+    float none
+    width 800px
+    max-width 800px
+    margin-top 15px
+    margin-bottom 2px
+
+    .CodeMirror
+      max-height 200px
+      width inherit
+
+      .CodeMirror-sizer
+        margin-left 26px
+
+        &:first-child
+          margin-left 55px !important
+
+      .CodeMirror-gutter.CodeMirror-lint-markers
+        width 16px !important
+
+      .CodeMirror-gutter.CodeMirror-linenumbers
+        width 29px !important
+
+      .CodeMirror-scroll
+        margin-left -20px
+
+    div.CodeMirror
+      border 1px solid $list-separator-color
+      height 250px !important
+      min-height 250px !important

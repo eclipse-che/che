@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,10 +23,12 @@ public class CheAdminTestUser implements AdminTestUser {
   @Inject
   public CheAdminTestUser(
       TestUserFactory userFactory,
-      @Named("che.admin_user.email") String email,
-      @Named("che.admin_user.password") String password)
+      @Named("che.admin.name") String name,
+      @Named("che.admin.email") String email,
+      @Named("che.admin.password") String password,
+      @Named("che.admin.offline_token") String offlineToken)
       throws Exception {
-    this.delegate = userFactory.create(email, password);
+    this.delegate = userFactory.create(name, email, password, offlineToken);
   }
 
   @Override
@@ -55,5 +57,10 @@ public class CheAdminTestUser implements AdminTestUser {
   }
 
   @Override
-  public void delete() {}
+  public String getOfflineToken() {
+    return delegate.getOfflineToken();
+  }
+
+  @Override
+  public void cleanUp() {}
 }

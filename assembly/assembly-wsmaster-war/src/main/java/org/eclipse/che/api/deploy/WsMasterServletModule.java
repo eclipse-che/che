@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Singleton;
 import org.apache.catalina.filters.CorsFilter;
+import org.eclipse.che.commons.logback.filter.RequestIdLoggerFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakServletModule;
 import org.eclipse.che.multiuser.machine.authentication.server.MachineLoginFilter;
@@ -25,8 +26,6 @@ import org.everrest.guice.servlet.GuiceEverrestServlet;
 public class WsMasterServletModule extends ServletModule {
   @Override
   protected void configureServlets() {
-    getServletContext().addListener(new org.everrest.websockets.WSConnectionTracker());
-
     final Map<String, String> corsFilterParams = new HashMap<>();
     corsFilterParams.put("cors.allowed.origins", "*");
     corsFilterParams.put(
@@ -45,8 +44,10 @@ public class WsMasterServletModule extends ServletModule {
     bind(CorsFilter.class).in(Singleton.class);
 
     filter("/*").through(CorsFilter.class, corsFilterParams);
+    filter("/*").through(RequestIdLoggerFilter.class);
 
-    serveRegex("^/(?!ws$|ws/|websocket.?)(.*)").with(GuiceEverrestServlet.class);
+    // Matching group SHOULD contain forward slash.
+    serveRegex("^(?!/websocket.?)(.*)").with(GuiceEverrestServlet.class);
     install(new org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule());
 
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {

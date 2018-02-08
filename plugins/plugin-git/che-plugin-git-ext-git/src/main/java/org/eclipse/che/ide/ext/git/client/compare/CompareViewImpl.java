@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,12 +92,15 @@ final class CompareViewImpl extends Window implements CompareView {
             locale.buttonSaveChanges(),
             "git-compare-save-changes-btn",
             event -> delegate.onSaveChangesClicked());
+    btnSaveChanges.addStyleName(resources.windowCss().primaryButton());
+
     btnNextDiff =
         createButton(
             locale.buttonNextDiff(),
             "git-compare-next-diff-btn",
             event -> delegate.onNextDiffClicked(),
             ButtonAlignment.LEFT);
+
     btnPrevDiff =
         createButton(
             locale.buttonPreviousDiff(),
@@ -105,9 +108,9 @@ final class CompareViewImpl extends Window implements CompareView {
             event -> delegate.onPreviousDiffClicked(),
             ButtonAlignment.LEFT);
 
-    addButtonToFooter(closeButton);
-    addButtonToFooter(refreshButton);
     addButtonToFooter(btnSaveChanges);
+    addButtonToFooter(refreshButton);
+    addButtonToFooter(closeButton);
 
     addButtonToFooter(btnPrevDiff);
     addButtonToFooter(btnNextDiff);

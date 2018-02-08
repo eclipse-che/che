@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,17 +24,17 @@ import org.eclipse.che.commons.lang.Pair;
  */
 public class MavenOptsEnvVariableProvider implements EnvVarProvider {
 
-  @Inject
-  @Named("che.workspace.java.options")
-  private String javaOpts;
+  private final String javaOpts;
 
   @Inject
-  @Named("che.workspace.maven.options")
-  @Nullable
-  private String mavenOpts;
+  public MavenOptsEnvVariableProvider(
+      @Named("che.workspace.maven_options") String javaOpts,
+      @Nullable @Named("che.workspace.http_proxy_java_options") String httpProxyJavaOptions) {
+    this.javaOpts = httpProxyJavaOptions == null ? javaOpts : javaOpts + " " + httpProxyJavaOptions;
+  }
 
   @Override
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) {
-    return Pair.of("MAVEN_OPTS", mavenOpts == null ? javaOpts : mavenOpts);
+    return Pair.of("MAVEN_OPTS", javaOpts);
   }
 }

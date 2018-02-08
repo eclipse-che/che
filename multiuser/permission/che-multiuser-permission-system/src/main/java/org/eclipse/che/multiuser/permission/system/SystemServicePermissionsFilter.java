@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,12 +32,11 @@ public class SystemServicePermissionsFilter extends CheMethodInvokerFilter {
   protected void filter(GenericResourceMethod resource, Object[] args) throws ApiException {
     switch (resource.getMethod().getName()) {
       case "stop":
-      case "getState":
         EnvironmentContext.getCurrent()
             .getSubject()
             .checkPermission(SystemDomain.DOMAIN_ID, null, SystemDomain.MANAGE_SYSTEM_ACTION);
         break;
-      case "getSystemRamLimitStatus":
+      case "getState":
         break;
       default:
         throw new ForbiddenException("The user does not have permission to perform this operation");

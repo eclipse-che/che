@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,6 +81,50 @@ export class CheTextarea extends CheInput {
       + '</div>';
 
     return template;
+  }
+
+  compile(element: ng.IRootElementService, attrs: ng.IAttributes): ng.IDirectiveCompileFn {
+    const tabindex = 'tabindex';
+    const avoidAttrs = ['ng-model', 'ng-change'];
+    const avoidStartWithAttrs: Array<string> = ['$', 'che-'];
+
+    const keys = Object.keys(attrs.$attr);
+    // search the input field
+    const inputJqEl = element.find('textarea');
+    let tabIndex;
+    keys.forEach((key: string) => {
+      const attr = attrs.$attr[key];
+      if (!attr) {
+        return;
+      }
+      if (avoidAttrs.indexOf(attr) !== -1) {
+        return;
+      }
+      const avoidAttr = avoidStartWithAttrs.find((avoidStartWithAttr: string) => {
+        return attr.indexOf(avoidStartWithAttr) === 0;
+      });
+      if (angular.isDefined(avoidAttr)) {
+        return;
+      }
+      const value = attrs[key];
+      // remember tabindex
+      if (attr === tabindex) {
+        tabIndex = value;
+      }
+      // set the value of the attribute
+      inputJqEl.attr(attr, value);
+      // add also the material version of max length (only one the first input which is the md-input)
+      element.removeAttr(attr);
+    });
+
+    // the focusable element is the input, remove tabIndex from top-level element
+    element.attr(tabindex, -1);
+    // the default value for tabindex on the input is 0 (meaning: set 0 if no value was set)
+    if (!tabIndex) {
+      inputJqEl.attr(tabindex, 0);
+    }
+
+    return;
   }
 
 }

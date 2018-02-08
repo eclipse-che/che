@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,12 +10,16 @@
  */
 package org.eclipse.che.api.languageserver.registry;
 
+import static javax.ws.rs.core.UriBuilder.fromUri;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
+import static org.eclipse.che.api.languageserver.registry.LanguageRecognizer.UNIDENTIFIED;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,15 +28,22 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.languageserver.exception.LanguageServerException;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
+import org.eclipse.che.api.languageserver.remote.RemoteLsLauncherProvider;
 import org.eclipse.che.api.languageserver.service.LanguageServiceUtils;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.RegisteredProject;
+import org.eclipse.che.api.workspace.server.WorkspaceService;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -44,6 +55,11 @@ import org.slf4j.LoggerFactory;
 public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
   private static final Logger LOG = LoggerFactory.getLogger(LanguageServerRegistryImpl.class);
+
+  private final String workspaceId;
+  private final String apiEndpoint;
+  private final HttpJsonRequestFactory httpJsonRequestFactory;
+  private final Set<RemoteLsLauncherProvider> launcherProviders;
   private final List<LanguageDescription> languages;
   private final List<LanguageServerLauncher> launchers;
   private final AtomicInteger serverId = new AtomicInteger();
@@ -57,40 +73,35 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
   private final ServerInitializer initializer;
   private EventService eventService;
   private CheLanguageClientFactory clientFactory;
+  private LanguageRecognizer languageRecognizer;
+  private Workspace workspace;
 
   @Inject
   public LanguageServerRegistryImpl(
+      @Named("env.CHE_WORKSPACE_ID") String workspaceId,
+      @Named("che.api") String apiEndpoint,
+      HttpJsonRequestFactory httpJsonRequestFactory,
+      Set<RemoteLsLauncherProvider> launcherProviders,
       Set<LanguageServerLauncher> languageServerLaunchers,
       Set<LanguageDescription> languages,
       Provider<ProjectManager> projectManagerProvider,
       ServerInitializer initializer,
       EventService eventService,
-      CheLanguageClientFactory clientFactory) {
+      CheLanguageClientFactory clientFactory,
+      LanguageRecognizer languageRecognizer) {
+    this.workspaceId = workspaceId;
+    this.apiEndpoint = apiEndpoint;
+    this.httpJsonRequestFactory = httpJsonRequestFactory;
+    this.launcherProviders = launcherProviders;
     this.languages = new ArrayList<>(languages);
     this.launchers = new ArrayList<>(languageServerLaunchers);
     this.projectManagerProvider = projectManagerProvider;
     this.initializer = initializer;
     this.eventService = eventService;
     this.clientFactory = clientFactory;
+    this.languageRecognizer = languageRecognizer;
     this.launchedServers = new HashMap<>();
     this.initializedServers = new HashMap<>();
-  }
-
-  private LanguageDescription findLanguage(String path) {
-    for (LanguageDescription language : languages) {
-      if (matchesFilenames(language, path) || matchesExtensions(language, path)) {
-        return language;
-      }
-    }
-    return null;
-  }
-
-  private boolean matchesExtensions(LanguageDescription language, String path) {
-    return language.getFileExtensions().stream().anyMatch(extension -> path.endsWith(extension));
-  }
-
-  private boolean matchesFilenames(LanguageDescription language, String path) {
-    return language.getFileNames().stream().anyMatch(name -> path.endsWith(name));
   }
 
   @Override
@@ -185,12 +196,21 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
   }
 
   private List<LanguageServerLauncher> findLaunchers(String projectPath, String fileUri) {
-    LanguageDescription language = findLanguage(fileUri);
+    String wsPath = absolutize(LanguageServiceUtils.removePrefixUri(fileUri));
+    LanguageDescription language = languageRecognizer.recognizeByPath(wsPath);
     if (language == null) {
       return Collections.emptyList();
     }
+    List<LanguageServerLauncher> combinedLaunchers = new LinkedList<>(launchers);
+    initWorkspaceConfiguration();
+    if (workspace != null) {
+      for (RemoteLsLauncherProvider launcherProvider : launcherProviders) {
+        combinedLaunchers.addAll(launcherProvider.getAll(workspace));
+      }
+    }
+
     List<LanguageServerLauncher> result = new ArrayList<>();
-    for (LanguageServerLauncher launcher : launchers) {
+    for (LanguageServerLauncher launcher : combinedLaunchers) {
       if (launcher.isAbleToLaunch()) {
         int score = matchScore(launcher.getDescription(), fileUri, language.getLanguageId());
         if (score > 0) {
@@ -203,7 +223,27 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
   @Override
   public List<LanguageDescription> getSupportedLanguages() {
-    return Collections.unmodifiableList(languages);
+    initWorkspaceConfiguration();
+
+    if (workspace == null) {
+      return Collections.unmodifiableList(languages);
+    }
+
+    List<LanguageDescription> languageDescriptions = new LinkedList<>(languages);
+
+    for (RemoteLsLauncherProvider launcherProvider : launcherProviders) {
+      for (LanguageServerLauncher launcher : launcherProvider.getAll(workspace)) {
+        for (String languageId : launcher.getDescription().getLanguageIds()) {
+          LanguageDescription language = languageRecognizer.recognizeById(languageId);
+          if (language.equals(UNIDENTIFIED)) {
+            continue;
+          }
+          languageDescriptions.add(language);
+        }
+      }
+    }
+
+    return Collections.unmodifiableList(languageDescriptions);
   }
 
   protected String extractProjectPath(String filePath) throws LanguageServerException {
@@ -224,7 +264,8 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
   public List<Collection<InitializedLanguageServer>> getApplicableLanguageServers(String fileUri)
       throws LanguageServerException {
     String projectPath = extractProjectPath(fileUri);
-    LanguageDescription language = findLanguage(fileUri);
+    String wsPath = absolutize(LanguageServiceUtils.removePrefixUri(fileUri));
+    LanguageDescription language = languageRecognizer.recognizeByPath(wsPath);
     if (projectPath == null || language == null) {
       return Collections.emptyList();
     }
@@ -344,5 +385,25 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
       }
     }
     return null;
+  }
+
+  private void initWorkspaceConfiguration() {
+    if (workspace != null) {
+      return;
+    }
+
+    String href =
+        fromUri(apiEndpoint)
+            .path(WorkspaceService.class)
+            .path(WorkspaceService.class, "getByKey")
+            .queryParam("includeInternalServers", true)
+            .build(workspaceId)
+            .toString();
+    try {
+      workspace =
+          httpJsonRequestFactory.fromUrl(href).useGetMethod().request().asDto(WorkspaceDto.class);
+    } catch (IOException | ApiException e) {
+      LOG.error("Did not manage to get workspace configuration: {}", workspaceId, e);
+    }
   }
 }

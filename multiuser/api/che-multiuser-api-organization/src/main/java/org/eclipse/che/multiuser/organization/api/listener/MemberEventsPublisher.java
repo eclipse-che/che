@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.multiuser.organization.api.listener;
+
+import static org.eclipse.che.multiuser.organization.api.DtoConverter.asDto;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -63,7 +65,7 @@ public class MemberEventsPublisher implements EventSubscriber<PermissionsEvent> 
               final String initiator = event.getInitiator();
               final User addedMember = userManager.getById(permissions.getUserId());
               final Organization org = organizationManager.getById(permissions.getInstanceId());
-              eventService.publish(new MemberAddedEvent(initiator, addedMember, org));
+              eventService.publish(asDto(new MemberAddedEvent(initiator, addedMember, org)));
               break;
             }
           case PERMISSIONS_REMOVED:
@@ -71,7 +73,7 @@ public class MemberEventsPublisher implements EventSubscriber<PermissionsEvent> 
               final String initiator = event.getInitiator();
               final User removedMember = userManager.getById(permissions.getUserId());
               final Organization org = organizationManager.getById(permissions.getInstanceId());
-              eventService.publish(new MemberRemovedEvent(initiator, removedMember, org));
+              eventService.publish(asDto(new MemberRemovedEvent(initiator, removedMember, org)));
               break;
             }
           default:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -252,20 +252,26 @@ public class ProjectTypeRegistry {
       myType.addAncestor(superTypeId);
 
       ProjectTypeDef supertype = validatedData.get(superTypeId);
-      for (Attribute attr : supertype.getAttributes()) {
+      for (Attribute supertypeAttr : supertype.getAttributes()) {
         // check attribute names
-        for (Attribute attr2 : myType.getAttributes()) {
-          if (attr.getName().equals(attr2.getName())
-              && !attr.getProjectType().equals(attr2.getProjectType())) {
-            throw new ProjectTypeConstraintException(
-                "Attribute name conflict. Project type "
-                    + myType.getId()
-                    + " could not be registered as attribute declaration "
-                    + attr.getName()
-                    + " is duplicated in its ancestor(s).");
+        for (Attribute attr : myType.getAttributes()) {
+          if (supertypeAttr.getName().equals(attr.getName())) {
+
+            ProjectTypeDef attrOriginProjectType = validatedData.get(attr.getProjectType());
+            // myType can't add attribute with the same name as one of its ancestors already has
+            if (attrOriginProjectType.getId().equals(myType.id)
+                // check whether the attribute isn't inherited from an ancestor PT
+                || !attrOriginProjectType.isTypeOf(supertypeAttr.getProjectType())) {
+              throw new ProjectTypeConstraintException(
+                  "Attribute name conflict. Project type "
+                      + myType.getId()
+                      + " could not be registered as attribute declaration "
+                      + attr.getName()
+                      + " is duplicated in its ancestor(s).");
+            }
           }
         }
-        myType.addAttributeDefinition(attr);
+        myType.addAttributeDefinition(supertypeAttr);
       }
       initRecursively(myType, superTypeId);
     }
@@ -286,7 +292,7 @@ public class ProjectTypeRegistry {
       myType.attributes.put(
           old.getName(),
           new Variable(
-              old.getId(),
+              myType.getId(),
               old.getName(),
               old.getDescription(),
               old.isRequired(),

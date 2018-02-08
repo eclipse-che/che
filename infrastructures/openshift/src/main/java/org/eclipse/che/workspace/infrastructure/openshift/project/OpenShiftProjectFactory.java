@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 
 /**
@@ -25,15 +26,16 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory
  * @author Anton Korneta
  */
 @Singleton
-public class OpenShiftProjectFactory {
+public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
 
   private final String projectName;
   private final OpenShiftClientFactory clientFactory;
 
   @Inject
   public OpenShiftProjectFactory(
-      @Nullable @Named("che.infra.openshift.project") String projectName,
+      @Nullable @Named("che.infra.kubernetes.namespace") String projectName,
       OpenShiftClientFactory clientFactory) {
+    super(projectName, clientFactory);
     this.projectName = projectName;
     this.clientFactory = clientFactory;
   }

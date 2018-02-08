@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,44 +76,12 @@ public class WorkspaceInstallers {
     return Boolean.parseBoolean(state);
   }
 
-  public Boolean isInstallerStateTurnedOn(String installerName, String installerVersion) {
-    String state =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(
-                ExpectedConditions.visibilityOfElementLocated(
-                    By.xpath(
-                        format(
-                            Locators.INSTALLER_VERSION_STATE,
-                            installerName,
-                            installerVersion,
-                            installerName))))
-            .getAttribute("aria-checked");
-
-    return Boolean.parseBoolean(state);
-  }
-
   public Boolean isInstallerStateNotChangeable(String installerName) {
     String state =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
             .until(
                 ExpectedConditions.visibilityOfElementLocated(
                     By.xpath(format(Locators.INSTALLER_STATE, installerName))))
-            .getAttribute("aria-disabled");
-
-    return Boolean.parseBoolean(state);
-  }
-
-  public Boolean isInstallerStateNotChangeable(String installerName, String installerVersion) {
-    String state =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(
-                ExpectedConditions.visibilityOfElementLocated(
-                    By.xpath(
-                        format(
-                            Locators.INSTALLER_VERSION_STATE,
-                            installerName,
-                            installerVersion,
-                            installerName))))
             .getAttribute("aria-disabled");
 
     return Boolean.parseBoolean(state);

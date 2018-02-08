@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,11 +15,10 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuIt
 import static org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage.OrganizationListHeader.NAME;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.eclipse.che.selenium.core.annotation.Multiuser;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestOrganizationServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
@@ -37,7 +36,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-@Multiuser
+@Test(groups = {TestGroup.MULTIUSER})
 public class FilterOrganizationTest {
   private static final String WRONG_ORG_NAME = generate("wrong-org-", 7);
 
@@ -62,7 +61,6 @@ public class FilterOrganizationTest {
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
 
-  @Test
   public void testOrganizationListFiler() {
     // Test that organization exist
     navigationBar.waitNavigationBar();
@@ -70,13 +68,7 @@ public class FilterOrganizationTest {
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
     assertEquals(navigationBar.getMenuCounterValue(ORGANIZATIONS), initialOrgNumber);
-    try {
-      assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
-    } catch (AssertionError a) {
-      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7279", a);
-    }
-
+    assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
     assertTrue(organizationListPage.getValues(NAME).contains(organization.getName()));
 
     // Tests filter the organization by full organization name
@@ -101,11 +93,6 @@ public class FilterOrganizationTest {
 
     organizationListPage.clearSearchInput();
 
-    try {
-      assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
-    } catch (AssertionError a) {
-      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7279", a);
-    }
+    assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
   }
 }

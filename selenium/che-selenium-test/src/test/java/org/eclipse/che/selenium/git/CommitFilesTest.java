@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.selenium.git;
+
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -31,6 +33,8 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -87,6 +91,13 @@ public class CommitFilesTest {
     ide.open(ws);
   }
 
+  @AfterMethod
+  public void closeForm() {
+    if (git.isCommitWidgetOpened()) {
+      git.clickOnCancelBtnCommitForm();
+    }
+  }
+
   @Test
   public void testCheckBoxSelections() {
     projectExplorer.waitProjectExplorer();
@@ -140,7 +151,7 @@ public class CommitFilesTest {
     git.waitItemCheckBoxToBeUnSelectedInCommitWindow("jsp", "guess_num.jsp");
     git.waitItemCheckBoxToBeSelectedInCommitWindow("web.xml", "spring-servlet.xml", "index.jsp");
 
-    git.clickOnCancelBtnComitForm();
+    git.clickOnCancelBtnCommitForm();
     git.waitCommitFormClosed();
   }
 
@@ -155,16 +166,14 @@ public class CommitFilesTest {
     refactor.waitRenamePackageFormIsOpen();
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     loader.waitOnClosed();
-    refactor.typeAndWaitNewName("org.eclipse.de");
-    refactor.sendKeysIntoField("v.exam");
-    refactor.sendKeysIntoField("pl");
-    refactor.sendKeysIntoField("es");
-    refactor.sendKeysIntoField("");
-    refactor.waitTextIntoNewNameField(NEW_NAME_PACKAGE);
+    refactor.typeAndWaitNewName(NEW_NAME_PACKAGE);
     refactor.clickOkButtonRefactorForm();
+
+    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/dev/examples");
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitCommitMainFormIsOpened();
+
     git.waitItemCheckBoxToBeSelectedInCommitWindow(
         "src/main",
         "java/org/eclipse/dev/examples",
@@ -177,7 +186,8 @@ public class CommitFilesTest {
         "spring-servlet.xml",
         "index.jsp",
         "pom.xml");
-    git.clickOnCancelBtnComitForm();
+
+    git.clickOnCancelBtnCommitForm();
     git.waitCommitFormClosed();
   }
 
@@ -186,7 +196,14 @@ public class CommitFilesTest {
     // perform init commit without one folder
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
-    git.clickItemCheckBoxInCommitWindow("java/org/eclipse/dev/examples");
+
+    try {
+      git.clickItemCheckBoxInCommitWindow("java/org/eclipse/dev/examples");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8042", ex);
+    }
+
     git.waitAndRunCommit("init");
     loader.waitOnClosed();
 

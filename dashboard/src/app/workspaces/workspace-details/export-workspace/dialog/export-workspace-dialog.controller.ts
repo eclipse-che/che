@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,7 @@ export class ExportWorkspaceDialogController {
   private $mdDialog: ng.material.IDialogService;
   private cheRemote: CheRemote;
   private $window: ng.IWindowService;
-  private lodash: _.LoDashStatic;
+  private lodash: any;
 
   private editorOptions: any;
   private destination: string;
@@ -45,9 +45,15 @@ export class ExportWorkspaceDialogController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $filter: ng.IFilterService, lodash: _.LoDashStatic, cheRemote: CheRemote,
-              cheNotification: CheNotification, $mdDialog: ng.material.IDialogService, $log: ng.ILogService,
-              $window: ng.IWindowService, $scope: ng.IScope) {
+  constructor($q: ng.IQService,
+              $filter: ng.IFilterService,
+              lodash: any,
+              cheRemote: CheRemote,
+              cheNotification: CheNotification,
+              $mdDialog: ng.material.IDialogService,
+              $log: ng.ILogService,
+              $window: ng.IWindowService,
+              $scope: ng.IScope) {
     this.$q = $q;
     this.$filter = $filter;
     this.lodash = lodash;
@@ -72,7 +78,7 @@ export class ExportWorkspaceDialogController {
     this.copyOfConfig = this.getCopyOfConfig();
     this.exportConfigContent = this.$filter('json')(angular.fromJson(this.copyOfConfig), 2);
 
-    $scope.selectedIndex = this.destination === 'file' ? 0 : 1;
+    ($scope as any).selectedIndex = this.destination === 'file' ? 0 : 1;
   }
 
   /**
@@ -101,7 +107,7 @@ export class ExportWorkspaceDialogController {
   removeLinks(object: any) {
     delete object.links;
 
-    return this.lodash.forEach(object, (value) => {
+    return this.lodash.forEach(object, (value: any) => {
       if (angular.isObject(value)) {
         return this.removeLinks(value);
       } else {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,11 +81,11 @@ public class RemoveLocalProjectsFolderOnWorkspaceRemove
   @Override
   public void onEvent(WorkspaceRemovedEvent event) {
     Workspace workspace = event.getWorkspace();
-    String workspaceName = workspace.getConfig().getName();
+    String workspaceId = workspace.getId();
 
     String projectSourcesPath;
     try {
-      projectSourcesPath = workspaceFolderPathProvider.getPathByName(workspaceName);
+      projectSourcesPath = workspaceFolderPathProvider.getPath(workspaceId);
     } catch (IOException e) {
       LOG.error(
           "Failed to evaluate projects files path for workspace with id: '{}'. Cause: '{}'",

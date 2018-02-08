@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,7 @@ import org.vectomatic.dom.svg.ui.SVGImage;
  */
 public class ClipboardButtonBuilderImpl implements ClipboardButtonBuilder {
 
-  private final ZeroClipboardResources res;
+  private final ClipboardResources res;
   private Widget resourceWidget;
   private Widget parentWidget;
   private SVGImage svgImage;
@@ -36,7 +36,7 @@ public class ClipboardButtonBuilderImpl implements ClipboardButtonBuilder {
   private String promptReadyToSelect;
 
   @Inject
-  public ClipboardButtonBuilderImpl(ZeroClipboardResources res, ZeroClipboardConstant locale) {
+  public ClipboardButtonBuilderImpl(ClipboardResources res, ClipboardConstant locale) {
     this.res = res;
     promptReadyToCopy = locale.promptReadyToCopy();
     promptAfterCopy = locale.promptAfterCopy();

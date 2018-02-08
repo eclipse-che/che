@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -162,6 +162,16 @@ public class RevertCommitViewImpl extends Window implements RevertCommitView {
   }
 
   private void createButtons() {
+    btnRevert =
+        createButton(
+            locale.buttonRevert(),
+            "git-revert",
+            event -> {
+              delegate.onRevertClicked();
+            });
+    btnRevert.addStyleName(resources.windowCss().primaryButton());
+    addButtonToFooter(btnRevert);
+
     btnCancel =
         createButton(
             locale.buttonCancel(),
@@ -170,15 +180,6 @@ public class RevertCommitViewImpl extends Window implements RevertCommitView {
               delegate.onCancelClicked();
             });
     addButtonToFooter(btnCancel);
-
-    btnRevert =
-        createButton(
-            locale.buttonRevert(),
-            "git-revert",
-            event -> {
-              delegate.onRevertClicked();
-            });
-    addButtonToFooter(btnRevert);
   }
 
   @UiHandler("revisionsPanel")

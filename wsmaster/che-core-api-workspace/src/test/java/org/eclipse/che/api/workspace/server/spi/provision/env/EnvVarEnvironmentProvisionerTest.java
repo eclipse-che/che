@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -136,7 +136,7 @@ public class EnvVarEnvironmentProvisionerTest {
   }
 
   @Test
-  public void shouldReplaceExistingEnvVarsWithMatchingNames() throws Exception {
+  public void shouldNotReplaceExistingEnvVarsWithMatchingNames() throws Exception {
     // given
     EnvVarEnvironmentProvisioner provisioner =
         new EnvVarEnvironmentProvisioner(singleton(provider1));
@@ -152,6 +152,6 @@ public class EnvVarEnvironmentProvisionerTest {
     provisioner.provision(RUNTIME_IDENTITY, internalEnvironment);
 
     // then
-    assertEquals(ImmutableMap.of(existingEnvVarName, envVarValueFromProvider), machine1Env);
+    assertEquals(ImmutableMap.of(existingEnvVarName, oldEnvVarValue), machine1Env);
   }
 }

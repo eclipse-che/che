@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -63,6 +64,16 @@ public class FailNotPrivateFieldTest {
     loader.waitOnClosed();
   }
 
+  @AfterMethod
+  public void closeForm() {
+    if (refactor.isWidgetOpened()) {
+      refactor.clickCancelButtonRefactorForm();
+    }
+    if (editor.isAnyTabsOpened()) {
+      editor.closeAllTabs();
+    }
+  }
+
   @Test
   public void testFail0() throws Exception {
     setFieldsForTest("testfail0");
@@ -73,8 +84,7 @@ public class FailNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     refactor.waitUpdateReferencesIsSelected();
     refactor.typeAndWaitNewName("g");
@@ -93,8 +103,7 @@ public class FailNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     refactor.waitUpdateReferencesIsSelected();
     refactor.typeAndWaitNewName("g");
@@ -113,8 +122,7 @@ public class FailNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     refactor.waitUpdateReferencesIsSelected();
     refactor.typeAndWaitNewName("g");
@@ -134,8 +142,7 @@ public class FailNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     refactor.waitUpdateReferencesIsSelected();
     refactor.typeAndWaitNewName("g");
@@ -155,8 +162,7 @@ public class FailNotPrivateFieldTest {
     editor.setCursorToLine(13);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameFieldFormIsOpen();
     refactor.waitUpdateReferencesIsSelected();
     refactor.typeAndWaitNewName("g");

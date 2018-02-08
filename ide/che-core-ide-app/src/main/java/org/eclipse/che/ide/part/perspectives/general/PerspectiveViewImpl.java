@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -178,17 +178,6 @@ public class PerspectiveViewImpl extends LayoutPanel
     smallBorder.getStyle().setProperty("top", "0px");
     smallBorder.getStyle().setProperty("backgroundColor", Style.getSplitterSmallBorderColor());
     el.appendChild(smallBorder);
-
-    /** Add large border */
-    DivElement largeBorder = Document.get().createDivElement();
-    largeBorder.getStyle().setProperty("position", "absolute");
-    largeBorder.getStyle().setProperty("width", "1px");
-    largeBorder.getStyle().setProperty("height", "100%");
-    largeBorder.getStyle().setProperty("left", "1px");
-    largeBorder.getStyle().setProperty("top", "0px");
-    largeBorder.getStyle().setProperty("opacity", "0.4");
-    largeBorder.getStyle().setProperty("backgroundColor", Style.getSplitterLargeBorderColor());
-    el.appendChild(largeBorder);
   }
 
   /**
@@ -217,17 +206,6 @@ public class PerspectiveViewImpl extends LayoutPanel
     smallBorder.getStyle().setProperty("top", "0px");
     smallBorder.getStyle().setProperty("backgroundColor", Style.getSplitterSmallBorderColor());
     el.appendChild(smallBorder);
-
-    /** Add large border */
-    DivElement largeBorder = Document.get().createDivElement();
-    largeBorder.getStyle().setProperty("position", "absolute");
-    largeBorder.getStyle().setProperty("width", "1px");
-    largeBorder.getStyle().setProperty("height", "100%");
-    largeBorder.getStyle().setProperty("left", "3px");
-    largeBorder.getStyle().setProperty("top", "0px");
-    largeBorder.getStyle().setProperty("opacity", "0.4");
-    largeBorder.getStyle().setProperty("backgroundColor", Style.getSplitterLargeBorderColor());
-    el.appendChild(largeBorder);
   }
 
   /**

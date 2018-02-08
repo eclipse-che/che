@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,19 +10,13 @@
  */
 'use strict';
 
+import {CheNotification} from '../../../../components/notification/che-notification.factory';
+import {CheProfile} from '../../../../components/api/che-profile.factory';
+
 enum Tab {Profile, Organization}
 
 interface IScope extends ng.IScope {
   profileInformationForm: ng.IFormController;
-}
-
-interface IProfileAttributes {
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
-  country?: string;
-  employer?: string;
-  jobtitle?: string;
 }
 
 const MAX_ITEMS = 12;
@@ -42,11 +36,11 @@ export class AdminUserDetailsController {
   /**
    * User profile service.
    */
-  private cheProfile: any;
+  private cheProfile: CheProfile;
   /**
    * Notification service.
    */
-  private cheNotification: any;
+  private cheNotification: CheNotification;
   /**
    * Index of the selected tab.
    */
@@ -58,7 +52,7 @@ export class AdminUserDetailsController {
   /**
    * Profile attributes.
    */
-  private profileAttributes: IProfileAttributes;
+  private profileAttributes: che.IProfileAttributes;
   /**
    * Loading state of the page.
    */
@@ -84,7 +78,13 @@ export class AdminUserDetailsController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor(cheProfile: any, $location: ng.ILocationService, $timeout: ng.ITimeoutService, $scope: ng.IScope, cheNotification: any, cheOrganization: che.api.ICheOrganization, initData: {userId; userName}) {
+  constructor(cheProfile: CheProfile,
+              $location: ng.ILocationService,
+              $timeout: ng.ITimeoutService,
+              $scope: ng.IScope,
+              cheNotification: CheNotification,
+              cheOrganization: che.api.ICheOrganization,
+              initData: {userId; userName}) {
     this.cheOrganization = cheOrganization;
     this.$location = $location;
     this.cheProfile = cheProfile;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,6 +63,7 @@ public class CheckMavenPluginTest {
         workspace.getId(), get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
     ide.open(workspace);
     projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
   }
 
   @Test
@@ -100,6 +101,7 @@ public class CheckMavenPluginTest {
   @Test(priority = 2)
   public void shouldAccessClassCreatedInAnotherModuleAfterIncludingModule() {
     includeModulesInTheParentPom();
+    projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
     editor.waitActive();

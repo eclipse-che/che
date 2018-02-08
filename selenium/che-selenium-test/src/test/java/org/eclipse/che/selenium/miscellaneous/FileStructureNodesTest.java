@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,8 @@ package org.eclipse.che.selenium.miscellaneous;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FILE_STRUCTURE;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SIMPLE;
+import static org.openqa.selenium.Keys.ESCAPE;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -24,6 +26,7 @@ import org.eclipse.che.selenium.pageobject.FileStructure;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -99,6 +102,34 @@ public class FileStructureNodesTest {
           + "FIVE\n"
           + "TEN";
 
+  private static final String ITEMS_FILTERED_GET =
+      "Company\n"
+          + "getInstance() : Company\n"
+          + "getListEmployees() : List<Employee>\n"
+          + "Inter\n"
+          + "getId() : double\n"
+          + "getDate() : String\n";
+
+  private static final String ITEMS_FILTERED_I =
+      "Company\n"
+          + "getInstance() : Company\n"
+          + "doListId() : List<String>\n"
+          + "doListName() : List<String>\n"
+          + "doListDate() : List<String>\n"
+          + "createListEmpl() : List<Employee>\n"
+          + "createListEmpl(int) : List<Employee>\n"
+          + "getListEmployees() : List<Employee>\n"
+          + "sortId() : List<Employee>\n"
+          + "listEmployees\n"
+          + "listId\n"
+          + "listName\n"
+          + "listDate\n"
+          + "CompanyHelper\n"
+          + "INSTANCE\n"
+          + "Inter\n"
+          + "getId() : double\n"
+          + "FIVE\n";
+
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
@@ -115,15 +146,34 @@ public class FileStructureNodesTest {
   }
 
   @Test
-  public void checkFileStructureNodes() {
+  void checkFileStructureFilter() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByVisibleNameInExplorer("Company.java");
 
-    // check work nodes in the 'file structure' by double click
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
+
+    try {
+      fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8300");
+    }
+
+    fileStructure.type("get");
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_FILTERED_GET);
+    fileStructure.type(ESCAPE.toString());
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+    fileStructure.type("i");
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_FILTERED_I);
+    fileStructure.type(ESCAPE.toString());
+  }
+
+  @Test(priority = 1)
+  public void checkFileStructureNodes() {
+    // check work nodes in the 'file structure' by double click
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);

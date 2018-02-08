@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,7 +43,9 @@ public class MavenServerManagerTest {
   private final String mavenServerPath =
       MavenServerManagerTest.class.getResource("/maven-server").getPath();
 
-  private MavenServerManager manager = new MavenServerManager(mavenServerPath);
+  private MavenServerManager manager =
+      new MavenServerManager(
+          mavenServerPath, "-XX:MaxRAM=128m -XX:MaxRAMFraction=1 -XX:+UseParallelGC");
 
   private MavenServerWrapper mavenServer;
 
@@ -71,7 +73,8 @@ public class MavenServerManagerTest {
 
   @Test
   public void testBuildMavenServerParametersMainWorkDirExec() throws Exception {
-    MavenServerManager test = new MavenServerManager("test");
+    MavenServerManager test =
+        new MavenServerManager("test", "-XX:MaxRAM=128m -XX:MaxRAMFraction=1 -XX:+UseParallelGC");
     try {
       JavaParameters parameters = test.buildMavenServerParameters();
       assertThat(parameters.getMainClassName())

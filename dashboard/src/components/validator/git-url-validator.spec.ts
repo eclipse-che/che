@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheHttpBackend} from '../api/test/che-http-backend';
 
 /**
  * Test the git URL
@@ -31,7 +32,7 @@ describe('git-url-validator', function() {
 
 
 
-  beforeEach(inject(function($compile, $rootScope, cheHttpBackend) {
+  beforeEach(inject(function($compile: ng.ICompileService, $rootScope: ng.IRootScopeService, cheHttpBackend: CheHttpBackend) {
     $scope = $rootScope;
     // setup backend
     cheBackend = cheHttpBackend;
@@ -65,7 +66,7 @@ describe('git-url-validator', function() {
         'ssh://host.xz/~/path/to/repo.git'
       ];
 
-      validUrls.forEach(function (url) {
+      validUrls.forEach(function (url: string) {
         form.url.$setViewValue(url);
         expect($scope.model.myURL).toEqual(url);
         expect(form.url.$valid).toBe(true);
@@ -87,7 +88,7 @@ describe('git-url-validator', function() {
 
     it('invalids URLs', function() {
       var invalidUrls = ['eeeee'];
-      invalidUrls.forEach(function (url) {
+      invalidUrls.forEach(function (url: string) {
         form.url.$setViewValue(url);
         // undefined model
         expect($scope.model.myURL).toBeUndefined();

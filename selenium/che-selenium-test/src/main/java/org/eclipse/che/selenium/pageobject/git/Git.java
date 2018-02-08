@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -362,8 +362,17 @@ public class Git {
     gitCommit.waitMainFormCommit();
   }
 
+  /**
+   * check opened state of commit form
+   *
+   * @return true if widget is open
+   */
+  public boolean isCommitWidgetOpened() {
+    return gitCommit.isWidgetOpened();
+  }
+
   /** click on the "Cancel' button in tne 'Commit' main form wait the main form is closed */
-  public void clickOnCancelBtnComitForm() {
+  public void clickOnCancelBtnCommitForm() {
     gitCommit.clickOnCancelBtn();
     gitCommit.waitMainFormCommitIsClosed();
   }

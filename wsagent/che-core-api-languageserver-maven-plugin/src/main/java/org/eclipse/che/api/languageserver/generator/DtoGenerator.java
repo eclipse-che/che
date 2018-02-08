@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -161,6 +161,7 @@ public abstract class DtoGenerator {
       out.println("import java.util.ArrayList;");
       out.println("import java.util.HashMap;");
       out.println("import org.eclipse.lsp4j.jsonrpc.messages.Either;");
+      out.println("import org.eclipse.lsp4j.jsonrpc.messages.Either3;");
       out.println("import org.eclipse.che.api.languageserver.util.EitherUtil;");
       out.println("import org.eclipse.che.api.languageserver.util.JsonUtil;");
       out.println("import org.eclipse.che.api.languageserver.shared.util.JsonDecision;");

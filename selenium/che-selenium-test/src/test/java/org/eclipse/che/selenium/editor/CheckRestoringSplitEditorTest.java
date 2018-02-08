@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,10 +25,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -63,6 +65,8 @@ public class CheckRestoringSplitEditorTest {
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
+  @Inject private TestApiEndpointUrlProvider testApiEndpointUrlProvider;
+  @Inject private HttpJsonRequestFactory httpJsonRequestFactory;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -80,25 +84,21 @@ public class CheckRestoringSplitEditorTest {
   }
 
   @Test
-  public void checkRestoringStateSplittedEditor() throws IOException {
+  public void checkRestoringStateSplittedEditor() throws IOException, Exception {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     splitEditorAndOpenFiles();
-    try {
-      setPositionsForSplittedEditor();
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7729", ex);
-    }
-
+    setPositionsForSplittedEditor();
     editor.waitActive();
     if (popupDialogsBrowser.isAlertPresent()) {
       popupDialogsBrowser.acceptAlert();
     }
 
+    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitItemIsSelected(PROJECT_NAME);
+
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitItem(PROJECT_NAME);
-
     try {
       projectExplorer.waitItemInVisibleArea(javaClassName);
     } catch (TimeoutException ex) {
@@ -154,5 +154,13 @@ public class CheckRestoringSplitEditorTest {
     editor.goToPosition(cursorPositionForReadMeFile.first, cursorPositionForReadMeFile.second);
     editor.selectTabByName(pomFileTab);
     editor.goToPosition(cursorPositionForPomFile.first, cursorPositionForPomFile.second);
+  }
+
+  private String getPreferences() throws Exception {
+    return httpJsonRequestFactory
+        .fromUrl(testApiEndpointUrlProvider.get() + "preferences")
+        .useGetMethod()
+        .request()
+        .asString();
   }
 }

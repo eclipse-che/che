@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,33 +15,28 @@
  * Expects in parent scope:
  * @param{object} stack
  */
-export class StackItem {
+export class StackItem implements ng.IDirective {
 
-  /**
-   * Default constructor.
-   */
-  constructor() {
-    this.restrict = 'E';
+  restrict = 'E';
 
-    // we require ngModel as we want to use it inside our directive
-    this.require = ['ngModel'];
+  // we require ngModel as we want to use it inside our directive
+  require = ['ngModel'];
 
-    // scope values
-    this.scope = {
-      stack: '=stack',
-      userId: '=userId',
-      isSelectable: '=cheSelectable',
-      isSelect: '=?ngModel',
-      onCheckboxClick: '&?cheOnCheckboxClick',
-      onDelete: '&cheOnDelete',
-      onDuplicate: '&cheOnDuplicate'
-    };
+  // scope values
+  scope = {
+    stack: '=stack',
+    userId: '=userId',
+    isSelectable: '=cheSelectable',
+    isSelect: '=?ngModel',
+    onCheckboxClick: '&?cheOnCheckboxClick',
+    onDelete: '&cheOnDelete',
+    onDuplicate: '&cheOnDuplicate'
+  };
 
-    this.templateUrl = 'app/stacks/list-stacks/stack-item/stack-item.html';
+  templateUrl = 'app/stacks/list-stacks/stack-item/stack-item.html';
 
-    this.controller = 'StackItemController';
-    this.controllerAs = 'stackItemController';
-    this.bindToController = true;
-  }
+  controller = 'StackItemController';
+  controllerAs = 'stackItemController';
+  bindToController = true;
 
 }

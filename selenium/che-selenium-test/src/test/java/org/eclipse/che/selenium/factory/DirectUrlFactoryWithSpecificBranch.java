@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
@@ -27,6 +28,8 @@ import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.PullRequestPanel;
+import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -45,6 +48,7 @@ public class DirectUrlFactoryWithSpecificBranch {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private PullRequestPanel pullRequestPanel;
 
   private TestFactory testFactoryWithSpecificBranch;
 
@@ -65,6 +69,7 @@ public class DirectUrlFactoryWithSpecificBranch {
   @Test
   public void factoryWithDirectUrlWithSpecificBranch() throws Exception {
     testFactoryWithSpecificBranch.authenticateAndOpen();
+
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitProgressPopupPanelClose();
     events.clickEventLogBtn();
@@ -76,7 +81,15 @@ public class DirectUrlFactoryWithSpecificBranch {
     events.waitExpectedMessage(
         "Project: gitPullTest | cloned from: gitPullTest | remote branch: refs/remotes/origin/contrib-12092015 | local branch: contrib-12092015",
         UPDATING_PROJECT_TIMEOUT_SEC);
-    projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");
+    projectExplorer.selectItem("gitPullTest");
+    pullRequestPanel.waitOpenPanel();
+
+    try {
+      projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8616");
+    }
     projectExplorer.waitItem("gitPullTest/my-lib/pom.xml");
 
     String wsId =

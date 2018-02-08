@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,8 @@ import {CheWorkspace, WorkspaceStatus} from '../../../components/api/workspace/c
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {WorkspaceDetailsService} from './workspace-details.service';
 import IdeSvc from '../../ide/ide.service';
+import {WorkspacesService} from '../workspaces.service';
+import {ICheEditModeOverlayConfig} from '../../../components/widget/edit-mode-overlay/che-edit-mode-overlay.directive';
 
 export  interface IInitData {
   namespaceId: string;
@@ -20,10 +22,7 @@ export  interface IInitData {
   workspaceDetails: che.IWorkspace;
 }
 
-const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Installers', 'Servers', 'Env_Variables', 'Config', 'SSH'];
-
-const STOPPING = WorkspaceStatus[WorkspaceStatus.STOPPING];
-const STOPPED = WorkspaceStatus[WorkspaceStatus.STOPPED];
+const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Installers', 'Servers', 'Env_Variables', 'Volumes', 'Config', 'SSH'];
 
 /**
  * @ngdoc controller
@@ -34,9 +33,16 @@ const STOPPED = WorkspaceStatus[WorkspaceStatus.STOPPED];
  * @author Oleksii Orel
  */
 export class WorkspaceDetailsController {
+  /**
+   * Overlay panel configuration.
+   */
+  editOverlayConfig: ICheEditModeOverlayConfig;
+  workspaceDetails: che.IWorkspace;
+  workspacesService: WorkspacesService;
   private $scope: ng.IScope;
   private $log: ng.ILogService;
   private $location: ng.ILocationService;
+  private $timeout: ng.ITimeoutService;
   private cheNotification: CheNotification;
   private cheWorkspace: CheWorkspace;
   private ideSvc: IdeSvc;
@@ -47,29 +53,40 @@ export class WorkspaceDetailsController {
   private workspaceId: string = '';
   private workspaceName: string = '';
   private newName: string = '';
-  private workspaceDetails: che.IWorkspace;
   private originWorkspaceDetails: any = {};
-  private editMode: boolean = false;
-  private showApplyMessage: boolean = false;
   private workspaceImportedRecipe: che.IRecipe;
   private forms: Map<string, ng.IFormController> = new Map();
   private tab: { [key: string]: string } = {};
-  private saving: boolean = false;
-  private editModeMessage: string = '';
   private errorMessage: string = '';
+  private tabsValidationTimeout: ng.IPromise<any>;
+  /**
+   * There are unsaved changes to apply (with restart) when is't <code>true</code>.
+   */
+  private unsavedChangesToApply: boolean;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, $log: ng.ILogService, $scope: ng.IScope, cheNotification: CheNotification, cheWorkspace: CheWorkspace, ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService, initData: IInitData) {
+  constructor($location: ng.ILocationService,
+              $log: ng.ILogService,
+              $scope: ng.IScope,
+              cheNotification: CheNotification,
+              cheWorkspace: CheWorkspace,
+              ideSvc: IdeSvc,
+              workspaceDetailsService: WorkspaceDetailsService,
+              initData: IInitData,
+              $timeout: ng.ITimeoutService,
+              workspacesService: WorkspacesService) {
     this.$log = $log;
     this.$scope = $scope;
+    this.$timeout = $timeout;
     this.$location = $location;
     this.cheNotification = cheNotification;
     this.cheWorkspace = cheWorkspace;
     this.ideSvc = ideSvc;
     this.workspaceDetailsService = workspaceDetailsService;
+    this.workspacesService = workspacesService;
 
     if (!initData.workspaceDetails) {
       cheNotification.showError(`There is no workspace with name ${initData.workspaceName}`);
@@ -81,12 +98,22 @@ export class WorkspaceDetailsController {
     this.workspaceName = initData.workspaceName;
     this.workspaceId = initData.workspaceDetails.id;
 
-    const action = (workspaceDetails: che.IWorkspace) => {
-      this.workspaceDetails = angular.copy(this.cheWorkspace.getWorkspaceById(this.originWorkspaceDetails.id));
-      this.updateWorkspaceData(workspaceDetails);
+    const action = (newWorkspaceDetails: che.IWorkspace) => {
+      if (angular.equals(newWorkspaceDetails, this.originWorkspaceDetails)) {
+        return;
+      }
+
+      this.originWorkspaceDetails = angular.copy(newWorkspaceDetails);
+      if (this.unsavedChangesToApply === false) {
+        this.workspaceDetails = angular.copy(newWorkspaceDetails);
+      }
+      this.checkEditMode();
     };
     this.cheWorkspace.subscribeOnWorkspaceChange(initData.workspaceDetails.id, action);
-    this.updateWorkspaceData(initData.workspaceDetails);
+
+    this.originWorkspaceDetails = angular.copy(initData.workspaceDetails);
+    this.workspaceDetails = angular.copy(initData.workspaceDetails);
+    this.checkEditMode();
 
     this.updateTabs();
 
@@ -102,6 +129,43 @@ export class WorkspaceDetailsController {
       this.cheWorkspace.unsubscribeOnWorkspaceChange(this.workspaceId, action);
       searchDeRegistrationFn();
     });
+
+    this.editOverlayConfig = {
+      visible: false,
+      disabled: false,
+      message: {
+        content: this.getOverlayMessage(),
+        visible: false
+      },
+      applyButton: {
+        action: () => {
+          this.applyConfigChanges();
+        },
+        disabled: this.workspaceDetailsService.getRestartToApply(this.workspaceId) === false,
+        title: 'Apply'
+      },
+      saveButton: {
+        action: () => {
+          this.saveConfigChanges();
+        },
+        title: 'Save',
+        disabled: false
+      },
+      cancelButton: {
+        action: () => {
+          this.cancelConfigChanges();
+        }
+      }
+    };
+  }
+
+  /**
+   * Returns `true` if the recipe of default environment of the workspace has supported recipe type
+   *
+   * @returns {boolean}
+   */
+  get isSupported(): boolean {
+    return this.workspacesService.isSupported(this.workspaceDetails);
   }
 
   /**
@@ -160,21 +224,6 @@ export class WorkspaceDetailsController {
   }
 
   /**
-   * Prepare workspaces data.
-   *
-   * @param workspaceDetails {che.IWorkspace}
-   */
-  updateWorkspaceData(workspaceDetails: che.IWorkspace): void {
-    this.originWorkspaceDetails = angular.copy(workspaceDetails);
-    this.checkEditMode();
-    if (this.workspaceDetails && this.editMode) {
-      return;
-    }
-    this.workspaceDetails = angular.copy(workspaceDetails);
-    this.workspaceDetailsService.publishWorkspaceChange(workspaceDetails);
-  }
-
-  /**
    * Returns current status of workspace.
    *
    * @returns {string}
@@ -210,6 +259,9 @@ export class WorkspaceDetailsController {
     if (!config) {
       return;
     }
+    if (angular.equals(this.workspaceDetails.config, config)) {
+      return;
+    }
 
     if (this.newName !== config.name) {
       this.newName = config.name;
@@ -222,18 +274,13 @@ export class WorkspaceDetailsController {
     this.checkEditMode();
   }
 
-
-  checkEditMode(): void {
-    if (!this.originWorkspaceDetails || !this.workspaceDetails) {
-      return;
-    }
-    this.editMode = !angular.equals(this.originWorkspaceDetails.config, this.workspaceDetails.config);
-    if (this.editMode === false) {
-      this.editModeMessage = '';
-      this.showApplyMessage = false;
-      return;
-    }
-    this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
+  /**
+   * This method checks form validity on each tab and returns <code>true</code> if
+   * all forms are valid.
+   *
+   * @returns {string[]} list of names of failed tabs.
+   */
+  checkForFailedTabs(): string[] {
     const failTabs = [];
     const tabs = Object.keys(this.tab).filter((tabKey: string) => {
       return !isNaN(parseInt(tabKey, 10));
@@ -243,61 +290,177 @@ export class WorkspaceDetailsController {
         failTabs.push(this.tab[tabKey]);
       }
     });
-    if (failTabs.length) {
-      const url = this.$location.absUrl().split('?')[0];
-      this.editModeMessage = '<i class="error fa fa-exclamation-circle" aria-hidden="true"></i>&nbsp;Impossible to save and apply the configuration. Errors in ';
-      this.editModeMessage += failTabs.map((tab: string) => {
-        return `<a href='${url}?tab=${tab}'>${tab}</a>`;
-      }).join(', ');
-      this.showApplyMessage = true;
-      return;
-    }
-    this.editModeMessage = 'Changes will be applied and workspace restarted';
-    const needRunningStatus = this.workspaceDetailsService.needRunningToUpdate();
-    if (needRunningStatus) {
-      this.showApplyMessage = true;
-    } else  {
-      const statusStr = this.getWorkspaceStatus();
-      this.showApplyMessage = [STOPPED, STOPPING].indexOf(statusStr) === -1;
-    }
+
+    return failTabs;
   }
 
   /**
-   * Updates workspace config changes.
+   * Builds and returns message for edit-mode-overlay component.
+   *
+   * @param {string[]=} failedTabs list of names of failed tabs.
+   * @returns {string}
    */
-  saveWorkspace(): void {
-    this.editMode = false;
-    this.showApplyMessage = false;
+  getOverlayMessage(failedTabs?: string[]): string {
+    if (this.isSupported === false) {
+      return `Current infrastructure doesn't support this workspace recipe type.`;
+    }
 
-    this.saving = true;
+    if (failedTabs && failedTabs.length > 0) {
+      const url = this.$location.absUrl().split('?')[0];
+      let message = `<i class="error fa fa-exclamation-circle"
+          aria-hidden="true"></i>&nbsp;Impossible to save and apply the configuration. Errors in `;
+      message += failedTabs.map((tab: string) => {
+        return `<a href='${url}?tab=${tab}'>${tab}</a>`;
+      }).join(', ');
+
+      return message;
+    }
+
+    return 'Your workspace will be restarted if you click Apply button.';
+  }
+
+  /**
+   * Updates config of edit-mode-overlay component.
+   *
+   * @param {boolean} configIsDiffer <code>true</code> if config is differ
+   * @param {string[]=} failedTabs list of names of failed tabs.
+   */
+  updateEditModeOverlayConfig(configIsDiffer: boolean, failedTabs?: string[]): void {
+    const formIsValid = !failedTabs || failedTabs.length === 0;
+
+    // panel
+    this.editOverlayConfig.disabled = !formIsValid || this.loading;
+    this.editOverlayConfig.visible = configIsDiffer || this.workspaceDetailsService.getRestartToApply(this.workspaceId);
+
+    // 'save' button
+    this.editOverlayConfig.saveButton.disabled = !this.isSupported || !configIsDiffer;
+
+    // 'apply' button
+    this.editOverlayConfig.applyButton.disabled = !this.isSupported
+      || (!this.unsavedChangesToApply && !this.workspaceDetailsService.getRestartToApply(this.workspaceId));
+
+    // 'cancel' button
+    this.editOverlayConfig.cancelButton.disabled = !configIsDiffer;
+
+    // message content
+    this.editOverlayConfig.message.content = this.getOverlayMessage(failedTabs);
+
+    // message visibility
+    this.editOverlayConfig.message.visible = !this.isSupported
+      || failedTabs.length > 0
+      || this.unsavedChangesToApply
+      || this.workspaceDetailsService.getRestartToApply(this.workspaceId);
+  }
+
+  /**
+   * Checks editing mode for workspace config.
+   */
+  checkEditMode(restartToApply?: boolean): ng.IPromise<any> {
+    if (!this.originWorkspaceDetails || !this.workspaceDetails) {
+      return;
+    }
+
+    if (this.tabsValidationTimeout) {
+      this.$timeout.cancel(this.tabsValidationTimeout);
+    }
+
+    return this.tabsValidationTimeout = this.$timeout(() => {
+      const configIsDiffer = !angular.equals(this.originWorkspaceDetails.config, this.workspaceDetails.config);
+
+      // the workspace should be restarted only if its status is STARTING or RUNNING
+      if (this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.STARTING] || this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.RUNNING]) {
+        this.unsavedChangesToApply = configIsDiffer && (this.unsavedChangesToApply || !!restartToApply);
+      } else {
+        this.unsavedChangesToApply = false;
+      }
+
+      // check for failed tabs
+      const failedTabs = this.checkForFailedTabs();
+      // update overlay
+      this.updateEditModeOverlayConfig(configIsDiffer, failedTabs);
+      // publish changes
+      this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
+    }, 500);
+  }
+
+  /**
+   * Applies workspace config changes and restarts the workspace.
+   */
+  applyConfigChanges(): void {
+    this.editOverlayConfig.disabled = true;
+
     this.loading = true;
     this.$scope.$broadcast('edit-workspace-details', {status: 'saving'});
 
-    this.workspaceDetailsService.applyChanges(this.originWorkspaceDetails, this.workspaceDetails).then((data: any) => {
-      this.cheNotification.showInfo('Workspace updated.');
-      this.$scope.$broadcast('edit-workspace-details', {status: 'saved'});
-      this.saving = false;
-      this.cheWorkspace.fetchWorkspaceDetails(this.originWorkspaceDetails.id).then(() => {
-        this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceDetails.config.name).search({tab: this.tab[this.selectedTabIndex]});
-      }).finally(() => {
+    this.workspaceDetailsService.applyConfigChanges(this.workspaceDetails)
+      .then(() => {
+        this.workspaceDetailsService.removeRestartToApply(this.workspaceId);
+        this.unsavedChangesToApply = false;
+
+        this.cheNotification.showInfo('Workspace updated.');
+        this.$scope.$broadcast('edit-workspace-details', {status: 'saved'});
+
+        return this.cheWorkspace.fetchWorkspaceDetails(this.originWorkspaceDetails.id).then(() => {
+          this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceDetails.config.name).search({tab: this.tab[this.selectedTabIndex]});
+        });
+      })
+      .catch((error: any) => {
+        this.$scope.$broadcast('edit-workspace-details', {status: 'failed'});
+        this.cheNotification.showError('Update workspace failed.', error);
+        return this.checkEditMode(true);
+      })
+      .finally(() => {
         this.loading = false;
       });
-    }, (error: any) => {
-      this.$scope.$broadcast('edit-workspace-details', {status: 'failed'});
-      this.cheNotification.showError('Update workspace failed.', error);
-      this.checkEditMode();
-      this.saving = false;
-      this.loading = false;
-    });
+  }
+
+  /**
+   * Updates workspace with new config.
+   */
+  saveConfigChanges(): void {
+    this.editOverlayConfig.disabled = true;
+
+    this.loading = true;
+    this.$scope.$broadcast('edit-workspace-details', {status: 'saving'});
+
+    this.workspaceDetailsService.saveConfigChanges(this.workspaceDetails)
+      .then(() => {
+        if (this.unsavedChangesToApply) {
+          this.workspaceDetailsService.addRestartToApply(this.workspaceId);
+        } else {
+          this.workspaceDetailsService.removeRestartToApply(this.workspaceId);
+        }
+        this.unsavedChangesToApply = false;
+
+        this.cheNotification.showInfo('Workspace updated.');
+        this.$scope.$broadcast('edit-workspace-details', {status: 'saved'});
+
+        return this.cheWorkspace.fetchWorkspaceDetails(this.originWorkspaceDetails.id).then(() => {
+          this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceDetails.config.name).search({tab: this.tab[this.selectedTabIndex]});
+        });
+      })
+      .catch((error: any) => {
+        this.$scope.$broadcast('edit-workspace-details', {status: 'failed'});
+        const errorMessage = 'Cannot update workspace configuration.';
+        this.cheNotification.showError(error && error.data && error.data.message ? error.data.message : errorMessage);
+      })
+      .finally(() => {
+        this.loading = false;
+
+        return this.checkEditMode();
+      });
   }
 
   /**
    * Cancels workspace config changes that weren't stored
    */
   cancelConfigChanges(): void {
+    this.editOverlayConfig.disabled = true;
+    this.unsavedChangesToApply = false;
+
     this.workspaceDetails = angular.copy(this.originWorkspaceDetails);
-    this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
-    this.editMode = false;
+
+    this.checkEditMode();
 
     this.$scope.$broadcast('edit-workspace-details', {status: 'cancelled'});
   }

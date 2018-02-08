@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.selenium.opendeclaration;
+
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -21,6 +23,7 @@ import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -57,7 +60,14 @@ public class Eclipse0121Test {
     editor.waitActive();
     editor.goToCursorPositionVisible(15, 43);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("Collections");
+
+    try {
+      editor.waitTabIsPresent("Collections");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7161", ex);
+    }
+
     editor.waitSpecifiedValueForLineAndChar(14, 35);
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,7 @@ public class StyleInjector {
     resources.dataGridStyle().ensureInjected();
     resources.cellTableStyle().ensureInjected();
     resources.defaultCategoriesListCss().ensureInjected();
-    resources.Css().ensureInjected();
+    resources.buttonLoaderCss().ensureInjected();
     resources.menuCss().ensureInjected();
 
     resources.commandsExplorerCss().ensureInjected();
@@ -44,5 +44,6 @@ public class StyleInjector {
     resources.commandToolbarCss().ensureInjected();
     resources.editorCss().ensureInjected();
     resources.commandTypeChooserCss().ensureInjected();
+    resources.treeStylesCss().ensureInjected();
   }
 }

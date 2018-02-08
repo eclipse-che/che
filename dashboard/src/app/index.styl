@@ -236,15 +236,17 @@ md-tabs-canvas md-tab-item.md-tab.md-active
 .error
   color $error-color
 
-md-tab-item
-  background-color inherit !important
-  .error-state
-    color $error-color !important
-    position absolute
-    display inline-block
-    font-size 14px
-    margin-top 5px
-    margin-left -15px
+md-tabs-wrapper
+  z-index 1
+  md-tab-item
+    background-color inherit !important
+    .error-state
+      color $error-color !important
+      position absolute
+      display inline-block
+      font-size 14px
+      margin-top 5px
+      margin-left -15px
 
 .popover
   font-family 'Open Sans'

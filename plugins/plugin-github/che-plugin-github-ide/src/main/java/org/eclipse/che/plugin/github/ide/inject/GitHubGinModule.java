@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,8 +16,8 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
-import org.eclipse.che.plugin.github.ide.GitHubClientService;
-import org.eclipse.che.plugin.github.ide.GitHubClientServiceImpl;
+import org.eclipse.che.plugin.github.ide.GitHubServiceClient;
+import org.eclipse.che.plugin.github.ide.GitHubServiceClientImpl;
 import org.eclipse.che.plugin.github.ide.authenticator.GitHubAuthenticatorImpl;
 import org.eclipse.che.plugin.github.ide.importer.GitHubImportWizardRegistrar;
 
@@ -27,7 +27,7 @@ public class GitHubGinModule extends AbstractGinModule {
   /** {@inheritDoc} */
   @Override
   protected void configure() {
-    bind(GitHubClientService.class).to(GitHubClientServiceImpl.class).in(Singleton.class);
+    bind(GitHubServiceClient.class).to(GitHubServiceClientImpl.class).in(Singleton.class);
     GinMultibinder.newSetBinder(binder(), OAuth2Authenticator.class)
         .addBinding()
         .to(GitHubAuthenticatorImpl.class);

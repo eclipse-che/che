@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,6 @@ import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.project.server.ProjectImporter;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.server.GitHubDTOFactory;
-import org.eclipse.che.plugin.github.server.GitHubFactory;
 import org.eclipse.che.plugin.github.server.GitHubKeyUploader;
 import org.eclipse.che.plugin.github.server.GitHubProjectImporter;
 import org.eclipse.che.plugin.github.server.rest.GitHubService;
@@ -32,7 +31,6 @@ public class GitHubModule extends AbstractModule {
   /** {@inheritDoc} */
   @Override
   protected void configure() {
-    bind(GitHubFactory.class);
     bind(GitHubDTOFactory.class);
 
     Multibinder<ProjectImporter> projectImporterMultibinder =

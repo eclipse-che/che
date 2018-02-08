@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,6 +74,20 @@ public class PullViewImpl extends Window implements PullView {
     this.setTitle(locale.pullTitle());
     this.setWidget(widget);
 
+    btnPull =
+        createButton(
+            locale.buttonPull(),
+            "git-remotes-pull-pull",
+            new ClickHandler() {
+
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onPullClicked();
+              }
+            });
+    btnPull.addStyleName(super.resources.windowCss().primaryButton());
+    addButtonToFooter(btnPull);
+
     btnCancel =
         createButton(
             locale.buttonCancel(),
@@ -86,19 +100,6 @@ public class PullViewImpl extends Window implements PullView {
               }
             });
     addButtonToFooter(btnCancel);
-
-    btnPull =
-        createButton(
-            locale.buttonPull(),
-            "git-remotes-pull-pull",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onPullClicked();
-              }
-            });
-    addButtonToFooter(btnPull);
   }
 
   @Override

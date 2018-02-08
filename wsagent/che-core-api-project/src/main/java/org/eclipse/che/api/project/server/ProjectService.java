@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -666,7 +666,7 @@ public class ProjectService {
           @DefaultValue("-1")
           int maxItems,
       @ApiParam(value = "Skip count") @QueryParam("skipCount") int skipCount)
-      throws NotFoundException, ForbiddenException, ConflictException, ServerException {
+      throws NotFoundException, ServerException, BadRequestException {
 
     return getProjectServiceApi().search(wsPath, name, text, maxItems, skipCount);
   }

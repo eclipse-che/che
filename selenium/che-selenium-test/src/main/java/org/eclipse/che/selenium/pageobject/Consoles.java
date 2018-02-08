@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -20,16 +22,23 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfEl
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElement;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Aleksandr Shmaraev */
@@ -62,13 +71,15 @@ public class Consoles {
   public static final String COMMAND_CONSOLE_ID =
       "//div[@active]//div[@id='gwt-debug-commandConsoleLines']";
   public static final String PLUS_ICON = "gwt-debug-plusPanel";
+  public static final String TERMINAL_MENU_ITEM = "contextMenu/Terminal";
   public static final String SERVER_MENU_ITEM = "contextMenu/Servers";
   public static final String SERVER_INFO_TABLE_CAPTION = "gwt-debug-runtimeInfoCellTableCaption";
   public static final String SERVER_INFO_HIDE_INTERNAL_CHECK_BOX =
       "gwt-debug-runtimeInfoHideServersCheckBox";
   public static final String MACHINE_NAME =
       "//div[@id='gwt-debug-process-tree']//span[text()= '%s']";
-  public static final String CONTEXT_MENU = "gwt-debug-contextMenu/commandsActionGroup";
+  public static final String COMMANDS_MENU_ITEM = "gwt-debug-contextMenu/commandsActionGroup";
+  public static final String SERVERS_MENU_ITEM = "contextMenu/Servers";
   public static final String COMMAND_NAME = "//tr[contains(@id,'command_%s')]";
 
   public interface CommandsGoal {
@@ -78,13 +89,16 @@ public class Consoles {
   }
 
   protected final SeleniumWebDriver seleniumWebDriver;
+  private final ActionsFactory actionsFactory;
   private final Loader loader;
   private static final String CONSOLE_PANEL_DRUGGER_CSS = "div.gwt-SplitLayoutPanel-VDragger";
 
   @Inject
-  public Consoles(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public Consoles(
+      SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
+    this.actionsFactory = actionsFactory;
     redrawDriverWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     loadPageDriverWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     updateProjDriverWait = new WebDriverWait(seleniumWebDriver, UPDATING_PROJECT_TIMEOUT_SEC);
@@ -127,14 +141,20 @@ public class Consoles {
   @FindBy(id = SERVER_MENU_ITEM)
   WebElement serverMenuItem;
 
+  @FindBy(id = TERMINAL_MENU_ITEM)
+  WebElement terminalMenuItem;
+
   @FindBy(id = SERVER_INFO_TABLE_CAPTION)
   WebElement serverInfoTableCaption;
 
   @FindBy(id = SERVER_INFO_HIDE_INTERNAL_CHECK_BOX)
   WebElement serverInfoHideInternalCheckBox;
 
-  @FindBy(id = CONTEXT_MENU)
-  WebElement contextMenu;
+  @FindBy(id = COMMANDS_MENU_ITEM)
+  WebElement commandsMenuItem;
+
+  @FindBy(id = SERVERS_MENU_ITEM)
+  WebElement serversMenuItem;
 
   /**
    * click on consoles icon in side line and wait opening console area (terminal on other console )
@@ -157,8 +177,13 @@ public class Consoles {
     redrawDriverWait.until(visibilityOf(serverMenuItem)).click();
   }
 
+  public void clickOnTerminalItemInContextMenu() {
+    redrawDriverWait.until(visibilityOf(terminalMenuItem)).click();
+  }
+
   public void clickOnPlusMenuButton() {
-    redrawDriverWait.until(visibilityOf(plusMenuBtn)).click();
+    redrawDriverWait.until(visibilityOf(plusMenuBtn));
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(plusMenuBtn).click().perform();
   }
 
   public void clickOnHideInternalServers() {
@@ -175,6 +200,21 @@ public class Consoles {
 
   public void waitReferenceIsNotPresent(String referenceId) {
     redrawDriverWait.until(invisibilityOfElementLocated(By.id(referenceId)));
+  }
+
+  public boolean checkThatServerExists(String serverName) {
+    List<WebElement> webElements =
+        loadPageDriverWait.until(
+            visibilityOfAllElementsLocatedBy(
+                By.xpath("//div[contains(@id, 'runtime-info-reference-')]")));
+
+    for (WebElement we : webElements) {
+      if (we.getText().equals(serverName)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public void waitExpectedTextIntoPreviewUrl(String expectedText) {
@@ -366,6 +406,21 @@ public class Consoles {
         .perform();
   }
 
+  public void openServersTabFromContextMenu(String machineName) {
+    Wait<WebDriver> wait =
+        new FluentWait<WebDriver>(seleniumWebDriver)
+            .withTimeout(ELEMENT_TIMEOUT_SEC, SECONDS)
+            .pollingEvery(500, MILLISECONDS)
+            .ignoring(WebDriverException.class);
+
+    WebElement machine =
+        wait.until(visibilityOfElementLocated(By.xpath(format(MACHINE_NAME, machineName))));
+    wait.until(visibilityOf(machine)).click();
+
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(machine).contextClick().perform();
+    redrawDriverWait.until(visibilityOf(serversMenuItem)).click();
+  }
+
   public void startCommandFromProcessesArea(
       String machineName, String commandGoal, String commandName) {
     WebElement machine =
@@ -373,13 +428,27 @@ public class Consoles {
             visibilityOfElementLocated(By.xpath(format(MACHINE_NAME, machineName))));
     machine.click();
 
-    Actions action = new Actions(seleniumWebDriver);
-    action.moveToElement(machine).contextClick().perform();
-    redrawDriverWait.until(visibilityOf(contextMenu)).click();
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(machine).contextClick().perform();
+    redrawDriverWait.until(visibilityOf(commandsMenuItem)).click();
 
     redrawDriverWait.until(visibilityOfElementLocated(By.id(commandGoal))).click();
     redrawDriverWait
         .until(visibilityOfElementLocated(By.xpath(format(COMMAND_NAME, commandName))))
+        .click();
+  }
+
+  public void startTerminalFromProcessesArea(String machineName) {
+    WebElement machine =
+        redrawDriverWait.until(
+            visibilityOfElementLocated(By.xpath(format(MACHINE_NAME, machineName))));
+
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(machine).contextClick().perform();
+    clickOnTerminalItemInContextMenu();
+  }
+
+  public void clickOnClearOutputButton() {
+    loadPageDriverWait
+        .until(visibilityOfElementLocated(By.id("gwt-debug-terminal_clear_output")))
         .click();
   }
 }

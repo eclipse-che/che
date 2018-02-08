@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  */
 'use strict';
 import {IEnvironmentManagerMachine, IEnvironmentManagerMachineServer} from './environment-manager-machine';
+import {IParser} from './parser';
 
 /**
  * This is base class, which describes the environment manager.
@@ -22,6 +23,7 @@ const SSH_AGENT_NAME: string = 'org.eclipse.che.ssh';
 const DEFAULT_MEMORY_LIMIT: number = 2 * 1073741824;
 
 export abstract class EnvironmentManager {
+  parser: IParser;
   $log: ng.ILogService;
 
   constructor($log: ng.ILogService) {
@@ -54,13 +56,29 @@ export abstract class EnvironmentManager {
 
   abstract parseRecipe(content: string): any;
 
-  abstract stringifyRecipe(recipe: any): string;
+  /**
+   * Parses a recipe content and returns validation error.
+   *
+   * @param {string} content
+   * @returns {string} validation error
+   */
+  validateRecipe(content: string): string {
+    let error: string = null;
+    try {
+      this.parser.parse(content);
+    } catch (e) {
+      error = e.message;
+    }
+    return error;
+  }
+
+  abstract stringifyRecipe(recipeObj: any): string;
 
   abstract getSource(machine: IEnvironmentManagerMachine): {[sourceType: string]: string};
 
   abstract setSource(machine: IEnvironmentManagerMachine, image: string): void;
 
-  abstract createNewDefaultMachine(environment: che.IWorkspaceEnvironment, image?: string): IEnvironmentManagerMachine;
+  abstract createMachine(environment: che.IWorkspaceEnvironment, image?: string): IEnvironmentManagerMachine;
 
   abstract addMachine(environment: che.IWorkspaceEnvironment, machine: IEnvironmentManagerMachine): che.IWorkspaceEnvironment
 
@@ -96,6 +114,28 @@ export abstract class EnvironmentManager {
     }
     machine.env = envVariables;
   };
+
+  /**
+   * Returns object with volumes.
+   *
+   * @param {IEnvironmentManagerMachine} machine
+   * @returns {any}
+   */
+  getMachineVolumes(machine: IEnvironmentManagerMachine): any {
+    return machine && machine.volumes ? machine.volumes : {};
+  }
+
+  /**
+   * Sets volumes.
+   * @param {IEnvironmentManagerMachine} machine
+   * @param {any} volumes
+   */
+  setMachineVolumes(machine: IEnvironmentManagerMachine, volumes: any): any {
+    if (!machine || !volumes) {
+      return;
+    }
+    machine.volumes = volumes;
+  }
 
   /**
    * Gets unique name for new machine based on prefix.
@@ -231,9 +271,6 @@ export abstract class EnvironmentManager {
       if (!hasWsAgent) {
         machine.installers.push(WS_AGENT_NAME);
       }
-      if (machine.installers.indexOf(SSH_AGENT_NAME) < 0) {
-        machine.installers.push(SSH_AGENT_NAME);
-      }
       if (machine.installers.indexOf(TERMINAL_AGENT_NAME) < 0) {
         machine.installers.push(TERMINAL_AGENT_NAME);
       }
@@ -304,6 +341,9 @@ export abstract class EnvironmentManager {
   }
 
   setAgents(machine: IEnvironmentManagerMachine, agents: string[]): void {
+    if (!machine) {
+      return;
+    }
     machine.installers = angular.copy(agents);
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,7 +43,14 @@ export class CreateFactoryCtrl {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, cheAPI: CheAPI, $log: ng.ILogService, cheNotification: CheNotification, $scope: ng.IScope, $filter: ng.IFilterService, lodash: any, $document: ng.IDocumentService) {
+  constructor($location: ng.ILocationService,
+              cheAPI: CheAPI,
+              $log: ng.ILogService,
+              cheNotification: CheNotification,
+              $scope: ng.IScope,
+              $filter: ng.IFilterService,
+              lodash: any,
+              $document: ng.IDocumentService) {
     this.$location = $location;
     this.cheAPI = cheAPI;
     this.$log = $log;

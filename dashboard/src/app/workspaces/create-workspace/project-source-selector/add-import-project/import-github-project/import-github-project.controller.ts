@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -205,7 +205,7 @@ export class ImportGithubProjectController {
    * Shows authentication popup window.
    */
   authenticateWithGitHub(): void {
-    if (!this.importGithubProjectService.getIsGitHubOAuthProviderAvailable()) {
+    if (!this.keycloakAuth.isPresent && !this.importGithubProjectService.getIsGitHubOAuthProviderAvailable()) {
       this.$mdDialog.show({
         controller: 'NoGithubOauthDialogController',
         controllerAs: 'noGithubOauthDialogController',
@@ -235,18 +235,21 @@ export class ImportGithubProjectController {
    * @param {string} token
    */
   openGithubPopup(token: string): void {
+    // given URL http://example.com - returns port => 80, which causes wrong redirect URL value:
+    let port = this.$location.port() === 80 ? '' : ':' + this.$location.port();
     const redirectUrl = this.$location.protocol() + '://'
-      + this.$location.host() + ':'
-      + this.$location.port()
+      + this.$location.host()
+      + port
       + (this.$browser as any).baseHref()
       + 'gitHubCallback.html';
-    this.githubPopup.open('/api/oauth/authenticate'
+    let link = '/api/oauth/authenticate'
       + '?oauth_provider=github'
       + '&scope=' + ['user', 'repo', 'write:public_key'].join(',')
       + '&userId=' + this.importGithubProjectService.getCurrentUserId()
       + token
       + '&redirect_after_login='
-      + redirectUrl,
+      + redirectUrl;
+    this.githubPopup.open(link,
       {
         width: 1020,
         height: 618

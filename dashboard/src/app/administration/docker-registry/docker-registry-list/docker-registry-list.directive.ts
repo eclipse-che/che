@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,24 +24,17 @@
  *
  * @author Oleksii Orel
  */
-export class DockerRegistryList {
+export class DockerRegistryList implements ng.IDirective {
 
-  /**
-   * Default constructor that is using resource
-   * @ngInject for Dependency injection
-   */
-  constructor() {
-    this.restrict = 'E';
-    this.templateUrl = 'app/administration/docker-registry/docker-registry-list/docker-registry-list.html';
-    this.replace = false;
+  restrict = 'E';
+  templateUrl = 'app/administration/docker-registry/docker-registry-list/docker-registry-list.html';
+  replace = false;
 
-    this.controller = 'DockerRegistryListController';
-    this.controllerAs = 'dockerRegistryListController';
+  controller = 'DockerRegistryListController';
+  controllerAs = 'dockerRegistryListController';
 
-    this.bindToController = true;
+  bindToController = true;
 
-    this.scope = true;
-
-  }
+  scope = true;
 
 }

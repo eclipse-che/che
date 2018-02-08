@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,18 +11,23 @@
 'use strict';
 
 import {CheWorkspaceAgent} from '../che-workspace-agent';
-import {ComposeEnvironmentManager} from '../environment/compose-environment-manager';
-import {DockerFileEnvironmentManager} from '../environment/docker-file-environment-manager';
-import {DockerImageEnvironmentManager} from '../environment/docker-image-environment-manager';
 import {CheEnvironmentRegistry} from '../environment/che-environment-registry.factory';
 import {CheJsonRpcMasterApi} from '../json-rpc/che-json-rpc-master-api';
 import {CheJsonRpcApi} from '../json-rpc/che-json-rpc-api.factory';
 import {IObservableCallbackFn, Observable} from '../../utils/observable';
 import {CheBranding} from '../../branding/che-branding.factory';
+import {CheEnvironmentManager} from '../environment/che-environment-manager.factory';
+import {ComposeEnvironmentManager} from '../environment/compose-environment-manager';
+import {DockerFileEnvironmentManager} from '../environment/docker-file-environment-manager';
+import {DockerImageEnvironmentManager} from '../environment/docker-image-environment-manager';
 import {OpenshiftEnvironmentManager} from '../environment/openshift-environment-manager';
 
 const WS_AGENT_HTTP_LINK: string = 'wsagent/http';
 const WS_AGENT_WS_LINK: string = 'wsagent/ws';
+
+interface IWorkspaceSettings {
+  supportedRecipeTypes: string;
+}
 
 interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
   create: any;
@@ -35,7 +40,7 @@ interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
   startWorkspace: any;
   startTemporaryWorkspace: any;
   addCommand: any;
-  getSettings: any;
+  getSettings: () => ng.resource.IResource<IWorkspaceSettings>;
 }
 
 export enum WorkspaceStatus {
@@ -78,16 +83,27 @@ export class CheWorkspace {
   /**
    * Map with promises.
    */
-  private workspaceDetailsByKeyPromise: Map<string, ng.IHttpPromise<any>> = new Map();
+  private workspacePromises: Map<string, ng.IHttpPromise<any>> = new Map();
 
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($resource: ng.resource.IResourceService, $http: ng.IHttpService, $q: ng.IQService, cheJsonRpcApi: CheJsonRpcApi,
-              $websocket: any, $location: ng.ILocationService, proxySettings : string, userDashboardConfig: any,
-              lodash: any, cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService, cheBranding: CheBranding, keycloakAuth: any) {
+  constructor($resource: ng.resource.IResourceService,
+              $http: ng.IHttpService,
+              $q: ng.IQService,
+              cheJsonRpcApi: CheJsonRpcApi,
+              $websocket: any,
+              $location: ng.ILocationService,
+              proxySettings: string,
+              userDashboardConfig: any,
+              lodash: any,
+              cheEnvironmentRegistry: CheEnvironmentRegistry,
+              $log: ng.ILogService,
+              cheBranding: CheBranding,
+              keycloakAuth: any,
+              cheEnvironmentManager: CheEnvironmentManager) {
     this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR'];
     // keep resource
     this.$q = $q;
@@ -137,8 +153,6 @@ export class CheWorkspace {
     cheEnvironmentRegistry.addEnvironmentManager('dockerfile', new DockerFileEnvironmentManager($log));
     cheEnvironmentRegistry.addEnvironmentManager('dockerimage', new DockerImageEnvironmentManager($log));
     cheEnvironmentRegistry.addEnvironmentManager('openshift', new OpenshiftEnvironmentManager($log));
-
-    this.fetchWorkspaceSettings();
 
     let keycloakToken = keycloakAuth.isPresent ? '?token=' + keycloakAuth.keycloak.token : '';
     const CONTEXT_FETCHER_ID = 'websocketContextFetcher';
@@ -208,7 +222,11 @@ export class CheWorkspace {
         }
       });
 
-      let workspaceAgentData = {path: wsAgentLink.url, websocket: wsAgentWebocketLink.url, clientId: this.cheJsonRpcMasterApi.getClientId()};
+      let workspaceAgentData = {
+        path: wsAgentLink.url,
+        websocket: wsAgentWebocketLink.url,
+        clientId: this.cheJsonRpcMasterApi.getClientId()
+      };
       let wsagent: CheWorkspaceAgent = new CheWorkspaceAgent(this.$resource, this.$q, this.$websocket, workspaceAgentData);
       this.workspaceAgents.set(workspaceId, wsagent);
       return wsagent;
@@ -343,12 +361,13 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>}
    */
   fetchWorkspaceDetails(workspaceKey: string): ng.IPromise<any> {
-    if (this.workspaceDetailsByKeyPromise.has(workspaceKey)) {
-      return this.workspaceDetailsByKeyPromise.get(workspaceKey);
+    const workspacePromisesKey = 'fetchWorkspaceDetails' + workspaceKey;
+    if (this.workspacePromises.has(workspacePromisesKey)) {
+      return this.workspacePromises.get(workspacePromisesKey);
     }
     const defer = this.$q.defer();
     const promise: ng.IHttpPromise<any> = this.$http.get('/api/workspace/' + workspaceKey);
-    this.workspaceDetailsByKeyPromise.set(workspaceKey, promise);
+    this.workspacePromises.set(workspacePromisesKey, promise);
 
     promise.then((response: ng.IHttpPromiseCallbackArg<che.IWorkspace>) => {
       const workspace = response.data;
@@ -362,7 +381,7 @@ export class CheWorkspace {
       }
       defer.reject(error);
     }).finally(() => {
-      this.workspaceDetailsByKeyPromise.delete(workspaceKey);
+      this.workspacePromises.delete(workspacePromisesKey);
     });
 
     return defer.promise;
@@ -511,7 +530,18 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>} promise
    */
   startWorkspace(workspaceId: string, envName: string): ng.IPromise<any> {
-    return this.remoteWorkspaceAPI.startWorkspace({workspaceId: workspaceId, envName: envName}, {}).$promise;
+    const workspacePromisesKey = 'startWorkspace' + workspaceId;
+    if (this.workspacePromises.has(workspacePromisesKey)) {
+      return this.workspacePromises.get(workspacePromisesKey);
+    }
+
+    const promise = this.remoteWorkspaceAPI.startWorkspace({workspaceId: workspaceId, envName: envName}, {}).$promise;
+    this.workspacePromises.set(workspacePromisesKey, promise);
+    promise.finally(() => {
+      this.workspacePromises.delete(workspacePromisesKey);
+    });
+
+    return promise;
   }
 
   /**
@@ -529,9 +559,19 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>} promise
    */
   stopWorkspace(workspaceId: string): ng.IPromise<any> {
-    return this.remoteWorkspaceAPI.stopWorkspace({
+    const workspacePromisesKey = 'stopWorkspace' + workspaceId;
+    if (this.workspacePromises.has(workspacePromisesKey)) {
+      return this.workspacePromises.get(workspacePromisesKey);
+    }
+    const promise = this.remoteWorkspaceAPI.stopWorkspace({
       workspaceId: workspaceId
     }, {}).$promise;
+    this.workspacePromises.set(workspacePromisesKey, promise);
+    promise.finally(() => {
+      this.workspacePromises.delete(workspacePromisesKey);
+    });
+
+    return promise;
   }
 
   /**
@@ -642,19 +682,21 @@ export class CheWorkspace {
     if (this.subscribedWorkspacesIds.indexOf(workspaceId) < 0) {
       this.subscribedWorkspacesIds.push(workspaceId);
       this.cheJsonRpcMasterApi.subscribeWorkspaceStatus(workspaceId, (message: any) => {
-        if (this.workspaceStatuses.indexOf(message.status) >= 0) {
-          this.getWorkspaceById(workspaceId).status = message.status;
+        let status = message.error ? 'ERROR' : message.status;
+
+        if (this.workspaceStatuses.indexOf(status) >= 0) {
+          this.getWorkspaceById(workspaceId).status = status;
         }
 
-        if (!this.statusDefers[workspaceId] || !this.statusDefers[workspaceId][message.status]) {
+        if (!this.statusDefers[workspaceId] || !this.statusDefers[workspaceId][status]) {
           return;
         }
 
-        this.statusDefers[workspaceId][message.status].forEach((defer: any) => {
+        this.statusDefers[workspaceId][status].forEach((defer: any) => {
           defer.resolve(message);
         });
 
-        this.statusDefers[workspaceId][message.status].length = 0;
+        this.statusDefers[workspaceId][status].length = 0;
       });
     }
   }
@@ -666,7 +708,7 @@ export class CheWorkspace {
    */
   fetchWorkspaceSettings(): ng.IPromise<any> {
     const promise = this.remoteWorkspaceAPI.getSettings().$promise;
-    return promise.then((settings: any) => {
+    return promise.then((settings: IWorkspaceSettings) => {
       this.workspaceSettings = settings;
       return this.workspaceSettings;
     }, (error: any) => {
@@ -675,6 +717,19 @@ export class CheWorkspace {
       }
       return this.$q.reject(error);
     });
+  }
+
+  /**
+   * Returns list of supported recipe types.
+   *
+   * @returns {string[]}
+   */
+  getSupportedRecipeTypes(): string[] {
+    if (!this.workspaceSettings || !this.workspaceSettings.supportedRecipeTypes) {
+      return [];
+    }
+
+    return this.workspaceSettings.supportedRecipeTypes.split(',');
   }
 
   /**

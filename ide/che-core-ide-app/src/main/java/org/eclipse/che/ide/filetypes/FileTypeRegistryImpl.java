@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.ide.filetypes;
+
+import static org.eclipse.che.ide.util.NameUtils.getFileExtension;
 
 import com.google.common.base.Strings;
 import com.google.gwt.regexp.shared.RegExp;
@@ -83,14 +85,5 @@ public class FileTypeRegistryImpl implements FileTypeRegistry {
     }
 
     return unknownFileType;
-  }
-
-  private String getFileExtension(String name) {
-    final int lastDotPosition = name.lastIndexOf('.');
-    // name has no extension
-    if (lastDotPosition < 0) {
-      return "";
-    }
-    return name.substring(lastDotPosition + 1);
   }
 }

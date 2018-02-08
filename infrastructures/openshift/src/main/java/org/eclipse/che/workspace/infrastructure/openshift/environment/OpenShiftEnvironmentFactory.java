@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,12 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.environment;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 
+import com.google.common.annotations.VisibleForTesting;
+import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
@@ -21,10 +25,12 @@ import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.Route;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
+import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
@@ -36,6 +42,9 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
 import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentValidator;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 
 /**
@@ -55,7 +64,8 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       "Persistent volume claims specified in OpenShift recipe are ignored.";
 
   private final OpenShiftClientFactory clientFactory;
-  private final OpenShiftEnvironmentValidator envValidator;
+  private final KubernetesEnvironmentValidator envValidator;
+  private final String defaultMachineMemorySizeAttribute;
 
   @Inject
   public OpenShiftEnvironmentFactory(
@@ -63,10 +73,13 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       RecipeRetriever recipeRetriever,
       MachineConfigsValidator machinesValidator,
       OpenShiftClientFactory clientFactory,
-      OpenShiftEnvironmentValidator envValidator) {
+      KubernetesEnvironmentValidator envValidator,
+      @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
     super(installerRegistry, recipeRetriever, machinesValidator);
     this.clientFactory = clientFactory;
     this.envValidator = envValidator;
+    this.defaultMachineMemorySizeAttribute =
+        String.valueOf(defaultMachineMemorySizeMB * 1024 * 1024);
   }
 
   @Override
@@ -101,7 +114,6 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
 
     Map<String, Pod> pods = new HashMap<>();
     Map<String, Service> services = new HashMap<>();
-    Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
     boolean isAnyRoutePresent = false;
     boolean isAnyPVCPresent = false;
     for (HasMetadata object : list.getItems()) {
@@ -131,6 +143,8 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       warnings.add(new WarningImpl(PVC_IGNORED_WARNING_CODE, PVC_IGNORED_WARNING_MESSAGE));
     }
 
+    addRamLimitAttribute(machines, pods.values());
+
     OpenShiftEnvironment osEnv =
         OpenShiftEnvironment.builder()
             .setInternalRecipe(recipe)
@@ -138,12 +152,36 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
             .setWarnings(warnings)
             .setPods(pods)
             .setServices(services)
-            .setPersistentVolumeClaims(pvcs)
+            .setPersistentVolumeClaims(new HashMap<>())
+            .setRoutes(new HashMap<>())
             .build();
 
     envValidator.validate(osEnv);
 
     return osEnv;
+  }
+
+  @VisibleForTesting
+  void addRamLimitAttribute(Map<String, InternalMachineConfig> machines, Collection<Pod> pods) {
+    for (Pod pod : pods) {
+      for (Container container : pod.getSpec().getContainers()) {
+        final String machineName = Names.machineName(pod, container);
+        InternalMachineConfig machineConfig;
+        if ((machineConfig = machines.get(machineName)) == null) {
+          machineConfig = new InternalMachineConfig();
+          machines.put(machineName, machineConfig);
+        }
+        final Map<String, String> attributes = machineConfig.getAttributes();
+        if (isNullOrEmpty(attributes.get(MEMORY_LIMIT_ATTRIBUTE))) {
+          final long ramLimit = Containers.getRamLimit(container);
+          if (ramLimit > 0) {
+            attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(ramLimit));
+          } else {
+            attributes.put(MEMORY_LIMIT_ATTRIBUTE, defaultMachineMemorySizeAttribute);
+          }
+        }
+      }
+    }
   }
 
   private void checkNotNull(Object object, String errorMessage) throws ValidationException {

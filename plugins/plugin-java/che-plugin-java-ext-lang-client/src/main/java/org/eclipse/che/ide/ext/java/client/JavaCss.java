@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,8 +36,8 @@ public interface JavaCss extends CssResource {
   @ClassName("error-border")
   String errorBorder();
 
-  @ClassName("disable-text-color")
-  String disableTextColor();
+  @ClassName("presentable-text-container")
+  String presentableTextContainer();
 
   @ClassName("search-match")
   String searchMatch();

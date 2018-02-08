@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,8 +20,9 @@ public class TestCheAdminHttpJsonRequestFactory extends TestUserHttpJsonRequestF
   @Inject
   public TestCheAdminHttpJsonRequestFactory(
       TestAuthServiceClient authServiceClient,
-      @Named("che.admin_user.email") String adminEmail,
-      @Named("che.admin_user.password") String adminPassword) {
-    super(authServiceClient, adminEmail, adminPassword);
+      @Named("che.admin.name") String adminName,
+      @Named("che.admin.password") String adminPassword,
+      @Named("che.admin.offline_token") String adminOfflineToken) {
+    super(authServiceClient, adminName, adminPassword, adminOfflineToken);
   }
 }

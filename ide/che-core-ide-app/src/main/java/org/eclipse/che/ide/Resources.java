@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,9 +26,10 @@ import org.eclipse.che.ide.ui.cellview.CellTreeResources;
 import org.eclipse.che.ide.ui.cellview.DataGridResources;
 import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.SimpleList;
+import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.tree.Tree;
 import org.eclipse.che.ide.ui.window.Window;
-import org.eclipse.che.ide.ui.zeroclipboard.ZeroClipboardResources;
+import org.eclipse.che.ide.ui.zeroclipboard.ClipboardResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -43,7 +44,7 @@ public interface Resources
         SimpleList.Resources,
         MenuResources,
         DialogBoxResources,
-        ZeroClipboardResources,
+        ClipboardResources,
         NotificationResources,
         DataGridResources,
         CellTableResources,
@@ -52,7 +53,8 @@ public interface Resources
         ButtonLoaderResources,
         ProjectWizardResources,
         MachineResources,
-        CommandResources {
+        CommandResources,
+        TreeStyles {
 
   @Source({
     "Core.css",
@@ -206,8 +208,17 @@ public interface Resources
   @Source("panel/panel-selector-right.svg")
   SVGResource panelSelectorRight();
 
+  @Source("machine/machine-cube.svg")
+  SVGResource machineCube();
+
   @Source("searchMatch.svg")
   SVGResource searchMatch();
+
+  @Source("run/run.svg")
+  SVGResource run();
+
+  @Source("run/debug.svg")
+  SVGResource debug();
 
   /** Interface for css resources. */
   interface CoreCss extends CssResource {

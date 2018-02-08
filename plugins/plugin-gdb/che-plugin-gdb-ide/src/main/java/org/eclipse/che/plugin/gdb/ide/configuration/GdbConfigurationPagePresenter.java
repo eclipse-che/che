@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -109,6 +109,7 @@ public class GdbConfigurationPagePresenter
   private void setHosts(List<MachineImpl> machines) {
     Map<String, String> hosts = new HashMap<>();
     for (MachineImpl machine : machines) {
+      // TODO this attribute is not provided anymore
       String host = machine.getAttributes().get("network.ipAddress");
       if (host == null) {
         continue;

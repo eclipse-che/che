@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 package org.eclipse.che.ide.editor.orion.client;
+
+import static org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewShowOptionsOverlay.ViewAnchorValue.CENTER;
 
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import org.eclipse.che.ide.api.editor.document.AbstractDocument;
@@ -30,6 +32,7 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionSelectionOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextModelOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextModelOverlay.EventHandler;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewShowOptionsOverlay;
 
 /**
  * The implementation of {@link Document} for Orion.
@@ -160,7 +163,9 @@ public class OrionDocument extends AbstractDocument {
 
   @Override
   public void setCursorPosition(final TextPosition position) {
-    this.editorOverlay.setCaretOffset(getIndexFromPosition(position));
+    OrionTextViewShowOptionsOverlay showOptionsOverlay = OrionTextViewShowOptionsOverlay.create();
+    showOptionsOverlay.setViewAnchor(CENTER.getValue());
+    this.editorOverlay.setCaretOffset(getIndexFromPosition(position), showOptionsOverlay);
   }
 
   public int getCursorOffset() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import org.eclipse.che.commons.lang.execution.ProcessOutputType;
  * Split input on lines and call {@link Consumer#consume(String, ProcessOutputType)} for each line.
  */
 public class LineSplitter {
+  private static final String TEST_MESSAGE_SUFFIX = "}>";
 
   private final Consumer consumer;
 
@@ -46,7 +47,7 @@ public class LineSplitter {
 
   private void processLine(String line, ProcessOutputType outputType) {
     StringBuilder buffer = buffers.get(outputType);
-    if (!line.endsWith("\n")) {
+    if (!line.endsWith("\n") && !line.endsWith(TEST_MESSAGE_SUFFIX)) {
       buffer.append(line);
       return;
     }

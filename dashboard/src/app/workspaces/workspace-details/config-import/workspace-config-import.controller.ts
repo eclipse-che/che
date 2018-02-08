@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,32 +56,21 @@ export class WorkspaceConfigImportController {
     this.errorMessagesService = cheErrorMessagesService;
     this.validationService = stackValidationService;
 
-    this.editorOptions = {
-      lineWrapping: true,
-      lineNumbers: true,
-      matchBrackets: true,
-      mode: 'application/json',
-      onLoad: (editor: any) => {
-        $timeout(() => {
-          editor.refresh();
-        }, 500);
-      }
-    };
+    this.importWorkspaceJson = angular.toJson(this.workspaceConfig, true);
 
-    this.importWorkspaceJson = angular.toJson(this.workspaceConfig);
-
-    $scope.$watch(() => { return this.workspaceConfig; }, () => {
+    $scope.$watch(() => {
+      return this.workspaceConfig;
+    }, () => {
+      let editedWorkspaceConfig;
       try {
-        let editedWorkspaceConfig = angular.fromJson(this.importWorkspaceJson) || {};
+        editedWorkspaceConfig = angular.fromJson(this.importWorkspaceJson) || {};
         angular.extend(editedWorkspaceConfig, this.workspaceConfig);
-
-        this.importWorkspaceJson = angular.toJson(editedWorkspaceConfig, true);
-
-        let validateOnly = true;
-        this.onChange(validateOnly);
       } catch (e) {
-        this.$log.error(e);
+        editedWorkspaceConfig = this.workspaceConfig;
       }
+      this.importWorkspaceJson = angular.toJson(editedWorkspaceConfig, true);
+      const validateOnly = true;
+      this.onChange(validateOnly);
     }, true);
 
     this.errorMessagesService.registerCallback(this.errorsScopeSettings, this.updateErrorsList.bind(this, this.errorsScopeSettings));
@@ -92,8 +81,20 @@ export class WorkspaceConfigImportController {
     this.otherValidationMessages[errorsScope] = angular.copy(otherErrors);
   }
 
+  /**
+   * Returns status of the workspace config validation.
+   * @returns {che.IValidation}
+   */
   workspaceConfigValidation(): che.IValidation {
-     return this.validationService.getWorkspaceConfigValidation(angular.fromJson(this.importWorkspaceJson));
+    let validation: che.IValidation;
+    try {
+      const importWorkspace = angular.fromJson(this.importWorkspaceJson);
+      validation = this.validationService.getWorkspaceConfigValidation(importWorkspace);
+    } catch (error) {
+      validation = {'isValid': true, 'errors': [error.toString()]};
+    }
+
+    return validation;
   }
 
   /**

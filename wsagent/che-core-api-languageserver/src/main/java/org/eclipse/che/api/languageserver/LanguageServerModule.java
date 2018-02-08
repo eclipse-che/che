@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,11 +17,14 @@ import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsJsonRpcTransmitter;
 import org.eclipse.che.api.languageserver.messager.ShowMessageJsonRpcTransmitter;
 import org.eclipse.che.api.languageserver.registry.CheLanguageClientFactory;
+import org.eclipse.che.api.languageserver.registry.DefaultLanguageRecognizer;
+import org.eclipse.che.api.languageserver.registry.LanguageRecognizer;
 import org.eclipse.che.api.languageserver.registry.LanguageServerFileWatcher;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistry;
 import org.eclipse.che.api.languageserver.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.api.languageserver.registry.ServerInitializer;
 import org.eclipse.che.api.languageserver.registry.ServerInitializerImpl;
+import org.eclipse.che.api.languageserver.remote.LsRemoteModule;
 import org.eclipse.che.api.languageserver.service.LanguageRegistryService;
 import org.eclipse.che.api.languageserver.service.LanguageServerInitializationHandler;
 import org.eclipse.che.api.languageserver.service.TextDocumentService;
@@ -32,6 +35,9 @@ public class LanguageServerModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    install(new LsRemoteModule());
+
+    bind(LanguageRecognizer.class).to(DefaultLanguageRecognizer.class);
     bind(LanguageServerRegistry.class).to(LanguageServerRegistryImpl.class);
     bind(ServerInitializer.class).to(ServerInitializerImpl.class);
     bind(LanguageRegistryService.class);

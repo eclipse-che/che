@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ class StartWorkspaceNotification {
   private final StartWorkspaceNotificationUiBinder uiBinder;
   private final WorkspaceStatusNotification wsStatusNotification;
   private final Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider;
+  private final RestartingStateHolder restartingStateHolder;
 
   @UiField Button button;
 
@@ -49,10 +50,12 @@ class StartWorkspaceNotification {
       StartWorkspaceNotificationUiBinder uiBinder,
       Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider,
       EventBus eventBus,
-      AppContext appContext) {
+      AppContext appContext,
+      RestartingStateHolder restartingStateHolder) {
     this.wsStatusNotification = wsStatusNotification;
     this.uiBinder = uiBinder;
     this.currentWorkspaceManagerProvider = currentWorkspaceManagerProvider;
+    this.restartingStateHolder = restartingStateHolder;
 
     eventBus.addHandler(
         BasicIDEInitializedEvent.TYPE,
@@ -69,6 +72,9 @@ class StartWorkspaceNotification {
 
   /** Displays a notification with a proposal to start the current workspace. */
   void show() {
+    if (restartingStateHolder.isRestarting()) {
+      return;
+    }
     Widget widget = uiBinder.createAndBindUi(StartWorkspaceNotification.this);
     wsStatusNotification.show(WORKSPACE_STOPPED, widget);
   }

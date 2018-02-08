@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -313,13 +313,13 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
    * @param {string} image
    * @return {IEnvironmentManagerMachine}
    */
-  createNewDefaultMachine(environment: che.IWorkspaceEnvironment, image?: string): IEnvironmentManagerMachine {
+  createMachine(environment: che.IWorkspaceEnvironment, image?: string): IEnvironmentManagerMachine {
     const machineName = this.getUniqueMachineName(environment);
     const machineImage = !image ? 'eclipse/ubuntu_jdk8' : image;
 
     return {
       name: machineName,
-      installers: [this.SSH_AGENT_NAME, this.TERMINAL_AGENT_NAME],
+      installers: [this.TERMINAL_AGENT_NAME],
       attributes: {
         memoryLimitBytes: this.DEFAULT_MEMORY_LIMIT
       },

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,6 +53,14 @@ public class MediaTypesExcludeMatcher implements PathMatcher {
     this.excludedMediaTypes = newHashSet(MediaType.APPLICATION_ZIP, MediaType.OCTET_STREAM);
     this.excludedTypes = newHashSet("video", "audio", "image");
     this.fsManager = fsManager;
+  }
+
+  public void addExcludedMediaType(MediaType mediaType) {
+    excludedMediaTypes.add(mediaType);
+  }
+
+  public void addExcludedTypes(String type) {
+    excludedTypes.add(type);
   }
 
   @Override

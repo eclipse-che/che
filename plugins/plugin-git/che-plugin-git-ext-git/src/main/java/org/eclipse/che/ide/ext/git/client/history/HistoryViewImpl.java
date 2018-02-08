@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -151,7 +151,7 @@ public class HistoryViewImpl extends Window implements HistoryView {
         new Column<Revision, String>(new TextCell()) {
           @Override
           public String getValue(Revision revision) {
-            return revision.getCommitter().getName();
+            return revision.getAuthor().getName();
           }
         };
     Column<Revision, String> titleColumn =
@@ -195,6 +195,19 @@ public class HistoryViewImpl extends Window implements HistoryView {
   }
 
   private void createButtons() {
+    btnCompare =
+        createButton(
+            locale.buttonCompare(),
+            "git-history-compare",
+            new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onCompareClicked();
+              }
+            });
+    btnCompare.addStyleName(resources.windowCss().primaryButton());
+    addButtonToFooter(btnCompare);
+
     btnClose =
         createButton(
             locale.buttonClose(),
@@ -206,18 +219,6 @@ public class HistoryViewImpl extends Window implements HistoryView {
               }
             });
     addButtonToFooter(btnClose);
-
-    btnCompare =
-        createButton(
-            locale.buttonCompare(),
-            "git-history-compare",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCompareClicked();
-              }
-            });
-    addButtonToFooter(btnCompare);
   }
 
   @UiHandler("revisionsPanel")

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -441,6 +441,28 @@ public class PopupMenu extends Composite {
           debugId = idPrefix + actionId;
         }
         UIObject.ensureDebugId(table.getRowFormatter().getElement(i), debugId);
+      }
+    }
+
+    // determine whether popup menu has icons
+    boolean hasIcons = false;
+    for (int i = 0; i < list.size(); i++) {
+      Element cellElement = table.getCellFormatter().getElement(i, 0);
+      if (cellElement.hasChildNodes()) {
+        hasIcons = true;
+        break;
+      }
+    }
+
+    // hide first column if there are no icons
+    if (!hasIcons) {
+      for (int i = 0; i < list.size(); i++) {
+        Element cellElement = table.getCellFormatter().getElement(i, 0);
+        if (hasCheckedItems) {
+          cellElement.getStyle().setWidth(3, Unit.PX);
+        } else {
+          cellElement.getStyle().setWidth(7, Unit.PX);
+        }
       }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,6 +76,20 @@ public class FetchViewImpl extends Window implements FetchView {
     this.setTitle(locale.fetchTitle());
     this.setWidget(widget);
 
+    btnFetch =
+        createButton(
+            locale.buttonFetch(),
+            "git-remotes-fetch-fetch",
+            new ClickHandler() {
+
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onFetchClicked();
+              }
+            });
+    btnFetch.addStyleName(super.resources.windowCss().primaryButton());
+    addButtonToFooter(btnFetch);
+
     btnCancel =
         createButton(
             locale.buttonCancel(),
@@ -88,19 +102,6 @@ public class FetchViewImpl extends Window implements FetchView {
               }
             });
     addButtonToFooter(btnCancel);
-
-    btnFetch =
-        createButton(
-            locale.buttonFetch(),
-            "git-remotes-fetch-fetch",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onFetchClicked();
-              }
-            });
-    addButtonToFooter(btnFetch);
   }
 
   @Override

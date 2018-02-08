@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2012-2017 Red Hat, Inc.
+    Copyright (c) 2012-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -15,9 +15,26 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='locale' type='org.eclipse.che.ide.ext.git.client.GitLocalizationConstant'/>
     <ui:with field='res' type='org.eclipse.che.ide.ext.git.client.GitResources'/>
-    <g:DockLayoutPanel unit="PX" width="750px" height="400px" debugId="git-revert-mainForm">
+
+    <ui:style src="org/eclipse/che/ide/api/ui/style.css">
+
+        @eval cellTableBackground org.eclipse.che.ide.api.theme.Style.theme.cellTableBackground();
+
+        .emptyBorder {
+            margin: 15px;
+        }
+
+        .scrollPanel {
+            background-color: cellTableBackground;
+            border: 1px solid windowSeparatorColor;
+        }
+
+    </ui:style>
+
+    <g:DockLayoutPanel unit="PX" width="750px" height="400px" debugId="git-revert-mainForm" addStyleNames="{style.emptyBorder}">
         <g:center>
-            <g:ScrollPanel ui:field="revisionsPanel" debugId="revert-commit-panel"/>
+            <g:ScrollPanel ui:field="revisionsPanel" debugId="revert-commit-panel" addStyleNames="{style.scrollPanel}" />
         </g:center>
     </g:DockLayoutPanel>
+
 </ui:UiBinder>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,7 @@ export class FactoryDetailsConfig {
     register.controller('FactoryDetailsController', FactoryDetailsController);
 
     // config routes
-    register.app.config(($routeProvider: any) => {
+    register.app.config(($routeProvider: che.route.IRouteProvider) => {
       let locationProvider = {
         title: 'Factory',
         templateUrl: 'app/factories/factory-details/factory-details.html',
@@ -34,6 +34,8 @@ export class FactoryDetailsConfig {
     });
 
     // config files
+    /* tslint:disable */
     new InformationTabConfig(register);
+    /* tslint:enable */
   }
 }

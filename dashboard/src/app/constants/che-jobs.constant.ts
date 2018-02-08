@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,36 +15,36 @@
  */
 export class CheJobsConfig {
 
-    constructor(register) {
-        // Register this factory
-        register.app.constant('jsonJobs', JSON.stringify([{
-                name: 'Architect'
-            }, {
-                name: 'Team Lead'
-            }, {
-                name: 'DevOps'
-            }, {
-                name: 'Developer'
-            }, {
-                name: 'System Administrator'
-            }, {
-                name: 'Manager'
-            }, {
-                name: 'Director'
-            }, {
-                name: 'VP'
-            }, {
-                name: 'C-Level'
-            }, {
-                name: 'Freelance'
-            }, {
-                name: 'Educator'
-            }, {
-                name: 'Student'
-            }, {
-                name: 'Hobbyist'
-            }]
-        ));
+  constructor(register: che.IRegisterService) {
+    // register this factory
+    register.app.constant('jsonJobs', JSON.stringify([{
+        name: 'Architect'
+      }, {
+        name: 'Team Lead'
+      }, {
+        name: 'DevOps'
+      }, {
+        name: 'Developer'
+      }, {
+        name: 'System Administrator'
+      }, {
+        name: 'Manager'
+      }, {
+        name: 'Director'
+      }, {
+        name: 'VP'
+      }, {
+        name: 'C-Level'
+      }, {
+        name: 'Freelance'
+      }, {
+        name: 'Educator'
+      }, {
+        name: 'Student'
+      }, {
+        name: 'Hobbyist'
+      }]
+    ));
 
-    }
+  }
 }

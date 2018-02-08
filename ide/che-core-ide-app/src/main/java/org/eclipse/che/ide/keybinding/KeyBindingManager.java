@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,6 +55,7 @@ public class KeyBindingManager implements KeyBindingAgent {
 
   private String activeScheme;
   private ActionManager actionManager;
+  private boolean disabled;
 
   @Inject
   public KeyBindingManager(ActionManager actionManager) {
@@ -74,6 +75,11 @@ public class KeyBindingManager implements KeyBindingAgent {
         new EventListener() {
           @Override
           public void handleEvent(Event event) {
+
+            if (disabled) {
+              return;
+            }
+
             SignalEvent signalEvent = SignalEventUtils.create(event, false);
             if (signalEvent == null) {
               return;
@@ -137,7 +143,7 @@ public class KeyBindingManager implements KeyBindingAgent {
       ActionEvent e = new ActionEvent(presentationFactory.getPresentation(action), actionManager);
       action.update(e);
 
-      if (e.getPresentation().isEnabled() && e.getPresentation().isVisible()) {
+      if (e.getPresentation().isEnabled()) {
         /** Stop handling the key event */
         keyEvent.preventDefault();
         keyEvent.stopPropagation();
@@ -205,5 +211,15 @@ public class KeyBindingManager implements KeyBindingAgent {
     else {
       return getGlobal().getKeyBinding(actionId);
     }
+  }
+
+  @Override
+  public void disable() {
+    disabled = true;
+  }
+
+  @Override
+  public void enable() {
+    disabled = false;
   }
 }

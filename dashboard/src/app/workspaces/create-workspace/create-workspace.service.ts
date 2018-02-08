@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -157,9 +157,10 @@ export class CreateWorkspaceSvc {
    * Creates a workspace from config.
    *
    * @param {che.IWorkspaceConfig} workspaceConfig the config of workspace which will be created
-   * @return {IPromise<any>}
+   * @param {any} attributes the attributes of the workspace
+   * @returns {ng.IPromise<any>}
    */
-  createWorkspace(workspaceConfig: che.IWorkspaceConfig, attributes?: any): ng.IPromise<any> {
+  createWorkspace(workspaceConfig: che.IWorkspaceConfig, attributes: any): ng.IPromise<any> {
     const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
           projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
@@ -167,17 +168,11 @@ export class CreateWorkspaceSvc {
       workspaceConfig.projects = projectTemplates;
       this.addProjectCommands(workspaceConfig, projectTemplates);
       return this.cheWorkspace.createWorkspaceFromConfig(namespaceId, workspaceConfig, attributes).then((workspace: che.IWorkspace) => {
+        this.projectSourceSelectorService.clearTemplatesList();
+        this.cheWorkspace.getWorkspacesById().set(workspace.id, workspace);
+        this.cheWorkspace.startUpdateWorkspaceStatus(workspace.id);
 
-        return this.cheWorkspace.startWorkspace(workspace.id, workspace.config.defaultEnv).then(() => {
-          this.redirectToIde(namespaceId, workspace);
-          this.projectSourceSelectorService.clearTemplatesList();
-
-          this.cheWorkspace.getWorkspacesById().set(workspace.id, workspace);
-          this.cheWorkspace.startUpdateWorkspaceStatus(workspace.id);
-          return this.cheWorkspace.fetchStatusChange(workspace.id, 'RUNNING');
-        }).then(() => {
-          return this.cheWorkspace.fetchWorkspaceDetails(workspace.id);
-        });
+        return workspace;
       }, (error: any) => {
         let errorMessage = 'Creation workspace failed.';
         if (error && error.data && error.data.message) {
@@ -209,13 +204,21 @@ export class CreateWorkspaceSvc {
   /**
    * Redirects to IDE with specified workspace.
    *
-   * @param {string} namespaceId the namespace ID
    * @param {che.IWorkspace} workspace the workspace to open in IDE
    */
-  redirectToIde(namespaceId: string, workspace: che.IWorkspace): void {
-    const path = `/ide/${namespaceId}/${workspace.config.name}`;
+  redirectToIDE(workspace: che.IWorkspace): void {
+    const path = `/ide/${workspace.namespace}/${workspace.config.name}`;
     this.$location.path(path);
-    this.$location.search({'init': 'true'});
+  }
+
+  /**
+   * Redirects to the details page of the workspace.
+   *
+   * @param {che.IWorkspace} workspace the workspace to open in IDE
+   */
+  redirectToDetails(workspace: che.IWorkspace): void {
+    const path = `/workspace/${workspace.namespace}/${workspace.config.name}`;
+    this.$location.path(path);
   }
 
   /**

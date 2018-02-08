@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2012-2017 Red Hat, Inc.
+    Copyright (c) 2012-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -17,6 +17,31 @@
        thread-count="1">
 
     <test name="all">
+        <method-selectors>
+            <method-selector>
+                <script language="beanshell">
+                    <![CDATA[
+    boolean isTestGroupsAgreedWithRequestedGroups() {
+      String testGroupsVal = System.getProperty("testGroups");
+      if (testGroupsVal == null || testGroupsVal.trim().isEmpty() || groups.isEmpty()){
+        return true;
+      }
+
+      String[] testGroups = testGroupsVal.split(",");
+      for (String group: groups.keySet()) {
+        if (!Arrays.asList(testGroups).contains(group)) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    isTestGroupsAgreedWithRequestedGroups();
+]]>
+                </script>
+            </method-selector>
+        </method-selectors>
         <classes>
             <class name="org.eclipse.che.selenium.dashboard.organization.UserEmptyOrganizationTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.AdminOfParentOrganizationTest"/>
@@ -30,11 +55,15 @@
             <class name="org.eclipse.che.selenium.dashboard.organization.OrganizationMembersTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.RenameOrganizationTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.SystemAdminOrganizationTest"/>
+            <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromDashboardTest"/>
+            <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromImportTest"/>
+            <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromPreferencesTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutReferenceTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest"/>
             <class name="org.eclipse.che.selenium.git.FetchUpdatesAndMergeRemoteBranchIntoLocalTest"/>
             <class name="org.eclipse.che.selenium.git.GitPullTest"/>
+            <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
             <class name="org.eclipse.che.selenium.git.ImportProjectIntoSpecifiedBranchTest"/>
             <class name="org.eclipse.che.selenium.git.ImportRecursiveSubmoduleTest"/>
             <class name="org.eclipse.che.selenium.git.KeepDirectoryGitImportTest"/>
@@ -44,6 +73,7 @@
             <class name="org.eclipse.che.selenium.git.PushingChangesTest"/>
             <class name="org.eclipse.che.selenium.git.RevertCommitTest"/>
             <class name="org.eclipse.che.selenium.git.WorkingWithPullConflictsTest"/>
+            <class name="org.eclipse.che.selenium.dashboard.ImportProjectFromGitHubTest"/>
         </classes>
     </test>
 </suite>

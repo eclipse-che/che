@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2015-2017 Red Hat, Inc.
+    Copyright (c) 2015-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -20,6 +20,8 @@
     <div che-multi-transclude-part="che-list-delete-button">
       <che-list-header-delete-button ng-if="workspaceDetailsProjectsCtrl.cheListHelper.isNoItemSelected === false"
                                      title="Delete"
+                                     disabled="workspaceDetailsProjectsCtrl.workspaceIsRunning() === false"
+                                     disabled-message="Projects cannot be removed in stopped workspace."
                                      on-delete="workspaceDetailsProjectsCtrl.deleteSelectedProjects()"></che-list-header-delete-button>
     </div>
     <div che-multi-transclude-part="che-list-search">

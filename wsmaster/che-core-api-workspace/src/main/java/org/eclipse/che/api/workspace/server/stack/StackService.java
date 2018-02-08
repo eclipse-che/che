@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -115,7 +115,6 @@ public class StackService extends Service {
             .setCreator(userId)
             .setTags(stackDto.getTags())
             .setWorkspaceConfig(stackDto.getWorkspaceConfig())
-            .setSource(stackDto.getSource())
             .setComponents(stackDto.getComponents())
             .build();
     stackDao.create(newStack);
@@ -180,7 +179,6 @@ public class StackService extends Service {
             .setCreator(stack.getCreator())
             .setTags(updateDto.getTags())
             .setWorkspaceConfig(updateDto.getWorkspaceConfig())
-            .setSource(updateDto.getSource())
             .setComponents(updateDto.getComponents())
             .build();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -111,13 +111,6 @@ public interface Theme {
    * @return text shadow
    */
   String activeTabTextShadow();
-
-  /**
-   * Icon color in active (selected) tab.
-   *
-   * @return color for icon
-   */
-  String activeTabIconColor();
 
   /**
    * Text color for part button.
@@ -292,6 +285,12 @@ public interface Theme {
 
   /** Background of the DropdownList widget. */
   String getDropdownListBackground();
+
+  /** Color of the ExecLabel for DropdownList widget. */
+  String getDropdownListExecLabelColor();
+
+  /** Background of the ExecLabel for DropdownList widget. */
+  String getDropdownListExecLabelBackground();
 
   /** Background of the hovered DropdownList widget. */
   String getHoveredDropdownListBackground();
@@ -1120,11 +1119,21 @@ public interface Theme {
   String consolesToolbarToggledButtonColor();
 
   /**
-   * Text color for DEV label in process tree.
+   * Toggled button border on the consoles toolbar.
+   *
+   * @return color
+   */
+  String consolesToolbarToggledButtonBorderColor();
+
+  /**
+   * Text color for DEV label in processes tree.
    *
    * @return color
    */
   String processTreeDevLabel();
+
+  /** Text color for machine name in processes tree. */
+  String processesTreeMachineNameColor();
 
   /**
    * Background color for console output area.
@@ -1348,8 +1357,6 @@ public interface Theme {
 
   String openedFilesDropdownListBackgroundColor();
 
-  String openedFilesDropdownListBorderColor();
-
   String openedFilesDropdownListShadowColor();
 
   String openedFilesDropdownListTextColor();
@@ -1357,8 +1364,6 @@ public interface Theme {
   String openedFilesDropdownListCloseButtonColor();
 
   String openedFilesDropdownListHoverBackgroundColor();
-
-  String openedFilesDropdownListHoverTextColor();
 
   /**
    * ******************************************************************************************
@@ -1628,6 +1633,8 @@ public interface Theme {
   String popupLoaderTextColor();
 
   /** Cell table */
+  String cellTableBackground();
+
   String cellTableHrefColor();
 
   String cellTableHeaderColor();
@@ -1640,6 +1647,10 @@ public interface Theme {
 
   String cellTableCellColor();
 
+  String cellTableHoveredBackground();
+
+  String cellTableSelectedBackground();
+
   /**
    * ******************************************************************************************
    *
@@ -1650,4 +1661,64 @@ public interface Theme {
   String findResultsBackground();
 
   String findResultsTextColor();
+
+  /**
+   * ******************************************************************************************
+   *
+   * <p>Editor placeholder
+   *
+   * <p>******************************************************************************************
+   */
+  String editorPlaceholderTabsPanelBackground();
+
+  String editorPlaceholderTabsPanelBottomBorderColor();
+
+  String editorPlaceholderTabBackground();
+
+  String editorPlaceholderTabIconColor();
+
+  String editorPlaceholderTabLabelColor();
+
+  String editorPlaceholderTabsPanelPlusColor();
+
+  String editorPlaceholderContentBackground();
+
+  String editorPlaceholderLineNumbersColor();
+
+  String editorPlaceholderRowsColor();
+
+  /**
+   * ******************************************************************************************
+   *
+   * <p>Project explorer placeholder
+   *
+   * <p>******************************************************************************************
+   */
+  String projectExplorerPlaceholderBackground();
+
+  String projectExplorerPlaceholderIconColor();
+
+  String projectExplorerPlaceholderRowColor();
+
+  /**
+   * ******************************************************************************************
+   *
+   * <p>Part switcher icons
+   *
+   * <p>******************************************************************************************
+   */
+  String tabIconColor();
+
+  String activeTabIconColor();
+
+  String hoveredTabIconColor();
+
+  /**
+   * ******************************************************************************************
+   *
+   * <p>Toolbar panel
+   *
+   * <p>******************************************************************************************
+   */
+  String noToolbarPanelColor();
 }

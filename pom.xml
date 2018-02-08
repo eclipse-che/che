@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2012-2017 Red Hat, Inc.
+    Copyright (c) 2012-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -16,11 +16,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>6.0.0-M3-SNAPSHOT</version>
+        <version>6.1.0-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>6.0.0-M3-SNAPSHOT</version>
+    <version>6.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -46,9 +46,9 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
-        <che.docs.version>6.0.0-M3-SNAPSHOT</che.docs.version>
-        <che.lib.version>6.0.0-M3-SNAPSHOT</che.lib.version>
-        <che.version>6.0.0-M3-SNAPSHOT</che.version>
+        <che.docs.version>6.1.0-SNAPSHOT</che.docs.version>
+        <che.lib.version>6.1.0-SNAPSHOT</che.lib.version>
+        <che.version>6.1.0-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
@@ -134,6 +134,22 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
+                <artifactId>che-exec-agent-client</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>che-exec-agent-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>che-exec-agent-shared</artifactId>
+                <version>${che.version}</version>
+                <classifier>sources</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
                 <artifactId>che-ide-gwt-app</artifactId>
                 <version>${che.version}</version>
                 <type>pom</type>
@@ -164,6 +180,11 @@
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>git-credentials-agent</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>ls-camel-agent</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
@@ -562,6 +583,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-commons-logback</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-commons-mail</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -729,6 +755,11 @@
                 <artifactId>che-docs</artifactId>
                 <version>${che.docs.version}</version>
                 <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.infrastructure</groupId>
+                <artifactId>infrastructure-kubernetes</artifactId>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.infrastructure</groupId>
@@ -927,6 +958,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-permission-installer</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
                 <artifactId>che-multiuser-permission-resource</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -985,6 +1021,11 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-activity-wsmaster</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-camel-server</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
@@ -1877,7 +1918,11 @@
                     <codeserverArgs>
                         <arg>-noprecompile</arg>
                         <arg>-noincremental</arg>
+                        <arg>-generateJsInteropExports</arg>
                     </codeserverArgs>
+                    <compilerArgs>
+                        <arg>-generateJsInteropExports</arg>
+                    </compilerArgs>
                     <jvmArgs>
                         <arg>${gwt.compiler.jvmArgs.Xss}</arg>
                         <arg>${gwt.compiler.jvmArgs.Xmx}</arg>

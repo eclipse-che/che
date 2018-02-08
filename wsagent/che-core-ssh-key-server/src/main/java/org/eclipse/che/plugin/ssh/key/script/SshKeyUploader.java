@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,7 @@ public interface SshKeyUploader {
    * @throws IOException if an i/o error occurs
    * @throws UnauthorizedException if user is not authorized to access SSH key storage
    */
-  void uploadKey(String publicKey) throws IOException, UnauthorizedException;
+  void uploadKey(String publicKey, String oauthToken) throws IOException, UnauthorizedException;
 
   /**
    * Check if specified url matched to use current upload provider.

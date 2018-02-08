@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,6 +79,10 @@ import {ProjectRepository} from './workspace-projects/project-details/repository
 import {ProjectRepositoryController} from './workspace-projects/project-details/repository/project-repository.controller';
 import {ProjectDetailsController} from './workspace-projects/project-details/project-details.controller';
 import {NoGithubOauthDialogController} from '../create-workspace/project-source-selector/add-import-project/import-github-project/oauth-dialog/no-github-oauth-dialog.controller';
+import {EditMachineVolumeDialogController} from './workspace-machine-volumes/edit-volume-dialog/edit-volume-dialog.controller';
+import {MachineVolumes} from './workspace-machine-volumes/machine-volumes.directive';
+import {MachineVolumesController} from './workspace-machine-volumes/machine-volumes.controller';
+
 
 
 /**
@@ -156,6 +160,9 @@ export class WorkspaceDetailsConfig {
     register.controller('EnvVariablesController', EnvVariablesController);
     register.directive('cheEnvVariables', EnvVariables);
     register.controller('EditEnvVariableDialogController', EditEnvVariableDialogController);
+    register.controller('MachineVolumesController', MachineVolumesController);
+    register.directive('cheMachineVolumes', MachineVolumes);
+    register.controller('EditMachineVolumeDialogController', EditMachineVolumeDialogController);
     register.controller('MachineSelectorController', MachineSelectorController);
     register.directive('cheMachineSelector', MachineSelector);
     register.controller('MachineServersController', MachineServersController);

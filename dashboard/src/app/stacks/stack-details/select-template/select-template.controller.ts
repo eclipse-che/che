@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,7 @@ import {StackController} from '../stack.controller';
  */
 export class SelectTemplateController {
   stack: che.IStack;
-  selectedTemplates: Array<che.IProject>;
+  selectedTemplates: Array<che.IProjectTemplate>;
   projectsOrderBy: string;
 
   private $mdDialog: ng.material.IDialogService;
@@ -53,10 +53,10 @@ export class SelectTemplateController {
 
   /**
    * Helper method used to get the length of keys of the given object
-   * @param projectTemplate {che.IProject}
+   * @param projectTemplate {che.IProjectTemplate}
    * @param isAdd {boolean}
    */
-  updateSelectedTemplates(projectTemplate: che.IProject, isAdd: boolean): void {
+  updateSelectedTemplates(projectTemplate: che.IProjectTemplate, isAdd: boolean): void {
     if (isAdd) {
       this.selectedTemplates.push(projectTemplate);
     } else {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -108,7 +108,7 @@ import org.eclipse.che.multiuser.permission.workspace.server.stack.StackPermissi
 import org.eclipse.che.multiuser.resource.api.AvailableResourcesProvider;
 import org.eclipse.che.multiuser.resource.api.ResourceLockKeyProvider;
 import org.eclipse.che.multiuser.resource.api.ResourceUsageTracker;
-import org.eclipse.che.multiuser.resource.api.license.ResourcesProvider;
+import org.eclipse.che.multiuser.resource.api.ResourcesProvider;
 import org.eclipse.che.multiuser.resource.api.type.RamResourceType;
 import org.eclipse.che.multiuser.resource.api.type.ResourceType;
 import org.eclipse.che.multiuser.resource.spi.FreeResourcesLimitDao;
@@ -264,6 +264,8 @@ public class JpaEntitiesCascadeRemovalTest {
                                     singletonList(
                                         new ResourceImpl(
                                             RamResourceType.ID, 1024, RamResourceType.UNIT)))));
+
+                bindConstant().annotatedWith(Names.named("che.workspace.probe_pool_size")).to(1);
               }
             });
 
@@ -315,13 +317,13 @@ public class JpaEntitiesCascadeRemovalTest {
     assertNull(notFoundToNull(() -> profileDao.getById(user.getId())));
     assertTrue(preferenceDao.getPreferences(user.getId()).isEmpty());
     assertTrue(sshDao.get(user.getId()).isEmpty());
-    assertTrue(workspaceDao.getByNamespace(account.getName()).isEmpty());
+    assertTrue(workspaceDao.getByNamespace(account.getName(), 30, 0).isEmpty());
     assertTrue(
         factoryDao
             .getByAttribute(0, 0, singletonList(Pair.of("creator.userId", user.getId())))
             .isEmpty());
     // Check workers and parent entity is removed
-    assertTrue(workspaceDao.getByNamespace(user2.getId()).isEmpty());
+    assertTrue(workspaceDao.getByNamespace(user2.getId(), 30, 0).isEmpty());
     assertEquals(workerDao.getWorkers(workspace3.getId(), 1, 0).getTotalItemsCount(), 0);
     // Check stack and recipes are removed
     assertNull(notFoundToNull(() -> stackDao.getById(stack1.getId())));

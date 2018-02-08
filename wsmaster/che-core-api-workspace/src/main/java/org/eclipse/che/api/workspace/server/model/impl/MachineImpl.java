@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 
 /**
@@ -25,14 +26,17 @@ public class MachineImpl implements Machine {
 
   private Map<String, String> attributes;
   private Map<String, ServerImpl> servers;
+  private MachineStatus status;
 
   public MachineImpl(Machine machineRuntime) {
-    this(machineRuntime.getAttributes(), machineRuntime.getServers());
+    this(machineRuntime.getAttributes(), machineRuntime.getServers(), machineRuntime.getStatus());
   }
 
-  public MachineImpl(Map<String, String> attributes, Map<String, ? extends Server> servers) {
+  public MachineImpl(
+      Map<String, String> attributes, Map<String, ? extends Server> servers, MachineStatus status) {
     this(servers);
     this.attributes = new HashMap<>(attributes);
+    this.status = status;
   }
 
   public MachineImpl(Map<String, ? extends Server> servers) {
@@ -65,21 +69,38 @@ public class MachineImpl implements Machine {
   }
 
   @Override
+  public MachineStatus getStatus() {
+    return status;
+  }
+
+  @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof MachineImpl)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof MachineImpl)) {
+      return false;
+    }
     MachineImpl machine = (MachineImpl) o;
     return Objects.equals(getAttributes(), machine.getAttributes())
-        && Objects.equals(getServers(), machine.getServers());
+        && Objects.equals(getServers(), machine.getServers())
+        && getStatus() == machine.getStatus();
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getAttributes(), getServers());
+    return Objects.hash(getAttributes(), getServers(), getStatus());
   }
 
   @Override
   public String toString() {
-    return "MachineImpl{" + "attributes=" + attributes + ", servers=" + servers + '}';
+    return "MachineImpl{"
+        + "attributes="
+        + attributes
+        + ", servers="
+        + servers
+        + ", status="
+        + status
+        + '}';
   }
 }

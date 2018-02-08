@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,11 +20,9 @@ import com.google.common.base.Strings;
 import com.google.common.io.CharStreams;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.factory.server.FactoryMessageBodyAdapter;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
@@ -50,14 +48,11 @@ public class URLFactoryBuilder {
 
   private final URLChecker urlChecker;
   private final URLFetcher urlFetcher;
-  private final FactoryMessageBodyAdapter factoryAdapter;
 
   @Inject
-  public URLFactoryBuilder(
-      URLChecker urlChecker, URLFetcher urlFetcher, FactoryMessageBodyAdapter factoryAdapter) {
+  public URLFactoryBuilder(URLChecker urlChecker, URLFetcher urlFetcher) {
     this.urlChecker = urlChecker;
     this.urlFetcher = urlFetcher;
-    this.factoryAdapter = factoryAdapter;
   }
 
   /**
@@ -76,8 +71,7 @@ public class URLFactoryBuilder {
         try {
           final ByteArrayInputStream contentStream =
               new ByteArrayInputStream(factoryJsonContent.getBytes(UTF_8));
-          final InputStream newStream = factoryAdapter.adapt(contentStream);
-          factoryJsonContent = CharStreams.toString(new InputStreamReader(newStream, UTF_8));
+          factoryJsonContent = CharStreams.toString(new InputStreamReader(contentStream, UTF_8));
         } catch (IOException x) {
           throw new IllegalStateException(x.getLocalizedMessage(), x);
         }
@@ -110,8 +104,7 @@ public class URLFactoryBuilder {
               .withType("dockerfile")
               .withContentType("text/x-dockerfile");
     } else {
-      recipeDto =
-          newDto(RecipeDto.class).withLocation(DEFAULT_DOCKER_IMAGE).withType("dockerimage");
+      recipeDto = newDto(RecipeDto.class).withContent(DEFAULT_DOCKER_IMAGE).withType("dockerimage");
     }
     MachineConfigDto machine =
         newDto(MachineConfigDto.class)

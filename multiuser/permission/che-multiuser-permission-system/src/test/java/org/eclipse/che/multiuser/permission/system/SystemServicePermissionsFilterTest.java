@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,7 +67,6 @@ public class SystemServicePermissionsFilterTest {
   @Test
   public void allPublicMethodsAreFiltered() {
     Set<String> existingMethods = getDeclaredPublicMethods(SystemService.class);
-    existingMethods.addAll(getDeclaredPublicMethods(SystemService.class));
 
     if (!existingMethods.equals(TEST_HANDLED_METHODS)) {
       Set<String> existingMinusExpected = Sets.difference(existingMethods, TEST_HANDLED_METHODS);
@@ -132,24 +131,10 @@ public class SystemServicePermissionsFilterTest {
         .auth()
         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
         .when()
-        .get(SECURE_PATH + "/system/state")
-        .then()
-        .statusCode(403);
+        .get(SECURE_PATH + "/system/state");
 
-    verify(systemService, never()).getState();
+    verify(systemService).getState();
   }
-
-  //    @Test
-  //    public void allowsToGetSystemRamForAnyone() throws Exception {
-  //        permitSubject("nothing");
-  //
-  //        given().auth()
-  //               .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-  //               .when()
-  //               .get(SECURE_PATH + "/system/ram/limit");
-  //
-  //        verify(systemService).getSystemRamLimitStatus();
-  //    }
 
   private static void permitSubject(String... allowedActions) throws ForbiddenException {
     doAnswer(

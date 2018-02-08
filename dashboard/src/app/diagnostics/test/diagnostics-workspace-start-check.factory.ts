@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -179,7 +179,7 @@ export class DiagnosticsWorkspaceStartCheck {
               }
             },
             'recipe': {
-              'content': 'FROM openjdk:8-jre-alpine\nRUN apk add --update bash\nCMD tail -f /dev/null\n',
+              'content': 'FROM openjdk:8-jre-alpine\nCMD tail -f /dev/null\n',
               'contentType': 'text/x-dockerfile',
               'type': 'dockerfile'
             }

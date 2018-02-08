@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,14 +20,17 @@ export class FactoryItemController {
   private $location: ng.ILocationService;
   private cheFactory: CheFactory;
   private cheEnvironmentRegistry: CheEnvironmentRegistry;
-  private lodash: _.LoDashStatic;
+  private lodash: any;
   private factory: che.IFactory;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, cheFactory: CheFactory, cheEnvironmentRegistry: CheEnvironmentRegistry, lodash: _.LoDashStatic) {
+  constructor($location: ng.ILocationService,
+              cheFactory: CheFactory,
+              cheEnvironmentRegistry: CheEnvironmentRegistry,
+              lodash: any) {
     this.$location = $location;
     this.cheFactory = cheFactory;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;

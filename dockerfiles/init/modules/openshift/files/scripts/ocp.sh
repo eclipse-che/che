@@ -16,12 +16,12 @@ LOCAL_IP_ADDRESS=$(detectIP)
 if [[ "$OSTYPE" == "darwin"* ]]; then
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
-    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.6.0/openshift-origin-client-tools-v3.6.0-c4dd4cf-mac.zip"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-mac.zip"
     DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-osx-amd64"
 else
     DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
     DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
-    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.6.0/openshift-origin-client-tools-v3.6.0-c4dd4cf-linux-64bit.tar.gz"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-linux-64bit.tar.gz"
     DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"
 fi
 
@@ -34,23 +34,34 @@ export JQ_BINARY_DOWNLOAD_URL=${JQ_BINARY_DOWNLOAD_URL:-${DEFAULT_JQ_BINARY_DOWN
 DEFAULT_CHE_MULTIUSER="false"
 export CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
 
+#Using local scripts is error prone and should only be used temporarly while developing Che.
+#If unsure leave the default value true set.
+DEFAULT_CHE_OPENSHIFT_GENERATE_SCRIPTS=true
+export CHE_OPENSHIFT_GENERATE_SCRIPTS=${CHE_OPENSHIFT_GENERATE_SCRIPTS:-${DEFAULT_CHE_OPENSHIFT_GENERATE_SCRIPTS}}
+
 DEFAULT_OPENSHIFT_USERNAME="developer"
 export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
 
 DEFAULT_OPENSHIFT_PASSWORD="developer"
 export OPENSHIFT_PASSWORD=${OPENSHIFT_PASSWORD:-${DEFAULT_OPENSHIFT_PASSWORD}}
 
+DNS_PROVIDERS=(
+xip.io
+nip.codenvy-stg.com
+)
 DEFAULT_DNS_PROVIDER="nip.io"
 export DNS_PROVIDER=${DNS_PROVIDER:-${DEFAULT_DNS_PROVIDER}}
 
 export OPENSHIFT_ROUTING_SUFFIX="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
 
-export CHE_OPENSHIFT_PROJECT="eclipse-che"
+DEFAULT_CHE_OPENSHIFT_PROJECT="eclipse-che"
+export CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
 
 export OPENSHIFT_FLAVOR="ocp"
 
 DEFAULT_OPENSHIFT_ENDPOINT="https://${OC_PUBLIC_HOSTNAME}:8443"
 export OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
+export CHE_INFRA_KUBERNETES_MASTER__URL=${CHE_INFRA_KUBERNETES_MASTER__URL:-${OPENSHIFT_ENDPOINT}}
 
 DEFAULT_ENABLE_SSL="false"
 export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
@@ -64,18 +75,37 @@ export IMAGE_PULL_POLICY=${IMAGE_PULL_POLICY:-${DEFAULT_IMAGE_PULL_POLICY}}
 DEFAULT_CHE_IMAGE_REPO="eclipse/che-server"
 export CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
 
-DEFAULT_IMAGE_INIT="eclipse/che-init"
-export IMAGE_INIT=${IMAGE_INIT:-${DEFAULT_IMAGE_INIT}}:${CHE_IMAGE_TAG}
+DEFAULT_IMAGE_INIT="eclipse/che-init:nightly"
+export IMAGE_INIT=${IMAGE_INIT:-${DEFAULT_IMAGE_INIT}}
+
+DEFAULT_CHE_CLI_IMAGE="eclipse/che-cli:nightly"
+export CHE_CLI_IMAGE=${CHE_CLI_IMAGE:-${DEFAULT_CHE_CLI_IMAGE}}
 
 DEFAULT_CONFIG_DIR="/tmp/che-config"
 export CONFIG_DIR=${CONFIG_DIR:-${DEFAULT_CONFIG_DIR}}
 
 }
 
+test_dns_provider() {
+    #add current $DNS_PROVIDER to the providers list to respect environment settings
+    DNS_PROVIDERS=("$DNS_PROVIDER" "${DNS_PROVIDERS[@]}")
+    for i in ${DNS_PROVIDERS[@]}
+        do
+        if [[ $(dig +short +time=5 +tries=1 10.0.0.1.$i) = "10.0.0.1" ]]; then
+            echo "Test $i - works OK, using it as DNS provider"
+            export DNS_PROVIDER="$i"
+            break;
+         else
+            echo "Test $i DNS provider failed, trying next one."
+        fi
+        done
+}
+
 get_tools() {
     TOOLS_DIR="/tmp"
     OC_BINARY="$TOOLS_DIR/oc"
     JQ_BINARY="$TOOLS_DIR/jq"
+    OC_VERSION=$(echo $DEFAULT_OC_BINARY_DOWNLOAD_URL | cut -d '/' -f 8)
     #OS specific extract archives
     if [[ "$OSTYPE" == "darwin"* ]]; then
         OC_PACKAGE="openshift-origin-client-tools.zip"
@@ -87,11 +117,21 @@ get_tools() {
         EXTRA_ARGS="-C $TOOLS_DIR"
     fi
 
-    if [ ! -f $OC_BINARY ]; then
-        echo "download oc client..."
+    download_oc() {
+        echo "download oc client $OC_VERSION"
         wget -q -O $TOOLS_DIR/$OC_PACKAGE $OC_BINARY_DOWNLOAD_URL
         eval "$ARCH" "$TOOLS_DIR"/"$OC_PACKAGE" "$EXTRA_ARGS" &>/dev/null
-        rm -rf "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE "${TOOLS_DIR:-/tmp}"/"$OC_PACKAGE"
+        rm -f "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE "${TOOLS_DIR:-/tmp}"/"$OC_PACKAGE"
+    }
+
+    if [[ ! -f $OC_BINARY ]]; then
+        download_oc
+    else
+        # here we check is installed version is same version defined in script, if not we update version to one that defined in script.
+        if [[ $($OC_BINARY version 2> /dev/null | grep "oc v" | cut -d " " -f2 | cut -d '+' -f1 || true) != *"$OC_VERSION"* ]]; then
+            rm -f "$OC_BINARY" "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE
+            download_oc
+        fi
     fi
 
     if [ ! -f $JQ_BINARY ]; then
@@ -132,42 +172,34 @@ wait_ocp() {
 }
 
 run_ocp() {
+    test_dns_provider
     $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
     wait_ocp
-    $OC_BINARY login -u system:admin
-    $OC_BINARY create serviceaccount pv-recycler-controller -n openshift-infra
 }
 
 deploy_che_to_ocp() {
+    OPENSHIFT_SCRIPTS_FOLDER="${CONFIG_DIR}/instance/config/openshift/scripts/"
     #Repull init image only if IMAGE_PULL_POLICY is set to Always
     if [ $IMAGE_PULL_POLICY == "Always" ]; then
         docker pull "$IMAGE_INIT"
     fi
-    docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} destroy --quiet --skip:pull --skip:nightly
-    docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" eclipse/che-cli:${CHE_IMAGE_TAG} config --skip:pull --skip:nightly
-    cd "${CONFIG_DIR}/instance/config/openshift/scripts/"
-    bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
-    wait_until_server_is_booted
-}
-
-server_is_booted() {
-  PING_URL="http://che-${CHE_OPENSHIFT_PROJECT}.${OPENSHIFT_ROUTING_SUFFIX}"
-  HTTP_STATUS_CODE=$(curl -I -k "${PING_URL}" -s -o /dev/null --write-out '%{http_code}')
-  if [[ "${HTTP_STATUS_CODE}" = "200" ]] || [[ "${HTTP_STATUS_CODE}" = "302" ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-wait_until_server_is_booted() {
-  SERVER_BOOT_TIMEOUT=300
-  echo "[CHE] wait CHE pod booting..."
-  ELAPSED=0
-  until server_is_booted || [ ${ELAPSED} -eq "${SERVER_BOOT_TIMEOUT}" ]; do
-    sleep 2
-    ELAPSED=$((ELAPSED+1))
-  done
+    #Only generate scripts and config files if CHE_OPENSHIFT_GENERATE_SCRIPTS=true
+    if [ $CHE_OPENSHIFT_GENERATE_SCRIPTS == true ]; then
+      echo "OCP generating temporary scripts and configuration files at ${OPENSHIFT_SCRIPTS_FOLDER} ."
+      #wipeout config folder
+      docker run -v "${CONFIG_DIR}":/to_remove alpine sh -c "rm -rf /to_remove/" || true
+      docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" ${CHE_CLI_IMAGE} config --skip:pull --skip:nightly
+      cd ${OPENSHIFT_SCRIPTS_FOLDER}
+    else
+      echo "OCP using existing scripts and configuration files in current folder."
+    fi
+    if [[ ! -f "deploy_che.sh" ]]; then
+      CURRENT_PWD=$(pwd)
+      echo "OCP script deploy_che.sh does not exist in ${CURRENT_PWD} ."
+      exit 1
+    else
+      bash deploy_che.sh --wait-che ${DEPLOY_SCRIPT_ARGS}
+    fi
 }
 
 destroy_ocp() {
@@ -177,20 +209,60 @@ destroy_ocp() {
     $OC_BINARY cluster down
 }
 
+remove_che_from_ocp() {
+	echo "[CHE] Checking if project \"${CHE_OPENSHIFT_PROJECT}\" exists before removing..."
+	WAIT_FOR_PROJECT_TO_DELETE=true
+	CHE_REMOVE_PROJECT=true
+	DELETE_OPENSHIFT_PROJECT_MESSAGE="[CHE] Removing Project \"${CHE_OPENSHIFT_PROJECT}\"."
+	if $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
+		echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" exists."
+		while $WAIT_FOR_PROJECT_TO_DELETE
+		do
+		{ # try
+			echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
+			if $CHE_REMOVE_PROJECT; then
+				$OC_BINARY delete project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
+				CHE_REMOVE_PROJECT=false
+			fi
+			DELETE_OPENSHIFT_PROJECT_MESSAGE="."
+			if ! $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
+				WAIT_FOR_PROJECT_TO_DELETE=false
+			fi
+			echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
+		} || { # catch
+			echo "[CHE] Could not find project \"${CHE_OPENSHIFT_PROJECT}\" to delete."
+			WAIT_FOR_PROJECT_TO_DELETE=false
+		}
+		done
+		echo "Done!"
+	else
+		echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" does NOT exists."
+	fi
+	
+}
+
 detectIP() {
     docker run --rm --net host eclipse/che-ip:nightly
 }
 
 parse_args() {
-    HELP="valid args: \\n
-    --run-ocp - run ocp cluster\\n
-    --destroy - destroy ocp cluster \\n
-    --deploy-che - deploy che to ocp \\n
-    --multiuser - deploy che in multiuser mode \\n
-    =================================== \\n
-    ENV vars \\n
-    CHE_IMAGE_TAG - set CHE images tag, default: nightly \\n
-    CHE_MULTIUSER - set CHE multi user mode, default: false (single user) \\n
+    HELP="valid args:
+    --help - this help menu
+    --run-ocp - run ocp cluster
+    --destroy - destroy ocp cluster
+    --deploy-che - deploy che to ocp
+    --multiuser - deploy che in multiuser mode
+    --remove-che - remove existing che project
+    ===================================
+    ENV vars
+    CHE_IMAGE_TAG - set che-server image tag, default: nightly
+    CHE_CLI_IMAGE - set che-cli image, default: eclipse/che-cli:nightly 
+    IMAGE_INIT - set che-cli image, default: eclipse/che-init:nightly
+    CHE_MULTIUSER - set CHE multi user mode, default: false (single user) 
+    OC_PUBLIC_HOSTNAME - set ocp hostname to admin console, default: host ip
+    OC_PUBLIC_IP - set ocp hostname for routing suffix, default: host ip
+    DNS_PROVIDER - set ocp DNS provider for routing suffix, default: nip.io
+    OPENSHIFT_TOKEN - set ocp token for authentication
 "
 
     DEPLOY_SCRIPT_ARGS=""
@@ -207,6 +279,10 @@ parse_args() {
 
     if [[ "$@" == *"--update"* ]]; then
       DEPLOY_SCRIPT_ARGS="-c rollupdate"
+    fi
+
+    if [[ "$@" == *"--remove-che"* ]]; then
+      remove_che_from_ocp
     fi
 
     for i in "${@}"
@@ -230,8 +306,15 @@ parse_args() {
            --update)
                shift
            ;;
+           --remove-che)
+               shift
+           ;;
+           --help)
+               echo -e "$HELP"
+               exit 1
+           ;;
            *)
-               echo "You've passed wrong arg!"
+               echo "You've passed wrong arg."
                echo -e "$HELP"
                exit 1
            ;;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,10 +57,6 @@ export class OrganizationSelectMembersDialogController {
    * The list of users, that are available to be added
    */
   private availableUsers: Array<IOrganizationMember>;
-  /**
-   * The list of users, that are going to be added
-   */
-  private usersToAdd: Array<IOrganizationMember>;
   /**
    * Current user.
    */
@@ -122,7 +118,7 @@ export class OrganizationSelectMembersDialogController {
       map[member.id] = member;
       return map;
     }, {});
-    this.availableUsers = this.parentOrganizationMembers.filter((parentOrganizationMember: che.IUser) => {
+    this.availableUsers = <any>this.parentOrganizationMembers.filter((parentOrganizationMember: che.IUser) => {
       return !existingMembers[parentOrganizationMember.id] && parentOrganizationMember.id !== this.user.id;
     });
 

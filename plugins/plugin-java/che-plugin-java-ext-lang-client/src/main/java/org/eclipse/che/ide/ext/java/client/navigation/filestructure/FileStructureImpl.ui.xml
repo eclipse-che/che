@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2012-2017 Red Hat, Inc.
+    Copyright (c) 2012-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -14,7 +14,8 @@
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:with field="locale" type="org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant"/>
 
-    <ui:style field="style">
+    <ui:style src="org/eclipse/che/ide/api/ui/style.css">
+
         .main {
             width: 400px;
             height: 450px;
@@ -25,8 +26,9 @@
             margin-bottom: 1px;
             text-align: end;
             width: 100%;
-            border-top: 1px solid;
+            border-top: 1px solid windowSeparatorColor;
         }
+
     </ui:style>
 
     <g:DockLayoutPanel addStyleNames="{style.main}" unit="PX" ui:field="treeContainer" debugId="file-structure-mainPanel">

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,15 +23,16 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElem
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.Arrays;
+import com.google.inject.name.Named;
 import java.util.List;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.client.TestKeycloakSettingsServiceClient;
 import org.eclipse.che.selenium.core.entrance.Entrance;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
-import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -45,25 +46,31 @@ public class Dashboard {
   protected final SeleniumWebDriver seleniumWebDriver;
   protected final TestUser defaultUser;
 
-  private final TestIdeUrlProvider testIdeUrlProvider;
   private final TestDashboardUrlProvider testDashboardUrlProvider;
   private final Entrance entrance;
   private final LoginPage loginPage;
+  private final TestWebElementRenderChecker testWebElementRenderChecker;
+  private final TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient;
+  private final boolean isMultiuser;
 
   @Inject
   public Dashboard(
       SeleniumWebDriver seleniumWebDriver,
       TestUser defaultUser,
-      TestIdeUrlProvider testIdeUrlProvider,
       TestDashboardUrlProvider testDashboardUrlProvider,
       Entrance entrance,
-      LoginPage loginPage) {
+      LoginPage loginPage,
+      TestWebElementRenderChecker testWebElementRenderChecker,
+      TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient,
+      @Named("che.multiuser") boolean isMultiuser) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.defaultUser = defaultUser;
-    this.testIdeUrlProvider = testIdeUrlProvider;
     this.testDashboardUrlProvider = testDashboardUrlProvider;
     this.entrance = entrance;
     this.loginPage = loginPage;
+    this.testWebElementRenderChecker = testWebElementRenderChecker;
+    this.testKeycloakSettingsServiceClient = testKeycloakSettingsServiceClient;
+    this.isMultiuser = isMultiuser;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -76,6 +83,7 @@ public class Dashboard {
     ORGANIZATIONS("Organizations"),
     SETTINGS("Settings"),
     CREATE_TEAM("Create Team");
+
     private final String title;
 
     MenuItem(String title) {
@@ -240,13 +248,17 @@ public class Dashboard {
   }
 
   public void logout() {
-    String apiEndpoint = testDashboardUrlProvider.get().toString();
-    List<String> api = Arrays.asList(apiEndpoint.split(":"));
-    String logoutApiEndpoint = api.get(0) + ":" + api.get(1);
-    String logoutURL = logoutApiEndpoint + ":5050/auth/realms/che/protocol/openid-connect/logout";
-    String redirectURL = logoutApiEndpoint + ":8080/dashboard/#/workspaces";
+    if (!isMultiuser) {
+      return;
+    }
 
-    seleniumWebDriver.navigate().to(logoutURL + "?redirect_uri=" + redirectURL);
+    String logoutUrl =
+        format(
+            "%s?redirect_uri=%s#/workspaces",
+            testKeycloakSettingsServiceClient.read().getKeycloakLogoutEndpoint(),
+            testDashboardUrlProvider.get());
+
+    seleniumWebDriver.navigate().to(logoutUrl);
   }
 
   /**
@@ -268,6 +280,28 @@ public class Dashboard {
     List<WebElement> workspaces =
         seleniumWebDriver.findElements(By.xpath(Locators.RESENT_WS_NAVBAR));
     return !(workspaces.size() == 0);
+  }
+
+  public void clickOnUsernameButton() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.id(Locators.USER_NAME)))
+        .click();
+  }
+
+  public void clickOnAccountItem() {
+    testWebElementRenderChecker.waitElementIsRendered(By.id("menu_container_1"));
+
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath("//span[text()=' Account']")))
+        .click();
+  }
+
+  public void clickOnLogoutItem() {
+    testWebElementRenderChecker.waitElementIsRendered(By.id("menu_container_1"));
+
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath("//span[text()=' Logout']")))
+        .click();
   }
 
   @PreDestroy

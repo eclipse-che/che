@@ -27,7 +27,8 @@
                               navbar-dropdown-external-class="recent-workspaces-menu"
                               navbar-dropdown-offset="30 22">
           <md-button nav-bar-selected flex che-reload-href
-                     ng-href="{{navbarRecentWorkspacesController.getIdeLink(workspace.id)}}" layout-align="left"
+                     ng-href="{{navbarRecentWorkspacesController.getLink(workspace)}}"
+                     layout-align="left"
                      target="_self">
             <div class="navbar-item" layout="row" layout-align="start center">
               <workspace-status-indicator
@@ -38,7 +39,7 @@
               <span title="{{navbarRecentWorkspacesController.getWorkspaceName(workspace.id)}}"
                     class="recent-workspace-name-container"
                     ng-class="{'recent-workspaces-stopped-workspace': navbarRecentWorkspacesController.getWorkspaceStatus(workspace.id) === 'STOPPED'}">
-                <span che-clip-the-middle>{{navbarRecentWorkspacesController.getWorkspaceName(workspace.id)}}</span>
+                <span che-clip-the-middle>{{workspace.config.name}}</span>
               </span>
             </div>
           </md-button>

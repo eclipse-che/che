@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.IsWidget;
  */
 public interface ImportFromConfigView extends IsWidget {
 
-  public interface ActionDelegate {
+  interface ActionDelegate {
     /**
      * Performs any actions appropriate in response to the user having pressed the Cancel button.
      */
@@ -30,7 +30,7 @@ public interface ImportFromConfigView extends IsWidget {
      */
     void onImportClicked();
 
-    /** Performs any actions appropriate in response to error reading file */
+    /** Performs any actions appropriate in response to error reading file. */
     void onErrorReadingFile(String errorMessage);
   }
 
@@ -38,7 +38,7 @@ public interface ImportFromConfigView extends IsWidget {
   void showDialog();
 
   /** Close dialog */
-  void closeDialog();
+  void onClose();
 
   /** Sets the delegate to receive events from this view. */
   void setDelegate(ActionDelegate delegate);

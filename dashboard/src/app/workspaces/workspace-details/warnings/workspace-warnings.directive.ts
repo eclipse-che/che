@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,14 +16,14 @@
  * @description This class is handling the directive for the container with warnings
  * @author Ann Shumilova
  */
-export class WorkspaceWarnings {
-  private restrict: string;
-  private bindToController:boolean;
-  private templateUrl: string;
-  private controller: string;
-  private controllerAs: string;
-  private transclude: boolean;
-  private scope: {
+export class WorkspaceWarnings implements ng.IDirective {
+  restrict: string;
+  bindToController: boolean;
+  templateUrl: string;
+  controller: string;
+  controllerAs: string;
+  transclude: boolean;
+  scope: {
     [propName: string]: string
   };
 
@@ -41,7 +41,7 @@ export class WorkspaceWarnings {
     this.transclude = true;
     this.scope = {
       workspace: '=workspace'
-    }
+    };
   }
 
 }

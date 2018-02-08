@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,6 +85,7 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     final SubPanel subPanel = subPanelFactory.newPanel(this);
     subPanel.setFocusListener(focusListener);
     subPanel.setDoubleClickListener(doubleClickListener);
+    subPanel.setAddTabButtonClickListener(addTabButtonClickListener);
     view.splitHorizontally(subPanel.getView());
   }
 
@@ -93,6 +94,7 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     final SubPanel subPanel = subPanelFactory.newPanel(this);
     subPanel.setFocusListener(focusListener);
     subPanel.setDoubleClickListener(doubleClickListener);
+    subPanel.setAddTabButtonClickListener(addTabButtonClickListener);
     view.splitVertically(subPanel.getView());
   }
 
@@ -169,6 +171,8 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     if (listener != null) {
       listener.onWidgetRemoving(removeCallback);
     }
+
+    widgets.removeIf(widgetToShow -> widgetToShow.getWidget().equals(widget));
   }
 
   @Override

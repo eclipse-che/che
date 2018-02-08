@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.user.client.Timer;
@@ -27,7 +29,9 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import elemental.js.dom.JsElement;
+import javax.inject.Inject;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.ui.button.ButtonAlignment;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -50,6 +54,7 @@ public abstract class Window implements IsWidget {
 
   private boolean isShowing;
   private View view;
+  private KeyBindingAgent keyBinding;
 
   protected Window() {
     this(true);
@@ -59,13 +64,18 @@ public abstract class Window implements IsWidget {
     view = new View(resources, showBottomPanel);
   }
 
-  public void setWidget(Widget widget) {
-    view.addContentWidget(widget);
-    handleViewEvents();
+  @Inject
+  protected void setKeyBinding(KeyBindingAgent keyBinding) {
+    this.keyBinding = keyBinding;
   }
 
   public Widget getWidget() {
     return view.getContent();
+  }
+
+  public void setWidget(Widget widget) {
+    view.addContentWidget(widget);
+    handleViewEvents();
   }
 
   /**
@@ -104,6 +114,10 @@ public abstract class Window implements IsWidget {
 
     if (!isShowing) {
       return;
+    }
+
+    if (keyBinding != null) {
+      keyBinding.enable();
     }
 
     isShowing = false;
@@ -224,6 +238,10 @@ public abstract class Window implements IsWidget {
       return;
     }
 
+    if (keyBinding != null) {
+      keyBinding.disable();
+    }
+
     isShowing = true;
 
     // Attach the popup to the body.
@@ -278,9 +296,7 @@ public abstract class Window implements IsWidget {
         new ViewEvents() {
           @Override
           public void onEscapeKey() {
-            if (hideOnEscapeEnabled && !blocked) {
-              Window.this.onClose();
-            }
+            Window.this.onEscapeKey();
           }
 
           @Override
@@ -294,8 +310,31 @@ public abstract class Window implements IsWidget {
           public void onEnterKey() {
             onEnterClicked();
           }
+
+          @Override
+          public void onKeyDownEvent(KeyDownEvent event) {
+            Window.this.onKeyDownEvent(event);
+          }
+
+          @Override
+          public void onKeyPressEvent(KeyPressEvent event) {
+            Window.this.onKeyPressEvent(event);
+          }
         });
   }
+
+  /** @see ViewEvents#onEscapeKey() */
+  protected void onEscapeKey() {
+    if (hideOnEscapeEnabled && !blocked) {
+      Window.this.onClose();
+    }
+  }
+
+  /** @see ViewEvents#onKeyDownEvent(KeyDownEvent) */
+  protected void onKeyDownEvent(KeyDownEvent event) {}
+
+  /** @see ViewEvents#onKeyPressEvent(KeyPressEvent) */
+  protected void onKeyPressEvent(KeyPressEvent event) {}
 
   /** Is called when user closes the Window. */
   protected void onClose() {
@@ -372,10 +411,22 @@ public abstract class Window implements IsWidget {
 
   /** The events sources by the View. */
   public interface ViewEvents {
+    /** Is called when ESCAPE key is pressed. */
     void onEscapeKey();
 
     void onClose();
 
+    /** Is called when ENTER key is pressed. */
     void onEnterKey();
+
+    /**
+     * Is called when {@link KeyDownEvent} is fired except events from ESCAPE and ENTER keys. In
+     * those cases {@link ViewEvents#onEscapeKey()} or {@link ViewEvents#onEnterKey()} will be
+     * fired.
+     */
+    void onKeyDownEvent(KeyDownEvent event);
+
+    /** Is called when {@link KeyPressEvent} is fired. */
+    void onKeyPressEvent(KeyPressEvent event);
   }
 }

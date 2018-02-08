@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,15 +18,15 @@ interface IFactoryFromFileScope extends ng.IScope {
  * Defines a directive for configuring factory from file.
  * @author Oleksii Orel
  */
-export class FactoryFromFile {
-  private restrict: string;
-  private templateUrl: string;
-  private replace: boolean;
-  private controller: string;
-  private controllerAs: string;
-  private bindToController: boolean;
+export class FactoryFromFile implements ng.IDirective {
+  restrict: string;
+  templateUrl: string;
+  replace: boolean;
+  controller: string;
+  controllerAs: string;
+  bindToController: boolean;
 
-  private scope: {
+  scope: {
     [propName: string]: string;
   };
 

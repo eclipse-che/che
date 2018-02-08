@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,8 @@ import java.util.concurrent.TimeUnit;
  * @author Alexander Garagatyi
  */
 public class HttpConnectionServerChecker extends ServerChecker {
+  private static final String CONNECTION_HEADER = "Connection";
+  private static final String CONNECTION_CLOSE = "close";
   private final URL url;
 
   public HttpConnectionServerChecker(
@@ -32,9 +34,10 @@ public class HttpConnectionServerChecker extends ServerChecker {
       String serverRef,
       long period,
       long timeout,
+      int successThreshold,
       TimeUnit timeUnit,
       Timer timer) {
-    super(machineName, serverRef, period, timeout, timeUnit, timer);
+    super(machineName, serverRef, period, timeout, successThreshold, timeUnit, timer);
     this.url = url;
   }
 
@@ -46,6 +49,7 @@ public class HttpConnectionServerChecker extends ServerChecker {
       // TODO consider how much time we should use as a limit
       httpURLConnection.setConnectTimeout((int) TimeUnit.SECONDS.toMillis(3));
       httpURLConnection.setReadTimeout((int) TimeUnit.SECONDS.toMillis(3));
+      httpURLConnection.setRequestProperty(CONNECTION_HEADER, CONNECTION_CLOSE);
       return isConnectionSuccessful(httpURLConnection);
     } catch (IOException e) {
       return false;

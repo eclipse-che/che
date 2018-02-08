@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,6 @@ import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
-import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.shared.Constants;
@@ -199,39 +197,6 @@ public class MachineConfigsValidatorTest {
     machinesValidator.validate(singletonMap(MACHINE_NAME, machine));
   }
 
-  @Test(
-    expectedExceptions = ValidationException.class,
-    expectedExceptionsMessageRegExp =
-        "Environment should contain exactly 1 machine with wsagent, but contains '.*'. All machines with this agent: .*",
-    dataProvider = "severalWsAgentsProvider"
-  )
-  public void shouldFailIfThereIsMoreThan1MachineWithWsAgent(
-      Map<String, InternalMachineConfig> machines) throws Exception {
-    // when
-    machinesValidator.validate(machines);
-  }
-
-  @DataProvider(name = "severalWsAgentsProvider")
-  public static Object[][] severalWsAgentsProvider() {
-    return new Object[][] {
-      {
-        ImmutableMap.of(
-            "machine1", machineMockWithServers(Constants.SERVER_WS_AGENT_HTTP_REFERENCE),
-            "machine2", machineMockWithServers(Constants.SERVER_WS_AGENT_HTTP_REFERENCE))
-      },
-      {
-        ImmutableMap.of(
-            "machine1", machineMockWithInstallers(WsAgentMachineFinderUtil.WS_AGENT_INSTALLER),
-            "machine2", machineMockWithServers(Constants.SERVER_WS_AGENT_HTTP_REFERENCE))
-      },
-      {
-        ImmutableMap.of(
-            "machine1", machineMockWithInstallers(WsAgentMachineFinderUtil.WS_AGENT_INSTALLER),
-            "machine2", machineMockWithInstallers(WsAgentMachineFinderUtil.WS_AGENT_INSTALLER))
-      }
-    };
-  }
-
   private static InternalMachineConfig machineMock() {
     InternalMachineConfig machineConfig = mock(InternalMachineConfig.class);
     when(machineConfig.getServers()).thenReturn(emptyMap());
@@ -245,13 +210,7 @@ public class MachineConfigsValidatorTest {
     return machineConfig;
   }
 
-  private static InternalMachineConfig machineMockWithInstallers(String... installers) {
-    InternalMachineConfig machineConfig = machineMock();
-    when(machineConfig.getInstallers()).thenReturn(createInstallers(installers));
-    return machineConfig;
-  }
-
-  private static List<Installer> createInstallers(String... installers) {
+  private static List<InstallerImpl> createInstallers(String... installers) {
     return Arrays.stream(installers)
         .map(s -> new InstallerImpl().withId(s))
         .collect(Collectors.toList());

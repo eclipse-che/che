@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,10 +49,6 @@ export class CheTeam implements che.api.ICheTeam {
    * The Che Team notifications.
    */
   private teamEventsManager: che.api.ICheTeamEventsManager;
-  /**
-   * User's personal account.
-   */
-  private personalAccount: any;
   /**
    * Client for requesting Team API.
    */
@@ -119,8 +115,10 @@ export class CheTeam implements che.api.ICheTeam {
   fetchTeams(): ng.IPromise<any> {
     let defer = this.$q.defer();
 
-    this.cheOrganization.fetchOrganizations().then((teams: any[]) => {
-      this.processTeams(teams, this.cheUser.getUser());
+    this.cheOrganization.fetchOrganizations().then((teams: Array<che.ITeam>) => {
+      if (this.getPersonalAccount()) {
+        this.processTeams(teams, this.cheUser.getUser());
+      }
       defer.resolve();
     }, (error: any) => {
       if (error.status === 304) {
@@ -142,89 +140,52 @@ export class CheTeam implements che.api.ICheTeam {
    * Process teams to retrieve personal account (name of the organization === current user's name) and
    * teams (organization with parent).
    *
-   * @param organizations {che.IOrganization}
+   * @param teams {che.ITeam}
    * @param user {che.IUser}
    */
-  processTeams(organizations: Array<che.IOrganization>, user: any): void {
+  processTeams(teams: Array<che.ITeam>, user: che.IUser): void {
     this.teamsMap = new Map();
     this.teams = [];
     this.cheNamespaceRegistry.getNamespaces().length = 0;
 
-    let name = user.name;
-    // detection personal account (organization which name equals to current user's name):
-    this.personalAccount = this.lodash.find(organizations, (organization: che.IOrganization) => {
-      return organization.qualifiedName === name;
-    });
+    // display personal account as "personal" on UI, namespace(id) stays the same for API interactions:
+    this.cheNamespaceRegistry.getNamespaces().push({id: this.getPersonalAccount().qualifiedName, label: 'personal', location: '/billing'});
+    this.cheNamespaceRegistry.setCaption('Team');
+    this.teamEventsManager.subscribeTeamMemberNotifications();
 
-    if (this.personalAccount) {
-      // display personal account as "personal" on UI, namespace(id) stays the same for API interactions:
-      this.cheNamespaceRegistry.getNamespaces().push({id: this.personalAccount.qualifiedName, label: 'personal', location: '/billing'});
-      this.cheNamespaceRegistry.setCaption('Team');
-    } else {
-      this.cheNamespaceRegistry.setCaption('Organization');
-      // todo add back, when API is ready: this.cheNamespaceRegistry.setEmptyMessage('You are not member of any organization and not able to create workspace. Please, contact your administrator.');
-      this.processOrganizationInfoRetriever(organizations);
-    }
-
-    organizations.forEach((organization: che.IOrganization) => {
-      this.teamsMap.set(organization.id, organization);
+    teams.forEach((team: che.ITeam) => {
+      this.teamsMap.set(team.id, team);
       // team has to have parent (root organizations are skipped):
-      if (organization.parent) {
-        this.teams.push(organization);
-        this.teamEventsManager.subscribeTeamNotifications(organization.id);
+      if (team.parent) {
+        this.teams.push(team);
+        this.teamEventsManager.subscribeTeamNotifications(team.id);
       }
 
-      if (this.personalAccount) {
-        if (organization.id !== this.personalAccount.id) {
-          this.cheNamespaceRegistry.getNamespaces().push({
-            id: organization.qualifiedName,
-            label: organization.qualifiedName,
-            location: '/team/' + organization.qualifiedName
-          });
-        }
-      } else {
-        this.cheNamespaceRegistry.getNamespaces().push({id: organization.qualifiedName, label: organization.qualifiedName, location: '/organization/' + organization.qualifiedName});
+      if (team.id !== this.getPersonalAccount().id) {
+        this.cheNamespaceRegistry.getNamespaces().push({
+          id: team.qualifiedName,
+          label: team.qualifiedName,
+          location: '/team/' + team.qualifiedName
+        });
       }
-    });
-  }
-
-  /**
-   * Process organization information retriever.
-   *
-   * @param organizations
-   */
-  processOrganizationInfoRetriever(organizations: Array<che.IOrganization>): void {
-    this.cheNamespaceRegistry.setGetAdditionalInfo((namespaceId: string) => {
-      let organization = this.lodash.find(organizations, (organization: che.IOrganization) => {
-        return organization.qualifiedName === namespaceId;
-      });
-
-      if (!organization) {
-        return null;
-      }
-
-      return this.cheResourcesDistribution.fetchAvailableOrganizationResources(organization.id).then(() => {
-        let resource = this.cheResourcesDistribution.getOrganizationAvailableResourceByType(organization.id, this.resourceLimits.RAM);
-        return resource ? 'Available RAM: ' + (resource.amount / 1024) + 'GB' : null;
-      });
     });
   }
 
   /**
    * Return current user's personal account.
    *
-   * @returns {any} personal account
+   * @returns {che.ITeam} personal account
    */
-  getPersonalAccount(): any {
-    return this.personalAccount;
+  getPersonalAccount(): che.ITeam {
+    return this.cheOrganization.getPersonalAccount();
   }
 
   /**
    * Returns the array of teams.
    *
-   * @returns {Array<any>} the array of teams
+   * @returns {Array<che.ITeam>} the array of teams
    */
-  getTeams(): Array<any> {
+  getTeams(): Array<che.ITeam> {
     return this.teams;
   }
 
@@ -232,16 +193,16 @@ export class CheTeam implements che.api.ICheTeam {
    * Requests team by it's id.
    *
    * @param id {string} the team's Id
-   * @returns {ng.IPromise<any>} result promise
+   * @returns {ng.IPromise<che.ITeam>} result promise
    */
-  fetchTeamById(id: string): ng.IPromise<any> {
+  fetchTeamById(id: string): ng.IPromise<che.ITeam> {
     let promise = this.cheOrganization.fetchOrganizationById(id);
-    let resultPromise = promise.then((organization: che.IOrganization) => {
-      this.teamsMap.set(id, organization);
-      return organization;
+    let resultPromise = promise.then((team: che.ITeam) => {
+      this.teamsMap.set(id, team);
+      return this.$q.when(team);
     }, (error: any) => {
       if (error.status === 304) {
-        return this.teamsMap.get(id);
+        return this.$q.when(this.teamsMap.get(id));
       }
       return this.$q.reject();
     });
@@ -253,9 +214,9 @@ export class CheTeam implements che.api.ICheTeam {
    * Requests team by it's name.
    *
    * @param name the team's name
-   * @returns {ng.IPromise<any>} result promise
+   * @returns {ng.IPromise<che.ITeam>} result promise
    */
-  fetchTeamByName(name: string): ng.IPromise<any> {
+  fetchTeamByName(name: string): ng.IPromise<che.ITeam> {
     let promise = this.cheOrganization.fetchOrganizationByName(name);
 
     return promise;
@@ -265,11 +226,11 @@ export class CheTeam implements che.api.ICheTeam {
    * Returns team by it's name.
    *
    * @param name team's name
-   * @returns {any} team or <code>null</code> if not found
+   * @returns {che.ITeam} team or <code>null</code> if not found
    */
-  getTeamByName(name: string): any {
-    if (this.personalAccount && this.personalAccount.qualifiedName === name) {
-      return this.personalAccount;
+  getTeamByName(name: string): che.ITeam {
+    if (this.getPersonalAccount() && this.getPersonalAccount().qualifiedName === name) {
+      return this.getPersonalAccount();
     }
 
     const team = this.cheOrganization.getOrganizationByName(name);
@@ -290,9 +251,9 @@ export class CheTeam implements che.api.ICheTeam {
    * Returns team by it's id.
    *
    * @param id {string} team's id
-   * @returns {any} team or <code>null</code> if not found
+   * @returns {che.ITeam} team or <code>null</code> if not found
    */
-  getTeamById(id: string): any {
+  getTeamById(id: string): che.ITeam {
     return this.teamsMap.get(id);
   }
 
@@ -303,7 +264,7 @@ export class CheTeam implements che.api.ICheTeam {
    * @returns {ng.IPromise<any>} result promise
    */
   createTeam(name: string): ng.IPromise<any> {
-    return this.cheOrganization.createOrganization(name, this.personalAccount.id);
+    return this.cheOrganization.createOrganization(name, this.getPersonalAccount().id);
   }
 
   /**

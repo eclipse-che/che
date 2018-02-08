@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,6 +72,10 @@ export class WorkspaceDetailsService {
 
   private pages: IPage[];
   private sections: ISection[];
+  /**
+   * This workspaces should be restarted for new config to be applied.
+   */
+  private restartToApply: string[] = [];
 
   /**
    * Default constructor that is using resource
@@ -204,122 +208,68 @@ export class WorkspaceDetailsService {
   }
 
   /**
-   * Returns <code>true</code> if workspace has to be running to apply changes.
+   * Applies changes to the workspace config with workspace restarting.
    *
-   * @return {boolean}
+   * @param {che.IWorkspace} workspace
+   * @returns {ng.IPromise<any>}
    */
-  needRunningToUpdate(): boolean {
-    return this.workspaceDetailsProjectsService.getProjectTemplates().length > 0 || this.workspaceDetailsProjectsService.getProjectNamesToDelete().length > 0;
+  applyConfigChanges(workspace: che.IWorkspace): ng.IPromise<any> {
+    return this.$q.when()
+      .then(() => {
+        if (this.getWorkspaceStatus(workspace.id) !== WorkspaceStatus[WorkspaceStatus.STOPPED]) {
+          this.stopWorkspace(workspace.id);
+        }
+        return this.cheWorkspace.fetchStatusChange(workspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
+      })
+      .then(() => {
+        this.removeRestartToApply(workspace.id);
+
+        return this.saveConfigChanges(workspace);
+      })
+      .then(() => {
+        this.cheWorkspace.startWorkspace(workspace.id, workspace.config.defaultEnv);
+        return this.cheWorkspace.fetchStatusChange(workspace.id, WorkspaceStatus[WorkspaceStatus.RUNNING]);
+      })
+      .catch((error: any) => {
+        this.$log.error(error);
+        return this.$q.reject(error);
+      });
   }
 
   /**
-   * Updates workspace with config's changes, creates and/or removes projects.
+   * Add workspace ID to the list of workspaces that should be restarted.
    *
-   * @param {che.IWorkspace} oldWorkspace old workspace details
-   * @param {che.IWorkspace} newWorkspace new workspace details
-   * @return {angular.IPromise<any>}
+   * @param {string} workspaceId
    */
-  applyChanges(oldWorkspace: che.IWorkspace, newWorkspace: che.IWorkspace): ng.IPromise<any> {
-    if (angular.equals(oldWorkspace.config, newWorkspace.config)) {
-      return this.$q.when();
+  addRestartToApply(workspaceId: string): void {
+    if (this.restartToApply.indexOf(workspaceId) === -1) {
+      this.restartToApply.push(workspaceId);
     }
+  }
 
-    const initStatus = oldWorkspace && oldWorkspace.status;
+  /**
+   * Remove workspace ID from the list of workspaces that should be restarted.
+   *
+   * @param {string} workspaceId
+   */
+  removeRestartToApply(workspaceId: string): void {
+    const index = this.restartToApply.indexOf(workspaceId);
+    if (index === -1) {
+      return;
+    }
+    this.restartToApply.splice(index, 1);
+  }
 
-    const oldConfig = angular.copy(oldWorkspace.config);
-    delete oldConfig.projects;
-    const newConfig = angular.copy(newWorkspace.config);
-    delete newConfig.projects;
-
-    const projectTemplatesToAdd = this.workspaceDetailsProjectsService.getProjectTemplates(),
-          hasProjectsToAdd = projectTemplatesToAdd.length > 0,
-          projectNamesToDelete = this.workspaceDetailsProjectsService.getProjectNamesToDelete(),
-          hasProjectsToDelete = projectNamesToDelete.length > 0,
-          hasConfigChanges = !angular.equals(newConfig, oldConfig);
-
-    return this.$q.when().then(() => {
-      // update config
-      if (!projectTemplatesToAdd && !hasConfigChanges) {
-        return this.$q.when();
-      }
-
-      return this.$q.when().then(() => {
-        /* Stop workspace */
-        const status = this.getWorkspaceStatus(newWorkspace.id);
-
-        if (WorkspaceStatus[status] === WorkspaceStatus.STARTING || WorkspaceStatus[status] === WorkspaceStatus.RUNNING) {
-          this.stopWorkspace(newWorkspace.id);
-          return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
-        }
-
-        if (WorkspaceStatus[status] === WorkspaceStatus.STOPPING) {
-          return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
-        }
-
-        return this.$q.when();
-      }).then(() => {
-        return this.applyConfigChanges(newWorkspace);
-      }).then(() => {
-        // restore init status
-        if (WorkspaceStatus[initStatus] === WorkspaceStatus.STARTING || WorkspaceStatus[initStatus] === WorkspaceStatus.RUNNING) {
-          this.cheWorkspace.startWorkspace(newWorkspace.id, newWorkspace.config.defaultEnv);
-          return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.RUNNING]).then(() => {
-            return this.cheWorkspace.fetchWorkspaceDetails(newWorkspace.id);
-          });
-        }
-      });
-    }).then(() => {
-      if (!hasProjectsToAdd && !hasProjectsToDelete) {
-        return this.$q.when();
-      }
-
-      return this.$q.when().then(() => {
-        const status = this.getWorkspaceStatus(newWorkspace.id);
-
-        if (WorkspaceStatus[status] === WorkspaceStatus.RUNNING) {
-          return this.$q.when();
-        }
-
-        if (WorkspaceStatus[status] === WorkspaceStatus.STARTING) {
-          return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.RUNNING]);
-        }
-
-        this.cheWorkspace.startWorkspace(newWorkspace.id, newWorkspace.config.defaultEnv);
-        return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.RUNNING]).then(() => {
-          return this.cheWorkspace.fetchWorkspaceDetails(newWorkspace.id);
-        });
-      }).then(() => {
-        // delete projects
-        if (!hasProjectsToDelete) {
-          return this.$q.when();
-        }
-
-        return this.workspaceDetailsProjectsService.deleteSelectedProjects(newWorkspace.id, projectNamesToDelete);
-      }).then(() => {
-        // add projects
-        if (!hasProjectsToAdd) {
-          return this.$q.when();
-        }
-
-        // add commands
-        return this.createWorkspaceSvc.addProjectCommands(newWorkspace.config, projectTemplatesToAdd);
-      }).then(() => {
-        if (WorkspaceStatus[initStatus] === WorkspaceStatus.STOPPED || WorkspaceStatus[initStatus] === WorkspaceStatus.STOPPING) {
-          // stop workspace
-          const status = this.getWorkspaceStatus(newWorkspace.id);
-
-          if (WorkspaceStatus[status] === WorkspaceStatus.STARTING || WorkspaceStatus[status] === WorkspaceStatus.RUNNING) {
-            this.stopWorkspace(newWorkspace.id);
-            return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
-          }
-
-          if (WorkspaceStatus[status] === WorkspaceStatus.STOPPING) {
-            return this.cheWorkspace.fetchStatusChange(newWorkspace.id, WorkspaceStatus[WorkspaceStatus.STOPPED]);
-          }
-        }
-        return this.$q.when();
-      });
-    });
+  /**
+   * Returns <code>true</code> if workspace ID belongs to the list of
+   * workspaces that should be restarted.
+   *
+   * @param {string} workspaceId
+   * @returns {boolean}
+   */
+  getRestartToApply(workspaceId: string): boolean {
+    const index = this.restartToApply.indexOf(workspaceId);
+    return index !== -1;
   }
 
   /**
@@ -328,13 +278,23 @@ export class WorkspaceDetailsService {
    * @param {che.IWorkspace} workspace new workspace details
    * @return {angular.IPromise<any>}
    */
-  applyConfigChanges(workspace: che.IWorkspace): ng.IPromise<any> {
+  saveConfigChanges(workspace: che.IWorkspace): ng.IPromise<any> {
     delete workspace.links;
 
-    return this.cheWorkspace.updateWorkspace(workspace.id, workspace).catch((error: any) => {
-      this.$log.error(error);
-      return this.$q.reject(error);
-    });
+    const projectNamesToDelete = this.workspaceDetailsProjectsService.getProjectNamesToDelete(),
+      hasProjectsToDelete = projectNamesToDelete.length > 0;
+
+    return this.cheWorkspace.updateWorkspace(workspace.id, workspace)
+      .then(() => {
+        if (!hasProjectsToDelete) {
+          return this.$q.when();
+        }
+        return this.workspaceDetailsProjectsService.deleteSelectedProjects(workspace.id, projectNamesToDelete);
+      })
+      .catch((error: any) => {
+        this.$log.error(error);
+        return this.$q.reject(error);
+      });
   }
 
   /**

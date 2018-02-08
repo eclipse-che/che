@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,28 +8,41 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
+
+@eval cellTableHeaderBackground org.eclipse.che.ide.api.theme.Style.theme.cellTableHeaderBackground();
+@eval cellTableHeaderColor org.eclipse.che.ide.api.theme.Style.theme.cellTableHeaderColor();
+
+@eval cellTableOddRowBackground org.eclipse.che.ide.api.theme.Style.theme.cellTableOddRowBackground();
+@eval cellTableEvenRowBackground org.eclipse.che.ide.api.theme.Style.theme.cellTableEvenRowBackground();
+
+@eval cellTableHoveredBackground org.eclipse.che.ide.api.theme.Style.theme.cellTableHoveredBackground();
+@eval cellTableSelectedBackground org.eclipse.che.ide.api.theme.Style.theme.cellTableSelectedBackground();
+
 .cellTableHeader {
-    border-bottom: 2px solid #6f7277;
+    border-bottom: 1px solid cellTableHeaderBackground;
     padding: 10px 15px;
     text-align: left;
-    color: #dbdbdb;
+    color: cellTableHeaderColor;
     overflow: hidden;
     text-shadow: none;
+    font-family: "Open Sans", sans-serif;
+    font-size: 9pt;
+    font-weight: normal;
 }
 
 .cellTableCell {
     padding: 7px 15px;
     overflow: hidden;
-    font-size: 11px;
+    font-family: "Open Sans", sans-serif;
+    font-size: 9pt;
 }
 
 .cellTableEvenRow {
-    background: #414141;
+    background: cellTableEvenRowBackground;
 }
 
 .cellTableOddRow {
-    /*background: transparent;*/
-    background: #313131;
+    background: cellTableOddRowBackground;
 }
 
 .cellTableEvenRowCell {
@@ -41,7 +54,7 @@
 }
 
 .cellTableHoveredRow {
-    background: rgba(37, 108, 159, 0.1);
+    background-color: cellTableHoveredBackground;
 }
 
 .cellTableHoveredRowCell {
@@ -49,5 +62,5 @@
 }
 
 .cellTableSelectedRow {
-    background: #256c9f;
+    background-color: cellTableSelectedBackground;
 }

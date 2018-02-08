@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
@@ -35,6 +36,7 @@ import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
  * Tracks usage of {@link RamResourceType} resource.
  *
  * @author Sergii Leschenko
+ * @author Anton Korneta
  */
 @Singleton
 public class RamResourceUsageTracker implements ResourceUsageTracker {
@@ -57,10 +59,11 @@ public class RamResourceUsageTracker implements ResourceUsageTracker {
       throws NotFoundException, ServerException {
     final Account account = accountManager.getById(accountId);
     List<WorkspaceImpl> activeWorkspaces =
-        workspaceManagerProvider
-            .get()
-            .getByNamespace(account.getName(), true)
-            .stream()
+        Pages.stream(
+                (maxItems, skipCount) ->
+                    workspaceManagerProvider
+                        .get()
+                        .getByNamespace(account.getName(), true, maxItems, skipCount))
             .filter(ws -> STOPPED != ws.getStatus())
             .collect(Collectors.toList());
     long currentlyUsedRamMB = 0;
@@ -68,21 +71,14 @@ public class RamResourceUsageTracker implements ResourceUsageTracker {
       if (WorkspaceStatus.STARTING.equals(activeWorkspace.getStatus())) {
         // starting workspace may not have all machine in runtime
         // it is need to calculate ram from environment config
-        EnvironmentImpl activeEnvironmentConfig =
+        final EnvironmentImpl startingEnvironment =
             activeWorkspace
                 .getConfig()
                 .getEnvironments()
                 .get(activeWorkspace.getRuntime().getActiveEnv());
-
-        currentlyUsedRamMB += environmentRamCalculator.calculate(activeEnvironmentConfig);
+        currentlyUsedRamMB += environmentRamCalculator.calculate(startingEnvironment);
       } else {
-        currentlyUsedRamMB += 0L;
-        //            activeWorkspace
-        //                .getRuntime()
-        //                .getMachines()
-        //                .stream()
-        //                .mapToInt(machine -> machine.getConfig().getLimits().getRam())
-        //                .sum();
+        currentlyUsedRamMB += environmentRamCalculator.calculate(activeWorkspace.getRuntime());
       }
     }
 

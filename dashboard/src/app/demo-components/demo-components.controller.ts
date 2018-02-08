@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,15 @@
  */
 'use strict';
 
-enum Tab {Font, Panel, Selecter, Icons, Buttons, Input, List, Label_container, Stack_selector, Popover};
+import {
+  ICheButtonDropdownMainAction,
+  ICheButtonDropdownOtherAction
+} from '../../components/widget/button-dropdown/che-button-dropdown.directive';
+
+import {ICheEditModeOverlayConfig} from '../../components/widget/edit-mode-overlay/che-edit-mode-overlay.directive';
+import {CheNotification} from '../../components/notification/che-notification.factory';
+
+enum Tab {Font, Panel, Selecter, Icons, Dropdown_button,  Buttons, Input, List, Label_container, Stack_selector, Popover, Edit_mode_overlay}
 
 /**
  * This class is handling the controller for the demo of components
@@ -19,6 +27,7 @@ enum Tab {Font, Panel, Selecter, Icons, Buttons, Input, List, Label_container, S
 export class DemoComponentsController {
 
   $location: ng.ILocationService;
+  cheNotification: CheNotification;
   selectedIndex: number;
   tab: Object = Tab;
 
@@ -38,12 +47,21 @@ export class DemoComponentsController {
 
   placement: any;
 
+  buttonDropdownConfig: {
+    mainAction: ICheButtonDropdownMainAction;
+    otherActions: Array<ICheButtonDropdownOtherAction>;
+  };
+
+  overlayConfig: ICheEditModeOverlayConfig;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService) {
+  constructor($location: ng.ILocationService,
+              cheNotification: CheNotification) {
     this.$location = $location;
+    this.cheNotification = cheNotification;
 
     const tab = $location.search().tab;
     if (Tab[tab]) {
@@ -68,6 +86,21 @@ export class DemoComponentsController {
       ],
       selected: 'top'
     };
+    this.buttonDropdownConfig = {
+      mainAction: {
+        title: 'Main Action',
+        type: 'button'
+      },
+      otherActions: [{
+        title: 'Other action 2',
+        type: 'button',
+        orderNumber: 2
+      }, {
+        title: 'Other action 1',
+        type: 'button',
+        orderNumber: 1
+      }]
+    };
     this.init();
   }
 
@@ -89,6 +122,34 @@ export class DemoComponentsController {
     // number spinner
     this.number = 0;
     this.numberIsChanged = 0;
+
+    // edit-mode config
+    this.overlayConfig = {
+      visible: true,
+      disabled: false,
+      message: {
+        content: `Information message`,
+        visible: true
+      },
+      applyButton: {
+        action: () => {
+          this.cheNotification.showInfo(`Button 'Apply' was clicked.`);
+        },
+        disabled: false
+      },
+      saveButton: {
+        action: () => {
+          this.cheNotification.showInfo(`Button 'Save' was clicked.`);
+        },
+        disabled: false
+      },
+      cancelButton: {
+        action: () => {
+          this.cheNotification.showInfo(`Button 'Cancel' was clicked.`);
+        },
+        disabled: false
+      }
+    };
   }
 
   /**

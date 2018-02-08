@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+
+import {IParser} from './parser';
 
 export interface IPodItem {
   apiVersion: string;
@@ -38,7 +40,9 @@ export interface IPodItemContainer {
  *
  *  @author Oleksii Orel
  */
-export class OpenshiftMachineRecipeParser {
+export class OpenshiftMachineRecipeParser implements IParser {
+  private recipeByContent: Map<string, IPodItem> = new Map();
+  private recipeKeys: Array<string> = [];
 
   /**
    * Parses recipe content
@@ -47,8 +51,21 @@ export class OpenshiftMachineRecipeParser {
    * @returns {IPodItem} recipe object
    */
   parse(content: string): IPodItem {
-    const recipe = jsyaml.load(content);
+    let recipe: IPodItem;
+    if (this.recipeByContent.has(content)) {
+      recipe = angular.copy(this.recipeByContent.get(content));
+      this.validate(recipe);
+      return recipe;
+    }
+    recipe = jsyaml.safeLoad(content);
+    // add to buffer
+    this.recipeByContent.set(content, angular.copy(recipe));
+    this.recipeKeys.push(content);
+    if (this.recipeKeys.length > 10) {
+      this.recipeByContent.delete(this.recipeKeys.shift());
+    }
     this.validate(recipe);
+
     return recipe;
   }
 
@@ -59,7 +76,7 @@ export class OpenshiftMachineRecipeParser {
    * @returns {string} recipe content
    */
   dump(recipe: IPodItem): string {
-    return jsyaml.dump(recipe, {'indent': 1});
+    return jsyaml.safeDump(recipe, {'indent': 1});
   }
 
   /**
@@ -96,10 +113,13 @@ export class OpenshiftMachineRecipeParser {
       throw new TypeError(`Recipe pod item spec containers should contain at least one 'container'.`);
     }
     recipe.spec.containers.forEach((podItemContainer: IPodItemContainer) => {
+      if (!podItemContainer) {
+        return;
+      }
       if (!podItemContainer.name) {
         throw new TypeError(`Recipe pod item container should contain 'name' section.`);
       }
-      if (!this.testName(podItemContainer.name)) {
+      if (podItemContainer.name && !this.testName(podItemContainer.name)) {
         throw new TypeError(`Recipe pod item container name should not contain special characters like dollar, etc.`);
       }
       if (!podItemContainer.image) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -135,7 +136,7 @@ public class CheckSimpleGwtAppTest {
             .getUrl()
             .replace("tcp", "http");
 
-    // the timeout needs for che6-ocp platform
+    // the timeout needs for ocp platform
     WaitUtils.sleepQuietly(10);
     seleniumWebDriver.get(url);
 
@@ -143,5 +144,10 @@ public class CheckSimpleGwtAppTest {
         .until(
             ExpectedConditions.textToBePresentInElementLocated(
                 By.tagName("body"), expectedTextOnCodeServerPage));
+  }
+
+  @AfterClass
+  public void tearDown() {
+    testWorkspace.delete();
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,7 +70,7 @@ export class ProjectRepositoryController {
     }
 
     if (projectDetails.mixins.indexOf(subversionMixinId) !== -1) {
-      //update remote svn url
+      // update remote svn url
       if (!this.wsagent.getSvn().getRemoteUrlByKey(projectDetails.workspaceId, projectDetails.path)) {
         const promise = this.wsagent.getSvn().fetchRemoteUrl(projectDetails.workspaceId, projectDetails.path);
 
@@ -83,7 +83,7 @@ export class ProjectRepositoryController {
     }
 
     if (projectDetails.mixins.indexOf(gitMixinId) !== -1) {
-      //update git local url
+      // update git local url
       if (!this.wsagent.getGit().getLocalUrlByKey(projectDetails.path)) {
         const promise = this.wsagent.getGit().fetchLocalUrl(projectDetails.path);
 
@@ -94,7 +94,7 @@ export class ProjectRepositoryController {
         this.localGitRepository = this.wsagent.getGit().getLocalUrlByKey(projectDetails.path);
       }
 
-      //update git remote urls
+      // update git remote urls
       if (!this.wsagent.getGit().getRemoteUrlArrayByKey(projectDetails.path)) {
         const promise = this.wsagent.getGit().fetchRemoteUrlArray(projectDetails.path);
 

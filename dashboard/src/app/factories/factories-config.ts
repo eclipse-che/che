@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ export class FactoryConfig {
     register.service('loadFactoryService', LoadFactoryService);
 
     // config routes
-    register.app.config(function ($routeProvider) {
+    register.app.config(function ($routeProvider: che.route.IRouteProvider) {
       $routeProvider.accessWhen('/factories', {
         title: 'Factories',
         templateUrl: 'app/factories/list-factories/list-factories.html',
@@ -55,9 +55,11 @@ export class FactoryConfig {
     });
 
     // config files
+    /* tslint:disable */
     new FactoryDetailsConfig(register);
     new CreateFactoryConfig(register);
     new LastFactoriesConfig(register);
+    /* tslint:enable */
   }
 }
 

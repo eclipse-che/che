@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,22 +59,11 @@ public class UploadFolderFromZipViewImpl extends Window implements UploadFolderF
       org.eclipse.che.ide.Resources resources,
       AgentURLModifier agentURLModifier) {
     this.constant = locale;
-    this.setTitle(locale.uploadZipFolderTitle());
+    this.agentURLModifier = agentURLModifier;
+
+    setTitle(locale.uploadZipFolderTitle());
     setWidget(uploadFileViewBinder.createAndBindUi(this));
     bind();
-
-    btnCancel =
-        createButton(
-            locale.cancel(),
-            "file-uploadFolder-cancel",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-              }
-            });
-    addButtonToFooter(btnCancel);
 
     btnUpload =
         createButton(
@@ -87,9 +76,24 @@ public class UploadFolderFromZipViewImpl extends Window implements UploadFolderF
                 delegate.onUploadClicked();
               }
             });
-    btnUpload.addStyleName(resources.Css().buttonLoader());
+    btnUpload.addStyleName(resources.windowCss().primaryButton());
+    btnUpload.addStyleName(resources.windowCss().buttonAlignRight());
+    btnUpload.addStyleName(resources.buttonLoaderCss().buttonLoader());
     addButtonToFooter(btnUpload);
-    this.agentURLModifier = agentURLModifier;
+
+    btnCancel =
+        createButton(
+            locale.cancel(),
+            "file-uploadFolder-cancel",
+            new ClickHandler() {
+
+              @Override
+              public void onClick(ClickEvent event) {
+                delegate.onCancelClicked();
+              }
+            });
+    btnCancel.addStyleName(resources.windowCss().buttonAlignRight());
+    addButtonToFooter(btnCancel);
   }
 
   /** Bind handlers. */

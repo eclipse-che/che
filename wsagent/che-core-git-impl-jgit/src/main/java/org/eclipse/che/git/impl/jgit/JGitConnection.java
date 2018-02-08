@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
+import static org.eclipse.che.api.git.shared.Constants.CHECKOUT_IN_PROGRESS_ERROR;
 import static org.eclipse.che.api.git.shared.Constants.COMMIT_IN_PROGRESS_ERROR;
 import static org.eclipse.che.api.git.shared.Constants.NOT_A_GIT_REPOSITORY_ERROR;
 import static org.eclipse.che.api.git.shared.EditedRegionType.DELETION;
@@ -91,13 +92,7 @@ import org.eclipse.che.api.git.GitUrlUtils;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.git.LogPage;
 import org.eclipse.che.api.git.UserCredential;
-import org.eclipse.che.api.git.exception.GitCommitInProgressException;
-import org.eclipse.che.api.git.exception.GitConflictException;
-import org.eclipse.che.api.git.exception.GitException;
-import org.eclipse.che.api.git.exception.GitInvalidRefNameException;
-import org.eclipse.che.api.git.exception.GitInvalidRepositoryException;
-import org.eclipse.che.api.git.exception.GitRefAlreadyExistsException;
-import org.eclipse.che.api.git.exception.GitRefNotFoundException;
+import org.eclipse.che.api.git.exception.*;
 import org.eclipse.che.api.git.params.AddParams;
 import org.eclipse.che.api.git.params.CheckoutParams;
 import org.eclipse.che.api.git.params.CloneParams;
@@ -304,6 +299,7 @@ class JGitConnection implements GitConnection {
   private static final Logger LOG = LoggerFactory.getLogger(JGitConnection.class);
 
   private static final Set<String> COMMITTING_REPOSITORIES = new CopyOnWriteArraySet<>();
+  private static final Set<String> CHECKOUT_REPOSITORIES = new CopyOnWriteArraySet<>();
 
   private Git git;
   private JGitConfigImpl config;
@@ -342,27 +338,25 @@ class JGitConnection implements GitConnection {
     try {
       addCommand.call();
 
-      addDeletedFilesToIndex(filePatterns);
+      addDeletedFilesToIndexIfNeeded(filePatterns);
     } catch (GitAPIException exception) {
       throw new GitException(exception.getMessage(), exception);
     }
   }
 
   /** To add deleted files in index it is required to perform git rm on them */
-  private void addDeletedFilesToIndex(List<String> filePatterns) throws GitAPIException {
+  private void addDeletedFilesToIndexIfNeeded(List<String> filePatterns) throws GitAPIException {
     Set<String> deletedFiles = getGit().status().call().getMissing();
+    if (deletedFiles.isEmpty()) {
+      return;
+    }
+    if (!filePatterns.isEmpty() && !filePatterns.contains(".")) {
+      deletedFiles =
+          deletedFiles.stream().filter(filePatterns::contains).collect(Collectors.toSet());
+    }
     if (!deletedFiles.isEmpty()) {
       RmCommand rmCommand = getGit().rm();
-      if (filePatterns.contains(".")) {
-        deletedFiles.forEach(rmCommand::addFilepattern);
-      } else {
-        filePatterns.forEach(
-            filePattern ->
-                deletedFiles
-                    .stream()
-                    .filter(deletedFile -> deletedFile.startsWith(filePattern))
-                    .forEach(rmCommand::addFilepattern));
-      }
+      deletedFiles.forEach(rmCommand::addFilepattern);
       rmCommand.call();
     }
   }
@@ -433,6 +427,7 @@ class JGitConnection implements GitConnection {
       checkoutCommand.setUpstreamMode(SetupUpstreamMode.SET_UPSTREAM);
     }
     try {
+      CHECKOUT_REPOSITORIES.add(getRepositoryPath());
       checkoutCommand.call();
     } catch (CheckoutConflictException exception) {
       throw new GitConflictException(exception.getMessage(), exception.getConflictingPaths());
@@ -450,6 +445,8 @@ class JGitConnection implements GitConnection {
                 name != null ? name : cleanRemoteName(trackBranch)));
       }
       throw new GitException(exception.getMessage(), exception);
+    } finally {
+      CHECKOUT_REPOSITORIES.remove(getRepositoryPath());
     }
   }
 
@@ -799,7 +796,7 @@ class JGitConnection implements GitConnection {
 
   @Override
   public DiffPage diff(DiffParams params) throws GitException {
-    return new JGitDiffPage(params, repository);
+    return new JGitDiffPage(params, repository, this);
   }
 
   @Override
@@ -1867,9 +1864,14 @@ class JGitConnection implements GitConnection {
     if (!isInsideWorkTree()) {
       throw new GitInvalidRepositoryException(NOT_A_GIT_REPOSITORY_ERROR);
     }
+    String repositoryPath = getRepositoryPath();
     // Status can be not actual, if commit is in progress.
-    if (COMMITTING_REPOSITORIES.contains(getRepository().getDirectory().getPath())) {
+    if (COMMITTING_REPOSITORIES.contains(repositoryPath)) {
       throw new GitCommitInProgressException(COMMIT_IN_PROGRESS_ERROR);
+    }
+    // Status can be not actual, if checkout is in progress.
+    if (CHECKOUT_REPOSITORIES.contains(repositoryPath)) {
+      throw new GitCheckoutInProgressException(CHECKOUT_IN_PROGRESS_ERROR);
     }
     String branchName = getCurrentBranch();
     StatusCommand statusCommand = getGit().status();
@@ -2228,6 +2230,10 @@ class JGitConnection implements GitConnection {
 
   private Repository getRepository() {
     return repository;
+  }
+
+  private String getRepositoryPath() {
+    return getRepository().getDirectory().getPath();
   }
 
   /**

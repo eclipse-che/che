@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
@@ -45,8 +46,8 @@ public class InstallerConfigProvisionerTest {
   @Mock private InternalMachineConfig machine1;
   @Mock private InternalMachineConfig machine2;
 
-  @Mock private Installer installer1;
-  @Mock private Installer installer2;
+  @Mock private InstallerImpl installer1;
+  @Mock private InstallerImpl installer2;
 
   private InstallerConfigProvisioner installerConfigProvisioner;
 

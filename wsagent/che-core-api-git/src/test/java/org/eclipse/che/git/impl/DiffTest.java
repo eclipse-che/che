@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,13 +63,15 @@ public class DiffTest {
     // given
     GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
     makeCommitInMaster(connection);
+    addFile(connection, "Untracked", "Content\n");
 
     // when
     List<String> diff =
         readDiff(DiffParams.create().withType(DiffType.NAME_STATUS).withRenameLimit(0), connection);
     // then
-    assertEquals(diff.size(), 1);
+    assertEquals(diff.size(), 2);
     assertTrue(diff.contains("M\taaa"));
+    assertTrue(diff.contains("U\tUntracked"));
   }
 
   @Test(

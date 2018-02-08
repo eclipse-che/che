@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2012-2017 Red Hat, Inc.
+    Copyright (c) 2012-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -14,6 +14,8 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
     <ui:style src="org/eclipse/che/ide/api/ui/style.css" >
+        @eval hoveredTabIconColor org.eclipse.che.ide.api.theme.Style.theme.hoveredTabIconColor();
+        @eval tabIconColor org.eclipse.che.ide.api.theme.Style.theme.tabIconColor();
 
         .partStack {
             position: relative;
@@ -176,26 +178,43 @@
          ******************************************************************************/
         .partSwitcher .partButtons > div svg,
         .partSwitcher .partButtons > div svg rect,
-        .partSwitcher .partButtons > div svg path {
-            fill: tabTextColor;
+        .partSwitcher .partButtons > div svg path,
+        .partSwitcher .partButtons > div svg polygon {
+            fill: tabIconColor;
             -webkit-transition: color 0.1s ease-in-out,
-            fill 0.1s ease-in-out,
+            fill 0.1s ease-in-out;
+            transition: color 0.1s ease-in-out,
+            fill 0.1s ease-in-out;
+        }
+
+        .partSwitcher .partButtons > div svg path {
+            stroke: tabIconColor;
+            -webkit-transition: color 0.1s ease-in-out,
             stroke 0.1s ease-in-out;
             transition: color 0.1s ease-in-out,
-            fill 0.1s ease-in-out,
             stroke 0.1s ease-in-out;
         }
 
         .partSwitcher .partButtons > div:hover svg,
         .partSwitcher .partButtons > div:hover svg rect,
+        .partSwitcher .partButtons > div:hover svg path,
+        .partSwitcher .partButtons > div:hover svg polygon {
+            fill: hoveredTabIconColor;
+        }
+
         .partSwitcher .partButtons > div:hover svg path {
-            fill: hoveredTabTextColor;
+            stroke: hoveredTabIconColor;
         }
 
         .partSwitcher .partButtons > div[selected] svg,
         .partSwitcher .partButtons > div[selected] svg rect,
-        .partSwitcher .partButtons > div[selected] svg path {
+        .partSwitcher .partButtons > div[selected] svg path,
+        .partSwitcher .partButtons > div[selected] svg polygon {
             fill: activeTabIconColor;
+        }
+
+        .partSwitcher .partButtons > div[selected] svg path {
+            stroke: activeTabIconColor;
         }
 
         /******************************************************************************

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
-import static org.eclipse.che.selenium.core.constant.TestWorkspaceConstants.RUNNING_WORKSPACE_MESS;
-import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.RUNNING;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -96,7 +94,8 @@ public class ProjectStateAfterRenameWorkspaceTest {
     workspaces.selectWorkspaceItemName(testWorkspace.getName());
     workspaceOverview.enterNameWorkspace(WORKSPACE_NEW_NAME);
     workspaceDetails.clickOnSaveChangesBtn();
-    workspaceDetails.checkStateOfWorkspace(RUNNING);
+    dashboard.waitNotificationMessage("Workspace updated");
+    dashboard.waitNotificationIsClosed();
     workspaceOverview.checkNameWorkspace(WORKSPACE_NEW_NAME);
 
     // open the IDE, check state of the project
@@ -106,17 +105,16 @@ public class ProjectStateAfterRenameWorkspaceTest {
 
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
+
     try {
       projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
     } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/3574");
+      // Remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7551");
     }
 
     projectExplorer.waitItem(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
-    events.clickEventLogBtn();
-    events.waitExpectedMessage(RUNNING_WORKSPACE_MESS);
     editor.waitTabIsPresent("index.jsp");
     editor.waitTabIsPresent("AppController");
     editor.waitActive();

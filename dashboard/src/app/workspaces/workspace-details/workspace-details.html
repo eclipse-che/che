@@ -2,14 +2,17 @@
   che-title="{{workspaceDetailsController.workspaceName}}"
   link-href="#/workspaces" link-title="Workspaces" class="workspace-details-toolbar">
   <div layout="row" layout-align="start center" class="toolbar-info">
-    <workspace-status che-status="workspaceDetailsController.getWorkspaceStatus()"></workspace-status>
+    <!-- is environment supported -->
+    <workspace-status che-status="workspaceDetailsController.getWorkspaceStatus()"
+                      che-is-supported="workspaceDetailsController.isSupported === true"></workspace-status>
     <workspace-warnings workspace="workspaceDetailsController.workspaceDetails"></workspace-warnings>
   </div>
   <div flex layout="row" layout-align="end center">
     <workspace-status-button workspace-status="workspaceDetailsController.getWorkspaceStatus()"
+                             button-disabled="workspaceDetailsController.isSupported===false"
                              on-stop-workspace="workspaceDetailsController.stopWorkspace()"
                              on-run-workspace="workspaceDetailsController.runWorkspace()"></workspace-status-button>
-    <che-button-default ng-if="workspaceDetailsController.editMode === false"
+    <che-button-default ng-disabled="workspaceDetailsController.isSupported===false"
                         id="open-in-ide-button"
                         che-button-title="Open"
                         href="#/ide/{{workspaceDetailsController.namespaceId}}/{{workspaceDetailsController.workspaceName}}"></che-button-default>
@@ -36,7 +39,7 @@
         <ng-form name="workspaceOverviewForm">
           <workspace-details-overview ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Overview, workspaceOverviewForm)"
                                       overview-form="workspaceOverviewForm"
-                                      on-change="workspaceDetailsController.checkEditMode()"
+                                      on-change="workspaceDetailsController.checkEditMode(false)"
                                       workspace-details="workspaceDetailsController.workspaceDetails"></workspace-details-overview>
         </ng-form>
       </md-tab-body>
@@ -50,7 +53,7 @@
       <md-tab-body>
         <workspace-details-projects
           workspace-details="workspaceDetailsController.workspaceDetails"
-          projects-on-change="workspaceDetailsController.checkEditMode()"></workspace-details-projects>
+          projects-on-change="workspaceDetailsController.checkEditMode(true)"></workspace-details-projects>
       </md-tab-body>
     </md-tab>
 
@@ -61,7 +64,7 @@
       </md-tab-label>
       <md-tab-body>
         <workspace-machines workspace-details="workspaceDetailsController.workspaceDetails"
-                            on-change="workspaceDetailsController.checkEditMode()"></workspace-machines>
+                            on-change="workspaceDetailsController.checkEditMode(true)"></workspace-machines>
       </md-tab-body>
     </md-tab>
 
@@ -73,7 +76,7 @@
       <md-tab-body>
         <che-machine-selector content-title="Workspace Installers"
                               workspace-details="workspaceDetailsController.workspaceDetails"
-                              on-change="workspaceDetailsController.checkEditMode()">
+                              on-change="workspaceDetailsController.checkEditMode(true)">
           <che-machine-agents environment-manager="environmentManager"
                               selected-machine="machine"
                               on-change="onChange()"></che-machine-agents>
@@ -89,7 +92,7 @@
       <md-tab-body>
         <che-machine-selector content-title="Servers"
                               workspace-details="workspaceDetailsController.workspaceDetails"
-                              on-change="workspaceDetailsController.checkEditMode()">
+                              on-change="workspaceDetailsController.checkEditMode(true)">
           <che-machine-servers environment-manager="environmentManager"
                                selected-machine="machine"
                                on-change="onChange()"></che-machine-servers>
@@ -105,10 +108,26 @@
       <md-tab-body>
         <che-machine-selector content-title="Environment variables"
                               workspace-details="workspaceDetailsController.workspaceDetails"
-                              on-change="workspaceDetailsController.checkEditMode({environment: environment})">
+                              on-change="workspaceDetailsController.checkEditMode(true)">
           <che-env-variables environment-manager="environmentManager"
                              selected-machine="machine"
                              on-change="onChange()"></che-env-variables>
+        </che-machine-selector>
+      </md-tab-body>
+    </md-tab>
+
+    <!-- Machine Volumes -->
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Volumes);">
+      <md-tab-label>
+        <span class="che-tab-label-title">Volumes</span>
+      </md-tab-label>
+      <md-tab-body>
+        <che-machine-selector content-title="Volumes"
+                              workspace-details="workspaceDetailsController.workspaceDetails"
+                              on-change="workspaceDetailsController.checkEditMode(true)">
+          <che-machine-volumes environment-manager="environmentManager"
+                             selected-machine="machine"
+                             on-change="onChange()"></che-machine-volumes>
         </che-machine-selector>
       </md-tab-body>
     </md-tab>
@@ -156,9 +175,4 @@
   </md-tabs>
 </md-content>
 
-<workspace-edit-mode-overlay ng-if="workspaceDetailsController.workspaceDetails && workspaceDetailsController.editMode && !workspaceDetailsController.saving"
-                             workspace-edit-mode-message="{{workspaceDetailsController.editModeMessage}}"
-                             workspace-edit-mode-show-message="workspaceDetailsController.showApplyMessage"
-                             workspace-edit-disable-save-button="workspaceDetailsController.isSaveButtonDisabled()"
-                             workspace-edit-mode-on-save="workspaceDetailsController.saveWorkspace()"
-                             workspace-edit-mode-on-cancel="workspaceDetailsController.cancelConfigChanges()"></workspace-edit-mode-overlay>
+<che-edit-mode-overlay config="workspaceDetailsController.editOverlayConfig"></che-edit-mode-overlay>

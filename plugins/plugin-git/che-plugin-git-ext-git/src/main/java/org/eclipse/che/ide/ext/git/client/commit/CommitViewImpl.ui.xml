@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2012-2017 Red Hat, Inc.
+    Copyright (c) 2012-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -25,11 +25,13 @@
         <g:north size="350" addStyleNames="{style.emptyBorder}">
             <g:FlowPanel ui:field="changesPanel" debugId="git-commit-changed-files"/>
         </g:north>
-        <g:center size="50" addStyleNames="{style.emptyBorder}">
-            <g:CheckBox ui:field="amend" HTML="{locale.commitAmendFieldTitle}" debugId="git-commit-amend"/>
-        </g:center>
-        <g:south size="130" addStyleNames="{style.emptyBorder}">
-            <g:TextArea ui:field="message" width="588px" height="118px" addStyleNames="{res.gitCSS.textFont}" debugId="git-commit-message"/>
+        <g:south size="146" addStyleNames="{style.emptyBorder}">
+            <g:FlowPanel>
+                <g:CheckBox ui:field="amend" HTML="{locale.commitAmendFieldTitle}"
+                            debugId="git-commit-amend"/>
+                <g:TextArea ui:field="message" width="588px" height="116px" addStyleNames="{res.gitCSS.textFont}"
+                            debugId="git-commit-message"/>
+            </g:FlowPanel>
         </g:south>
 
     </g:DockLayoutPanel>

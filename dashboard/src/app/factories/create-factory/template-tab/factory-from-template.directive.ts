@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,15 +14,15 @@
  * Defines a directive for displaying factory from template widget.
  * @author Oleksii Orel
  */
-export class FactoryFromTemplate {
-  private restrict: string;
-  private templateUrl: string;
-  private controller: string;
-  private controllerAs: string;
-  private bindToController: boolean;
-  private replace: boolean;
+export class FactoryFromTemplate implements ng.IDirective {
+  restrict: string;
+  templateUrl: string;
+  controller: string;
+  controllerAs: string;
+  bindToController: boolean;
+  replace: boolean;
 
-  private scope: {
+  scope: {
     [propName: string]: string;
   };
 

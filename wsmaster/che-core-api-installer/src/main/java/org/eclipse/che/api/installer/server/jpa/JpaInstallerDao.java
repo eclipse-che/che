@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -151,20 +151,9 @@ public class JpaInstallerDao implements InstallerDao {
   }
 
   @Transactional
-  protected void doUpdate(InstallerImpl update) throws InstallerNotFoundException {
-    InstallerFqn fqn = InstallerFqn.of(update);
-
-    final EntityManager manager = managerProvider.get();
-    InstallerImpl installer =
-        manager
-            .createNamedQuery("Inst.getByKey", InstallerImpl.class)
-            .setParameter("id", fqn.getId())
-            .setParameter("version", fqn.getVersion())
-            .getSingleResult();
-    update.setInternalId(installer.getInternalId());
-
-    manager.merge(update);
-    manager.flush();
+  protected void doUpdate(InstallerImpl update) throws InstallerException {
+    doRemove(InstallerFqn.of(update));
+    doCreate(update);
   }
 
   @Transactional

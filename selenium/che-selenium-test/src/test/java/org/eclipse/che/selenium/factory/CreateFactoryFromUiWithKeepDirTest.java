@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,7 @@ import org.eclipse.che.selenium.pageobject.LoadingBehaviorPage;
 import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
@@ -79,6 +80,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestFactoryServiceClient factoryServiceClient;
+  @Inject private PullRequestPanel pullRequestPanel;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -146,16 +148,16 @@ public class CreateFactoryFromUiWithKeepDirTest {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7253");
     }
-
+    projectExplorer.selectItem(PROJECT_NAME);
+    pullRequestPanel.waitOpenPanel();
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        PROJECT_NAME + "/" + KEEPED_DIR + "/src" + "/main" + "/java/hello",
-        "GreetingController.java");
+        PROJECT_NAME + "/" + KEEPED_DIR + "/src/main/java/hello", "GreetingController.java");
+
     mavenPluginStatusBar.waitClosingInfoPanel(UPDATING_PROJECT_TIMEOUT_SEC);
     editor.waitAllMarkersDisappear(ERROR_MARKER);
   }
 
-  private void makeKeepDirectoryFromGitUrl(String url, String projectName, String folderName)
-      throws Exception {
+  private void makeKeepDirectoryFromGitUrl(String url, String projectName, String folderName) {
     menu.runCommand(WORKSPACE, IMPORT_PROJECT);
     importProjectFromLocation.waitMainForm();
     loader.waitOnClosed();

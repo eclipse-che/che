@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -107,8 +107,7 @@ public class PullRequestPluginTest {
         TestMenuCommandsConstants.Profile.PROFILE_MENU,
         TestMenuCommandsConstants.Profile.PREFERENCES);
     preferences.waitPreferencesForm();
-    gitHubClientService.deleteAllGrants(gitHubUsername, gitHubPassword);
-    preferences.regenerateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);
+    preferences.generateAndUploadSshKeyOnGithub(gitHubUsername, gitHubPassword);
   }
 
   @AfterClass
@@ -118,9 +117,12 @@ public class PullRequestPluginTest {
     List<String> listPullRequest =
         gitHubClientService.getNumbersOfOpenedPullRequests(
             NAME_REPO, gitHubUsername, gitHubPassword);
-    gitHubClientService.closePullRequest(
-        NAME_REPO, Collections.max(listPullRequest), gitHubUsername, gitHubPassword);
-    gitHubClientService.deleteBranch(NAME_REPO, NEW_BRANCH, gitHubUsername, gitHubPassword);
+
+    if (!listPullRequest.isEmpty()) {
+      gitHubClientService.closePullRequest(
+          NAME_REPO, Collections.max(listPullRequest), gitHubUsername, gitHubPassword);
+      gitHubClientService.deleteBranch(NAME_REPO, NEW_BRANCH, gitHubUsername, gitHubPassword);
+    }
   }
 
   @Test(priority = 0)

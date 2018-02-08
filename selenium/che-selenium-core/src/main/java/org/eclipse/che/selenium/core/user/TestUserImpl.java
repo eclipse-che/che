@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,16 +12,12 @@ package org.eclipse.che.selenium.core.user;
 
 import static java.lang.String.format;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.PreDestroy;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
+import org.eclipse.che.selenium.core.client.TestUserServiceClientFactory;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
 import org.slf4j.Logger;
@@ -41,58 +37,31 @@ public class TestUserImpl implements TestUser {
   private final String name;
   private final String id;
   private final String authToken;
+  private final String offlineToken;
 
   private final TestUserServiceClient userServiceClient;
   private final TestWorkspaceServiceClient workspaceServiceClient;
 
-  /** To instantiate user with generated email and password. */
-  @Inject
-  public TestUserImpl(
-      Provider<TestUserServiceClient> userServiceClient,
-      TestAuthServiceClient authServiceClient,
-      TestWorkspaceServiceClientFactory wsServiceClientFactory)
-      throws Exception {
-    this(
-        userServiceClient.get(),
-        authServiceClient,
-        wsServiceClientFactory,
-        NameGenerator.generate("user", 6) + "@some.mail");
-  }
-
-  /** To instantiate user with specific e-mail. */
+  /** To instantiate user with specific name, e-mail, password and offline token. */
   @AssistedInject
   public TestUserImpl(
-      TestUserServiceClient userServiceClient,
+      TestUserServiceClientFactory testUserServiceClientFactory,
       TestAuthServiceClient authServiceClient,
       TestWorkspaceServiceClientFactory wsServiceClientFactory,
-      @Assisted("email") String email)
-      throws Exception {
-    this(
-        userServiceClient,
-        authServiceClient,
-        wsServiceClientFactory,
-        email,
-        NameGenerator.generate("Pwd1", 6));
-  }
-
-  /** To instantiate user with specific e-mail and password. */
-  @AssistedInject
-  public TestUserImpl(
-      TestUserServiceClient userServiceClient,
-      TestAuthServiceClient authServiceClient,
-      TestWorkspaceServiceClientFactory wsServiceClientFactory,
+      @Assisted("name") String name,
       @Assisted("email") String email,
-      @Assisted("password") String password)
+      @Assisted("password") String password,
+      @Assisted("offlineToken") String offlineToken)
       throws Exception {
-    this.userServiceClient = userServiceClient;
+    this.userServiceClient = testUserServiceClientFactory.create(name, password, offlineToken);
     this.email = email;
     this.password = password;
-    this.name = email.split("@")[0];
-    this.userServiceClient.create(name, email, password);
-    this.authToken = authServiceClient.login(name, password);
+    this.name = name;
+    this.offlineToken = offlineToken;
+    this.authToken = authServiceClient.login(name, password, offlineToken);
     this.id = userServiceClient.findByEmail(email).getId();
-    LOG.info("User name='{}', id='{}' has been created", name, id);
-    this.workspaceServiceClient = wsServiceClientFactory.create(email, password);
+    LOG.info("User name='{}', id='{}' is being used for testing", name, id);
+    this.workspaceServiceClient = wsServiceClientFactory.create(email, password, offlineToken);
   }
 
   @Override
@@ -120,32 +89,13 @@ public class TestUserImpl implements TestUser {
     return id;
   }
 
+  public String getOfflineToken() {
+    return offlineToken;
+  }
+
   @Override
   @PreDestroy
-  public void delete() {
-    List<String> workspaces = new ArrayList<>();
-    try {
-      workspaces = workspaceServiceClient.getAll();
-    } catch (Exception e) {
-      LOG.error("Failed to get all workspaces.", e);
-    }
-
-    for (String workspace : workspaces) {
-      try {
-        workspaceServiceClient.delete(workspace, name);
-      } catch (Exception e) {
-        LOG.error(
-            format("User name='%s' failed to remove workspace name='%s'", workspace, name), e);
-      }
-    }
-
-    try {
-      userServiceClient.remove(id);
-      LOG.info("User name='{}', id='{}' removed", name, id);
-    } catch (Exception e) {
-      LOG.error(format("Failed to remove user email='%s', id='%s'", email, id), e);
-    }
-  }
+  public void cleanUp() {}
 
   @Override
   public String toString() {

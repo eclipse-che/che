@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2012-2017 Red Hat, Inc.
+    Copyright (c) 2012-2018 Red Hat, Inc.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -80,10 +80,10 @@
                           debugId="githubImporter-loadRepo"/>
             </g:FlowPanel>
         </g:north>
-        <g:north size="205">
+        <g:north size="215">
             <g:FlowPanel ui:field="bottomPanel">
                 <g:DockLayoutPanel ui:field="githubPanel" debugId="file-importProject-githubPanel">
-                    <g:north size="25">
+                    <g:north size="45">
                         <g:FlowPanel addStyleNames="{style.bottomSpace}">
                             <g:Label text="{locale.importFromGithubAccount}"
                                      addStyleNames="{style.alignLeft} {style.textPosition} {style.rightSpace}"/>

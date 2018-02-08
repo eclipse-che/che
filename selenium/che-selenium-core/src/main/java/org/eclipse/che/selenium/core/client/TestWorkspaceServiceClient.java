@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.WsAgentMachineFinderUtil.containsWsAgentServer;
 
@@ -37,7 +38,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.core.user.TestUserNamespaceResolver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.MemoryMeasure;
 import org.slf4j.Logger;
@@ -53,29 +53,24 @@ public class TestWorkspaceServiceClient {
 
   private final TestApiEndpointUrlProvider apiEndpointProvider;
   private final HttpJsonRequestFactory requestFactory;
-  private final TestUserNamespaceResolver userNamespaceResolver;
 
   @Inject
   public TestWorkspaceServiceClient(
-      TestApiEndpointUrlProvider apiEndpointProvider,
-      HttpJsonRequestFactory requestFactory,
-      TestUserNamespaceResolver userNamespaceResolver) {
+      TestApiEndpointUrlProvider apiEndpointProvider, HttpJsonRequestFactory requestFactory) {
     this.apiEndpointProvider = apiEndpointProvider;
     this.requestFactory = requestFactory;
-    this.userNamespaceResolver = userNamespaceResolver;
   }
 
   @AssistedInject
   public TestWorkspaceServiceClient(
       TestApiEndpointUrlProvider apiEndpointProvider,
-      TestUserNamespaceResolver userNamespaceResolver,
       TestUserHttpJsonRequestFactoryCreator userHttpJsonRequestFactoryCreator,
-      @Assisted("email") String email,
-      @Assisted("password") String password) {
+      @Assisted("name") String name,
+      @Assisted("password") String password,
+      @Assisted("offlineToken") String offlineToken) {
     this(
         apiEndpointProvider,
-        userHttpJsonRequestFactoryCreator.create(email, password),
-        userNamespaceResolver);
+        userHttpJsonRequestFactoryCreator.create(name, password, offlineToken));
   }
 
   private String getBaseUrl() {
@@ -142,7 +137,9 @@ public class TestWorkspaceServiceClient {
     }
 
     Workspace workspace = getByName(workspaceName, userName);
-    if (workspace.getStatus() != STOPPED) {
+    if (workspace.getStatus() == STOPPING) {
+      waitStatus(workspaceName, userName, STOPPED);
+    } else if (workspace.getStatus() != STOPPED) {
       stop(workspaceName, userName);
     }
 
@@ -160,12 +157,12 @@ public class TestWorkspaceServiceClient {
       throws Exception {
 
     WorkspaceStatus status = null;
-    for (int i = 0; i < 120; i++) {
+    for (int i = 0; i < 600; i++) {
       status = getByName(workspaceName, userName).getStatus();
       if (status == expectedStatus) {
         return;
       } else {
-        WaitUtils.sleepQuietly(5);
+        WaitUtils.sleepQuietly(1);
       }
     }
 
@@ -289,7 +286,7 @@ public class TestWorkspaceServiceClient {
   }
 
   private String getNameBasedUrl(String workspaceName, String username) {
-    return getBaseUrl() + "/" + userNamespaceResolver.resolve(username) + "/" + workspaceName;
+    return getBaseUrl() + "/" + username + "/" + workspaceName;
   }
 
   private String getIdBasedUrl(String workspaceId) {

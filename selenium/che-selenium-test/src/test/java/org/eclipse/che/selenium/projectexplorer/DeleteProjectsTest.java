@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
@@ -72,6 +73,12 @@ public class DeleteProjectsTest {
     waitAllProjectsInProjectExplorer();
     loader.waitOnClosed();
     consoles.selectProcessByTabName("dev-machine");
+  }
+
+  @BeforeMethod
+  public void clearTerminalOutput() {
+    consoles.clickOnClearOutputButton();
+    consoles.waitExpectedTextIntoConsole("", 20);
   }
 
   @Test

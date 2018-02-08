@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,7 +42,6 @@ export class EditMachineDialogController {
   private environment: che.IWorkspaceEnvironment;
   private copyEnvironment: che.IWorkspaceEnvironment;
   private editorMode: string;
-  private prevName: string;
 
   /**
    * Environment recipe service.
@@ -84,10 +83,11 @@ export class EditMachineDialogController {
         // we can add a new machine in case with scalable type of recipes only
         return;
       }
-      this.machine = this.environmentManager.createNewDefaultMachine(this.copyEnvironment);
+      this.machine = this.environmentManager.createMachine(this.copyEnvironment);
       this.copyEnvironment = this.environmentManager.addMachine(this.copyEnvironment, this.machine);
     } else {
-      this.machine = angular.copy(this.environmentManager.getMachines(this.copyEnvironment).find((machine: IEnvironmentManagerMachine) => {
+      const machines = this.environmentManager.getMachines(this.copyEnvironment);
+      this.machine = angular.copy(machines.find((machine: IEnvironmentManagerMachine) => {
         return machine.name === this.machineName;
       }));
     }
@@ -211,20 +211,9 @@ export class EditMachineDialogController {
   }
 
   /**
-   * Stringify machine recipe.
-   */
-  private stringifyMachineRecipe(): void {
-    try {
-      this.machineRecipeScript = this.environmentManager.stringifyRecipe(this.machine.recipe);
-    } catch (e) {
-      this.$log.error('Cannot parse machine\'s recipe, error: ', e);
-    }
-  }
-
-  /**
    * Parse machine recipe.
    */
-  private parseMachineRecipe(): void {
+  parseMachineRecipe(): void {
     try {
       this.machine.recipe = this.environmentManager.parseMachineRecipe(this.machineRecipeScript);
       // checks critical recipe changes
@@ -246,6 +235,17 @@ export class EditMachineDialogController {
       this.copyEnvironment = this.environmentManager.getEnvironment(this.copyEnvironment, machines);
     } catch (e) {
       this.$log.error('Cannot stringify machine\'s recipe, error: ', e);
+    }
+  }
+
+  /**
+   * Stringify machine recipe.
+   */
+  private stringifyMachineRecipe(): void {
+    try {
+      this.machineRecipeScript = this.environmentManager.stringifyRecipe(this.machine.recipe);
+    } catch (e) {
+      this.$log.error('Cannot parse machine\'s recipe, error: ', e);
     }
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,9 +11,7 @@
 package org.eclipse.che.api.search.server;
 
 import java.nio.file.Path;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.search.server.impl.QueryExpression;
 
 public interface Searcher {
   /**
@@ -23,7 +21,7 @@ public interface Searcher {
    * @return results of search
    * @throws ServerException if an error occurs
    */
-  SearchResult search(QueryExpression query) throws ServerException;
+  SearchResult search(QueryExpression query) throws InvalidQueryException, QueryExecutionException;
 
   /**
    * Add VirtualFile to index.
@@ -31,7 +29,7 @@ public interface Searcher {
    * @param fsPath file to add
    * @throws ServerException if an error occurs
    */
-  void add(Path fsPath) throws ServerException, NotFoundException;
+  void add(Path fsPath);
 
   /**
    * Delete VirtualFile from index.
@@ -39,7 +37,7 @@ public interface Searcher {
    * @param fsPath path of VirtualFile
    * @throws ServerException if an error occurs
    */
-  void delete(Path fsPath) throws ServerException, NotFoundException;
+  void delete(Path fsPath);
 
   /**
    * Updated indexed VirtualFile.
@@ -47,5 +45,5 @@ public interface Searcher {
    * @param fsPath path of a file to update
    * @throws ServerException if an error occurs
    */
-  void update(Path fsPath) throws ServerException, NotFoundException;
+  void update(Path fsPath);
 }

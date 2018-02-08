@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
@@ -121,7 +122,7 @@ public class PhpProjectDebuggingTest {
     notificationPopup.waitExpectedMessageOnProgressPanelAndClosed("Remote debugger connected");
 
     projectExplorer.openItemByPath(PATH_TO_LIB_PHP);
-    editor.setBreakpoint(14);
+    editor.setBreakpoint(13);
     editor.closeAllTabs();
 
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
@@ -139,7 +140,7 @@ public class PhpProjectDebuggingTest {
 
     // then
     editor.waitTabFileWithSavedStatus("lib.php");
-    editor.waitActiveBreakpoint(14);
+    editor.waitActiveBreakpoint(13);
     debugPanel.waitDebugHighlightedText("return \"Hello, $name\"");
     debugPanel.waitTextInVariablesPanel("$name=\"man\"");
 
@@ -171,7 +172,7 @@ public class PhpProjectDebuggingTest {
             NON_DEFAULT_DEBUG_PORT));
 
     projectExplorer.openItemByPath(PATH_TO_LIB_PHP);
-    editor.setBreakpoint(14);
+    editor.setBreakpoint(13);
     editor.closeAllTabs();
 
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
@@ -184,7 +185,8 @@ public class PhpProjectDebuggingTest {
 
     // then
     editor.waitTabFileWithSavedStatus("lib.php");
-    editor.waitActiveBreakpoint(14);
+
+    editor.waitActiveBreakpoint(13);
     debugPanel.waitDebugHighlightedText("return \"Hello, $name\"");
     debugPanel.waitTextInVariablesPanel("$name=\"man\"");
 
@@ -203,6 +205,12 @@ public class PhpProjectDebuggingTest {
    */
   private void startWebPhpScriptInDebugMode() {
     final String previewUrl = consoles.getPreviewUrl() + START_DEBUG_PARAMETERS;
+
+    // it needs when the test is running on the che6-ocp platform
+    if (previewUrl.contains("route")) {
+      WaitUtils.sleepQuietly(10);
+    }
+
     new Thread(
             () -> {
               try {

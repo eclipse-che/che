@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017 Red Hat, Inc.
+ * Copyright (c) 2012-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,12 +18,10 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.DEFAULT_DOCKER_IMAGE;
 import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.DEFAULT_MEMORY_LIMIT_BYTES;
 import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.MACHINE_NAME;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-import org.eclipse.che.api.factory.server.FactoryMessageBodyAdapter;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
@@ -50,8 +48,6 @@ public class URLFactoryBuilderTest {
   /** Grab content of URLs */
   @Mock private URLFetcher urlFetcher;
 
-  @Mock private FactoryMessageBodyAdapter factoryAdapter;
-
   /** Tested instance. */
   @InjectMocks private URLFactoryBuilder urlFactoryBuilder;
 
@@ -60,7 +56,7 @@ public class URLFactoryBuilderTest {
   public void checkDefaultImage() throws Exception {
 
     RecipeDto recipeDto =
-        newDto(RecipeDto.class).withLocation(DEFAULT_DOCKER_IMAGE).withType("dockerimage");
+        newDto(RecipeDto.class).withContent(DEFAULT_DOCKER_IMAGE).withType("dockerimage");
     MachineConfigDto machine =
         newDto(MachineConfigDto.class)
             .withInstallers(singletonList("org.eclipse.che.ws-agent"))
@@ -130,7 +126,7 @@ public class URLFactoryBuilderTest {
   public void checkWithNonAccessibleCustomDockerfile() throws Exception {
     String myLocation = "http://foo-location";
     RecipeDto recipeDto =
-        newDto(RecipeDto.class).withLocation(DEFAULT_DOCKER_IMAGE).withType("dockerimage");
+        newDto(RecipeDto.class).withContent(DEFAULT_DOCKER_IMAGE).withType("dockerimage");
     MachineConfigDto machine =
         newDto(MachineConfigDto.class)
             .withInstallers(singletonList("org.eclipse.che.ws-agent"))
@@ -159,8 +155,6 @@ public class URLFactoryBuilderTest {
   /** Check that with a custom factory.json we've this factory being built */
   @Test
   public void checkWithCustomFactoryJsonFile() throws Exception {
-
-    when(factoryAdapter.adapt(any())).thenAnswer(inv -> inv.getArguments()[0]);
 
     WorkspaceConfigDto workspaceConfigDto = newDto(WorkspaceConfigDto.class);
     FactoryDto templateFactory =

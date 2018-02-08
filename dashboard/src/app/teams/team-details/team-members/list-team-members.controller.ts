@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 Red Hat, Inc.
+ * Copyright (c) 2015-2018 Red Hat, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,10 @@
  */
 'use strict';
 import {TeamDetailsService} from '../team-details.service';
+import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
+import {CheNotification} from '../../../../components/notification/che-notification.factory';
+import {CheProfile} from '../../../../components/api/che-profile.factory';
+import {CheUser} from '../../../../components/api/che-user.factory';
 
 /**
  * @ngdoc controller
@@ -22,6 +26,10 @@ export class ListTeamMembersController {
    * Location service.
    */
   $location: ng.ILocationService;
+  /**
+   * Selection and filtration helper
+   */
+  cheListHelper: che.widget.ICheListHelper;
 
   /**
    * Team API interaction.
@@ -34,11 +42,11 @@ export class ListTeamMembersController {
   /**
    * User API interaction.
    */
-  private cheUser: any;
+  private cheUser: CheUser;
   /**
    * User profile API interaction.
    */
-  private cheProfile: any;
+  private cheProfile: CheProfile;
   /**
    * Permissions API interaction.
    */
@@ -50,11 +58,11 @@ export class ListTeamMembersController {
   /**
    * Notifications service.
    */
-  private cheNotification: any;
+  private cheNotification: CheNotification;
   /**
    * Confirm dialog service.
    */
-  private confirmDialogService: any;
+  private confirmDialogService: ConfirmDialogService;
   /**
    * Promises service.
    */
@@ -87,19 +95,25 @@ export class ListTeamMembersController {
    * The editable (whether current user can edit members list and see invitations) state of the members (comes from outside).
    */
   private editable: any;
-  /**
-   * Selection and filtration helper
-   */
-  cheListHelper: che.widget.ICheListHelper;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheTeam: che.api.ICheTeam, chePermissions: che.api.IChePermissions, cheInvite: che.api.ICheInvite, cheUser: any, cheProfile: any,
-              confirmDialogService: any, $mdDialog: angular.material.IDialogService, $q: ng.IQService, cheNotification: any,
-              lodash: any, $location: ng.ILocationService, teamDetailsService: TeamDetailsService,
-              $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
+  constructor(cheTeam: che.api.ICheTeam,
+              chePermissions: che.api.IChePermissions,
+              cheInvite: che.api.ICheInvite,
+              cheUser: CheUser,
+              cheProfile: CheProfile,
+              confirmDialogService: ConfirmDialogService,
+              $mdDialog: angular.material.IDialogService,
+              $q: ng.IQService,
+              cheNotification: CheNotification,
+              lodash: any,
+              $location: ng.ILocationService,
+              teamDetailsService: TeamDetailsService,
+              $scope: ng.IScope,
+              cheListHelperFactory: che.widget.ICheListHelperFactory) {
     this.cheTeam = cheTeam;
     this.cheInvite = cheInvite;
     this.chePermissions = chePermissions;
