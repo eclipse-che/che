@@ -70,12 +70,6 @@ public interface JavaLocalizationConstant extends Messages {
   @Key("action.quick.fix.description")
   String actionQuickFixDescription();
 
-  @Key("action.openDeclaration.title")
-  String actionOpenDeclarationTitle();
-
-  @Key("action.openDeclaration.description")
-  String actionOpenDeclarationDescription();
-
   @Key("compiler.error.warnings.setup")
   String compilerSetup();
 
