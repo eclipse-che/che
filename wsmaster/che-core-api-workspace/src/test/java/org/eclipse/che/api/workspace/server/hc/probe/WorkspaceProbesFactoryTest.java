@@ -90,7 +90,7 @@ public class WorkspaceProbesFactoryTest {
             WORKSPACE_ID,
             MACHINE_NAME,
             singletonMap(
-                SERVER_TERMINAL_REFERENCE, new ServerImpl().withUrl("wss://localhost:4040")));
+                SERVER_TERMINAL_REFERENCE, new ServerImpl().withUrl("wss://localhost:4040/pty")));
 
     verifyHttpProbeConfig(
         wsProbes,
@@ -111,7 +111,11 @@ public class WorkspaceProbesFactoryTest {
   public void returnsProbesForAMachineForExec() throws Exception {
     WorkspaceProbes wsProbes =
         probesFactory.getProbes(
-            WORKSPACE_ID, MACHINE_NAME, singletonMap(SERVER_EXEC_AGENT_HTTP_REFERENCE, SERVER));
+            WORKSPACE_ID,
+            MACHINE_NAME,
+            singletonMap(
+                SERVER_EXEC_AGENT_HTTP_REFERENCE,
+                new ServerImpl().withUrl("https://localhost:4040/process")));
 
     verifyHttpProbeConfig(
         wsProbes,

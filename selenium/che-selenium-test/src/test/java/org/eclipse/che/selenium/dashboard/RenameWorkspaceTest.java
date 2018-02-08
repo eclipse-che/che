@@ -68,7 +68,7 @@ public class RenameWorkspaceTest {
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
     workspaces.clickOnWorkspaceActionsButton(workspaceName);
-    workspaces.waitWorkspaceStatusIs(workspaceName, STOPPED);
+    workspaces.waitWorkspaceStatus(workspaceName, STOPPED);
     workspaces.selectWorkspaceItemName(workspaceName);
     workspaceDetails.waitToolbarTitleName(workspaceName);
     workspaceDetails.selectTabInWorkspaceMenu(OVERVIEW);

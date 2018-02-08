@@ -95,7 +95,7 @@ public class CreateNamedFactoryFromDashBoard {
     events.clickEventLogBtn();
     events.waitExpectedMessage(CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE);
     events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
-    notificationsPopupPanel.waitPopUpPanelsIsClosed();
+    notificationsPopupPanel.waitPopupPanelsAreClosed();
     projectExplorer.selectItem(PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
     projectExplorer.openItemByPath(PROJECT_NAME);
