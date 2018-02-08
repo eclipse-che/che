@@ -90,7 +90,7 @@ public class AutocompleteProposalJavaDocTest {
     loader.waitOnClosed();
     editor.goToCursorPositionVisible(30, 30);
     editor.launchAutocompleteAndWaitContainer();
-    editor.selectAutocompleteProposal("concat(String part1, String part2, char divider) : String");
+    editor.selectAutocompleteProposal("concat(String part1, String part2, char divider) : String ");
 
     // then
     editor.waitContextMenuJavaDocText(
@@ -125,7 +125,7 @@ public class AutocompleteProposalJavaDocTest {
     loader.waitOnClosed();
     editor.goToCursorPositionVisible(24, 20);
     editor.launchAutocompleteAndWaitContainer();
-    editor.selectAutocompleteProposal("isEquals(Object o) : boolean");
+    editor.selectAutocompleteProposal("isEquals(Object o) : boolean ");
 
     // then
     editor.waitContextMenuJavaDocText(

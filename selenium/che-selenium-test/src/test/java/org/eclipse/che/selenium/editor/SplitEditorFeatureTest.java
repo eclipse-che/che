@@ -20,6 +20,7 @@ import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -56,11 +57,13 @@ public class SplitEditorFeatureTest {
   @Inject private Menu menu;
   @Inject private Refactor refactor;
   @Inject private Wizard wizard;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(workspace);
     createProject(PROJECT_NAME);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_JAVA_FILE);
