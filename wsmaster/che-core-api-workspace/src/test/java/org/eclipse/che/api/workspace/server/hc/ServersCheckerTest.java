@@ -65,9 +65,9 @@ public class ServersCheckerTest {
     servers = new HashMap<>();
     servers.putAll(
         ImmutableMap.of(
-            "wsagent/http", new ServerImpl().withUrl("http://localhost"),
-            "exec-agent/http", new ServerImpl().withUrl("http://localhost"),
-            "terminal", new ServerImpl().withUrl("http://localhost")));
+            "wsagent/http", new ServerImpl().withUrl("http://localhost/api"),
+            "exec-agent/http", new ServerImpl().withUrl("http://localhost/exec-agent/process"),
+            "terminal", new ServerImpl().withUrl("http://localhost/terminal/pty")));
 
     compFuture = new CompletableFuture<>();
 

@@ -11,24 +11,21 @@
 package org.eclipse.che.workspace.infrastructure.openshift;
 
 import com.google.inject.assistedinject.Assisted;
-import java.net.URI;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesRuntimeContext;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 
 /** @author Sergii Leshchenko */
-public class OpenShiftRuntimeContext extends RuntimeContext<OpenShiftEnvironment> {
-
+public class OpenShiftRuntimeContext extends KubernetesRuntimeContext<OpenShiftEnvironment> {
   private final OpenShiftRuntimeFactory runtimeFactory;
   private final OpenShiftProjectFactory projectFactory;
-  private final String websocketOutputEndpoint;
 
   @Inject
   public OpenShiftRuntimeContext(
@@ -39,24 +36,19 @@ public class OpenShiftRuntimeContext extends RuntimeContext<OpenShiftEnvironment
       @Assisted RuntimeIdentity identity,
       @Assisted RuntimeInfrastructure infrastructure)
       throws ValidationException, InfrastructureException {
-    super(openShiftEnvironment, identity, infrastructure);
-    this.projectFactory = projectFactory;
+    super(
+        cheWebsocketEndpoint,
+        projectFactory,
+        runtimeFactory,
+        openShiftEnvironment,
+        identity,
+        infrastructure);
     this.runtimeFactory = runtimeFactory;
-    this.websocketOutputEndpoint = cheWebsocketEndpoint;
+    this.projectFactory = projectFactory;
   }
 
   @Override
-  public URI getOutputChannel() throws InfrastructureException {
-    try {
-      return URI.create(websocketOutputEndpoint);
-    } catch (IllegalArgumentException ex) {
-      throw new InternalInfrastructureException(
-          "Failed to get the output channel.  " + ex.getMessage());
-    }
-  }
-
-  @Override
-  public OpenShiftInternalRuntime getRuntime() throws InfrastructureException {
+  public KubernetesInternalRuntime getRuntime() throws InfrastructureException {
     return runtimeFactory.create(
         this,
         projectFactory.create(getIdentity().getWorkspaceId()),
