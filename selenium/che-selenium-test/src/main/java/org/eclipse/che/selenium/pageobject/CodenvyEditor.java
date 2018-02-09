@@ -27,6 +27,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllEle
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -636,14 +637,11 @@ public class CodenvyEditor {
   /** Wait for no Git change markers in the opened editor. */
   public void waitNoGitChangeMarkers() {
 
-    List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
-    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(VCS_RULER)));
-
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver ->
-                    rulerVcsElements
+                    getListGitMarkers()
                         .stream()
                         .allMatch(element -> "".equals(element.getAttribute("class"))));
   }
@@ -656,16 +654,13 @@ public class CodenvyEditor {
    */
   public void waitGitInsertionMarkerInPosition(int startLine, int endLine) {
 
-    List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
-    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(VCS_RULER)));
-
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver -> {
                   for (int i = startLine; i <= endLine; i++) {
                     if (!"git-change-marker insertion"
-                        .equals(rulerVcsElements.get(i).getAttribute("class"))) {
+                        .equals(getListGitMarkers().get(i).getAttribute("class"))) {
                       return false;
                     }
                   }
@@ -681,16 +676,13 @@ public class CodenvyEditor {
    */
   public void waitGitModificationMarkerInPosition(int startLine, int endLine) {
 
-    List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
-    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(VCS_RULER)));
-
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver -> {
                   for (int i = startLine; i <= endLine; i++) {
                     if (!"git-change-marker modification"
-                        .equals(rulerVcsElements.get(i).getAttribute("class"))) {
+                        .equals(getListGitMarkers().get(i).getAttribute("class"))) {
                       return false;
                     }
                   }
@@ -705,15 +697,24 @@ public class CodenvyEditor {
    */
   public void waitGitDeletionMarkerInPosition(int line) {
 
-    List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
-    loadPageDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(VCS_RULER)));
-
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver ->
                     "git-change-marker deletion"
-                        .equals(rulerVcsElements.get(line).getAttribute("class")));
+                        .equals(getListGitMarkers().get(line).getAttribute("class")));
+  }
+
+  /**
+   * get the list of git markers web-elements in the editor
+   *
+   * @return the list of git markers web-elements
+   */
+  private List<WebElement> getListGitMarkers() {
+    List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
+    List<WebElement> subList = rulerVcsElements.subList(1, rulerVcsElements.size() - 1);
+    loadPageDriverWait.until(visibilityOfAllElements(subList));
+    return rulerVcsElements;
   }
 
   /**
