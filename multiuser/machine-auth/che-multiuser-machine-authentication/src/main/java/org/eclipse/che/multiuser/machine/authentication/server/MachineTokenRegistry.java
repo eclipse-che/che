@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server;
 
-import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 
 import com.google.common.collect.HashBasedTable;
@@ -42,7 +41,7 @@ public class MachineTokenRegistry {
    * @param workspaceId id of workspace to generate token for
    * @return generated token value
    */
-  public String generateToken(String userId, String workspaceId) {
+  private String generateToken(String userId, String workspaceId) {
     lock.writeLock().lock();
     try {
       final String token = generate("machine", 128);
@@ -60,15 +59,11 @@ public class MachineTokenRegistry {
    * @param userId id of user to get token
    * @param workspaceId id of workspace to get token
    * @return machine security token for for given user and workspace
-   * @throws NotFoundException when there is no running workspace with given id
    */
-  public String getOrCreateToken(String userId, String workspaceId) throws NotFoundException {
+  public String getOrCreateToken(String userId, String workspaceId) {
     lock.writeLock().lock();
     try {
       final Map<String, String> wsRow = tokens.row(workspaceId);
-      if (wsRow.isEmpty()) {
-        throw new NotFoundException(format("No running workspace found with id %s", workspaceId));
-      }
       return wsRow.get(userId) == null ? generateToken(userId, workspaceId) : wsRow.get(userId);
     } finally {
       lock.writeLock().unlock();
