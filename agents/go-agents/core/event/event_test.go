@@ -12,6 +12,7 @@
 package event_test
 
 import (
+	"sync"
 	"testing"
 
 	"github.com/eclipse/che/agents/go-agents/core/event"
@@ -80,6 +81,42 @@ func TestRmItself(t *testing.T) {
 	}
 }
 
+func TestManyTmpConsumersAreProperlyHandled(t *testing.T) {
+	publishingRoutinesCount := 5
+	eventsToPublish := 1000
+	subscribersCount := 100
+
+	bus := event.NewBus()
+	for i := 0; i < subscribersCount; i++ {
+		bus.Sub(&testTmpConsumer{hitsUntilDone: publishingRoutinesCount * eventsToPublish}, "test")
+	}
+
+	startWaiter := &sync.WaitGroup{}
+	startWaiter.Add(publishingRoutinesCount)
+
+	completionWaiter := &sync.WaitGroup{}
+	completionWaiter.Add(publishingRoutinesCount)
+
+	for i := 0; i < publishingRoutinesCount; i++ {
+		go func() {
+			startWaiter.Done()
+			startWaiter.Wait()
+
+			for j := 0; j < eventsToPublish; j++ {
+				bus.Pub(&testEvent{"test"})
+			}
+
+			completionWaiter.Done()
+		}()
+	}
+
+	completionWaiter.Wait()
+
+	if len(bus.Clear()) != 0 {
+		t.Fatal("All TmpConsumers must be removed")
+	}
+}
+
 type testEvent struct{ eType string }
 
 func (te *testEvent) Type() string { return te.eType }
@@ -108,4 +145,21 @@ func checkAccepts(t *testing.T, tc *testConsumer, expected int) {
 	if tc.accepts != expected {
 		t.Fatalf("Consumer id = '%s'. Expected accepts %d != Actual %d", tc.id, expected, tc.accepts)
 	}
+}
+
+type testTmpConsumer struct {
+	sync.Mutex
+	hitsUntilDone int
+}
+
+func (c *testTmpConsumer) Accept(e event.E) {
+	c.Lock()
+	defer c.Unlock()
+	c.hitsUntilDone--
+}
+
+func (c *testTmpConsumer) IsDone() bool {
+	c.Lock()
+	defer c.Unlock()
+	return c.hitsUntilDone <= 0
 }
