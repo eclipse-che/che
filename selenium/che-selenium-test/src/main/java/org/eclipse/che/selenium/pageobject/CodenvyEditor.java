@@ -289,7 +289,7 @@ public class CodenvyEditor {
   /** wait active editor */
   public void waitActive() {
     loader.waitOnClosed();
-    loadPageDriverWait.until(visibilityOf(activeEditorContainer));
+    elemDriverWait.until(visibilityOf(activeEditorContainer));
   }
 
   /**
