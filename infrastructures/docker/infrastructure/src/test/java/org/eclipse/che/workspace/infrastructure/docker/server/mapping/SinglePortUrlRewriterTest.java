@@ -12,6 +12,7 @@ package org.eclipse.che.workspace.infrastructure.docker.server.mapping;
 
 import static org.testng.Assert.assertEquals;
 
+import javax.inject.Provider;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -32,8 +33,9 @@ public class SinglePortUrlRewriterTest {
       String incomeURL,
       String expectedURL)
       throws Exception {
-    SinglePortUrlRewriter rewriter =
-        new SinglePortUrlRewriter(externalIP, 8080, internalIp, nioHost);
+    Provider<SinglePortHostnameBuilder> provider =
+        () -> new SinglePortHostnameBuilder(externalIP, internalIp, nioHost);
+    SinglePortUrlRewriter rewriter = new SinglePortUrlRewriter(8080, provider);
 
     String rewrittenURL = rewriter.rewriteURL(identity, machineName, serverName, incomeURL);
 
@@ -46,8 +48,8 @@ public class SinglePortUrlRewriterTest {
       // External IP
       {
         new RuntimeIdentityImpl("ws123", null, null),
-        "127.0.0.1",
         "172.12.0.2",
+        "127.0.0.1",
         "machine1",
         "exec/http",
         "my.io",
@@ -96,8 +98,9 @@ public class SinglePortUrlRewriterTest {
         "Rewriting of host 'server.machine1.ws123.172.12.0.2.nip.io' in URL ':' failed. Error: .*"
   )
   public void shouldThrowExceptionWhenRewritingFails() throws Exception {
-    SinglePortUrlRewriter rewriter =
-        new SinglePortUrlRewriter("127.0.0.1", 8080, "172.12.0.2", null);
+    Provider<SinglePortHostnameBuilder> provider =
+        () -> new SinglePortHostnameBuilder("172.12.0.2", "127.0.0.1", null);
+    SinglePortUrlRewriter rewriter = new SinglePortUrlRewriter(8080, provider);
     rewriter.rewriteURL(new RuntimeIdentityImpl("ws123", null, null), "machine1", "server", ":");
   }
 }

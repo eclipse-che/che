@@ -104,9 +104,7 @@ public class FileStructurePresenterTest {
         .thenReturn(promise);
     when(loaderFactory.newLoader()).thenReturn(loader);
 
-    presenter =
-        new FileStructurePresenter(
-            view, javaNavigationService, context, editorAgent, loaderFactory);
+    presenter = new FileStructurePresenter(view, javaNavigationService, context, editorAgent);
   }
 
   @Test
