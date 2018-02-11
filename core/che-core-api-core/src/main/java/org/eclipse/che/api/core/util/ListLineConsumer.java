@@ -24,14 +24,44 @@ import java.util.List;
  */
 public class ListLineConsumer implements LineConsumer {
   protected final LinkedList<String> lines;
+  private long textSizeLimit = -1;
+  private long consumedTextSize;
 
   public ListLineConsumer() {
     lines = new LinkedList<>();
   }
 
+  /**
+   * Limit size of consuming text.
+   *
+   * @param textSizeLimit maximum number of symbols of consuming text. Don't limit data if {@code
+   *     textSizeLimit} < 0. Don't consume if {@code textSizeLimit} = 0.
+   */
+  public ListLineConsumer(long textSizeLimit) {
+    lines = new LinkedList<>();
+    this.textSizeLimit = textSizeLimit;
+  }
+
   @Override
   public void writeLine(String line) {
+    if (textSizeLimit < 0) {
+      lines.add(line);
+      return;
+    }
+
+    if (consumedTextSize >= textSizeLimit) {
+      return;
+    }
+
+    if (line != null && (line.length() + consumedTextSize > textSizeLimit)) {
+      long lineSizeLimit = textSizeLimit - consumedTextSize;
+      lines.add(line.substring(0, (int) lineSizeLimit));
+      consumedTextSize += lineSizeLimit;
+      return;
+    }
+
     lines.add(line);
+    consumedTextSize += line == null ? 0 : line.length();
   }
 
   @Override
@@ -39,6 +69,7 @@ public class ListLineConsumer implements LineConsumer {
 
   public void clear() {
     lines.clear();
+    consumedTextSize = 0;
   }
 
   public List<String> getLines() {

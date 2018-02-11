@@ -19,11 +19,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
@@ -224,7 +222,7 @@ public class TestWorkspaceLogsReaderTest {
     ArgumentCaptor<String> logArgumentCaptor2 = forClass(String.class);
     ArgumentCaptor<String> logArgumentCaptor3 = forClass(String.class);
     ArgumentCaptor<Path> logArgumentCaptor4 = forClass(Path.class);
-    ArgumentCaptor<IOException> logArgumentCaptor5 = forClass(IOException.class);
+    ArgumentCaptor<String> logArgumentCaptor5 = forClass(String.class);
 
     verify(log)
         .warn(
@@ -236,20 +234,19 @@ public class TestWorkspaceLogsReaderTest {
 
     assertEquals(
         logArgumentCaptor1.getValue(),
-        "Can't obtain '{}' logs from workspace with id='{}' from directory '{}'.");
+        "Can't obtain '{}' logs from workspace with id='{}' from directory '{}'. Error: {}");
     assertEquals(logArgumentCaptor2.getValue(), FIRST_LOG_INFO.getName());
     assertEquals(logArgumentCaptor3.getValue(), TEST_WORKSPACE_ID);
     assertEquals(logArgumentCaptor4.getValue(), FIRST_LOG_INFO.getLocationInsideWorkspace());
-    assertNotNull(logArgumentCaptor5.getValue());
 
-    String exceptionErrorMessage = logArgumentCaptor5.getValue().getMessage();
+    String errorMessage = logArgumentCaptor5.getValue();
     assertTrue(
-        exceptionErrorMessage.contains("bash: command-435f4q6we3as5va5s: command not found"),
-        "Actual error message was: " + exceptionErrorMessage);
+        errorMessage.contains(UNKNOWN_COMMAND), "Actual errorMessage content: " + errorMessage);
 
     assertEquals(testStdoutOfFirstLogRead.getText(), "");
-    assertEquals(
-        testStderrOfFirstLogRead.getText(), "bash: command-435f4q6we3as5va5s: command not found");
+    assertTrue(
+        testStderrOfFirstLogRead.getText().contains(UNKNOWN_COMMAND),
+        "Actual stderr content: " + testStderrOfFirstLogRead.getText());
 
     assertEquals(testStdoutOfSecondLogRead.getText(), "read-log-2");
     assertEquals(testStderrOfSecondLogRead.getText(), "");

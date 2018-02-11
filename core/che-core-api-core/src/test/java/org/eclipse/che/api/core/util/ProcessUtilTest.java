@@ -107,7 +107,7 @@ public class ProcessUtilTest {
       String[] commandLine,
       String expectedErrorMessageFragment,
       String expectedStdout,
-      String expectedStderr)
+      String expectedStderrFragment)
       throws TimeoutException, InterruptedException {
     // when
     ListLineConsumer stdout = new ListLineConsumer();
@@ -118,10 +118,8 @@ public class ProcessUtilTest {
     } catch (IOException e) {
       // then
       assertNotNull(expectedErrorMessageFragment, format("Unexpected error '%s'.", e));
-
-      String errorMessagePattern = format(".*%s.*", expectedErrorMessageFragment);
       assertTrue(
-          e.getMessage().matches(errorMessagePattern),
+          e.getMessage().contains(expectedErrorMessageFragment),
           format("Error message doesn't contain '%s'.", expectedErrorMessageFragment));
 
       return;
@@ -136,7 +134,8 @@ public class ProcessUtilTest {
     }
 
     assertEquals(stdout.getText(), expectedStdout);
-    assertEquals(stderr.getText(), expectedStderr);
+    assertTrue(
+        stderr.getText().contains(expectedStderrFragment), "Actual stderr: " + stderr.getText());
   }
 
   @DataProvider
@@ -144,7 +143,7 @@ public class ProcessUtilTest {
     return new Object[][] {
       {SIMPLE_COMMAND, null, TEST_MESSAGE, ""},
       {UNKNOWN_COMMAND_ARRAY, UNKNOWN_COMMAND, "", ""},
-      {BASH_UNKNOWN_COMMAND, UNKNOWN_COMMAND, "", UNKNOWN_COMMAND}
+      {BASH_UNKNOWN_COMMAND, null, "", UNKNOWN_COMMAND}
     };
   }
 }

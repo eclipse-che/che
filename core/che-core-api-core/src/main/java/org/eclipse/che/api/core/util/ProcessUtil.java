@@ -16,7 +16,6 @@ import com.google.common.base.Joiner;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -142,16 +141,15 @@ public final class ProcessUtil {
    * @param stderr a consumer where stderr will be redirected
    * @return the started process
    * @throws InterruptedException in case terminate process
-   * @throws IOException in case I/O error, or command execution error, or stderr is not empty after
-   *     the command execution
+   * @throws IOException in case I/O error, or command execution error
    * @throws TimeoutException if process gets more time then defined by {@code timeout}
    */
   public static Process executeAndWait(
       String[] commandLine,
       int timeout,
       TimeUnit timeUnit,
-      ListLineConsumer stdout,
-      ListLineConsumer stderr)
+      LineConsumer stdout,
+      LineConsumer stderr)
       throws TimeoutException, IOException, InterruptedException {
     ProcessBuilder pb = new ProcessBuilder(commandLine);
 
@@ -185,25 +183,6 @@ public final class ProcessUtil {
     }
 
     future.join(); // wait until process output is read
-
-    if (process.exitValue() == 0) {
-      return process;
-    }
-
-    String errorMessage = stderr.getText();
-    if (!errorMessage.isEmpty()) {
-      // trim error message to have size <= MAX_SIZE_OF_ERROR_MESSAGE
-      if (errorMessage.length() > MAX_SIZE_OF_ERROR_MESSAGE) {
-        errorMessage = errorMessage.substring(0, MAX_SIZE_OF_ERROR_MESSAGE);
-        errorMessage += "...";
-      }
-
-      throw new IOException(
-          format(
-              "Failed to execute command '%s' due to occurred error: %s",
-              Arrays.toString(commandLine), errorMessage));
-    }
-
     return process;
   }
 

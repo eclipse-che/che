@@ -24,7 +24,9 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
+import org.eclipse.che.api.core.util.StubLineConsumer;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +38,9 @@ import org.slf4j.LoggerFactory;
  * @author Dmytro Nochevnov
  */
 public abstract class TestWorkspaceLogsReader {
+
+  private static final String READ_LOGS_ERROR_MESSAGE_TEMPLATE =
+      "Can't obtain '{}' logs from workspace with id='{}' from directory '{}'.";
 
   @VisibleForTesting Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -91,11 +96,22 @@ public abstract class TestWorkspaceLogsReader {
         getReadLogsCommand(workspaceId, testLogsDirectory, logInfo.getLocationInsideWorkspace())
       };
 
-      executeAndWait(
-          commandLine, PREPARING_WS_TIMEOUT_SEC, SECONDS, getStdoutConsumer(), getStderrConsumer());
+      ListLineConsumer stderrConsumer = getStderrConsumer();
+      Process process =
+          executeAndWait(
+              commandLine, PREPARING_WS_TIMEOUT_SEC, SECONDS, getStdoutConsumer(), stderrConsumer);
+
+      if (process.exitValue() > 0) {
+        log.warn(
+            READ_LOGS_ERROR_MESSAGE_TEMPLATE + " Error: {}",
+            logInfo.getName(),
+            workspaceId,
+            logInfo.getLocationInsideWorkspace(),
+            stderrConsumer.getText());
+      }
     } catch (Exception e) {
       log.warn(
-          "Can't obtain '{}' logs from workspace with id='{}' from directory '{}'.",
+          READ_LOGS_ERROR_MESSAGE_TEMPLATE,
           logInfo.getName(),
           workspaceId,
           logInfo.getLocationInsideWorkspace(),
@@ -135,13 +151,13 @@ public abstract class TestWorkspaceLogsReader {
   abstract boolean canWorkspaceLogsBeRead();
 
   @VisibleForTesting
-  ListLineConsumer getStdoutConsumer() {
-    return new ListLineConsumer();
+  LineConsumer getStdoutConsumer() {
+    return new StubLineConsumer();
   }
 
   @VisibleForTesting
   ListLineConsumer getStderrConsumer() {
-    return new ListLineConsumer();
+    return new ListLineConsumer(1000);
   }
 
   /** Holds information about log to read. */

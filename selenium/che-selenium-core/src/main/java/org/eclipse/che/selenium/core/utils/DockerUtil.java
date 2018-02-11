@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPA
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import java.util.Arrays;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.slf4j.Logger;
@@ -31,7 +32,8 @@ public class DockerUtil {
   private String cheHost;
 
   public boolean isCheRunLocally() {
-    ListLineConsumer stdoutConsumer = new ListLineConsumer();
+    ListLineConsumer stdoutConsumer = new ListLineConsumer(1000);
+    ListLineConsumer stderrConsumer = new ListLineConsumer(1000);
     String[] commandLine = {
       "bash",
       "-c",
@@ -41,8 +43,18 @@ public class DockerUtil {
     };
 
     try {
-      executeAndWait(
-          commandLine, PREPARING_WS_TIMEOUT_SEC, SECONDS, stdoutConsumer, new ListLineConsumer());
+      Process process =
+          executeAndWait(
+              commandLine, PREPARING_WS_TIMEOUT_SEC, SECONDS, stdoutConsumer, stderrConsumer);
+
+      if (process.exitValue() > 0) {
+        LOG.warn(
+            "Failed to execute command '{}' due to occurred error: {}",
+            Arrays.toString(commandLine),
+            stderrConsumer.getText());
+        return false;
+      }
+
       if (stdoutConsumer.getText().equals("true")) {
         return true;
       }
