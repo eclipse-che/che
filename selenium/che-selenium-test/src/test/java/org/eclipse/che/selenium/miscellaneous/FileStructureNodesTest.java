@@ -44,94 +44,92 @@ public class FileStructureNodesTest {
   private static final String INTERFACE_NAME = "Inter";
 
   private static final String ITEMS_CLASS =
-      "Company() : void\n"
-          + "getInstance() : Company\n"
-          + "doListId() : List<String>\n"
-          + "doListName() : List<String>\n"
-          + "doListDate() : List<String>\n"
-          + "createListEmpl() : List<Employee>\n"
-          + "createListEmpl(int) : List<Employee>\n"
-          + "removeEmployee(String) : List<Employee>\n"
-          + "getListEmployees() : List<Employee>\n"
-          + "sortSalary() : List<Employee>\n"
-          + "sortSurname() : List<Employee>\n"
-          + "sortId() : List<Employee>\n"
-          + "sortDate() : List<Employee>\n"
-          + "listEmployees\n"
-          + "listId\n"
-          + "listName\n"
-          + "listDate\n"
+      "Company\n"
+          + "Company()\n"
           + "CompanyHelper\n"
           + "INSTANCE\n"
           + "ONE\n"
           + "QWE\n"
           + "TWO\n"
           + "Inter\n"
-          + "setDate() : void\n"
-          + "getId() : double\n"
-          + "getDate() : String\n"
           + "ASD\n"
           + "FIVE\n"
-          + "TEN";
-
-  private static final String ITEMS_CLASS_1 =
-      "Company() : void\n"
-          + "getInstance() : Company\n"
-          + "doListId() : List<String>\n"
-          + "doListName() : List<String>\n"
-          + "doListDate() : List<String>\n"
-          + "createListEmpl() : List<Employee>\n"
-          + "createListEmpl(int) : List<Employee>\n"
-          + "removeEmployee(String) : List<Employee>\n"
-          + "getListEmployees() : List<Employee>\n"
-          + "sortSalary() : List<Employee>\n"
-          + "sortSurname() : List<Employee>\n"
-          + "sortId() : List<Employee>\n"
-          + "sortDate() : List<Employee>\n"
+          + "TEN\n"
+          + "setDate()\n"
+          + "getId()\n"
+          + "getDate()\n"
+          + "getInstance()\n"
           + "listEmployees\n"
           + "listId\n"
           + "listName\n"
           + "listDate\n"
+          + "doListId()\n"
+          + "doListName()\n"
+          + "doListDate()\n"
+          + "createListEmpl()\n"
+          + "createListEmpl(int)\n"
+          + "removeEmployee(String)\n"
+          + "getListEmployees()\n"
+          + "sortSalary()\n"
+          + "sortSurname()\n"
+          + "sortId()\n"
+          + "sortDate()";
+
+  private static final String ITEMS_CLASS_1 =
+      "Company\n"
+          + "Company()\n"
           + "CompanyHelper\n"
-          + "Inter";
+          + "Inter\n"
+          + "getInstance()\n"
+          + "listEmployees\n"
+          + "listId\n"
+          + "listName\n"
+          + "listDate\n"
+          + "doListId()\n"
+          + "doListName()\n"
+          + "doListDate()\n"
+          + "createListEmpl()\n"
+          + "createListEmpl(int)\n"
+          + "removeEmployee(String)\n"
+          + "getListEmployees()\n"
+          + "sortSalary()\n"
+          + "sortSurname()\n"
+          + "sortId()\n"
+          + "sortDate()";
 
   private static final String ITEMS_INNER_CLASS = "INSTANCE\n" + "ONE\n" + "QWE\n" + "TWO\n";
 
   private static final String ITEMS_INTERFACE =
-      "setDate() : void\n"
-          + "getId() : double\n"
-          + "getDate() : String\n"
-          + "ASD\n"
-          + "FIVE\n"
-          + "TEN";
+      "ASD\n" + "FIVE\n" + "TEN\n" + "setDate()\n" + "getId()\n" + "getDate()";
 
   private static final String ITEMS_FILTERED_GET =
       "Company\n"
-          + "getInstance() : Company\n"
-          + "getListEmployees() : List<Employee>\n"
           + "Inter\n"
-          + "getId() : double\n"
-          + "getDate() : String\n";
+          + "getId()\n"
+          + "getDate()\n"
+          + "getInstance()\n"
+          + "getListEmployees()\n";
 
   private static final String ITEMS_FILTERED_I =
       "Company\n"
-          + "getInstance() : Company\n"
-          + "doListId() : List<String>\n"
-          + "doListName() : List<String>\n"
-          + "doListDate() : List<String>\n"
-          + "createListEmpl() : List<Employee>\n"
-          + "createListEmpl(int) : List<Employee>\n"
-          + "getListEmployees() : List<Employee>\n"
-          + "sortId() : List<Employee>\n"
+          + "CompanyHelper\n"
+          + "INSTANCE\n"
+          + "Inter\n"
+          + "FIVE\n"
+          + "getId()\n"
+          + "getInstance()\n"
           + "listEmployees\n"
           + "listId\n"
           + "listName\n"
           + "listDate\n"
-          + "CompanyHelper\n"
-          + "INSTANCE\n"
-          + "Inter\n"
-          + "getId() : double\n"
-          + "FIVE\n";
+          + "doListId()\n"
+          + "doListName()\n"
+          + "doListDate()\n"
+          + "createListEmpl()\n"
+          + "createListEmpl(int)\n"
+          + "removeEmployee(String)\n"
+          + "getListEmployees()\n"
+          + "sortId()";
 
   @Inject private Ide ide;
   @Inject private Menu menu;
@@ -176,15 +174,14 @@ public class FileStructureNodesTest {
     fileStructure.waitExpectedTextInFileStructure(ITEMS_FILTERED_I);
     fileStructure.type(ESCAPE.toString());
 
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
-  }
-
   @Test(priority = 1)
   public void checkFileStructureNodes() {
-    // close nodes in the File Structure form by click
+    // check work nodes in the 'file structure' by click on the icon
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
     fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
 
@@ -195,18 +192,11 @@ public class FileStructureNodesTest {
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
 
-    // close nodes in the File Structure form by double click
-    fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.selectItemInFileStructureByDoubleClick(INTERFACE_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
-
-    // open nodes in the File Structure form by double click
-    fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.selectItemInFileStructureByDoubleClick(INTERFACE_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+    fileStructure.selectItemInFileStructure(JAVA_FILE_NAME);
+    fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
+    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
+    fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
 
     // close and open root node in the File Structure form
     fileStructure.selectItemInFileStructure(JAVA_FILE_NAME);
