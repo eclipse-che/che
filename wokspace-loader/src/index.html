@@ -18,13 +18,21 @@
     <% if(htmlWebpackPlugin.options.cssName) { %>
     <link href="<%= htmlWebpackPlugin.options.urlPrefix %><%= htmlWebpackPlugin.options.cssName %>" rel="stylesheet">
     <% } %>
-    <script src="<%= htmlWebpackPlugin.options.urlPrefix %><%= htmlWebpackPlugin.files.js %>" type="text/javascript"></script>
+    <script src="<%= htmlWebpackPlugin.options.urlPrefix %><%= htmlWebpackPlugin.files.js %>" type="text/javascript" async="true"></script>
 </head>
 
-<body>
-    <main>
-        <div id="output"></div>
-    </main>
+<body style="background-color: #21252b; transition: background-color 0.5s ease;">
+    <div id="workspace-loader">
+        <div id="workspace-loader-label">Loading...</div>
+        <div id="workspace-loader-progress">
+            <div>
+                <div id="workspace-loader-progress-bar"></div>
+            </div>
+        </div>
+    </div>
+    <div id="workspace-console">
+        <div id="workspace-console-container"></div>
+    </div>
 </body>
 
 </html>
