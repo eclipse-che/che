@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPED;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.ENV_VARIABLES;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.MACHINES;
@@ -26,6 +25,7 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Consoles;
+import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -63,6 +63,7 @@ public class WorkspaceDetailsComposeTest {
   @Inject private WorkspaceMachines workspaceMachines;
   @Inject private WorkspaceEnvVariables workspaceEnvVariables;
   @Inject private MachineTerminal terminal;
+  @Inject private Ide ide;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -151,9 +152,8 @@ public class WorkspaceDetailsComposeTest {
     // check that created machine exists in the Process Console tree
     workspaceDetails.clickOpenInIdeWsBtn();
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    projectExplorer.waitProjectExplorer();
 
-    terminal.waitTerminalTab(PREPARING_WS_TIMEOUT_SEC);
+    ide.waitOpenedWorkspaceIsReadyToUse();
     consoles.waitProcessInProcessConsoleTree("machine");
     consoles.waitTabNameProcessIsPresent("machine");
   }

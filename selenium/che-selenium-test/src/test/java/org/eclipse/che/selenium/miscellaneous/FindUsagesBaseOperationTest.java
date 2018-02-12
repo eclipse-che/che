@@ -86,7 +86,7 @@ public class FindUsagesBaseOperationTest {
 
   @Test
   public void checkFindUsagesBaseOperation() {
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");

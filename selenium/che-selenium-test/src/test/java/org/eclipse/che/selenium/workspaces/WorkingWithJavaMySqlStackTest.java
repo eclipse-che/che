@@ -35,6 +35,7 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.Consoles;
+import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -77,6 +78,7 @@ public class WorkingWithJavaMySqlStackTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Workspaces workspaces;
+  @Inject private Ide ide;
 
   @AfterClass
   public void tearDown() throws Exception {
@@ -102,7 +104,7 @@ public class WorkingWithJavaMySqlStackTest {
 
     seleniumWebDriver.switchFromDashboardIframeToIde(LOADER_TIMEOUT_SEC);
     currentWindow = seleniumWebDriver.getWindowHandle();
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME, APPLICATION_START_TIMEOUT_SEC);
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME, PROJECT_FOLDER);
     loader.waitOnClosed();

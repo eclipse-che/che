@@ -43,7 +43,7 @@ import org.testng.annotations.Test;
  * @author Alexander Andrienko
  */
 public class WorkingWithTerminalTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("SpringWebApp", 4);
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
   private static final Logger LOG = LoggerFactory.getLogger(WorkingWithTerminalTest.class);
 
   private static final String[] CHECK_MC_OPENING = {
@@ -81,13 +81,12 @@ public class WorkingWithTerminalTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @BeforeMethod
   private void prepareNewTerminal() {
     try {
-      projectExplorer.waitProjectExplorer();
-      loader.waitOnClosed();
       projectExplorer.waitItem(PROJECT_NAME);
 
       if (terminal.terminalIsPresent()) {
