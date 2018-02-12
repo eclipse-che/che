@@ -333,109 +333,91 @@ public abstract class Window implements IsWidget {
   private class ViewKeyboardNavigationHandler extends KeyboardNavigationHandler {
     @Override
     public void onAlt(NativeEvent evt) {
-      super.onAlt(evt);
-      Window.this.onAltPress(evt);
+      onAltPress(evt);
     }
 
     @Override
     public void onBackspace(NativeEvent evt) {
-      super.onBackspace(evt);
-      Window.this.onBackspacePress(evt);
+      onBackspacePress(evt);
     }
 
     @Override
     public void onControl(NativeEvent evt) {
-      super.onControl(evt);
-      Window.this.onControlPress(evt);
+      onControlPress(evt);
     }
 
     @Override
     public void onDelete(NativeEvent evt) {
-      super.onDelete(evt);
-      Window.this.onDeletePress(evt);
+      onDeletePress(evt);
     }
 
     @Override
     public void onDown(NativeEvent evt) {
-      super.onDown(evt);
-      Window.this.onDownPress(evt);
+      onDownPress(evt);
     }
 
     @Override
     public void onEnd(NativeEvent evt) {
-      super.onEnd(evt);
-      Window.this.onEndPress(evt);
+      onEndPress(evt);
     }
 
     @Override
     public void onEnter(NativeEvent evt) {
-      super.onEnter(evt);
-      Window.this.onEnterPress(evt);
+      onEnterPress(evt);
     }
 
     @Override
     public void onEsc(NativeEvent evt) {
-      super.onEsc(evt);
-
       if (view.isCloseOnEscape()) {
         hide();
       }
 
-      Window.this.onEscPress(evt);
+      onEscPress(evt);
     }
 
     @Override
     public void onHome(NativeEvent evt) {
-      super.onHome(evt);
-      Window.this.onHomePress(evt);
+      onHomePress(evt);
     }
 
     @Override
     public void onKeyPress(NativeEvent evt) {
-      super.onKeyPress(evt);
       Window.this.onKeyPress(evt);
     }
 
     @Override
     public void onLeft(NativeEvent evt) {
-      super.onLeft(evt);
-      Window.this.onLeftPress(evt);
+      onLeftPress(evt);
     }
 
     @Override
     public void onPageDown(NativeEvent evt) {
-      super.onPageDown(evt);
-      Window.this.onPageDownPress(evt);
+      onPageDownPress(evt);
     }
 
     @Override
     public void onPageUp(NativeEvent evt) {
-      super.onPageUp(evt);
-      Window.this.onPageUpPress(evt);
+      onPageUpPress(evt);
     }
 
     @Override
     public void onRight(NativeEvent evt) {
-      super.onRight(evt);
-      Window.this.onRightPress(evt);
+      onRightPress(evt);
     }
 
     @Override
     public void onShift(NativeEvent evt) {
-      super.onShift(evt);
-      Window.this.onShiftPress(evt);
+      onShiftPress(evt);
     }
 
     @Override
     public void onTab(NativeEvent evt) {
-      super.onTab(evt);
-      Window.this.onTabPress(evt);
+      onTabPress(evt);
     }
 
     @Override
     public void onUp(NativeEvent evt) {
-      super.onUp(evt);
-      Window.this.onUpPress(evt);
+      onUpPress(evt);
     }
   }
 }
