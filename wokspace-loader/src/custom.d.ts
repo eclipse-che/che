@@ -12,6 +12,8 @@ declare module 'che' {
     export = che;
 }
 
+declare function require(string: string): any;
+
 declare namespace che {
     export interface IWorkspace {
         id?: string;
@@ -38,6 +40,47 @@ declare namespace che {
         };
         projects?: Array<any>;
         commands?: Array<any>;
+    }
+
+    export interface IWorkspaceEnvironment {
+        machines: {
+            [machineName: string]: IEnvironmentMachine
+        };
+        recipe: IRecipe;
+    }
+
+    export interface IRecipe {
+        id?: string;
+        content?: string;
+        location?: string;
+        contentType?: string;
+        type: string;
+    }
+
+    export interface IEnvironmentMachine {
+        installers?: string[];
+        attributes?: {
+            memoryLimitBytes?: string | number;
+            [attrName: string]: string | number;
+        };
+        servers?: {
+            [serverRef: string]: IEnvironmentMachineServer
+        };
+        volumes?: {
+            [volumeRef: string]: IEnvironmentMachineVolume
+        };
+        env?: { [envName: string]: string };
+    }
+
+    export interface IEnvironmentMachineServer {
+        port: string | number;
+        protocol: string;
+        path?: string;
+        properties?: any;
+    }
+
+    export interface IEnvironmentMachineVolume {
+        path: string;
     }
 
     export interface IWorkspaceAttributes {

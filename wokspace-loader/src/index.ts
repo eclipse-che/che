@@ -10,7 +10,7 @@
  */
 'use strict';
 
-import "./style.css";
+const css = require('./style.css');
 import { WebsocketClient } from './json-rpc/websocket-client';
 import { CheJsonRpcMasterApi } from './json-rpc/che-json-rpc-master-api';
 import { getWorkspace, startWorkspace } from './workspace';
