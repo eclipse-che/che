@@ -1,0 +1,31 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: che-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: "nginx"
+{{ if .Values.tlsEnabled }}
+    kubernetes.io/tls-acme: "true"
+{{ else }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    ingress.kubernetes.io/proxy-read-timeout: "3600"
+    ingress.kubernetes.io/proxy-connect-timeout: "3600"
+{{ end }}
+spec:
+{{ if .Values.tlsEnabled }}
+  tls:
+  - hosts:
+    - {{ template "cheHost" . }}
+    secretName: che-tls
+{{ end }}
+  rules:
+  - http:
+      paths:
+      - backend:
+          serviceName: che-host
+          servicePort: 8080
+        path: /
+{{ if .Values.isHostBased }}
+    host: {{ template "cheHost" . }}
+{{ end }}
