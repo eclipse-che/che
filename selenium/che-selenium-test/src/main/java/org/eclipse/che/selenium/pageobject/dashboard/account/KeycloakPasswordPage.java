@@ -81,7 +81,7 @@ public class KeycloakPasswordPage {
         (ExpectedCondition<Boolean>)
             driver ->
                 seleniumWebDriverHelper
-                    .waitAndGetElement(By.xpath(ERROR_ALERT))
+                    .waitElementIsVisible(By.xpath(ERROR_ALERT))
                     .getText()
                     .equals(expectedText));
   }
@@ -91,7 +91,7 @@ public class KeycloakPasswordPage {
         (ExpectedCondition<Boolean>)
             driver ->
                 seleniumWebDriverHelper
-                    .waitAndGetElement(By.xpath(SUCCESS_ALERT))
+                    .waitElementIsVisible(By.xpath(SUCCESS_ALERT))
                     .getText()
                     .equals(expectedText));
   }

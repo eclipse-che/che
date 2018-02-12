@@ -85,7 +85,7 @@ public class DashboardAccount {
   }
 
   public String getTitle() {
-    return seleniumWebDriverHelper.waitAndGetElement(By.id(Locators.TITLE_ID)).getText();
+    return seleniumWebDriverHelper.waitElementIsVisible(By.id(Locators.TITLE_ID)).getText();
   }
 
   public void clickOnEditButton() {

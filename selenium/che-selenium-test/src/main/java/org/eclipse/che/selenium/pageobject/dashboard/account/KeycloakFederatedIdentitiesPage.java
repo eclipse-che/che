@@ -99,7 +99,7 @@ public class KeycloakFederatedIdentitiesPage {
         (ExpectedCondition<Boolean>)
             driver ->
                 seleniumWebDriverHelper
-                    .waitAndGetElement(xpath(SUCCESS_ALERT))
+                    .waitElementIsVisible(xpath(SUCCESS_ALERT))
                     .getText()
                     .equals(expectedText));
   }

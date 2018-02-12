@@ -103,7 +103,7 @@ public class KeycloakAccountPage {
 
   public boolean usernameFieldIsDisabled() {
     return seleniumWebDriverHelper
-        .waitAndGetElement(By.id(USERNAME_FIELD_ID))
+        .waitElementIsVisible(By.id(USERNAME_FIELD_ID))
         .getAttribute("disabled")
         .equals("true");
   }
@@ -121,7 +121,7 @@ public class KeycloakAccountPage {
         (ExpectedCondition<Boolean>)
             driver ->
                 seleniumWebDriverHelper
-                    .waitAndGetElement(By.xpath(ERROR_ALERT))
+                    .waitElementIsVisible(By.xpath(ERROR_ALERT))
                     .getText()
                     .equals(expectedText));
   }
@@ -131,7 +131,7 @@ public class KeycloakAccountPage {
         (ExpectedCondition<Boolean>)
             driver ->
                 seleniumWebDriverHelper
-                    .waitAndGetElement(By.xpath(SUCCESS_ALERT))
+                    .waitElementIsVisible(By.xpath(SUCCESS_ALERT))
                     .getText()
                     .equals(expectedText));
   }
