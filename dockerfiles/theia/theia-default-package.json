@@ -1,0 +1,17 @@
+{
+    "private": true,
+    "dependencies": {
+        "@theia/typescript": "latest",
+        "@theia/navigator": "latest",
+        "@theia/terminal": "latest",
+        "@theia/outline-view": "latest",
+        "@theia/preferences": "latest",
+        "@theia/git": "latest",
+        "@theia/file-search": "latest",
+        "@theia/markers": "latest",
+        "@theia/extension-manager": "latest"
+    },
+    "devDependencies": {
+        "@theia/cli": "latest"
+    }
+}
