@@ -51,7 +51,6 @@ public class CheckGeneratingMavenArchetypeTest {
             NAME_OF_ARTIFACT + "/src/test/java/" + NAME_OF_ARTIFACT + "/AppTest.java",
             NAME_OF_ARTIFACT + "/pom.xml");
     ide.open(workspace);
-    consoles.waitJDTLSProjectResolveFinishedMessage(NAME_OF_ARTIFACT);
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
         TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
@@ -65,6 +64,7 @@ public class CheckGeneratingMavenArchetypeTest {
     projectWizard.checkVersionOnWizardContainsText("1.0-SNAPSHOT");
     projectWizard.clickCreateButton();
     projectExplorer.waitItem(NAME_OF_ARTIFACT);
+    consoles.waitJDTLSProjectResolveFinishedMessage(NAME_OF_ARTIFACT);
     console.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
     projectExplorer.quickExpandWithJavaScript();
     expectedItems.forEach(projectExplorer::waitItem);
