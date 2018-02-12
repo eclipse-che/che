@@ -10,16 +10,10 @@
  */
 package org.eclipse.che.ide.part.perspectives.project;
 
-import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
-import static org.eclipse.che.ide.api.parts.PartStackType.INFORMATION;
-import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
-import static org.eclipse.che.ide.api.parts.PartStackType.TOOLING;
-
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.command.explorer.CommandsExplorerPresenter;
@@ -32,6 +26,13 @@ import org.eclipse.che.ide.part.perspectives.general.AbstractPerspective;
 import org.eclipse.che.ide.part.perspectives.general.PerspectiveViewImpl;
 import org.eclipse.che.ide.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.providers.DynaProvider;
+
+import javax.validation.constraints.NotNull;
+
+import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
+import static org.eclipse.che.ide.api.parts.PartStackType.INFORMATION;
+import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
+import static org.eclipse.che.ide.api.parts.PartStackType.TOOLING;
 
 /**
  * General-purpose, displaying all the PartStacks in a default manner: Navigation at the left side;
@@ -102,6 +103,23 @@ public class ProjectPerspective extends AbstractPerspective {
   /** {@inheritDoc} */
   @Override
   public void go(@NotNull AcceptsOneWidget container) {
+    PartStack navigatorPanel = getPartStack(NAVIGATION);
+    PartStack editorPanel = getPartStack(EDITING);
+    PartStack toolPanel = getPartStack(TOOLING);
+    PartStack infoPanel = getPartStack(INFORMATION);
+
+    if (navigatorPanel != null) {
+      navigatorPanel.go(view.getNavigationPanel());
+    }
+    if (editorPanel != null) {
+      editorPanel.go(view.getEditorPanel());
+    }
+    if (toolPanel != null) {
+      toolPanel.go(view.getToolPanel());
+    }
+    if (infoPanel != null) {
+      infoPanel.go(view.getInformationPanel());
+    }
     container.setWidget(view);
   }
 }
