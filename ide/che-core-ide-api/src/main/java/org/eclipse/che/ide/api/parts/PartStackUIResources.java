@@ -12,6 +12,8 @@ package org.eclipse.che.ide.api.parts;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.DataResource;
+import com.google.gwt.resources.client.DataResource.MimeType;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /** @author Nikolay Zamosenchuk */
@@ -45,4 +47,12 @@ public interface PartStackUIResources extends ClientBundle {
 
   @Source("maximize-part.svg")
   SVGResource maximizePart();
+
+  @MimeType("image/svg+xml")
+  @Source("tabLineError.svg")
+  DataResource tabLineError();
+
+  @MimeType("image/svg+xml")
+  @Source("tabLineWarning.svg")
+  DataResource tabLineWarning();
 }
