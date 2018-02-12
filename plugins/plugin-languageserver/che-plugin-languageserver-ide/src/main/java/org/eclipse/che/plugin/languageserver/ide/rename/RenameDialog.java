@@ -35,7 +35,7 @@ public class RenameDialog extends InputDialogViewImpl {
       Consumer<String> rename,
       Consumer<String> preview,
       CancelCallback cancelCallback) {
-    setTitle(localization.renameViewTitle());
+    setTitleCaption(localization.renameViewTitle());
     setContent(localization.renameDialogLabel());
     setValue(value);
     setSelectionStartIndex(0);

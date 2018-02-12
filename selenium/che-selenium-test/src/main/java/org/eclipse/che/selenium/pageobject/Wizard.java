@@ -53,7 +53,7 @@ public class Wizard {
     String ARTIFACT_ID_INPUT = "//div[text() = 'Artifact ID:']//following::input";
     String VERSION_INPUT = "//div[text() = 'Version:']//following::input";
     String PARENT_DIRECTORY_INPUT =
-        "//div[@id='gwt-debug-projectWizard-window']//div[text()='Parent:']/following-sibling::div";
+        "//table[@id='gwt-debug-projectWizard-window']//div[text()='Parent:']/following-sibling::div";
     String SELECT_PACKAGING_DROPDOWN = "//div[@id='gwt-debug-mavenPageView-packagingField']";
     String SELECT_PACKAGING_DROPDOWN_BLOCK =
         "//div[@id='gwt-debug-mavenPageView-packagingField']//span";
@@ -61,7 +61,7 @@ public class Wizard {
         "//div[text()='%s']/following-sibling::button[text()='Browse']";
     String FOLDER_PATH_FIELD_XPATH = "//div[text()='%s']/following-sibling::input";
     String SELECT_PATH_FOR_PARENT_BTN = "//div[text()='Parent:']/parent::div/button";
-    String CLOSE_ICON_CSS = "div#gwt-debug-projectWizard-window svg[width='8px'][height='8px']";
+    String CLOSE_ICON_CSS = "table#gwt-debug-projectWizard-window svg[width='8px'][height='8px']";
     String ARCHETYPE_CK_BOX_ID = "gwt-debug-mavenPageView-generateFromArchetype-label";
     String ARCHETYPE_DROP_DAWN_ID = "gwt-debug-mavenPageView-archetypeField";
   }

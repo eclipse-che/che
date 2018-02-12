@@ -32,9 +32,9 @@ public class AskDialog {
   public static final String OK_BTN_ID = "ask-dialog-ok";
   public static final String CANCEL_BTN_ID = "ask-dialog-cancel";
   public static final String ASK_DIALOG_FORM_XPATH =
-      "//button[@id='ask-dialog-ok']/ancestor::div[3]";
+      "//button[@id='ask-dialog-ok']/ancestor::table";
   public static final String WARNING_TEXT_XPATH =
-      "//button[@id='ask-dialog-ok']/ancestor::div[3]//span";
+      "//button[@id='ask-dialog-ok']/ancestor::table//span";
 
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;

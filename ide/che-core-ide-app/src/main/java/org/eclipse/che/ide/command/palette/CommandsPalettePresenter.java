@@ -67,7 +67,7 @@ public class CommandsPalettePresenter implements CommandsPaletteView.ActionDeleg
   }
 
   public void showDialog() {
-    view.show();
+    view.showDialog();
     view.setCommands(commandUtils.groupCommandsByGoal(commandManager.getCommands()));
   }
 

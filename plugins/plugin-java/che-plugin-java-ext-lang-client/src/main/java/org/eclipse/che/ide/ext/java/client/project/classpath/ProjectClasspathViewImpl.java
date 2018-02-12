@@ -10,18 +10,13 @@
  */
 package org.eclipse.che.ide.ext.java.client.project.classpath;
 
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
+
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.dom.client.*;
 import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -30,7 +25,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import elemental.events.KeyboardEvent;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -71,25 +65,22 @@ public class ProjectClasspathViewImpl extends Window implements ProjectClasspath
     this.localization = localization;
     this.commandResources = commandResources;
 
-    Map<Object, List<Object>> categories = new HashMap<>();
-
     commandResources.getCss().ensureInjected();
 
-    setWidget(UI_BINDER.createAndBindUi(this));
+    Widget widget = UI_BINDER.createAndBindUi(this);
+    widget.getElement().setId("classpathManagerView");
+    widget.getElement().getStyle().setPadding(0, Style.Unit.PX);
+    setWidget(widget);
     setTitle(localization.projectClasspathTitle());
-    getWidget().getElement().setId("classpathManagerView");
 
     list = new CategoriesList(resources);
     list.addDomHandler(
-        new KeyDownHandler() {
-          @Override
-          public void onKeyDown(KeyDownEvent event) {
-            switch (event.getNativeKeyCode()) {
-              case KeyboardEvent.KeyCode.INSERT:
-                break;
-              case KeyboardEvent.KeyCode.DELETE:
-                break;
-            }
+        event -> {
+          switch (event.getNativeKeyCode()) {
+            case KeyboardEvent.KeyCode.INSERT:
+              break;
+            case KeyboardEvent.KeyCode.DELETE:
+              break;
           }
         },
         KeyDownEvent.getType());
@@ -98,8 +89,6 @@ public class ProjectClasspathViewImpl extends Window implements ProjectClasspath
     contentPanel.clear();
 
     createButtons();
-
-    getWidget().getElement().getStyle().setPadding(0, Style.Unit.PX);
   }
 
   @Override
@@ -108,15 +97,12 @@ public class ProjectClasspathViewImpl extends Window implements ProjectClasspath
   }
 
   @Override
-  public void show() {
-    super.show();
-    super.setHideOnEscapeEnabled(true);
-
-    doneButton.setFocus(true);
+  public void showDialog() {
+    show(doneButton);
   }
 
   @Override
-  public void hideWindow() {
+  public void close() {
     this.hide();
   }
 
@@ -131,19 +117,18 @@ public class ProjectClasspathViewImpl extends Window implements ProjectClasspath
   }
 
   @Override
-  protected void onEnterClicked() {
+  public void onEnterPress(NativeEvent evt) {
     delegate.onEnterClicked();
   }
 
   @Override
-  protected void onClose() {
+  protected void onHide() {
     delegate.onCloseClicked();
-    super.onClose();
   }
 
   @Override
   public boolean isDoneButtonInFocus() {
-    return isWidgetFocused(doneButton);
+    return isWidgetOrChildFocused(doneButton);
   }
 
   @Override
@@ -169,20 +154,11 @@ public class ProjectClasspathViewImpl extends Window implements ProjectClasspath
   private void createButtons() {
 
     doneButton =
-        createPrimaryButton(
+        addFooterButton(
             localization.buttonDone(),
             "window-edit-configurations-close",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onDoneClicked();
-              }
-            });
-    addButtonToFooter(doneButton);
-
-    Element dummyFocusElement = DOM.createSpan();
-    dummyFocusElement.setTabIndex(0);
-    getFooter().getElement().appendChild(dummyFocusElement);
+            event -> delegate.onDoneClicked(),
+            true);
   }
 
   private final CategoryRenderer<ClasspathPagePresenter> projectPropertiesRenderer =

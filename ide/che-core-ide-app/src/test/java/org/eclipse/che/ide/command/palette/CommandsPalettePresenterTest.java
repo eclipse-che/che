@@ -78,7 +78,7 @@ public class CommandsPalettePresenterTest {
   public void shouldShowViewAndSetCommands() throws Exception {
     presenter.showDialog();
 
-    verify(view).show();
+    verify(view).showDialog();
     verify(commandManager).getCommands();
     verify(view).setCommands(org.mockito.ArgumentMatchers.any());
   }

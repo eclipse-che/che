@@ -139,7 +139,7 @@ public class PreviewPresenterTest {
     verify(refactoringPreviewPromise).then(refactoringPreviewOperation.capture());
     refactoringPreviewOperation.getValue().apply(refactoringPreview);
     verify(view).setTreeOfChanges(refactoringPreview);
-    verify(view).show();
+    verify(view).showDialog();
   }
 
   @Test
@@ -160,7 +160,7 @@ public class PreviewPresenterTest {
     verify(clientServerEventService).sendFileTrackingResumeEvent();
     verify(refactoringUpdater).handleMovingFiles(anyList());
     verify(refactoringUpdater).updateAfterRefactoring(anyList());
-    verify(view).hide();
+    verify(view).close();
   }
 
   @Test
@@ -179,7 +179,7 @@ public class PreviewPresenterTest {
     refactoringStatusOperation.getValue().apply(refactoringStatus);
     verify(clientServerEventService).sendFileTrackingResumeEvent();
     verify(refactoringUpdater).handleMovingFiles(anyList());
-    verify(view, never()).hide();
+    verify(view, never()).close();
     verify(editor, never()).getEditorInput();
     verify(editorInput, never()).getFile();
     verify(virtualFile, never()).getLocation();
@@ -195,7 +195,7 @@ public class PreviewPresenterTest {
     presenter.show(SESSION_ID, refactorInfo);
     presenter.onBackButtonClicked();
 
-    verify(view).hide();
+    verify(view).close();
     verify(movePresenter).show(refactorInfo);
   }
 
@@ -208,7 +208,7 @@ public class PreviewPresenterTest {
     presenter.show(SESSION_ID, refactorInfo);
     presenter.onBackButtonClicked();
 
-    verify(view).hide();
+    verify(view).close();
     verify(renamePresenter).show(refactorInfo);
   }
 

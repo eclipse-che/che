@@ -14,10 +14,6 @@ import static org.eclipse.che.ide.ext.java.client.refactoring.move.MoveType.REFA
 import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType.COMPILATION_UNIT;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTree;
@@ -29,7 +25,6 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -95,53 +90,29 @@ final class MoveViewImpl extends Window implements MoveView {
 
     createButtons(locale);
 
-    updateFullNames.addValueChangeHandler(
-        new ValueChangeHandler<Boolean>() {
-          @Override
-          public void onValueChange(ValueChangeEvent<Boolean> event) {
-            patternField.setEnabled(event.getValue());
-          }
-        });
+    updateFullNames.addValueChangeHandler(event -> patternField.setEnabled(event.getValue()));
   }
 
   private void createButtons(JavaLocalizationConstant locale) {
     preview =
-        createButton(
+        addFooterButton(
             locale.moveDialogButtonPreview(),
             "move-preview-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onPreviewButtonClicked();
-              }
-            });
+            event -> delegate.onPreviewButtonClicked());
 
-    Button cancel =
-        createButton(
-            locale.moveDialogButtonCancel(),
-            "move-cancel-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                hide();
-                delegate.onCancelButtonClicked();
-              }
-            });
+    addFooterButton(
+        locale.moveDialogButtonCancel(),
+        "move-cancel-button",
+        event -> {
+          hide();
+          delegate.onCancelButtonClicked();
+        });
 
     accept =
-        createButton(
+        addFooterButton(
             locale.moveDialogButtonOk(),
             "move-accept-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onAcceptButtonClicked();
-              }
-            });
-
-    addButtonToFooter(accept);
-    addButtonToFooter(cancel);
-    addButtonToFooter(preview);
+            event -> delegate.onAcceptButtonClicked());
   }
 
   /** {@inheritDoc} */
@@ -177,6 +148,11 @@ final class MoveViewImpl extends Window implements MoveView {
     show();
   }
 
+  @Override
+  public void close() {
+    hide();
+  }
+
   /** {@inheritDoc} */
   @Override
   public void clearErrorLabel() {
@@ -188,25 +164,21 @@ final class MoveViewImpl extends Window implements MoveView {
   public void setTreeOfDestinations(RefactorInfo refactorInfo, List<JavaProject> projects) {
     final SingleSelectionModel<Object> selectionModel = new SingleSelectionModel<>();
     selectionModel.addSelectionChangeHandler(
-        new SelectionChangeEvent.Handler() {
-          @Override
-          public void onSelectionChange(SelectionChangeEvent event) {
-            Object object = selectionModel.getSelectedObject();
+        event -> {
+          Object object = selectionModel.getSelectedObject();
 
-            if (object instanceof JavaProject) {
-              JavaProject project = (JavaProject) object;
-              delegate.setMoveDestinationPath(project.getPath(), project.getPath());
-            }
-            if (object instanceof PackageFragmentRoot) {
-              PackageFragmentRoot fragmentRoot = (PackageFragmentRoot) object;
-              delegate.setMoveDestinationPath(
-                  fragmentRoot.getPath(), fragmentRoot.getProjectPath());
-            }
+          if (object instanceof JavaProject) {
+            JavaProject project = (JavaProject) object;
+            delegate.setMoveDestinationPath(project.getPath(), project.getPath());
+          }
+          if (object instanceof PackageFragmentRoot) {
+            PackageFragmentRoot fragmentRoot = (PackageFragmentRoot) object;
+            delegate.setMoveDestinationPath(fragmentRoot.getPath(), fragmentRoot.getProjectPath());
+          }
 
-            if (object instanceof PackageFragment) {
-              PackageFragment fragment = (PackageFragment) object;
-              delegate.setMoveDestinationPath(fragment.getPath(), fragment.getProjectPath());
-            }
+          if (object instanceof PackageFragment) {
+            PackageFragment fragment = (PackageFragment) object;
+            delegate.setMoveDestinationPath(fragment.getPath(), fragment.getProjectPath());
           }
         });
     CellTree tree =
