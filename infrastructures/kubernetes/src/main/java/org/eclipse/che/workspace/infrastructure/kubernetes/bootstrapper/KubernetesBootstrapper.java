@@ -94,10 +94,11 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
             + kubernetesMachine.getName()
             + " -runtime-id "
             + String.format(
-                "%s:%s:%s",
+                "%s:%s:%s:%s",
                 runtimeIdentity.getWorkspaceId(),
                 runtimeIdentity.getEnvName(),
-                runtimeIdentity.getOwner())
+                runtimeIdentity.getOwnerName(),
+                runtimeIdentity.getOwnerId())
             + " -push-endpoint "
             + installerWebsocketEndpoint
             + " -push-logs-endpoint "

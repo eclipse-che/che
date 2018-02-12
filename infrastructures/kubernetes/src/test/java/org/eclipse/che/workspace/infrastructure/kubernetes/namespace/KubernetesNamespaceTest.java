@@ -68,6 +68,7 @@ public class KubernetesNamespaceTest {
   @BeforeMethod
   public void setUp() throws Exception {
     when(clientFactory.create()).thenReturn(kubernetesClient);
+    when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
 
     doReturn(namespaceOperation).when(kubernetesClient).namespaces();
 

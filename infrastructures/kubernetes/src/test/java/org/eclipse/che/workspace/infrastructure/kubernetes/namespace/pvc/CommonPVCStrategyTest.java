@@ -81,7 +81,7 @@ public class CommonPVCStrategyTest {
   private static final String[] WORKSPACE_SUBPATHS = {"/projects", "/logs"};
 
   private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "usr1");
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "usr1", "id1");
 
   @Mock private Pod pod;
   @Mock private Pod pod2;

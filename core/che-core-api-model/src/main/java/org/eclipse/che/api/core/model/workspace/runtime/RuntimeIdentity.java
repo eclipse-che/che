@@ -16,5 +16,7 @@ public interface RuntimeIdentity {
 
   String getEnvName();
 
-  String getOwner();
+  String getOwnerName();
+
+  String getOwnerId();
 }

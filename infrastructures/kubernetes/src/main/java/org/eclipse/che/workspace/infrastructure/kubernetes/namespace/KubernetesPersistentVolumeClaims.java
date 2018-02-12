@@ -28,11 +28,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFacto
  */
 public class KubernetesPersistentVolumeClaims {
   private final String namespace;
+  private final String workspaceId;
   private final KubernetesClientFactory clientFactory;
 
-  KubernetesPersistentVolumeClaims(String namespace, KubernetesClientFactory clientFactory) {
+  KubernetesPersistentVolumeClaims(
+      String namespace, String workspaceId, KubernetesClientFactory clientFactory) {
     this.namespace = namespace;
     this.clientFactory = clientFactory;
+    this.workspaceId = workspaceId;
   }
 
   /**
@@ -44,7 +47,11 @@ public class KubernetesPersistentVolumeClaims {
    */
   public PersistentVolumeClaim create(PersistentVolumeClaim pvc) throws InfrastructureException {
     try {
-      return clientFactory.create().persistentVolumeClaims().inNamespace(namespace).create(pvc);
+      return clientFactory
+          .create(workspaceId)
+          .persistentVolumeClaims()
+          .inNamespace(namespace)
+          .create(pvc);
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
@@ -58,7 +65,7 @@ public class KubernetesPersistentVolumeClaims {
   public List<PersistentVolumeClaim> get() throws InfrastructureException {
     try {
       return clientFactory
-          .create()
+          .create(workspaceId)
           .persistentVolumeClaims()
           .inNamespace(namespace)
           .list()
@@ -80,7 +87,7 @@ public class KubernetesPersistentVolumeClaims {
       throws InfrastructureException {
     try {
       return clientFactory
-          .create()
+          .create(workspaceId)
           .persistentVolumeClaims()
           .inNamespace(namespace)
           .withLabel(labelName, labelValue)

@@ -48,7 +48,7 @@ public class KubernetesServices {
     putLabel(service, CHE_WORKSPACE_ID_LABEL, workspaceId);
     putSelector(service, CHE_WORKSPACE_ID_LABEL, workspaceId);
     try {
-      return clientFactory.create().services().inNamespace(namespace).create(service);
+      return clientFactory.create(workspaceId).services().inNamespace(namespace).create(service);
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
@@ -62,7 +62,7 @@ public class KubernetesServices {
   public List<Service> get() throws InfrastructureException {
     try {
       return clientFactory
-          .create()
+          .create(workspaceId)
           .services()
           .inNamespace(namespace)
           .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
@@ -81,7 +81,7 @@ public class KubernetesServices {
   public void delete() throws InfrastructureException {
     try {
       clientFactory
-          .create()
+          .create(workspaceId)
           .services()
           .inNamespace(namespace)
           .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
