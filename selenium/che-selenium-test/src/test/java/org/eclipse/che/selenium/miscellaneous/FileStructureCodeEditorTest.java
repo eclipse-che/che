@@ -74,9 +74,8 @@ public class FileStructureCodeEditorTest {
     // check the highlighted item in editor
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
-    fileStructure.selectItemInFileStructureByDoubleClick("getInstance() : Company");
+    fileStructure.selectItemInFileStructureByDoubleClick("getInstance()");
     fileStructure.waitFileStructureFormIsClosed();
-    editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.waitTextElementsActiveLine("getInstance");
     editor.waitSpecifiedValueForLineAndChar(41, 27);
 
@@ -85,16 +84,13 @@ public class FileStructureCodeEditorTest {
     fileStructure.selectItemInFileStructure("INSTANCE");
     fileStructure.selectItemInFileStructureByEnter("INSTANCE");
     fileStructure.waitFileStructureFormIsClosed();
-    editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.waitTextElementsActiveLine("INSTANCE");
     editor.waitSpecifiedValueForLineAndChar(25, 38);
 
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
-    fileStructure.selectItemInFileStructure("getId() : double");
-    fileStructure.selectItemInFileStructureByEnter("getId() : double");
+    fileStructure.selectItemInFileStructureByEnter("getId()");
     fileStructure.waitFileStructureFormIsClosed();
-    editor.typeTextIntoEditor(Keys.ARROW_LEFT.toString());
     editor.waitTextElementsActiveLine("getId");
     editor.waitSpecifiedValueForLineAndChar(37, 23);
 
