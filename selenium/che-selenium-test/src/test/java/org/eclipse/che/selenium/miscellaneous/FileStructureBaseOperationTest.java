@@ -36,9 +36,7 @@ public class FileStructureBaseOperationTest {
   private static final String PROJECT_NAME = generate("project", 4);
 
   private static final String CLASS_MEMBERS_1 =
-      "AppController\n"
-          + "handleRequest(HttpServletRequest, HttpServletResponse) : ModelAndView\n"
-          + "secretNum";
+      "AppController\n" + "secretNum\n" + "handleRequest(HttpServletRequest, HttpServletResponse)";
 
   private static final String CLASS_MEMBERS_2 =
       "AppController\n"
