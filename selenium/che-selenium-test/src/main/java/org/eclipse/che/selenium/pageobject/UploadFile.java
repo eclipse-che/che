@@ -34,7 +34,7 @@ public class UploadFile {
   }
 
   private interface Locators {
-    String FILE_UPLOAD_FORM = "//div[text()='Upload File']/ancestor::div[3]";
+    String FILE_UPLOAD_FORM = "//table[@title='Upload File']";
     String UPLOAD_FILE_BUTTON = "file-uploadFile-upload";
     String UPLOAD_FILE_CANCEL = "file-uploadFile-cancel";
     String UPLOAD_SELECT_FILE = "gwt-debug-file-uploadFile-ChooseFile";

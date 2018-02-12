@@ -33,7 +33,7 @@ public class SimilarNamesConfigurationPresenterTest {
   public void windowShouldBeShow() throws Exception {
     presenter.show();
 
-    verify(view).show();
+    verify(view).showDialog();
   }
 
   @Test

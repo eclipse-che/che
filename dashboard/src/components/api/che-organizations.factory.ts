@@ -10,6 +10,11 @@
  */
 'use strict';
 
+import {CheUser} from './che-user.factory';
+import {CheNamespaceRegistry} from './namespace/che-namespace-registry.factory';
+import {CheResourcesDistribution} from './che-resources-distribution.factory';
+import {ChePageObject} from './paging-resource/page-object.factory';
+
 interface IOrganizationsResource<T> extends ng.resource.IResourceClass<T> {
   findOrganization(data: { name: string }): ng.resource.IResource<T>;
   createOrganization(data: { name: string, parent?: string }): ng.resource.IResource<T>;
@@ -36,7 +41,7 @@ export class CheOrganization implements che.api.ICheOrganization {
   /**
    * Factory for PageObjectResource.
    */
-  private chePageObject: any;
+  private chePageObject: ChePageObject;
   /**
    * Current user organization map by organization's id.
    */
@@ -58,11 +63,23 @@ export class CheOrganization implements che.api.ICheOrganization {
    */
   private remoteOrganizationAPI: IOrganizationsResource<any>;
   /**
+   * The namespace registry.
+   */
+  private cheNamespaceRegistry: CheNamespaceRegistry;
+  /**
+   * Organization resources management API.
+   */
+  private cheResourcesDistribution: CheResourcesDistribution;
+  /**
+   * Resource limits types.
+   */
+  private resourceLimits: che.resource.ICheResourceLimits;
+  /**
    * Organizations map by parent organization's id.
    */
   private subOrganizationsMap: Map<string, Array<che.IOrganization>> = new Map();
 
-  private cheUser: any;
+  private cheUser: CheUser;
 
   private pageInfo: che.IPageInfo;
 
@@ -72,13 +89,23 @@ export class CheOrganization implements che.api.ICheOrganization {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($resource: ng.resource.IResourceService, $q: ng.IQService, cheUser: any, lodash: any, chePageObject: any, resourcesService: che.service.IResourcesService) {
+  constructor($resource: ng.resource.IResourceService,
+              $q: ng.IQService,
+              cheUser: CheUser,
+              lodash: any,
+              chePageObject: ChePageObject,
+              resourcesService: che.service.IResourcesService,
+              cheNamespaceRegistry: CheNamespaceRegistry,
+              cheResourcesDistribution: CheResourcesDistribution) {
     this.chePageObject = chePageObject;
     this.$resource = $resource;
     this.cheUser = cheUser;
     this.lodash = lodash;
     this.$q = $q;
     this.organizationRoles = resourcesService.getOrganizationRoles();
+    this.cheNamespaceRegistry = cheNamespaceRegistry;
+    this.cheResourcesDistribution = cheResourcesDistribution;
+    this.resourceLimits = resourcesService.getResourceLimits();
 
     this.remoteOrganizationAPI = <IOrganizationsResource<any>>$resource(MAIN_URL, {}, {
       fetchOrganization: {method: 'GET', url: MAIN_URL + '/:id'},
@@ -93,54 +120,49 @@ export class CheOrganization implements che.api.ICheOrganization {
   /**
    * Requests organization by it's name.
    *
-   * @param name the organization's name
-   * @returns {ng.IPromise<any>} result promise
+   * @param {string} name the organization's name
+   * @returns {ng.IPromise<che.IOrganization>} result promise
    */
-  fetchOrganizationByName(name: string): ng.IPromise<any> {
-    let promise = this.remoteOrganizationAPI.findOrganization({'name' : name}).$promise;
-    let resultPromise = promise.then((organization: che.IOrganization) => {
+  fetchOrganizationByName(name: string): ng.IPromise<che.IOrganization> {
+    return this.remoteOrganizationAPI.findOrganization({'name' : name}).$promise.then((organization: che.IOrganization) => {
       this.organizationByNameMap.set(organization.qualifiedName, organization);
-      return organization;
+      this.organizationsByIdMap.set(organization.id, organization);
+      return this.$q.when(organization);
     }, (error: any) => {
       if (error && error.status === 304) {
-        return this.getOrganizationByName(name);
+        return this.$q.when(this.getOrganizationByName(name));
       }
       return this.$q.reject(error);
     });
-
-    return resultPromise;
   }
 
   /**
    * Request the list of available organizations with the same parent id.
    *
    * @param id {string} parent organization's id
-   * @returns {ng.IPromise<any>}
+   * @returns {ng.IPromise<Array<che.IOrganization>>}
    */
-  fetchSubOrganizationsById(id: string): ng.IPromise<any> {
-    let data = {'id': id};
-    let promise = this.remoteOrganizationAPI.fetchSubOrganizations(data).$promise;
-    let resultPromise = promise.then((organizations: Array<che.IOrganization>) => {
+  fetchSubOrganizationsById(id: string): ng.IPromise<Array<che.IOrganization>> {
+    const data = {'id': id};
+    return this.remoteOrganizationAPI.fetchSubOrganizations(data).$promise.then((organizations: Array<che.IOrganization>) => {
       this.subOrganizationsMap.set(id, organizations);
-      return organizations;
+      return this.$q.when(organizations);
     }, (error: any) => {
       if (error && error.status === 304) {
-        return this.subOrganizationsMap.get(id);
+        return this.$q.when(this.subOrganizationsMap.get(id));
       }
       return this.$q.reject(error);
     });
-
-    return resultPromise;
   }
 
   /**
    * Request the list of current user organizations for the first page.
    *
-   * @returns {ng.IPromise<any>}
+   * @returns {ng.IPromise<Array<che.IOrganization>>}
    */
-  fetchOrganizations(maxItems?: number): ng.IPromise<any> {
-    let userDeferred = this.$q.defer();
-    let user: che.IUser = this.cheUser.getUser();
+  fetchOrganizations(maxItems?: number): ng.IPromise<Array<che.IOrganization>> {
+    const userDeferred = this.$q.defer();
+    const user: che.IUser = this.cheUser.getUser();
     if (angular.isUndefined(user)) {
       this.cheUser.fetchUser().then((user: che.IUser) => {
         userDeferred.resolve(user);
@@ -154,8 +176,14 @@ export class CheOrganization implements che.api.ICheOrganization {
     return userDeferred.promise.then((user: che.IUser) => {
       let userOrganizationsPageObject = this._getUserOrganizationPage(user.id);
       return this.fetchUserOrganizations(user.id, maxItems).then((organizations: Array<che.IOrganization>) => {
+        this.organizationByNameMap.clear();
+        this.organizationsByIdMap.clear();
+
         this.pageInfo = userOrganizationsPageObject.getPagesInfo();
         this._updateCurrentUserOrganizations(organizations);
+        if (!this.getPersonalAccount()) {
+          this.updateNamespaces();
+        }
         return this.$q.when(organizations);
       });
     });
@@ -193,15 +221,15 @@ export class CheOrganization implements che.api.ICheOrganization {
    * Request the list of available organizations for an user.
    * @param userId {string}
    * @param maxItems {number}
-   * @returns {ng.IPromise<any>}
+   * @returns {ng.IPromise<Array<che.IOrganization>>}
    */
-  fetchUserOrganizations(userId: string, maxItems?: number): ng.IPromise<any> {
+  fetchUserOrganizations(userId: string, maxItems?: number): ng.IPromise<Array<che.IOrganization>> {
     let userOrganizationsPageObject = this._getUserOrganizationPage(userId);
 
     let promise = userOrganizationsPageObject.fetchObjects(maxItems);
 
     return promise.then((organizations: Array<che.IOrganization>) => {
-      return organizations;
+      return this.$q.when(organizations);
     }, (error: any) => {
         return this.$q.reject(error);
     });
@@ -224,7 +252,7 @@ export class CheOrganization implements che.api.ICheOrganization {
    * @param userId {string}
    * @returns {Array<any>} the array of organizations
    */
-  getUserOrganizations(userId: string): Array<any> {
+  getUserOrganizations(userId: string): Array<che.IOrganization> {
     let userOrganizationsPageObject = this._getUserOrganizationPage(userId);
 
     return userOrganizationsPageObject.getPageObjects();
@@ -286,9 +314,9 @@ export class CheOrganization implements che.api.ICheOrganization {
   /**
    * Returns the array of current user organizations.
    *
-   * @returns {Array<any>} the array of organizations
+   * @returns {Array<che.IOrganization>} the array of organizations
    */
-  getOrganizations(): Array<any> {
+  getOrganizations(): Array<che.IOrganization> {
     return this.currentUserOrganizations;
   }
 
@@ -296,17 +324,17 @@ export class CheOrganization implements che.api.ICheOrganization {
    * Requests organization by it's id.
    *
    * @param id the organization's Id
-   * @returns {ng.IPromise<any>} result promise
+   * @returns {ng.IPromise<che.IOrganization>} result promise
    */
-  fetchOrganizationById(id: string): ng.IPromise<any> {
-    let data = {'id': id};
-    let promise = this.remoteOrganizationAPI.fetchOrganization(data).$promise;
-    return promise.then((organization: che.IOrganization) => {
+  fetchOrganizationById(id: string): ng.IPromise<che.IOrganization> {
+    const data = {'id': id};
+    return this.remoteOrganizationAPI.fetchOrganization(data).$promise.then((organization: che.IOrganization) => {
       this.organizationsByIdMap.set(id, organization);
-      return organization;
+      this.organizationByNameMap.set(organization.qualifiedName, organization);
+      return this.$q.when(organization);
     }, (error: any) => {
       if (error.status === 304) {
-        return this.organizationsByIdMap.get(id);
+        return this.$q.when(this.organizationsByIdMap.get(id));
       }
       return this.$q.reject();
     });
@@ -316,7 +344,7 @@ export class CheOrganization implements che.api.ICheOrganization {
    * Returns organization by it's id.
    *
    * @param id {string} organization's id
-   * @returns {any} organization or <code>null</code> if not found
+   * @returns {che.IOrganization} organization or <code>null</code> if not found
    */
   getOrganizationById(id: string): che.IOrganization {
     return this.organizationsByIdMap.get(id);
@@ -326,7 +354,7 @@ export class CheOrganization implements che.api.ICheOrganization {
    * Returns organization by it's name.
    *
    * @param name {string} organization's name
-   * @returns {any} organization or <code>null</code> if not found
+   * @returns {che.IOrganization} organization or <code>null</code> if not found
    */
   getOrganizationByName(name: string): che.IOrganization {
     return this.organizationByNameMap.get(name);
@@ -357,12 +385,22 @@ export class CheOrganization implements che.api.ICheOrganization {
     let promise = this.remoteOrganizationAPI.deleteOrganization({'id': id}).$promise;
 
     return promise.then(() => {
-      if (this.organizationsByIdMap.has(id)) {
-        const {qualifiedName} = this.organizationsByIdMap.get(id);
-        this.organizationsByIdMap.delete(id);
-        if (this.organizationByNameMap.has(qualifiedName)) {
-          this.organizationByNameMap.delete(qualifiedName);
+      const organization = this.organizationsByIdMap.get(id);
+
+      if (organization) {
+        // get list of sub-organizations to delete
+        const toDelete = this.getChildren(organization);
+
+        toDelete.push(organization);
+
+        while (toDelete.length !== 0) {
+          const _organization = toDelete.pop();
+
+          this.organizationsByIdMap.delete(_organization.id);
+          this.organizationByNameMap.delete(_organization.qualifiedName);
         }
+
+        this.updateNamespaces();
       }
       return this.$q.when();
     });
@@ -375,19 +413,7 @@ export class CheOrganization implements che.api.ICheOrganization {
    * @returns {ng.IPromise<any>} result promise
    */
   updateOrganization(organization: che.IOrganization): ng.IPromise<any> {
-    let promise = this.remoteOrganizationAPI.updateOrganization({'id': organization.id}, organization).$promise;
-
-    return promise.then((organization: che.IOrganization) => {
-      if (organization) {
-        if (this.organizationsByIdMap.has(organization.id)) {
-          this.organizationsByIdMap.set(organization.id, organization);
-        }
-        if (this.organizationByNameMap.has(organization.qualifiedName)) {
-          this.organizationByNameMap.set(organization.qualifiedName, organization);
-        }
-      }
-      return organization;
-    });
+    return this.remoteOrganizationAPI.updateOrganization({'id': organization.id}, organization).$promise;
   }
 
   /**
@@ -448,4 +474,69 @@ export class CheOrganization implements che.api.ICheOrganization {
 
     return actions;
   }
+
+  getPersonalAccount(): che.IOrganization {
+    const user = this.cheUser.getUser();
+
+    // detection personal account (organization which name equals to current user's name):
+    return user ? this.organizationByNameMap.get(user.name) : null;
+  }
+
+  updateNamespaces(): void {
+    this.cheNamespaceRegistry.getNamespaces().length = 0;
+
+    this.cheNamespaceRegistry.setCaption('Organization');
+    // todo add back, when API is ready: this.cheNamespaceRegistry.setEmptyMessage('You are not member of any organization and not able to create workspace. Please, contact your administrator.');
+    this.processOrganizationInfoRetriever();
+
+    this.organizationByNameMap.forEach((organization: che.IOrganization) => {
+      this.cheNamespaceRegistry.getNamespaces().push({
+        id: organization.qualifiedName,
+        label: organization.qualifiedName,
+        location: '/organization/' + organization.qualifiedName
+      });
+    });
+  }
+
+  /**
+   * Process organization information retriever.
+   */
+  processOrganizationInfoRetriever(): void {
+    this.cheNamespaceRegistry.setGetAdditionalInfo((namespaceId: string) => {
+      const organization = this.organizationByNameMap.get(namespaceId);
+
+      if (!organization) {
+        return null;
+      }
+
+      return this.cheResourcesDistribution.fetchAvailableOrganizationResources(organization.id).then(() => {
+        let resource = this.cheResourcesDistribution.getOrganizationAvailableResourceByType(organization.id, this.resourceLimits.RAM);
+        if (resource.amount === -1) {
+          return 'RAM is not limited'
+        }
+
+        return resource ? 'Available RAM: ' + (resource.amount / 1024) + 'GB' : null;
+      });
+    });
+  }
+
+  /**
+   * Returns list of sub-organization for an organization.
+   *
+   * @param {che.IOrganization} parent
+   * @returns {Array<che.IOrganization>}
+   */
+  private getChildren(parent: che.IOrganization): Array<che.IOrganization> {
+    const children: Array<che.IOrganization> = [];
+
+    this.organizationsByIdMap.forEach((organization: che.IOrganization) => {
+      const prefixRE = new RegExp('^' + parent.qualifiedName + '/');
+      if (prefixRE.test(organization.qualifiedName)) {
+        children.push(organization);
+      }
+    });
+
+    return children;
+  }
+
 }

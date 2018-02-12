@@ -12,8 +12,7 @@ package org.eclipse.che.ide.ext.help.client.about;
 
 import static java.util.Objects.nonNull;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -66,18 +65,7 @@ public class AboutViewImpl extends Window implements AboutView {
     this.ensureDebugId("aboutView-window");
 
     btnOk =
-        createButton(
-            coreLocale.ok(),
-            "help-about-ok",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onOkClicked();
-              }
-            });
-    btnOk.addStyleName(resources.windowCss().primaryButton());
-    addButtonToFooter(btnOk);
+        addFooterButton(coreLocale.ok(), "help-about-ok", event -> delegate.onOkClicked(), true);
 
     final SVGResource logo = productInfoDataProvider.getLogo();
     if (nonNull(logo)) {
@@ -104,7 +92,7 @@ public class AboutViewImpl extends Window implements AboutView {
   }
 
   @Override
-  protected void onEnterClicked() {
+  public void onEnterPress(NativeEvent evt) {
     delegate.onOkClicked();
   }
 

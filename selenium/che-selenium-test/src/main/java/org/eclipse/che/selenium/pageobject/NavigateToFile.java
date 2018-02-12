@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.Keys.ALT;
@@ -31,7 +30,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** Created by aleksandr shmaraev on 12.12.14. */
@@ -41,13 +39,18 @@ public class NavigateToFile {
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
   private final ActionsFactory actionsFactory;
+  private final TestWebElementRenderChecker testWebElementRenderChecker;
 
   @Inject
   public NavigateToFile(
-      SeleniumWebDriver seleniumWebDriver, Loader loader, ActionsFactory actionsFactory) {
+      SeleniumWebDriver seleniumWebDriver,
+      Loader loader,
+      ActionsFactory actionsFactory,
+      TestWebElementRenderChecker testWebElementRenderChecker) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
+    this.testWebElementRenderChecker = testWebElementRenderChecker;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -112,12 +115,6 @@ public class NavigateToFile {
     fileNameInput.sendKeys(symbol);
   }
 
-  /** wait appearance of the dropdawn list (may be empty) */
-  public void waitFileNamePopUp() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(visibilityOf(suggestionPanel));
-  }
-
   /**
    * wait expected text in the dropdawn list of the widget
    *
@@ -127,13 +124,8 @@ public class NavigateToFile {
     return suggestionPanel.getText().contains(text);
   }
 
-  public void waitSuggestedPanelIsDisplayed() {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                webDriver -> {
-                  return suggestionPanel.isDisplayed();
-                });
+  public void waitSuggestedPanel() {
+    testWebElementRenderChecker.waitElementIsRendered(suggestionPanel);
   }
 
   public String getText() {

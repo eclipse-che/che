@@ -11,10 +11,6 @@
 package org.eclipse.che.plugin.ssh.key.client.upload;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -63,46 +59,17 @@ public class UploadSshKeyViewImpl extends Window implements UploadSshKeyView {
     this.setTitle(locale.uploadSshKeyViewTitle());
     this.setWidget(widget);
 
-    uploadForm.addSubmitCompleteHandler(
-        new FormPanel.SubmitCompleteHandler() {
-          @Override
-          public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-            delegate.onSubmitComplete(event.getResults());
-          }
-        });
+    uploadForm.addSubmitCompleteHandler(event -> delegate.onSubmitComplete(event.getResults()));
 
-    file.addChangeHandler(
-        new ChangeHandler() {
-          @Override
-          public void onChange(ChangeEvent event) {
-            delegate.onFileNameChanged();
-          }
-        });
+    file.addChangeHandler(event -> delegate.onFileNameChanged());
 
     btnCancel =
-        createButton(
-            locale.cancelButton(),
-            "sshKeys-cancel",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-              }
-            });
-    addButtonToFooter(btnCancel);
+        addFooterButton(
+            locale.cancelButton(), "sshKeys-cancel", event -> delegate.onCancelClicked());
 
     btnUpload =
-        createButton(
-            locale.uploadButton(),
-            "sshKeys-upload",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onUploadClicked();
-              }
-            });
-    addButtonToFooter(btnUpload);
+        addFooterButton(
+            locale.uploadButton(), "sshKeys-upload", event -> delegate.onUploadClicked());
   }
 
   /** {@inheritDoc} */
@@ -160,8 +127,12 @@ public class UploadSshKeyViewImpl extends Window implements UploadSshKeyView {
   /** {@inheritDoc} */
   @Override
   public void showDialog() {
+    show();
+  }
+
+  @Override
+  protected void onShow() {
     uploadForm.reset();
-    this.show();
   }
 
   /** {@inheritDoc} */
@@ -174,11 +145,5 @@ public class UploadSshKeyViewImpl extends Window implements UploadSshKeyView {
   @Override
   public void setDelegate(ActionDelegate delegate) {
     this.delegate = delegate;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  protected void onClose() {
-    hide();
   }
 }

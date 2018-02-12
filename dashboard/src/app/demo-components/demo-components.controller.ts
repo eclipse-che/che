@@ -15,7 +15,10 @@ import {
   ICheButtonDropdownOtherAction
 } from '../../components/widget/button-dropdown/che-button-dropdown.directive';
 
-enum Tab {Font, Panel, Selecter, Icons, Dropdown_button, Buttons, Input, List, Label_container, Stack_selector, Popover}
+import {ICheEditModeOverlayConfig} from '../../components/widget/edit-mode-overlay/che-edit-mode-overlay.directive';
+import {CheNotification} from '../../components/notification/che-notification.factory';
+
+enum Tab {Font, Panel, Selecter, Icons, Dropdown_button,  Buttons, Input, List, Label_container, Stack_selector, Popover, Edit_mode_overlay}
 
 /**
  * This class is handling the controller for the demo of components
@@ -24,6 +27,7 @@ enum Tab {Font, Panel, Selecter, Icons, Dropdown_button, Buttons, Input, List, L
 export class DemoComponentsController {
 
   $location: ng.ILocationService;
+  cheNotification: CheNotification;
   selectedIndex: number;
   tab: Object = Tab;
 
@@ -48,12 +52,16 @@ export class DemoComponentsController {
     otherActions: Array<ICheButtonDropdownOtherAction>;
   };
 
+  overlayConfig: ICheEditModeOverlayConfig;
+
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService) {
+  constructor($location: ng.ILocationService,
+              cheNotification: CheNotification) {
     this.$location = $location;
+    this.cheNotification = cheNotification;
 
     const tab = $location.search().tab;
     if (Tab[tab]) {
@@ -114,6 +122,34 @@ export class DemoComponentsController {
     // number spinner
     this.number = 0;
     this.numberIsChanged = 0;
+
+    // edit-mode config
+    this.overlayConfig = {
+      visible: true,
+      disabled: false,
+      message: {
+        content: `Information message`,
+        visible: true
+      },
+      applyButton: {
+        action: () => {
+          this.cheNotification.showInfo(`Button 'Apply' was clicked.`);
+        },
+        disabled: false
+      },
+      saveButton: {
+        action: () => {
+          this.cheNotification.showInfo(`Button 'Save' was clicked.`);
+        },
+        disabled: false
+      },
+      cancelButton: {
+        action: () => {
+          this.cheNotification.showInfo(`Button 'Cancel' was clicked.`);
+        },
+        disabled: false
+      }
+    };
   }
 
   /**

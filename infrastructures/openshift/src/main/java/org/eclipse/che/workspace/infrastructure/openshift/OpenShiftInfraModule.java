@@ -10,27 +10,32 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
-import static org.eclipse.che.workspace.infrastructure.openshift.project.pvc.CommonPVCStrategy.COMMON_STRATEGY;
-import static org.eclipse.che.workspace.infrastructure.openshift.project.pvc.UniqueWorkspacePVCStrategy.UNIQUE_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy.UNIQUE_STRATEGY;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.bootstrapper.OpenShiftBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspacePVCCleaner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumeStrategyProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiEnvVarProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.RemoveProjectOnWorkspaceRemove;
-import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.CommonPVCStrategy;
-import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.UniqueWorkspacePVCStrategy;
-import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspacePVCCleaner;
-import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspaceVolumeStrategyProvider;
-import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspaceVolumesStrategy;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftCheApiEnvVarProvider;
 
 /** @author Sergii Leshchenko */
 public class OpenShiftInfraModule extends AbstractModule {
@@ -44,18 +49,25 @@ public class OpenShiftInfraModule extends AbstractModule {
 
     bind(RuntimeInfrastructure.class).to(OpenShiftInfrastructure.class);
 
+    bind(KubernetesNamespaceFactory.class).to(OpenShiftProjectFactory.class);
+
     install(new FactoryModuleBuilder().build(OpenShiftRuntimeContextFactory.class));
     install(new FactoryModuleBuilder().build(OpenShiftRuntimeFactory.class));
-    install(new FactoryModuleBuilder().build(OpenShiftBootstrapperFactory.class));
+
+    install(new FactoryModuleBuilder().build(KubernetesBootstrapperFactory.class));
     bind(WorkspacePVCCleaner.class).asEagerSingleton();
     bind(RemoveProjectOnWorkspaceRemove.class).asEagerSingleton();
 
-    bind(CheApiEnvVarProvider.class).to(OpenShiftCheApiEnvVarProvider.class);
+    bind(CheApiEnvVarProvider.class).to(KubernetesCheApiEnvVarProvider.class);
 
     MapBinder<String, WorkspaceVolumesStrategy> volumesStrategies =
         MapBinder.newMapBinder(binder(), String.class, WorkspaceVolumesStrategy.class);
     volumesStrategies.addBinding(COMMON_STRATEGY).to(CommonPVCStrategy.class);
     volumesStrategies.addBinding(UNIQUE_STRATEGY).to(UniqueWorkspacePVCStrategy.class);
     bind(WorkspaceVolumesStrategy.class).toProvider(WorkspaceVolumeStrategyProvider.class);
+
+    Multibinder<EnvVarProvider> envVarProviders =
+        Multibinder.newSetBinder(binder(), EnvVarProvider.class);
+    envVarProviders.addBinding().to(LogsRootEnvVariableProvider.class);
   }
 }

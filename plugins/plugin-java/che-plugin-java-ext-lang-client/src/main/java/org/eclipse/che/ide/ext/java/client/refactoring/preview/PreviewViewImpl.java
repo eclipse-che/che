@@ -21,7 +21,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -101,30 +100,23 @@ final class PreviewViewImpl extends Window implements PreviewView {
 
     setWidget(UI_BINDER.createAndBindUi(this));
 
-    Button backButton =
-        createButton(
-            locale.moveDialogButtonBack(),
-            "preview-back-button",
-            event -> delegate.onBackButtonClicked());
+    addFooterButton(
+        locale.moveDialogButtonBack(),
+        "preview-back-button",
+        event -> delegate.onBackButtonClicked());
 
-    Button cancelButton =
-        createButton(
-            locale.moveDialogButtonCancel(),
-            "preview-cancel-button",
-            event -> {
-              hide();
-              delegate.onCancelButtonClicked();
-            });
+    addFooterButton(
+        locale.moveDialogButtonCancel(),
+        "preview-cancel-button",
+        event -> {
+          hide();
+          delegate.onCancelButtonClicked();
+        });
 
-    Button acceptButton =
-        createButton(
-            locale.moveDialogButtonOk(),
-            "preview-ok-button",
-            event -> delegate.onAcceptButtonClicked());
-
-    addButtonToFooter(acceptButton);
-    addButtonToFooter(cancelButton);
-    addButtonToFooter(backButton);
+    addFooterButton(
+        locale.moveDialogButtonOk(),
+        "preview-ok-button",
+        event -> delegate.onAcceptButtonClicked());
 
     diff.getElement().setId("compareParentDiv");
     showDiff(null);
@@ -138,22 +130,32 @@ final class PreviewViewImpl extends Window implements PreviewView {
 
   /** {@inheritDoc} */
   @Override
-  public void show() {
+  public void showDialog() {
+    show();
+  }
+
+  @Override
+  public void close() {
+    hide();
+  }
+
+  @Override
+  protected void onShow() {
     errorLabel.setText("");
     diff.clear();
     compare = null;
     treePanel.clear();
     containerChanges.clear();
-
-    super.show();
   }
 
-  /** {@inheritDoc} */
   @Override
-  protected void onClose() {
-    delegate.onCancelButtonClicked();
+  public void setTitleCaption(String title) {
+    setTitle(title);
+  }
 
-    super.onClose();
+  @Override
+  protected void onHide() {
+    delegate.onCancelButtonClicked();
   }
 
   /** {@inheritDoc} */

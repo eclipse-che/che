@@ -15,10 +15,6 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -57,11 +53,7 @@ public class HotKeysDialogViewImpl extends Window implements HotKeysDialogView {
   private final HotKeyResources hotKeyResources;
 
   private final Category.CategoryEventDelegate<HotKeyItem> keyBindingsEventDelegate =
-      new Category.CategoryEventDelegate<HotKeyItem>() {
-
-        @Override
-        public void onListItemClicked(Element listItemBase, HotKeyItem hotKeyItem) {}
-      };
+      (listItemBase, hotKeyItem) -> {};
 
   private final CategoryRenderer<HotKeyItem> keyBindingsRenderer =
       new CategoryRenderer<HotKeyItem>() {
@@ -122,53 +114,22 @@ public class HotKeysDialogViewImpl extends Window implements HotKeysDialogView {
     this.setWidget(uiBinder.createAndBindUi(this));
 
     saveButton =
-        createButton(
-            locale.save(),
-            "keybindings-saveButton-btn",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent clickEvent) {
-                delegate.onSaveClicked();
-              }
-            });
-    addButtonToFooter(saveButton);
-    saveButton.addStyleName(resources.windowCss().primaryButton());
+        addFooterButton(
+            locale.save(), "keybindings-saveButton-btn", event -> delegate.onSaveClicked(), true);
 
     closeButton =
-        createButton(
-            locale.close(),
-            "keybindings-closeButton-btn",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCloseClicked();
-              }
-            });
-    addButtonToFooter(closeButton);
+        addFooterButton(
+            locale.close(), "keybindings-closeButton-btn", event -> delegate.onCloseClicked());
 
     printButton =
-        createButton(
-            locale.print(),
-            "keybindings-printButton-btn",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent clickEvent) {
-                delegate.onPrintClicked();
-              }
-            });
-    addButtonToFooter(printButton);
+        addFooterButton(
+            locale.print(), "keybindings-printButton-btn", event -> delegate.onPrintClicked());
 
     list = new CategoriesList(res);
     categoriesList = new ArrayList<>();
     category.add(list);
     filterInput.getElement().setAttribute("placeholder", "Search");
-    selectionListBox.addChangeHandler(
-        new ChangeHandler() {
-          @Override
-          public void onChange(ChangeEvent changeEvent) {
-            delegate.onSchemeSelectionChanged();
-          }
-        });
+    selectionListBox.addChangeHandler(changeEvent -> delegate.onSchemeSelectionChanged());
 
     // Override DockLayoutPanel Overflow to correctly display ListBox
     selectionPanel.getElement().getParentElement().getStyle().setOverflow(Style.Overflow.VISIBLE);
@@ -180,8 +141,17 @@ public class HotKeysDialogViewImpl extends Window implements HotKeysDialogView {
   }
 
   @Override
-  public void hide() {
-    super.hide();
+  public void showDialog() {
+    show();
+  }
+
+  @Override
+  public void hideDialog() {
+    hide();
+  }
+
+  @Override
+  protected void onHide() {
     resetFilter();
   }
 

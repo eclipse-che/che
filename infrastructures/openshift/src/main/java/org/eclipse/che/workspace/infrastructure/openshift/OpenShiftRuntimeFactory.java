@@ -12,10 +12,11 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import java.util.List;
 import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesRuntimeFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 
 /** @author Sergii Leshchenko */
-public interface OpenShiftRuntimeFactory {
+public interface OpenShiftRuntimeFactory extends KubernetesRuntimeFactory {
   OpenShiftInternalRuntime create(
       OpenShiftRuntimeContext context, OpenShiftProject namespace, List<Warning> warnings);
 }

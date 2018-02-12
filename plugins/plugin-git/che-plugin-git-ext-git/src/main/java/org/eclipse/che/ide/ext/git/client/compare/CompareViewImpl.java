@@ -81,41 +81,35 @@ final class CompareViewImpl extends Window implements CompareView {
 
     setWidget(UI_BINDER.createAndBindUi(this));
 
-    Button closeButton =
-        createButton(locale.buttonClose(), "git-compare-close-btn", event -> onClose());
-    Button refreshButton =
-        createButton(
-            locale.buttonRefresh(), "git-compare-refresh-btn", event -> compareWidget.refresh());
+    addFooterButton(locale.buttonClose(), "git-compare-close-btn", event -> hide());
+    addFooterButton(
+        locale.buttonRefresh(), "git-compare-refresh-btn", event -> compareWidget.refresh());
 
     btnSaveChanges =
-        createButton(
+        addFooterButton(
             locale.buttonSaveChanges(),
             "git-compare-save-changes-btn",
-            event -> delegate.onSaveChangesClicked());
-    btnSaveChanges.addStyleName(resources.windowCss().primaryButton());
-
+            event -> delegate.onSaveChangesClicked(),
+            true);
     btnNextDiff =
-        createButton(
+        addFooterButton(
             locale.buttonNextDiff(),
             "git-compare-next-diff-btn",
             event -> delegate.onNextDiffClicked(),
             ButtonAlignment.LEFT);
-
     btnPrevDiff =
-        createButton(
+        addFooterButton(
             locale.buttonPreviousDiff(),
             "git-compare-prev-diff-btn",
             event -> delegate.onPreviousDiffClicked(),
             ButtonAlignment.LEFT);
 
-    addButtonToFooter(btnSaveChanges);
-    addButtonToFooter(refreshButton);
-    addButtonToFooter(closeButton);
-
-    addButtonToFooter(btnPrevDiff);
-    addButtonToFooter(btnNextDiff);
-
     comparePanel.getElement().setId(Document.get().createUniqueId());
+  }
+
+  @Override
+  public void setTitleCaption(String title) {
+    setTitle(title);
   }
 
   @Override
@@ -124,7 +118,7 @@ final class CompareViewImpl extends Window implements CompareView {
   }
 
   @Override
-  protected void onClose() {
+  protected void onHide() {
     visible = false;
     delegate.onClose();
   }
@@ -183,6 +177,11 @@ final class CompareViewImpl extends Window implements CompareView {
           @Override
           public void onFailure(Throwable caught) {}
         });
+  }
+
+  @Override
+  public void close() {
+    hide();
   }
 
   @Override

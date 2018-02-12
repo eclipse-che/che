@@ -26,7 +26,7 @@ interface OrganizeImportsView extends View<OrganizeImportsView.ActionDelegate> {
   void show(ConflictImportDTO match);
 
   /** Hide Organize Imports panel. */
-  void hide();
+  void close();
 
   /** @return selected import for current view page. */
   String getSelectedImport();

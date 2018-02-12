@@ -22,10 +22,10 @@ import org.eclipse.che.ide.api.mvp.View;
 public interface ResolveDependencyView extends View<ResolveDependencyView.ActionDelegate> {
 
   /** Shows the widget. */
-  void show();
+  void showDialog();
 
   /** Hides the widget. */
-  void hide();
+  void close();
 
   /**
    * Set label into loader which describes current state of loader.

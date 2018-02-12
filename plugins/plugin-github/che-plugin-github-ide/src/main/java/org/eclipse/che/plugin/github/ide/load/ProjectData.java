@@ -26,6 +26,9 @@ public class ProjectData {
   /** Url to clone from GitHub (readOnly). */
   private String readOnlyUrl;
 
+  private String httpTransportUrl;
+  private boolean isPrivateRepo;
+
   private List<String> targets;
 
   public ProjectData(
@@ -34,13 +37,17 @@ public class ProjectData {
       String type,
       List<String> targets,
       String repositoryUrl,
-      String readOnlyUrl) {
+      String readOnlyUrl,
+      String httpTransportUrl,
+      boolean isPrivateRepo) {
     this.name = name;
     this.description = description;
     this.type = type;
     this.repositoryUrl = repositoryUrl;
     this.targets = targets;
     this.readOnlyUrl = readOnlyUrl;
+    this.httpTransportUrl = httpTransportUrl;
+    this.isPrivateRepo = isPrivateRepo;
   }
 
   /**
@@ -105,5 +112,37 @@ public class ProjectData {
 
   public void setReadOnlyUrl(String readOnlyUrl) {
     this.readOnlyUrl = readOnlyUrl;
+  }
+
+  /**
+   * Gets the HTTPS URL to the repository, such as "https://github.com/eclipse/che.git" This URL is
+   * read-only.
+   */
+  public String getHttpTransportUrl() {
+    return httpTransportUrl;
+  }
+
+  /** Sets the HTTPS URL to the repository, such as "https://github.com/eclipse/che.git" */
+  public void setHttpTransportUrl(String httpTransportUrl) {
+    this.httpTransportUrl = httpTransportUrl;
+  }
+
+  /**
+   * Gets state of the repository.
+   *
+   * @return {@code true} when the repository is private, {@code false} otherwise
+   */
+  public boolean isPrivateRepo() {
+    return isPrivateRepo;
+  }
+
+  /**
+   * Sets state of the repository.
+   *
+   * @param isPrivateRepo should be {@code true} when the repository is private, {@code false}
+   *     otherwise
+   */
+  void setPrivateRepo(boolean isPrivateRepo) {
+    this.isPrivateRepo = isPrivateRepo;
   }
 }

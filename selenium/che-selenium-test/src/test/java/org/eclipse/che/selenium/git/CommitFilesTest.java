@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.selenium.git;
 
-import static org.testng.Assert.fail;
-
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.net.URL;
@@ -33,7 +31,6 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -196,14 +193,7 @@ public class CommitFilesTest {
     // perform init commit without one folder
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
-
-    try {
-      git.clickItemCheckBoxInCommitWindow("java/org/eclipse/dev/examples");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8042", ex);
-    }
-
+    git.clickItemCheckBoxInCommitWindow("java/org/eclipse/dev/examples");
     git.waitAndRunCommit("init");
     loader.waitOnClosed();
 

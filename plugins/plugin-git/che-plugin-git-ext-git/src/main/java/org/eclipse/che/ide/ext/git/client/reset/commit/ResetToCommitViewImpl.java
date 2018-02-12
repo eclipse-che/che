@@ -10,13 +10,14 @@
  */
 package org.eclipse.che.ide.ext.git.client.reset.commit;
 
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
+
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -27,7 +28,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -91,42 +91,20 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
 
     prepareRadioButtons();
 
-    btnReset =
-        createButton(
-            locale.buttonReset(),
-            "git-reset-reset",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onResetClicked();
-              }
-            });
-    btnReset.addStyleName(super.resources.windowCss().primaryButton());
-    addButtonToFooter(btnReset);
-
     btnCancel =
-        createButton(
-            locale.buttonCancel(),
-            "git-reset-cancel",
-            new ClickHandler() {
+        addFooterButton(
+            locale.buttonCancel(), "git-reset-cancel", event -> delegate.onCancelClicked());
 
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-              }
-            });
-    addButtonToFooter(btnCancel);
+    btnReset =
+        addFooterButton(
+            locale.buttonReset(), "git-reset-reset", event -> delegate.onResetClicked(), true);
   }
 
   @Override
-  protected void onEnterClicked() {
-    if (isWidgetFocused(btnCancel)) {
+  public void onEnterPress(NativeEvent evt) {
+    if (isWidgetOrChildFocused(btnCancel)) {
       delegate.onCancelClicked();
-      return;
-    }
-
-    if (isWidgetFocused(btnReset)) {
+    } else if (isWidgetOrChildFocused(btnReset)) {
       delegate.onResetClicked();
     }
   }
@@ -165,14 +143,14 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
 
   /** Creates table what contains list of available commits. */
   private void createCommitsTable() {
-    commits = new CellTable<Revision>(15, tableRes);
+    commits = new CellTable<>(15, tableRes);
 
     Column<Revision, String> dateColumn =
         new Column<Revision, String>(new TextCell()) {
           @Override
           public String getValue(Revision revision) {
             return DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM)
-                .format(new Date((long) revision.getCommitTime()));
+                .format(new Date(revision.getCommitTime()));
           }
 
           @Override
@@ -213,12 +191,9 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
 
     final SingleSelectionModel<Revision> selectionModel = new SingleSelectionModel<Revision>();
     selectionModel.addSelectionChangeHandler(
-        new SelectionChangeEvent.Handler() {
-          @Override
-          public void onSelectionChange(SelectionChangeEvent event) {
-            Revision selectedObject = selectionModel.getSelectedObject();
-            delegate.onRevisionSelected(selectedObject);
-          }
+        event -> {
+          Revision selectedObject = selectionModel.getSelectedObject();
+          delegate.onRevisionSelected(selectedObject);
         });
     commits.setSelectionModel(selectionModel);
   }
@@ -278,14 +253,7 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
   @Override
   public void setEnableResetButton(final boolean enabled) {
     btnReset.setEnabled(enabled);
-    Scheduler.get()
-        .scheduleDeferred(
-            new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                btnReset.setFocus(enabled);
-              }
-            });
+    Scheduler.get().scheduleDeferred(() -> btnReset.setFocus(enabled));
   }
 
   /** {@inheritDoc} */

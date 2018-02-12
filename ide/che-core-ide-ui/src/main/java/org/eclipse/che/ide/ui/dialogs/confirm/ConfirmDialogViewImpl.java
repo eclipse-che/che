@@ -10,7 +10,10 @@
  */
 package org.eclipse.che.ide.ui.dialogs.confirm;
 
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -43,7 +46,7 @@ public class ConfirmDialogViewImpl extends Window implements ConfirmDialogView {
     setWidget(widget);
 
     this.footer = footer;
-    getFooter().add(this.footer);
+    addFooterWidget(footer);
   }
 
   @Override
@@ -53,7 +56,7 @@ public class ConfirmDialogViewImpl extends Window implements ConfirmDialogView {
   }
 
   @Override
-  protected void onEnterClicked() {
+  public void onEnterPress(NativeEvent evt) {
     delegate.onEnterClicked();
   }
 
@@ -73,6 +76,11 @@ public class ConfirmDialogViewImpl extends Window implements ConfirmDialogView {
     this.content.setWidget(content);
   }
 
+  @Override
+  public void setTitleCaption(String title) {
+    setTitle(title);
+  }
+
   public void setOkButtonLabel(String label) {
     footer.setOkButtonLabel(label);
   }
@@ -83,12 +91,12 @@ public class ConfirmDialogViewImpl extends Window implements ConfirmDialogView {
 
   @Override
   public boolean isOkButtonInFocus() {
-    return isWidgetFocused(footer.okButton);
+    return isWidgetOrChildFocused(footer.okButton);
   }
 
   @Override
   public boolean isCancelButtonInFocus() {
-    return isWidgetFocused(footer.cancelButton);
+    return isWidgetOrChildFocused(footer.cancelButton);
   }
 
   /** The UI binder interface for this components. */

@@ -22,6 +22,11 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
  * @author Alexander Garagatyi
  */
 public class TerminalServerLivenessProbeConfigFactory implements HttpProbeConfigFactory {
+  private final int successThreshold;
+
+  public TerminalServerLivenessProbeConfigFactory(int successThreshold) {
+    this.successThreshold = successThreshold;
+  }
 
   @Override
   public HttpProbeConfig get(String workspaceId, Server server)
@@ -50,6 +55,9 @@ public class TerminalServerLivenessProbeConfigFactory implements HttpProbeConfig
       port = uri.getPort();
     }
 
-    return new HttpProbeConfig(port, uri.getHost(), protocol, "/liveness", null, 1, 3, 120, 10, 10);
+    String path = uri.getPath().replaceFirst("/pty$", "/liveness");
+
+    return new HttpProbeConfig(
+        port, uri.getHost(), protocol, path, null, successThreshold, 3, 120, 10, 10);
   }
 }

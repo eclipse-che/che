@@ -51,7 +51,7 @@ public class GitCompare {
     String ID_PREFIX_BRANCH = "gwt-debug-git-compare-branch-";
     String BRANCH_COMPARE_BUTTON = "git-compare-branch-compare";
     String COMPARE_BRANCH_CLOSE_BTN = "git-compare-branch-close";
-    String MAIN_FORM_COMPARE = "//button[@id='git-compare-close-btn']/ancestor::div[2]";
+    String MAIN_FORM_COMPARE = "//button[@id='git-compare-close-btn']/ancestor::table";
     String LEFT_COMPARE_EDITOR = "gwt-debug-compareParentDiv_left_editor_id";
     String LEFT_COMPARE_STATUS =
         "//div[@id='gwt-debug-compareParentDiv_left_status_id' and text()='%s']";
@@ -59,10 +59,10 @@ public class GitCompare {
     String COMPARE_CLOSE_BUTTON = "git-compare-close-btn";
     String COMPARE_REVISION_FORM = "gwt-debug-git-compare-revision-window";
     String REVISION_ITEM =
-        "//div[@id='gwt-debug-git-compare-revision-window']//tr[@__gwt_row='%s']";
+        "//table[@id='gwt-debug-git-compare-revision-window']//tr[@__gwt_row='%s']";
     String REVISION_COMPARE_BUTTON = "git-compare-revision-compare";
     String REVISION_CLOSE_BUTTON = "git-compare-revision-close";
-    String GROUP_GIT_COMPARE_FORM = "//div[text()='Git Compare']/ancestor::div[3]";
+    String GROUP_GIT_COMPARE_FORM = "//table[@title='Git Compare']";
     String PATH_TO_FILE_COMPARE =
         "//div[@id='gwt-debug-git-compare-window-changed-files']//div[text()='%s']";
     String GROUP_COMPARE_TEXT_AREA = "gwt-debug-git-compare-window-changed-files";

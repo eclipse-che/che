@@ -96,7 +96,7 @@ public class ProjectClasspathPresenter
             new Operation<Void>() {
               @Override
               public void apply(Void arg) throws OperationException {
-                view.hideWindow();
+                view.close();
               }
             });
   }
@@ -172,7 +172,7 @@ public class ProjectClasspathPresenter
 
                   view.setPages(propertiesMap);
                 }
-                view.show();
+                view.showDialog();
                 view.selectPage(
                     propertiesMap.entrySet().iterator().next().getValue().iterator().next());
               }

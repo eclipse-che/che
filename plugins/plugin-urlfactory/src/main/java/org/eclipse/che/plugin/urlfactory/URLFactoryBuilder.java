@@ -104,8 +104,7 @@ public class URLFactoryBuilder {
               .withType("dockerfile")
               .withContentType("text/x-dockerfile");
     } else {
-      recipeDto =
-          newDto(RecipeDto.class).withLocation(DEFAULT_DOCKER_IMAGE).withType("dockerimage");
+      recipeDto = newDto(RecipeDto.class).withContent(DEFAULT_DOCKER_IMAGE).withType("dockerimage");
     }
     MachineConfigDto machine =
         newDto(MachineConfigDto.class)

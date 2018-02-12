@@ -490,7 +490,7 @@ public class InternalRuntimeTest {
     doReturn(internalMachines).when(internalRuntime).getInternalMachines();
     doThrow(new InfrastructureException(badServerRewritingExcMessage))
         .when(urlRewriter)
-        .rewriteURL(any(RuntimeIdentity.class), anyString(), eq(badServerURL));
+        .rewriteURL(any(RuntimeIdentity.class), any(), anyString(), eq(badServerURL));
 
     // when
     Map<String, ? extends Machine> actualMachines = internalRuntime.getMachines();
@@ -545,7 +545,7 @@ public class InternalRuntimeTest {
     return new ServerImpl()
         .withStatus(server.getStatus())
         .withAttributes(server.getAttributes())
-        .withUrl(TEST_URL_REWRITER.rewriteURL(null, null, server.getUrl()));
+        .withUrl(TEST_URL_REWRITER.rewriteURL(null, null, null, server.getUrl()));
   }
 
   /**
@@ -617,8 +617,10 @@ public class InternalRuntimeTest {
   }
 
   private static class TestURLRewriter implements URLRewriter {
+
     @Override
-    public String rewriteURL(RuntimeIdentity identity, String name, String url)
+    public String rewriteURL(
+        RuntimeIdentity identity, String machineName, String serverName, String url)
         throws InfrastructureException {
       return url + "#something";
     }

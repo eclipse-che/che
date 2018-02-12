@@ -17,7 +17,6 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
-import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
@@ -44,7 +43,7 @@ public class PhpExtension {
     DefaultActionGroup newGroup = (DefaultActionGroup) actionManager.getAction(GROUP_FILE_NEW);
 
     actionManager.registerAction("newPhpFile", phpSourceFileAction);
-    newGroup.add(phpSourceFileAction, Constraints.FIRST);
+    newGroup.add(phpSourceFileAction);
     iconRegistry.registerIcon(
         new Icon(PHP_CATEGORY + ".samples.category.icon", resources.category()));
   }

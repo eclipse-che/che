@@ -61,7 +61,7 @@ export OPENSHIFT_FLAVOR="ocp"
 
 DEFAULT_OPENSHIFT_ENDPOINT="https://${OC_PUBLIC_HOSTNAME}:8443"
 export OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
-export CHE_INFRA_OPENSHIFT_MASTER__URL=${CHE_INFRA_OPENSHIFT_MASTER__URL:-${OPENSHIFT_ENDPOINT}}
+export CHE_INFRA_KUBERNETES_MASTER__URL=${CHE_INFRA_KUBERNETES_MASTER__URL:-${OPENSHIFT_ENDPOINT}}
 
 DEFAULT_ENABLE_SSL="false"
 export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
@@ -198,31 +198,8 @@ deploy_che_to_ocp() {
       echo "OCP script deploy_che.sh does not exist in ${CURRENT_PWD} ."
       exit 1
     else
-      bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
+      bash deploy_che.sh --wait-che ${DEPLOY_SCRIPT_ARGS}
     fi
-    wait_until_server_is_booted
-}
-
-server_is_booted() {
-  PING_URL="http://che-${CHE_OPENSHIFT_PROJECT}.${OPENSHIFT_ROUTING_SUFFIX}"
-  HTTP_STATUS_CODE=$(curl -I -k "${PING_URL}" -s -o /dev/null --write-out '%{http_code}')
-  if [[ "${HTTP_STATUS_CODE}" = "200" ]] || [[ "${HTTP_STATUS_CODE}" = "302" ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-wait_until_server_is_booted() {
-  SERVER_BOOT_TIMEOUT=300
-  echo -n "[CHE] wait CHE pod booting..."
-  ELAPSED=0
-  until server_is_booted || [ ${ELAPSED} -eq "${SERVER_BOOT_TIMEOUT}" ]; do
-    echo -n "."
-    sleep 2
-    ELAPSED=$((ELAPSED+1))
-  done
-  echo "Done!"
 }
 
 destroy_ocp() {

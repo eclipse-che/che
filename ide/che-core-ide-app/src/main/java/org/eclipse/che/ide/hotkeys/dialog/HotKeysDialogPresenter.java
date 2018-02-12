@@ -98,7 +98,7 @@ public class HotKeysDialogPresenter implements HotKeysDialogView.ActionDelegate 
     view.setData(categories);
     view.setSchemes(selectedSchemeId, keyBindingAgent.getSchemes());
     view.renderKeybindings();
-    view.show();
+    view.showDialog();
   }
 
   private List<HotKeyItem> getIDEHotKey() {
@@ -136,12 +136,12 @@ public class HotKeysDialogPresenter implements HotKeysDialogView.ActionDelegate 
   @Override
   public void onSaveClicked() {
     keyBindingAgent.setActive(selectedSchemeId);
-    view.hide();
+    view.hideDialog();
   }
 
   @Override
   public void onCloseClicked() {
-    view.hide();
+    view.hideDialog();
   }
 
   @Override

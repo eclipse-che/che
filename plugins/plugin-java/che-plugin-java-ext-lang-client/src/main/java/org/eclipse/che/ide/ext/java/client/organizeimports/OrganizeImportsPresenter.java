@@ -181,7 +181,7 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
                 @Override
                 public void apply(List<Change> result) throws OperationException {
                   applyChanges(((TextEditor) editor).getDocument(), result);
-                  view.hide();
+                  view.close();
                   ((TextEditor) editor).setFocus();
                 }
               })

@@ -10,16 +10,18 @@
 #  ``` bash
 #   DEPLOY_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/dockerfiles/cli/scripts/openshift/deploy_che.sh
 #   curl -fsSL ${DEPLOY_SCRIPT_URL} -o get-che.sh
-#   WAIT_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/dockerfiles/cli/scripts/openshift/wait_until_che_is_available.sh
-#   curl -fsSL ${WAIT_SCRIPT_URL} -o wait-che.sh
-#   STACKS_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/dockerfiles/cli/scripts/openshift/replace_stacks.sh
-#   curl -fsSL ${STACKS_SCRIPT_URL} -o stacks-che.sh
-#   bash get-che.sh && wait-che.sh && stacks-che.sh
+#   bash get-che.sh --wait-che
 #   ```
 #
 # For more deployment options: https://www.eclipse.org/che/docs/setup/openshift/index.html
 
 set -e
+
+# --------------------------------------------------------
+# Check pre-requisites
+# --------------------------------------------------------
+command -v oc >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool oc (https://docs.openshift.org/latest/cli_reference/get_started_cli.html) is required but it's not installed. Aborting."; exit 1; }
+command -v jq >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool jq (https://stedolan.github.io/jq) is required but it's not installed. Aborting."; exit 1; }
 
 # ----------------
 # helper functions
@@ -45,6 +47,49 @@ inject_che_config() {
           done <$2
       fi
     done < /dev/stdin
+}
+
+wait_until_che_is_available() {
+    if [ -z "${CHE_API_ENDPOINT+x}" ]; then
+        echo -n "[CHE] Inferring \$CHE_API_ENDPOINT..."
+        che_host=$(oc get route che -o jsonpath='{.spec.host}')
+        if [ -z "${che_host}" ]; then echo >&2 "[CHE] [ERROR] Failed to infer environment variable \$CHE_API_ENDPOINT. Aborting. Please set it and run ${0} script again."; exit 1; fi
+        if [[ $(oc get route che -o jsonpath='{.spec.tls}') ]]; then protocol="https" ; else protocol="http"; fi
+        CHE_API_ENDPOINT="${protocol}://${che_host}/api"
+        echo "done (${CHE_API_ENDPOINT})"
+    fi
+
+    available=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
+    progressing=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
+
+    DEPLOYMENT_TIMEOUT_SEC=300
+    POLLING_INTERVAL_SEC=5
+    end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
+    while [ "${available}" != "\"True\"" ] && [ ${SECONDS} -lt ${end} ]; do
+      available=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
+      progressing=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
+      timeout_in=$((end-SECONDS))
+      echo "[CHE] Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, Timeout in ${timeout_in}s)"
+      sleep ${POLLING_INTERVAL_SEC}
+    done
+
+    if [ "${progressing}" == "\"True\"" ]; then
+      echo "[CHE] Che deployed successfully"
+    elif [ "${progressing}" == "False" ]; then
+      echo "[CHE] [ERROR] Che deployment failed. Aborting. Run command 'oc rollout status che' to get more details."
+      exit 1
+    elif [ ${SECONDS} -lt ${end} ]; then
+      echo "[CHE] [ERROR] Deployment timeout. Aborting."
+      exit 1
+    fi
+
+    che_http_status=$(curl -s -o /dev/null -I -w "%{http_code}" "${CHE_API_ENDPOINT}/system/state")
+    if [ "${che_http_status}" == "200" ]; then
+      echo "[CHE] Che is up and running"
+    else
+      echo "[CHE] [ERROR] Che is not responding (HTTP status= ${che_http_status})"
+      exit 1
+    fi
 }
 
 # --------------
@@ -76,26 +121,23 @@ EOF
 echo
 
 # --------------------------------------------------------
-# Check pre-requisites
-# --------------------------------------------------------
-command -v oc >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool oc (https://docs.openshift.org/latest/cli_reference/get_started_cli.html) is required but it's not installed. Aborting."; exit 1; }
-
-# --------------------------------------------------------
 # Parse options
 # --------------------------------------------------------
-while [[ $# -gt 1 ]]
+for key in "$@"
 do
-key="$1"
 case $key in
     -c | --command)
     COMMAND="$2"
+    shift
+    ;;
+    --wait-che)
+    WAIT_FOR_CHE=true
     shift
     ;;
     *)
             # unknown option
     ;;
 esac
-shift
 done
 
 # OPENSHIFT_FLAVOR can be minishift or osio or ocp
@@ -126,7 +168,7 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   # Set minishift configuration
   # ----------------------
   DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT=""
-  DEFAULT_CHE_INFRA_OPENSHIFT_PVC_STRATEGY="unique"
+  DEFAULT_CHE_INFRA_KUBERNETES_PVC_STRATEGY="unique"
   DEFAULT_OPENSHIFT_ENDPOINT="https://${MINISHIFT_IP}:8443/"
   DEFAULT_OPENSHIFT_USERNAME="developer"
   DEFAULT_OPENSHIFT_PASSWORD="developer"
@@ -139,14 +181,14 @@ if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
   DEFAULT_ENABLE_SSL="false"
   DEFAULT_CHE_LOG_LEVEL="INFO"
   DEFAULT_CHE_PREDEFINED_STACKS_RELOAD="false"
-  DEFAULT_CHE_INFRA_OPENSHIFT_PVC_PRECREATE__SUBPATHS="true"
+  DEFAULT_CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS="true"
 elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   # ----------------------
   # Set osio configuration
   # ----------------------
   if [ -z "${OPENSHIFT_TOKEN+x}" ]; then echo "[CHE] **ERROR** Env var OPENSHIFT_TOKEN is unset. You need to set it with your OSO token to continue. To retrieve your token: https://console.starter-us-east-2.openshift.com/console/command-line. Aborting"; exit 1; fi
   DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
-  DEFAULT_CHE_INFRA_OPENSHIFT_PVC_STRATEGY="common"
+  DEFAULT_CHE_INFRA_KUBERNETES_PVC_STRATEGY="common"
   DEFAULT_OPENSHIFT_ENDPOINT="https://api.starter-us-east-2.openshift.com"
   DEFAULT_CHE_OPENSHIFT_PROJECT="$(oc get projects -o=custom-columns=NAME:.metadata.name --no-headers | grep "\\-che$")"
   DEFAULT_OPENSHIFT_ROUTING_SUFFIX="8a09.starter-us-east-2.openshiftapps.com"
@@ -155,13 +197,13 @@ elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
   DEFAULT_ENABLE_SSL="true"
   DEFAULT_CHE_LOG_LEVEL="INFO"
   DEFAULT_CHE_PREDEFINED_STACKS_RELOAD="true"
-  DEFAULT_CHE_INFRA_OPENSHIFT_PVC_PRECREATE__SUBPATHS="false"
+  DEFAULT_CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS="false"
 elif [ "${OPENSHIFT_FLAVOR}" == "ocp" ]; then
   # ----------------------
   # Set ocp configuration
   # ----------------------
   DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT=""
-  DEFAULT_CHE_INFRA_OPENSHIFT_PVC_STRATEGY="unique"
+  DEFAULT_CHE_INFRA_KUBERNETES_PVC_STRATEGY="unique"
   DEFAULT_OPENSHIFT_USERNAME="developer"
   DEFAULT_OPENSHIFT_PASSWORD="developer"
   DEFAULT_CHE_OPENSHIFT_PROJECT="eclipse-che"
@@ -170,7 +212,7 @@ elif [ "${OPENSHIFT_FLAVOR}" == "ocp" ]; then
   DEFAULT_ENABLE_SSL="true"
   DEFAULT_CHE_LOG_LEVEL="INFO"
   DEFAULT_CHE_PREDEFINED_STACKS_RELOAD="true"
-  DEFAULT_CHE_INFRA_OPENSHIFT_PVC_PRECREATE__SUBPATHS="true"
+  DEFAULT_CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS="true"
 fi
 
 # --------------------------------------------------------
@@ -185,6 +227,7 @@ DEFAULT_CHE_KEYCLOAK_OSO_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/
 DEFAULT_KEYCLOAK_GITHUB_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/github/token"
 
 COMMAND=${COMMAND:-${DEFAULT_COMMAND}}
+WAIT_FOR_CHE=${WAIT_FOR_CHE:-"false"}
 CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
 if [ "${CHE_MULTIUSER}" == "true" ]; then
   CHE_DEDICATED_KEYCLOAK=${CHE_DEDICATED_KEYCLOAK:-"true"}
@@ -201,10 +244,10 @@ fi
 CHE_OAUTH_GITHUB_CLIENTID=${CHE_OAUTH_GITHUB_CLIENTID:-}
 CHE_OAUTH_GITHUB_CLIENTSECRET=${CHE_OAUTH_GITHUB_CLIENTSECRET:-}
 CHE_INFRA_OPENSHIFT_PROJECT=${CHE_INFRA_OPENSHIFT_PROJECT:-${DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT}}
-if [ -z ${CHE_INFRA_OPENSHIFT_USERNAME+x} ]; then CHE_INFRA_OPENSHIFT_USERNAME=$OPENSHIFT_USERNAME; fi
-if [ -z ${CHE_INFRA_OPENSHIFT_PASSWORD+x} ]; then CHE_INFRA_OPENSHIFT_PASSWORD=$OPENSHIFT_PASSWORD; fi
-if [ -z ${CHE_INFRA_OPENSHIFT_OAUTH__TOKEN+x} ]; then CHE_INFRA_OPENSHIFT_OAUTH__TOKEN=$OPENSHIFT_TOKEN; fi
-CHE_INFRA_OPENSHIFT_PVC_PRECREATE__SUBPATHS=${CHE_INFRA_OPENSHIFT_PVC_PRECREATE__SUBPATHS:-${DEFAULT_CHE_INFRA_OPENSHIFT_PVC_PRECREATE__SUBPATHS}}
+if [ -z ${CHE_INFRA_KUBERNETES_USERNAME+x} ]; then CHE_INFRA_KUBERNETES_USERNAME=$OPENSHIFT_USERNAME; fi
+if [ -z ${CHE_INFRA_KUBERNETES_PASSWORD+x} ]; then CHE_INFRA_KUBERNETES_PASSWORD=$OPENSHIFT_PASSWORD; fi
+if [ -z ${CHE_INFRA_KUBERNETES_OAUTH__TOKEN+x} ]; then CHE_INFRA_KUBERNETES_OAUTH__TOKEN=$OPENSHIFT_TOKEN; fi
+CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS=${CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS:-${DEFAULT_CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS}}
 
 OPENSHIFT_ROUTING_SUFFIX=${OPENSHIFT_ROUTING_SUFFIX:-${DEFAULT_OPENSHIFT_ROUTING_SUFFIX}}
 DEFAULT_OPENSHIFT_NAMESPACE_URL="${CHE_OPENSHIFT_PROJECT}.${OPENSHIFT_ROUTING_SUFFIX}"
@@ -218,7 +261,7 @@ CHE_DEBUG_SERVER=${CHE_DEBUG_SERVER:-${DEFAULT_CHE_DEBUG_SERVER}}
 OC_SKIP_TLS=${OC_SKIP_TLS:-${DEFAULT_OC_SKIP_TLS}}
 CHE_APPLY_RESOURCE_QUOTAS=${CHE_APPLY_RESOURCE_QUOTAS:-${DEFAULT_CHE_APPLY_RESOURCE_QUOTAS}}
 IMAGE_PULL_POLICY=${IMAGE_PULL_POLICY:-${DEFAULT_IMAGE_PULL_POLICY}}
-CHE_INFRA_OPENSHIFT_PVC_STRATEGY=${CHE_INFRA_OPENSHIFT_PVC_STRATEGY:-${DEFAULT_CHE_INFRA_OPENSHIFT_PVC_STRATEGY}}
+CHE_INFRA_KUBERNETES_PVC_STRATEGY=${CHE_INFRA_KUBERNETES_PVC_STRATEGY:-${DEFAULT_CHE_INFRA_KUBERNETES_PVC_STRATEGY}}
 CHE_HOST="${OPENSHIFT_NAMESPACE_URL}"
 if [ "${ENABLE_SSL}" == "true" ]; then
     HTTP_PROTOCOL="https"
@@ -486,6 +529,10 @@ if [ "${CHE_DEBUG_SERVER}" == "true" ]; then
   oc expose dc che --name=che-debug --target-port=http-debug --port=8000 --type=NodePort
   NodePort=$(oc get service che-debug -o jsonpath='{.spec.ports[0].nodePort}')
   echo "[CHE] Remote wsmaster debugging URL: ${MINISHIFT_IP}:${NodePort}"
+fi
+
+if [ "${WAIT_FOR_CHE}" == "true" ]; then
+  wait_until_che_is_available
 fi
 
 che_route=$(oc get route che -o jsonpath='{.spec.host}')

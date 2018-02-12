@@ -77,7 +77,7 @@ public class CheckReplaceFeatureInEditorTest {
   public void checkReplace() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    notificationsPopupPanel.waitPopUpPanelsIsClosed();
+    notificationsPopupPanel.waitPopupPanelsAreClosed();
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();

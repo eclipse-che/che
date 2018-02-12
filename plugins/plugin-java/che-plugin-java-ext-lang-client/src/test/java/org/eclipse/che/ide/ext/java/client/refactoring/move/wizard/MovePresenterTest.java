@@ -234,7 +234,7 @@ public class MovePresenterTest {
     verify(changeCreationResultPromise).then(changeResultOperation.capture());
     changeResultOperation.getValue().apply(changeCreationResult);
     verify(previewPresenter).show(nullable(String.class), any());
-    verify(moveView).hide();
+    verify(moveView).close();
   }
 
   @Test
@@ -270,7 +270,7 @@ public class MovePresenterTest {
     verify(changeCreationResultPromise).then(changeResultOperation.capture());
     changeResultOperation.getValue().apply(changeCreationResult);
     verify(previewPresenter, never()).show(nullable(String.class), any());
-    verify(moveView, never()).hide();
+    verify(moveView, never()).close();
     verify(moveView).showStatusMessage(refactoringStatus);
   }
 
@@ -344,7 +344,7 @@ public class MovePresenterTest {
 
     verify(refactoringResultPromise).then(refResultOperation.capture());
     refResultOperation.getValue().apply(refactoringResult);
-    verify(moveView).hide();
+    verify(moveView).close();
 
     verify(updateAfterRefactoringPromise).then(updateAfterRefactoringOperation.capture());
     updateAfterRefactoringOperation.getValue().apply(null);
@@ -385,7 +385,7 @@ public class MovePresenterTest {
 
     verify(refactoringResultPromise).then(refResultOperation.capture());
     refResultOperation.getValue().apply(refactoringResult);
-    verify(moveView, never()).hide();
+    verify(moveView, never()).close();
     verify(refactoringUpdater, never()).updateAfterRefactoring(anyList());
 
     verify(moveView).showErrorMessage(refactoringResult);

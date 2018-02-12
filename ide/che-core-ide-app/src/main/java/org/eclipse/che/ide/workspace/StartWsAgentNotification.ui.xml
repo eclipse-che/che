@@ -15,8 +15,6 @@
 
     <ui:with field="locale" type="org.eclipse.che.ide.CoreLocalizationConstant"/>
 
-    <ui:with field='res' type='org.eclipse.che.ide.ui.window.Window.Resources'/>
-
     <ui:style>
 
         .main {
@@ -41,8 +39,8 @@
     </ui:style>
 
     <g:FlowPanel addStyleNames="{style.main}">
-        <g:Button ui:field="restartButton" addStyleNames="{res.windowCss.button} {res.windowCss.primaryButton} {style.button}" text="{locale.restartWsAgentButton}"></g:Button>
-        <g:Button ui:field="ignoreButton" addStyleNames="{res.windowCss.button} {res.windowCss.primaryButton} {style.button}" text="{locale.ignoreWsAgentButton}"></g:Button>
+        <g:Button ui:field="restartButton" addStyleNames="{style.button}" text="{locale.restartWsAgentButton}" />
+        <g:Button ui:field="ignoreButton" addStyleNames="{style.button}" text="{locale.ignoreWsAgentButton}" />
     </g:FlowPanel>
 
 </ui:UiBinder>

@@ -137,4 +137,10 @@ public class FontAwesome {
 
   /** http://fontawesome.io/icon/file-text/ */
   public static final String FILE_TEXT = "<i class=\"fa fa-file-text\"></i>";
+
+  /** http://fontawesome.io/icon/i-cursor/ */
+  public static final String I_CURSOR = "<i class=\"fa fa-i-cursor\"></i>";
+
+  /** http://fontawesome.io/icon/share-square-o/ */
+  public static final String SHARE_SQUARE = "<i class=\"fa fa-share-square-o\"></i>";
 }

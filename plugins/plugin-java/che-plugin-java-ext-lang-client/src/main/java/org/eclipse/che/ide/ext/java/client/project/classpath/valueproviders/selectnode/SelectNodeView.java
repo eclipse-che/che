@@ -38,5 +38,5 @@ public interface SelectNodeView extends View<SelectNodeView.ActionDelegate> {
   void setStructure(List<Node> nodes, ClasspathNodeInterceptor nodeInterceptor);
 
   /** Show dialog. */
-  void show();
+  void showDialog();
 }

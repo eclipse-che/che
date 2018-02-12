@@ -33,7 +33,7 @@ public interface ConfirmDialogView {
   void setContent(IsWidget content);
 
   /** Sets the window title. */
-  void setTitle(String title);
+  void setTitleCaption(String title);
 
   /** Overwrites label of Ok button */
   void setOkButtonLabel(String label);

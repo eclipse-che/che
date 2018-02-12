@@ -38,7 +38,7 @@ public class MessageDialogPresenter implements MessageDialogView.ActionDelegate 
       Consumer<MessageActionItem> callback) {
     this.callback = callback;
     view.setContent(content);
-    view.setTitle(title);
+    view.setTitleCaption(title);
     view.setActions(actions);
     view.showDialog();
   }

@@ -23,6 +23,7 @@ import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -36,6 +37,7 @@ public class CheckFactoryWithMultiModuleTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private NotificationsPopupPanel notifications;
   @Inject private Dashboard dashboard;
+  @Inject private PullRequestPanel pullRequestPanel;
 
   @Inject
   @Named("github.username")
@@ -73,6 +75,7 @@ public class CheckFactoryWithMultiModuleTest {
     notifications.waitExpectedMessageOnProgressPanelAndClosed(
         "Project " + PROJECT_NAME + " imported");
     projectExplorer.selectItem(PROJECT_NAME);
+    pullRequestPanel.waitOpenPanel();
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", PROJECT_FOLDER);
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(
