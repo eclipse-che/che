@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.FindUsages;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -76,6 +77,7 @@ public class FindUsagesBaseOperationTest {
   @Inject private TestWorkspace workspace;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -85,6 +87,7 @@ public class FindUsagesBaseOperationTest {
 
     ide.open(workspace);
     ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -126,7 +129,10 @@ public class FindUsagesBaseOperationTest {
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.selectNodeInFindUsagesByDoubleClick(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
-    findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT);
+    findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_1);
+    findUsages.selectNodeInFindUsagesPanel("AppController");
+    findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
+    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
 
     // Check nodes in the Find Usages panel by click on node icon
     findUsages.clickOnIconNodeInFindUsagesPanel(
