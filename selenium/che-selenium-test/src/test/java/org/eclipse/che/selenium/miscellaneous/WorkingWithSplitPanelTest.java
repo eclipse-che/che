@@ -10,13 +10,13 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
-import static com.sun.applet2.preloader.event.ConfigEvent.STATUS;
 import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.COMMON_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.MAVEN_TYPE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.ADD_TO_INDEX;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.STATUS;
 import static org.eclipse.che.selenium.pageobject.MultiSplitPanel.SplitPaneCommands.CLOSE_ALL_TABS;
 import static org.eclipse.che.selenium.pageobject.MultiSplitPanel.SplitPaneCommands.SPLIT_PANE_IN_COLUMNS;
 import static org.eclipse.che.selenium.pageobject.MultiSplitPanel.SplitPaneCommands.SPLIT_PANE_IN_ROWS;
@@ -27,7 +27,6 @@ import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
@@ -180,7 +179,7 @@ public class WorkingWithSplitPanelTest {
     // switch tabs and panels
     consoles.clickOnMaximizePanelIcon();
     multiSplitPanel.selectSplitPanel(1);
-    menu.runCommand(GIT, TestMenuCommandsConstants.Git.STATUS);
+    menu.runCommand(GIT, STATUS);
     multiSplitPanel.waitTabProcessIsPresent(1, "Git status");
     multiSplitPanel.waitTabNameProcessIsFocused("Git status");
     multiSplitPanel.waitMesageIntoSplitGitPanel(
@@ -188,14 +187,14 @@ public class WorkingWithSplitPanelTest {
     multiSplitPanel.selectProcessByTabName(2, "Git add to index");
     multiSplitPanel.waitTabNameProcessIsFocused("Git add to index");
     multiSplitPanel.waitMesageIntoSplitGitPanel(2, "Git index updated");
-    menu.runCommand(GIT, TestMenuCommandsConstants.Git.STATUS);
+    menu.runCommand(GIT, STATUS);
     multiSplitPanel.waitTabProcessIsPresent(2, "Git status");
     multiSplitPanel.waitTabNameProcessIsFocused("Git status");
     multiSplitPanel.waitTabProcessIsNotPresent(1, "Git status");
     multiSplitPanel.waitMesageIntoSplitGitPanel(
         2, " On branch master\n" + " Changes to be committed");
     multiSplitPanel.selectSplitPanel(1);
-    menu.runCommand(GIT, TestMenuCommandsConstants.Git.STATUS);
+    menu.runCommand(GIT, STATUS);
     multiSplitPanel.waitTabProcessIsPresent(1, "Git status");
     multiSplitPanel.waitTabNameProcessIsFocused("Git status");
     multiSplitPanel.waitTabProcessIsNotPresent(2, "Git status");

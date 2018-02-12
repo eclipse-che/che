@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.CUSTOM_NAME;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.COMMON_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.CUSTOM_TYPE;
@@ -45,8 +46,7 @@ public class CheckMacrosFeatureTest {
           + " ${editor.current.project.type}";
   private static final String COMMAND_NAME = "firstCommand";
   private String expectedText =
-      "README.md /projects/CheckMacrosFeatureTest/README.md"
-          + " /CheckMacrosFeatureTest/README.md CheckMacrosFeatureTest maven";
+      format("README.md /projects/%1$s/README.md" + " /%1$s/README.md %1$s maven", PROJECT_NAME);
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
