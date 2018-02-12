@@ -26,6 +26,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.FindUsages;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -75,6 +76,7 @@ public class FindUsagesBaseOperationTest {
   @Inject private Loader loader;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Events events;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -82,6 +84,7 @@ public class FindUsagesBaseOperationTest {
     testProjectServiceClient.importProject(
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -123,6 +126,7 @@ public class FindUsagesBaseOperationTest {
     findUsages.selectNodeInFindUsagesByDoubleClick(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_1);
+    findUsages.selectNodeInFindUsagesPanel("AppController");
     findUsages.clickOnIconNodeInFindUsagesPanel("AppController");
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
     findUsages.selectNodeInFindUsagesByDoubleClick("AppController");
