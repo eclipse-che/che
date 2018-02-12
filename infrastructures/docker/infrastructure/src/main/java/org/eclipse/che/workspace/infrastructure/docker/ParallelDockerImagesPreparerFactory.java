@@ -14,7 +14,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
 /** @author Max Shaposhnik (mshaposh@redhat.com) */
-public interface ParallelDockerImagesResolverFactory {
+public interface ParallelDockerImagesPreparerFactory {
 
-  ParallelDockerImagesResolver create(RuntimeIdentity identity) throws InfrastructureException;
+  ParallelDockerImagesPreparer create(RuntimeIdentity identity) throws InfrastructureException;
 }

@@ -28,9 +28,10 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -56,22 +57,28 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConf
 import org.slf4j.Logger;
 
 /**
+ * This class allows to make parallel prepare (build or download) of docker images for workspace
+ * being started.
+ *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
-public class ParallelDockerImagesResolver {
+public class ParallelDockerImagesPreparer {
 
-  private static final Logger LOG = getLogger(ParallelDockerImagesResolver.class);
+  private static final Logger LOG = getLogger(ParallelDockerImagesPreparer.class);
+  private static final String PARALLEL_NUMBER_PROPERTY = "che.infra.docker.parallel_pull_number";
 
   private final RuntimeIdentity identity;
   private final MachineLoggersFactory machineLoggersFactory;
   private final boolean doForcePullImage;
   private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
   private final DockerConnector dockerConnector;
+  private final ThreadPoolExecutor executor;
 
   @Inject
-  public ParallelDockerImagesResolver(
+  public ParallelDockerImagesPreparer(
       @Assisted RuntimeIdentity identity,
       @Named("che.docker.always_pull_image") boolean doForcePullImage,
+      @Named(PARALLEL_NUMBER_PROPERTY) int parallelPullsNumber,
       UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
       DockerConnector dockerConnector,
       MachineLoggersFactory machineLoggersFactory) {
@@ -80,40 +87,51 @@ public class ParallelDockerImagesResolver {
     this.dockerCredentials = dockerCredentials;
     this.dockerConnector = dockerConnector;
     this.machineLoggersFactory = machineLoggersFactory;
-  }
 
-  public Map<String, String> resolveImages(Map<String, DockerContainerConfig> containers)
-      throws InterruptedException, InfrastructureException {
-    ThreadFactoryBuilder builder = new ThreadFactoryBuilder();
     ThreadFactory factory =
-        builder
+        new ThreadFactoryBuilder()
             .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
             .setNameFormat(getClass().getSimpleName())
             .build();
-    ExecutorService executor = Executors.newFixedThreadPool(6, factory); // why 6 ?
-    Map<String, String> imagesMap = new ConcurrentHashMap<>(containers.size());
+    this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(parallelPullsNumber, factory);
+  }
 
+  /**
+   * Schedule parallel preparation of docker images for the set of docker containers.
+   *
+   * @param containers map of machine name and it's container config
+   * @return map of machine names and theirs image names.
+   * @throws InterruptedException if process is interrupted
+   * @throws InfrastructureException if build failed
+   */
+  public Map<String, String> prepareImages(Map<String, DockerContainerConfig> containers)
+      throws InterruptedException, InfrastructureException {
+    if (executor.getActiveCount() + containers.size() > executor.getMaximumPoolSize()) {
+      LOG.warn(
+          String.format(
+              "Maximum parallel images preparing threads reached. Some images will be queued.\n"
+                  + " Workspace machines count is %s. If problem persists, increase %s property value.",
+              containers.size(), PARALLEL_NUMBER_PROPERTY));
+    }
+    Map<String, String> imagesMap = new ConcurrentHashMap<>(containers.size());
     CompletableFuture<Void> firstFailed = new CompletableFuture<>();
-    List<CompletableFuture<String>> taskFutures =
+    List<CompletableFuture<Void>> taskFutures =
         containers
             .entrySet()
             .stream()
             .map(
                 e ->
                     CompletableFuture.supplyAsync(
-                        () -> {
-                          String imageName = null;
-                          try {
-                            imageName =
-                                prepareImage(
-                                    e.getKey(),
-                                    e.getValue(),
-                                    machineLoggersFactory.newProgressMonitor(e.getKey(), identity));
-                          } catch (InternalInfrastructureException | SourceNotFoundException ex) {
-                            firstFailed.completeExceptionally(ex);
-                          }
-                          return imagesMap.put(e.getKey(), imageName);
-                        },
+                        (Supplier<Void>)
+                            () -> {
+                              try {
+                                imagesMap.put(e.getKey(), prepareImage(e.getKey(), e.getValue()));
+                              } catch (InternalInfrastructureException
+                                  | SourceNotFoundException ex) {
+                                firstFailed.completeExceptionally(ex);
+                              }
+                              return null;
+                            },
                         executor))
             .collect(toList());
 
@@ -133,14 +151,23 @@ public class ParallelDockerImagesResolver {
     return imagesMap;
   }
 
-  private String prepareImage(
-      String machineName, DockerContainerConfig container, ProgressMonitor progressMonitor)
+  /**
+   * Prepares (builds or downloads) docker image for container config.
+   *
+   * @param container container config
+   * @return map of machine names and theirs image names.
+   * @throws InternalInfrastructureException if config is incomplete or image build failed
+   * @throws SourceNotFoundException if image pull failed
+   */
+  private String prepareImage(String machineName, DockerContainerConfig container)
       throws SourceNotFoundException, InternalInfrastructureException {
 
-    String imageName = "eclipse-che/" + container.getContainerName();
+    ProgressMonitor progressMonitor =
+        machineLoggersFactory.newProgressMonitor(machineName, identity);
+    final String imageName = "eclipse-che/" + container.getContainerName();
     if ((container.getBuild() == null
-        || (container.getBuild().getContext() == null
-        && container.getBuild().getDockerfileContent() == null))
+            || (container.getBuild().getContext() == null
+                && container.getBuild().getDockerfileContent() == null))
         && container.getImage() == null) {
 
       throw new InternalInfrastructureException(
@@ -149,7 +176,7 @@ public class ParallelDockerImagesResolver {
 
     if (container.getBuild() != null
         && (container.getBuild().getContext() != null
-        || container.getBuild().getDockerfileContent() != null)) {
+            || container.getBuild().getDockerfileContent() != null)) {
       buildImage(container, imageName, doForcePullImage, progressMonitor);
     } else {
       pullImage(container, imageName, progressMonitor);
@@ -164,7 +191,7 @@ public class ParallelDockerImagesResolver {
    * @param containerConfig configuration of container
    * @param machineImageName name of image that should be applied to built image
    * @param doForcePullOnBuild whether re-pulling of base image should be performed when it exists
-   * locally
+   *     locally
    * @param progressMonitor consumer of build logs
    * @throws InternalInfrastructureException when any error occurs
    */
