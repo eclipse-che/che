@@ -15,7 +15,6 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.STOP_WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
 
@@ -24,6 +23,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -32,7 +32,6 @@ import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
@@ -50,13 +49,13 @@ public class CreateWorkspaceOnDashboardTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private NewWorkspace newWorkspace;
   @Inject private TestUser defaultTestUser;
-  @Inject private MachineTerminal terminal;
   @Inject private ToastLoader toastLoader;
   @Inject private Workspaces workspaces;
   @Inject private CodenvyEditor editor;
   @Inject private Dashboard dashboard;
   @Inject private Wizard wizard;
   @Inject private Menu menu;
+  @Inject private Ide ide;
 
   @AfterClass
   public void tearDown() throws Exception {
@@ -81,9 +80,7 @@ public class CreateWorkspaceOnDashboardTest {
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
     // wait that the workspace is started
-    projectExplorer.waitProjectExplorer(PREPARING_WS_TIMEOUT_SEC); // we need long timeout for OSIO
-    terminal.waitTerminalTab(PREPARING_WS_TIMEOUT_SEC); // we need long timeout for OSIO
-    menu.waitMenuItemIsEnabled(WORKSPACE);
+    ide.waitOpenedWorkspaceIsReadyToUse();
 
     // Import the "web-java-spring" project
     menu.runCommand(WORKSPACE, CREATE_PROJECT);

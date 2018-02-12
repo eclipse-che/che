@@ -45,7 +45,11 @@ public class RequestIdLoggerFilter implements Filter {
       MDC.put(REQUEST_ID_MDC_KEY, requestId);
     }
 
-    filterChain.doFilter(request, response);
+    try {
+      filterChain.doFilter(request, response);
+    } finally {
+      MDC.remove(REQUEST_ID_MDC_KEY);
+    }
   }
 
   @Override

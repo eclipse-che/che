@@ -35,6 +35,8 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.proxy.ProxySe
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.securityopt.SecurityOptProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.provisioner.volume.ExtraVolumesProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.server.mapping.ExternalIpURLRewriter;
+import org.eclipse.che.workspace.infrastructure.docker.server.mapping.SinglePortHostnameBuilder;
+import org.eclipse.che.workspace.infrastructure.docker.server.mapping.SinglePortHostnameBuilder.SinglePortHostnameBuilderProvider;
 import org.eclipse.che.workspace.infrastructure.docker.server.mapping.SinglePortUrlRewriter;
 
 /** @author Alexander Garagatyi */
@@ -76,6 +78,7 @@ public class DockerInfraModule extends AbstractModule {
         MapBinder.newMapBinder(binder(), String.class, URLRewriter.class);
     rewriters.addBinding("default").to(ExternalIpURLRewriter.class);
     rewriters.addBinding("singleport").to(SinglePortUrlRewriter.class);
+    bind(SinglePortHostnameBuilder.class).toProvider(SinglePortHostnameBuilderProvider.class);
 
     bind(URLRewriter.class).toProvider(UrlRewriterProvider.class);
   }

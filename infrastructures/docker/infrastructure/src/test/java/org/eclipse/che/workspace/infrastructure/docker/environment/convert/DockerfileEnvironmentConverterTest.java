@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.environment.convert;
 
-import static com.google.common.collect.Maps.*;
+import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
