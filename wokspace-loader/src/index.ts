@@ -20,8 +20,7 @@ const WEBSOCKET_CONTEXT = '/api/websocket';
 
 let websocketURL = websocketBaseURL() + WEBSOCKET_CONTEXT;
 let master = new CheJsonRpcMasterApi(new WebsocketClient());
-
-var loader: Loader = new Loader();
+let loader = new Loader();
 
 master.connect(websocketURL).then(() => {
     getWorkspace(getWorkspaceKey())
@@ -71,7 +70,7 @@ function handleWorkspace(workspace: che.IWorkspace) {
  * @param workspace workspace
  */
 async function openIDE(workspace: che.IWorkspace) {
-    let startedWs: che.IWorkspace = await getWorkspace(workspace.id);
+    let startedWs = await getWorkspace(workspace.id);
     let machines = startedWs.runtime.machines;
 
     let ideUrl: string;
@@ -95,8 +94,7 @@ async function openIDE(workspace: che.IWorkspace) {
 /** Returns base websocket URL. */
 function websocketBaseURL(): string {
     let wsProtocol = 'http:' === document.location.protocol ? 'ws' : 'wss';
-    let wsUrl = wsProtocol + '://' + document.location.host;
-    return wsUrl;
+    return wsProtocol + '://' + document.location.host;
 }
 
 /** Returns workspace key from current address or empty string when it is undefined. */
