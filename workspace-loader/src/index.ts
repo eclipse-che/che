@@ -14,64 +14,66 @@ const css = require('./style.css');
 import { WebsocketClient } from './json-rpc/websocket-client';
 import { CheJsonRpcMasterApi } from './json-rpc/che-json-rpc-master-api';
 import { getWorkspace, startWorkspace } from './workspace';
+import { Loader } from './loader/loader'
 
-const DEFAULT_WEBSOCKET_CONTEXT = '/api/websocket';
+const WEBSOCKET_CONTEXT = '/api/websocket';
 
-let wsClient = new WebsocketClient();
-let wsUrl = formJsonRpcApiLocation(document.location) + DEFAULT_WEBSOCKET_CONTEXT;
-let masterApi = new CheJsonRpcMasterApi(wsClient);
-let workspaceKey = getWorkspaceKey();
-masterApi.connect(wsUrl).then(() => {
-    getWorkspace(getWorkspaceKey()).then(handleWorkspace).catch(err => {
-        console.error(err);
-    });
+let websocketURL = websocketBaseURL() + WEBSOCKET_CONTEXT;
+let master = new CheJsonRpcMasterApi(new WebsocketClient());
+let loader = new Loader();
+
+master.connect(websocketURL).then(() => {
+    getWorkspace(getWorkspaceKey())
+        .then(handleWorkspace)
+        .catch(err => {console.error(err);});
 });
 
-function handleWorkspace(ws: che.IWorkspace) {
-    let machineStatusHandler = (message: any) => {
+function handleWorkspace(workspace: che.IWorkspace) {
+    let startAfterStopping = false;
+
+    if (workspace.status === 'RUNNING') {
+        openIDE(workspace);
+        return;
+    }
+
+    /** Handle machine status */
+    master.subscribeEnvironmentStatus(workspace.id, (message: any) => {
         console.log('machine status', message);
-    };
-    let machineOutputHandler = (message: any) => {
-        document.getElementById("output").appendChild(document.createTextNode(message.text));
-    };
-    let workspaceStatusHandler = (message: any) => {
-        console.log('workspace status', message);
-        let workspaceStatus = message.status;
+    });
 
-        if (workspaceStatus === 'RUNNING') {
-            openIdeAfterRunning(ws);
+    /** Handle environment output */
+    master.subscribeEnvironmentOutput(workspace.id, (message: any) => {
+        loader.log(message.text);
+    });
+
+    /** Handle changing workspace status */
+    master.subscribeWorkspaceStatus(workspace.id, (message: any) => {
+        let status = message.status;
+
+        if (status === 'RUNNING') {
+            openIDE(workspace);
+        } else if (status === 'STOPPED' && startAfterStopping) {
+            startWorkspace(workspace);
         }
+    });
 
-    };
-
-    masterApi.subscribeEnvironmentStatus(ws.id, machineStatusHandler);
-    masterApi.subscribeEnvironmentOutput(ws.id, machineOutputHandler);
-    masterApi.subscribeWorkspaceStatus(ws.id, workspaceStatusHandler);
-
-    if (ws.status === 'RUNNING') {
-        openIdeAfterRunning(ws);
-    } else if (ws.status === 'STARTING') {
-        console.log("Workspace is STARTING, listening Workspace status");
-    } else {
-        console.log("Workspace is stopped, now try to start it");
-        startIde(ws);
+    if (workspace.status === 'STOPPED') {
+        startWorkspace(workspace);
+    } else if (workspace.status === 'STOPPING') {
+        startAfterStopping = true;
     }
 }
 
-function startIde(workspace: che.IWorkspace) {
-    startWorkspace(workspace).then((ws) => {
-        // workspace is starting now
-    }, (error: any) => {
-        console.error(error);
-        // TODO show error on UI
-    });
-}
-
-async function openIdeAfterRunning(ws: che.IWorkspace) {
-    let startedWs = await getWorkspace(ws.id);
+/**
+ * Opens IDE for the workspace.
+ * 
+ * @param workspace workspace
+ */
+async function openIDE(workspace: che.IWorkspace) {
+    let startedWs = await getWorkspace(workspace.id);
     let machines = startedWs.runtime.machines;
-    let ideUrl: string;
 
+    let ideUrl: string;
     Object.keys(machines).forEach((key, index) => {
         let servers = machines[key].servers;
         Object.keys(servers).forEach((key, index) => {
@@ -83,29 +85,20 @@ async function openIdeAfterRunning(ws: che.IWorkspace) {
     });
 
     if (!ideUrl) {
-        ideUrl = ws.links.ide;
+        ideUrl = workspace.links.ide;
     }
 
-    console.log('IDE url is: ', ideUrl);
     document.location.assign(ideUrl);
 }
 
-function formJsonRpcApiLocation(location: Location): string {
-    let wsUrl;
-    let wsProtocol;
-    wsProtocol = 'http:' === location.protocol ? 'ws' : 'wss';
-    wsUrl = wsProtocol + '://' + location.host;
-    console.log(wsUrl);
-    return wsUrl;
+/** Returns base websocket URL. */
+function websocketBaseURL(): string {
+    let wsProtocol = 'http:' === document.location.protocol ? 'ws' : 'wss';
+    return wsProtocol + '://' + document.location.host;
 }
 
 /** Returns workspace key from current address or empty string when it is undefined. */
 function getWorkspaceKey(): string {
-    let browserUrl = window.location.pathname;
-    let result: string;
-
-    result = browserUrl.substr(1);
-
+    let result: string = window.location.pathname.substr(1);
     return result.substr(result.indexOf('/') + 1, result.length);
-
 }
