@@ -39,8 +39,6 @@ export class Loader {
     }
 
     onclick(event: Event): void {
-        console.log(">> click");
-
         if (document.getElementById('workspace-loader').hasAttribute("max")) {
             document.getElementById('workspace-loader').removeAttribute("max");
             document.getElementById('workspace-console').removeAttribute("max");
