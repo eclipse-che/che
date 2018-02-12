@@ -39,7 +39,7 @@ if (fs.existsSync(theiaPath)) {
 else {
     let pluginString = process.env.THEIA_PLUGINS;
     let pluginList = [];
-    if (pluginString) {
+    if (pluginString && pluginString.length !== 0) {
         let arr = JSON.parse(pluginString);
         pluginList = [...arr];
         theiaConfig = defaultConfig;
@@ -53,7 +53,7 @@ else {
         handlePromise(callYarn().then(callBuild).then(callRun));
     } else {
         const defaultTheia = `/home/default/theia`;
-        shell(`cp -r ${src}/* ${theiaRoot}`);
+        cp.execSync(`cp -r ${defaultTheia}/* ${theiaRoot}`);
         handlePromise(callRun());
     }
 
