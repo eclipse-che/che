@@ -250,15 +250,16 @@ public class OrionEditorWidget extends Composite
 
   @Override
   public void setValue(String newValue, final ContentInitializedHandler initializationHandler) {
-    editorOverlay.addEventListener(
-        OrionInputChangedEventOverlay.TYPE,
-        (OrionEditorOverlay.EventHandler<OrionInputChangedEventOverlay>)
-            event -> {
+    editorOverlay
+        .getTextView()
+        .addEventListener(
+            OrionInputChangedEventOverlay.TYPE,
+            parameter -> {
               if (initializationHandler != null) {
                 initializationHandler.onContentInitialized();
               }
             },
-        true);
+            true);
 
     this.editorViewOverlay.setContents(newValue, modeName);
     this.editorOverlay.getUndoStack().reset();
@@ -825,6 +826,10 @@ public class OrionEditorWidget extends Composite
 
   public void setTopLine(int line) {
     editorOverlay.getTextView().setTopIndex(line);
+  }
+
+  public void destroy() {
+    editorOverlay.getTextView().destroy();
   }
 
   /**
