@@ -221,6 +221,15 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <!-- Do not exclude .gitignore file from resources. See more: https://maven.apache.org/plugins/maven-resources-plugin/copy-resources-mojo.html-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <addDefaultExcludes>false</addDefaultExcludes>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
