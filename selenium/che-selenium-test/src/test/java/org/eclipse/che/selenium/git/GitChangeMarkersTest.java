@@ -185,6 +185,7 @@ public class GitChangeMarkersTest {
     askForValueDialog.typeAndWaitText("newFile");
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
+    editor.closeFileByNameWithSaving("Main");
 
     // Add file to index
     menu.runCommand(GIT, ADD_TO_INDEX);
@@ -194,7 +195,7 @@ public class GitChangeMarkersTest {
     // Make a change
     editor.selectTabByName("newFile");
     editor.typeTextIntoEditor("change", 1);
-
+    editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitNoGitChangeMarkers();
   }
 }

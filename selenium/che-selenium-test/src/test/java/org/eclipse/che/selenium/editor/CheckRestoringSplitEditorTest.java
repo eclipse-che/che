@@ -106,7 +106,7 @@ public class CheckRestoringSplitEditorTest {
       fail("Known issue https://github.com/eclipse/che/issues/7551", ex);
     }
 
-    notificationsPopupPanel.waitPopUpPanelsIsClosed();
+    notificationsPopupPanel.waitPopupPanelsAreClosed();
     checkSplitdEditorAfterRefreshing(
         1, javaClassTab, expectedTextFromEditor.get(0), cursorPositionForJavaFile);
     checkSplitdEditorAfterRefreshing(

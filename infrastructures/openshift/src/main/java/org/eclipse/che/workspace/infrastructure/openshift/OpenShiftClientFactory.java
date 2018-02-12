@@ -22,6 +22,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * @author Anton Korneta
  */
 @Singleton
-public class OpenShiftClientFactory {
+public class OpenShiftClientFactory extends KubernetesClientFactory {
 
   private static final Logger LOG = LoggerFactory.getLogger(OpenShiftClientFactory.class);
 
@@ -38,11 +39,12 @@ public class OpenShiftClientFactory {
 
   @Inject
   public OpenShiftClientFactory(
-      @Nullable @Named("che.infra.openshift.master_url") String masterUrl,
-      @Nullable @Named("che.infra.openshift.username") String username,
-      @Nullable @Named("che.infra.openshift.password") String password,
-      @Nullable @Named("che.infra.openshift.oauth_token") String oauthToken,
-      @Nullable @Named("che.infra.openshift.trust_certs") Boolean doTrustCerts) {
+      @Nullable @Named("che.infra.kubernetes.master_url") String masterUrl,
+      @Nullable @Named("che.infra.kubernetes.username") String username,
+      @Nullable @Named("che.infra.kubernetes.password") String password,
+      @Nullable @Named("che.infra.kubernetes.oauth_token") String oauthToken,
+      @Nullable @Named("che.infra.kubernetes.trust_certs") Boolean doTrustCerts) {
+    super(masterUrl, username, password, oauthToken, doTrustCerts);
     OpenShiftConfigBuilder configBuilder = new OpenShiftConfigBuilder();
     if (!isNullOrEmpty(masterUrl)) {
       configBuilder.withMasterUrl(masterUrl);

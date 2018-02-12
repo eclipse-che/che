@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.selenium.refactor.packages;
 
-import static org.testng.Assert.fail;
-
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -28,7 +26,6 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -94,7 +91,7 @@ public class RenamePackageSpringTest {
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     loader.waitOnClosed();
     refactor.sendKeysIntoField(NEW_NAME_PACKAGE);
-    waitTextIntoNewNameField(NEW_NAME_PACKAGE);
+    refactor.waitTextIntoNewNameField(NEW_NAME_PACKAGE);
     loader.waitOnClosed();
     refactor.clickOkButtonRefactorForm();
     refactor.waitRenamePackageFormIsClosed();
@@ -111,7 +108,7 @@ public class RenamePackageSpringTest {
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     loader.waitOnClosed();
     refactor.sendKeysIntoField(OLD_NAME_PACKAGE);
-    waitTextIntoNewNameField(OLD_NAME_PACKAGE);
+    refactor.waitTextIntoNewNameField(OLD_NAME_PACKAGE);
     loader.waitOnClosed();
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
@@ -134,21 +131,11 @@ public class RenamePackageSpringTest {
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     loader.waitOnClosed();
     refactor.sendKeysIntoField("org.eclipse.dev.examples");
-    waitTextIntoNewNameField(NEW_NAME_PACKAGE);
+    refactor.waitTextIntoNewNameField(NEW_NAME_PACKAGE);
     loader.waitOnClosed();
     refactor.clickOkButtonRefactorForm();
     askDialog.acceptDialogWithText(WARNING_TEXT);
     refactor.waitRenamePackageFormIsClosed();
     projectExplorer.waitItem(PROJECT_NAME_2 + "/src/main/java/org/eclipse/dev/examples");
-  }
-
-  private void waitTextIntoNewNameField(String expectedText) {
-    try {
-      refactor.waitTextIntoNewNameField(expectedText);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      refactor.clickCancelButtonRefactorForm();
-      fail("Known issue https://github.com/eclipse/che/issues/7500", ex);
-    }
   }
 }

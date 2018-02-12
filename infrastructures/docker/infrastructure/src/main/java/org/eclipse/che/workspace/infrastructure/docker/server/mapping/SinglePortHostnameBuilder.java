@@ -14,6 +14,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Provider;
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.inject.ConfigurationException;
 
 /**
  * Produces host names in form:
@@ -92,5 +97,38 @@ public class SinglePortHostnameBuilder {
       normalized = normalized.substring(0, normalized.length() - 1);
     }
     return normalized;
+  }
+
+  public static class SinglePortHostnameBuilderProvider
+      implements Provider<SinglePortHostnameBuilder> {
+
+    private final SinglePortHostnameBuilder instance;
+
+    @Inject
+    public SinglePortHostnameBuilderProvider(
+        @Named("che.single.port") boolean isSinglePortEnabled,
+        @Nullable @Named("che.docker.ip") String internalIpOfContainers,
+        @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
+        @Nullable @Named("che.singleport.wildcard_domain.host") String wildcardHost) {
+      if (isSinglePortEnabled && internalIpOfContainers == null && externalIpOfContainers == null) {
+        throw new ConfigurationException(
+            "Value of both of the properties 'che.docker.ip' and 'che.docker.ip.external' is null,"
+                + " which is unsuitable for the single-port mode");
+      }
+      this.instance =
+          isSinglePortEnabled
+              ? new SinglePortHostnameBuilder(
+                  externalIpOfContainers, internalIpOfContainers, wildcardHost)
+              : null;
+    }
+
+    @Override
+    public SinglePortHostnameBuilder get() {
+      if (instance == null) {
+        throw new IllegalStateException(
+            "This class may not be used other than in single-port mode.");
+      }
+      return instance;
+    }
   }
 }

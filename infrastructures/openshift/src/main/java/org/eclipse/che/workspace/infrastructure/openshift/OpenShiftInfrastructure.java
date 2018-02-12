@@ -25,8 +25,9 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.DockerImageEnvironmentConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.convert.DockerImageEnvironmentConverter;
 
 /** @author Sergii Leshchenko */
 @Singleton
@@ -47,7 +48,8 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
       DockerImageEnvironmentConverter dockerImageEnvConverter) {
     super(
         NAME,
-        ImmutableSet.of(OpenShiftEnvironment.TYPE, DockerImageEnvironment.TYPE),
+        ImmutableSet.of(
+            OpenShiftEnvironment.TYPE, KubernetesEnvironment.TYPE, DockerImageEnvironment.TYPE),
         eventService,
         internalEnvProvisioners);
     this.runtimeContextFactory = runtimeContextFactory;
@@ -71,9 +73,17 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
     if (source instanceof OpenShiftEnvironment) {
       return (OpenShiftEnvironment) source;
     }
-    if (source instanceof DockerImageEnvironment) {
-      return dockerImageEnvConverter.convert((DockerImageEnvironment) source);
+
+    if (source instanceof KubernetesEnvironment) {
+      return new OpenShiftEnvironment((KubernetesEnvironment) source);
     }
+
+    if (source instanceof DockerImageEnvironment) {
+      KubernetesEnvironment k8sEnv =
+          dockerImageEnvConverter.convert((DockerImageEnvironment) source);
+      return new OpenShiftEnvironment(k8sEnv);
+    }
+
     throw new InternalInfrastructureException(
         format(
             "Environment type '%s' is not supported. Supported environment types: %s",

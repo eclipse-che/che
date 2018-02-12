@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEME
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
@@ -100,8 +101,9 @@ public class Workspaces {
         .getAttribute("data-ws-status");
   }
 
-  public void waitWorkspaceStatusIs(String workspaceName, String workspaceStatus) {
-    new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+  public void waitWorkspaceStatus(String workspaceName, String workspaceStatus) {
+    // we need long timeout for OCP
+    new WebDriverWait(seleniumWebDriver, PREPARING_WS_TIMEOUT_SEC)
         .until(
             new ExpectedCondition<Boolean>() {
               @Override
@@ -240,7 +242,8 @@ public class Workspaces {
 
   /** wait the workspace is not present on dashboard */
   public void waitWorkspaceIsNotPresent(String workspaceName) {
-    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
+    // we need long timeout for OCP
+    new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
         .until(
             invisibilityOfElementLocated(
                 By.xpath(format(Locators.WORKSPACE_ITEM_NAME, workspaceName))));

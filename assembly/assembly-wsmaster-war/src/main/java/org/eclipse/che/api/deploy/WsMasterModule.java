@@ -77,7 +77,10 @@ import org.eclipse.che.security.PBKDF2PasswordEncryptor;
 import org.eclipse.che.security.PasswordEncryptor;
 import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
 import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfraModule;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructure;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfraModule;
+import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftInfrastructure;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.flywaydb.core.internal.util.PlaceholderReplacer;
 
@@ -229,8 +232,10 @@ public class WsMasterModule extends AbstractModule {
             .properties(persistenceProperties));
 
     String infrastructure = System.getenv("CHE_INFRASTRUCTURE_ACTIVE");
-    if ("openshift".equals(infrastructure)) {
+    if (OpenShiftInfrastructure.NAME.equals(infrastructure)) {
       install(new OpenShiftInfraModule());
+    } else if (KubernetesInfrastructure.NAME.equals(infrastructure)) {
+      install(new KubernetesInfraModule());
     } else {
       install(new LocalDockerModule());
       install(new DockerInfraModule());
