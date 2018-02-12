@@ -17,6 +17,7 @@ import com.google.common.base.Optional;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Overflow;
+import com.google.gwt.dom.client.Style.WhiteSpace;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -186,7 +187,7 @@ public class SignatureWidget implements EventListener {
     }
 
     HTML widget = new HTML(documentation);
-    widget.setWordWrap(true);
+    widget.getElement().getStyle().setWhiteSpace(WhiteSpace.PRE_LINE);
     widget.getElement().getStyle().setColor(theme.completionPopupItemTextColor());
     widget.getElement().getStyle().setFontSize(13, Style.Unit.PX);
     widget.getElement().getStyle().setMarginLeft(4, Style.Unit.PX);
