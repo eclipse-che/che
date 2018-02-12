@@ -74,16 +74,6 @@ async function openIDE(workspace: che.IWorkspace) {
     let startedWs: che.IWorkspace = await getWorkspace(workspace.id);
     let machines = startedWs.runtime.machines;
 
-    // for (let machineName in machines) {
-    //     let servers = machines[machineName].servers;
-    //     for (let serverId in servers) {
-    //         let attributes = servers[serverId].attributes;
-    //         if (attributes['type'] === 'ide') {
-    //             console.log('Open IDE: ', servers[serverId].url);
-    //         }
-    //     }
-    // }
-    
     let ideUrl: string;
     Object.keys(machines).forEach((key, index) => {
         let servers = machines[key].servers;
@@ -99,8 +89,7 @@ async function openIDE(workspace: che.IWorkspace) {
         ideUrl = workspace.links.ide;
     }
 
-    console.log('IDE URL: ', ideUrl);
-    // document.location.assign(ideUrl);
+    document.location.assign(ideUrl);
 }
 
 /** Returns base websocket URL. */
