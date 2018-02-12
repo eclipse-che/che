@@ -39,7 +39,7 @@ public class UploadFolderFromZip {
   }
 
   private interface Locators {
-    String UPLOAD_FOLDER_ZIP_FORM = "//div[text()='Upload Folder']/ancestor::div[3]";
+    String UPLOAD_FOLDER_ZIP_FORM = "//table[@title='Upload Folder']";
     String UPLOAD_FOLDER_ZIP_SELECT = "gwt-debug-file-uploadFile-ChooseFile";
     String UPLOAD_FOLDER_ZIP_OVERWRITE = "gwt-debug-file-uploadFolder-overwrite";
     String UPLOAD_FOLDER_ZIP_SKIP_ROOT = "gwt-debug-file-uploadFolder-skipFirstLevel";

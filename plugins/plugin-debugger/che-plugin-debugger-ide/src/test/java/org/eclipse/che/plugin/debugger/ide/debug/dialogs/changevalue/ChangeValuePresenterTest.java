@@ -85,7 +85,7 @@ public class ChangeValuePresenterTest extends BaseTest {
     verify(view).focusInValueField();
     verify(view).selectAllText();
     verify(view).setEnableChangeButton(eq(DISABLE_BUTTON));
-    verify(view).show();
+    verify(view).showDialog();
   }
 
   @Test

@@ -10,10 +10,6 @@
  */
 package org.eclipse.che.ide.upload.file;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -56,67 +52,50 @@ public class UploadFileViewImpl extends Window implements UploadFileView {
       CoreLocalizationConstant locale,
       AgentURLModifier agentURLModifier) {
 
-    this.agentURLModifier = agentURLModifier;
-    setTitle(locale.uploadFileTitle());
+    this.setTitle(locale.uploadFileTitle());
     setWidget(uploadFileViewBinder.createAndBindUi(this));
     bind();
 
+    btnCancel =
+        addFooterButton(
+            locale.cancel(), "file-uploadFile-cancel", event -> delegate.onCancelClicked());
+
     btnUpload =
-        createButton(
+        addFooterButton(
             locale.uploadButton(),
             "file-uploadFile-upload",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onUploadClicked();
-              }
-            });
-
-    btnUpload.addStyleName(resources.windowCss().primaryButton());
-    btnUpload.addStyleName(resources.windowCss().buttonAlignRight());
-    addButtonToFooter(btnUpload);
-
-    btnCancel =
-        createButton(
-            locale.cancel(),
-            "file-uploadFile-cancel",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-              }
-            });
-    btnCancel.addStyleName(resources.windowCss().buttonAlignRight());
-    addButtonToFooter(btnCancel);
+            event -> delegate.onUploadClicked(),
+            true);
+    this.agentURLModifier = agentURLModifier;
   }
 
   /** Bind handlers. */
   private void bind() {
-    submitForm.addSubmitCompleteHandler(
-        new FormPanel.SubmitCompleteHandler() {
-          @Override
-          public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-            delegate.onSubmitComplete(event.getResults());
-          }
-        });
+    submitForm.addSubmitCompleteHandler(event -> delegate.onSubmitComplete(event.getResults()));
   }
 
   /** {@inheritDoc} */
   @Override
   public void showDialog() {
+    show();
+  }
+
+  @Override
+  protected void onShow() {
     addFile();
-    this.show();
   }
 
   /** {@inheritDoc} */
   @Override
   public void closeDialog() {
-    this.hide();
-    this.onClose();
+    hide();
+  }
+
+  @Override
+  protected void onHide() {
     btnUpload.setEnabled(false);
     overwrite.setValue(false);
+    uploadPanel.remove(file);
   }
 
   /** {@inheritDoc} */
@@ -172,26 +151,13 @@ public class UploadFileViewImpl extends Window implements UploadFileView {
     return overwrite.getValue();
   }
 
-  /** {@inheritDoc} */
-  @Override
-  protected void onClose() {
-    uploadPanel.remove(file);
-    super.onClose();
-  }
-
   private void addFile() {
     file = new FileUpload();
     file.setHeight("22px");
     file.setWidth("100%");
     file.setName("file");
     file.ensureDebugId("file-uploadFile-ChooseFile");
-    file.addChangeHandler(
-        new ChangeHandler() {
-          @Override
-          public void onChange(ChangeEvent event) {
-            delegate.onFileNameChanged();
-          }
-        });
+    file.addChangeHandler(event -> delegate.onFileNameChanged());
     uploadPanel.insert(file, 0);
   }
 }

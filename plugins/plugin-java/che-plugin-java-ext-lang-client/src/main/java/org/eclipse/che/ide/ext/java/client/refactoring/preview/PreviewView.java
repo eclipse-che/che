@@ -38,7 +38,7 @@ interface PreviewView extends View<PreviewView.ActionDelegate> {
    *
    * @param title the name of the preview window
    */
-  void setTitle(String title);
+  void setTitleCaption(String title);
 
   /**
    * Show error message into bottom of view.
@@ -55,10 +55,10 @@ interface PreviewView extends View<PreviewView.ActionDelegate> {
   void showDiff(@Nullable ChangePreview preview);
 
   /** Hide Move panel. */
-  void hide();
+  void close();
 
   /** Show Preview panel with the special information. */
-  void show();
+  void showDialog();
 
   interface ActionDelegate {
     /** Performs some actions in response to user's clicking on the 'Cancel' button. */

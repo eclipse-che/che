@@ -15,6 +15,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import javax.inject.Named;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class RemoveProjectOnWorkspaceRemove implements EventSubscriber<WorkspaceRemovedEvent> {
+
   private static final Logger LOG = LoggerFactory.getLogger(RemoveProjectOnWorkspaceRemove.class);
 
   private final OpenShiftClientFactory clientFactory;
@@ -39,7 +41,7 @@ public class RemoveProjectOnWorkspaceRemove implements EventSubscriber<Workspace
 
   @Inject
   public RemoveProjectOnWorkspaceRemove(
-      @Nullable @Named("che.infra.openshift.project") String projectName,
+      @Nullable @Named("che.infra.kubernetes.namespace") String projectName,
       OpenShiftClientFactory clientFactory) {
     this.projectName = projectName;
     this.clientFactory = clientFactory;
@@ -66,6 +68,13 @@ public class RemoveProjectOnWorkspaceRemove implements EventSubscriber<Workspace
 
   @VisibleForTesting
   void doRemoveProject(String projectName) throws InfrastructureException {
-    clientFactory.create().projects().withName(projectName).delete();
+    try {
+      clientFactory.create().projects().withName(projectName).delete();
+    } catch (KubernetesClientException e) {
+      if (!(e.getCode() == 403)) {
+        throw new InfrastructureException(e.getMessage(), e);
+      }
+      // project doesn't exist
+    }
   }
 }

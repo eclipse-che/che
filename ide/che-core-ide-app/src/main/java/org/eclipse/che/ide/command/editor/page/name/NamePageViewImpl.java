@@ -53,6 +53,11 @@ public class NamePageViewImpl extends Composite implements NamePageView {
     commandName.setValue(name);
   }
 
+  @Override
+  public void setFocusOnName() {
+    commandName.setFocus(true);
+  }
+
   @UiHandler({"commandName"})
   void onNameChanged(KeyUpEvent event) {
     delegate.onNameChanged(commandName.getValue());

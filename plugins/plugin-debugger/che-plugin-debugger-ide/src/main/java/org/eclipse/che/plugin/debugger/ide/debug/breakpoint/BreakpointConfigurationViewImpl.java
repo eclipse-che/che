@@ -18,7 +18,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
@@ -64,19 +63,16 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
     this.setTitle(locale.breakpointConfigurationTitle());
     ensureDebugId("breakpoint-configuration-window");
 
-    Button closeButton =
-        createButton(
-            locale.evaluateExpressionViewCloseButtonTitle(),
-            UIObject.DEBUG_ID_PREFIX + "close-btn",
-            clickEvent -> delegate.onCloseClicked());
-    addButtonToFooter(closeButton);
+    addFooterButton(
+        locale.evaluateExpressionViewCloseButtonTitle(),
+        UIObject.DEBUG_ID_PREFIX + "close-btn",
+        clickEvent -> delegate.onCloseClicked());
 
-    Button applyButton =
-        createButton(
-            locale.viewBreakpointConfigurationApplyButton(),
-            UIObject.DEBUG_ID_PREFIX + "apply-btn",
-            clickEvent -> delegate.onApplyClicked());
-    addButtonToFooter(applyButton);
+    addFooterButton(
+        locale.viewBreakpointConfigurationApplyButton(),
+        UIObject.DEBUG_ID_PREFIX + "apply-btn",
+        clickEvent -> delegate.onApplyClicked(),
+        true);
   }
 
   @Override
@@ -86,8 +82,7 @@ public class BreakpointConfigurationViewImpl extends Window implements Breakpoin
 
   @Override
   public void showDialog() {
-    this.show();
-    breakpointCondition.setFocus(true);
+    show(breakpointCondition);
   }
 
   @Override

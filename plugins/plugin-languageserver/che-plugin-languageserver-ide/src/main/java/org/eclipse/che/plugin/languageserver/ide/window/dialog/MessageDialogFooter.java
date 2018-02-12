@@ -22,7 +22,6 @@ import com.google.inject.Inject;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.ui.UILocalizationConstant;
-import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.lsp4j.MessageActionItem;
 
 /**
@@ -33,7 +32,7 @@ import org.eclipse.lsp4j.MessageActionItem;
  */
 public class MessageDialogFooter implements IsWidget {
 
-  private static final Window.Resources resources = GWT.create(Window.Resources.class);
+  //  private static final Window.Resources resources = GWT.create(Window.Resources.class);
   /** The UI binder instance. */
   private static ConfirmDialogFooterUiBinder uiBinder =
       GWT.create(ConfirmDialogFooterUiBinder.class);

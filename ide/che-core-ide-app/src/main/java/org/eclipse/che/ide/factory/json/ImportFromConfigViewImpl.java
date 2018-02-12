@@ -36,7 +36,7 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
 
   @UiField FormPanel uploadForm;
   @UiField Label errorMessage;
-  FileUpload fileUpload;
+  private FileUpload fileUpload;
 
   private ActionDelegate delegate;
 
@@ -50,31 +50,18 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
     this.setTitle(locale.importFromConfigurationTitle());
     setWidget(importFromConfigViewBinder.createAndBindUi(this));
 
+    addFooterButton(
+        locale.cancelButton(),
+        "import-from-config-btn-cancel",
+        event -> delegate.onCancelClicked());
+
     buttonImport =
-        createButton(
+        addFooterButton(
             locale.importButton(),
             "import-from-config-btn-import",
-            event -> delegate.onImportClicked());
-    buttonImport.addStyleName(resources.windowCss().primaryButton());
-    buttonImport.addStyleName(resources.windowCss().buttonAlignRight());
-    addButtonToFooter(buttonImport);
+            event -> delegate.onImportClicked(),
+            true);
 
-    Button buttonCancel =
-        createButton(
-            locale.cancelButton(),
-            "import-from-config-btn-cancel",
-            event -> delegate.onCancelClicked());
-    buttonCancel.addStyleName(resources.windowCss().buttonAlignRight());
-    addButtonToFooter(buttonCancel);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void showDialog() {
-    uploadForm.clear();
-
-    errorMessage.setText("");
-    fileContent = null;
     fileUpload = new FileUpload();
     fileUpload.setHeight("22px");
     fileUpload.setWidth("100%");
@@ -85,17 +72,21 @@ public class ImportFromConfigViewImpl extends Window implements ImportFromConfig
     fileUpload.addChangeHandler(event -> buttonImport.setEnabled(fileUpload.getFilename() != null));
 
     uploadForm.add(fileUpload);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void showDialog() {
+    errorMessage.setText("");
+    fileContent = null;
 
     this.show();
   }
 
   /** {@inheritDoc} */
   @Override
-  public void onClose() {
+  public void closeDialog() {
     hide();
-
-    uploadForm.remove(fileUpload);
-    fileUpload = null;
   }
 
   /** {@inheritDoc} */

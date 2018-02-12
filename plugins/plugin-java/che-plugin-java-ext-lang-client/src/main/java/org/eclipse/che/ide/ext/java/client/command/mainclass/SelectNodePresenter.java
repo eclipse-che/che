@@ -65,7 +65,7 @@ public class SelectNodePresenter implements SelectNodeView.ActionDelegate {
 
     view.setStructure(nodes);
 
-    view.show();
+    view.showDialog();
   }
 
   @Override

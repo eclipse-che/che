@@ -46,7 +46,7 @@ public class GitBranches {
     String DELETE_BTN_ID = "git-branches-delete";
     String RENAME_BTN_ID = "git-branches-rename";
     String CLOSE_BTN_ID = "git-branches-close";
-    String DELBRANCH_FORM = "//div[text()='Delete branch']/ancestor::div[3]"; // TODO CREATE ID
+    String DELBRANCH_FORM = "//table[@title='Delete branch']"; // TODO CREATE ID
     String DELBRANCH_BUTN_OK = "ask-dialog-ok";
     String SEARCH_FILTER_LABEL_ID = "gwt-debug-git-branches-search_filter";
   }

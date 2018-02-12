@@ -34,7 +34,7 @@ public interface MessageDialogView {
   void setContent(@NotNull IsWidget content);
 
   /** Sets the window title. */
-  void setTitle(@NotNull String title);
+  void setTitleCaption(@NotNull String title);
 
   /** Sets the Confirm button text. */
   void setConfirmButtonText(@NotNull String text);

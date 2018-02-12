@@ -62,9 +62,7 @@ public class OnWorkspaceStartProjectInitializer {
 
   private void initializeNotRegisteredProjects() throws ServerException {
     for (String wsPath : fsManager.getDirWsPaths(ROOT)) {
-      if (!projectConfigRegistry.isRegistered(wsPath)) {
-        projectConfigRegistry.put(wsPath, true, true);
-      }
+      projectConfigRegistry.putIfAbsent(wsPath, true, true);
     }
   }
 

@@ -62,7 +62,7 @@ public class InputDialogPresenter implements InputDialog, InputDialogView.Action
       final UILocalizationConstant localizationConstant) {
     this.view = view;
     this.view.setContent(label);
-    this.view.setTitle(title);
+    this.view.setTitleCaption(title);
     this.view.setValue(initialValue);
     this.view.setSelectionStartIndex(selectionStartIndex);
     this.view.setSelectionLength(selectionLength);
@@ -86,7 +86,7 @@ public class InputDialogPresenter implements InputDialog, InputDialogView.Action
       final UILocalizationConstant localizationConstant) {
     this.view = view;
     this.view.setContent(label);
-    this.view.setTitle(title);
+    this.view.setTitleCaption(title);
     this.view.setValue(initialValue);
     this.view.setSelectionStartIndex(selectionStartIndex);
     this.view.setSelectionLength(selectionLength);

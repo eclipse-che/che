@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.languageserver.ide.window.dialog;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -44,7 +45,7 @@ public class MessageDialogViewImpl extends Window implements MessageDialogView {
     setWidget(widget);
 
     this.footer = footer;
-    getFooter().add(this.footer);
+    addFooterWidget(footer);
   }
 
   @Override
@@ -64,8 +65,13 @@ public class MessageDialogViewImpl extends Window implements MessageDialogView {
   }
 
   @Override
-  protected void onEnterClicked() {
+  public void onEnterPress(NativeEvent evt) {
     delegate.onEnterClicked();
+  }
+
+  @Override
+  public void setTitleCaption(String title) {
+    setTitle(title);
   }
 
   @Override

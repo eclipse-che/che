@@ -13,57 +13,47 @@ package org.eclipse.che.workspace.infrastructure.openshift.environment;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.openshift.api.model.Route;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Warning;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
  * Holds objects of OpenShift environment.
  *
  * @author Sergii Leshchenko
  */
-public class OpenShiftEnvironment extends InternalEnvironment {
+public class OpenShiftEnvironment extends KubernetesEnvironment {
 
   public static final String TYPE = "openshift";
 
-  private final Map<String, Pod> pods;
-  private final Map<String, Service> services;
   private final Map<String, Route> routes;
-  private final Map<String, PersistentVolumeClaim> persistentVolumeClaims;
+
+  public OpenShiftEnvironment(KubernetesEnvironment k8sEnv) {
+    super(k8sEnv);
+    this.routes = new HashMap<>();
+  }
 
   public static Builder builder() {
     return new Builder();
   }
 
-  private OpenShiftEnvironment(
+  public OpenShiftEnvironment(
       InternalRecipe internalRecipe,
       Map<String, InternalMachineConfig> machines,
       List<Warning> warnings,
       Map<String, Pod> pods,
       Map<String, Service> services,
-      Map<String, Route> routes,
-      Map<String, PersistentVolumeClaim> persistentVolumeClaims) {
-    super(internalRecipe, machines, warnings);
-    this.pods = pods;
-    this.services = services;
+      Map<String, Ingress> ingresses,
+      Map<String, PersistentVolumeClaim> persistentVolumeClaims,
+      Map<String, Route> routes) {
+    super(internalRecipe, machines, warnings, pods, services, ingresses, persistentVolumeClaims);
     this.routes = routes;
-    this.persistentVolumeClaims = persistentVolumeClaims;
-  }
-
-  /** Returns pods that should be created when environment starts. */
-  public Map<String, Pod> getPods() {
-    return pods;
-  }
-
-  /** Returns services that should be created when environment starts. */
-  public Map<String, Service> getServices() {
-    return services;
   }
 
   /** Returns services that should be created when environment starts. */
@@ -71,19 +61,8 @@ public class OpenShiftEnvironment extends InternalEnvironment {
     return routes;
   }
 
-  /** Returns PVCs that should be created when environment starts. */
-  public Map<String, PersistentVolumeClaim> getPersistentVolumeClaims() {
-    return persistentVolumeClaims;
-  }
-
-  public static class Builder {
-    private InternalRecipe internalRecipe;
-    private final Map<String, InternalMachineConfig> machines = new HashMap<>();
-    private final List<Warning> warnings = new ArrayList<>();
-    private final Map<String, Pod> pods = new HashMap<>();
-    private final Map<String, Service> services = new HashMap<>();
+  public static class Builder extends KubernetesEnvironment.Builder {
     private final Map<String, Route> routes = new HashMap<>();
-    private final Map<String, PersistentVolumeClaim> persistentVolumeClaims = new HashMap<>();
 
     private Builder() {}
 
@@ -112,8 +91,8 @@ public class OpenShiftEnvironment extends InternalEnvironment {
       return this;
     }
 
-    public Builder setRoutes(Map<String, Route> route) {
-      this.routes.putAll(route);
+    public Builder setIngresses(Map<String, Ingress> ingresses) {
+      this.ingresses.putAll(ingresses);
       return this;
     }
 
@@ -122,9 +101,21 @@ public class OpenShiftEnvironment extends InternalEnvironment {
       return this;
     }
 
+    public Builder setRoutes(Map<String, Route> route) {
+      this.routes.putAll(route);
+      return this;
+    }
+
     public OpenShiftEnvironment build() {
       return new OpenShiftEnvironment(
-          internalRecipe, machines, warnings, pods, services, routes, persistentVolumeClaims);
+          internalRecipe,
+          machines,
+          warnings,
+          pods,
+          services,
+          ingresses,
+          persistentVolumeClaims,
+          routes);
     }
   }
 }

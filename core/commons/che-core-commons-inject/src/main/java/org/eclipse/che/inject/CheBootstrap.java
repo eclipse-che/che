@@ -32,8 +32,10 @@ import java.nio.charset.Charset;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
@@ -98,9 +100,24 @@ import org.slf4j.LoggerFactory;
  * <tr><td>${root_data}/input/</td><td>&nbsp;</td><td>&nbsp;</td><td>${root_data}/input/</td></tr>
  * </table>
  *
+ * During code evolution might be the case when someone will want to rename some property. This
+ * brings a couple of problems like support of old property name in external plugins and support old
+ * configuration values in code with the new property name. To cover these cases there is a file
+ * che_aliases.properties that contains old names of all existed properties. It has such format
+ * current_name =old_name, very_old_name. In this case will be such binding.
+ *
+ * <p>Always current_name = current_value if old_name property exist it will be binded to old_value
+ * and current_name = old_value and very_old_name = old_value if very_old_name property exist it
+ * will be binded to very_old_value, and current_name = very_old_value and old_name = very_old_value
+ *
+ * <p>NOTE: it's prohibited to use a different name for same property on the same level. From the
+ * example above - you can use environment property CHE_CURRENT_NAME and CHE_OLD_NAME. But you can
+ * use it on a different level, for instance, environment property and system property.
+ *
  * @author gazarenkov
  * @author andrew00x
  * @author Florent Benoit
+ * @author Sergii Kabashniuk
  */
 public class CheBootstrap extends EverrestGuiceContextListener {
   private static final Logger LOG = LoggerFactory.getLogger(CheBootstrap.class);
@@ -319,10 +336,18 @@ public class CheBootstrap extends EverrestGuiceContextListener {
       Pattern.compile("\\$\\{[^\\}^\\$\\{]+\\}");
 
   abstract static class AbstractConfigurationModule extends AbstractModule {
-    final Map<String, Set<String>> aliases;
+    final Map<String, Set<String>> bindMap;
 
     AbstractConfigurationModule(Map<String, Set<String>> aliases) {
-      this.aliases = aliases;
+      this.bindMap = new HashMap<>(aliases);
+      for (Entry<String, Set<String>> entry : aliases.entrySet()) {
+        for (String alias : entry.getValue()) {
+          Set<String> newAliases = new HashSet<>(entry.getValue());
+          newAliases.remove(alias);
+          newAliases.add(entry.getKey());
+          bindMap.put(alias, newAliases);
+        }
+      }
     }
 
     protected void bindConf(File confDir) {
@@ -410,7 +435,7 @@ public class CheBootstrap extends EverrestGuiceContextListener {
 
     private void bindProperty(String prefix, String name, String value) {
       String key = prefix == null ? name : (prefix + name);
-      Set<String> aliasesForName = aliases.get(name);
+      Set<String> aliasesForName = bindMap.get(name);
       if (value == null) {
         bind(String.class).annotatedWith(Names.named(key)).toProvider(Providers.<String>of(null));
         if (aliasesForName != null) {

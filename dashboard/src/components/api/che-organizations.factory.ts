@@ -511,6 +511,10 @@ export class CheOrganization implements che.api.ICheOrganization {
 
       return this.cheResourcesDistribution.fetchAvailableOrganizationResources(organization.id).then(() => {
         let resource = this.cheResourcesDistribution.getOrganizationAvailableResourceByType(organization.id, this.resourceLimits.RAM);
+        if (resource.amount === -1) {
+          return 'RAM is not limited'
+        }
+
         return resource ? 'Available RAM: ' + (resource.amount / 1024) + 'GB' : null;
       });
     });

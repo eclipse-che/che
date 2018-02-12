@@ -48,7 +48,11 @@ public class IdentityIdLoggerFilter implements Filter {
       MDC.put(IDENTITY_ID_MDC_KEY, subject.getUserId());
     }
 
-    filterChain.doFilter(request, response);
+    try {
+      filterChain.doFilter(request, response);
+    } finally {
+      MDC.remove(IDENTITY_ID_MDC_KEY);
+    }
   }
 
   @Override

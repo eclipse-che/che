@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import org.eclipse.che.ide.ui.window.Window;
+import org.eclipse.che.ide.ui.window.WindowClientBundle;
 
 /**
  * The footer show on choice dialogs.
@@ -30,7 +30,6 @@ import org.eclipse.che.ide.ui.window.Window;
  */
 public class ChoiceDialogFooter implements IsWidget {
 
-  private static final Window.Resources resources = GWT.create(Window.Resources.class);
   /** The UI binder instance. */
   private static ChoiceDialogFooterUiBinder uiBinder = GWT.create(ChoiceDialogFooterUiBinder.class);
 
@@ -43,16 +42,16 @@ public class ChoiceDialogFooter implements IsWidget {
   private ChoiceDialogView.ActionDelegate actionDelegate;
 
   @Inject
-  public ChoiceDialogFooter() {
+  public ChoiceDialogFooter(WindowClientBundle resources) {
     rootPanel = uiBinder.createAndBindUi(this);
 
-    firstChoiceButton.addStyleName(resources.windowCss().primaryButton());
+    firstChoiceButton.addStyleName(resources.getStyle().windowFrameFooterButtonPrimary());
     firstChoiceButton.getElement().setId("ask-dialog-first");
 
-    secondChoiceButton.addStyleName(resources.windowCss().button());
+    secondChoiceButton.addStyleName(resources.getStyle().windowFrameFooterButton());
     secondChoiceButton.getElement().setId("ask-dialog-second");
 
-    thirdChoiceButton.addStyleName(resources.windowCss().button());
+    thirdChoiceButton.addStyleName(resources.getStyle().windowFrameFooterButton());
     thirdChoiceButton.getElement().setId("ask-dialog-third");
   }
 

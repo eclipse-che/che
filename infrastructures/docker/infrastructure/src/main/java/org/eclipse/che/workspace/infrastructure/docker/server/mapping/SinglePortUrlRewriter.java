@@ -12,9 +12,9 @@ package org.eclipse.che.workspace.infrastructure.docker.server.mapping;
 
 import static java.lang.String.format;
 
-import java.net.URI;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -31,21 +31,14 @@ import org.eclipse.che.commons.annotation.Nullable;
  */
 public class SinglePortUrlRewriter implements URLRewriter {
 
-  private final SinglePortHostnameBuilder hostnameBuilder;
-  private final String wildcartPort;
+  private final Provider<SinglePortHostnameBuilder> hostnameBuilderprovider;
   private final int chePort;
 
   @Inject
   public SinglePortUrlRewriter(
-      @Named("che.docker.ip") String internalIpOfContainers,
-      @Named("che.port") int chePort,
-      @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
-      @Nullable @Named("che.singleport.wildcard_domain.host") String wildcardHost,
-      @Nullable @Named("che.singleport.wildcard_domain.port") String wildcardPort) {
-    this.hostnameBuilder =
-        new SinglePortHostnameBuilder(externalIpOfContainers, internalIpOfContainers, wildcardHost);
+      @Named("che.port") int chePort, Provider<SinglePortHostnameBuilder> hostnameBuilderProvider) {
     this.chePort = chePort;
-    this.wildcartPort = wildcardPort;
+    this.hostnameBuilderprovider = hostnameBuilderProvider;
   }
 
   @Override
@@ -55,11 +48,14 @@ public class SinglePortUrlRewriter implements URLRewriter {
       @Nullable String serverName,
       String url)
       throws InfrastructureException {
-    final String host = hostnameBuilder.build(serverName, machineName, identity.getWorkspaceId());
+    final String host =
+        hostnameBuilderprovider.get().build(serverName, machineName, identity.getWorkspaceId());
     try {
-      int port = wildcartPort != null ? Integer.parseInt(wildcartPort) : chePort;
-      URI uri = UriBuilder.fromUri(url).host(host).port(port).build();
-      url = uri.toString();
+      UriBuilder uriBUilder = UriBuilder.fromUri(url).host(host);
+      if (chePort != 80 && chePort != 443) {
+        uriBUilder.port(chePort);
+      }
+      url = uriBUilder.build().toString();
     } catch (UriBuilderException | IllegalArgumentException e) {
       throw new InternalInfrastructureException(
           format(

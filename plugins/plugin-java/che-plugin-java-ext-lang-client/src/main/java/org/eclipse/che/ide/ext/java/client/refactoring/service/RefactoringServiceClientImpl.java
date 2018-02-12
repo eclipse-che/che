@@ -41,7 +41,6 @@ import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
-import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 
 /**
  * @author Dmitry Shnurenko
@@ -54,8 +53,8 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
   private final AsyncRequestFactory asyncRequestFactory;
   private final DtoUnmarshallerFactory unmarshallerFactory;
   private final AppContext appContext;
+  private final LoaderFactory loaderFactory;
   private final String pathToService;
-  private final MessageLoader loader;
 
   @Inject
   public RefactoringServiceClientImpl(
@@ -66,7 +65,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     this.asyncRequestFactory = asyncRequestFactory;
     this.unmarshallerFactory = unmarshallerFactory;
     this.appContext = appContext;
-    this.loader = loaderFactory.newLoader();
+    this.loaderFactory = loaderFactory;
     this.pathToService = "/java/refactoring/";
   }
 
@@ -79,7 +78,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
             moveRefactoring)
         .header(ACCEPT, TEXT_PLAIN)
         .header(CONTENT_TYPE, APPLICATION_JSON)
-        .loader(loader)
+        .loader(loaderFactory.newLoader("Prepare for move refactoring ..."))
         .send(new StringUnmarshaller());
   }
 
@@ -92,7 +91,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
         .createPostRequest(url, settings)
         .header(ACCEPT, APPLICATION_JSON)
         .header(CONTENT_TYPE, APPLICATION_JSON)
-        .loader(loader)
+        .loader(loaderFactory.newLoader("Prepare for rename refactoring ..."))
         .send(unmarshallerFactory.newUnmarshaller(RenameRefactoringSession.class));
   }
 
@@ -106,7 +105,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
         .createPostRequest(url, refactoringApply)
         .header(ACCEPT, APPLICATION_JSON)
         .header(CONTENT_TYPE, APPLICATION_JSON)
-        .loader(loader)
+        .loader(loaderFactory.newLoader("Apply linked mode rename refactoring ..."))
         .send(unmarshallerFactory.newUnmarshaller(RefactoringResult.class));
   }
 
@@ -119,7 +118,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
         .createPostRequest(url, destination)
         .header(ACCEPT, APPLICATION_JSON)
         .header(CONTENT_TYPE, APPLICATION_JSON)
-        .loader(loader)
+        .loader(loaderFactory.newLoader("Set move refactoring destination..."))
         .send(unmarshallerFactory.newUnmarshaller(RefactoringStatus.class));
   }
 
@@ -133,7 +132,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
         .createPostRequest(url, settings)
         .header(ACCEPT, APPLICATION_JSON)
         .header(CONTENT_TYPE, APPLICATION_JSON)
-        .loader(loader)
+        .loader(loaderFactory.newLoader("Set move refactoring settings ..."))
         .send();
   }
 
@@ -146,7 +145,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
         .createPostRequest(url, session)
         .header(ACCEPT, APPLICATION_JSON)
         .header(CONTENT_TYPE, APPLICATION_JSON)
-        .loader(loader)
+        .loader(loaderFactory.newLoader("Creating refactoring changes"))
         .send(unmarshallerFactory.newUnmarshaller(ChangeCreationResult.class));
   }
 
@@ -159,7 +158,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
         .createPostRequest(url, session)
         .header(ACCEPT, APPLICATION_JSON)
         .header(CONTENT_TYPE, APPLICATION_JSON)
-        .loader(loader)
+        .loader(loaderFactory.newLoader("Getting preview ..."))
         .send(unmarshallerFactory.newUnmarshaller(RefactoringPreview.class));
   }
 
@@ -172,7 +171,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
         .createPostRequest(url, session)
         .header(ACCEPT, APPLICATION_JSON)
         .header(CONTENT_TYPE, APPLICATION_JSON)
-        .loader(loader)
+        .loader(loaderFactory.newLoader("Apply refactoring ... "))
         .send(unmarshallerFactory.newUnmarshaller(RefactoringResult.class));
   }
 
@@ -185,7 +184,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
         .createPostRequest(url, state)
         .header(ACCEPT, APPLICATION_JSON)
         .header(CONTENT_TYPE, APPLICATION_JSON)
-        .loader(loader)
+        .loader(loaderFactory.newLoader("Choosing some change ..."))
         .send();
   }
 
@@ -198,7 +197,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
         .createPostRequest(url, change)
         .header(ACCEPT, APPLICATION_JSON)
         .header(CONTENT_TYPE, APPLICATION_JSON)
-        .loader(loader)
+        .loader(loaderFactory.newLoader("Get refactoring change preview"))
         .send(unmarshallerFactory.newUnmarshaller(ChangePreview.class));
   }
 
@@ -212,7 +211,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
         .createPostRequest(url, newName)
         .header(ACCEPT, APPLICATION_JSON)
         .header(CONTENT_TYPE, APPLICATION_JSON)
-        .loader(loader)
+        .loader(loaderFactory.newLoader("Validates new name ..."))
         .send(unmarshallerFactory.newUnmarshaller(RefactoringStatus.class));
   }
 
@@ -226,7 +225,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
         .createPostRequest(url, settings)
         .header(ACCEPT, APPLICATION_JSON)
         .header(CONTENT_TYPE, APPLICATION_JSON)
-        .loader(loader)
+        .loader(loaderFactory.newLoader("Set rename refactoring settings"))
         .send();
   }
 
@@ -238,6 +237,9 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
             + "reindex?projectpath="
             + encodePath(valueOf(projectPath));
 
-    return asyncRequestFactory.createGetRequest(url).loader(loader).send();
+    return asyncRequestFactory
+        .createGetRequest(url)
+        .loader(loaderFactory.newLoader("Reindexing project ..."))
+        .send();
   }
 }

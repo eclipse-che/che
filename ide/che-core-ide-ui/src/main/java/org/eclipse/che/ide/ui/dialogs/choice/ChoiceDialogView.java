@@ -33,7 +33,7 @@ public interface ChoiceDialogView {
   void setContent(IsWidget content);
 
   /** Sets the window title. */
-  void setTitle(String title);
+  void setTitleCaption(String title);
 
   /** Sets the text of the first choice. */
   void setFirstChoiceLabel(String firstChoiceLabel);

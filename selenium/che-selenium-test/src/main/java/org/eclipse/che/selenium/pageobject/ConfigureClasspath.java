@@ -29,16 +29,15 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @Singleton
 public class ConfigureClasspath {
 
-  public static final String CONFIGURE_CLASSPATH_FORM =
-      "//div[text()='Configure Classpath']/ancestor::div[3]";
+  public static final String CONFIGURE_CLASSPATH_FORM = "//table[@title='Configure Classpath']";
   public static final String CONFIGURE_CLASSPATH_CLOSE_ICON =
-      "//div[text()='Configure Classpath']/following::div[1]";
+      "//table[@title='Configure Classpath']/tbody/tr[1]/td/table/tbody/tr/td[2]//*[local-name() = 'svg']";
   public static final String JAVA_BUILD_PATH = "gwt-debug-categoryHeader-Java Build Path";
   public static final String LIBRARIES_CATEGORY = "gwt-debug-projectWizard-Libraries";
   public static final String SOURCE_CATEGORY = "gwt-debug-projectWizard-Source";
   public static final String DELETE_JAR_OR_FOLDER = "//div[text()='%s']/following::span[1]";
   public static final String DONE_BUTTON = "window-edit-configurations-close";
-  public static final String SELECT_PATH_FORM = "//div[text()='Select Path']/ancestor::div[3]";
+  public static final String SELECT_PATH_FORM = "//table[@title='Select Path']";
   public static final String ITEM_SELECT_PATH_FORM =
       "//div[text()='Select Path']/following::div[text()='%s']";
   public static final String SELECT_PATH_CANCEL_BTN = "select-path-cancel-button";
@@ -46,7 +45,7 @@ public class ConfigureClasspath {
   public static final String ADD_JAR = "//button[text()='Add JAR']";
   public static final String ADD_FOLDER = "//button[text()='Add Folder']";
   public static final String SELECT_PATH_SELECT_BTN =
-      "//div[text()='Select Path']/ancestor::div[3]//button[text()='Select']";
+      "//table[@title='Select Path']//button[text()='Select']";
   public static final String JARS_AND_FOLDERS_AREA = "gwt-debug-pageViewContainer";
   public static final String JAVA_BUILD_PATH_AREA = "gwt-debug-propertiesWizard";
 

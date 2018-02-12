@@ -22,6 +22,9 @@ public interface NamePageView extends View<NamePageView.ActionDelegate> {
   /** Sets the command's name value. */
   void setCommandName(String name);
 
+  /** Sets the focus on name field. */
+  void setFocusOnName();
+
   /** The action delegate for this view. */
   interface ActionDelegate {
 

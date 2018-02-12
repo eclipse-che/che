@@ -47,7 +47,7 @@ public class SelectPathPresenterTest {
     when(appContext.getProjects()).thenReturn(new Project[0]);
     selectPathPresenter.show(searcher);
     verify(view).setStructure(org.mockito.ArgumentMatchers.<List<Node>>any());
-    verify(view).show();
+    verify(view).showDialog();
   }
 
   @Test

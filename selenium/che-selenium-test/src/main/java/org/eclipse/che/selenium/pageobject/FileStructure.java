@@ -54,9 +54,8 @@ public class FileStructure {
   }
 
   private interface Locators {
-    String FILE_STRUCTURE_FORM = "//div[text()='%s.java']/ancestor::div[3]";
-    String FILE_STRUCTURE_CLOSE_ICON =
-        "//div[@id='gwt-debug-file-structure-mainPanel']/parent::div/preceding-sibling::div//*[local-name() = 'svg']";
+    String FILE_STRUCTURE_FORM = "//table[@title='%s.java']";
+    String FILE_STRUCTURE_CLOSE_ICON = "gwt-debug-file-structure-windowFrameCloseButton";
     String FILE_STRUCTURE_CONTENT = "gwt-debug-file-structure-mainPanel";
     String FILE_STRUCTURE_ICON_NODE =
         "(//div[text()='%s']/preceding::*[local-name()='svg'][2])[last()]";
@@ -99,7 +98,7 @@ public class FileStructure {
   /** close the 'File Structure' form by click on the close icon */
   public void clickFileStructureCloseIcon() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(Locators.FILE_STRUCTURE_CLOSE_ICON)))
+        .until(visibilityOfElementLocated(By.id(Locators.FILE_STRUCTURE_CLOSE_ICON)))
         .click();
   }
 

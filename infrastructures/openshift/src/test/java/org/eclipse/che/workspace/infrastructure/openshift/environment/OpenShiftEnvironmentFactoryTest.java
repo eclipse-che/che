@@ -17,7 +17,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.eclipse.che.workspace.infrastructure.openshift.Constants.MACHINE_NAME_ANNOTATION_FMT;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.PVC_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.PVC_IGNORED_WARNING_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.ROUTES_IGNORED_WARNING_MESSAGE;
@@ -56,6 +56,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -80,7 +81,7 @@ public class OpenShiftEnvironmentFactoryTest {
   private OpenShiftEnvironmentFactory osEnvironmentFactory;
 
   @Mock private OpenShiftClientFactory clientFactory;
-  @Mock private OpenShiftEnvironmentValidator osEnvValidator;
+  @Mock private KubernetesEnvironmentValidator k8sEnvValidator;
   @Mock private OpenShiftClient client;
   @Mock private InternalEnvironment internalEnvironment;
   @Mock private InternalRecipe internalRecipe;
@@ -99,7 +100,7 @@ public class OpenShiftEnvironmentFactoryTest {
   public void setup() throws Exception {
     osEnvironmentFactory =
         new OpenShiftEnvironmentFactory(
-            null, null, null, clientFactory, osEnvValidator, DEFAULT_RAM_LIMIT_MB);
+            null, null, null, clientFactory, k8sEnvValidator, DEFAULT_RAM_LIMIT_MB);
     when(clientFactory.create()).thenReturn(client);
     when(client.lists()).thenReturn(listMixedOperation);
     when(listMixedOperation.load(any(InputStream.class))).thenReturn(serverGettable);

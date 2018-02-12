@@ -12,8 +12,6 @@ package org.eclipse.che.ide.preferences;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -117,43 +115,22 @@ public class PreferencesViewImpl extends Window implements PreferencesView {
 
   private void createButtons() {
     btnSave =
-        createPrimaryButton(
+        addFooterButton(
             locale.save(),
             "window-preferences-storeChanges",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                Log.debug(this.getClass(), "< SAVE");
-                delegate.onSaveClicked();
-              }
-            });
-    addButtonToFooter(btnSave);
-
+            event -> delegate.onSaveClicked(),
+            true);
     btnRefresh =
-        createButton(
-            locale.refresh(),
-            "window-preferences-refresh",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                Log.debug(this.getClass(), "< REFRESH");
-                delegate.onRefreshClicked();
-              }
-            });
-    addButtonToFooter(btnRefresh);
-
+        addFooterButton(
+            locale.refresh(), "window-preferences-refresh", event -> delegate.onRefreshClicked());
     btnClose =
-        createButton(
+        addFooterButton(
             locale.close(),
             "window-preferences-close",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                Log.debug(this.getClass(), "< CLOSE");
-                delegate.onCloseClicked();
-              }
+            event -> {
+              delegate.onCloseClicked();
+              Log.info(getClass(), "close clicked");
             });
-    addButtonToFooter(btnClose);
   }
 
   /** {@inheritDoc} */
@@ -165,13 +142,7 @@ public class PreferencesViewImpl extends Window implements PreferencesView {
   /** {@inheritDoc} */
   @Override
   public void close() {
-    this.hide();
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void show() {
-    super.show();
+    hide();
   }
 
   /** {@inheritDoc} */
@@ -199,14 +170,14 @@ public class PreferencesViewImpl extends Window implements PreferencesView {
     list.render(categoriesList, true);
   }
 
-  @Override
-  protected void onClose() {
-    delegate.onCloseWindow();
-  }
-
   /** {@inheritDoc} */
   @Override
   public void selectPreference(PreferencePagePresenter preference) {
     list.selectElement(preference);
+  }
+
+  @Override
+  public void showDialog() {
+    show(btnClose);
   }
 }

@@ -307,7 +307,7 @@
                         <td class="{style.machineState}" rel="stopped" id="machine-state">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
                     </tr>
 
-                    <tr ui:field="machineInlineDelimiterTemplate"><td colspan="7" style="height: 10px;"></td></tr>
+                    <tr ui:field="machineInlineDelimiterTemplate" style="height: 20px;"><td colspan="7"></td></tr>
 
                     <tr ui:field="installerTemplate" class="{style.installerRow}">
                         <td class="{style.list}">•</td>
