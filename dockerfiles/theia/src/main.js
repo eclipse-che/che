@@ -14,22 +14,8 @@ const cp = require("child_process");
 const theiaRoot = '/home/theia';
 const theiaPath = theiaRoot + '/package.json';
 
-const defaultConfig = {
-    "private": true,
-    "dependencies": {
-        "@theia/typescript": "latest",
-        "@theia/navigator": "latest",
-        "@theia/terminal": "latest",
-        "@theia/outline-view": "latest",
-        "@theia/preferences": "latest",
-        "@theia/git": "latest",
-        "@theia/file-search": "latest",
-        "@theia/markers": "latest"
-    },
-    "devDependencies": {
-        "@theia/cli": "latest"
-    }
-};
+const defaultConfig = require('/home/default/theia/package.json');
+
 process.chdir(theiaRoot);
 
 let theiaConfig;
