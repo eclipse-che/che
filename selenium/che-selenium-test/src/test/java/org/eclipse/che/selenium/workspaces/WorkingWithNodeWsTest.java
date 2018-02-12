@@ -86,7 +86,7 @@ public class WorkingWithNodeWsTest {
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
     currentWindow = seleniumWebDriver.getWindowHandle();
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.selectItem(PROJECT_NAME);
 
@@ -103,6 +103,7 @@ public class WorkingWithNodeWsTest {
     consoles.waitPreviewUrlIsPresent();
     seleniumWebDriver.navigate().refresh();
     seleniumWebDriver.switchFromDashboardIframeToIde();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     consoles.waitPreviewUrlIsPresent();
 
     // Run the application
