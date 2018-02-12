@@ -56,6 +56,7 @@ public final class FileStructureView
     UI_BINDER.createAndBindUi(this);
     tree.setAutoExpand(false);
     tree.getSelectionModel().setSelectionMode(SINGLE);
+    tree.enableSpeedSearch(true);
   }
 
   public void setInput(List<ExtendedSymbolInformation> input) {
@@ -75,6 +76,10 @@ public final class FileStructureView
       tree.getSelectionModel().select(tree.getRootNodes().get(0), false);
     }
     tree.expandAll();
+  }
+
+  public void onClose() {
+    tree.closeSpeedSearchPopup();
   }
 
   @Override
