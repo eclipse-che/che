@@ -20,6 +20,7 @@ import static org.eclipse.che.ide.actions.EditorActions.SPLIT_HORIZONTALLY;
 import static org.eclipse.che.ide.actions.EditorActions.SPLIT_VERTICALLY;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_COMMAND_EXPLORER_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDIT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDITOR_CONTEXT_MENU;
@@ -71,6 +72,7 @@ import org.eclipse.che.ide.actions.HotKeysListAction;
 import org.eclipse.che.ide.actions.ImportProjectAction;
 import org.eclipse.che.ide.actions.LinkWithEditorAction;
 import org.eclipse.che.ide.actions.NavigateToFileAction;
+import org.eclipse.che.ide.actions.NewXmlFileAction;
 import org.eclipse.che.ide.actions.OpenFileAction;
 import org.eclipse.che.ide.actions.ProjectConfigurationAction;
 import org.eclipse.che.ide.actions.RedoAction;
@@ -116,6 +118,8 @@ import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
+import org.eclipse.che.ide.command.actions.MoveCommandAction;
+import org.eclipse.che.ide.command.actions.RenameCommandAction;
 import org.eclipse.che.ide.command.editor.CommandEditorProvider;
 import org.eclipse.che.ide.command.palette.ShowCommandsPaletteAction;
 import org.eclipse.che.ide.devmode.DevModeOffAction;
@@ -159,7 +163,6 @@ import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.ide.workspace.StopWorkspaceAction;
-import org.eclipse.che.ide.xml.NewXmlFileAction;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -393,6 +396,10 @@ public class StandardComponentInitializer {
 
   @Inject private TerminalDisplayingModeAction terminalDisplayingModeAction;
 
+  @Inject private RenameCommandAction renameCommandAction;
+
+  @Inject private MoveCommandAction moveCommandAction;
+
   @Inject
   @Named("XMLFileType")
   private FileType xmlFile;
@@ -536,10 +543,10 @@ public class StandardComponentInitializer {
     newGroup.addSeparator();
 
     actionManager.registerAction(NEW_FILE, newFileAction);
-    newGroup.addAction(newFileAction);
+    newGroup.addAction(newFileAction, Constraints.FIRST);
 
     actionManager.registerAction("newFolder", newFolderAction);
-    newGroup.addAction(newFolderAction);
+    newGroup.addAction(newFolderAction, new Constraints(AFTER, NEW_FILE));
 
     newGroup.addSeparator();
 
@@ -850,6 +857,14 @@ public class StandardComponentInitializer {
 
     editorContextMenuGroup.addSeparator();
     editorContextMenuGroup.add(revealResourceAction);
+
+    DefaultActionGroup commandExplorerMenuGroup = new DefaultActionGroup(actionManager);
+    actionManager.registerAction(GROUP_COMMAND_EXPLORER_CONTEXT_MENU, commandExplorerMenuGroup);
+
+    actionManager.registerAction("renameCommand", renameCommandAction);
+    commandExplorerMenuGroup.add(renameCommandAction);
+    actionManager.registerAction("moveCommand", moveCommandAction);
+    commandExplorerMenuGroup.add(moveCommandAction);
 
     // Define hot-keys
     keyBinding

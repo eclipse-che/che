@@ -45,6 +45,9 @@ public interface CommandEditorPage {
   /** Sets {@link DirtyStateListener}. */
   void setDirtyStateListener(DirtyStateListener listener);
 
+  /** This method is called when focus need to be set up in the given page. */
+  default void focus() {}
+
   /**
    * Listener that should be called by page every time when any command modifications on the page
    * have been performed.

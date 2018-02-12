@@ -156,45 +156,45 @@ public class RenamePresenter implements ActionDelegate {
 
     switch (renameRefactoringSession.getWizardType()) {
       case COMPILATION_UNIT:
-        view.setTitle(locale.renameCompilationUnitTitle());
+        view.setTitleCaption(locale.renameCompilationUnitTitle());
         view.setVisiblePatternsPanel(true);
         view.setVisibleFullQualifiedNamePanel(true);
         view.setVisibleSimilarlyVariablesPanel(true);
         break;
       case PACKAGE:
-        view.setTitle(locale.renamePackageTitle());
+        view.setTitleCaption(locale.renamePackageTitle());
         view.setVisiblePatternsPanel(true);
         view.setVisibleFullQualifiedNamePanel(true);
         view.setVisibleRenameSubpackagesPanel(true);
         break;
       case TYPE:
-        view.setTitle(locale.renameTypeTitle());
+        view.setTitleCaption(locale.renameTypeTitle());
         view.setVisiblePatternsPanel(true);
         view.setVisibleFullQualifiedNamePanel(true);
         view.setVisibleSimilarlyVariablesPanel(true);
         break;
       case FIELD:
-        view.setTitle(locale.renameFieldTitle());
+        view.setTitleCaption(locale.renameFieldTitle());
         view.setVisiblePatternsPanel(true);
         break;
       case ENUM_CONSTANT:
-        view.setTitle(locale.renameEnumTitle());
+        view.setTitleCaption(locale.renameEnumTitle());
         view.setVisiblePatternsPanel(true);
         break;
       case TYPE_PARAMETER:
-        view.setTitle(locale.renameTypeVariableTitle());
+        view.setTitleCaption(locale.renameTypeVariableTitle());
         break;
       case METHOD:
-        view.setTitle(locale.renameMethodTitle());
+        view.setTitleCaption(locale.renameMethodTitle());
         view.setVisibleKeepOriginalPanel(true);
         break;
       case LOCAL_VARIABLE:
-        view.setTitle(locale.renameLocalVariableTitle());
+        view.setTitleCaption(locale.renameLocalVariableTitle());
         break;
       default:
     }
 
-    view.show();
+    view.showDialog();
   }
 
   /** {@inheritDoc} */
@@ -288,7 +288,7 @@ public class RenamePresenter implements ActionDelegate {
                 if (arg.isCanShowPreviewPage() || arg.getStatus().getSeverity() <= 3) {
                   previewPresenter.show(renameRefactoringSession.getSessionId(), refactorInfo);
                   previewPresenter.setTitle(locale.renameItemTitle());
-                  view.hide();
+                  view.close();
                 } else {
                   view.showErrorMessage(arg.getStatus());
                 }
@@ -376,7 +376,7 @@ public class RenamePresenter implements ActionDelegate {
             refactoringResult -> {
               List<ChangeInfo> changes = refactoringResult.getChanges();
               if (refactoringResult.getSeverity() == OK) {
-                view.hide();
+                view.close();
                 updateAfterRefactoring(changes)
                     .then(
                         refactoringUpdater

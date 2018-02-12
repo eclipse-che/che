@@ -49,7 +49,7 @@ public class NewWorkspace {
     String WORKSPACE_NAME_INPUT = "workspace-name-input";
     String ERROR_MESSAGE = "new-workspace-error-message";
     String TOOLBAR_TITLE_ID = "New_Workspace";
-    String CREATE_BUTTON = "//che-button-save-flat[@name='saveButton']";
+    String CREATE_BUTTON = "//che-button-save-flat/button[@name='saveButton']";
     String SELECT_ALL_STACKS_TAB = "all-stacks-button";
     String SELECT_QUICK_START_STACKS_TAB = "quick-start-button";
     String SELECT_SINGLE_MACHINE_STACKS_TAB = "single-machine-button";
@@ -266,13 +266,15 @@ public class NewWorkspace {
   }
 
   public void clickOnCreateButtonAndOpenInIDE() {
-    createWorkspaceButton.click();
+    WaitUtils.sleepQuietly(1);
+    redrawUiElementsTimeout.until(visibilityOf(createWorkspaceButton)).click();
     waitWorkspaceIsCreatedDialogIsVisible();
     clickOnOpenInIDEButton();
   }
 
   public void clickOnCreateButtonAndEditWorkspace() {
-    createWorkspaceButton.click();
+    WaitUtils.sleepQuietly(1);
+    redrawUiElementsTimeout.until(visibilityOf(createWorkspaceButton)).click();
     waitWorkspaceIsCreatedDialogIsVisible();
     clickOnEditWorkspaceButton();
   }

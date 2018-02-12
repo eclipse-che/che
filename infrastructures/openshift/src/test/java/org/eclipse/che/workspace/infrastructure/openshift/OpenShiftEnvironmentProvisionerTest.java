@@ -14,15 +14,16 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.project.pvc.WorkspaceVolumesStrategy;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.InstallerServersPortProvisioner;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.UniqueNamesProvisioner;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.env.EnvVarsConverter;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.limits.ram.RamLimitProvisioner;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.restartpolicy.RestartPolicyRewriter;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.route.TlsRouteProvisioner;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.server.ServersConverter;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftServersConverter;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftUniqueNamesProvisioner;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProvisioner;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -40,14 +41,15 @@ public class OpenShiftEnvironmentProvisionerTest {
 
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
   @Mock private InstallerServersPortProvisioner installerServersPortProvisioner;
-  @Mock private UniqueNamesProvisioner uniqueNamesProvisioner;
+  @Mock private OpenShiftUniqueNamesProvisioner uniqueNamesProvisioner;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private RuntimeIdentity runtimeIdentity;
-  @Mock private TlsRouteProvisioner tlsRouteProvisioner;
+  @Mock private RouteTlsProvisioner tlsRouteProvisioner;
   @Mock private EnvVarsConverter envVarsProvisioner;
-  @Mock private ServersConverter serversProvisioner;
+  @Mock private OpenShiftServersConverter serversProvisioner;
   @Mock private RestartPolicyRewriter restartPolicyRewriter;
   @Mock private RamLimitProvisioner ramLimitProvisioner;
+  @Mock private LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
 
   private OpenShiftEnvironmentProvisioner osInfraProvisioner;
 
@@ -65,15 +67,17 @@ public class OpenShiftEnvironmentProvisionerTest {
             restartPolicyRewriter,
             volumesStrategy,
             ramLimitProvisioner,
-            installerServersPortProvisioner);
+            installerServersPortProvisioner,
+            logsVolumeMachineProvisioner);
     provisionOrder =
         inOrder(
             installerServersPortProvisioner,
+            logsVolumeMachineProvisioner,
+            serversProvisioner,
+            envVarsProvisioner,
             volumesStrategy,
             uniqueNamesProvisioner,
             tlsRouteProvisioner,
-            serversProvisioner,
-            envVarsProvisioner,
             restartPolicyRewriter,
             ramLimitProvisioner);
   }
@@ -85,6 +89,7 @@ public class OpenShiftEnvironmentProvisionerTest {
     provisionOrder
         .verify(installerServersPortProvisioner)
         .provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(logsVolumeMachineProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(serversProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(envVarsProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(volumesStrategy).provision(eq(osEnv), eq(runtimeIdentity));

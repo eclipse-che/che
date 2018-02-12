@@ -13,20 +13,23 @@ package org.eclipse.che.ide.preferences;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.ui.window.WindowClientBundle;
 
 /** @author Evgen Vidolob */
 @Singleton
 public class StyleInjector {
   private Resources resources;
+  private WindowClientBundle windowClientBundle;
 
   @Inject
-  public StyleInjector(Resources resources) {
+  public StyleInjector(Resources resources, WindowClientBundle windowClientBundle) {
     this.resources = resources;
+    this.windowClientBundle = windowClientBundle;
   }
 
   public void inject() {
     resources.coreCss().ensureInjected();
-    resources.windowCss().ensureInjected();
+    windowClientBundle.getStyle().ensureInjected();
     resources.treeCss().ensureInjected();
     resources.defaultSimpleListCss().ensureInjected();
     resources.partStackCss().ensureInjected();
@@ -36,7 +39,7 @@ public class StyleInjector {
     resources.dataGridStyle().ensureInjected();
     resources.cellTableStyle().ensureInjected();
     resources.defaultCategoriesListCss().ensureInjected();
-    resources.Css().ensureInjected();
+    resources.buttonLoaderCss().ensureInjected();
     resources.menuCss().ensureInjected();
 
     resources.commandsExplorerCss().ensureInjected();
@@ -44,5 +47,6 @@ public class StyleInjector {
     resources.commandToolbarCss().ensureInjected();
     resources.editorCss().ensureInjected();
     resources.commandTypeChooserCss().ensureInjected();
+    resources.treeStylesCss().ensureInjected();
   }
 }

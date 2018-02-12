@@ -11,6 +11,7 @@
 package org.eclipse.che.multiuser.organization.api;
 
 import static java.util.Objects.requireNonNull;
+import static org.eclipse.che.multiuser.organization.api.DtoConverter.asDto;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
@@ -136,8 +137,9 @@ public class OrganizationManager {
       updateSuborganizationsQualifiedNames(oldQualifiedName, organization.getQualifiedName());
 
       final String performerName = EnvironmentContext.getCurrent().getSubject().getUserName();
+      // should be DTO as it sent via json rpc
       eventService.publish(
-          new OrganizationRenamedEvent(performerName, oldName, newName, organization));
+          asDto(new OrganizationRenamedEvent(performerName, oldName, newName, organization)));
     }
     return organization;
   }
@@ -159,10 +161,10 @@ public class OrganizationManager {
           .propagateException();
       eventService.publish(new BeforeOrganizationRemovedEvent(organization)).propagateException();
       removeSuborganizations(organizationId);
-      final List<Member> members = removeMembers(organizationId);
+      final List<String> members = removeMembers(organizationId);
       organizationDao.remove(organizationId);
       final String initiator = EnvironmentContext.getCurrent().getSubject().getUserName();
-      eventService.publish(new OrganizationRemovedEvent(initiator, organization, members));
+      eventService.publish(asDto(new OrganizationRemovedEvent(initiator, organization, members)));
     } catch (NotFoundException e) {
       // organization is already removed
     }
@@ -311,15 +313,15 @@ public class OrganizationManager {
   }
 
   @VisibleForTesting
-  List<Member> removeMembers(String organizationId) throws ServerException {
-    List<Member> removed = new ArrayList<>();
+  List<String> removeMembers(String organizationId) throws ServerException {
+    List<String> removed = new ArrayList<>();
     Page<MemberImpl> membersPage;
     do {
       // skip count always equals to 0 because elements will be shifted after removing previous
       // items
       membersPage = memberDao.getMembers(organizationId, 100, 0);
       for (MemberImpl member : membersPage.getItems()) {
-        removed.add(member);
+        removed.add(member.getUserId());
         memberDao.remove(member.getUserId(), member.getOrganizationId());
       }
     } while (membersPage.hasNextPage());

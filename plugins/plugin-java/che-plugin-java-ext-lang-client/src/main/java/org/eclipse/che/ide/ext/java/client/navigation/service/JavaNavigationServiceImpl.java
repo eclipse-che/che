@@ -272,6 +272,7 @@ public class JavaNavigationServiceImpl implements JavaNavigationService {
     return requestFactory
         .createGetRequest(url)
         .header(ACCEPT, APPLICATION_JSON)
+        .loader(loaderFactory.newLoader("Getting information about ..."))
         .send(unmarshallerFactory.newUnmarshaller(CompilationUnit.class));
   }
 

@@ -69,7 +69,7 @@ public class ConfirmDialogPresenter implements ConfirmDialog, ConfirmDialogView.
       final @Nullable @Assisted CancelCallback cancelCallback) {
     this.view = view;
     this.view.setContent(content);
-    this.view.setTitle(title);
+    this.view.setTitleCaption(title);
     this.confirmCallback = confirmCallback;
     this.cancelCallback = cancelCallback;
     this.view.setDelegate(this);
@@ -86,7 +86,7 @@ public class ConfirmDialogPresenter implements ConfirmDialog, ConfirmDialogView.
       final @Nullable @Assisted CancelCallback cancelCallback) {
     this.view = view;
     this.view.setContent(content);
-    this.view.setTitle(title);
+    this.view.setTitleCaption(title);
     this.confirmCallback = confirmCallback;
     this.cancelCallback = cancelCallback;
     this.view.setDelegate(this);

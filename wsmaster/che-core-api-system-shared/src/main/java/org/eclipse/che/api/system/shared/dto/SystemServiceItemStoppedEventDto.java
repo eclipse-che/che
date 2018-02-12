@@ -50,4 +50,6 @@ public interface SystemServiceItemStoppedEventDto extends SystemServiceEventDto 
   void setTotal(Integer total);
 
   SystemServiceItemStoppedEventDto withTotal(Integer total);
+
+  SystemServiceItemStoppedEventDto withService(String service);
 }

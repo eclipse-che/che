@@ -22,7 +22,7 @@
                 <script language="beanshell">
                     <![CDATA[
     boolean isTestGroupsAgreedWithRequestedGroups() {
-     String testGroupsVal = System.getProperty("testGroups");
+      String testGroupsVal = System.getProperty("testGroups");
       if (testGroupsVal == null || testGroupsVal.trim().isEmpty() || groups.isEmpty()){
         return true;
       }
@@ -120,7 +120,6 @@
           <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest"/>
           <class name="org.eclipse.che.selenium.git.GitChangeMarkersTest"/>
           <class name="org.eclipse.che.selenium.git.GitColorsTest"/>
-          <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
           <class name="org.eclipse.che.selenium.git.InitializeAndDeleteLocalRepositoryTest"/>
           <class name="org.eclipse.che.selenium.git.SetGitCommitterTest"/>
           <class name="org.eclipse.che.selenium.gwt.CheckSimpleGwtAppTest"/>

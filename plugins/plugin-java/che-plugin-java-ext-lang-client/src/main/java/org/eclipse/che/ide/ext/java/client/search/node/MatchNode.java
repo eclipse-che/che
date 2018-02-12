@@ -92,7 +92,7 @@ public class MatchNode extends AbstractPresentationNode implements HasAction {
   @Override
   public void updatePresentation(@NotNull NodePresentation presentation) {
     SpanElement spanElement =
-        Elements.createSpanElement(styles.styles().presentableTextContainer());
+        Elements.createSpanElement(styles.treeStylesCss().presentableTextContainer());
 
     SpanElement lineNumberElement = Elements.createSpanElement();
     lineNumberElement.setInnerHTML(

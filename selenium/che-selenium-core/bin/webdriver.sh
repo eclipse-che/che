@@ -531,14 +531,12 @@ fetchActualResults() {
     unset ACTUAL_RESULTS
     unset ACTUAL_RESULTS_URL
 
-    # define the URL of CI job to compare result with result on it
-    if [[ ${CHE_MULTIUSER} == true ]]; then
-      local nameOfCIJob=che-multiuser-integration-tests
-    else
-      local nameOfCIJob=che-integration-tests
-    fi
+    # define the URL of CI job to compare local result with result on CI
+    local multiuserToken=$([[ "$CHE_MULTIUSER" == true ]] && echo "-multiuser")
+    local infrastructureToken=$([[ "$CHE_INFRASTRUCTURE" == "openshift" ]] && echo "-ocp" || echo "-$CHE_INFRASTRUCTURE")
+    local nameOfCIJob="che-integration-tests${multiuserToken}-master${infrastructureToken}"
 
-    [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/$nameOfCIJob/"; }
+    [[ -z ${BASE_ACTUAL_RESULTS_URL+x} ]] && { BASE_ACTUAL_RESULTS_URL="https://ci.codenvycorp.com/view/qa/job/${nameOfCIJob}/"; }
 
     local build=$(echo $@ | sed 's/.*--compare-with-ci\W\+\([0-9]\+\).*/\1/')
     if [[ ! ${build} =~ ^[0-9]+$ ]]; then
@@ -876,6 +874,9 @@ prepareTestUsersForMultiuserChe() {
     export CHE_ADMIN_PASSWORD=${CHE_ADMIN_PASSWORD:-admin}
     export CHE_ADMIN_OFFLINE__TOKEN=${CHE_ADMIN_OFFLINE__TOKEN}
 
+    export CHE_TESTUSER_OFFLINE__TOKEN=${CHE_TESTUSER_OFFLINE__TOKEN}
+    export CHE_SECOND_TESTUSER_OFFLINE__TOKEN=${CHE_SECOND_TESTUSER_OFFLINE__TOKEN}
+
     if [[ -n ${CHE_TESTUSER_EMAIL+x} ]] && [[ -n ${CHE_TESTUSER_PASSWORD+x} ]]; then
         return
     fi
@@ -898,8 +899,6 @@ prepareTestUsersForMultiuserChe() {
            CHE_TESTUSER_PASSWORD=${CHE_ADMIN_PASSWORD}
         fi
 
-        export CHE_TESTUSER_OFFLINE__TOKEN=${CHE_TESTUSER_OFFLINE__TOKEN}
-
         # create second test user
         time=$(date +%s)
         export CHE_SECOND_TESTUSER_NAME=${CHE_SECOND_TESTUSER_NAME:-user${time}}
@@ -916,7 +915,6 @@ prepareTestUsersForMultiuserChe() {
            CHE_SECOND_TESTUSER_PASSWORD=${CHE_ADMIN_PASSWORD}
         fi
 
-        export CHE_SECOND_TESTUSER_OFFLINE__TOKEN=${CHE_SECOND_TESTUSER_OFFLINE__TOKEN}
     fi
 }
 

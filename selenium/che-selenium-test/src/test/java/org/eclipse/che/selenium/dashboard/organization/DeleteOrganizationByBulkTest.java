@@ -15,7 +15,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.organization.Organiz
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -68,13 +67,7 @@ public class DeleteOrganizationByBulkTest {
     organizationListPage.waitForOrganizationsToolbar();
     organizationListPage.waitForOrganizationsList();
 
-    try {
-      assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
-    } catch (AssertionError a) {
-      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7279", a);
-    }
-
+    assertEquals(organizationListPage.getOrganizationListItemCount(), initialOrgNumber);
     assertTrue(organizationListPage.getValues(NAME).contains(org1.getName()));
     assertTrue(organizationListPage.getValues(NAME).contains(org2.getName()));
 
@@ -107,15 +100,9 @@ public class DeleteOrganizationByBulkTest {
     organizationListPage.waitForOrganizationIsRemoved(org1.getName());
     organizationListPage.waitForOrganizationIsRemoved(org2.getName());
 
-    try {
-      assertEquals(
-          organizationListPage.getOrganizationListItemCount(),
-          initialOrgNumber - TEST_ROOT_ORG_NUMBER);
-    } catch (AssertionError a) {
-      // remove try-catch block after https://github.com/eclipse/che/issues/7279 has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7279", a);
-    }
-
+    assertEquals(
+        organizationListPage.getOrganizationListItemCount(),
+        initialOrgNumber - TEST_ROOT_ORG_NUMBER);
     assertFalse(organizationListPage.getValues(NAME).contains(org1.getName()));
     assertFalse(organizationListPage.getValues(NAME).contains(org2.getName()));
     assertEquals(

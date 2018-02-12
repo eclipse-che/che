@@ -107,8 +107,6 @@ public class SplitEditorFeatureTest {
 
     projectExplorer.launchRefactorByKeyboard();
     refactor.typeAndWaitNewName(NEW_NAME_JAVA);
-    refactor.sendKeysIntoField(Keys.SPACE.toString());
-    refactor.sendKeysIntoField(Keys.BACK_SPACE.toString());
     refactor.clickOkButtonRefactorForm();
     editor.waitActive();
 

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.0.0-M5-SNAPSHOT</version>
+        <version>6.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-wsmaster-war</artifactId>
     <packaging>war</packaging>
@@ -83,6 +83,10 @@
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>git-credentials-agent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>ls-camel-agent</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
@@ -254,6 +258,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-permission-installer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-permission-resource</artifactId>
         </dependency>
         <dependency>
@@ -315,10 +323,6 @@
         <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-integration-guice</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.everrest</groupId>
-            <artifactId>everrest-websockets</artifactId>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-master-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>6.0.0-M5-SNAPSHOT</version>
+        <version>6.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-workspace</artifactId>
     <packaging>jar</packaging>
@@ -108,10 +108,6 @@
         <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.everrest</groupId>
-            <artifactId>everrest-websockets</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

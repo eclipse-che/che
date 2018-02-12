@@ -54,7 +54,7 @@ public class EditWatchExpressionPresenter implements TextAreaDialogView.ActionDe
     view.focusInValueField();
     view.selectAllText();
     view.setEnableChangeButton(false);
-    view.show();
+    view.showDialog();
   }
 
   @Override

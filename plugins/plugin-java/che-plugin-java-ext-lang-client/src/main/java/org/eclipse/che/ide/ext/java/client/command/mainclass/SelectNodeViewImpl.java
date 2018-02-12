@@ -12,10 +12,9 @@ package org.eclipse.che.ide.ext.java.client.command.mainclass;
 
 import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.resolveFQN;
 import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
 
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -37,7 +36,6 @@ import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
-import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.window.Window;
 
 /**
@@ -89,25 +87,22 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
 
     tree.getSelectionModel()
         .addSelectionChangedHandler(
-            new SelectionChangedEvent.SelectionChangedHandler() {
-              @Override
-              public void onSelectionChanged(SelectionChangedEvent event) {
-                if (event.getSelection().isEmpty()) {
-                  return;
-                }
-
-                Node node = event.getSelection().get(0);
-
-                if (!(node instanceof ResourceNode)) {
-                  acceptButton.setEnabled(false);
-                  return;
-                }
-
-                ResourceNode selectedNode = (ResourceNode) node;
-
-                acceptButton.setEnabled(
-                    selectedNode.getData().getLocation().toString().endsWith(".java"));
+            event -> {
+              if (event.getSelection().isEmpty()) {
+                return;
               }
+
+              Node node = event.getSelection().get(0);
+
+              if (!(node instanceof ResourceNode)) {
+                acceptButton.setEnabled(false);
+                return;
+              }
+
+              ResourceNode selectedNode = (ResourceNode) node;
+
+              acceptButton.setEnabled(
+                  selectedNode.getData().getLocation().toString().endsWith(".java"));
             });
 
     KeyboardNavigationHandler handler =
@@ -121,40 +116,17 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
 
     handler.bind(tree);
 
-    cancelButton =
-        createButton(
-            locale.cancel(),
-            "select-path-cancel-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                hide();
-              }
-            });
+    cancelButton = addFooterButton(locale.cancel(), "select-path-cancel-button", event -> hide());
 
     acceptButton =
-        createPrimaryButton(
-            locale.ok(),
-            "select-path-ok-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                acceptButtonClicked();
-              }
-            });
-
-    addButtonToFooter(acceptButton);
-    addButtonToFooter(cancelButton);
+        addFooterButton(locale.ok(), "select-path-ok-button", event -> acceptButtonClicked());
   }
 
   @Override
-  protected void onEnterClicked() {
-    if (isWidgetFocused(acceptButton)) {
+  public void onEnterPress(NativeEvent evt) {
+    if (isWidgetOrChildFocused(acceptButton)) {
       acceptButtonClicked();
-      return;
-    }
-
-    if (isWidgetFocused(cancelButton)) {
+    } else if (isWidgetOrChildFocused(cancelButton)) {
       hide();
     }
   }
@@ -165,8 +137,12 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
   }
 
   @Override
-  public void show() {
-    super.show(tree);
+  public void showDialog() {
+    show(tree);
+  }
+
+  @Override
+  protected void onShow() {
     if (!tree.getRootNodes().isEmpty()) {
       tree.getSelectionModel().select(tree.getRootNodes().get(0), false);
     }

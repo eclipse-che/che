@@ -26,8 +26,6 @@ import org.everrest.guice.servlet.GuiceEverrestServlet;
 public class WsMasterServletModule extends ServletModule {
   @Override
   protected void configureServlets() {
-    getServletContext().addListener(new org.everrest.websockets.WSConnectionTracker());
-
     final Map<String, String> corsFilterParams = new HashMap<>();
     corsFilterParams.put("cors.allowed.origins", "*");
     corsFilterParams.put(
@@ -48,7 +46,8 @@ public class WsMasterServletModule extends ServletModule {
     filter("/*").through(CorsFilter.class, corsFilterParams);
     filter("/*").through(RequestIdLoggerFilter.class);
 
-    serveRegex("^/(?!ws$|ws/|websocket.?)(.*)").with(GuiceEverrestServlet.class);
+    // Matching group SHOULD contain forward slash.
+    serveRegex("^(?!/websocket.?)(.*)").with(GuiceEverrestServlet.class);
     install(new org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule());
 
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {

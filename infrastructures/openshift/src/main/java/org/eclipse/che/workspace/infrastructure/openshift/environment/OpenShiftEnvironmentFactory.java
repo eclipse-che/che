@@ -42,9 +42,10 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
 import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
-import org.eclipse.che.workspace.infrastructure.openshift.Names;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentValidator;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.util.Containers;
 
 /**
  * Parses {@link InternalEnvironment} into {@link OpenShiftEnvironment}.
@@ -63,7 +64,8 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       "Persistent volume claims specified in OpenShift recipe are ignored.";
 
   private final OpenShiftClientFactory clientFactory;
-  private final OpenShiftEnvironmentValidator envValidator;
+  private final KubernetesEnvironmentValidator envValidator;
+  private final String defaultMachineMemorySizeAttribute;
 
   @Inject
   public OpenShiftEnvironmentFactory(
@@ -71,11 +73,13 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       RecipeRetriever recipeRetriever,
       MachineConfigsValidator machinesValidator,
       OpenShiftClientFactory clientFactory,
-      OpenShiftEnvironmentValidator envValidator,
+      KubernetesEnvironmentValidator envValidator,
       @Named("che.workspace.default_memory_mb") long defaultMachineMemorySizeMB) {
-    super(installerRegistry, recipeRetriever, machinesValidator, defaultMachineMemorySizeMB);
+    super(installerRegistry, recipeRetriever, machinesValidator);
     this.clientFactory = clientFactory;
     this.envValidator = envValidator;
+    this.defaultMachineMemorySizeAttribute =
+        String.valueOf(defaultMachineMemorySizeMB * 1024 * 1024);
   }
 
   @Override
@@ -110,7 +114,6 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
 
     Map<String, Pod> pods = new HashMap<>();
     Map<String, Service> services = new HashMap<>();
-    Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
     boolean isAnyRoutePresent = false;
     boolean isAnyPVCPresent = false;
     for (HasMetadata object : list.getItems()) {
@@ -149,7 +152,8 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
             .setWarnings(warnings)
             .setPods(pods)
             .setServices(services)
-            .setPersistentVolumeClaims(pvcs)
+            .setPersistentVolumeClaims(new HashMap<>())
+            .setRoutes(new HashMap<>())
             .build();
 
     envValidator.validate(osEnv);
@@ -172,6 +176,8 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
           final long ramLimit = Containers.getRamLimit(container);
           if (ramLimit > 0) {
             attributes.put(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(ramLimit));
+          } else {
+            attributes.put(MEMORY_LIMIT_ATTRIBUTE, defaultMachineMemorySizeAttribute);
           }
         }
       }

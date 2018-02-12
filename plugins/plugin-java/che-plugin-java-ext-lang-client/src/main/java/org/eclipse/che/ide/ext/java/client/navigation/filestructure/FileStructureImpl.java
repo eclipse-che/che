@@ -17,7 +17,6 @@ import com.google.common.base.Predicate;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -25,19 +24,26 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import elemental.events.Event;
 import java.util.Collections;
-import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
+import org.eclipse.che.ide.ext.java.client.JavaExtension;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.navigation.factory.NodeFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
-import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
-import org.eclipse.che.ide.ui.smartTree.data.NodeInterceptor;
+import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 import org.eclipse.che.ide.ui.window.Window;
+import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
+import org.eclipse.che.ide.util.input.SignalEvent;
+import org.eclipse.che.ide.util.input.SignalEventUtils;
 
 /**
  * Implementation of {@link FileStructure} view.
@@ -53,6 +59,10 @@ final class FileStructureImpl extends Window implements FileStructure {
   private final NodeFactory nodeFactory;
   private final Tree tree;
 
+  private final ActionManager actionManager;
+  private final PresentationFactory presentationFactory;
+  private final KeyBindingAgent keyBindingAgent;
+
   private ActionDelegate delegate;
 
   @UiField DockLayoutPanel treeContainer;
@@ -61,55 +71,42 @@ final class FileStructureImpl extends Window implements FileStructure {
   @UiField(provided = true)
   final JavaLocalizationConstant locale;
 
-  private Predicate<Node> LEAFS =
-      new Predicate<Node>() {
-        @Override
-        public boolean apply(Node input) {
-          return input.isLeaf();
-        }
-      };
+  private Predicate<Node> LEAFS = Node::isLeaf;
 
   @Inject
-  public FileStructureImpl(NodeFactory nodeFactory, JavaLocalizationConstant locale) {
-    super(false);
+  public FileStructureImpl(
+      NodeFactory nodeFactory,
+      JavaLocalizationConstant locale,
+      ActionManager actionManager,
+      PresentationFactory presentationFactory,
+      KeyBindingAgent keyBindingAgent) {
     this.nodeFactory = nodeFactory;
     this.locale = locale;
+    this.actionManager = actionManager;
+    this.presentationFactory = presentationFactory;
+    this.keyBindingAgent = keyBindingAgent;
+
     setWidget(UI_BINDER.createAndBindUi(this));
 
     NodeStorage storage =
-        new NodeStorage(
-            new NodeUniqueKeyProvider() {
-              @Override
-              public String getKey(@NotNull Node item) {
-                return String.valueOf(item.hashCode());
-              }
-            });
-    NodeLoader loader = new NodeLoader(Collections.<NodeInterceptor>emptySet());
+        new NodeStorage((NodeUniqueKeyProvider) item -> String.valueOf(item.hashCode()));
+    NodeLoader loader = new NodeLoader(Collections.emptySet());
     tree = new Tree(storage, loader);
     tree.setAutoExpand(false);
     tree.getSelectionModel().setSelectionMode(SINGLE);
 
-    KeyboardNavigationHandler handler =
-        new KeyboardNavigationHandler() {
-          @Override
-          public void onEnter(NativeEvent evt) {
-            hide();
-          }
-        };
     tree.addDomHandler(
-        new DoubleClickHandler() {
-          @Override
-          public void onDoubleClick(DoubleClickEvent event) {
-            if (all(tree.getSelectionModel().getSelectedNodes(), LEAFS)) {
-              hide();
-            }
+        event -> {
+          if (all(tree.getSelectionModel().getSelectedNodes(), LEAFS)) {
+            hide();
           }
         },
         DoubleClickEvent.getType());
 
-    handler.bind(tree);
-
     treeContainer.add(tree);
+
+    tree.enableSpeedSearch(true);
+    ensureDebugId("file-structure");
   }
 
   /** {@inheritDoc} */
@@ -126,6 +123,11 @@ final class FileStructureImpl extends Window implements FileStructure {
                 compilationUnit.getTypes().get(0), compilationUnit, showInheritedMembers, false));
   }
 
+  @Override
+  public void setTitleCaption(String title) {
+    setTitle(title);
+  }
+
   /** {@inheritDoc} */
   @Override
   public void close() {
@@ -134,24 +136,64 @@ final class FileStructureImpl extends Window implements FileStructure {
 
   /** {@inheritDoc} */
   @Override
-  public void show() {
-    super.show(tree);
+  public void showDialog() {
+    show(tree);
+  }
+
+  @Override
+  protected void onShow() {
     if (!tree.getRootNodes().isEmpty()) {
       tree.getSelectionModel().select(tree.getRootNodes().get(0), false);
     }
     tree.expandAll();
   }
 
-  /** {@inheritDoc} */
   @Override
-  public void hide() {
-    super.hide();
-    delegate.onEscapeClicked();
+  protected void onHide() {
+    tree.closeSpeedSearchPopup();
   }
 
   /** {@inheritDoc} */
   @Override
   public void setDelegate(ActionDelegate delegate) {
     this.delegate = delegate;
+  }
+
+  @Override
+  public Widget asWidget() {
+    return super.asWidget();
+  }
+
+  @Override
+  public void onKeyPress(NativeEvent evt) {
+    handleKey(evt);
+  }
+
+  @Override
+  public void onEscPress(NativeEvent evt) {
+    delegate.onEscapeClicked();
+  }
+
+  private void handleKey(NativeEvent event) {
+    SignalEvent signalEvent = SignalEventUtils.create((Event) event, false);
+    CharCodeWithModifiers keyBinding =
+        keyBindingAgent.getKeyBinding(JavaExtension.JAVA_CLASS_STRUCTURE);
+    if (signalEvent == null || keyBinding == null) {
+      return;
+    }
+    int digest = CharCodeWithModifiers.computeKeyDigest(signalEvent);
+    if (digest == keyBinding.getKeyDigest()) {
+      Action action = actionManager.getAction(JavaExtension.JAVA_CLASS_STRUCTURE);
+      if (action != null) {
+        ActionEvent e = new ActionEvent(presentationFactory.getPresentation(action), actionManager);
+        action.update(e);
+
+        if (e.getPresentation().isEnabled()) {
+          event.preventDefault();
+          event.stopPropagation();
+          action.actionPerformed(e);
+        }
+      }
+    }
   }
 }

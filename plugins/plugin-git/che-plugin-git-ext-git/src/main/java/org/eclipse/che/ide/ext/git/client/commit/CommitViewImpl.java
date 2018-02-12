@@ -10,7 +10,10 @@
  */
 package org.eclipse.che.ide.ext.git.client.commit;
 
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -78,12 +81,11 @@ public class CommitViewImpl extends Window implements CommitView {
     this.setWidget(widget);
 
     btnCancel =
-        createButton(
+        addFooterButton(
             locale.buttonCancel(), "git-commit-cancel", event -> delegate.onCancelClicked());
     btnCommit =
-        createButton(
-            locale.buttonCommit(), "git-commit-commit", event -> delegate.onCommitClicked());
-    btnCommit.addStyleName(resources.windowCss().primaryButton());
+        addFooterButton(
+            locale.buttonCommit(), "git-commit-commit", event -> delegate.onCommitClicked(), true);
 
     remoteBranches = new ListBox();
     remoteBranches.setEnabled(false);
@@ -95,21 +97,15 @@ public class CommitViewImpl extends Window implements CommitView {
     pushAfterCommit.addValueChangeHandler(event -> remoteBranches.setEnabled(event.getValue()));
 
     pushAfterCommit.addStyleName(res.gitCSS().spacing());
-    getFooter().add(pushAfterCommit);
-    getFooter().add(remoteBranches);
-
-    addButtonToFooter(btnCommit);
-    addButtonToFooter(btnCancel);
+    addFooterWidget(pushAfterCommit);
+    addFooterWidget(remoteBranches);
   }
 
   @Override
-  protected void onEnterClicked() {
-    if (isWidgetFocused(btnCommit)) {
+  public void onEnterPress(NativeEvent evt) {
+    if (isWidgetOrChildFocused(btnCommit)) {
       delegate.onCommitClicked();
-      return;
-    }
-
-    if (isWidgetFocused(btnCancel)) {
+    } else if (isWidgetOrChildFocused(btnCancel)) {
       delegate.onCancelClicked();
     }
   }

@@ -20,6 +20,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
@@ -50,7 +51,8 @@ public class EnvironmentRamCalculator {
               .getMachines()
               .values()
               .stream()
-              .mapToLong(m -> Long.parseLong(m.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE)))
+              .mapToLong(
+                  m -> parseMemoryAttributeValue(m.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE)))
               .sum()
           / BYTES_TO_MEGABYTES_DIVIDER;
     } catch (InfrastructureException | ValidationException | NotFoundException ex) {
@@ -68,9 +70,29 @@ public class EnvironmentRamCalculator {
             .getMachines()
             .values()
             .stream()
-            .mapToLong(m -> Long.parseLong(m.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE)))
+            .mapToLong(
+                m -> parseMemoryAttributeValue(m.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE)))
             .sum()
         / BYTES_TO_MEGABYTES_DIVIDER;
+  }
+
+  /**
+   * Parse {@link MachineConfig#MEMORY_LIMIT_ATTRIBUTE} value to {@code Long}.
+   *
+   * @param attributeValue value of {@link MachineConfig#MEMORY_LIMIT_ATTRIBUTE} attribute from
+   *     machine config or runtime
+   * @return long value parsed from provided string attribute value or {@code 0} if {@code null} is
+   *     provided
+   * @throws NumberFormatException if provided value is neither {@code null} nor valid stringified
+   *     long
+   * @see Long#parseLong(String)
+   */
+  private long parseMemoryAttributeValue(String attributeValue) {
+    if (attributeValue == null) {
+      return 0;
+    } else {
+      return Long.parseLong(attributeValue);
+    }
   }
 
   private InternalEnvironment getInternalEnvironment(Environment environment)

@@ -17,7 +17,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.eclipse.che.workspace.infrastructure.openshift.Constants.MACHINE_NAME_ANNOTATION_FMT;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.PVC_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.PVC_IGNORED_WARNING_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironmentFactory.ROUTES_IGNORED_WARNING_MESSAGE;
@@ -56,6 +56,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -72,6 +73,7 @@ import org.testng.annotations.Test;
 public class OpenShiftEnvironmentFactoryTest {
 
   private static final String YAML_RECIPE = "application/x-yaml";
+  private static final long BYTES_IN_MB = 1024 * 1024;
   private static final long DEFAULT_RAM_LIMIT_MB = 2048;
   public static final String MACHINE_NAME_1 = "machine1";
   public static final String MACHINE_NAME_2 = "machine2";
@@ -79,7 +81,7 @@ public class OpenShiftEnvironmentFactoryTest {
   private OpenShiftEnvironmentFactory osEnvironmentFactory;
 
   @Mock private OpenShiftClientFactory clientFactory;
-  @Mock private OpenShiftEnvironmentValidator osEnvValidator;
+  @Mock private KubernetesEnvironmentValidator k8sEnvValidator;
   @Mock private OpenShiftClient client;
   @Mock private InternalEnvironment internalEnvironment;
   @Mock private InternalRecipe internalRecipe;
@@ -98,7 +100,7 @@ public class OpenShiftEnvironmentFactoryTest {
   public void setup() throws Exception {
     osEnvironmentFactory =
         new OpenShiftEnvironmentFactory(
-            null, null, null, clientFactory, osEnvValidator, DEFAULT_RAM_LIMIT_MB);
+            null, null, null, clientFactory, k8sEnvValidator, DEFAULT_RAM_LIMIT_MB);
     when(clientFactory.create()).thenReturn(client);
     when(client.lists()).thenReturn(listMixedOperation);
     when(listMixedOperation.load(any(InputStream.class))).thenReturn(serverGettable);
@@ -141,8 +143,8 @@ public class OpenShiftEnvironmentFactoryTest {
 
   @Test
   public void testSetsRamLimitAttributeFromOpenShiftResource() throws Exception {
-    final long firstMachineRamLimit = 3072;
-    final long secondMachineRamLimit = 1024;
+    final long firstMachineRamLimit = 3072 * BYTES_IN_MB;
+    final long secondMachineRamLimit = 1024 * BYTES_IN_MB;
     when(machineConfig1.getAttributes()).thenReturn(new HashMap<>());
     when(machineConfig2.getAttributes()).thenReturn(new HashMap<>());
     final Set<Pod> pods =
@@ -159,13 +161,13 @@ public class OpenShiftEnvironmentFactoryTest {
 
   @Test
   public void testDoNotOverrideRamLimitAttributeWhenItAlreadyPresent() throws Exception {
-    final long customRamLimit = 3072;
+    final long customRamLimit = 3072 * BYTES_IN_MB;
     final Map<String, String> attributes =
         ImmutableMap.of(MEMORY_LIMIT_ATTRIBUTE, String.valueOf(customRamLimit));
     when(machineConfig1.getAttributes()).thenReturn(attributes);
     when(machineConfig2.getAttributes()).thenReturn(attributes);
-    final Pod pod1 = mockPod(MACHINE_NAME_1, 0);
-    final Pod pod2 = mockPod(MACHINE_NAME_2, 0);
+    final Pod pod1 = mockPod(MACHINE_NAME_1, 0L);
+    final Pod pod2 = mockPod(MACHINE_NAME_2, 0L);
     final Set<Pod> pods = ImmutableSet.of(pod1, pod2);
 
     osEnvironmentFactory.addRamLimitAttribute(machines, pods);
@@ -179,7 +181,7 @@ public class OpenShiftEnvironmentFactoryTest {
   @Test
   public void testAddsMachineConfIntoEnvAndSetsRamLimAttributeWhenMachinePresentOnlyInRecipe()
       throws Exception {
-    final long customRamLimit = 2048;
+    final long customRamLimit = 2048 * BYTES_IN_MB;
     final Map<String, InternalMachineConfig> machines = new HashMap<>();
     final Set<Pod> pods = ImmutableSet.of(mockPod(MACHINE_NAME_2, customRamLimit));
 
@@ -191,20 +193,40 @@ public class OpenShiftEnvironmentFactoryTest {
     assertTrue(Arrays.equals(actual, expected));
   }
 
-  private static Pod mockPod(String machineName, long ramLimit) {
+  @Test
+  public void testSetsDefaultRamLimitAttributeIfRamLimitIsMissingInRecipeAndConfig()
+      throws Exception {
+    final long firstMachineRamLimit = 3072 * BYTES_IN_MB;
+    when(machineConfig1.getAttributes()).thenReturn(new HashMap<>());
+    when(machineConfig2.getAttributes()).thenReturn(new HashMap<>());
+    final Set<Pod> pods =
+        ImmutableSet.of(
+            mockPod(MACHINE_NAME_1, firstMachineRamLimit), mockPod(MACHINE_NAME_2, null));
+
+    osEnvironmentFactory.addRamLimitAttribute(machines, pods);
+
+    final long[] actual = machinesRam(machines.values());
+    final long[] expected = new long[] {firstMachineRamLimit, DEFAULT_RAM_LIMIT_MB * BYTES_IN_MB};
+    assertTrue(Arrays.equals(actual, expected));
+  }
+
+  /** If provided {@code ramLimit} is {@code null} ram limit won't be set in POD */
+  private static Pod mockPod(String machineName, Long ramLimit) {
     final String containerName = "container_" + machineName;
     final Container containerMock = mock(Container.class);
-    final ResourceRequirements resourcesMock = mock(ResourceRequirements.class);
-    final Quantity quantityMock = mock(Quantity.class);
     final Pod podMock = mock(Pod.class);
     final PodSpec specMock = mock(PodSpec.class);
     final ObjectMeta metadataMock = mock(ObjectMeta.class);
     when(podMock.getSpec()).thenReturn(specMock);
     when(podMock.getMetadata()).thenReturn(metadataMock);
-    when(quantityMock.getAmount()).thenReturn(String.valueOf(ramLimit));
-    when(resourcesMock.getLimits()).thenReturn(ImmutableMap.of("memory", quantityMock));
+    if (ramLimit != null) {
+      final Quantity quantityMock = mock(Quantity.class);
+      final ResourceRequirements resourcesMock = mock(ResourceRequirements.class);
+      when(quantityMock.getAmount()).thenReturn(String.valueOf(ramLimit));
+      when(resourcesMock.getLimits()).thenReturn(ImmutableMap.of("memory", quantityMock));
+      when(containerMock.getResources()).thenReturn(resourcesMock);
+    }
     when(containerMock.getName()).thenReturn(containerName);
-    when(containerMock.getResources()).thenReturn(resourcesMock);
     when(metadataMock.getAnnotations())
         .thenReturn(
             ImmutableMap.of(format(MACHINE_NAME_ANNOTATION_FMT, containerName), machineName));

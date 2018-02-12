@@ -52,20 +52,17 @@ public class TextAreaDialogViewImpl extends Window implements TextAreaDialogView
     this.setWidget(widget);
     this.ensureDebugId("debugger-textarea-dialog");
 
-    Button cancelButton =
-        createButton(
-            cancelBtnLabel,
-            "debugger-textarea-dialog-cancel-btn",
-            clickEvent -> delegate.onCancelClicked());
+    addFooterButton(
+        cancelBtnLabel,
+        "debugger-textarea-dialog-cancel-btn",
+        clickEvent -> delegate.onCancelClicked());
 
     agreeButton =
-        createButton(
+        addFooterButton(
             agreeBtnLabel,
             "debugger-textarea-dialog-agree-btn",
-            clickEvent -> delegate.onAgreeClicked());
-
-    addButtonToFooter(cancelButton);
-    addButtonToFooter(agreeButton);
+            clickEvent -> delegate.onAgreeClicked(),
+            true);
   }
 
   /** {@inheritDoc} */
@@ -118,8 +115,12 @@ public class TextAreaDialogViewImpl extends Window implements TextAreaDialogView
 
   /** {@inheritDoc} */
   @Override
-  public void show() {
-    super.show();
+  public void showDialog() {
+    show();
+  }
+
+  @Override
+  protected void onShow() {
     if (!value.getText().isEmpty()) {
       value.selectAll();
       setEnableChangeButton(true);

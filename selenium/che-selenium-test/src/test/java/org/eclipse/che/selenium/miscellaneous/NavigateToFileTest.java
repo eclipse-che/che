@@ -146,14 +146,14 @@ public class NavigateToFileTest {
     // in tabs)
     String openedFileNameInTheTab = openedFileWithExtension.replace(".java", "");
     launchNavigateToFileFromUIAndTypeValue(navigatingValue);
-    navigateToFile.waitSuggestedPanelIsDisplayed();
-    waitExpectedItemsInNavigateToFileDropdawn(expectedItems);
+    navigateToFile.waitSuggestedPanel();
+    waitExpectedItemsInNavigateToFileDropdown(expectedItems);
 
     try {
       navigateToFile.selectFileByName(dropdownVerificationPath);
     } catch (WebDriverException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8293");
+      fail("Known issue https://github.com/eclipse/che/issues/8465");
     }
 
     editor.waitActive();
@@ -170,7 +170,7 @@ public class NavigateToFileTest {
     loader.waitOnClosed();
   }
 
-  private void waitExpectedItemsInNavigateToFileDropdawn(Map<Integer, String> expectedItems) {
+  private void waitExpectedItemsInNavigateToFileDropdown(Map<Integer, String> expectedItems) {
     expectedItems
         .values()
         .stream()

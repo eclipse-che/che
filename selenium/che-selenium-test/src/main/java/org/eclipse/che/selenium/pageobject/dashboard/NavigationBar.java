@@ -14,12 +14,14 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -71,7 +73,13 @@ public class NavigationBar {
   List<WebElement> teamsList;
 
   public void waitNavigationBar() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(visibilityOf(navigationBar));
+    try {
+      new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+          .until(visibilityOf(navigationBar));
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8490");
+    }
   }
 
   public void clickOnMenu(MenuItem menuItem) {

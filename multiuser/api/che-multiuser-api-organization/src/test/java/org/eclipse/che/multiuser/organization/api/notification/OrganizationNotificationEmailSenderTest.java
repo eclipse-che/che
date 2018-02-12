@@ -12,6 +12,7 @@ package org.eclipse.che.multiuser.organization.api.notification;
 
 import static java.util.Arrays.*;
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.multiuser.organization.api.DtoConverter.asDto;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -86,10 +87,11 @@ public class OrganizationNotificationEmailSenderTest {
 
     // when
     emailSender.onEvent(
-        new MemberAddedEvent(
-            "admin",
-            new UserImpl("id", "email", null),
-            new OrganizationImpl("id", "/parent/name", "parent")));
+        asDto(
+            new MemberAddedEvent(
+                "admin",
+                new UserImpl("id", "email", null),
+                new OrganizationImpl("id", "/parent/name", "parent"))));
 
     // then
     verify(emails).memberAdded("name", DASHBOARD_ENDPOINT, "/parent/name", "admin");
@@ -106,10 +108,11 @@ public class OrganizationNotificationEmailSenderTest {
 
     // when
     emailSender.onEvent(
-        new MemberRemovedEvent(
-            "admin",
-            new UserImpl("id", "email", null),
-            new OrganizationImpl("id", "/parent/name", "parent")));
+        asDto(
+            new MemberRemovedEvent(
+                "admin",
+                new UserImpl("id", "email", null),
+                new OrganizationImpl("id", "/parent/name", "parent"))));
 
     // then
     verify(emails).memberRemoved("name", "admin");
@@ -136,11 +139,12 @@ public class OrganizationNotificationEmailSenderTest {
 
     // when
     emailSender.onEvent(
-        new OrganizationRenamedEvent(
-            "admin",
-            "oldName",
-            "newName",
-            new OrganizationImpl("org123", "/parent/newName", "parent")));
+        asDto(
+            new OrganizationRenamedEvent(
+                "admin",
+                "oldName",
+                "newName",
+                new OrganizationImpl("org123", "/parent/newName", "parent"))));
 
     // then
     verify(emails).organizationRenamed("oldName", "newName");
@@ -168,11 +172,12 @@ public class OrganizationNotificationEmailSenderTest {
 
     // when
     emailSender.onEvent(
-        new OrganizationRenamedEvent(
-            "admin",
-            "oldName",
-            "newName",
-            new OrganizationImpl("org123", "/parent/newName", "parent")));
+        asDto(
+            new OrganizationRenamedEvent(
+                "admin",
+                "oldName",
+                "newName",
+                new OrganizationImpl("org123", "/parent/newName", "parent"))));
 
     // then
     verify(emails).organizationRenamed("oldName", "newName");
@@ -195,8 +200,11 @@ public class OrganizationNotificationEmailSenderTest {
 
     // when
     emailSender.onEvent(
-        new OrganizationRemovedEvent(
-            "admin", new OrganizationImpl("id", "/parent/q", "parent"), asList(member1, member2)));
+        asDto(
+            new OrganizationRemovedEvent(
+                "admin",
+                new OrganizationImpl("id", "/parent/q", "parent"),
+                asList(member1.getUserId(), member2.getUserId()))));
 
     // then
     verify(emails).organizationRemoved("q");
@@ -221,8 +229,11 @@ public class OrganizationNotificationEmailSenderTest {
 
     // when
     emailSender.onEvent(
-        new OrganizationRemovedEvent(
-            "admin", new OrganizationImpl("id", "/parent/q", "parent"), asList(member1, member2)));
+        asDto(
+            new OrganizationRemovedEvent(
+                "admin",
+                new OrganizationImpl("id", "/parent/q", "parent"),
+                asList(member1.getUserId(), member2.getUserId()))));
 
     // then
     verify(emails).organizationRemoved("q");

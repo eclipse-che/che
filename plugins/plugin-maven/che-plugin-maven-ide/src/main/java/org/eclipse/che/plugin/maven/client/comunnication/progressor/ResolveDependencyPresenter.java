@@ -30,7 +30,7 @@ public class ResolveDependencyPresenter implements ResolveDependencyView.ActionD
 
   /** Shows the widget. */
   public void show() {
-    view.show();
+    view.showDialog();
   }
 
   /**
@@ -53,6 +53,6 @@ public class ResolveDependencyPresenter implements ResolveDependencyView.ActionD
 
   /** Hides the widget. */
   public void hide() {
-    view.hide();
+    view.close();
   }
 }

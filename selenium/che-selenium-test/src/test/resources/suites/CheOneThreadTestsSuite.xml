@@ -22,7 +22,7 @@
                 <script language="beanshell">
                     <![CDATA[
     boolean isTestGroupsAgreedWithRequestedGroups() {
-     String testGroupsVal = System.getProperty("testGroups");
+      String testGroupsVal = System.getProperty("testGroups");
       if (testGroupsVal == null || testGroupsVal.trim().isEmpty() || groups.isEmpty()){
         return true;
       }
@@ -55,11 +55,15 @@
             <class name="org.eclipse.che.selenium.dashboard.organization.OrganizationMembersTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.RenameOrganizationTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.SystemAdminOrganizationTest"/>
+            <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromDashboardTest"/>
+            <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromImportTest"/>
+            <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromPreferencesTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutReferenceTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest"/>
             <class name="org.eclipse.che.selenium.git.FetchUpdatesAndMergeRemoteBranchIntoLocalTest"/>
             <class name="org.eclipse.che.selenium.git.GitPullTest"/>
+            <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
             <class name="org.eclipse.che.selenium.git.ImportProjectIntoSpecifiedBranchTest"/>
             <class name="org.eclipse.che.selenium.git.ImportRecursiveSubmoduleTest"/>
             <class name="org.eclipse.che.selenium.git.KeepDirectoryGitImportTest"/>

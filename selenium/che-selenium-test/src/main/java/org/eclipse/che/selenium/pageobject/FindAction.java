@@ -32,7 +32,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @Singleton
 public class FindAction {
 
-  private static final String ENTER_ACTION_FORM = "//div[text()='Enter action name:']";
+  private static final String ENTER_ACTION_FORM = "//div[contains(text(),'Enter action name:')]";
   private static final String TEXT_BOX_ACTION_FORM =
       "//div[text()='Enter action name:']/following::input[@class='gwt-TextBox']";
   private static final String INCLUDE_NON_MENU_ACTIONS = "//span[@class='gwt-CheckBox']";

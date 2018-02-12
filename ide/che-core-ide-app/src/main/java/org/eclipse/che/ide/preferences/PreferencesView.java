@@ -58,7 +58,7 @@ public interface PreferencesView extends View<PreferencesView.ActionDelegate> {
   void close();
 
   /** Show preferences. */
-  void show();
+  void showDialog();
 
   /**
    * Returns content panel.

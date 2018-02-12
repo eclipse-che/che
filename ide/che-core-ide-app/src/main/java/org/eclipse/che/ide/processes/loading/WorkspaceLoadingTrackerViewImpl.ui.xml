@@ -18,35 +18,17 @@
     <ui:with field="machineResources" type="org.eclipse.che.ide.machine.MachineResources"/>
     <ui:with field="resources" type="org.eclipse.che.ide.Resources" />
 
-    <ui:style>
-
-        @def workspaceStatusBackgroundColor #191c28;
+    <ui:style  src="org/eclipse/che/ide/api/ui/style.css">
         @def workspaceStatusDelimiterColor rgba(160, 169, 183, 0.2);
-        @def workspaceStatusMachineOutputsHyperlink #4973c1;
-
-        @def workspaceStatusWaitingWorkspaceSection #f0c530;
-        @def workspaceStatusWorkspaceStartedSection #3aa461;
-        @def workspaceStatusWorkspaceStoppedSection #f0c530;
-        @def workspaceStatusWorkspaceFailedSection red;
-
-        @def workspaceStatusMachineStateStarting #4973c1;
-        @def workspaceStatusMachineStateRunning #3aa461;
-        @def workspaceStatusMachineStateStopped #adadad;
-        @def workspaceStatusMachineStateFailed red;
-
-        @def workspaceStatusInstallerStateStarting #4973c1;
-        @def workspaceStatusInstallerStateRunning #4973c1;
-        @def workspaceStatusInstallerStateFailed red;
-
-        @def workspaceStatusInstallerStatusStarting #4973c1;
-        @def workspaceStatusInstallerStatusRunning #3aa461;
-        @def workspaceStatusInstallerStatusFailed red;
-
-        @def workspaceStatusErrorMessage red;
+        @def workspaceStatusGreyColor #adadad;
+        @def workspaceStatusYellowColor #f0c530;
+        @def workspaceStatusBlueColor #4973c1;
+        @def workspaceStatusGreenColor #3aa461;
+        @def workspaceStatusRedColor red;
 
         .panel {
             overflow: auto;
-            background-color: workspaceStatusBackgroundColor;
+            background-color: outputBackgroundColor;
             user-select: text;
             position: relative;
         }
@@ -61,6 +43,7 @@
 
         .table > tbody > tr > td {
             font-family: "Open Sans", sans-serif;
+            color: outputFontColor;
             font-size: 9pt;
             line-height: 13px;
             white-space: pre;
@@ -100,7 +83,7 @@
             top: 37px;
             line-height: 15px!important;
             font-size: 9px;
-            color: workspaceStatusMachineOutputsHyperlink;
+            color: workspaceStatusBlueColor;
             text-decoration: underline;
             cursor: pointer;
         }
@@ -131,19 +114,19 @@
         }
 
         .machineState[rel="starting"] {
-            color: workspaceStatusMachineStateStarting;
+            color: workspaceStatusBlueColor;
         }
 
         .machineState[rel="running"] {
-            color: workspaceStatusMachineStateRunning;
+            color: workspaceStatusGreenColor;
         }
 
         .machineState[rel="stopped"] {
-            color: workspaceStatusMachineStateStopped;
+            color: workspaceStatusGreyColor;
         }
 
         .machineState[rel="failed"] {
-            color: workspaceStatusMachineStateFailed;
+            color: workspaceStatusRedColor;
         }
 
         .installerRow {
@@ -177,32 +160,32 @@
         }
 
         .state[rel="starting"] {
-            color: workspaceStatusInstallerStateStarting;
+            color: workspaceStatusBlueColor;
         }
 
         .state[rel="running"] {
-            color: workspaceStatusInstallerStateRunning;
+            color: workspaceStatusBlueColor;
         }
 
         .state[rel="failed"] {
-            color: workspaceStatusInstallerStateFailed;
+            color: workspaceStatusRedColor;
         }
 
         .status[rel="starting"] {
-            color: workspaceStatusInstallerStatusStarting;
+            color: workspaceStatusBlueColor;
         }
 
         .status[rel="running"],
         .status[rel="ok"] {
-            color: workspaceStatusInstallerStatusRunning;
+            color: workspaceStatusGreenColor;
         }
 
         .status[rel="failed"] {
-            color: workspaceStatusInstallerStatusFailed;
+            color: workspaceStatusRedColor;
         }
 
         .error {
-            color: workspaceStatusErrorMessage;
+            color: workspaceStatusRedColor;
             white-space: normal!important;
             padding-right: 30px;
         }
@@ -213,7 +196,7 @@
             font-size: 20px;
             line-height: 20px!important;
             text-align: center;
-            color: workspaceStatusErrorMessage;
+            color: workspaceStatusRedColor;
             position: relative;
             vertical-align: middle;
         }
@@ -221,7 +204,7 @@
         .workspaceFailedIcon > div {
             position: absolute;
             left: 15px;
-            top: 0px;
+            top: 0;
         }
 
         .workspaceFailedTitle {
@@ -254,19 +237,19 @@
         }
 
         .waitingWorkspaceSection td {
-            color: workspaceStatusWaitingWorkspaceSection;
+            color: workspaceStatusYellowColor;
         }
 
         .workspaceStartedSection td {
-            color: workspaceStatusWorkspaceStartedSection;
+            color: workspaceStatusGreenColor;
         }
 
         .workspaceStoppedSection td {
-            color: workspaceStatusWorkspaceStoppedSection;
+            color: workspaceStatusYellowColor;
         }
 
         .workspaceFailedSection td {
-            color: workspaceStatusWorkspaceFailedSection;
+            color: workspaceStatusRedColor;
         }
 
     </ui:style>
@@ -309,7 +292,7 @@
                         <td class="{style.machineState}" rel="stopped" id="machine-state">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
                     </tr>
 
-                    <tr ui:field="machineInlineDelimiterTemplate"><td colspan="7" style="height: 10px;"></td></tr>
+                    <tr ui:field="machineInlineDelimiterTemplate" style="height: 20px;"><td colspan="7"></td></tr>
 
                     <tr ui:field="installerTemplate" class="{style.installerRow}">
                         <td class="{style.list}">•</td>

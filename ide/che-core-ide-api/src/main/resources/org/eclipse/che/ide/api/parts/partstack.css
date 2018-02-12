@@ -8,11 +8,13 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
+@url tabLineError tabLineError;
+@url tabLineWarning tabLineWarning;
+
 .listItemPanel {
     background-color: openedFilesDropdownListBackgroundColor;
-    border: 1px solid openedFilesDropdownListBorderColor;
+    border: none;
     box-shadow: 0 2px 2px 0 openedFilesDropdownListShadowColor;
-    border-radius: 0 0 3px 3px;
     max-height: 300px;
     overflow-y: auto;
     width: 200px;
@@ -34,9 +36,10 @@ div[maximized="true"] svg[name="workBenchIconMaximize"] * {
     width: auto;
     overflow: visible;
 
-    text-decoration-line: underline;
-    text-decoration-style: wavy;
-    text-decoration-color: red;
+    background: tabLineError 0 1.3em;
+    background-repeat-y: no-repeat;
+    background-repeat-x: repeat;
+    background-size: 15px 7px;
 }
 
 .ide-PartStack-Tab-Line-Warning {
@@ -46,7 +49,8 @@ div[maximized="true"] svg[name="workBenchIconMaximize"] * {
     width: auto;
     overflow: visible;
 
-    text-decoration-line: underline;
-    text-decoration-style: wavy;
-    text-decoration-color: #FFD31E;
+    background: tabLineWarning 0 1.3em;
+    background-repeat-y: no-repeat;
+    background-repeat-x: repeat;
+    background-size: 15px 7px;
 }

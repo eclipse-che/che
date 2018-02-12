@@ -15,10 +15,12 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEME
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -49,7 +52,7 @@ public class Workspaces {
 
   private interface Locators {
     String TOOLBAR = "Workspaces";
-    String DOCUMENTATION_LINK = "//a[@ng-href='/docs/devops/intro/index.html']";
+    String DOCUMENTATION_LINK = "//div[@che-link-title='Learn more.']/a";
     String ADD_WORKSPACE_BTN = "add-item-button";
     String DELETE_WORKSPACE_BTN = "delete-item-button";
     String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
@@ -98,8 +101,9 @@ public class Workspaces {
         .getAttribute("data-ws-status");
   }
 
-  public void waitWorkspaceStatusIs(String workspaceName, String workspaceStatus) {
-    new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
+  public void waitWorkspaceStatus(String workspaceName, String workspaceStatus) {
+    // we need long timeout for OCP
+    new WebDriverWait(seleniumWebDriver, PREPARING_WS_TIMEOUT_SEC)
         .until(
             new ExpectedCondition<Boolean>() {
               @Override
@@ -214,21 +218,32 @@ public class Workspaces {
   }
 
   public void selectWorkspaceItemName(String wsName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(format(Locators.WORKSPACE_ITEM_NAME, wsName))))
-        .click();
+    try {
+      new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+          .until(visibilityOfElementLocated(By.xpath(format(Locators.WORKSPACE_ITEM_NAME, wsName))))
+          .click();
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8594");
+    }
   }
 
   public void waitWorkspaceIsPresent(String workspaceName) {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format(Locators.WORKSPACE_ITEM_NAME, workspaceName))));
+    try {
+      new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+          .until(
+              visibilityOfElementLocated(
+                  By.xpath(format(Locators.WORKSPACE_ITEM_NAME, workspaceName))));
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8594");
+    }
   }
 
   /** wait the workspace is not present on dashboard */
   public void waitWorkspaceIsNotPresent(String workspaceName) {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+    // we need long timeout for OCP
+    new WebDriverWait(seleniumWebDriver, EXPECTED_MESS_IN_CONSOLE_SEC)
         .until(
             invisibilityOfElementLocated(
                 By.xpath(format(Locators.WORKSPACE_ITEM_NAME, workspaceName))));

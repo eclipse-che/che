@@ -142,7 +142,7 @@ public class RenameStaticMethodsTest {
   private void doRefactoringWithKeys(
       int cursorPositionLine, int cursorPositionChar, String newName) {
     prepareProjectForRefactor(cursorPositionLine, cursorPositionChar);
-    editor.launchRefactorFormFromEditor();
+    editor.launchLocalRefactor();
     editor.typeTextIntoEditor("k");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitTextIntoEditor(contentFromOutB);
@@ -150,8 +150,7 @@ public class RenameStaticMethodsTest {
 
   private void doRefactorByWizard(int cursorPositionLine, int cursorPositionChar, String newName) {
     prepareProjectForRefactor(cursorPositionLine, cursorPositionChar);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameMethodFormIsOpen();
     refactor.typeAndWaitNewName(newName);
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
@@ -167,8 +166,7 @@ public class RenameStaticMethodsTest {
       String expectedWarningMessage) {
 
     prepareProjectForRefactor(cursorPositionLine, cursorPositionChar);
-    editor.launchRefactorFormFromEditor();
-    editor.launchRefactorFormFromEditor();
+    editor.launchRefactorForm();
     refactor.waitRenameMethodFormIsOpen();
     refactor.typeAndWaitNewName(newName);
     refactor.clickOkButtonRefactorForm();

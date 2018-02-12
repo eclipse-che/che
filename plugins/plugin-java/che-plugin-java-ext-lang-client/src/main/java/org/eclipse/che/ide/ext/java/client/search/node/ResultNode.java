@@ -85,7 +85,7 @@ public class ResultNode extends AbstractPresentationNode {
   @Override
   public void updatePresentation(@NotNull NodePresentation presentation) {
     SpanElement spanElement =
-        Elements.createSpanElement(styles.styles().presentableTextContainer());
+        Elements.createSpanElement(styles.treeStylesCss().presentableTextContainer());
     spanElement.setInnerHTML(
         "Usages of <span class=\""
             + resources.css().searchMatch()

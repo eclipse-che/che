@@ -63,7 +63,7 @@ services:
       traefik.che.port: "<%= scope.lookupvar('che::che_port') -%>"
       traefik.che.frontend.rule: "PathPrefix:/"
 <% if scope.lookupvar('che::che_multiuser') == 'true' -%>
-      traefik.che.docker.network: "che_default"
+      traefik.docker.network: "che_default"
 <% end -%>
 <% end -%>
     restart: always
@@ -84,6 +84,11 @@ services:
     command: --logLevel=DEBUG
     links:
       - che:che
+<% if scope.lookupvar('che::che_multiuser') == 'true' -%>
+    networks:
+      - default
+      - che-network
+<% end -%>
     labels:
       traefik.enable: "false"
     ports:
@@ -115,8 +120,10 @@ services:
       - '<%= scope.lookupvar('che::che_instance') -%>/data/postgres:/var/lib/pgsql/data'
       - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/init-che-user.sh:/var/lib/pgsql/init-che-user.sh'
       - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/init-che-user-and-run.sh:/var/lib/pgsql/init-che-user-and-run.sh'
+<% if scope.lookupvar('che::che_single_port') == 'false' -%>
     ports:
       - '5432:5432'
+<% end -%>
     restart: always
     healthcheck:
         test: [ "CMD", "/bin/sh", "-i", "-c", "psql -h 127.0.0.1 -U keycloak -q -d keycloak -c 'SELECT 1'" ]
@@ -132,8 +139,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+<% if scope.lookupvar('che::che_single_port') == 'false' -%>
     ports:
       - '5050:8080'
+<% end -%>
     entrypoint:
       - start-keycloak.sh
       - -Dkeycloak.migration.action=import
@@ -149,6 +158,17 @@ services:
       - POSTGRES_PASSWORD=keycloak
     links:
       - postgres:postgres
+<% if scope.lookupvar('che::che_single_port') == 'true' -%>
+    labels:
+      traefik.keycloak.frontend.entryPoints: "http"
+      traefik.keycloak.port: "8080"
+<% if ! @che_docker_ip_external.empty? -%>
+      traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::che_docker_ip_external') -%>.<%= scope.lookupvar('che::che_single_port_wildcard_domain_host') -%>"
+<% else -%>
+      traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::docker_ip') -%>.<%= scope.lookupvar('che::che_single_port_wildcard_domain_host') -%>"
+<% end -%>
+      traefik.docker.network: "che_default"
+<% end -%>
     volumes:
       - '<%= scope.lookupvar('che::che_instance') -%>/config/keycloak/che:/opt/jboss/keycloak/themes/che'
       - '<%= scope.lookupvar('che::che_instance') -%>/config/keycloak/:/opt/jboss/keycloak/realms/'

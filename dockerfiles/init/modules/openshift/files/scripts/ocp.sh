@@ -61,7 +61,7 @@ export OPENSHIFT_FLAVOR="ocp"
 
 DEFAULT_OPENSHIFT_ENDPOINT="https://${OC_PUBLIC_HOSTNAME}:8443"
 export OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
-export CHE_INFRA_OPENSHIFT_MASTER__URL=${CHE_INFRA_OPENSHIFT_MASTER__URL:-${OPENSHIFT_ENDPOINT}}
+export CHE_INFRA_KUBERNETES_MASTER__URL=${CHE_INFRA_KUBERNETES_MASTER__URL:-${OPENSHIFT_ENDPOINT}}
 
 DEFAULT_ENABLE_SSL="false"
 export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
@@ -75,10 +75,10 @@ export IMAGE_PULL_POLICY=${IMAGE_PULL_POLICY:-${DEFAULT_IMAGE_PULL_POLICY}}
 DEFAULT_CHE_IMAGE_REPO="eclipse/che-server"
 export CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
 
-DEFAULT_IMAGE_INIT="eclipse/che-init:${CHE_IMAGE_TAG}"
+DEFAULT_IMAGE_INIT="eclipse/che-init:nightly"
 export IMAGE_INIT=${IMAGE_INIT:-${DEFAULT_IMAGE_INIT}}
 
-DEFAULT_CHE_CLI_IMAGE="eclipse/che-cli:${CHE_IMAGE_TAG}"
+DEFAULT_CHE_CLI_IMAGE="eclipse/che-cli:nightly"
 export CHE_CLI_IMAGE=${CHE_CLI_IMAGE:-${DEFAULT_CHE_CLI_IMAGE}}
 
 DEFAULT_CONFIG_DIR="/tmp/che-config"
@@ -198,60 +198,8 @@ deploy_che_to_ocp() {
       echo "OCP script deploy_che.sh does not exist in ${CURRENT_PWD} ."
       exit 1
     else
-      bash deploy_che.sh ${DEPLOY_SCRIPT_ARGS}
+      bash deploy_che.sh --wait-che ${DEPLOY_SCRIPT_ARGS}
     fi
-    wait_until_server_is_booted
-    if [ $CHE_MULTIUSER == true ]; then
-        wait_until_kc_is_booted
-    fi
-}
-
-server_is_booted() {
-  PING_URL="http://che-${CHE_OPENSHIFT_PROJECT}.${OPENSHIFT_ROUTING_SUFFIX}"
-  HTTP_STATUS_CODE=$(curl -I -k "${PING_URL}" -s -o /dev/null --write-out '%{http_code}')
-  if [[ "${HTTP_STATUS_CODE}" = "200" ]] || [[ "${HTTP_STATUS_CODE}" = "302" ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-wait_until_server_is_booted() {
-  SERVER_BOOT_TIMEOUT=300
-  echo -n "[CHE] wait CHE pod booting..."
-  ELAPSED=0
-  until server_is_booted || [ ${ELAPSED} -eq "${SERVER_BOOT_TIMEOUT}" ]; do
-    echo -n "."
-    sleep 2
-    ELAPSED=$((ELAPSED+1))
-  done
-  echo "Done!"
-}
-
-wait_until_kc_is_booted() {
-  echo "[CHE] wait Keycloak pod booting..."
-  available=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
-  progressing=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
-
-  DEPLOYMENT_TIMEOUT_SEC=1200
-  POLLING_INTERVAL_SEC=5
-  end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
-  while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
-    available=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
-    progressing=$($OC_BINARY get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
-    timeout_in=$((end-SECONDS))
-    echo "[CHE] Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, Timeout in ${timeout_in}s)"
-    sleep ${POLLING_INTERVAL_SEC}
-  done
-
-  if [ "${progressing}" == "\"True\"" ]; then
-    echo "[CHE] Keycloak deployed successfully"
-  elif [ "${progressing}" == "False" ]; then
-    echo "[CHE] [ERROR] Keycloak deployment failed. Aborting. Run command 'oc rollout status keycloak' to get more details."
-  elif [ ${SECONDS} -ge ${end} ]; then
-    echo "[CHE] [ERROR] Deployment timeout. Aborting."
-    exit 1
-  fi
 }
 
 destroy_ocp() {
@@ -307,7 +255,9 @@ parse_args() {
     --remove-che - remove existing che project
     ===================================
     ENV vars
-    CHE_IMAGE_TAG - set CHE images tag, default: nightly
+    CHE_IMAGE_TAG - set che-server image tag, default: nightly
+    CHE_CLI_IMAGE - set che-cli image, default: eclipse/che-cli:nightly 
+    IMAGE_INIT - set che-cli image, default: eclipse/che-init:nightly
     CHE_MULTIUSER - set CHE multi user mode, default: false (single user) 
     OC_PUBLIC_HOSTNAME - set ocp hostname to admin console, default: host ip
     OC_PUBLIC_IP - set ocp hostname for routing suffix, default: host ip

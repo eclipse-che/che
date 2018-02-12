@@ -21,13 +21,11 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RenameSettings.MachSt
  */
 @ImplementedBy(SimilarNamesConfigurationViewImpl.class)
 interface SimilarNamesConfigurationView extends View<SimilarNamesConfigurationView.ActionDelegate> {
-  /** Hide Move panel. */
-  void hide();
 
   MachStrategy getMachStrategy();
 
   /** Show Similar Names Configuration panel. */
-  void show();
+  void showDialog();
 
   interface ActionDelegate {}
 }

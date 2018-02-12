@@ -44,25 +44,27 @@ declare namespace che {
     }
 
     export interface ICheOrganization {
-      fetchOrganizationByName(name: string): ng.IPromise<any>;
-      fetchSubOrganizationsById(id: string): ng.IPromise<any>;
-      fetchOrganizations(maxItems?: number): ng.IPromise<any>;
+      fetchOrganizationByName(name: string): ng.IPromise<che.IOrganization>;
+      fetchSubOrganizationsById(id: string): ng.IPromise<Array<che.IOrganization>>;
+      fetchOrganizations(maxItems?: number): ng.IPromise<Array<che.IOrganization>>;
       fetchOrganizationPageObjects(pageKey?: string): ng.IPromise<any>;
       getPageInfo(): IPageInfo;
-      fetchUserOrganizations(userId: string, maxItems?: number): ng.IPromise<any>;
+      fetchUserOrganizations(userId: string, maxItems?: number): ng.IPromise<Array<che.IOrganization>>;
       fetchUserOrganizationPageObjects(userId: string, pageKey: string): ng.IPromise<any>;
-      getUserOrganizations(userId: string): Array<any>;
+      getUserOrganizations(userId: string): Array<che.IOrganization>;
       getUserOrganizationPageInfo(userId: string): IPageInfo;
       getUserOrganizationRequestData(userId: string): IRequestData;
-      getOrganizations(): Array<any>;
-      fetchOrganizationById(id: string): ng.IPromise<any>;
-      getOrganizationById(id: string): IOrganization;
-      getOrganizationByName(name: string): IOrganization;
+      getOrganizations(): Array<che.IOrganization>;
+      fetchOrganizationById(id: string): ng.IPromise<che.IOrganization>;
+      getOrganizationById(id: string): che.IOrganization;
+      getOrganizationByName(name: string): che.IOrganization;
       createOrganization(name: string, parentId?: string): ng.IPromise<any>;
       deleteOrganization(id: string): ng.IPromise<any>;
-      updateOrganization(organization: IOrganization): ng.IPromise<any>;
+      updateOrganization(organization: che.IOrganization): ng.IPromise<any>;
       getRolesFromActions(actions: Array<string>): Array<IRole>;
       getActionsFromRoles(roles: Array<IRole>): Array<string>;
+      getPersonalAccount(): che.IOrganization;
+      processOrganizationInfoRetriever(organizations: Array<che.IOrganization>): void;
     }
 
     interface ISystemPermissions {
@@ -85,17 +87,16 @@ declare namespace che {
 
     export interface ICheTeam {
       fetchTeams(): ng.IPromise<any>;
-      processTeams(organizations: Array<IOrganization>, user: any): void;
-      processOrganizationInfoRetriever(organizations: Array<IOrganization>): void;
-      getPersonalAccount(): any;
-      getTeams(): Array<any>;
-      fetchTeamById(id: string): ng.IPromise<any>;
-      fetchTeamByName(name: string): ng.IPromise<any>;
-      getTeamByName(name: string): any;
-      getTeamById(id: string): any;
+      processTeams(teams: Array<che.ITeam>, user: che.IUser): void;
+      getPersonalAccount(): che.ITeam;
+      getTeams(): Array<che.ITeam>;
+      fetchTeamById(id: string): ng.IPromise<che.ITeam>;
+      fetchTeamByName(name: string): ng.IPromise<che.ITeam>;
+      getTeamByName(name: string): che.ITeam;
+      getTeamById(id: string): che.ITeam;
       createTeam(name: string): ng.IPromise<any>;
       deleteTeam(id: string): ng.IPromise<any>;
-      updateTeam(team: any): ng.IPromise<any>;
+      updateTeam(team: any): ng.IPromise<che.ITeam>;
       getRolesFromActions(actions: Array<string>): Array<any>;
       getActionsFromRoles(roles: Array<any>): Array<string>;
       getTeamDisplayName(team: any): string;
@@ -103,7 +104,6 @@ declare namespace che {
 
     export interface ICheTeamEventsManager {
       subscribeTeamNotifications(teamId: string): void;
-      fetchUser(): void;
       subscribeTeamMemberNotifications(): void;
       unSubscribeTeamNotifications(teamId: string): void;
       addRenameHandler(handler: Function): void;
@@ -264,7 +264,6 @@ declare namespace che {
     scope?: string;
     components?: Array<any>;
     links?: Array<any>;
-    source?: any;
     workspaceConfig: IWorkspaceConfig;
   }
 

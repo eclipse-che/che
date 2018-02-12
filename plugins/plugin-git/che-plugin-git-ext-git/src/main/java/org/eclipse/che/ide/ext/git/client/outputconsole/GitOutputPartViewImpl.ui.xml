@@ -22,7 +22,7 @@
          * Toolbar on the left with buttons.
          */
         .toolbar {
-            background-color: #373737;
+            background-color: consolesToolbarBackground;
         }
 
         /**

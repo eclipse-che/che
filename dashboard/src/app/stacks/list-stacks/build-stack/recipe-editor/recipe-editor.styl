@@ -18,12 +18,14 @@
       .CodeMirror-sizer
         margin-left 26px
 
-      .CodeMirror-gutter-wrapper
-        left 0 !important
+        &:first-child
+          margin-left 55px !important
 
-      .CodeMirror-gutter-elt,
-      .CodeMirror-linenumber
-        margin-left -55px
+      .CodeMirror-gutter.CodeMirror-lint-markers
+        width 16px !important
+
+      .CodeMirror-gutter.CodeMirror-linenumbers
+        width 29px !important
 
       .CodeMirror-scroll
         margin-left -20px

@@ -15,6 +15,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -27,6 +28,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+@Singleton
 public class TestWebElementRenderChecker {
   private final SeleniumWebDriver seleniumWebDriver;
   private final WebDriverWait loadPageWebDriverWait;

@@ -19,8 +19,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper;
@@ -30,12 +28,15 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.PromisableAction;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandManager;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.parts.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.command.explorer.CommandsExplorerPresenter;
+import org.eclipse.che.ide.command.explorer.CommandsExplorerView;
 import org.eclipse.che.ide.resources.DeleteResourceManager;
 
 /**
@@ -51,9 +52,11 @@ public class DeleteResourceAction extends AbstractPerspectiveAction implements P
 
   private final DeleteResourceManager deleteResourceManager;
   private final AppContext appContext;
+  private final CommandsExplorerPresenter commandsExplorer;
+  private final CommandManager commandManager;
 
   private Callback<Void, Throwable> actionCompletedCallBack;
-  private PartPresenter partPresenter;
+  private PartPresenter activePart;
 
   @Inject
   public DeleteResourceAction(
@@ -61,7 +64,9 @@ public class DeleteResourceAction extends AbstractPerspectiveAction implements P
       DeleteResourceManager deleteResourceManager,
       CoreLocalizationConstant localization,
       AppContext appContext,
-      EventBus eventBus) {
+      EventBus eventBus,
+      CommandsExplorerPresenter commandsExplorer,
+      CommandManager commandManager) {
     super(
         singletonList(PROJECT_PERSPECTIVE_ID),
         localization.deleteItemActionText(),
@@ -69,69 +74,76 @@ public class DeleteResourceAction extends AbstractPerspectiveAction implements P
         resources.delete());
     this.deleteResourceManager = deleteResourceManager;
     this.appContext = appContext;
+    this.commandsExplorer = commandsExplorer;
+    this.commandManager = commandManager;
 
-    eventBus.addHandler(
-        ActivePartChangedEvent.TYPE,
-        new ActivePartChangedHandler() {
-          @Override
-          public void onActivePartChanged(ActivePartChangedEvent event) {
-            partPresenter = event.getActivePart();
-          }
-        });
+    eventBus.addHandler(ActivePartChangedEvent.TYPE, event -> activePart = event.getActivePart());
   }
 
   /** {@inheritDoc} */
   @Override
   public void actionPerformed(ActionEvent e) {
-    deleteResourceManager
-        .delete(true, appContext.getResources())
-        .then(
-            new Operation<Void>() {
-              @Override
-              public void apply(Void arg) throws OperationException {
-                if (actionCompletedCallBack != null) {
-                  actionCompletedCallBack.onSuccess(null);
-                }
-              }
-            })
-        .catchError(
-            new Operation<PromiseError>() {
-              @Override
-              public void apply(PromiseError arg) throws OperationException {
-                if (actionCompletedCallBack != null) {
-                  actionCompletedCallBack.onFailure(arg.getCause());
-                }
-              }
-            });
+    if (activePart instanceof CommandsExplorerPresenter) {
+      CommandImpl command =
+          ((CommandsExplorerView) commandsExplorer.getView()).getSelectedCommand();
+      if (command != null) {
+        commandManager
+            .removeCommand(command.getName())
+            .then(this::onSuccess)
+            .catchError(this::onFailure);
+      }
+    } else {
+      deleteResourceManager
+          .delete(true, appContext.getResources())
+          .then(this::onSuccess)
+          .catchError(this::onFailure);
+    }
   }
 
   /** {@inheritDoc} */
   @Override
   public void updateInPerspective(@NotNull ActionEvent event) {
+    event.getPresentation().setVisible(true);
+
+    if (activePart instanceof CommandsExplorerPresenter) {
+      CommandImpl command =
+          ((CommandsExplorerView) commandsExplorer.getView()).getSelectedCommand();
+      event.getPresentation().setEnabled(command != null);
+      return;
+    }
+
     final Resource[] resources = appContext.getResources();
 
-    event.getPresentation().setVisible(true);
     event
         .getPresentation()
         .setEnabled(
             resources != null
                 && resources.length > 0
-                && !(partPresenter instanceof TextEditor)
-                && !(partPresenter.getSelection() instanceof Selection.NoSelectionProvided));
+                && !(activePart instanceof TextEditor)
+                && !(activePart.getSelection() instanceof Selection.NoSelectionProvided));
   }
 
   /** {@inheritDoc} */
   @Override
   public Promise<Void> promise(final ActionEvent event) {
     final CallbackPromiseHelper.Call<Void, Throwable> call =
-        new CallbackPromiseHelper.Call<Void, Throwable>() {
-          @Override
-          public void makeCall(Callback<Void, Throwable> callback) {
-            actionCompletedCallBack = callback;
-            actionPerformed(event);
-          }
+        callback -> {
+          actionCompletedCallBack = callback;
+          actionPerformed(event);
         };
 
     return createFromCallback(call);
+  }
+
+  private void onSuccess(Void arg) {
+    if (actionCompletedCallBack != null) {
+      actionCompletedCallBack.onSuccess(arg);
+    }
+  }
+
+  private void onFailure(PromiseError error) {
+    if (actionCompletedCallBack != null) {
+      actionCompletedCallBack.onFailure(error.getCause());
+    }
   }
 }

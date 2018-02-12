@@ -90,7 +90,7 @@
             max-width: 247px;
             overflow: hidden;
             text-overflow: ellipsis;
-            padding-left: 3px;
+            margin-left: 3px;
         }
 
         .closeTabPanel {
@@ -219,7 +219,7 @@
         }
     </ui:style>
 
-    <g:FlowPanel addStyleNames="{style.mainPanel}">
+    <g:FlowPanel addStyleNames="{style.mainPanel}" debugId="editor-tab">
         <g:SimplePanel ui:field="iconPanel" styleName="{style.iconPanel}" />
         <g:Label ui:field="title" styleName="{style.titlePanel}" />
         <g:FlowPanel styleName="{style.closeTabPanel}">
