@@ -24,9 +24,10 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.util.AbstractLineConsumer;
+import org.eclipse.che.api.core.util.LimitedListLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
-import org.eclipse.che.api.core.util.StubLineConsumer;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,13 +102,14 @@ public abstract class TestWorkspaceLogsReader {
           executeAndWait(
               commandLine, PREPARING_WS_TIMEOUT_SEC, SECONDS, getStdoutConsumer(), stderrConsumer);
 
-      if (process.exitValue() > 0) {
+      String errorMessage = stderrConsumer.getText();
+      if (!errorMessage.isEmpty() || process.exitValue() > 0) {
         log.warn(
             READ_LOGS_ERROR_MESSAGE_TEMPLATE + " Error: {}",
             logInfo.getName(),
             workspaceId,
             logInfo.getLocationInsideWorkspace(),
-            stderrConsumer.getText());
+            errorMessage);
       }
     } catch (Exception e) {
       log.warn(
@@ -152,12 +154,12 @@ public abstract class TestWorkspaceLogsReader {
 
   @VisibleForTesting
   LineConsumer getStdoutConsumer() {
-    return new StubLineConsumer();
+    return new AbstractLineConsumer() {};
   }
 
   @VisibleForTesting
   ListLineConsumer getStderrConsumer() {
-    return new ListLineConsumer(1000);
+    return new LimitedListLineConsumer(1000);
   }
 
   /** Holds information about log to read. */
