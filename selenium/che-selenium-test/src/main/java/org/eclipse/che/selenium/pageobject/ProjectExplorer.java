@@ -246,7 +246,7 @@ public class ProjectExplorer {
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
 
-      if (seleniumWebDriverHelper.isElementVisible(By.id("ide-loader-progress-bar"))) {
+      if (seleniumWebDriverHelper.isVisible(By.id("ide-loader-progress-bar"))) {
         browserLogsUtil.storeLogs();
         fail("Known issue https://github.com/eclipse/che/issues/8468", ex);
       }

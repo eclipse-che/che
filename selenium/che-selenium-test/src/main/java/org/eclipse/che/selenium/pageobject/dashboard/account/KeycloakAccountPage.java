@@ -86,24 +86,24 @@ public class KeycloakAccountPage {
   }
 
   public void setUserNameValue(String value) {
-    seleniumWebDriverHelper.setFieldValue(By.id(USERNAME_FIELD_ID), value);
+    seleniumWebDriverHelper.setValue(By.id(USERNAME_FIELD_ID), value);
   }
 
   public void setEmailValue(String value) {
-    seleniumWebDriverHelper.setFieldValue(By.id(EMAIL_FIELD_ID), value);
+    seleniumWebDriverHelper.setValue(By.id(EMAIL_FIELD_ID), value);
   }
 
   public void setFirstNameValue(String value) {
-    seleniumWebDriverHelper.setFieldValue(By.id(FIRST_NAME_FIELD_ID), value);
+    seleniumWebDriverHelper.setValue(By.id(FIRST_NAME_FIELD_ID), value);
   }
 
   public void setLastNameValue(String value) {
-    seleniumWebDriverHelper.setFieldValue(By.id(LAST_NAME_FIELD_ID), value);
+    seleniumWebDriverHelper.setValue(By.id(LAST_NAME_FIELD_ID), value);
   }
 
   public boolean usernameFieldIsDisabled() {
     return seleniumWebDriverHelper
-        .waitElementIsVisible(By.id(USERNAME_FIELD_ID))
+        .waitVisibility(By.id(USERNAME_FIELD_ID))
         .getAttribute("disabled")
         .equals("true");
   }
@@ -121,7 +121,7 @@ public class KeycloakAccountPage {
         (ExpectedCondition<Boolean>)
             driver ->
                 seleniumWebDriverHelper
-                    .waitElementIsVisible(By.xpath(ERROR_ALERT))
+                    .waitVisibility(By.xpath(ERROR_ALERT))
                     .getText()
                     .equals(expectedText));
   }
@@ -131,7 +131,7 @@ public class KeycloakAccountPage {
         (ExpectedCondition<Boolean>)
             driver ->
                 seleniumWebDriverHelper
-                    .waitElementIsVisible(By.xpath(SUCCESS_ALERT))
+                    .waitVisibility(By.xpath(SUCCESS_ALERT))
                     .getText()
                     .equals(expectedText));
   }
@@ -144,6 +144,6 @@ public class KeycloakAccountPage {
             By.id(EMAIL_FIELD_ID),
             By.id(FIRST_NAME_FIELD_ID),
             By.id(LAST_NAME_FIELD_ID))
-        .forEach(locator -> seleniumWebDriverHelper.waitElementIsVisible(locator));
+        .forEach(locator -> seleniumWebDriverHelper.waitVisibility(locator));
   }
 }

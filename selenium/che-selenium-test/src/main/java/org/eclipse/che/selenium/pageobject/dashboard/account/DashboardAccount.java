@@ -85,7 +85,7 @@ public class DashboardAccount {
   }
 
   public String getTitle() {
-    return seleniumWebDriverHelper.waitElementIsVisible(By.id(Locators.TITLE_ID)).getText();
+    return seleniumWebDriverHelper.waitVisibility(By.id(Locators.TITLE_ID)).getText();
   }
 
   public void clickOnEditButton() {
@@ -94,6 +94,6 @@ public class DashboardAccount {
 
   public void waitPageIsLoaded() {
     asList(EMAIL_FIELD, LOGIN_FIELD, FIRST_NAME_FIELD, LAST_NAME_FIELD, EDIT_BUTTON)
-        .forEach(locator -> seleniumWebDriverHelper.waitElementIsVisible(By.name(locator)));
+        .forEach(locator -> seleniumWebDriverHelper.waitVisibility(By.name(locator)));
   }
 }

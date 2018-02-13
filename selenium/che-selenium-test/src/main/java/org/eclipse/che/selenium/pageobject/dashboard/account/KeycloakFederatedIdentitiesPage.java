@@ -99,13 +99,12 @@ public class KeycloakFederatedIdentitiesPage {
         (ExpectedCondition<Boolean>)
             driver ->
                 seleniumWebDriverHelper
-                    .waitElementIsVisible(xpath(SUCCESS_ALERT))
+                    .waitVisibility(xpath(SUCCESS_ALERT))
                     .getText()
                     .equals(expectedText));
   }
 
   private void waitAllBodyFieldsAndButtonsIsVisible() {
-    asList(xpath(TITLE_XPATH))
-        .forEach(locator -> seleniumWebDriverHelper.waitElementIsVisible(locator));
+    asList(xpath(TITLE_XPATH)).forEach(locator -> seleniumWebDriverHelper.waitVisibility(locator));
   }
 }

@@ -92,6 +92,6 @@ public class KeycloakHeaderButtons {
             Button.FEDERATED_IDENTITIES.getXpath(),
             Button.SESSIONS.getXpath(),
             Button.APPLICATIONS.getXpath())
-        .forEach(locator -> seleniumWebDriverHelper.waitElementIsVisible(locator));
+        .forEach(locator -> seleniumWebDriverHelper.waitVisibility(locator));
   }
 }

@@ -45,59 +45,63 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Set text in provided field with checks which get text for compare by {@link
-   * WebElement#getAttribute(String)}
+   * Ensures {@code element} has got {@code value} in next steps: ensures element is visible and has
+   * empty value, sets {@code value} by sending corresponding keys to {@code element} and waits
+   * until element has got the {@code value}. Checks text by {@link WebElement#getAttribute(String)}
    *
-   * @param fieldLocator
+   * @param elementLocator
    * @param value
    */
-  public void setFieldValue(By fieldLocator, String value) {
-    waitElementIsVisible(fieldLocator).clear();
-    waitElementValue(fieldLocator, "");
-    sendKeysToElement(fieldLocator, value);
-    waitElementValue(fieldLocator, value);
+  public void setValue(By elementLocator, String value) {
+    waitVisibility(elementLocator).clear();
+    waitValue(elementLocator, "");
+    sendKeysTo(elementLocator, value);
+    waitValue(elementLocator, value);
   }
 
   /**
-   * Set text in provided field with checks which get text for compare by {@link
-   * WebElement#getAttribute(String)}
+   * Ensures {@code element} has got {@code value} in next steps: ensures element is visible and has
+   * empty value, sets {@code value} by sending corresponding keys to {@code element} and waits
+   * until element has got the {@code value}. Checks text by {@link WebElement#getAttribute(String)}
    *
    * @param webElement
    * @param value
    */
-  public void setFieldValue(WebElement webElement, String value) {
-    waitElementIsVisible(webElement).clear();
-    waitElementValue(webElement, "");
-    sendKeysToElement(webElement, value);
-    waitElementValue(webElement, value);
+  public void setValue(WebElement webElement, String value) {
+    waitVisibility(webElement).clear();
+    waitValue(webElement, "");
+    sendKeysTo(webElement, value);
+    waitValue(webElement, value);
   }
 
   /**
-   * Set text in provided field with checks which get text for compare by {@link
-   * WebElement#getText()}
+   * Ensures {@code element} has got {@code value} in next steps: ensures element is visible and has
+   * empty value, sets {@code value} by sending corresponding keys to {@code element} and waits
+   * until element has got the {@code value}. Checks text by {@link WebElement#getText()}
    *
-   * @param fieldLocator
+   * @param elementLocator
    * @param value
    */
-  public void setFieldText(By fieldLocator, String value) {
-    waitElementIsVisible(fieldLocator).clear();
-    waitElementText(fieldLocator, "");
-    sendKeysToElement(fieldLocator, value);
-    waitElementText(fieldLocator, value);
+  public void setText(By elementLocator, String value) {
+    waitVisibility(elementLocator).clear();
+    waitText(elementLocator, "");
+    sendKeysTo(elementLocator, value);
+    waitText(elementLocator, value);
   }
 
   /**
-   * Set text in provided field with checks which get text for compare by {@link
-   * WebElement#getText()}
+   * Ensures {@code element} has got {@code value} in next steps: ensures element is visible and has
+   * empty value, sets {@code value} by sending corresponding keys to {@code element} and waits
+   * until element has got the {@code value}. Checks text by {@link WebElement#getText()}
    *
    * @param webElement
    * @param value
    */
-  public void setFieldText(WebElement webElement, String value) {
-    waitElementIsVisible(webElement).clear();
-    waitElementText(webElement, "");
-    sendKeysToElement(webElement, value);
-    waitElementText(webElement, value);
+  public void setText(WebElement webElement, String value) {
+    waitVisibility(webElement).clear();
+    waitText(webElement, "");
+    sendKeysTo(webElement, value);
+    waitText(webElement, value);
   }
 
   /**
@@ -107,7 +111,7 @@ public class SeleniumWebDriverHelper {
    * @param timeout waiting time in seconds
    * @return found element
    */
-  public WebElement waitElementIsVisible(By elementLocator, int timeout) {
+  public WebElement waitVisibility(By elementLocator, int timeout) {
     return webDriverWaitFactory.get(timeout).until(visibilityOfElementLocated(elementLocator));
   }
 
@@ -117,8 +121,8 @@ public class SeleniumWebDriverHelper {
    * @param elementLocator
    * @return found element
    */
-  public WebElement waitElementIsVisible(By elementLocator) {
-    return waitElementIsVisible(elementLocator, DEFAULT_TIMEOUT);
+  public WebElement waitVisibility(By elementLocator) {
+    return waitVisibility(elementLocator, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -128,7 +132,7 @@ public class SeleniumWebDriverHelper {
    * @param timeout waiting time in seconds
    * @return found element
    */
-  public WebElement waitElementIsVisible(WebElement webElement, int timeout) {
+  public WebElement waitVisibility(WebElement webElement, int timeout) {
     return webDriverWaitFactory.get(timeout).until(visibilityOf(webElement));
   }
 
@@ -138,8 +142,8 @@ public class SeleniumWebDriverHelper {
    * @param webElement
    * @return found element
    */
-  public WebElement waitElementIsVisible(WebElement webElement) {
-    return waitElementIsVisible(webElement, DEFAULT_TIMEOUT);
+  public WebElement waitVisibility(WebElement webElement) {
+    return waitVisibility(webElement, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -150,7 +154,7 @@ public class SeleniumWebDriverHelper {
    * @param timeout waiting time in seconds
    * @return found element
    */
-  public WebElement waitElementIsPresent(By elementLocator, int timeout) {
+  public WebElement waitPresence(By elementLocator, int timeout) {
     return webDriverWaitFactory.get(timeout).until(presenceOfElementLocated(elementLocator));
   }
 
@@ -161,7 +165,7 @@ public class SeleniumWebDriverHelper {
    * @param elementLocator
    * @return found element
    */
-  public WebElement waitElementIsPresent(By elementLocator) {
+  public WebElement waitPresence(By elementLocator) {
     return webDriverWaitFactory
         .get(DEFAULT_TIMEOUT)
         .until(presenceOfElementLocated(elementLocator));
@@ -173,8 +177,8 @@ public class SeleniumWebDriverHelper {
    * @param elementLocator
    * @param text
    */
-  public void sendKeysToElement(By elementLocator, String text) {
-    waitElementIsVisible(elementLocator).sendKeys(text);
+  public void sendKeysTo(By elementLocator, String text) {
+    waitVisibility(elementLocator).sendKeys(text);
   }
 
   /**
@@ -183,18 +187,18 @@ public class SeleniumWebDriverHelper {
    * @param webElement
    * @param text
    */
-  public void sendKeysToElement(WebElement webElement, String text) {
-    waitElementIsVisible(webElement).sendKeys(text);
+  public void sendKeysTo(WebElement webElement, String text) {
+    waitVisibility(webElement).sendKeys(text);
   }
 
   /**
    * Waits visibility of {@link WebElement} with provided locator {@link By} and get text
    *
-   * @param fieldLocator
+   * @param elementLocator
    * @return element text by {@link WebElement#getAttribute(String)}
    */
-  public String waitVisibilityAndGetValue(By fieldLocator) {
-    return waitElementIsVisible(fieldLocator).getAttribute("value");
+  public String waitVisibilityAndGetValue(By elementLocator) {
+    return waitVisibility(elementLocator).getAttribute("value");
   }
 
   /**
@@ -204,7 +208,7 @@ public class SeleniumWebDriverHelper {
    * @return element text by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetValue(WebElement webElement) {
-    return waitElementIsVisible(webElement).getAttribute("value");
+    return waitVisibility(webElement).getAttribute("value");
   }
 
   /**
@@ -214,7 +218,7 @@ public class SeleniumWebDriverHelper {
    * @return element text by {@link WebElement#getText()}
    */
   public String waitVisibilityAndGetText(By fieldLocator) {
-    return waitElementIsVisible(fieldLocator).getText();
+    return waitVisibility(fieldLocator).getText();
   }
 
   /**
@@ -224,34 +228,34 @@ public class SeleniumWebDriverHelper {
    * @return element text by {@link WebElement#getText()}
    */
   public String waitVisibilityAndGetText(WebElement webElement) {
-    return waitElementIsVisible(webElement).getText();
+    return waitVisibility(webElement).getText();
   }
 
   /**
    * Waits until text extracted by {@link WebElement#getAttribute(String)} be equivalent to provided
    * text
    *
-   * @param fieldLocator
+   * @param elementLocator
    * @param expectedValue
    * @param timeout waiting time in seconds
    */
-  public void waitElementValue(By fieldLocator, String expectedValue, int timeout) {
+  public void waitValue(By elementLocator, String expectedValue, int timeout) {
     webDriverWaitFactory
         .get(timeout)
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibilityAndGetValue(fieldLocator).equals(expectedValue));
+                driver -> waitVisibilityAndGetValue(elementLocator).equals(expectedValue));
   }
 
   /**
    * Waits until text extracted by {@link WebElement#getAttribute(String)} be equivalent to provided
    * text
    *
-   * @param fieldLocator
+   * @param elementLocator
    * @param expectedValue
    */
-  public void waitElementValue(By fieldLocator, String expectedValue) {
-    waitElementValue(fieldLocator, expectedValue, DEFAULT_TIMEOUT);
+  public void waitValue(By elementLocator, String expectedValue) {
+    waitValue(elementLocator, expectedValue, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -262,7 +266,7 @@ public class SeleniumWebDriverHelper {
    * @param expectedValue
    * @param timeout waiting time in seconds
    */
-  public void waitElementValue(WebElement webElement, String expectedValue, int timeout) {
+  public void waitValue(WebElement webElement, String expectedValue, int timeout) {
     webDriverWaitFactory
         .get(timeout)
         .until(
@@ -277,33 +281,33 @@ public class SeleniumWebDriverHelper {
    * @param webElement
    * @param expectedValue
    */
-  public void waitElementValue(WebElement webElement, String expectedValue) {
-    waitElementValue(webElement, expectedValue, DEFAULT_TIMEOUT);
+  public void waitValue(WebElement webElement, String expectedValue) {
+    waitValue(webElement, expectedValue, DEFAULT_TIMEOUT);
   }
 
   /**
    * Waits until text extracted by {@link WebElement#getText()} be equivalent to provided text
    *
-   * @param fieldLocator
+   * @param elementLocator
    * @param expectedText
    * @param timeout waiting time in seconds
    */
-  public void waitElementText(By fieldLocator, String expectedText, int timeout) {
+  public void waitText(By elementLocator, String expectedText, int timeout) {
     webDriverWaitFactory
         .get(timeout)
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> waitVisibilityAndGetText(fieldLocator).equals(expectedText));
+                driver -> waitVisibilityAndGetText(elementLocator).equals(expectedText));
   }
 
   /**
    * Waits until text extracted by {@link WebElement#getText()} be equivalent to provided text
    *
-   * @param fieldLocator
+   * @param elementLocator
    * @param expectedText
    */
-  public void waitElementText(By fieldLocator, String expectedText) {
-    waitElementText(fieldLocator, expectedText, DEFAULT_TIMEOUT);
+  public void waitText(By elementLocator, String expectedText) {
+    waitText(elementLocator, expectedText, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -313,7 +317,7 @@ public class SeleniumWebDriverHelper {
    * @param expectedText
    * @param timeout waiting time in seconds
    */
-  public void waitElementText(WebElement webElement, String expectedText, int timeout) {
+  public void waitText(WebElement webElement, String expectedText, int timeout) {
     webDriverWaitFactory
         .get(timeout)
         .until(
@@ -327,8 +331,8 @@ public class SeleniumWebDriverHelper {
    * @param webElement
    * @param expectedText
    */
-  public void waitElementText(WebElement webElement, String expectedText) {
-    waitElementText(webElement, expectedText, DEFAULT_TIMEOUT);
+  public void waitText(WebElement webElement, String expectedText) {
+    waitText(webElement, expectedText, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -380,9 +384,9 @@ public class SeleniumWebDriverHelper {
    *
    * @param elementLocator
    */
-  public void moveCursorToElementAndDoubleClick(By elementLocator) {
-    moveCursorToElement(elementLocator);
-    waitElementIsVisible(elementLocator);
+  public void moveCursorToAndDoubleClick(By elementLocator) {
+    moveCursorTo(elementLocator);
+    waitVisibility(elementLocator);
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
   }
 
@@ -393,9 +397,9 @@ public class SeleniumWebDriverHelper {
    *
    * @param webElement
    */
-  public void moveCursorToElementAndDoubleClick(WebElement webElement) {
-    moveCursorToElement(webElement);
-    waitElementIsVisible(webElement);
+  public void moveCursorToAndDoubleClick(WebElement webElement) {
+    moveCursorTo(webElement);
+    waitVisibility(webElement);
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
   }
 
@@ -405,9 +409,9 @@ public class SeleniumWebDriverHelper {
    *
    * @param elementLocator
    */
-  public void moveCursorToElementAndClick(By elementLocator) {
-    moveCursorToElement(elementLocator);
-    waitElementIsVisible(elementLocator);
+  public void moveCursorToAndClick(By elementLocator) {
+    moveCursorTo(elementLocator);
+    waitVisibility(elementLocator);
     actionsFactory.createAction(seleniumWebDriver).click().perform();
   }
 
@@ -417,9 +421,9 @@ public class SeleniumWebDriverHelper {
    *
    * @param webElement
    */
-  public void moveCursorToElementAndClick(WebElement webElement) {
-    moveCursorToElement(webElement);
-    waitElementIsVisible(webElement);
+  public void moveCursorToAndClick(WebElement webElement) {
+    moveCursorTo(webElement);
+    waitVisibility(webElement);
     actionsFactory.createAction(seleniumWebDriver).click().perform();
   }
 
@@ -429,10 +433,10 @@ public class SeleniumWebDriverHelper {
    *
    * @param elementLocator {@link By}
    */
-  public void moveCursorToElement(By elementLocator) {
+  public void moveCursorTo(By elementLocator) {
     actionsFactory
         .createAction(seleniumWebDriver)
-        .moveToElement(waitElementIsPresent(elementLocator))
+        .moveToElement(waitPresence(elementLocator))
         .perform();
   }
 
@@ -442,21 +446,21 @@ public class SeleniumWebDriverHelper {
    *
    * @param webElement
    */
-  public void moveCursorToElement(WebElement webElement) {
+  public void moveCursorTo(WebElement webElement) {
     actionsFactory.createAction(seleniumWebDriver).moveToElement(webElement).perform();
   }
 
   /**
    * Checks visibility state of {@link WebElement} with provided locator {@link By}
    *
-   * @param locator
+   * @param elementLocator
    * @return state of element visibility
    */
-  public boolean isElementVisible(By locator) {
+  public boolean isVisible(By elementLocator) {
     try {
       webDriverWaitFactory
           .get(ATTACHING_ELEM_TO_DOM_SEC)
-          .until(visibilityOfElementLocated(locator));
+          .until(visibilityOfElementLocated(elementLocator));
       return true;
     } catch (TimeoutException ex) {
       return false;
@@ -469,7 +473,7 @@ public class SeleniumWebDriverHelper {
    * @param webElement
    * @return state of element visibility
    */
-  public boolean isElementVisible(WebElement webElement) {
+  public boolean isVisible(WebElement webElement) {
     try {
       webDriverWaitFactory.get(ATTACHING_ELEM_TO_DOM_SEC).until(visibilityOf(webElement));
       return true;
