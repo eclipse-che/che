@@ -101,6 +101,7 @@ public class RunPlainJavaProjectTest {
     // import the project and configure
     projectExplorer.waitProjectExplorer();
     importPlainJavaApp(testRepo.getHtmlUrl(), PROJECT_NAME, Wizard.TypeProject.PLAIN_JAVA);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
 
     // check library into configure classpath form
     projectExplorer.quickExpandWithJavaScript();
