@@ -91,6 +91,7 @@ export class CheHttpBackend {
     this.$httpBackend.when('GET', '/api/').respond(200, {rootResources: []});
 
     this.$httpBackend.when('GET', '/api/keycloak/settings').respond(404);
+    this.$httpBackend.when('GET', '/workspace-loader/').respond(404);
 
     // add the remote call
     let workspaceReturn = [];

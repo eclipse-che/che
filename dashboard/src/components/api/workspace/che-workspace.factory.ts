@@ -76,6 +76,7 @@ export class CheWorkspace {
   private statusDefers: Object;
   private workspaceSettings: any;
   private jsonRpcApiLocation: string;
+  private workspaceLoaderUrl: string;
   /**
    * Map with instance of Observable by workspaceId.
    */
@@ -163,6 +164,8 @@ export class CheWorkspace {
       cheBranding.unregisterCallback(CONTEXT_FETCHER_ID);
     };
     cheBranding.registerCallback(CONTEXT_FETCHER_ID, callback.bind(this));
+
+    this.checkWorkspaceLoader(userDashboardConfig.developmentMode, proxySettings);
   }
 
   /**
@@ -648,6 +651,10 @@ export class CheWorkspace {
     return '/ide/' + namespace + '/' + workspaceName;
   }
 
+  getWorkspaceLoaderUrl(namespace: string, workspaceName: string): string {
+    return this.workspaceLoaderUrl ? this.workspaceLoaderUrl + namespace + '/' + workspaceName : null;
+  }
+
   /**
    * Creates deferred object which will be resolved
    * when workspace change it's status to given
@@ -796,5 +803,18 @@ export class CheWorkspace {
       wsUrl = wsProtocol + '://' + $location.host() + ':' + $location.port();
     }
     return wsUrl;
+  }
+
+  private checkWorkspaceLoader(devmode: boolean, proxySettings: string): void {
+    let url = '/workspace-loader/';
+
+    let promise = this.$http.get(url);
+    promise.then((response: {data: any}) => {
+      this.workspaceLoaderUrl = devmode ? proxySettings + url : url;
+    }, (error: any) => {
+      if (error.status !== 304) {
+        this.workspaceLoaderUrl = null;
+      }
+    });
   }
 }

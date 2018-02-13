@@ -22,6 +22,9 @@ let websocketURL = websocketBaseURL() + WEBSOCKET_CONTEXT;
 let master = new CheJsonRpcMasterApi(new WebsocketClient());
 let loader = new Loader();
 
+/** Ask dashboard to show the IDE. */
+window.parent.postMessage("show-ide", "*");
+
 master.connect(websocketURL).then(() => {
     getWorkspace(getWorkspaceKey())
         .then(handleWorkspace)

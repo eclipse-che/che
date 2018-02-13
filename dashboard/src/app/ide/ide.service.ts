@@ -140,11 +140,11 @@ class IdeSvc {
     let inDevMode = this.userDashboardConfig.developmentMode;
     let randVal = Math.floor((Math.random() * 1000000) + 1);
     let appendUrl = '?uid=' + randVal;
-
     let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
     this.openedWorkspace = workspace;
 
-    let ideUrlLink = workspace.links.ide;
+    let workspaceLoaderUrl = this.cheWorkspace.getWorkspaceLoaderUrl(workspace.namespace, workspace.config.name);
+    let ideUrlLink = workspaceLoaderUrl || workspace.links.ide;
 
     if (this.ideAction != null) {
       appendUrl = appendUrl + '&action=' + this.ideAction;
