@@ -13,7 +13,7 @@ RUN apk add --no-cache make gcc g++ python git openssh bash
 WORKDIR /home/theia
 # build Theia with all extensions to persist yarn cache in the image and
 # have default Theia build in the workspace in case no plugins are requested
-ADD theia-full-package.json /home/theia/package.json
+ADD https://raw.githubusercontent.com/theia-ide/theia-apps/master/theia-full-docker/latest.package.json /home/theia/package.json
 ADD theia-default-package.json /home/default/theia/package.json
 ADD src/main.js /theia_launcher/theia_launcher.js
 RUN yarn && \
