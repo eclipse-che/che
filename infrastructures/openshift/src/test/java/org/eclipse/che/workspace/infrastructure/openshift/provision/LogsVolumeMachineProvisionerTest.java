@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.provision;
 
-import static org.eclipse.che.workspace.infrastructure.openshift.provision.LogsVolumeMachineProvisioner.LOGS_VOLUME_NAME;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner.LOGS_VOLUME_NAME;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;

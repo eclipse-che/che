@@ -55,7 +55,9 @@ public class TerminalServerLivenessProbeConfigFactory implements HttpProbeConfig
       port = uri.getPort();
     }
 
+    String path = uri.getPath().replaceFirst("/pty$", "/liveness");
+
     return new HttpProbeConfig(
-        port, uri.getHost(), protocol, "/liveness", null, successThreshold, 3, 120, 10, 10);
+        port, uri.getHost(), protocol, path, null, successThreshold, 3, 120, 10, 10);
   }
 }

@@ -15,8 +15,10 @@
 package org.eclipse.che.ide.util.dom;
 
 import com.google.common.base.Strings;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.Widget;
 import elemental.dom.Element;
 import elemental.dom.Node;
 import elemental.events.Event;
@@ -30,6 +32,21 @@ import org.eclipse.che.ide.util.browser.UserAgent;
 /** Utility methods for DOM manipulation. */
 public final class DomUtils {
 
+  private static final ZIndexImpl zIndexImpl = GWT.create(ZIndexImpl.class);
+
+  public static class ZIndexImpl {
+    private int zIndexId = 1000000;
+
+    int incrementAndGetTopZIndex() {
+      return ++zIndexId;
+    }
+
+    int incrementAndGetTopZIndex(int i) {
+      zIndexId = zIndexId + i + 1;
+      return zIndexId;
+    }
+  }
+
   public static class Offset {
     public int top = 0;
 
@@ -41,6 +58,25 @@ public final class DomUtils {
       this.top = top;
       this.left = left;
     }
+  }
+
+  /**
+   * Increments and returns the top z-index value.
+   *
+   * @return index of z-index value
+   */
+  public static int incrementAndGetTopZIndex() {
+    return zIndexImpl.incrementAndGetTopZIndex();
+  }
+
+  /**
+   * Increments and returns the top z-index value.
+   *
+   * @param i increment index
+   * @return index of z-index value
+   */
+  public static int incrementAndGetTopZIndex(int i) {
+    return zIndexImpl.incrementAndGetTopZIndex(i);
   }
 
   private static final EventListener STOP_PROPAGATION_EVENT_LISTENER =
@@ -254,6 +290,10 @@ public final class DomUtils {
   public static boolean isElementOrChildFocused(Element element) {
     Element active = element.getOwnerDocument().getActiveElement();
     return element.contains(active);
+  }
+
+  public static boolean isWidgetOrChildFocused(Widget widget) {
+    return isElementOrChildFocused((Element) widget.getElement());
   }
 
   public static JsElement getFirstChildElement(Element element) {

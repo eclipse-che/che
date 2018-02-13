@@ -19,7 +19,6 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.ALL_PROJECTS_XPATH;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.CONTEXT_MENU_ID;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.EXPLORER_RIGHT_TAB_ID;
@@ -43,17 +42,20 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNested
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
@@ -75,6 +77,8 @@ public class ProjectExplorer {
   private final Menu menu;
   private final CodenvyEditor editor;
   private final TestWebElementRenderChecker testWebElementRenderChecker;
+  private final BrowserLogsUtil browserLogsUtil;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private WebDriverWait loadPageTimeout;
   private WebDriverWait redrawUiElementsWait;
 
@@ -86,7 +90,9 @@ public class ProjectExplorer {
       NavigateToFile navigateToFile,
       Menu menu,
       CodenvyEditor editor,
-      TestWebElementRenderChecker testWebElementRenderChecker) {
+      TestWebElementRenderChecker testWebElementRenderChecker,
+      BrowserLogsUtil browserLogsUtil,
+      SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
@@ -94,6 +100,8 @@ public class ProjectExplorer {
     this.menu = menu;
     this.editor = editor;
     this.testWebElementRenderChecker = testWebElementRenderChecker;
+    this.browserLogsUtil = browserLogsUtil;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     loadPageTimeout = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     redrawUiElementsWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
@@ -232,8 +240,19 @@ public class ProjectExplorer {
    * @param timeout user timeout
    */
   public void waitProjectExplorer(int timeout) {
-    new WebDriverWait(seleniumWebDriver, timeout)
-        .until(visibilityOfElementLocated(By.id(PROJECT_EXPLORER_TREE_ITEMS)));
+    try {
+      new WebDriverWait(seleniumWebDriver, timeout)
+          .until(visibilityOfElementLocated(By.id(PROJECT_EXPLORER_TREE_ITEMS)));
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+
+      if (seleniumWebDriverHelper.elementIsVisible(By.id("ide-loader-progress-bar"))) {
+        browserLogsUtil.storeLogs();
+        fail("Known issue https://github.com/eclipse/che/issues/8468", ex);
+      }
+
+      throw ex;
+    }
   }
 
   /**
@@ -923,7 +942,7 @@ public class ProjectExplorer {
    * Finds a file by name using Navigate to file feature. Expand the tree using Reveal resource
    * feature
    *
-   * @param file file for serch with Navigate to file feature.
+   * @param file file for search with Navigate to file feature.
    * @param pathToFile
    */
   public void expandToFileWithRevealResource(String file, String pathToFile) {
@@ -931,11 +950,7 @@ public class ProjectExplorer {
     navigateToFile.waitFormToOpen();
     loader.waitOnClosed();
     navigateToFile.typeSymbolInFileNameField(file);
-    try {
-      navigateToFile.waitFileNamePopUp();
-    } catch (StaleElementReferenceException ex) {
-      sleepQuietly(1);
-    }
+    navigateToFile.waitSuggestedPanel();
     navigateToFile.isFilenameSuggested(file);
     navigateToFile.selectFileByName(file);
     navigateToFile.waitFormToClose();

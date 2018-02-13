@@ -10,12 +10,9 @@
  */
 package org.eclipse.che.ide.search;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
+
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -139,7 +136,8 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
   }
 
   @Override
-  protected void onEnterClicked() {
+  public void onEnterPress(NativeEvent evt) {
+    super.onEnterPress(evt);
     delegate.onEnterClicked();
   }
 
@@ -155,17 +153,17 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
 
   @Override
   public boolean isAcceptButtonInFocus() {
-    return isWidgetFocused(acceptButton);
+    return isWidgetOrChildFocused(acceptButton);
   }
 
   @Override
   public boolean isCancelButtonInFocus() {
-    return isWidgetFocused(cancelButton);
+    return isWidgetOrChildFocused(cancelButton);
   }
 
   @Override
   public boolean isSelectPathButtonInFocus() {
-    return isWidgetFocused(selectPathButton);
+    return isWidgetOrChildFocused(selectPathButton);
   }
 
   @Override
@@ -179,64 +177,24 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
   }
 
   private void createButtons() {
-    cancelButton =
-        createButton(
-            locale.cancel(),
-            "search-cancel-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                close();
-              }
-            });
+    cancelButton = addFooterButton(locale.cancel(), "search-cancel-button", event -> close());
 
     acceptButton =
-        createPrimaryButton(
-            locale.search(),
-            "search-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.search(text.getText());
-              }
-            });
-
-    addButtonToFooter(acceptButton);
-    addButtonToFooter(cancelButton);
+        addFooterButton(
+            locale.search(), "search-button", event -> delegate.search(text.getText()), true);
   }
 
   private void addHandlers() {
-    isUseFileMask.addValueChangeHandler(
-        new ValueChangeHandler<Boolean>() {
-          @Override
-          public void onValueChange(ValueChangeEvent<Boolean> event) {
-            filesMask.setEnabled(event.getValue());
-          }
-        });
+    isUseFileMask.addValueChangeHandler(event -> filesMask.setEnabled(event.getValue()));
 
     isUseDirectory.addValueChangeHandler(
-        new ValueChangeHandler<Boolean>() {
-          @Override
-          public void onValueChange(ValueChangeEvent<Boolean> event) {
-            directory.setEnabled(event.getValue());
-            selectPathButton.setEnabled(event.getValue());
-          }
+        event -> {
+          directory.setEnabled(event.getValue());
+          selectPathButton.setEnabled(event.getValue());
         });
 
-    text.addKeyUpHandler(
-        new KeyUpHandler() {
-          @Override
-          public void onKeyUp(KeyUpEvent event) {
-            acceptButton.setEnabled(!text.getValue().isEmpty());
-          }
-        });
+    text.addKeyUpHandler(event -> acceptButton.setEnabled(!text.getValue().isEmpty()));
 
-    selectPathButton.addClickHandler(
-        new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            showSelectPathDialog();
-          }
-        });
+    selectPathButton.addClickHandler(event -> showSelectPathDialog());
   }
 }

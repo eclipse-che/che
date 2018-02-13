@@ -10,14 +10,14 @@
  */
 package org.eclipse.che.ide.ext.git.client.checkout;
 
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
+
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -48,45 +48,24 @@ public class CheckoutReferenceViewImpl extends Window implements CheckoutReferen
     this.setTitle(locale.checkoutReferenceTitle());
     this.setWidget(widget);
 
-    btnCheckout =
-        createButton(
-            locale.buttonCheckout(),
-            "git-checkoutReference-checkout",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCheckoutClicked(reference.getValue());
-              }
-            });
-    btnCheckout.addStyleName(resources.windowCss().primaryButton());
-    addButtonToFooter(btnCheckout);
-
     btnCancel =
-        createButton(
+        addFooterButton(
             locale.buttonCancel(),
             "git-checkoutReference-cancel",
-            new ClickHandler() {
+            event -> delegate.onCancelClicked());
 
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-              }
-            });
-    addButtonToFooter(btnCancel);
+    btnCheckout =
+        addFooterButton(
+            locale.buttonCheckout(),
+            "git-checkoutReference-checkout",
+            event -> delegate.onCheckoutClicked(reference.getValue()),
+            true);
   }
 
   @Override
   public void showDialog() {
     reference.setText("");
-    this.show();
-
-    new Timer() {
-      @Override
-      public void run() {
-        reference.setFocus(true);
-      }
-    }.schedule(300);
+    show(reference);
   }
 
   @Override
@@ -115,11 +94,11 @@ public class CheckoutReferenceViewImpl extends Window implements CheckoutReferen
   }
 
   @Override
-  protected void onEnterClicked() {
-    if (isWidgetFocused(btnCancel)) {
+  public void onEnterPress(NativeEvent evt) {
+    if (isWidgetOrChildFocused(btnCancel)) {
       delegate.onCancelClicked();
-      return;
+    } else {
+      delegate.onEnterClicked();
     }
-    delegate.onEnterClicked();
   }
 }

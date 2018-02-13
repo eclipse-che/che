@@ -657,6 +657,9 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("start.ws.title")
   String startWsTitle();
 
+  @Key("start.ws.description")
+  String startWsDescription();
+
   @Key("stop.ws.title")
   String stopWsTitle();
 
@@ -1297,6 +1300,12 @@ public interface CoreLocalizationConstant extends Messages {
 
   @Key("menu.loader.workspaceStarted")
   String menuLoaderWorkspaceStarted();
+
+  @Key("menu.loader.workspaceStopping")
+  String menuLoaderWorkspaceStopping();
+
+  @Key("menu.loader.workspaceStopped")
+  String menuLoaderWorkspaceStopped();
 
   @Key("menu.loader.waitingWorkspace")
   String menuLoaderWaitingWorkspace();

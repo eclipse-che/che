@@ -77,7 +77,6 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
 
     filterField.getElement().setAttribute("placeholder", messages.filterPlaceholder());
     initHintLabel();
-    getFooter().removeFromParent();
   }
 
   private void initHintLabel() {
@@ -116,11 +115,13 @@ public class CommandsPaletteViewImpl extends Window implements CommandsPaletteVi
   }
 
   @Override
-  public void show() {
-    super.show();
+  public void showDialog() {
+    show(filterField);
+  }
 
+  @Override
+  protected void onShow() {
     filterField.setValue("");
-    filterField.setFocus(true);
   }
 
   @Override

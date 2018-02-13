@@ -38,7 +38,7 @@ public interface ImportFromConfigView extends IsWidget {
   void showDialog();
 
   /** Close dialog */
-  void onClose();
+  void closeDialog();
 
   /** Sets the delegate to receive events from this view. */
   void setDelegate(ActionDelegate delegate);

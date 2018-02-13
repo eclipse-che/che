@@ -28,7 +28,6 @@ import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.tree.Tree;
-import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.ide.ui.zeroclipboard.ClipboardResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -38,8 +37,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  * @author Codenvy crowd
  */
 public interface Resources
-    extends Window.Resources,
-        Tree.Resources,
+    extends Tree.Resources,
         PartStackUIResources,
         SimpleList.Resources,
         MenuResources,

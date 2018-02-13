@@ -115,17 +115,17 @@ public class DebugPanel {
 
   private interface BreakpointConfigurationWindow {
     String BREAKPOINT_CONDITION_TEXT =
-        "//div[@id='gwt-debug-breakpoint-configuration-window']//input[@id='gwt-debug-breakpoint-condition-text']";
+        "//table[@id='gwt-debug-breakpoint-configuration-window']//input[@id='gwt-debug-breakpoint-condition-text']";
     String BREAKPOINT_CONDITION_ENABLED =
-        "//div[@id='gwt-debug-breakpoint-configuration-window']//label[@id='gwt-debug-breakpoint-condition-enabled-label']";
+        "//table[@id='gwt-debug-breakpoint-configuration-window']//label[@id='gwt-debug-breakpoint-condition-enabled-label']";
     String APPLY_BTN =
-        "//div[@id='gwt-debug-breakpoint-configuration-window']//button[@id='gwt-debug-apply-btn']";
+        "//table[@id='gwt-debug-breakpoint-configuration-window']//button[@id='gwt-debug-apply-btn']";
     String SUSPEND_NONE =
-        "//div[@id='gwt-debug-breakpoint-configuration-window']//label[@id='gwt-debug-breakpoint-suspend-none-label']";
+        "//table[@id='gwt-debug-breakpoint-configuration-window']//label[@id='gwt-debug-breakpoint-suspend-none-label']";
     String SUSPEND_THREAD =
-        "//div[@id='gwt-debug-breakpoint-configuration-window']//label[@id='gwt-debug-breakpoint-suspend-thread-label']";
+        "//table[@id='gwt-debug-breakpoint-configuration-window']//label[@id='gwt-debug-breakpoint-suspend-thread-label']";
     String SUSPEND_ALL =
-        "//div[@id='gwt-debug-breakpoint-configuration-window']//label[@id='gwt-debug-breakpoint-suspend-all-label']";
+        "//table[@id='gwt-debug-breakpoint-configuration-window']//label[@id='gwt-debug-breakpoint-suspend-all-label']";
   }
 
   private interface FramesPanel {

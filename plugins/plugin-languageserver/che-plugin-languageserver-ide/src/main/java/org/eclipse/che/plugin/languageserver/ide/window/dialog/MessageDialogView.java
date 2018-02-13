@@ -36,7 +36,7 @@ public interface MessageDialogView {
   void setContent(String content);
 
   /** Sets the window title. */
-  void setTitle(String title);
+  void setTitleCaption(String title);
 
   void setActions(List<MessageActionItem> actions);
 

@@ -43,7 +43,7 @@ interface CompareView extends View<CompareView.ActionDelegate> {
    *
    * @param title text that will be as a title in the window
    */
-  void setTitle(String title);
+  void setTitleCaption(String title);
 
   /**
    * Set left and right column titles.
@@ -54,7 +54,7 @@ interface CompareView extends View<CompareView.ActionDelegate> {
   void setColumnTitles(String leftTitle, String rightTitle);
 
   /** Hide compare window. */
-  void hide();
+  void close();
 
   /** Shows whether widget is opened */
   boolean isVisible();

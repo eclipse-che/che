@@ -22,7 +22,7 @@ public interface SelectPathView extends View<SelectPathView.ActionDelegate> {
 
   void setStructure(List<Node> nodes, boolean showFiles);
 
-  void show();
+  void showDialog();
 
   interface ActionDelegate {
     void onPathSelected(Path path);

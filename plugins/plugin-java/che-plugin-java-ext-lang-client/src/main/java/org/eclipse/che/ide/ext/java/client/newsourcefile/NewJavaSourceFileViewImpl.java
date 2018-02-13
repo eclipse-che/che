@@ -10,14 +10,9 @@
  */
 package org.eclipse.che.ide.ext.java.client.newsourcefile;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -48,44 +43,24 @@ public class NewJavaSourceFileViewImpl extends Window implements NewJavaSourceFi
       AddToIndexViewImplUiBinder uiBinder, JavaLocalizationConstant constant) {
     setTitle(constant.title());
 
-    Button btnCancel =
-        createButton(
-            constant.buttonCancel(),
-            "newJavaClass-dialog-cancel",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-              }
-            });
-    addButtonToFooter(btnCancel);
+    addFooterButton(
+        constant.buttonCancel(), "newJavaClass-dialog-cancel", event -> delegate.onCancelClicked());
 
     btnOk =
-        createButton(
-            constant.buttonOk(),
-            "newJavaClass-dialog-ok",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onOkClicked();
-              }
-            });
-    addButtonToFooter(btnOk);
+        addFooterButton(
+            constant.buttonOk(), "newJavaClass-dialog-ok", event -> delegate.onOkClicked());
 
     Widget widget = uiBinder.createAndBindUi(this);
     this.setWidget(widget);
     this.ensureDebugId("newJavaSourceFileView-window");
 
     nameField.addKeyUpHandler(
-        new KeyUpHandler() {
-          @Override
-          public void onKeyUp(KeyUpEvent event) {
-            delegate.onNameChanged();
-            final boolean isNameEmpty = nameField.getText().trim().isEmpty();
-            btnOk.setEnabled(!isNameEmpty);
-            if (!isNameEmpty && KeyCodes.KEY_ENTER == event.getNativeKeyCode()) {
-              delegate.onOkClicked();
-            }
+        event -> {
+          delegate.onNameChanged();
+          final boolean isNameEmpty = nameField.getText().trim().isEmpty();
+          btnOk.setEnabled(!isNameEmpty);
+          if (!isNameEmpty && KeyCodes.KEY_ENTER == event.getNativeKeyCode()) {
+            delegate.onOkClicked();
           }
         });
   }
@@ -129,14 +104,8 @@ public class NewJavaSourceFileViewImpl extends Window implements NewJavaSourceFi
   public void showDialog() {
     nameField.setText("");
     hideErrorHint();
-    show();
+    show(nameField);
     btnOk.setEnabled(false);
-    new Timer() {
-      @Override
-      public void run() {
-        nameField.setFocus(true);
-      }
-    }.schedule(300);
   }
 
   @Override

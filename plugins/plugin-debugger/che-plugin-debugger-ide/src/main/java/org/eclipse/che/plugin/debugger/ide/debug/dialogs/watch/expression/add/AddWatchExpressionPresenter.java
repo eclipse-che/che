@@ -49,7 +49,7 @@ public class AddWatchExpressionPresenter implements TextAreaDialogView.ActionDel
     view.focusInValueField();
     view.selectAllText();
     view.setEnableChangeButton(false);
-    view.show();
+    view.showDialog();
   }
 
   @Override

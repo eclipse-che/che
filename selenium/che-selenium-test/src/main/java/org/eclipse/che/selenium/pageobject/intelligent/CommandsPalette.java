@@ -66,7 +66,7 @@ public class CommandsPalette {
     static final String COMMAND_PALETTE_BUTTON =
         "//div[@id='gwt-debug-button-open_command_palette']";
     static final String CLOSE_COMMAND_PALETTE =
-        "//div[contains(text(), 'Commands Palette')]//parent::div//parent::div//div[2]";
+        "//table[@title='Commands Palette']/tbody/tr[1]/td/table/tbody/tr/td[2]//*[local-name() = 'svg']";
     static final String SEARCH_FIELD = "//input[@id='gwt-debug-commands_palette-filter']";
     static final String COMMANDS_LIST =
         "//div[@id = 'gwt-debug-commands_palette']//div[contains(@id,'gwt-uid')]";

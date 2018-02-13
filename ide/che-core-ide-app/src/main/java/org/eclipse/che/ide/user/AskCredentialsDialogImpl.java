@@ -57,18 +57,15 @@ public class AskCredentialsDialogImpl extends Window implements AskCredentialsDi
     this.setWidget(uiBinder.createAndBindUi(this));
     this.setTitle(localizationConstant.authorizationDialogTitle());
     authenticateButton =
-        createPrimaryButton(
+        addFooterButton(
             localizationConstant.authenticationDialogAuthenticate(),
             "authentication-dialog-authenticate-button",
-            event -> onAuthenticateClicked());
-    Button cancelButton =
-        createButton(
-            localizationConstant.cancel(),
-            "authentication-dialog-cancel-button",
-            event -> onCancelClicked());
-
-    addButtonToFooter(authenticateButton);
-    addButtonToFooter(cancelButton);
+            event -> onAuthenticateClicked(),
+            true);
+    addFooterButton(
+        localizationConstant.cancel(),
+        "authentication-dialog-cancel-button",
+        event -> onCancelClicked());
   }
 
   @Override
@@ -93,11 +90,11 @@ public class AskCredentialsDialogImpl extends Window implements AskCredentialsDi
   }
 
   public void showDialog() {
-    super.show();
+    show();
   }
 
   public void closeDialog() {
-    super.hide();
+    hide();
   }
 
   public String getUsername() {

@@ -11,11 +11,8 @@
 package org.eclipse.che.ide.reference;
 
 import com.google.common.base.Strings;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -55,7 +52,6 @@ final class ShowReferenceViewImpl extends Window implements ShowReferenceView {
     setTitle(locale.showReference());
 
     setWidget(binder.createAndBindUi(this));
-    setHideOnEscapeEnabled(true);
 
     reference.setReadOnly(true);
 
@@ -66,18 +62,7 @@ final class ShowReferenceViewImpl extends Window implements ShowReferenceView {
   }
 
   private void addButtons() {
-    Button cancel =
-        createButton(
-            locale.cancel(),
-            "copy-reference-cancel-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                hide();
-              }
-            });
-
-    addButtonToFooter(cancel);
+    addFooterButton(locale.cancel(), "copy-reference-cancel-button", event -> hide());
   }
 
   @Override
@@ -88,7 +73,7 @@ final class ShowReferenceViewImpl extends Window implements ShowReferenceView {
     this.referencePanel.setVisible(hasReference);
     this.path.setText(path.toString());
 
-    super.show(this.reference);
+    show(this.reference);
   }
 
   @Override
