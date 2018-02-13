@@ -74,7 +74,7 @@ public class LimitedSizeLineConsumerWrapperTest {
 
   @Test(
     expectedExceptions = IllegalArgumentException.class,
-    expectedExceptionsMessageRegExp = NEGATIVE_TEXT_SIZE_LIMIT + ""
+    expectedExceptionsMessageRegExp = "Limit number shouldn't be negative."
   )
   public void shouldThrowExceptionIfTextSizeLimitIsNegative() {
     // when

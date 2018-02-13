@@ -29,7 +29,7 @@ public class LimitedSizeLineConsumerWrapper implements LineConsumer {
    */
   public LimitedSizeLineConsumerWrapper(LineConsumer lineConsumer, int limit) {
     if (limit < 0) {
-      throw new IllegalArgumentException(Integer.toString(limit));
+      throw new IllegalArgumentException("Limit number shouldn't be negative.");
     }
 
     this.lineConsumer = lineConsumer;
