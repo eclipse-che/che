@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ui.dialogs.input;
 
 import static org.eclipse.che.ide.ui.dialogs.input.InputDialogView.ActionDelegate;
-import static org.eclipse.che.ide.ui.window.Window.Resources;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -25,6 +24,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.ui.UILocalizationConstant;
+import org.eclipse.che.ide.ui.window.WindowClientBundle;
 
 /**
  * The footer show on input dialogs.
@@ -34,7 +34,7 @@ import org.eclipse.che.ide.ui.UILocalizationConstant;
  */
 public class InputDialogFooter implements IsWidget {
 
-  protected static final Resources resources = GWT.create(Resources.class);
+  protected final WindowClientBundle resources;
   /** The UI binder instance. */
   private static ConfirmWindowFooterUiBinder uiBinder =
       GWT.create(ConfirmWindowFooterUiBinder.class);
@@ -51,14 +51,16 @@ public class InputDialogFooter implements IsWidget {
   private ActionDelegate actionDelegate;
 
   @Inject
-  public InputDialogFooter(final @NotNull UILocalizationConstant messages) {
+  public InputDialogFooter(
+      final @NotNull UILocalizationConstant messages, WindowClientBundle resources) {
     this.messages = messages;
+    this.resources = resources;
     rootPanel = uiBinder.createAndBindUi(this);
 
-    okButton.addStyleName(resources.windowCss().primaryButton());
+    okButton.addStyleName(resources.getStyle().windowFrameFooterButtonPrimary());
     okButton.getElement().setId("askValue-dialog-ok");
 
-    cancelButton.addStyleName(resources.windowCss().button());
+    cancelButton.addStyleName(resources.getStyle().windowFrameFooterButton());
     cancelButton.getElement().setId("askValue-dialog-cancel");
   }
 

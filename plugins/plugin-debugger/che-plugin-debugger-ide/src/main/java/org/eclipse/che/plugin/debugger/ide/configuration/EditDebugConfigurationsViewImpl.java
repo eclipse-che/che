@@ -10,24 +10,17 @@
  */
 package org.eclipse.che.plugin.debugger.ide.configuration;
 
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
+
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.*;
 import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -109,10 +102,11 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
     categories = new HashMap<>();
 
     editConfigurationsResources.getCss().ensureInjected();
-
-    setWidget(UI_BINDER.createAndBindUi(this));
+    Widget widget = UI_BINDER.createAndBindUi(this);
+    widget.getElement().setId("editDebugConfigurationsView");
+    widget.getElement().getStyle().setPadding(0, Style.Unit.PX);
+    setWidget(widget);
     setTitle(locale.editConfigurationsViewTitle());
-    getWidget().getElement().setId("editDebugConfigurationsView");
 
     hintLabel = new Label(locale.editConfigurationsViewHint());
     hintLabel.addStyleName(editConfigurationsResources.getCss().hintLabel());
@@ -126,30 +120,24 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
 
     list = new CategoriesList(resources);
     list.addDomHandler(
-        new KeyDownHandler() {
-          @Override
-          public void onKeyDown(KeyDownEvent event) {
-            switch (event.getNativeKeyCode()) {
-              case KeyboardEvent.KeyCode.INSERT:
-                delegate.onAddClicked();
-                resetFilter();
-                break;
-              case KeyboardEvent.KeyCode.DELETE:
-                delegate.onRemoveClicked(selectedConfiguration);
-                break;
-            }
+        event -> {
+          switch (event.getNativeKeyCode()) {
+            case KeyboardEvent.KeyCode.INSERT:
+              delegate.onAddClicked();
+              resetFilter();
+              break;
+            case KeyboardEvent.KeyCode.DELETE:
+              delegate.onRemoveClicked(selectedConfiguration);
+              break;
           }
         },
         KeyDownEvent.getType());
     categoriesPanel.add(list);
 
     categoryEventDelegate =
-        new Category.CategoryEventDelegate<DebugConfiguration>() {
-          @Override
-          public void onListItemClicked(Element listItemBase, DebugConfiguration itemData) {
-            selectedType = itemData.getType();
-            setSelectedConfiguration(itemData);
-          }
+        (listItemBase, itemData) -> {
+          selectedType = itemData.getType();
+          setSelectedConfiguration(itemData);
         };
 
     categoryRenderer =
@@ -173,8 +161,6 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
 
     createButtons();
     resetFilter();
-
-    getWidget().getElement().getStyle().setPadding(0, Style.Unit.PX);
   }
 
   private SpanElement renderSubElementButtons() {
@@ -188,14 +174,11 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
     Event.sinkEvents(removeConfigurationButtonElement, Event.ONCLICK);
     Event.setEventListener(
         removeConfigurationButtonElement,
-        new EventListener() {
-          @Override
-          public void onBrowserEvent(Event event) {
-            if (Event.ONCLICK == event.getTypeInt()) {
-              event.stopPropagation();
-              setSelectedConfiguration(selectedConfiguration);
-              delegate.onRemoveClicked(selectedConfiguration);
-            }
+        event -> {
+          if (Event.ONCLICK == event.getTypeInt()) {
+            event.stopPropagation();
+            setSelectedConfiguration(selectedConfiguration);
+            delegate.onRemoveClicked(selectedConfiguration);
           }
         });
 
@@ -206,13 +189,10 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
     Event.sinkEvents(duplicateConfigurationButton, Event.ONCLICK);
     Event.setEventListener(
         duplicateConfigurationButton,
-        new EventListener() {
-          @Override
-          public void onBrowserEvent(Event event) {
-            if (Event.ONCLICK == event.getTypeInt()) {
-              event.stopPropagation();
-              delegate.onDuplicateClicked();
-            }
+        event -> {
+          if (Event.ONCLICK == event.getTypeInt()) {
+            event.stopPropagation();
+            delegate.onDuplicateClicked();
           }
         });
 
@@ -242,16 +222,13 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
     Event.sinkEvents(buttonElement, Event.ONCLICK);
     Event.setEventListener(
         buttonElement,
-        new EventListener() {
-          @Override
-          public void onBrowserEvent(Event event) {
-            if (Event.ONCLICK == event.getTypeInt()) {
-              event.stopPropagation();
-              namePanel.setVisible(true);
-              selectedType = getTypeById(categoryTitle);
-              delegate.onAddClicked();
-              resetFilter();
-            }
+        event -> {
+          if (Event.ONCLICK == event.getTypeInt()) {
+            event.stopPropagation();
+            namePanel.setVisible(true);
+            selectedType = getTypeById(categoryTitle);
+            delegate.onAddClicked();
+            resetFilter();
           }
         });
 
@@ -347,67 +324,33 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
 
   private void createButtons() {
     saveButton =
-        createButton(
+        addFooterButton(
             coreLocale.save(),
             "window-edit-debug-configurations-save",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onSaveClicked();
-              }
-            });
-    saveButton.addStyleName(Window.resources.windowCss().primaryButton());
-    overFooter.add(saveButton);
-
+            event -> delegate.onSaveClicked(),
+            true);
     cancelButton =
-        createButton(
+        addFooterButton(
             coreLocale.cancel(),
             "window-edit-debug-configurations-cancel",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-              }
-            });
-    overFooter.add(cancelButton);
-
+            event -> delegate.onCancelClicked());
     debugButton =
-        createButton(
+        addFooterButton(
             coreLocale.debug(),
             "window-edit-debug-configurations-debug",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onDebugClicked();
-              }
-            });
-    overFooter.add(debugButton);
-
+            event -> delegate.onDebugClicked());
     closeButton =
-        createButton(
+        addFooterButton(
             coreLocale.close(),
             "window-edit-debug-configurations-close",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCloseClicked();
-              }
-            });
+            event -> delegate.onCloseClicked());
+
     closeButton.addDomHandler(
-        new BlurHandler() {
-          @Override
-          public void onBlur(BlurEvent blurEvent) {
-            // set default focus
-            selectText(filterInputField.getElement());
-          }
+        blurEvent -> {
+          // set default focus
+          selectText(filterInputField.getElement());
         },
         BlurEvent.getType());
-
-    addButtonToFooter(closeButton);
-
-    Element dummyFocusElement = DOM.createSpan();
-    dummyFocusElement.setTabIndex(0);
-    getFooter().getElement().appendChild(dummyFocusElement);
   }
 
   private native void selectText(Element inputElement) /*-{
@@ -421,8 +364,12 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
   }
 
   @Override
-  public void show() {
-    super.show();
+  public void showDialog() {
+    show();
+  }
+
+  @Override
+  protected void onShow() {
     configurationName.setText("");
   }
 
@@ -511,24 +458,23 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
   }
 
   @Override
-  protected void onEnterClicked() {
+  public void onEnterPress(NativeEvent evt) {
     delegate.onEnterPressed();
   }
 
   @Override
-  protected void onClose() {
-    super.onClose();
+  protected void onHide() {
     setSelectedConfiguration(selectedConfiguration);
   }
 
   @Override
   public boolean isCancelButtonFocused() {
-    return isWidgetFocused(cancelButton);
+    return isWidgetOrChildFocused(cancelButton);
   }
 
   @Override
   public boolean isCloseButtonFocused() {
-    return isWidgetFocused(closeButton);
+    return isWidgetOrChildFocused(closeButton);
   }
 
   interface EditDebugConfigurationsViewImplUiBinder

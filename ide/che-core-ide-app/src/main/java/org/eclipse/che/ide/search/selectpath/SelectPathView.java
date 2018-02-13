@@ -36,5 +36,5 @@ public interface SelectPathView extends View<SelectPathView.ActionDelegate> {
   void setStructure(List<Node> nodes);
 
   /** Show dialog. */
-  void show();
+  void showDialog();
 }

@@ -59,7 +59,7 @@ public class MessageDialogPresenter implements MessageDialog, MessageDialogView.
       @Nullable @Assisted("confirmButtonText") String confirmButtonText) {
     this.view = view;
     this.view.setContent(content);
-    this.view.setTitle(title);
+    this.view.setTitleCaption(title);
     this.confirmCallback = confirmCallback;
     this.view.setDelegate(this);
 

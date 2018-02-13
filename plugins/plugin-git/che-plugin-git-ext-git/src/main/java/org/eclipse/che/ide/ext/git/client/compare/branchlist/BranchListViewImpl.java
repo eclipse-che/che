@@ -13,8 +13,7 @@ package org.eclipse.che.ide.ext.git.client.compare.branchlist;
 import static com.google.gwt.event.dom.client.KeyCodes.KEY_BACKSPACE;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -137,6 +136,8 @@ public class BranchListViewImpl extends Window implements BranchListView {
             this::onFilterChanged);
     branchesPanel.add(branchesList);
 
+    setCloseOnEscape(false);
+
     createButtons();
   }
 
@@ -168,34 +169,27 @@ public class BranchListViewImpl extends Window implements BranchListView {
 
   @Override
   public void closeDialogIfShowing() {
-    if (super.isShowing()) {
-      this.hide();
-      delegate.onClose();
-    }
+    hide();
   }
 
   @Override
   public void showDialog() {
-    this.show();
-    super.focus();
+    show();
   }
 
   @Override
-  protected void onKeyDownEvent(KeyDownEvent event) {
-    if (event.getNativeEvent().getKeyCode() == KEY_BACKSPACE) {
+  public void onKeyPress(NativeEvent evt) {
+    if (evt.getKeyCode() == KEY_BACKSPACE) {
       branchesList.removeLastCharacter();
+    } else {
+      branchesList.addCharacterToFilter(String.valueOf(evt.getCharCode()));
     }
   }
 
   @Override
-  protected void onKeyPressEvent(KeyPressEvent event) {
-    branchesList.addCharacterToFilter(String.valueOf(event.getCharCode()));
-  }
-
-  @Override
-  protected void onEscapeKey() {
+  public void onEscPress(NativeEvent evt) {
     if (branchesList.getFilter().isEmpty()) {
-      super.onEscapeKey();
+      hide();
     } else {
       branchesList.resetFilter();
     }
@@ -212,21 +206,14 @@ public class BranchListViewImpl extends Window implements BranchListView {
     searchFilterLabel.setText(locale.branchSearchFilterLabel());
   }
 
-  @Override
-  public void onClose() {
-    closeDialogIfShowing();
-  }
-
   private void createButtons() {
     btnClose =
-        createButton(locale.buttonClose(), "git-compare-branch-close", event -> delegate.onClose());
-    addButtonToFooter(btnClose);
-
+        addFooterButton(
+            locale.buttonClose(), "git-compare-branch-close", event -> delegate.onClose());
     btnCompare =
-        createButton(
+        addFooterButton(
             locale.buttonCompare(),
             "git-compare-branch-compare",
             event -> delegate.onCompareClicked());
-    addButtonToFooter(btnCompare);
   }
 }

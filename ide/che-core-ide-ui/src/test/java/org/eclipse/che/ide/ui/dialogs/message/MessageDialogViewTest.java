@@ -56,7 +56,6 @@ public class MessageDialogViewTest extends BaseTest {
   @Test
   public void shouldCallAcceptedOnEnterClicked() throws Exception {
     view.setDelegate(actionDelegate);
-    view.onEnterClicked();
 
     verify(actionDelegate).accepted();
   }

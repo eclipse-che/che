@@ -47,6 +47,7 @@ public class CheckCreatingProjectInEmptyWsTest {
 
   @Test
   public void checkImportAndCreatingFromProjectExplorer() throws InterruptedException {
+    ide.waitOpenedWorkspaceIsReadyToUse();
     loader.waitOnClosed();
     projectExplorer.clickOnCreateProjectLink(10);
     wizard.closeWithIcon();

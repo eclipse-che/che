@@ -22,7 +22,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.ui.UILocalizationConstant;
-import org.eclipse.che.ide.ui.window.Window;
+import org.eclipse.che.ide.ui.window.WindowClientBundle;
 
 /**
  * The footer show on confirmation dialogs.
@@ -32,7 +32,6 @@ import org.eclipse.che.ide.ui.window.Window;
  */
 public class ConfirmDialogFooter implements IsWidget {
 
-  private static final Window.Resources resources = GWT.create(Window.Resources.class);
   /** The UI binder instance. */
   private static ConfirmDialogFooterUiBinder uiBinder =
       GWT.create(ConfirmDialogFooterUiBinder.class);
@@ -48,14 +47,15 @@ public class ConfirmDialogFooter implements IsWidget {
   private ConfirmDialogView.ActionDelegate actionDelegate;
 
   @Inject
-  public ConfirmDialogFooter(final @NotNull UILocalizationConstant messages) {
+  public ConfirmDialogFooter(
+      final @NotNull UILocalizationConstant messages, WindowClientBundle resources) {
     this.messages = messages;
     rootPanel = uiBinder.createAndBindUi(this);
 
-    okButton.addStyleName(resources.windowCss().primaryButton());
+    okButton.addStyleName(resources.getStyle().windowFrameFooterButtonPrimary());
     okButton.getElement().setId("ask-dialog-ok");
 
-    cancelButton.addStyleName(resources.windowCss().button());
+    cancelButton.addStyleName(resources.getStyle().windowFrameFooterButton());
     cancelButton.getElement().setId("ask-dialog-cancel");
   }
 

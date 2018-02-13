@@ -27,7 +27,7 @@ public interface EditDebugConfigurationsView
     extends View<EditDebugConfigurationsView.ActionDelegate> {
 
   /** Show view. */
-  void show();
+  void showDialog();
 
   /** Close view. */
   void close();

@@ -60,6 +60,7 @@
     display: inline-block;
     margin-left: 2px;
     margin-top: 2px;
+    transform: scaleY(0.4);
     animation: stretchAnimation 1.2s infinite ease-in-out;
 }
 

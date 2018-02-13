@@ -66,6 +66,8 @@ public class WsMasterJsonRpcInitializer {
   private final SecurityTokenProvider securityTokenProvider;
   private final WsAgentServerUtil wsAgentServerUtil;
 
+  private boolean initialized = false;
+
   @Inject
   public WsMasterJsonRpcInitializer(
       JsonRpcInitializer initializer,
@@ -87,15 +89,13 @@ public class WsMasterJsonRpcInitializer {
 
     eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> initialize());
     eventBus.addHandler(WorkspaceStartingEvent.TYPE, e -> initialize());
-    eventBus.addHandler(
-        WorkspaceStoppedEvent.TYPE,
-        e -> {
-          unsubscribeFromEvents();
-          terminate();
-        });
   }
 
   private void initialize() {
+    if (initialized) {
+      return;
+    }
+
     securityTokenProvider
         .getSecurityToken()
         .then(
@@ -128,6 +128,8 @@ public class WsMasterJsonRpcInitializer {
               initActions.add(this::checkStatuses);
 
               initializer.initialize(WS_MASTER_JSON_RPC_ENDPOINT_ID, initProperties, initActions);
+
+              initialized = true;
             });
   }
 

@@ -35,8 +35,8 @@ public class RecentFiles {
   }
 
   private interface Locators {
-    String RECENT_FILES = "//div[text()='Recent Files']/ancestor::div[3]";
-    String RECENT_FILES_ITEM = "//div[text()='Recent Files']/ancestor::div[3]//div[text()='%s']";
+    String RECENT_FILES = "//table[@title='Recent Files']";
+    String RECENT_FILES_ITEM = "//table[@title='Recent Files']//div[text()='%s']";
   }
 
   /** Wait the 'Recent Files' window is opened */

@@ -10,8 +10,10 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Help.ABOUT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Help.HELP;
+
 import com.google.inject.Inject;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.DialogAbout;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -32,8 +34,8 @@ public class DialogAboutTest {
   public void dialogAboutTest() throws Exception {
     ide.open(testWorkspace);
 
-    projectExplorer.waitProjectExplorer();
-    menu.runCommand(TestMenuCommandsConstants.Help.HELP, TestMenuCommandsConstants.Help.ABOUT);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    menu.runCommand(HELP, ABOUT);
 
     dialogAbout.waitVerifyTextElements("About");
     dialogAbout.waitVerifyTextElements("Version :");
