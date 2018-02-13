@@ -23,6 +23,7 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
 /** @author Igor Okhrimenko */
@@ -367,7 +368,9 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Moves cursor to {@link WebElement} with provided locator {@link By} and click twice on it by
-   * {@link org.openqa.selenium.interactions.Action}
+   * {@link org.openqa.selenium.interactions.Action} Used exactly {@link Actions#doubleClick()} and
+   * not {@link Actions#doubleClick(WebElement)} , it allows avoid {@link
+   * org.openqa.selenium.StaleElementReferenceException}
    *
    * @param elementLocator
    */
@@ -379,7 +382,9 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Moves cursor to provided {@link WebElement} and click twice on it by {@link
-   * org.openqa.selenium.interactions.Action}
+   * org.openqa.selenium.interactions.Action} Used exactly {@link Actions#doubleClick()} and not
+   * {@link Actions#doubleClick(WebElement)} , it allows avoid {@link
+   * org.openqa.selenium.StaleElementReferenceException}
    *
    * @param webElement
    */
