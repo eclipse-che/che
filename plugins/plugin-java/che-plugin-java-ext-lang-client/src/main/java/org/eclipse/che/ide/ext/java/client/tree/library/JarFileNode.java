@@ -146,6 +146,11 @@ public class JarFileNode extends SyntheticNode<JarEntry>
 
   @Override
   public Path getLocation() {
+    // We have to use uri instead of path here despite it looks a bit weird.
+    // We are allowed to do this because this path is used as virtual file ID in the editor only.
+    // First, sometimes we don't have path field filled in (like in case
+    // TextDocumentServiceClient#references)
+    // Second, to prevent collision in case if two classes have the same FQN from different jars.
     return Path.valueOf(getData().getUri());
   }
 
