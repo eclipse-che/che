@@ -25,5 +25,4 @@ RUN yarn && \
 EXPOSE 3000
 ENV USE_LOCAL_GIT=true \
     GITHUB_TOKEN=957257352ad57b7853c8b8714d2201bf4d337b5e
-#    ENV THEIA_PLUGINS=[\"@theia\/extension-manager\",\"\@theia\/python\"]
 ENTRYPOINT ["node", "/theia_launcher/theia_launcher.js"]
