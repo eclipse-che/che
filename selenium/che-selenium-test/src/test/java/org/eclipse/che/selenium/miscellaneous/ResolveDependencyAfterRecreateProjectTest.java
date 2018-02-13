@@ -58,7 +58,7 @@ public class ResolveDependencyAfterRecreateProjectTest {
 
   @Test
   public void updateDependencyWithInheritTest() throws InterruptedException {
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
 
     createProjectFromUI(PROJECT_NAME1);
     projectExplorer.waitItem(PROJECT_NAME1);
@@ -80,7 +80,7 @@ public class ResolveDependencyAfterRecreateProjectTest {
     editor.waitAllMarkersDisappear(ERROR_MARKER);
   }
 
-  public void removeProjectFromUI() {
+  private void removeProjectFromUI() {
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME1);
     projectExplorer.clickOnItemInContextMenu(DELETE);
     askDialog.waitFormToOpen();
@@ -94,7 +94,7 @@ public class ResolveDependencyAfterRecreateProjectTest {
    *
    * @param nameOfTheProject name of created project
    */
-  public void createProjectFromUI(String nameOfTheProject) {
+  private void createProjectFromUI(String nameOfTheProject) {
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
     wizard.selectTypeProject(MAVEN);
     wizard.selectSample(WEB_JAVA_SPRING);

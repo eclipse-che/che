@@ -43,6 +43,9 @@ public interface WorkspaceLoadingTrackerView extends IsWidget {
   /** Shows workspace started section. */
   void showWorkspaceStarted();
 
+  /** Shows workspace stopping section. */
+  void showWorkspaceStopping();
+
   /** Shows workspace stopped section. */
   void showWorkspaceStopped();
 

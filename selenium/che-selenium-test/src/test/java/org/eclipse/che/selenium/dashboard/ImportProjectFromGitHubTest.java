@@ -23,6 +23,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
@@ -48,6 +49,7 @@ public class ImportProjectFromGitHubTest {
   @Named("github.password")
   private String gitHubPassword;
 
+  @Inject private Ide ide;
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
   @Inject private TestUser defaultTestUser;
@@ -94,7 +96,7 @@ public class ImportProjectFromGitHubTest {
 
     seleniumWebDriver.switchFromDashboardIframeToIde(ELEMENT_TIMEOUT_SEC);
 
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(projectName);
     projectExplorer.waitFolderDefinedTypeOfFolderByPath(projectName, PROJECT_FOLDER);
   }

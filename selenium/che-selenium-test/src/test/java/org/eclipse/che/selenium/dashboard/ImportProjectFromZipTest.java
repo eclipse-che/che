@@ -19,6 +19,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -47,6 +48,7 @@ public class ImportProjectFromZipTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestUser defaultTestUser;
   @Inject private Workspaces workspaces;
+  @Inject private Ide ide;
 
   @BeforeClass
   public void setUp() {
@@ -77,25 +79,10 @@ public class ImportProjectFromZipTest {
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    loader.waitOnClosed();
+
+    ide.waitOpenedWorkspaceIsReadyToUse();
     explorer.waitItem(PROJECT_NAME);
     explorer.selectItem(PROJECT_NAME);
     explorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
-
-    /* TODO when bug with project type is solved:
-    explorer.clickOnItemInContextMenu(ProjectExplorerContextMenuConstants.MAVEN);
-    explorer.clickOnItemInContextMenu(ProjectExplorer.PROJECT_EXPLORER_CONTEXT_MENU_MAVEN.REIMPORT);
-    loader.waitOnClosed();
-
-    explorer.openItemByPath(PROJECT_NAME);
-
-    explorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/my-lib");
-    explorer.clickOnItemInContextMenu(ProjectExplorerContextMenuConstants.MAVEN);
-    explorer.clickOnItemInContextMenu(ProjectExplorer.PROJECT_EXPLORER_CONTEXT_MENU_MAVEN.REIMPORT);
-    loader.waitOnClosed();
-
-    explorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/my-webapp");
-    explorer.clickOnItemInContextMenu(ProjectExplorerContextMenuConstants.MAVEN);
-    explorer.clickOnItemInContextMenu(ProjectExplorer.PROJECT_EXPLORER_CONTEXT_MENU_MAVEN.REIMPORT);*/
   }
 }

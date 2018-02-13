@@ -147,7 +147,7 @@ public class FileStructureNodesTest {
 
   @Test
   void checkFileStructureFilter() {
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByVisibleNameInExplorer("Company.java");

@@ -50,11 +50,12 @@ public class WorkspaceLoadingTrackerViewImpl extends Composite
   @UiField TableRowElement installerFailedTemplate;
   @UiField TableRowElement machinesDelimiterTemplate;
 
-  @UiField TableRowElement waitingWorkspaceSection;
+  @UiField TableRowElement workspaceStartingSection;
 
   @UiField TableRowElement workspaceStartedSection;
   @UiField TableRowElement workspaceStartedSectionFooter;
 
+  @UiField TableRowElement workspaceStoppingSection;
   @UiField TableRowElement workspaceStoppedSection;
 
   @UiField TableRowElement workspaceFailedSection;
@@ -503,17 +504,25 @@ public class WorkspaceLoadingTrackerViewImpl extends Composite
     }
   }
 
-  @Override
-  public void showWorkspaceStarting() {
-    waitingWorkspaceSection.getStyle().clearDisplay();
+  private void hideSections() {
+    workspaceStartingSection.getStyle().setDisplay(Style.Display.NONE);
 
     workspaceStartedSection.getStyle().setDisplay(Style.Display.NONE);
     workspaceStartedSectionFooter.getStyle().setDisplay(Style.Display.NONE);
+
+    workspaceStoppingSection.getStyle().setDisplay(Style.Display.NONE);
 
     workspaceStoppedSection.getStyle().setDisplay(Style.Display.NONE);
 
     workspaceFailedSection.getStyle().setDisplay(Style.Display.NONE);
     workspaceFailedSectionFooter.getStyle().setDisplay(Style.Display.NONE);
+  }
+
+  @Override
+  public void showWorkspaceStarting() {
+    hideSections();
+
+    workspaceStartingSection.getStyle().clearDisplay();
 
     for (Machine machine : machines.values()) {
       machine.reset();
@@ -522,23 +531,30 @@ public class WorkspaceLoadingTrackerViewImpl extends Composite
 
   @Override
   public void showWorkspaceStarted() {
-    waitingWorkspaceSection.getStyle().setDisplay(Style.Display.NONE);
+    hideSections();
 
     workspaceStartedSection.getStyle().clearDisplay();
     workspaceStartedSectionFooter.getStyle().clearDisplay();
+  }
 
-    workspaceStoppedSection.getStyle().setDisplay(Style.Display.NONE);
+  @Override
+  public void showWorkspaceStopping() {
+    hideSections();
 
-    workspaceFailedSection.getStyle().setDisplay(Style.Display.NONE);
-    workspaceFailedSectionFooter.getStyle().setDisplay(Style.Display.NONE);
+    workspaceStoppingSection.getStyle().clearDisplay();
+
+    for (Machine machine : machines.values()) {
+      machine.setState("stopping");
+
+      for (Installer installer : machine.installers.values()) {
+        installer.reset();
+      }
+    }
   }
 
   @Override
   public void showWorkspaceStopped() {
-    waitingWorkspaceSection.getStyle().setDisplay(Style.Display.NONE);
-
-    workspaceStartedSection.getStyle().setDisplay(Style.Display.NONE);
-    workspaceStartedSectionFooter.getStyle().setDisplay(Style.Display.NONE);
+    hideSections();
 
     workspaceStoppedSection.getStyle().clearDisplay();
 
@@ -549,22 +565,13 @@ public class WorkspaceLoadingTrackerViewImpl extends Composite
         installer.setStopped();
       }
     }
-
-    workspaceFailedSection.getStyle().setDisplay(Style.Display.NONE);
-    workspaceFailedSectionFooter.getStyle().setDisplay(Style.Display.NONE);
   }
 
   @Override
   public void showWorkspaceFailed(String error) {
-    waitingWorkspaceSection.getStyle().setDisplay(Style.Display.NONE);
-
-    workspaceStartedSection.getStyle().setDisplay(Style.Display.NONE);
-    workspaceStartedSectionFooter.getStyle().setDisplay(Style.Display.NONE);
-
-    workspaceStoppedSection.getStyle().setDisplay(Style.Display.NONE);
+    hideSections();
 
     workspaceFailedSection.getStyle().clearDisplay();
-
     workspaceFailedSectionFooter.getStyle().clearDisplay();
   }
 

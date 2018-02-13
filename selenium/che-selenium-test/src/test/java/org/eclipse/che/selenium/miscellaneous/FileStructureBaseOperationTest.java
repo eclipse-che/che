@@ -80,7 +80,7 @@ public class FileStructureBaseOperationTest {
 
   @Test
   public void checkFileStructureBaseOperations() {
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
 
