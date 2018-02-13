@@ -57,7 +57,6 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
       @Assisted KubernetesMachine kubernetesMachine,
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       @Named("che.infra.kubernetes.bootstrapper.binary_url") String bootstrapperBinaryUrl,
-      @Named("che.infra.kubernetes.bootstrapper.timeout_min") int bootstrappingTimeoutMinutes,
       @Named("che.infra.kubernetes.bootstrapper.installer_timeout_sec") int installerTimeoutSeconds,
       @Named("che.infra.kubernetes.bootstrapper.server_check_period_sec")
           int serverCheckPeriodSeconds,
@@ -66,7 +65,6 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
     super(
         kubernetesMachine.getName(),
         runtimeIdentity,
-        bootstrappingTimeoutMinutes,
         cheWebsocketEndpoint,
         cheWebsocketEndpoint,
         eventService);
