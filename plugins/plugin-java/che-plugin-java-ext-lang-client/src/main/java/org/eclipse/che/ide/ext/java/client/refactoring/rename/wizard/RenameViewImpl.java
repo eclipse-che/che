@@ -14,6 +14,7 @@ import static com.google.gwt.dom.client.Style.Cursor.DEFAULT;
 import static com.google.gwt.dom.client.Style.Cursor.POINTER;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -148,6 +149,13 @@ final class RenameViewImpl extends Window implements RenameView {
     updateMarkDeprecated.setEnabled(false);
 
     super.show(newName);
+  }
+
+  @Override
+  public void onEnterPress(NativeEvent evt) {
+    if (accept.isEnabled()) {
+      accept.click();
+    }
   }
 
   @Override
