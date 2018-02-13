@@ -24,15 +24,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-/** @author Igor Ohrimenko */
+/** @author Igor Okhrimenko */
 @Singleton
 public class SeleniumWebDriverHelper {
   protected final int DEFAULT_TIMEOUT = LOAD_PAGE_TIMEOUT_SEC;
   protected final SeleniumWebDriver seleniumWebDriver;
-  protected final WebDriverWait loadPageWait;
-  protected final WebDriverWait attachingElementToDomWait;
   protected final WebDriverWaitFactory webDriverWaitFactory;
   protected final ActionsFactory actionsFactory;
 
@@ -44,12 +41,10 @@ public class SeleniumWebDriverHelper {
     this.seleniumWebDriver = seleniumWebDriver;
     this.webDriverWaitFactory = webDriverWaitFactory;
     this.actionsFactory = actionsFactory;
-    this.loadPageWait = webDriverWaitFactory.get(LOAD_PAGE_TIMEOUT_SEC);
-    this.attachingElementToDomWait = webDriverWaitFactory.get(ATTACHING_ELEM_TO_DOM_SEC);
   }
 
   /**
-   * set text in provided field with checks
+   * Set text in provided field with checks
    *
    * @param fieldLocator
    * @param value
@@ -62,7 +57,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * set text in provided field with checks
+   * Set text in provided field with checks
    *
    * @param webElement
    * @param value
@@ -75,7 +70,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * set text in provided field with checks
+   * Set text in provided field with checks
    *
    * @param fieldLocator
    * @param value
@@ -88,7 +83,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * set text in provided field with checks
+   * Set text in provided field with checks
    *
    * @param webElement
    * @param value
@@ -101,7 +96,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait until {@link WebElement} with provided locator {@link By} be visible
+   * Waits until {@link WebElement} with provided locator {@link By} be visible
    *
    * @param elementLocator
    * @param timeout waiting time in seconds
@@ -112,7 +107,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait until {@link WebElement} with provided locator {@link By} be visible
+   * Waits until {@link WebElement} with provided locator {@link By} be visible
    *
    * @param elementLocator
    * @return found element
@@ -122,7 +117,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait until provided {@link WebElement} be visible
+   * Waits until provided {@link WebElement} be visible
    *
    * @param webElement
    * @param timeout waiting time in seconds
@@ -133,7 +128,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait until provided {@link WebElement} be visible
+   * Waits until provided {@link WebElement} be visible
    *
    * @param webElement
    * @return found element
@@ -143,7 +138,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait until {@link WebElement} with provided locator {@link By} be attached to DOM it does not
+   * Waits until {@link WebElement} with provided locator {@link By} be attached to DOM it does not
    * mean that element is visible
    *
    * @param elementLocator
@@ -155,7 +150,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait until {@link WebElement} with provided locator {@link By} be attached to DOM it does not
+   * Waits until {@link WebElement} with provided locator {@link By} be attached to DOM it does not
    * mean that element is visible
    *
    * @param elementLocator
@@ -168,7 +163,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * type text in the {@link WebElement} with provided locator {@link By}
+   * Type text in the {@link WebElement} with provided locator {@link By}
    *
    * @param elementLocator
    * @param text
@@ -178,7 +173,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * type text in the provided {@link WebElement}
+   * Type text in the provided {@link WebElement}
    *
    * @param webElement
    * @param text
@@ -188,7 +183,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait visibility of {@link WebElement} with provided locator {@link By} and get text
+   * Waits visibility of {@link WebElement} with provided locator {@link By} and get text
    *
    * @param fieldLocator
    * @return element text by {@link WebElement#getAttribute(String)}
@@ -198,7 +193,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait visibility of provided {@link WebElement} and get text
+   * Waits visibility of provided {@link WebElement} and get text
    *
    * @param webElement
    * @return element text by {@link WebElement#getAttribute(String)}
@@ -208,7 +203,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait visibility of {@link WebElement} with provided locator {@link By} and get text
+   * Waits visibility of {@link WebElement} with provided locator {@link By} and get text
    *
    * @param fieldLocator
    * @return element text by {@link WebElement#getText()}
@@ -218,7 +213,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait visibility of provided {@link WebElement} and get text
+   * Waits visibility of provided {@link WebElement} and get text
    *
    * @param webElement
    * @return element text by {@link WebElement#getText()}
@@ -228,7 +223,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait until text extracted by {@link WebElement#getAttribute(String)} be equivalent to provided
+   * Waits until text extracted by {@link WebElement#getAttribute(String)} be equivalent to provided
    * text
    *
    * @param fieldLocator
@@ -244,7 +239,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait until text extracted by {@link WebElement#getAttribute(String)} be equivalent to provided
+   * Waits until text extracted by {@link WebElement#getAttribute(String)} be equivalent to provided
    * text
    *
    * @param fieldLocator
@@ -255,7 +250,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait until text extracted by {@link WebElement#getAttribute(String)} be equivalent to provided
+   * Waits until text extracted by {@link WebElement#getAttribute(String)} be equivalent to provided
    * text
    *
    * @param webElement
@@ -270,7 +265,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait until text extracted by {@link WebElement#getAttribute(String)} be equivalent to provided
+   * Waits until text extracted by {@link WebElement#getAttribute(String)} be equivalent to provided
    * text
    *
    * @param webElement
@@ -281,7 +276,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait until text extracted by {@link WebElement#getText()} be equivalent to provided text
+   * Waits until text extracted by {@link WebElement#getText()} be equivalent to provided text
    *
    * @param fieldLocator
    * @param expectedText
@@ -295,7 +290,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait until text extracted by {@link WebElement#getText()} be equivalent to provided text
+   * Waits until text extracted by {@link WebElement#getText()} be equivalent to provided text
    *
    * @param fieldLocator
    * @param expectedText
@@ -305,7 +300,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait until text extracted by {@link WebElement#getText()} be equivalent to provided text
+   * Waits until text extracted by {@link WebElement#getText()} be equivalent to provided text
    *
    * @param webElement
    * @param expectedText
@@ -319,7 +314,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait until text extracted by {@link WebElement#getText()} be equivalent to provided text
+   * Waits until text extracted by {@link WebElement#getText()} be equivalent to provided text
    *
    * @param webElement
    * @param expectedText
@@ -329,7 +324,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait visibility of {@link WebElement} with provided locator {@link By} and click once on it by
+   * Waits visibility of {@link WebElement} with provided locator {@link By} and click once on it by
    * {@link WebElement#click()}
    *
    * @param elementLocator
@@ -340,7 +335,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait visibility of {@link WebElement} with provided locator {@link By} and click once on it by
+   * Waits visibility of {@link WebElement} with provided locator {@link By} and click once on it by
    * {@link WebElement#click()}
    *
    * @param elementLocator
@@ -350,7 +345,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait visibility of provided {@link WebElement} and click once on it by {@link
+   * Waits visibility of provided {@link WebElement} and click once on it by {@link
    * WebElement#click()}
    *
    * @param webElement
@@ -361,7 +356,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * wait visibility of provided {@link WebElement} and click once on it by {@link
+   * Waits visibility of provided {@link WebElement} and click once on it by {@link
    * WebElement#click()}
    *
    * @param webElement
@@ -371,7 +366,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * move cursor to {@link WebElement} with provided locator {@link By} and click twice on it by
+   * Moves cursor to {@link WebElement} with provided locator {@link By} and click twice on it by
    * {@link org.openqa.selenium.interactions.Action}
    *
    * @param elementLocator
@@ -383,7 +378,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * move cursor to provided {@link WebElement} and click twice on it by {@link
+   * Moves cursor to provided {@link WebElement} and click twice on it by {@link
    * org.openqa.selenium.interactions.Action}
    *
    * @param webElement
@@ -395,7 +390,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * move cursor to {@link WebElement} with provided locator {@link By} and click once on it by
+   * Moves cursor to {@link WebElement} with provided locator {@link By} and click once on it by
    * {@link org.openqa.selenium.interactions.Action}
    *
    * @param elementLocator
@@ -407,7 +402,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * move cursor to provided {@link WebElement} and click once on it by {@link
+   * Moves cursor to provided {@link WebElement} and click once on it by {@link
    * org.openqa.selenium.interactions.Action}
    *
    * @param webElement
@@ -419,8 +414,8 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * move cursor to WebElement with provided locator which attached to DOM but it does not mean that
-   * element is visible
+   * Moves cursor to WebElement with provided locator which attached to DOM but it does not mean
+   * that element is visible
    *
    * @param elementLocator {@link By}
    */
@@ -432,7 +427,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * move cursor to provided WebElement which attached to DOM but it does not mean that element is
+   * Moves cursor to provided WebElement which attached to DOM but it does not mean that element is
    * visible
    *
    * @param webElement
@@ -442,14 +437,16 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * check visibility state of element with provided locator
+   * Checks visibility state of {@link WebElement} with provided locator {@link By}
    *
    * @param locator
    * @return state of element visibility
    */
   public boolean elementIsVisible(By locator) {
     try {
-      attachingElementToDomWait.until(visibilityOfElementLocated(locator));
+      webDriverWaitFactory
+          .get(ATTACHING_ELEM_TO_DOM_SEC)
+          .until(visibilityOfElementLocated(locator));
       return true;
     } catch (TimeoutException ex) {
       return false;
@@ -457,14 +454,14 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * check visibility state of provided WebElement
+   * Checks visibility state of provided {@link WebElement}
    *
    * @param webElement
    * @return state of element visibility
    */
   public boolean elementIsVisible(WebElement webElement) {
     try {
-      attachingElementToDomWait.until(visibilityOf(webElement));
+      webDriverWaitFactory.get(ATTACHING_ELEM_TO_DOM_SEC).until(visibilityOf(webElement));
       return true;
     } catch (TimeoutException ex) {
       return false;
