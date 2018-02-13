@@ -102,6 +102,23 @@ public class ProjectPerspective extends AbstractPerspective {
   /** {@inheritDoc} */
   @Override
   public void go(@NotNull AcceptsOneWidget container) {
+    PartStack navigatorPanel = getPartStack(NAVIGATION);
+    PartStack editorPanel = getPartStack(EDITING);
+    PartStack toolPanel = getPartStack(TOOLING);
+    PartStack infoPanel = getPartStack(INFORMATION);
+
+    if (navigatorPanel != null) {
+      navigatorPanel.go(view.getNavigationPanel());
+    }
+    if (editorPanel != null) {
+      editorPanel.go(view.getEditorPanel());
+    }
+    if (toolPanel != null) {
+      toolPanel.go(view.getToolPanel());
+    }
+    if (infoPanel != null) {
+      infoPanel.go(view.getInformationPanel());
+    }
     container.setWidget(view);
   }
 }

@@ -11,10 +11,9 @@
 package org.eclipse.che.plugin.java.plain.client.wizard.selector;
 
 import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.MULTI;
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
 
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -89,40 +88,17 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
 
     handler.bind(tree);
 
-    cancelButton =
-        createButton(
-            locale.cancel(),
-            "select-path-cancel-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                hide();
-              }
-            });
+    cancelButton = addFooterButton(locale.cancel(), "select-path-cancel-button", event -> hide());
 
     acceptButton =
-        createPrimaryButton(
-            locale.ok(),
-            "select-path-ok-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                acceptButtonClicked();
-              }
-            });
-
-    addButtonToFooter(acceptButton);
-    addButtonToFooter(cancelButton);
+        addFooterButton(locale.ok(), "select-path-ok-button", event -> acceptButtonClicked(), true);
   }
 
   @Override
-  protected void onEnterClicked() {
-    if (isWidgetFocused(acceptButton)) {
+  public void onEnterPress(NativeEvent evt) {
+    if (isWidgetOrChildFocused(acceptButton)) {
       acceptButtonClicked();
-      return;
-    }
-
-    if (isWidgetFocused(cancelButton)) {
+    } else if (isWidgetOrChildFocused(cancelButton)) {
       hide();
     }
   }
@@ -133,9 +109,12 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
   }
 
   @Override
-  public void show() {
-    super.show(tree);
+  public void showDialog() {
+    show(tree);
+  }
 
+  @Override
+  protected void onShow() {
     if (!tree.getRootNodes().isEmpty()) {
       tree.getSelectionModel().select(tree.getRootNodes().get(0), false);
     }

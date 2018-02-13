@@ -24,6 +24,8 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -34,6 +36,7 @@ import org.testng.annotations.Test;
 public class Eclipse0121Test {
 
   private static final String PATH_TO_PACKAGE_PREFIX = "/src/main/java/org/eclipse/qa/examples/";
+  private static final Logger LOG = LoggerFactory.getLogger(Eclipse0121Test.class);
   private static final String PROJECT_NAME =
       NameGenerator.generate(Eclipse0121Test.class.getSimpleName(), 4);
 
@@ -64,10 +67,34 @@ public class Eclipse0121Test {
     try {
       editor.waitTabIsPresent("Collections");
     } catch (TimeoutException ex) {
+      logExternalLibraries();
+      logProjectTypeChecking();
+      logProjectLanguageChecking();
+
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7161", ex);
     }
 
     editor.waitSpecifiedValueForLineAndChar(14, 35);
+  }
+
+  private void logExternalLibraries() throws Exception {
+    testProjectServiceClient
+        .getExternalLibraries(ws.getId(), PROJECT_NAME)
+        .forEach(library -> LOG.info("project external library:  {}", library));
+  }
+
+  private void logProjectTypeChecking() throws Exception {
+    LOG.info(
+        "Project type of the {} project is \"maven\" - {}",
+        PROJECT_NAME,
+        testProjectServiceClient.checkProjectType(ws.getId(), PROJECT_NAME, "maven"));
+  }
+
+  private void logProjectLanguageChecking() throws Exception {
+    LOG.info(
+        "Project language of the {} project is \"java\" - {}",
+        PROJECT_NAME,
+        testProjectServiceClient.checkProjectLanguage(ws.getId(), PROJECT_NAME, "java"));
   }
 }

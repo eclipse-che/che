@@ -247,7 +247,7 @@ public class OrganizeImportsPresenterTest {
     resolveConflictsOperation.getValue().apply(null);
 
     verify(editor).setFocus();
-    verify(view).hide();
+    verify(view).close();
     verify(clientServerEventService).sendFileTrackingResumeEvent();
   }
 }

@@ -37,7 +37,7 @@ public class CreateFactoryWidget {
   private interface Locators {
 
     // TODO  replace the Xpathes on ids and use it
-    String CLOSE_BTN_ID = "gwt-debug-projectReadOnlyGitUrl-btnClose";
+    String CLOSE_BTN_ID = "projectReadOnlyGitUrl-btnClose";
     String FACTORY_FIELD_XPATH = "//div[text()='Factory']/parent::div//input[@readonly]";
     String FACTORY_NAME_FIELD = "//input[@placeholder='new-factory-name']";
     String CREATE_BTN =

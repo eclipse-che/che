@@ -175,7 +175,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
           .showFileContent(gitDirLocation, relPath, revision)
           .then(
               content -> {
-                view.setTitle(getTitleForFile(relPath.toString()));
+                view.setTitleCaption(getTitleForFile(relPath.toString()));
                 view.setColumnTitles(
                     locale.compareYourVersionTitle(), revision + locale.compareReadOnlyTitle());
                 view.show(content.getContent(), "", relPath.toString(), true);
@@ -200,7 +200,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
   private void showCompareBetweenRevisionsForFile(
       final Path gitDir, final Path relPath, final Status status) {
-    view.setTitle(getTitleForFile(relPath.toString()));
+    view.setTitleCaption(getTitleForFile(relPath.toString()));
 
     if (status == Status.ADDED) {
       service
@@ -261,17 +261,17 @@ public class ComparePresenter implements CompareView.ActionDelegate {
     final String newContent = view.getEditableContent();
 
     if (!isSaveNeeded(newContent)) {
-      view.hide();
+      view.close();
       return;
     }
 
     ConfirmCallback confirmCallback =
         () -> {
           saveContent(newContent);
-          view.hide();
+          view.close();
         };
 
-    CancelCallback cancelCallback = view::hide;
+    CancelCallback cancelCallback = view::close;
 
     dialogFactory
         .createConfirmDialog(
@@ -321,7 +321,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
             local -> {
               localContent = local;
               final String path = comparedFile.getLocation().removeFirstSegments(1).toString();
-              view.setTitle(getTitleForFile(path));
+              view.setTitleCaption(getTitleForFile(path));
               view.setColumnTitles(
                   locale.compareYourVersionTitle(), revision + locale.compareReadOnlyTitle());
               view.show(remoteContent, localContent, path, false);

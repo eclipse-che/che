@@ -10,12 +10,13 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SIMPLE;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.FileStructure;
@@ -26,7 +27,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class FileStructureByKeyboardTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("FileStructureKeyboard", 4);
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
   private static final String JAVA_FILE_NAME = "Company";
   private static final String INNER_CLASS_NAME = "CompanyHelper";
   private static final String INTERFACE_NAME = "Inter";
@@ -104,17 +105,14 @@ public class FileStructureByKeyboardTest {
   public void setUp() throws Exception {
     URL resource = getClass().getResource("/projects/prOutline");
     testProjectServiceClient.importProject(
-        workspace.getId(),
-        Paths.get(resource.toURI()),
-        PROJECT_NAME,
-        ProjectTemplates.MAVEN_SIMPLE);
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SIMPLE);
 
     ide.open(workspace);
   }
 
   @Test
   public void checkFileStructureByKeyboard() {
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.openItemByPath(PROJECT_NAME);
     expandTReeProjectAndOpenClass(JAVA_FILE_NAME);
 

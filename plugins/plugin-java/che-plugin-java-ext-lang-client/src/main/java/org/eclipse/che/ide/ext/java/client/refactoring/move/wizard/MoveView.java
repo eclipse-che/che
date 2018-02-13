@@ -35,7 +35,7 @@ interface MoveView extends View<MoveView.ActionDelegate> {
   void show(RefactorInfo refactorInfo);
 
   /** Hide Move panel. */
-  void hide();
+  void close();
 
   /** Sets empty text into error label */
   void clearErrorLabel();

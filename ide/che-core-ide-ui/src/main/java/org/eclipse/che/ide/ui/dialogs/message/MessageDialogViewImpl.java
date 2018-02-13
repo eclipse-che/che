@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ui.dialogs.message;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -43,7 +44,7 @@ public class MessageDialogViewImpl extends Window implements MessageDialogView {
     setWidget(widget);
 
     this.footer = footer;
-    getFooter().add(this.footer);
+    addFooterWidget(footer);
   }
 
   /** {@inheritDoc} */
@@ -66,7 +67,7 @@ public class MessageDialogViewImpl extends Window implements MessageDialogView {
   }
 
   @Override
-  protected void onEnterClicked() {
+  public void onEnterPress(NativeEvent evt) {
     delegate.accepted();
   }
 
@@ -75,6 +76,11 @@ public class MessageDialogViewImpl extends Window implements MessageDialogView {
   public void setContent(@NotNull IsWidget content) {
     this.content.clear();
     this.content.setWidget(content);
+  }
+
+  @Override
+  public void setTitleCaption(String title) {
+    setTitle(title);
   }
 
   /** {@inheritDoc} */

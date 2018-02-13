@@ -71,7 +71,7 @@ public class SelectNodePresenter implements SelectNodeView.ActionDelegate {
                           nodeFactory.newContainerNode(
                               container.get(), settingsProvider.getSettings())));
 
-                  view.show();
+                  view.showDialog();
                 }
               }
             });

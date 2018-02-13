@@ -60,7 +60,12 @@ public class DirectUrlFactoryWithRootFolder {
 
   @AfterClass
   public void tearDown() throws Exception {
-    testFactoryWithRootFolder.delete();
+    try {
+      testFactoryWithRootFolder.delete();
+    } catch (org.eclipse.che.api.core.NotFoundException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("https://github.com/eclipse/che/issues/8667");
+    }
   }
 
   @Test

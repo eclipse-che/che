@@ -32,7 +32,7 @@ public class GitReset {
     String HARD_RESET_LABEL = "gwt-debug-git-reset-hard-label";
     String SOFT_RESET_LABEL = "gwt-debug-git-reset-soft-label";
     String COMMENT = "//div[text()='%s']";
-    String COMMIT_ITEM = "//div[@id='gwt-debug-git-reset-window']//tbody[1]/tr[%s]";
+    String COMMIT_ITEM = "//div[@id='gwt-debug-git-reset-mainForm']//tbody[1]/tr[%s]";
   }
 
   @FindBy(id = Locators.RESET_TO_COMMIT_FORM)

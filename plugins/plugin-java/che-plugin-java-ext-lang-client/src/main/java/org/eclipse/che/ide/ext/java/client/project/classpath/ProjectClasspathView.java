@@ -26,10 +26,10 @@ import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.page
 public interface ProjectClasspathView extends View<ProjectClasspathView.ActionDelegate> {
 
   /** Show view. */
-  void show();
+  void showDialog();
 
   /** Close view. */
-  void hideWindow();
+  void close();
 
   /** Returns the component used for configurations display. */
   AcceptsOneWidget getConfigurationsContainer();

@@ -24,7 +24,7 @@ import org.eclipse.che.ide.api.mvp.View;
 public interface CommandsPaletteView extends View<CommandsPaletteView.ActionDelegate> {
 
   /** Show the view. */
-  void show();
+  void showDialog();
 
   /** Close the view. */
   void close();

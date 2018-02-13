@@ -254,6 +254,7 @@ public class OrionEditorWidget extends Composite
         OrionInputChangedEventOverlay.TYPE,
         (OrionEditorOverlay.EventHandler<OrionInputChangedEventOverlay>)
             event -> {
+              orionSettingsController.updateSettings();
               if (initializationHandler != null) {
                 initializationHandler.onContentInitialized();
               }
@@ -827,6 +828,10 @@ public class OrionEditorWidget extends Composite
     editorOverlay.getTextView().setTopIndex(line);
   }
 
+  public void destroy() {
+    editorOverlay.getTextView().destroy();
+  }
+
   /**
    * UI binder interface for this component.
    *
@@ -899,7 +904,6 @@ public class OrionEditorWidget extends Composite
           contentAssistWidgetFactory.create(OrionEditorWidget.this, cheContentAssistMode);
       gutter = initBreakpointRuler(moduleHolder);
 
-      orionSettingsController.updateSettings();
       widgetInitializedCallback.initialized(OrionEditorWidget.this);
     }
   }

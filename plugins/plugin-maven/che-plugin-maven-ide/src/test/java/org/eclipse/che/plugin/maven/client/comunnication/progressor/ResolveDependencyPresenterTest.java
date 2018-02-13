@@ -31,7 +31,7 @@ public class ResolveDependencyPresenterTest {
   public void viewShouldBeShowed() throws Exception {
     presenter.show();
 
-    verify(view).show();
+    verify(view).showDialog();
   }
 
   @Test
@@ -52,6 +52,6 @@ public class ResolveDependencyPresenterTest {
   public void viewShouldBeHidden() throws Exception {
     presenter.hide();
 
-    verify(view).hide();
+    verify(view).close();
   }
 }

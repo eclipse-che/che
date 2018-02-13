@@ -27,17 +27,17 @@ interface RenameView extends View<RenameView.ActionDelegate> {
   String getNewName();
 
   /** Show Rename panel with the special information. */
-  void show();
+  void showDialog();
 
   /** Hide Rename panel. */
-  void hide();
+  void close();
 
   /**
    * Set title of wizard.
    *
    * @param title name of wizard
    */
-  void setTitle(String title);
+  void setTitleCaption(String title);
 
   /**
    * Sets the renaming name.
