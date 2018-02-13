@@ -44,7 +44,7 @@ public class KeyBindings {
   }
 
   private interface Locators {
-    String KEY_BINDINGS_FORM = "//div[text()='Key Bindings']/ancestor::div[3]";
+    String KEY_BINDINGS_FORM = "//table[@title='Key Bindings']";
     String OK_BUTTON_ID = "keybindings-saveButton-btn";
     String ID_KEY_BY_KEY_BINDINGS = "gwt-debug-projectWizard";
     String SEARCH_INPUT = "//input[@placeholder='Search']";

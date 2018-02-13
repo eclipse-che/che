@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
-
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import java.util.List;
@@ -52,9 +50,7 @@ public class ServerRuntimeInfoTest {
 
   @Test
   public void testShouldCheckServerList() throws Exception {
-    projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab(LOADER_TIMEOUT_SEC);
-    loader.waitOnClosed();
+    ide.waitOpenedWorkspaceIsReadyToUse();
 
     consoles.clickOnPlusMenuButton();
     consoles.clickOnServerItemInContextMenu();

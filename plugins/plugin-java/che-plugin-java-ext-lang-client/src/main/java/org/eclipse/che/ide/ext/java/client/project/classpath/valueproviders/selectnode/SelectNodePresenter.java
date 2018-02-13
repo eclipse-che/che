@@ -83,7 +83,7 @@ public class SelectNodePresenter implements SelectNodeView.ActionDelegate {
       view.setStructure(nodes, interceptor);
     }
 
-    view.show();
+    view.showDialog();
   }
 
   /** {@inheritDoc} */

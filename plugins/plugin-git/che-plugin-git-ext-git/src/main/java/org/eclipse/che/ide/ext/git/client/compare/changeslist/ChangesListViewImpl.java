@@ -68,16 +68,12 @@ public class ChangesListViewImpl extends Window implements ChangesListView {
   }
 
   private void createButtons() {
-    Button btnClose =
-        createButton(
-            locale.buttonClose(), "git-compare-btn-close", event -> delegate.onCloseClicked());
+    addFooterButton(
+        locale.buttonClose(), "git-compare-btn-close", event -> delegate.onCloseClicked());
     btnCompare =
-        createButton(
+        addFooterButton(
             locale.buttonCompare(),
             "git-compare-btn-compare",
             event -> delegate.onCompareClicked());
-
-    addButtonToFooter(btnClose);
-    addButtonToFooter(btnCompare);
   }
 }

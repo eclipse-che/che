@@ -35,6 +35,7 @@ import org.eclipse.che.ide.api.workspace.event.MachineRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
 import org.eclipse.che.ide.api.workspace.model.EnvironmentImpl;
 import org.eclipse.che.ide.api.workspace.model.MachineConfigImpl;
 import org.eclipse.che.ide.api.workspace.model.MachineImpl;
@@ -56,6 +57,7 @@ public class WorkspaceLoadingTrackerImpl
         InstallerFailedEvent.Handler,
         WorkspaceStartingEvent.Handler,
         WorkspaceRunningEvent.Handler,
+        WorkspaceStoppingEvent.Handler,
         WorkspaceStoppedEvent.Handler,
         MachineStatusChangedEvent.Handler,
         WorkspaceLoadingTrackerView.ActionDelegate {
@@ -99,6 +101,7 @@ public class WorkspaceLoadingTrackerImpl
     eventBus.addHandler(WorkspaceStartingEvent.TYPE, this);
     eventBus.addHandler(WorkspaceRunningEvent.TYPE, this);
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
+    eventBus.addHandler(WorkspaceStoppingEvent.TYPE, this);
 
     eventBus.addHandler(
         MachineRunningEvent.TYPE,
@@ -259,6 +262,9 @@ public class WorkspaceLoadingTrackerImpl
 
     addMachines();
     showInstallers();
+
+    processesListView.setLoadMode();
+    processesListView.setLoadingMessage(localizationConstant.menuLoaderWaitingWorkspace());
   }
 
   @Override
@@ -286,7 +292,23 @@ public class WorkspaceLoadingTrackerImpl
   }
 
   @Override
+  public void onWorkspaceStopping(WorkspaceStoppingEvent event) {
+    isWorkspaceStarting = false;
+
+    showPanel();
+    view.showWorkspaceStopping();
+
+    processesListView.setLoadMode();
+    processesListView.setLoadingMessage(localizationConstant.menuLoaderWorkspaceStopping());
+    processesListView.setLoadingProgress(100);
+  }
+
+  @Override
   public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+    processesListView.setLoadMode();
+    processesListView.setLoadingMessage(localizationConstant.menuLoaderWorkspaceStopped());
+    processesListView.setLoadingProgress(0);
+
     if (isWorkspaceStarting) {
       view.showWorkspaceFailed(null);
       return;

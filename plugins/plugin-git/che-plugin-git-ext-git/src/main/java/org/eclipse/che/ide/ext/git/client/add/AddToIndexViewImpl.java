@@ -10,9 +10,10 @@
  */
 package org.eclipse.che.ide.ext.git.client.add;
 
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
+
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -66,39 +67,19 @@ public class AddToIndexViewImpl extends Window implements AddToIndexView {
     setWidget(ourUiBinder.createAndBindUi(this));
 
     btnAdd =
-        createButton(
-            locale.buttonAdd(),
-            "git-addToIndex-btnAdd",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onAddClicked();
-              }
-            });
-    btnAdd.addStyleName(Window.resources.windowCss().primaryButton());
-    addButtonToFooter(btnAdd);
+        addFooterButton(
+            locale.buttonAdd(), "git-addToIndex-btnAdd", event -> delegate.onAddClicked());
 
     btnCancel =
-        createButton(
-            locale.buttonCancel(),
-            "git-addToIndex-btnCancel",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-              }
-            });
-    addButtonToFooter(btnCancel);
+        addFooterButton(
+            locale.buttonCancel(), "git-addToIndex-btnCancel", event -> delegate.onCancelClicked());
   }
 
   @Override
-  protected void onEnterClicked() {
-    if (isWidgetFocused(btnAdd)) {
+  public void onEnterPress(NativeEvent evt) {
+    if (isWidgetOrChildFocused(btnAdd)) {
       delegate.onAddClicked();
-      return;
-    }
-
-    if (isWidgetFocused(btnCancel)) {
+    } else if (isWidgetOrChildFocused(btnCancel)) {
       delegate.onCancelClicked();
     }
   }

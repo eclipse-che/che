@@ -28,6 +28,7 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppingEvent;
 import org.eclipse.che.ide.context.AppContextImpl;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspaceServiceClient;
 
 /**
@@ -64,20 +65,24 @@ class WorkspaceStatusEventHandler {
         .getWorkspace(appContext.getWorkspaceId())
         .then(
             workspace -> {
-              // Update workspace model in AppContext before firing an event.
-              // Because AppContext always must return an actual workspace model.
-              ((AppContextImpl) appContext).setWorkspace(workspace);
+              try {
+                // Update workspace model in AppContext before firing an event.
+                // Because AppContext always must return an actual workspace model.
+                ((AppContextImpl) appContext).setWorkspace(workspace);
 
-              if (event.getStatus() == STARTING) {
-                eventBus.fireEvent(new WorkspaceStartingEvent());
-              } else if (event.getStatus() == RUNNING) {
-                eventBus.fireEvent(new WorkspaceRunningEvent());
-              } else if (event.getStatus() == STOPPING) {
-                eventBus.fireEvent(new WorkspaceStoppingEvent());
-              } else if (event.getStatus() == STOPPED) {
-                eventBus.fireEvent(
-                    new WorkspaceStoppedEvent(
-                        event.getError() != null, nullToEmpty(event.getError())));
+                if (event.getStatus() == STARTING) {
+                  eventBus.fireEvent(new WorkspaceStartingEvent());
+                } else if (event.getStatus() == RUNNING) {
+                  eventBus.fireEvent(new WorkspaceRunningEvent());
+                } else if (event.getStatus() == STOPPING) {
+                  eventBus.fireEvent(new WorkspaceStoppingEvent());
+                } else if (event.getStatus() == STOPPED) {
+                  eventBus.fireEvent(
+                      new WorkspaceStoppedEvent(
+                          event.getError() != null, nullToEmpty(event.getError())));
+                }
+              } catch (Exception e) {
+                Log.error(WorkspaceStatusEventHandler.class, "Error: " + e.getMessage(), e);
               }
             });
   }

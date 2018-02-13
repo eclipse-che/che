@@ -116,7 +116,7 @@ public class ChoiceDialogPresenter implements ChoiceDialog, ChoiceDialogView.Act
       final @Nullable @Assisted("thirdCallback") ConfirmCallback thirdChoiceCallback) {
     this.view = view;
     this.view.setContent(content);
-    this.view.setTitle(title);
+    this.view.setTitleCaption(title);
     this.view.setFirstChoiceLabel(firstChoiceLabel);
     this.view.setSecondChoiceLabel(secondChoiceLabel);
     this.view.setThirdChoiceLabel(thirdChoiceLabel);

@@ -253,12 +253,12 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameCompilationUnitTitle();
-    verify(view).setTitle(nullable(String.class));
+    verify(view).setTitleCaption(nullable(String.class));
     verify(view).setVisiblePatternsPanel(true);
     verify(view).setVisibleFullQualifiedNamePanel(true);
     verify(view).setVisibleSimilarlyVariablesPanel(true);
 
-    verify(view).show();
+    verify(view).showDialog();
   }
 
   @Test
@@ -280,12 +280,12 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renamePackageTitle();
-    verify(view).setTitle(nullable(String.class));
+    verify(view).setTitleCaption(nullable(String.class));
     verify(view).setVisiblePatternsPanel(true);
     verify(view).setVisibleFullQualifiedNamePanel(true);
     verify(view).setVisibleRenameSubpackagesPanel(true);
 
-    verify(view).show();
+    verify(view).showDialog();
   }
 
   @Test
@@ -307,12 +307,12 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameTypeTitle();
-    verify(view).setTitle(nullable(String.class));
+    verify(view).setTitleCaption(nullable(String.class));
     verify(view).setVisiblePatternsPanel(true);
     verify(view).setVisibleFullQualifiedNamePanel(true);
     verify(view).setVisibleSimilarlyVariablesPanel(true);
 
-    verify(view).show();
+    verify(view).showDialog();
   }
 
   @Test
@@ -334,10 +334,10 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameFieldTitle();
-    verify(view).setTitle(nullable(String.class));
+    verify(view).setTitleCaption(nullable(String.class));
     verify(view).setVisiblePatternsPanel(true);
 
-    verify(view).show();
+    verify(view).showDialog();
   }
 
   @Test
@@ -359,10 +359,10 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameEnumTitle();
-    verify(view).setTitle(nullable(String.class));
+    verify(view).setTitleCaption(nullable(String.class));
     verify(view).setVisiblePatternsPanel(true);
 
-    verify(view).show();
+    verify(view).showDialog();
   }
 
   @Test
@@ -384,9 +384,9 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameTypeVariableTitle();
-    verify(view).setTitle(nullable(String.class));
+    verify(view).setTitleCaption(nullable(String.class));
 
-    verify(view).show();
+    verify(view).showDialog();
   }
 
   @Test
@@ -408,10 +408,10 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameMethodTitle();
-    verify(view).setTitle(nullable(String.class));
+    verify(view).setTitleCaption(nullable(String.class));
     verify(view).setVisibleKeepOriginalPanel(true);
 
-    verify(view).show();
+    verify(view).showDialog();
   }
 
   @Test
@@ -432,9 +432,9 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameLocalVariableTitle();
-    verify(view).setTitle(nullable(String.class));
+    verify(view).setTitleCaption(nullable(String.class));
 
-    verify(view).show();
+    verify(view).showDialog();
   }
 
   @Test
@@ -454,9 +454,9 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameLocalVariableTitle();
-    verify(view).setTitle(nullable(String.class));
+    verify(view).setTitleCaption(nullable(String.class));
 
-    verify(view).show();
+    verify(view).showDialog();
   }
 
   @Test
@@ -481,9 +481,9 @@ public class RenamePresenterTest {
     verifyPreparingWizard();
 
     verify(locale).renameCompilationUnitTitle();
-    verify(view).setTitle(nullable(String.class));
+    verify(view).setTitleCaption(nullable(String.class));
 
-    verify(view).show();
+    verify(view).showDialog();
   }
 
   private void verifyPreparingWizard() {
@@ -592,7 +592,7 @@ public class RenamePresenterTest {
     refactoringStatusCaptor.getValue().apply(refactoringStatus);
 
     verify(refactoringStatus, times(2)).getSeverity();
-    verify(view).hide();
+    verify(view).close();
 
     verify(updateAfterRefactoringPromise).then(updateAfterRefactoringOperation.capture());
     updateAfterRefactoringOperation.getValue().apply(null);
@@ -634,7 +634,7 @@ public class RenamePresenterTest {
     verify(refactoringStatusPromise).then(refactoringStatusCaptor.capture());
     refactoringStatusCaptor.getValue().apply(refactoringStatus);
 
-    verify(view).hide();
+    verify(view).close();
     verify(updateAfterRefactoringPromise).then(updateAfterRefactoringOperation.capture());
     updateAfterRefactoringOperation.getValue().apply(null);
     verify(refactoringUpdater)
@@ -714,7 +714,7 @@ public class RenamePresenterTest {
     verify(changeCreationResultPromise).then(changeCreationResultCaptor.capture());
     changeCreationResultCaptor.getValue().apply(changeCreationResult);
 
-    verify(view).hide();
+    verify(view).close();
     verify(previewPresenter).show(SESSION_ID, refactorInfo);
     verify(previewPresenter).setTitle(nullable(String.class));
   }

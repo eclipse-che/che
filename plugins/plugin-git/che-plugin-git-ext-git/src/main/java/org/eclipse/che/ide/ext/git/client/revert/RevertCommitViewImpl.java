@@ -97,13 +97,12 @@ public class RevertCommitViewImpl extends Window implements RevertCommitView {
 
   @Override
   public void close() {
-    onClose();
+    hide();
   }
 
   @Override
-  protected void onClose() {
+  protected void onHide() {
     selectionModel.clear();
-    super.onClose();
   }
 
   @Override
@@ -162,24 +161,13 @@ public class RevertCommitViewImpl extends Window implements RevertCommitView {
   }
 
   private void createButtons() {
-    btnRevert =
-        createButton(
-            locale.buttonRevert(),
-            "git-revert",
-            event -> {
-              delegate.onRevertClicked();
-            });
-    btnRevert.addStyleName(resources.windowCss().primaryButton());
-    addButtonToFooter(btnRevert);
-
     btnCancel =
-        createButton(
-            locale.buttonCancel(),
-            "git-revert-cancel",
-            event -> {
-              delegate.onCancelClicked();
-            });
-    addButtonToFooter(btnCancel);
+        addFooterButton(
+            locale.buttonCancel(), "git-revert-cancel", event -> delegate.onCancelClicked());
+
+    btnRevert =
+        addFooterButton(
+            locale.buttonRevert(), "git-revert", event -> delegate.onRevertClicked(), true);
   }
 
   @UiHandler("revisionsPanel")

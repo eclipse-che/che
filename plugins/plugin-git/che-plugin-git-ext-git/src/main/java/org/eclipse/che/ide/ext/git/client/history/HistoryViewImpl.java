@@ -12,10 +12,7 @@ package org.eclipse.che.ide.ext.git.client.history;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -26,7 +23,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -118,13 +114,12 @@ public class HistoryViewImpl extends Window implements HistoryView {
 
   @Override
   public void close() {
-    onClose();
+    hide();
   }
 
   @Override
-  protected void onClose() {
+  protected void onHide() {
     selectionModel.clear();
-    super.onClose();
   }
 
   @Override
@@ -171,54 +166,31 @@ public class HistoryViewImpl extends Window implements HistoryView {
     revisions.addColumn(authorColumn, locale.viewCompareRevisionTableAuthorTitle());
     revisions.addColumn(titleColumn, locale.viewCompareRevisionTableTitleTitle());
 
-    selectionModel = new SingleSelectionModel<Revision>();
+    selectionModel = new SingleSelectionModel<>();
     selectionModel.addSelectionChangeHandler(
-        new SelectionChangeEvent.Handler() {
-          @Override
-          public void onSelectionChange(SelectionChangeEvent event) {
-            description.setText(selectionModel.getSelectedObject().getMessage());
-            delegate.onRevisionSelected(selectionModel.getSelectedObject());
-          }
+        event -> {
+          description.setText(selectionModel.getSelectedObject().getMessage());
+          delegate.onRevisionSelected(selectionModel.getSelectedObject());
         });
     revisions.setSelectionModel(selectionModel);
 
     revisions.addDomHandler(
-        new DoubleClickHandler() {
-          @Override
-          public void onDoubleClick(DoubleClickEvent event) {
-            delegate.onRevisionDoubleClicked();
-          }
-        },
-        DoubleClickEvent.getType());
+        event -> delegate.onRevisionDoubleClicked(), DoubleClickEvent.getType());
 
     this.revisionsPanel.add(revisions);
   }
 
   private void createButtons() {
+    btnClose =
+        addFooterButton(
+            locale.buttonClose(), "git-history-close", event -> delegate.onCloseClicked());
+
     btnCompare =
-        createButton(
+        addFooterButton(
             locale.buttonCompare(),
             "git-history-compare",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCompareClicked();
-              }
-            });
-    btnCompare.addStyleName(resources.windowCss().primaryButton());
-    addButtonToFooter(btnCompare);
-
-    btnClose =
-        createButton(
-            locale.buttonClose(),
-            "git-history-close",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCloseClicked();
-              }
-            });
-    addButtonToFooter(btnClose);
+            event -> delegate.onCompareClicked(),
+            true);
   }
 
   @UiHandler("revisionsPanel")

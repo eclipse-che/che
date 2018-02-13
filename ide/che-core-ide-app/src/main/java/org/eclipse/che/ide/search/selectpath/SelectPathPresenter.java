@@ -64,7 +64,7 @@ public class SelectPathPresenter implements SelectPathView.ActionDelegate {
     }
 
     view.setStructure(rootNodes);
-    view.show();
+    view.showDialog();
   }
 
   /** {@inheritDoc} */

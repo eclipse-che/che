@@ -39,8 +39,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.Region;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Member;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
-import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,8 +56,6 @@ public class FileStructurePresenterTest {
   @Mock private JavaNavigationService javaNavigationService;
   @Mock private AppContext context;
   @Mock private EditorAgent editorAgent;
-  @Mock private MessageLoader loader;
-  @Mock private LoaderFactory loaderFactory;
 
   @Mock private TextEditor editor;
   @Mock private EditorInput editorInput;
@@ -102,7 +98,6 @@ public class FileStructurePresenterTest {
         .thenReturn(promise);
     when(promise.catchError(org.mockito.ArgumentMatchers.<Operation<PromiseError>>anyObject()))
         .thenReturn(promise);
-    when(loaderFactory.newLoader()).thenReturn(loader);
 
     presenter = new FileStructurePresenter(view, javaNavigationService, context, editorAgent);
   }
@@ -111,14 +106,11 @@ public class FileStructurePresenterTest {
   public void fileStructureShouldBeShow() throws Exception {
     presenter.show(editor);
 
-    verify(loader).show();
-    verify(view).setTitle("A.java");
-
     verify(promise).then(operationSuccessCapture.capture());
     operationSuccessCapture.getValue().apply(compilationUnit);
 
     verify(view).setStructure(compilationUnit, false);
-    verify(loader).hide();
+    verify(view).setTitleCaption("A.java");
   }
 
   @Test
@@ -131,7 +123,6 @@ public class FileStructurePresenterTest {
 
     verify(view, never()).setStructure(compilationUnit, false);
     verify(promiseError).getMessage();
-    verify(loader).hide();
   }
 
   @Test

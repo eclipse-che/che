@@ -10,58 +10,58 @@
  */
 package org.eclipse.che.ide.ui.window;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.Focusable;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import elemental.js.dom.JsElement;
+import com.google.gwt.user.client.ui.impl.FocusImpl;
 import javax.inject.Inject;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.ui.button.ButtonAlignment;
-import org.vectomatic.dom.svg.ui.SVGResource;
+import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
 
 /**
- * A popup that automatically centers its content, even if the dimensions of the content change. The
- * centering is done in CSS, so performance is very good. A semi-transparent "glass" panel appears
- * behind the popup. The glass is not optional due to the way {@link Window} is implemented.
+ * Base class to create a window based panel with user defined widgets. In general, window contains
+ * of three parts: frame title, frame content and frame bottom bar.
  *
- * <p>
+ * <p>Frame title contains a visible title of the window. To setup a custom title method {@link
+ * #setTitle(String)} has to be called. The best place to call this method is the constructor of
+ * implemented class.
  *
- * <p>{@link Window} animates into and out of view using the shrink in/expand out animation.
+ * <p>Frame content consists of user defined widget represented by {@link Widget}. Window adopts its
+ * own size by user defined widget. To place user defined widget into window, method {@link
+ * #setWidget(Widget)} has to be called.
+ *
+ * <p>Frame bottom bar may include that resides below the content area and includes controls for
+ * affecting the content of the window. Usually bar contains buttons to accept or perform specific
+ * actions. To add a predefined type of control, e.g. button, method {@link #addFooterButton(String,
+ * String, ClickHandler, boolean, ButtonAlignment)} should be called. To place custom widget into
+ * button bar, method {@link #addFooterWidget(Widget)} should be called. If button bar doesn't
+ * contain any control, it will be hidden automatically.
+ *
+ * <p>By default window listens to the keyPress event to be able to close itself when user press
+ * Escape key. To disable it method {@link #setCloseOnEscape(boolean)} should be called.
+ *
+ * @since 6.0.0
+ * @author Vlad Zhukovskyi
  */
 public abstract class Window implements IsWidget {
 
-  protected static final Resources resources = GWT.create(Resources.class);
-
-  private boolean blocked = false;
-
-  private boolean hideOnEscapeEnabled = true;
-
-  private boolean isShowing;
-  private View view;
+  private final WindowView view;
+  private final WindowManager windowManager;
   private KeyBindingAgent keyBinding;
 
-  protected Window() {
-    this(true);
-  }
+  public Window() {
+    windowManager = WindowManager.getInstance();
 
-  protected Window(boolean showBottomPanel) {
-    view = new View(resources, showBottomPanel);
+    view = new CompositeWindowView();
+    view.addBrowserEventHandler(this::onBrowserEvent);
+    view.addWindowCloseEventHandler(this::onWindowClose);
+    view.addKeyboardNavigationHandler(new ViewKeyboardNavigationHandler());
   }
 
   @Inject
@@ -69,364 +69,357 @@ public abstract class Window implements IsWidget {
     this.keyBinding = keyBinding;
   }
 
-  public Widget getWidget() {
-    return view.getContent();
-  }
+  // Configuration section
 
-  public void setWidget(Widget widget) {
-    view.addContentWidget(widget);
-    handleViewEvents();
+  /**
+   * Set the title to the current window.
+   *
+   * @param title window title
+   */
+  protected final void setTitle(String title) {
+    view.setTitle(title);
   }
 
   /**
-   * ensureDebugId on the current window container. ensureDebugId id + "-headerLabel" on the window
-   * control bar title
+   * Set user defined widget to show it in the window.
    *
-   * @see UIObject#ensureDebugId(String)
+   * @param widget widget to show
    */
-  public void ensureDebugId(String id) {
-    view.contentContainer.ensureDebugId(id);
-    view.headerLabel.ensureDebugId(id + "-headerLabel");
+  protected final void setWidget(Widget widget) {
+    view.setContentWidget(widget);
   }
 
-  public void hideCrossButton() {
-    view.closeButton.setVisible(false);
+  /**
+   * Set the debug ID on the window implementation. Window implementation may use debug ID in other
+   * internal components such as buttons, content container, etc.
+   *
+   * @param id debug id
+   */
+  protected final void ensureDebugId(String id) {
+    view.setDebugId(id);
   }
 
-  /** Blocks the window, prevents it closing. */
-  public void setBlocked(boolean blocked) {
-    this.blocked = blocked;
-
-    if (blocked) {
-      view.closeButton.getElement().getStyle().setProperty("opacity", "0.3");
-      view.closeButton.getElement().setAttribute("blocked", "");
-    } else {
-      view.closeButton.getElement().getStyle().clearProperty("opacity");
-      view.closeButton.getElement().removeAttribute("blocked");
-    }
+  /**
+   * Allow window listen to Escape key press to close the window. By default window is allowed to be
+   * closed by Escape key.
+   *
+   * @param closeOnEscape {@code true} if window is allowed to be closed by Escape key press
+   */
+  protected final void setCloseOnEscape(boolean closeOnEscape) {
+    view.setCloseOnEscape(closeOnEscape);
   }
 
-  /** Hides the {@link Window} popup. The popup will animate out of view. */
-  public void hide() {
-    if (blocked) {
-      return;
-    }
+  /**
+   * Provide property to set up current window as modal. By default, window is modal.
+   *
+   * @param modal {@code true} if window has to be modal
+   */
+  protected final void setModal(boolean modal) {
+    view.setModal(modal);
+  }
 
-    if (!isShowing) {
-      return;
-    }
+  /**
+   * Create a button in button bar. Button can be a primary. Primary flag set the different style
+   * for the button to mark it from other ones.
+   *
+   * @param text button caption
+   * @param debugId debug identifier
+   * @param clickHandler handler to process click operation
+   * @param primary mark button with different style
+   * @param alignment button alignment
+   * @return created instance of {@link Button}
+   */
+  protected final Button addFooterButton(
+      String text,
+      String debugId,
+      ClickHandler clickHandler,
+      boolean primary,
+      ButtonAlignment alignment) {
+    return view.addButtonBarControl(text, debugId, clickHandler, primary, alignment);
+  }
+
+  /**
+   * Create a button in button bar. Button can be a primary. Primary flag set the different style
+   * for the button to mark it from other ones.
+   *
+   * @param text button caption
+   * @param debugId debug identifier
+   * @param clickHandler handler to process click operation
+   * @param primary mark button with different style
+   * @return created instance of {@link Button}
+   */
+  protected final Button addFooterButton(
+      String text, String debugId, ClickHandler clickHandler, boolean primary) {
+    return addFooterButton(text, debugId, clickHandler, primary, ButtonAlignment.RIGHT);
+  }
+
+  /**
+   * Create a button in button bar.
+   *
+   * @param text button caption
+   * @param debugId debug identifier
+   * @param clickHandler handler to process click operation
+   * @param alignment button alignment
+   * @return created instance of {@link Button}
+   */
+  protected final Button addFooterButton(
+      String text, String debugId, ClickHandler clickHandler, ButtonAlignment alignment) {
+    return addFooterButton(text, debugId, clickHandler, false, alignment);
+  }
+
+  /**
+   * Create a button in button bar.
+   *
+   * @param text button caption
+   * @param debugId debug identifier
+   * @param clickHandler handler to process click operation
+   * @return created instance of {@link Button}
+   */
+  protected final Button addFooterButton(String text, String debugId, ClickHandler clickHandler) {
+    return addFooterButton(text, debugId, clickHandler, false, ButtonAlignment.RIGHT);
+  }
+
+  /**
+   * Place the user defined widget into button bar. Widget may represent different type of control,
+   * e.g. checkbox, help indicator, etc.
+   *
+   * <p>User widget places into the left part of the button bar.
+   *
+   * @param widget user defined widget
+   */
+  protected final void addFooterWidget(Widget widget) {
+    view.addButtonBarWidget(widget);
+  }
+
+  /**
+   * Place the user defined widget into button bar. Widget may represent different type of control,
+   * e.g. checkbox, help indicator, etc.
+   *
+   * <p>User widget places into the left part of the button bar.
+   *
+   * @param widget user defined widget
+   */
+  protected final void addFooterWidget(IsWidget widget) {
+    addFooterWidget(widget.asWidget());
+  }
+
+  // Window control
+
+  /**
+   * Remove the current window from the DOM and hide it. After window hide, method {@link #onHide()}
+   * is called to allow user to perform some actions after hide.
+   */
+  public final void hide() {
+    view.detach();
+    windowManager.unregister(this);
 
     if (keyBinding != null) {
       keyBinding.enable();
     }
 
-    isShowing = false;
-
-    // Animate the popup out of existence.
-    view.setShowing(false);
-
-    // Remove the popup when the animation completes.
-    new Timer() {
-      @Override
-      public void run() {
-        if (blocked) {
-          return;
-        }
-
-        // The popup may have been shown before this timer executes.
-        if (!isShowing) {
-          view.removeFromParent();
-          Style style = view.contentContainer.getElement().getStyle();
-          style.clearPosition();
-          style.clearLeft();
-          style.clearTop();
-        }
-      }
-    }.schedule(view.getAnimationDuration());
+    onHide();
   }
 
-  /**
-   * Checks if the {@link Window} is showing or animating into view.
-   *
-   * @return true if showing, false if hidden
-   */
-  public boolean isShowing() {
-    return isShowing;
-  }
-
-  /**
-   * Sets whether or not the popup should hide when escape is pressed. The default behavior is to
-   * ignore the escape key.
-   *
-   * @param isEnabled true to close on escape, false not to
-   */
-  public void setHideOnEscapeEnabled(boolean isEnabled) {
-    this.hideOnEscapeEnabled = isEnabled;
-  }
-
-  protected Button createButton(String title, String debugId, ClickHandler clickHandler) {
-    return createButton(title, debugId, clickHandler, ButtonAlignment.RIGHT);
-  }
-
-  protected Button createButton(
-      String title, String debugId, ClickHandler clickHandler, ButtonAlignment alignment) {
-    Button button = new Button();
-    button.setText(title);
-    button.ensureDebugId(debugId);
-    button.getElement().setId(debugId);
-    button.addStyleName(resources.windowCss().button());
-    addButtonAlignment(button, alignment);
-    button.addClickHandler(clickHandler);
-    // set default tab index
-    button.setTabIndex(0);
-    return button;
-  }
-
-  protected Button createPrimaryButton(String title, String debugId, ClickHandler clickHandler) {
-    return createPrimaryButton(title, debugId, clickHandler, ButtonAlignment.RIGHT);
-  }
-
-  protected Button createPrimaryButton(
-      String title, String debugId, ClickHandler clickHandler, ButtonAlignment alignment) {
-    Button button = createButton(title, debugId, clickHandler);
-    button.addStyleName(resources.windowCss().primaryButton());
-    addButtonAlignment(button, alignment);
-    // set default tab index
-    button.setTabIndex(0);
-    return button;
-  }
-
-  protected void addButtonToFooter(Button button) {
-    button.addStyleName(resources.windowCss().alignBtn());
-    getFooter().add(button);
-  }
-
-  protected void onEnterClicked() {}
-
-  /** Set focus to current window. */
-  public void focus() {
-    view.setFocus();
-  }
-
-  /** Sets focus on the last focused child element if such exists. */
-  public void focusLastFocusedElement() {
-    view.focusLastFocusedElement();
-  }
-
-  /** Returns {@code true} if widget is in the focus and {@code false} - otherwise. */
-  public boolean isWidgetFocused(FocusWidget widget) {
-    return view.isElementFocused(widget.getElement());
-  }
-
-  /** See {@link #show(Focusable)}. */
-  public void show() {
+  /** Display current window on the viewport. */
+  public final void show() {
     show(null);
   }
 
   /**
-   * Displays the {@link Window} popup. The popup will animate into view.
+   * Display current window on the viewport and set up focus on given {@code focusOn} widget.
    *
-   * @param selectAndFocusElement an {@link Focusable} to select and focus on when the panel is
-   *     shown. If null, no element will be given focus
+   * @param focusOn widget to focus
    */
-  public void show(@Nullable final Focusable selectAndFocusElement) {
-    setBlocked(false);
-
-    if (isShowing) {
-      setFocusOn(
-          selectAndFocusElement); // the window is displayed but focus for the element may be lost
-      return;
-    }
+  public final void show(Widget focusOn) {
+    windowManager.register(this);
+    view.attach();
+    view.setFocusWidget(focusOn);
 
     if (keyBinding != null) {
       keyBinding.disable();
     }
 
-    isShowing = true;
+    onShow();
 
-    // Attach the popup to the body.
-    final JsElement popup = view.popup.getElement().cast();
-    if (popup.getParentElement() == null) {
-      // Hide the popup so it can enter its initial state without flickering.
-
-      popup.getStyle().setVisibility("hidden");
-      RootLayoutPanel.get().add(view);
-    }
-
-    // The popup may have been hidden before this timer executes.
-    if (isShowing) {
-      popup.getStyle().removeProperty("visibility");
-      // Start the animation after the element is attached.
-      Scheduler.get()
-          .scheduleDeferred(
-              new ScheduledCommand() {
-                @Override
-                public void execute() {
-                  // The popup may have been hidden before this timer executes.
-                  view.setShowing(true);
-                  setFocusOn(selectAndFocusElement);
-                }
-              });
-    }
-  }
-
-  private void addButtonAlignment(Button button, ButtonAlignment alignment) {
-    switch (alignment) {
-      case LEFT:
-        button.addStyleName(resources.windowCss().buttonAlignLeft());
-        break;
-      case RIGHT:
-      default:
-        button.addStyleName(resources.windowCss().buttonAlignRight());
-    }
+    windowManager.bringToFront(this);
   }
 
   /**
-   * Sets focus on the given element. If {@code elementToFocus} is {@code null}, no element will be
-   * given focus
+   * Set focus to current window. Current method is not intended to be called by user. Service
+   * method used by {@link WindowManager} to control the focus between window switch.
    */
-  private void setFocusOn(@Nullable Focusable elementToFocus) {
-    if (elementToFocus != null) {
-      elementToFocus.setFocus(true);
-    }
+  protected final void focus() {
+    Scheduler.get().scheduleFinally(this::doFocus);
   }
 
-  private void handleViewEvents() {
-    view.setDelegate(
-        new ViewEvents() {
-          @Override
-          public void onEscapeKey() {
-            Window.this.onEscapeKey();
-          }
+  /** Perform user actions after widget show. */
+  protected void onShow() {}
 
-          @Override
-          public void onClose() {
-            if (!blocked) {
-              Window.this.onClose();
-            }
-          }
+  /** Perform user actions after widget hide. */
+  protected void onHide() {}
 
-          @Override
-          public void onEnterKey() {
-            onEnterClicked();
-          }
-
-          @Override
-          public void onKeyDownEvent(KeyDownEvent event) {
-            Window.this.onKeyDownEvent(event);
-          }
-
-          @Override
-          public void onKeyPressEvent(KeyPressEvent event) {
-            Window.this.onKeyPressEvent(event);
-          }
-        });
-  }
-
-  /** @see ViewEvents#onEscapeKey() */
-  protected void onEscapeKey() {
-    if (hideOnEscapeEnabled && !blocked) {
-      Window.this.onClose();
-    }
-  }
-
-  /** @see ViewEvents#onKeyDownEvent(KeyDownEvent) */
-  protected void onKeyDownEvent(KeyDownEvent event) {}
-
-  /** @see ViewEvents#onKeyPressEvent(KeyPressEvent) */
-  protected void onKeyPressEvent(KeyPressEvent event) {}
-
-  /** Is called when user closes the Window. */
-  protected void onClose() {
-    hide();
-  }
+  // Service methods
 
   @Override
   public Widget asWidget() {
-    return com.google.gwt.user.client.ui.HTML.wrap(view.getElement());
+    return view.getContentWidget();
   }
 
-  public void setTitle(String title) {
-    view.headerLabel.setText(title);
+  private void doFocus() {
+    FocusImpl.getFocusImplForWidget().focus(getFocusEl());
   }
 
-  public HTMLPanel getFooter() {
-    return view.footer;
+  private Element getFocusEl() {
+    Widget focusWidget = view.getFocusWidget();
+
+    return focusWidget.getElement();
   }
 
-  /** The resources used by this UI component. */
-  public interface Resources extends ClientBundle {
-    @Source({
-      "org/eclipse/che/ide/ui/constants.css",
-      "Window.css",
-      "org/eclipse/che/ide/api/ui/style.css"
-    })
-    Css windowCss();
-
-    @Source("close-icon.svg")
-    SVGResource closeButton();
+  private void onBrowserEvent(Event event) {
+    switch (event.getTypeInt()) {
+      case Event.ONMOUSEDOWN:
+        Window activeWindow = windowManager.getActive();
+        if (activeWindow != null && activeWindow != this) {
+          windowManager.bringToFront(this);
+        }
+        break;
+    }
   }
 
-  /** The Css Style names used by this panel. */
-  public interface Css extends CssResource {
-    /** Returns duration of the popup animation in milliseconds. */
-    int animationDuration();
-
-    String content();
-
-    String contentVisible();
-
-    String center();
-
-    String glassVisible();
-
-    String popup();
-
-    String positioner();
-
-    String header();
-
-    String headerTitleWrapper();
-
-    String headerTitleLabel();
-
-    String footer();
-
-    String separator();
-
-    String alignBtn();
-
-    String closeButton();
-
-    String primaryButton();
-
-    String button();
-
-    String buttonAlignLeft();
-
-    String buttonAlignRight();
-
-    String image();
+  private void onWindowClose() {
+    hide();
   }
 
-  /** The events sources by the View. */
-  public interface ViewEvents {
-    /** Is called when ESCAPE key is pressed. */
-    void onEscapeKey();
+  protected final void setZIndex(int zIndex) {
+    view.setZIndex(zIndex);
+  }
 
-    void onClose();
+  protected final void setActive(boolean active) {
+    view.setActive(active);
+  }
 
-    /** Is called when ENTER key is pressed. */
-    void onEnterKey();
+  public void onAltPress(NativeEvent evt) {}
 
-    /**
-     * Is called when {@link KeyDownEvent} is fired except events from ESCAPE and ENTER keys. In
-     * those cases {@link ViewEvents#onEscapeKey()} or {@link ViewEvents#onEnterKey()} will be
-     * fired.
-     */
-    void onKeyDownEvent(KeyDownEvent event);
+  public void onBackspacePress(NativeEvent evt) {}
 
-    /** Is called when {@link KeyPressEvent} is fired. */
-    void onKeyPressEvent(KeyPressEvent event);
+  public void onControlPress(NativeEvent evt) {}
+
+  public void onDeletePress(NativeEvent evt) {}
+
+  public void onDownPress(NativeEvent evt) {}
+
+  public void onEndPress(NativeEvent evt) {}
+
+  public void onEnterPress(NativeEvent evt) {}
+
+  public void onEscPress(NativeEvent evt) {}
+
+  public void onHomePress(NativeEvent evt) {}
+
+  public void onKeyPress(NativeEvent evt) {}
+
+  public void onLeftPress(NativeEvent evt) {}
+
+  public void onPageDownPress(NativeEvent evt) {}
+
+  public void onPageUpPress(NativeEvent evt) {}
+
+  public void onRightPress(NativeEvent evt) {}
+
+  public void onShiftPress(NativeEvent evt) {}
+
+  public void onTabPress(NativeEvent evt) {}
+
+  public void onUpPress(NativeEvent evt) {}
+
+  private class ViewKeyboardNavigationHandler extends KeyboardNavigationHandler {
+    @Override
+    public void onAlt(NativeEvent evt) {
+      onAltPress(evt);
+    }
+
+    @Override
+    public void onBackspace(NativeEvent evt) {
+      onBackspacePress(evt);
+    }
+
+    @Override
+    public void onControl(NativeEvent evt) {
+      onControlPress(evt);
+    }
+
+    @Override
+    public void onDelete(NativeEvent evt) {
+      onDeletePress(evt);
+    }
+
+    @Override
+    public void onDown(NativeEvent evt) {
+      onDownPress(evt);
+    }
+
+    @Override
+    public void onEnd(NativeEvent evt) {
+      onEndPress(evt);
+    }
+
+    @Override
+    public void onEnter(NativeEvent evt) {
+      onEnterPress(evt);
+    }
+
+    @Override
+    public void onEsc(NativeEvent evt) {
+      if (view.isCloseOnEscape()) {
+        hide();
+      }
+
+      onEscPress(evt);
+    }
+
+    @Override
+    public void onHome(NativeEvent evt) {
+      onHomePress(evt);
+    }
+
+    @Override
+    public void onKeyPress(NativeEvent evt) {
+      Window.this.onKeyPress(evt);
+    }
+
+    @Override
+    public void onLeft(NativeEvent evt) {
+      onLeftPress(evt);
+    }
+
+    @Override
+    public void onPageDown(NativeEvent evt) {
+      onPageDownPress(evt);
+    }
+
+    @Override
+    public void onPageUp(NativeEvent evt) {
+      onPageUpPress(evt);
+    }
+
+    @Override
+    public void onRight(NativeEvent evt) {
+      onRightPress(evt);
+    }
+
+    @Override
+    public void onShift(NativeEvent evt) {
+      onShiftPress(evt);
+    }
+
+    @Override
+    public void onTab(NativeEvent evt) {
+      onTabPress(evt);
+    }
+
+    @Override
+    public void onUp(NativeEvent evt) {
+      onUpPress(evt);
+    }
   }
 }

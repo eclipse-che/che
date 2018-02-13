@@ -22,7 +22,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.pageobject.Loader;
+import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -48,7 +48,6 @@ public class CreateAndDeleteProjectsTest {
   @Inject private NavigationBar navigationBar;
   @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
-  @Inject private Loader loader;
   @Inject private ProjectExplorer explorer;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
@@ -56,6 +55,7 @@ public class CreateAndDeleteProjectsTest {
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private MavenPluginStatusBar mavenPluginStatusBar;
   @Inject private Workspaces workspaces;
+  @Inject private Ide ide;
 
   @BeforeClass
   public void setUp() {
@@ -84,8 +84,8 @@ public class CreateAndDeleteProjectsTest {
 
     String dashboardWindow = seleniumWebDriver.getWindowHandle();
     seleniumWebDriver.switchFromDashboardIframeToIde();
-    loader.waitOnClosed();
-    explorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
+
     explorer.waitItem(CONSOLE_JAVA_SIMPLE);
     notificationsPopupPanel.waitPopupPanelsAreClosed();
     mavenPluginStatusBar.waitClosingInfoPanel();

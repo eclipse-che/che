@@ -26,7 +26,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @Singleton
 public class OrganizeImports {
   private interface Locators {
-    String ORGANIZE_IMPORTS_DIALOG = "//div[text()='Organize Imports']/ancestor::div[3]";
+    String ORGANIZE_IMPORTS_DIALOG = "//table[@title='Organize Imports']";
     String FINISH_BUTTON = "imports-finish-button";
     String BACK_BUTTON = "imports-back-button";
     String IMPORT_FIELD = "//div[text()='%s']";

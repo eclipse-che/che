@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.E
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_PETCLINIC;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_RIGHT;
@@ -30,7 +31,6 @@ import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -74,11 +74,10 @@ public class FindTextFeatureTest {
   public void setUp() throws Exception {
     URL resource = getClass().getResource("/projects/java-multimodule");
     testProjectServiceClient.importProject(
-        workspace.getId(),
-        Paths.get(resource.toURI()),
-        PROJECT_NAME,
-        ProjectTemplates.MAVEN_SPRING);
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
+
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @Test

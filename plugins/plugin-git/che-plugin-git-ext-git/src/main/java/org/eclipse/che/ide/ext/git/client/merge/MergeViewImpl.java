@@ -14,10 +14,10 @@ import static org.eclipse.che.ide.ext.git.client.merge.MergePresenter.LOCAL_BRAN
 import static org.eclipse.che.ide.ext.git.client.merge.MergePresenter.REMOTE_BRANCHES_TITLE;
 import static org.eclipse.che.ide.ext.git.client.merge.Reference.RefType.LOCAL_BRANCH;
 import static org.eclipse.che.ide.ext.git.client.merge.Reference.RefType.REMOTE_BRANCH;
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -156,42 +156,20 @@ public class MergeViewImpl extends Window implements MergeView {
     branches.add(remoteBranch);
     root.setBranches(branches);
 
-    btnMerge =
-        createButton(
-            locale.buttonMerge(),
-            "git-merge-merge",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onMergeClicked();
-              }
-            });
-    btnMerge.addStyleName(super.resources.windowCss().primaryButton());
-    addButtonToFooter(btnMerge);
-
     btnCancel =
-        createButton(
-            locale.buttonCancel(),
-            "git-merge-cancel",
-            new ClickHandler() {
+        addFooterButton(
+            locale.buttonCancel(), "git-merge-cancel", event -> delegate.onCancelClicked());
 
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-              }
-            });
-    addButtonToFooter(btnCancel);
+    btnMerge =
+        addFooterButton(
+            locale.buttonMerge(), "git-merge-merge", event -> delegate.onMergeClicked(), true);
   }
 
   @Override
-  protected void onEnterClicked() {
-    if (isWidgetFocused(btnMerge)) {
+  public void onEnterPress(NativeEvent evt) {
+    if (isWidgetOrChildFocused(btnMerge)) {
       delegate.onMergeClicked();
-      return;
-    }
-
-    if (isWidgetFocused(btnCancel)) {
+    } else if (isWidgetOrChildFocused(btnCancel)) {
       delegate.onCancelClicked();
     }
   }

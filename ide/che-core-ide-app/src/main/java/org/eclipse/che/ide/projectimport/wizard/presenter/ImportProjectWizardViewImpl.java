@@ -12,14 +12,11 @@ package org.eclipse.che.ide.projectimport.wizard.presenter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.mvp.Presenter;
@@ -39,65 +36,37 @@ public class ImportProjectWizardViewImpl extends Window implements ImportProject
   Button previousStepButton;
   Button importButton;
 
-  @UiField(provided = true)
-  final org.eclipse.che.ide.ui.window.Window.Resources resources;
-
   final CoreLocalizationConstant locale;
 
   private ActionDelegate delegate;
 
   @Inject
   public ImportProjectWizardViewImpl(
-      org.eclipse.che.ide.Resources ideResources,
-      org.eclipse.che.ide.ui.window.Window.Resources resources,
-      CoreLocalizationConstant locale) {
+      org.eclipse.che.ide.Resources ideResources, CoreLocalizationConstant locale) {
     this.ensureDebugId("importProjectWizard-window");
-    this.resources = resources;
     this.locale = locale;
     setTitle(locale.importProjectViewTitle());
-    setWidget(uiBinder.createAndBindUi(this));
+    FlowPanel widget = uiBinder.createAndBindUi(this);
+    widget.getElement().getStyle().setPadding(0, Style.Unit.PX);
+    setWidget(widget);
 
     importButton =
-        createPrimaryButton(
+        addFooterButton(
             locale.importProjectButton(),
             "importProjectWizard-importButton",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onImportClicked();
-              }
-            });
+            event -> delegate.onImportClicked(),
+            true);
     importButton.addStyleName(ideResources.buttonLoaderCss().buttonLoader());
 
-    addButtonToFooter(importButton);
-
     nextStepButton =
-        createButton(
-            locale.next(),
-            "importProjectWizard-nextStepButton",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onNextClicked();
-              }
-            });
-
-    addButtonToFooter(nextStepButton);
+        addFooterButton(
+            locale.next(), "importProjectWizard-nextStepButton", event -> delegate.onNextClicked());
 
     previousStepButton =
-        createButton(
+        addFooterButton(
             locale.back(),
             "importProjectWizard-previousStepButton",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onBackClicked();
-              }
-            });
-
-    addButtonToFooter(previousStepButton);
-
-    getWidget().getElement().getStyle().setPadding(0, Style.Unit.PX);
+            event -> delegate.onBackClicked());
   }
 
   @Override
@@ -135,16 +104,6 @@ public class ImportProjectWizardViewImpl extends Window implements ImportProject
   @Override
   public void setDelegate(ActionDelegate delegate) {
     this.delegate = delegate;
-  }
-
-  @Override
-  public Widget asWidget() {
-    return null;
-  }
-
-  @Override
-  protected void onClose() {
-    delegate.onCancelClicked();
   }
 
   interface ImportProjectWizardViewImplUiBinder

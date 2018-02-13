@@ -112,7 +112,7 @@ public class PreferencesPresenter
   /** Shows preferences. */
   public void showPreferences() {
     if (preferencesMap != null) {
-      view.show();
+      view.showDialog();
       return;
     }
 
@@ -128,9 +128,9 @@ public class PreferencesPresenter
     }
     view.setPreferences(preferencesMap);
 
-    view.show();
     view.enableSaveButton(false);
     view.selectPreference(preferencesMap.entrySet().iterator().next().getValue().iterator().next());
+    view.showDialog();
   }
 
   @Override

@@ -334,7 +334,7 @@ public class EditDebugConfigurationsPresenter
 
   /** Show dialog. */
   public void show() {
-    view.show();
+    view.showDialog();
     fetchConfigurations();
   }
 
