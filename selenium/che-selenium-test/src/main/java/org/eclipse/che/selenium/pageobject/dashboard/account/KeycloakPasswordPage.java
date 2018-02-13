@@ -73,7 +73,7 @@ public class KeycloakPasswordPage {
   }
 
   public void clickOnSavePasswordButton() {
-    seleniumWebDriverHelper.waitAndClickOnElement(By.xpath(SAVE_BUTTON));
+    seleniumWebDriverHelper.waitAndClick(By.xpath(SAVE_BUTTON));
   }
 
   public void waitTextInErrorAlert(String expectedText) {

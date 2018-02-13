@@ -70,19 +70,19 @@ public class KeycloakAccountPage {
   }
 
   public String getUserNameValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.id(USERNAME_FIELD_ID));
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.id(USERNAME_FIELD_ID));
   }
 
   public String getEmailValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.id(EMAIL_FIELD_ID));
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.id(EMAIL_FIELD_ID));
   }
 
   public String getFirstNameValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.id(FIRST_NAME_FIELD_ID));
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.id(FIRST_NAME_FIELD_ID));
   }
 
   public String getLastNameValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.id(LAST_NAME_FIELD_ID));
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.id(LAST_NAME_FIELD_ID));
   }
 
   public void setUserNameValue(String value) {
@@ -109,11 +109,11 @@ public class KeycloakAccountPage {
   }
 
   public void clickOnSaveButton() {
-    seleniumWebDriverHelper.waitAndClickOnElement(By.xpath(SAVE_BUTTON));
+    seleniumWebDriverHelper.waitAndClick(By.xpath(SAVE_BUTTON));
   }
 
   public void clickOnCancelButton() {
-    seleniumWebDriverHelper.waitAndClickOnElement(By.xpath(CANCEL_BUTTON));
+    seleniumWebDriverHelper.waitAndClick(By.xpath(CANCEL_BUTTON));
   }
 
   public void waitTextInErrorAlert(String expectedText) {

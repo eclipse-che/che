@@ -69,19 +69,19 @@ public class DashboardAccount {
   }
 
   public String getEmailFieldValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.name(EMAIL_FIELD));
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.name(EMAIL_FIELD));
   }
 
   public String getLoginFieldValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.name(LOGIN_FIELD));
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.name(LOGIN_FIELD));
   }
 
   public String getFirstNameFieldValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.name(FIRST_NAME_FIELD));
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.name(FIRST_NAME_FIELD));
   }
 
   public String getLastNameFieldValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.name(LAST_NAME_FIELD));
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.name(LAST_NAME_FIELD));
   }
 
   public String getTitle() {
@@ -89,7 +89,7 @@ public class DashboardAccount {
   }
 
   public void clickOnEditButton() {
-    seleniumWebDriverHelper.waitAndClickOnElement(By.name(EDIT_BUTTON));
+    seleniumWebDriverHelper.waitAndClick(By.name(EDIT_BUTTON));
   }
 
   public void waitPageIsLoaded() {

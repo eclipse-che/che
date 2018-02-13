@@ -81,11 +81,11 @@ public class KeycloakFederatedIdentitiesPage {
   }
 
   public String getGitHubIdentityFieldValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.xpath(GITHUB_INPUT_XPATH));
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.xpath(GITHUB_INPUT_XPATH));
   }
 
   public void removeGithubIdentity() {
-    seleniumWebDriverHelper.waitAndClickOnElement(By.id(GITHUB_REMOVE_BUTTON_ID));
+    seleniumWebDriverHelper.waitAndClick(By.id(GITHUB_REMOVE_BUTTON_ID));
     waitTextInSuccessAlert(IDENTITY_PROVIDER_REMOVED_SUCCESSFULLY_MESSAGE);
   }
 

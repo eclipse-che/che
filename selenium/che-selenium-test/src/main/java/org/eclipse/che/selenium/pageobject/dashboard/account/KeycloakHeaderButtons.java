@@ -80,7 +80,7 @@ public class KeycloakHeaderButtons {
   }
 
   private void clickOnButton(Button button) {
-    seleniumWebDriverHelper.waitAndClickOnElement(button.getXpath());
+    seleniumWebDriverHelper.waitAndClick(button.getXpath());
   }
 
   /** wait until all buttons which placed in the header of the page will be visible */
