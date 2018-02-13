@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
-import org.eclipse.che.api.core.util.LimitedListLineConsumer;
+import org.eclipse.che.api.core.util.LimitedSizeLineConsumerWrapper;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -100,7 +100,11 @@ public abstract class TestWorkspaceLogsReader {
       ListLineConsumer stderrConsumer = getStderrConsumer();
       Process process =
           executeAndWait(
-              commandLine, PREPARING_WS_TIMEOUT_SEC, SECONDS, getStdoutConsumer(), stderrConsumer);
+              commandLine,
+              PREPARING_WS_TIMEOUT_SEC,
+              SECONDS,
+              new LimitedSizeLineConsumerWrapper(getStdoutConsumer(), 1000),
+              new LimitedSizeLineConsumerWrapper(stderrConsumer, 1000));
 
       String errorMessage = stderrConsumer.getText();
       if (!errorMessage.isEmpty() || process.exitValue() > 0) {
@@ -159,7 +163,7 @@ public abstract class TestWorkspaceLogsReader {
 
   @VisibleForTesting
   ListLineConsumer getStderrConsumer() {
-    return new LimitedListLineConsumer(1000);
+    return new ListLineConsumer();
   }
 
   /** Holds information about log to read. */

@@ -18,7 +18,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.util.Arrays;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.util.LimitedListLineConsumer;
+import org.eclipse.che.api.core.util.LimitedSizeLineConsumerWrapper;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +33,8 @@ public class DockerUtil {
   private String cheHost;
 
   public boolean isCheRunLocally() {
-    ListLineConsumer stdoutConsumer = new LimitedListLineConsumer(1000);
-    ListLineConsumer stderrConsumer = new LimitedListLineConsumer(1000);
+    ListLineConsumer stdoutConsumer = new ListLineConsumer();
+    ListLineConsumer stderrConsumer = new ListLineConsumer();
     String[] commandLine = {
       "bash",
       "-c",
@@ -46,7 +46,11 @@ public class DockerUtil {
     try {
       Process process =
           executeAndWait(
-              commandLine, PREPARING_WS_TIMEOUT_SEC, SECONDS, stdoutConsumer, stderrConsumer);
+              commandLine,
+              PREPARING_WS_TIMEOUT_SEC,
+              SECONDS,
+              new LimitedSizeLineConsumerWrapper(stdoutConsumer, 1000),
+              new LimitedSizeLineConsumerWrapper(stderrConsumer, 1000));
 
       if (process.exitValue() > 0) {
         LOG.warn(
