@@ -31,7 +31,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -55,6 +57,7 @@ import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundE
 import org.eclipse.che.workspace.infrastructure.docker.logs.MachineLoggersFactory;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class allows to make parallel prepare (build or download) of docker images for workspace
@@ -65,7 +68,7 @@ import org.slf4j.Logger;
 public class ParallelDockerImagesPreparer {
 
   private static final Logger LOG = getLogger(ParallelDockerImagesPreparer.class);
-  private static final String PARALLEL_NUMBER_PROPERTY = "che.infra.docker.parallel_pull_number";
+  private static final String PARALLEL_NUMBER_PROPERTY = "che.infra.docker.max_pull_thread";
 
   private final RuntimeIdentity identity;
   private final MachineLoggersFactory machineLoggersFactory;
@@ -301,6 +304,20 @@ public class ParallelDockerImagesPreparer {
     } catch (IOException e) {
       LOG.warn("Failed to check image {} availability. Cause: {}", imageName, e.getMessage(), e);
       return false; // consider that image doesn't exist locally
+    }
+  }
+
+  @PreDestroy
+  private void terminate() throws InterruptedException {
+    if (!executor.isShutdown()) {
+      executor.shutdown();
+      if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
+        executor.shutdownNow();
+        if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
+          LoggerFactory.getLogger(DockerSharedPool.class)
+              .error("Couldn't terminate image creator thread pool");
+        }
+      }
     }
   }
 }
