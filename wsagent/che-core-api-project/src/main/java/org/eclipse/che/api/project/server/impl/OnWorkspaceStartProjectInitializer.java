@@ -11,6 +11,7 @@
 package org.eclipse.che.api.project.server.impl;
 
 import static org.eclipse.che.api.fs.server.WsPathUtils.ROOT;
+import static org.eclipse.che.api.project.shared.Constants.CHE_DIR;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,10 +61,12 @@ public class OnWorkspaceStartProjectInitializer {
     }
   }
 
-  private void initializeNotRegisteredProjects() throws ServerException {
-    for (String wsPath : fsManager.getDirWsPaths(ROOT)) {
-      projectConfigRegistry.putIfAbsent(wsPath, true, true);
-    }
+  private void initializeNotRegisteredProjects() {
+    fsManager
+        .getDirWsPaths(ROOT)
+        .stream()
+        .filter(wsPath -> !("/" + CHE_DIR).equals(wsPath))
+        .forEach(wsPath -> projectConfigRegistry.putIfAbsent(wsPath, true, true));
   }
 
   private void firePostInitializationHandlers()
