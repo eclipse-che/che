@@ -23,6 +23,8 @@ import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.mockito.Mock;
@@ -40,13 +42,16 @@ public class WorkspaceProbesFactoryTest {
   private static final int SERVER_PING_SUCCESS_THRESHOLD = 1;
   private static final ServerImpl SERVER = new ServerImpl().withUrl("https://localhost:4040/path1");
 
+  private static final RuntimeIdentity IDENTITY =
+      new RuntimeIdentityImpl(WORKSPACE_ID, "default", "usr1", "id1");
+
   @Mock private MachineTokenProvider tokenProvider;
 
   private WorkspaceProbesFactory probesFactory;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(tokenProvider.getToken(WORKSPACE_ID)).thenReturn(TOKEN);
+    when(tokenProvider.getToken(IDENTITY.getOwnerId(), WORKSPACE_ID)).thenReturn(TOKEN);
 
     probesFactory = new WorkspaceProbesFactory(tokenProvider, SERVER_PING_SUCCESS_THRESHOLD);
   }
@@ -55,7 +60,7 @@ public class WorkspaceProbesFactoryTest {
   public void shouldNotCreateProbesFactoriesForOtherServers() throws Exception {
     WorkspaceProbes wsProbes =
         probesFactory.getProbes(
-            WORKSPACE_ID,
+            IDENTITY,
             MACHINE_NAME,
             ImmutableMap.of("server1/http", SERVER, "terminal/http", SERVER, "terminal1", SERVER));
 
@@ -66,7 +71,7 @@ public class WorkspaceProbesFactoryTest {
   public void returnsProbesForAMachineForWsAgent() throws Exception {
     WorkspaceProbes wsProbes =
         probesFactory.getProbes(
-            WORKSPACE_ID, MACHINE_NAME, singletonMap(SERVER_WS_AGENT_HTTP_REFERENCE, SERVER));
+            IDENTITY, MACHINE_NAME, singletonMap(SERVER_WS_AGENT_HTTP_REFERENCE, SERVER));
 
     verifyHttpProbeConfig(
         wsProbes,
@@ -87,7 +92,7 @@ public class WorkspaceProbesFactoryTest {
   public void returnsProbesForAMachineForTerminal() throws Exception {
     WorkspaceProbes wsProbes =
         probesFactory.getProbes(
-            WORKSPACE_ID,
+            IDENTITY,
             MACHINE_NAME,
             singletonMap(
                 SERVER_TERMINAL_REFERENCE, new ServerImpl().withUrl("wss://localhost:4040/pty")));
@@ -111,7 +116,7 @@ public class WorkspaceProbesFactoryTest {
   public void returnsProbesForAMachineForExec() throws Exception {
     WorkspaceProbes wsProbes =
         probesFactory.getProbes(
-            WORKSPACE_ID,
+            IDENTITY,
             MACHINE_NAME,
             singletonMap(
                 SERVER_EXEC_AGENT_HTTP_REFERENCE,

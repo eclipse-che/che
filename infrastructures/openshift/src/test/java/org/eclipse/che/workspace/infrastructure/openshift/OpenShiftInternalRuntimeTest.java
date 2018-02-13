@@ -68,6 +68,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.Kubernet
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPods;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftRoutes;
@@ -130,13 +132,15 @@ public class OpenShiftInternalRuntimeTest {
     internalRuntime =
         new OpenShiftInternalRuntime(
             13,
+            5,
             new URLRewriter.NoOpURLRewriter(),
-            eventService,
             bootstrapperFactory,
             serverCheckerFactory,
             volumesStrategy,
             probesScheduler,
             workspaceProbesFactory,
+            new RuntimeEventsPublisher(eventService),
+            mock(KubernetesSharedPool.class),
             context,
             project,
             emptyList());
