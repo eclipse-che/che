@@ -5,6 +5,7 @@ metadata:
     app: che
   name: che
 data:
+  CHE_DOMAIN: {{ .Values.cheDomain }}
   CHE_HOST: {{ template "cheHost" . }}
   CHE_PORT: "8080"
 {{- if .Values.tlsEnabled }}
@@ -26,7 +27,7 @@ data:
   CHE_INFRA_KUBERNETES_NAMESPACE: ""
   CHE_INFRA_KUBERNETES_TRUST__CERTS: "false"
   CHE_INFRA_KUBERNETES_PVC_STRATEGY: "common"
-  CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS: "true"
+  CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS: "false"
   CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_RUN__AS__USER: "0"
   CHE_INFRA_KUBERNETES_POD_SECURITY__CONTEXT_FS__GROUP: "0"
   CHE_LOCAL_CONF_DIR: /etc/conf
@@ -38,4 +39,8 @@ data:
   CHE_PREDEFINED_STACKS_RELOAD__ON__START: "false"
   JAVA_OPTS: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true -Xms20m "
   CHE_WORKSPACE_AUTO_START: "false"
+{{- if .Values.tlsEnabled }}
+  CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON: '{"nginx.ingress.kubernetes.io/rewrite-target": "/","nginx.ingress.kubernetes.io/ssl-true": "false","kubernetes.io/tls-acme": "true","nginx.ingress.kubernetes.io/proxy-connect-timeout": "3600","nginx.ingress.kubernetes.io/proxy-read-timeout": "3600"}'
+{{- else }}
   CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON: '{"nginx.ingress.kubernetes.io/rewrite-target": "/","nginx.ingress.kubernetes.io/ssl-redirect": "false","nginx.ingress.kubernetes.io/proxy-connect-timeout": "3600","nginx.ingress.kubernetes.io/proxy-read-timeout": "3600"}'
+{{- end }}

@@ -21,6 +21,11 @@ spec:
     spec:
       containers:
       - env:
+        - name: CHE_DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_DOMAIN
+              name: che
         - name: CHE_HOST
           valueFrom:
             configMapKeyRef:

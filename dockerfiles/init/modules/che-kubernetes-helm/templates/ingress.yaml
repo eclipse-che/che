@@ -5,20 +5,20 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     kubernetes.io/ingress.class: "nginx"
-{{ if .Values.tlsEnabled }}
+{{- if .Values.tlsEnabled }}
     kubernetes.io/tls-acme: "true"
-{{ else }}
+{{- else }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
+{{- end }}
     ingress.kubernetes.io/proxy-read-timeout: "3600"
     ingress.kubernetes.io/proxy-connect-timeout: "3600"
-{{ end }}
 spec:
-{{ if .Values.tlsEnabled }}
+{{- if .Values.tlsEnabled }}
   tls:
   - hosts:
     - {{ template "cheHost" . }}
     secretName: che-tls
-{{ end }}
+{{- end }}
   rules:
   - http:
       paths:
@@ -26,6 +26,6 @@ spec:
           serviceName: che-host
           servicePort: 8080
         path: /
-{{ if .Values.isHostBased }}
+{{- if .Values.isHostBased }}
     host: {{ template "cheHost" . }}
-{{ end }}
+{{- end }}
