@@ -14,7 +14,6 @@ import static java.util.Collections.emptySet;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -61,7 +60,7 @@ public class RemoteSubscriptionManager {
     eventService.subscribe(
         event ->
             subscriptionContexts
-                .getOrDefault(method, new HashSet<>())
+                .getOrDefault(method, emptySet())
                 .stream()
                 .filter(context -> biPredicate.test(event, context.scope))
                 .forEach(context -> transmit(context.endpointId, method, event)),
@@ -70,7 +69,7 @@ public class RemoteSubscriptionManager {
 
   private void consumeSubscriptionRequest(String endpointId, EventSubscription eventSubscription) {
     subscriptionContexts
-        .computeIfAbsent(eventSubscription.getMethod(), k -> new HashSet<>())
+        .computeIfAbsent(eventSubscription.getMethod(), k -> ConcurrentHashMap.newKeySet(1))
         .add(new SubscriptionContext(endpointId, eventSubscription.getScope()));
   }
 
