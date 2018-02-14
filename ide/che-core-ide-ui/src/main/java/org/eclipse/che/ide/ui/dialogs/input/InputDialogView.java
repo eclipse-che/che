@@ -34,7 +34,7 @@ public interface InputDialogView {
   void setValue(String value);
 
   /** Sets the window title. */
-  void setTitle(String title);
+  void setTitleCaption(String title);
 
   /** Sets new label for Ok button */
   void setOkButtonLabel(String label);

@@ -541,6 +541,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter
 
     this.documentStorage.documentClosed(this.document);
     editorInit.uninstall();
+    editorWidget.destroy();
     workspaceAgent.removePart(this);
   }
 

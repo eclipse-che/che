@@ -55,7 +55,7 @@ public class ImportProjectFromLocation {
     String LOAD_REPO_BTN_ID = "gwt-debug-githubImporter-loadRepo";
     String IMPORT_BTN_ID = "importProjectWizard-importButton";
     String CLOSE_ICON_CSS =
-        "div#gwt-debug-importProjectWizard-window svg[width='8px'][height='8px']";
+        "table#gwt-debug-importProjectWizard-window svg[width='8px'][height='8px']";
     String CATEGORY_PANEL_XPATH =
         "//table[@id='gwt-debug-githubImporter-repositories']//div[text()='%s']";
     String BRANCH_NAME = "gwt-debug-file-importProject-branchName";

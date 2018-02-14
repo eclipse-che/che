@@ -15,8 +15,6 @@ import static org.eclipse.che.ide.api.theme.Style.getEditorSelectionColor;
 import static org.eclipse.che.ide.api.theme.Style.getMainFontColor;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -84,19 +82,21 @@ final class OrganizeImportsViewImpl extends Window implements OrganizeImportsVie
       label.getElement().getStyle().setColor(getMainFontColor());
       label.getElement().getStyle().setCursor(POINTER);
       label.addClickHandler(
-          new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-              selectedLabel.getElement().getStyle().setBackgroundColor("initial");
-              selectedLabel = label;
-              label.getElement().getStyle().setBackgroundColor(getEditorSelectionColor());
-            }
+          clickEvent -> {
+            selectedLabel.getElement().getStyle().setBackgroundColor("initial");
+            selectedLabel = label;
+            label.getElement().getStyle().setBackgroundColor(getEditorSelectionColor());
           });
 
       container.add(label);
     }
 
-    super.show();
+    show();
+  }
+
+  @Override
+  public void close() {
+    hide();
   }
 
   /** {@inheritDoc} */
@@ -136,53 +136,30 @@ final class OrganizeImportsViewImpl extends Window implements OrganizeImportsVie
 
   private void createButtons(JavaLocalizationConstant locale) {
     back =
-        createButton(
+        addFooterButton(
             locale.organizeImportsButtonBack(),
             "imports-back-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onBackButtonClicked();
-              }
-            });
+            event -> delegate.onBackButtonClicked());
 
     next =
-        createButton(
+        addFooterButton(
             locale.organizeImportsButtonNext(),
             "imports-next-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onNextButtonClicked();
-              }
-            });
+            event -> delegate.onNextButtonClicked());
 
-    Button cancel =
-        createButton(
-            locale.organizeImportsButtonCancel(),
-            "imports-cancel-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                hide();
-                delegate.onCancelButtonClicked();
-              }
-            });
+    addFooterButton(
+        locale.organizeImportsButtonCancel(),
+        "imports-cancel-button",
+        event -> {
+          hide();
+          delegate.onCancelButtonClicked();
+        });
 
     finish =
-        createPrimaryButton(
+        addFooterButton(
             locale.organizeImportsButtonFinish(),
             "imports-finish-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onFinishButtonClicked();
-              }
-            });
-
-    addButtonToFooter(finish);
-    addButtonToFooter(cancel);
-    addButtonToFooter(next);
-    addButtonToFooter(back);
+            event -> delegate.onFinishButtonClicked(),
+            true);
   }
 }

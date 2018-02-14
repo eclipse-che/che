@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -113,13 +114,17 @@ public class ContributionMixinProvider {
   }
 
   private void processCurrentProject(Selection<?> selection) {
+    if (WorkspaceStatus.RUNNING != appContext.getWorkspace().getStatus()) {
+      return;
+    }
+
     if (!isSupportedSelection(selection)) {
       return;
     }
 
     final Project rootProject = appContext.getRootProject();
 
-    if (lastSelected != null && lastSelected.equals(rootProject)) {
+    if (lastSelected != null && lastSelected.equals(rootProject) && hasVcsService(rootProject)) {
       return;
     }
 
@@ -127,6 +132,7 @@ public class ContributionMixinProvider {
 
     if (rootProject == null) {
       invalidateContext(lastSelected);
+      lastSelected = null;
       if (selection.isMultiSelection()) {
         contributePart.showStub(messages.stubTextShouldBeSelectedOnlyOneProject());
       } else {
@@ -137,8 +143,8 @@ public class ContributionMixinProvider {
     } else {
       invalidateContext(rootProject);
       contributePart.showStub(messages.stubTextProjectNotProvideSupportedVCS());
+      lastSelected = null;
     }
-    lastSelected = rootProject;
   }
 
   private boolean isSupportedSelection(Selection<?> selection) {
@@ -165,6 +171,8 @@ public class ContributionMixinProvider {
                 workflowExecutor.init(vcsHostingService, prj);
                 addPart();
                 contributePart.showContent();
+
+                lastSelected = prj;
               })
           .catchError(
               err -> {

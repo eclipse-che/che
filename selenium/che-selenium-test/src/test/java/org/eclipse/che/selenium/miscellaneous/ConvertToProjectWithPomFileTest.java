@@ -77,8 +77,7 @@ public class ConvertToProjectWithPomFileTest {
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
     ide.open(workspace);
 
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME);
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.selectItem(PROJECT_NAME);
   }
 
@@ -146,6 +145,7 @@ public class ConvertToProjectWithPomFileTest {
     editor.waitTabIsPresent("new-qa-spring-sample");
 
     seleniumWebDriver.navigate().refresh();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     try {
       projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     } catch (TimeoutException ex) {

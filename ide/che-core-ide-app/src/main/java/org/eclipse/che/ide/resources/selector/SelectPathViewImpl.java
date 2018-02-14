@@ -12,12 +12,11 @@ package org.eclipse.che.ide.resources.selector;
 
 import static com.google.gwt.dom.client.Style.Overflow.AUTO;
 import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -71,7 +70,9 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
       SkipHiddenNodesInterceptor skipHiddenNodesInterceptor,
       SkipLeafsInterceptor skipLeafsInterceptor) {
     this.skipLeafsInterceptor = skipLeafsInterceptor;
-    setWidget(uiBinder.createAndBindUi(this));
+    Widget widget = uiBinder.createAndBindUi(this);
+    widget.addStyleName(styles.css().window());
+    setWidget(widget);
 
     styles.css().ensureInjected();
 
@@ -144,45 +145,36 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
 
     handler.bind(tree);
 
-    submitBtn = new Button("Select");
-    submitBtn.addClickHandler(
-        new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            delegate.onSubmit();
-            hide();
-          }
-        });
-    submitBtn.addStyleName(resources.windowCss().primaryButton());
-    submitBtn.addStyleName(resources.windowCss().buttonAlignRight());
-    addButtonToFooter(submitBtn);
+    submitBtn =
+        addFooterButton(
+            "Select",
+            "select-path-submit-button",
+            event -> {
+              delegate.onSubmit();
+              hide();
+            },
+            true);
 
-    cancelButton = new Button("Cancel");
-    cancelButton.addClickHandler(
-        new ClickHandler() {
-          @Override
-          public void onClick(ClickEvent event) {
-            delegate.onCancel();
-            hide();
-          }
-        });
-    cancelButton.addStyleName(resources.windowCss().buttonAlignRight());
-    addButtonToFooter(cancelButton);
+    cancelButton =
+        addFooterButton(
+            "Cancel",
+            "select-path-cancel-button",
+            event -> {
+              delegate.onCancel();
+              hide();
+            });
 
-    setHideOnEscapeEnabled(false);
     setTitle("Select Path");
-    getWidget().setStyleName(styles.css().window());
   }
 
   @Override
-  protected void onEnterClicked() {
-    if (isWidgetFocused(submitBtn)) {
+  public void onEnterPress(NativeEvent evt) {
+    super.onEnterPress(evt);
+
+    if (isWidgetOrChildFocused(submitBtn)) {
       delegate.onSubmit();
       hide();
-      return;
-    }
-
-    if (isWidgetFocused(cancelButton)) {
+    } else if (isWidgetOrChildFocused(cancelButton)) {
       delegate.onCancel();
       hide();
     }
@@ -206,19 +198,20 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
   }
 
   @Override
-  public void show() {
-    super.show(tree);
-    super.setHideOnEscapeEnabled(true);
+  public void showDialog() {
+    show(tree);
+  }
 
+  @Override
+  protected void onShow() {
     if (!tree.getRootNodes().isEmpty()) {
       tree.getSelectionModel().select(tree.getRootNodes().get(0), false);
     }
   }
 
   @Override
-  protected void onClose() {
+  protected void onHide() {
     delegate.onCancel();
-    super.onClose();
   }
 
   public interface Styles extends ClientBundle {

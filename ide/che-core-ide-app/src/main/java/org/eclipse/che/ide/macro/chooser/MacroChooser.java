@@ -62,7 +62,7 @@ public class MacroChooser implements MacroChooserView.ActionDelegate {
 
     updateMacrosProvider(macroRegistry.getMacros());
 
-    view.show();
+    view.showDialog();
   }
 
   @Override

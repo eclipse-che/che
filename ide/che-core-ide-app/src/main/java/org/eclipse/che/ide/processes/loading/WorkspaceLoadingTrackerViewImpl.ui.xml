@@ -111,6 +111,7 @@
             height: 20px;
             line-height: 20px!important;
             padding-top: 11px;
+            width: 60px;
         }
 
         .machineState[rel="starting"] {
@@ -119,6 +120,10 @@
 
         .machineState[rel="running"] {
             color: workspaceStatusGreenColor;
+        }
+
+        .machineState[rel="stopping"] {
+            color: workspaceStatusBlueColor;
         }
 
         .machineState[rel="stopped"] {
@@ -221,35 +226,41 @@
             text-transform: uppercase;
         }
 
-        .waitingWorkspaceSection,
+        .workspaceStartingSection,
         .workspaceStartedSection,
+        .workspaceStoppingSection,
         .workspaceStoppedSection,
         .workspaceFailedSection {
             height: 40px;
         }
 
-        .waitingWorkspaceSection td,
+        .workspaceStartingSection td,
         .workspaceStartedSection td,
+        .workspaceStoppingSection td,
         .workspaceStoppedSection td,
         .workspaceFailedSection td {
             height: 50px;
             line-height: 50px!important;
         }
 
-        .waitingWorkspaceSection td {
-            color: workspaceStatusYellowColor;
+        .workspaceStartingSection td {
+            color: workspaceStatusYellowColor !important;
         }
 
         .workspaceStartedSection td {
-            color: workspaceStatusGreenColor;
+            color: workspaceStatusGreenColor !important;
+        }
+
+        .workspaceStoppingSection td {
+            color: workspaceStatusYellowColor !important;
         }
 
         .workspaceStoppedSection td {
-            color: workspaceStatusYellowColor;
+            color: workspaceStatusYellowColor !important;
         }
 
         .workspaceFailedSection td {
-            color: workspaceStatusRedColor;
+            color: workspaceStatusRedColor !important;
         }
 
     </ui:style>
@@ -261,12 +272,16 @@
             <table cellpadding="0" cellspacing="0" class="{style.table}" border="0">
                 <tbody ui:field="tableBody">
 
-                    <tr ui:field="waitingWorkspaceSection" class="{style.waitingWorkspaceSection}">
+                    <tr ui:field="workspaceStartingSection" class="{style.workspaceStartingSection}">
                         <td colspan="8">Starting and configuring your workspace machines</td>
                     </tr>
 
                     <tr ui:field="workspaceStartedSection" class="{style.workspaceStartedSection}" style="display: none;">
                         <td colspan="8">Your workspace is ready to be used</td>
+                    </tr>
+
+                    <tr ui:field="workspaceStoppingSection" class="{style.workspaceStoppingSection}" style="display: none;">
+                        <td colspan="8">Workspace stopping</td>
                     </tr>
 
                     <tr ui:field="workspaceStoppedSection" class="{style.workspaceStoppedSection}" style="display: none;">

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
+import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GIT;
 
 import com.google.inject.Inject;
@@ -17,9 +18,8 @@ import java.util.concurrent.ExecutionException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.constant.TestStacksConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.pageobject.Loader;
+import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
@@ -38,7 +38,6 @@ public class ImportMavenProjectFromGitTest {
 
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
-  @Inject private Loader loader;
   @Inject private ProjectExplorer explorer;
   @Inject private NavigationBar navigationBar;
   @Inject private NewWorkspace newWorkspace;
@@ -47,6 +46,7 @@ public class ImportMavenProjectFromGitTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestUser defaultTestUser;
   @Inject private Workspaces workspaces;
+  @Inject private Ide ide;
 
   @BeforeClass
   public void setUp() {
@@ -65,7 +65,7 @@ public class ImportMavenProjectFromGitTest {
 
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
-    newWorkspace.selectStack(TestStacksConstants.JAVA.getId());
+    newWorkspace.selectStack(JAVA.getId());
     newWorkspace.typeWorkspaceName(WORKSPACE);
 
     projectSourcePage.clickOnAddOrImportProjectButton();
@@ -78,12 +78,7 @@ public class ImportMavenProjectFromGitTest {
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
-    loader.waitOnClosed();
-    explorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     explorer.waitItem(PROJECT_NAME);
-    /* TODO when bug with project type is solved:
-    explorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
-    explorer.clickOnItemInContextMenu(ProjectExplorerContextMenuConstants.MAVEN);
-    explorer.clickOnItemInContextMenu(ProjectExplorer.PROJECT_EXPLORER_CONTEXT_MENU_MAVEN.REIMPORT);*/
   }
 }

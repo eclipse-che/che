@@ -14,6 +14,7 @@ import static com.google.gwt.dom.client.Style.Cursor.DEFAULT;
 import static com.google.gwt.dom.client.Style.Cursor.POINTER;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
@@ -118,56 +119,63 @@ final class RenameViewImpl extends Window implements RenameView {
 
   private void createButtons(JavaLocalizationConstant locale) {
     preview =
-        createButton(
+        addFooterButton(
             locale.moveDialogButtonPreview(),
             "move-preview-button",
             event -> delegate.onPreviewButtonClicked());
 
-    Button cancel =
-        createButton(
-            locale.moveDialogButtonCancel(),
-            "move-cancel-button",
-            event -> {
-              hide();
-              delegate.onCancelButtonClicked();
-            });
+    addFooterButton(
+        locale.moveDialogButtonCancel(),
+        "move-cancel-button",
+        event -> {
+          hide();
+          delegate.onCancelButtonClicked();
+        });
 
     accept =
-        createButton(
+        addFooterButton(
             locale.moveDialogButtonOk(),
             "move-accept-button",
             event -> delegate.onAcceptButtonClicked());
-
-    addButtonToFooter(accept);
-    addButtonToFooter(cancel);
-    addButtonToFooter(preview);
   }
 
   /** {@inheritDoc} */
   @Override
-  public void show() {
+  public void showDialog() {
     newName.getElement().setAttribute("spellcheck", "false");
     newName.addStyleName(javaResources.css().errorBorder());
     updateDelegateUpdating.setValue(false);
     updateMarkDeprecated.setValue(false);
     updateMarkDeprecated.setEnabled(false);
 
-    super.show();
-
-    new Timer() {
-      @Override
-      public void run() {
-        setFocus();
-      }
-    }.schedule(100);
+    super.show(newName);
   }
 
-  /** {@inheritDoc} */
   @Override
-  protected void onClose() {
-    delegate.onCancelButtonClicked();
+  public void onEnterPress(NativeEvent evt) {
+    if (accept.isEnabled()) {
+      accept.click();
+    }
+  }
 
-    super.onClose();
+  @Override
+  protected void onShow() {
+    newName.selectAll();
+  }
+
+  @Override
+  public void setTitleCaption(String title) {
+    setTitle(title);
+  }
+
+  @Override
+  protected void onHide() {
+    delegate.onCancelButtonClicked();
+  }
+
+  @Override
+  public void close() {
+    hide();
   }
 
   /** {@inheritDoc} */
@@ -241,10 +249,7 @@ final class RenameViewImpl extends Window implements RenameView {
   }
 
   @Override
-  public void setFocus() {
-    newName.selectAll();
-    newName.setFocus(true);
-  }
+  public void setFocus() {}
 
   /** {@inheritDoc} */
   @Override

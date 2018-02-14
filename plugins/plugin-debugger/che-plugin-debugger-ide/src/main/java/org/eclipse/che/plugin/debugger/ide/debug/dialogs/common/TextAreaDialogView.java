@@ -75,5 +75,5 @@ public interface TextAreaDialogView extends View<TextAreaDialogView.ActionDelega
   void close();
 
   /** Show dialog. */
-  void show();
+  void showDialog();
 }

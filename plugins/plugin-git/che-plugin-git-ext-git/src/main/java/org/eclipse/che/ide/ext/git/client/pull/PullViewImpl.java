@@ -10,11 +10,12 @@
  */
 package org.eclipse.che.ide.ext.git.client.pull;
 
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -74,42 +75,20 @@ public class PullViewImpl extends Window implements PullView {
     this.setTitle(locale.pullTitle());
     this.setWidget(widget);
 
-    btnPull =
-        createButton(
-            locale.buttonPull(),
-            "git-remotes-pull-pull",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onPullClicked();
-              }
-            });
-    btnPull.addStyleName(super.resources.windowCss().primaryButton());
-    addButtonToFooter(btnPull);
-
     btnCancel =
-        createButton(
-            locale.buttonCancel(),
-            "git-remotes-pull-cancel",
-            new ClickHandler() {
+        addFooterButton(
+            locale.buttonCancel(), "git-remotes-pull-cancel", event -> delegate.onCancelClicked());
 
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-              }
-            });
-    addButtonToFooter(btnCancel);
+    btnPull =
+        addFooterButton(
+            locale.buttonPull(), "git-remotes-pull-pull", event -> delegate.onPullClicked(), true);
   }
 
   @Override
-  protected void onEnterClicked() {
-    if (isWidgetFocused(btnCancel)) {
+  public void onEnterPress(NativeEvent evt) {
+    if (isWidgetOrChildFocused(btnCancel)) {
       delegate.onCancelClicked();
-      return;
-    }
-
-    if (isWidgetFocused(btnPull)) {
+    } else if (isWidgetOrChildFocused(btnPull)) {
       delegate.onPullClicked();
     }
   }
@@ -182,14 +161,7 @@ public class PullViewImpl extends Window implements PullView {
   @Override
   public void setEnablePullButton(final boolean enabled) {
     btnPull.setEnabled(enabled);
-    Scheduler.get()
-        .scheduleDeferred(
-            new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                btnPull.setFocus(enabled);
-              }
-            });
+    Scheduler.get().scheduleDeferred(() -> btnPull.setFocus(enabled));
   }
 
   /** {@inheritDoc} */

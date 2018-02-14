@@ -28,13 +28,13 @@ import org.eclipse.che.ide.api.mvp.View;
 public interface HotKeysDialogView extends View<HotKeysDialogView.ActionDelegate> {
 
   /** Reset filter input and Show dialog. */
-  void show();
+  void showDialog();
 
   /** Clear and Render keybinding combination. */
   void renderKeybindings();
 
   /** Hide dialog. */
-  void hide();
+  void hideDialog();
 
   /**
    * Set keybindings map for displaying.

@@ -11,11 +11,8 @@
 package org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.similarnames;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.Widget;
@@ -71,7 +68,7 @@ final class SimilarNamesConfigurationViewImpl extends Window
 
   /** {@inheritDoc} */
   @Override
-  public void show() {
+  public void showDialog() {
     findExactNames.setValue(true);
     findNameSuffixes.setValue(false);
     findEmbeddedNames.setValue(false);
@@ -86,33 +83,17 @@ final class SimilarNamesConfigurationViewImpl extends Window
   }
 
   private void createButtons(JavaLocalizationConstant locale) {
-    Button cancel =
-        createButton(
-            locale.moveDialogButtonCancel(),
-            "similar-cancel-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                findExactNames.setValue(true);
-                findNameSuffixes.setValue(false);
-                findEmbeddedNames.setValue(false);
+    addFooterButton(
+        locale.moveDialogButtonCancel(),
+        "similar-cancel-button",
+        event -> {
+          findExactNames.setValue(true);
+          findNameSuffixes.setValue(false);
+          findEmbeddedNames.setValue(false);
 
-                hide();
-              }
-            });
+          hide();
+        });
 
-    Button accept =
-        createButton(
-            locale.moveDialogButtonOk(),
-            "similar-accept-button",
-            new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                hide();
-              }
-            });
-
-    addButtonToFooter(accept);
-    addButtonToFooter(cancel);
+    addFooterButton(locale.moveDialogButtonOk(), "similar-accept-button", event -> hide());
   }
 }

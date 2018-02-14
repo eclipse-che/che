@@ -11,14 +11,14 @@
 package org.eclipse.che.ide.ext.git.client.reset.files;
 
 import static com.google.gwt.user.client.ui.HasHorizontalAlignment.ALIGN_LEFT;
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -79,37 +79,21 @@ public class ResetFilesViewImpl extends Window implements ResetFilesView {
     this.setTitle(locale.resetFilesViewTitle());
     this.setWidget(widget);
 
+    btnCancel =
+        addFooterButton(
+            locale.buttonCancel(), "git-resetFiles-btnCancel", event -> delegate.onCancelClicked());
+
     btnReset =
-        createButton(
+        addFooterButton(
             locale.buttonReset(),
             "git-resetFiles-btnReset",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onResetClicked();
-              }
-            });
-    btnReset.addStyleName(super.resources.windowCss().primaryButton());
-    addButtonToFooter(btnReset);
-
-    btnCancel =
-        createButton(
-            locale.buttonCancel(),
-            "git-resetFiles-btnCancel",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-              }
-            });
-    addButtonToFooter(btnCancel);
+            event -> delegate.onResetClicked(),
+            true);
   }
 
   /** Initialize the columns of the grid. */
   private void initColumns() {
-    indexFiles = new CellTable<IndexFile>();
+    indexFiles = new CellTable<>();
 
     // Create files column:
     Column<IndexFile, String> filesColumn =
@@ -131,25 +115,13 @@ public class ResetFilesViewImpl extends Window implements ResetFilesView {
 
     // Create bean value updater:
     FieldUpdater<IndexFile, Boolean> checkFieldUpdater =
-        new FieldUpdater<IndexFile, Boolean>() {
-          @Override
-          public void update(int index, IndexFile file, Boolean value) {
-            file.setIndexed(!value);
-          }
-        };
+        (index, file, value) -> file.setIndexed(!value);
 
     checkColumn.setFieldUpdater(checkFieldUpdater);
 
     filesColumn.setHorizontalAlignment(ALIGN_LEFT);
 
-    indexFiles.addColumn(
-        checkColumn,
-        new SafeHtml() {
-          @Override
-          public String asString() {
-            return "&nbsp;";
-          }
-        });
+    indexFiles.addColumn(checkColumn, (SafeHtml) () -> "&nbsp;");
     indexFiles.setColumnWidth(checkColumn, 1, Style.Unit.PCT);
     indexFiles.addColumn(filesColumn, FILES);
     indexFiles.setColumnWidth(filesColumn, 35, Style.Unit.PCT);
@@ -157,13 +129,10 @@ public class ResetFilesViewImpl extends Window implements ResetFilesView {
   }
 
   @Override
-  protected void onEnterClicked() {
-    if (isWidgetFocused(btnCancel)) {
+  public void onEnterPress(NativeEvent evt) {
+    if (isWidgetOrChildFocused(btnCancel)) {
       delegate.onCancelClicked();
-      return;
-    }
-
-    if (isWidgetFocused(btnReset)) {
+    } else if (isWidgetOrChildFocused(btnReset)) {
       delegate.onResetClicked();
     }
   }
