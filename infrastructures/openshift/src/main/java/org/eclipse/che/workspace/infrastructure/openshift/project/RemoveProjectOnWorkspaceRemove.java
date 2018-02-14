@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +73,7 @@ public class RemoveProjectOnWorkspaceRemove implements EventSubscriber<Workspace
       clientFactory.create().projects().withName(projectName).delete();
     } catch (KubernetesClientException e) {
       if (!(e.getCode() == 403)) {
-        throw new InfrastructureException(e.getMessage(), e);
+        throw new KubernetesInfrastructureException(e);
       }
       // project doesn't exist
     }
