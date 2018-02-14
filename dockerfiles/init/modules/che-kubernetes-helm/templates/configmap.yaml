@@ -44,3 +44,10 @@ data:
 {{- else }}
   CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON: '{"nginx.ingress.kubernetes.io/rewrite-target": "/","nginx.ingress.kubernetes.io/ssl-redirect": "false","nginx.ingress.kubernetes.io/proxy-connect-timeout": "3600","nginx.ingress.kubernetes.io/proxy-read-timeout": "3600"}'
 {{- end }}
+{{- if .Values.isHostBased }}
+  CHE_INFRA_KUBERNETES_SERVER_STRATEGY: "host"
+{{- else }}
+  CHE_INFRA_KUBERNETES_SERVER_STRATEGY: "path"
+{{- end }}
+
+

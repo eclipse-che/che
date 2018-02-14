@@ -11,7 +11,6 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 
 import static java.lang.Integer.parseInt;
-import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.INTERNAL_SERVER_ATTRIBUTE;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
@@ -19,23 +18,11 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
-import io.fabric8.kubernetes.api.model.IntOrString;
-import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
-import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPath;
-import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPathBuilder;
-import io.fabric8.kubernetes.api.model.extensions.HTTPIngressRuleValue;
-import io.fabric8.kubernetes.api.model.extensions.HTTPIngressRuleValueBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import io.fabric8.kubernetes.api.model.extensions.IngressBackend;
-import io.fabric8.kubernetes.api.model.extensions.IngressBackendBuilder;
-import io.fabric8.kubernetes.api.model.extensions.IngressRule;
-import io.fabric8.kubernetes.api.model.extensions.IngressRuleBuilder;
-import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
-import io.fabric8.kubernetes.api.model.extensions.IngressSpecBuilder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,7 +32,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
@@ -99,9 +85,11 @@ import org.slf4j.LoggerFactory;
  *       protocol: TCP                ---->> Pod.spec.ports[0].protocol
  * </pre>
  *
- * Then corresponding ingress expose one of the service's port:
+ * Then, a server exposer strategy is used to expose one of the service's ports, to outside of the
+ * cluster. Currently, Host-Based and Path-Based Ingresses can be used to expose service ports.
  *
  * <pre>
+ *   Path-Based Ingress exposing service's port:
  * Ingress
  * ...
  * spec:
@@ -109,6 +97,21 @@ import org.slf4j.LoggerFactory;
  *     - http:
  *         paths:
  *           - path: service123/webapp        ---->> Service.metadata.name + / + Service.spec.ports[0].name
+ *             backend:
+ *               serviceName: service123      ---->> Service.metadata.name
+ *               servicePort: [8080|web-app]  ---->> Service.spec.ports[0].[port|name]
+ * </pre>
+ *
+ * <pre>
+ *   Host-Based Ingress exposing service's port:
+ * Ingress
+ * ...
+ * spec:
+ *   rules:
+ *     - host: service123-webapp.che-domain   ---->> Service.metadata.name + - + Service.spec.ports[0].name
+ *     - http:
+ *         paths:
+ *           - path: /
  *             backend:
  *               serviceName: service123      ---->> Service.metadata.name
  *               servicePort: [8080|web-app]  ---->> Service.spec.ports[0].[port|name]
@@ -130,24 +133,19 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
   public static final int SERVER_UNIQUE_PART_SIZE = 8;
   public static final String SERVER_PREFIX = "server";
 
-  private final Map<String, String> ingressAnnotations;
+  private final ExternalServerExposerStrategy kubernetesExternalServerExposerStrategy;
   protected final String machineName;
   protected final Container container;
   protected final Pod pod;
   protected final T kubernetesEnvironment;
 
   public KubernetesServerExposer(
-      @Named("infra.kubernetes.ingress.annotations") Map<String, String> ingressAnnotations,
+      ExternalServerExposerStrategy kubernetesExternalServerExposerStrategy,
       String machineName,
       Pod pod,
       Container container,
       T kubernetesEnvironment) {
-    if (ingressAnnotations == null) {
-      LOG.warn(
-          "Ingresses annotations are absent. Make sure that workspace ingresses don't need "
-              + "to be configured according to ingress controller.");
-    }
-    this.ingressAnnotations = ingressAnnotations;
+    this.kubernetesExternalServerExposerStrategy = kubernetesExternalServerExposerStrategy;
     this.machineName = machineName;
     this.pod = pod;
     this.container = container;
@@ -190,35 +188,8 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
     String serviceName = service.getMetadata().getName();
     kubernetesEnvironment.getServices().put(serviceName, service);
 
-    exposeExternalServers(serviceName, portToServicePort, externalServers);
-  }
-
-  protected void exposeExternalServers(
-      String serviceName,
-      Map<String, ServicePort> portToServicePort,
-      Map<String, ServerConfig> externalServers) {
-    for (ServicePort servicePort : portToServicePort.values()) {
-      int port = servicePort.getTargetPort().getIntVal();
-
-      Map<String, ServerConfig> ingressesServers =
-          externalServers
-              .entrySet()
-              .stream()
-              .filter(e -> parseInt(e.getValue().getPort().split("/")[0]) == port)
-              .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-      Ingress ingress =
-          new IngressBuilder()
-              .withName(serviceName + '-' + servicePort.getName())
-              .withMachineName(machineName)
-              .withServiceName(serviceName)
-              .withAnnotations(ingressAnnotations)
-              .withServicePort(servicePort.getName())
-              .withServers(ingressesServers)
-              .build();
-
-      kubernetesEnvironment.getIngresses().put(ingress.getMetadata().getName(), ingress);
-    }
+    kubernetesExternalServerExposerStrategy.exposeExternalServers(
+        kubernetesEnvironment, machineName, serviceName, portToServicePort, externalServers);
   }
 
   private Map<String, ServicePort> exposePort(Collection<? extends ServerConfig> serverConfig) {
@@ -307,76 +278,6 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
     public ServiceBuilder withMachineName(String machineName) {
       this.machineName = machineName;
       return this;
-    }
-  }
-
-  private static class IngressBuilder {
-    private String name;
-    private String serviceName;
-    private IntOrString servicePort;
-    private Map<String, ? extends ServerConfig> serversConfigs;
-    private String machineName;
-    private Map<String, String> annotations;
-
-    private IngressBuilder withName(String name) {
-      this.name = name;
-      return this;
-    }
-
-    private IngressBuilder withServiceName(String serviceName) {
-      this.serviceName = serviceName;
-      return this;
-    }
-
-    private IngressBuilder withAnnotations(Map<String, String> annotations) {
-      this.annotations = annotations;
-      return this;
-    }
-
-    private IngressBuilder withServicePort(String targetPortName) {
-      this.servicePort = new IntOrString(targetPortName);
-      return this;
-    }
-
-    private IngressBuilder withServers(Map<String, ? extends ServerConfig> serversConfigs) {
-      this.serversConfigs = serversConfigs;
-      return this;
-    }
-
-    public IngressBuilder withMachineName(String machineName) {
-      this.machineName = machineName;
-      return this;
-    }
-
-    private Ingress build() {
-
-      IngressBackend ingressBackend =
-          new IngressBackendBuilder()
-              .withServiceName(serviceName)
-              .withNewServicePort(servicePort.getStrVal())
-              .build();
-
-      String serverPath = "/" + serviceName + "/" + servicePort.getStrVal();
-      HTTPIngressPath httpIngressPath =
-          new HTTPIngressPathBuilder().withPath(serverPath).withBackend(ingressBackend).build();
-
-      HTTPIngressRuleValue httpIngressRuleValue =
-          new HTTPIngressRuleValueBuilder().withPaths(httpIngressPath).build();
-      IngressRule ingressRule = new IngressRuleBuilder().withHttp(httpIngressRuleValue).build();
-      IngressSpec ingressSpec = new IngressSpecBuilder().withRules(ingressRule).build();
-
-      Map<String, String> ingressAnnotations = new HashMap<>(annotations);
-      ingressAnnotations.putAll(
-          Annotations.newSerializer()
-              .servers(serversConfigs)
-              .machineName(machineName)
-              .annotations());
-
-      return new io.fabric8.kubernetes.api.model.extensions.IngressBuilder()
-          .withSpec(ingressSpec)
-          .withMetadata(
-              new ObjectMetaBuilder().withName(name).withAnnotations(ingressAnnotations).build())
-          .build();
     }
   }
 }

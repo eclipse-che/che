@@ -12,6 +12,8 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy.UNIQUE_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.IngressHostExternalServerExposer.HOST_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.IngressPathExternalServerExposer.PATH_STRATEGY;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -36,7 +38,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.IngressAnnotationsProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.IngressHostExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.IngressPathExternalServerExposer;
 
 /** @author Sergii Leshchenko */
 public class KubernetesInfraModule extends AbstractModule {
@@ -64,6 +70,13 @@ public class KubernetesInfraModule extends AbstractModule {
     volumesStrategies.addBinding(COMMON_STRATEGY).to(CommonPVCStrategy.class);
     volumesStrategies.addBinding(UNIQUE_STRATEGY).to(UniqueWorkspacePVCStrategy.class);
     bind(WorkspaceVolumesStrategy.class).toProvider(WorkspaceVolumeStrategyProvider.class);
+
+    MapBinder<String, ExternalServerExposerStrategy> ingressStrategies =
+        MapBinder.newMapBinder(binder(), String.class, ExternalServerExposerStrategy.class);
+    ingressStrategies.addBinding(HOST_STRATEGY).to(IngressHostExternalServerExposer.class);
+    ingressStrategies.addBinding(PATH_STRATEGY).to(IngressPathExternalServerExposer.class);
+    bind(ExternalServerExposerStrategy.class)
+        .toProvider(ExternalServerExposerStrategyProvider.class);
 
     Multibinder<EnvVarProvider> envVarProviders =
         Multibinder.newSetBinder(binder(), EnvVarProvider.class);

@@ -166,6 +166,11 @@ spec:
             configMapKeyRef:
               key: CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON
               name: che
+        - name: CHE_INFRA_KUBERNETES_SERVER_STRATEGY
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_SERVER_STRATEGY
+              name: che
         image: {{ .Values.cheImage }}
         imagePullPolicy: {{ .Values.cheImagePullPolicy }}
         livenessProbe:

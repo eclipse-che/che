@@ -34,6 +34,18 @@ The context of the commands below is the directory in which this readme file res
   ```bash
   helm upgrade --install <my-che-installation> --namespace <my-che-namespace> --set cheDomain=<my-hostname> --set cheImage=<my-image> ./
   ```
+
+- Local Host-Based (wildcard DNS) installation:
+  ```bash
+  helm upgrade --install <my-che-installation> --namespace che --set cheDomain=che.<minikube-ip>.xip.io ./
+  ```
+  master url: http://master.che.<minikube-ip>.xip.io
+- Local Path-Based installation:
+  ```bash
+  helm upgrade --install <my-che-installation> --namespace che --set cheDomain=<minikube-ip> --set isHostBased=false ./ 
+  ```
+  master url: http://<minikube-ip>
+  
 ## Deleting a Deployment
 You can delete a deployment using the following command:
 ``` bash
