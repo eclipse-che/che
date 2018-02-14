@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -260,7 +260,7 @@ public class Menu {
    * @param idCommand is name of command in the menu
    */
   public void waitMenuItemIsEnabled(String idCommand) {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.id(idCommand)));
   }
 }
