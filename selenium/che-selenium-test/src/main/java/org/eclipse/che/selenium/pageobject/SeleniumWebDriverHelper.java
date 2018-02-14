@@ -456,7 +456,7 @@ public class SeleniumWebDriverHelper {
    * @param elementLocator
    * @return state of element visibility
    */
-  public boolean isVisible(By elementLocator) {
+  public boolean isVisibleDuringTimeout(By elementLocator) {
     try {
       webDriverWaitFactory
           .get(ATTACHING_ELEM_TO_DOM_SEC)
@@ -473,7 +473,7 @@ public class SeleniumWebDriverHelper {
    * @param webElement
    * @return state of element visibility
    */
-  public boolean isVisible(WebElement webElement) {
+  public boolean isVisibleDuringTimeout(WebElement webElement) {
     try {
       webDriverWaitFactory.get(ATTACHING_ELEM_TO_DOM_SEC).until(visibilityOf(webElement));
       return true;
