@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -25,11 +27,14 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
 public class ShowHintsCommandTest {
+  private final Logger LOG = LoggerFactory.getLogger(ShowHintsCommandTest.class);
   private static final String PROJECT_NAME =
       NameGenerator.generate(ShowHintsCommandTest.class.getSimpleName(), 4);
 
@@ -69,7 +74,7 @@ public class ShowHintsCommandTest {
   }
 
   @Test
-  public void checkShowHintsCommand() {
+  public void checkShowHintsCommand() throws Exception {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     console.closeProcessesArea();
@@ -109,25 +114,36 @@ public class ShowHintsCommandTest {
     editor.waitShowHintsPopUpClosed();
   }
 
-  private void waitErrorMarkerInPosition() {
+  private void waitErrorMarkerInPosition() throws Exception {
     try {
       editor.waitMarkerInPosition(MarkersType.ERROR_MARKER, 33);
     } catch (TimeoutException ex) {
-      editor.setCursorToLine(33);
-      editor.waitCursorPosition(33, 1);
-      editor.typeTextIntoEditor(Keys.ENTER.toString());
-      editor.waitCursorPosition(34, 1);
-      editor.typeTextIntoEditor(Keys.ENTER.toString());
-      editor.waitCursorPosition(35, 1);
-      editor.typeTextIntoEditor(Keys.ENTER.toString());
-      editor.waitCursorPosition(36, 1);
-      editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
-      editor.waitCursorPosition(35, 1);
-      editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
-      editor.waitCursorPosition(34, 1);
-      editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
-      editor.waitCursorPosition(33, 1);
-      editor.waitMarkerInPosition(MarkersType.ERROR_MARKER, 33);
+      logExternalLibraries();
+      logProjectTypeChecking();
+      logProjectLanguageChecking();
+
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7161", ex);
     }
+  }
+
+  private void logExternalLibraries() throws Exception {
+    testProjectServiceClient
+        .getExternalLibraries(workspace.getId(), PROJECT_NAME)
+        .forEach(library -> LOG.info("project external library:  {}", library));
+  }
+
+  private void logProjectTypeChecking() throws Exception {
+    LOG.info(
+        "Project type of the {} project is \"maven\" - {}",
+        PROJECT_NAME,
+        testProjectServiceClient.checkProjectType(workspace.getId(), PROJECT_NAME, "maven"));
+  }
+
+  private void logProjectLanguageChecking() throws Exception {
+    LOG.info(
+        "Project language of the {} project is \"java\" - {}",
+        PROJECT_NAME,
+        testProjectServiceClient.checkProjectLanguage(workspace.getId(), PROJECT_NAME, "java"));
   }
 }
