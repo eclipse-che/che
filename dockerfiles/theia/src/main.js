@@ -26,7 +26,7 @@ else {
     let pluginString = process.env.THEIA_PLUGINS;
     let pluginList = [];
     if (pluginString && pluginString.length !== 0) {
-        let arr = JSON.parse(pluginString);
+        let arr = pluginString.split(',');
         pluginList = [...arr];
         theiaConfig = defaultConfig;
         let dep = theiaConfig.dependencies;
