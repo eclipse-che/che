@@ -110,6 +110,7 @@ public class Dashboard {
     String LICENSE_NAG_MESSAGE_XPATH = "//div[contains(@class, 'license-message')]";
     String TOOLBAR_TITLE_NAME =
         "//div[contains(@class,'che-toolbar')]//span[contains(text(),'%s')]";
+    String WORKSPACE_NAME_IN_RECENT_LIST = "//span[@title='%s']";
   }
 
   @FindBy(id = Locators.DASHBOARD_TOOLBAR_TITLE)
@@ -280,6 +281,14 @@ public class Dashboard {
     List<WebElement> workspaces =
         seleniumWebDriver.findElements(By.xpath(Locators.RESENT_WS_NAVBAR));
     return !(workspaces.size() == 0);
+  }
+
+  public boolean checkWorkspaceNamePresentInRecentList(String workspaceName) {
+    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(
+            visibilityOfElementLocated(
+                By.xpath(format(Locators.WORKSPACE_NAME_IN_RECENT_LIST, workspaceName))))
+        .isDisplayed();
   }
 
   public void clickOnUsernameButton() {
