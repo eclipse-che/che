@@ -124,7 +124,7 @@ public class ContributionMixinProvider {
 
     final Project rootProject = appContext.getRootProject();
 
-    if (lastSelected != null && lastSelected.equals(rootProject)) {
+    if (lastSelected != null && lastSelected.equals(rootProject) && hasVcsService(rootProject)) {
       return;
     }
 
@@ -132,6 +132,7 @@ public class ContributionMixinProvider {
 
     if (rootProject == null) {
       invalidateContext(lastSelected);
+      lastSelected = null;
       if (selection.isMultiSelection()) {
         contributePart.showStub(messages.stubTextShouldBeSelectedOnlyOneProject());
       } else {
@@ -142,8 +143,8 @@ public class ContributionMixinProvider {
     } else {
       invalidateContext(rootProject);
       contributePart.showStub(messages.stubTextProjectNotProvideSupportedVCS());
+      lastSelected = null;
     }
-    lastSelected = rootProject;
   }
 
   private boolean isSupportedSelection(Selection<?> selection) {
@@ -170,6 +171,8 @@ public class ContributionMixinProvider {
                 workflowExecutor.init(vcsHostingService, prj);
                 addPart();
                 contributePart.showContent();
+
+                lastSelected = prj;
               })
           .catchError(
               err -> {

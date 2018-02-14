@@ -61,19 +61,19 @@ public class KeycloakPasswordPage {
   }
 
   public void setPasswordFieldValue(String value) {
-    seleniumWebDriverHelper.setFieldValue(By.id(PASSWORD_FIELD_ID), value);
+    seleniumWebDriverHelper.setValue(By.id(PASSWORD_FIELD_ID), value);
   }
 
   public void setNewPasswordFieldValue(String value) {
-    seleniumWebDriverHelper.setFieldValue(By.id(NEW_PASSWORD_FIELD_ID), value);
+    seleniumWebDriverHelper.setValue(By.id(NEW_PASSWORD_FIELD_ID), value);
   }
 
   public void setNewPasswordConfirmationFieldValue(String value) {
-    seleniumWebDriverHelper.setFieldValue(By.id(NEW_PASSWORD_CONFIRMATION_ID), value);
+    seleniumWebDriverHelper.setValue(By.id(NEW_PASSWORD_CONFIRMATION_ID), value);
   }
 
   public void clickOnSavePasswordButton() {
-    seleniumWebDriverHelper.waitAndClickOnElement(By.xpath(SAVE_BUTTON));
+    seleniumWebDriverHelper.waitAndClick(By.xpath(SAVE_BUTTON));
   }
 
   public void waitTextInErrorAlert(String expectedText) {
@@ -81,7 +81,7 @@ public class KeycloakPasswordPage {
         (ExpectedCondition<Boolean>)
             driver ->
                 seleniumWebDriverHelper
-                    .waitAndGetElement(By.xpath(ERROR_ALERT))
+                    .waitVisibility(By.xpath(ERROR_ALERT))
                     .getText()
                     .equals(expectedText));
   }
@@ -91,7 +91,7 @@ public class KeycloakPasswordPage {
         (ExpectedCondition<Boolean>)
             driver ->
                 seleniumWebDriverHelper
-                    .waitAndGetElement(By.xpath(SUCCESS_ALERT))
+                    .waitVisibility(By.xpath(SUCCESS_ALERT))
                     .getText()
                     .equals(expectedText));
   }
@@ -102,6 +102,6 @@ public class KeycloakPasswordPage {
             By.id(NEW_PASSWORD_FIELD_ID),
             By.id(NEW_PASSWORD_CONFIRMATION_ID),
             By.xpath(SAVE_BUTTON))
-        .forEach(locator -> seleniumWebDriverHelper.waitElementIsVisible(locator));
+        .forEach(locator -> seleniumWebDriverHelper.waitVisibility(locator));
   }
 }

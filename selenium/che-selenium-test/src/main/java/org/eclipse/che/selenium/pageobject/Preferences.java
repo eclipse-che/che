@@ -407,13 +407,13 @@ public class Preferences {
 
       switch (valueOfDropDown) {
         case IGNORE:
-          webDriverHelper.waitAndClickOnElement(dropDownList.get(0));
+          webDriverHelper.waitAndClick(dropDownList.get(0));
           break;
         case WARNING:
-          webDriverHelper.waitAndClickOnElement(dropDownList.get(1));
+          webDriverHelper.waitAndClick(dropDownList.get(1));
           break;
         default:
-          webDriverHelper.waitAndClickOnElement(dropDownList.get(2));
+          webDriverHelper.waitAndClick(dropDownList.get(2));
           break;
       }
     }
