@@ -13,7 +13,7 @@ package org.eclipse.che.api.core.util;
 import java.io.IOException;
 
 /**
- * Wrapper of {@link LineConsumer} which limits total size of consuming lines.
+ * Wrapper of {@link LineConsumer} object which is limiting total number of characters which this object can consume.
  *
  * @author Dmytro Nochevnov
  * @author Anatolii Bazko
@@ -37,7 +37,7 @@ public class LimitedSizeLineConsumerWrapper implements LineConsumer {
   }
 
   /**
-   * Consumes line and ensures that total size of consumed lines doesn't exceed {@link
+   * Consumes line and ensures that total length of consumed lines doesn't exceed {@link
    * LimitedSizeLineConsumerWrapper#limit}. Doesn't write line if limit has been already succeeded
    * before. Trims {@code line} to prevent exceeding of {@link
    * LimitedSizeLineConsumerWrapper#limit}.
