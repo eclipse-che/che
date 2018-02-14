@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author andrew00x
  * @author Alexander Garagatyi
+ * @author Dmytro Nochevnov
  */
 public final class ProcessUtil {
 
@@ -90,6 +91,7 @@ public final class ProcessUtil {
    * @throws IOException in case I/O error
    * @throws TimeoutException if process gets more time then defined by {@code timeout}
    */
+  @SuppressWarnings("FutureReturnValueIgnored")
   public static Process executeAndWait(
       String[] commandLine, int timeout, TimeUnit timeUnit, LineConsumer outputConsumer)
       throws TimeoutException, IOException, InterruptedException {
@@ -127,6 +129,63 @@ public final class ProcessUtil {
   }
 
   /**
+   * Start the process, writing the stdout of process to {@code stdout}, stderr of process to {@code
+   * stderr}, and terminate process by {@code timeout}.<br>
+   *
+   * @param commandLine arguments of process command
+   * @param timeout timeout for process. If process duration > {@code timeout} than kill process and
+   *     throw {@link TimeoutException}.
+   * @param timeUnit timeUnit of the {@code timeout}.
+   * @param stdout a consumer where stdout will be redirected
+   * @param stderr a consumer where stderr will be redirected
+   * @return the started process
+   * @throws InterruptedException in case terminate process
+   * @throws IOException in case I/O error, or command execution error
+   * @throws TimeoutException if process gets more time then defined by {@code timeout}
+   */
+  public static Process executeAndWait(
+      String[] commandLine,
+      int timeout,
+      TimeUnit timeUnit,
+      LineConsumer stdout,
+      LineConsumer stderr)
+      throws TimeoutException, IOException, InterruptedException {
+    ProcessBuilder pb = new ProcessBuilder(commandLine);
+
+    Process process = pb.start();
+
+    CompletableFuture<Void> future =
+        CompletableFuture.runAsync(
+            () -> {
+              try {
+                // consume logs until process ends
+                process(process, stdout, stderr);
+              } catch (IOException e) {
+                LOG.error(
+                    format(
+                        "Failed to complete reading of the process '%s' output due to occurred error",
+                        Joiner.on(" ").join(commandLine)),
+                    e);
+              }
+            });
+
+    if (!process.waitFor(timeout, timeUnit)) {
+      try {
+        ProcessUtil.kill(process);
+      } catch (RuntimeException x) {
+        LOG.error("An error occurred while killing process '{}'", Joiner.on(" ").join(commandLine));
+      }
+      throw new TimeoutException(
+          format(
+              "Process '%s' was terminated by timeout %s %s.",
+              Joiner.on(" ").join(commandLine), timeout, timeUnit.name().toLowerCase()));
+    }
+
+    future.join(); // wait until process output is read
+    return process;
+  }
+
+  /**
    * Start the process, writing the stdout and stderr to consumer.
    *
    * @param pb process builder to start
@@ -139,6 +198,23 @@ public final class ProcessUtil {
     Process process = pb.start();
 
     process(process, consumer);
+
+    return process;
+  }
+
+  /**
+   * Start the process.
+   *
+   * @param pb process builder to start
+   * @param stdout a consumer for stdout of process
+   * @param stderr a consumer for stderr of process
+   * @return the started process
+   * @throws IOException
+   */
+  public static Process execute(ProcessBuilder pb, LineConsumer stdout, LineConsumer stderr)
+      throws IOException {
+    Process process = pb.start();
+    process(process, stdout, stderr);
 
     return process;
   }
