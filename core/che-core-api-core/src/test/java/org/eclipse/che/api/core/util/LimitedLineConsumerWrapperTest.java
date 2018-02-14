@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
 
 /** @author Dmytro Nochevnov */
 @Listeners(value = MockitoTestNGListener.class)
-public class LimitedSizeLineConsumerWrapperTest {
+public class LimitedLineConsumerWrapperTest {
 
   private static final String LINE_2 = "line2";
   private static final String LINE_1 = "line1";
@@ -43,8 +43,8 @@ public class LimitedSizeLineConsumerWrapperTest {
       throws IOException {
     // given
     ListLineConsumer testConsumer = new ListLineConsumer();
-    LimitedSizeLineConsumerWrapper testConsumerWrapper =
-        new LimitedSizeLineConsumerWrapper(testConsumer, limit);
+    LimitedLineConsumerWrapper testConsumerWrapper =
+        new LimitedLineConsumerWrapper(testConsumer, limit);
 
     // when
     for (String line : consumingLines) {
@@ -78,7 +78,7 @@ public class LimitedSizeLineConsumerWrapperTest {
   )
   public void shouldThrowExceptionIfTextSizeLimitIsNegative() {
     // when
-    new LimitedSizeLineConsumerWrapper(new AbstractLineConsumer() {}, NEGATIVE_TEXT_SIZE_LIMIT);
+    new LimitedLineConsumerWrapper(new AbstractLineConsumer() {}, NEGATIVE_TEXT_SIZE_LIMIT);
   }
 
   @Test
@@ -87,7 +87,7 @@ public class LimitedSizeLineConsumerWrapperTest {
     LineConsumer mockConsumer = Mockito.mock(LineConsumer.class);
 
     // when
-    new LimitedSizeLineConsumerWrapper(mockConsumer, 123).close();
+    new LimitedLineConsumerWrapper(mockConsumer, 123).close();
 
     // then
     verify(mockConsumer).close();
