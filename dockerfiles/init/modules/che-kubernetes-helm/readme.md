@@ -22,7 +22,8 @@ In case you're specifying a hostname, simply pass it as the value of the `cheDom
 If you must use an ip address (e.g. your corporate policy prevents you from using nip.io), you would also have to set `isHostBased` to `false`.
 
 ### Perform the Actual Deployment
-- The context of the commands below is the directory in which this readme file resides
+The context of the commands below is the directory in which this readme file resides
+
 - Override default values by changing the values.yaml file and then typing:
 
   ```bash
@@ -33,3 +34,8 @@ If you must use an ip address (e.g. your corporate policy prevents you from usin
   ```bash
   helm upgrade --install <my-che-installation> --namespace <my-che-namespace> --set cheDomain=<my-hostname> --set cheImage=<my-image> ./
   ```
+## Deleting a Deployment
+You can delete a deployment using the following command:
+``` bash
+helm delete <my-che-installation>
+```
