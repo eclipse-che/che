@@ -16,14 +16,11 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
@@ -36,8 +33,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
-import org.eclipse.che.ide.ext.java.shared.dto.Change;
-import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.jdt.ls.extension.api.dto.ImportConflicts;
 import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImports;
 import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportsResult;
@@ -145,7 +140,8 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
   public void onNextButtonClicked() {
     selected.put(page++, view.getSelectedImport());
     if (!selected.containsKey(page)) {
-      selected.put(page, view.getSelectedImport());
+      String newSelection = choices.get(page).getMatches().get(0);
+      selected.put(page, newSelection);
     }
     view.setSelectedImport(selected.get(page));
     view.changePage(choices.get(page));
@@ -211,10 +207,8 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
     page = 0;
     selected = new HashMap<>(choices.size());
 
-    ImportConflicts conflict = choices.get(0);
-
-    String selection = conflict.getMatches().get(0);
-    selected.put(page, choices.get(0).getMatches().get(0));
+    String selection = choices.get(0).getMatches().get(0);
+    selected.put(page, selection);
     view.setSelectedImport(selection);
 
     updateButtonsState();

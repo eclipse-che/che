@@ -62,7 +62,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.text.edits.TextEdit;
 
-public class  OrganizeImportsOperation implements IWorkspaceRunnable {
+public class OrganizeImportsOperation implements IWorkspaceRunnable {
   public static interface IChooseImportQuery {
     /**
      * Selects imports from a list of choices.
