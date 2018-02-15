@@ -9,6 +9,7 @@
 set -e
 
 echo "[CHE] This script is going to wait until Postgres is deployed and available"
+echo "[CHE] It can take a couple of minutes depending on network and image availability"
 
 command -v oc >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool oc (https://docs.openshift.org/latest/cli_reference/get_started_cli.html) is required but it's not installed. Aborting."; exit 1; }
 command -v jq >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool jq (https://stedolan.github.io/jq) is required but it's not installed. Aborting."; exit 1; }

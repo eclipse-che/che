@@ -544,3 +544,24 @@ echo "[CHE] -> Once the deployment is completed Che will be available at: "
 echo "[CHE]    ${HTTP_PROTOCOL}://${che_route}"
 echo
 echo
+
+if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
+
+echo "Configuring Keycloak..."
+
+cat /home/eugene/projects/che/dockerfiles/init/modules/keycloak/templates/che-realm.json.erb | sed -e "s@<%= scope\.lookupvar('che::che_server_url') %>@${HTTP_PROTOCOL}://${che_route}@" > /home/eugene/che-realm.json
+
+KC_ROUTE=$(oc get route keycloak -o jsonpath='{.spec.host}')
+
+cd /home/eugene/Downloads/keycloak-3.4.3.Final/bin
+
+echo "[CHE] Creating Che realm and che-public client..."
+
+./kcadm.sh create realms -f /home/eugene/che-realm.json --no-config --server ${HTTP_PROTOCOL}://${KC_ROUTE}/auth --realm master --user admin --password admin
+
+echo "[CHE] Creating default Che user with the following credentials 'admin:admin'"
+
+./kcadm.sh create users -r che -f /home/eugene/Documents/chemultikc/instance/config/keycloak/che-users-0.json --no-config --server ${HTTP_PROTOCOL}://${KC_ROUTE}/auth --realm master --user admin --password admin
+
+echo "Done!"
+fi

@@ -39,59 +39,6 @@ if [ "${CHE_SERVER_URL}" == "" ]; then
 fi
 DEFAULT_CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD=true
 
-# apply KC build config
-oc apply -f - <<-EOF
-
-apiVersion: v1
-kind: BuildConfig
-metadata:
-  name: keycloak-for-che
-spec:
-  nodeSelector: null
-  output:
-    to:
-      kind: ImageStreamTag
-      name: 'keycloak:latest'
-  postCommit: {}
-  resources: {}
-  runPolicy: Serial
-  source:
-    images:
-      - from:
-          kind: ImageStreamTag
-          name: 'che-init:latest'
-        paths:
-          - destinationDir: ./themes/
-            sourcePath: /etc/puppet/modules/keycloak/files/che/
-          - destinationDir: ./realms/
-            sourcePath: /etc/puppet/modules/keycloak/templates/.
-          - destinationDir: .s2i/bin/
-            sourcePath: /files/s2i/keycloak/assemble
-          - destinationDir: .s2i/bin/
-            sourcePath: /files/s2i/keycloak/run
-    type: Image
-  strategy:
-    sourceStrategy:
-      env:
-          - name: "CHE_SERVER_URL"
-            value: "${CHE_SERVER_URL}"
-          - name: "CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD"
-            value: "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD:-${DEFAULT_CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}}"
-      from:
-        kind: ImageStreamTag
-        name: 'keycloak-source:latest'
-    type: Source
-  triggers:
-  - type: "ImageChange"
-    imageChange: {}
-  - type: "ImageChange"
-    imageChange:
-      from:
-        kind: "ImageStreamTag"
-        name: "che-init:latest"
-status:
-
-EOF
 
 # apply all yaml files from "$COMMAND_DIR"/keycloak/
 oc apply -f "$COMMAND_DIR"/keycloak/
@@ -114,22 +61,5 @@ if [ "${CHE_SERVER_ROUTE_TLS}" != "" ]; then
 fi
 
 IMAGE_KEYCLOACK=${IMAGE_KEYCLOACK:-"jboss/keycloak-openshift:3.3.0.CR2-3"}
-
-oc apply -f - <<-EOF
-
-apiVersion: v1
-kind: ImageStream
-metadata:
-  name: keycloak-source
-spec:
-  tags:
-  - from:
-      kind: DockerImage
-      name: ${IMAGE_KEYCLOACK}
-    name: latest
-    importPolicy:
-      scheduled: true
-
-EOF
 
 "$COMMAND_DIR"/wait_until_keycloak_is_available.sh
