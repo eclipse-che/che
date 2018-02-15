@@ -34,23 +34,6 @@ public class MachineTokenRegistry {
   private final Table<String, String, String> tokens = HashBasedTable.create();
   private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-  /**
-   * Generates new machine security token for given user and workspace.
-   *
-   * @param userId id of user to generate token for
-   * @param workspaceId id of workspace to generate token for
-   * @return generated token value
-   */
-  private String generateToken(String userId, String workspaceId) {
-    lock.writeLock().lock();
-    try {
-      final String token = generate("machine", 128);
-      tokens.put(workspaceId, userId, token);
-      return token;
-    } finally {
-      lock.writeLock().unlock();
-    }
-  }
 
   /**
    * Gets or creates machine security token for user and workspace. For running workspace, there is
@@ -64,7 +47,13 @@ public class MachineTokenRegistry {
     lock.writeLock().lock();
     try {
       final Map<String, String> wsRow = tokens.row(workspaceId);
-      return wsRow.get(userId) == null ? generateToken(userId, workspaceId) : wsRow.get(userId);
+      String token = wsRow.get(userId);
+
+      if (token == null) {
+        token = generate("machine", 128);
+        tokens.put(workspaceId, userId, token);
+      }
+      return token;
     } finally {
       lock.writeLock().unlock();
     }
