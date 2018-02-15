@@ -48,6 +48,10 @@ public class EitherUtil {
       }
     }
 
-    return element.isJsonObject();
+    if (decision == JsonDecision.OBJECT) {
+      return element.isJsonObject();
+    }
+
+    return false;
   }
 }
