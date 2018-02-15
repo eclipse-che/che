@@ -40,7 +40,7 @@ spec:
           value: admin
         - name: KEYCLOAK_PASSWORD
           value: admin
-        image: 'jboss/keycloak-openshift:3.3.0.CR2-3'
+        image: 'eivantsov/keycloak:latest'
         imagePullPolicy: Always
         name: keycloak
         livenessProbe:

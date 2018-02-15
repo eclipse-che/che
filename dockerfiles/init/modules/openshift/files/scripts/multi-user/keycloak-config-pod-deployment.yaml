@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: keycloak-util
+  name: keycloak-util
+spec:
+    containers:
+    - env:
+      - name: CHE_HOST
+        value: "${CHE_HOST}"
+      - name: HTTP_PROTOCOL
+        value: "${HTTP_PROTOCOL}"
+      - name: KC_HOST
+        value: "${KC_HOST}"
+      image: eivantsov/kc-utils
+      name: keycloak-util
+      imagePullPolicy: Always
+    restartPolicy: Never
