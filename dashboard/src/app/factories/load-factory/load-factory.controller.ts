@@ -23,6 +23,9 @@ const WS_AGENT_STEP: number = 3;
  * @author Ann Shumilova
  */
 export class LoadFactoryController {
+
+  static $inject = ['cheAPI', 'cheJsonRpcApi', '$route', '$timeout', '$mdDialog', 'loadFactoryService', 'lodash', 'cheNotification', '$location', 'routeHistory', '$window'];
+
   private cheAPI: CheAPI;
   private $timeout: ng.ITimeoutService;
   private $mdDialog: ng.material.IDialogService;
@@ -41,10 +44,8 @@ export class LoadFactoryController {
   private factory: che.IFactory;
   private jsonRpcMasterApi: CheJsonRpcMasterApi;
 
-
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(cheAPI: CheAPI,
               cheJsonRpcApi: CheJsonRpcApi,

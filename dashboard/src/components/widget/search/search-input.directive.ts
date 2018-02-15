@@ -42,7 +42,6 @@ export class SearchInput {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor() {
     this.scope = {

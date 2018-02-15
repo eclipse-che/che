@@ -17,6 +17,9 @@
  * @author Oleksii Orel
  */
 export class OrganizationMemberDialogController {
+
+  static $inject = ['$q', '$mdDialog', 'cheUser', 'cheOrganization', 'lodash', 'resourcesService'];
+
   /**
    * User API interaction.
    */
@@ -100,7 +103,6 @@ export class OrganizationMemberDialogController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($q: ng.IQService, $mdDialog: angular.material.IDialogService, cheUser: any, cheOrganization: che.api.ICheOrganization, lodash: any, resourcesService: che.service.IResourcesService) {
     this.$mdDialog = $mdDialog;

@@ -16,6 +16,9 @@
  * @author Ann Shumilova
  */
 export class TeamItemController {
+
+  static $inject = ['$location', 'cheTeam', 'confirmDialogService', 'cheNotification'];
+
   /**
    * Service for displaying dialogs.
    */
@@ -43,7 +46,6 @@ export class TeamItemController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($location: ng.ILocationService, cheTeam: che.api.ICheTeam, confirmDialogService: any, cheNotification: any) {
     this.$location = $location;

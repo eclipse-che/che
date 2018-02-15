@@ -17,6 +17,9 @@ import {IEnvironmentManagerMachine} from '../../../../../components/api/environm
  * @author Oleksii Orel
  */
 export class ChangeDevMachineDialogController {
+
+  static $inject = ['$mdDialog'];
+
   /**
    * Material design Dialog service.
    */
@@ -57,7 +60,6 @@ export class ChangeDevMachineDialogController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;

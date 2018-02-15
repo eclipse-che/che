@@ -42,6 +42,9 @@
  * @author Oleksii Kurinnyi
  */
 export abstract class CheMultiTransclude implements ng.IDirective {
+
+  static $inject = ['$compile'];
+
   restrict: string = 'AE';
   transclude: boolean = false;
 
@@ -52,7 +55,6 @@ export abstract class CheMultiTransclude implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($compile: ng.ICompileService) {
     this.$compile = $compile;

@@ -29,6 +29,10 @@ import {
  * @author Oleksii Kurinnyi
  */
 export class CreateWorkspaceController {
+
+  static $inject = ['$mdDialog', '$timeout', 'cheEnvironmentRegistry', 'createWorkspaceSvc', 'namespaceSelectorSvc', 'stackSelectorSvc',
+   'randomSvc', '$log', 'cheNotification'];
+
   /**
    * Dropdown button config.
    */
@@ -108,7 +112,6 @@ export class CreateWorkspaceController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService,
               $timeout: ng.ITimeoutService,

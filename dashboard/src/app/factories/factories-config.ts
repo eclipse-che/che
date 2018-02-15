@@ -32,7 +32,7 @@ export class FactoryConfig {
     register.service('loadFactoryService', LoadFactoryService);
 
     // config routes
-    register.app.config(function ($routeProvider: che.route.IRouteProvider) {
+    register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/factories', {
         title: 'Factories',
         templateUrl: 'app/factories/list-factories/list-factories.html',
@@ -52,7 +52,7 @@ export class FactoryConfig {
         controllerAs: 'loadFactoryController'
       });
 
-    });
+    }]);
 
     // config files
     /* tslint:disable */

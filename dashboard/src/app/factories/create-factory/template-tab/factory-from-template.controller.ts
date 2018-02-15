@@ -17,6 +17,9 @@ import {CheFactoryTemplate} from '../../../../components/api/che-factory-templat
  * @author Oleksii Orel
  */
 export class FactoryFromTemplateController {
+
+  static $inject = ['$filter', 'cheFactoryTemplate', 'cheNotification'];
+
   editorState: {isValid: boolean; errors: Array<string>} = {isValid: true, errors: []};
   private $filter: ng.IFilterService;
   private cheFactoryTemplate: CheFactoryTemplate;
@@ -27,7 +30,6 @@ export class FactoryFromTemplateController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($filter: ng.IFilterService, cheFactoryTemplate: CheFactoryTemplate, cheNotification: CheNotification) {
     this.$filter = $filter;

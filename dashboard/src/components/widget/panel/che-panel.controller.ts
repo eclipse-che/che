@@ -18,6 +18,8 @@
  */
 export class ChePanelCtrl {
 
+  static $inject = ['$scope'];
+
   $scope: ng.IScope;
 
   collapse: boolean;
@@ -27,7 +29,6 @@ export class ChePanelCtrl {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope) {
     this.collapse = false;

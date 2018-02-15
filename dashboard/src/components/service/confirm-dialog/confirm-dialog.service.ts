@@ -17,11 +17,12 @@
  */
 export class ConfirmDialogService {
 
+  static $inject = ['$mdDialog'];
+
   private $mdDialog: ng.material.IDialogService;
 
     /**
      * Default constructor that is using resource
-     * @ngInject for Dependency injection
      */
     constructor ($mdDialog: ng.material.IDialogService) {
       this.$mdDialog = $mdDialog;

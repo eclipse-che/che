@@ -19,6 +19,9 @@ interface ICheFormatOutputAttributes extends ng.IAttributes {
  * @author Ann Shumilova
  */
 export class CheFormatOutput implements ng.IDirective {
+
+  static $inject = ['jsonOutputColors', '$compile'];
+
   restrict = 'A';
 
   outputColors: any;
@@ -26,7 +29,6 @@ export class CheFormatOutput implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(jsonOutputColors: string,
               $compile: ng.ICompileService) {

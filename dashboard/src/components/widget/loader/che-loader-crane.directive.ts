@@ -22,6 +22,9 @@ interface ICheLoaderCraneScope extends ng.IScope {
  * @author Oleksii Kurinnyi
  */
 export class CheLoaderCrane implements ng.IDirective {
+
+  static $inject = ['$timeout', '$window'];
+
   $timeout: ng.ITimeoutService;
   $window: ng.IWindowService;
 
@@ -39,7 +42,6 @@ export class CheLoaderCrane implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($timeout: ng.ITimeoutService, $window: ng.IWindowService) {
     this.$timeout = $timeout;

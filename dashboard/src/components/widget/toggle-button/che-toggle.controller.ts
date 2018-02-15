@@ -15,11 +15,13 @@
  * @author Florent Benoit
  */
 export class CheToggleController {
+
+  static $inject = ['$scope'];
+
   $scope: ng.IScope;
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope) {
     this.$scope = $scope;

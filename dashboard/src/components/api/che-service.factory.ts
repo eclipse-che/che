@@ -15,6 +15,9 @@
  * @author Ann Shumilova
  */
 export class CheService {
+
+  static $inject = ['$http'];
+
   /**
    * Service for performing HTTP requests.
    */
@@ -32,7 +35,6 @@ export class CheService {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor ($http: ng.IHttpService) {
     this.$http = $http;

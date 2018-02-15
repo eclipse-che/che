@@ -25,6 +25,9 @@ interface INavBarSelectedRootScopeService extends ng.IRootScopeService {
  * @author Florent Benoit
  */
 export class NavBarSelected  implements ng.IDirective {
+
+  static $inject = ['$rootScope', '$location'];
+
   restrict = 'A';
   replace = false;
   controller = 'NavBarSelectedCtrl';
@@ -36,7 +39,6 @@ export class NavBarSelected  implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor ($rootScope: ng.IRootScopeService, $location: ng.ILocationService) {
     this.$rootScope = <INavBarSelectedRootScopeService>$rootScope;

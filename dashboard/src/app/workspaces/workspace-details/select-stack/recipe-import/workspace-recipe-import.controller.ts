@@ -18,6 +18,9 @@
  * @author Oleksii Kurinnyi
  */
 export class WorkspaceRecipeImportController {
+
+  static $inject = ['$scope', '$timeout'];
+
   $timeout: ng.ITimeoutService;
 
   recipeUrl: string;
@@ -28,7 +31,6 @@ export class WorkspaceRecipeImportController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope, $timeout: ng.ITimeoutService) {
     this.recipeFormat = this.recipeFormat || 'compose';

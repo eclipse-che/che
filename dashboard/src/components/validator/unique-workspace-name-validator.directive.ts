@@ -20,6 +20,9 @@ interface IUniqueWorkspaceNameValidatorAttributes extends ng.IAttributes {
  * @author Oleksii Kurinnyi
  */
 export class UniqueWorkspaceNameValidator implements ng.IDirective {
+
+  static $inject = ['cheAPI', '$q'];
+
   restrict = 'A';
   require = 'ngModel';
 
@@ -28,7 +31,6 @@ export class UniqueWorkspaceNameValidator implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor (cheAPI: CheAPI, $q: ng.IQService) {
     this.cheAPI = cheAPI;

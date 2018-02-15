@@ -19,6 +19,9 @@ import {CheNotification} from '../../../components/notification/che-notification
  * @author Oleksii Orel
  */
 export class DashboardLastWorkspacesController {
+
+  static $inject = ['cheWorkspace', 'cheNotification'];
+
   cheWorkspace: CheWorkspace;
   cheNotification: CheNotification;
   workspaces: Array<che.IWorkspace>;
@@ -26,7 +29,6 @@ export class DashboardLastWorkspacesController {
 
   /**
    * Default constructor
-   * @ngInject for Dependency injection
    */
   constructor(cheWorkspace: CheWorkspace, cheNotification: CheNotification) {
     this.cheWorkspace = cheWorkspace;

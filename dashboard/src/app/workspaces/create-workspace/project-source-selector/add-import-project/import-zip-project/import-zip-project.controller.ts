@@ -20,6 +20,9 @@ import {AddImportProjectService} from '../add-import-project.service';
  * @author Oleksii Kurinnyi
  */
 export class ImportZipProjectController {
+
+  static $inject = ['$scope', 'importZipProjectService', 'addImportProjectService'];
+
   /**
    * Import Zip project service.
    */
@@ -43,7 +46,6 @@ export class ImportZipProjectController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope, importZipProjectService: ImportZipProjectService, addImportProjectService: AddImportProjectService) {
     this.importZipProjectService = importZipProjectService;

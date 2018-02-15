@@ -17,6 +17,9 @@
  * @author Ann Shumilova
  */
 export class NavbarTeamsController {
+
+  static $inject = ['cheTeam'];
+
   /**
    * Team API interaction.
    */
@@ -24,7 +27,6 @@ export class NavbarTeamsController {
 
   /**
    * Default constructor
-   * @ngInject for Dependency injection
    */
   constructor(cheTeam: che.api.ICheTeam) {
     this.cheTeam = cheTeam;

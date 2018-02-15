@@ -27,6 +27,9 @@ const MAX_ITEMS = 12;
  * @author Oleksii Orel
  */
 export class AdminUserDetailsController {
+
+  static $inject = ['cheProfile', '$location', '$timeout', '$scope', 'cheNotification', 'cheOrganization', 'initData'];
+
   tab: Object = Tab;
 
  /**
@@ -76,7 +79,6 @@ export class AdminUserDetailsController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor(cheProfile: CheProfile,
               $location: ng.ILocationService,

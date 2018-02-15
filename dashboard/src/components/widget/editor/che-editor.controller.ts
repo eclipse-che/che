@@ -35,6 +35,9 @@ interface IEditorState {
  * @author Oleksii Orel
  */
 export class CheEditorController {
+
+  static $inject = ['$timeout'];
+
   setEditorValue: (content: string) => void;
   /**
    * Editor options object.
@@ -70,7 +73,6 @@ export class CheEditorController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($timeout: ng.ITimeoutService) {
     this.editorOptions = {

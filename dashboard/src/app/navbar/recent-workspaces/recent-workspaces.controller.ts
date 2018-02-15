@@ -23,6 +23,9 @@ const MAX_RECENT_WORKSPACES_ITEMS: number = 5;
  * @author Oleksii Kurinnyi
  */
 export class NavbarRecentWorkspacesController {
+
+  static $inject = ['ideSvc', 'cheWorkspace', 'cheBranding', '$window', '$log', '$scope', '$rootScope', 'workspacesService'];
+
   cheWorkspace: CheWorkspace;
   dropdownItemTempl: Array<any>;
   workspaces: Array<che.IWorkspace>;
@@ -40,7 +43,6 @@ export class NavbarRecentWorkspacesController {
 
   /**
    * Default constructor
-   * @ngInject for Dependency injection
    */
   constructor(ideSvc: IdeSvc,
               cheWorkspace: CheWorkspace,

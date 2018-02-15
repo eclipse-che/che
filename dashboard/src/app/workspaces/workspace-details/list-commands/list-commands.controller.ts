@@ -18,6 +18,9 @@ import {ConfirmDialogService} from '../../../../components/service/confirm-dialo
  * @author Oleksii Orel
  */
 export class ListCommandsController {
+
+  static $inject = ['$mdDialog', 'confirmDialogService'];
+
   $mdDialog: ng.material.IDialogService;
 
   commands: Array<che.IWorkspaceCommand>;
@@ -33,7 +36,6 @@ export class ListCommandsController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService, confirmDialogService: ConfirmDialogService) {
     this.$mdDialog = $mdDialog;

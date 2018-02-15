@@ -38,7 +38,6 @@ export class ListAgents {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor () {
     // scope values

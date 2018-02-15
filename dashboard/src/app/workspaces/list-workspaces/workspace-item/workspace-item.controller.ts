@@ -19,6 +19,9 @@ import {WorkspacesService} from '../../workspaces.service';
  * @author Ann Shumilova
  */
 export class WorkspaceItemCtrl {
+
+  static $inject = ['$location', 'lodash', 'cheWorkspace', 'workspacesService'];
+
   $location: ng.ILocationService;
   lodash: any;
   cheWorkspace: CheWorkspace;
@@ -28,7 +31,6 @@ export class WorkspaceItemCtrl {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($location: ng.ILocationService,
               lodash: any,

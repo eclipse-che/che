@@ -21,6 +21,9 @@ const PORT_MAX = 65535;
  * @author Oleksii Orel
  */
 export class EditMachineServerDialogController {
+
+  static $inject = ['$mdDialog'];
+
   updateServer: (port: number, protocol: string, reference: string, oldReference?: string) => void;
 
   private $mdDialog: ng.material.IDialogService;
@@ -38,7 +41,6 @@ export class EditMachineServerDialogController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;

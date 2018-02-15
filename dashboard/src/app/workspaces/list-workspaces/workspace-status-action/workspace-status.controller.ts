@@ -19,6 +19,9 @@ import {CheWorkspace, WorkspaceStatus} from '../../../../components/api/workspac
  * @author Oleksii Orel
  */
 export class WorkspaceStatusController {
+
+  static $inject = ['$rootScope', 'cheWorkspace', 'cheNotification'];
+
   /**
    * Root scope service.
    */
@@ -31,7 +34,6 @@ export class WorkspaceStatusController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($rootScope: ng.IRootScopeService, cheWorkspace: CheWorkspace, cheNotification: CheNotification) {
     this.$rootScope = $rootScope;

@@ -16,13 +16,14 @@ import {HttpInterceptorBase} from './interceptor-base';
  * @author Oleksii Kurinnyi
  */
 export class ETagInterceptor extends HttpInterceptorBase {
+  static $inject = ['$q'];
+
   $q: ng.IQService;
 
   etagMap: any;
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($q: ng.IQService) {
     super();

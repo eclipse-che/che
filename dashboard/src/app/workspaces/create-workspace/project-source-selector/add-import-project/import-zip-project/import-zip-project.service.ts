@@ -29,7 +29,6 @@ export class ImportZipProjectService implements IEditingProgress {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor() {
     this._location = '';

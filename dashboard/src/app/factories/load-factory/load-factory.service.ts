@@ -21,7 +21,6 @@ export class LoadFactoryService {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor () {
     this.loadFactoryInProgress = false;

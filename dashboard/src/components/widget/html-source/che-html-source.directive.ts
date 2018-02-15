@@ -15,6 +15,9 @@
  * @author Florent Benoit
  */
 export class CheHtmlSource {
+
+  static $inject = ['$sce'];
+
   $sce: ng.ISCEService;
 
   restrict: string = 'E';
@@ -27,7 +30,6 @@ export class CheHtmlSource {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor ($sce: ng.ISCEService) {
     this.$sce = $sce;

@@ -91,7 +91,7 @@ export class OrganizationsConfig {
     };
 
     // config routes
-    register.app.config(($routeProvider: che.route.IRouteProvider) => {
+    register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/organizations', {
         title: 'organizations',
         templateUrl: 'app/organizations/organizations.html',
@@ -101,6 +101,6 @@ export class OrganizationsConfig {
         .accessWhen('/admin/create-organization', createOrganizationLocationProvider)
         .accessWhen('/admin/create-organization/:parentQualifiedName*', createOrganizationLocationProvider)
         .accessWhen('/organization/:organizationName*', organizationDetailsLocationProvider);
-    });
+    }]);
   }
 }

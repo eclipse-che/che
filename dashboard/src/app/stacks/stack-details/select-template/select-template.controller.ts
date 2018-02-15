@@ -19,6 +19,9 @@ import {StackController} from '../stack.controller';
  * @author Oleksii Orel
  */
 export class SelectTemplateController {
+
+  static $inject = ['cheAPI', '$mdDialog'];
+
   stack: che.IStack;
   selectedTemplates: Array<che.IProjectTemplate>;
   projectsOrderBy: string;
@@ -27,10 +30,8 @@ export class SelectTemplateController {
   private templates: Array<che.IProject>;
   private callbackController: StackController;
 
-
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(cheAPI: CheAPI, $mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;

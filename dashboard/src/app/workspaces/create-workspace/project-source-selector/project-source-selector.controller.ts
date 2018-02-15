@@ -20,6 +20,9 @@ import {ActionType} from './project-source-selector-action-type.enum';
  * @author Oleksii Orel
  */
 export class ProjectSourceSelectorController {
+
+  static $inject = ['$scope', 'projectSourceSelectorService'];
+
   /**
    * Directive's scope.
    */
@@ -60,7 +63,6 @@ export class ProjectSourceSelectorController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($scope: IProjectSourceSelectorScope, projectSourceSelectorService: ProjectSourceSelectorService) {
     this.$scope = $scope;

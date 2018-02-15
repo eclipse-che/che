@@ -19,7 +19,11 @@ enum Tab {Settings, Members, Workspaces}
  * @author Ann Shumilova
  */
 export class TeamDetailsController {
-  tab: Object = Tab;
+
+  static $inject = ['cheTeam', 'cheResourcesDistribution', 'chePermissions', 'cheUser', '$route', '$location', '$rootScope', '$scope', 'confirmDialogService',
+'cheTeamEventsManager', 'cheNotification', 'lodash', 'teamDetailsService', 'resourcesService'];
+
+tab: Object = Tab;
 
   /**
    * Team API interaction.
@@ -99,10 +103,8 @@ export class TeamDetailsController {
   private hasTeamAccess: boolean;
 
   private resourceLimits: che.resource.ICheResourceLimits;
-
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor(cheTeam: che.api.ICheTeam, cheResourcesDistribution: che.api.ICheResourcesDistribution, chePermissions: che.api.IChePermissions,
               cheUser: any, $route: ng.route.IRouteService, $location: ng.ILocationService, $rootScope: che.IRootScopeService,

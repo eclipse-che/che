@@ -19,6 +19,9 @@ import {CheAPI} from '../../../../components/api/che-api.factory';
  * @author Oleksii Orel
  */
 export class FactoryFromFileCtrl {
+
+  static $inject = ['$filter', 'cheAPI', 'cheNotification', 'FileUploader'];
+
   private cheAPI: CheAPI;
   private cheNotification: CheNotification;
   private uploader: any;
@@ -27,12 +30,8 @@ export class FactoryFromFileCtrl {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($filter: ng.IFilterService, cheAPI: CheAPI, cheNotification: CheNotification, FileUploader: any) {
-    /* tslint:disable */
-    'ngInject';
-    /* tslint:enable */
 
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;

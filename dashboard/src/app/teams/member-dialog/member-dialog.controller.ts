@@ -18,6 +18,9 @@ import {CheTeamRoles} from '../../../components/api/che-team-roles';
  * @author Ann Shumilova
  */
 export class MemberDialogController {
+
+  static $inject = ['$mdDialog', 'cheTeam', 'cheUser', '$q', 'lodash'];
+
   /**
    * Team API interaction.
    */
@@ -90,7 +93,6 @@ export class MemberDialogController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: angular.material.IDialogService, cheTeam: che.api.ICheTeam, cheUser: any, $q: ng.IQService, lodash: any) {
     this.$mdDialog = $mdDialog;

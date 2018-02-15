@@ -56,6 +56,8 @@ interface IPopoverScope extends ng.IScope {
  * @author Oleksii Kurinnyi
  */
 export class CheTogglePopover implements ng.IDirective {
+  static $inject = ['$compile', '$timeout'];
+
   restrict = 'E';
   transclude = true;
   scope = {
@@ -71,7 +73,6 @@ export class CheTogglePopover implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($compile: ng.ICompileService, $timeout: ng.ITimeoutService) {
     this.$compile = $compile;
