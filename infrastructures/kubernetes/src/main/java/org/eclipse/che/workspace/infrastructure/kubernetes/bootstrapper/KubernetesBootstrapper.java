@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.assistedinject.Assisted;
+import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -128,14 +129,44 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
     kubernetesMachine.exec("chmod", "+x", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE);
 
     LOG.debug("Bootstrapping {}:{}. Creating config file", runtimeIdentity, machineName);
-    kubernetesMachine.exec(
-        "sh",
-        "-c",
-        "cat > "
-            + BOOTSTRAPPER_DIR
-            + CONFIG_FILE
-            + " << 'EOF'\n"
-            + GSON.toJson(installers)
-            + "\nEOF");
+
+    List<String> filesToContatenate = new ArrayList<String>();
+    filesToContatenate.add("[");
+    boolean firstOne = true;
+    for (Installer installer : installers) {
+      if (firstOne) {
+        firstOne = false;
+      } else {
+        filesToContatenate.add(",");
+      }
+      filesToContatenate.add(GSON.toJson(installer));
+    }
+    filesToContatenate.add("]");
+    int counter = 1;
+    for (String fileToConcatenate : filesToContatenate) {
+      kubernetesMachine.exec(
+          "sh",
+          "-c",
+          "cat > "
+              + BOOTSTRAPPER_DIR
+              + CONFIG_FILE
+              + "____"
+              + counter
+              + " << 'EOF'\n"
+              + fileToConcatenate
+              + "\nEOF");
+      counter++;
+    }
+
+    String generalConcatCommand = "cat ";
+    for (int i = 1; i < counter; i++) {
+      generalConcatCommand += BOOTSTRAPPER_DIR + CONFIG_FILE + "____" + i + " ";
+    }
+    generalConcatCommand += "> " + BOOTSTRAPPER_DIR + CONFIG_FILE;
+
+    LOG.debug("Executing {}", "sh -c '" + generalConcatCommand + "'");
+    kubernetesMachine.exec("sh", "-c", generalConcatCommand);
+
+    kubernetesMachine.exec("sh", "-c", "rm " + BOOTSTRAPPER_DIR + CONFIG_FILE + "____*");
   }
 }
