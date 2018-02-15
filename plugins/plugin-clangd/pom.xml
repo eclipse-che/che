@@ -14,31 +14,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-parent</artifactId>
-        <groupId>org.eclipse.che</groupId>
-        <version>6.2.0-SNAPSHOT</version>
+        <artifactId>che-plugin-parent</artifactId>
+        <groupId>org.eclipse.che.plugin</groupId>
+        <version>6.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>che-agents-parent</artifactId>
-    <version>6.2.0-SNAPSHOT</version>
+    <artifactId>che-plugin-clangd-parent</artifactId>
     <packaging>pom</packaging>
-    <name>Che Agents Parent</name>
+    <name>Che Plugin :: Clangd :: Parent</name>
     <modules>
-        <module>bootstrapper</module>
-        <module>go-agents</module>
-        <module>exec</module>
-        <module>terminal</module>
-        <module>ssh</module>
-        <module>unison</module>
-        <module>ls-json</module>
-        <module>git-credentials</module>
-        <module>ls-php</module>
-        <module>ls-python</module>
-        <module>ls-typescript</module>
-        <module>ls-csharp</module>
-        <module>test-ls</module>
-        <module>ls-yaml</module>
-        <module>ls-camel</module>
-        <module>ls-clang</module>
+        <module>che-plugin-clangd-lang-server</module>
     </modules>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.che.core</groupId>
+                    <artifactId>che-core-api-dto-maven-plugin</artifactId>
+                    <version>${project.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

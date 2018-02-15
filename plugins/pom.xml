@@ -59,5 +59,6 @@
         <module>plugin-pullrequest-parent</module>
         <module>plugin-yaml</module>
         <module>plugin-camel</module>
+        <module>plugin-clangd</module>
     </modules>
 </project>
