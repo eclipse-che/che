@@ -23,6 +23,7 @@ RUN yarn && \
     yarn && \
     yarn theia build
 EXPOSE 3000
+ARG GITHUB_TOKEN
 ENV USE_LOCAL_GIT=true \
-    GITHUB_TOKEN=957257352ad57b7853c8b8714d2201bf4d337b5e
+    GITHUB_TOKEN=${GITHUB_TOKEN}
 ENTRYPOINT ["node", "/theia_launcher/theia_launcher.js"]
