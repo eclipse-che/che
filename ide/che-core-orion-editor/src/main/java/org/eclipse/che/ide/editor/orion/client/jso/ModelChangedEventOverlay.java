@@ -42,4 +42,8 @@ public class ModelChangedEventOverlay extends OrionEventOverlay {
   public final native int start() /*-{
         return this.start;
     }-*/;
+
+  public final native String getText() /*-{
+        return this.text;
+  }-*/;
 }

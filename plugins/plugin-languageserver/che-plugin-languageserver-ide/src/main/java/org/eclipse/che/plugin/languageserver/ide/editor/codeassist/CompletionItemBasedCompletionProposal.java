@@ -232,7 +232,7 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
             new TextEdit(
                 newRange(
                     cursorPosition.getLine(),
-                    cursorPosition.getCharacter() - offset,
+                    cursorPosition.getCharacter() - currentWord.length(),
                     cursorPosition.getLine(),
                     cursorPosition.getCharacter()),
                 completionItem.getInsertText()));
