@@ -283,8 +283,8 @@ public class Dashboard {
     return !(workspaces.size() == 0);
   }
 
-  public boolean checkWorkspaceNamePresentInRecentList(String workspaceName) {
-    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+  public void waitWorkspaceNamePresentInRecentList(String workspaceName) {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(
             visibilityOfElementLocated(
                 By.xpath(format(Locators.WORKSPACE_NAME_IN_RECENT_LIST, workspaceName))))
