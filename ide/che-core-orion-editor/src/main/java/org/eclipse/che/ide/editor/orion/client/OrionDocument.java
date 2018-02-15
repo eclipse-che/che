@@ -91,7 +91,7 @@ public class OrionDocument extends AbstractDocument {
     int addedCharCount = param.addedCharCount();
     int removedCharCount = param.removedCharCount();
 
-    String text = editorOverlay.getModel().getText(startOffset, startOffset + addedCharCount);
+    String text = param.getText();
 
     final DocumentChangedEvent event =
         new DocumentChangedEvent(this, startOffset, addedCharCount, text, removedCharCount);
@@ -104,7 +104,7 @@ public class OrionDocument extends AbstractDocument {
     int addedCharCount = param.addedCharCount();
     int removedCharCount = param.removedCharCount();
 
-    String text = editorOverlay.getModel().getText(startOffset, startOffset + addedCharCount);
+    String text = param.getText();
 
     final DocumentChangingEvent event =
         new DocumentChangingEvent(this, startOffset, addedCharCount, text, removedCharCount);
