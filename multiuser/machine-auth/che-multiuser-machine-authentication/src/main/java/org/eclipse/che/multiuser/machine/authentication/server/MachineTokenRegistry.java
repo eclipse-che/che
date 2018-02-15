@@ -34,7 +34,6 @@ public class MachineTokenRegistry {
   private final Table<String, String, String> tokens = HashBasedTable.create();
   private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-
   /**
    * Gets or creates machine security token for user and workspace. For running workspace, there is
    * always at least one token for user who performed start.
