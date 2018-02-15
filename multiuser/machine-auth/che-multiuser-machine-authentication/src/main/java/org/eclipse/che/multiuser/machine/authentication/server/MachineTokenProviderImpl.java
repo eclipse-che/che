@@ -12,8 +12,6 @@ package org.eclipse.che.multiuser.machine.authentication.server;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.workspace.server.token.MachineTokenException;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
@@ -35,12 +33,8 @@ public class MachineTokenProviderImpl implements MachineTokenProvider {
   }
 
   @Override
-  public String getToken(String workspaceId) throws MachineTokenException {
+  public String getToken(String workspaceId) {
     String currentUserId = EnvironmentContext.getCurrent().getSubject().getUserId();
-    try {
-      return tokenRegistry.getOrCreateToken(currentUserId, workspaceId);
-    } catch (NotFoundException e) {
-      throw new MachineTokenException(e.getMessage(), e);
-    }
+    return tokenRegistry.getOrCreateToken(currentUserId, workspaceId);
   }
 }
