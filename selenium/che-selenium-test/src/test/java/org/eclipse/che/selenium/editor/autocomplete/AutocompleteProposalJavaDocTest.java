@@ -71,13 +71,11 @@ public class AutocompleteProposalJavaDocTest {
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         PATH_FOR_EXPAND_APP_CLASS, APP_CLASS_NAME + ".java");
 
-    projectExplorer.openItemByPath(PROJECT + "/model");
-    projectExplorer.openItemByPath(PROJECT + "/model/src");
-    projectExplorer.openItemByPath(PROJECT + "/model/src/main");
-    projectExplorer.openItemByPath(PROJECT + "/model/src/main/java");
-    projectExplorer.openItemByPath(PROJECT + "/model/src/main/java/multimodule/model");
-    projectExplorer.openItemByPath(
-        PROJECT + "/model/src/main/java/multimodule/model/" + BOOK_IMPL_CLASS_NAME + ".java");
+    // close project tree
+    projectExplorer.openItemByPath(PROJECT);
+
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(
+        PROJECT + "/model/src/main/java/multimodule.model", BOOK_IMPL_CLASS_NAME + ".java");
   }
 
   @BeforeMethod
