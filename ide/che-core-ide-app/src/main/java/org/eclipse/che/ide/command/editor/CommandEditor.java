@@ -240,7 +240,7 @@ public class CommandEditor extends AbstractEditorPresenter
 
               updateDirtyState(false);
 
-              view.setSaveEnabled(false);
+              initializePages();
 
               callback.onSuccess(getEditorInput());
             })

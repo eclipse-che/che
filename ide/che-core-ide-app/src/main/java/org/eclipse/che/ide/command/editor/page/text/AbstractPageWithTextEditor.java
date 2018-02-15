@@ -103,16 +103,15 @@ public abstract class AbstractPageWithTextEditor extends AbstractCommandEditorPa
   protected void initialize() {
     initialValue = getCommandPropertyValue();
 
-    setContent(initialValue);
-  }
-
-  /** Sets editor's content. */
-  private void setContent(String content) {
-    VirtualFile file = new SyntheticFile(editedCommand.getName() + getType(), content);
-
-    editor.init(
-        new EditorInputImpl(fileTypeRegistry.getFileTypeByFile(file), file),
-        new OpenEditorCallbackImpl());
+    Document document = editor.getDocument();
+    if (document != null) {
+      document.replace(0, document.getContentsCharCount(), initialValue);
+    } else {
+      VirtualFile file = new SyntheticFile(editedCommand.getName() + getType(), initialValue);
+      editor.init(
+          new EditorInputImpl(fileTypeRegistry.getFileTypeByFile(file), file),
+          new OpenEditorCallbackImpl());
+    }
   }
 
   @Override
