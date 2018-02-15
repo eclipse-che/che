@@ -107,15 +107,7 @@ public class CommandEditorTest {
     verify(view).setDelegate(editor);
     verify(eventBus).addHandler(CommandRemovedEvent.getType(), editor);
 
-    verify(commandLinePage).setDirtyStateListener(any(DirtyStateListener.class));
-    verify(goalPage).setDirtyStateListener(any(DirtyStateListener.class));
-    verify(projectsPage).setDirtyStateListener(any(DirtyStateListener.class));
-    verify(previewUrlPage).setDirtyStateListener(any(DirtyStateListener.class));
-
-    verify(commandLinePage).edit(editor.editedCommand);
-    verify(goalPage).edit(editor.editedCommand);
-    verify(projectsPage).edit(editor.editedCommand);
-    verify(previewUrlPage).edit(editor.editedCommand);
+    verifyPagesInitialized();
   }
 
   @Test
@@ -154,10 +146,7 @@ public class CommandEditorTest {
     editor.doSave();
 
     verify(commandManager).updateCommand(anyString(), eq(editor.editedCommand));
-    verify(commandPromise).then(operationCaptor.capture());
-    operationCaptor.getValue().apply(editedCommand);
-
-    verify(view).setSaveEnabled(false);
+    verifyPagesInitialized();
   }
 
   @Test(expected = OperationException.class)
@@ -210,5 +199,17 @@ public class CommandEditorTest {
 
     verify(editorAgent).closeEditor(editor);
     verify(handlerRegistration).removeHandler();
+  }
+
+  private void verifyPagesInitialized() throws Exception {
+    verify(commandLinePage).setDirtyStateListener(any(DirtyStateListener.class));
+    verify(goalPage).setDirtyStateListener(any(DirtyStateListener.class));
+    verify(projectsPage).setDirtyStateListener(any(DirtyStateListener.class));
+    verify(previewUrlPage).setDirtyStateListener(any(DirtyStateListener.class));
+
+    verify(commandLinePage).edit(editor.editedCommand);
+    verify(goalPage).edit(editor.editedCommand);
+    verify(projectsPage).edit(editor.editedCommand);
+    verify(previewUrlPage).edit(editor.editedCommand);
   }
 }

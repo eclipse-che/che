@@ -69,31 +69,31 @@ public class DashboardAccount {
   }
 
   public String getEmailFieldValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.name(EMAIL_FIELD));
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.name(EMAIL_FIELD));
   }
 
   public String getLoginFieldValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.name(LOGIN_FIELD));
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.name(LOGIN_FIELD));
   }
 
   public String getFirstNameFieldValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.name(FIRST_NAME_FIELD));
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.name(FIRST_NAME_FIELD));
   }
 
   public String getLastNameFieldValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.name(LAST_NAME_FIELD));
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.name(LAST_NAME_FIELD));
   }
 
   public String getTitle() {
-    return seleniumWebDriverHelper.waitAndGetElement(By.id(Locators.TITLE_ID)).getText();
+    return seleniumWebDriverHelper.waitVisibility(By.id(Locators.TITLE_ID)).getText();
   }
 
   public void clickOnEditButton() {
-    seleniumWebDriverHelper.waitAndClickOnElement(By.name(EDIT_BUTTON));
+    seleniumWebDriverHelper.waitAndClick(By.name(EDIT_BUTTON));
   }
 
   public void waitPageIsLoaded() {
     asList(EMAIL_FIELD, LOGIN_FIELD, FIRST_NAME_FIELD, LAST_NAME_FIELD, EDIT_BUTTON)
-        .forEach(locator -> seleniumWebDriverHelper.waitElementIsVisible(By.name(locator)));
+        .forEach(locator -> seleniumWebDriverHelper.waitVisibility(By.name(locator)));
   }
 }
