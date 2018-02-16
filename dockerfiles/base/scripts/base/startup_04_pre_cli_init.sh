@@ -384,14 +384,14 @@ get_value_of_var_from_env_file() {
 # Returns the value of variable from environment array.
 get_value_of_var_from_env() {
 
-  che_cli_env_arr_index="0"
-  while [ $che_cli_env_arr_index -lt ${#CLI_ENV_ARRAY[@]} ]; do
-    var1=$(echo ${CLI_ENV_ARRAY[$che_cli_env_arr_index]} | cut -f1 -d=)
-    var2=$(echo ${CLI_ENV_ARRAY[$che_cli_env_arr_index]} | cut -f2 -d=)
+  for element in "${CLI_ENV_ARRAY[@]}"
+  do
+    var1=$(echo $element | cut -f1 -d=)
+    var2=$(echo $element | cut -f2 -d=)
+
     if [ $var1 = $1 ]; then
       echo $var2
     fi
-    che_cli_env_arr_index=$[$che_cli_env_arr_index+1]
   done
   echo ""
 }
