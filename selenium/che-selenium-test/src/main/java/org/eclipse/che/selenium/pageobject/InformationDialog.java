@@ -42,7 +42,7 @@ public class InformationDialog {
   }
 
   private interface Locators {
-    String INFORMATION_DIALOG_FORM = "//button[@id='info-window']/ancestor::div[3]";
+    String INFORMATION_DIALOG_FORM = "//button[@id='info-window']/ancestor::table";
     String OK_BUTTON_ID = "info-window";
     String MESSAGE_CONTAINER = "gwt-debug-info-window-message";
   }

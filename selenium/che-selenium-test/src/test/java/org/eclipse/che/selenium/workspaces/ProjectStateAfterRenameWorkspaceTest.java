@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -19,7 +20,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Events;
@@ -59,10 +59,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
     URL resource =
         ProjectStateAfterRenameWorkspaceTest.this.getClass().getResource("/projects/guess-project");
     testProjectServiceClient.importProject(
-        testWorkspace.getId(),
-        Paths.get(resource.toURI()),
-        PROJECT_NAME,
-        ProjectTemplates.MAVEN_SPRING);
+        testWorkspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
     ide.open(testWorkspace);
   }
 
@@ -73,7 +70,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
 
   @Test
   public void checkProjectAfterRenameWs() throws Exception {
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
@@ -103,7 +100,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
 
     seleniumWebDriver.switchFromDashboardIframeToIde();
 
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
 
     try {

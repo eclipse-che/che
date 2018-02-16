@@ -64,13 +64,14 @@ func NewBus() *Bus {
 // Pub publishes an event to the interested consumers.
 func (bus *Bus) Pub(e E) {
 	bus.RLock()
-	defer bus.RUnlock()
-	cons, ok := bus.consumers[e.Type()]
+	consumers, ok := bus.consumers[e.Type()]
+	bus.RUnlock()
+
 	if ok {
-		for idx, v := range cons {
+		for _, v := range consumers {
 			v.Accept(e)
 			if tmpCons, ok := v.(TmpConsumer); ok && tmpCons.IsDone() {
-				bus.rm(e.Type(), idx)
+				bus.Rm(tmpCons)
 			}
 		}
 	}
@@ -81,7 +82,7 @@ func (bus *Bus) Pub(e E) {
 func (bus *Bus) Sub(consumer Consumer, eType string) {
 	bus.Lock()
 	defer bus.Unlock()
-	bus.consumers[eType] = append(bus.consumers[eType], consumer)
+	bus.consumers[eType] = append(bus.copyConsumers(eType), consumer)
 }
 
 // SubAny does the same as Sub func, but for multiple event types.
@@ -89,11 +90,12 @@ func (bus *Bus) SubAny(consumer Consumer, types ...string) {
 	bus.Lock()
 	defer bus.Unlock()
 	for _, t := range types {
-		bus.consumers[t] = append(bus.consumers[t], consumer)
+		bus.consumers[t] = append(bus.copyConsumers(t), consumer)
 	}
 }
 
-// Rm removes given consumer from the bus, == operator is used to determine
+// Rm removes given consumer from the bus, == operator is used
+// to determine what elements should be removed.
 // Returns true if consumer is removed.
 func (bus *Bus) Rm(consumer Consumer) bool {
 	return bus.RmIf(func(c Consumer) bool { return c == consumer })
@@ -126,6 +128,10 @@ func (bus *Bus) Clear() map[string][]Consumer {
 	return tmp
 }
 
+// Removes consumer subscribed to a given type and placed at a
+// given index. If it is the last consumer then the whole slice is removed,
+// otherwise a copy of slice is used, so concurrently publishing go-routines are not affected.
+// Note that this function MUST be called within an appropriate lock.
 func (bus *Bus) rm(key string, idx int) {
 	arr := bus.consumers[key]
 	if len(arr) == 1 {
@@ -136,4 +142,13 @@ func (bus *Bus) rm(key string, idx int) {
 		newArr = append(newArr, arr[idx+1:]...)
 		bus.consumers[key] = newArr
 	}
+}
+
+// Returns a copy of consumers of a given event type.
+// Note that this function MUST be called within an appropriate lock.
+func (bus *Bus) copyConsumers(eType string) []Consumer {
+	consumers := bus.consumers[eType]
+	snapshot := make([]Consumer, len(consumers))
+	copy(snapshot, consumers)
+	return snapshot
 }

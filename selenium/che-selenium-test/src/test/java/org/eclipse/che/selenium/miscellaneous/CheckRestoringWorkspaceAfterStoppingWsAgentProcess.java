@@ -64,8 +64,7 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcess {
 
   @Test()
   public void checkRestoreWsAgentByApi() throws Exception {
-    projectExplorer.waitProjectExplorer();
-    terminal.waitTerminalTab();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
 
     projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, nameCommandForKillWsAgent);
@@ -78,7 +77,7 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcess {
 
   @Test(priority = 1)
   public void checkRestoreIdeItems() {
-    terminal.waitTerminalTab();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
   }
 }

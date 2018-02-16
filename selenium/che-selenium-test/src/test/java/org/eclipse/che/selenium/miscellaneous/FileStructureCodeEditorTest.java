@@ -10,12 +10,14 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FILE_STRUCTURE;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.Random;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -29,7 +31,7 @@ import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 15.12.15 */
 public class FileStructureCodeEditorTest {
-  private static final String PROJECT_NAME = "FileStructureCode" + new Random().nextInt(999);
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 5);
   private static final String JAVA_FILE_NAME = "Company";
 
   private static final String NEW_CONTENT =
@@ -61,14 +63,12 @@ public class FileStructureCodeEditorTest {
 
   @Test
   public void checkFileStructureCodeEditor() {
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.openItemByPath(PROJECT_NAME);
     expandTReeProjectAndOpenClass(JAVA_FILE_NAME);
 
     // check the highlighted item in editor
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.FILE_STRUCTURE);
+    menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
     fileStructure.selectItemInFileStructureByDoubleClick("getInstance() : Company");
     fileStructure.waitFileStructureFormIsClosed();
@@ -76,9 +76,7 @@ public class FileStructureCodeEditorTest {
     editor.waitTextElementsActiveLine("getInstance");
     editor.waitSpecifiedValueForLineAndChar(40, 27);
 
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.FILE_STRUCTURE);
+    menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
     fileStructure.selectItemInFileStructureByEnter("INSTANCE");
     fileStructure.waitFileStructureFormIsClosed();
@@ -86,9 +84,7 @@ public class FileStructureCodeEditorTest {
     editor.waitTextElementsActiveLine("INSTANCE");
     editor.waitSpecifiedValueForLineAndChar(24, 38);
 
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.FILE_STRUCTURE);
+    menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
     fileStructure.selectItemInFileStructureByEnter("getId() : double");
     fileStructure.waitFileStructureFormIsClosed();
@@ -102,9 +98,7 @@ public class FileStructureCodeEditorTest {
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(NEW_CONTENT);
     editor.waitTextIntoEditor(EXPECTED_TEXT);
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.FILE_STRUCTURE);
+    menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
     fileStructure.waitExpectedTextInFileStructure(NEW_ITEMS);
   }

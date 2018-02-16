@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.Keys.ALT;
@@ -153,12 +154,15 @@ public class NavigateToFile {
    * @param nameOfFile name of a file for searching
    */
   public void selectFileByName(String nameOfFile) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format(Locators.FILE_NAME_LIST_SELECT, nameOfFile))))
-        .click();
-    actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
+    WebElement webElement =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+            .until(
+                visibilityOfElementLocated(
+                    By.xpath(format(Locators.FILE_NAME_LIST_SELECT, nameOfFile))));
+
+    webElement.click();
+    WaitUtils.sleepQuietly(500, MILLISECONDS);
+    actionsFactory.createAction(seleniumWebDriver).doubleClick(webElement).perform();
   }
 
   /** close the Navigate to file widget by 'Escape' key and wait closing of the widget */

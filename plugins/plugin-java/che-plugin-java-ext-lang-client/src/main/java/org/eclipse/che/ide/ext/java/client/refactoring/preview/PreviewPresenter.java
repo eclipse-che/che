@@ -93,7 +93,7 @@ public class PreviewPresenter implements PreviewView.ActionDelegate {
               }
             });
 
-    view.show();
+    view.showDialog();
   }
 
   /**
@@ -102,7 +102,7 @@ public class PreviewPresenter implements PreviewView.ActionDelegate {
    * @param title the name of the preview window
    */
   public void setTitle(String title) {
-    view.setTitle(title);
+    view.setTitleCaption(title);
   }
 
   /** {@inheritDoc} */
@@ -132,7 +132,7 @@ public class PreviewPresenter implements PreviewView.ActionDelegate {
             refactoringResult -> {
               List<ChangeInfo> changes = refactoringResult.getChanges();
               if (refactoringResult.getSeverity() == OK) {
-                view.hide();
+                view.close();
                 refactoringUpdater
                     .updateAfterRefactoring(changes)
                     .then(
@@ -159,7 +159,7 @@ public class PreviewPresenter implements PreviewView.ActionDelegate {
       movePresenter.show(refactorInfo);
     }
 
-    view.hide();
+    view.close();
   }
 
   /** {@inheritDoc} */

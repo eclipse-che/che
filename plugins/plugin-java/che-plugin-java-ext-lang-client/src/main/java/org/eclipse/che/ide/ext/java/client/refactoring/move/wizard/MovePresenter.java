@@ -209,7 +209,7 @@ public class MovePresenter implements MoveView.ActionDelegate {
                 if (arg.isCanShowPreviewPage()) {
                   previewPresenter.show(refactoringSessionId, refactorInfo);
 
-                  view.hide();
+                  view.close();
                 } else {
                   view.showStatusMessage(arg.getStatus());
                 }
@@ -264,7 +264,7 @@ public class MovePresenter implements MoveView.ActionDelegate {
             refactoringResult -> {
               List<ChangeInfo> changes = refactoringResult.getChanges();
               if (refactoringResult.getSeverity() == OK) {
-                view.hide();
+                view.close();
                 refactoringUpdater
                     .updateAfterRefactoring(changes)
                     .then(

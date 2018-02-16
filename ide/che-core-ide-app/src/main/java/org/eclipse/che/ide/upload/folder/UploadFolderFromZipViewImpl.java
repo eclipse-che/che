@@ -10,10 +10,6 @@
  */
 package org.eclipse.che.ide.upload.folder;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -59,52 +55,28 @@ public class UploadFolderFromZipViewImpl extends Window implements UploadFolderF
       org.eclipse.che.ide.Resources resources,
       AgentURLModifier agentURLModifier) {
     this.constant = locale;
-    this.agentURLModifier = agentURLModifier;
-
-    setTitle(locale.uploadZipFolderTitle());
+    this.setTitle(locale.uploadZipFolderTitle());
     setWidget(uploadFileViewBinder.createAndBindUi(this));
     bind();
 
+    btnCancel =
+        addFooterButton(
+            locale.cancel(), "file-uploadFolder-cancel", event -> delegate.onCancelClicked());
     btnUpload =
-        createButton(
+        addFooterButton(
             locale.uploadButton(),
             "file-uploadFolder-upload",
-            new ClickHandler() {
+            event -> delegate.onUploadClicked(),
+            true);
 
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onUploadClicked();
-              }
-            });
-    btnUpload.addStyleName(resources.windowCss().primaryButton());
-    btnUpload.addStyleName(resources.windowCss().buttonAlignRight());
     btnUpload.addStyleName(resources.buttonLoaderCss().buttonLoader());
-    addButtonToFooter(btnUpload);
 
-    btnCancel =
-        createButton(
-            locale.cancel(),
-            "file-uploadFolder-cancel",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-              }
-            });
-    btnCancel.addStyleName(resources.windowCss().buttonAlignRight());
-    addButtonToFooter(btnCancel);
+    this.agentURLModifier = agentURLModifier;
   }
 
   /** Bind handlers. */
   private void bind() {
-    submitForm.addSubmitCompleteHandler(
-        new FormPanel.SubmitCompleteHandler() {
-          @Override
-          public void onSubmitComplete(FormPanel.SubmitCompleteEvent event) {
-            delegate.onSubmitComplete(event.getResults());
-          }
-        });
+    submitForm.addSubmitCompleteHandler(event -> delegate.onSubmitComplete(event.getResults()));
   }
 
   /** {@inheritDoc} */
@@ -118,10 +90,14 @@ public class UploadFolderFromZipViewImpl extends Window implements UploadFolderF
   @Override
   public void closeDialog() {
     hide();
-    onClose();
     btnUpload.setEnabled(false);
     overwrite.setValue(false);
     skipFirstLevel.setValue(false);
+  }
+
+  @Override
+  protected void onHide() {
+    uploadPanel.remove(file);
   }
 
   @Override
@@ -189,26 +165,13 @@ public class UploadFolderFromZipViewImpl extends Window implements UploadFolderF
     return overwrite.getValue();
   }
 
-  /** {@inheritDoc} */
-  @Override
-  protected void onClose() {
-    uploadPanel.remove(file);
-    super.onClose();
-  }
-
   private void addFileUploadForm() {
     file = new FileUpload();
     file.setHeight("22px");
     file.setWidth("100%");
     file.setName("file");
     file.ensureDebugId("file-uploadFile-ChooseFile");
-    file.addChangeHandler(
-        new ChangeHandler() {
-          @Override
-          public void onChange(ChangeEvent event) {
-            delegate.onFileNameChanged();
-          }
-        });
+    file.addChangeHandler(event -> delegate.onFileNameChanged());
     uploadPanel.insert(file, 0);
   }
 }

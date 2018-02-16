@@ -60,7 +60,7 @@ public class ProjectStateAfterRefreshTest {
 
   @Test
   public void checkRestoreStateOfProjectAfterRefreshTest() throws Exception {
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     consoles.closeProcessesArea();

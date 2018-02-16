@@ -77,7 +77,7 @@ public class NavigateToFileTest {
         CUSTOM,
         workspace.getId());
     ide.open(workspace);
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME_2);
   }

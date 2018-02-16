@@ -10,13 +10,15 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.IMPLEMENTATION_S;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SIMPLE;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.Random;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -28,8 +30,7 @@ import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 12.01.16 */
 public class ImplementationBaseOperationsTest {
-  private static final String PROJECT_NAME =
-      "OpenImplementationProject" + new Random().nextInt(999);
+  private static final String PROJECT_NAME = NameGenerator.generate("project", 5);
   private static final String JAVA_FILE_NAME = "Company";
   private static final String ABSTRACT_CLASS_NAME = "Empl";
   private static final String INTERFACE_NAME = "Employee";
@@ -59,32 +60,25 @@ public class ImplementationBaseOperationsTest {
   public void setUp() throws Exception {
     URL resource = getClass().getResource("/projects/prOutline");
     testProjectServiceClient.importProject(
-        workspace.getId(),
-        Paths.get(resource.toURI()),
-        PROJECT_NAME,
-        ProjectTemplates.MAVEN_SIMPLE);
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SIMPLE);
     ide.open(workspace);
   }
 
   @Test
   public void checkImplementationInEditor() {
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.openItemByPath(PROJECT_NAME);
     expandTReeProjectAndOpenClass(JAVA_FILE_NAME);
 
     // check that the 'Implementation' container is not present
     editor.setCursorToLine(12);
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.IMPLEMENTATION_S);
+    menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
     editor.waitImplementationFormIsClosed(JAVA_FILE_NAME);
 
     // check the 'implementation' for simple java class
     editor.setCursorToLine(20);
     editor.clickOnSelectedElementInEditor(JAVA_FILE_NAME);
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.IMPLEMENTATION_S);
+    menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
     editor.waitImplementationFormIsOpen(JAVA_FILE_NAME);
     editor.cancelFormInEditorByEscape();
     editor.waitImplementationFormIsClosed(JAVA_FILE_NAME);
@@ -108,9 +102,7 @@ public class ImplementationBaseOperationsTest {
     editor.selectTabByName(ABSTRACT_CLASS_NAME);
     editor.setCursorToLine(22);
     editor.clickOnSelectedElementInEditor("toString");
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.IMPLEMENTATION_S);
+    menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
     editor.waitActiveTabFileName("EmployeeFixedSalary");
     editor.expectedNumberOfActiveLine(38);
     editor.waitTextElementsActiveLine("toString");
@@ -128,9 +120,7 @@ public class ImplementationBaseOperationsTest {
     editor.selectTabByName(INTERFACE_NAME);
     editor.setCursorToLine(18);
     editor.clickOnSelectedElementInEditor("toString");
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.IMPLEMENTATION_S);
+    menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
     editor.waitActiveTabFileName("EmployeeHourlyWages");
     editor.expectedNumberOfActiveLine(58);
     editor.waitTextElementsActiveLine("toString");
@@ -138,9 +128,7 @@ public class ImplementationBaseOperationsTest {
     editor.setCursorToLine(15);
     editor.waitTextElementsActiveLine("interface Employee extends Serializable");
     editor.clickOnSelectedElementInEditor("Serializable");
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.IMPLEMENTATION_S);
+    menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
     editor.waitImplementationFormIsOpen("Serializable");
     editor.waitTextInImplementationForm(LIST_IMPLEMENTATIONS);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -157,9 +145,7 @@ public class ImplementationBaseOperationsTest {
     editor.waitImplementationFormIsClosed("Serializable");
     editor.waitActiveTabFileName("EmployeeHourlyWages");
     editor.selectTabByName(INTERFACE_NAME);
-    menu.runCommand(
-        TestMenuCommandsConstants.Assistant.ASSISTANT,
-        TestMenuCommandsConstants.Assistant.IMPLEMENTATION_S);
+    menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
     editor.waitImplementationFormIsOpen("Serializable");
     editor.waitTextInImplementationForm(LIST_IMPLEMENTATIONS);
     editor.chooseImplementationByDoubleClick("EmployeeFixedSalary");
@@ -167,7 +153,7 @@ public class ImplementationBaseOperationsTest {
     editor.waitActiveTabFileName("EmployeeFixedSalary");
   }
 
-  public void expandTReeProjectAndOpenClass(String fileName) {
+  private void expandTReeProjectAndOpenClass(String fileName) {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src");
     projectExplorer.waitItem(PROJECT_NAME + "/src" + "/main");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src" + "/main");

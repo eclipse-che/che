@@ -10,7 +10,10 @@
  */
 package org.eclipse.che.ide.ui.dialogs.choice;
 
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
+
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -43,7 +46,7 @@ public class ChoiceDialogViewImpl extends Window implements ChoiceDialogView {
     setWidget(widget);
 
     this.footer = footer;
-    getFooter().add(this.footer);
+    addFooterWidget(footer);
   }
 
   @Override
@@ -53,7 +56,12 @@ public class ChoiceDialogViewImpl extends Window implements ChoiceDialogView {
   }
 
   @Override
-  protected void onEnterClicked() {
+  public void setTitleCaption(String title) {
+    setTitle(title);
+  }
+
+  @Override
+  public void onEnterPress(NativeEvent evt) {
     delegate.onEnterClicked();
   }
 
@@ -93,17 +101,17 @@ public class ChoiceDialogViewImpl extends Window implements ChoiceDialogView {
 
   @Override
   public boolean isFirstButtonInFocus() {
-    return isWidgetFocused(footer.firstChoiceButton);
+    return isWidgetOrChildFocused(footer.firstChoiceButton);
   }
 
   @Override
   public boolean isSecondButtonInFocus() {
-    return isWidgetFocused(footer.secondChoiceButton);
+    return isWidgetOrChildFocused(footer.secondChoiceButton);
   }
 
   @Override
   public boolean isThirdButtonInFocus() {
-    return isWidgetFocused(footer.thirdChoiceButton);
+    return isWidgetOrChildFocused(footer.thirdChoiceButton);
   }
 
   /** The UI binder interface for this components. */

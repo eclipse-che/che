@@ -34,7 +34,7 @@ public interface OpenRecentFilesView extends View<OpenRecentFilesView.ActionDele
   void clearRecentFiles();
 
   /** Show dialog. */
-  void show();
+  void showDialog();
 
   interface ActionDelegate {}
 }

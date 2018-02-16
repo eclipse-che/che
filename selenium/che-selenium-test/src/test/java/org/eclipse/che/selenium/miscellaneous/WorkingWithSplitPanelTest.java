@@ -10,6 +10,10 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.STATUS;
+import static org.eclipse.che.selenium.pageobject.MultiSplitPanel.SplitPaneCommands.CLOSE_ALL_TABS;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -118,16 +122,10 @@ public class WorkingWithSplitPanelTest {
     consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS, 120);
     multiSplitPanel.waitTabProcessIsPresent(3, BUILD_COMM);
     multiSplitPanel.selectSplitPanel(1);
-    projectExplorer.invokeCommandWithContextMenu(
-        ProjectExplorer.CommandsGoal.COMMON, PROJECT_NAME, BUILD_COMM);
-    consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS, 120);
-    multiSplitPanel.waitTabProcessIsPresent(1, BUILD_COMM);
-    multiSplitPanel.waitTabNameProcessIsFocused(BUILD_COMM);
-    multiSplitPanel.waitTabProcessIsNotPresent(3, BUILD_COMM);
-
+    consoles.clickOnPlusMenuButton();
+    consoles.clickOnTerminalItemInContextMenu();
     consoles.startTerminalFromProcessesArea("dev-machine");
     multiSplitPanel.waitTabProcessIsPresent(1, "Terminal-2");
-    multiSplitPanel.waitTabNameProcessIsFocused("Terminal-2");
     terminal.waitTerminalIsNotEmpty();
     loader.waitOnClosed();
     terminal.typeIntoTerminal("mc");
@@ -137,6 +135,7 @@ public class WorkingWithSplitPanelTest {
     for (String partOfContent : checkMcTerminal) {
       terminal.waitExpectedTextIntoTerminal(partOfContent);
     }
+    multiSplitPanel.waitTabProcessIsNotPresent(2, BUILD_COMM);
   }
 
   @Test(priority = 2)
@@ -175,7 +174,7 @@ public class WorkingWithSplitPanelTest {
     // switch tabs and panels
     consoles.clickOnMaximizePanelIcon();
     multiSplitPanel.selectSplitPanel(1);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
+    menu.runCommand(GIT, STATUS);
     multiSplitPanel.waitTabProcessIsPresent(1, "Git status");
     multiSplitPanel.waitTabNameProcessIsFocused("Git status");
     multiSplitPanel.waitMesageIntoSplitGitPanel(
@@ -183,27 +182,11 @@ public class WorkingWithSplitPanelTest {
     multiSplitPanel.selectProcessByTabName(2, "Git add to index");
     multiSplitPanel.waitTabNameProcessIsFocused("Git add to index");
     multiSplitPanel.waitMesageIntoSplitGitPanel(2, "Git index updated");
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
-    multiSplitPanel.waitTabProcessIsPresent(2, "Git status");
-    multiSplitPanel.waitTabNameProcessIsFocused("Git status");
-    multiSplitPanel.waitTabProcessIsNotPresent(1, "Git status");
-    multiSplitPanel.waitMesageIntoSplitGitPanel(
-        2, " On branch master\n" + " Changes to be committed");
-    multiSplitPanel.selectSplitPanel(1);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
-    multiSplitPanel.waitTabProcessIsPresent(1, "Git status");
-    multiSplitPanel.waitTabNameProcessIsFocused("Git status");
-    multiSplitPanel.waitTabProcessIsNotPresent(2, "Git status");
-    multiSplitPanel.waitMesageIntoSplitGitPanel(
-        1, " On branch master\n" + " Changes to be committed");
-    multiSplitPanel.selectProcessByTabName(1, BUILD_COMM);
-    consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
+    consoles.clickOnPlusMenuButton();
+    consoles.clickOnServerItemInContextMenu();
+    multiSplitPanel.waitTabProcessIsPresent(1, "Servers");
     multiSplitPanel.clickOnIconMultiSplitPanel(1);
-    multiSplitPanel.waitSplitPanelMenuIsOpen();
-    multiSplitPanel.waitProcessIsPresentIntoPaneMenu("Terminal-2");
-    multiSplitPanel.waitProcessIsPresentIntoPaneMenu("Git status");
-    multiSplitPanel.waitProcessIsPresentIntoPaneMenu(BUILD_COMM);
-    multiSplitPanel.selectCommandSplitPane(MultiSplitPanel.SplitPaneCommands.CLOSE_ALL_TABS);
+    multiSplitPanel.selectCommandSplitPane(CLOSE_ALL_TABS);
     multiSplitPanel.waitSplitPanelMenuIsClosed();
     multiSplitPanel.waitTabProcessIsNotPresent(1, BUILD_COMM);
     multiSplitPanel.waitTabProcessIsNotPresent(1, "Terminal-2");

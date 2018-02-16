@@ -69,6 +69,7 @@ import org.eclipse.che.ide.ui.smartTree.data.TreeExpander;
 import org.eclipse.che.ide.ui.smartTree.data.settings.NodeSettings;
 import org.eclipse.che.ide.ui.smartTree.data.settings.SettingsProvider;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -128,7 +129,7 @@ public class ProjectExplorerPresenter extends BasePresenter
     eventBus.addHandler(ResourceChangedEvent.getType(), this);
     eventBus.addHandler(MarkerChangedEvent.getType(), this);
     eventBus.addHandler(SyntheticNodeUpdateEvent.getType(), this);
-    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> getTree().getNodeStorage().clear());
+    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> onWorkspaceStopped());
     eventBus.addHandler(WorkspaceRunningEvent.TYPE, event -> view.showPlaceholder(false));
     eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> view.showPlaceholder(true));
     eventBus.addHandler(WorkspaceStartingEvent.TYPE, event -> view.showPlaceholder(true));
@@ -178,6 +179,14 @@ public class ProjectExplorerPresenter extends BasePresenter
             partStack.setActivePart(ProjectExplorerPresenter.this);
           }
         });
+  }
+
+  private void onWorkspaceStopped() {
+    try {
+      getTree().getNodeStorage().clear();
+    } catch (Exception e) {
+      Log.error(getClass(), e.getMessage(), e);
+    }
   }
 
   public void addSelectionHandler(SelectionHandler<Node> handler) {

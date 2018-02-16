@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 
 @Singleton
@@ -59,16 +58,40 @@ public class ProjectConfigRegistry {
     return projects.get(wsPath);
   }
 
-  public RegisteredProject put(ProjectConfig config, boolean updated, boolean detected)
-      throws ServerException {
+  public synchronized RegisteredProject put(
+      ProjectConfig config, boolean updated, boolean detected) {
     String wsPath = config.getPath();
     RegisteredProject project = registeredProjectFactory.create(wsPath, config, updated, detected);
     projects.put(wsPath, project);
     return project;
   }
 
-  public RegisteredProject put(String wsPath, boolean updated, boolean detected)
-      throws ServerException {
+  public synchronized RegisteredProject putIfAbsent(
+      ProjectConfig config, boolean updated, boolean detected) {
+    RegisteredProject registeredProject = projects.get(config.getPath());
+    if (registeredProject != null) {
+      return registeredProject;
+    }
+
+    String wsPath = config.getPath();
+    RegisteredProject project = registeredProjectFactory.create(wsPath, config, updated, detected);
+    projects.put(wsPath, project);
+    return project;
+  }
+
+  public synchronized RegisteredProject put(String wsPath, boolean updated, boolean detected) {
+    RegisteredProject project = registeredProjectFactory.create(wsPath, null, updated, detected);
+    projects.put(wsPath, project);
+    return project;
+  }
+
+  public synchronized RegisteredProject putIfAbsent(
+      String wsPath, boolean updated, boolean detected) {
+    RegisteredProject registeredProject = projects.get(wsPath);
+    if (registeredProject != null) {
+      return registeredProject;
+    }
+
     RegisteredProject project = registeredProjectFactory.create(wsPath, null, updated, detected);
     projects.put(wsPath, project);
     return project;

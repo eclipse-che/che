@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
+import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -46,6 +47,7 @@ public class Eclipse0093Test {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private BrowserLogsUtil browserLogsUtil;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -59,9 +61,8 @@ public class Eclipse0093Test {
   public void test0093() throws Exception {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(PROJECT_NAME + PATH_TO_PACKAGE_PREFIX + "Test.java");
-    editor.waitActive();
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(
+        PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples", "Test.java");
     waitMarkerInPosition();
     editor.goToCursorPositionVisible(17, 26);
     editor.typeTextIntoEditor(Keys.F4.toString());
@@ -76,6 +77,7 @@ public class Eclipse0093Test {
       logExternalLibraries();
       logProjectTypeChecking();
       logProjectLanguageChecking();
+      browserLogsUtil.storeLogs();
 
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7161", ex);

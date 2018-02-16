@@ -32,7 +32,7 @@
 
         .configureLabel {
             float: left;
-            margin-left: 140px;
+            margin-left: 130px;
             margin-top: 6px;
             margin-right: 10px;
             text-decoration: underline;

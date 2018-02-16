@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Button;
 import javax.inject.Inject;
 import org.eclipse.che.ide.ui.UILocalizationConstant;
 import org.eclipse.che.ide.ui.dialogs.input.InputDialogFooter;
+import org.eclipse.che.ide.ui.window.WindowClientBundle;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
 
 /** Rename dialog footer with 'Preview' button */
@@ -24,12 +25,14 @@ public class RenameDialogFooter extends InputDialogFooter {
 
   @Inject
   public RenameDialogFooter(
-      UILocalizationConstant messages, LanguageServerLocalization localization) {
-    super(messages);
+      UILocalizationConstant messages,
+      LanguageServerLocalization localization,
+      WindowClientBundle resources) {
+    super(messages, resources);
     previewButton = new Button();
     previewButton.setText(localization.renameDialogPreviewLabel());
     previewButton.getElement().getStyle().setMarginRight(1, Unit.EM);
-    previewButton.addStyleName(resources.windowCss().button());
+    previewButton.addStyleName(resources.getStyle().windowFrameFooterButton());
     rootPanel.clear();
     rootPanel.add(cancelButton);
     rootPanel.add(previewButton);

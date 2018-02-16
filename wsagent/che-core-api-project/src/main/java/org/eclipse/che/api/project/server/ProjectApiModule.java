@@ -27,6 +27,7 @@ import org.eclipse.che.api.project.server.impl.ProjectServiceApiFactory;
 import org.eclipse.che.api.project.server.impl.ProjectSynchronizer;
 import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.server.impl.RegisteredProjectFactory;
+import org.eclipse.che.api.project.server.impl.RootDirCreationHandler;
 import org.eclipse.che.api.project.server.impl.ValidatingProjectManager;
 import org.eclipse.che.api.project.server.impl.WorkspaceProjectSynchronizer;
 import org.eclipse.che.api.project.server.impl.ZipProjectImporter;
@@ -59,6 +60,8 @@ public class ProjectApiModule extends AbstractModule {
     bind(ProjectConfigRegistry.class);
     bind(ProjectImporterRegistry.class);
     bind(ProjectHandlerRegistry.class);
+
+    bind(RootDirCreationHandler.class).asEagerSingleton();
 
     bind(ProjectManager.class).to(ValidatingProjectManager.class);
     bind(ProjectSynchronizer.class).to(WorkspaceProjectSynchronizer.class);

@@ -10,9 +10,10 @@
  */
 package org.eclipse.che.ide.ext.git.client.remote.add;
 
+import static org.eclipse.che.ide.util.dom.DomUtils.isWidgetOrChildFocused;
+
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -71,40 +72,21 @@ public class AddRemoteRepositoryViewImpl extends Window implements AddRemoteRepo
     this.setWidget(widget);
 
     btnCancel =
-        createButton(
+        addFooterButton(
             locale.buttonCancel(),
             "git-addRemoteRepository-btnCancel",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-              }
-            });
-    addButtonToFooter(btnCancel);
+            event -> delegate.onCancelClicked());
 
     btnOk =
-        createButton(
-            locale.buttonOk(),
-            "git-addRemoteRepository-btnOk",
-            new ClickHandler() {
-
-              @Override
-              public void onClick(ClickEvent event) {
-                delegate.onOkClicked();
-              }
-            });
-    addButtonToFooter(btnOk);
+        addFooterButton(
+            locale.buttonOk(), "git-addRemoteRepository-btnOk", event -> delegate.onOkClicked());
   }
 
   @Override
-  protected void onEnterClicked() {
-    if (isWidgetFocused(btnOk)) {
+  public void onEnterPress(NativeEvent evt) {
+    if (isWidgetOrChildFocused(btnOk)) {
       delegate.onOkClicked();
-      return;
-    }
-
-    if (isWidgetFocused(btnCancel)) {
+    } else if (isWidgetOrChildFocused(btnCancel)) {
       delegate.onCancelClicked();
     }
   }

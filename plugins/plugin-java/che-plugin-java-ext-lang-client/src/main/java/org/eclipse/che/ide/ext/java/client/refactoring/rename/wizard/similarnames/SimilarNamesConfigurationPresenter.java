@@ -32,7 +32,7 @@ public class SimilarNamesConfigurationPresenter implements ActionDelegate {
 
   /** Show Move panel with the special information. */
   public void show() {
-    view.show();
+    view.showDialog();
   }
 
   /** @return selected value of mach strategy. */

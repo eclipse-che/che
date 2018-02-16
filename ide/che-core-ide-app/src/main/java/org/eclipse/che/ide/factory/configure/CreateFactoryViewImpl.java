@@ -70,7 +70,9 @@ public class CreateFactoryViewImpl extends Window implements CreateFactoryView {
       ClipboardButtonBuilder buttonBuilder) {
     this.factoryResources = factoryResources;
     setTitle(locale.createFactoryTitle());
-    setWidget(uiBinder.createAndBindUi(this));
+    Widget widget = uiBinder.createAndBindUi(this);
+    widget.getElement().getStyle().setPadding(0, Unit.PX);
+    setWidget(widget);
     factoryNameLabel.setText(locale.createFactoryName());
     factoryLinkLabel.setText(locale.createFactoryLink());
     configure.getElement().insertFirst(factoryResources.configure().getSvg().getElement());
@@ -78,15 +80,11 @@ public class CreateFactoryViewImpl extends Window implements CreateFactoryView {
     launch.addStyleName(style.launchIcon());
     configure.addStyleName(style.configureIcon());
     createFactoryButton.setEnabled(false);
-    Button cancelButton =
-        createButton(
-            locale.createFactoryButtonClose(),
-            "git-remotes-pull-cancel",
-            event -> delegate.onCancelClicked());
+    addFooterButton(
+        locale.createFactoryButtonClose(),
+        "projectReadOnlyGitUrl-btnClose",
+        event -> delegate.onCancelClicked());
     createFactoryButton.addClickHandler(clickEvent -> delegate.onCreateClicked());
-    cancelButton.ensureDebugId("projectReadOnlyGitUrl-btnClose");
-    addButtonToFooter(cancelButton);
-    getWidget().getElement().getStyle().setPadding(0, Unit.PX);
     buttonBuilder.withResourceWidget(factoryLink).build();
     factoryLink.setReadOnly(true);
     final Tooltip launchFactoryTooltip =
