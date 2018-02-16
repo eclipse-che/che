@@ -11,17 +11,14 @@
  */
 package org.eclipse.che.ide.editor.orion.client.signature;
 
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.user.client.ui.Widget;
+import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyModeOverlay;
 
 /**
- * Simple wrapper to create GWT Widget from DOM Elemen
+ * Factory for creating Signature widget.
  *
- * @author Evgen Vidolob
+ * @author Valeriy Svydenko
  */
-public class ElementWidget extends Widget {
-
-  public ElementWidget(Element element) {
-    setElement(element);
-  }
+public interface SignatureWidgetFactory {
+  SignatureWidget create(OrionEditorWidget editor, OrionKeyModeOverlay assistMode);
 }
