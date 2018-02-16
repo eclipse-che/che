@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.core.factory;
 
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
@@ -50,7 +51,7 @@ public class TestFactory {
   }
 
   /** Login to factory and open it by url. */
-  public void authenticateAndOpen() throws Exception {
+  public void authenticateAndOpen() {
     seleniumWebDriver.get(dashboardUrl.get().toString());
     entrance.login(owner);
     seleniumWebDriver.get(factoryUrl);
@@ -58,7 +59,7 @@ public class TestFactory {
   }
 
   /** Opens factory url. */
-  public void open(WebDriver driver) throws Exception {
+  public void open(WebDriver driver) {
     driver.get(factoryUrl);
   }
 
@@ -68,7 +69,7 @@ public class TestFactory {
     deleteFactory();
   }
 
-  private void deleteFactory() throws Exception {
+  private void deleteFactory() {
     if (isNamedFactory()) {
       testFactoryServiceClient.deleteFactory(factoryDto.getName());
     }
@@ -76,5 +77,11 @@ public class TestFactory {
 
   private boolean isNamedFactory() {
     return factoryDto.getName() != null;
+  }
+
+  public WorkspaceStatus getWorkspaceStatusAssociatedWithFactory() throws Exception {
+    return workspaceServiceClient
+        .getByName(factoryDto.getWorkspace().getName(), owner.getName())
+        .getStatus();
   }
 }
