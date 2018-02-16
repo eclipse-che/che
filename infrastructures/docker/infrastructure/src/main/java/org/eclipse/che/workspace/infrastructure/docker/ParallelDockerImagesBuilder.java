@@ -64,7 +64,7 @@ import org.slf4j.Logger;
 public class ParallelDockerImagesBuilder {
 
   private static final Logger LOG = getLogger(ParallelDockerImagesBuilder.class);
-  private static final String PARALLEL_NUMBER_PROPERTY = "che.infra.docker.max_pull_thread";
+  private static final String PARALLEL_PULL_PROPERTY_NAME = "che.infra.docker.max_pull_thread";
 
   private final RuntimeIdentity identity;
   private final MachineLoggersFactory machineLoggersFactory;
@@ -77,7 +77,7 @@ public class ParallelDockerImagesBuilder {
   public ParallelDockerImagesBuilder(
       @Assisted RuntimeIdentity identity,
       @Named("che.docker.always_pull_image") boolean doForcePullImage,
-      @Named(PARALLEL_NUMBER_PROPERTY) int parallelPullsNumber,
+      @Named(PARALLEL_PULL_PROPERTY_NAME) int parallelPullsNumber,
       UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
       DockerConnector dockerConnector,
       MachineLoggersFactory machineLoggersFactory) {
@@ -110,7 +110,7 @@ public class ParallelDockerImagesBuilder {
           String.format(
               "Maximum parallel images preparing threads reached. Some images will be queued.\n"
                   + " Workspace machines count is %s. If problem persists, increase %s property value.",
-              containers.size(), PARALLEL_NUMBER_PROPERTY));
+              containers.size(), PARALLEL_PULL_PROPERTY_NAME));
     }
     Map<String, String> imagesMap = new ConcurrentHashMap<>(containers.size());
     CompletableFuture<Void> firstFailed = new CompletableFuture<>();
