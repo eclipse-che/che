@@ -65,6 +65,7 @@ import org.eclipse.che.ide.api.editor.keymap.KeymapChangeEvent;
 import org.eclipse.che.ide.api.editor.keymap.KeymapChangeHandler;
 import org.eclipse.che.ide.api.editor.link.LinkedMode;
 import org.eclipse.che.ide.api.editor.position.PositionConverter;
+import org.eclipse.che.ide.api.editor.signature.SignatureHelp;
 import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.text.Region;
 import org.eclipse.che.ide.api.editor.text.RegionImpl;
@@ -103,6 +104,8 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionStyleOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.StatusMessageReporterOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.UiUtilsOverlay;
+import org.eclipse.che.ide.editor.orion.client.signature.SignatureWidget;
+import org.eclipse.che.ide.editor.orion.client.signature.SignatureWidgetFactory;
 import org.eclipse.che.ide.editor.preferences.keymaps.KeyMapsPreferencePresenter;
 import org.eclipse.che.ide.status.message.StatusMessageReporter;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
@@ -135,6 +138,7 @@ public class OrionEditorWidget extends Composite
   private final JavaScriptObject uiUtilsOverlay;
   private EditorAgentImpl editorAgent;
   private final ContentAssistWidgetFactory contentAssistWidgetFactory;
+  private final SignatureWidgetFactory signatureWidgetFactory;
   private final DialogFactory dialogFactory;
   private final PreferencesManager preferencesManager;
   private final OrionSettingsController orionSettingsController;
@@ -158,6 +162,7 @@ public class OrionEditorWidget extends Composite
 
   private Keymap keymap;
   private ContentAssistWidget assistWidget;
+  private SignatureWidget signatureWidget;
   private Gutter gutter;
 
   private boolean changeHandlerAdded = false;
@@ -178,6 +183,7 @@ public class OrionEditorWidget extends Composite
       final EventBus eventBus,
       final Provider<OrionCodeEditWidgetOverlay> orionCodeEditWidgetProvider,
       final ContentAssistWidgetFactory contentAssistWidgetFactory,
+      final SignatureWidgetFactory signatureWidgetFactory,
       final DialogFactory dialogFactory,
       final PreferencesManager preferencesManager,
       @Assisted final List<String> editorModes,
@@ -188,6 +194,7 @@ public class OrionEditorWidget extends Composite
       final OrionSettingsController orionSettingsController) {
     this.editorAgent = editorAgent;
     this.contentAssistWidgetFactory = contentAssistWidgetFactory;
+    this.signatureWidgetFactory = signatureWidgetFactory;
     this.moduleHolder = moduleHolder;
     this.keyModeInstances = keyModeInstances;
     this.eventBus = eventBus;
@@ -680,6 +687,10 @@ public class OrionEditorWidget extends Composite
       return;
     }
 
+    if (signatureWidget.isVisible()) {
+      signatureWidget.hide();
+    }
+
     assistWidget.show(proposals);
   }
 
@@ -839,6 +850,32 @@ public class OrionEditorWidget extends Composite
   }
 
   /**
+   * Shows widget with method's signatures.
+   *
+   * @param signatureHelp information about signatures {@link SignatureHelp}
+   */
+  public void showSignatureWidget(SignatureHelp signatureHelp) {
+    if (assistWidget.isVisible()) {
+      assistWidget.hide();
+    }
+    signatureWidget.show(signatureHelp);
+  }
+
+  /**
+   * Checks visibility of Signatures widget.
+   *
+   * @return {@code true} if the widget is visible otherwise {@code false}
+   */
+  public boolean isSignatureWidgetVisible() {
+    return signatureWidget.isVisible();
+  }
+
+  /** Hides Signatures widget. */
+  public void hideSignatureWidget() {
+    signatureWidget.hide();
+  }
+
+  /**
    * UI binder interface for this component.
    *
    * @author "Mickaël Leduque"
@@ -908,6 +945,7 @@ public class OrionEditorWidget extends Composite
               moduleHolder.getModule("CheContentAssistMode"), editorOverlay.getTextView());
       assistWidget =
           contentAssistWidgetFactory.create(OrionEditorWidget.this, cheContentAssistMode);
+      signatureWidget = signatureWidgetFactory.create(OrionEditorWidget.this, cheContentAssistMode);
       gutter = initBreakpointRuler(moduleHolder);
 
       widgetInitializedCallback.initialized(OrionEditorWidget.this);
@@ -922,13 +960,14 @@ public class OrionEditorWidget extends Composite
    * will return input value clicking "Cancel" will return null
    */
   private native void registerPromptFunction() /*-{
-        if (!$wnd["promptIDE"]) {
-            var instance = this;
-            $wnd["promptIDE"] = function (title, text, defaultValue, callback) {
-                instance.@org.eclipse.che.ide.editor.orion.client.OrionEditorWidget::askLineNumber(*)(title, text, defaultValue, callback);
-            };
-        }
-    }-*/;
+    if (!$wnd["promptIDE"]) {
+      var instance = this;
+      $wnd["promptIDE"] = function (title, text, defaultValue, callback) {
+        instance.@org.eclipse.che.ide.editor.orion.client.OrionEditorWidget::askLineNumber(*)(title,
+            text, defaultValue, callback);
+      };
+    }
+  }-*/;
 
   /** Custom callback to pass given value to native javascript function. */
   private class InputCallback implements org.eclipse.che.ide.ui.dialogs.input.InputCallback {
@@ -946,9 +985,9 @@ public class OrionEditorWidget extends Composite
     }
 
     private native void acceptedNative(String value) /*-{
-            var callback = this.@org.eclipse.che.ide.editor.orion.client.OrionEditorWidget.InputCallback::callback;
-            callback(value);
-        }-*/;
+      var callback = this.@org.eclipse.che.ide.editor.orion.client.OrionEditorWidget.InputCallback::callback;
+      callback(value);
+    }-*/;
   }
 
   private void askLineNumber(
