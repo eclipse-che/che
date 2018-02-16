@@ -13,8 +13,6 @@ package org.eclipse.che.ide.ext.java.client.navigation.service;
 import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
-import org.eclipse.che.ide.ext.java.shared.dto.model.MethodParameters;
-import org.eclipse.che.ide.resource.Path;
 
 /**
  * Service for the operations of navigation.
@@ -24,7 +22,4 @@ import org.eclipse.che.ide.resource.Path;
  */
 public interface JavaNavigationService {
   Promise<List<JavaProject>> getProjectsAndPackages(boolean includePackage);
-
-  Promise<List<MethodParameters>> getMethodParametersHints(
-      Path project, String fqn, int offset, int lineStartOffset);
 }
