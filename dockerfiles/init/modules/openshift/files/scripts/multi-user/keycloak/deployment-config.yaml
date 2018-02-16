@@ -40,7 +40,7 @@ spec:
           value: admin
         - name: KEYCLOAK_PASSWORD
           value: admin
-        image: 'eivantsov/keycloak:latest'
+        image: '${IMAGE_KEYCLOAK}'
         imagePullPolicy: Always
         name: keycloak
         livenessProbe:

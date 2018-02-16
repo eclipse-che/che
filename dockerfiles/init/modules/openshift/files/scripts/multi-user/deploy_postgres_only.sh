@@ -9,13 +9,15 @@
 COMMAND_DIR=$(dirname "$0")
 export CHE_EPHEMERAL=${CHE_EPHEMERAL:-false}
 
-oc apply -f "$COMMAND_DIR"/postgres/
+IMAGE_POSTGRES=${IMAGE_POSTGRES:-eclipse/che-psql:nightly}
+
+        for i in $(ls "$COMMAND_DIR"/postgres ); do
+            cat "${COMMAND_DIR}"/postgres/"${i}" | sed "s#\${IMAGE_POSTGRES}#${IMAGE_POSTGRES}#" | oc apply -f -
+        done
 
 if [ "${CHE_EPHEMERAL}" == "true" ]; then
   oc volume dc/postgres --remove --confirm
   oc delete pvc/postgres-data
 fi
-
-IMAGE_POSTGRES=${IMAGE_POSTGRES:-centos/postgresql-96-centos7}
 
 "$COMMAND_DIR"/wait_until_postgres_is_available.sh

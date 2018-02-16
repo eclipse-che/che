@@ -535,6 +535,10 @@ if [ "${WAIT_FOR_CHE}" == "true" ]; then
   wait_until_che_is_available
 fi
 
+if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
+"${COMMAND_DIR}"/multi-user/configure_keycloak.sh
+fi
+
 che_route=$(oc get route che -o jsonpath='{.spec.host}')
 echo
 echo "[CHE] Che deployment has been successufully bootstrapped"
@@ -544,7 +548,3 @@ echo "[CHE] -> Once the deployment is completed Che will be available at: "
 echo "[CHE]    ${HTTP_PROTOCOL}://${che_route}"
 echo
 echo
-
-if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
-"${COMMAND_DIR}"/multi-user/configure_keycloak.sh
-fi

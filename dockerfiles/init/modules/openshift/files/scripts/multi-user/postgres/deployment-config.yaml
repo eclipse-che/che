@@ -32,7 +32,7 @@ spec:
           value: "pgchepassword"
         - name: "CHE_POSTGRES_DATABASE"
           value: "dbche"
-        image: 'eivantsov/psql'
+        image: '${IMAGE_POSTGRES}'
         imagePullPolicy: Always
         name: postgres
         livenessProbe:

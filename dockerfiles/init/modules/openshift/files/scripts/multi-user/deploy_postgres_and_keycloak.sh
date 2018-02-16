@@ -41,7 +41,13 @@ DEFAULT_CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD=true
 
 
 # apply all yaml files from "$COMMAND_DIR"/keycloak/
-oc apply -f "$COMMAND_DIR"/keycloak/
+
+IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK:-"eclipse/keycloak:nightly"}
+
+        for i in $(ls -Iconfig "$COMMAND_DIR"/keycloak ); do
+            cat "${COMMAND_DIR}"/keycloak/"${i}" | sed "s#\${IMAGE_KEYCLOAK}#${IMAGE_KEYCLOAK}#" | oc apply -f -
+        done
+
 
 if [ "${CHE_EPHEMERAL}" == "true" ]; then
   oc volume dc/keycloak --remove --confirm
@@ -59,7 +65,5 @@ if [ "${CHE_SERVER_ROUTE_TLS}" != "" ]; then
   append_before_match "wildcardPolicy:" "${TLS_SETTINGS}" | \
   oc replace -f -
 fi
-
-IMAGE_KEYCLOACK=${IMAGE_KEYCLOACK:-"jboss/keycloak-openshift:3.3.0.CR2-3"}
 
 "$COMMAND_DIR"/wait_until_keycloak_is_available.sh
