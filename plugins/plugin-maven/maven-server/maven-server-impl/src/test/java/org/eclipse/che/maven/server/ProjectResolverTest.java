@@ -232,6 +232,18 @@ public class ProjectResolverTest {
   }
 
   @Test
+  public void testResolveProjectWithRepository() throws Exception {
+    MavenServerResult resolveProject =
+        mavenServer.resolveProject(
+            new File(
+                MavenServerTest.class.getResource("/with-remote-repository/pom.xml").getFile()),
+            emptyList(),
+            emptyList());
+    assertNotNull(resolveProject);
+    assertEquals(resolveProject.getProjectInfo().getMavenModel().getRemoteRepositories().size(), 3);
+  }
+
+  @Test
   public void testResolveArtifactSource() throws Exception {
     MavenArtifactKey artifactKey = new MavenArtifactKey("junit", "junit", "4.11", "jar", "sources");
     MavenArtifact artifact = mavenServer.resolveArtifact(artifactKey, emptyList());

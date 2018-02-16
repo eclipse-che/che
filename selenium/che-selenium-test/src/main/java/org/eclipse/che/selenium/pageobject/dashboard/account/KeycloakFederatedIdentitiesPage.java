@@ -81,11 +81,11 @@ public class KeycloakFederatedIdentitiesPage {
   }
 
   public String getGitHubIdentityFieldValue() {
-    return seleniumWebDriverHelper.getFieldValue(By.xpath(GITHUB_INPUT_XPATH));
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.xpath(GITHUB_INPUT_XPATH));
   }
 
   public void removeGithubIdentity() {
-    seleniumWebDriverHelper.waitAndClickOnElement(By.id(GITHUB_REMOVE_BUTTON_ID));
+    seleniumWebDriverHelper.waitAndClick(By.id(GITHUB_REMOVE_BUTTON_ID));
     waitTextInSuccessAlert(IDENTITY_PROVIDER_REMOVED_SUCCESSFULLY_MESSAGE);
   }
 
@@ -99,13 +99,12 @@ public class KeycloakFederatedIdentitiesPage {
         (ExpectedCondition<Boolean>)
             driver ->
                 seleniumWebDriverHelper
-                    .waitAndGetElement(xpath(SUCCESS_ALERT))
+                    .waitVisibility(xpath(SUCCESS_ALERT))
                     .getText()
                     .equals(expectedText));
   }
 
   private void waitAllBodyFieldsAndButtonsIsVisible() {
-    asList(xpath(TITLE_XPATH))
-        .forEach(locator -> seleniumWebDriverHelper.waitElementIsVisible(locator));
+    asList(xpath(TITLE_XPATH)).forEach(locator -> seleniumWebDriverHelper.waitVisibility(locator));
   }
 }

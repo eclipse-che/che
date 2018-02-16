@@ -31,7 +31,7 @@ public class KeycloakHeaderButtons {
 
     private static final String BUTTON_XPATH_TEMPLATE = "//div[@id='tabs-menu']//a[text()='%s']";
 
-    private String text;
+    private final String text;
 
     Button(String text) {
       this.text = text;
@@ -80,7 +80,7 @@ public class KeycloakHeaderButtons {
   }
 
   private void clickOnButton(Button button) {
-    seleniumWebDriverHelper.waitAndClickOnElement(button.getXpath());
+    seleniumWebDriverHelper.waitAndClick(button.getXpath());
   }
 
   /** wait until all buttons which placed in the header of the page will be visible */
@@ -92,6 +92,6 @@ public class KeycloakHeaderButtons {
             Button.FEDERATED_IDENTITIES.getXpath(),
             Button.SESSIONS.getXpath(),
             Button.APPLICATIONS.getXpath())
-        .forEach(locator -> seleniumWebDriverHelper.waitElementIsVisible(locator));
+        .forEach(locator -> seleniumWebDriverHelper.waitVisibility(locator));
   }
 }

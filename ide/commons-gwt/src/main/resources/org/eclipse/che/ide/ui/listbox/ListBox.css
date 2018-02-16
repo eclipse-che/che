@@ -25,6 +25,13 @@
     margin: 0;
 }
 
+.listBox:focus {
+    color: textFieldFocusedColor;
+    background-color: textFieldFocusedBackgroundColor;
+    -webkit-text-fill-color: textFieldFocusedColor;
+    -webkit-animation: textFieldFocus 0.2s infinite;
+}
+
 .listBox label {
     font-size: inherit;
     font-weight: inherit !important;

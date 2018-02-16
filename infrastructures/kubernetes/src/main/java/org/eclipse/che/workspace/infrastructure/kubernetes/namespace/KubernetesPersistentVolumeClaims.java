@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 
 /**
  * Defines an internal API for managing {@link PersistentVolumeClaim} instances in {@link
@@ -46,7 +47,7 @@ public class KubernetesPersistentVolumeClaims {
     try {
       return clientFactory.create().persistentVolumeClaims().inNamespace(namespace).create(pvc);
     } catch (KubernetesClientException e) {
-      throw new InfrastructureException(e.getMessage(), e);
+      throw new KubernetesInfrastructureException(e);
     }
   }
 
@@ -64,7 +65,7 @@ public class KubernetesPersistentVolumeClaims {
           .list()
           .getItems();
     } catch (KubernetesClientException e) {
-      throw new InfrastructureException(e.getMessage(), e);
+      throw new KubernetesInfrastructureException(e);
     }
   }
 
@@ -87,7 +88,7 @@ public class KubernetesPersistentVolumeClaims {
           .list()
           .getItems();
     } catch (KubernetesClientException e) {
-      throw new InfrastructureException(e.getMessage(), e);
+      throw new KubernetesInfrastructureException(e);
     }
   }
 

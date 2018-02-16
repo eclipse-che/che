@@ -16,6 +16,7 @@ import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
@@ -78,7 +79,7 @@ public class OpenShiftProject extends KubernetesNamespace {
           .done();
       waitDefaultServiceAccount(projectName, client);
     } catch (KubernetesClientException e) {
-      throw new InfrastructureException(e.getMessage(), e);
+      throw new KubernetesInfrastructureException(e);
     }
   }
 
@@ -90,7 +91,7 @@ public class OpenShiftProject extends KubernetesNamespace {
         // project is foreign or doesn't exist
         return null;
       } else {
-        throw new InfrastructureException(e.getMessage(), e);
+        throw new KubernetesInfrastructureException(e);
       }
     }
   }

@@ -10,23 +10,18 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
-import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
-import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.COMMON_GOAL;
-import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.MAVEN_TYPE;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.ADD_TO_INDEX;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.STATUS;
 import static org.eclipse.che.selenium.pageobject.MultiSplitPanel.SplitPaneCommands.CLOSE_ALL_TABS;
-import static org.eclipse.che.selenium.pageobject.MultiSplitPanel.SplitPaneCommands.SPLIT_PANE_IN_COLUMNS;
-import static org.eclipse.che.selenium.pageobject.MultiSplitPanel.SplitPaneCommands.SPLIT_PANE_IN_ROWS;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.COMMON;
 
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
+import org.eclipse.che.selenium.core.constant.TestBuildConstants;
+import org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants;
+import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
@@ -47,7 +42,7 @@ import org.testng.annotations.Test;
 /** @author Aleksandr Shmaraev */
 public class WorkingWithSplitPanelTest {
 
-  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
+  private static final String PROJECT_NAME = NameGenerator.generate("MultiSplitPane", 4);
   private static final String BUILD_COMM = "newMaven";
   private static final String[] checkMcTerminal = {"Left", "File", "Command", "Options", "Right"};
 
@@ -78,7 +73,7 @@ public class WorkingWithSplitPanelTest {
 
   @Test
   public void checkMultiSplitPane() {
-    ide.waitOpenedWorkspaceIsReadyToUse();
+    projectExplorer.waitProjectExplorer();
     projectExplorer.selectItem(PROJECT_NAME);
     terminal.waitTerminalTab();
     loader.waitOnClosed();
@@ -94,14 +89,14 @@ public class WorkingWithSplitPanelTest {
     // create a several panels
     multiSplitPanel.clickOnIconMultiSplitPanel(1);
     multiSplitPanel.waitSplitPanelMenuIsOpen();
-    multiSplitPanel.selectCommandSplitPane(SPLIT_PANE_IN_COLUMNS);
+    multiSplitPanel.selectCommandSplitPane(MultiSplitPanel.SplitPaneCommands.SPLIT_PANE_IN_COLUMNS);
     multiSplitPanel.waitNumberOpenSplitPanels(2);
     multiSplitPanel.clickOnIconMultiSplitPanel(1);
-    multiSplitPanel.selectCommandSplitPane(SPLIT_PANE_IN_ROWS);
+    multiSplitPanel.selectCommandSplitPane(MultiSplitPanel.SplitPaneCommands.SPLIT_PANE_IN_ROWS);
     multiSplitPanel.waitNumberOpenSplitPanels(3);
     multiSplitPanel.clickOnIconMultiSplitPanel(3);
     multiSplitPanel.waitSplitPanelMenuIsOpen();
-    multiSplitPanel.selectCommandSplitPane(SPLIT_PANE_IN_ROWS);
+    multiSplitPanel.selectCommandSplitPane(MultiSplitPanel.SplitPaneCommands.SPLIT_PANE_IN_ROWS);
     multiSplitPanel.waitNumberOpenSplitPanels(4);
 
     // close one panel from split pane menu
@@ -119,20 +114,18 @@ public class WorkingWithSplitPanelTest {
   public void checkTerminalAndBuild() {
     // make build, open terminal and check tabs
     multiSplitPanel.selectSplitPanel(3);
-    commandsBuilder(COMMON_GOAL, MAVEN_TYPE);
-    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, BUILD_COMM);
-    consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS, 120);
+    commandsBuilder(
+        TestIntelligentCommandsConstants.CommandsGoals.COMMON_GOAL,
+        TestIntelligentCommandsConstants.CommandsTypes.MAVEN_TYPE);
+    projectExplorer.invokeCommandWithContextMenu(
+        ProjectExplorer.CommandsGoal.COMMON, PROJECT_NAME, BUILD_COMM);
+    consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS, 120);
     multiSplitPanel.waitTabProcessIsPresent(3, BUILD_COMM);
     multiSplitPanel.selectSplitPanel(1);
-    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, BUILD_COMM);
-    consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS, 120);
-    multiSplitPanel.waitTabProcessIsPresent(1, BUILD_COMM);
-    multiSplitPanel.waitTabNameProcessIsFocused(BUILD_COMM);
-    multiSplitPanel.waitTabProcessIsNotPresent(3, BUILD_COMM);
-
+    consoles.clickOnPlusMenuButton();
+    consoles.clickOnTerminalItemInContextMenu();
     consoles.startTerminalFromProcessesArea("dev-machine");
     multiSplitPanel.waitTabProcessIsPresent(1, "Terminal-2");
-    multiSplitPanel.waitTabNameProcessIsFocused("Terminal-2");
     terminal.waitTerminalIsNotEmpty();
     loader.waitOnClosed();
     terminal.typeIntoTerminal("mc");
@@ -142,16 +135,18 @@ public class WorkingWithSplitPanelTest {
     for (String partOfContent : checkMcTerminal) {
       terminal.waitExpectedTextIntoTerminal(partOfContent);
     }
+    multiSplitPanel.waitTabProcessIsNotPresent(2, BUILD_COMM);
   }
 
   @Test(priority = 2)
   public void checkTabsOnSplitPanel() {
     // check tabs on split panels
     multiSplitPanel.selectSplitPanel(2);
-    menu.runCommand(GIT, INITIALIZE_REPOSITORY);
+    menu.runCommand(
+        TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
     askDialog.confirmAndWaitClosed();
     loader.waitOnClosed();
-    menu.runCommand(GIT, STATUS);
+    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
     multiSplitPanel.waitTabProcessIsPresent(2, "Git status");
     multiSplitPanel.waitTabProcessIsPresent(2, "Git init");
     multiSplitPanel.waitMesageIntoSplitGitPanel(
@@ -169,7 +164,7 @@ public class WorkingWithSplitPanelTest {
     multiSplitPanel.closeProcessIntoPaneMenu("Git init");
     multiSplitPanel.waitSplitPanelMenuIsClosed();
     multiSplitPanel.waitTabProcessIsNotPresent(2, "Git init");
-    menu.runCommand(GIT, ADD_TO_INDEX);
+    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.confirmAddToIndexForm();
     multiSplitPanel.waitTabProcessIsPresent(2, "Git add to index");
   }
@@ -187,26 +182,10 @@ public class WorkingWithSplitPanelTest {
     multiSplitPanel.selectProcessByTabName(2, "Git add to index");
     multiSplitPanel.waitTabNameProcessIsFocused("Git add to index");
     multiSplitPanel.waitMesageIntoSplitGitPanel(2, "Git index updated");
-    menu.runCommand(GIT, STATUS);
-    multiSplitPanel.waitTabProcessIsPresent(2, "Git status");
-    multiSplitPanel.waitTabNameProcessIsFocused("Git status");
-    multiSplitPanel.waitTabProcessIsNotPresent(1, "Git status");
-    multiSplitPanel.waitMesageIntoSplitGitPanel(
-        2, " On branch master\n" + " Changes to be committed");
-    multiSplitPanel.selectSplitPanel(1);
-    menu.runCommand(GIT, STATUS);
-    multiSplitPanel.waitTabProcessIsPresent(1, "Git status");
-    multiSplitPanel.waitTabNameProcessIsFocused("Git status");
-    multiSplitPanel.waitTabProcessIsNotPresent(2, "Git status");
-    multiSplitPanel.waitMesageIntoSplitGitPanel(
-        1, " On branch master\n" + " Changes to be committed");
-    multiSplitPanel.selectProcessByTabName(1, BUILD_COMM);
-    consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS);
+    consoles.clickOnPlusMenuButton();
+    consoles.clickOnServerItemInContextMenu();
+    multiSplitPanel.waitTabProcessIsPresent(1, "Servers");
     multiSplitPanel.clickOnIconMultiSplitPanel(1);
-    multiSplitPanel.waitSplitPanelMenuIsOpen();
-    multiSplitPanel.waitProcessIsPresentIntoPaneMenu("Terminal-2");
-    multiSplitPanel.waitProcessIsPresentIntoPaneMenu("Git status");
-    multiSplitPanel.waitProcessIsPresentIntoPaneMenu(BUILD_COMM);
     multiSplitPanel.selectCommandSplitPane(CLOSE_ALL_TABS);
     multiSplitPanel.waitSplitPanelMenuIsClosed();
     multiSplitPanel.waitTabProcessIsNotPresent(1, BUILD_COMM);
