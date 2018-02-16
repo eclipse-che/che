@@ -160,17 +160,17 @@ generate_configuration_with_puppet() {
     fi
   fi
 
-  for element in "${CLI_ENV_ARRAY[@]}" 
-  do
-    var1=$(echo $element | cut -f1 -d=)
-    var2=$(echo $element | cut -f2 -d=)
-
+  che_cli_env_arr_index="0"
+  while [ $che_cli_env_arr_index -lt ${#CLI_ENV_ARRAY[@]} ]; do
+    var1=$(echo ${CLI_ENV_ARRAY[$che_cli_env_arr_index]} | cut -f1 -d=)
+    var2=$(echo ${CLI_ENV_ARRAY[$che_cli_env_arr_index]} | cut -f2 -d=)
     if [[ $var1 == CHE_* ]] ||
        [[ $var1 == IMAGE_* ]]  ||
        [[ $var1 == *_IMAGE_* ]]  ||
        [[ $var1 == ${CHE_PRODUCT_NAME}_* ]]; then
-      WRITE_PARAMETERS+=" -e \"$var1=$var2\""
+      WRITE_PARAMETERS+=" -e $var1='$var2'"
     fi
+    che_cli_env_arr_index=$[$che_cli_env_arr_index+1]
   done
 
   GENERATE_CONFIG_COMMAND="docker_run \
