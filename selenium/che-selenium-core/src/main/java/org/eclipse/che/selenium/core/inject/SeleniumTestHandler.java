@@ -51,6 +51,8 @@ import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.user.InjectTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
@@ -84,8 +86,16 @@ public abstract class SeleniumTestHandler
   private static final AtomicBoolean isCleanUpCompleted = new AtomicBoolean();
 
   @Inject
-  @Named("tests.screenshot_dir")
-  private String screenshotDir;
+  @Named("tests.screenshots_dir")
+  private String screenshotsDir;
+
+  @Inject
+  @Named("tests.htmldumps_dir")
+  private String htmldumpsDir;
+
+  @Inject
+  @Named("tests.workspacelogs_dir")
+  private String workspaceLogsDir;
 
   @Inject private PageObjectsInjector pageObjectsInjector;
 
@@ -116,6 +126,7 @@ public abstract class SeleniumTestHandler
   @Inject private TestUser defaultTestUser;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
   @Inject private TestGitHubServiceClient gitHubClientService;
+  @Inject private TestWorkspaceLogsReader testWorkspaceLogsReader;
 
   private final Injector injector;
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
@@ -261,7 +272,37 @@ public abstract class SeleniumTestHandler
       }
       captureScreenshot(result);
       captureHtmlSource(result);
+      captureTestWorkspaceLogs(result);
     }
+  }
+
+  private void captureTestWorkspaceLogs(ITestResult result) {
+    Object testInstance = result.getInstance();
+    for (Field field : testInstance.getClass().getDeclaredFields()) {
+      field.setAccessible(true);
+
+      Object obj;
+      try {
+        obj = field.get(testInstance);
+      } catch (IllegalAccessException e) {
+        LOG.error(
+            "Field {} is unaccessable in {}.", field.getName(), testInstance.getClass().getName());
+        continue;
+      }
+
+      if (obj == null || !(obj instanceof TestWorkspace) || !isInjectedWorkspace(field)) {
+        continue;
+      }
+
+      Path pathToStoreWorkspaceLogs = Paths.get(workspaceLogsDir, getTestDefinition(result));
+      testWorkspaceLogsReader.read((TestWorkspace) obj, pathToStoreWorkspaceLogs);
+    }
+  }
+
+  private boolean isInjectedWorkspace(Field field) {
+    return field.isAnnotationPresent(com.google.inject.Inject.class)
+        || field.isAnnotationPresent(javax.inject.Inject.class)
+        || field.isAnnotationPresent(InjectTestWorkspace.class);
   }
 
   /** Releases resources by invoking methods annotated with {@link PreDestroy} */
@@ -367,16 +408,20 @@ public abstract class SeleniumTestHandler
   }
 
   private void captureScreenshotFromWindow(ITestResult result, SeleniumWebDriver webDriver) {
-    String testName = result.getTestClass().getName() + "." + result.getMethod().getMethodName();
-    String filename = NameGenerator.generate(testName + "_", 8) + ".png";
+    String testDefinition = getTestDefinition(result);
+    String filename = NameGenerator.generate(testDefinition + "_", 8) + ".png";
     try {
       byte[] data = webDriver.getScreenshotAs(OutputType.BYTES);
-      Path screenshot = Paths.get(screenshotDir, filename);
+      Path screenshot = Paths.get(screenshotsDir, filename);
       Files.createDirectories(screenshot.getParent());
       Files.copy(new ByteArrayInputStream(data), screenshot);
     } catch (WebDriverException | IOException e) {
-      LOG.error(format("Can't capture screenshot for test %s", testName), e);
+      LOG.error(format("Can't capture screenshot for test %s", testDefinition), e);
     }
+  }
+
+  private String getTestDefinition(ITestResult result) {
+    return result.getTestClass().getName() + "." + result.getMethod().getMethodName();
   }
 
   private void captureScreenshotsFromOpenedWindows(
@@ -391,11 +436,11 @@ public abstract class SeleniumTestHandler
   }
 
   private void dumpHtmlCodeFromTheCurrentPage(ITestResult result, SeleniumWebDriver webDriver) {
-    String testName = result.getTestClass().getName() + "." + result.getMethod().getMethodName();
+    String testName = getTestDefinition(result);
     String filename = NameGenerator.generate(testName + "_", 8) + ".html";
     try {
       String pageSource = webDriver.getPageSource();
-      Path dumpDirectory = Paths.get("target/htmldumps", filename);
+      Path dumpDirectory = Paths.get(htmldumpsDir, filename);
       Files.createDirectories(dumpDirectory.getParent());
       Files.write(
           dumpDirectory, pageSource.getBytes(Charset.forName("UTF-8")), StandardOpenOption.CREATE);
