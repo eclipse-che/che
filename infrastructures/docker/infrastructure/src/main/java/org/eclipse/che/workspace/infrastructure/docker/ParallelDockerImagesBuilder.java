@@ -64,7 +64,7 @@ import org.slf4j.Logger;
 public class ParallelDockerImagesBuilder {
 
   private static final Logger LOG = getLogger(ParallelDockerImagesBuilder.class);
-  private static final String PARALLEL_PULL_PROPERTY_NAME = "che.infra.docker.max_pull_thread";
+  private static final String PARALLEL_PULL_PROPERTY_NAME = "che.infra.docker.max_pull_threads";
 
   private final RuntimeIdentity identity;
   private final MachineLoggersFactory machineLoggersFactory;
@@ -112,7 +112,7 @@ public class ParallelDockerImagesBuilder {
                   + " Workspace machines count is %s. If problem persists, increase %s property value.",
               containers.size(), PARALLEL_PULL_PROPERTY_NAME));
     }
-    Map<String, String> imagesMap = new ConcurrentHashMap<>(containers.size());
+    Map<String, String> machineToImageNames = new ConcurrentHashMap<>(containers.size());
     CompletableFuture<Void> firstFailed = new CompletableFuture<>();
     List<CompletableFuture<Void>> taskFutures =
         containers
@@ -124,7 +124,8 @@ public class ParallelDockerImagesBuilder {
                         (Supplier<Void>)
                             () -> {
                               try {
-                                imagesMap.put(e.getKey(), prepareImage(e.getKey(), e.getValue()));
+                                machineToImageNames.put(
+                                    e.getKey(), prepareImage(e.getKey(), e.getValue()));
                               } catch (InternalInfrastructureException
                                   | SourceNotFoundException ex) {
                                 firstFailed.completeExceptionally(ex);
@@ -144,17 +145,17 @@ public class ParallelDockerImagesBuilder {
       } catch (InfrastructureException rethrow) {
         throw rethrow;
       } catch (Throwable thr) {
-        throw new InternalInfrastructureException("Unable to build image", thr);
+        throw new InternalInfrastructureException("Unable to build or pull image", thr);
       }
     }
-    return imagesMap;
+    return machineToImageNames;
   }
 
   /**
    * Prepares (builds or downloads) docker image for container config.
    *
    * @param container container config
-   * @return map of machine names and theirs image names.
+   * @return name of the image for the given container config
    * @throws InternalInfrastructureException if config is incomplete or image build failed
    * @throws SourceNotFoundException if image pull failed
    */
@@ -194,7 +195,7 @@ public class ParallelDockerImagesBuilder {
    * @param progressMonitor consumer of build logs
    * @throws InternalInfrastructureException when any error occurs
    */
-  protected void buildImage(
+  private void buildImage(
       DockerContainerConfig containerConfig,
       String machineImageName,
       boolean doForcePullOnBuild,
@@ -247,7 +248,7 @@ public class ParallelDockerImagesBuilder {
    * @throws SourceNotFoundException if image for pulling not found in registry
    * @throws InternalInfrastructureException if any other error occurs
    */
-  protected void pullImage(
+  private void pullImage(
       DockerContainerConfig container, String machineImageName, ProgressMonitor progressMonitor)
       throws InternalInfrastructureException, SourceNotFoundException {
     final DockerImageIdentifier dockerImageIdentifier;
