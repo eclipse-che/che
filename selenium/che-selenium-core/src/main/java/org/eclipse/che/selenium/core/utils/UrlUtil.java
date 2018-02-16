@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.selenium.core;
+package org.eclipse.che.selenium.core.utils;
 
 import java.net.MalformedURLException;
 import java.net.URL;

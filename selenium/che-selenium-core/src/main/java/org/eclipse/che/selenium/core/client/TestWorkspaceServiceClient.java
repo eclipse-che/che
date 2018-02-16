@@ -224,6 +224,11 @@ public class TestWorkspaceServiceClient {
     return requestFactory.fromUrl(getIdBasedUrl(workspaceId)).request().asDto(WorkspaceDto.class);
   }
 
+  /** Gets workspace status by id. */
+  public WorkspaceStatus getStatus(String workspaceId) throws Exception {
+    return getById(workspaceId).getStatus();
+  }
+
   /**
    * Return server URL related with defined port
    *

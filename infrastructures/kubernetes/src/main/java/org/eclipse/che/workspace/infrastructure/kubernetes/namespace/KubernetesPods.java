@@ -41,6 +41,7 @@ import java.util.regex.Pattern;
 import okhttp3.Response;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.ContainerEventHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodActionHandler;
@@ -97,7 +98,7 @@ public class KubernetesPods {
     try {
       return clientFactory.create().pods().inNamespace(namespace).create(pod);
     } catch (KubernetesClientException e) {
-      throw new InfrastructureException(e.getMessage(), e);
+      throw new KubernetesInfrastructureException(e);
     }
   }
 
@@ -116,7 +117,7 @@ public class KubernetesPods {
           .list()
           .getItems();
     } catch (KubernetesClientException e) {
-      throw new InfrastructureException(e.getMessage(), e);
+      throw new KubernetesInfrastructureException(e);
     }
   }
 
@@ -130,7 +131,7 @@ public class KubernetesPods {
       return Optional.ofNullable(
           clientFactory.create().pods().inNamespace(namespace).withName(name).get());
     } catch (KubernetesClientException e) {
-      throw new InfrastructureException(e.getMessage(), e);
+      throw new KubernetesInfrastructureException(e);
     }
   }
 
@@ -190,7 +191,7 @@ public class KubernetesPods {
         throw new InfrastructureException("Waiting for pod '" + name + "' was interrupted");
       }
     } catch (KubernetesClientException e) {
-      throw new InfrastructureException(e.getMessage(), e);
+      throw new KubernetesInfrastructureException(e);
     } finally {
       if (watch != null) {
         watch.close();
@@ -227,7 +228,7 @@ public class KubernetesPods {
                 .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
                 .watch(watcher);
       } catch (KubernetesClientException ex) {
-        throw new InfrastructureException(ex.getMessage());
+        throw new KubernetesInfrastructureException(ex);
       }
     }
     podActionHandlers.add(handler);
@@ -273,7 +274,7 @@ public class KubernetesPods {
       try {
         containerWatch = clientFactory.create().events().inNamespace(namespace).watch(watcher);
       } catch (KubernetesClientException ex) {
-        throw new InfrastructureException(ex.getMessage());
+        throw new KubernetesInfrastructureException(ex);
       }
     }
     containerEventsHandlers.add(handler);
@@ -336,7 +337,7 @@ public class KubernetesPods {
         throw new InfrastructureException(e.getMessage(), e);
       }
     } catch (KubernetesClientException e) {
-      throw new InfrastructureException(e.getMessage());
+      throw new KubernetesInfrastructureException(e);
     }
   }
 
@@ -406,7 +407,7 @@ public class KubernetesPods {
         throw new InfrastructureException("Pods removal timeout reached " + ex.getMessage());
       }
     } catch (KubernetesClientException e) {
-      throw new InfrastructureException(e.getMessage(), e);
+      throw new KubernetesInfrastructureException(e);
     }
   }
 
@@ -426,7 +427,7 @@ public class KubernetesPods {
             watch.close();
           });
     } catch (KubernetesClientException ex) {
-      throw new InfrastructureException(ex.getMessage(), ex);
+      throw new KubernetesInfrastructureException(ex);
     }
   }
 

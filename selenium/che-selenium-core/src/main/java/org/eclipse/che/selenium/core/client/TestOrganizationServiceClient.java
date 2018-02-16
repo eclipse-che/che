@@ -53,7 +53,7 @@ public class TestOrganizationServiceClient {
     List<OrganizationDto> organizations =
         requestFactory.fromUrl(getApiUrl()).request().asList(OrganizationDto.class);
 
-    organizations.removeIf(o -> o.getParent() != parent);
+    organizations.removeIf(o -> !o.getParent().equals(parent));
     return organizations;
   }
 

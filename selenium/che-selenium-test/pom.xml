@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-selenium-parent</artifactId>
         <groupId>org.eclipse.che.selenium</groupId>
-        <version>6.1.0-SNAPSHOT</version>
+        <version>6.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-selenium-test</artifactId>
     <packaging>jar</packaging>
@@ -187,9 +187,6 @@
                         <exclude>**/.keep</exclude>
                         <exclude>**/*.txt</exclude>
                         <exclude>**/*.zip</exclude>
-                        <exclude>**/*.zip</exclude>
-                        <exclude>**/resources/**/.gitkeep</exclude>
-                        <exclude>**/resources/**/.keep</exclude>
                         <exclude>**/resources/**/another</exclude>
                         <exclude>**/resources/**/classpath</exclude>
                         <exclude>**/resources/**/editor</exclude>

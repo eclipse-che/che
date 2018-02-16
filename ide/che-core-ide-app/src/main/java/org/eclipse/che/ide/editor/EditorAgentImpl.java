@@ -327,6 +327,7 @@ public class EditorAgentImpl
             openEditorCallback.onEditorOpened(editor);
 
             eventBus.fireEvent(new EditorOpenedEvent(file, editor));
+            eventBus.fireEvent(FileEvent.createFileOpenedEvent(file));
           }
 
           @Override
@@ -361,8 +362,6 @@ public class EditorAgentImpl
             if (editor instanceof TextEditor) {
               editorContentSynchronizer.trackEditor(editor);
             }
-
-            eventBus.fireEvent(FileEvent.createFileOpenedEvent(file));
           }
         });
   }

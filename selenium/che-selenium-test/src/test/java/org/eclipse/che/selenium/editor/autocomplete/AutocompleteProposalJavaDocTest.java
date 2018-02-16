@@ -18,6 +18,7 @@ import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
+import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -37,12 +38,11 @@ public class AutocompleteProposalJavaDocTest {
   private static final String PROJECT = "multi-module-java-with-ext-libs";
 
   private static final String APP_CLASS_NAME = "App";
-  private static final String PATH_TO_APP_CLASS =
-      PROJECT + "/app/src/main/java/multimodule/" + APP_CLASS_NAME + ".java";
+  private static final String PATH_FOR_EXPAND_APP_CLASS =
+      PROJECT + "/app/src/main/java/multimodule";
   private static final String BOOK_IMPL_CLASS_NAME = "BookImpl";
   private static final Logger LOG = LoggerFactory.getLogger(AutocompleteProposalJavaDocTest.class);
-  private static final String PATH_TO_BOOK_IMPL_CLASS =
-      PROJECT + "/model/src/main/java/multimodule/model/" + BOOK_IMPL_CLASS_NAME + ".java";
+  private static final String PATH_FOR_EXPAND_IMPL_CLASS = "model/src/main/java/multimodule.model";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -51,6 +51,7 @@ public class AutocompleteProposalJavaDocTest {
   @Inject private CodenvyEditor editor;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private BrowserLogsUtil browserLogsUtil;
 
   @BeforeClass
   public void setup() throws Exception {
@@ -67,10 +68,14 @@ public class AutocompleteProposalJavaDocTest {
     projectExplorer.selectItem(PROJECT);
     notificationsPopupPanel.waitProgressPopupPanelClose();
 
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(PATH_TO_APP_CLASS);
-    projectExplorer.scrollToItemByPath(PATH_TO_BOOK_IMPL_CLASS);
-    projectExplorer.openItemByPath(PATH_TO_BOOK_IMPL_CLASS);
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(
+        PATH_FOR_EXPAND_APP_CLASS, APP_CLASS_NAME + ".java");
+
+    // close project tree
+    projectExplorer.openItemByPath(PROJECT);
+
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(
+        PROJECT + "/model/src/main/java/multimodule.model", BOOK_IMPL_CLASS_NAME + ".java");
   }
 
   @BeforeMethod
@@ -212,6 +217,7 @@ public class AutocompleteProposalJavaDocTest {
       logExternalLibraries();
       logProjectTypeChecking();
       logProjectLanguageChecking();
+      browserLogsUtil.storeLogs();
 
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7161", ex);
