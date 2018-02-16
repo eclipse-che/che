@@ -19,7 +19,7 @@ import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory
  * @author Florent Benoit
  */
 class IdeCtrl {
-  static $inject = ['$location', '$rootScope', '$routeParams', '$timeout', 'ideSvc', 'ideIframeSvc', 'cheWorkspace', 'routeHistory'];
+  static $inject = ['$location', '$rootScope', '$routeParams', '$timeout', 'ideSvc', 'ideIFrameSvc', 'cheWorkspace', 'routeHistory'];
 
   $rootScope: che.IRootScopeService;
   $routeParams: che.route.IRouteParamsService;

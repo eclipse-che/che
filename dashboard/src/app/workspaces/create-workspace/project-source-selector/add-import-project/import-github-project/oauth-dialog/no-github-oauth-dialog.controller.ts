@@ -18,7 +18,7 @@
  */
 export class NoGithubOauthDialogController {
 
-  static $inject = ['$mdDialog'];
+  static $inject = ['$mdDialog', '$rootScope'];
 
   /**
    * Material's dialog service.
