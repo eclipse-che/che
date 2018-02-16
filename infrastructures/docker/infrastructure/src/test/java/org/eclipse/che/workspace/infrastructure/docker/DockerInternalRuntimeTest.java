@@ -102,8 +102,8 @@ public class DockerInternalRuntimeTest {
   @Mock private ProbeScheduler probesScheduler;
   @Mock private WorkspaceProbes workspaceProbes;
   @Mock private DockerMachine dockerMachine;
-  @Mock private ParallelDockerImagesBuilderFactory dockerImagesPreparerFactory;
-  @Mock private ParallelDockerImagesBuilder dockerImagesPreparer;
+  @Mock private ParallelDockerImagesBuilderFactory dockerImagesBuilderFactory;
+  @Mock private ParallelDockerImagesBuilder dockerImagesBuilder;
 
   @Captor private ArgumentCaptor<Consumer<ProbeResult>> probeResultConsumerCaptor;
   @Captor private ArgumentCaptor<MachineStatusEvent> eventCaptor;
@@ -136,8 +136,8 @@ public class DockerInternalRuntimeTest {
         .thenReturn(mock(ServersChecker.class));
     when(workspaceProbesFactory.getProbes(eq(IDENTITY.getWorkspaceId()), anyString(), any()))
         .thenReturn(workspaceProbes);
-    when(dockerImagesPreparerFactory.create(any())).thenReturn(dockerImagesPreparer);
-    when(dockerImagesPreparer.prepareImages(anyMap())).thenReturn(emptyMap());
+    when(dockerImagesBuilderFactory.create(any())).thenReturn(dockerImagesBuilder);
+    when(dockerImagesBuilder.prepareImages(anyMap())).thenReturn(emptyMap());
     dockerRuntime =
         new DockerInternalRuntime(
             runtimeContext,
@@ -151,7 +151,7 @@ public class DockerInternalRuntimeTest {
             mock(MachineLoggersFactory.class),
             probesScheduler,
             workspaceProbesFactory,
-            dockerImagesPreparerFactory);
+            dockerImagesBuilderFactory);
   }
 
   @Test

@@ -46,11 +46,11 @@ public class ParallelDockerImagesBuilderTest {
   @Mock private DockerConnector dockerConnector;
   @Mock private MachineLoggersFactory machineLoggersFactory;
 
-  private ParallelDockerImagesBuilder preparer;
+  private ParallelDockerImagesBuilder dockerImagesBuilder;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    preparer =
+    dockerImagesBuilder =
         new ParallelDockerImagesBuilder(
             identity, false, 10, dockerCredentials, dockerConnector, machineLoggersFactory);
   }
@@ -64,7 +64,7 @@ public class ParallelDockerImagesBuilderTest {
     DockerContainerConfig config = new DockerContainerConfig();
     config.setBuild(new DockerBuildContext());
     Map<String, DockerContainerConfig> input = singletonMap("machine1", config);
-    preparer.prepareImages(input);
+    dockerImagesBuilder.prepareImages(input);
   }
 
   @Test(
@@ -76,7 +76,7 @@ public class ParallelDockerImagesBuilderTest {
     DockerContainerConfig config = new DockerContainerConfig();
     config.setImage("**/%%");
     Map<String, DockerContainerConfig> input = singletonMap("machine1", config);
-    preparer.prepareImages(input);
+    dockerImagesBuilder.prepareImages(input);
   }
 
   @Test
@@ -90,7 +90,7 @@ public class ParallelDockerImagesBuilderTest {
     input.put("machine1", config1);
     input.put("machine2", config2);
     when(dockerConnector.listImages(any())).thenReturn(Collections.emptyList());
-    Map<String, String> result = preparer.prepareImages(input);
+    Map<String, String> result = dockerImagesBuilder.prepareImages(input);
 
     verify(dockerConnector, times(input.size())).pull(any(), any());
     verify(dockerConnector, times(input.size())).tag(any());
@@ -120,7 +120,7 @@ public class ParallelDockerImagesBuilderTest {
     input.put("machine2", config2);
 
     when(dockerConnector.listImages(any())).thenReturn(Collections.emptyList());
-    Map<String, String> result = preparer.prepareImages(input);
+    Map<String, String> result = dockerImagesBuilder.prepareImages(input);
 
     ArgumentCaptor<BuildImageParams> captor = ArgumentCaptor.forClass(BuildImageParams.class);
     verify(dockerConnector, times(input.size())).buildImage(captor.capture(), any());

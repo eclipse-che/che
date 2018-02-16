@@ -132,7 +132,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       DockerMachineStopDetector stopDetector,
       ProbeScheduler probeScheduler,
       WorkspaceProbesFactory probesFactory,
-      ParallelDockerImagesBuilderFactory imagesPreparerFactory)
+      ParallelDockerImagesBuilderFactory imagesBuilderFactory)
       throws InfrastructureException {
     this(
         context,
@@ -147,7 +147,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         loggers,
         probeScheduler,
         probesFactory,
-        imagesPreparerFactory);
+        imagesBuilderFactory);
 
     for (ContainerListEntry container : containers) {
       DockerMachine machine = machineCreator.create(container);
