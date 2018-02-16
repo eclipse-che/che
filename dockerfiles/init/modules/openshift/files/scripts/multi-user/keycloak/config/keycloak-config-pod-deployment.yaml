@@ -20,7 +20,7 @@ spec:
         value: "${HTTP_PROTOCOL}"
       - name: KC_HOST
         value: "${KC_HOST}"
-      image: eclipse/keycloak-utils:nightly
+      image: eclipse/keycloak-util:nightly
       name: keycloak-util
       imagePullPolicy: Always
     restartPolicy: Never
