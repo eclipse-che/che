@@ -38,7 +38,6 @@ import org.eclipse.che.ide.ext.java.client.action.NewJavaSourceFileAction;
 import org.eclipse.che.ide.ext.java.client.action.NewPackageAction;
 import org.eclipse.che.ide.ext.java.client.action.OpenImplementationAction;
 import org.eclipse.che.ide.ext.java.client.action.OrganizeImportsAction;
-import org.eclipse.che.ide.ext.java.client.action.ParametersHintsAction;
 import org.eclipse.che.ide.ext.java.client.action.ProjectClasspathAction;
 import org.eclipse.che.ide.ext.java.client.action.QuickDocumentationAction;
 import org.eclipse.che.ide.ext.java.client.action.QuickFixAction;
@@ -58,7 +57,6 @@ public class JavaExtension {
   public static final String SHOW_QUICK_DOC = "showQuickDoc";
   public static final String JAVA_CLASS_STRUCTURE = "javaClassStructure";
   public static final String ORGANIZE_IMPORTS = "organizeImports";
-  public static final String PARAMETERS_INFO = "parametersInfo";
   public static final String QUICK_FIX = "quickFix";
   public static final String JAVA_RENAME_REFACTORING = "javaRenameRefactoring";
   public static final String JAVA_CUT_REFACTORING = "javaCutRefactoring";
@@ -97,8 +95,7 @@ public class JavaExtension {
       QuickDocumentationAction quickDocumentationAction,
       QuickFixAction quickFixAction,
       OpenImplementationAction openImplementationAction,
-      FindUsagesAction findUsagesAction,
-      ParametersHintsAction parametersHintsAction) {
+      FindUsagesAction findUsagesAction) {
 
     DefaultActionGroup newGroup = (DefaultActionGroup) actionManager.getAction(GROUP_FILE_NEW);
 
@@ -136,7 +133,6 @@ public class JavaExtension {
     actionManager.registerAction(JAVA_FIND_USAGES, findUsagesAction);
     actionManager.registerAction(JAVA_CLASS_STRUCTURE, fileStructureAction);
     actionManager.registerAction(ORGANIZE_IMPORTS, organizeImportsAction);
-    actionManager.registerAction(PARAMETERS_INFO, parametersHintsAction);
     actionManager.registerAction(QUICK_FIX, quickFixAction);
 
     assistantGroup.add(
@@ -189,9 +185,6 @@ public class JavaExtension {
           .addKey(new KeyBuilder().alt().control().charCode('o').build(), ORGANIZE_IMPORTS);
       keyBinding
           .getGlobal()
-          .addKey(new KeyBuilder().control().charCode('p').build(), PARAMETERS_INFO);
-      keyBinding
-          .getGlobal()
           .addKey(new KeyBuilder().action().charCode(KeyCodeMap.ENTER).build(), QUICK_FIX);
     } else {
       keyBinding
@@ -206,9 +199,6 @@ public class JavaExtension {
       keyBinding
           .getGlobal()
           .addKey(new KeyBuilder().alt().action().charCode('o').build(), ORGANIZE_IMPORTS);
-      keyBinding
-          .getGlobal()
-          .addKey(new KeyBuilder().action().charCode('p').build(), PARAMETERS_INFO);
       keyBinding
           .getGlobal()
           .addKey(new KeyBuilder().alt().charCode(KeyCodeMap.ENTER).build(), QUICK_FIX);
