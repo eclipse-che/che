@@ -25,6 +25,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.fs.server.FsManager;
+import org.eclipse.che.api.fs.server.WsPathUtils;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 
 @Singleton
@@ -65,7 +66,7 @@ public class OnWorkspaceStartProjectInitializer {
     fsManager
         .getDirWsPaths(ROOT)
         .stream()
-        .filter(wsPath -> !("/" + CHE_DIR).equals(wsPath))
+        .filter(wsPath -> !WsPathUtils.resolve(ROOT, CHE_DIR).equals(wsPath))
         .forEach(wsPath -> projectConfigRegistry.putIfAbsent(wsPath, true, true));
   }
 
