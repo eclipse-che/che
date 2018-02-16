@@ -110,3 +110,12 @@
 
     color: completionPopupItemTextColor;
 }
+
+.parameter {
+    display: inline-block;
+}
+
+.active {
+    font-weight: bold;
+    color: #4EABFF;
+}

@@ -34,5 +34,9 @@ public interface PopupResources extends ClientBundle {
     String icon();
 
     String label();
+
+    String active();
+
+    String parameter();
   }
 }
