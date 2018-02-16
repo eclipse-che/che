@@ -23,6 +23,7 @@ import org.eclipse.che.ide.editor.orion.client.OrionEditorBuilder;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionCodeEditWidgetOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorOptionsOverlay;
+import org.eclipse.che.ide.editor.orion.client.signature.SignatureWidgetFactory;
 
 @ExtensionGinModule
 public class OrionEditorGinModule extends AbstractGinModule {
@@ -40,6 +41,7 @@ public class OrionEditorGinModule extends AbstractGinModule {
     bind(OrionEditorOptionsOverlay.class).toProvider(OrionEditorOptionsOverlayProvider.class);
 
     install(new GinFactoryModuleBuilder().build(ContentAssistWidgetFactory.class));
+    install(new GinFactoryModuleBuilder().build(SignatureWidgetFactory.class));
 
     GinMultibinder.newSetBinder(binder(), OrionPlugin.class)
         .addBinding()
