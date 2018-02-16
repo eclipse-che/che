@@ -383,7 +383,6 @@ get_value_of_var_from_env_file() {
 
 # Returns the value of variable from environment array.
 get_value_of_var_from_env() {
-
   for element in "${CLI_ENV_ARRAY[@]}"
   do
     var1=$(echo $element | cut -f1 -d=)
