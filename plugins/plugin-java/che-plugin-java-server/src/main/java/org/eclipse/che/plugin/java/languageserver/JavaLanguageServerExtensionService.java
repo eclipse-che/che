@@ -96,7 +96,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.JavaCoreOptions;
 import org.eclipse.che.jdt.ls.extension.api.dto.JobResult;
-import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImports;
+import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportParams;
 import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportsResult;
 import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocation;
@@ -224,7 +224,7 @@ public class JavaLanguageServerExtensionService {
     requestHandler
         .newConfiguration()
         .methodName(ORGANIZE_IMPORTS)
-        .paramsAsDto(OrganizeImports.class)
+        .paramsAsDto(OrganizeImportParams.class)
         .resultAsDto(OrganizeImportsResult.class)
         .withFunction(this::organizeImports);
 
@@ -690,7 +690,7 @@ public class JavaLanguageServerExtensionService {
   }
 
   /** Organizes imports in a file or in a directory. */
-  public OrganizeImportsResult organizeImports(OrganizeImports organizeImports) {
+  public OrganizeImportsResult organizeImports(OrganizeImportParams organizeImports) {
     organizeImports.setResourceUri(prefixURI(organizeImports.getResourceUri()));
 
     Type type = new TypeToken<OrganizeImportsResult>() {}.getType();

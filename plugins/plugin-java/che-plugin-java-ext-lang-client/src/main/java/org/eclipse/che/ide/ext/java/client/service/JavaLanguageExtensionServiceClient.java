@@ -51,7 +51,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ImplementersResponse;
 import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.JavaCoreOptions;
-import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImports;
+import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportParams;
 import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportsResult;
 import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.UsagesResponse;
@@ -283,7 +283,7 @@ public class JavaLanguageExtensionServiceClient {
    * @param path the path to the file or to the directory
    * @return {@link WorkspaceEdit} changes to apply
    */
-  public Promise<OrganizeImportsResult> organizeImports(OrganizeImports organizeImports) {
+  public Promise<OrganizeImportsResult> organizeImports(OrganizeImportParams organizeImports) {
     return Promises.create(
         (resolve, reject) ->
             requestTransmitter
