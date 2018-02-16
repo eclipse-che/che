@@ -189,10 +189,13 @@ public class LanguageServerFormatter implements ContentFormatter {
   }
 
   private FormattingOptions getFormattingOptions() {
-    FormattingOptions options = dtoFactory.createDto(FormattingOptions.class);
-    options.setInsertSpaces(Boolean.parseBoolean(getEditorProperty(EditorProperties.EXPAND_TAB)));
-    options.setTabSize(Integer.parseInt(getEditorProperty(EditorProperties.TAB_SIZE)));
-    return options;
+    // TODO will be fixed after merging https://github.com/eclipse/che/pull/8784
+    return null;
+    //    FormattingOptions options = dtoFactory.createDto(FormattingOptions.class);
+    //
+    // options.setInsertSpaces(Boolean.parseBoolean(getEditorProperty(EditorProperties.EXPAND_TAB)));
+    //    options.setTabSize(Integer.parseInt(getEditorProperty(EditorProperties.TAB_SIZE)));
+    //    return options;
   }
 
   private String getEditorProperty(EditorProperties property) {
