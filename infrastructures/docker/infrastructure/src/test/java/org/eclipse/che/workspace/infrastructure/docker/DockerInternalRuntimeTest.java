@@ -102,8 +102,8 @@ public class DockerInternalRuntimeTest {
   @Mock private ProbeScheduler probesScheduler;
   @Mock private WorkspaceProbes workspaceProbes;
   @Mock private DockerMachine dockerMachine;
-  @Mock private ParallelDockerImagesPreparerFactory dockerImagesPreparerFactory;
-  @Mock private ParallelDockerImagesPreparer dockerImagesPreparer;
+  @Mock private ParallelDockerImagesBuilderFactory dockerImagesPreparerFactory;
+  @Mock private ParallelDockerImagesBuilder dockerImagesPreparer;
 
   @Captor private ArgumentCaptor<Consumer<ProbeResult>> probeResultConsumerCaptor;
   @Captor private ArgumentCaptor<MachineStatusEvent> eventCaptor;

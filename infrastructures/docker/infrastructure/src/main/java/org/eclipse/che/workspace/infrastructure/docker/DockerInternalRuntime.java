@@ -76,7 +76,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
   private final MachineLoggersFactory loggers;
   private final ProbeScheduler probeScheduler;
   private final WorkspaceProbesFactory probesFactory;
-  private final ParallelDockerImagesPreparerFactory imagesResolverFactory;
+  private final ParallelDockerImagesBuilderFactory imagesBuilderFactory;
 
   /**
    * Creates non running runtime. Normally created by {@link
@@ -95,7 +95,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       MachineLoggersFactory loggers,
       ProbeScheduler probeScheduler,
       WorkspaceProbesFactory probesFactory,
-      ParallelDockerImagesPreparerFactory imagesResolverFactory) {
+      ParallelDockerImagesBuilderFactory imagesBuilderFactory) {
     this(
         context,
         urlRewriter,
@@ -109,7 +109,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         loggers,
         probeScheduler,
         probesFactory,
-        imagesResolverFactory);
+        imagesBuilderFactory);
   }
 
   /**
@@ -132,7 +132,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       DockerMachineStopDetector stopDetector,
       ProbeScheduler probeScheduler,
       WorkspaceProbesFactory probesFactory,
-      ParallelDockerImagesPreparerFactory imagesPreparerFactory)
+      ParallelDockerImagesBuilderFactory imagesPreparerFactory)
       throws InfrastructureException {
     this(
         context,
@@ -172,7 +172,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       MachineLoggersFactory loggers,
       ProbeScheduler probeScheduler,
       WorkspaceProbesFactory probesFactory,
-      ParallelDockerImagesPreparerFactory imagesPreparerFactory) {
+      ParallelDockerImagesBuilderFactory imagesBuilderFactory) {
     super(context, urlRewriter, warnings, running);
     this.networks = networks;
     this.containerStarter = machineStarter;
@@ -185,7 +185,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     this.runtimeMachines = new RuntimeMachines();
     this.loggers = loggers;
     this.probeScheduler = probeScheduler;
-    this.imagesResolverFactory = imagesPreparerFactory;
+    this.imagesBuilderFactory = imagesBuilderFactory;
   }
 
   @Override
@@ -194,7 +194,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     try {
       networks.createNetwork(getContext().getEnvironment().getNetwork());
       Map<String, String> images =
-          imagesResolverFactory
+          imagesBuilderFactory
               .create(getContext().getIdentity())
               .prepareImages(getContext().getEnvironment().getContainers());
 

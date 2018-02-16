@@ -39,19 +39,19 @@ import org.testng.annotations.Test;
 
 /** @author Max Shaposhnik (mshaposh@redhat.com) */
 @Listeners(MockitoTestNGListener.class)
-public class ParallelDockerImagesPreparerTest {
+public class ParallelDockerImagesBuilderTest {
 
   @Mock private RuntimeIdentity identity;
   @Mock private UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
   @Mock private DockerConnector dockerConnector;
   @Mock private MachineLoggersFactory machineLoggersFactory;
 
-  private ParallelDockerImagesPreparer preparer;
+  private ParallelDockerImagesBuilder preparer;
 
   @BeforeMethod
   public void setUp() throws Exception {
     preparer =
-        new ParallelDockerImagesPreparer(
+        new ParallelDockerImagesBuilder(
             identity, false, 10, dockerCredentials, dockerConnector, machineLoggersFactory);
   }
 
