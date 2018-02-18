@@ -37,6 +37,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerExposer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -59,6 +60,7 @@ public class OpenShiftServerExposerTest {
   private OpenShiftServerExposer serverExposer;
   private OpenShiftEnvironment openShiftEnvironment;
   private Container container;
+  private OpenShiftExternalServerExposer openShiftExternalServerExposer;
 
   @BeforeMethod
   public void setUp() throws Exception {
@@ -75,8 +77,10 @@ public class OpenShiftServerExposerTest {
 
     openShiftEnvironment =
         OpenShiftEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
+    openShiftExternalServerExposer = new OpenShiftExternalServerExposer();
     this.serverExposer =
-        new OpenShiftServerExposer(MACHINE_NAME, pod, container, openShiftEnvironment);
+        new OpenShiftServerExposer(
+            openShiftExternalServerExposer, MACHINE_NAME, pod, container, openShiftEnvironment);
   }
 
   @Test

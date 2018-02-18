@@ -32,7 +32,8 @@ import org.slf4j.LoggerFactory;
  * @author Sergii Leshchenko
  * @author Guy Daich
  */
-public class IngressHostExternalServerExposer implements ExternalServerExposerStrategy {
+public class IngressHostExternalServerExposer
+    implements ExternalServerExposerStrategy<KubernetesEnvironment> {
 
   public static final String HOST_STRATEGY = "host";
   private final String domain;

@@ -133,7 +133,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
   public static final int SERVER_UNIQUE_PART_SIZE = 8;
   public static final String SERVER_PREFIX = "server";
 
-  private final ExternalServerExposerStrategy kubernetesExternalServerExposerStrategy;
+  protected final ExternalServerExposerStrategy kubernetesExternalServerExposerStrategy;
   protected final String machineName;
   protected final Container container;
   protected final Pod pod;
@@ -187,9 +187,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
 
     String serviceName = service.getMetadata().getName();
     kubernetesEnvironment.getServices().put(serviceName, service);
-
-    kubernetesExternalServerExposerStrategy.exposeExternalServers(
-        kubernetesEnvironment, machineName, serviceName, portToServicePort, externalServers);
+    exposeExternalServers(serviceName, portToServicePort, externalServers);
   }
 
   private Map<String, ServicePort> exposePort(Collection<? extends ServerConfig> serverConfig) {
@@ -227,6 +225,15 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
               .build());
     }
     return exposedPorts;
+  }
+
+  protected void exposeExternalServers(
+      String serviceName,
+      Map<String, ServicePort> portToServicePort,
+      Map<String, ServerConfig> externalServers) {
+
+    kubernetesExternalServerExposerStrategy.exposeExternalServers(
+        kubernetesEnvironment, machineName, serviceName, portToServicePort, externalServers);
   }
 
   private static class ServiceBuilder {

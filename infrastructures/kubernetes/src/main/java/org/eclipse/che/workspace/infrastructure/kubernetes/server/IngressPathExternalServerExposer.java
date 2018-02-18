@@ -35,7 +35,8 @@ import org.slf4j.LoggerFactory;
  * @author Sergii Leshchenko
  * @author Guy Daich
  */
-public class IngressPathExternalServerExposer implements ExternalServerExposerStrategy {
+public class IngressPathExternalServerExposer
+    implements ExternalServerExposerStrategy<KubernetesEnvironment> {
 
   public static final String PATH_STRATEGY = "path";
   private final Map<String, String> ingressAnnotations;

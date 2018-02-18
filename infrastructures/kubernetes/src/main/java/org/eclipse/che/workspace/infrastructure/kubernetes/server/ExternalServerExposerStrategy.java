@@ -16,10 +16,10 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /** @author Guy Daich */
-public interface ExternalServerExposerStrategy {
+public interface ExternalServerExposerStrategy<T extends KubernetesEnvironment> {
 
-  void exposeExternalServers(
-      KubernetesEnvironment k8sEnv,
+  public void exposeExternalServers(
+      T k8sEnv,
       String machineName,
       String serviceName,
       Map<String, ServicePort> portToServicePort,

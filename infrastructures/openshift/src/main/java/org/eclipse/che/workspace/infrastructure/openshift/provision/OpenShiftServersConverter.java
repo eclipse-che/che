@@ -14,6 +14,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import java.util.Map;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -21,6 +22,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerExposer;
 
@@ -36,6 +38,13 @@ import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServer
 @Singleton
 public class OpenShiftServersConverter implements ConfigurationProvisioner<OpenShiftEnvironment> {
 
+  ExternalServerExposerStrategy openshiftExternalServerExposer;
+
+  @Inject
+  public OpenShiftServersConverter(ExternalServerExposerStrategy externalServerExposerStrategy) {
+    this.openshiftExternalServerExposer = externalServerExposerStrategy;
+  }
+
   @Override
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
@@ -47,7 +56,8 @@ public class OpenShiftServersConverter implements ConfigurationProvisioner<OpenS
         InternalMachineConfig machineConfig = osEnv.getMachines().get(machineName);
         if (!machineConfig.getServers().isEmpty()) {
           OpenShiftServerExposer openShiftServerExposer =
-              new OpenShiftServerExposer(machineName, podConfig, containerConfig, osEnv);
+              new OpenShiftServerExposer(
+                  openshiftExternalServerExposer, machineName, podConfig, containerConfig, osEnv);
           openShiftServerExposer.expose(machineConfig.getServers());
         }
       }
