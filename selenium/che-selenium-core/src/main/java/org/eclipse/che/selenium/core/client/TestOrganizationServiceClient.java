@@ -46,14 +46,10 @@ public class TestOrganizationServiceClient {
   }
 
   public List<OrganizationDto> getAllRoot() throws Exception {
-    return getAll(null);
-  }
-
-  public List<OrganizationDto> getAll(@Nullable String parent) throws Exception {
     List<OrganizationDto> organizations =
         requestFactory.fromUrl(getApiUrl()).request().asList(OrganizationDto.class);
 
-    organizations.removeIf(o -> !o.getParent().equals(parent));
+    organizations.removeIf(o -> o.getParent() != null);
     return organizations;
   }
 
