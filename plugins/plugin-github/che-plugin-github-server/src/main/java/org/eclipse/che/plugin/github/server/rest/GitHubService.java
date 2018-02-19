@@ -363,7 +363,7 @@ public class GitHubService {
   public GitHubUser getUserInfo(@HeaderParam(AUTH_HEADER_NAME) String oauthToken)
       throws ApiException {
     try {
-      return gitHubDTOFactory.createUser(GitHub.connectUsingOAuth(oauthToken).getMyself());
+      return gitHubDTOFactory.createUser(gitHubFactory.oauthConnect(oauthToken).getMyself());
     } catch (IOException e) {
       LOG.error("Getting user info fail", e);
       throw new ServerException(e.getMessage());

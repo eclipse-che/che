@@ -16,8 +16,8 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.commons.env.EnvironmentContext;
 
+/** Creates {@link KeycloakHttpJsonRequest} instances. */
 @Singleton
 public class KeycloakHttpJsonRequestFactory extends DefaultHttpJsonRequestFactory {
 
@@ -26,15 +26,11 @@ public class KeycloakHttpJsonRequestFactory extends DefaultHttpJsonRequestFactor
 
   @Override
   public HttpJsonRequest fromUrl(@NotNull String url) {
-    return super.fromUrl(url)
-        .setAuthorizationHeader(
-            "bearer " + EnvironmentContext.getCurrent().getSubject().getToken());
+    return new KeycloakHttpJsonRequest(url);
   }
 
   @Override
   public HttpJsonRequest fromLink(@NotNull Link link) {
-    return super.fromLink(link)
-        .setAuthorizationHeader(
-            "bearer " + EnvironmentContext.getCurrent().getSubject().getToken());
+    return new KeycloakHttpJsonRequest(link);
   }
 }

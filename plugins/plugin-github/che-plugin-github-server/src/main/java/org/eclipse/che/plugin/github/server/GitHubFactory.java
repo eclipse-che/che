@@ -10,10 +10,13 @@
  */
 package org.eclipse.che.plugin.github.server;
 
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+
 import java.io.IOException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.kohsuke.github.GitHub;
+import org.kohsuke.github.HttpException;
 
 /**
  * Factory class used to generate connection to GitHub
@@ -32,6 +35,11 @@ public class GitHubFactory {
   public GitHub oauthConnect(String oauthToken) throws ServerException, UnauthorizedException {
     try {
       return GitHub.connectUsingOAuth(oauthToken);
+    } catch (HttpException e) {
+      if (UNAUTHORIZED.getStatusCode() == e.getResponseCode()) {
+        throw new UnauthorizedException(e.getMessage());
+      }
+      throw new ServerException(e.getMessage());
     } catch (IOException e) {
       throw new ServerException(e.getMessage());
     }

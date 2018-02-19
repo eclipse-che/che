@@ -12,6 +12,7 @@ package org.eclipse.che.api.core.rest;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
+import static javax.ws.rs.core.UriBuilder.fromUri;
 
 import com.google.common.io.CharStreams;
 import java.io.IOException;
@@ -62,14 +63,14 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
   private static final int DEFAULT_QUERY_PARAMS_LIST_SIZE = 5;
   private static final Object[] EMPTY_ARRAY = new Object[0];
 
-  private final String url;
+  protected final String url;
 
-  private int timeout;
-  private String method;
-  private Object body;
-  private List<Pair<String, ?>> queryParams;
-  private List<Pair<String, String>> headers;
-  private String authorizationHeaderValue;
+  protected int timeout;
+  protected String method;
+  protected Object body;
+  protected List<Pair<String, ?>> queryParams;
+  protected List<Pair<String, String>> headers;
+  protected String authorizationHeaderValue;
 
   protected DefaultHttpJsonRequest(String url, String method) {
     this.url = requireNonNull(url, "Required non-null url");
@@ -144,7 +145,7 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
 
   @Override
   public String getUrl() {
-    final UriBuilder ub = UriBuilder.fromUri(url);
+    final UriBuilder ub = fromUri(url);
     if (queryParams != null) {
       for (Pair<String, ?> parameter : queryParams) {
         ub.queryParam(parameter.first, parameter.second);
@@ -200,7 +201,7 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
     final String authToken = EnvironmentContext.getCurrent().getSubject().getToken();
     final boolean hasQueryParams = parameters != null && !parameters.isEmpty();
     if (hasQueryParams || authToken != null) {
-      final UriBuilder ub = UriBuilder.fromUri(url);
+      final UriBuilder ub = fromUri(url);
       // remove sensitive information from url.
       ub.replaceQueryParam("token", EMPTY_ARRAY);
 
@@ -248,42 +249,7 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
       }
       final int responseCode = conn.getResponseCode();
       if ((responseCode / 100) != 2) {
-        InputStream in = conn.getErrorStream();
-        if (in == null) {
-          in = conn.getInputStream();
-        }
-        final String str;
-        try (Reader reader = new InputStreamReader(in)) {
-          str = CharStreams.toString(reader);
-        }
-        final String contentType = conn.getContentType();
-        if (contentType != null
-            && (contentType.startsWith(MediaType.APPLICATION_JSON)
-                || contentType.startsWith("application/vnd.api+json"))) {
-          final ServiceError serviceError =
-              DtoFactory.getInstance().createDtoFromJson(str, ServiceError.class);
-          if (serviceError.getMessage() != null) {
-            if (responseCode == Response.Status.FORBIDDEN.getStatusCode()) {
-              throw new ForbiddenException(serviceError);
-            } else if (responseCode == Response.Status.NOT_FOUND.getStatusCode()) {
-              throw new NotFoundException(serviceError);
-            } else if (responseCode == Response.Status.UNAUTHORIZED.getStatusCode()) {
-              throw new UnauthorizedException(serviceError);
-            } else if (responseCode == Response.Status.CONFLICT.getStatusCode()) {
-              throw new ConflictException(serviceError);
-            } else if (responseCode == Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()) {
-              throw new ServerException(serviceError);
-            } else if (responseCode == Response.Status.BAD_REQUEST.getStatusCode()) {
-              throw new BadRequestException(serviceError);
-            }
-            throw new ServerException(serviceError);
-          }
-        }
-        // Can't parse content as json or content has format other we expect for error.
-        throw new IOException(
-            String.format(
-                "Failed access: %s, method: %s, response code: %d, message: %s",
-                UriBuilder.fromUri(url).replaceQuery("token").build(), method, responseCode, str));
+        onConnectionFailed(conn);
       }
       final String contentType = conn.getContentType();
       if (responseCode != HttpURLConnection.HTTP_NO_CONTENT
@@ -300,6 +266,48 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
     } finally {
       conn.disconnect();
     }
+  }
+
+  protected void onConnectionFailed(HttpURLConnection conn)
+      throws IOException, ForbiddenException, NotFoundException, UnauthorizedException,
+          ConflictException, ServerException, BadRequestException {
+    final int responseCode = conn.getResponseCode();
+    InputStream in = conn.getErrorStream();
+    if (in == null) {
+      in = conn.getInputStream();
+    }
+    final String message;
+    try (Reader reader = new InputStreamReader(in)) {
+      message = CharStreams.toString(reader);
+    }
+    final String contentType = conn.getContentType();
+    if (contentType != null
+        && (contentType.startsWith(MediaType.APPLICATION_JSON)
+            || contentType.startsWith("application/vnd.api+json"))) {
+      final ServiceError serviceError =
+          DtoFactory.getInstance().createDtoFromJson(message, ServiceError.class);
+      if (serviceError.getMessage() != null) {
+        if (responseCode == Response.Status.FORBIDDEN.getStatusCode()) {
+          throw new ForbiddenException(serviceError);
+        } else if (responseCode == Response.Status.NOT_FOUND.getStatusCode()) {
+          throw new NotFoundException(serviceError);
+        } else if (responseCode == Response.Status.UNAUTHORIZED.getStatusCode()) {
+          throw new UnauthorizedException(serviceError);
+        } else if (responseCode == Response.Status.CONFLICT.getStatusCode()) {
+          throw new ConflictException(serviceError);
+        } else if (responseCode == Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()) {
+          throw new ServerException(serviceError);
+        } else if (responseCode == Response.Status.BAD_REQUEST.getStatusCode()) {
+          throw new BadRequestException(serviceError);
+        }
+        throw new ServerException(serviceError);
+      }
+    }
+    // Can't parse content as json or content has format other we expect for error.
+    throw new IOException(
+        String.format(
+            "Failed access: %s, method: %s, response code: %d, message: %s",
+            fromUri(url).replaceQuery("token").build(), method, responseCode, message));
   }
 
   @Override
