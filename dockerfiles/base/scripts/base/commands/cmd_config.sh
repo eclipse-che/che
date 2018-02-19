@@ -160,7 +160,7 @@ generate_configuration_with_puppet() {
     fi
   fi
 
-  for element in "${CLI_ENV_ARRAY[@]}" 
+  for element in "${CLI_ENV_ARRAY[@]}"
   do
     var1=$(echo $element | cut -f1 -d=)
     var2=$(echo $element | cut -f2 -d=)
@@ -169,7 +169,7 @@ generate_configuration_with_puppet() {
        [[ $var1 == IMAGE_* ]]  ||
        [[ $var1 == *_IMAGE_* ]]  ||
        [[ $var1 == ${CHE_PRODUCT_NAME}_* ]]; then
-      WRITE_PARAMETERS+=" -e \"$var1=$var2\""
+      WRITE_PARAMETERS+=" -e $var1='$var2'"
     fi
   done
 
