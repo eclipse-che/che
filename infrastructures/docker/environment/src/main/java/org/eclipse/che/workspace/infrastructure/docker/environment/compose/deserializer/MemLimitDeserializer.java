@@ -1,0 +1,44 @@
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+package org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer;
+
+import static java.lang.String.format;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import java.io.IOException;
+import org.eclipse.che.commons.lang.Size;
+
+public class MemLimitDeserializer extends JsonDeserializer<Long> {
+  private static final String UNSUPPORTED_VALUE_MESSAGE = "Unsupported value '%s'.";
+
+  @Override
+  public Long deserialize(JsonParser jsonParser, DeserializationContext ctxt)
+      throws IOException, JsonProcessingException {
+    Object memLimit = jsonParser.readValueAs(Object.class);
+    if (memLimit instanceof Long) {
+      return (Long) memLimit;
+    }
+    if (memLimit instanceof Integer) {
+      return ((Integer) memLimit).longValue();
+    }
+    if (memLimit instanceof String) {
+      try {
+        return Size.parseSize((String) memLimit);
+      } catch (IllegalArgumentException e) {
+        throw ctxt.mappingException(format(UNSUPPORTED_VALUE_MESSAGE, memLimit));
+      }
+    }
+    throw ctxt.mappingException(format(UNSUPPORTED_VALUE_MESSAGE, memLimit));
+  }
+}
