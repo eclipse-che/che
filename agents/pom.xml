@@ -39,5 +39,6 @@
         <module>test-ls</module>
         <module>ls-yaml</module>
         <module>ls-camel</module>
+        <module>ls-clang</module>
     </modules>
 </project>

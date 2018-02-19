@@ -10,11 +10,7 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server;
 
-import static com.google.inject.matcher.Matchers.subclassesOf;
-import static org.eclipse.che.inject.Matchers.names;
-
 import com.google.inject.AbstractModule;
-import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 
 /**
@@ -26,10 +22,6 @@ import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 public class MachineAuthModule extends AbstractModule {
   @Override
   protected void configure() {
-    final MachineTokenInterceptor tokenInterceptor = new MachineTokenInterceptor();
-    requestInjection(tokenInterceptor);
-    bindInterceptor(subclassesOf(WorkspaceRuntimes.class), names("startAsync"), tokenInterceptor);
-
     bind(MachineSessionInvalidator.class).asEagerSingleton();
 
     bind(MachineTokenProvider.class).to(MachineTokenProviderImpl.class);

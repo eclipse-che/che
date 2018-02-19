@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.net.URL;
 import javax.inject.Named;
-import org.eclipse.che.selenium.core.UrlUtil;
+import org.eclipse.che.selenium.core.utils.UrlUtil;
 
 /** @author Anatolii Bazko */
 @Singleton

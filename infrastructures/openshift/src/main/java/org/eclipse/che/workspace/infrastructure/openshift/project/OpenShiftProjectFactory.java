@@ -33,7 +33,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
 
   @Inject
   public OpenShiftProjectFactory(
-      @Nullable @Named("che.infra.kubernetes.namespace") String projectName,
+      @Nullable @Named("che.infra.openshift.project") String projectName,
       OpenShiftClientFactory clientFactory) {
     super(projectName, clientFactory);
     this.projectName = projectName;

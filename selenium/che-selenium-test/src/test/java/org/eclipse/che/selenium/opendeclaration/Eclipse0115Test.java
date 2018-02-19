@@ -61,9 +61,8 @@ public class Eclipse0115Test {
   public void test0115() throws Exception {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(PROJECT_NAME + PATH_TO_PACKAGE_PREFIX + "X.java");
-    editor.waitActive();
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(
+        PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples", "X.java");
     waitMarkerInPosition();
     editor.goToCursorPositionVisible(32, 14);
     editor.typeTextIntoEditor(Keys.F4.toString());

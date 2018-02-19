@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextM
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -28,6 +29,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -75,7 +77,14 @@ public class ResolveDependencyAfterRecreateProjectTest {
     projectExplorer.waitItem(PROJECT_NAME2);
     projectExplorer.selectVisibleItem(PROJECT_NAME2);
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(PROJECT_NAME2 + PATH_FOR_EXPAND);
+
+    try {
+      projectExplorer.openItemByPath(PROJECT_NAME2 + PATH_FOR_EXPAND);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8791");
+    }
+
     editor.waitActive();
     editor.waitAllMarkersDisappear(ERROR_MARKER);
   }

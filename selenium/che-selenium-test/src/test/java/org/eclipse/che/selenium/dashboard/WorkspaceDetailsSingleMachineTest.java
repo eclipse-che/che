@@ -52,7 +52,7 @@ public class WorkspaceDetailsSingleMachineTest {
   private static final ImmutableMap<String, Boolean> EXPECTED_INSTALLERS =
       ImmutableMap.<String, Boolean>builder()
           .put("C# language server", false)
-          .put("Exec", false)
+          .put("Exec", true)
           .put("File sync", false)
           .put("Git credentials", false)
           .put("JSON language server", false)

@@ -79,12 +79,9 @@ public class AutocompleteWithInheritTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     mavenPluginStatusBar.waitClosingInfoPanel();
-    projectExplorer.selectItem(PROJECT_NAME);
-    projectExplorer.quickExpandWithJavaScript();
-
-    projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(
+        PROJECT_NAME + "/src/main/java/example", BASE_CLASS + ".java");
     editor.waitAllMarkersDisappear(ERROR_MARKER);
-
     projectExplorer.openItemByVisibleNameInExplorer(EXTENDED_CLASS + ".java");
     editor.returnFocusInCurrentLine();
     waitErrorMarkerInPosition();

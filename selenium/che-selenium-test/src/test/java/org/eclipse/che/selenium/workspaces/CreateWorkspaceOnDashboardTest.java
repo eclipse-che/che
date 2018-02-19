@@ -101,7 +101,6 @@ public class CreateWorkspaceOnDashboardTest {
 
     // stop the workspace
     menu.runCommand(WORKSPACE, STOP_WORKSPACE);
-    toastLoader.waitExpectedTextInToastLoader("Stopping the workspace");
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running");
   }
 }

@@ -189,6 +189,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
+                <artifactId>ls-clang-agent</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
                 <artifactId>ls-csharp-agent</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -1026,6 +1031,11 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-camel-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-clangd-lang-server</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

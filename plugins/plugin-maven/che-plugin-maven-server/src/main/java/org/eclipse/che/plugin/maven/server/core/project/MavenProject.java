@@ -134,6 +134,14 @@ public class MavenProject {
     }
   }
 
+  public List<MavenRemoteRepository> getRemoteRepositories() {
+    if (info.remoteRepositories != null) {
+      return info.remoteRepositories;
+    } else {
+      return emptyList();
+    }
+  }
+
   private List<MavenProjectProblem> generateProblems() {
     List<MavenProjectProblem> result = new ArrayList<>();
 

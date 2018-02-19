@@ -16,19 +16,14 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
-import static org.eclipse.che.workspace.infrastructure.docker.DockerMachine.LATEST_TAG;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,23 +34,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import javax.inject.Inject;
-import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.infrastructure.docker.client.DockerConnector;
-import org.eclipse.che.infrastructure.docker.client.DockerFileException;
 import org.eclipse.che.infrastructure.docker.client.LogMessage;
 import org.eclipse.che.infrastructure.docker.client.MessageProcessor;
-import org.eclipse.che.infrastructure.docker.client.ProgressMonitor;
-import org.eclipse.che.infrastructure.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.infrastructure.docker.client.exception.ContainerNotFoundException;
-import org.eclipse.che.infrastructure.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerConfig;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerInfo;
-import org.eclipse.che.infrastructure.docker.client.json.Filters;
 import org.eclipse.che.infrastructure.docker.client.json.HostConfig;
 import org.eclipse.che.infrastructure.docker.client.json.ImageConfig;
 import org.eclipse.che.infrastructure.docker.client.json.PortBinding;
@@ -63,17 +51,11 @@ import org.eclipse.che.infrastructure.docker.client.json.Volume;
 import org.eclipse.che.infrastructure.docker.client.json.container.NetworkingConfig;
 import org.eclipse.che.infrastructure.docker.client.json.network.ConnectContainer;
 import org.eclipse.che.infrastructure.docker.client.json.network.EndpointConfig;
-import org.eclipse.che.infrastructure.docker.client.params.BuildImageParams;
 import org.eclipse.che.infrastructure.docker.client.params.CreateContainerParams;
 import org.eclipse.che.infrastructure.docker.client.params.GetContainerLogsParams;
-import org.eclipse.che.infrastructure.docker.client.params.ListImagesParams;
-import org.eclipse.che.infrastructure.docker.client.params.PullParams;
 import org.eclipse.che.infrastructure.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.infrastructure.docker.client.params.StartContainerParams;
-import org.eclipse.che.infrastructure.docker.client.params.TagParams;
 import org.eclipse.che.infrastructure.docker.client.params.network.ConnectContainerToNetworkParams;
-import org.eclipse.che.infrastructure.docker.client.parser.DockerImageIdentifier;
-import org.eclipse.che.infrastructure.docker.client.parser.DockerImageIdentifierParser;
 import org.eclipse.che.workspace.infrastructure.docker.exception.SourceNotFoundException;
 import org.eclipse.che.workspace.infrastructure.docker.logs.MachineLoggersFactory;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
@@ -152,28 +134,24 @@ public class DockerMachineStarter {
           .build();
 
   private final DockerConnector docker;
-  private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
+
   private final ExecutorService executor;
   private final DockerMachineStopDetector dockerInstanceStopDetector;
-  private final boolean doForcePullImage;
+
   private final MachineLoggersFactory machineLoggerFactory;
   private final DockerMachineCreator machineCreator;
 
   @Inject
   public DockerMachineStarter(
       DockerConnector docker,
-      UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
       DockerMachineStopDetector dockerMachineStopDetector,
-      @Named("che.docker.always_pull_image") boolean doForcePullImage,
       MachineLoggersFactory machineLogger,
       DockerMachineCreator machineCreator) {
     this.machineCreator = machineCreator;
     // TODO spi should we move all configuration stuff into infrastructure provisioner and left
     // logic of container start here only
     this.docker = docker;
-    this.dockerCredentials = dockerCredentials;
     this.dockerInstanceStopDetector = dockerMachineStopDetector;
-    this.doForcePullImage = doForcePullImage;
     this.machineLoggerFactory = machineLogger;
     // single point of failure in case of highly loaded system
     executor =
@@ -201,6 +179,7 @@ public class DockerMachineStarter {
   public DockerMachine startContainer(
       String networkName,
       String machineName,
+      String image,
       DockerContainerConfig containerConfig,
       RuntimeIdentity identity,
       AbnormalMachineStopHandler abnormalMachineStopHandler)
@@ -209,12 +188,8 @@ public class DockerMachineStarter {
 
     // copy to not affect/be affected by changes in origin
     containerConfig = new DockerContainerConfig(containerConfig);
-    final ProgressMonitor progressMonitor =
-        machineLoggerFactory.newProgressMonitor(machineName, identity);
     String container = null;
     try {
-      String image = prepareImage(machineName, containerConfig, progressMonitor);
-
       container = createContainer(machineName, image, networkName, containerConfig);
 
       connectContainerToAdditionalNetworks(container, containerConfig);
@@ -239,150 +214,6 @@ public class DockerMachineStarter {
       } else {
         throw new InternalInfrastructureException(e.getLocalizedMessage(), e);
       }
-    }
-  }
-
-  private String prepareImage(
-      String machineName, DockerContainerConfig container, ProgressMonitor progressMonitor)
-      throws SourceNotFoundException, InternalInfrastructureException {
-
-    String imageName = "eclipse-che/" + container.getContainerName();
-    if ((container.getBuild() == null
-            || (container.getBuild().getContext() == null
-                && container.getBuild().getDockerfileContent() == null))
-        && container.getImage() == null) {
-
-      throw new InternalInfrastructureException(
-          format("Che container '%s' doesn't have neither build nor image fields", machineName));
-    }
-
-    if (container.getBuild() != null
-        && (container.getBuild().getContext() != null
-            || container.getBuild().getDockerfileContent() != null)) {
-      buildImage(container, imageName, doForcePullImage, progressMonitor);
-    } else {
-      pullImage(container, imageName, progressMonitor);
-    }
-
-    return imageName;
-  }
-
-  /**
-   * Builds Docker image for container creation.
-   *
-   * @param containerConfig configuration of container
-   * @param machineImageName name of image that should be applied to built image
-   * @param doForcePullOnBuild whether re-pulling of base image should be performed when it exists
-   *     locally
-   * @param progressMonitor consumer of build logs
-   * @throws InternalInfrastructureException when any error occurs
-   */
-  protected void buildImage(
-      DockerContainerConfig containerConfig,
-      String machineImageName,
-      boolean doForcePullOnBuild,
-      ProgressMonitor progressMonitor)
-      throws InternalInfrastructureException {
-
-    File workDir = null;
-    try {
-      BuildImageParams buildImageParams;
-      if (containerConfig.getBuild() != null
-          && containerConfig.getBuild().getDockerfileContent() != null) {
-
-        workDir = Files.createTempDirectory(null).toFile();
-        final File dockerfileFile = new File(workDir, "Dockerfile");
-        try (FileWriter output = new FileWriter(dockerfileFile)) {
-          output.append(containerConfig.getBuild().getDockerfileContent());
-        }
-
-        buildImageParams = BuildImageParams.create(dockerfileFile);
-      } else {
-        buildImageParams =
-            BuildImageParams.create(containerConfig.getBuild().getContext())
-                .withDockerfile(containerConfig.getBuild().getDockerfilePath());
-      }
-      buildImageParams
-          .withForceRemoveIntermediateContainers(true)
-          .withRepository(machineImageName)
-          .withAuthConfigs(dockerCredentials.getCredentials())
-          .withDoForcePull(doForcePullOnBuild)
-          .withMemoryLimit(containerConfig.getMemLimit())
-          .withMemorySwapLimit(-1)
-          .withBuildArgs(containerConfig.getBuild().getArgs());
-
-      docker.buildImage(buildImageParams, progressMonitor);
-    } catch (IOException e) {
-      throw new InternalInfrastructureException(e.getLocalizedMessage(), e);
-    } finally {
-      if (workDir != null) {
-        FileCleaner.addFile(workDir);
-      }
-    }
-  }
-
-  /**
-   * Pulls docker image for container creation.
-   *
-   * @param container container that provides description of image that should be pulled
-   * @param machineImageName name of the image that should be assigned on pull
-   * @param progressMonitor consumer of output
-   * @throws SourceNotFoundException if image for pulling not found in registry
-   * @throws InternalInfrastructureException if any other error occurs
-   */
-  protected void pullImage(
-      DockerContainerConfig container, String machineImageName, ProgressMonitor progressMonitor)
-      throws InternalInfrastructureException, SourceNotFoundException {
-    final DockerImageIdentifier dockerImageIdentifier;
-    try {
-      dockerImageIdentifier = DockerImageIdentifierParser.parse(container.getImage());
-    } catch (DockerFileException e) {
-      throw new InternalInfrastructureException(
-          "Try to build a docker machine source with an invalid location/content. It is not in the expected format",
-          e);
-    }
-    if (dockerImageIdentifier.getRepository() == null) {
-      throw new InternalInfrastructureException(
-          format(
-              "Machine creation failed. Machine source is invalid. No repository is defined. Found '%s'.",
-              dockerImageIdentifier.getRepository()));
-    }
-    try {
-      boolean isImageExistLocally =
-          isDockerImageExistLocally(dockerImageIdentifier.getRepository());
-      if (doForcePullImage || !isImageExistLocally) {
-        PullParams pullParams =
-            PullParams.create(dockerImageIdentifier.getRepository())
-                .withTag(MoreObjects.firstNonNull(dockerImageIdentifier.getTag(), LATEST_TAG))
-                .withRegistry(dockerImageIdentifier.getRegistry())
-                .withAuthConfigs(dockerCredentials.getCredentials());
-        docker.pull(pullParams, progressMonitor);
-      }
-
-      String fullNameOfPulledImage = container.getImage();
-      try {
-        // tag image with generated name to allow sysadmin recognize it
-        docker.tag(TagParams.create(fullNameOfPulledImage, machineImageName));
-      } catch (ImageNotFoundException nfEx) {
-        throw new SourceNotFoundException(nfEx.getLocalizedMessage(), nfEx);
-      }
-    } catch (IOException e) {
-      throw new InternalInfrastructureException(
-          "Can't create machine from image. Cause: " + e.getLocalizedMessage(), e);
-    }
-  }
-
-  @VisibleForTesting
-  boolean isDockerImageExistLocally(String imageName) {
-    try {
-      return !docker
-          .listImages(
-              ListImagesParams.create()
-                  .withFilters(new Filters().withFilter("reference", imageName)))
-          .isEmpty();
-    } catch (IOException e) {
-      LOG.warn("Failed to check image {} availability. Cause: {}", imageName, e.getMessage(), e);
-      return false; // consider that image doesn't exist locally
     }
   }
 
