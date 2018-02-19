@@ -34,8 +34,8 @@ import org.eclipse.che.api.fs.server.FsManager;
 @Path("java/formatter/")
 public class JavaFormatterService {
 
-  private static final String CHE_FOLDER = ".che";
-  private static final String CHE_FORMATTER_XML = "che-formatter.xml";
+  public static final String CHE_FOLDER = ".che";
+  public static final String CHE_FORMATTER_XML = "che-formatter.xml";
 
   private final FsManager fsManager;
 
