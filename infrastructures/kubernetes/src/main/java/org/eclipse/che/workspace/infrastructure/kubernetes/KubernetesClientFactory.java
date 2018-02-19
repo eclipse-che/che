@@ -58,6 +58,52 @@ public class KubernetesClientFactory {
     this.httpClient = HttpClientUtils.createHttpClient(defaultConfig);
   }
 
+  /**
+   * Builds the Kubernetes {@link Config} object based on a default {@link Config} object and an
+   * optional workspace Id.
+   */
+  public Config buildConfig(Config defaultConfig, @Nullable String workspaceId)
+      throws InfrastructureException {
+    return defaultConfig;
+  }
+
+  /**
+   * Creates instance of {@link KubernetesClient}.
+   *
+   * @throws InfrastructureException if any error occurs on client instance creation.
+   */
+  public KubernetesClient create(String workspaceId) throws InfrastructureException {
+    Config configForWorkspace = buildConfig(defaultConfig, workspaceId);
+
+    return create(configForWorkspace);
+  }
+
+  /**
+   * Creates instance of {@link KubernetesClient}.
+   *
+   * @throws InfrastructureException if any error occurs on client instance creation.
+   */
+  public KubernetesClient create() throws InfrastructureException {
+    return create(buildConfig(defaultConfig, null));
+  }
+
+  /** Retrieves the {@link OkHttpClient} instance shared by all Kubernetes clients. */
+  protected OkHttpClient getHttpClient() {
+    return httpClient;
+  }
+
+  /**
+   * Retrieves the default Kubernetes {@link Config} that will be the base configuration to create
+   * per-workspace configurations.
+   */
+  protected Config getDefaultConfig() {
+    return defaultConfig;
+  }
+
+  /**
+   * Builds the default Kubernetes {@link Config} that will be the base configuration to create
+   * per-workspace configurations.
+   */
   protected Config buildDefaultConfig(
       String masterUrl, String username, String password, String oauthToken, Boolean doTrustCerts) {
     ConfigBuilder configBuilder = new ConfigBuilder();
@@ -83,19 +129,6 @@ public class KubernetesClientFactory {
 
     Config config = configBuilder.build();
     return config;
-  }
-
-  protected OkHttpClient getHttpClient() {
-    return httpClient;
-  }
-
-  protected Config getDefaultConfig() {
-    return defaultConfig;
-  }
-
-  public Config buildConfig(Config defaultConfig, @Nullable String workspaceId)
-      throws InfrastructureException {
-    return defaultConfig;
   }
 
   /**
@@ -141,26 +174,6 @@ public class KubernetesClientFactory {
             .build();
 
     return new UnclosableKubernetesClient(clientHttpClient, config);
-  }
-
-  /**
-   * Creates instance of {@link KubernetesClient}.
-   *
-   * @throws InfrastructureException if any error occurs on client instance creation.
-   */
-  public KubernetesClient create(String workspaceId) throws InfrastructureException {
-    Config configForWorkspace = buildConfig(defaultConfig, workspaceId);
-
-    return create(configForWorkspace);
-  }
-
-  /**
-   * Creates instance of {@link KubernetesClient}.
-   *
-   * @throws InfrastructureException if any error occurs on client instance creation.
-   */
-  public KubernetesClient create() throws InfrastructureException {
-    return create(buildConfig(defaultConfig, null));
   }
 
   @PreDestroy
