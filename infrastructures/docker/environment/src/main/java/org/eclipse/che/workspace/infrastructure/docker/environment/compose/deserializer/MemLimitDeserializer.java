@@ -19,6 +19,12 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import java.io.IOException;
 import org.eclipse.che.commons.lang.Size;
 
+/**
+ * Deserialize Compose memory limit value, which could be either a plain byte number, or a string
+ * followed by byte units (e.g. "1mb"), which is parsed, using {@link Size} class.
+ *
+ * @author Mykhailo Kuznietsov
+ */
 public class MemLimitDeserializer extends JsonDeserializer<Long> {
   private static final String UNSUPPORTED_VALUE_MESSAGE = "Unsupported value '%s'.";
 
