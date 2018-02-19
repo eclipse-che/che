@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.core;
 
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 
 import com.google.inject.Inject;
@@ -316,7 +316,7 @@ public class SeleniumWebDriver
   }
 
   public void switchFromDashboardIframeToIde() {
-    new WebDriverWait(this, APPLICATION_START_TIMEOUT_SEC)
+    new WebDriverWait(this, LOADER_TIMEOUT_SEC * 6)
         .until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(By.id("ide-application-iframe")));
   }
 
