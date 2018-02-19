@@ -49,7 +49,7 @@ export class AdminsUserManagementConfig {
     };
 
     // configure routes
-    register.app.config(($routeProvider: che.route.IRouteProvider) => {
+    register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/admin/usermanagement', {
         title: 'Users',
         templateUrl: 'app/admin/user-management/user-management.html',
@@ -70,7 +70,7 @@ export class AdminsUserManagementConfig {
         }
       })
         .accessWhen('/admin/userdetails/:userId', userDetailLocationProvider);
-    });
+    }]);
 
   }
 }

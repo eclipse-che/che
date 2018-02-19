@@ -19,6 +19,9 @@ import {CheEnvironmentRegistry} from '../../../../components/api/environment/che
  * @author Oleksii Orel
  */
 export class WorkspaceSelectStackController {
+
+  static $inject = ['$log', '$timeout', '$scope', 'lodash', 'cheStack', 'cheEnvironmentRegistry'];
+
   $log: ng.ILogService;
   $timeout: ng.ITimeoutService;
   $scope: ng.IScope;
@@ -49,7 +52,6 @@ export class WorkspaceSelectStackController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($log: ng.ILogService, $timeout: ng.ITimeoutService, $scope: ng.IScope, lodash: any, cheStack: CheStack, cheEnvironmentRegistry: CheEnvironmentRegistry) {
     this.$log = $log;

@@ -30,13 +30,15 @@ interface ICheAutoScrollAttributes extends ng.IAttributes {
  * @author Florent Benoit
  */
 export class CheAutoScroll {
+
+  static $inject = ['$timeout'];
+
   restrict = 'A';
 
   $timeout: ng.ITimeoutService;
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($timeout: ng.ITimeoutService) {
     this.$timeout = $timeout;

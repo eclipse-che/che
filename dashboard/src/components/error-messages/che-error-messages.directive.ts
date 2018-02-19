@@ -44,6 +44,8 @@ interface IErrorMessagesScope extends ng.IScope {
  * @author Oleksii Kurinnyi
  */
 export class CheErrorMessages {
+  static $inject = ['cheErrorMessagesService'];
+
   restrict: string = 'AE';
   replace: boolean = true;
 
@@ -53,9 +55,9 @@ export class CheErrorMessages {
 
   cheErrorMessagesService: CheErrorMessagesService;
 
+
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor(cheErrorMessagesService: CheErrorMessagesService) {
     this.cheErrorMessagesService = cheErrorMessagesService;

@@ -23,6 +23,9 @@ interface IPermissionsResource<T> extends ng.resource.IResourceClass<T> {
  * @author Oleksii Orel
  */
 export class ChePermissions implements che.api.IChePermissions {
+
+  static $inject = ['$q', '$resource'];
+
   /**
    * Angular promise service.
    */
@@ -54,7 +57,6 @@ export class ChePermissions implements che.api.IChePermissions {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($q: ng.IQService, $resource: ng.resource.IResourceService) {
     this.$q = $q;

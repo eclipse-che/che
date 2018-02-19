@@ -17,6 +17,9 @@ import {NamespaceSelectorSvc} from './namespace-selector.service';
  * @author Oleksii Kurinnyi
  */
 export class NamespaceSelectorController {
+
+  static $inject = ['namespaceSelectorSvc'];
+
   /**
    * Namespace selector service.
    */
@@ -28,7 +31,6 @@ export class NamespaceSelectorController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor(namespaceSelectorSvc: NamespaceSelectorSvc) {
     this.namespaceSelectorSvc = namespaceSelectorSvc;

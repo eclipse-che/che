@@ -21,6 +21,9 @@ import {CheListHelperFactory} from '../../../../components/widget/list/che-list-
  * @author Oleksii Orel
  */
 export class MachineVolumesController {
+
+  static $inject = ['$scope', '$mdDialog', 'confirmDialogService', 'cheListHelperFactory'];
+
   machineVolumeOrderBy = 'name';
 
   private $mdDialog: ng.material.IDialogService;
@@ -34,7 +37,6 @@ export class MachineVolumesController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope, $mdDialog: ng.material.IDialogService, confirmDialogService: ConfirmDialogService, cheListHelperFactory: CheListHelperFactory) {
     this.$mdDialog = $mdDialog;

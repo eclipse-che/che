@@ -22,6 +22,8 @@ interface IProfileResource<T> extends ng.resource.IResourceClass<T> {
  */
 export class CheProfile {
 
+  static $inject = ['$q', '$resource', '$http'];
+
   /**
    * Angular Promise service.
    */
@@ -41,7 +43,6 @@ export class CheProfile {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($q: ng.IQService, $resource: ng.resource.IResourceService, $http: ng.IHttpService) {
     this.$q = $q;

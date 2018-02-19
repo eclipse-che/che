@@ -25,6 +25,8 @@ interface IIdeIFrameRootScope extends ng.IRootScopeService {
  * @author Florent Benoit
  */
 class IdeIFrameSvc {
+  static $inject = ['$window', '$timeout', '$compile', '$location', '$rootScope', '$mdSidenav', 'cheUIElementsInjectorService'];
+
   private cheUIElementsInjectorService: CheUIElementsInjectorService;
   private $timeout: ng.ITimeoutService;
   private $compile: ng.ICompileService;
@@ -33,7 +35,6 @@ class IdeIFrameSvc {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($window: ng.IWindowService,
               $timeout: ng.ITimeoutService,

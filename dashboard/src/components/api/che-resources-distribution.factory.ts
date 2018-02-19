@@ -25,6 +25,9 @@ interface IResourcesResource<T> extends ng.resource.IResourceClass<T> {
  * @author Ann Shumilova
  */
 export class CheResourcesDistribution implements che.api.ICheResourcesDistribution {
+
+  static $inject = ['$q', '$resource', 'lodash'];
+
   /**
    * Angular promise service.
    */
@@ -60,7 +63,6 @@ export class CheResourcesDistribution implements che.api.ICheResourcesDistributi
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($q: ng.IQService, $resource: ng.resource.IResourceService, lodash: any) {
     this.$q = $q;

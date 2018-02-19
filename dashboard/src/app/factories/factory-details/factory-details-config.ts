@@ -20,7 +20,7 @@ export class FactoryDetailsConfig {
     register.controller('FactoryDetailsController', FactoryDetailsController);
 
     // config routes
-    register.app.config(($routeProvider: che.route.IRouteProvider) => {
+    register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
       let locationProvider = {
         title: 'Factory',
         templateUrl: 'app/factories/factory-details/factory-details.html',
@@ -31,7 +31,7 @@ export class FactoryDetailsConfig {
       $routeProvider.accessWhen('/factory/:id', locationProvider)
         .accessWhen('/factory/:id/:tabName', locationProvider);
 
-    });
+    }]);
 
     // config files
     /* tslint:disable */

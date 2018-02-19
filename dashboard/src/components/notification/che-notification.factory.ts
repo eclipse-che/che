@@ -21,6 +21,9 @@ const MAX_NOTIFICATION_COUNT = 10;
  * @author Oleksii Orel
  */
 export class CheNotification {
+
+  static $inject = ['$timeout', '$document', 'cheUIElementsInjectorService'];
+
   private $timeout: ng.ITimeoutService;
   private $document: ng.IDocumentService;
   private cheUIElementsInjectorService: CheUIElementsInjectorService;
@@ -30,7 +33,6 @@ export class CheNotification {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($timeout: ng.ITimeoutService, $document: ng.IDocumentService, cheUIElementsInjectorService: CheUIElementsInjectorService) {
     this.$timeout = $timeout;

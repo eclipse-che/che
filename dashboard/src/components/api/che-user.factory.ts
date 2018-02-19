@@ -25,6 +25,9 @@ interface IUsersResource<T> extends ng.resource.IResourceClass<T> {
  * @author Oleksii Orel
  */
 export class CheUser {
+
+  static $inject = ['$resource', '$q', '$cookies'];
+
   private $resource: ng.resource.IResourceService;
   private $q: ng.IQService;
   private $cookies: ng.cookies.ICookiesService;
@@ -44,7 +47,6 @@ export class CheUser {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($resource: ng.resource.IResourceService, $q: ng.IQService, $cookies: ng.cookies.ICookiesService) {
     this.$q = $q;

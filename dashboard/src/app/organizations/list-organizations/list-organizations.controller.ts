@@ -18,6 +18,10 @@ import {OrganizationsPermissionService} from '../organizations-permission.servic
  * @author Oleksii Orel
  */
 export class ListOrganizationsController {
+
+  static $inject = ['$q', '$scope', 'chePermissions', 'cheResourcesDistribution', 'cheOrganization', 'cheNotification', 'confirmDialogService', '$route',
+'organizationsPermissionService', 'cheListHelperFactory', 'resourcesService'];
+
   /**
    * Organization API interaction.
    */
@@ -106,9 +110,10 @@ export class ListOrganizationsController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $scope: ng.IScope, chePermissions: che.api.IChePermissions, cheResourcesDistribution: che.api.ICheResourcesDistribution, cheOrganization: che.api.ICheOrganization, cheNotification: any, confirmDialogService: any, $route: ng.route.IRouteService, organizationsPermissionService: OrganizationsPermissionService, cheListHelperFactory: che.widget.ICheListHelperFactory, resourcesService: che.service.IResourcesService) {
+  constructor($q: ng.IQService, $scope: ng.IScope, chePermissions: che.api.IChePermissions, cheResourcesDistribution: che.api.ICheResourcesDistribution,
+     cheOrganization: che.api.ICheOrganization, cheNotification: any, confirmDialogService: any, $route: ng.route.IRouteService,
+     organizationsPermissionService: OrganizationsPermissionService, cheListHelperFactory: che.widget.ICheListHelperFactory, resourcesService: che.service.IResourcesService) {
     this.$q = $q;
     this.cheNotification = cheNotification;
     this.chePermissions = chePermissions;

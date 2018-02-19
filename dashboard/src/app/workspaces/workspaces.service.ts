@@ -19,6 +19,8 @@ import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory
  */
 export class WorkspacesService {
 
+  static $inject = ['cheWorkspace'];
+
   /**
    * Workspace API interaction.
    */
@@ -26,7 +28,6 @@ export class WorkspacesService {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(cheWorkspace: CheWorkspace) {
     this.cheWorkspace = cheWorkspace;

@@ -33,12 +33,12 @@ export class DiagnosticsConfig {
     register.controller('DiagnosticsController', DiagnosticsController);
 
     // config routes
-    register.app.config(($routeProvider: che.route.IRouteProvider) => {
+    register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/diagnostic', {
         title: 'Diagnostic',
         templateUrl: 'app/diagnostics/diagnostics.html'
       });
-    });
+    }]);
 
   }
 }

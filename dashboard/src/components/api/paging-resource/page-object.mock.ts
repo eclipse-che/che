@@ -40,9 +40,10 @@ export class PageObjectMock {
   private pageLabels: Array<string>;
   private pageBackendMap: Map<string, PageBackend> = new Map();
 
+  static $inject = ['pageObjectResource', 'maxItems', 'countObjects'];
+
   /**
    * Default constructor
-   * @ngInject for Dependency injection
    */
   constructor(pageObjectResource: PageObjectResource, maxItems: number, countObjects: number) {
     this.countObjects = countObjects;

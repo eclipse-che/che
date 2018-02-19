@@ -20,6 +20,9 @@ interface IUniqueProjectNameValidatorAttributes extends ng.IAttributes {
  * @author Florent Benoit
  */
 export class UniqueProjectNameValidator implements ng.IDirective {
+
+  static $inject = ['cheAPI', '$q'];
+
   restrict = 'A';
   require = 'ngModel';
 
@@ -28,7 +31,6 @@ export class UniqueProjectNameValidator implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor (cheAPI: CheAPI, $q: ng.IQService) {
     this.cheAPI = cheAPI;

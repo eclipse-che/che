@@ -54,7 +54,7 @@ export class StacksConfig {
     register.directive('recipeEditor', RecipeEditorDirective);
 
     // config routes
-    register.app.config(($routeProvider: any) => {
+    register.app.config(['$routeProvider', ($routeProvider: any) => {
       $routeProvider.accessWhen('/stacks', {
         title: 'Stacks',
         templateUrl: 'app/stacks/list-stacks/list-stacks.html',
@@ -69,6 +69,6 @@ export class StacksConfig {
           controller: 'StackController',
           controllerAs: 'stackController'
         });
-    });
+    }]);
   }
 }

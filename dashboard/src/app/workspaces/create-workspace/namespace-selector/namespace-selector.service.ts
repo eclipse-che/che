@@ -19,6 +19,9 @@ import {CheUser} from '../../../../components/api/che-user.factory';
  * @author Oleksii Kurinnyi
  */
 export class NamespaceSelectorSvc {
+
+  static $inject = ['$location', '$log', '$q', 'cheNamespaceRegistry', 'cheUser'];
+
   /**
    * Location service.
    */
@@ -57,7 +60,6 @@ export class NamespaceSelectorSvc {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($location: ng.ILocationService, $log: ng.ILogService, $q: ng.IQService,
               cheNamespaceRegistry: CheNamespaceRegistry, cheUser: CheUser) {

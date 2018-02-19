@@ -31,7 +31,6 @@ export class TemplateSelector implements ng.IDirective {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor() {
     this.scope = {

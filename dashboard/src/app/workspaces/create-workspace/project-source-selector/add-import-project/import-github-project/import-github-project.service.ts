@@ -24,6 +24,9 @@ export enum LoadingState {
  * @author Oleksii Kurinnyi
  */
 export class ImportGithubProjectService implements IEditingProgress {
+
+  static $inject = ['cheAPI', '$http', '$q', '$filter', 'GitHub', 'gitHubTokenStore'];
+
   /**
    * API entry point.
    */
@@ -83,7 +86,6 @@ export class ImportGithubProjectService implements IEditingProgress {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor (cheAPI: CheAPI, $http: ng.IHttpService, $q: ng.IQService, $filter: ng.IFilterService, GitHub: any, gitHubTokenStore: any) {
     this.cheAPI = cheAPI;

@@ -28,6 +28,9 @@ interface ICheLearmMoreTemplateScope extends ng.IScope {
  * @author Florent Benoit
  */
 export class CheLearnMoreTemplate implements ng.IDirective {
+
+  static $inject = ['$compile', '$mdUtil'];
+
   $compile: ng.ICompileService;
   $mdUtil: any;
 
@@ -42,7 +45,6 @@ export class CheLearnMoreTemplate implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor ($compile: ng.ICompileService, $mdUtil: any) {
     this.$compile = $compile;

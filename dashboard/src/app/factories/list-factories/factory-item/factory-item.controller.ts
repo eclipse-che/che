@@ -17,6 +17,9 @@ import {CheEnvironmentRegistry} from '../../../../components/api/environment/che
  * @author Oleksii Orel
  */
 export class FactoryItemController {
+
+  static $inject = ['$location', 'cheFactory', 'cheEnvironmentRegistry', 'lodash'];
+
   private $location: ng.ILocationService;
   private cheFactory: CheFactory;
   private cheEnvironmentRegistry: CheEnvironmentRegistry;
@@ -25,7 +28,6 @@ export class FactoryItemController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($location: ng.ILocationService,
               cheFactory: CheFactory,

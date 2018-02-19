@@ -36,10 +36,10 @@ export class IdeConfig {
     };
 
     // config routes
-    register.app.config(($routeProvider: che.route.IRouteProvider) => {
+    register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/ide', ideProvider)
         .accessWhen('/ide/:namespace*/:workspaceName', ideProvider);
-    });
+    }]);
   }
 }
 

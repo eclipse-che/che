@@ -168,7 +168,7 @@ export class WorkspacesConfig {
     register.service('workspacesService', WorkspacesService);
 
     // config routes
-    register.app.config(($routeProvider: che.route.IRouteProvider) => {
+    register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/workspaces', {
         title: 'Workspaces',
         templateUrl: 'app/workspaces/list-workspaces/list-workspaces.html',
@@ -186,6 +186,6 @@ export class WorkspacesConfig {
             }]
           }
         });
-    });
+    }]);
   }
 }

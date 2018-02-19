@@ -17,6 +17,9 @@ import {IMachinesListItem, WorkspaceMachineConfigController} from '../machine-co
  * @author Oleksii Kurinnyi
  */
 export class DeleteDevMachineDialogController {
+
+  static $inject = ['$mdDialog'];
+
   /**
    * Material design Dialog service.
    */
@@ -50,7 +53,6 @@ export class DeleteDevMachineDialogController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;

@@ -21,6 +21,8 @@ import {CheSsh} from '../../../../components/api/che-ssh.factory';
  */
 export class WorkspaceDetailsSshCtrl {
 
+  static $inject = ['$route', 'cheSsh', 'cheWorkspace', 'cheNotification', '$mdDialog', '$log', '$q'];
+
   /**
    * Workspace.
    */
@@ -70,7 +72,6 @@ export class WorkspaceDetailsSshCtrl {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($route: ng.route.IRouteService,
               cheSsh: CheSsh,
