@@ -35,6 +35,7 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -283,12 +284,16 @@ public class Dashboard {
     return !(workspaces.size() == 0);
   }
 
-  public void waitWorkspaceNamePresentInRecentList(String workspaceName) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format(Locators.WORKSPACE_NAME_IN_RECENT_LIST, workspaceName))))
-        .isDisplayed();
+  public boolean ifWorkspaceNamePresentInRecentList(String workspaceName) {
+    try {
+      return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+          .until(
+              visibilityOfElementLocated(
+                  By.xpath(format(Locators.WORKSPACE_NAME_IN_RECENT_LIST, workspaceName))))
+          .isDisplayed();
+    } catch (TimeoutException ex) {
+      return false;
+    }
   }
 
   public void clickOnUsernameButton() {

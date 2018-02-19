@@ -13,6 +13,8 @@ package org.eclipse.che.selenium.dashboard.organization;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -37,12 +39,11 @@ public class AddWorkspaceToOrganizationTest {
 
   private static final String WS_NAME1 = generate("workspace", 4);
   private static final String WS_NAME2 = generate("workspace", 4);
-  private static final String WS_NAME_SUB1 = generate("workspace", 4);
-
   private static final String WS_NAME3 = generate("workspace", 4);
-  private static final String WS_NAME_SUB2 = generate("workspace", 4);
+  private static final String WS_SUB_NAME1 = generate("workspace", 4);
+  private static final String WS_SUB_NAME2 = generate("workspace", 4);
 
-  private String suborgNameAdmin;
+  private String suborgNamePath;
   private String suborgNameMember;
 
   @InjectTestOrganization(prefix = "organization1")
@@ -58,14 +59,14 @@ public class AddWorkspaceToOrganizationTest {
   private TestOrganization suborg2;
 
   @Inject private OrganizationListPage organizationListPage;
+  @Inject private CheMultiuserAdminDashboard dashboard;
+  @Inject private WorkspaceDetails workspaceDetails;
   @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
-  @Inject private CheMultiuserAdminDashboard dashboard;
   @Inject private AdminTestUser adminTestUser;
-  @Inject private TestUser testUser;
-  @Inject private Workspaces workspaces;
   @Inject private NewWorkspace newWorkspace;
-  @Inject private WorkspaceDetails workspaceDetails;
+  @Inject private Workspaces workspaces;
+  @Inject private TestUser testUser;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -74,7 +75,8 @@ public class AddWorkspaceToOrganizationTest {
     organization2.addMember(testUser.getId());
     suborg1.addAdmin(adminTestUser.getId());
     suborg2.addMember(testUser.getId());
-    suborgNameAdmin = organization1.getName() + "/" + suborg1.getName();
+
+    suborgNamePath = organization1.getName() + "/" + suborg1.getName();
     suborgNameMember = organization2.getName() + "/" + suborg2.getName();
 
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
@@ -93,20 +95,28 @@ public class AddWorkspaceToOrganizationTest {
     // create workspace for each organizations
     createWorkspace(organization1.getName(), WS_NAME1);
     createWorkspace(organization2.getName(), WS_NAME2);
-    createWorkspace(suborgNameAdmin, WS_NAME_SUB1);
+
+    // create workspace for suborganization
+    createWorkspace(suborgNamePath, WS_SUB_NAME1);
 
     // check that workspaces names exist in the Workspaces list and the Recent list
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.waitWorkspaceIsPresent(organization1.getName(), WS_NAME1);
     workspaces.waitWorkspaceIsPresent(organization2.getName(), WS_NAME2);
-    workspaces.waitWorkspaceIsPresent(suborgNameAdmin, WS_NAME_SUB1);
-    dashboard.waitWorkspaceNamePresentInRecentList(WS_NAME1);
-    dashboard.waitWorkspaceNamePresentInRecentList(WS_NAME2);
-    dashboard.waitWorkspaceNamePresentInRecentList(WS_NAME_SUB1);
+    workspaces.waitWorkspaceIsPresent(suborgNamePath, WS_SUB_NAME1);
+    assertTrue(dashboard.ifWorkspaceNamePresentInRecentList(WS_NAME1));
+    assertTrue(dashboard.ifWorkspaceNamePresentInRecentList(WS_NAME2));
+    assertTrue(dashboard.ifWorkspaceNamePresentInRecentList(WS_SUB_NAME1));
 
-    // check that the Namespace links are correct
+    // check that the Namespace link in workspace details correct
     checkNamespaceLink(WS_NAME1, organization1.getName());
     checkNamespaceLink(WS_NAME2, organization2.getName());
+    try {
+      checkNamespaceLink(WS_SUB_NAME1, suborgNamePath);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/7925");
+    }
   }
 
   @Test(priority = 1)
@@ -121,24 +131,26 @@ public class AddWorkspaceToOrganizationTest {
 
     organizationListPage.waitOrganizationInList(organization2.getName());
 
-    // create a workspace for organization2
+    // create a workspace for organization2 and its suborganization
     createWorkspace(organization2.getName(), WS_NAME3);
-    createWorkspace(suborgNameMember, WS_NAME_SUB2);
+    createWorkspace(suborgNameMember, WS_SUB_NAME2);
 
     // check that workspace name exists in the Workspaces list and the Recent list
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.waitWorkspaceIsPresent(organization2.getName(), WS_NAME3);
-    workspaces.waitWorkspaceIsPresent(suborgNameMember, WS_NAME_SUB2);
-    dashboard.waitWorkspaceNamePresentInRecentList(WS_NAME3);
-    dashboard.waitWorkspaceNamePresentInRecentList(WS_NAME_SUB2);
+    workspaces.waitWorkspaceIsPresent(suborgNameMember, WS_SUB_NAME2);
+    assertTrue(dashboard.ifWorkspaceNamePresentInRecentList(WS_NAME3));
+    assertTrue(dashboard.ifWorkspaceNamePresentInRecentList(WS_SUB_NAME2));
 
-    // TODO check that this member cannot see other workspaces
+    // check that workspaces names of other users are not exist in the Recent list
+    assertFalse(dashboard.ifWorkspaceNamePresentInRecentList(WS_NAME1));
+    assertFalse(dashboard.ifWorkspaceNamePresentInRecentList(WS_SUB_NAME1));
 
-    // check that the Namespace link is correct
+    // check that the Namespace link in workspace details correct
     checkNamespaceLink(WS_NAME3, organization2.getName());
 
     try {
-      checkNamespaceLink(WS_NAME_SUB2, suborgNameMember);
+      checkNamespaceLink(WS_SUB_NAME2, suborgNameMember);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7925");
@@ -146,7 +158,6 @@ public class AddWorkspaceToOrganizationTest {
   }
 
   private void createWorkspace(String organizationName, String workspaceName) {
-    // create a new workspace for parenOrg organization2
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
 
@@ -157,9 +168,10 @@ public class AddWorkspaceToOrganizationTest {
     newWorkspace.selectStack(JAVA.getId());
     newWorkspace.typeWorkspaceName(workspaceName);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
-    // TODO change after https://github.com/eclipse/che/issues/8497 issue is fixed
+
+    // TODO uncomment after https://github.com/eclipse/che/issues/8497 issue is fixed
     // workspaceDetails.waitToolbarTitleName(workspaceName);
-    WaitUtils.sleepQuietly(2);
+    WaitUtils.sleepQuietly(3);
   }
 
   private void checkNamespaceLink(String workspaceName, String organizationName) {
