@@ -131,43 +131,25 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
 
     LOG.debug("Bootstrapping {}:{}. Creating config file", runtimeIdentity, machineName);
 
-    List<String> filesToContatenate = new ArrayList<String>();
-    filesToContatenate.add("[");
+    kubernetesMachine.exec("sh", "-c", "rm " + BOOTSTRAPPER_DIR + CONFIG_FILE);
+
+    List<String> contentsToContatenate = new ArrayList<String>();
+    contentsToContatenate.add("[");
     boolean firstOne = true;
     for (Installer installer : installers) {
       if (firstOne) {
         firstOne = false;
       } else {
-        filesToContatenate.add(",");
+        contentsToContatenate.add(",");
       }
-      filesToContatenate.add(GSON.toJson(installer));
+      contentsToContatenate.add(GSON.toJson(installer));
     }
-    filesToContatenate.add("]");
-    int counter = 1;
-    for (String fileToConcatenate : filesToContatenate) {
+    contentsToContatenate.add("]");
+    for (String content : contentsToContatenate) {
       kubernetesMachine.exec(
           "sh",
           "-c",
-          "cat > "
-              + BOOTSTRAPPER_DIR
-              + CONFIG_FILE
-              + "____"
-              + counter
-              + " << 'EOF'\n"
-              + fileToConcatenate
-              + "\nEOF");
-      counter++;
+          "cat >> " + BOOTSTRAPPER_DIR + CONFIG_FILE + " << 'EOF'\n" + content + "\nEOF");
     }
-
-    String generalConcatCommand = "cat ";
-    for (int i = 1; i < counter; i++) {
-      generalConcatCommand += BOOTSTRAPPER_DIR + CONFIG_FILE + "____" + i + " ";
-    }
-    generalConcatCommand += "> " + BOOTSTRAPPER_DIR + CONFIG_FILE;
-
-    LOG.debug("Executing {}", "sh -c '" + generalConcatCommand + "'");
-    kubernetesMachine.exec("sh", "-c", generalConcatCommand);
-
-    kubernetesMachine.exec("sh", "-c", "rm " + BOOTSTRAPPER_DIR + CONFIG_FILE + "____*");
   }
 }
