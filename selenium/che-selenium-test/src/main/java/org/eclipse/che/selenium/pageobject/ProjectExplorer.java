@@ -866,12 +866,11 @@ public class ProjectExplorer {
    * @param path path for expand
    */
   public void expandPathInProjectExplorer(String path) {
-    List<String> itemsPaths = getItemsPathsWithReplacedDots(path);
+    List<String> itemsPaths = getItemsPathsWithReplaceDots(path);
     ListIterator<String> iterator = itemsPaths.listIterator();
 
     while (iterator.hasNext()) {
       String currentItem = iterator.next();
-
       if (!iterator.hasNext()) {
         waitItem(currentItem);
         openItemByPath(currentItem);
@@ -880,7 +879,6 @@ public class ProjectExplorer {
 
       By nextItemLocator =
           By.xpath(format(PROJECT_EXPORER_ITEM_TEMPLATE, itemsPaths.get(iterator.nextIndex())));
-
       if (!seleniumWebDriverHelper.isVisible(nextItemLocator)) {
         waitItem(currentItem);
         openItemByPath(currentItem);
@@ -895,7 +893,7 @@ public class ProjectExplorer {
    * @return Paths in format ["RootFolder", "RootFolder/src", "RootFolder/src/main",
    *     "RootFolder/src/main/java", "RootFolder/src/main/java/org/package"]
    */
-  private List<String> getItemsPathsWithReplacedDots(String path) {
+  private List<String> getItemsPathsWithReplaceDots(String path) {
     Path fullPath = Paths.get(path);
     List<String> itemsPaths = new ArrayList<>();
 

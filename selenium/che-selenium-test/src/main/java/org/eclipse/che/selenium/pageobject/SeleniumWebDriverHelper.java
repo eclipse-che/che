@@ -464,7 +464,7 @@ public class SeleniumWebDriverHelper {
     } catch (NoSuchElementException ex) {
       return false;
     } catch (Exception ex) {
-      LOG.info("Unhandled exception in \"isVisible()\" method", ex);
+      LOG.info("Unhandled {} in \"isVisible()\" method", ex.getClass().getSimpleName());
       return false;
     }
   }
@@ -481,7 +481,7 @@ public class SeleniumWebDriverHelper {
     } catch (NoSuchElementException ex) {
       return false;
     } catch (Exception ex) {
-      LOG.info("Unhandled exception in \"isVisible()\" method", ex);
+      LOG.info("Unhandled {} in \"isVisible()\" method", ex.getClass().getSimpleName());
       return false;
     }
   }
