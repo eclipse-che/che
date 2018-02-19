@@ -13,9 +13,9 @@ CHE_SERVER_ROUTE_TLS=$(oc get route che -o jsonpath='{.spec.tls}' || echo "")
 
 if [ "${CHE_SERVER_ROUTE_TLS}" != "" ]; then
     HTTP_PROTOCOL="https"
-    else
+else
     HTTP_PROTOCOL="http"
-    fi
+fi
 
 echo "[CHE] Configuring Keycloak realm, client and user..."
 
