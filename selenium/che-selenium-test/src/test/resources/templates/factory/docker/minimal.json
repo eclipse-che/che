@@ -43,7 +43,8 @@
           "dev-machine" : {
             "installers" : [
               "org.eclipse.che.terminal",
-              "org.eclipse.che.ws-agent"
+              "org.eclipse.che.ws-agent",
+              "org.eclipse.che.exec"
             ],
             "servers" : {
               "tomcat8" : {
