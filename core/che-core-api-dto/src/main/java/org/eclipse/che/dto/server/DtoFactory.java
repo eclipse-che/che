@@ -41,6 +41,7 @@ import org.eclipse.che.commons.lang.reflect.ParameterizedTypeImpl;
 import org.eclipse.che.dto.shared.DTO;
 import org.eclipse.che.dto.shared.JsonArray;
 import org.eclipse.che.dto.shared.JsonStringMap;
+import org.eclipse.lsp4j.jsonrpc.json.adapters.EitherTypeAdapterFactory;
 
 /**
  * Provides implementations of DTO interfaces.
@@ -106,6 +107,7 @@ public final class DtoFactory {
               new NullAsEmptyTAF<>(Collection.class, Collections.emptyList()))
           .registerTypeAdapterFactory(new NullAsEmptyTAF<>(Map.class, Collections.emptyMap()))
           .registerTypeAdapterFactory(new DtoInterfaceTAF())
+          .registerTypeAdapterFactory(new EitherTypeAdapterFactory())
           .create();
 
   /**
