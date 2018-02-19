@@ -1,5 +1,12 @@
+# Copyright (c) 2018 Red Hat, Inc.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
 FROM jboss/keycloak-openshift:3.3.0.CR2-3
-ADD che-realm.json.erb che-users-0.json.erb /scripts/
+ADD . /scripts/
 USER root
 RUN chgrp -R 0 /scripts && \
     chmod -R g+rwX /scripts

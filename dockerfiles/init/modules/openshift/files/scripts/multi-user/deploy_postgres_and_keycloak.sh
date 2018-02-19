@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2012-2017 Red Hat, Inc
+# Copyright (c) 2018 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -42,11 +42,11 @@ DEFAULT_CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD=true
 
 # apply all yaml files from "$COMMAND_DIR"/keycloak/
 
-IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK:-"eclipse/keycloak:nightly"}
+IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK:-"eclipse/che-keycloak:nightly"}
 
-        for i in $(ls -Iconfig "$COMMAND_DIR"/keycloak ); do
-            cat "${COMMAND_DIR}"/keycloak/"${i}" | sed "s#\${IMAGE_KEYCLOAK}#${IMAGE_KEYCLOAK}#" | oc apply -f -
-        done
+for i in $(ls -Iconfig "$COMMAND_DIR"/keycloak ); do
+    cat "${COMMAND_DIR}"/keycloak/"${i}" | sed "s#\${IMAGE_KEYCLOAK}#${IMAGE_KEYCLOAK}#" | oc apply -f -
+done
 
 
 if [ "${CHE_EPHEMERAL}" == "true" ]; then

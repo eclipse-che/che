@@ -1,10 +1,9 @@
 #!/bin/bash
-# Copyright (c) 2012-2017 Red Hat, Inc
+# Copyright (c) 2018 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
-#
 
 echo "Configuring Keycloak..."
 
@@ -12,6 +11,7 @@ cat /scripts/che-users-0.json.erb | \
 				    sed -e "/<% if scope.lookupvar('keycloak::che_keycloak_admin_require_update_password') == 'true' -%>/d" | \
 				    sed -e "/<% else -%>/d" | \
 				    sed -e "/<% end -%>/d" | \
+				    sed -e "/\"requiredActions\" : \[ \],/d" | \
 				    jq .users[] > /scripts/che-user.json
 
 cat /scripts/che-realm.json.erb | sed -e "s@<%= scope\.lookupvar('che::che_server_url') %>@${HTTP_PROTOCOL}://${CHE_HOST}@" > /scripts/realm.json
