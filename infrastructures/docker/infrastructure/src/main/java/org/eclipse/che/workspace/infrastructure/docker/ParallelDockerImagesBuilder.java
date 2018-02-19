@@ -31,7 +31,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -120,18 +119,15 @@ public class ParallelDockerImagesBuilder {
             .stream()
             .map(
                 e ->
-                    CompletableFuture.supplyAsync(
-                        (Supplier<Void>)
-                            () -> {
-                              try {
-                                machineToImageNames.put(
-                                    e.getKey(), prepareImage(e.getKey(), e.getValue()));
-                              } catch (InternalInfrastructureException
-                                  | SourceNotFoundException ex) {
-                                firstFailed.completeExceptionally(ex);
-                              }
-                              return null;
-                            },
+                    CompletableFuture.runAsync(
+                        () -> {
+                          try {
+                            machineToImageNames.put(
+                                e.getKey(), prepareImage(e.getKey(), e.getValue()));
+                          } catch (InternalInfrastructureException | SourceNotFoundException ex) {
+                            firstFailed.completeExceptionally(ex);
+                          }
+                        },
                         executor))
             .collect(toList());
 
