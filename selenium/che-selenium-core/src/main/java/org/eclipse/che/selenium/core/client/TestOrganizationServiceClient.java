@@ -12,7 +12,6 @@ package org.eclipse.che.selenium.core.client;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static java.util.Objects.nonNull;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import com.google.inject.Inject;
@@ -50,7 +49,7 @@ public class TestOrganizationServiceClient {
     List<OrganizationDto> organizations =
         requestFactory.fromUrl(getApiUrl()).request().asList(OrganizationDto.class);
 
-    organizations.removeIf(o -> nonNull(o.getParent()));
+    organizations.removeIf(o -> o.getParent() != null);
     return organizations;
   }
 
