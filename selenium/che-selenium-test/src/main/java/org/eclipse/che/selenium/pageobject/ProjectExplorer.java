@@ -865,7 +865,7 @@ public class ProjectExplorer {
    * @param path path for expand
    */
   public void expandPathInProjectExplorer(String path) {
-    List<String> itemsPaths = splitPathOnSubitems(path);
+    List<String> itemsPaths = splitPathWithReplaceDotsToSlashes(path);
 
     for (int i = 0; i < itemsPaths.size(); i++) {
       String currentItem = itemsPaths.get(i);
@@ -893,13 +893,14 @@ public class ProjectExplorer {
   }
 
   /**
-   * Parses {@code path} and makes full path for each element which separated by "/".
+   * Parses {@code path} and makes full path for each element which separated by "/". Items like
+   * 'org.package.sub' will be treated as 'org/package/sub'.
    *
-   * @param path Path in format "RootFolder/src/main/java/org.package".
+   * @param path Path in format "RootFolder/src/main/java/org.package.sub".
    * @return Paths in format ["RootFolder", "RootFolder/src", "RootFolder/src/main",
-   *     "RootFolder/src/main/java", "RootFolder/src/main/java/org/package"]
+   *     "RootFolder/src/main/java", "RootFolder/src/main/java/org/package/sub"]
    */
-  private List<String> splitPathOnSubitems(String path) {
+  private List<String> splitPathWithReplaceDotsToSlashes(String path) {
     Path fullPath = Paths.get(path);
     List<String> itemsPaths = new ArrayList<>();
 
