@@ -39,11 +39,7 @@ public class MemLimitDeserializer extends JsonDeserializer<Long> {
       return ((Integer) memLimit).longValue();
     }
     if (memLimit instanceof String) {
-      try {
         return Size.parseSize((String) memLimit);
-      } catch (IllegalArgumentException e) {
-        throw ctxt.mappingException(format(UNSUPPORTED_VALUE_MESSAGE, memLimit));
-      }
     }
     throw ctxt.mappingException(format(UNSUPPORTED_VALUE_MESSAGE, memLimit));
   }
