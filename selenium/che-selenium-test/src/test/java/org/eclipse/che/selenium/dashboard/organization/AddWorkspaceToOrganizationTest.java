@@ -176,7 +176,7 @@ public class AddWorkspaceToOrganizationTest {
     WaitUtils.sleepQuietly(2);
   }
 
-  private void checkNamespaceLink(String workspaceName, String organizationName) {
+  private void checkNamespaceLink(String organizationName, String workspaceName) {
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.selectWorkspaceItemName(workspaceName);
     workspaceDetails.waitToolbarTitleName(workspaceName);
