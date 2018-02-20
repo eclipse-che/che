@@ -25,13 +25,6 @@
     <packaging>pom</packaging>
     <name>Che Workspace Loader :: Web App</name>
     <inceptionYear>2018</inceptionYear>
-    <dependencies>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-j2ee</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-    </dependencies>
     <build>
         <finalName>workspace-loader</finalName>
         <plugins>
