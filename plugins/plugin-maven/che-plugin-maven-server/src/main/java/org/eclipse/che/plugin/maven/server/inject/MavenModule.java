@@ -26,12 +26,10 @@ import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.generator.archetype.MavenArchetypeJsonRpcMessenger;
 import org.eclipse.che.plugin.maven.lsp.MavenLanguageServerConfig;
-import org.eclipse.che.plugin.maven.server.PomModificationDetector;
 import org.eclipse.che.plugin.maven.server.core.MavenJsonRpcCommunication;
 import org.eclipse.che.plugin.maven.server.core.MavenProgressNotifier;
 import org.eclipse.che.plugin.maven.server.core.MavenServerNotifier;
 import org.eclipse.che.plugin.maven.server.core.MavenTerminalImpl;
-import org.eclipse.che.plugin.maven.server.core.project.PomChangeListener;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenProjectType;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenTargetExcludeMatcher;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenValueProviderFactory;
@@ -40,7 +38,6 @@ import org.eclipse.che.plugin.maven.server.projecttype.handler.GeneratorStrategy
 import org.eclipse.che.plugin.maven.server.projecttype.handler.MavenProjectGenerator;
 import org.eclipse.che.plugin.maven.server.projecttype.handler.MavenProjectInitHandler;
 import org.eclipse.che.plugin.maven.server.projecttype.handler.SimpleGeneratorStrategy;
-import org.eclipse.che.plugin.maven.server.rest.MavenServerService;
 
 /** @author Artem Zatsarynnyi */
 @DynaModule
@@ -79,12 +76,8 @@ public class MavenModule extends AbstractModule {
     bind(MavenTerminal.class).to(MavenTerminalImpl.class).in(Singleton.class);
     bind(MavenProgressNotifier.class).to(MavenServerNotifier.class).in(Singleton.class);
 
-    bind(MavenServerService.class);
     bind(MavenJsonRpcCommunication.class);
     bind(MavenArchetypeJsonRpcMessenger.class);
-
-    bind(PomChangeListener.class).asEagerSingleton();
-    bind(PomModificationDetector.class).asEagerSingleton();
 
     newMapBinder(binder(), String.class, LanguageServerConfig.class)
         .addBinding("org.eclipse.che.plugin.maven")
