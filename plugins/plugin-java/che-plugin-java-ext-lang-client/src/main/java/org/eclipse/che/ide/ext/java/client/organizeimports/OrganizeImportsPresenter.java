@@ -18,33 +18,24 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.filewatcher.ClientServerEventService;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.resources.Container;
-import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.ext.java.client.editor.JavaCodeAssistClient;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
-import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
-import org.eclipse.che.ide.ext.java.shared.dto.Change;
-import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
-import org.eclipse.che.ide.ext.java.shared.dto.OrganizeImportResult;
-import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
+import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportParams;
+import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportsResult;
+import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.ApplyWorkspaceEditAction;
 
 /**
  * The class that manages conflicts with organize imports if if they occur.
@@ -54,30 +45,32 @@ import org.eclipse.che.ide.util.loging.Log;
 @Singleton
 public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDelegate {
   private final OrganizeImportsView view;
-  private final JavaCodeAssistClient javaCodeAssistClient;
+  private final JavaLanguageExtensionServiceClient client;
   private final DtoFactory dtoFactory;
   private final JavaLocalizationConstant locale;
   private final NotificationManager notificationManager;
   private final ClientServerEventService clientServerEventService;
+  private final ApplyWorkspaceEditAction applyWorkspaceEditAction;
 
   private int page;
-  private List<ConflictImportDTO> choices;
+  private List<List<String>> ambiguousTypes;
   private Map<Integer, String> selected;
   private VirtualFile file;
-  private Document document;
   private EditorPartPresenter editor;
 
   @Inject
   public OrganizeImportsPresenter(
       OrganizeImportsView view,
-      JavaCodeAssistClient javaCodeAssistClient,
+      JavaLanguageExtensionServiceClient client,
       DtoFactory dtoFactory,
       JavaLocalizationConstant locale,
       NotificationManager notificationManager,
-      ClientServerEventService clientServerEventService) {
+      ClientServerEventService clientServerEventService,
+      ApplyWorkspaceEditAction applyWorkspaceEditAction) {
     this.view = view;
-    this.javaCodeAssistClient = javaCodeAssistClient;
+    this.client = client;
     this.clientServerEventService = clientServerEventService;
+    this.applyWorkspaceEditAction = applyWorkspaceEditAction;
     this.view.setDelegate(this);
 
     this.dtoFactory = dtoFactory;
@@ -93,12 +86,9 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
    */
   public void organizeImports(EditorPartPresenter editor) {
     this.editor = editor;
-    this.document = ((TextEditor) editor).getDocument();
     this.file = editor.getEditorInput().getFile();
 
     if (file instanceof Resource) {
-      final Optional<Project> project = ((Resource) file).getRelatedProject();
-
       final Optional<Resource> srcFolder =
           ((Resource) file).getParentWithMarker(SourceFolderMarker.ID);
 
@@ -106,36 +96,43 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
         return;
       }
 
-      final String fqn = JavaUtil.resolveFQN((Container) srcFolder.get(), (Resource) file);
       clientServerEventService
           .sendFileTrackingSuspendEvent()
           .then(
-              arg -> {
-                doOrganizeImports(fqn, project);
+              success -> {
+                doOrganizeImports(file.getLocation().toString());
               });
     }
   }
 
-  private Promise<OrganizeImportResult> doOrganizeImports(String fqn, Optional<Project> project) {
-    return javaCodeAssistClient
-        .organizeImports(project.get().getLocation().toString(), fqn)
+  private Promise<OrganizeImportsResult> doOrganizeImports(String path) {
+    OrganizeImportParams organizeImports = dtoFactory.createDto(OrganizeImportParams.class);
+    organizeImports.setChoices(Collections.emptyList());
+    organizeImports.setResourceUri(path);
+
+    return client
+        .organizeImports(organizeImports)
         .then(
             result -> {
-              if (result.getConflicts() != null && !result.getConflicts().isEmpty()) {
-                show(result.getConflicts());
-              } else {
-                applyChanges(document, result.getChanges());
+              try {
+                if (result.getAmbiguousTypes() != null && !result.getAmbiguousTypes().isEmpty()) {
+                  show(result.getAmbiguousTypes());
+                } else {
+                  applyWorkspaceEditAction.applyWorkspaceEdit(result.getWorkspaceEdit());
+                }
+              } finally {
+                clientServerEventService.sendFileTrackingResumeEvent();
               }
-
-              clientServerEventService.sendFileTrackingResumeEvent();
             })
         .catchError(
             error -> {
-              String title = locale.failedToProcessOrganizeImports();
-              String message = error.getMessage();
-              notificationManager.notify(title, message, FAIL, FLOAT_MODE);
-
-              clientServerEventService.sendFileTrackingResumeEvent();
+              try {
+                String title = locale.failedToProcessOrganizeImports();
+                String message = error.getMessage();
+                notificationManager.notify(title, message, FAIL, FLOAT_MODE);
+              } finally {
+                clientServerEventService.sendFileTrackingResumeEvent();
+              }
             });
   }
 
@@ -144,11 +141,11 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
   public void onNextButtonClicked() {
     selected.put(page++, view.getSelectedImport());
     if (!selected.containsKey(page)) {
-      String newSelection = choices.get(page).getTypeMatches().get(0);
+      String newSelection = ambiguousTypes.get(page).get(0);
       selected.put(page, newSelection);
     }
     view.setSelectedImport(selected.get(page));
-    view.changePage(choices.get(page));
+    view.changePage(ambiguousTypes.get(page));
     updateButtonsState();
   }
 
@@ -157,7 +154,7 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
   public void onBackButtonClicked() {
     selected.put(page--, view.getSelectedImport());
     view.setSelectedImport(selected.get(page));
-    view.changePage(choices.get(page));
+    view.changePage(ambiguousTypes.get(page));
     updateButtonsState();
   }
 
@@ -166,36 +163,37 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
   public void onFinishButtonClicked() {
     selected.put(page, view.getSelectedImport());
 
-    ConflictImportDTO result =
-        dtoFactory
-            .createDto(ConflictImportDTO.class)
-            .withTypeMatches(new ArrayList<>(selected.values()));
+    OrganizeImportParams organizeImports = dtoFactory.createDto(OrganizeImportParams.class);
+    organizeImports.setResourceUri(file.getLocation().toString());
+    organizeImports.setChoices(new ArrayList<>(selected.values()));
 
-    if (file instanceof Resource) {
-      final Optional<Project> project = ((Resource) file).getRelatedProject();
-
-      javaCodeAssistClient
-          .applyChosenImports(
-              project.get().getLocation().toString(), JavaUtil.resolveFQN(file), result)
-          .then(
-              new Operation<List<Change>>() {
-                @Override
-                public void apply(List<Change> result) throws OperationException {
-                  applyChanges(((TextEditor) editor).getDocument(), result);
-                  view.close();
-                  ((TextEditor) editor).setFocus();
-                }
-              })
-          .catchError(
-              new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError arg) throws OperationException {
-                  String title = locale.failedToProcessOrganizeImports();
-                  String message = arg.getMessage();
-                  notificationManager.notify(title, message, FAIL, FLOAT_MODE);
-                }
-              });
-    }
+    clientServerEventService
+        .sendFileTrackingSuspendEvent()
+        .then(
+            successful -> {
+              client
+                  .organizeImports(organizeImports)
+                  .then(
+                      result -> {
+                        try {
+                          applyWorkspaceEditAction.applyWorkspaceEdit(result.getWorkspaceEdit());
+                        } finally {
+                          clientServerEventService.sendFileTrackingResumeEvent();
+                          view.hide();
+                        }
+                      })
+                  .catchError(
+                      error -> {
+                        try {
+                          String title = locale.failedToProcessOrganizeImports();
+                          String message = error.getMessage();
+                          notificationManager.notify(title, message, FAIL, FLOAT_MODE);
+                        } finally {
+                          clientServerEventService.sendFileTrackingResumeEvent();
+                          view.hide();
+                        }
+                      });
+            });
   }
 
   /** {@inheritDoc} */
@@ -205,56 +203,29 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
   }
 
   /** Show Organize Imports panel with the special information. */
-  private void show(List<ConflictImportDTO> choices) {
-    if (choices == null || choices.isEmpty()) {
+  private void show(List<List<String>> ambiguousTypes) {
+    if (ambiguousTypes == null || ambiguousTypes.isEmpty()) {
       return;
     }
 
-    this.choices = choices;
+    this.ambiguousTypes = ambiguousTypes;
 
     page = 0;
-    selected = new HashMap<>(choices.size());
+    selected = new HashMap<>(ambiguousTypes.size());
 
-    String selection = choices.get(0).getTypeMatches().get(0);
+    String selection = ambiguousTypes.get(0).get(0);
     selected.put(page, selection);
     view.setSelectedImport(selection);
 
     updateButtonsState();
 
-    view.show(choices.get(page));
-  }
-
-  /**
-   * Update content of the file.
-   *
-   * @param document current document
-   * @param changes
-   */
-  private void applyChanges(Document document, List<Change> changes) {
-    HandlesUndoRedo undoRedo = null;
-    if (editor instanceof UndoableEditor) {
-      undoRedo = ((UndoableEditor) editor).getUndoRedo();
-    }
-    try {
-      if (undoRedo != null) {
-        undoRedo.beginCompoundChange();
-      }
-      for (Change change : changes) {
-        document.replace(change.getOffset(), change.getLength(), change.getText());
-      }
-    } catch (final Exception e) {
-      Log.error(getClass(), e);
-    } finally {
-      if (undoRedo != null) {
-        undoRedo.endCompoundChange();
-      }
-    }
+    view.show(ambiguousTypes.get(page));
   }
 
   private void updateButtonsState() {
     view.setEnableBackButton(!isFirstPage());
     view.setEnableNextButton(!isLastPage());
-    view.setEnableFinishButton(selected.size() == choices.size());
+    view.setEnableFinishButton(selected.size() == ambiguousTypes.size());
   }
 
   private boolean isFirstPage() {
@@ -262,6 +233,6 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
   }
 
   private boolean isLastPage() {
-    return (choices.size() - 1) == page;
+    return (ambiguousTypes.size() - 1) == page;
   }
 }
