@@ -21,6 +21,9 @@ const MAX_ITEMS = 12;
  * @author Oleksii Orel
  */
 export class AdminsUserManagementCtrl {
+
+  static $inject = ['$q', '$rootScope', '$log', '$mdDialog', 'cheUser', '$location', 'cheNotification', 'confirmDialogService', 'cheOrganization', '$scope', 'cheListHelperFactory'];
+
   $q: ng.IQService;
   $log: ng.ILogService;
   $mdDialog: ng.material.IDialogService;
@@ -41,7 +44,6 @@ export class AdminsUserManagementCtrl {
 
   /**
    * Default constructor.
-   * @ngInject for Dependency injection
    */
   constructor($q: ng.IQService,
               $rootScope: che.IRootScopeService,

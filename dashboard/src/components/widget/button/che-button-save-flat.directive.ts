@@ -41,7 +41,6 @@ export class CheButtonSaveFlat extends CheButton {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor () {
     super();

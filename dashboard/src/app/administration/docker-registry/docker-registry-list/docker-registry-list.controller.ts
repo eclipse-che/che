@@ -21,6 +21,8 @@ import {CheNotification} from '../../../../components/notification/che-notificat
  * @author Oleksii Orel
  */
 export class DockerRegistryListController {
+  static $inject = ['$q', '$log', '$mdDialog', '$document', 'chePreferences', 'cheNotification', 'confirmDialogService', '$scope', 'cheListHelperFactory'];
+
   private $q: ng.IQService;
   private $log: ng.ILogService;
   private $scope: ng.IScope;
@@ -39,9 +41,9 @@ export class DockerRegistryListController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, $document: ng.IDocumentService, chePreferences: ChePreferences, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService, $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
+  constructor($q: ng.IQService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, $document: ng.IDocumentService,
+    chePreferences: ChePreferences, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService, $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
     this.$q = $q;
     this.$log = $log;
     this.$scope = $scope;

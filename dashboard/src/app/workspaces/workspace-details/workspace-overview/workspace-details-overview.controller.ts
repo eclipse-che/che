@@ -26,6 +26,9 @@ const STOPPED = WorkspaceStatus[WorkspaceStatus.STOPPED];
  * @author Oleksii Orel
  */
 export class WorkspaceDetailsOverviewController {
+
+  static $inject = ['$q', '$route', '$timeout', '$location', 'cheWorkspace', 'cheNotification', 'confirmDialogService', 'namespaceSelectorSvc', 'workspaceDetailsService'];
+
   onChange: Function;
 
   private $q: ng.IQService;
@@ -47,9 +50,10 @@ export class WorkspaceDetailsOverviewController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $route: ng.route.IRouteService, $timeout: ng.ITimeoutService, $location: ng.ILocationService, cheWorkspace: CheWorkspace, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService, namespaceSelectorSvc: NamespaceSelectorSvc, workspaceDetailsService: WorkspaceDetailsService) {
+  constructor($q: ng.IQService, $route: ng.route.IRouteService, $timeout: ng.ITimeoutService, $location: ng.ILocationService,
+    cheWorkspace: CheWorkspace, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService,
+    namespaceSelectorSvc: NamespaceSelectorSvc, workspaceDetailsService: WorkspaceDetailsService) {
     this.$q = $q;
     this.$route = $route;
     this.$timeout = $timeout;

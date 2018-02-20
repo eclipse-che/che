@@ -64,7 +64,7 @@ public class CheckFactoryWithSincePolicyTest {
   }
 
   @Test
-  public void checkFactoryAcceptingWithSincePolicy() throws Exception {
+  public void checkFactoryAcceptingWithSincePolicy() {
     // check factory now, make sure its restricted
     dashboard.open();
     testFactory.open(seleniumWebDriver);

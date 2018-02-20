@@ -3,10 +3,7 @@
   "version": "1.0.3",
   "name": "Workspace API",
   "description": "Workspace API support",
-  "dependencies": [
-    "org.eclipse.che.exec",
-    "org.eclipse.che.terminal"
-  ],
+  "dependencies": [],
   "properties": {},
   "servers": {
     "wsagent/http": {

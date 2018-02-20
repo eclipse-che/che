@@ -25,6 +25,9 @@ interface IRemoteStackAPI<T> extends ng.resource.IResourceClass<T> {
  * @author Ann Shumilova
  */
 export class CheStack {
+
+  static $inject = ['$resource', '$q'];
+
   $resource: ng.resource.IResourceService;
   stacksById: { [stackId: string]: che.IStack };
   stacks: Array<any>;
@@ -37,7 +40,6 @@ export class CheStack {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($resource: ng.resource.IResourceService, $q: ng.IQService) {
 

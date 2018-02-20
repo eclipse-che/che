@@ -20,6 +20,9 @@ import {AddImportProjectService} from '../add-import-project.service';
  * @author Oleksii Kurinnyi
  */
 export class ImportBlankProjectController {
+
+  static $inject = ['$scope', 'addImportProjectService', 'importBlankProjectService'];
+
   /**
    * Service for adding or importing projects.
    */
@@ -48,7 +51,6 @@ export class ImportBlankProjectController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope, addImportProjectService: AddImportProjectService, importBlankProjectService: ImportBlankProjectService) {
     this.addImportProjectService = addImportProjectService;

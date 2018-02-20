@@ -17,6 +17,7 @@ import {ShareWorkspaceController} from '../share-workspace.controller';
  * @author Ann Shumilova
  */
 export class UserItemController {
+  static $inject = ['confirmDialogService', 'chePermissions', '$mdDialog'];
 
   user: { id: string; email: string; permissions: { actions: Array<string> } };
 
@@ -27,7 +28,6 @@ export class UserItemController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor(confirmDialogService: any, chePermissions: che.api.IChePermissions, $mdDialog: ng.material.IDialogService) {
     this.confirmDialogService = confirmDialogService;

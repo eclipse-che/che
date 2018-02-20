@@ -21,6 +21,9 @@ import {ConfirmDialogService} from '../../../components/service/confirm-dialog/c
  * @author Ann Shumilova
  */
 export class ListStacksController {
+
+  static $inject = ['cheStack', 'cheProfile', '$log', '$mdDialog', 'cheNotification', '$rootScope', 'lodash', '$q', 'confirmDialogService', '$scope', 'cheListHelperFactory'];
+
   cheStack: CheStack;
   cheNotification: CheNotification;
   $log: ng.ILogService;
@@ -42,7 +45,6 @@ export class ListStacksController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(cheStack: CheStack, cheProfile: CheProfile, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $rootScope: ng.IRootScopeService, lodash: any, $q: ng.IQService, confirmDialogService: ConfirmDialogService, $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {
     this.cheStack = cheStack;

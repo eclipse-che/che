@@ -17,6 +17,8 @@ import {CheNotification} from '../../../../../components/notification/che-notifi
  * @author Oleksii Orel
  */
 export class EditRegistryController {
+  static $inject = ['$mdDialog', 'chePreferences', 'cheNotification'];
+
   registry: {
     url: string,
     username: string,
@@ -29,7 +31,6 @@ export class EditRegistryController {
 
   /**
    * Default constructor.
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService, chePreferences: ChePreferences, cheNotification: CheNotification) {
     this.$mdDialog = $mdDialog;

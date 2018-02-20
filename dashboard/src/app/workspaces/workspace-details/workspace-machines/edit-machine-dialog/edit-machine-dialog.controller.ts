@@ -27,6 +27,9 @@ interface IPodItem {
  * @author Oleksii Orel
  */
 export class EditMachineDialogController {
+
+  static $inject = ['$mdDialog', 'cheEnvironmentRegistry', 'cheRecipeService'];
+
   errors: Array<string> = [];
   private $mdDialog: ng.material.IDialogService;
   private $log: ng.ILogService;
@@ -54,7 +57,6 @@ export class EditMachineDialogController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService,
               cheEnvironmentRegistry: CheEnvironmentRegistry,

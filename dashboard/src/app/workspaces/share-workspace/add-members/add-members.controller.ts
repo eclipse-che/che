@@ -19,6 +19,8 @@ import {CheUser} from '../../../../components/api/che-user.factory';
  */
 export class AddMemberController {
 
+  static $inject = ['$q', '$mdDialog', 'lodash', 'cheTeam', 'chePermissions', 'cheProfile', 'cheUser', '$log', '$scope', 'cheListHelperFactory'];
+
   private $mdDialog: angular.material.IDialogService;
   private $q: ng.IQService;
   private lodash: any;
@@ -67,7 +69,6 @@ export class AddMemberController {
 
   /**
    * Default constructor.
-   * @ngInject for Dependency injection
    */
   constructor($q: ng.IQService, $mdDialog: angular.material.IDialogService, lodash: any, cheTeam: che.api.ICheTeam,
               chePermissions: che.api.IChePermissions, cheProfile: CheProfile, cheUser: CheUser, $log: ng.ILogService,

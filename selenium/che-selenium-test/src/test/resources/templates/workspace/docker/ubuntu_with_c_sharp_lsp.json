@@ -20,7 +20,8 @@
           "installers": [
             "org.eclipse.che.terminal",
             "org.eclipse.che.ws-agent",
-            "org.eclipse.che.ls.csharp"
+            "org.eclipse.che.ls.csharp",
+            "org.eclipse.che.exec"
           ],
           "attributes": {
             "memoryLimitBytes": "desired_memory_value"

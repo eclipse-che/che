@@ -25,6 +25,9 @@ interface IFactoryNameValidatorAttributes extends ng.IAttributes {
  * @author Oleksii Kurinnyi
  */
 export class UniqueFactoryNameValidator implements ng.IDirective {
+
+  static $inject = ['cheAPI', '$q'];
+
   $q: ng.IQService;
   cheAPI: CheAPI;
 
@@ -35,7 +38,6 @@ export class UniqueFactoryNameValidator implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor (cheAPI: CheAPI, $q: ng.IQService) {
     this.cheAPI = cheAPI;

@@ -26,6 +26,8 @@ import {CheBranding} from '../../components/branding/che-branding.factory';
  */
 export class DiagnosticsController {
 
+  static $inject = ['$log', '$q', 'lodash', '$timeout', 'diagnosticsWebsocketWsMaster', 'cheWebsocket', 'cheBranding', 'diagnosticsRunningWorkspaceCheck', 'diagnosticsWorkspaceStartCheck'];
+
   /**
    * Promise service handling.
    */
@@ -118,7 +120,6 @@ export class DiagnosticsController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($log: ng.ILogService, $q: ng.IQService, lodash: any,
               $timeout: ng.ITimeoutService,

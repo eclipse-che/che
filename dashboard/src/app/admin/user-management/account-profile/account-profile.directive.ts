@@ -39,6 +39,9 @@ interface IAccountProfileScope extends ng.IScope {
  * @author Florent Benoit
  */
 export class AccountProfile implements ng.IDirective {
+
+  static $inject = ['jsonCountries', 'jsonJobs'];
+
   restrict = 'E';
   templateUrl = 'app/account/account-profile/account-profile.html';
   replace = true;
@@ -52,7 +55,6 @@ export class AccountProfile implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(jsonCountries: string, jsonJobs: string) {
     this.jsonCountries = jsonCountries;

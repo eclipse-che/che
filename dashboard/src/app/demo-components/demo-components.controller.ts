@@ -26,6 +26,8 @@ enum Tab {Font, Panel, Selecter, Icons, Dropdown_button,  Buttons, Input, List, 
  */
 export class DemoComponentsController {
 
+  static $inject = ['$location', 'cheNotification'];
+
   $location: ng.ILocationService;
   cheNotification: CheNotification;
   selectedIndex: number;
@@ -56,7 +58,6 @@ export class DemoComponentsController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($location: ng.ILocationService,
               cheNotification: CheNotification) {

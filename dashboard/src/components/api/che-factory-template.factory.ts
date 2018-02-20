@@ -21,7 +21,6 @@ export class CheFactoryTemplate {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor() {
     this.factoryTemplatesByName = new Map<string, string>();

@@ -32,6 +32,9 @@ const MAIN_URL = '/api/organization';
  * @author Oleksii Orel
  */
 export class CheOrganization implements che.api.ICheOrganization {
+
+  static $inject = ['$resource', '$q', 'cheUser', 'lodash', 'chePageObject', 'resourcesService', 'cheNamespaceRegistry', 'cheResourcesDistribution'];
+
   /**
    * Angular Resource service.
    */
@@ -87,7 +90,6 @@ export class CheOrganization implements che.api.ICheOrganization {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($resource: ng.resource.IResourceService,
               $q: ng.IQService,

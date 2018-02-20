@@ -18,11 +18,12 @@ import {ApplicationNotifications} from '../../../components/notification/applica
  */
 export class NavbarNotificationController {
 
+  static $inject = ['applicationNotifications', '$scope'];
+
   private applicationNotifications: ApplicationNotifications;
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(applicationNotifications: ApplicationNotifications, $scope: ng.IScope) {
     this.applicationNotifications = applicationNotifications;

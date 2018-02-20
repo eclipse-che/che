@@ -18,6 +18,9 @@ import {CheNotification} from '../../../../components/notification/che-notificat
  * @author Michail Kuznyetsov
  */
 export class FactoryFromWorkspaceCtrl {
+
+  static $inject = ['$filter', 'cheAPI', 'cheNotification'];
+
   private $filter: ng.IFilterService;
   private cheAPI: CheAPI;
   private cheNotification: CheNotification;
@@ -31,7 +34,6 @@ export class FactoryFromWorkspaceCtrl {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($filter: ng.IFilterService, cheAPI: CheAPI, cheNotification: CheNotification) {
     this.$filter = $filter;

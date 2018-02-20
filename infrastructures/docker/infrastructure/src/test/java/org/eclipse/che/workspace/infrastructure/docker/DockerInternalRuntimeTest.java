@@ -20,6 +20,7 @@ import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STA
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STOPPED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -101,6 +102,8 @@ public class DockerInternalRuntimeTest {
   @Mock private ProbeScheduler probesScheduler;
   @Mock private WorkspaceProbes workspaceProbes;
   @Mock private DockerMachine dockerMachine;
+  @Mock private ParallelDockerImagesBuilderFactory dockerImagesBuilderFactory;
+  @Mock private ParallelDockerImagesBuilder dockerImagesBuilder;
 
   @Captor private ArgumentCaptor<Consumer<ProbeResult>> probeResultConsumerCaptor;
   @Captor private ArgumentCaptor<MachineStatusEvent> eventCaptor;
@@ -133,6 +136,8 @@ public class DockerInternalRuntimeTest {
         .thenReturn(mock(ServersChecker.class));
     when(workspaceProbesFactory.getProbes(eq(IDENTITY.getWorkspaceId()), anyString(), any()))
         .thenReturn(workspaceProbes);
+    when(dockerImagesBuilderFactory.create(any())).thenReturn(dockerImagesBuilder);
+    when(dockerImagesBuilder.prepareImages(anyMap())).thenReturn(emptyMap());
     dockerRuntime =
         new DockerInternalRuntime(
             runtimeContext,
@@ -145,7 +150,8 @@ public class DockerInternalRuntimeTest {
             serversCheckerFactory,
             mock(MachineLoggersFactory.class),
             probesScheduler,
-            workspaceProbesFactory);
+            workspaceProbesFactory,
+            dockerImagesBuilderFactory);
   }
 
   @Test
@@ -155,7 +161,13 @@ public class DockerInternalRuntimeTest {
     dockerRuntime.start(emptyMap());
 
     verify(starter, times(2))
-        .startContainer(nullable(String.class), nullable(String.class), any(), any(), any());
+        .startContainer(
+            nullable(String.class),
+            nullable(String.class),
+            nullable(String.class),
+            any(),
+            any(),
+            any());
     verify(eventService, times(4)).publish(any(MachineStatusEvent.class));
     verifyEventsOrder(
         newEvent(DEV_MACHINE, STARTING, null),
@@ -174,7 +186,13 @@ public class DockerInternalRuntimeTest {
       dockerRuntime.start(emptyMap());
     } catch (InfrastructureException ex) {
       verify(starter, times(1))
-          .startContainer(nullable(String.class), nullable(String.class), any(), any(), any());
+          .startContainer(
+              nullable(String.class),
+              nullable(String.class),
+              nullable(String.class),
+              any(),
+              any(),
+              any());
       verify(eventService, times(3)).publish(any(MachineStatusEvent.class));
       verifyEventsOrder(
           newEvent(DEV_MACHINE, STARTING, null),
@@ -192,7 +210,13 @@ public class DockerInternalRuntimeTest {
       dockerRuntime.start(emptyMap());
     } catch (InfrastructureException ex) {
       verify(starter, times(1))
-          .startContainer(nullable(String.class), nullable(String.class), any(), any(), any());
+          .startContainer(
+              nullable(String.class),
+              nullable(String.class),
+              nullable(String.class),
+              any(),
+              any(),
+              any());
       verify(bootstrapper, times(1)).bootstrap();
       verify(eventService, times(4)).publish(any(MachineStatusEvent.class));
       verifyEventsOrder(
@@ -215,7 +239,13 @@ public class DockerInternalRuntimeTest {
       dockerRuntime.start(emptyMap());
     } catch (InfrastructureException ex) {
       verify(starter, never())
-          .startContainer(nullable(String.class), nullable(String.class), any(), any(), any());
+          .startContainer(
+              nullable(String.class),
+              nullable(String.class),
+              nullable(String.class),
+              any(),
+              any(),
+              any());
       throw ex;
     }
   }
@@ -229,7 +259,13 @@ public class DockerInternalRuntimeTest {
       dockerRuntime.start(emptyMap());
     } catch (InfrastructureException ex) {
       verify(starter, times(1))
-          .startContainer(nullable(String.class), nullable(String.class), any(), any(), any());
+          .startContainer(
+              nullable(String.class),
+              nullable(String.class),
+              nullable(String.class),
+              any(),
+              any(),
+              any());
       throw ex;
     }
   }
@@ -248,6 +284,7 @@ public class DockerInternalRuntimeTest {
         .startContainer(
             nullable(String.class),
             nullable(String.class),
+            nullable(String.class),
             any(DockerContainerConfig.class),
             any(RuntimeIdentity.class),
             any(AbnormalMachineStopHandler.class));
@@ -256,7 +293,13 @@ public class DockerInternalRuntimeTest {
       dockerRuntime.start(emptyMap());
     } catch (InfrastructureException ex) {
       verify(starter, times(1))
-          .startContainer(nullable(String.class), nullable(String.class), any(), any(), any());
+          .startContainer(
+              nullable(String.class),
+              nullable(String.class),
+              nullable(String.class),
+              any(),
+              any(),
+              any());
       throw ex;
     }
   }
@@ -386,6 +429,7 @@ public class DockerInternalRuntimeTest {
     when(starter.startContainer(
             nullable(String.class),
             nullable(String.class),
+            nullable(String.class),
             nullable(DockerContainerConfig.class),
             nullable(RuntimeIdentity.class),
             nullable(AbnormalMachineStopHandler.class)))
@@ -395,6 +439,7 @@ public class DockerInternalRuntimeTest {
   private void mockContainerStartFailed(InfrastructureException exception)
       throws InfrastructureException {
     when(starter.startContainer(
+            nullable(String.class),
             nullable(String.class),
             nullable(String.class),
             nullable(DockerContainerConfig.class),

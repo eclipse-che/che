@@ -31,10 +31,14 @@ cli_init() {
     return 2;
   fi
 
-  CLI_ENV=$(docker inspect --format='{{.Config.Env}}' $(get_this_container_id))
-  CLI_ENV=${CLI_ENV#*[}
-  CLI_ENV=${CLI_ENV%*]}
-  IFS=' ' read -r -a CLI_ENV_ARRAY <<< "$CLI_ENV"
+  CLI_ENV_ARRAY_LENGTH=$(docker inspect --format='{{json .Config.Env}}' $(get_this_container_id) | jq '. | length')
+  CLI_ENV_ARRAY=()
+  # fill an array
+  che_cli_env_arr_index="0"
+  while [ $che_cli_env_arr_index -lt $CLI_ENV_ARRAY_LENGTH ]; do
+      CLI_ENV_ARRAY[$che_cli_env_arr_index]=$(docker inspect --format='{{json .Config.Env}}' $(get_this_container_id) | jq -r .[$che_cli_env_arr_index])
+      che_cli_env_arr_index=$[$che_cli_env_arr_index+1]
+  done
 
   CHE_HOST_PROTOCOL="http"
   if is_initialized; then
@@ -379,7 +383,7 @@ get_value_of_var_from_env_file() {
 
 # Returns the value of variable from environment array.
 get_value_of_var_from_env() {
-  for element in "${CLI_ENV_ARRAY[@]}" 
+  for element in "${CLI_ENV_ARRAY[@]}"
   do
     var1=$(echo $element | cut -f1 -d=)
     var2=$(echo $element | cut -f2 -d=)

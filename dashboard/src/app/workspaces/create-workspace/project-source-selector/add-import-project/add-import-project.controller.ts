@@ -19,6 +19,9 @@ import {ProjectSourceSelectorService} from '../project-source-selector.service';
  * @author Oleksii Kurinyi
  */
 export class AddImportProjectController {
+
+  static $inject = ['$scope', 'addImportProjectService', 'projectSourceSelectorService'];
+
   /**
    * Project selector service.
    */
@@ -49,7 +52,6 @@ export class AddImportProjectController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope, addImportProjectService: AddImportProjectService, projectSourceSelectorService: ProjectSourceSelectorService) {
     this.addImportProjectService = addImportProjectService;

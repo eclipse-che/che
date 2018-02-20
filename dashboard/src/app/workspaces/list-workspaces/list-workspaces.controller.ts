@@ -23,7 +23,11 @@ import {CheBranding} from '../../../components/branding/che-branding.factory';
  * @author Ann Shumilova
  */
 export class ListWorkspacesCtrl {
-  $q: ng.IQService;
+
+  static $inject = ['$log', '$mdDialog', '$q', 'lodash', 'cheAPI', 'cheNotification', 'cheBranding', 'cheWorkspace', 'cheNamespaceRegistry',
+   'confirmDialogService', '$scope', 'cheListHelperFactory'];
+
+   $q: ng.IQService;
   $log: ng.ILogService;
   lodash: any;
   $mdDialog: ng.material.IDialogService;
@@ -53,7 +57,6 @@ export class ListWorkspacesCtrl {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService, lodash: any,
               cheAPI: CheAPI, cheNotification: CheNotification, cheBranding: CheBranding,

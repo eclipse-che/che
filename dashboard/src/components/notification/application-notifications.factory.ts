@@ -21,7 +21,6 @@ export class ApplicationNotifications {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor () {
     this.notifications = [];

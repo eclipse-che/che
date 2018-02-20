@@ -20,6 +20,8 @@ import {CheNotification} from '../../../components/notification/che-notification
  */
 export class ListFactoriesController {
 
+  static $inject = ['$q', '$log', 'cheAPI', 'cheNotification', 'confirmDialogService', '$scope', 'cheListHelperFactory'];
+
   private confirmDialogService: ConfirmDialogService;
   private cheAPI: CheAPI;
   private cheNotification: CheNotification;
@@ -38,7 +40,6 @@ export class ListFactoriesController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($q: ng.IQService, $log: ng.ILogService, cheAPI: CheAPI, cheNotification: CheNotification,
               confirmDialogService: ConfirmDialogService, $scope: ng.IScope, cheListHelperFactory: che.widget.ICheListHelperFactory) {

@@ -20,6 +20,8 @@ import {PageObjectResource} from './page-object-resource';
  */
 export class ChePageObject {
 
+  static $inject = ['$resource', '$q'];
+
   /**
    * Angular services
    */
@@ -28,7 +30,6 @@ export class ChePageObject {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($resource: ng.resource.IResourceService, $q: ng.IQService) {
     // keep resource

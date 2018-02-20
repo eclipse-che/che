@@ -27,6 +27,9 @@ import {WorkspaceStatus} from '../../../../components/api/workspace/che-workspac
  * @author Oleksii Kurinnyi
  */
 export class WorkspaceDetailsProjectsCtrl {
+
+  static $inject = ['cheAPI', '$mdDialog', 'confirmDialogService', '$scope', 'cheListHelperFactory', 'stackSelectorSvc', 'randomSvc', 'createWorkspaceSvc', 'workspaceDetailsService', 'workspaceDetailsProjectsService'];
+
   /**
    * Material design Dialog service.
    */
@@ -74,7 +77,6 @@ export class WorkspaceDetailsProjectsCtrl {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(cheAPI: CheAPI,
               $mdDialog: ng.material.IDialogService,

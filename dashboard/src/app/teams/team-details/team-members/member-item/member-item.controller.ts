@@ -16,6 +16,9 @@
  * @author Ann Shumilova
  */
 export class MemberItemController {
+
+  static $inject = ['$mdDialog', 'cheTeam', 'lodash', 'confirmDialogService'];
+
   /**
    * Team API interaction.
    */
@@ -52,7 +55,6 @@ export class MemberItemController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: angular.material.IDialogService, cheTeam: che.api.ICheTeam, lodash: any, confirmDialogService: any) {
     this.$mdDialog = $mdDialog;

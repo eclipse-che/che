@@ -17,6 +17,9 @@
  * @author Florent Benoit
  */
 export class NoGithubOauthDialogController {
+
+  static $inject = ['$mdDialog', '$rootScope'];
+
   /**
    * Material's dialog service.
    */
@@ -26,7 +29,6 @@ export class NoGithubOauthDialogController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService, $rootScope: ng.IRootScopeService) {
     this.$mdDialog = $mdDialog;

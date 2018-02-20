@@ -243,7 +243,7 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
   }
 ]);
 
-initModule.config(($mdThemingProvider: ng.material.IThemingProvider, jsonColors: any) => {
+initModule.config(['$mdThemingProvider', 'jsonColors', ($mdThemingProvider: ng.material.IThemingProvider, jsonColors: any) => {
 
   const cheColors = angular.fromJson(jsonColors);
   const getColor = (key: string) => {
@@ -383,7 +383,7 @@ initModule.config(($mdThemingProvider: ng.material.IThemingProvider, jsonColors:
   $mdThemingProvider.theme('maincontent-theme')
     .primaryPalette('che')
     .accentPalette('cheAccent');
-});
+}]);
 
 initModule.constant('userDashboardConfig', {
   developmentMode: DEV

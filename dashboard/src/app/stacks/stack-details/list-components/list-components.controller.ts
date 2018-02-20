@@ -23,6 +23,9 @@ interface IComponent {
  * @author Oleksii Orel
  */
 export class ListComponentsController {
+
+  static $inject = ['$mdDialog', 'confirmDialogService'];
+
   $mdDialog: ng.material.IDialogService;
 
   components: Array<any>;
@@ -38,7 +41,6 @@ export class ListComponentsController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService, confirmDialogService: ConfirmDialogService) {
     this.$mdDialog = $mdDialog;

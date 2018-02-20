@@ -22,6 +22,7 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Loader;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -63,6 +64,7 @@ public class DashboardFactory {
     }
   }
 
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
   private final ActionsFactory actionsFactory;
@@ -71,11 +73,13 @@ public class DashboardFactory {
 
   @Inject
   public DashboardFactory(
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
       SeleniumWebDriver seleniumWebDriver,
       Loader loader,
       ActionsFactory actionsFactory,
       Dashboard dashboard,
       TestIdeUrlProvider ideUrlProvider) {
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
@@ -192,8 +196,11 @@ public class DashboardFactory {
 
   /** wait any data in the json editor */
   public void waitJsonFactoryIsNotEmpty() {
+    WebElement jsonArea =
+        seleniumWebDriverHelper.waitPresence(By.cssSelector(Locators.JSON_FACTORY_EDITOR_AREA_CSS));
+    seleniumWebDriverHelper.moveCursorTo(jsonArea);
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until((WebDriver driver) -> jsonAreaEditor.getText().length() > LOAD_PAGE_TIMEOUT_SEC);
+        .until((WebDriver driver) -> jsonArea.getText().length() > LOAD_PAGE_TIMEOUT_SEC);
   }
 
   /** click on 'Create factory button' */

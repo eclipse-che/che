@@ -30,7 +30,6 @@ export class CheShowArea {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor() {
     this.restrict = 'E';

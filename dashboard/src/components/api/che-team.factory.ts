@@ -23,6 +23,9 @@ interface ITeamsResource<T> extends ng.resource.IResourceClass<T> {
  * @author Ann Shumilova
  */
 export class CheTeam implements che.api.ICheTeam {
+
+  static $inject = ['$resource', '$q', 'lodash', 'cheNamespaceRegistry', 'cheUser', 'cheOrganization', 'cheTeamEventsManager', 'cheResourcesDistribution', 'resourcesService'];
+
   /**
    * Angular Resource service.
    */
@@ -70,7 +73,6 @@ export class CheTeam implements che.api.ICheTeam {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($resource: ng.resource.IResourceService,
               $q: ng.IQService, lodash: any, cheNamespaceRegistry: any, cheUser: any,

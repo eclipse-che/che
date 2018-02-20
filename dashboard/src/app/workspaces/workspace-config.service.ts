@@ -23,6 +23,9 @@ import {ImportGithubProjectService} from './create-workspace/project-source-sele
  * @author Oleksii Kurinnyi
  */
 export class WorkspaceConfigService {
+
+  static $inject = ['$log', '$q', 'cheWorkspace', 'namespaceSelectorSvc', 'createWorkspaceSvc', 'stackSelectorSvc', 'templateSelectorSvc', 'importGithubProjectService'];
+
   /**
    * Log service.
    */
@@ -57,9 +60,9 @@ export class WorkspaceConfigService {
   private importGithubProjectService: ImportGithubProjectService;
 
   /** Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
-  constructor($log: ng.ILogService, $q: ng.IQService, cheWorkspace: CheWorkspace, namespaceSelectorSvc: NamespaceSelectorSvc, createWorkspaceSvc: CreateWorkspaceSvc, stackSelectorSvc: StackSelectorSvc, templateSelectorSvc: TemplateSelectorSvc, importGithubProjectService: ImportGithubProjectService) {
+  constructor($log: ng.ILogService, $q: ng.IQService, cheWorkspace: CheWorkspace, namespaceSelectorSvc: NamespaceSelectorSvc, createWorkspaceSvc: CreateWorkspaceSvc,
+     stackSelectorSvc: StackSelectorSvc, templateSelectorSvc: TemplateSelectorSvc, importGithubProjectService: ImportGithubProjectService) {
     this.$log = $log;
     this.$q = $q;
     this.cheWorkspace = cheWorkspace;

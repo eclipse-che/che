@@ -20,6 +20,8 @@ interface ICheAccordionScope extends ng.IScope {
  */
 export class CheAccordion implements ng.IDirective {
 
+  static $inject = ['$timeout'];
+
   restrict = 'E';
   transclude = true;
   replace = true;
@@ -34,7 +36,6 @@ export class CheAccordion implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($timeout: ng.ITimeoutService) {
     this.$timeout = $timeout;

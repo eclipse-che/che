@@ -17,6 +17,8 @@ import {ICheSelecterScope} from './che-selecter.directive';
  */
 export class CheSelecterCtrl {
 
+  static $inject = ['$scope'];
+
   $scope: ICheSelecterScope;
 
   globalSelecterName: string;
@@ -24,7 +26,6 @@ export class CheSelecterCtrl {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($scope: ICheSelecterScope) {
     this.$scope = $scope;

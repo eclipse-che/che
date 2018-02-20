@@ -41,7 +41,6 @@ export class CheButtonWarning extends CheButton {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor () {
     super();

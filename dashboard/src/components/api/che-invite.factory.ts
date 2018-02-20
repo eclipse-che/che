@@ -22,6 +22,9 @@ interface IInviteResource<T> extends ng.resource.IResourceClass<T> {
  * @author Ann Shumilova
  */
 export class CheInvite implements che.api.ICheInvite {
+
+  static $inject = ['$q', '$resource'];
+
   /**
    * Angular promise service.
    */
@@ -42,7 +45,6 @@ export class CheInvite implements che.api.ICheInvite {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($q: ng.IQService, $resource: ng.resource.IResourceService) {
     this.$q = $q;
