@@ -11,7 +11,7 @@
 package org.eclipse.che.wsagent.server;
 
 import com.google.inject.AbstractModule;
-import org.eclipse.che.LivenessProbeService;
+import org.eclipse.che.api.core.rest.LivenessProbeService;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.inject.DynaModule;
 

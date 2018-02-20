@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che;
+package org.eclipse.che.api.core.rest;
 
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
