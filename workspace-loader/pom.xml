@@ -50,56 +50,6 @@
                     <finalName>workspace-loader</finalName>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <configuration>
-                    <useDefaultExcludes>false</useDefaultExcludes>
-                    <excludes>
-                        <exclude>**/.idea/**</exclude>
-                        <exclude>**/*.less</exclude>
-                        <exclude>**/*.html</exclude>
-                        <exclude>**/*.ico</exclude>
-                        <exclude>**/*.ttf</exclude>
-                        <exclude>**/*.eot</exclude>
-                        <exclude>**/*.css</exclude>
-                        <exclude>**/*.woff</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>.</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <configuration>
-                    <includePom>true</includePom>
-                    <includes>
-                        <include>e2e/**/*</include>
-                        <include>gulp/**/*</include>
-                        <include>src/**/*</include>
-                        <include>*.json</include>
-                        <include>*.js</include>
-                        <include>.*</include>
-                    </includes>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -114,14 +64,14 @@
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>build-dashboard</id>
+                                <id>build-workspace-loader</id>
                                 <phase>compile</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <!-- build user dashboard -->
+                                        <!-- build workspace loader -->
                                         <exec dir="${basedir}" executable="npm" failonerror="true">
                                             <arg value="install" />
                                         </exec>
