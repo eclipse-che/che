@@ -284,7 +284,7 @@ public class Dashboard {
     return !(workspaces.size() == 0);
   }
 
-  public boolean ifWorkspaceNamePresentInRecentList(String workspaceName) {
+  public boolean isWorkspaceNamePresentInRecentList(String workspaceName) {
     try {
       return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
           .until(

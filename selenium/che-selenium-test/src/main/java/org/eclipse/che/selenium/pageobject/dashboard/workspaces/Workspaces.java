@@ -60,7 +60,7 @@ public class Workspaces {
     String SEARCH_WORKSPACE_FIELD = "//input[@ng-placeholder='Search']";
     String NO_WORKSPACE_FOUND = "//span[text()='No workspaces found.']";
     String WORKSPACE_ITEM_NAME = "//div[@id='ws-name-%s']";
-    String WORKSPACE_ITEM_FULL_NAME = "//div[@data-str='%s/%s']";
+    String WORKSPACE_ITEM_FULL_NAME = "//div[@data-str='%s']";
     String WORKSPACE_ITEM_CHECKBOX = "//div[@id='ws-name-%s']//md-checkbox";
     String WORKSPACE_ITEM_RAM = "//div[@id='ws-name-%s']//span[@name='workspace-ram-value']";
     String WORKSPACE_ITEM_PROJECTS =
@@ -242,11 +242,11 @@ public class Workspaces {
   }
 
   public void waitWorkspaceIsPresent(String organizationName, String workspaceName) {
+    String fullWorkspaceName = organizationName + "/" + workspaceName;
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(
             visibilityOfElementLocated(
-                By.xpath(
-                    format(Locators.WORKSPACE_ITEM_FULL_NAME, organizationName, workspaceName))));
+                By.xpath(format(Locators.WORKSPACE_ITEM_FULL_NAME, fullWorkspaceName))));
   }
 
   /** wait the workspace is not present on dashboard */

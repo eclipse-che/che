@@ -72,8 +72,8 @@ public class WorkspaceDetails {
     String TOOLBAR_TITLE_NAME =
         "//div[contains(@class,'che-toolbar')]//span[contains(text(),'%s')]";
 
-    String ORGANIZATION_NAME = "//div[contains(@class,'namespace-link ')]//span";
-    String OPEN_ORGANIZATION_BUTTON = "//div[contains(@class,'namespace-link ')]/div";
+    String ORGANIZATION_NAME = "namespace-name";
+    String OPEN_ORGANIZATION_BUTTON = "open-namespace-button";
   }
 
   public enum StateWorkspace {
@@ -250,13 +250,13 @@ public class WorkspaceDetails {
 
   public String getOrganizationName() {
     return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(Locators.ORGANIZATION_NAME)))
+        .until(visibilityOfElementLocated(By.id(Locators.ORGANIZATION_NAME)))
         .getText();
   }
 
   public void clickOnOpenOrganizationButton() {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(Locators.OPEN_ORGANIZATION_BUTTON)))
+        .until(visibilityOfElementLocated(By.id(Locators.OPEN_ORGANIZATION_BUTTON)))
         .click();
   }
 }
