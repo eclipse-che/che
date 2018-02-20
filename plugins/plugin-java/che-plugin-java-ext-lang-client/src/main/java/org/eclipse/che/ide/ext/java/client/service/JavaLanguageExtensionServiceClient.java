@@ -51,6 +51,8 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ImplementersResponse;
 import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.JavaCoreOptions;
+import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportParams;
+import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportsResult;
 import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.UsagesResponse;
 import org.eclipse.che.plugin.languageserver.ide.service.ServiceUtil;
@@ -281,15 +283,15 @@ public class JavaLanguageExtensionServiceClient {
    * @param path the path to the file or to the directory
    * @return {@link WorkspaceEdit} changes to apply
    */
-  public Promise<WorkspaceEdit> organizeImports(String path) {
+  public Promise<OrganizeImportsResult> organizeImports(OrganizeImportParams organizeImports) {
     return Promises.create(
         (resolve, reject) ->
             requestTransmitter
                 .newRequest()
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName(ORGANIZE_IMPORTS)
-                .paramsAsString(path)
-                .sendAndReceiveResultAsDto(WorkspaceEdit.class, REQUEST_TIMEOUT)
+                .paramsAsDto(organizeImports)
+                .sendAndReceiveResultAsDto(OrganizeImportsResult.class, REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
                 .onFailure(error -> reject.apply(ServiceUtil.getPromiseError(error))));
