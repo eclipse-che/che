@@ -139,6 +139,10 @@
                         <classe>org.eclipse.lsp4j.Location</classe>
                         <classe>org.eclipse.lsp4j.Range</classe>
                         <classe>org.eclipse.lsp4j.Position</classe>
+                        <classe>org.eclipse.lsp4j.WorkspaceEdit</classe>
+                        <classe>org.eclipse.lsp4j.TextEdit</classe>
+                        <classe>org.eclipse.lsp4j.TextDocumentEdit</classe>
+                        <classe>org.eclipse.lsp4j.VersionedTextDocumentIdentifier</classe>
                     </classes>
                     <dtoPackages>
                         <package>org.eclipse.che.jdt.ls.extension.api.dto</package>
