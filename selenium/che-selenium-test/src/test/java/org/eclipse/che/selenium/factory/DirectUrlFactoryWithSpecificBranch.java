@@ -95,6 +95,7 @@ public class DirectUrlFactoryWithSpecificBranch {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/8616");
     }
+
     pullRequestPanel.waitOpenPanel();
 
     try {
