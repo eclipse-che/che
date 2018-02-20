@@ -29,25 +29,20 @@ import org.testng.annotations.Test;
  * @author Mykhailo Kuznietsov
  */
 public class MemLimitDeserializerTest {
-
-  @Mock InstallerRegistry installerRegistry;
-  @Mock RecipeRetriever recipeRetriever;
-  @Mock MachineConfigsValidator machinesValidator;
-  @Mock ComposeEnvironmentValidator composeValidator;
-  @Mock ComposeServicesStartStrategy startStrategy;
+  @Mock private InstallerRegistry installerRegistry;
+  @Mock private RecipeRetriever recipeRetriever;
+  @Mock private MachineConfigsValidator machinesValidator;
+  @Mock private ComposeEnvironmentValidator composeValidator;
+  @Mock private ComposeServicesStartStrategy startStrategy;
 
   private ComposeEnvironmentFactory factory;
 
-  private static final String RECIPE_WITHOUT_COMMAND_VALUE =
-      "services:\n"
-          + " machine1:\n"
-          + "  image: codenvy/mysql\n"
-          + "  environment:\n"
-          + "   MYSQL_USER: petclinic\n"
-          + "   MYSQL_PASSWORD: password\n"
-          + "  mem_limit: %s\n"
-          + // <- test target
-          "  expose: [4403, 5502]";
+  private static final long K = 1024;
+  private static final long M = 1024 * K;
+  private static final long G = 1024 * M;
+
+  private static final String RECIPE_WITHOUT_MEMORY_LIMIT =
+      "services:\n" + " machine1:\n" + "  mem_limit: %s";
 
   @BeforeMethod
   public void setup() {
@@ -64,27 +59,26 @@ public class MemLimitDeserializerTest {
   @Test(dataProvider = "validValues")
   public void shouldDeserializeValues(Object memoryLimit, Object parsedLimit)
       throws ValidationException {
-    ComposeRecipe service =
-        factory.doParse(String.format(RECIPE_WITHOUT_COMMAND_VALUE, memoryLimit));
-    assertEquals(service.getServices().get("machine1").getMemLimit(), parsedLimit);
+    ComposeRecipe recipe = factory.doParse(String.format(RECIPE_WITHOUT_MEMORY_LIMIT, memoryLimit));
+    assertEquals(recipe.getServices().get("machine1").getMemLimit(), parsedLimit);
   }
 
   @Test(dataProvider = "invalidValues", expectedExceptions = ValidationException.class)
   public void shouldThrowExceptionOnDeseralization(Object memoryLimit) throws ValidationException {
-    factory.doParse(String.format(RECIPE_WITHOUT_COMMAND_VALUE, memoryLimit));
+    factory.doParse(String.format(RECIPE_WITHOUT_MEMORY_LIMIT, memoryLimit));
   }
 
   @DataProvider(name = "validValues")
   public Object[][] validValues() {
     return new Object[][] {
       {"2048", 2048L},
-      {"1gb", 1073741824L},
-      {"2g", 2147483648L},
-      {"1073741824", 1073741824L},
-      {"8m", 8388608L},
-      {"200mb", 209715200L},
-      {"5k", 5120L},
-      {"10kb", 10240L},
+      {"1gb", G},
+      {"2g", 2 * G},
+      {"1073741824", G},
+      {"8m", 8 * M},
+      {"200mb", 200 * M},
+      {"5k", 5 * K},
+      {"10kb", 10 * K},
     };
   }
 
