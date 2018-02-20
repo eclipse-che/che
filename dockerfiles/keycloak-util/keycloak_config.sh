@@ -14,6 +14,10 @@ cat /scripts/che-users-0.json.erb | \
 				    sed -e "/\"requiredActions\" : \[ \],/d" | \
 				    jq .users[] > /scripts/che-user.json
 
+if [ "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}" == "false" ]; then
+   sed -i -e "s#\"UPDATE_PASSWORD\"##" /scripts/che-user.json
+fi
+
 cat /scripts/che-realm.json.erb | sed -e "s@<%= scope\.lookupvar('che::che_server_url') %>@${HTTP_PROTOCOL}://${CHE_HOST}@" > /scripts/realm.json
 
 echo "Creating Che realm and che-public client..."

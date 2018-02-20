@@ -20,7 +20,9 @@ spec:
         value: "${HTTP_PROTOCOL}"
       - name: KC_HOST
         value: "${KC_HOST}"
-      image: eclipse/che-keycloak-util:nightly
+      - name: CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD
+        value: "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}"
+      image: eclipse/che-keycloak-util
       name: keycloak-util
       imagePullPolicy: Always
     restartPolicy: Never

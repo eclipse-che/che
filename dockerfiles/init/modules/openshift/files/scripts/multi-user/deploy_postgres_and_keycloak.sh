@@ -37,8 +37,6 @@ if [ "${CHE_SERVER_URL}" == "" ]; then
     CHE_SERVER_URL="https://${CHE_SERVER_ROUTE_HOST}"
   fi
 fi
-DEFAULT_CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD=true
-
 
 # apply all yaml files from "$COMMAND_DIR"/keycloak/
 

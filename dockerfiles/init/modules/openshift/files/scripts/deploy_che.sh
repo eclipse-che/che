@@ -225,6 +225,7 @@ DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server"
 DEFAULT_CHE_IMAGE_TAG="nightly"
 DEFAULT_CHE_KEYCLOAK_OSO_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token"
 DEFAULT_KEYCLOAK_GITHUB_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/github/token"
+DEFAULT_CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD="true"
 
 COMMAND=${COMMAND:-${DEFAULT_COMMAND}}
 WAIT_FOR_CHE=${WAIT_FOR_CHE:-"false"}
