@@ -28,7 +28,6 @@ import org.eclipse.che.ide.api.filetypes.FileTypeRegistry.FileTypeProvider;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
 import org.eclipse.che.ide.ext.java.client.action.GetEffectivePomAction;
 import org.eclipse.che.ide.ext.java.client.action.ReimportMavenDependenciesAction;
-import org.eclipse.che.plugin.maven.client.comunnication.MavenMessagesHandler;
 import org.eclipse.che.plugin.maven.client.comunnication.progressor.background.DependencyResolverAction;
 import org.eclipse.che.plugin.maven.client.editor.ClassFileSourcesDownloader;
 import org.eclipse.che.plugin.maven.client.project.MavenModelImporter;
@@ -50,7 +49,7 @@ public class MavenExtension {
   @Inject
   public MavenExtension(
       PreSelectedProjectTypeManager preSelectedProjectManager,
-      MavenMessagesHandler messagesHandler,
+      //      MavenMessagesHandler messagesHandler,
       ClassFileSourcesDownloader downloader,
       MavenModelImporter importMavenModelHandler,
       MavenResources resources,
