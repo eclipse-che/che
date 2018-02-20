@@ -45,7 +45,7 @@ public class WsAgentServerLivenessProbeConfigFactory implements HttpProbeConfigF
 
     try {
       // add trailing slash
-      URI uri = UriBuilder.fromUri(server.getUrl()).path("/").build();
+      URI uri = UriBuilder.fromUri(server.getUrl()).path("/liveness").build();
 
       int port;
       if (uri.getPort() == -1) {
