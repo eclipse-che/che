@@ -72,9 +72,9 @@ public class MemLimitDeserializerTest {
   public Object[][] validValues() {
     return new Object[][] {
       {"2048", 2048L},
-      {"1gb", G},
+      {"1gb", 1 * G},
       {"2g", 2 * G},
-      {"1073741824", G},
+      {"1073741824", 1 * G},
       {"8m", 8 * M},
       {"200mb", 200 * M},
       {"5k", 5 * K},
