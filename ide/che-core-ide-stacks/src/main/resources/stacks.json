@@ -275,7 +275,7 @@
           "machines": {
             "dev-machine": {
               "installers": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ls.java"
               ],
               "servers": {
                 "tomcat8" : {
@@ -368,7 +368,7 @@
           "machines": {
             "dev-machine": {
               "installers": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ls.java"
               ],
               "servers": {
                 "tomcat8" : {
@@ -458,7 +458,7 @@
           "machines": {
             "dev-machine": {
               "installers": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ls.java"
               ],
               "servers": {
                 "tomcat8" : {
@@ -1258,7 +1258,7 @@
           "machines": {
             "dev-machine": {
               "installers": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ls.java"
               ],
               "servers": {
                 "tomcat8" : {
@@ -1332,7 +1332,8 @@
               "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
-                "org.eclipse.che.ws-agent"
+                "org.eclipse.che.ws-agent",
+                "org.eclipse.che.ls.java"
               ],
               "servers": {
                 "vertx" : {
@@ -1430,7 +1431,8 @@
               "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
-                "org.eclipse.che.ws-agent"
+                "org.eclipse.che.ws-agent",
+                "org.eclipse.che.ls.java"
               ],
               "servers": {
                 "springboot" : {
@@ -1532,7 +1534,8 @@
               "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
-                "org.eclipse.che.ws-agent"
+                "org.eclipse.che.ws-agent",
+                "org.eclipse.che.ls.java"
               ],
               "servers": {
                 "wildfly" : {
@@ -1695,7 +1698,7 @@
           "machines": {
             "dev-machine": {
               "installers": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ls.java"
               ],
               "servers": {},
               "attributes" : {
@@ -1740,7 +1743,7 @@
           "machines": {
             "dev-machine": {
               "installers": [
-                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent"
+                "org.eclipse.che.exec", "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ls.java"
               ],
               "servers": {
                 "8080/tcp" : {
