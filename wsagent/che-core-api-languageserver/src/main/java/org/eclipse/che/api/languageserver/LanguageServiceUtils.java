@@ -30,8 +30,8 @@ import org.eclipse.lsp4j.Location;
  */
 public class LanguageServiceUtils {
 
-  private static final String PROJECTS = "/projects";
-  private static final String FILE_PROJECTS = "file:///projects";
+  public static final String PROJECTS = "/projects";
+  public static final String FILE_PROJECTS = "file:///projects";
 
   public static String prefixURI(String uri) {
     return uri.startsWith("/") ? FILE_PROJECTS + uri : uri;
