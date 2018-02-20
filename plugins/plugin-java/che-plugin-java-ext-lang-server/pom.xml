@@ -104,10 +104,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.jface.text</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>org.eclipse.ltk.core.refactoring</artifactId>
         </dependency>
         <dependency>
