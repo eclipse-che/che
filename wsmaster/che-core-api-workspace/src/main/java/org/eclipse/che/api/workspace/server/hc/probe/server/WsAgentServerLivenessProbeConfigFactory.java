@@ -44,7 +44,7 @@ public class WsAgentServerLivenessProbeConfigFactory implements HttpProbeConfigF
       throws InternalInfrastructureException {
 
     try {
-      // add trailing slash
+      // add check path
       URI uri = UriBuilder.fromUri(server.getUrl()).path("/liveness").build();
 
       int port;
