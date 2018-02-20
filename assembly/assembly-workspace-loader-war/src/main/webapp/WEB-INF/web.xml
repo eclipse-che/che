@@ -33,9 +33,4 @@
         <url-pattern>/loader/*</url-pattern>
     </servlet-mapping>
 
-    <security-role>
-        <description>the user role</description>
-        <role-name>developer</role-name>
-    </security-role>
-
 </web-app>
