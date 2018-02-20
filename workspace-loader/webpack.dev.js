@@ -29,7 +29,7 @@ module.exports = merge(common, {
     },
     devServer: {
         contentBase: './dist',
-        port: 3050,
+        port: 3000,
         index: 'index.html',
         historyApiFallback: true,
         proxy: {
