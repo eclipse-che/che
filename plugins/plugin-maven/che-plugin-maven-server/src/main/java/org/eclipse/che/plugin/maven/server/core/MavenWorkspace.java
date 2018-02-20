@@ -177,7 +177,7 @@ public class MavenWorkspace {
 
   public void update(List<IProject> projects) {
     manager.update(projects, true);
-    runResolve();
+    //    runResolve();
   }
 
   private void runResolve() {
