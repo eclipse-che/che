@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.CommandDeserializer;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.EnvironmentDeserializer;
+import org.eclipse.che.workspace.infrastructure.docker.environment.compose.deserializer.MemLimitDeserializer;
 
 /**
  * Description of docker compose service.
@@ -55,6 +56,7 @@ public class ComposeService {
   @JsonProperty("volumes_from")
   private List<String> volumesFrom;
 
+  @JsonDeserialize(using = MemLimitDeserializer.class)
   @JsonProperty("mem_limit")
   private Long memLimit;
 
