@@ -476,17 +476,10 @@ public class KubernetesPods {
     }
 
     @Override
-    public void onOpen(Response response) {
-      if (response != null && response.body() != null) {
-        response.body().close();
-      }
-    }
+    public void onOpen(Response response) {}
 
     @Override
     public void onFailure(Throwable t, Response response) {
-      if (response != null && response.body() != null) {
-        response.body().close();
-      }
       latch.countDown();
     }
 
