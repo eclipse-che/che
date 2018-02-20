@@ -20,7 +20,6 @@ import org.eclipse.che.JavadocUrlProvider;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.jdt.rest.UrlContextProvider;
 import org.eclipse.che.plugin.java.server.refactoring.RefactoringManager;
-import org.eclipse.che.plugin.java.server.rest.CodeAssistService;
 import org.eclipse.che.plugin.java.server.rest.JavaFormatterService;
 import org.eclipse.che.plugin.java.server.rest.JavaNavigationService;
 import org.eclipse.che.plugin.java.server.rest.JavadocService;
@@ -38,7 +37,6 @@ public class JdtGuiceModule extends AbstractModule {
   protected void configure() {
     bind(JavadocService.class);
     bind(JavaNavigationService.class);
-    bind(CodeAssistService.class);
     bind(JavaFormatterService.class);
     bind(ResourcesPlugin.class).asEagerSingleton();
     bind(JavaPlugin.class).asEagerSingleton();

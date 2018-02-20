@@ -96,6 +96,8 @@ import org.eclipse.che.jdt.ls.extension.api.dto.Jar;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.jdt.ls.extension.api.dto.JavaCoreOptions;
 import org.eclipse.che.jdt.ls.extension.api.dto.JobResult;
+import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportParams;
+import org.eclipse.che.jdt.ls.extension.api.dto.OrganizeImportsResult;
 import org.eclipse.che.jdt.ls.extension.api.dto.ReImportMavenProjectsCommandParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.ResourceLocation;
 import org.eclipse.che.jdt.ls.extension.api.dto.TestFindParameters;
@@ -111,7 +113,6 @@ import org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.TestPositio
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
-import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.CollectionTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EitherTypeAdapterFactory;
 import org.eclipse.lsp4j.jsonrpc.json.adapters.EnumTypeAdapterFactory;
@@ -223,8 +224,8 @@ public class JavaLanguageServerExtensionService {
     requestHandler
         .newConfiguration()
         .methodName(ORGANIZE_IMPORTS)
-        .paramsAsString()
-        .resultAsDto(WorkspaceEdit.class)
+        .paramsAsDto(OrganizeImportParams.class)
+        .resultAsDto(OrganizeImportsResult.class)
         .withFunction(this::organizeImports);
 
     requestHandler
@@ -688,14 +689,12 @@ public class JavaLanguageServerExtensionService {
     }
   }
 
-  /**
-   * Organizes imports in a file or in a directory.
-   *
-   * @param path the path to the file or to the directory
-   */
-  public WorkspaceEdit organizeImports(String path) {
-    Type type = new TypeToken<WorkspaceEdit>() {}.getType();
-    return doGetOne("java.edit.organizeImports", singletonList(prefixURI(path)), type);
+  /** Organizes imports in a file or in a directory. */
+  public OrganizeImportsResult organizeImports(OrganizeImportParams organizeImports) {
+    organizeImports.setResourceUri(prefixURI(organizeImports.getResourceUri()));
+
+    Type type = new TypeToken<OrganizeImportsResult>() {}.getType();
+    return doGetOne(Commands.ORGANIZE_IMPORTS, singletonList(organizeImports), type);
   }
 
   // configuration
