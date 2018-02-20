@@ -866,7 +866,7 @@ public class ProjectExplorer {
    * @param path path for expand
    */
   public void expandPathInProjectExplorer(String path) {
-    List<String> itemsPaths = getItemsPathsWithReplaceDots(path);
+    List<String> itemsPaths = splitPathOnSubitems(path);
     ListIterator<String> iterator = itemsPaths.listIterator();
 
     while (iterator.hasNext()) {
@@ -893,7 +893,7 @@ public class ProjectExplorer {
    * @return Paths in format ["RootFolder", "RootFolder/src", "RootFolder/src/main",
    *     "RootFolder/src/main/java", "RootFolder/src/main/java/org/package"]
    */
-  private List<String> getItemsPathsWithReplaceDots(String path) {
+  private List<String> splitPathOnSubitems(String path) {
     Path fullPath = Paths.get(path);
     List<String> itemsPaths = new ArrayList<>();
 
