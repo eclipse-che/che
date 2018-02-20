@@ -27,7 +27,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
 import org.eclipse.che.ide.ui.window.Window;
 
 /**
@@ -72,9 +71,8 @@ final class OrganizeImportsViewImpl extends Window implements OrganizeImportsVie
 
   /** {@inheritDoc} */
   @Override
-  public void show(ConflictImportDTO match) {
+  public void show(List<String> matches) {
     container.clear();
-    List<String> matches = match.getTypeMatches();
     for (String fqn : matches) {
       final Label label = new Label(fqn);
       if (fqn.equals(selectedImport)) {
@@ -112,8 +110,8 @@ final class OrganizeImportsViewImpl extends Window implements OrganizeImportsVie
 
   /** {@inheritDoc} */
   @Override
-  public void changePage(ConflictImportDTO match) {
-    show(match);
+  public void changePage(List<String> matches) {
+    show(matches);
   }
 
   /** {@inheritDoc} */
