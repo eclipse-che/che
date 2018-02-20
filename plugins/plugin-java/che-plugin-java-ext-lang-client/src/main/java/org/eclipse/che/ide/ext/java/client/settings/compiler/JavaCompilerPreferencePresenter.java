@@ -12,8 +12,6 @@ package org.eclipse.che.ide.ext.java.client.settings.compiler;
 
 import static java.util.Arrays.asList;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.COMPARING_IDENTICAL_VALUES;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.COMPILER_UNUSED_IMPORT;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.COMPILER_UNUSED_LOCAL;
@@ -44,7 +42,6 @@ import java.util.Map;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
@@ -181,16 +178,6 @@ public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePrese
                 for (ErrorWarningsOptions option : options) {
                   createAndAddWidget(option);
                 }
-              }
-            })
-        .catchError(
-            new Operation<PromiseError>() {
-              @Override
-              public void apply(PromiseError arg) throws OperationException {
-                notificationManagerProvider
-                    .get()
-                    .notify(
-                        locale.unableToLoadJavaCompilerErrorsWarningsSettings(), FAIL, FLOAT_MODE);
               }
             });
   }
