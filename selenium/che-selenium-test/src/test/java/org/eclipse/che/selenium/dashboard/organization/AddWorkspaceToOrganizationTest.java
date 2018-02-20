@@ -22,7 +22,6 @@ import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
@@ -109,10 +108,10 @@ public class AddWorkspaceToOrganizationTest {
     assertTrue(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_NAME4));
 
     // check that the Namespace link in workspace details correct
-    checkNamespaceLink(WORKSPACE_NAME1, org1.getName());
-    checkNamespaceLink(WORKSPACE_NAME2, org2.getName());
+    checkNamespaceLink(org1.getName(), WORKSPACE_NAME1);
+    checkNamespaceLink(org2.getName(), WORKSPACE_NAME2);
     try {
-      checkNamespaceLink(WORKSPACE_NAME4, suborgName1);
+      checkNamespaceLink(suborgName1, WORKSPACE_NAME4);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7925");
@@ -147,10 +146,10 @@ public class AddWorkspaceToOrganizationTest {
     assertFalse(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_NAME4));
 
     // check that the Namespace link in workspace details correct
-    checkNamespaceLink(WORKSPACE_NAME3, org2.getName());
+    checkNamespaceLink(org2.getName(), WORKSPACE_NAME3);
 
     try {
-      checkNamespaceLink(WORKSPACE_NAME5, suborgName2);
+      checkNamespaceLink(suborgName2, WORKSPACE_NAME5);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7925");
@@ -169,11 +168,12 @@ public class AddWorkspaceToOrganizationTest {
     newWorkspace.typeWorkspaceName(workspaceName);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
 
-    // TODO uncomment after https://github.com/eclipse/che/issues/8497 issue is fixed
-    // workspaceDetails.waitToolbarTitleName(workspaceName);
-
-    // timeout for workspaces list page to open
-    WaitUtils.sleepQuietly(2);
+    try {
+      workspaceDetails.waitToolbarTitleName(workspaceName);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8497");
+    }
   }
 
   private void checkNamespaceLink(String organizationName, String workspaceName) {
