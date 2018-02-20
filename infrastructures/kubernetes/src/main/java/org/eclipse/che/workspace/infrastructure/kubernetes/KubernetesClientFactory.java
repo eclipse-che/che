@@ -18,13 +18,17 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.utils.HttpClientUtils;
+import io.fabric8.kubernetes.client.utils.Utils;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import okhttp3.Authenticator;
+import okhttp3.ConnectionPool;
 import okhttp3.Credentials;
+import okhttp3.Dispatcher;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -43,7 +47,13 @@ public class KubernetesClientFactory {
 
   private static final Logger LOG = LoggerFactory.getLogger(KubernetesClientFactory.class);
 
+  /** {@link OkHttpClient} instance shared by all Kubernetes clients. */
   private OkHttpClient httpClient;
+
+  /**
+   * Default Kubernetes {@link Config} that will be the base configuration to create per-workspace
+   * configurations.
+   */
   private Config defaultConfig;
 
   @Inject
@@ -56,15 +66,6 @@ public class KubernetesClientFactory {
     this.defaultConfig =
         buildDefaultConfig(masterUrl, username, password, oauthToken, doTrustCerts);
     this.httpClient = HttpClientUtils.createHttpClient(defaultConfig);
-  }
-
-  /**
-   * Builds the Kubernetes {@link Config} object based on a default {@link Config} object and an
-   * optional workspace Id.
-   */
-  public Config buildConfig(Config defaultConfig, @Nullable String workspaceId)
-      throws InfrastructureException {
-    return defaultConfig;
   }
 
   /**
@@ -132,7 +133,35 @@ public class KubernetesClientFactory {
   }
 
   /**
-   * Creates instance of {@link KubernetesClient}.
+   * Builds the Kubernetes {@link Config} object based on a default {@link Config} object and an
+   * optional workspace Id.
+   */
+  protected Config buildConfig(Config defaultConfig, @Nullable String workspaceId)
+      throws InfrastructureException {
+    return defaultConfig;
+  }
+
+  protected void doCleanup() {
+    ConnectionPool connectionPool = httpClient.connectionPool();
+    Dispatcher dispatcher = httpClient.dispatcher();
+    ExecutorService executorService =
+        httpClient.dispatcher() != null ? httpClient.dispatcher().executorService() : null;
+
+    if (dispatcher != null) {
+      dispatcher.cancelAll();
+    }
+
+    if (connectionPool != null) {
+      connectionPool.evictAll();
+    }
+
+    Utils.shutdownExecutorService(executorService);
+  }
+
+  /**
+   * Creates instance of {@link KubernetesClient} that uses an {@link OkHttpClient} instance derived
+   * from the shared {@code httpClient} instance in which interceptors are overriden to authenticate
+   * with the credentials (user/password or Oauth token) contained in the {@code config} parameter.
    *
    * @throws InfrastructureException if any error occurs on client instance creation.
    */
@@ -179,14 +208,7 @@ public class KubernetesClientFactory {
   @PreDestroy
   private void cleanup() {
     try {
-      if (httpClient.connectionPool() != null) {
-        httpClient.connectionPool().evictAll();
-      }
-      if (httpClient.dispatcher() != null
-          && httpClient.dispatcher().executorService() != null
-          && !httpClient.dispatcher().executorService().isShutdown()) {
-        httpClient.dispatcher().executorService().shutdown();
-      }
+      doCleanup();
     } catch (RuntimeException ex) {
       LOG.error(ex.getMessage());
     }

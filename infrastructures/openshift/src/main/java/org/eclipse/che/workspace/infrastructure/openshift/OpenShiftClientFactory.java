@@ -91,7 +91,12 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
   }
 
   /**
-   * Creates instance of {@link OpenShiftClient}.
+   * Creates an instance of {@link OpenShiftClient}. </br> <strong>Important note: </strong> In some
+   * use-cases involving web sockets, the Openshift client may introduce connection leaks. That's
+   * why this method should only be used for API calls that are specific to Openshift and thus not
+   * available in the `KubernetesClient` class: mainly route-related calls and project-related
+   * calls. For all other Kubernetes standard calls, just use the `create()` method to get a
+   * Kubernetes client.
    *
    * @throws InfrastructureException if any error occurs on client instance creation.
    */
@@ -101,7 +106,12 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
   }
 
   /**
-   * Creates instance of {@link OpenShiftClient}.
+   * Creates an instance of {@link OpenShiftClient}. </br> <strong>Important note: </strong> In some
+   * use-cases involving web sockets, the Openshift client may introduce connection leaks. That's
+   * why this method should only be used for API calls that are specific to Openshift and thus not
+   * available in the `KubernetesClient` class: mainly route-related calls and project-related
+   * calls. For all other Kubernetes standard calls, just use the `create()` method to get a
+   * Kubernetes client.
    *
    * @throws InfrastructureException if any error occurs on client instance creation.
    */
@@ -111,16 +121,8 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
 
   @PreDestroy
   private void cleanup() {
-    OkHttpClient httpClient = getHttpClient();
     try {
-      if (httpClient.connectionPool() != null) {
-        httpClient.connectionPool().evictAll();
-      }
-      if (httpClient.dispatcher() != null
-          && httpClient.dispatcher().executorService() != null
-          && !httpClient.dispatcher().executorService().isShutdown()) {
-        httpClient.dispatcher().executorService().shutdown();
-      }
+      doCleanup();
     } catch (RuntimeException ex) {
       LOG.error(ex.getMessage());
     }
