@@ -463,9 +463,6 @@ public class SeleniumWebDriverHelper {
       return seleniumWebDriver.findElement(elementLocator).isDisplayed();
     } catch (NoSuchElementException ex) {
       return false;
-    } catch (Exception ex) {
-      LOG.info("Unhandled {} in \"isVisible()\" method", ex.getClass().getSimpleName());
-      return false;
     }
   }
 
@@ -479,9 +476,6 @@ public class SeleniumWebDriverHelper {
     try {
       return webElement.isDisplayed();
     } catch (NoSuchElementException ex) {
-      return false;
-    } catch (Exception ex) {
-      LOG.info("Unhandled {} in \"isVisible()\" method", ex.getClass().getSimpleName());
       return false;
     }
   }
