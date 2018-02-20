@@ -36,14 +36,14 @@ import org.testng.annotations.Test;
 
 public class AddWorkspaceToOrganizationTest {
 
-  private static final String WORKSPACE_NAME1 = generate("workspace", 4);
-  private static final String WORKSPACE_NAME2 = generate("workspace", 4);
-  private static final String WORKSPACE_NAME3 = generate("workspace", 4);
-  private static final String WORKSPACE_NAME4 = generate("workspace", 4);
-  private static final String WORKSPACE_NAME5 = generate("workspace", 4);
+  private static final String WORKSPACE_FOR_ADMIN_1 = generate("workspace", 4);
+  private static final String WORKSPACE_FOR_ADMIN_2 = generate("workspace", 4);
+  private static final String WORKSPACE_FOR_ADMIN_3 = generate("workspace", 4);
+  private static final String WORKSPACE_FOR_MEMBER_1 = generate("workspace", 4);
+  private static final String WORKSPACE_FOR_MEMBER_2 = generate("workspace", 4);
 
-  private String suborgName1;
-  private String suborgName2;
+  private String suborgForAdminName;
+  private String suborgForMemberName;
 
   @InjectTestOrganization(prefix = "org1")
   private TestOrganization org1;
@@ -75,8 +75,8 @@ public class AddWorkspaceToOrganizationTest {
     suborg1.addAdmin(adminTestUser.getId());
     suborg2.addMember(testUser.getId());
 
-    suborgName1 = org1.getName() + "/" + suborg1.getName();
-    suborgName2 = org2.getName() + "/" + suborg2.getName();
+    suborgForAdminName = org1.getName() + "/" + suborg1.getName();
+    suborgForMemberName = org2.getName() + "/" + suborg2.getName();
 
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
   }
@@ -92,26 +92,26 @@ public class AddWorkspaceToOrganizationTest {
     organizationListPage.waitOrganizationInList(org2.getName());
 
     // create workspace for each organizations
-    createWorkspace(org1.getName(), WORKSPACE_NAME1);
-    createWorkspace(org2.getName(), WORKSPACE_NAME2);
+    createWorkspace(org1.getName(), WORKSPACE_FOR_ADMIN_1);
+    createWorkspace(org2.getName(), WORKSPACE_FOR_ADMIN_2);
 
     // create workspace for suborganization
-    createWorkspace(suborgName1, WORKSPACE_NAME4);
+    createWorkspace(suborgForAdminName, WORKSPACE_FOR_ADMIN_3);
 
     // check that workspaces names exist in the Workspaces list and the Recent list
     dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.waitWorkspaceIsPresent(org1.getName(), WORKSPACE_NAME1);
-    workspaces.waitWorkspaceIsPresent(org2.getName(), WORKSPACE_NAME2);
-    workspaces.waitWorkspaceIsPresent(suborgName1, WORKSPACE_NAME4);
-    assertTrue(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_NAME1));
-    assertTrue(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_NAME2));
-    assertTrue(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_NAME4));
+    workspaces.waitWorkspaceIsPresent(org1.getName(), WORKSPACE_FOR_ADMIN_1);
+    workspaces.waitWorkspaceIsPresent(org2.getName(), WORKSPACE_FOR_ADMIN_2);
+    workspaces.waitWorkspaceIsPresent(suborgForAdminName, WORKSPACE_FOR_ADMIN_3);
+    assertTrue(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_FOR_ADMIN_1));
+    assertTrue(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_FOR_ADMIN_2));
+    assertTrue(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_FOR_ADMIN_3));
 
     // check that the Namespace link in workspace details correct
-    checkNamespaceLink(org1.getName(), WORKSPACE_NAME1);
-    checkNamespaceLink(org2.getName(), WORKSPACE_NAME2);
+    checkNamespaceLink(org1.getName(), WORKSPACE_FOR_ADMIN_1);
+    checkNamespaceLink(org2.getName(), WORKSPACE_FOR_ADMIN_2);
     try {
-      checkNamespaceLink(suborgName1, WORKSPACE_NAME4);
+      checkNamespaceLink(suborgForAdminName, WORKSPACE_FOR_ADMIN_3);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7925");
@@ -131,25 +131,25 @@ public class AddWorkspaceToOrganizationTest {
     organizationListPage.waitOrganizationInList(org2.getName());
 
     // create a workspace for org2 and its suborganization
-    createWorkspace(org2.getName(), WORKSPACE_NAME3);
-    createWorkspace(suborgName2, WORKSPACE_NAME5);
+    createWorkspace(org2.getName(), WORKSPACE_FOR_MEMBER_1);
+    createWorkspace(suborgForMemberName, WORKSPACE_FOR_MEMBER_2);
 
     // check that workspace name exists in the Workspaces list and the Recent list
     dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.waitWorkspaceIsPresent(org2.getName(), WORKSPACE_NAME3);
-    workspaces.waitWorkspaceIsPresent(suborgName2, WORKSPACE_NAME5);
-    assertTrue(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_NAME3));
-    assertTrue(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_NAME5));
+    workspaces.waitWorkspaceIsPresent(org2.getName(), WORKSPACE_FOR_MEMBER_1);
+    workspaces.waitWorkspaceIsPresent(suborgForMemberName, WORKSPACE_FOR_MEMBER_2);
+    assertTrue(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_FOR_MEMBER_1));
+    assertTrue(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_FOR_MEMBER_2));
 
     // check that workspaces names of other users are not exist in the Recent list
-    assertFalse(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_NAME1));
-    assertFalse(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_NAME4));
+    assertFalse(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_FOR_ADMIN_1));
+    assertFalse(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_FOR_ADMIN_3));
 
     // check that the Namespace link in workspace details correct
-    checkNamespaceLink(org2.getName(), WORKSPACE_NAME3);
+    checkNamespaceLink(org2.getName(), WORKSPACE_FOR_MEMBER_1);
 
     try {
-      checkNamespaceLink(suborgName2, WORKSPACE_NAME5);
+      checkNamespaceLink(suborgForMemberName, WORKSPACE_FOR_MEMBER_2);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7925");
