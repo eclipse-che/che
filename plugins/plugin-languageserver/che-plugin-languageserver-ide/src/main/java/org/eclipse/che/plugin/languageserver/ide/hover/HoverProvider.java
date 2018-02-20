@@ -101,7 +101,6 @@ public class HoverProvider implements OrionHoverHandler {
         // plain markdown text
         contents.add(dto.getLeft());
       } else {
-        contents.add(dto.getRight().getLanguage());
         contents.add(dto.getRight().getValue());
       }
     }
