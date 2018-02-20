@@ -12,8 +12,8 @@
 package org.eclipse.che.ide.ext.java.client.organizeimports;
 
 import com.google.inject.ImplementedBy;
+import java.util.List;
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
 
 /**
  * The visual part of Organize Imports wizard that has an ability to resolve import conflicts.
@@ -23,8 +23,12 @@ import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
 @ImplementedBy(OrganizeImportsViewImpl.class)
 interface OrganizeImportsView extends View<OrganizeImportsView.ActionDelegate> {
 
-  /** Show Organize Imports panel with the list of conflict imports. */
-  void show(ConflictImportDTO match);
+  /**
+   * Show Organize Imports panel with the list of conflict imports.
+   *
+   * @param matches
+   */
+  void show(List<String> matches);
 
   /** Hide Organize Imports panel. */
   void close();
@@ -42,9 +46,9 @@ interface OrganizeImportsView extends View<OrganizeImportsView.ActionDelegate> {
   /**
    * Show new view page for choosing necessary import.
    *
-   * @param match conflict object with possible options to choose
+   * @param matches conflict object with possible options to choose
    */
-  void changePage(ConflictImportDTO match);
+  void changePage(List<String> matches);
 
   /**
    * Setts enable scope of the Finish button.
