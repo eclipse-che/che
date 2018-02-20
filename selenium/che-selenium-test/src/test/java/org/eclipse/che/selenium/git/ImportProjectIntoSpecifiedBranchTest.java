@@ -19,6 +19,7 @@ import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ImportProjectFromLocation;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -58,6 +59,7 @@ public class ImportProjectIntoSpecifiedBranchTest {
   @Inject private ImportProjectFromLocation importProject;
   @Inject private TestGitHubServiceClient gitHubClientService;
   @Inject private TestProjectServiceClient projectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -81,6 +83,7 @@ public class ImportProjectIntoSpecifiedBranchTest {
     projectExplorer.waitProjectExplorer();
     performImportIntoBranch(
         "git@github.com:" + gitHubUsername + "/Repo_For_Test.git", PROJECT_NAME, BRANCH_1);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.selectVisibleItem(PROJECT_NAME);
     loader.waitOnClosed();

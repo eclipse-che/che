@@ -768,8 +768,18 @@ public class CodenvyEditor {
     return autocompleteContainer.getText();
   }
 
+  /** Scroll autocomplete form to the bottom */
+  public void scrollAutocompleteFormToBottom() {
+    redrawDriverWait
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(Locators.AUTOCOMPLETE_CONTAINER + "/li[2]")))
+        .sendKeys(Keys.END);
+  }
+
   /**
-   * Go to the item in autocomplete proposals list and press enter key.
+   * Go to the item in autocomplete proposals list and press enter key. The item parameter mustn't
+   * contain highlighted part of the proposal element.
    *
    * @param item item in the autocomplete proposals list.
    */

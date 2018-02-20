@@ -18,16 +18,12 @@ import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.re
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.annotation.PostConstruct;
-
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.impl.RegisteredProject;
 import org.eclipse.che.api.project.server.notification.PreProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectInitializedEvent;

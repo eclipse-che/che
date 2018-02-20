@@ -8,18 +8,16 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.ext.java.client.navigation.service;
+package org.eclipse.che.ide.editor.orion.client.signature;
 
-import java.util.List;
-import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
+import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyModeOverlay;
 
 /**
- * Service for the operations of navigation.
+ * Factory for creating Signature widget.
  *
- * @author Evgen Vidolob
  * @author Valeriy Svydenko
  */
-public interface JavaNavigationService {
-  Promise<List<JavaProject>> getProjectsAndPackages(boolean includePackage);
+public interface SignatureWidgetFactory {
+  SignatureWidget create(OrionEditorWidget editor, OrionKeyModeOverlay assistMode);
 }

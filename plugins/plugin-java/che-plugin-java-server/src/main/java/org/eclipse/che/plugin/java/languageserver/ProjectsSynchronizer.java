@@ -12,7 +12,9 @@ package org.eclipse.che.plugin.java.languageserver;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -26,10 +28,6 @@ import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * Synchronizes che and eclipse projects.
