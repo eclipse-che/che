@@ -25,7 +25,6 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.EXTERNAL_LIBRARY_ENT
 import static org.eclipse.che.ide.ext.java.shared.Constants.FILE_STRUCTURE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.GET_JAVA_CORE_OPTIONS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.IMPLEMENTERS;
-import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.eclipse.che.ide.ext.java.shared.Constants.ORGANIZE_IMPORTS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.RECOMPUTE_POM_DIAGNOSTICS;
 import static org.eclipse.che.ide.ext.java.shared.Constants.REIMPORT_MAVEN_PROJECTS;
@@ -662,13 +661,14 @@ public class JavaLanguageServerExtensionService {
           REIMPORT_MAVEN_PROJECTS_REQUEST_TIMEOUT,
           TimeUnit.MILLISECONDS);
     } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
       return new JobResult(Severity.ERROR, 1, e.getMessage());
     } finally {
-      updatePlainJavaProjectsWithProblems(updateWorkspaceParameters.getAddedProjectsUri());
+      updateProjectsWithProblems(updateWorkspaceParameters.getAddedProjectsUri());
     }
   }
 
-  private void updatePlainJavaProjectsWithProblems(List<String> addedProjectsUri) {
+  private void updateProjectsWithProblems(List<String> addedProjectsUri) {
     for (String projectUri : addedProjectsUri) {
       final String projectPath = removePrefixUri(projectUri);
 
@@ -676,8 +676,7 @@ public class JavaLanguageServerExtensionService {
           .get(projectPath)
           .ifPresent(
               projectConfig -> {
-                if (projectConfig.getType().equals(JAVAC)
-                    && !projectConfig.getProblems().isEmpty()) {
+                if (!projectConfig.getProblems().isEmpty()) {
                   try {
                     projectManager.update(projectConfig);
                     eventService.publish(new ProjectUpdatedEvent(projectPath));
@@ -714,6 +713,18 @@ public class JavaLanguageServerExtensionService {
     Type type = new TypeToken<Boolean>() {}.getType();
     return doGetOne(
         Commands.UPDATE_JAVA_CORE_OPTIONS_СOMMAND, singletonList(javaCoreOptions), type);
+  }
+
+  /**
+   * Returns all nested projects starting from the given path.
+   *
+   * @param rootPath the root project path
+   */
+  public List<String> getMavenProjects(String rootPath) {
+    Type type = new TypeToken<ArrayList<String>>() {}.getType();
+    List<String> projectsUri =
+        doGetList(Commands.GET_MAVEN_PROJECTS_COMMAND, singletonList(prefixURI(rootPath)), type);
+    return removePrefixUri(projectsUri);
   }
 
   private <T, P> List<T> doGetList(String command, P params, Type type) {
