@@ -52,7 +52,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
@@ -867,23 +866,30 @@ public class ProjectExplorer {
    */
   public void expandPathInProjectExplorer(String path) {
     List<String> itemsPaths = splitPathOnSubitems(path);
-    ListIterator<String> iterator = itemsPaths.listIterator();
 
-    while (iterator.hasNext()) {
-      String currentItem = iterator.next();
-      if (!iterator.hasNext()) {
-        waitItem(currentItem);
-        openItemByPath(currentItem);
-        break;
+    for (int i = 0; i < itemsPaths.size(); i++) {
+      String currentItem = itemsPaths.get(i);
+      int nextItemIndex = i + 1;
+
+      // don't open if next item has already been visible
+      if (nextItemIndex < itemsPaths.size() && isItemVisible(itemsPaths.get(nextItemIndex))) {
+        continue;
       }
 
-      By nextItemLocator =
-          By.xpath(format(PROJECT_EXPORER_ITEM_TEMPLATE, itemsPaths.get(iterator.nextIndex())));
-      if (!seleniumWebDriverHelper.isVisible(nextItemLocator)) {
-        waitItem(currentItem);
-        openItemByPath(currentItem);
-      }
+      waitItem(currentItem);
+      openItemByPath(currentItem);
     }
+  }
+
+  /**
+   * Checks without wait a visibility state of the item with specified {@code itemPath}
+   *
+   * @param itemPath Path in format "RootFolder/src/main/java/org/package/ExampleClass.java".
+   * @return state of visibility
+   */
+  public boolean isItemVisible(String itemPath) {
+    return seleniumWebDriverHelper.isVisible(
+        By.xpath(format(PROJECT_EXPORER_ITEM_TEMPLATE, itemPath)));
   }
 
   /**
