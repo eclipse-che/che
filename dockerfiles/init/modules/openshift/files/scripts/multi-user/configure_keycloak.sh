@@ -19,11 +19,14 @@ fi
 
 CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD=${DEFAULT_CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD:-${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}}
 
+IMAGE_KEYCLOAK_UTIL=${IMAGE_KEYCLOAK_UTIL:-"eclipse/che-keycloak-util:nightly"}
+
 echo "[CHE] Configuring Keycloak realm, client and user..."
 
 cat "${COMMAND_DIR}"/keycloak/config/keycloak-config-pod-deployment.yaml | sed "s/\${CHE_HOST}/${CHE_HOST}/" | \
                                                            sed "s/\${KC_HOST}/${KC_HOST}/" | \
                                                            sed "s/\${HTTP_PROTOCOL}/${HTTP_PROTOCOL}/" | \
+                                                           sed "s#\${IMAGE_KEYCLOAK_UTIL}#${IMAGE_KEYCLOAK_UTIL}#" | \
                                                            sed "s/\${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}/${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}/" | \
                                                            oc apply -f -
 

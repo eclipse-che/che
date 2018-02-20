@@ -22,7 +22,7 @@ spec:
         value: "${KC_HOST}"
       - name: CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD
         value: "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}"
-      image: eclipse/che-keycloak-util
+      image: "${IMAGE_KEYCLOAK_UTIL}"
       name: keycloak-util
       imagePullPolicy: Always
     restartPolicy: Never
