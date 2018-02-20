@@ -865,7 +865,7 @@ public class ProjectExplorer {
    * @param path path for expand
    */
   public void expandPathInProjectExplorer(String path) {
-    List<String> itemsPaths = splitPathWithReplaceDotsToSlashes(path);
+    List<String> itemsPaths = splitJavaProjectPath(path);
 
     for (int i = 0; i < itemsPaths.size(); i++) {
       String currentItem = itemsPaths.get(i);
@@ -893,26 +893,6 @@ public class ProjectExplorer {
   }
 
   /**
-   * Parses {@code path} and makes full path for each element which separated by "/". Items like
-   * 'org.package.sub' will be treated as 'org/package/sub'.
-   *
-   * @param path Path in format "RootFolder/src/main/java/org.package.sub".
-   * @return Paths in format ["RootFolder", "RootFolder/src", "RootFolder/src/main",
-   *     "RootFolder/src/main/java", "RootFolder/src/main/java/org/package/sub"]
-   */
-  private List<String> splitPathWithReplaceDotsToSlashes(String path) {
-    Path fullPath = Paths.get(path);
-    List<String> itemsPaths = new ArrayList<>();
-
-    for (int i = 0; i < fullPath.getNameCount(); i++) {
-      String currentItemPath = fullPath.subpath(0, i + 1).toString().replace(".", "/");
-      itemsPaths.add(i, currentItemPath);
-    }
-
-    return itemsPaths;
-  }
-
-  /**
    * Expands specified path in project explorer and open a file Path given in format like like
    * below: TestProject/src/main/java/org.eclipse.che.examples
    *
@@ -925,6 +905,26 @@ public class ProjectExplorer {
     waitItem(pathToFile);
     openItemByPath(pathToFile);
     editor.waitActive();
+  }
+
+  /**
+   * Parses {@code path} and makes full path for each element which separated by "/". Items like
+   * 'org.package.sub' will be treated as 'org/package/sub'.
+   *
+   * @param path Path in format "RootFolder/src/main/java/org.package.sub".
+   * @return Paths in format ["RootFolder", "RootFolder/src", "RootFolder/src/main",
+   *     "RootFolder/src/main/java", "RootFolder/src/main/java/org/package/sub"]
+   */
+  private List<String> splitJavaProjectPath(String path) {
+    Path fullPath = Paths.get(path);
+    List<String> itemsPaths = new ArrayList<>();
+
+    for (int i = 0; i < fullPath.getNameCount(); i++) {
+      String currentItemPath = fullPath.subpath(0, i + 1).toString().replace(".", "/");
+      itemsPaths.add(i, currentItemPath);
+    }
+
+    return itemsPaths;
   }
 
   /**
