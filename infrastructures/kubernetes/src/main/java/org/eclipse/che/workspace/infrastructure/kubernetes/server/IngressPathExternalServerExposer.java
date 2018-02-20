@@ -30,7 +30,21 @@ import org.slf4j.LoggerFactory;
  * Each external server is exposed with a unique path prefix.
  *
  * <p>This strategy imposes limitation on user-developed applications. <br>
- * It should only be used for local development with a single IP adress
+ * It should only be used for local development with a single IP address
+ *
+ * <pre>
+ *   Path-Based Ingress exposing service's port:
+ * Ingress
+ * ...
+ * spec:
+ *   rules:
+ *     - http:
+ *         paths:
+ *           - path: service123/webapp        ---->> Service.metadata.name + / + Service.spec.ports[0].name
+ *             backend:
+ *               serviceName: service123      ---->> Service.metadata.name
+ *               servicePort: [8080|web-app]  ---->> Service.spec.ports[0].[port|name]
+ * </pre>
  *
  * @author Sergii Leshchenko
  * @author Guy Daich

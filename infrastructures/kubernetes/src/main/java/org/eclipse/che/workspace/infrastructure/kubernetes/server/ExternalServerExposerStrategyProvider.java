@@ -31,7 +31,7 @@ public class ExternalServerExposerStrategyProvider
 
   @Inject
   public ExternalServerExposerStrategyProvider(
-      @Named("che.infra.kubernetes.server.strategy") String strategy,
+      @Named("che.infra.kubernetes.server_strategy") String strategy,
       Map<String, ExternalServerExposerStrategy> strategies) {
     final ExternalServerExposerStrategy externalServerExposerStrategy = strategies.get(strategy);
     if (externalServerExposerStrategy != null) {

@@ -88,35 +88,6 @@ import org.slf4j.LoggerFactory;
  * Then, a server exposer strategy is used to expose one of the service's ports, to outside of the
  * cluster. Currently, Host-Based and Path-Based Ingresses can be used to expose service ports.
  *
- * <pre>
- *   Path-Based Ingress exposing service's port:
- * Ingress
- * ...
- * spec:
- *   rules:
- *     - http:
- *         paths:
- *           - path: service123/webapp        ---->> Service.metadata.name + / + Service.spec.ports[0].name
- *             backend:
- *               serviceName: service123      ---->> Service.metadata.name
- *               servicePort: [8080|web-app]  ---->> Service.spec.ports[0].[port|name]
- * </pre>
- *
- * <pre>
- *   Host-Based Ingress exposing service's port:
- * Ingress
- * ...
- * spec:
- *   rules:
- *     - host: service123-webapp.che-domain   ---->> Service.metadata.name + - + Service.spec.ports[0].name
- *     - http:
- *         paths:
- *           - path: /
- *             backend:
- *               serviceName: service123      ---->> Service.metadata.name
- *               servicePort: [8080|web-app]  ---->> Service.spec.ports[0].[port|name]
- * </pre>
- *
  * <p>For accessing publicly accessible server user will use ingress host or its load balancer IP.
  * For accessing workspace-wide accessible server user will use service name. Information about
  * servers that are exposed by ingress and/or service are stored in annotations of a ingress or

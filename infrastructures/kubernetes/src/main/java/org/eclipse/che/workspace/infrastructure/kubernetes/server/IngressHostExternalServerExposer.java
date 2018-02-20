@@ -29,6 +29,21 @@ import org.slf4j.LoggerFactory;
  * <p>This strategy uses different Ingress host entries <br>
  * Each external server is exposed with a unique subdomain of CHE_DOMAIN.
  *
+ * <pre>
+ *   Host-Based Ingress exposing service's port:
+ * Ingress
+ * ...
+ * spec:
+ *   rules:
+ *     - host: service123-webapp.che-domain   ---->> Service.metadata.name + - + Service.spec.ports[0].name + . + CHE_DOMAIN
+ *     - http:
+ *         paths:
+ *           - path: /
+ *             backend:
+ *               serviceName: service123      ---->> Service.metadata.name
+ *               servicePort: [8080|web-app]  ---->> Service.spec.ports[0].[port|name]
+ * </pre>
+ *
  * @author Sergii Leshchenko
  * @author Guy Daich
  */

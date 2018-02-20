@@ -15,9 +15,24 @@ import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
-/** @author Guy Daich */
+/**
+ * Defines a basic set of operations for exposing external servers.
+ *
+ * @author Guy Daich
+ */
 public interface ExternalServerExposerStrategy<T extends KubernetesEnvironment> {
 
+  /**
+   * Exposes service ports on given service externally (outside kubernetes cluster). Each exposed
+   * service port is associated with a specific Server configuration. Server configuration should be
+   * encoded in the exposing object's annotations, to be used by {@link KubernetesServerResolver}.
+   *
+   * @param k8sEnv Kubernetes environment
+   * @param machineName machine containing servers
+   * @param serviceName service associated with machine, mapping all machine server ports
+   * @param portToServicePort specific service ports to be exposed externally
+   * @param externalServers server configs of servers to be exposed externally
+   */
   public void exposeExternalServers(
       T k8sEnv,
       String machineName,

@@ -13,9 +13,7 @@ package org.eclipse.che.workspace.infrastructure.openshift.server;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.Route;
-import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategy;
@@ -88,21 +86,12 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 public class OpenShiftServerExposer extends KubernetesServerExposer<OpenShiftEnvironment> {
 
   public OpenShiftServerExposer(
-      ExternalServerExposerStrategy OpenshiftExternalServerExposerStrategy,
+      ExternalServerExposerStrategy<OpenShiftEnvironment> openshiftExternalServerExposerStrategy,
       String machineName,
       Pod pod,
       Container container,
       OpenShiftEnvironment kubernetesEnvironment) {
     super(
-        OpenshiftExternalServerExposerStrategy, machineName, pod, container, kubernetesEnvironment);
-  }
-
-  @Override
-  protected void exposeExternalServers(
-      String serviceName,
-      Map<String, ServicePort> portToServicePort,
-      Map<String, ServerConfig> externalServers) {
-    kubernetesExternalServerExposerStrategy.exposeExternalServers(
-        kubernetesEnvironment, machineName, serviceName, portToServicePort, externalServers);
+        openshiftExternalServerExposerStrategy, machineName, pod, container, kubernetesEnvironment);
   }
 }
