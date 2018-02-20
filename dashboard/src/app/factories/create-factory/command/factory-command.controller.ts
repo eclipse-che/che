@@ -17,6 +17,9 @@
  * @author Florent Benoit
  */
 export class FactoryCommandController {
+
+  static $inject = ['$mdDialog'];
+
   private $mdDialog: ng.material.IDialogService;
   private factoryObject: any;
   private onChange: Function;
@@ -25,7 +28,6 @@ export class FactoryCommandController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;

@@ -20,6 +20,8 @@ import {CheBranding} from '../../../components/branding/che-branding.factory';
  */
 export class DiagnosticsRunningWorkspaceCheck {
 
+  static $inject = ['$q', 'lodash', 'cheWebsocket', 'cheWorkspace', '$resource', '$location', 'cheBranding'];
+
   /**
    * Q service for creating delayed promises.
    */
@@ -57,7 +59,6 @@ export class DiagnosticsRunningWorkspaceCheck {
 
   /**
    * Default constructor
-   * @ngInject for Dependency injection
    */
   constructor($q: ng.IQService, lodash: any, cheWebsocket: CheWebsocket, cheWorkspace: CheWorkspace,
               $resource: ng.resource.IResourceService, $location: ng.ILocationService, cheBranding: CheBranding) {

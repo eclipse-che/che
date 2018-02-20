@@ -16,11 +16,12 @@
  */
 export class RouteHistory {
 
+  static $inject = ['$rootScope', '$location'];
+
   history: string[];
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($rootScope: ng.IRootScopeService,
               $location: ng.ILocationService) {

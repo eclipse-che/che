@@ -23,6 +23,9 @@ import {CheWorkspace} from '../../../components/api/workspace/che-workspace.fact
  * @author Oleksii Kurinnyi
  */
 export class CreateWorkspaceSvc {
+
+  static $inject = ['$location', '$log', '$q', 'cheWorkspace', 'namespaceSelectorSvc', 'stackSelectorSvc', 'projectSourceSelectorService', 'cheNotification', 'confirmDialogService', '$document'];
+
   /**
    * Location service.
    */
@@ -72,7 +75,6 @@ export class CreateWorkspaceSvc {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($location: ng.ILocationService, $log: ng.ILogService, $q: ng.IQService, cheWorkspace: CheWorkspace, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, projectSourceSelectorService: ProjectSourceSelectorService, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService, $document: ng.IDocumentService) {
     this.$location = $location;

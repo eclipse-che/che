@@ -26,6 +26,9 @@ enum TEAM_EVENTS {
  * @author Ann Shumilova
  */
 export class CheTeamEventsManager implements che.api.ICheTeamEventsManager {
+
+  static $inject = ['cheAPI', 'cheJsonRpcApi', 'applicationNotifications', '$log', 'cheUser'];
+
   cheUser: any;
   cheJsonRpcMasterApi: CheJsonRpcMasterApi;
   $log: ng.ILogService;
@@ -37,7 +40,6 @@ export class CheTeamEventsManager implements che.api.ICheTeamEventsManager {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(cheAPI: CheAPI, cheJsonRpcApi: CheJsonRpcApi, applicationNotifications: any, $log: ng.ILogService, cheUser: any) {
     this.cheUser = cheUser;

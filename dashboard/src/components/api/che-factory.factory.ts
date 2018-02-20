@@ -30,6 +30,9 @@ const DEFAULT_MAX_ITEMS = 15;
  * @author Oleksii Orel
  */
 export class CheFactory {
+
+  static $inject = ['$resource', '$q', 'lodash', 'cheUser'];
+
   private $resource: ng.resource.IResourceService;
   private $q: ng.IQService;
   private lodash: any;
@@ -48,7 +51,6 @@ export class CheFactory {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($resource: ng.resource.IResourceService, $q: ng.IQService, lodash: any, cheUser: CheUser) {
     // keep resource

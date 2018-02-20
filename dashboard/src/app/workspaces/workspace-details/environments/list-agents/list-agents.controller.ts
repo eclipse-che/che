@@ -25,6 +25,8 @@ const DISABLED_AGENTS: Array<string> = ['org.eclipse.che.ws-agent',
                                         'com.codenvy.external_rsync'];
 
 export class ListAgentsController {
+  static $inject = ['cheAPI'];
+
   cheAgent: CheAgent;
 
   agents: string[];
@@ -35,7 +37,6 @@ export class ListAgentsController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(cheAPI: CheAPI) {
     this.cheAgent = cheAPI.getAgent();

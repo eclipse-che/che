@@ -25,6 +25,9 @@ interface IEnvironmentVariable {
  * @author Oleksii Orel
  */
 export class EnvVariablesController {
+
+  static $inject = ['$scope', '$mdDialog', 'confirmDialogService'];
+
   envVariableOrderBy = 'name';
 
   private $mdDialog: ng.material.IDialogService;
@@ -41,7 +44,6 @@ export class EnvVariablesController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope, $mdDialog: ng.material.IDialogService, confirmDialogService: ConfirmDialogService) {
     this.$mdDialog = $mdDialog;

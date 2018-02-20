@@ -20,6 +20,9 @@ import {AddImportProjectService} from '../add-import-project.service';
  * @author Oleksii Kurinnyi
  */
 export class ImportGitProjectController {
+
+  static $inject = ['$scope', 'importGitProjectService', 'addImportProjectService'];
+
   /**
    * Import Git project service.
    */
@@ -39,7 +42,6 @@ export class ImportGitProjectController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope, importGitProjectService: ImportGitProjectService, addImportProjectService: AddImportProjectService) {
     this.importGitProjectService = importGitProjectService;

@@ -16,6 +16,9 @@
  * @author Oleksii Orel
  */
 export class ChePreferences {
+
+  static $inject = ['$resource', '$http', '$window'];
+
   private $window: ng.IWindowService;
   private $resource: ng.resource.IResourceService;
   private $http: ng.IHttpService;
@@ -25,7 +28,6 @@ export class ChePreferences {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($resource: ng.resource.IResourceService,
               $http: ng.IHttpService,

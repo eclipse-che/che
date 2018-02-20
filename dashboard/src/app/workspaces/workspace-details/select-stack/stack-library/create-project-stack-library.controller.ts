@@ -18,6 +18,8 @@ import {CheStack} from '../../../../../components/api/che-stack.factory';
  */
 export class CreateProjectStackLibraryController {
 
+  static $inject = ['$scope', 'cheStack', 'lodash'];
+
   private $scope: ng.IScope;
   private lodash: any;
   private tabName: string;
@@ -28,7 +30,6 @@ export class CreateProjectStackLibraryController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope,
               cheStack: CheStack,

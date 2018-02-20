@@ -18,6 +18,9 @@ import {OrganizationsPermissionService} from '../../organizations-permission.ser
  * @author Oleksii Orel
  */
 export class OrganizationsItemController {
+
+  static $inject = ['$location', 'cheOrganization', 'confirmDialogService', 'cheNotification', 'organizationsPermissionService', 'chePermissions', 'resourcesService'];
+
   /**
    * Service for displaying dialogs.
    */
@@ -57,9 +60,9 @@ export class OrganizationsItemController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, cheOrganization: che.api.ICheOrganization, confirmDialogService: any, cheNotification: any,  organizationsPermissionService: OrganizationsPermissionService, chePermissions: che.api.IChePermissions, resourcesService: che.service.IResourcesService) {
+  constructor($location: ng.ILocationService, cheOrganization: che.api.ICheOrganization, confirmDialogService: any, cheNotification: any,
+      organizationsPermissionService: OrganizationsPermissionService, chePermissions: che.api.IChePermissions, resourcesService: che.service.IResourcesService) {
     this.$location = $location;
     this.confirmDialogService = confirmDialogService;
     this.cheOrganization = cheOrganization;

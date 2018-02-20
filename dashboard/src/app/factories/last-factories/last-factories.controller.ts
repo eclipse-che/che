@@ -19,16 +19,17 @@ import {CheFactory} from '../../../components/api/che-factory.factory';
  */
 export class LastFactoriesController {
 
+
+  static $inject = ['cheFactory'];
+
   private cheFactory: CheFactory;
   private factories: Array<che.IFactory>;
   private factoriesOrderBy: string;
   private maxItems: number;
   private isLoading: boolean;
 
-
   /**
    * Default constructor
-   * @ngInject for Dependency injection
    */
   constructor(cheFactory: CheFactory) {
     this.cheFactory = cheFactory;

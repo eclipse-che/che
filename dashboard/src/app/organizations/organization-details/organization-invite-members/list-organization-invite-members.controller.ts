@@ -17,6 +17,9 @@
  * @author Oleksii Orel
  */
 export class ListOrganizationInviteMembersController {
+
+  static $inject = ['$mdDialog', 'lodash', 'cheUser', 'resourcesService'];
+
   /**
    * Lodash library.
    */
@@ -68,7 +71,6 @@ export class ListOrganizationInviteMembersController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: angular.material.IDialogService, lodash: any, cheUser: any, resourcesService: che.service.IResourcesService) {
     this.$mdDialog = $mdDialog;

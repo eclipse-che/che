@@ -24,6 +24,9 @@ const COMPOSE = 'compose';
  * @author Oleksii Kurinnyi
  */
 export class WorkspaceRecipeAuthoringController {
+
+  static $inject = ['$scope', '$timeout', 'cheBranding'];
+
   $timeout: ng.ITimeoutService;
 
   composeParser: ComposeParser;
@@ -49,7 +52,6 @@ export class WorkspaceRecipeAuthoringController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope, $timeout: ng.ITimeoutService, cheBranding: CheBranding) {
     this.$timeout = $timeout;

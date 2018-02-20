@@ -19,6 +19,8 @@ import {CheUIElementsInjectorService} from '../../components/service/injector/ch
  * @author Florent Benoit
  */
 class IdeSvc {
+  static $inject = ['$location', '$log', '$mdDialog', '$q', '$rootScope', '$sce', '$timeout', 'cheAPI', 'cheWorkspace', 'lodash', 'proxySettings', 'routeHistory', 'userDashboardConfig', 'cheUIElementsInjectorService'];
+
   $location: ng.ILocationService;
   $log: ng.ILogService;
   $mdDialog: ng.material.IDialogService;
@@ -42,7 +44,6 @@ class IdeSvc {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($location: ng.ILocationService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService,
               $q: ng.IQService, $rootScope: ng.IRootScopeService, $sce: ng.ISCEService, $timeout: ng.ITimeoutService,

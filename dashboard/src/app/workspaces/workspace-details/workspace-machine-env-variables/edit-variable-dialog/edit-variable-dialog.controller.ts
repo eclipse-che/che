@@ -17,6 +17,9 @@
  * @author Oleksii Orel
  */
 export class EditEnvVariableDialogController {
+
+  static $inject = ['$mdDialog'];
+
   private $mdDialog: ng.material.IDialogService;
   private popupTitle: string;
   private toEdit: string;
@@ -30,7 +33,6 @@ export class EditEnvVariableDialogController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;

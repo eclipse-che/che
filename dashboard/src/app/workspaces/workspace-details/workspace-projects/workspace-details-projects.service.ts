@@ -20,6 +20,9 @@ import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.f
  * @author Oleksii Kurinnyi
  */
 export class WorkspaceDetailsProjectsService {
+
+  static $inject = ['$log', '$q', 'cheAPI', 'cheNotification'];
+
   /**
    * Log service.
    */
@@ -51,7 +54,6 @@ export class WorkspaceDetailsProjectsService {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($log: ng.ILogService,
               $q: ng.IQService,

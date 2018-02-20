@@ -23,6 +23,8 @@ interface IEnvironmentVariable {
  * @author Oleksii Kurinnyi
  */
 export class ListEnvVariablesController {
+  static $inject = ['$mdDialog', 'lodash', 'confirmDialogService'];
+
   $mdDialog: ng.material.IDialogService;
   lodash: any;
 
@@ -44,7 +46,6 @@ export class ListEnvVariablesController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService,
               lodash: any,

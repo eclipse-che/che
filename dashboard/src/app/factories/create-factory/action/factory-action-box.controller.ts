@@ -17,6 +17,9 @@
  * @author Florent Benoit
  */
 export class FactoryActionBoxController {
+
+  static $inject = ['$mdDialog'];
+
   private $mdDialog: ng.material.IDialogService;
   private actions: Array<any>;
   private selectedAction: string;
@@ -27,7 +30,6 @@ export class FactoryActionBoxController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;

@@ -64,7 +64,7 @@ export class Register implements che.IRegisterService {
     return this;
   }
 
-  service(name: string, constructorFn: Function): che.IRegisterService {
+  service(name: string, constructorFn: any): che.IRegisterService {
     this.app.service(name, constructorFn);
     return this;
   }

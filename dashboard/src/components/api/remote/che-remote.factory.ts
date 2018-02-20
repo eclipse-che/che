@@ -21,13 +21,15 @@ import {CheJsonRpcApi} from '../json-rpc/che-json-rpc-api.factory';
  * @author Florent Benoit
  */
 export class CheRemote {
+
+  static $inject = ['$resource', '$q', 'cheJsonRpcApi'];
+
   private $resource: ng.resource.IResourceService;
   private $q: ng.IQService;
   private cheJsonRpcApi: CheJsonRpcApi;
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($resource: ng.resource.IResourceService, $q: ng.IQService, cheJsonRpcApi: CheJsonRpcApi) {
     this.$resource = $resource;

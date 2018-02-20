@@ -15,6 +15,9 @@
  * @author Florent Benoit
  */
 export class CheWorkspaceRamAllocationSliderController {
+
+  static $inject = ['$timeout', '$scope'];
+
   onChangeTimeoutPromise: ng.IPromise<any>;
   $timeout: ng.ITimeoutService;
   ngModel: number;
@@ -23,12 +26,8 @@ export class CheWorkspaceRamAllocationSliderController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor ($timeout: ng.ITimeoutService, $scope: ng.IScope) {
-    /* tslint:disable */
-    'ngInject';
-    /* tslint:enable */
     this.$timeout = $timeout;
 
     $scope.$watch(() => {

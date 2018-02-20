@@ -17,6 +17,8 @@
  */
 export class OrganizationsPermissionService {
 
+  static $inject = ['chePermissions', 'cheUser'];
+
   /**
    * Permissions API interaction.
    */
@@ -33,7 +35,6 @@ export class OrganizationsPermissionService {
   private fetchingMap: Map<string, ng.IPromise<any>> = new Map();
 
   /**
-   * @ngInject for Dependency injection
    */
   constructor(chePermissions: che.api.IChePermissions, cheUser: any) {
     this.chePermissions = chePermissions;

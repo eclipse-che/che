@@ -35,7 +35,6 @@ export class ChePopup {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor() {
     this.restrict = 'E';

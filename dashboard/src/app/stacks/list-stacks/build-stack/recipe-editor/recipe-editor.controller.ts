@@ -18,6 +18,8 @@ import {IRecipeEditorControllerScope} from './recipe-editor.directive';
  */
 export class RecipeEditorController implements IRecipeEditorControllerScope {
 
+  static $inject = ['$timeout', '$scope'];
+
   /**
    * Allows to pass a not valid recipe to onChange callback if `true`
    * Passed from parent controller.
@@ -76,7 +78,6 @@ export class RecipeEditorController implements IRecipeEditorControllerScope {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($timeout: ng.ITimeoutService,
               $scope: ng.IScope) {

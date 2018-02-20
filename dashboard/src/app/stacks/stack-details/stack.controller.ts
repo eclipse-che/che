@@ -25,7 +25,11 @@ const STACK_TEST_POPUP_ID: string = 'stackTestPopup';
  * @author Oleksii Orel
  */
 export class StackController {
-  GENERAL_SCOPE: string = 'general';
+
+  static $inject = ['$q', '$timeout', '$route', '$location', '$log', '$filter', 'cheStack', 'cheWorkspace', '$mdDialog', 'cheNotification',
+   '$document', 'cheUIElementsInjectorService', '$scope', '$window', 'importStackService', 'confirmDialogService'];
+
+   GENERAL_SCOPE: string = 'general';
   ADVANCED_SCOPE: string = 'advanced';
   $q: ng.IQService;
   $log: ng.ILogService;
@@ -63,9 +67,11 @@ export class StackController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $timeout: ng.ITimeoutService, $route: ng.route.IRoute, $location: ng.ILocationService, $log: ng.ILogService, $filter: ng.IFilterService, cheStack: CheStack, cheWorkspace: CheWorkspace, $mdDialog: ng.material.IDialogService, cheNotification: CheNotification, $document: ng.IDocumentService, cheUIElementsInjectorService: CheUIElementsInjectorService, $scope: ng.IScope, $window: ng.IWindowService, importStackService: ImportStackService, confirmDialogService: ConfirmDialogService) {
+  constructor($q: ng.IQService, $timeout: ng.ITimeoutService, $route: ng.route.IRoute, $location: ng.ILocationService,
+    $log: ng.ILogService, $filter: ng.IFilterService, cheStack: CheStack, cheWorkspace: CheWorkspace, $mdDialog: ng.material.IDialogService,
+     cheNotification: CheNotification, $document: ng.IDocumentService, cheUIElementsInjectorService: CheUIElementsInjectorService,
+     $scope: ng.IScope, $window: ng.IWindowService, importStackService: ImportStackService, confirmDialogService: ConfirmDialogService) {
     this.$q = $q;
     this.$timeout = $timeout;
     this.$location = $location;

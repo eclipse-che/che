@@ -17,6 +17,9 @@ import {CheProfile} from '../../components/api/che-profile.factory';
  * @author Anna Shumilova
  */
 export class ProfileController {
+
+  static $inject = ['cheKeycloak', 'cheProfile', '$window'];
+
   private profileUrl: string;
   private firstName: string;
   private lastName: string;
@@ -26,7 +29,6 @@ export class ProfileController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(cheKeycloak: CheKeycloak, cheProfile: CheProfile, $window: ng.IWindowService) {
     this.$window = $window;

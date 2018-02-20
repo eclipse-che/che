@@ -20,6 +20,9 @@ import {CheProject} from '../../../../../components/api/che-project';
  * @author Oleksii Orel
  */
 export class ProjectDetailsController {
+
+  static $inject = ['$scope', '$log', '$route', '$location', '$timeout', 'cheAPI', 'confirmDialogService', 'cheNotification', 'lodash'];
+
   private $log: ng.ILogService;
   private cheNotification: CheNotification;
   private cheAPI: CheAPI;
@@ -42,7 +45,6 @@ export class ProjectDetailsController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope,
               $log: ng.ILogService,

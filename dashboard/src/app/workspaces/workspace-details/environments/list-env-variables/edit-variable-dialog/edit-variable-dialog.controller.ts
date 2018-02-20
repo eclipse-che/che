@@ -18,6 +18,8 @@ import {ListEnvVariablesController} from '../list-env-variables.controller';
  * @author Oleksii Kurinnyi
  */
 export class EditVariableDialogController {
+  static $inject = ['$mdDialog'];
+
   $mdDialog: ng.material.IDialogService;
 
   popupTitle: string;
@@ -34,7 +36,6 @@ export class EditVariableDialogController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;

@@ -19,6 +19,9 @@ import {CheRemote} from '../../../../../components/api/remote/che-remote.factory
  * @author Florent Benoit
  */
 export class ExportWorkspaceDialogController {
+
+  static $inject = ['$q', '$filter', 'lodash', 'cheRemote', 'cheNotification', '$mdDialog', '$log', '$window', '$scope'];
+
   private $q: ng.IQService;
   private $filter: ng.IFilterService;
   private cheNotification: CheNotification;
@@ -40,10 +43,8 @@ export class ExportWorkspaceDialogController {
   private workspaceDetails: any;
   private exportInCloudSteps: string;
 
-
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($q: ng.IQService,
               $filter: ng.IFilterService,

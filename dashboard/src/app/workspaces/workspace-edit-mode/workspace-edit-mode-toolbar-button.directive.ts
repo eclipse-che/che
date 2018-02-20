@@ -44,7 +44,6 @@ export class WorkspaceEditModeToolbarButton {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor () {
     this.scope = {

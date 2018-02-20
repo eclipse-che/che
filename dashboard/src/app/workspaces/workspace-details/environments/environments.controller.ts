@@ -26,6 +26,9 @@ const MAX_WORKSPACE_RAM: number = 100 * MIN_WORKSPACE_RAM;
 const DEFAULT_WORKSPACE_RAM: number = 2 * MIN_WORKSPACE_RAM;
 
 export class WorkspaceEnvironmentsController {
+
+  static $inject = ['$q', '$scope', '$timeout', '$mdDialog', 'cheEnvironmentRegistry', '$log', 'cheNotification', 'cheRecipeService'];
+
   cheEnvironmentRegistry: CheEnvironmentRegistry;
   environmentManager: EnvironmentManager;
   $mdDialog: ng.material.IDialogService;
@@ -68,9 +71,9 @@ export class WorkspaceEnvironmentsController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
-  constructor($q: ng.IQService, $scope: ng.IScope, $timeout: ng.ITimeoutService, $mdDialog: ng.material.IDialogService, cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService, cheNotification: CheNotification, cheRecipeService: CheRecipeService) {
+  constructor($q: ng.IQService, $scope: ng.IScope, $timeout: ng.ITimeoutService, $mdDialog: ng.material.IDialogService,
+    cheEnvironmentRegistry: CheEnvironmentRegistry, $log: ng.ILogService, cheNotification: CheNotification, cheRecipeService: CheRecipeService) {
     this.$q = $q;
     this.$mdDialog = $mdDialog;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;

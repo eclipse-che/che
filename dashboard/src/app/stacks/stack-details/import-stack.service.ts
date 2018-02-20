@@ -17,13 +17,14 @@ import {StackValidationService} from './stack-validation.service';
  * @author Oleksii Orel
  */
 export class ImportStackService {
+
+  static $inject = ['stackValidationService'];
+
   private stackValidationService: StackValidationService;
   private stack: che.IStack;
 
-
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(stackValidationService: StackValidationService) {
     this.stackValidationService = stackValidationService;

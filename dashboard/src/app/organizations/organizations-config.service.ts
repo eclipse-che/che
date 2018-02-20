@@ -11,6 +11,9 @@
 'use strict';
 
 export class OrganizationsConfigService {
+
+  static $inject = ['$log', '$q', '$route', 'cheOrganization', 'chePermissions', 'cheResourcesDistribution', 'cheUser'];
+
   /**
    * Log service.
    */
@@ -41,7 +44,6 @@ export class OrganizationsConfigService {
   private cheUser: any;
 
   /** Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($log: ng.ILogService,
               $q: ng.IQService,

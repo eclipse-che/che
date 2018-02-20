@@ -16,6 +16,9 @@
  * @author Oleksii Kurinnyi
  */
 export class NavbarDropdownMenuController {
+
+  static $inject = ['$window'];
+
   /**
    * Reference to the browser's <code>window</code> object.
    */
@@ -26,7 +29,6 @@ export class NavbarDropdownMenuController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($window: ng.IWindowService) {
     this.$window = $window;

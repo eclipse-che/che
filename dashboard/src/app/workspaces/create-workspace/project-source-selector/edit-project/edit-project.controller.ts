@@ -17,6 +17,9 @@ import {EditProjectService} from './edit-project.service';
  * @author Oleksii Kurinnyi
  */
 export class EditProjectController {
+
+  static $inject = ['$scope', 'editProjectService'];
+
   /**
    * Edit project section service.
    */
@@ -41,7 +44,6 @@ export class EditProjectController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope, editProjectService: EditProjectService) {
     this.editProjectService = editProjectService;

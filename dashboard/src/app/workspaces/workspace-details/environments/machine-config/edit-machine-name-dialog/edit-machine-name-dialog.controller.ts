@@ -18,6 +18,9 @@ import {WorkspaceMachineConfigController} from '../machine-config.controller';
  * @author Oleksii Kurinnyi
  */
 export class EditMachineNameDialogController {
+
+  static $inject = ['$mdDialog'];
+
   private $mdDialog: ng.material.IDialogService;
   private name: string;
   private origName: string;
@@ -27,7 +30,6 @@ export class EditMachineNameDialogController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;

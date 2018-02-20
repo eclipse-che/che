@@ -21,6 +21,9 @@ interface IOrganizationMember extends che.IMember {
  * @author Oleksii Kurinnyi
  */
 export class OrganizationSelectMembersDialogController {
+
+  static $inject = ['$q', '$mdDialog', 'lodash', 'cheProfile', 'cheUser', 'resourcesService'];
+
   /**
    * User profile API interaction.
    */
@@ -88,7 +91,6 @@ export class OrganizationSelectMembersDialogController {
 
   /**
    * Default constructor.
-   * @ngInject for Dependency injection
    */
   constructor($q: ng.IQService, $mdDialog: angular.material.IDialogService, lodash: any, cheProfile: any, cheUser: any, resourcesService: che.service.IResourcesService) {
     this.$q = $q;

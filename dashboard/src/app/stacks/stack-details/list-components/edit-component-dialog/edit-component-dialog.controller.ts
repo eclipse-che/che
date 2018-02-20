@@ -23,6 +23,9 @@ interface IComponent {
  * @author Oleksii Orel
  */
 export class EditComponentDialogController {
+
+  static $inject = ['$mdDialog'];
+
   $mdDialog: ng.material.IDialogService;
 
   index: number;
@@ -34,7 +37,6 @@ export class EditComponentDialogController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;

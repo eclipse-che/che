@@ -16,6 +16,9 @@
  * @author Florent Benoit
  */
 export class CheProjectTemplate {
+
+  static $inject = ['$resource'];
+
   $resource: ng.resource.IResourceService;
   templatesPerCategory: {
     [category: string]: Array<che.IProjectTemplate>;
@@ -26,7 +29,6 @@ export class CheProjectTemplate {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor ($resource: ng.resource.IResourceService) {
 
