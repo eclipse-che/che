@@ -19,6 +19,9 @@ import {editingProgress} from '../project-source-selector-editing-progress';
  * @author Oleksii Kurinnyi
  */
 export class EditProjectService {
+
+  static $inject = ['projectMetadataService'];
+
   /**
    * Service for editing project's metadata.
    */
@@ -27,7 +30,6 @@ export class EditProjectService {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor(projectMetadataService: ProjectMetadataService) {
     this.projectMetadataService = projectMetadataService;

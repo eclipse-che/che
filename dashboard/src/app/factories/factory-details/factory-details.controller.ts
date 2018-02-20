@@ -17,17 +17,16 @@ import {CheFactory} from '../../../components/api/che-factory.factory';
  * @author Florent Benoit
  */
 export class FactoryDetailsController {
+
+  static $inject = ['$route', 'cheFactory', 'cheNotification'];
+
   private cheFactory: CheFactory;
   private factory: che.IFactory;
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($route: ng.route.IRouteService, cheFactory: CheFactory, cheNotification: CheNotification) {
-    /* tslint:disable */
-    'ngInject';
-    /* tslint:enable */
 
     this.cheFactory = cheFactory;
     let factoryId = $route.current.params.id;

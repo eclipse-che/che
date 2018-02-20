@@ -18,6 +18,9 @@ import {TeamDetailsService} from '../team-details.service';
  * @author Ann Shumilova
  */
 export class ListTeamOwnersController {
+
+  static $inject = ['cheTeam', 'cheUser', 'chePermissions', 'cheProfile', 'cheNotification', 'lodash', 'teamDetailsService'];
+
   /**
    * Team API interaction.
    */
@@ -57,7 +60,6 @@ export class ListTeamOwnersController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(cheTeam: che.api.ICheTeam, cheUser: any, chePermissions: che.api.IChePermissions, cheProfile: any, cheNotification: any,
               lodash: any, teamDetailsService: TeamDetailsService) {

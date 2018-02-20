@@ -17,6 +17,9 @@ import {CheListHelper} from './che-list-helper';
  * @author Oleksii Kurinnyi
  */
 export class CheListHelperFactory implements che.widget.ICheListHelperFactory {
+
+  static $inject = ['$filter'];
+
   /**
    * Angular filter service
    */
@@ -24,10 +27,8 @@ export class CheListHelperFactory implements che.widget.ICheListHelperFactory {
 
   private helpers: Map<string, CheListHelper>;
 
-
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($filter: ng.IFilterService) {
     this.$filter = $filter;

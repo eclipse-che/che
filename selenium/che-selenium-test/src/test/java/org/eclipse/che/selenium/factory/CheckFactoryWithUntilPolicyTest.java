@@ -63,7 +63,7 @@ public class CheckFactoryWithUntilPolicyTest {
   }
 
   @Test
-  public void checkFactoryAcceptingWithUntilPolicy() throws Exception {
+  public void checkFactoryAcceptingWithUntilPolicy() {
     dashboard.open();
     testFactory.open(seleniumWebDriver);
     seleniumWebDriver.switchFromDashboardIframeToIde();

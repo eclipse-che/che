@@ -18,6 +18,8 @@
  */
 export class CheWebsocket {
 
+  static $inject = ['$websocket', '$location', '$interval', 'proxySettings', 'userDashboardConfig', 'keycloakAuth'];
+
   private bus : MessageBus;
   private wsBaseUrl : string;
   private remoteBus : MessageBus;
@@ -26,7 +28,6 @@ export class CheWebsocket {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor ($websocket: any,
                $location: ng.ILocationService,

@@ -19,6 +19,9 @@ const IDE_FETCHER_CALLBACK_ID = 'cheIdeFetcherCallback';
  * @author Oleksii Orel
  */
 export class CheIdeFetcher {
+
+  static $inject = ['$log', '$http', '$window', 'cheBranding'];
+
   private $log: ng.ILogService;
   private $http: ng.IHttpService;
   private $window: ng.IWindowService;
@@ -27,7 +30,6 @@ export class CheIdeFetcher {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($log: ng.ILogService, $http: ng.IHttpService, $window: ng.IWindowService, cheBranding: CheBranding) {
     this.$log = $log;

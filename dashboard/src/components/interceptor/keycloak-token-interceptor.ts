@@ -18,6 +18,8 @@ const GITHUB_API = 'api.github.com';
  * @author Oleksii Kurinnyi
  */
 export class KeycloakTokenInterceptor extends HttpInterceptorBase {
+  static $inject = ['$log', '$q', 'keycloakAuth'];
+
   $log: ng.ILogService;
   $q: ng.IQService;
   keycloak: any;
@@ -25,7 +27,6 @@ export class KeycloakTokenInterceptor extends HttpInterceptorBase {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($log: ng.ILogService,
               $q: ng.IQService,

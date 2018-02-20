@@ -28,6 +28,8 @@ const DEFAULT_WORKSPACE_RAM: number = 2 * Math.pow(1024, 3);
  */
 export class BuildStackController {
 
+  static $inject = ['$mdDialog', '$location', 'cheStack', 'importStackService', 'cheEnvironmentRegistry', 'cheBranding', 'cheWorkspace'];
+
   importStackService: ImportStackService;
   cheEnvironmentRegistry: CheEnvironmentRegistry;
   stackDocsUrl: string;
@@ -40,7 +42,6 @@ export class BuildStackController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService,
               $location: ng.ILocationService,

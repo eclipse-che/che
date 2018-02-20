@@ -58,6 +58,9 @@ export enum WorkspaceStatus {
  * @author Florent Benoit
  */
 export class CheWorkspace {
+
+  static $inject = ['$resource', '$http', '$q', 'cheJsonRpcApi', '$websocket', '$location', 'proxySettings', 'userDashboardConfig', 'lodash', 'cheEnvironmentRegistry', '$log', 'cheBranding', 'keycloakAuth', 'cheEnvironmentManager'];
+
   private $resource: ng.resource.IResourceService;
   private $http: ng.IHttpService;
   private $q: ng.IQService;
@@ -85,10 +88,8 @@ export class CheWorkspace {
    */
   private workspacePromises: Map<string, ng.IHttpPromise<any>> = new Map();
 
-
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($resource: ng.resource.IResourceService,
               $http: ng.IHttpService,

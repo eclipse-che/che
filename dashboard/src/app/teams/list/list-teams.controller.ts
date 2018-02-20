@@ -18,6 +18,9 @@
  */
 export class ListTeamsController {
 
+  static $inject = ['cheTeam', 'chePermissions', 'cheResourcesDistribution', 'cheNotification', 'cheTeamEventsManager', 'confirmDialogService',
+'$scope', '$q', '$location', 'resourcesService'];
+
   /**
    * Team API interaction.
    */
@@ -85,7 +88,6 @@ export class ListTeamsController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(cheTeam: che.api.ICheTeam, chePermissions: che.api.IChePermissions, cheResourcesDistribution: che.api.ICheResourcesDistribution,
               cheNotification: any, cheTeamEventsManager: che.api.ICheTeamEventsManager, confirmDialogService: any, $scope: ng.IScope,

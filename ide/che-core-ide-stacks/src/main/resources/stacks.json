@@ -2398,6 +2398,7 @@
                 "memoryLimitBytes": "2147483648"
               },
               "installers": [
+                "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent"
               ],
@@ -2489,6 +2490,7 @@
                 "memoryLimitBytes": "2147483648"
               },
               "installers": [
+                "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
                 "org.eclipse.che.ws-agent"
               ],
@@ -2678,6 +2680,7 @@
         "machines": {
           "dev-machine": {
             "installers": [
+              "org.eclipse.che.exec",
               "org.eclipse.che.terminal",
               "org.eclipse.che.ws-agent"
             ],

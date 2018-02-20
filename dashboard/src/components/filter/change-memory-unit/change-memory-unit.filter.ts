@@ -35,7 +35,6 @@ export class ChangeMemoryUnitFilter {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   static filter($log: ng.ILogService) {
     return (num: number|string, units: [string, string]) => {

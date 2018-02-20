@@ -30,6 +30,11 @@ import {CheUser} from './che-user.factory';
  */
 export class CheAPI {
 
+  static $inject = ['cheWorkspace', 'cheFactory', 'cheFactoryTemplate',
+               'cheProfile', 'chePreferences', 'cheProjectTemplate',
+              'cheService', 'cheStack', 'cheOAuthProvider', 'cheAgent',
+            'cheSsh', 'cheUser', 'chePermissions', 'cheOrganization'];
+
   private cheWorkspace: CheWorkspace;
   private cheProfile: CheProfile;
   private chePreferences: ChePreferences;
@@ -47,7 +52,6 @@ export class CheAPI {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(cheWorkspace: CheWorkspace, cheFactory: CheFactory, cheFactoryTemplate: CheFactoryTemplate,
               cheProfile: CheProfile, chePreferences: ChePreferences, cheProjectTemplate: CheProjectTemplate,

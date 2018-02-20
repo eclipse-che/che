@@ -24,8 +24,8 @@ export class ProfileConfig {
     };
 
     // config routes
-    register.app.config(function ($routeProvider: che.route.IRouteProvider) {
+    register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/account', locationProvider);
-    });
+    }]);
   }
 }

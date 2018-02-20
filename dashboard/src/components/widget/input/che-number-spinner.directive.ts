@@ -83,7 +83,6 @@ export class CheNumberSpinner {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor ($timeout: ng.ITimeoutService, $interval: ng.IIntervalService) {
     this.$interval = $interval;

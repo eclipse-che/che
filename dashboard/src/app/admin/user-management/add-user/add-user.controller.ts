@@ -16,6 +16,9 @@ import {AdminsUserManagementCtrl} from '../user-management.controller';
  * @author Oleksii Orel
  */
 export class AdminsAddUserController {
+
+  static $inject = ['$mdDialog', 'cheUser', 'cheNotification', 'lodash', 'cheOrganization', 'chePermissions', 'resourcesService'];
+
   private $mdDialog: ng.material.IDialogService;
   private lodash: any;
   private cheNotification: any;
@@ -32,7 +35,6 @@ export class AdminsAddUserController {
 
   /**
    * Default constructor.
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService,
               cheUser: any,

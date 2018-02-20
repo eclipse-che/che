@@ -24,7 +24,8 @@
             "org.eclipse.che.terminal",
             "org.eclipse.che.ws-agent",
             "org.eclipse.che.ls.php",
-            "org.eclipse.che.ls.json"
+            "org.eclipse.che.ls.json",
+            "org.eclipse.che.exec"
           ]
         }
       },

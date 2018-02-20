@@ -34,13 +34,14 @@ interface ICheOnLongTouchAttributes extends ng.IAttributes {
  * @author Oleksii Kurinnyi
  */
 export class CheOnLongTouch {
+
+  static $inject = ['$timeout'];
+
   restrict = 'A';
 
   $timeout: ng.ITimeoutService;
-
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($timeout: ng.ITimeoutService) {
     this.$timeout = $timeout;

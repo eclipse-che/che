@@ -18,6 +18,9 @@ import {FactoryActionBoxController} from './factory-action-box.controller';
  * @author Florent Benoit
  */
 export class FactoryActionDialogEditController {
+
+  static $inject = ['$mdDialog'];
+
   isName: boolean;
   isFile: boolean;
   selectedValue: { name: string; file: string };
@@ -28,7 +31,6 @@ export class FactoryActionDialogEditController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;

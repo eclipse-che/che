@@ -16,6 +16,9 @@ import {WorkspaceStatus} from '../../../../../../components/api/workspace/che-wo
 import {CheWorkspaceAgent} from '../../../../../../components/api/che-workspace-agent';
 
 export class ProjectRepositoryController {
+
+  static $inject = ['$route', 'cheAPI', 'lodash'];
+
   private cheAPI: CheAPI;
   private lodash: any;
 
@@ -27,7 +30,6 @@ export class ProjectRepositoryController {
 
   /**
    * Controller for the project local repository and remote repositories details
-   * @ngInject for Dependency injection
    * @author Oleksii Orel
    */
   constructor($route: ng.route.IRouteService,

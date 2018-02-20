@@ -31,7 +31,6 @@ export class ImportZipProject implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor() {
     this.scope = {};

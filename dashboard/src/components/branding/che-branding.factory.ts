@@ -68,6 +68,9 @@ const DEFAULT_WEBSOCKET_CONTEXT = '/api/websocket';
  * @author Oleksii Orel
  */
 export class CheBranding {
+
+  static $inject = ['$http', '$rootScope', 'cheService'];
+
   private $rootScope: che.IRootScopeService;
   private $http: ng.IHttpService;
   private cheService: CheService;
@@ -76,7 +79,6 @@ export class CheBranding {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($http: ng.IHttpService, $rootScope: che.IRootScopeService, cheService: CheService) {
     this.$http = $http;

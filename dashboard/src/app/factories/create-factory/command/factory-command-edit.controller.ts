@@ -17,6 +17,9 @@
  * @author Florent Benoit
  */
 export class FactoryCommandDialogEditController {
+
+  static $inject = ['$mdDialog'];
+
   private $mdDialog: ng.material.IDialogService;
   private callbackController: any;
   private index: number;
@@ -24,7 +27,6 @@ export class FactoryCommandDialogEditController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;

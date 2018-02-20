@@ -19,7 +19,6 @@ export class CheToggleJoined extends CheToggle {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor() {
     super();

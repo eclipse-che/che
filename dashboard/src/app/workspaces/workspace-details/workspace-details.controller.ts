@@ -33,6 +33,9 @@ const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Installers', 'S
  * @author Oleksii Orel
  */
 export class WorkspaceDetailsController {
+
+  static $inject = ['$location', '$log', '$scope', 'cheNotification', 'cheWorkspace', 'ideSvc', 'workspaceDetailsService', 'initData', '$timeout', 'workspacesService'];
+
   /**
    * Overlay panel configuration.
    */
@@ -66,7 +69,6 @@ export class WorkspaceDetailsController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($location: ng.ILocationService,
               $log: ng.ILogService,

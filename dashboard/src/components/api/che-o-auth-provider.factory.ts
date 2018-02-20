@@ -15,6 +15,9 @@
  * @author Ann Shumilova
  */
 export class CheOAuthProvider {
+
+  static $inject = ['$http'];
+
   private $http: ng.IHttpService;
 
   private providersByName: Map<string, any>;
@@ -22,7 +25,6 @@ export class CheOAuthProvider {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor ($http: ng.IHttpService) {
     this.$http = $http;

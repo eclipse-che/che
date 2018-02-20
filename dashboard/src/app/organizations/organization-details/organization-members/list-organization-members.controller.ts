@@ -26,6 +26,10 @@ interface IOrganizationMember extends che.IUser {
  * @author Oleksii Orel
  */
 export class ListOrganizationMembersController {
+
+  static $inject = ['chePermissions', 'cheUser', 'cheProfile', 'cheOrganization', 'confirmDialogService', '$mdDialog',
+'$q', 'cheNotification', 'lodash', '$location', 'organizationsPermissionService', '$scope', 'cheListHelperFactory', 'resourcesService', '$log'];
+
   /**
    * Location service.
    */
@@ -113,7 +117,6 @@ export class ListOrganizationMembersController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(chePermissions: che.api.IChePermissions, cheUser: CheUser, cheProfile: CheProfile, cheOrganization: che.api.ICheOrganization,
               confirmDialogService: ConfirmDialogService, $mdDialog: angular.material.IDialogService, $q: ng.IQService, cheNotification: CheNotification,

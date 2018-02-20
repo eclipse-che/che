@@ -17,6 +17,9 @@ import {CheRecipeTypes} from '../../../components/api/recipe/che-recipe-types';
  * @author Oleksii Orel
  */
 export class CheRecipeService {
+
+  static $inject = ['$log'];
+
   /**
    * Logging service.
    */
@@ -24,7 +27,6 @@ export class CheRecipeService {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor ($log: ng.ILogService) {
     this.$log = $log;
