@@ -160,7 +160,7 @@ public class NavigateToFile {
                 visibilityOfElementLocated(
                     By.xpath(format(Locators.FILE_NAME_LIST_SELECT, nameOfFile))));
 
-    webElement.click();
+    // webElement.click();
     WaitUtils.sleepQuietly(500, MILLISECONDS);
     actionsFactory.createAction(seleniumWebDriver).doubleClick(webElement).perform();
   }
