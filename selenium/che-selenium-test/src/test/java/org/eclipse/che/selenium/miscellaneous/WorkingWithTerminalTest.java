@@ -206,8 +206,14 @@ public class WorkingWithTerminalTest {
 
     // check resize of the terminal
     for (String partOfContent : CHECK_MC_OPENING) {
-      terminal.waitExpectedTextIntoTerminal(partOfContent);
+      try {
+        terminal.waitExpectedTextIntoTerminal(partOfContent);
+      } catch (TimeoutException ex) {
+        // remove try-catch block after issue has been resolved
+        fail("Known issue https://github.com/eclipse/che/issues/8390");
+      }
     }
+
     terminal.waitExpectedTextIntoTerminal(".dockerenv");
     consoles.clickOnMaximizePanelIcon();
     loader.waitOnClosed();
