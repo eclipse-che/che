@@ -215,7 +215,7 @@ public class WorkingWithTerminalTest {
         terminal.waitExpectedTextIntoTerminal(partOfContent);
       } catch (TimeoutException ex) {
         // remove try-catch block after issue has been resolved
-        fail("Known issue https://github.com/eclipse/che/issues/8390");
+        fail("Known issue https://github.com/eclipse/che-lib/issues/57");
       }
     }
 
