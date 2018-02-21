@@ -10,7 +10,11 @@
  */
 package org.eclipse.che.api.languageserver.registry;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import javax.inject.Singleton;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 
