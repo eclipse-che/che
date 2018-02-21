@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.languageserver.ide.filestructure;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Event;
+import elemental.events.KeyboardEvent;
 import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
@@ -35,6 +36,11 @@ public class FileStructureTree extends Tree {
         onDoubleClick(event);
         break;
       default:
+        if (event instanceof KeyboardEvent && event.getKeyCode() == KeyboardEvent.KeyCode.ENTER) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+
         super.onBrowserEvent(event);
     }
   }
