@@ -160,7 +160,7 @@ public class ImportRecursiveSubmoduleTest {
 
   private void openSubmoduleOne(String projectName) throws Exception {
     projectExplorer.openItemByPath(projectName);
-    projectExplorer.selectItem(projectName + "/" + SUBMODULE_NAME_1);
+    projectExplorer.waitAndSelectItem(projectName + "/" + SUBMODULE_NAME_1);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.CONVERT_TO_PROJECT);
@@ -181,7 +181,7 @@ public class ImportRecursiveSubmoduleTest {
   }
 
   private void openSubmoduleTwo(String projectName) throws Exception {
-    projectExplorer.selectItem(projectName + "/" + SUBMODULE_NAME_2);
+    projectExplorer.waitAndSelectItem(projectName + "/" + SUBMODULE_NAME_2);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.CONVERT_TO_PROJECT);

@@ -184,7 +184,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     String absPathToClass = PROJECT + "/src/main/java/org/eclipse/qa/examples/AppController.java";
     projectExplorer.waitItem(PROJECT);
     loader.waitOnClosed();
-    projectExplorer.selectItem(PROJECT);
+    projectExplorer.waitAndSelectItem(PROJECT);
     projectExplorer.invokeCommandWithContextMenu(
         ProjectExplorer.CommandsGoal.COMMON, PROJECT, BUILD);
     consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);

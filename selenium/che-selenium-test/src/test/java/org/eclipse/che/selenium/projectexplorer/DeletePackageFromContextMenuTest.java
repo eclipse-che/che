@@ -77,7 +77,7 @@ public class DeletePackageFromContextMenuTest {
     openItemByPath(PATH_TO_WEB_INF + "/web.xml");
 
     // select package1 for deletion
-    projectExplorer.selectItem(PATH_TO_PACKAGE1);
+    projectExplorer.waitAndSelectItem(PATH_TO_PACKAGE1);
     deletePackage(PATH_TO_PACKAGE1, DELETE_TEXT1);
     loader.waitOnClosed();
     // check that files from deleted package was closed in editor
@@ -90,7 +90,7 @@ public class DeletePackageFromContextMenuTest {
     projectExplorer.waitDisappearItemByPath(PATH_TO_PACKAGE1);
 
     // select package2 for deletion
-    projectExplorer.selectItem(PATH_TO_PACKAGE2);
+    projectExplorer.waitAndSelectItem(PATH_TO_PACKAGE2);
     deletePackage(PATH_TO_PACKAGE2, DELETE_TEXT2);
     loader.waitOnClosed();
     // check that files from deleted package was closed in editor
@@ -102,7 +102,7 @@ public class DeletePackageFromContextMenuTest {
 
     // select package3 for deletion
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples");
-    projectExplorer.selectItem(PATH_TO_PACKAGE3);
+    projectExplorer.waitAndSelectItem(PATH_TO_PACKAGE3);
     deletePackage(PATH_TO_PACKAGE3, DELETE_TEXT3);
     loader.waitOnClosed();
     // check that files from deleted package was closed in editor

@@ -21,11 +21,16 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.ALL_PROJECTS_XPATH;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.COLOURED_ITEM_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.CONTEXT_MENU_ID;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.EXPLORER_RIGHT_TAB_ID;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.PROJECT_EXPLORER_ITEM_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.PROJECT_EXPLORER_TREE_ITEMS;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.PROJECT_EXPORER_ITEM_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerItemColors.BLUE;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerItemColors.DEFAULT;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerItemColors.GREEN;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerItemColors.YELLOW;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.COLLAPSE_ALL;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.REFRESH_MAIN;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.REVEAL_RESOURCE;
@@ -41,9 +46,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfEl
 import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -83,9 +86,11 @@ public class ProjectExplorer {
   private final CodenvyEditor editor;
   private final TestWebElementRenderChecker testWebElementRenderChecker;
   private final BrowserLogsUtil browserLogsUtil;
-  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final SeleniumWebDriverHelper helper;
+  private final WebDriverWaitFactory waitFactory;
   private WebDriverWait loadPageTimeout;
   private WebDriverWait redrawUiElementsWait;
+  private final int DEFAULT_TIMEOUT;
 
   @Inject
   public ProjectExplorer(
@@ -97,7 +102,8 @@ public class ProjectExplorer {
       CodenvyEditor editor,
       TestWebElementRenderChecker testWebElementRenderChecker,
       BrowserLogsUtil browserLogsUtil,
-      SeleniumWebDriverHelper seleniumWebDriverHelper) {
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
+      WebDriverWaitFactory webDriverWaitFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
@@ -106,10 +112,29 @@ public class ProjectExplorer {
     this.editor = editor;
     this.testWebElementRenderChecker = testWebElementRenderChecker;
     this.browserLogsUtil = browserLogsUtil;
-    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
-    loadPageTimeout = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
-    redrawUiElementsWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    this.helper = seleniumWebDriverHelper;
+    this.waitFactory = webDriverWaitFactory;
+    loadPageTimeout = this.waitFactory.get(LOAD_PAGE_TIMEOUT_SEC);
+    redrawUiElementsWait = this.waitFactory.get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    this.DEFAULT_TIMEOUT = LOAD_PAGE_TIMEOUT_SEC;
     PageFactory.initElements(seleniumWebDriver, this);
+  }
+
+  public enum ProjectExplorerItemColors {
+    YELLOW("color: #e0b91d;"),
+    GREEN("color: #72ad42;"),
+    BLUE("color: #3193d4;"),
+    DEFAULT("opacity:1;");
+
+    ProjectExplorerItemColors(String color) {
+      this.color = color;
+    }
+
+    private final String color;
+
+    private String get() {
+      return this.color;
+    }
   }
 
   public interface CommandsGoal {
@@ -139,7 +164,9 @@ public class ProjectExplorer {
     String REFRESH_CONTEXT_MENU_ID = "gwt-debug-contextMenu/refreshPathAction";
     String PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL =
         "//div[@id='gwt-debug-navPanel']//div[@id='gwt-debug-partButton-Projects']";
-    String PROJECT_EXPORER_ITEM_TEMPLATE = "//div[@path='/%s']/div";
+    String PROJECT_EXPLORER_ITEM_TEMPLATE = "//div[@path='/%s']/div";
+    String COLOURED_ITEM_TEMPLATE =
+        "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']";
   }
 
   public interface FolderTypes {
@@ -187,8 +214,7 @@ public class ProjectExplorer {
    * @return found WebElement
    */
   private WebElement getProjectExplorerItem(String path, int timeout) {
-    return new WebDriverWait(seleniumWebDriver, timeout)
-        .until(visibilityOfElementLocated(By.xpath(format(PROJECT_EXPORER_ITEM_TEMPLATE, path))));
+    return helper.waitVisibility(By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, path)), timeout);
   }
 
   /**
@@ -200,18 +226,13 @@ public class ProjectExplorer {
   }
 
   public void clickOnProjectExplorerOptionsButton() {
-    redrawUiElementsWait
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(
-                    "//div[@id='gwt-debug-navPanel']//div[@name='workBenchIconPartStackOptions']")))
-        .click();
+    helper.waitAndClick(
+        By.xpath("//div[@id='gwt-debug-navPanel']//div[@name='workBenchIconPartStackOptions']"),
+        REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   public void clickOnOptionsMenuItem(String menuID) {
-    redrawUiElementsWait
-        .until(visibilityOfElementLocated(By.xpath(format("//tr[@id='%s']", menuID))))
-        .click();
+    helper.waitAndClick(By.xpath(format("//tr[@id='%s']", menuID)), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** Clicks on project explorer tab and waits its appearance. */
@@ -222,7 +243,7 @@ public class ProjectExplorer {
 
   /** press on the project explorer tab */
   public void clickOnProjectExplorerTab() {
-    redrawUiElementsWait.until(visibilityOfElementLocated(By.id(EXPLORER_RIGHT_TAB_ID))).click();
+    helper.waitAndClick(By.id(EXPLORER_RIGHT_TAB_ID), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /**
@@ -232,7 +253,7 @@ public class ProjectExplorer {
    */
   public void clickOnEmptyAreaOfProjectTree(int timeOutForWaiting) {
     waitProjectExplorer(timeOutForWaiting);
-    loadPageTimeout.until(visibilityOf(projectExplorerTree)).click();
+    helper.waitAndClick(projectExplorerTree);
   }
 
   /** wait appearance of the IDE Project Explorer */
@@ -247,12 +268,11 @@ public class ProjectExplorer {
    */
   public void waitProjectExplorer(int timeout) {
     try {
-      new WebDriverWait(seleniumWebDriver, timeout)
-          .until(visibilityOfElementLocated(By.id(PROJECT_EXPLORER_TREE_ITEMS)));
+      helper.waitVisibility(By.id(PROJECT_EXPLORER_TREE_ITEMS), timeout);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
 
-      if (seleniumWebDriverHelper.isVisible(By.id("ide-loader-progress-bar"))) {
+      if (helper.isVisible(By.id("ide-loader-progress-bar"))) {
         browserLogsUtil.storeLogs();
         fail("Known issue https://github.com/eclipse/che/issues/8468", ex);
       }
@@ -282,8 +302,8 @@ public class ProjectExplorer {
    */
   public void waitItem(String path, int timeout) {
     loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, timeout)
-        .until(visibilityOfElementLocated(By.xpath(format(PROJECT_EXPORER_ITEM_TEMPLATE, path))));
+
+    helper.waitVisibility(By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, path)), timeout);
   }
 
   /**
@@ -292,10 +312,9 @@ public class ProjectExplorer {
    * @param libraryName name of library
    */
   public void waitLibraryIsPresent(String libraryName) {
-    new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format("//div[@synthetic='true'and @name='%s']", libraryName))));
+    helper.waitVisibility(
+        By.xpath(format("//div[@synthetic='true'and @name='%s']", libraryName)),
+        WIDGET_TIMEOUT_SEC);
   }
 
   /**
@@ -304,10 +323,9 @@ public class ProjectExplorer {
    * @param libraryName name of library
    */
   public void waitLibraryIsNotPresent(String libraryName) {
-    new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
-        .until(
-            invisibilityOfElementLocated(
-                By.xpath(format("//div[@synthetic='true'and @name='%s']", libraryName))));
+    helper.waitInvisibility(
+        By.xpath(format("//div[@synthetic='true'and @name='%s']", libraryName)),
+        WIDGET_TIMEOUT_SEC);
   }
 
   /**
@@ -321,10 +339,9 @@ public class ProjectExplorer {
    * @param path
    */
   public void waitVisibleItem(String path) {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(
-            visibilityOfElementLocated(
-                By.xpath("//div[@path='/" + path + "']//div[string-length(text()) > 0]")));
+    helper.waitVisibility(
+        By.xpath("//div[@path='/" + path + "']//div[string-length(text()) > 0]"),
+        ELEMENT_TIMEOUT_SEC);
   }
 
   /**
@@ -333,44 +350,24 @@ public class ProjectExplorer {
    * @param path path to item
    */
   public void waitItemIsDisappeared(String path) {
-    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
-        .until(invisibilityOfElementLocated(By.xpath(format(PROJECT_EXPORER_ITEM_TEMPLATE, path))));
+    helper.waitInvisibility(
+        By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, path)), LOADER_TIMEOUT_SEC);
   }
 
   public void waitYellowNode(String path) {
-    loadPageTimeout.until(
-        visibilityOfElementLocated(
-            By.xpath(
-                format(
-                    "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']",
-                    path, "color: #e0b91d;"))));
+    helper.waitVisibility(By.xpath(format(COLOURED_ITEM_TEMPLATE, path, YELLOW.get())));
   }
 
   public void waitGreenNode(String path) {
-    loadPageTimeout.until(
-        visibilityOfElementLocated(
-            By.xpath(
-                format(
-                    "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']",
-                    path, "color: #72ad42;"))));
+    helper.waitVisibility(By.xpath(format(COLOURED_ITEM_TEMPLATE, path, GREEN.get())));
   }
 
   public void waitBlueNode(String path) {
-    loadPageTimeout.until(
-        visibilityOfElementLocated(
-            By.xpath(
-                format(
-                    "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']",
-                    path, "color: #3193d4;"))));
+    helper.waitVisibility(By.xpath(format(COLOURED_ITEM_TEMPLATE, path, BLUE.get())));
   }
 
   public void waitDefaultColorNode(String path) {
-    loadPageTimeout.until(
-        visibilityOfElementLocated(
-            By.xpath(
-                format(
-                    "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']",
-                    path, "opacity:1;"))));
+    helper.waitVisibility(By.xpath(format(COLOURED_ITEM_TEMPLATE, path, DEFAULT.get())));
   }
 
   /**
@@ -381,7 +378,7 @@ public class ProjectExplorer {
    * @param item
    */
   public void waitItemInVisibleArea(String item) {
-    waitItemInVisibleArea(item, LOAD_PAGE_TIMEOUT_SEC);
+    waitItemInVisibleArea(item, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -393,10 +390,9 @@ public class ProjectExplorer {
    */
   public void waitItemInVisibleArea(String item, final int timeOut) {
     loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, timeOut)
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format("//div[@id='gwt-debug-projectTree']//div[text()='%s']", item))));
+
+    helper.waitVisibility(
+        By.xpath(format("//div[@id='gwt-debug-projectTree']//div[text()='%s']", item)), timeOut);
   }
 
   /**
@@ -405,11 +401,9 @@ public class ProjectExplorer {
    * @param item visible name
    * @return found WebElement
    */
-  private WebElement getVisibleElement(String item) {
-    return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format("//div[@id='gwt-debug-projectTree']//div[text()='%s']", item))));
+  private WebElement waitVisibilityItemByName(String item) {
+    return helper.waitVisibility(
+        By.xpath(format("//div[@id='gwt-debug-projectTree']//div[text()='%s']", item)));
   }
 
   /**
@@ -420,7 +414,7 @@ public class ProjectExplorer {
    * @param item visible name
    */
   public void waitItemIsNotPresentVisibleArea(String item) {
-    loadPageTimeout.until(invisibilityOfElementLocated(By.name(item)));
+    helper.waitInvisibility(By.name(item));
   }
 
   /**
@@ -429,8 +423,8 @@ public class ProjectExplorer {
    *
    * @param path full path to project item
    */
-  public void selectItem(String path) {
-    selectItem(path, EXPECTED_MESS_IN_CONSOLE_SEC);
+  public void waitAndSelectItem(String path) {
+    waitAndSelectItem(path, EXPECTED_MESS_IN_CONSOLE_SEC);
   }
 
   /**
@@ -442,7 +436,7 @@ public class ProjectExplorer {
    * @param timeoutForWaitingItem user timeout for waiting expected item in the Project Explorer
    *     tree
    */
-  public void selectItem(String path, int timeoutForWaitingItem) {
+  public void waitAndSelectItem(String path, int timeoutForWaitingItem) {
     waitItem(path);
     try {
       getProjectExplorerItem(path, timeoutForWaitingItem).click();
@@ -455,7 +449,7 @@ public class ProjectExplorer {
       waitProjectExplorer();
       clickOnRefreshTreeButton();
       waitItem(path);
-      getProjectExplorerItem(path, EXPECTED_MESS_IN_CONSOLE_SEC).click();
+      getProjectExplorerItem(path, timeoutForWaitingItem).click();
     }
   }
 
@@ -465,22 +459,20 @@ public class ProjectExplorer {
    *
    * @param item
    */
-  public void selectVisibleItem(String item) {
-    getVisibleElement(item).click();
+  public void waitAndSelectItemByName(String item) {
+    waitVisibilityItemByName(item).click();
   }
 
   /** wait external maven Libraries relative module */
   public WebElement waitLibraries(String modulePath) {
-    return loadPageTimeout.until(
-        visibilityOfElementLocated(
-            By.xpath(format("//div [@name='External Libraries' and @project='/%s']", modulePath))));
+    return helper.waitVisibility(
+        By.xpath(format("//div [@name='External Libraries' and @project='/%s']", modulePath)));
   }
 
   /** wait disappearance external maven Libraries relative module */
   public void waitLibrariesIsNotPresent(String modulePath) {
-    loadPageTimeout.until(
-        invisibilityOfElementLocated(
-            By.xpath(format("//div [@name='External Libraries' and @project='/%s']", modulePath))));
+    helper.waitInvisibility(
+        By.xpath(format("//div [@name='External Libraries' and @project='/%s']", modulePath)));
   }
 
   /** select external maven Library relative module */
@@ -490,7 +482,7 @@ public class ProjectExplorer {
 
   /**
    * select item in project explorer with path For Example in project with name:'Test' presents
-   * folder 'src' and there is present locates file 'pom.xpl' path will be next:'Test/src/pom.xml')
+   * folder 'src' and there is present locates file 'pom.xml' path will be next:'Test/src/pom.xml')
    *
    * @param path
    */
@@ -510,7 +502,7 @@ public class ProjectExplorer {
    */
   public void openItemByPath(String path) {
     Actions action = actionsFactory.createAction(seleniumWebDriver);
-    selectItem(path);
+    waitAndSelectItem(path);
     waitItemIsSelected(path);
 
     try {
@@ -523,7 +515,7 @@ public class ProjectExplorer {
       LOG.debug(ex.getLocalizedMessage(), ex);
 
       clickOnRefreshTreeButton();
-      selectItem(path);
+      waitAndSelectItem(path);
       waitItemIsSelected(path);
       action.moveToElement(getProjectExplorerItem(path)).perform();
       action.doubleClick().perform();
@@ -539,10 +531,10 @@ public class ProjectExplorer {
    * @param visibleItem
    */
   public void openItemByVisibleNameInExplorer(String visibleItem) {
-    getVisibleElement(visibleItem).click();
+    waitVisibilityItemByName(visibleItem).click();
     actionsFactory
         .createAction(seleniumWebDriver)
-        .moveToElement(getVisibleElement(visibleItem))
+        .moveToElement(waitVisibilityItemByName(visibleItem))
         .doubleClick()
         .perform();
     loader.waitOnClosed();
@@ -556,7 +548,7 @@ public class ProjectExplorer {
   public void openVisiblePackage(String packageName) {
     actionsFactory
         .createAction(seleniumWebDriver)
-        .doubleClick(getVisibleElement(packageName))
+        .doubleClick(waitVisibilityItemByName(packageName))
         .perform();
   }
 
@@ -566,10 +558,8 @@ public class ProjectExplorer {
    * @param pathToItem full path to item in the codenvy project explorer
    */
   public void waitDisappearItemByPath(String pathToItem) {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(
-            invisibilityOfElementLocated(
-                By.xpath(format(PROJECT_EXPORER_ITEM_TEMPLATE, pathToItem))));
+    helper.waitInvisibility(
+        By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, pathToItem)), ELEMENT_TIMEOUT_SEC);
   }
 
   /**
@@ -579,14 +569,13 @@ public class ProjectExplorer {
    * @param typeFolder type folder in java project may be simple folder, projectFolder and
    *     javaSource folder. We can use this types from ProjectExlorer.FolderTypes public interface.
    */
-  public void waitFolderDefinedTypeOfFolderByPath(String pathToFolder, String typeFolder) {
+  public void waitDefinedTypeOfFolderByPath(String pathToFolder, String typeFolder) {
     loader.waitOnClosed();
-    loadPageTimeout.until(
-        visibilityOfElementLocated(
-            By.xpath(
-                format(
-                    "//div[@path='/%s']/div/*[local-name() = 'svg' and @id='%s']",
-                    pathToFolder, typeFolder))));
+    helper.waitVisibility(
+        By.xpath(
+            format(
+                "//div[@path='/%s']/div/*[local-name() = 'svg' and @id='%s']",
+                pathToFolder, typeFolder)));
   }
 
   /**
@@ -595,10 +584,12 @@ public class ProjectExplorer {
    * @param pathToItem full path to item in the codenvy project explorer
    */
   public void waitRemoveItemsByPath(String pathToItem) {
-    loadPageTimeout.until(
-        not(
-            presenceOfAllElementsLocatedBy(
-                By.xpath(format(PROJECT_EXPORER_ITEM_TEMPLATE, pathToItem)))));
+    waitFactory
+        .get(DEFAULT_TIMEOUT)
+        .until(
+            not(
+                presenceOfAllElementsLocatedBy(
+                    By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, pathToItem)))));
   }
 
   /**
@@ -608,7 +599,7 @@ public class ProjectExplorer {
    */
   public void openContextMenuByPathSelectedItem(String path) {
     waitItem(path);
-    selectItem(path);
+    waitAndSelectItem(path);
     waitItemIsSelected(path);
 
     Actions action = actionsFactory.createAction(seleniumWebDriver);
@@ -622,8 +613,7 @@ public class ProjectExplorer {
     testWebElementRenderChecker.waitElementIsRendered(
         By.xpath("//tr[@id='gwt-debug-contextMenu/newGroup']/parent::tbody"));
 
-    new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.id(CONTEXT_MENU_ID)));
+    helper.waitVisibility(By.id(CONTEXT_MENU_ID), WIDGET_TIMEOUT_SEC);
   }
 
   /**
@@ -632,11 +622,7 @@ public class ProjectExplorer {
    * @param item
    */
   public void clickOnItemInContextMenu(String item) {
-    loadPageTimeout
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format("//tr[@item-enabled='true' and @id='%s']", item))))
-        .click();
+    helper.waitAndClick(By.xpath(format("//tr[@item-enabled='true' and @id='%s']", item)));
   }
 
   /**
@@ -645,12 +631,7 @@ public class ProjectExplorer {
    * @param item item form {@code SubMenuNew}
    */
   public void clickOnNewContextMenuItem(String item) {
-    loadPageTimeout
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format("//tr[@item-enabled='true' and @id='%s']", item))))
-        .click();
-
+    helper.waitAndClick(By.xpath(format("//tr[@item-enabled='true' and @id='%s']", item)));
     waitContextMenuPopUpClosed();
   }
 
@@ -666,7 +647,7 @@ public class ProjectExplorer {
   public void selectMultiFilesByCtrlKeys(String path) {
     Actions actions = actionsFactory.createAction(seleniumWebDriver);
     actions.keyDown(CONTROL).perform();
-    selectItem(path);
+    waitAndSelectItem(path);
     waitItemIsSelected(path);
     actions.keyUp(CONTROL).perform();
   }
@@ -685,7 +666,7 @@ public class ProjectExplorer {
   public void selectMultiFilesByShiftKey(String path) {
     Actions actions = actionsFactory.createAction(seleniumWebDriver);
     actions.keyDown(SHIFT).perform();
-    selectItem(path);
+    waitAndSelectItem(path);
     waitItemIsSelected(path);
     actions.keyUp(Keys.SHIFT).perform();
   }
@@ -700,7 +681,7 @@ public class ProjectExplorer {
       String clickItemPath, List<String> selectedItemsPaths) {
     Actions actions = actionsFactory.createAction(seleniumWebDriver);
     actions.keyDown(SHIFT).perform();
-    selectItem(clickItemPath);
+    waitAndSelectItem(clickItemPath);
     waitAllItemsIsSelected(selectedItemsPaths);
     actions.keyUp(SHIFT).perform();
   }
@@ -713,7 +694,7 @@ public class ProjectExplorer {
 
   /** click on the 'go back' in the project explorer */
   public void clickGoBackButton() {
-    loadPageTimeout.until(visibilityOf(goBackBtn)).click();
+    helper.waitAndClick(goBackBtn);
   }
 
   /** launch the 'Refactor Rename' form by keyboard after select a package or Java class */
@@ -739,7 +720,8 @@ public class ProjectExplorer {
    * @return list of names
    */
   public List<String> getNamesAllProjects() {
-    return loadPageTimeout
+    return waitFactory
+        .get(DEFAULT_TIMEOUT)
         .until(visibilityOfAllElementsLocatedBy(By.xpath(ALL_PROJECTS_XPATH)))
         .stream()
         .map((webElement) -> webElement.getAttribute("name"))
@@ -757,27 +739,27 @@ public class ProjectExplorer {
 
   /** perform right arrow key pressed in a browser */
   public void sendToItemRightArrowKey() {
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(RIGHT.toString()).perform();
+    sendKeys(RIGHT.toString());
   }
 
   /** perform left arrow key pressed in a browser */
   public void sendToItemLeftArrowKey() {
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(LEFT.toString()).perform();
+    sendKeys(LEFT.toString());
   }
 
   /** perform up arrow key pressed in a browser */
   public void sendToItemUpArrowKey() {
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(UP.toString()).perform();
+    sendKeys(UP.toString());
   }
 
   /** perform down arrow key pressed in a browser */
   public void sendToItemDownArrowKey() {
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(ARROW_DOWN.toString()).perform();
+    sendKeys(ARROW_DOWN.toString());
   }
 
   /** perform enter key pressed in a browser */
   public void sendToItemEnterKey() {
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(ENTER.toString()).perform();
+    sendKeys(ENTER.toString());
   }
 
   /** wait refresh button and click this one */
@@ -786,32 +768,37 @@ public class ProjectExplorer {
     clickOnOptionsMenuItem(REFRESH_MAIN);
   }
 
+  public void sendKeys(String text) {
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(text).perform();
+  }
+
   public void clickOnImportProjectLink(int userTimeout) {
     waitProjectExplorer();
     WebElement importProjectLink =
-        new WebDriverWait(seleniumWebDriver, userTimeout)
+        waitFactory
+            .get(userTimeout)
             .until(
                 presenceOfNestedElementLocatedBy(
                     projectExplorerTree, By.xpath("//div[text()='Import Project...']")));
 
-    loadPageTimeout.until(visibilityOf(importProjectLink)).click();
+    helper.waitAndClick(importProjectLink);
   }
 
   public void clickOnCreateProjectLink(int userTimeout) {
     waitProjectExplorer();
     WebElement createProjectLink =
-        new WebDriverWait(seleniumWebDriver, userTimeout)
+        waitFactory
+            .get(userTimeout)
             .until(
                 presenceOfNestedElementLocatedBy(
                     projectExplorerTree, By.xpath("//div[text()='Create Project...']")));
 
-    loadPageTimeout.until(visibilityOf(createProjectLink)).click();
+    helper.waitAndClick(createProjectLink);
   }
 
   public void clickOnProjectExplorerTabInTheLeftPanel() {
-    redrawUiElementsWait
-        .until(visibilityOfElementLocated(By.xpath(PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL)))
-        .click();
+    helper.waitAndClick(
+        By.xpath(PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** invoke command from context menu. Work for Common scope commands only */
@@ -827,11 +814,9 @@ public class ProjectExplorer {
 
     clickOnItemInContextMenu(COMMANDS);
     clickOnItemInContextMenu(commandsGoal);
-    redrawUiElementsWait
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(format("//tr[@id[contains(.,'%s')]]", commandName))))
-        .click();
+    helper.waitAndClick(
+        By.xpath(format("//tr[@id[contains(.,'%s')]]", commandName)),
+        REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   public void invokeCommandWithContextMenu(
@@ -842,7 +827,7 @@ public class ProjectExplorer {
     actionsFactory
         .createAction(seleniumWebDriver)
         .doubleClick(
-            seleniumWebDriver.findElement(
+            helper.waitVisibility(
                 By.xpath(
                     format(
                         "//select[@class = 'gwt-ListBox']//option[contains(.,'%s')]",
@@ -860,7 +845,8 @@ public class ProjectExplorer {
 
   /**
    * Expands specified {@code path} in project explorer. Path given in format like below:
-   * TestProject/src/main/java/org.eclipse.che.examples
+   *
+   * <p>"TestProject/src/main/java/org.eclipse.che.examples"
    *
    * @param path path for expand
    */
@@ -888,13 +874,14 @@ public class ProjectExplorer {
    * @return state of visibility
    */
   public boolean isItemVisible(String itemPath) {
-    return seleniumWebDriverHelper.isVisible(
-        By.xpath(format(PROJECT_EXPORER_ITEM_TEMPLATE, itemPath)));
+    return helper.isVisible(By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, itemPath)));
   }
 
   /**
    * Expands specified path in project explorer and open a file Path given in format like like
-   * below: TestProject/src/main/java/org.eclipse.che.examples
+   * below:
+   *
+   * <p>"TestProject/src/main/java/org.eclipse.che.examples"
    *
    * @param path path for expand
    * @param fileName
@@ -908,12 +895,17 @@ public class ProjectExplorer {
   }
 
   /**
-   * Parses {@code path} and makes full path for each element which separated by "/". Items like
-   * 'org.package.sub' will be treated as 'org/package/sub'.
+   * Parses {@code path} and makes full path for each element which separated by "/".
+   *
+   * <p>Items like 'org.package.sub' will be treated as 'org/package/sub'.
    *
    * @param path Path in format "RootFolder/src/main/java/org.package.sub".
-   * @return Paths in format ["RootFolder", "RootFolder/src", "RootFolder/src/main",
-   *     "RootFolder/src/main/java", "RootFolder/src/main/java/org/package/sub"]
+   * @return Paths in format:
+   *     <p>["RootFolder",
+   *     <p>"RootFolder/src",
+   *     <p>"RootFolder/src/main",
+   *     <p>"RootFolder/src/main/java",
+   *     <p>"RootFolder/src/main/java/org/package/sub"]
    */
   private List<String> splitJavaProjectPath(String path) {
     Path fullPath = Paths.get(path);
@@ -979,13 +971,12 @@ public class ProjectExplorer {
   }
 
   public void waitItemIsSelected(String path) {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(
-                    format(
-                        "//div[@path='/%s']/div[contains(concat(' ', normalize-space(@class), ' '), ' selected')]",
-                        path))));
+    helper.waitVisibility(
+        By.xpath(
+            format(
+                "//div[@path='/%s']/div[contains(concat(' ', normalize-space(@class), ' '), ' selected')]",
+                path)),
+        ELEMENT_TIMEOUT_SEC);
   }
 
   public void waitAllItemsIsSelected(List<String> paths) {

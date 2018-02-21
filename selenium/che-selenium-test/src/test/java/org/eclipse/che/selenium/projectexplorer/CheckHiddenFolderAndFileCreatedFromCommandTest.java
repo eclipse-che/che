@@ -82,7 +82,7 @@ public class CheckHiddenFolderAndFileCreatedFromCommandTest {
   @Test
   public void checkHiddenFolderAndFile() throws Exception {
     projectExplorer.waitProjectExplorer();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
 
     menu.runCommand(

@@ -87,7 +87,7 @@ public class RunPlainJavaProjectTest {
     // check library into configure classpath form
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
     configureClasspath.waitConfigureClasspathFormIsOpen();
     configureClasspath.waitExpectedTextJarsAndFolderArea(
@@ -107,14 +107,14 @@ public class RunPlainJavaProjectTest {
     codenvyEditor.waitTextIntoEditor("import org.mockito.Mockito;");
 
     // Create new java class into new package
-    projectExplorer.selectItem(PROJECT_NAME + "/src");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src");
     menu.runCommand(PROJECT, NEW, PACKAGE);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(NEW_PACKAGE);
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
     projectExplorer.waitItemInVisibleArea(NEW_PACKAGE);
-    projectExplorer.selectItem(PROJECT_NAME + "/src/base/test");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/base/test");
     menu.runCommand(TestMenuCommandsConstants.Project.PROJECT, NEW, JAVA_CLASS);
     loader.waitOnClosed();
     askForValueDialog.waitNewJavaClassOpen();
@@ -135,7 +135,7 @@ public class RunPlainJavaProjectTest {
     codenvyEditor.waitTextIntoEditor("import base.test.A;");
 
     // open the 'Commands Explorer' and choose java command
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     loader.waitOnClosed();
     commandsExplorer.openCommandsExplorer();
     commandsExplorer.waitCommandExplorerIsOpened();
@@ -167,7 +167,7 @@ public class RunPlainJavaProjectTest {
     projectExplorer.clickOnProjectExplorerTabInTheLeftPanel();
     commandsExplorer.waitCommandExplorerIsClosed();
     projectExplorer.waitProjectExplorer();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
     projectExplorer.clickOnNewContextMenuItem(

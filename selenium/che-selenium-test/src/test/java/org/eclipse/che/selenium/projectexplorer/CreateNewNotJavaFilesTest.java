@@ -141,7 +141,7 @@ public class CreateNewNotJavaFilesTest {
   private void createNewFile(String pathFromItem, String name, String type, String fileExt)
       throws Exception {
 
-    projectExplorer.selectItem(pathFromItem);
+    projectExplorer.waitAndSelectItem(pathFromItem);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.New.NEW, type);
     askForValueDialog.waitFormToOpen();

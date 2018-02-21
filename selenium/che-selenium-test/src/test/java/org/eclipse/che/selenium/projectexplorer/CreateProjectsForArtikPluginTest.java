@@ -144,7 +144,7 @@ public class CreateProjectsForArtikPluginTest {
   private void createAndCheckNewFile(
       String projectName, String fileName, String type, String fileExt) {
 
-    projectExplorer.selectItem(projectName);
+    projectExplorer.waitAndSelectItem(projectName);
     projectExplorer.openContextMenuByPathSelectedItem(projectName);
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
     projectExplorer.clickOnItemInContextMenu(type);

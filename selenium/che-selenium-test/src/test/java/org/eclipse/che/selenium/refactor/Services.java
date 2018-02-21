@@ -71,7 +71,7 @@ public class Services {
   }
 
   public void invokeRefactorWizardForProjectExplorerItem(String pathThToItem) {
-    projectExplorer.selectItem(pathThToItem);
+    projectExplorer.waitAndSelectItem(pathThToItem);
     projectExplorer.launchRefactorByKeyboard();
     refactor.waitRenameCompilationUnitFormIsOpen();
   }

@@ -10,7 +10,10 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfAllElements;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
@@ -146,6 +149,52 @@ public class SeleniumWebDriverHelper {
    */
   public WebElement waitVisibility(WebElement webElement) {
     return waitVisibility(webElement, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits until {@link WebElement} with provided locator {@link By} be invisible
+   *
+   * @param elementLocator
+   * @param timeout waiting time in seconds
+   * @return {@code true} - if not visible,
+   *     <p>throws {@link org.openqa.selenium.TimeoutException} - if visible.
+   */
+  public boolean waitInvisibility(By elementLocator, int timeout) {
+    return webDriverWaitFactory.get(timeout).until(invisibilityOfElementLocated(elementLocator));
+  }
+
+  /**
+   * Waits until {@link WebElement} with provided locator {@link By} be invisible
+   *
+   * @param elementLocator
+   * @return {@code true} - if not visible,
+   *     <p>throws {@link org.openqa.selenium.TimeoutException} - if visible.
+   */
+  public boolean waitInvisibility(By elementLocator) {
+    return waitInvisibility(elementLocator, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits until provided {@link WebElement} be invisible
+   *
+   * @param webElement
+   * @param timeout waiting time in seconds
+   * @return {@code true} - if not visible,
+   *     <p>throws {@link org.openqa.selenium.TimeoutException} - if visible.
+   */
+  public boolean waitInvisibility(WebElement webElement, int timeout) {
+    return webDriverWaitFactory.get(timeout).until(invisibilityOfAllElements(asList(webElement)));
+  }
+
+  /**
+   * Waits until provided {@link WebElement} be invisible
+   *
+   * @param webElement
+   * @return {@code true} - if not visible,
+   *     <p>throws {@link org.openqa.selenium.TimeoutException} - if visible.
+   */
+  public boolean waitInvisibility(WebElement webElement) {
+    return waitInvisibility(webElement, DEFAULT_TIMEOUT);
   }
 
   /**

@@ -76,7 +76,7 @@ public class ResolveDependencyAfterRecreateProjectTest {
     createProjectFromUI(PROJECT_NAME2);
 
     projectExplorer.waitItem(PROJECT_NAME2);
-    projectExplorer.selectVisibleItem(PROJECT_NAME2);
+    projectExplorer.waitAndSelectItemByName(PROJECT_NAME2);
     projectExplorer.expandPathInProjectExplorer(PROJECT_NAME2 + PATH_TO_EXPAND);
 
     try {

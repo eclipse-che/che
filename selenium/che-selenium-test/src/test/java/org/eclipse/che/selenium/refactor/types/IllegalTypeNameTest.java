@@ -71,7 +71,7 @@ public class IllegalTypeNameTest {
     editor.waitActive();
     Assert.assertEquals(editor.getVisibleTextFromEditor(), contentFromInA);
     editor.waitTextIntoEditor(contentFromInA);
-    projectExplorer.selectVisibleItem("A.java");
+    projectExplorer.waitAndSelectItemByName("A.java");
   }
 
   private void setFieldsForTest(String nameCurrentTest) throws Exception {

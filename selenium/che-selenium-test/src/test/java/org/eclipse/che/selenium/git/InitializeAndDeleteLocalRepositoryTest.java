@@ -80,7 +80,7 @@ public class InitializeAndDeleteLocalRepositoryTest {
     // Initialize git repository
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
     askDialog.acceptDialogWithText(ASK_DIALOG_TEXT);
@@ -92,17 +92,17 @@ public class InitializeAndDeleteLocalRepositoryTest {
     menu.waitCommandIsDisabledInMenu(TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
     menu.runCommandByXpath(TestMenuCommandsConstants.Git.STATUS);
     git.waitGitStatusBarWithMess("On branch master");
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_FOR_EXPAND + "AppController.java");
     loader.waitOnClosed();
 
     // Check git log
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.SHOW_HISTORY);
     warningDialog.waitWaitWarnDialogWindowWithSpecifiedTextMess(WARNING_TEXT);
     warningDialog.clickOkBtn();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit("init");
     loader.waitOnClosed();

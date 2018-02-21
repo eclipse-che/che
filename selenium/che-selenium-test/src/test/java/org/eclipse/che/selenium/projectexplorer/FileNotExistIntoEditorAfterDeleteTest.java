@@ -109,7 +109,7 @@ public class FileNotExistIntoEditorAfterDeleteTest {
     editor.waitActive();
     editor.waitTextIntoEditor(EXPECTED_TEXT_2);
 
-    projectExplorer.selectItem(PATH_TO_JAVA_FILE);
+    projectExplorer.waitAndSelectItem(PATH_TO_JAVA_FILE);
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
 
     loader.waitOnClosed();
@@ -130,7 +130,7 @@ public class FileNotExistIntoEditorAfterDeleteTest {
 
     projectExplorer.waitItem(PATH_TO_JSP_FILE);
     projectExplorer.openItemByPath(PATH_TO_JSP_FILE);
-    projectExplorer.selectItem(PATH_TO_JSP_FILE);
+    projectExplorer.waitAndSelectItem(PATH_TO_JSP_FILE);
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     loader.waitOnClosed();
 

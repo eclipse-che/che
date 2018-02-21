@@ -93,7 +93,7 @@ public class DeleteProjectsTest {
   @Test(priority = 1)
   public void shouldDeleteProjectByMenuFile() {
     projectExplorer.waitItem(PROJECT_NAMES.get(1));
-    projectExplorer.selectItem(PROJECT_NAMES.get(1));
+    projectExplorer.waitAndSelectItem(PROJECT_NAMES.get(1));
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     acceptDeletion(PROJECT_NAMES.get(1));
     checkErrorMessageNotPresentInConsole();
@@ -105,7 +105,7 @@ public class DeleteProjectsTest {
     projectExplorer.openItemByPath(PROJECT_NAMES.get(3));
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT_NAMES.get(3));
-    projectExplorer.selectItem(PROJECT_NAMES.get(3));
+    projectExplorer.waitAndSelectItem(PROJECT_NAMES.get(3));
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     acceptDeletion(PROJECT_NAMES.get(3));
     projectExplorer.waitDisappearItemByPath(PROJECT_NAMES.get(3));
@@ -118,7 +118,7 @@ public class DeleteProjectsTest {
     projectExplorer.openItemByPath(PROJECT_NAMES.get(4));
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT_NAMES.get(4));
-    projectExplorer.selectItem(PROJECT_NAMES.get(4));
+    projectExplorer.waitAndSelectItem(PROJECT_NAMES.get(4));
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAMES.get(4));
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.DELETE);
     acceptDeletion(PROJECT_NAMES.get(4));
@@ -128,7 +128,7 @@ public class DeleteProjectsTest {
 
   private void deleteFromDeleteIcon(String pathToProject) {
     loader.waitOnClosed();
-    projectExplorer.selectItem(pathToProject);
+    projectExplorer.waitAndSelectItem(pathToProject);
     ideMainDockPanel.clickDeleteIcon();
     loader.waitOnClosed();
   }

@@ -59,7 +59,7 @@ public class CreateNewPackageFromContextMenuTest {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
-    projectExplorer.selectItem(PROJECT_NAME + "/" + SOURCE_FOLDER);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/" + SOURCE_FOLDER);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/" + SOURCE_FOLDER);
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
     projectExplorer.clickOnNewContextMenuItem(

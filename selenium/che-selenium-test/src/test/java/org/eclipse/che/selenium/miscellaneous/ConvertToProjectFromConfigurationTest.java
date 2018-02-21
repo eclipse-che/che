@@ -109,7 +109,7 @@ public class ConvertToProjectFromConfigurationTest {
     wizard.waitCloseProjectConfigForm();
 
     projectExplorer.waitItem(pathToPhpFile);
-    projectExplorer.selectItem(pathToPhpFile);
+    projectExplorer.waitAndSelectItem(pathToPhpFile);
     menu.runCommand(PROJECT, CONFIGURATION);
     wizard.waitOpenProjectConfigForm();
     wizard.waitTextParentDirectoryName("/" + PROJECT_NAME + "/src/main/webapp");
@@ -139,7 +139,7 @@ public class ConvertToProjectFromConfigurationTest {
     wizard.waitCloseProjectConfigForm();
 
     projectExplorer.waitItem(pathToJsFile);
-    projectExplorer.selectItem(pathToJsFile);
+    projectExplorer.waitAndSelectItem(pathToJsFile);
     menu.runCommand(PROJECT, CONFIGURATION);
     wizard.waitOpenProjectConfigForm();
     wizard.waitTextParentDirectoryName("/" + PROJECT_NAME + "/src/main/webapp/WEB-INF");
@@ -151,7 +151,7 @@ public class ConvertToProjectFromConfigurationTest {
   }
 
   public void createNewFolder(String path, String folderName) {
-    projectExplorer.selectItem(path);
+    projectExplorer.waitAndSelectItem(path);
     menu.runCommand(PROJECT, TestMenuCommandsConstants.Project.New.NEW, FOLDER);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(folderName);
@@ -162,7 +162,7 @@ public class ConvertToProjectFromConfigurationTest {
   }
 
   private void convertToProject(String folderName, String parentDirectory) {
-    projectExplorer.selectVisibleItem(folderName);
+    projectExplorer.waitAndSelectItemByName(folderName);
     projectExplorer.openContextMenuByPathSelectedItem(parentDirectory + "/" + folderName);
     projectExplorer.clickOnItemInContextMenu(CONVERT_TO_PROJECT);
     wizard.waitOpenProjectConfigForm();
@@ -171,7 +171,7 @@ public class ConvertToProjectFromConfigurationTest {
   }
 
   private void createNewFile(String name, String pathToFile, String type) throws Exception {
-    projectExplorer.selectItem(pathToFile);
+    projectExplorer.waitAndSelectItem(pathToFile);
     projectExplorer.openContextMenuByPathSelectedItem(pathToFile);
     projectExplorer.clickOnItemInContextMenu(NEW);
     projectExplorer.clickOnItemInContextMenu(type);

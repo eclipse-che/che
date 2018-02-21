@@ -65,7 +65,7 @@ public class CheckDisplayingArtifactIdTest {
     projectExplorer.waitItemInVisibleArea(PROJECT_NAME + " " + ARTIFACT_ID);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java");
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java");
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/src/main/java");
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
     projectExplorer.clickOnNewContextMenuItem(

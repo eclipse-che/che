@@ -88,7 +88,7 @@ public class WorkingWithNodeWsTest {
     currentWindow = seleniumWebDriver.getWindowHandle();
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
     // Perform run web nodeJs application
     consoles.startCommandFromProcessesArea("dev-machine", BUILD, INSTALL_DEPENDENCIES_PROCESS);
@@ -107,7 +107,7 @@ public class WorkingWithNodeWsTest {
     consoles.waitPreviewUrlIsPresent();
 
     // Run the application
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     consoles.selectProcessInProcessConsoleTreeByName(RUN_PROCESS);
     consoles.clickOnPreviewUrl();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);

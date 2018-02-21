@@ -78,7 +78,7 @@ public class ConvertToProjectWithPomFileTest {
     ide.open(workspace);
 
     ide.waitOpenedWorkspaceIsReadyToUse();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
   }
 
   @BeforeMethod
@@ -92,7 +92,7 @@ public class ConvertToProjectWithPomFileTest {
 
     // create a folder and check message if the path is wrong
     createNewFolder(PROJECT_NAME, NEW_FOLDER_NAME);
-    projectExplorer.selectVisibleItem(NEW_FOLDER_NAME);
+    projectExplorer.waitAndSelectItemByName(NEW_FOLDER_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/" + NEW_FOLDER_NAME);
     projectExplorer.clickOnItemInContextMenu(CONVERT_TO_PROJECT);
     wizard.waitOpenProjectConfigForm();
@@ -118,14 +118,14 @@ public class ConvertToProjectWithPomFileTest {
     // this timeout is needed for waiting that the Editor tab name of 'pom.xml' file is changed
     WaitUtils.sleepQuietly(5);
     editor.waitTabIsPresent("pom.xml");
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PATH_TO_POM_FILE, "simpleFolder");
+    projectExplorer.waitDefinedTypeOfFolderByPath(PATH_TO_POM_FILE, "simpleFolder");
 
     editor.closeAllTabs();
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitProjectExplorer();
 
     try {
-      projectExplorer.waitFolderDefinedTypeOfFolderByPath(PATH_TO_POM_FILE, "simpleFolder");
+      projectExplorer.waitDefinedTypeOfFolderByPath(PATH_TO_POM_FILE, "simpleFolder");
     } catch (TimeoutException ex) {
       // Remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7551");
@@ -158,7 +158,7 @@ public class ConvertToProjectWithPomFileTest {
   }
 
   private void createNewFolder(String path, String folderName) {
-    projectExplorer.selectItem(path);
+    projectExplorer.waitAndSelectItem(path);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
@@ -172,7 +172,7 @@ public class ConvertToProjectWithPomFileTest {
   }
 
   private void createNewFile(String name, String pathToFile, String type) {
-    projectExplorer.selectItem(pathToFile);
+    projectExplorer.waitAndSelectItem(pathToFile);
     projectExplorer.openContextMenuByPathSelectedItem(pathToFile);
     projectExplorer.clickOnItemInContextMenu(NEW);
     projectExplorer.clickOnItemInContextMenu(type);

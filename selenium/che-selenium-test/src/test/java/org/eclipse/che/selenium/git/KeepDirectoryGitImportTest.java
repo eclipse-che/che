@@ -94,7 +94,7 @@ public class KeepDirectoryGitImportTest {
         PROJECT_NAME,
         DIRECTORY_NAME_1);
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectVisibleItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItemByName(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     loader.waitOnClosed();
     projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/my-webapp");
@@ -110,7 +110,7 @@ public class KeepDirectoryGitImportTest {
         PROJECT_NAME,
         DIRECTORY_NAME_2);
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectVisibleItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItemByName(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME + "/my-lib");
     projectExplorer.openItemByPath(PROJECT_NAME + "/my-lib");
@@ -161,7 +161,7 @@ public class KeepDirectoryGitImportTest {
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectVisibleItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItemByName(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     loader.waitOnClosed();
     projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/my-lib");

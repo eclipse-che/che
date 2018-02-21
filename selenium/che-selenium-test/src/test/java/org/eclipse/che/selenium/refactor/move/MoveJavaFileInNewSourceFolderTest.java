@@ -68,25 +68,25 @@ public class MoveJavaFileInNewSourceFolderTest {
     projectExplorer.openItemByPath(PATH_TO_FILE);
 
     // create new folder and configure as source
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     createNewFolder(NEW_FOLDER_NAME);
     projectExplorer.waitItem(PROJECT_NAME + "/" + NEW_FOLDER_NAME);
-    projectExplorer.selectItem(PROJECT_NAME + "/" + NEW_FOLDER_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/" + NEW_FOLDER_NAME);
     createNewFolder(NEW_SOURCE_FOLDER);
-    projectExplorer.selectItem(PATH_NEW_SOURCE_FOLDER);
+    projectExplorer.waitAndSelectItem(PATH_NEW_SOURCE_FOLDER);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/test/" + NEW_SOURCE_FOLDER);
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.BUILD_PATH);
     projectExplorer.clickOnItemInContextMenu(
         TestProjectExplorerContextMenuConstants.SubMenuBuildPath.USE_AS_SOURCE_FOLDER);
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(
+    projectExplorer.waitDefinedTypeOfFolderByPath(
         PATH_NEW_SOURCE_FOLDER, ProjectExplorer.FolderTypes.JAVA_SOURCE_FOLDER);
-    projectExplorer.selectItem(PATH_NEW_SOURCE_FOLDER);
+    projectExplorer.waitAndSelectItem(PATH_NEW_SOURCE_FOLDER);
     projectExplorer.openContextMenuByPathSelectedItem(PATH_NEW_SOURCE_FOLDER);
     createPackage();
 
     // move java file into new source folder
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectItem(PATH_TO_FILE);
+    projectExplorer.waitAndSelectItem(PATH_TO_FILE);
     projectExplorer.launchRefactorMoveByKeyboard();
     refactor.waitMoveItemFormIsOpen();
     refactor.clickOnExpandIconTree(PROJECT_NAME);

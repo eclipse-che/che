@@ -91,7 +91,7 @@ public class GitColorsTest {
     projectExplorer.waitYellowNode(PROJECT_NAME + "/pom.xml");
 
     // perform init commit
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit("init");
     loader.waitOnClosed();
@@ -143,7 +143,7 @@ public class GitColorsTest {
   @Test(priority = 2)
   public void testNewFileColor() {
     // Create new file
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(PROJECT, NEW, FILE);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText("newFile");
@@ -155,7 +155,7 @@ public class GitColorsTest {
     projectExplorer.waitYellowNode(PROJECT_NAME + "/newFile");
 
     // add file to index
-    projectExplorer.selectItem(PROJECT_NAME + "/newFile");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/newFile");
     menu.runCommand(GIT, ADD_TO_INDEX);
     git.waitAddToIndexFormToOpen();
     git.confirmAddToIndexForm();
@@ -198,7 +198,7 @@ public class GitColorsTest {
     editor.waitBlueTab("README.md");
 
     // Perform commit
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit("commit");
     git.waitCommitFormClosed();

@@ -64,7 +64,7 @@ public class RenamedAlreadyCreatedNotJavaFileTest {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_WEB_APP + "/index.jsp");
     editor.waitActive();
-    projectExplorer.selectItem(PATH_TO_FILE);
+    projectExplorer.waitAndSelectItem(PATH_TO_FILE);
     loader.waitOnClosed();
     editor.waitTabIsPresent("index.jsp");
     loader.waitOnClosed();
@@ -73,7 +73,7 @@ public class RenamedAlreadyCreatedNotJavaFileTest {
   }
 
   private void renameFile(String pathToFile) {
-    projectExplorer.selectItem(pathToFile);
+    projectExplorer.waitAndSelectItem(pathToFile);
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.RENAME);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.clearInput();

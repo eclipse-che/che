@@ -91,12 +91,12 @@ public class PlainJavaProjectConfigureClasspathTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/test/java");
     projectExplorer.openItemByPath(PROJECT_NAME + "/test/java/com");
     projectExplorer.openItemByPath(PROJECT_NAME + "/test/java/com/company");
-    projectExplorer.selectItem(PROJECT_NAME + "/test/java");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/test/java");
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/test/java");
     projectExplorer.clickOnItemInContextMenu(BUILD_PATH);
     projectExplorer.clickOnItemInContextMenu(USE_AS_SOURCE_FOLDER);
     projectExplorer.waitItem(PROJECT_NAME + "/test/java/com/company");
-    projectExplorer.selectItem(PROJECT_NAME + "/test/java");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/test/java");
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/test/java");
     projectExplorer.clickOnItemInContextMenu(BUILD_PATH);
     loader.waitOnClosed();
@@ -104,12 +104,12 @@ public class PlainJavaProjectConfigureClasspathTest {
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME + "/test/java/com/company");
 
     // check build path to the folder 'test' from context menu
-    projectExplorer.selectItem(PROJECT_NAME + "/test");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/test");
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/test");
     projectExplorer.clickOnItemInContextMenu(BUILD_PATH);
     projectExplorer.clickOnItemInContextMenu(USE_AS_SOURCE_FOLDER);
     projectExplorer.waitItem(PROJECT_NAME + "/test/java/com/company");
-    projectExplorer.selectItem(PROJECT_NAME + "/test");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/test");
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/test");
     projectExplorer.clickOnItemInContextMenu(BUILD_PATH);
     loader.waitOnClosed();
@@ -117,7 +117,7 @@ public class PlainJavaProjectConfigureClasspathTest {
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME + "/test/java/com/company");
 
     // check the 'Cancel' button of the 'Select Path' form
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.CONFIGURE_CLASSPATH);
@@ -140,7 +140,7 @@ public class PlainJavaProjectConfigureClasspathTest {
     configureClasspath.waitExpectedTextJarsAndFolderArea("/" + PROJECT_NAME + "/test");
     configureClasspath.clickOnDoneBtnConfigureClasspath();
     projectExplorer.waitItem(PROJECT_NAME + "/test/java/com/company");
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
     projectExplorer.clickOnItemInContextMenu(BUILD_PATH);
     projectExplorer.clickOnItemInContextMenu(
@@ -155,7 +155,7 @@ public class PlainJavaProjectConfigureClasspathTest {
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME + "/test/java/com/company");
 
     // check the library container
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(PROJECT, TestMenuCommandsConstants.Project.CONFIGURE_CLASSPATH);
     configureClasspath.waitConfigureClasspathFormIsOpen();
     configureClasspath.clickLibraryContainer("org.eclipse.jdt.launching.JRE_CONTAINER");

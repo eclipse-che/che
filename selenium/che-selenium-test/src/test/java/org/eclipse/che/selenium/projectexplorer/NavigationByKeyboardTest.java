@@ -94,7 +94,7 @@ public class NavigationByKeyboardTest {
 
   @Test
   public void navigationByKeyboard() throws Exception {
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.waitVisibleItem(PROJECT_NAME + "/src");
 
@@ -119,7 +119,7 @@ public class NavigationByKeyboardTest {
     projectExplorer.waitItemInVisibleArea(nameSecondModule);
     projectExplorer.waitItemInVisibleArea("com.example");
 
-    projectExplorer.selectItem(PATH_TO_SECOND_MODULE);
+    projectExplorer.waitAndSelectItem(PATH_TO_SECOND_MODULE);
     projectExplorer.waitItemIsSelected(PATH_TO_SECOND_MODULE);
 
     projectExplorer.sendToItemRightArrowKey();
@@ -138,7 +138,7 @@ public class NavigationByKeyboardTest {
     editor.waitActive();
     editor.waitTextIntoEditor(EXPECTED_TEXT_IN_JAVA_FILE);
 
-    projectExplorer.selectVisibleItem(nameFirstModule);
+    projectExplorer.waitAndSelectItemByName(nameFirstModule);
     projectExplorer.sendToItemEnterKey();
     checkLibrariesIsVisible();
 
@@ -157,7 +157,7 @@ public class NavigationByKeyboardTest {
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemRightArrowKey();
     projectExplorer.waitItemInVisibleArea("MANIFEST.MF");
-    projectExplorer.selectVisibleItem(nameFirstModule);
+    projectExplorer.waitAndSelectItemByName(nameFirstModule);
 
     projectExplorer.sendToItemEnterKey();
     checkServletInnerFilesIsNotVisible();

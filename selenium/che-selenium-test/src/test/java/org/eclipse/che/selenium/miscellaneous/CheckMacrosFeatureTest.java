@@ -75,7 +75,7 @@ public class CheckMacrosFeatureTest {
 
     projectExplorer.waitProjectExplorer();
     loader.waitOnClosed();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME + "/README.md");
     loader.waitOnClosed();

@@ -74,7 +74,7 @@ public class WorkingWithSplitPanelTest {
   @Test
   public void checkMultiSplitPane() {
     projectExplorer.waitProjectExplorer();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     terminal.waitTerminalTab();
     loader.waitOnClosed();
 

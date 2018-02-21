@@ -66,7 +66,7 @@ public class CheckFileWatcherExcludeFeatureTest {
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.SHOW_HIDE_HIDDEN_FILES);
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     doFileWatcherExcludeOperation(PROJECT_NAME + "/" + "pom.xml", ADD_TO_FILE_WATCHER_EXCLUDES);
     projectExplorer.clickOnRefreshTreeButton();
   }
@@ -160,7 +160,7 @@ public class CheckFileWatcherExcludeFeatureTest {
   }
 
   private void doFileWatcherExcludeOperation(String itemName, String typeOfOperation) {
-    projectExplorer.selectItem(itemName);
+    projectExplorer.waitAndSelectItem(itemName);
     projectExplorer.openContextMenuByPathSelectedItem(itemName);
     projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(typeOfOperation);

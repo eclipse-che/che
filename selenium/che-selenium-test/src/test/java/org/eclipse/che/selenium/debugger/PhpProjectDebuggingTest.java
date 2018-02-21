@@ -88,7 +88,7 @@ public class PhpProjectDebuggingTest {
   public void startDebug() {
     // goto root item in the Project Explorer to have proper value of ${current.project.path} when
     // executing maven command.
-    projectExplorer.selectItem(PROJECT);
+    projectExplorer.waitAndSelectItem(PROJECT);
   }
 
   @AfterMethod

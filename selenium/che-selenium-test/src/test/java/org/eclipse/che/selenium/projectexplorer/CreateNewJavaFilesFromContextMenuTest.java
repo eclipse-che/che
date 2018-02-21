@@ -89,7 +89,7 @@ public class CreateNewJavaFilesFromContextMenuTest {
   }
 
   private void createNewFile(String name, AskForValueDialog.JavaFiles item) {
-    projectExplorer.selectItem(PATH_TO_FILES);
+    projectExplorer.waitAndSelectItem(PATH_TO_FILES);
 
     // create new File from context menu
     projectExplorer.openContextMenuByPathSelectedItem(PATH_TO_FILES);

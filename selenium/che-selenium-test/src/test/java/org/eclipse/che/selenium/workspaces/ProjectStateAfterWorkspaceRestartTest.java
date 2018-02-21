@@ -63,7 +63,7 @@ public class ProjectStateAfterWorkspaceRestartTest {
     // create workspace from dashboard
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
     editor.waitActive();

@@ -63,7 +63,7 @@ public class CreateNewFoldersTest {
     loader.waitOnClosed();
 
     // Create new folder in the folder webapp
-    projectExplorer.selectItem(PROJECT_NAME + "/" + SOURCE_FOLDER);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/" + SOURCE_FOLDER);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
@@ -75,7 +75,7 @@ public class CreateNewFoldersTest {
     projectExplorer.waitItemInVisibleArea(NEW_FOLDER_NAME);
 
     // Create new folder in the folder main
-    projectExplorer.selectItem(PROJECT_NAME + "/" + SOURCE_FOLDER_2);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/" + SOURCE_FOLDER_2);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,

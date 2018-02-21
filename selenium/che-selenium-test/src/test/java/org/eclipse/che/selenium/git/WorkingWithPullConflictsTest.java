@@ -117,7 +117,7 @@ public class WorkingWithPullConflictsTest {
         PROJECT_2 + "/src/main/java/commenttest/" + fileForChange + ".java");
     typeTextAndSaveIntoJavaClass(CHANGE_STRING_1);
     typeTextAndSaveIntoTextFile(CHANGE_STRING_1);
-    projectExplorer.selectItem(PROJECT_2);
+    projectExplorer.waitAndSelectItem(PROJECT_2);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     events.clickEventLogBtn();
@@ -161,7 +161,7 @@ public class WorkingWithPullConflictsTest {
     events.waitExpectedMessage(firstMergeConflictMessage);
 
     // Add to index and commit
-    projectExplorer.selectItem(PROJECT_1);
+    projectExplorer.waitAndSelectItem(PROJECT_1);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     events.clickEventLogBtn();

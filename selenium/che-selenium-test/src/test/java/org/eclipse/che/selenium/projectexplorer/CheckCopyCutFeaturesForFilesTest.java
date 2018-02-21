@@ -76,10 +76,10 @@ public class CheckCopyCutFeaturesForFilesTest {
   }
 
   private void moveFile(String filePath, String folderPath) {
-    projectExplorer.selectItem(filePath);
+    projectExplorer.waitAndSelectItem(filePath);
     projectExplorer.openContextMenuByPathSelectedItem(filePath);
     projectExplorer.clickOnNewContextMenuItem(TestProjectExplorerContextMenuConstants.CUT);
-    projectExplorer.selectItem(folderPath);
+    projectExplorer.waitAndSelectItem(folderPath);
     projectExplorer.openContextMenuByPathSelectedItem(folderPath);
     projectExplorer.clickOnNewContextMenuItem(TestProjectExplorerContextMenuConstants.PASTE);
     loader.waitOnClosed();

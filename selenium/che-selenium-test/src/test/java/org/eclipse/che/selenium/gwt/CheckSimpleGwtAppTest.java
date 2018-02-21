@@ -124,7 +124,7 @@ public class CheckSimpleGwtAppTest {
 
     projectExplorer.waitItem(projectName);
     toastLoader.waitAppeareanceAndClosing();
-    projectExplorer.selectItem(projectName);
+    projectExplorer.waitAndSelectItem(projectName);
     projectExplorer.invokeCommandWithContextMenu(COMMON, projectName, BUILD_COMMAND);
     consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS, 600);
     projectExplorer.invokeCommandWithContextMenu(COMMON, projectName, RUN_GWT_COMMAND);

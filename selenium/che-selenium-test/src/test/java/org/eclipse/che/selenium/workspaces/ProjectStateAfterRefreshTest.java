@@ -102,7 +102,7 @@ public class ProjectStateAfterRefreshTest {
   public void checkRestoreStateOfProjectIfPomXmlFileOpened() throws Exception {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF");

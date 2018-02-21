@@ -57,7 +57,7 @@ public class RenameProjectTest {
     projectExplorer.waitItem(PROJECT_NAME);
 
     // Rename project from context menu
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
     projectExplorer.clickOnItemInContextMenu(RENAME);
     askForValueDialog.waitFormToOpen();
@@ -69,17 +69,17 @@ public class RenameProjectTest {
     // Wait that project renamed and folder has project type
     projectExplorer.waitItem(NEW_PROJECT_NAME);
     projectExplorer.waitItemIsDisappeared(PROJECT_NAME);
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(NEW_PROJECT_NAME, PROJECT_FOLDER);
+    projectExplorer.waitDefinedTypeOfFolderByPath(NEW_PROJECT_NAME, PROJECT_FOLDER);
 
     // Test that the Rename project dialog is started from menu
-    projectExplorer.selectItem(NEW_PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(NEW_PROJECT_NAME);
     menu.runCommand(Edit.EDIT, Edit.RENAME);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.clickCancelBtn();
     askForValueDialog.waitFormToClose();
 
     // Test that the Rename project dialog is started by SHIFT + F6 keys
-    projectExplorer.selectItem(NEW_PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(NEW_PROJECT_NAME);
     askForValueDialog.launchFindFormByKeyboard();
     askForValueDialog.waitFormToOpen();
     askForValueDialog.clickCancelBtn();

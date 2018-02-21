@@ -95,7 +95,7 @@ public class CreateNewJavaFilesTest {
   private void createNewFileFromMenuFile(
       String name, AskForValueDialog.JavaFiles item, String fileExt) {
 
-    projectExplorer.selectItem(PATH_TO_FILES);
+    projectExplorer.waitAndSelectItem(PATH_TO_FILES);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,

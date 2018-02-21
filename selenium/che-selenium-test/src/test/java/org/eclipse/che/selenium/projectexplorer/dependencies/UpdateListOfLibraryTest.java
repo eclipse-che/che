@@ -110,7 +110,7 @@ public class UpdateListOfLibraryTest {
     addNewDependency();
 
     mavenPluginStatusBar.waitClosingInfoPanel();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
     projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.MAVEN);
@@ -124,7 +124,7 @@ public class UpdateListOfLibraryTest {
     deleteDependency();
 
     mavenPluginStatusBar.waitClosingInfoPanel();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
     projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.MAVEN);
