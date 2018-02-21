@@ -33,7 +33,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.rest.annotations.Required;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.multiuser.keycloak.server.KeycloakBrokeringClient;
+import org.eclipse.che.multiuser.keycloak.server.KeycloakServiceClient;
 import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
 
 @Path("/oauth")
@@ -42,11 +42,11 @@ public class KeycloakOAuthAuthenticationService {
 
   @Context SecurityContext security;
 
-  private final KeycloakBrokeringClient keycloakBrokeringClient;
+  private final KeycloakServiceClient keycloakServiceClient;
 
   @Inject
-  public KeycloakOAuthAuthenticationService(KeycloakBrokeringClient keycloakBrokeringClient) {
-    this.keycloakBrokeringClient = keycloakBrokeringClient;
+  public KeycloakOAuthAuthenticationService(KeycloakServiceClient keycloakServiceClient) {
+    this.keycloakServiceClient = keycloakServiceClient;
   }
 
   /**
@@ -66,8 +66,8 @@ public class KeycloakOAuthAuthenticationService {
     if (jwtToken == null) {
       throw new BadRequestException("No token provided.");
     }
-    String accountLinkUrl = keycloakBrokeringClient
-        .getAccountLinkingURL(jwtToken, oauthProvider, redirectAfterLogin);
+    String accountLinkUrl =
+        keycloakServiceClient.getAccountLinkingURL(jwtToken, oauthProvider, redirectAfterLogin);
     return Response.temporaryRedirect(URI.create(accountLinkUrl)).build();
   }
 
@@ -85,7 +85,8 @@ public class KeycloakOAuthAuthenticationService {
       throws ForbiddenException, BadRequestException, ConflictException, NotFoundException,
           ServerException, UnauthorizedException {
     try {
-      KeycloakTokenResponse response = keycloakBrokeringClient.getToken(oauthProvider);
+      KeycloakTokenResponse response =
+          keycloakServiceClient.getIdentityProviderToken(oauthProvider);
       return DtoFactory.newDto(OAuthToken.class)
           .withToken(response.getAccess_token())
           .withScope(response.getScope());
