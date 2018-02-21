@@ -60,7 +60,6 @@ public final class FileStructureView
   }
 
   public void setInput(List<ExtendedSymbolInformation> input) {
-
     tree.getNodeStorage().clear();
     for (ExtendedSymbolInformation symbol : input) {
       tree.getNodeStorage().add(nodeFactory.create(delegate, symbol));
@@ -72,6 +71,7 @@ public final class FileStructureView
   }
 
   public void onShow() {
+    tree.setFocus(true);
     if (!tree.getRootNodes().isEmpty()) {
       tree.getSelectionModel().select(tree.getRootNodes().get(0), false);
     }
