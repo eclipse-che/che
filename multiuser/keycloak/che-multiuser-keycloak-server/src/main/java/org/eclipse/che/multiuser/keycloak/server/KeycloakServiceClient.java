@@ -14,6 +14,7 @@ import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_S
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_SETTING;
 
 import com.google.common.io.CharStreams;
+import com.google.gson.Gson;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.impl.DefaultClaims;
 import java.io.IOException;
@@ -25,8 +26,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
@@ -102,7 +106,9 @@ public class KeycloakServiceClient {
             .toString();
     try {
       String response = doRequest(url, HttpMethod.GET, null);
-      return DtoFactory.getInstance().createDtoFromJson(response, KeycloakTokenResponse.class);
+      // Successful answer is not a json, but key=value&foo=bar format pairs
+      return DtoFactory.getInstance()
+          .createDtoFromJson(toJson(response), KeycloakTokenResponse.class);
     } catch (BadRequestException e) {
       if (assotiateUserPattern.matcher(e.getMessage()).matches()) {
         // If user has no link with identity provider yet,
@@ -188,5 +194,16 @@ public class KeycloakServiceClient {
     } finally {
       conn.disconnect();
     }
+  }
+
+  private static String toJson(String source) {
+    Map<String, String> queryPairs = new HashMap<>();
+    Arrays.stream(source.split("&"))
+        .forEach(
+            p -> {
+              int delimiterIndex = p.indexOf("=");
+              queryPairs.put(p.substring(0, delimiterIndex), p.substring(delimiterIndex + 1));
+            });
+    return new Gson().toJson(queryPairs);
   }
 }
