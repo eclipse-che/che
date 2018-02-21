@@ -952,7 +952,7 @@ removeUser() {
 
 getKeycloakContainerId() {
     if [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
-        echo $(docker ps | grep 'eclipse-che/keycloak' | cut -d ' ' -f1)
+        echo $(docker ps | grep 'keycloak_keycloak-' | cut -d ' ' -f1)
     else
         echo $(docker ps | grep che_keycloak | cut -d ' ' -f1)
     fi
