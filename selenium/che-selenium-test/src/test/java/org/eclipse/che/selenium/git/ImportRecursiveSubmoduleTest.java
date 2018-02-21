@@ -175,7 +175,6 @@ public class ImportRecursiveSubmoduleTest {
     projectExplorer.waitItem(projectName);
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         projectName + "/" + SUBMODULE_NAME_1 + "/src/main/java/com.codenvy.example.spring",
-        1,
         "GreetingController.java");
     projectExplorer.waitItemInVisibleArea("HelloWorld.java");
     editor.closeFileByNameWithSaving("GreetingController");
@@ -196,7 +195,7 @@ public class ImportRecursiveSubmoduleTest {
     loader.waitOnClosed();
     projectExplorer.waitItem(projectName);
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        projectName + "/" + SUBMODULE_NAME_2 + "/src/main/java/com.company.example", 1, "A.java");
+        projectName + "/" + SUBMODULE_NAME_2 + "/src/main/java/com.company.example", "A.java");
     projectExplorer.openItemByPath(
         projectName + "/" + SUBMODULE_NAME_2 + "/src/main/java/commenttest");
     projectExplorer.waitItemInVisibleArea("GitPullTest.java");
