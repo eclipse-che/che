@@ -17,7 +17,7 @@
   <includeBaseDirectory>false</includeBaseDirectory>
   <fileSets>
     <fileSet>
-      <directory>${project.basedir}/dist</directory>
+      <directory>${project.basedir}/target/dist</directory>
       <outputDirectory>/loader</outputDirectory>
     </fileSet>
   </fileSets>
