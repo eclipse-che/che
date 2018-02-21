@@ -19,6 +19,7 @@ public class ActivityServletModule extends ServletModule {
 
   @Override
   protected void configureServlets() {
-    filter("/*").through(org.eclipse.che.plugin.activity.LastAccessTimeFilter.class);
+    filterRegex("^(?!.*(/liveness/?)$).*") // Not ends with /liveness or /liveness/
+        .through(org.eclipse.che.plugin.activity.LastAccessTimeFilter.class);
   }
 }

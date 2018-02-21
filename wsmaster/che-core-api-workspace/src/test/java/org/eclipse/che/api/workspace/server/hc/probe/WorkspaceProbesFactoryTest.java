@@ -76,7 +76,7 @@ public class WorkspaceProbesFactoryTest {
         10,
         10,
         120,
-        "/path1/",
+        "/path1/liveness",
         "localhost",
         4040,
         "https",

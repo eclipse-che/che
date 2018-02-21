@@ -11,6 +11,7 @@
 package org.eclipse.che.wsagent.server;
 
 import com.google.inject.AbstractModule;
+import org.eclipse.che.api.core.rest.LivenessProbeService;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.inject.DynaModule;
 
@@ -25,6 +26,7 @@ public class WsAgentModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(ApiInfoService.class);
+    bind(LivenessProbeService.class);
     install(new org.eclipse.che.security.oauth.OAuthAgentModule());
     install(new org.eclipse.che.api.core.rest.CoreRestModule());
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
