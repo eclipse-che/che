@@ -17,8 +17,6 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.ide.ext.java.dto.DtoClientImpls;
-import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
-import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
@@ -60,62 +58,40 @@ public class FileStructurePresenter implements ElementSelectionDelegate<Extended
    * @param editorPartPresenter the active editor
    */
   public void show(EditorPartPresenter editorPartPresenter) {
-    if (view.isShowing()) {
-      showInheritedMembers = !showInheritedMembers;
-      view.setShowInherited(showInheritedMembers);
-      VirtualFile file = activeEditor.getEditorInput().getFile();
-      javaExtensionService
-          .fileStructure(
-              new DtoClientImpls.FileStructureCommandParametersDto(
-                  new FileStructureCommandParameters(dtoHelper.getUri(file), showInheritedMembers)))
-          .then(
-              result -> {
-                loader.hide();
-                view.setInput(result);
-                view.show();
-              })
-          .catchError(
-              e -> {
-                loader.hide();
-              });
-    } else {
-      showInheritedMembers = false;
-      view.setTitle(editorPartPresenter.getEditorInput().getFile().getName());
-      view.setShowInherited(showInheritedMembers);
-
-      if (!(editorPartPresenter instanceof TextEditor)) {
-        Log.error(getClass(), "Open Declaration support only TextEditor as editor");
-        return;
-      }
-      activeEditor = ((TextEditor) editorPartPresenter);
-      VirtualFile file = activeEditor.getEditorInput().getFile();
-      javaExtensionService
-          .fileStructure(
-              new DtoClientImpls.FileStructureCommandParametersDto(
-                  new FileStructureCommandParameters(dtoHelper.getUri(file), showInheritedMembers)))
-          .then(
-              result -> {
-                loader.hide();
-                view.setInput(result);
-                view.show();
-              })
-          .catchError(
-              e -> {
-                loader.hide();
-                Log.error(getClass(), e);
-              });
+    if (!(editorPartPresenter instanceof TextEditor)) {
+      Log.error(getClass(), "Open Declaration support only TextEditor as editor");
+      return;
     }
+
+    activeEditor = (TextEditor) editorPartPresenter;
+    view.setShowInherited(showInheritedMembers);
+    VirtualFile file = activeEditor.getEditorInput().getFile();
+    javaExtensionService
+        .fileStructure(
+            new DtoClientImpls.FileStructureCommandParametersDto(
+                new FileStructureCommandParameters(dtoHelper.getUri(file), showInheritedMembers)))
+        .then(
+            result -> {
+              view.setInput(file.getName(), result);
+              view.show();
+              showInheritedMembers = !showInheritedMembers;
+            })
+        .catchError(
+            e -> {
+              Log.error(getClass(), e);
+            });
   }
 
   @Override
   public void onSelect(ExtendedSymbolInformation element) {
+    showInheritedMembers = false;
     view.hide();
     openHelper.openLocation(element.getInfo().getLocation());
   }
 
   @Override
   public void onCancel() {
-    view.hide();
+    showInheritedMembers = false;
     activeEditor.setFocus();
   }
 }
