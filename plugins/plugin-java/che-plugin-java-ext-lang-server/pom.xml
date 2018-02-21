@@ -107,16 +107,6 @@
             <artifactId>org.eclipse.ltk.core.refactoring</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.text</groupId>
-            <artifactId>org.eclipse.text</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>org.eclipse.equinox.common</artifactId>
-                    <groupId>org.eclipse.equinox</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
