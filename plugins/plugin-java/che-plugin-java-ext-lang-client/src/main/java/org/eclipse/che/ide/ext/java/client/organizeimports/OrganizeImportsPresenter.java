@@ -179,7 +179,7 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
                           applyWorkspaceEditAction.applyWorkspaceEdit(result.getWorkspaceEdit());
                         } finally {
                           clientServerEventService.sendFileTrackingResumeEvent();
-                          view.hide();
+                          view.close();
                         }
                       })
                   .catchError(
@@ -190,7 +190,7 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
                           notificationManager.notify(title, message, FAIL, FLOAT_MODE);
                         } finally {
                           clientServerEventService.sendFileTrackingResumeEvent();
-                          view.hide();
+                          view.close();
                         }
                       });
             });
