@@ -25,6 +25,9 @@ import {editingProgress} from '../project-source-selector-editing-progress';
  * @author Oleksii Kurinnyi
  */
 export class AddImportProjectService {
+
+  static $inject = ['templateSelectorSvc', 'importBlankProjectService', 'importGitProjectService', 'importGithubProjectService', 'importZipProjectService'];
+
   /**
    * Template selector service.
    */
@@ -56,7 +59,6 @@ export class AddImportProjectService {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor(templateSelectorSvc: TemplateSelectorSvc, importBlankProjectService: ImportBlankProjectService, importGitProjectService: ImportGitProjectService, importGithubProjectService: ImportGithubProjectService, importZipProjectService: ImportZipProjectService) {
     this.templateSelectorSvc = templateSelectorSvc;

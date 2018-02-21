@@ -148,7 +148,7 @@ public class CommitFilesByMultiSelectTest {
     // Edit GreetingController.java
     git.closeGitInfoPanel();
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        PATH_FOR_EXPAND_SECOND_MODULE, 1, "AppController.java");
+        PATH_FOR_EXPAND_SECOND_MODULE, "AppController.java");
     loader.waitOnClosed();
     editor.setCursorToLine(16);
     editor.typeTextIntoEditor("//" + CHANGE_CONTENT);

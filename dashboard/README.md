@@ -137,7 +137,8 @@ list-projects
 ## AngularJS recommandation
 As classes are available, the controller will be designed as es6 classes.
 
-All injection required will be done through the constructor by adding also the @ngInject annotation.
+All injection required will be done through the constructor by adding also the  static $inject = ['$toBeInjected']; line.
+
 
 Also properties are bound with this. scope (so avoid to use $scope in injection as this will be more aligned with AngularJS 2.0 where scope will disappear)
 
@@ -149,9 +150,10 @@ example
  */
 class CheToggleCtrl {
 
+  static $inject = ['$http'];
+
   /**
    * Constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor ($http) {
     this.$http = $http; // to use $http in other methods, use this.$http

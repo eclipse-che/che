@@ -21,6 +21,9 @@ interface ICheClipboardScope extends ng.IScope {
  * @author Oleksii Orel
  */
 export class CheClipboard implements ng.IDirective {
+
+  static $inject = ['$window', '$log'];
+
   restrict = 'E';
   replace = true;
   templateUrl = 'components/widget/copy-clipboard/che-clipboard.html';
@@ -30,10 +33,8 @@ export class CheClipboard implements ng.IDirective {
   private $window: ng.IWindowService;
   private $log: ng.ILogService;
 
-
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($window: ng.IWindowService, $log: ng.ILogService) {
     this.$window = $window;

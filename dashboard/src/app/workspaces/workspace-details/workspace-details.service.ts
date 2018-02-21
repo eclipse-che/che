@@ -37,6 +37,9 @@ interface ISection {
  * @author Oleksii Orel
  */
 export class WorkspaceDetailsService {
+
+  static $inject = ['$log', '$q', 'cheWorkspace', 'cheNotification', 'ideSvc', 'createWorkspaceSvc', 'workspaceDetailsProjectsService', 'cheService', 'chePermissions'];
+
   /**
    * Logging service.
    */
@@ -79,7 +82,6 @@ export class WorkspaceDetailsService {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor (
     $log: ng.ILogService,

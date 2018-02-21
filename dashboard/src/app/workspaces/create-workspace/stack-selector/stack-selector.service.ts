@@ -19,6 +19,9 @@ import {Observable} from '../../../../components/utils/observable';
  * @author Oleksii Kurinnyi
  */
 export class StackSelectorSvc extends Observable<any> {
+
+  static $inject = ['$log', '$q', 'cheStack'];
+
   /**
    * Log service.
    */
@@ -38,7 +41,6 @@ export class StackSelectorSvc extends Observable<any> {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($log: ng.ILogService, $q: ng.IQService, cheStack: CheStack) {
     super();

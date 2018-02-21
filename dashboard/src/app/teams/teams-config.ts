@@ -124,7 +124,7 @@ export class TeamsConfig {
     };
 
     // config routes
-    register.app.config(function ($routeProvider: che.route.IRouteProvider) {
+    register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
       $routeProvider.accessWhen('/team/create', {
         title: 'New Team',
         templateUrl: 'app/teams/create-team/create-team.html',
@@ -134,6 +134,6 @@ export class TeamsConfig {
           check: ['$q', 'cheTeam', checkPersonalTeam]
         }
       }).accessWhen('/team/:teamName*', locationProvider);
-    });
+    }]);
   }
 }

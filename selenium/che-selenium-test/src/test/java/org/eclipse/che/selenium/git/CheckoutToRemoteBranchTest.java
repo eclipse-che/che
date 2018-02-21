@@ -202,7 +202,7 @@ public class CheckoutToRemoteBranchTest {
         PROJECT_NAME2 + "/src/main/java/helloworld", "GreetingController.java");
     loader.waitOnClosed();
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        PROJECT_NAME2 + "/src/main/webapp", 3, "index.jsp");
+        PROJECT_NAME2 + "/src/main/webapp", "index.jsp");
     loader.waitOnClosed();
     projectExplorer.openItemByVisibleNameInExplorer("GreetingController.java");
     editor.waitTextIntoEditor(uniqueValue);

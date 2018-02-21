@@ -19,6 +19,9 @@ import {editingProgress, IEditingProgress} from '../../project-source-selector-e
  * @author Oleksii Kurinnyi
  */
 export class TemplateSelectorSvc implements IEditingProgress {
+
+  static $inject = ['$filter', '$q', 'cheProjectTemplate'];
+
   /**
    * Filter service.
    */
@@ -38,7 +41,6 @@ export class TemplateSelectorSvc implements IEditingProgress {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($filter: ng.IFilterService, $q: ng.IQService, cheProjectTemplate: CheProjectTemplate) {
     this.$filter = $filter;

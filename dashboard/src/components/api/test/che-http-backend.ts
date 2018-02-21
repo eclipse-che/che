@@ -16,6 +16,8 @@ import {CheAPIBuilder} from '../builder/che-api-builder.factory';
  * @author Florent Benoit
  */
 export class CheHttpBackend {
+  static $inject = ['$httpBackend', 'cheAPIBuilder'];
+
   private $httpBackend: ng.IHttpBackendService;
   private projectsPerWorkspace: Map<string, any>;
   private workspaces: Map<string, any>;

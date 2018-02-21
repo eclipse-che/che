@@ -19,6 +19,8 @@ import {ConfirmDialogService} from '../../../../../components/service/confirm-di
  */
 export class FactoryInformationController {
 
+  static $inject = ['$scope', 'cheAPI', 'cheNotification', '$location', '$log', '$timeout', 'lodash', '$filter', '$q', 'confirmDialogService'];
+
   private confirmDialogService: ConfirmDialogService;
   private cheAPI: CheAPI;
   private cheNotification: CheNotification;
@@ -47,7 +49,6 @@ export class FactoryInformationController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope,
               cheAPI: CheAPI,

@@ -25,6 +25,9 @@ import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.f
  * @author Oleksii Kurinnyi
  */
 export class StackSelectorController {
+
+  static $inject = ['$filter', '$mdDialog', '$q', 'lodash', 'cheStack', 'cheWorkspace', 'confirmDialogService', '$location', 'cheBranding', 'cheEnvironmentRegistry', 'stackSelectorSvc'];
+
   /**
    * Filter service.
    */
@@ -140,7 +143,6 @@ export class StackSelectorController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($filter: ng.IFilterService,
               $mdDialog: ng.material.IDialogService,

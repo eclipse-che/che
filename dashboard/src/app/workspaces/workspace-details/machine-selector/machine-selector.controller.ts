@@ -31,6 +31,9 @@ type machine = {
  * @author Oleksii Orel
  */
 export class MachineSelectorController {
+
+  static $inject = ['$scope', 'cheEnvironmentRegistry', 'workspaceDetailsService'];
+
   /**
    * The selected machine.
    */
@@ -74,7 +77,6 @@ export class MachineSelectorController {
 
   /**
    * Default constructor that is using resource injection.
-   * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope, cheEnvironmentRegistry: CheEnvironmentRegistry, workspaceDetailsService: WorkspaceDetailsService) {
     this.$scope = $scope;

@@ -22,6 +22,10 @@ import {CheUser} from '../../../../components/api/che-user.factory';
  * @author Ann Shumilova
  */
 export class ListTeamMembersController {
+
+  static $inject = ['cheTeam', 'chePermissions', 'cheInvite', 'cheUser', 'cheProfile', 'confirmDialogService', '$mdDialog',
+      '$q', 'cheNotification', 'lodash', '$location', 'teamDetailsService', '$scope', 'cheListHelperFactory'];
+
   /**
    * Location service.
    */
@@ -98,7 +102,6 @@ export class ListTeamMembersController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(cheTeam: che.api.ICheTeam,
               chePermissions: che.api.IChePermissions,

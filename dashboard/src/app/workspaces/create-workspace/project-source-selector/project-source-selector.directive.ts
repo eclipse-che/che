@@ -21,6 +21,9 @@ export interface IProjectSourceSelectorScope extends ng.IScope {
  * @author Oleksii Orel
  */
 export class ProjectSourceSelector implements ng.IDirective {
+
+  static $inject = ['$timeout'];
+
   restrict: string = 'E';
   templateUrl: string = 'app/workspaces/create-workspace/project-source-selector/project-source-selector.html';
   replace: boolean = true;
@@ -36,7 +39,6 @@ export class ProjectSourceSelector implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($timeout: ng.ITimeoutService) {
     this.$timeout = $timeout;

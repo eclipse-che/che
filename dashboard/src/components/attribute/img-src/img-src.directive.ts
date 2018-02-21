@@ -16,6 +16,9 @@
  * @author Oleksii Kurinnyi
  */
 export class ImgSrc implements ng.IDirective {
+
+  static $inject = ['$http', 'userDashboardConfig'];
+
   $http: ng.IHttpService;
   isDev: boolean;
 
@@ -23,7 +26,6 @@ export class ImgSrc implements ng.IDirective {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($http: ng.IHttpService, userDashboardConfig: any) {
     this.$http = $http;

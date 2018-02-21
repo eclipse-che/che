@@ -23,6 +23,8 @@ interface ICheLogsOutputScope extends ng.IScope {
  */
 export class CheLogsOutput implements ng.IDirective {
 
+  static $inject = ['$timeout'];
+
   restrict = 'E';
   templateUrl = 'components/widget/logs-output/che-logs-output.html';
 
@@ -38,7 +40,6 @@ export class CheLogsOutput implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($timeout: ng.ITimeoutService) {
     this.$timeout = $timeout;

@@ -36,7 +36,6 @@ export class AddProjectPopoverController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor() {
     this.isOpen = false;

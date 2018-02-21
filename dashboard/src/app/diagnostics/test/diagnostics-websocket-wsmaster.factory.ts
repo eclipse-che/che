@@ -18,6 +18,8 @@ import {DiagnosticCallback} from '../diagnostic-callback';
  */
 export class DiagnosticsWebsocketWsMaster {
 
+  static $inject = ['cheWebsocket', '$timeout'];
+
   /**
    * Websocket handling.
    */
@@ -30,7 +32,6 @@ export class DiagnosticsWebsocketWsMaster {
 
   /**
    * Default constructor
-   * @ngInject for Dependency injection
    */
   constructor(cheWebsocket: CheWebsocket, $timeout: ng.ITimeoutService) {
     this.cheWebsocket = cheWebsocket;

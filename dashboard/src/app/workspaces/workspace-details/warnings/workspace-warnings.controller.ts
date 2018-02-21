@@ -27,7 +27,6 @@ export class WorkspaceWarningsController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor() {
     this.warnings = [];

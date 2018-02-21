@@ -18,6 +18,9 @@ import {ICheDropZoneEventObject} from './che-dropzone.directive';
  * @author Florent Benoit
  */
 export class CheDropZoneCtrl {
+
+  static $inject = ['$scope', 'lodash'];
+
   $scope: ng.IScope;
   lodash: any;
   HOVER_KO_CLASS = 'che-dropzone-hover-ko';
@@ -29,7 +32,6 @@ export class CheDropZoneCtrl {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($scope: ng.IScope, lodash: any) {
     this.$scope = $scope;

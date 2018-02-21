@@ -18,6 +18,9 @@ import {TeamDetailsService} from '../team-details.service';
  */
 export class ListTeamWorkspacesController {
 
+  static $inject = ['cheTeam', 'chePermissions', 'cheUser', 'cheWorkspace', 'cheNotification', 'lodash', '$mdDialog', '$q', 'teamDetailsService',
+'$scope', 'cheListHelperFactory'];
+
   /**
    * Team API interaction.
    */
@@ -71,7 +74,6 @@ export class ListTeamWorkspacesController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(cheTeam: che.api.ICheTeam, chePermissions: che.api.IChePermissions, cheUser: any, cheWorkspace: any,
               cheNotification: any, lodash: any, $mdDialog: angular.material.IDialogService, $q: ng.IQService,

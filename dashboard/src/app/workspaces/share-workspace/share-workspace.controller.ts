@@ -27,6 +27,10 @@ interface ISharedWorkspaceUser extends che.IUser {
  * @author Ann Shumilova
  */
 export class ShareWorkspaceController {
+
+  static $inject = ['cheWorkspace', 'cheUser', 'cheNotification', '$mdDialog', '$document', '$mdConstant', '$route', '$q', 'lodash',
+   'confirmDialogService', 'cheTeam', '$log', '$scope', 'cheListHelperFactory'];
+
   /**
    * Workspace API interaction.
    */
@@ -93,7 +97,6 @@ export class ShareWorkspaceController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(cheWorkspace: CheWorkspace,
               cheUser: CheUser,
@@ -110,9 +113,6 @@ export class ShareWorkspaceController {
               $log: ng.ILogService,
               $scope: ng.IScope,
               cheListHelperFactory: che.widget.ICheListHelperFactory) {
-    /* tslint:disable */
-    'ngInject';
-    /* tslint:enable */
 
     this.cheWorkspace = cheWorkspace;
     this.cheUser = cheUser;

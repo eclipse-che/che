@@ -21,6 +21,9 @@ interface IUniqueStackNameValidatorAttributes extends ng.IAttributes {
  * @author Ann Shumilova
  */
 export class UniqueStackNameValidator implements ng.IDirective {
+
+  static $inject = ['cheAPI', '$q'];
+
   restrict = 'A';
   require = 'ngModel';
 
@@ -29,7 +32,6 @@ export class UniqueStackNameValidator implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor (cheAPI: CheAPI, $q: ng.IQService) {
     this.cheAPI = cheAPI;

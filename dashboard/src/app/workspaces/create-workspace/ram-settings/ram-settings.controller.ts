@@ -26,6 +26,9 @@ type machine = {
  * @author Oleksii Kurinnyi
  */
 export class RamSettingsController {
+
+  static $inject = ['$filter', '$scope'];
+
   /**
    * Filter service.
    */
@@ -49,7 +52,6 @@ export class RamSettingsController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($filter: ng.IFilterService, $scope: ng.IScope) {
     this.$filter = $filter;

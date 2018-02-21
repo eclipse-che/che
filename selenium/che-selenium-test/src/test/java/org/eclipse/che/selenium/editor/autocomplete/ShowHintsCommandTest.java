@@ -80,8 +80,8 @@ public class ShowHintsCommandTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     console.closeProcessesArea();
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(
+        PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples", "AppController.java");
     loader.waitOnClosed();
     projectExplorer.openItemByVisibleNameInExplorer("HintTestClass.java");
     loader.waitOnClosed();

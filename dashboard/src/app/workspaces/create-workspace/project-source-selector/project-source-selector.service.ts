@@ -21,6 +21,9 @@ import {RandomSvc} from '../../../../components/utils/random.service';
  * @author Oleksii Kurinnyi
  */
 export class ProjectSourceSelectorService {
+
+  static $inject = ['randomSvc', 'addImportProjectService', 'editProjectService'];
+
   /**
    * Service for project adding or importing.
    */
@@ -44,7 +47,6 @@ export class ProjectSourceSelectorService {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor(randomSvc: RandomSvc, addImportProjectService: AddImportProjectService, editProjectService: EditProjectService) {
     this.randomSvc = randomSvc;

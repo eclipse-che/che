@@ -12,11 +12,9 @@ package org.eclipse.che.multiuser.machine.authentication.server;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.core.NotFoundException;
 import org.testng.annotations.Test;
 
 /**
@@ -31,26 +29,21 @@ public class MachineTokenRegistryTest {
     final MachineTokenRegistry registry = new MachineTokenRegistry();
 
     final Map<String, String> userToToken = new HashMap<>();
-    userToToken.put("user1", registry.generateToken("user1", "workspace123"));
-    userToToken.put("user2", registry.generateToken("user2", "workspace123"));
-    userToToken.put("user3", registry.generateToken("user3", "workspace123"));
-    registry.generateToken("user1", "workspace234");
+    userToToken.put("user1", registry.getOrCreateToken("user1", "workspace123"));
+    userToToken.put("user2", registry.getOrCreateToken("user2", "workspace123"));
+    userToToken.put("user3", registry.getOrCreateToken("user3", "workspace123"));
+    final String tokenNotToRemove = registry.getOrCreateToken("user1", "workspace234");
 
     final Map<String, String> removedTokens = registry.removeTokens("workspace123");
 
     assertEquals(removedTokens, userToToken);
-    assertTrue(exists(registry, "user1", "workspace234"));
-    assertFalse(exists(registry, "user1", "workspace123"));
-    assertFalse(exists(registry, "user2", "workspace123"));
-    assertFalse(exists(registry, "user3", "workspace123"));
-  }
 
-  private static boolean exists(MachineTokenRegistry registry, String user, String workspace) {
-    try {
-      registry.getOrCreateToken(user, workspace);
-      return true;
-    } catch (NotFoundException e) {
-      return false;
-    }
+    assertEquals(registry.getOrCreateToken("user1", "workspace234"), tokenNotToRemove);
+    assertFalse(
+        registry.getOrCreateToken("user1", "workspace123").equals(userToToken.get("user1")));
+    assertFalse(
+        registry.getOrCreateToken("user2", "workspace123").equals(userToToken.get("user2")));
+    assertFalse(
+        registry.getOrCreateToken("user2", "workspace123").equals(userToToken.get("user3")));
   }
 }

@@ -18,6 +18,8 @@
  */
 export class ExportWorkspaceController {
 
+  static $inject = ['$mdDialog'];
+
   $mdDialog: ng.material.IDialogService;
 
   workspaceId: string;
@@ -25,7 +27,6 @@ export class ExportWorkspaceController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;

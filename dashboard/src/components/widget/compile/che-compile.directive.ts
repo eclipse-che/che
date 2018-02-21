@@ -17,13 +17,14 @@
  */
 export class CheCompile implements ng.IDirective {
 
+  static $inject = ['$compile'];
+
   restrict = 'A';
 
   $compile: ng.ICompileService;
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor ($compile: ng.ICompileService) {
     this.$compile = $compile;

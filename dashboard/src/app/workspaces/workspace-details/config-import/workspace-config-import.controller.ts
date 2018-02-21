@@ -19,6 +19,9 @@ import {StackValidationService} from '../../../stacks/stack-details/stack-valida
  * @author Oleksii Kurinnyi
  */
 export class WorkspaceConfigImportController {
+
+  static $inject = ['$log', '$scope', '$timeout', 'cheErrorMessagesService', 'stackValidationService'];
+
   $log: ng.ILogService;
   $scope: ng.IScope;
   $timeout: ng.ITimeoutService;
@@ -45,11 +48,12 @@ export class WorkspaceConfigImportController {
   newWorkspaceConfig: any;
   workspaceConfigOnChange: Function;
 
+
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor($log: ng.ILogService, $scope: ng.IScope, $timeout: ng.ITimeoutService, cheErrorMessagesService: CheErrorMessagesService, stackValidationService: StackValidationService) {
+  constructor($log: ng.ILogService, $scope: ng.IScope, $timeout: ng.ITimeoutService, cheErrorMessagesService: CheErrorMessagesService,
+     stackValidationService: StackValidationService) {
     this.$log = $log;
     this.$scope = $scope;
     this.$timeout = $timeout;

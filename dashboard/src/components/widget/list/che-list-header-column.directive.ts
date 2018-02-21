@@ -22,6 +22,9 @@ interface ICheListHeaderColumnScope extends ng.IScope {
  * @author Oleksii Orel
  */
 export class CheListHeaderColumn implements ng.IDirective {
+
+  static $inject = ['$timeout'];
+
   restrict = 'E';
   replace = true;
   templateUrl = 'components/widget/list/che-list-header-column.html';
@@ -38,7 +41,6 @@ export class CheListHeaderColumn implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($timeout: ng.ITimeoutService) {
     this.$timeout = $timeout;

@@ -34,6 +34,8 @@
  */
 
 export class DemoSourceRender {
+  static $inject = ['$compile'];
+
   $compile: ng.ICompileService;
 
   restrict: string = 'EA';
@@ -41,7 +43,6 @@ export class DemoSourceRender {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor ($compile: ng.ICompileService) {
     this.$compile = $compile;

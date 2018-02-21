@@ -19,11 +19,12 @@ import {OpenshiftEnvironmentManager} from './openshift-environment-manager';
 
 export class CheEnvironmentManager {
 
+  static $inject = ['$log'];
+
   private $log: ng.ILogService;
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($log: ng.ILogService) {
     this.$log = $log;

@@ -19,9 +19,10 @@ import {CheAPIBuilder} from '../builder/che-api-builder.factory';
  */
 export class CheHttpBackendFactory extends CheHttpBackend {
 
+  static $inject = ['$httpBackend', 'cheAPIBuilder'];
+
   /**
    * Default constructor
-   * @ngInject for Dependency injection
    */
   constructor($httpBackend: ng.IHttpBackendService,
               cheAPIBuilder: CheAPIBuilder) {

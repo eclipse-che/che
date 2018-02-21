@@ -50,7 +50,7 @@ public class CheckFactoryWithPerClickCreatePolicyTest {
   }
 
   @Test
-  public void checkFactoryAcceptingWithPerClickPolicy() throws Exception {
+  public void checkFactoryAcceptingWithPerClickPolicy() {
     // accept factory
     dashboard.open();
     testFactory.open(seleniumWebDriver);

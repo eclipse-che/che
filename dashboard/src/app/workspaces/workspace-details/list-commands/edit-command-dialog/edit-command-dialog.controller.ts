@@ -18,6 +18,9 @@ import {ListCommandsController} from '../list-commands.controller';
  * @author Oleksii Orel
  */
 export class EditCommandDialogController {
+
+  static $inject = ['$mdDialog'];
+
   $mdDialog: ng.material.IDialogService;
   index: number;
   name: string;
@@ -29,7 +32,6 @@ export class EditCommandDialogController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;

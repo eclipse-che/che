@@ -30,6 +30,9 @@ interface ICheReloadHrefAttributes extends ng.IAttributes {
  * @author Florent Benoit
  */
 export class CheReloadHref implements ng.IDirective {
+
+  static $inject = ['$location', '$route'];
+
   restrict = 'A';
 
   $location: ng.ILocationService;
@@ -37,7 +40,6 @@ export class CheReloadHref implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($location: ng.ILocationService,
               $route: ng.route.IRouteService) {

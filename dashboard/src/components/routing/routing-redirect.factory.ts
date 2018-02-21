@@ -17,12 +17,13 @@
  */
 export class RoutingRedirect {
 
+  static $inject = ['$location'];
+
   $location: ng.ILocationService;
   routeCallbacks: Array<any>;
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($location: ng.ILocationService) {
     this.$location = $location;

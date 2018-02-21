@@ -24,13 +24,15 @@ export type keycloakUserInfo = {
  * @author Oleksii Kurinnyi
  */
 export class CheKeycloak {
+
+  static $inject = ['$q', 'keycloakAuth'];
+
   $q: ng.IQService;
   keycloak: any;
   keycloakConfig: any;
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor($q: ng.IQService, keycloakAuth: any) {
     this.$q = $q;

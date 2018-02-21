@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import org.eclipse.che.maven.data.MavenArtifact;
 import org.eclipse.che.maven.data.MavenArtifactKey;
+import org.eclipse.che.maven.data.MavenRemoteRepository;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
 import org.eclipse.che.plugin.maven.server.MavenWrapperManager;
@@ -173,6 +174,7 @@ public class ClasspathManager {
     IJavaProject javaProject =
         JavaModelManager.getJavaModelManager().getJavaModel().getJavaProject(projectPath);
     try {
+      MavenProject mavenProject = projectManager.findMavenProject(javaProject.getProject());
       IType type = javaProject.findType(fqn);
       if (type != null && type.isBinary()) {
         IClassFile classFile = type.getClassFile();
@@ -184,7 +186,11 @@ public class ClasspathManager {
               IPackageFragmentRoot root = (IPackageFragmentRoot) element;
 
               if (root.getSourceAttachmentPath() == null) {
-                return downloadSources(root);
+                return downloadSources(
+                    root,
+                    mavenProject.getRemoteRepositories() != null
+                        ? mavenProject.getRemoteRepositories()
+                        : Collections.emptyList());
               }
             }
           }
@@ -197,7 +203,9 @@ public class ClasspathManager {
     return false;
   }
 
-  private boolean downloadSources(IPackageFragmentRoot fragmentRoot) throws JavaModelException {
+  private boolean downloadSources(
+      IPackageFragmentRoot fragmentRoot, List<MavenRemoteRepository> repositories)
+      throws JavaModelException {
     fragmentRoot.getAdapter(MavenArtifactKey.class);
     IClasspathEntry classpathEntry = fragmentRoot.getResolvedClasspathEntry();
     MavenArtifactKey artifactKey = getArtifactKey(classpathEntry);
@@ -216,8 +224,7 @@ public class ClasspathManager {
                 artifactKey.getVersion(),
                 artifactKey.getPackaging(),
                 SOURCES);
-        MavenArtifact mavenArtifact =
-            mavenServer.resolveArtifact(sourceKey, Collections.emptyList());
+        MavenArtifact mavenArtifact = mavenServer.resolveArtifact(sourceKey, repositories);
         if (mavenArtifact.isResolved()) {
           updateClasspath(
               projectManager.findMavenProject(fragmentRoot.getJavaProject().getProject()));

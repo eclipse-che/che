@@ -30,6 +30,7 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -87,7 +88,14 @@ public class DirectUrlFactoryWithSpecificBranch {
     events.waitExpectedMessage(
         "Project: gitPullTest | cloned from: gitPullTest | remote branch: refs/remotes/origin/contrib-12092015 | local branch: contrib-12092015",
         UPDATING_PROJECT_TIMEOUT_SEC);
-    projectExplorer.selectItem("gitPullTest");
+
+    try {
+      projectExplorer.selectItem("gitPullTest");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8616");
+    }
+
     pullRequestPanel.waitOpenPanel();
 
     try {

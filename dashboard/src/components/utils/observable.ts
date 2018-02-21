@@ -33,7 +33,6 @@ export class Observable<T> implements IObservable<T> {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
   constructor() {
     this.actions = [];

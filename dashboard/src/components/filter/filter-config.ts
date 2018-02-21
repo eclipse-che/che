@@ -16,7 +16,7 @@ export class FilterConfig {
 
   constructor(register: che.IRegisterService) {
     register.filter('numberRound', CheNumberRoundFilter.filter);
-    register.filter('changeMemoryUnit', ChangeMemoryUnitFilter.filter);
+    register.filter('changeMemoryUnit', ['$log', ChangeMemoryUnitFilter.filter]);
   }
 
 }

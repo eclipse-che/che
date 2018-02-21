@@ -25,6 +25,9 @@ interface IDropdonwMenuRootScope extends ng.IRootScopeService {
  * @author Oleksii Kurinnyi
  */
 export class NavbarDropdownMenu implements ng.IDirective {
+
+  static $inject = ['$timeout', '$document', '$rootScope'];
+
   /**
    * Timeout service.
    */
@@ -58,7 +61,6 @@ export class NavbarDropdownMenu implements ng.IDirective {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($timeout: ng.ITimeoutService,
               $document: ng.IDocumentService,

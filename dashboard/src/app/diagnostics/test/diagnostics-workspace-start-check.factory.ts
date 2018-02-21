@@ -22,6 +22,8 @@ import {CheJsonRpcMasterApi} from '../../../components/api/json-rpc/che-json-rpc
  */
 export class DiagnosticsWorkspaceStartCheck {
 
+  static $inject = ['$q', 'lodash', 'cheWorkspace', 'diagnosticsRunningWorkspaceCheck', 'cheBranding', '$location', 'cheJsonRpcApi', 'userDashboardConfig', 'keycloakAuth', 'proxySettings'];
+
   /**
    * Q service for creating delayed promises.
    */
@@ -84,7 +86,6 @@ export class DiagnosticsWorkspaceStartCheck {
 
   /**
    * Default constructor
-   * @ngInject for Dependency injection
    */
   constructor($q: ng.IQService,
               lodash: any,

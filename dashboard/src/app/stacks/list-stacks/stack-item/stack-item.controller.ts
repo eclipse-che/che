@@ -18,6 +18,8 @@
  */
 export class StackItemController {
 
+  static $inject = ['$location', 'lodash'];
+
   $location: ng.ILocationService;
   lodash: any;
 
@@ -25,7 +27,6 @@ export class StackItemController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor($location: ng.ILocationService,
               lodash: any) {

@@ -21,6 +21,9 @@ import {AddImportProjectService} from '../add-import-project.service';
  * @author Oleksii Kurinnyi
  */
 export class TemplateSelectorController {
+
+  static $inject = ['$filter', '$scope', 'addImportProjectService', 'templateSelectorSvc', 'stackSelectorSvc', 'cheListHelperFactory'];
+
   /**
    * Filter service.
    */
@@ -60,9 +63,9 @@ export class TemplateSelectorController {
 
   /**
    * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
    */
-  constructor($filter: ng.IFilterService, $scope: ng.IScope, addImportProjectService: AddImportProjectService, templateSelectorSvc: TemplateSelectorSvc, stackSelectorSvc: StackSelectorSvc, cheListHelperFactory: che.widget.ICheListHelperFactory) {
+  constructor($filter: ng.IFilterService, $scope: ng.IScope, addImportProjectService: AddImportProjectService, templateSelectorSvc: TemplateSelectorSvc,
+     stackSelectorSvc: StackSelectorSvc, cheListHelperFactory: che.widget.ICheListHelperFactory) {
 
     this.$filter = $filter;
     this.templateSelectorSvc = templateSelectorSvc;

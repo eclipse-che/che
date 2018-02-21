@@ -23,6 +23,10 @@ import {AddImportProjectService} from '../add-import-project.service';
  * @author Oleksii Kurinnyi
  */
 export class ImportGithubProjectController {
+
+  static $inject = ['$q', '$mdDialog', '$location', '$browser', '$scope', 'githubPopup', 'cheBranding', 'githubOrganizationNameResolver',
+'importGithubProjectService', 'cheListHelperFactory', 'addImportProjectService', 'keycloakAuth'];
+
   /**
    * Promises service.
    */
@@ -115,10 +119,9 @@ export class ImportGithubProjectController {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor ($q: ng.IQService, $mdDialog: ng.material.IDialogService, $location: ng.ILocationService,
-               $browser: ng.IBrowserService, $scope: ng.IScope, githubPopup: any, cheBranding: CheBranding,
+               $browser: any, $scope: ng.IScope, githubPopup: any, cheBranding: CheBranding,
                githubOrganizationNameResolver: any, importGithubProjectService: ImportGithubProjectService,
                cheListHelperFactory: che.widget.ICheListHelperFactory, addImportProjectService: AddImportProjectService, keycloakAuth: any) {
     this.$q = $q;

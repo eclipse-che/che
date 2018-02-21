@@ -43,6 +43,9 @@ const STOPPING = WorkspaceStatus[WorkspaceStatus.STOPPING];
 
 
 export class CheWorkspaceStatusButton {
+
+  static $inject = ['cheWorkspace'];
+
   restrict = 'E';
   templateUrl = 'app/workspaces/workspace-details/status-button/workspace-status-button.html';
 
@@ -58,7 +61,6 @@ export class CheWorkspaceStatusButton {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
   constructor(cheWorkspace: CheWorkspace) {
     this.cheWorkspace = cheWorkspace;
