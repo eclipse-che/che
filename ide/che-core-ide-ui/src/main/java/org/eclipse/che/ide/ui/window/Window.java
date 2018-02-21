@@ -21,13 +21,11 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.FocusImpl;
 import com.google.web.bindery.event.shared.EventBus;
-import elemental.js.dom.JsElement;
 import javax.inject.Inject;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.ui.button.ButtonAlignment;
 import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
 import org.eclipse.che.ide.ui.window.event.WindowOpenedEvent;
-import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * Base class to create a window based panel with user defined widgets. In general, window contains
@@ -75,10 +73,10 @@ public abstract class Window implements IsWidget {
     this.keyBinding = keyBinding;
   }
 
-    @Inject
-    protected void setEventBus(EventBus eventBus) {
-        this.eventBus = eventBus;
-    }
+  @Inject
+  protected void setEventBus(EventBus eventBus) {
+    this.eventBus = eventBus;
+  }
 
   // Configuration section
 
@@ -250,6 +248,7 @@ public abstract class Window implements IsWidget {
       keyBinding.disable();
     }
 
+    eventBus.fireEvent(new WindowOpenedEvent());
     onShow();
 
     windowManager.bringToFront(this);
@@ -264,9 +263,7 @@ public abstract class Window implements IsWidget {
   }
 
   /** Perform user actions after widget show. */
-  protected void onShow() {
-      eventBus.fireEvent(new WindowOpenedEvent());
-  }
+  protected void onShow() {}
 
   /** Perform user actions after widget hide. */
   protected void onHide() {}

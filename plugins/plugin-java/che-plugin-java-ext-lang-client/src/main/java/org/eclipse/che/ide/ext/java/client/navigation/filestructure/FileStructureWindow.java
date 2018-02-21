@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.java.client.navigation.filestructure;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -18,10 +19,20 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import elemental.events.Event;
 import java.util.List;
+import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.ext.java.client.JavaExtension;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
+import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 import org.eclipse.che.ide.ui.window.Window;
+import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
+import org.eclipse.che.ide.util.input.SignalEvent;
+import org.eclipse.che.ide.util.input.SignalEventUtils;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.plugin.languageserver.ide.filestructure.ElementSelectionDelegate;
 import org.eclipse.che.plugin.languageserver.ide.filestructure.FileStructureView;
@@ -40,6 +51,9 @@ public final class FileStructureWindow extends Window
   private static FileStructureWindowUiBinder UI_BINDER =
       GWT.create(FileStructureWindowUiBinder.class);
   private final FileStructureView view;
+  private final ActionManager actionManager;
+  private final PresentationFactory presentationFactor;
+  private final KeyBindingAgent keyBindingAgent;
 
   @UiField DockLayoutPanel treeContainer;
   @UiField Label showInheritedLabel;
@@ -47,9 +61,19 @@ public final class FileStructureWindow extends Window
   @UiField(provided = true)
   final JavaLocalizationConstant locale;
 
+  private ElementSelectionDelegate<ExtendedSymbolInformation> delegate;
+
   @Inject
-  public FileStructureWindow(NodeFactory nodeFactory, JavaLocalizationConstant locale) {
-    super(false);
+  public FileStructureWindow(
+      NodeFactory nodeFactory,
+      ActionManager actionManager,
+      PresentationFactory presentationFactor,
+      KeyBindingAgent keyBindingAgent,
+      JavaLocalizationConstant locale) {
+    super();
+    this.actionManager = actionManager;
+    this.presentationFactor = presentationFactor;
+    this.keyBindingAgent = keyBindingAgent;
     this.locale = locale;
     setWidget(UI_BINDER.createAndBindUi(this));
     view = new FileStructureView(nodeFactory);
@@ -62,25 +86,58 @@ public final class FileStructureWindow extends Window
         on ? locale.hideInheritedMembersLabel() : locale.showInheritedMembersLabel());
   }
 
-  public void setInput(List<ExtendedSymbolInformation> input) {
+  public void setInput(String title, List<ExtendedSymbolInformation> input) {
+    setTitle(title);
     view.setInput(input);
   }
 
-  /** {@inheritDoc} */
   @Override
-  public void show() {
-    super.show(view);
+  protected void onShow() {
     view.onShow();
   }
 
   @Override
   public void setDelegate(ElementSelectionDelegate<ExtendedSymbolInformation> delegate) {
     view.setDelegate(delegate);
+    this.delegate = delegate;
   }
 
   @Override
-  public void onClose() {
+  protected void onHide() {
     view.onClose();
-    super.hide();
+    delegate.onCancel();
+  }
+
+  @Override
+  public void onKeyPress(NativeEvent evt) {
+    handleKey(evt);
+  }
+
+  @Override
+  public void onEnterPress(NativeEvent evt) {
+    handleKey(evt);
+  }
+
+  private void handleKey(NativeEvent event) {
+    SignalEvent signalEvent = SignalEventUtils.create((Event) event, false);
+    CharCodeWithModifiers keyBinding =
+        keyBindingAgent.getKeyBinding(JavaExtension.JAVA_CLASS_STRUCTURE);
+    if (signalEvent == null || keyBinding == null) {
+      return;
+    }
+    int digest = CharCodeWithModifiers.computeKeyDigest(signalEvent);
+    if (digest == keyBinding.getKeyDigest()) {
+      Action action = actionManager.getAction(JavaExtension.JAVA_CLASS_STRUCTURE);
+      if (action != null) {
+        ActionEvent e = new ActionEvent(presentationFactor.getPresentation(action), actionManager);
+        action.update(e);
+
+        if (e.getPresentation().isEnabled()) {
+          event.preventDefault();
+          event.stopPropagation();
+          action.actionPerformed(e);
+        }
+      }
+    }
   }
 }
