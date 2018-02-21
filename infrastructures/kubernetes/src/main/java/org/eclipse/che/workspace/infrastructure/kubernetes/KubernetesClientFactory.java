@@ -69,8 +69,12 @@ public class KubernetesClientFactory {
   }
 
   /**
-   * Creates instance of {@link KubernetesClient}.
+   * Creates an instance of {@link KubernetesClient} that can be used to perform any operation
+   * related to a given workspace. </br> For all operations performed in the context of a given
+   * workspace (workspace start, workspace stop, etc ...), this method should be used to retrieve a
+   * Kubernetes client.
    *
+   * @param workspaceId Identifier of the workspace on which Kubernetes operations will be performed
    * @throws InfrastructureException if any error occurs on client instance creation.
    */
   public KubernetesClient create(String workspaceId) throws InfrastructureException {
@@ -80,7 +84,10 @@ public class KubernetesClientFactory {
   }
 
   /**
-   * Creates instance of {@link KubernetesClient}.
+   * Creates an instance of {@link KubernetesClient} that can be used to perform any operation
+   * <strong>that is not related to a given workspace</strong>. </br> For all operations performed
+   * in the context of a given workspace (workspace start, workspace stop, etc ...), the {@code
+   * create(String workspaceId)} method should be used to retrieve a Kubernetes client.
    *
    * @throws InfrastructureException if any error occurs on client instance creation.
    */

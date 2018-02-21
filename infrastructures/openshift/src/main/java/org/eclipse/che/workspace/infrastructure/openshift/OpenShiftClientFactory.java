@@ -91,13 +91,15 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
   }
 
   /**
-   * Creates an instance of {@link OpenShiftClient}. </br> <strong>Important note: </strong> In some
+   * Creates an instance of {@link OpenShiftClient} that can be used to perform any operation
+   * related to a given workspace. </br> <strong>Important note: </strong> However, in some
    * use-cases involving web sockets, the Openshift client may introduce connection leaks. That's
    * why this method should only be used for API calls that are specific to Openshift and thus not
-   * available in the `KubernetesClient` class: mainly route-related calls and project-related
-   * calls. For all other Kubernetes standard calls, just use the `create()` method to get a
-   * Kubernetes client.
+   * available in the {@link KubernetesClient} class: mainly route-related calls and project-related
+   * calls. For all other Kubernetes standard calls, prefer the {@code create(String workspaceId)}
+   * method that returns a Kubernetes client.
    *
+   * @param workspaceId Identifier of the workspace on which Openshift operations will be performed
    * @throws InfrastructureException if any error occurs on client instance creation.
    */
   public OpenShiftClient createOC(String workspaceId) throws InfrastructureException {
@@ -106,12 +108,16 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
   }
 
   /**
-   * Creates an instance of {@link OpenShiftClient}. </br> <strong>Important note: </strong> In some
-   * use-cases involving web sockets, the Openshift client may introduce connection leaks. That's
-   * why this method should only be used for API calls that are specific to Openshift and thus not
-   * available in the `KubernetesClient` class: mainly route-related calls and project-related
-   * calls. For all other Kubernetes standard calls, just use the `create()` method to get a
-   * Kubernetes client.
+   * Creates an instance of {@link OpenShiftClient} that can be used to perform any operation
+   * <strong>that is not related to a given workspace</strong>. </br> For operations performed in
+   * the context of a given workspace (workspace start, workspace stop, etc ...), the {@code
+   * createOC(String workspaceId)} method should be used to retrieve an Openshift client. </br>
+   * <strong>Important note: </strong> However in some use-cases involving web sockets, the
+   * Openshift client may introduce connection leaks. That's why this method should only be used for
+   * API calls that are specific to Openshift and thus not available in the {@link KubernetesClient}
+   * class: mainly route-related calls and project-related calls. For all other Kubernetes standard
+   * calls, just use the {@code create()} or {@code create(String workspaceId)} methods that return
+   * a Kubernetes client.
    *
    * @throws InfrastructureException if any error occurs on client instance creation.
    */
