@@ -103,9 +103,9 @@ public class AddWorkspaceToOrganizationTest {
     workspaces.waitWorkspaceIsPresent(org1.getName(), WORKSPACE_FOR_ADMIN_1);
     workspaces.waitWorkspaceIsPresent(org2.getName(), WORKSPACE_FOR_ADMIN_2);
     workspaces.waitWorkspaceIsPresent(suborgForAdminName, WORKSPACE_FOR_ADMIN_3);
-    assertTrue(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_FOR_ADMIN_1));
-    assertTrue(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_FOR_ADMIN_2));
-    assertTrue(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_FOR_ADMIN_3));
+    assertTrue(dashboard.isWorkspacePresentedInRecentList(WORKSPACE_FOR_ADMIN_1));
+    assertTrue(dashboard.isWorkspacePresentedInRecentList(WORKSPACE_FOR_ADMIN_2));
+    assertTrue(dashboard.isWorkspacePresentedInRecentList(WORKSPACE_FOR_ADMIN_3));
 
     // check that the Namespace link in workspace details correct
     checkNamespaceLink(org1.getName(), WORKSPACE_FOR_ADMIN_1);
@@ -138,12 +138,12 @@ public class AddWorkspaceToOrganizationTest {
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.waitWorkspaceIsPresent(org2.getName(), WORKSPACE_FOR_MEMBER_1);
     workspaces.waitWorkspaceIsPresent(suborgForMemberName, WORKSPACE_FOR_MEMBER_2);
-    assertTrue(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_FOR_MEMBER_1));
-    assertTrue(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_FOR_MEMBER_2));
+    assertTrue(dashboard.isWorkspacePresentedInRecentList(WORKSPACE_FOR_MEMBER_1));
+    assertTrue(dashboard.isWorkspacePresentedInRecentList(WORKSPACE_FOR_MEMBER_2));
 
     // check that workspaces names of other users are not exist in the Recent list
-    assertFalse(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_FOR_ADMIN_1));
-    assertFalse(dashboard.isWorkspaceNamePresentInRecentList(WORKSPACE_FOR_ADMIN_3));
+    assertFalse(dashboard.isWorkspacePresentedInRecentList(WORKSPACE_FOR_ADMIN_1));
+    assertFalse(dashboard.isWorkspacePresentedInRecentList(WORKSPACE_FOR_ADMIN_3));
 
     // check that the Namespace link in workspace details correct
     checkNamespaceLink(org2.getName(), WORKSPACE_FOR_MEMBER_1);
