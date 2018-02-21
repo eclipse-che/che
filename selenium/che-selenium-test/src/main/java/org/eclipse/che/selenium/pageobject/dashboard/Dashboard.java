@@ -35,6 +35,7 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.eclipse.che.selenium.pageobject.site.LoginPage;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -110,6 +111,7 @@ public class Dashboard {
     String LICENSE_NAG_MESSAGE_XPATH = "//div[contains(@class, 'license-message')]";
     String TOOLBAR_TITLE_NAME =
         "//div[contains(@class,'che-toolbar')]//span[contains(text(),'%s')]";
+    String WORKSPACE_NAME_IN_RECENT_LIST = "//span[@title='%s']";
   }
 
   @FindBy(id = Locators.DASHBOARD_TOOLBAR_TITLE)
@@ -280,6 +282,18 @@ public class Dashboard {
     List<WebElement> workspaces =
         seleniumWebDriver.findElements(By.xpath(Locators.RESENT_WS_NAVBAR));
     return !(workspaces.size() == 0);
+  }
+
+  public boolean isWorkspacePresentedInRecentList(String workspaceName) {
+    try {
+      return new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+          .until(
+              visibilityOfElementLocated(
+                  By.xpath(format(Locators.WORKSPACE_NAME_IN_RECENT_LIST, workspaceName))))
+          .isDisplayed();
+    } catch (TimeoutException ex) {
+      return false;
+    }
   }
 
   public void clickOnUsernameButton() {

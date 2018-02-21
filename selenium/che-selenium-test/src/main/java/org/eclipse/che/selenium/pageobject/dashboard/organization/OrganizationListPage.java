@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard.organization;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -228,7 +229,7 @@ public class OrganizationListPage {
    * @return list of values in the cells
    */
   public ArrayList<String> getValues(OrganizationListHeader header) {
-    String locator = String.format(Locators.ORGANIZATION_CELL_XPATH, header.getIndex());
+    String locator = format(Locators.ORGANIZATION_CELL_XPATH, header.getIndex());
     List<WebElement> cells = seleniumWebDriver.findElements(By.xpath(locator));
     ArrayList<String> values = new ArrayList<>();
     cells.forEach(
@@ -252,20 +253,19 @@ public class OrganizationListPage {
   }
 
   public void clickOnOrganization(String name) {
-    String locator = String.format(Locators.ORGANIZATION_XPATH, name);
+    String locator = format(Locators.ORGANIZATION_XPATH, name);
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(locator)));
     seleniumWebDriver.findElement(By.xpath(locator)).click();
   }
 
   public void clickOnDeleteButton(String name) {
-    String locator = String.format(Locators.ORGANIZATION_DELETE_XPATH, getOrganizationIndex(name));
+    String locator = format(Locators.ORGANIZATION_DELETE_XPATH, getOrganizationIndex(name));
     seleniumWebDriver.findElement(By.xpath(locator)).click();
   }
 
   public void clickCheckbox(String name) {
-    String locator =
-        String.format(Locators.ORGANIZATION_CHECKBOX_XPATH, getOrganizationIndex(name));
+    String locator = format(Locators.ORGANIZATION_CHECKBOX_XPATH, getOrganizationIndex(name));
     seleniumWebDriver.findElement(By.xpath(locator)).click();
   }
 
@@ -284,8 +284,13 @@ public class OrganizationListPage {
    * @param name
    */
   public void waitForOrganizationIsRemoved(String name) {
-    String xpath = String.format(Locators.ORGANIZATION_XPATH, name);
+    String xpath = format(Locators.ORGANIZATION_XPATH, name);
     this.waitForElementDisappearance(xpath);
+  }
+
+  public void waitOrganizationInList(String name) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.xpath(format(Locators.ORGANIZATION_XPATH, name))));
   }
 
   /**
