@@ -52,6 +52,7 @@
   <che-label-container che-label-name="">
     <che-button-default class="prifile-add-button"
                         che-button-title="Edit" name="editButton"
-                        ng-click="profileController.editProfile()"></che-button-default>
+                        ng-click="profileController.editProfile()"
+                        ng-disabled="profileController.cannotEdit"></che-button-default>
   </che-label-container>
 </md-content>
