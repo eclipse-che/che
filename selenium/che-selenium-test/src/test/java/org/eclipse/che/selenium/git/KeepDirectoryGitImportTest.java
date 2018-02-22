@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.selenium.git;
 
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.GO_BACK;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.GO_INTO;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.GO_BACK;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.GO_INTO;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;

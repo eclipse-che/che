@@ -10,18 +10,18 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.NODE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.BUILD;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.RUN;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -91,7 +91,8 @@ public class WorkingWithNodeWsTest {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
     // Perform run web nodeJs application
-    consoles.startCommandFromProcessesArea("dev-machine", BUILD, INSTALL_DEPENDENCIES_PROCESS);
+    consoles.startCommandFromProcessesArea(
+        "dev-machine", ContextMenuCommandGoals.BUILD, INSTALL_DEPENDENCIES_PROCESS);
     consoles.waitTabNameProcessIsPresent(INSTALL_DEPENDENCIES_PROCESS);
     consoles.waitExpectedTextIntoConsole("bower_components/angular", APPLICATION_START_TIMEOUT_SEC);
 

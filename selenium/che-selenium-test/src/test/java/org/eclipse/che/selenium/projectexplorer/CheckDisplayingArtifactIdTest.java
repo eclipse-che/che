@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.NEW;
+
 import com.google.inject.Inject;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -67,7 +69,7 @@ public class CheckDisplayingArtifactIdTest {
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java");
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java");
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/src/main/java");
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
+    projectExplorer.clickOnItemInContextMenu(NEW);
     projectExplorer.clickOnNewContextMenuItem(
         TestProjectExplorerContextMenuConstants.SubMenuNew.JAVA_CLASS);
     askForValueDialog.waitNewJavaClassOpen();

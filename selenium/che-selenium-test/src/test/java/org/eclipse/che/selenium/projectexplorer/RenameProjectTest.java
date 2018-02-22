@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.projectexplorer;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.RENAME;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.RENAME;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 
 import com.google.inject.Inject;

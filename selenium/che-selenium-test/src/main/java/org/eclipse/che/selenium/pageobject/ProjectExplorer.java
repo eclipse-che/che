@@ -13,7 +13,7 @@ package org.eclipse.che.selenium.pageobject;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.COMMANDS;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.COMMANDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
@@ -57,6 +57,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuItems;
 import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -137,22 +139,6 @@ public class ProjectExplorer {
     }
   }
 
-  public interface CommandsGoal {
-    String COMMON = "gwt-debug-contextMenu/Commands/goal_Common";
-    String BUILD = "gwt-debug-contextMenu/Commands/goal_Build";
-    String RUN = "gwt-debug-contextMenu/Commands/goal_Run";
-  }
-
-  public interface PROJECT_EXPLORER_CONTEXT_MENU_MAVEN {
-    String REIMPORT = "gwt-debug-contextMenu/Maven/reimportMavenDependenciesAction";
-  }
-
-  public interface FileWatcherExcludeOperations {
-    String ADD_TO_FILE_WATCHER_EXCLUDES = "gwt-debug-contextMenu/Add to File Watcher excludes";
-    String REMOVE_FROM_FILE_WATCHER_EXCLUDES =
-        "gwt-debug-contextMenu/Remove from File Watcher excludes";
-  }
-
   protected interface Locators {
     String PROJECT_EXPLORER_TREE_ITEMS = "gwt-debug-projectTree";
     String EXPLORER_RIGHT_TAB_ID = "gwt-debug-partButton-Projects";
@@ -169,21 +155,19 @@ public class ProjectExplorer {
         "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']";
   }
 
-  /**
-   * Displaying folder types
-   */
+  /** Displaying folder types */
   public enum FolderTypes {
     SIMPLE_FOLDER("simpleFolder"),
-    PROJECT_FOLDER ("projectFolder"),
-    JAVA_SOURCE_FOLDER ("javaSourceFolder");
+    PROJECT_FOLDER("projectFolder"),
+    JAVA_SOURCE_FOLDER("javaSourceFolder");
 
     private final String folderType;
 
-    FolderTypes(String folderType){
+    FolderTypes(String folderType) {
       this.folderType = folderType;
     }
 
-    private String get(){
+    private String get() {
       return this.folderType;
     }
   }
@@ -467,7 +451,9 @@ public class ProjectExplorer {
 
   /**
    * Waits until item with specified {@code name} is not visible in project explorer tree area.
+   *
    * <p>Note! Items must not repeat.
+   *
    * <p>For example: in a project can be some folder. Into each folder can be a file with same name.
    * This method will be track only first item.
    *
@@ -487,7 +473,8 @@ public class ProjectExplorer {
   }
 
   /**
-   * Waits during {@code timeout} for visibility and selects item with specified {@code path} in project explorer.
+   * Waits during {@code timeout} for visibility and selects item with specified {@code path} in
+   * project explorer.
    *
    * @param path item's path in format: 'Test/src/pom.xml'
    * @param timeout waiting timeout in seconds
@@ -510,9 +497,9 @@ public class ProjectExplorer {
   }
 
   /**
-   * Selects item in project explorer with specified {@code name} attribute.
-   * It means that if exist two files with the same name in the different folders, and both file is visible, than
-   * the first file in the DOM will be selected
+   * Selects item in project explorer with specified {@code name} attribute. It means that if exist
+   * two files with the same name in the different folders, and both file is visible, than the first
+   * file in the DOM will be selected
    *
    * @param name item's visible name
    */
@@ -524,7 +511,6 @@ public class ProjectExplorer {
    * Waits external maven Libraries relative module
    *
    * @param modulePath
-   *
    */
   public WebElement waitLibraries(String modulePath) {
     return helper.waitVisibility(
@@ -585,10 +571,13 @@ public class ProjectExplorer {
   }
 
   /**
-   * Opens item with specified {@code name}  by double click.
-   * <p>It means, if we have several
-   * items with same name, and they are visible, than the first item in the DOM will be opened.
-   * <p>If need to opens item in concrete folder, use method {@link ProjectExplorer#openItemByPath(String)}
+   * Opens item with specified {@code name} by double click.
+   *
+   * <p>It means, if we have several items with same name, and they are visible, than the first item
+   * in the DOM will be opened.
+   *
+   * <p>If need to opens item in concrete folder, use method {@link
+   * ProjectExplorer#openItemByPath(String)}
    *
    * @param name item's visible name
    */
@@ -605,7 +594,8 @@ public class ProjectExplorer {
   /**
    * Opens visible package with specified {@code name} by double click in the Project Explorer tree
    *
-   * @param name item's visible name. For example: "com.qe.package" if packages displaying together, or just "org" if package displaying separately
+   * @param name item's visible name. For example: "com.qe.package" if packages displaying together,
+   *     or just "org" if package displaying separately
    */
   public void openVisiblePackage(String name) {
     actionsFactory
@@ -682,8 +672,8 @@ public class ProjectExplorer {
    *
    * @param item
    */
-  public void clickOnItemInContextMenu(String item) {
-    helper.waitAndClick(By.xpath(format("//tr[@item-enabled='true' and @id='%s']", item)));
+  public void clickOnItemInContextMenu(ContextMenuItems item) {
+    helper.waitAndClick(By.xpath(format("//tr[@item-enabled='true' and @id='%s']", item.get())));
   }
 
   /**
@@ -691,8 +681,8 @@ public class ProjectExplorer {
    *
    * @param item item form {@code SubMenuNew}
    */
-  public void clickOnNewContextMenuItem(String item) {
-    helper.waitAndClick(By.xpath(format("//tr[@item-enabled='true' and @id='%s']", item)));
+  public void clickOnNewContextMenuItem(ContextMenuItems item) {
+    helper.waitAndClick(By.xpath(format("//tr[@item-enabled='true' and @id='%s']", item.get())));
     waitContextMenuPopUpClosed();
   }
 
@@ -855,7 +845,7 @@ public class ProjectExplorer {
 
   /** invoke command from context menu. Work for Common scope commands only */
   public void invokeCommandWithContextMenu(
-      String commandsGoal, String pathToItem, String commandName) {
+      ContextMenuCommandGoals commandsGoal, String pathToItem, String commandName) {
     try {
       openContextMenuByPathSelectedItem(pathToItem);
     } catch (NoSuchElementException e) {
@@ -872,7 +862,10 @@ public class ProjectExplorer {
   }
 
   public void invokeCommandWithContextMenu(
-      String commandsGoal, String pathToItem, String commandName, String machineName) {
+      ContextMenuCommandGoals commandsGoal,
+      String pathToItem,
+      String commandName,
+      String machineName) {
     invokeCommandWithContextMenu(commandsGoal, pathToItem, commandName);
 
     loader.waitOnClosed();

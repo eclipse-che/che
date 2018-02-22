@@ -13,8 +13,8 @@ package org.eclipse.che.selenium.miscellaneous;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.CONFIGURATION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.FOLDER;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.CONVERT_TO_PROJECT;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.NEW;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.CONVERT_TO_PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.NEW;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.FILE;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.JAVASCRIPT_FILE;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
@@ -31,6 +31,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuItems;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -170,7 +171,8 @@ public class ConvertToProjectFromConfigurationTest {
     wizard.waitTextProjectNameInput(folderName);
   }
 
-  private void createNewFile(String name, String pathToFile, String type) throws Exception {
+  private void createNewFile(String name, String pathToFile, ContextMenuItems type)
+      throws Exception {
     projectExplorer.waitAndSelectItem(pathToFile);
     projectExplorer.openContextMenuByPathSelectedItem(pathToFile);
     projectExplorer.clickOnItemInContextMenu(NEW);

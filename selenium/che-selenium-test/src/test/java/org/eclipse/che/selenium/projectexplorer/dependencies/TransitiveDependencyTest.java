@@ -10,12 +10,14 @@
  */
 package org.eclipse.che.selenium.projectexplorer.dependencies;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.MAVEN;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.REIMPORT;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Random;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -64,8 +66,8 @@ public class TransitiveDependencyTest {
   public void transitiveDependencyTest() throws Exception {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.MAVEN);
-    projectExplorer.clickOnNewContextMenuItem(TestProjectExplorerContextMenuConstants.REIMPORT);
+    projectExplorer.clickOnItemInContextMenu(MAVEN);
+    projectExplorer.clickOnNewContextMenuItem(REIMPORT);
     loader.waitOnClosed();
     projectExplorer.openItemByPath(PROJECT_NAME);
     loader.waitOnClosed();

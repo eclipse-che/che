@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.miscellaneous;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.STATUS;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON;
 import static org.eclipse.che.selenium.pageobject.MultiSplitPanel.SplitPaneCommands.CLOSE_ALL_TABS;
 
 import com.google.inject.Inject;
@@ -117,8 +118,7 @@ public class WorkingWithSplitPanelTest {
     commandsBuilder(
         TestIntelligentCommandsConstants.CommandsGoals.COMMON_GOAL,
         TestIntelligentCommandsConstants.CommandsTypes.MAVEN_TYPE);
-    projectExplorer.invokeCommandWithContextMenu(
-        ProjectExplorer.CommandsGoal.COMMON, PROJECT_NAME, BUILD_COMM);
+    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, BUILD_COMM);
     consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS, 120);
     multiSplitPanel.waitTabProcessIsPresent(3, BUILD_COMM);
     multiSplitPanel.selectSplitPanel(1);

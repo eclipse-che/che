@@ -10,11 +10,13 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.CUT;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.PASTE;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -78,10 +80,10 @@ public class CheckCopyCutFeaturesForFilesTest {
   private void moveFile(String filePath, String folderPath) {
     projectExplorer.waitAndSelectItem(filePath);
     projectExplorer.openContextMenuByPathSelectedItem(filePath);
-    projectExplorer.clickOnNewContextMenuItem(TestProjectExplorerContextMenuConstants.CUT);
+    projectExplorer.clickOnNewContextMenuItem(CUT);
     projectExplorer.waitAndSelectItem(folderPath);
     projectExplorer.openContextMenuByPathSelectedItem(folderPath);
-    projectExplorer.clickOnNewContextMenuItem(TestProjectExplorerContextMenuConstants.PASTE);
+    projectExplorer.clickOnNewContextMenuItem(PASTE);
     loader.waitOnClosed();
   }
 }
