@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-php-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.22.2-SNAPSHOT</version>
+        <version>5.22.2</version>
     </parent>
     <artifactId>che-plugin-php-lang-ide</artifactId>
     <packaging>jar</packaging>

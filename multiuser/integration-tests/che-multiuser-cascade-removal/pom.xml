@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-multiuser-integration-tests</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>5.22.2-SNAPSHOT</version>
+        <version>5.22.2</version>
     </parent>
     <artifactId>che-multiuser-cascade-removal</artifactId>
     <packaging>jar</packaging>
