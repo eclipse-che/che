@@ -88,7 +88,7 @@ public class KeycloakOAuthAuthenticationService {
       KeycloakTokenResponse response =
           keycloakServiceClient.getIdentityProviderToken(oauthProvider);
       return DtoFactory.newDto(OAuthToken.class)
-          .withToken(response.getAccess_token())
+          .withToken(response.getAccessToken())
           .withScope(response.getScope());
     } catch (IOException e) {
       throw new ServerException(e.getMessage());

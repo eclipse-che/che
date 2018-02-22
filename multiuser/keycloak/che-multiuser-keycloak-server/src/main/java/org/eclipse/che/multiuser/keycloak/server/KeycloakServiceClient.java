@@ -34,13 +34,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -56,12 +56,15 @@ import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
+@Singleton
 public class KeycloakServiceClient {
 
   private KeycloakSettings keycloakSettings;
 
-  private final Pattern assotiateUserPattern =
+  private static final Pattern assotiateUserPattern =
       Pattern.compile("User (.+) is not associated with identity provider (.+)");
+
+  private static final Gson gson = new Gson();
 
   @Inject
   public KeycloakServiceClient(KeycloakSettings keycloakSettings) {
@@ -70,12 +73,12 @@ public class KeycloakServiceClient {
 
   /**
    * Generates URL for account linking redirect
-   * @param token  client jwt token
+   *
+   * @param token client jwt token
    * @param oauthProvider provider name
    * @param redirectAfterLogin URL to return after login
    * @return URL to redirect client to perform account linking
    */
-
   public String getAccountLinkingURL(Jwt token, String oauthProvider, String redirectAfterLogin) {
 
     DefaultClaims claims = (DefaultClaims) token.getBody();
@@ -104,23 +107,21 @@ public class KeycloakServiceClient {
         .toString();
   }
 
-
   /**
    * Gets auth token from given identity provider.
    *
    * @param oauthProvider provider name
    * @return KeycloakTokenResponse token response
-   * @throws ForbiddenException
-   * @throws BadRequestException
-   * @throws IOException
-   * @throws ConflictException
-   * @throws NotFoundException
-   * @throws ServerException
-   * @throws UnauthorizedException
+   * @throws ForbiddenException when HTTP request was forbidden
+   * @throws BadRequestException when HTTP request considered as bad
+   * @throws IOException when unable to parse error response
+   * @throws NotFoundException when requested URL not found
+   * @throws ServerException when other error occurs
+   * @throws UnauthorizedException when no token present for user or user not linked to provider
    */
   public KeycloakTokenResponse getIdentityProviderToken(String oauthProvider)
-      throws ForbiddenException, BadRequestException, IOException, ConflictException,
-          NotFoundException, ServerException, UnauthorizedException {
+      throws ForbiddenException, BadRequestException, IOException, NotFoundException,
+          ServerException, UnauthorizedException {
     String url =
         UriBuilder.fromUri(keycloakSettings.get().get(AUTH_SERVER_URL_SETTING))
             .path("/realms/{realm}/broker/{provider}/token")
@@ -136,15 +137,14 @@ public class KeycloakServiceClient {
         // If user has no link with identity provider yet,
         // we should threat this as unauthorized and send to oAuth login page.
         throw new UnauthorizedException(e.getMessage());
-      } else {
-        throw e;
       }
+      throw e;
     }
   }
 
   private String doRequest(String url, String method, List<Pair<String, ?>> parameters)
       throws IOException, ServerException, ForbiddenException, NotFoundException,
-          UnauthorizedException, ConflictException, BadRequestException {
+          UnauthorizedException, BadRequestException {
     final String authToken = EnvironmentContext.getCurrent().getSubject().getToken();
     final boolean hasQueryParams = parameters != null && !parameters.isEmpty();
     if (hasQueryParams) {
@@ -187,8 +187,6 @@ public class KeycloakServiceClient {
             throw new NotFoundException(serviceError.getErrorMessage());
           } else if (responseCode == Response.Status.UNAUTHORIZED.getStatusCode()) {
             throw new UnauthorizedException(serviceError.getErrorMessage());
-          } else if (responseCode == Response.Status.CONFLICT.getStatusCode()) {
-            throw new ConflictException(serviceError.getErrorMessage());
           } else if (responseCode == Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()) {
             throw new ServerException(serviceError.getErrorMessage());
           } else if (responseCode == Response.Status.BAD_REQUEST.getStatusCode()) {
@@ -202,14 +200,6 @@ public class KeycloakServiceClient {
                 "Failed access: %s, method: %s, response code: %d, message: %s",
                 UriBuilder.fromUri(url).replaceQuery("token").build(), method, responseCode, str));
       }
-      final String contentType = conn.getContentType();
-      if (responseCode != HttpURLConnection.HTTP_NO_CONTENT
-          && contentType != null
-          && !(contentType.startsWith(MediaType.APPLICATION_JSON)
-              || contentType.startsWith("application/vnd.api+json"))) {
-        throw new IOException(conn.getResponseMessage());
-      }
-
       try (Reader reader = new InputStreamReader(conn.getInputStream())) {
         return CharStreams.toString(reader);
       }
@@ -218,9 +208,7 @@ public class KeycloakServiceClient {
     }
   }
 
-  /**
-   * Converts key=value&foo=bar string into json
-   */
+  /** Converts key=value&foo=bar string into json */
   private static String toJson(String source) {
     Map<String, String> queryPairs = new HashMap<>();
     Arrays.stream(source.split("&"))
@@ -229,6 +217,6 @@ public class KeycloakServiceClient {
               int delimiterIndex = p.indexOf("=");
               queryPairs.put(p.substring(0, delimiterIndex), p.substring(delimiterIndex + 1));
             });
-    return new Gson().toJson(queryPairs);
+    return gson.toJson(queryPairs);
   }
 }

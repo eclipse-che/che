@@ -11,16 +11,18 @@
 package org.eclipse.che.multiuser.keycloak.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
+import org.eclipse.che.dto.shared.JsonFieldName;
 
 /** @author Max Shaposhnik (mshaposh@redhat.com) */
 @DTO
 public interface KeycloakTokenResponse {
 
-  String getAccess_token();
+  @JsonFieldName("access_token")
+  String getAccessToken();
 
-  void setAccess_token(String accessToken);
+  void setAccessToken(String accessToken);
 
-  KeycloakTokenResponse withAccess_token(String accessToken);
+  KeycloakTokenResponse withAccessToken(String accessToken);
 
   String getTokenType();
 
