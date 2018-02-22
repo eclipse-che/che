@@ -18,6 +18,10 @@ import {IPodItem, IPodItemContainer, OpenshiftMachineRecipeParser} from './opens
 
 enum MemoryUnit { 'B', 'Ki', 'Mi', 'Gi' }
 
+const POD: string = 'Pod';
+const LIST: string = 'List';
+const MACHINE_NAME: string = 'machine_name';
+const NAME_ANNOTATION_PREFIX: string = 'org.eclipse.che.container';
 
 /**
  * This is the implementation of environment manager that handles the openshift format.
@@ -118,28 +122,30 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
     }
 
     recipe.items.forEach((podItem: IPodItem) => {
-      if (!podItem || podItem.kind.toString().toLowerCase() !== 'pod' || !podItem.metadata.name && podItem.spec || !angular.isArray(podItem.spec.containers)) {
+      if (!podItem || podItem.kind !== POD || !podItem.metadata.name && podItem.spec || !angular.isArray(podItem.spec.containers)) {
         return;
       }
+      const annotations = podItem.metadata.annotations;
       podItem.spec.containers.forEach((container: IPodItemContainer) => {
         if (!container || !container.name) {
           return;
         }
         const podName = podItem.metadata.name ? podItem.metadata.name : podItem.metadata.generateName;
-        const containerName: string = `${podName}/${container.name}`;
+        const nameAnnotation = `${NAME_ANNOTATION_PREFIX}.${container.name}.${MACHINE_NAME}`;
+        const machineName = annotations && annotations[nameAnnotation] ? annotations[nameAnnotation] : `${podName}/${container.name}`;
         let machine: IEnvironmentManagerMachine = machines.find((_machine: IEnvironmentManagerMachine) => {
-          return _machine.name === containerName;
+          return _machine.name === machineName;
         });
         if (!machine) {
-          machine = {name: containerName};
+          machine = {name: machineName};
           machines.push(machine);
         }
         const machinePodItem = angular.copy(podItem);
         machinePodItem.spec.containers = [container];
         machine.recipe = machinePodItem;
 
-        if (environment.machines && environment.machines[containerName]) {
-          angular.merge(machine, environment.machines[containerName]);
+        if (environment.machines && environment.machines[machineName]) {
+          angular.merge(machine, environment.machines[machineName]);
         }
         // memory
         let memoryLimitBytes = this.getMemoryLimit(machine);
@@ -166,7 +172,29 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
    * @returns {che.IWorkspaceEnvironment} environment's configuration
    */
   getEnvironment(environment: che.IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[]): che.IWorkspaceEnvironment {
-    const newEnvironment = super.getEnvironment(environment, machines);
+    let newEnvironment: che.IWorkspaceEnvironment = angular.copy(environment);
+
+    machines.forEach((machine: IEnvironmentManagerMachine) => {
+      const podItem = machine.recipe;
+      const podItemContainer = machine.recipe.spec.containers[0];
+      const annotations = podItem.metadata.annotations;
+      const podName = podItem.metadata.name ? podItem.metadata.name : podItem.metadata.generateName;
+      const nameAnnotation = `${NAME_ANNOTATION_PREFIX}.${podItemContainer.name}.${MACHINE_NAME}`;
+      const machineName = annotations && annotations[nameAnnotation] ? annotations[nameAnnotation] : `${podName}/${podItemContainer.name}`;
+
+      if (angular.isUndefined(newEnvironment.machines)) {
+        newEnvironment.machines = {};
+      }
+      if (angular.isUndefined(newEnvironment.machines[machineName])) {
+        newEnvironment.machines[machineName] = {attributes: {}};
+      }
+      newEnvironment.machines[machineName].attributes.memoryLimitBytes = machine.attributes ? machine.attributes.memoryLimitBytes : super.DEFAULT_MEMORY_LIMIT;
+      newEnvironment.machines[machineName].installers = angular.copy(machine.installers);
+      newEnvironment.machines[machineName].servers = angular.copy(machine.servers);
+      newEnvironment.machines[machineName].volumes = angular.copy(machine.volumes);
+      newEnvironment.machines[machineName].env = angular.copy(machine.env);
+    });
+
     if (!environment || !environment.recipe || !environment.recipe.content) {
       return newEnvironment;
     }
@@ -175,33 +203,48 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
       this.$log.error('EnvironmentManager: cannot parse recipe.');
       return newEnvironment;
     }
-    if (recipe) {
-      machines.forEach((machine: IEnvironmentManagerMachine) => {
-        const [podName, containerName] = this.splitName(machine.name);
-        if (podName && containerName) {
-          let item;
-          if (recipe.kind.toString().toLowerCase() === 'list' && angular.isArray(recipe.items)) {
-            item = recipe.items.find((podItem: any) => {
-              const podItemName = podItem.metadata.name ? podItem.metadata.name : podItem.metadata.generateName;
-              return podItemName === podName;
-            });
-          }
-          if (item && item.kind.toString().toLowerCase() === 'pod' && item.metadata.name && item.spec && angular.isArray(item.spec.containers)) {
-            const containerIndex = item.spec.containers.findIndex((container: any) => {
-              return container.name === containerName;
-            });
-            if (containerIndex !== -1 && item.spec.containers && machine.recipe && machine.recipe.spec && machine.recipe.spec.containers) {
-              item.spec.containers[containerIndex] = machine.recipe.spec.containers[containerIndex];
-            }
-          }
+    if (!recipe || recipe.kind !== LIST || !angular.isArray(recipe.items)) {
+      return newEnvironment;
+    }
+    machines.forEach((machine: IEnvironmentManagerMachine) => {
+      let containerName: string;
+      let pod = recipe.items.find((podItem: IPodItem) => {
+        if (!podItem || !podItem.metadata) {
+          return false;
         }
+        const podItemName = podItem.metadata.name ? podItem.metadata.name : podItem.metadata.generateName;
+        if (podItem.metadata.annotations) {
+          const nameAnnotation = Object.keys(podItem.metadata.annotations).find((annotation: string) => {
+            return podItem.metadata.annotations[annotation] === machine.name;
+          });
+          if (nameAnnotation) {
+            const regExpExecArray = new RegExp(`^${NAME_ANNOTATION_PREFIX}.([-_\\w]+).${MACHINE_NAME}$`, 'i').exec(nameAnnotation);
+            if (regExpExecArray !== null) {
+              containerName = regExpExecArray[1];
+            }
+            return true;
+          }
+          return false;
+        }
+        let podName: string;
+        [podName, containerName] = this.splitName(machine.name);
+        return podItemName === podName;
       });
 
-      try {
-        newEnvironment.recipe.content = this.stringifyRecipe(recipe);
-      } catch (e) {
-        this.$log.error('Cannot retrieve environment\'s recipe, error: ', e);
+      if (pod && pod.kind === POD && pod.metadata.name && pod.spec && angular.isArray(pod.spec.containers)) {
+        const containerIndex = pod.spec.containers.findIndex((container: IPodItemContainer) => {
+          return container.name === containerName;
+        });
+        if (containerIndex !== -1 && pod.spec.containers && machine.recipe && machine.recipe.spec && machine.recipe.spec.containers) {
+          pod.spec.containers[containerIndex] = machine.recipe.spec.containers[0];
+        }
       }
+    });
+
+    try {
+      newEnvironment.recipe.content = this.stringifyRecipe(recipe);
+    } catch (e) {
+      this.$log.error('Cannot retrieve environment\'s recipe, error: ', e);
     }
 
     return newEnvironment;
@@ -245,6 +288,10 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
     }
     const machineRecipe = machine.recipe;
     if (machineRecipe && machineRecipe.spec && machineRecipe.spec.containers && machineRecipe.spec.containers.length === 1) {
+      const nameAnnotation = `${NAME_ANNOTATION_PREFIX}.${machineRecipe.spec.containers[0].name}.${MACHINE_NAME}`;
+      if (machineRecipe.metadata && machineRecipe.metadata.annotations && machineRecipe.metadata.annotations[nameAnnotation]) {
+        return machineRecipe.metadata.annotations[nameAnnotation];
+      }
       return machineRecipe.spec.containers[0].name;
     }
     const [, containerName] = this.splitName(machine.name);
@@ -269,36 +316,62 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
       this.$log.error('EnvironmentManager: cannot rename machine.');
       return environment;
     }
-    const recipe: IPodList = this.parseRecipe(environment.recipe.content);
+    const recipe = this.parseRecipe(environment.recipe.content);
     if (!recipe) {
       this.$log.error('EnvironmentManager: cannot rename machine.');
       return environment;
     }
-    const [podName, containerName] = this.splitName(fullOldName);
-    if (podName && containerName) {
-      let item;
-      if (recipe && recipe.kind.toString().toLowerCase() === 'list' && angular.isArray(recipe.items)) {
-        item = recipe.items.find((podItem: any) => {
-          const podItemName = podItem.metadata.name ? podItem.metadata.name : podItem.metadata.generateName;
-          return podItemName === podName;
-        });
-      }
-      if (item && item.kind.toString().toLowerCase() === 'pod' && item.metadata.name && item.spec && angular.isArray(item.spec.containers)) {
-        const containerIndex = item.spec.containers.findIndex((container: any) => {
-          return container.name === containerName;
-        });
-        // rename machine in recipe
-        if (containerIndex > -1) {
-          item.spec.containers[containerIndex].name = newMachineName;
-          const newEnvironment = angular.copy(environment);
-          newEnvironment.recipe.content = this.stringifyRecipe(recipe);
-          newEnvironment.machines[newName] = environment.machines[fullOldName];
-          delete newEnvironment.machines[fullOldName];
-          return newEnvironment;
+    let pod;
+    let containerName: string;
+    if (recipe && recipe.kind === LIST && angular.isArray(recipe.items)) {
+      pod = recipe.items.find((podItem: IPodItem) => {
+        if (!podItem || podItem.kind !== POD || !podItem.metadata.name || !podItem.spec || !angular.isArray(podItem.spec.containers)) {
+          return false;
         }
+
+        let containerIndex = podItem.spec.containers.findIndex((container: IPodItemContainer) => {
+          const nameAnnotation = `${NAME_ANNOTATION_PREFIX}.${container.name}.${MACHINE_NAME}`;
+          if (podItem.metadata && podItem.metadata.annotations && podItem.metadata.annotations[nameAnnotation]) {
+            return podItem.metadata.annotations[nameAnnotation] === fullOldName;
+          }
+          return false;
+        });
+        if (containerIndex > -1) {
+          containerName = podItem.spec.containers[containerIndex].name;
+          return true;
+        }
+        const podName = podItem.metadata.name ? podItem.metadata.name : podItem.metadata.generateName;
+        const [podItemName, containerItemName] = this.splitName(fullOldName);
+        if (podName === podItemName) {
+          containerName = containerItemName;
+          return true;
+        }
+        return false;
+      });
+    }
+    if (!pod) {
+      this.$log.error('EnvironmentManager: cannot rename machine.');
+      return environment;
+    }
+    const containerIndex = pod.spec.containers.findIndex((container: IPodItemContainer) => {
+      return container.name === containerName;
+    });
+    // rename machine in recipe
+    if (containerIndex > -1) {
+      const nameAnnotation = `${NAME_ANNOTATION_PREFIX}.${pod.spec.containers[containerIndex].name}.${MACHINE_NAME}`;
+      if (pod.metadata && pod.metadata.annotations && pod.metadata.annotations[nameAnnotation]) {
+        pod.metadata.annotations[nameAnnotation] = newMachineName;
       } else {
-        this.$log.error('EnvironmentManager: cannot rename machine.');
+        pod.spec.containers[containerIndex].name = newMachineName;
       }
+      const newEnvironment = angular.copy(environment);
+      newEnvironment.recipe.content = this.stringifyRecipe(recipe);
+      if (newEnvironment.machines[fullOldName]) {
+        newEnvironment.machines[newName] = environment.machines[fullOldName];
+        delete newEnvironment.machines[fullOldName];
+      }
+
+      return newEnvironment;
     }
 
     return environment;
@@ -354,7 +427,7 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
    * @return {che.IWorkspaceEnvironment}
    */
   addMachine(environment: che.IWorkspaceEnvironment, machine: IEnvironmentManagerMachine): che.IWorkspaceEnvironment {
-    const machineRecipe = machine ? machine.recipe : null;
+    const machineRecipe: IPodItem = machine ? machine.recipe : null;
     const environmentRecipe = environment && environment.recipe ? environment.recipe.content : null;
     if (!environmentRecipe || !machineRecipe) {
       this.$log.error('EnvironmentManager: cannot add machine.');
@@ -365,16 +438,38 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
       this.$log.error('EnvironmentManager: cannot add machine.');
       return environment;
     }
-    if (recipe && angular.isArray(recipe.items) && angular.isObject(machineRecipe)) {
-      recipe.items.push(machineRecipe);
-      // try to update recipe
-      environment.recipe.content = this.stringifyRecipe(recipe);
+
+    const nameAnnotation = `${NAME_ANNOTATION_PREFIX}.${machineRecipe.spec.containers[0].name}.${MACHINE_NAME}`;
+    if (angular.isArray(recipe.items)) {
+      const machineRecipePod = this.getMachinePod(machineRecipe);
+      const usedPodIndex = recipe.items.findIndex((pod: IPodItem) => {
+        if (!pod.kind || pod.kind !== POD || pod.metadata.name !== machineRecipe.metadata.name) {
+          return false;
+        }
+        return angular.equals(machineRecipePod, this.getMachinePod(pod));
+      });
+      if (usedPodIndex === -1) {
+        recipe.items.push(machineRecipe);
+      } else {
+        recipe.items[usedPodIndex].spec.containers.push(machineRecipe.spec.containers[0]);
+      }
+
       // update machine name
-      if (machineRecipe.metadata) {
+      if (usedPodIndex > -1 && machineRecipePod.metadata.annotations && machineRecipePod.metadata.annotations[nameAnnotation]) {
+        const name = machineRecipePod.metadata.annotations[nameAnnotation];
+        if (name) {
+          recipe.items[usedPodIndex].metadata.annotations[nameAnnotation] = name;
+          machine.name = name;
+        }
+      } else {
         const [, containerName] = this.splitName(machine.name);
         const podItemName = machineRecipe.metadata.name ? machineRecipe.metadata.name : machineRecipe.metadata.generateName;
         machine.name = `${podItemName}/${containerName}`;
       }
+
+      // try to update recipe
+      environment.recipe.content = this.stringifyRecipe(recipe);
+
       const copyMachine = angular.copy(machine);
       delete copyMachine.recipe;
       const containerName = copyMachine.name;
@@ -398,10 +493,10 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
     if (!environment || !environment.recipe || !environment.recipe.content || !name) {
       return environment;
     }
+
     environment = angular.copy(environment);
-    if (environment.machines[name]) {
-      delete environment.machines[name];
-    }
+    delete environment.machines[name];
+
     const envRecipe = this.parseRecipe(environment.recipe.content);
     if (!envRecipe) {
       this.$log.error('Cannot delete machine, error: ');
@@ -410,15 +505,37 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
     if (!envRecipe || !angular.isArray(envRecipe.items)) {
       return environment;
     }
-    const [podName, containerName] = this.splitName(name);
 
-    const podIndex = envRecipe.items.findIndex((machinePodItem: IPodItem) => {
-      const podItemName = machinePodItem.metadata.name ? machinePodItem.metadata.name : machinePodItem.metadata.generateName;
-      return podName === podItemName;
-    });
+    let podIndex: number;
+    let containerName: string;
+    if (envRecipe && envRecipe.kind === LIST && angular.isArray(envRecipe.items)) {
+      podIndex = envRecipe.items.findIndex((podItem: IPodItem) => {
+        if (!podItem || podItem.kind !== POD || !podItem.metadata.name || !podItem.spec || !angular.isArray(podItem.spec.containers)) {
+          return false;
+        }
+        const containerIndex = podItem.spec.containers.findIndex((container: IPodItemContainer) => {
+          const nameAnnotation = `${NAME_ANNOTATION_PREFIX}.${container.name}.${MACHINE_NAME}`;
+          if (podItem.metadata && podItem.metadata.annotations && podItem.metadata.annotations[nameAnnotation]) {
+            return podItem.metadata.annotations[nameAnnotation] === name;
+          }
+          return false;
+        });
+        if (containerIndex > -1) {
+          containerName = podItem.spec.containers[containerIndex].name;
+          return true;
+        }
+        const podName = podItem.metadata.name ? podItem.metadata.name : podItem.metadata.generateName;
+        const [podItemName, containerItemName] = this.splitName(name);
+        if (podName === podItemName) {
+          containerName = containerItemName;
+          return true;
+        }
+        return false;
+      });
+    }
     if (podIndex > -1) {
       const podItem = envRecipe.items[podIndex];
-      if (podItem && podItem.kind.toString().toLowerCase() === 'pod' && podItem.metadata.name && podItem.spec && angular.isArray(podItem.spec.containers)) {
+      if (podItem && podItem.kind === POD && podItem.metadata.name && podItem.spec && angular.isArray(podItem.spec.containers)) {
         if (podItem.spec.containers.length) {
           const containerIndex = podItem.spec.containers.findIndex((podItemContainer: IPodItemContainer) => {
             return podItemContainer.name === containerName;
@@ -470,15 +587,38 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
   }
 
   /**
+   * Gets empty pod from machine's recipe.
+   * @param {IPodItem} machineRecipe
+   * @returns {IPodItem}
+   */
+  getMachinePod(machineRecipe: IPodItem): IPodItem {
+    if (!machineRecipe || !machineRecipe.metadata) {
+      return machineRecipe;
+    }
+    const pod = angular.copy(machineRecipe);
+    delete pod.spec;
+    if (!angular.isArray(machineRecipe.metadata.annotations)) {
+      return pod;
+    }
+    Object.keys(machineRecipe.metadata.annotations).forEach((annotation: string) => {
+      if (annotation.startsWith(NAME_ANNOTATION_PREFIX)) {
+        delete pod.metadata.annotations[annotation];
+      }
+    });
+    return pod;
+  }
+
+  /**
    * Gets pod container from machine recipe.
    * @param {IEnvironmentManagerMachine} machine
    * @returns {IPodItemContainer}
    */
   private getPodContainer(machine: IEnvironmentManagerMachine): IPodItemContainer {
-    if (!machine || !machine.name || !machine.recipe) {
+    if (!machine || !machine.name || !machine.recipe || !machine.recipe.metadata || !machine.recipe.spec) {
       return null;
     }
-    const [podName, containerName] = this.splitName(machine.name);
+    const podName = machine.recipe.metadata.name ? machine.recipe.metadata.name : machine.recipe.metadata.generateName;
+    const containerName = machine.recipe.spec.containers[0].name;
     return this.getPodContainersByPodName([machine.recipe], podName).find((podItemContainer: IPodItemContainer) => {
       return podItemContainer && podItemContainer.name === containerName;
     });
@@ -498,7 +638,7 @@ export class OpenshiftEnvironmentManager extends EnvironmentManager {
     const machinePodItems: Array<IPodItem> = angular.isArray(podItems) ? podItems : [];
     machinePodItems.forEach((machinePodItem: IPodItem) => {
       const podItemName = machinePodItem.metadata.name ? machinePodItem.metadata.name : machinePodItem.metadata.generateName;
-      if (podItemName === podName && machinePodItem.kind.toString().toLowerCase() === 'pod' && machinePodItem.spec && angular.isArray(machinePodItem.spec.containers)) {
+      if (podItemName === podName && machinePodItem.kind === POD && machinePodItem.spec && angular.isArray(machinePodItem.spec.containers)) {
         containers = machinePodItem.spec.containers;
         return;
       }

@@ -18,6 +18,7 @@ export interface IPodItem {
   metadata: {
     name?: string;
     generateName?: string;
+    annotations?: { [propName: string]: string };
     [propName: string]: string | Object;
   };
   spec: { containers: Array<IPodItemContainer> };
