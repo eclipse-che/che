@@ -121,9 +121,10 @@ public class NavigateToFileTest {
   }
 
   @Test(dataProvider = "dataForCheckingFindingFileWithSymbols")
-  public void shouldDisplay(String inputValueForChecking, Map<Integer, String> expectedValues) {
+  public void shouldDisplayFilesFoundByMask(
+      String inputValueForChecking, Map<Integer, String> expectedValues) {
     try {
-      launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 1);
+      launchNavigateToFileAndCheckSuggestionsList(inputValueForChecking, expectedValues);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/8735");
@@ -169,6 +170,16 @@ public class NavigateToFileTest {
     editor.waitActive();
     editor.getAssociatedPathFromTheTab(openedFileNameInTheTab);
     editor.closeFileByNameWithSaving(openedFileNameInTheTab);
+  }
+
+  private void launchNavigateToFileAndCheckSuggestionsList(
+      String navigatingValue, Map<Integer, String> expectedItems) {
+
+    launchNavigateToFileFromUIAndTypeValue(navigatingValue);
+    navigateToFile.waitSuggestedPanel();
+    waitExpectedItemsInNavigateToFileDropdown(expectedItems);
+    navigateToFile.closeNavigateToFileForm();
+    navigateToFile.waitFormToClose();
   }
 
   private void launchNavigateToFileFromUIAndTypeValue(String navigatingValue) {
