@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-agent-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.22.2</version>
+        <version>5.22.3-SNAPSHOT</version>
     </parent>
     <artifactId>wsagent</artifactId>
     <name>Workspace Agent</name>
