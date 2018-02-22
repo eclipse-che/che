@@ -79,7 +79,7 @@ public class CreateNamedFactoryFromDashBoard {
   public void createFactoryFromDashBoard() throws ExecutionException, InterruptedException {
     String currentWin = seleniumWebDriver.getWindowHandle();
     dashboard.open();
-    dashboardFactory.selectFactoryOnNavBar();
+    dashboardFactory.selectFactoriesOnNavBar();
     dashboardFactory.waitAllFactoriesPage();
     dashboardFactory.clickOnAddFactoryBtn();
     dashboardFactory.selectWorkspaceForCreation(testWorkspace.getName());
