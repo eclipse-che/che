@@ -915,6 +915,8 @@ prepareTestUsersForMultiuserChe() {
            CHE_SECOND_TESTUSER_PASSWORD=${CHE_ADMIN_PASSWORD}
         fi
 
+        # add role "read-token" of client "broker" to admin user
+        docker exec -i $(getKeycloakContainerId) sh -c "keycloak/bin/kcadm.sh add-roles -r che --uusername ${CHE_ADMIN_NAME} --cclientid broker --rolename read-token --no-config --server http://localhost:8080/auth --user ${CHE_ADMIN_NAME} --password ${CHE_ADMIN_PASSWORD} --realm master"
     fi
 }
 
@@ -952,7 +954,7 @@ removeUser() {
 
 getKeycloakContainerId() {
     if [[ "${CHE_INFRASTRUCTURE}" == "openshift" ]]; then
-        echo $(docker ps | grep 'eclipse-che/keycloak' | cut -d ' ' -f1)
+        echo $(docker ps | grep 'keycloak_keycloak-' | cut -d ' ' -f1)
     else
         echo $(docker ps | grep che_keycloak | cut -d ' ' -f1)
     fi
