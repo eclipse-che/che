@@ -101,7 +101,7 @@ public class WorkspaceRuntimesTest {
 
   @Test
   public void runtimeIsRecovered() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me", "myId");
 
     mockWorkspace(identity);
     RuntimeContext context = mockContext(identity);
@@ -119,7 +119,7 @@ public class WorkspaceRuntimesTest {
 
   @Test
   public void runtimeIsNotRecoveredIfNoWorkspaceFound() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me", "myId");
     when(workspaceDao.get(identity.getWorkspaceId())).thenThrow(new NotFoundException("no!"));
 
     // try recover
@@ -130,7 +130,7 @@ public class WorkspaceRuntimesTest {
 
   @Test
   public void runtimeIsNotRecoveredIfNoEnvironmentFound() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me", "myId");
     WorkspaceImpl workspace = mockWorkspace(identity);
     when(workspace.getConfig().getEnvironments()).thenReturn(emptyMap());
 
@@ -142,7 +142,7 @@ public class WorkspaceRuntimesTest {
 
   @Test
   public void runtimeIsNotRecoveredIfInfraPreparationFailed() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me", "myId");
 
     mockWorkspace(identity);
     InternalEnvironment internalEnvironment = mock(InternalEnvironment.class);
@@ -160,7 +160,7 @@ public class WorkspaceRuntimesTest {
   @Test
   public void runtimeIsNotRecoveredIfAnotherRuntimeWithTheSameIdentityAlreadyExists()
       throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me", "myId");
 
     mockWorkspace(identity);
     RuntimeContext context = mockContext(identity);
@@ -203,7 +203,8 @@ public class WorkspaceRuntimesTest {
         DtoFactory.newDto(RuntimeIdentityDto.class)
             .withWorkspaceId("workspace123")
             .withEnvName("my-env")
-            .withOwner("me");
+            .withOwnerName("me")
+            .withOwnerId("myId");
     mockWorkspace(identity);
     mockContext(identity);
     RuntimeStatusEvent event =

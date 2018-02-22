@@ -95,7 +95,7 @@ public class KubernetesPods {
   public Pod create(Pod pod) throws InfrastructureException {
     putLabel(pod, CHE_WORKSPACE_ID_LABEL, workspaceId);
     try {
-      return clientFactory.create().pods().inNamespace(namespace).create(pod);
+      return clientFactory.create(workspaceId).pods().inNamespace(namespace).create(pod);
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
@@ -109,7 +109,7 @@ public class KubernetesPods {
   public List<Pod> get() throws InfrastructureException {
     try {
       return clientFactory
-          .create()
+          .create(workspaceId)
           .pods()
           .inNamespace(namespace)
           .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
@@ -128,7 +128,7 @@ public class KubernetesPods {
   public Optional<Pod> get(String name) throws InfrastructureException {
     try {
       return Optional.ofNullable(
-          clientFactory.create().pods().inNamespace(namespace).withName(name).get());
+          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name).get());
     } catch (KubernetesClientException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
@@ -152,7 +152,7 @@ public class KubernetesPods {
     try {
 
       PodResource<Pod, DoneablePod> podResource =
-          clientFactory.create().pods().inNamespace(namespace).withName(name);
+          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name);
 
       watch =
           podResource.watch(
@@ -221,7 +221,7 @@ public class KubernetesPods {
       try {
         podWatch =
             clientFactory
-                .create()
+                .create(workspaceId)
                 .pods()
                 .inNamespace(namespace)
                 .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
@@ -271,7 +271,8 @@ public class KubernetesPods {
             public void onClose(KubernetesClientException ignored) {}
           };
       try {
-        containerWatch = clientFactory.create().events().inNamespace(namespace).watch(watcher);
+        containerWatch =
+            clientFactory.create(workspaceId).events().inNamespace(namespace).watch(watcher);
       } catch (KubernetesClientException ex) {
         throw new InfrastructureException(ex.getMessage());
       }
@@ -320,7 +321,7 @@ public class KubernetesPods {
     final ExecWatchdog watchdog = new ExecWatchdog();
     try (ExecWatch watch =
         clientFactory
-            .create()
+            .create(workspaceId)
             .pods()
             .inNamespace(namespace)
             .withName(podName)
@@ -381,7 +382,7 @@ public class KubernetesPods {
       // pods are removed with some delay related to stopping of containers. It is need to wait them
       List<Pod> pods =
           clientFactory
-              .create()
+              .create(workspaceId)
               .pods()
               .inNamespace(namespace)
               .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
@@ -413,7 +414,7 @@ public class KubernetesPods {
   private CompletableFuture<Void> doDelete(String name) throws InfrastructureException {
     try {
       final PodResource<Pod, DoneablePod> podResource =
-          clientFactory.create().pods().inNamespace(namespace).withName(name);
+          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name);
       final CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
       final Watch watch = podResource.watch(new DeleteWatcher(deleteFuture));
 

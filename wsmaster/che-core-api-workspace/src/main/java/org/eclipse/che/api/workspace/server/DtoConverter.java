@@ -246,7 +246,8 @@ public final class DtoConverter {
     return newDto(RuntimeIdentityDto.class)
         .withWorkspaceId(identity.getWorkspaceId())
         .withEnvName(identity.getEnvName())
-        .withOwner(identity.getOwner());
+        .withOwnerName(identity.getOwnerName())
+        .withOwnerId(identity.getOwnerId());
   }
 
   /** Converts {@link Volume} to {@link VolumeDto}. */

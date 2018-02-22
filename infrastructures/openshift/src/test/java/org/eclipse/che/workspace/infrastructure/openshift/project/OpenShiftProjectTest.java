@@ -21,6 +21,7 @@ import static org.testng.Assert.assertNotNull;
 
 import io.fabric8.kubernetes.api.model.DoneableServiceAccount;
 import io.fabric8.kubernetes.api.model.ServiceAccount;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
@@ -60,18 +61,22 @@ public class OpenShiftProjectTest {
   @Mock private KubernetesIngresses ingresses;
   @Mock private OpenShiftClientFactory clientFactory;
   @Mock private OpenShiftClient openShiftClient;
+  @Mock private KubernetesClient kubernetesClient;
   @Mock private Resource<ServiceAccount, DoneableServiceAccount> serviceAccountResource;
 
   private OpenShiftProject openShiftProject;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(clientFactory.create()).thenReturn(openShiftClient);
+    when(clientFactory.create()).thenReturn(kubernetesClient);
+    when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
+    when(clientFactory.createOC()).thenReturn(openShiftClient);
+    when(clientFactory.createOC(anyString())).thenReturn(openShiftClient);
     when(openShiftClient.adapt(OpenShiftClient.class)).thenReturn(openShiftClient);
 
     final MixedOperation mixedOperation = mock(MixedOperation.class);
     final NonNamespaceOperation namespaceOperation = mock(NonNamespaceOperation.class);
-    doReturn(mixedOperation).when(openShiftClient).serviceAccounts();
+    doReturn(mixedOperation).when(kubernetesClient).serviceAccounts();
     when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
     when(namespaceOperation.withName(anyString())).thenReturn(serviceAccountResource);
     when(serviceAccountResource.get()).thenReturn(mock(ServiceAccount.class));

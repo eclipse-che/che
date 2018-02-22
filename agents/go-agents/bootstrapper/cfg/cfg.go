@@ -97,7 +97,7 @@ func init() {
 		&runtimeIDRaw,
 		"runtime-id",
 		"",
-		"The identifier of the runtime in format 'workspace:environment:owner'",
+		"The identifier of the runtime in format 'workspace:environment:ownerName:ownerId'",
 	)
 	flag.StringVar(
 		&MachineName,
@@ -155,10 +155,10 @@ func Parse() {
 		log.Fatal("Runtime ID required(set it with -runtime-id argument)")
 	}
 	parts := strings.Split(runtimeIDRaw, ":")
-	if len(parts) != 3 {
-		log.Fatalf("Expected runtime id to be in format 'workspace:env:owner'")
+	if len(parts) != 4 {
+		log.Fatalf("Expected runtime id to be in format 'workspace:env:ownerName:ownerId'")
 	}
-	RuntimeID = booter.RuntimeID{Workspace: parts[0], Environment: parts[1], Owner: parts[2]}
+	RuntimeID = booter.RuntimeID{Workspace: parts[0], Environment: parts[1], OwnerName: parts[2], OwnerId: parts[3]}
 
 	// machine-name
 	if len(MachineName) == 0 {
@@ -182,7 +182,8 @@ func Print() {
 	log.Print("  Runtime ID:")
 	log.Printf("    Workspace: %s", RuntimeID.Workspace)
 	log.Printf("    Environment: %s", RuntimeID.Environment)
-	log.Printf("    Owner: %s", RuntimeID.Owner)
+	log.Printf("    OwnerName: %s", RuntimeID.OwnerName)
+	log.Printf("    OwnerId: %s", RuntimeID.OwnerId)
 	log.Printf("  Machine name: %s", MachineName)
 	log.Printf("  Installer timeout: %dseconds", InstallerTimeoutSec)
 	log.Printf("  Check servers period: %dseconds", CheckServersPeriodSec)
