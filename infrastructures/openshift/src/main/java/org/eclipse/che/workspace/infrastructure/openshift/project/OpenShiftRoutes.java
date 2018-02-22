@@ -47,7 +47,7 @@ public class OpenShiftRoutes {
   public Route create(Route route) throws InfrastructureException {
     putLabel(route, CHE_WORKSPACE_ID_LABEL, workspaceId);
     try {
-      return clientFactory.create().routes().inNamespace(namespace).create(route);
+      return clientFactory.createOC(workspaceId).routes().inNamespace(namespace).create(route);
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
     }
@@ -61,7 +61,7 @@ public class OpenShiftRoutes {
   public List<Route> get() throws InfrastructureException {
     try {
       return clientFactory
-          .create()
+          .createOC(workspaceId)
           .routes()
           .inNamespace(namespace)
           .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
@@ -80,7 +80,7 @@ public class OpenShiftRoutes {
   public void delete() throws InfrastructureException {
     try {
       clientFactory
-          .create()
+          .createOC(workspaceId)
           .routes()
           .inNamespace(namespace)
           .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)

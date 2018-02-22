@@ -69,7 +69,7 @@ public class RemoveNamespaceOnWorkspaceRemove implements EventSubscriber<Workspa
   @VisibleForTesting
   void doRemoveNamespace(String namespaceName) throws InfrastructureException {
     try {
-      clientFactory.create().namespaces().withName(namespaceName).delete();
+      clientFactory.create(namespaceName).namespaces().withName(namespaceName).delete();
     } catch (KubernetesClientException e) {
       if (!(e.getCode() == 403)) {
         throw new KubernetesInfrastructureException(e);
