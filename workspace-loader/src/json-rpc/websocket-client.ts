@@ -32,11 +32,11 @@ export class WebsocketClient implements ICommunicationClient {
     connect(entrypoint: string): Promise<void> {
         return new Promise((resolve, reject) => {
             this.websocketStream = new WebSocket(entrypoint);
-            this.websocketStream.addEventListener("open", (e) => {
+            this.websocketStream.addEventListener("open", () => {
                 resolve();
             });
 
-            this.websocketStream.addEventListener("error", (e) => {
+            this.websocketStream.addEventListener("error", () => {
                 reject();
             });
             this.websocketStream.addEventListener("message", (message) => {

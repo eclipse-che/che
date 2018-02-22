@@ -46,23 +46,10 @@ interface IRequest {
   params: any;
 }
 
-interface IResponse {
-  jsonrpc: string;
-  id: string;
-  result?: any;
-  error?: IError;
-}
-
 interface INotification {
   jsonrpc: string;
   method: string;
   params: any;
-}
-
-interface IError {
-  number: number;
-  message: string;
-  data?: any;
 }
 
 /**

@@ -16,7 +16,7 @@ export class Loader {
      * Initializes the Loader.
      */
     constructor() {
-        document.getElementById('workspace-console').onclick = (e) => this.onclick(e);
+        document.getElementById('workspace-console').onclick = () => this.onclick();
 
         setTimeout(() => {
             document.getElementById('workspace-loader').style.display = "block";
@@ -38,7 +38,7 @@ export class Loader {
         element.scrollIntoView();
     }
 
-    onclick(event: Event): void {
+    onclick(): void {
         if (document.getElementById('workspace-loader').hasAttribute("max")) {
             document.getElementById('workspace-loader').removeAttribute("max");
             document.getElementById('workspace-console').removeAttribute("max");

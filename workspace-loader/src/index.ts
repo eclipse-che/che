@@ -10,7 +10,8 @@
  */
 'use strict';
 
-const css = require('./style.css');
+require('./style.css');
+
 import { WebsocketClient } from './json-rpc/websocket-client';
 import { CheJsonRpcMasterApi } from './json-rpc/che-json-rpc-master-api';
 import { getWorkspace, startWorkspace } from './workspace';
@@ -77,9 +78,9 @@ async function openIDE(workspace: che.IWorkspace) {
     let machines = startedWs.runtime.machines;
 
     let ideUrl: string;
-    Object.keys(machines).forEach((key, index) => {
+    Object.keys(machines).forEach((key) => {
         let servers = machines[key].servers;
-        Object.keys(servers).forEach((key, index) => {
+        Object.keys(servers).forEach((key) => {
             let att = servers[key].attributes;
             if (att['type'] === 'ide') {
                 ideUrl = servers[key].url;
