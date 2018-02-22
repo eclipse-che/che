@@ -64,7 +64,7 @@ public class CheckOnValidAndInvalidPackageNameTest {
   public void createValidPackageNameInJavaFolderTest(String packageName) {
     createPackageByPath(PROJECT_NAME + PATH_TO_JAVA_FOLDER, packageName);
 
-    projectExplorer.waitItemInVisibleArea(packageName);
+    projectExplorer.waitVisibilityByName(packageName);
     projectExplorer.openItemByVisibleNameInExplorer(packageName);
   }
 
@@ -72,7 +72,7 @@ public class CheckOnValidAndInvalidPackageNameTest {
   public void createValidPackageNameInRootPackageTest(String packageName) {
     createPackageByPath(PROJECT_NAME + PATH_TO_JAVA_FOLDER + ROOT_PACKAGE, packageName + PREFIX);
 
-    projectExplorer.waitItemInVisibleArea(packageName + PREFIX);
+    projectExplorer.waitVisibilityByName(packageName + PREFIX);
     projectExplorer.openItemByVisibleNameInExplorer(packageName + PREFIX);
   }
 

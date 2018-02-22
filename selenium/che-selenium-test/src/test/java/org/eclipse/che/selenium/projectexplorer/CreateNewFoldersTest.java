@@ -72,7 +72,7 @@ public class CreateNewFoldersTest {
     askForValueDialog.typeAndWaitText(NEW_FOLDER_NAME);
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    projectExplorer.waitItemInVisibleArea(NEW_FOLDER_NAME);
+    projectExplorer.waitVisibilityByName(NEW_FOLDER_NAME);
 
     // Create new folder in the folder main
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/" + SOURCE_FOLDER_2);
@@ -84,6 +84,6 @@ public class CreateNewFoldersTest {
     askForValueDialog.typeAndWaitText(NEW_FOLDER_NAME_2);
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    projectExplorer.waitItemInVisibleArea(NEW_FOLDER_NAME_2);
+    projectExplorer.waitVisibilityByName(NEW_FOLDER_NAME_2);
   }
 }

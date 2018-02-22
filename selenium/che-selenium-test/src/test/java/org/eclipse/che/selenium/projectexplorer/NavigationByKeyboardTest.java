@@ -102,22 +102,22 @@ public class NavigationByKeyboardTest {
     projectExplorer.waitItemIsSelected(PROJECT_NAME + "/src");
 
     projectExplorer.sendToItemEnterKey();
-    projectExplorer.waitItemInVisibleArea("main");
-    projectExplorer.waitItemInVisibleArea("test");
+    projectExplorer.waitVisibilityByName("main");
+    projectExplorer.waitVisibilityByName("test");
 
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.waitItemIsSelected(PROJECT_NAME + "/src/main");
 
     projectExplorer.sendToItemRightArrowKey();
-    projectExplorer.waitItemInVisibleArea("java");
-    projectExplorer.waitItemInVisibleArea("webapp");
+    projectExplorer.waitVisibilityByName("java");
+    projectExplorer.waitVisibilityByName("webapp");
 
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.waitItemIsSelected(PROJECT_NAME + "/src/main/java");
 
     projectExplorer.sendToItemEnterKey();
-    projectExplorer.waitItemInVisibleArea(nameSecondModule);
-    projectExplorer.waitItemInVisibleArea("com.example");
+    projectExplorer.waitVisibilityByName(nameSecondModule);
+    projectExplorer.waitVisibilityByName("com.example");
 
     projectExplorer.waitAndSelectItem(PATH_TO_SECOND_MODULE);
     projectExplorer.waitItemIsSelected(PATH_TO_SECOND_MODULE);
@@ -150,13 +150,13 @@ public class NavigationByKeyboardTest {
 
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemEnterKey();
-    projectExplorer.waitItemInVisibleArea("META-INF");
-    projectExplorer.waitItemInVisibleArea("javax.servlet");
+    projectExplorer.waitVisibilityByName("META-INF");
+    projectExplorer.waitVisibilityByName("javax.servlet");
 
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemDownArrowKey();
     projectExplorer.sendToItemRightArrowKey();
-    projectExplorer.waitItemInVisibleArea("MANIFEST.MF");
+    projectExplorer.waitVisibilityByName("MANIFEST.MF");
     projectExplorer.waitAndSelectItemByName(nameFirstModule);
 
     projectExplorer.sendToItemEnterKey();
@@ -189,10 +189,10 @@ public class NavigationByKeyboardTest {
   }
 
   private void checkLibrariesIsVisible() {
-    projectExplorer.waitItemInVisibleArea("servlet-api-2.5.jar");
-    projectExplorer.waitItemInVisibleArea("spring-asm-3.0.5.RELEASE.jar");
-    projectExplorer.waitItemInVisibleArea("spring-beans-3.0.5.RELEASE.jar");
-    projectExplorer.waitItemInVisibleArea("junit-4.12.jar");
+    projectExplorer.waitVisibilityByName("servlet-api-2.5.jar");
+    projectExplorer.waitVisibilityByName("spring-asm-3.0.5.RELEASE.jar");
+    projectExplorer.waitVisibilityByName("spring-beans-3.0.5.RELEASE.jar");
+    projectExplorer.waitVisibilityByName("junit-4.12.jar");
   }
 
   private void checkLibrariesIsNotVisible() {

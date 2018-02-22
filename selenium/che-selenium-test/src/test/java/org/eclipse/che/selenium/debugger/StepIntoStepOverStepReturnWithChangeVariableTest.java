@@ -106,7 +106,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
   public void shutDownTomCatAndCleanWebApp() {
     editor.closeAllTabs();
     debugPanel.stopDebuggerWithUiAndCleanUpTomcat(CLEAN_TOMCAT);
-    projectExplorer.clickOnProjectExplorerTabInTheLeftPanel();
+    projectExplorer.clickOnProjectExplorerTab();
   }
 
   @Test

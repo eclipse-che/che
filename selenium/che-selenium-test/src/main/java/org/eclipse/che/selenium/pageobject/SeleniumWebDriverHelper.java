@@ -223,7 +223,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Type text in the {@link WebElement} with provided locator {@link By}
+   * Types {@code text} in the {@link WebElement} with provided locator {@link By}
    *
    * @param elementLocator
    * @param text
@@ -233,13 +233,22 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Type text in the provided {@link WebElement}
+   * Types {@code text} in the provided {@link WebElement}
    *
    * @param webElement
    * @param text
    */
   public void sendKeysTo(WebElement webElement, String text) {
     waitVisibility(webElement).sendKeys(text);
+  }
+
+  /**
+   * Types {@code text}
+   *
+   * @param text
+   */
+  public void sendKeys(String text) {
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(text).perform();
   }
 
   /**

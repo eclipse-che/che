@@ -89,7 +89,7 @@ public class CreateWorkspaceOnDashboardTest {
 
     // wait that type of the added project folder has PROJECT FOLDER status
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.waitDefinedTypeOfFolderByPath(PROJECT_NAME, PROJECT_FOLDER);
+    projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME, PROJECT_FOLDER);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
     // open a file in the Editor

@@ -106,7 +106,7 @@ public class WorkingWithJavaMySqlStackTest {
     currentWindow = seleniumWebDriver.getWindowHandle();
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME, APPLICATION_START_TIMEOUT_SEC);
-    projectExplorer.waitDefinedTypeOfFolderByPath(PROJECT_NAME, PROJECT_FOLDER);
+    projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME, PROJECT_FOLDER);
     loader.waitOnClosed();
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
 

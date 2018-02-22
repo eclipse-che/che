@@ -74,9 +74,9 @@ public class ConfigureSomeSourceFoldersTest {
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.BUILD_PATH);
     projectExplorer.clickOnItemInContextMenu(
         TestProjectExplorerContextMenuConstants.SubMenuBuildPath.USE_AS_SOURCE_FOLDER);
-    projectExplorer.waitDefinedTypeOfFolderByPath(
+    projectExplorer.waitDefinedTypeOfFolder(
         PROJECT_NAME + "/source", ProjectExplorer.FolderTypes.JAVA_SOURCE_FOLDER);
-    projectExplorer.waitDefinedTypeOfFolderByPath(
+    projectExplorer.waitDefinedTypeOfFolder(
         PROJECT_NAME + "/src", ProjectExplorer.FolderTypes.JAVA_SOURCE_FOLDER);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/source");
     createNewJavaClass(newJavaClassName);
@@ -103,7 +103,7 @@ public class ConfigureSomeSourceFoldersTest {
     projectExplorer.clickOnItemInContextMenu(NEW);
     projectExplorer.clickOnNewContextMenuItem(JAVA_CLASS);
     askForValueDialog.createJavaFileByNameAndType(name, CLASS);
-    projectExplorer.waitItemInVisibleArea(name + ".java");
+    projectExplorer.waitVisibilityByName(name + ".java");
     codenvyEditor.waitActive();
     loader.waitOnClosed();
     codenvyEditor.waitTabIsPresent(name);

@@ -62,7 +62,7 @@ public class CheckDisplayingArtifactIdTest {
     preferences.clickOnOkBtn();
     preferences.clickOnCloseBtn();
     preferences.waitPreferencesFormIsClosed();
-    projectExplorer.waitItemInVisibleArea(PROJECT_NAME + " " + ARTIFACT_ID);
+    projectExplorer.waitVisibilityByName(PROJECT_NAME + " " + ARTIFACT_ID);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java");
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java");
@@ -83,6 +83,6 @@ public class CheckDisplayingArtifactIdTest {
     preferences.clickOnOkBtn();
     preferences.clickOnCloseBtn();
 
-    projectExplorer.waitItemInVisibleArea(PROJECT_NAME);
+    projectExplorer.waitVisibilityByName(PROJECT_NAME);
   }
 }

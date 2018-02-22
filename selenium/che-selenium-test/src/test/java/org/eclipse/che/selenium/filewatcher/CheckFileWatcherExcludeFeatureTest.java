@@ -80,7 +80,7 @@ public class CheckFileWatcherExcludeFeatureTest {
   public void checkFileWatcherIgnoreFileAfterIncludingAndExcludingFileWatching() throws Exception {
     String fileNameForExcluding = "pom.xml";
     String pathToExcludedFile = PROJECT_NAME + "/" + fileNameForExcluding;
-    projectExplorer.waitItemInVisibleArea(FILE_WATCHER_IGNORE_FILE_NAME);
+    projectExplorer.waitVisibilityByName(FILE_WATCHER_IGNORE_FILE_NAME);
     projectExplorer.openItemByVisibleNameInExplorer(FILE_WATCHER_IGNORE_FILE_NAME);
     editor.waitActive();
     editor.waitTextIntoEditor(fileNameForExcluding);

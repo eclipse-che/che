@@ -134,7 +134,7 @@ public class CreateNewNotJavaFilesFromContextMenuTest {
     askForValueDialog.typeAndWaitText(name);
     askForValueDialog.clickOkBtn();
     loader.waitOnClosed();
-    projectExplorer.waitItemInVisibleArea(name + fileExt);
+    projectExplorer.waitVisibilityByName(name + fileExt);
   }
 
   public void checkDefaultTextInCodeMirrorEditorForFile(String defaultText, String fileName)

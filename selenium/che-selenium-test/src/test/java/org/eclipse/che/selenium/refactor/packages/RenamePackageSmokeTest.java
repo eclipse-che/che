@@ -84,7 +84,7 @@ public class RenamePackageSmokeTest {
     loader.waitOnClosed();
     refactor.clickOkButtonRefactorForm();
     refactor.waitRenamePackageFormIsClosed();
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/src/main/java/test0/r/A.java");
+    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/src/main/java/test0/r/A.java");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test0/p1/A.java");
     editor.waitTextIntoEditor(TEST0_P1_OUT);
     editor.closeFileByNameWithSaving("A");

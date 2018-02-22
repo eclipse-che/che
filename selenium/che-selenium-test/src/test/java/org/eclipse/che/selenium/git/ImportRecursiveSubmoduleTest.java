@@ -176,7 +176,7 @@ public class ImportRecursiveSubmoduleTest {
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         projectName + "/" + SUBMODULE_NAME_1 + "/src/main/java/com.codenvy.example.spring",
         "GreetingController.java");
-    projectExplorer.waitItemInVisibleArea("HelloWorld.java");
+    projectExplorer.waitVisibilityByName("HelloWorld.java");
     editor.closeFileByNameWithSaving("GreetingController");
   }
 
@@ -198,8 +198,8 @@ public class ImportRecursiveSubmoduleTest {
         projectName + "/" + SUBMODULE_NAME_2 + "/src/main/java/com.company.example", "A.java");
     projectExplorer.openItemByPath(
         projectName + "/" + SUBMODULE_NAME_2 + "/src/main/java/commenttest");
-    projectExplorer.waitItemInVisibleArea("GitPullTest.java");
-    projectExplorer.waitItemInVisibleArea("JavaCommentsTest.java");
+    projectExplorer.waitVisibilityByName("GitPullTest.java");
+    projectExplorer.waitVisibilityByName("JavaCommentsTest.java");
     editor.closeFileByNameWithSaving("A");
   }
 }

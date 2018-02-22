@@ -118,14 +118,14 @@ public class ConvertToProjectWithPomFileTest {
     // this timeout is needed for waiting that the Editor tab name of 'pom.xml' file is changed
     WaitUtils.sleepQuietly(5);
     editor.waitTabIsPresent("pom.xml");
-    projectExplorer.waitDefinedTypeOfFolderByPath(PATH_TO_POM_FILE, "simpleFolder");
+    projectExplorer.waitDefinedTypeOfFolder(PATH_TO_POM_FILE, "simpleFolder");
 
     editor.closeAllTabs();
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitProjectExplorer();
 
     try {
-      projectExplorer.waitDefinedTypeOfFolderByPath(PATH_TO_POM_FILE, "simpleFolder");
+      projectExplorer.waitDefinedTypeOfFolder(PATH_TO_POM_FILE, "simpleFolder");
     } catch (TimeoutException ex) {
       // Remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7551");
@@ -167,7 +167,7 @@ public class ConvertToProjectWithPomFileTest {
     askForValueDialog.typeAndWaitText(folderName);
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    projectExplorer.waitItemInVisibleArea(folderName);
+    projectExplorer.waitVisibilityByName(folderName);
     loader.waitOnClosed();
   }
 

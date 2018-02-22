@@ -89,13 +89,13 @@ public class CheckMavenPluginTest {
     editor.goToCursorPositionVisible(26, 32);
     editor.typeTextIntoEditor("--");
     try {
-      projectExplorer.waitDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", SIMPLE_FOLDER);
+      projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME + "/my-lib", SIMPLE_FOLDER);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7109");
     }
 
-    projectExplorer.waitDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-webapp", SIMPLE_FOLDER);
+    projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME + "/my-webapp", SIMPLE_FOLDER);
   }
 
   @Test(priority = 2)
@@ -119,8 +119,8 @@ public class CheckMavenPluginTest {
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
-    projectExplorer.waitDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", PROJECT_FOLDER);
-    projectExplorer.waitDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-webapp", PROJECT_FOLDER);
+    projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME + "/my-lib", PROJECT_FOLDER);
+    projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME + "/my-webapp", PROJECT_FOLDER);
     editor.closeAllTabs();
   }
 
@@ -152,6 +152,6 @@ public class CheckMavenPluginTest {
     loader.waitOnClosed();
     askDialog.createJavaFileByNameAndType(name, item);
     loader.waitOnClosed();
-    projectExplorer.waitItemInVisibleArea(name + fileExt);
+    projectExplorer.waitVisibilityByName(name + fileExt);
   }
 }

@@ -89,8 +89,8 @@ public class CreateAndDeleteProjectsTest {
     explorer.waitItem(CONSOLE_JAVA_SIMPLE);
     notificationsPopupPanel.waitPopupPanelsAreClosed();
     mavenPluginStatusBar.waitClosingInfoPanel();
-    explorer.waitDefinedTypeOfFolderByPath(CONSOLE_JAVA_SIMPLE, PROJECT_FOLDER);
-    explorer.waitDefinedTypeOfFolderByPath(WEB_JAVA_SPRING, PROJECT_FOLDER);
+    explorer.waitDefinedTypeOfFolder(CONSOLE_JAVA_SIMPLE, PROJECT_FOLDER);
+    explorer.waitDefinedTypeOfFolder(WEB_JAVA_SPRING, PROJECT_FOLDER);
     notificationsPopupPanel.waitPopupPanelsAreClosed();
 
     switchToWindow(dashboardWindow);

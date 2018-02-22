@@ -283,7 +283,7 @@ public class RenamePackageTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitRenamePackageFormIsClosed();
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/src/main/java/test0/r/A.java");
+    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/src/main/java/test0/r/A.java");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test0/p1/A.java");
     editor.waitTextIntoEditor(TEST0_P1_OUT);
     editor.closeFileByNameWithSaving("A");
@@ -306,7 +306,7 @@ public class RenamePackageTest {
     refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(false);
     refactor.clickOkButtonRefactorForm();
     refactor.waitRenamePackageFormIsClosed();
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/src/main/java/test1/r/A.java");
+    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/src/main/java/test1/r/A.java");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test1/p1/A.java");
     editor.waitTextIntoEditor(TEST1_P1_OUT);
     editor.closeFileByNameWithSaving("A");
@@ -336,7 +336,7 @@ public class RenamePackageTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitRenamePackageFormIsClosed();
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/src/main/java/test2/r");
+    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/src/main/java/test2/r");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test2/p1");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test2/fred/A.java");
     loader.waitOnClosed();
@@ -364,7 +364,7 @@ public class RenamePackageTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitRenamePackageFormIsClosed();
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/src/main/java/test3/fred");
+    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/src/main/java/test3/fred");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test3/r");
     editor.waitTextIntoEditor(TEST3_R_OUT);
     editor.closeFileByNameWithSaving("A");
@@ -405,7 +405,7 @@ public class RenamePackageTest {
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test4/r");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test4/q");
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/test4/r");
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/src/main/java/test4/r/p1");
+    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/src/main/java/test4/r/p1");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test4/q/A.java");
     loader.waitOnClosed();
     editor.waitTextIntoEditor(TEST4_Q_OUT);

@@ -72,7 +72,7 @@ public class RenameJustCreatedNotJavaFileTest {
     askForValueDialog.typeAndWaitText("newFile.jsp");
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    projectExplorer.waitItemInVisibleArea("newFile.jsp");
+    projectExplorer.waitVisibilityByName("newFile.jsp");
     editor.waitActive();
     editor.waitTabIsPresent("newFile.jsp");
 
@@ -89,6 +89,6 @@ public class RenameJustCreatedNotJavaFileTest {
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
     editor.waitTabIsPresent("Renamed.jsp");
-    projectExplorer.waitItemInVisibleArea("Renamed.jsp");
+    projectExplorer.waitVisibilityByName("Renamed.jsp");
   }
 }

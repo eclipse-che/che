@@ -93,7 +93,7 @@ public class ConvertToProjectFromConfigurationTest {
     // create folder with php file and convert to project
     createNewFolder(PROJECT_NAME + "/src/main/webapp", PHP_FOLDER_NAME);
     createNewFile("file.php", pathToPhpFile, FILE);
-    projectExplorer.waitItemInVisibleArea("file.php");
+    projectExplorer.waitVisibilityByName("file.php");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/phpFolder/file.php");
     editor.waitActive();
     actionsFactory
@@ -123,7 +123,7 @@ public class ConvertToProjectFromConfigurationTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/WEB-INF");
     createNewFolder(PROJECT_NAME + "/src/main/webapp/WEB-INF", JS_FOLDER_NAME);
     createNewFile("fileJS", pathToJsFile, JAVASCRIPT_FILE);
-    projectExplorer.waitItemInVisibleArea("fileJS.js");
+    projectExplorer.waitVisibilityByName("fileJS.js");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsFolder/fileJS.js");
     editor.waitActive();
     actionsFactory
@@ -157,7 +157,7 @@ public class ConvertToProjectFromConfigurationTest {
     askForValueDialog.typeAndWaitText(folderName);
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    projectExplorer.waitItemInVisibleArea(folderName);
+    projectExplorer.waitVisibilityByName(folderName);
     loader.waitOnClosed();
   }
 

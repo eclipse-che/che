@@ -97,7 +97,7 @@ public class CreateNewPackagesWithHelpCreationJavaClassTest {
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test/ua");
 
     try {
-      projectExplorer.waitItemInVisibleArea("TestClass2.java");
+      projectExplorer.waitVisibilityByName("TestClass2.java");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       browserLogsUtil.storeLogs();

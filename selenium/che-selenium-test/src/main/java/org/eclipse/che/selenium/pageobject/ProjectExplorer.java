@@ -72,7 +72,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** @author Zaryana Dombrovskaya */
 @Singleton
 public class ProjectExplorer {
 
@@ -120,17 +119,18 @@ public class ProjectExplorer {
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
+  /** Colors are defined for coloring files in Project Explorer */
   public enum ProjectExplorerItemColors {
     YELLOW("color: #e0b91d;"),
     GREEN("color: #72ad42;"),
     BLUE("color: #3193d4;"),
     DEFAULT("opacity:1;");
 
+    private final String color;
+
     ProjectExplorerItemColors(String color) {
       this.color = color;
     }
-
-    private final String color;
 
     private String get() {
       return this.color;
@@ -169,19 +169,43 @@ public class ProjectExplorer {
         "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']";
   }
 
-  public interface FolderTypes {
-    String SIMPLE_FOLDER = "simpleFolder";
-    String PROJECT_FOLDER = "projectFolder";
-    String JAVA_SOURCE_FOLDER = "javaSourceFolder";
+  /**
+   * Displaying folder types
+   */
+  public enum FolderTypes {
+    SIMPLE_FOLDER("simpleFolder"),
+    PROJECT_FOLDER ("projectFolder"),
+    JAVA_SOURCE_FOLDER ("javaSourceFolder");
+
+    private final String folderType;
+
+    FolderTypes(String folderType){
+      this.folderType = folderType;
+    }
+
+    private String get(){
+      return this.folderType;
+    }
   }
 
-  public interface ProjectExplorerOptionsMenuItem {
-    String MAXIMIZE = "gwt-debug-contextMenu/Maximize";
-    String HIDE = "gwt-debug-contextMenu/Hide";
-    String COLLAPSE_ALL = "gwt-debug-contextMenu/collapseAll";
-    String REVEAL_RESOURCE = "gwt-debug-contextMenu/revealResourceInProjectTree";
-    String REFRESH_MAIN = "gwt-debug-contextMenu/refreshPathAction";
-    String LINK_WITH_EDITOR = "gwt-debug-contextMenu/linkWithEditor";
+  /** Items which displayed after click on {@code Options} button in the project explorer area */
+  public enum ProjectExplorerOptionsMenuItem {
+    MAXIMIZE("gwt-debug-contextMenu/Maximize"),
+    HIDE("gwt-debug-contextMenu/Hide"),
+    COLLAPSE_ALL("gwt-debug-contextMenu/collapseAll"),
+    REVEAL_RESOURCE("gwt-debug-contextMenu/revealResourceInProjectTree"),
+    REFRESH_MAIN("gwt-debug-contextMenu/refreshPathAction"),
+    LINK_WITH_EDITOR("gwt-debug-contextMenu/linkWithEditor");
+
+    private final String id;
+
+    ProjectExplorerOptionsMenuItem(String id) {
+      this.id = id;
+    }
+
+    private String get() {
+      return this.id;
+    }
   }
 
   @FindBy(id = PROJECT_EXPLORER_TREE_ITEMS)
@@ -209,45 +233,58 @@ public class ProjectExplorer {
   WebElement projectExplorerTabInTheLeftPanel;
 
   /**
-   * @param path path to item in Project Explorer
+   * Waits for visibility of the {@link WebElement} with specified {@code path} for a during {@code
+   * timeout} and gets this {@link WebElement}
+   *
+   * @param path path to item in format: 'RootFolder/src/main/java/org/qe/package'
    * @param timeout timeout in seconds
-   * @return found WebElement
+   * @return found {@link WebElement}
    */
-  private WebElement getProjectExplorerItem(String path, int timeout) {
+  private WebElement waitAndGetItem(String path, int timeout) {
     return helper.waitVisibility(By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, path)), timeout);
   }
 
   /**
-   * @param path path to item in Project Explorer
-   * @return item by path
+   * Waits for visibility of the {@link WebElement} with specified {@code path} and gets this {@link
+   * WebElement}
+   *
+   * @param path path to item in format: 'RootFolder/src/main/java/org/qe/package'
+   * @return found {@link WebElement}
    */
-  private WebElement getProjectExplorerItem(String path) {
-    return getProjectExplorerItem(path, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+  private WebElement waitAndGetItem(String path) {
+    return waitAndGetItem(path, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
+  /** Waits for visibility and clicks on {@code Options} button in the project explorer area */
   public void clickOnProjectExplorerOptionsButton() {
     helper.waitAndClick(
         By.xpath("//div[@id='gwt-debug-navPanel']//div[@name='workBenchIconPartStackOptions']"),
         REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
-  public void clickOnOptionsMenuItem(String menuID) {
-    helper.waitAndClick(By.xpath(format("//tr[@id='%s']", menuID)), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+  /**
+   * Waits for visibility and clicks on {@code item} with specified {@code id}
+   *
+   * @param item 'id' which stores in {@link ProjectExplorerOptionsMenuItem}
+   */
+  public void clickOnOptionsMenuItem(ProjectExplorerOptionsMenuItem item) {
+    helper.waitAndClick(
+        By.xpath(format("//tr[@id='%s']", item.get())), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** Clicks on project explorer tab and waits its appearance. */
-  public void openPanel() {
-    clickOnProjectExplorerTabInTheLeftPanel();
+  public void openAndWaitProjectExplorer() {
+    clickOnProjectExplorerTab();
     waitProjectExplorer();
   }
 
-  /** press on the project explorer tab */
+  /** Clicks on the project explorer tab */
   public void clickOnProjectExplorerTab() {
     helper.waitAndClick(By.id(EXPLORER_RIGHT_TAB_ID), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /**
-   * wait project explorer and click on empty area
+   * Waits project explorer and click on empty area
    *
    * @param timeOutForWaiting defined timeout for appearance project explorer page
    */
@@ -262,16 +299,15 @@ public class ProjectExplorer {
   }
 
   /**
-   * wait appearance of the IDE Project Explorer
+   * Waits appearance of the IDE Project Explorer
    *
-   * @param timeout user timeout
+   * @param timeout waiting timeout in seconds
    */
   public void waitProjectExplorer(int timeout) {
     try {
       helper.waitVisibility(By.id(PROJECT_EXPLORER_TREE_ITEMS), timeout);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-
       if (helper.isVisible(By.id("ide-loader-progress-bar"))) {
         browserLogsUtil.storeLogs();
         fail("Known issue https://github.com/eclipse/che/issues/8468", ex);
@@ -282,23 +318,19 @@ public class ProjectExplorer {
   }
 
   /**
-   * wait item in project explorer with path (For Example in project with name:'Test' presents
-   * folder 'src' and there is present locates file 'pom.xml' path will be next:'Test/src/pom.xml')
-   * Note! in this method visibility is not checked
+   * Waits item in project explorer with specified {@code path}.
    *
-   * @param path
+   * @param path item's path in format: "Test/src/pom.xml"
    */
   public void waitItem(String path) {
     waitItem(path, EXPECTED_MESS_IN_CONSOLE_SEC);
   }
 
   /**
-   * wait item in project explorer with customized timeout (For Example in project with name:'Test'
-   * presents folder 'src' and there is present locates file 'pom.xpl' path will be
-   * next:'Test/src/pom.xml')
+   * Waits item in project explorer with specified {@code path} and customized {@code timeout}.
    *
-   * @param path
-   * @param timeout user timeout
+   * @param path item's path in format: "Test/src/pom.xml"
+   * @param timeout waiting timeout in seconds
    */
   public void waitItem(String path, int timeout) {
     loader.waitOnClosed();
@@ -307,9 +339,9 @@ public class ProjectExplorer {
   }
 
   /**
-   * wait until library will be present in External Libraries
+   * Waits until library will be present in External Libraries folder
    *
-   * @param libraryName name of library
+   * @param libraryName visible name of library
    */
   public void waitLibraryIsPresent(String libraryName) {
     helper.waitVisibility(
@@ -318,9 +350,9 @@ public class ProjectExplorer {
   }
 
   /**
-   * wait until library will be not present in External Libraries
+   * Waits until library will be not present in External Libraries folder
    *
-   * @param libraryName name of library
+   * @param libraryName visible name of library
    */
   public void waitLibraryIsNotPresent(String libraryName) {
     helper.waitInvisibility(
@@ -329,14 +361,12 @@ public class ProjectExplorer {
   }
 
   /**
-   * wait visible item in project explorer with path (For Example in project with name:'Test'
-   * presents folder 'src' and there is present locates file 'pom.xml' path will be
-   * next:'Test/src/pom.xml')
+   * Waits visible item in project explorer with specified {@code path}.
    *
-   * <p>With [string-length(text()) > 0] we will be sure 'div' not empty and contains some text here
-   * we suggest it will be name of node but for now we don't check name to equals
+   * <p>With [string-length(text()) > 0] we will be sure that 'div' not empty and contains some text
+   * here we suggest it will be name of node but for now we don't check name to equals
    *
-   * @param path
+   * @param path item's path in format: "Test/src/pom.xml"
    */
   public void waitVisibleItem(String path) {
     helper.waitVisibility(
@@ -345,101 +375,127 @@ public class ProjectExplorer {
   }
 
   /**
-   * wait item will disappear in project explorer with path
+   * Waits item with specified {@code path} will be invisible in project explorer
    *
-   * @param path path to item
+   * @param path item's path in format: "Test/src/pom.xml"
    */
-  public void waitItemIsDisappeared(String path) {
+  public void waitItemInvisibility(String path) {
     helper.waitInvisibility(
         By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, path)), LOADER_TIMEOUT_SEC);
   }
 
+  /**
+   * Waits visibility of yellow project explorer's item with specified {@code path}
+   *
+   * @param path item's path in format: "Test/src/pom.xml"
+   */
   public void waitYellowNode(String path) {
-    helper.waitVisibility(By.xpath(format(COLOURED_ITEM_TEMPLATE, path, YELLOW.get())));
+    waitNodeColor(path, YELLOW);
   }
 
+  /**
+   * Waits visibility of green project explorer's item with specified {@code path}
+   *
+   * @param path item's path in format: "Test/src/pom.xml"
+   */
   public void waitGreenNode(String path) {
-    helper.waitVisibility(By.xpath(format(COLOURED_ITEM_TEMPLATE, path, GREEN.get())));
+    waitNodeColor(path, GREEN);
   }
 
+  /**
+   * Waits visibility of blue project explorer's item with specified {@code path}
+   *
+   * @param path item's path in format: "Test/src/pom.xml"
+   */
   public void waitBlueNode(String path) {
-    helper.waitVisibility(By.xpath(format(COLOURED_ITEM_TEMPLATE, path, BLUE.get())));
+    waitNodeColor(path, BLUE);
   }
 
+  /**
+   * Waits visibility of project explorer's item with specified {@code path} and default color
+   *
+   * @param path item's path in format: "Test/src/pom.xml"
+   */
   public void waitDefaultColorNode(String path) {
-    helper.waitVisibility(By.xpath(format(COLOURED_ITEM_TEMPLATE, path, DEFAULT.get())));
+    waitNodeColor(path, DEFAULT);
   }
 
   /**
-   * wait item in project explorer tree area Note! Items must not repeat (for example: in a project
-   * can be some folder. Into each folder can be a file with same name. This method will be track
-   * only first item.)
+   * Waits visibility of project explorer's item with specified {@code path} and {@code color}
    *
-   * @param item
+   * @param path item's path in format: "Test/src/pom.xml"
+   * @param color item's color which stores in {@link ProjectExplorerItemColors}
    */
-  public void waitItemInVisibleArea(String item) {
-    waitItemInVisibleArea(item, DEFAULT_TIMEOUT);
+  public void waitNodeColor(String path, ProjectExplorerItemColors color) {
+    helper.waitVisibility(By.xpath(format(COLOURED_ITEM_TEMPLATE, path, color.get())));
   }
 
   /**
-   * wait item in project explorer tree area Note! Items must not repeat (for example: in a project
-   * can be some folder. Into each folder can be a file with same name. This method will be track
-   * only first item.)
+   * Waits item with specified {@code name} in project explorer tree area.
    *
-   * @param item
+   * <p>Note! Items must not repeats.
+   *
+   * <p>For example: in a project can be some folder. Into each folder can be a file with same name.
+   * This method will be track only first item.
+   *
+   * @param name visible item's name
+   * @return found {@link WebElement}
    */
-  public void waitItemInVisibleArea(String item, final int timeOut) {
+  public WebElement waitVisibilityByName(String name) {
+    return waitVisibilityByName(name, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits item with specified {@code name} in project explorer tree area, during specified {@code
+   * timeOut}
+   *
+   * <p>Note! Items must not repeats.
+   *
+   * <p>For example: in a project can be some folder. Into each folder can be a file with same name.
+   * This method will be track only first item.
+   *
+   * @param name visible item's name
+   * @param timeOut waiting timeout in seconds
+   * @return found {@link WebElement}
+   */
+  public WebElement waitVisibilityByName(String name, int timeOut) {
     loader.waitOnClosed();
 
-    helper.waitVisibility(
-        By.xpath(format("//div[@id='gwt-debug-projectTree']//div[text()='%s']", item)), timeOut);
-  }
-
-  /**
-   * get web element by his visible name
-   *
-   * @param item visible name
-   * @return found WebElement
-   */
-  private WebElement waitVisibilityItemByName(String item) {
     return helper.waitVisibility(
-        By.xpath(format("//div[@id='gwt-debug-projectTree']//div[text()='%s']", item)));
+        By.xpath(format("//div[@id='gwt-debug-projectTree']//div[text()='%s']", name)), timeOut);
   }
 
   /**
-   * wait item is not in project explorer tree area Note! Items must not repeat (for example: in a
-   * project can be some folder. Into each folder can be a file with same name. This method will be
-   * track only first item.)
+   * Waits until item with specified {@code name} is not visible in project explorer tree area.
+   * <p>Note! Items must not repeat.
+   * <p>For example: in a project can be some folder. Into each folder can be a file with same name.
+   * This method will be track only first item.
    *
-   * @param item visible name
+   * @param name item's visible name
    */
-  public void waitItemIsNotPresentVisibleArea(String item) {
-    helper.waitInvisibility(By.name(item));
+  public void waitItemIsNotPresentVisibleArea(String name) {
+    helper.waitInvisibility(By.name(name));
   }
 
   /**
-   * select item in project explorer with path For Example in project with name:'Test' presents
-   * folder 'src' and there is present locates file 'pom.xml' path will be next:'Test/src/pom.xml')
+   * Waits visibility and selects item with specified {@code path} in project explorer.
    *
-   * @param path full path to project item
+   * @param path item's path in format: "Test/src/pom.xml"
    */
   public void waitAndSelectItem(String path) {
     waitAndSelectItem(path, EXPECTED_MESS_IN_CONSOLE_SEC);
   }
 
   /**
-   * select item in project explorer with path, with user timeout for waiting of the item For
-   * Example in project with name:'Test' presents folder 'src' and there is present locates file
-   * 'pom.xpl' path will be next:'Test/src/pom.xml')
+   * Waits during {@code timeout} for visibility and selects item with specified {@code path} in project explorer.
    *
-   * @param path full path to project item
-   * @param timeoutForWaitingItem user timeout for waiting expected item in the Project Explorer
-   *     tree
+   * @param path item's path in format: 'Test/src/pom.xml'
+   * @param timeout waiting timeout in seconds
    */
-  public void waitAndSelectItem(String path, int timeoutForWaitingItem) {
+  public void waitAndSelectItem(String path, int timeout) {
     waitItem(path);
     try {
-      getProjectExplorerItem(path, timeoutForWaitingItem).click();
+      waitAndGetItem(path, timeout).click();
     }
     // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
@@ -449,56 +505,61 @@ public class ProjectExplorer {
       waitProjectExplorer();
       clickOnRefreshTreeButton();
       waitItem(path);
-      getProjectExplorerItem(path, timeoutForWaitingItem).click();
+      waitAndGetItem(path, timeout).click();
     }
   }
 
   /**
-   * select item in project explorer with 'name' attribute This is mean if will be two same files in
-   * the different folders, will be selected file, that first in the DOM
+   * Selects item in project explorer with specified {@code name} attribute.
+   * It means that if exist two files with the same name in the different folders, and both file is visible, than
+   * the first file in the DOM will be selected
    *
-   * @param item
+   * @param name item's visible name
    */
-  public void waitAndSelectItemByName(String item) {
-    waitVisibilityItemByName(item).click();
+  public void waitAndSelectItemByName(String name) {
+    waitVisibilityByName(name).click();
   }
 
-  /** wait external maven Libraries relative module */
+  /**
+   * Waits external maven Libraries relative module
+   *
+   * @param modulePath
+   *
+   */
   public WebElement waitLibraries(String modulePath) {
     return helper.waitVisibility(
         By.xpath(format("//div [@name='External Libraries' and @project='/%s']", modulePath)));
   }
 
-  /** wait disappearance external maven Libraries relative module */
+  /** Wait disappearance external maven Libraries relative module */
   public void waitLibrariesIsNotPresent(String modulePath) {
     helper.waitInvisibility(
         By.xpath(format("//div [@name='External Libraries' and @project='/%s']", modulePath)));
   }
 
-  /** select external maven Library relative module */
+  /** Select external maven Library relative module */
   public void selectLibraries(String modulePath) {
     waitLibraries(modulePath).click();
   }
 
   /**
-   * select item in project explorer with path For Example in project with name:'Test' presents
-   * folder 'src' and there is present locates file 'pom.xml' path will be next:'Test/src/pom.xml')
+   * Selects item with specified {@code path} in project explorer.
    *
-   * @param path
+   * @param path item's path in format: 'Test/src/pom.xml'
    */
   public void scrollAndSelectItem(String path) {
     waitItem(path);
     actionsFactory
         .createAction(seleniumWebDriver)
-        .moveToElement(getProjectExplorerItem(path))
+        .moveToElement(waitAndGetItem(path))
         .click()
         .perform();
   }
 
   /**
-   * open a item using full path of root folder the project
+   * Opens an item with specified {@code path} in the project explorer
    *
-   * @param path
+   * @param path item's path in format: 'Test/src/pom.xml'
    */
   public void openItemByPath(String path) {
     Actions action = actionsFactory.createAction(seleniumWebDriver);
@@ -506,7 +567,7 @@ public class ProjectExplorer {
     waitItemIsSelected(path);
 
     try {
-      action.moveToElement(getProjectExplorerItem(path)).perform();
+      action.moveToElement(waitAndGetItem(path)).perform();
       action.doubleClick().perform();
     }
     // sometimes an element in the project explorer may not be attached to the DOM. We should
@@ -517,71 +578,71 @@ public class ProjectExplorer {
       clickOnRefreshTreeButton();
       waitAndSelectItem(path);
       waitItemIsSelected(path);
-      action.moveToElement(getProjectExplorerItem(path)).perform();
+      action.moveToElement(waitAndGetItem(path)).perform();
       action.doubleClick().perform();
     }
     loader.waitOnClosed();
   }
 
   /**
-   * open item with double click in visible area (this mean if we have in project explorer several
-   * items with same name: in folder /webapp and in folder /src. And the folders are opened, will be
-   * opened first item). If we need open item in concrete folder use method openItemByPath
+   * Opens item with specified {@code name}  by double click.
+   * <p>It means, if we have several
+   * items with same name, and they are visible, than the first item in the DOM will be opened.
+   * <p>If need to opens item in concrete folder, use method {@link ProjectExplorer#openItemByPath(String)}
    *
-   * @param visibleItem
+   * @param name item's visible name
    */
-  public void openItemByVisibleNameInExplorer(String visibleItem) {
-    waitVisibilityItemByName(visibleItem).click();
+  public void openItemByVisibleNameInExplorer(String name) {
+    waitVisibilityByName(name).click();
     actionsFactory
         .createAction(seleniumWebDriver)
-        .moveToElement(waitVisibilityItemByName(visibleItem))
+        .moveToElement(waitVisibilityByName(name))
         .doubleClick()
         .perform();
     loader.waitOnClosed();
   }
 
   /**
-   * open visible package by double click in the Project Explorer tree
+   * Opens visible package with specified {@code name} by double click in the Project Explorer tree
    *
-   * @param packageName
+   * @param name item's visible name. For example: "com.qe.package" if packages displaying together, or just "org" if package displaying separately
    */
-  public void openVisiblePackage(String packageName) {
+  public void openVisiblePackage(String name) {
     actionsFactory
         .createAction(seleniumWebDriver)
-        .doubleClick(waitVisibilityItemByName(packageName))
+        .doubleClick(waitVisibilityByName(name))
         .perform();
   }
 
   /**
-   * wait disappearance the item in codenvy project explorer
+   * Waits invisibility of the item with specified {@code path} in project explorer
    *
-   * @param pathToItem full path to item in the codenvy project explorer
+   * @param path item's path in format: 'Test/src/pom.xml'
    */
-  public void waitDisappearItemByPath(String pathToItem) {
+  public void waitDisappearItemByPath(String path) {
     helper.waitInvisibility(
-        By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, pathToItem)), ELEMENT_TIMEOUT_SEC);
+        By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, path)), ELEMENT_TIMEOUT_SEC);
   }
 
   /**
-   * wait defined folder by user Path
+   * Waits visibility of the folder with defined {@code path} and {@code folderType}
    *
-   * @param pathToFolder the path to folder (fpr example: TestProject/src/main/test )
-   * @param typeFolder type folder in java project may be simple folder, projectFolder and
-   *     javaSource folder. We can use this types from ProjectExlorer.FolderTypes public interface.
+   * @param path folder's path in format: "TestProject/src/main/test"
+   * @param folderType folder's type, defined in {@link FolderTypes}
    */
-  public void waitDefinedTypeOfFolderByPath(String pathToFolder, String typeFolder) {
+  public void waitDefinedTypeOfFolder(String path, FolderTypes folderType) {
     loader.waitOnClosed();
     helper.waitVisibility(
         By.xpath(
             format(
                 "//div[@path='/%s']/div/*[local-name() = 'svg' and @id='%s']",
-                pathToFolder, typeFolder)));
+                path, folderType.get())));
   }
 
   /**
-   * wait removing item from DOM
+   * Waits removing item from DOM
    *
-   * @param pathToItem full path to item in the codenvy project explorer
+   * @param pathToItem item's path in format: "TestProject/src/main/test"
    */
   public void waitRemoveItemsByPath(String pathToItem) {
     waitFactory
@@ -593,9 +654,9 @@ public class ProjectExplorer {
   }
 
   /**
-   * context menu on item with specified name
+   * Opens context menu on item with specified {@code path}
    *
-   * @param path
+   * @param path item's path in format: "Test/src/pom.xml"
    */
   public void openContextMenuByPathSelectedItem(String path) {
     waitItem(path);
@@ -603,12 +664,12 @@ public class ProjectExplorer {
     waitItemIsSelected(path);
 
     Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.moveToElement(getProjectExplorerItem(path)).contextClick().perform();
+    action.moveToElement(waitAndGetItem(path)).contextClick().perform();
 
     waitContextMenu();
   }
 
-  /** wait for context menu. */
+  /** Waits on context menu visibility. */
   public void waitContextMenu() {
     testWebElementRenderChecker.waitElementIsRendered(
         By.xpath("//tr[@id='gwt-debug-contextMenu/newGroup']/parent::tbody"));
@@ -617,7 +678,7 @@ public class ProjectExplorer {
   }
 
   /**
-   * click on element from context menu by name
+   * Clicks on element from context menu by specified {@code itemId}
    *
    * @param item
    */
@@ -739,37 +800,33 @@ public class ProjectExplorer {
 
   /** perform right arrow key pressed in a browser */
   public void sendToItemRightArrowKey() {
-    sendKeys(RIGHT.toString());
+    helper.sendKeys(RIGHT.toString());
   }
 
   /** perform left arrow key pressed in a browser */
   public void sendToItemLeftArrowKey() {
-    sendKeys(LEFT.toString());
+    helper.sendKeys(LEFT.toString());
   }
 
   /** perform up arrow key pressed in a browser */
   public void sendToItemUpArrowKey() {
-    sendKeys(UP.toString());
+    helper.sendKeys(UP.toString());
   }
 
   /** perform down arrow key pressed in a browser */
   public void sendToItemDownArrowKey() {
-    sendKeys(ARROW_DOWN.toString());
+    helper.sendKeys(ARROW_DOWN.toString());
   }
 
   /** perform enter key pressed in a browser */
   public void sendToItemEnterKey() {
-    sendKeys(ENTER.toString());
+    helper.sendKeys(ENTER.toString());
   }
 
   /** wait refresh button and click this one */
   public void clickOnRefreshTreeButton() {
     clickOnProjectExplorerOptionsButton();
     clickOnOptionsMenuItem(REFRESH_MAIN);
-  }
-
-  public void sendKeys(String text) {
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(text).perform();
   }
 
   public void clickOnImportProjectLink(int userTimeout) {
@@ -794,11 +851,6 @@ public class ProjectExplorer {
                     projectExplorerTree, By.xpath("//div[text()='Create Project...']")));
 
     helper.waitAndClick(createProjectLink);
-  }
-
-  public void clickOnProjectExplorerTabInTheLeftPanel() {
-    helper.waitAndClick(
-        By.xpath(PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** invoke command from context menu. Work for Common scope commands only */
@@ -837,10 +889,7 @@ public class ProjectExplorer {
 
   public void scrollToItemByPath(String path) {
     waitItem(path);
-    actionsFactory
-        .createAction(seleniumWebDriver)
-        .moveToElement(getProjectExplorerItem(path))
-        .perform();
+    actionsFactory.createAction(seleniumWebDriver).moveToElement(waitAndGetItem(path)).perform();
   }
 
   /**

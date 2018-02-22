@@ -148,7 +148,7 @@ public class CreateNewNotJavaFilesTest {
     askForValueDialog.typeAndWaitText(name);
     askForValueDialog.clickOkBtn();
     loader.waitOnClosed();
-    projectExplorer.waitItemInVisibleArea(name + fileExt);
+    projectExplorer.waitVisibilityByName(name + fileExt);
   }
 
   private void checkDefaultTextInCodeMirrorEditorForFile(String defaultText, String fileName)

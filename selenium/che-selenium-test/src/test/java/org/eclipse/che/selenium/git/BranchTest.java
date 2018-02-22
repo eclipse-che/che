@@ -148,7 +148,7 @@ public class BranchTest {
     askForValueDialog.typeTextInFieldName("Hello");
     askForValueDialog.clickOkBtnNewJavaClass();
     askForValueDialog.waitNewJavaClassClose();
-    projectExplorer.waitItemInVisibleArea("Hello.java");
+    projectExplorer.waitVisibilityByName("Hello.java");
     projectExplorer.openItemByVisibleNameInExplorer("Hello.java");
     loader.waitOnClosed();
     editor.closeFileByNameWithSaving("Hello");

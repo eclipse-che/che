@@ -204,6 +204,6 @@ public class WorkingWithSplitPanelTest {
     commandsEditor.waitActive();
     commandsEditor.clickOnCancelCommandEditorButton();
     loader.waitOnClosed();
-    projectExplorer.clickOnProjectExplorerTabInTheLeftPanel();
+    projectExplorer.clickOnProjectExplorerTab();
   }
 }

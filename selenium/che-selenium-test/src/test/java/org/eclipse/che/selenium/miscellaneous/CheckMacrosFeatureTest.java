@@ -129,6 +129,6 @@ public class CheckMacrosFeatureTest {
     commandsEditor.clickOnSaveButtonInTheEditCommand();
     loader.waitOnClosed();
 
-    projectExplorer.clickOnProjectExplorerTabInTheLeftPanel();
+    projectExplorer.clickOnProjectExplorerTab();
   }
 }

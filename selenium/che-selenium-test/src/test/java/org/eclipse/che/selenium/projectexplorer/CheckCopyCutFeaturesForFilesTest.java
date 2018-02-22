@@ -66,9 +66,9 @@ public class CheckCopyCutFeaturesForFilesTest {
     moveFile(PATH_TO_CSS, PATH_TO_JSP_FOLDER);
     moveFile(PATH_TO_HTML, PATH_TO_JSP_FOLDER);
 
-    projectExplorer.waitItemIsDisappeared(PATH_TO_XML);
-    projectExplorer.waitItemIsDisappeared(PATH_TO_CSS);
-    projectExplorer.waitItemIsDisappeared(PATH_TO_HTML);
+    projectExplorer.waitItemInvisibility(PATH_TO_XML);
+    projectExplorer.waitItemInvisibility(PATH_TO_CSS);
+    projectExplorer.waitItemInvisibility(PATH_TO_HTML);
 
     projectExplorer.waitItem(PATH_TO_XML_AFTER_MOVING);
     projectExplorer.waitItem(PATH_TO_CSS_AFTER_MOVING);

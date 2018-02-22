@@ -69,6 +69,6 @@ public class CreateNewPackageFromContextMenuTest {
     askForValueDialog.typeAndWaitText(NEW_PACKAGE_NAME);
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    projectExplorer.waitItemInVisibleArea(NEW_PACKAGE_NAME);
+    projectExplorer.waitVisibilityByName(NEW_PACKAGE_NAME);
   }
 }

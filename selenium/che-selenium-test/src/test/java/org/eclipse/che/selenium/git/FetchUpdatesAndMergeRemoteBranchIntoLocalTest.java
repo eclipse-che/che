@@ -128,7 +128,7 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
 
     // Remove file css from index
-    projectExplorer.waitItemInVisibleArea(NEW_FILE_NAME);
+    projectExplorer.waitVisibilityByName(NEW_FILE_NAME);
     projectExplorer.waitAndSelectItem(PROJECT_1 + "/" + NEW_FILE_NAME);
     menu.runAndWaitCommand(
         TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.REMOVE_FROM_INDEX);
@@ -138,7 +138,7 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_REMOVE_FROM_INDEX_SUCCESS);
     events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_REMOVE_FROM_INDEX_SUCCESS);
-    projectExplorer.waitItemIsDisappeared(PROJECT_1 + "/" + NEW_FILE_NAME);
+    projectExplorer.waitItemInvisibility(PROJECT_1 + "/" + NEW_FILE_NAME);
 
     // Commit changes into master branch with specific comment
     projectExplorer.waitAndSelectItem(PROJECT_1);
@@ -188,7 +188,7 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     projectExplorer.openItemByPath(
         PROJECT_2 + "/src/main/java/commenttest/" + FILE_FOR_CHANGE_2 + ".java");
     editor.waitTextNotPresentIntoEditor("//" + MESSAGE_FOR_CHANGE_CONTENT);
-    projectExplorer.waitItemInVisibleArea(NEW_FILE_NAME);
+    projectExplorer.waitVisibilityByName(NEW_FILE_NAME);
 
     // Open "Git > Merge..." window, choose remote branch master and merge
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.MERGE);
@@ -208,7 +208,7 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     projectExplorer.openItemByPath(
         PROJECT_2 + "/src/main/java/commenttest/" + FILE_FOR_CHANGE_2 + ".java");
     editor.waitTextIntoEditor(MESSAGE_FOR_CHANGE_CONTENT);
-    projectExplorer.waitItemIsDisappeared(PROJECT_2 + "/" + NEW_FILE_NAME);
+    projectExplorer.waitItemInvisibility(PROJECT_2 + "/" + NEW_FILE_NAME);
 
     // Merge remote branch master again
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.MERGE);

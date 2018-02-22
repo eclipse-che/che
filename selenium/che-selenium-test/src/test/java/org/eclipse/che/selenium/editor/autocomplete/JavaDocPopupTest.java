@@ -209,6 +209,6 @@ public class JavaDocPopupTest {
     loader.waitOnClosed();
     askForValueDialog.createJavaFileByNameAndType(className, AskForValueDialog.JavaFiles.CLASS);
     loader.waitOnClosed();
-    projectExplorer.waitItemInVisibleArea(className + ".java");
+    projectExplorer.waitVisibilityByName(className + ".java");
   }
 }

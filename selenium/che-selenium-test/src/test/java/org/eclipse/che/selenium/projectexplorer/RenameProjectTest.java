@@ -68,8 +68,8 @@ public class RenameProjectTest {
 
     // Wait that project renamed and folder has project type
     projectExplorer.waitItem(NEW_PROJECT_NAME);
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME);
-    projectExplorer.waitDefinedTypeOfFolderByPath(NEW_PROJECT_NAME, PROJECT_FOLDER);
+    projectExplorer.waitItemInvisibility(PROJECT_NAME);
+    projectExplorer.waitDefinedTypeOfFolder(NEW_PROJECT_NAME, PROJECT_FOLDER);
 
     // Test that the Rename project dialog is started from menu
     projectExplorer.waitAndSelectItem(NEW_PROJECT_NAME);

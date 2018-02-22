@@ -99,7 +99,7 @@ public class CreateNewJavaFilesFromContextMenuTest {
 
     askForValueDialog.createJavaFileByNameAndType(name, item);
 
-    projectExplorer.waitItemInVisibleArea(name + ".java");
+    projectExplorer.waitVisibilityByName(name + ".java");
 
     editor.waitActive();
     loader.waitOnClosed();

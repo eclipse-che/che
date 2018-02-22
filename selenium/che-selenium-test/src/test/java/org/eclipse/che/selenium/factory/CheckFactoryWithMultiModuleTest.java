@@ -77,7 +77,7 @@ public class CheckFactoryWithMultiModuleTest {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
     projectExplorer.openItemByPath(PROJECT_NAME);
-    projectExplorer.waitDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", PROJECT_FOLDER);
-    projectExplorer.waitDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-webapp", PROJECT_FOLDER);
+    projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME + "/my-lib", PROJECT_FOLDER);
+    projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME + "/my-webapp", PROJECT_FOLDER);
   }
 }

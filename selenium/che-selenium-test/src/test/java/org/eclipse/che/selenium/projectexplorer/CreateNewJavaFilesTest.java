@@ -72,7 +72,7 @@ public class CreateNewJavaFilesTest {
     projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.waitItemInVisibleArea("AppController.java");
+    projectExplorer.waitVisibilityByName("AppController.java");
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
     loader.waitOnClosed();
 
@@ -104,7 +104,7 @@ public class CreateNewJavaFilesTest {
     loader.waitOnClosed();
     askForValueDialog.createJavaFileByNameAndType(name, item);
     loader.waitOnClosed();
-    projectExplorer.waitItemInVisibleArea(name + fileExt);
+    projectExplorer.waitVisibilityByName(name + fileExt);
   }
 
   private void checkDefaultTextInEditorForFile(String defaultText, String fileName) {

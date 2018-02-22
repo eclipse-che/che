@@ -113,7 +113,7 @@ public class RunPlainJavaProjectTest {
     askForValueDialog.typeAndWaitText(NEW_PACKAGE);
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    projectExplorer.waitItemInVisibleArea(NEW_PACKAGE);
+    projectExplorer.waitVisibilityByName(NEW_PACKAGE);
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/base/test");
     menu.runCommand(TestMenuCommandsConstants.Project.PROJECT, NEW, JAVA_CLASS);
     loader.waitOnClosed();
@@ -164,7 +164,7 @@ public class RunPlainJavaProjectTest {
     consoles.waitExpectedTextIntoConsole(CONSOLE_MESS);
 
     // add the folder 'bin'
-    projectExplorer.clickOnProjectExplorerTabInTheLeftPanel();
+    projectExplorer.clickOnProjectExplorerTab();
     commandsExplorer.waitCommandExplorerIsClosed();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
@@ -220,7 +220,7 @@ public class RunPlainJavaProjectTest {
     projectWizard.clickSaveButton();
     loader.waitOnClosed();
     projectWizard.waitCloseProjectConfigForm();
-    projectExplorer.waitItemInVisibleArea(nameApp);
+    projectExplorer.waitVisibilityByName(nameApp);
     loader.waitOnClosed();
   }
 }

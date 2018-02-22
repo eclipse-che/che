@@ -78,7 +78,7 @@ public class MoveJavaFileInNewSourceFolderTest {
     projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.BUILD_PATH);
     projectExplorer.clickOnItemInContextMenu(
         TestProjectExplorerContextMenuConstants.SubMenuBuildPath.USE_AS_SOURCE_FOLDER);
-    projectExplorer.waitDefinedTypeOfFolderByPath(
+    projectExplorer.waitDefinedTypeOfFolder(
         PATH_NEW_SOURCE_FOLDER, ProjectExplorer.FolderTypes.JAVA_SOURCE_FOLDER);
     projectExplorer.waitAndSelectItem(PATH_NEW_SOURCE_FOLDER);
     projectExplorer.openContextMenuByPathSelectedItem(PATH_NEW_SOURCE_FOLDER);
@@ -120,6 +120,6 @@ public class MoveJavaFileInNewSourceFolderTest {
     askForValueDialog.typeAndWaitText(NEW_PACKAGE_NAME);
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    projectExplorer.waitItemInVisibleArea(NEW_PACKAGE_NAME);
+    projectExplorer.waitVisibilityByName(NEW_PACKAGE_NAME);
   }
 }

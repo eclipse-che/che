@@ -83,7 +83,7 @@ public class AutocompleteJSFilesTest {
     askForValueDialog.typeAndWaitText("newJsFile");
     askForValueDialog.clickOkBtn();
     loader.waitOnClosed();
-    projectExplorer.waitItemInVisibleArea("newJsFile.js");
+    projectExplorer.waitVisibilityByName("newJsFile.js");
 
     editor.waitActive();
     loader.waitOnClosed();

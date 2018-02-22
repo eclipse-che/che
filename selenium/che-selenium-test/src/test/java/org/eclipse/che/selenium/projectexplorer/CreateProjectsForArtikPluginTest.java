@@ -152,7 +152,7 @@ public class CreateProjectsForArtikPluginTest {
     askForValueDialog.typeAndWaitText(fileName);
     askForValueDialog.clickOkBtn();
     loader.waitOnClosed();
-    projectExplorer.waitItemInVisibleArea(fileName + fileExt);
+    projectExplorer.waitVisibilityByName(fileName + fileExt);
     projectExplorer.openItemByPath(projectName + "/" + fileName + fileExt);
   }
 

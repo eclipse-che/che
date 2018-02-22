@@ -252,7 +252,7 @@ public class CommitFilesTest {
     askForValueDialog.clickOkBtnNewJavaClass();
     askForValueDialog.waitNewJavaClassClose();
     loader.waitOnClosed();
-    projectExplorer.waitItemInVisibleArea("Hello.java");
+    projectExplorer.waitVisibilityByName("Hello.java");
     editor.waitTabIsPresent("Hello");
     loader.waitOnClosed();
     editor.closeFileByNameWithSaving("Hello");

@@ -100,7 +100,7 @@ public class CheckRestoringSplitEditorTest {
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitItem(PROJECT_NAME);
     try {
-      projectExplorer.waitItemInVisibleArea(javaClassName);
+      projectExplorer.waitVisibilityByName(javaClassName);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7551", ex);

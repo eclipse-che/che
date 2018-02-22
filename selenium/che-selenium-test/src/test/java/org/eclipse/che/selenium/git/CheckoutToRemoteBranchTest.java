@@ -113,8 +113,8 @@ public class CheckoutToRemoteBranchTest {
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/helloworld/GreetingController.java");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
-    projectExplorer.waitItemInVisibleArea("GreetingController.java");
-    projectExplorer.waitItemInVisibleArea("index.jsp");
+    projectExplorer.waitVisibilityByName("GreetingController.java");
+    projectExplorer.waitVisibilityByName("index.jsp");
     editor.closeFileByNameWithSaving("index.jsp");
     editor.waitWhileFileIsClosed("index.jsp");
 
