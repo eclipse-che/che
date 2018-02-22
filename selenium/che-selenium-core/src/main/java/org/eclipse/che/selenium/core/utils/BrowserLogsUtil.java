@@ -44,6 +44,11 @@ public class BrowserLogsUtil {
     return seleniumWebDriver.manage().logs().get(BROWSER).getAll();
   }
 
+  public List<LogEntry> getLogs(String logType) {
+
+    return seleniumWebDriver.manage().logs().get(logType).getAll();
+  }
+
   /** store browser logs to the test logs */
   public void storeLogs() {
     getLogs().forEach(logEntry -> LOG.info("{} {}", logEntry.getLevel(), logEntry.getMessage()));
