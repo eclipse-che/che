@@ -52,7 +52,7 @@ import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakErrorResponse;
 import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
 
 /**
- * Helps to make keycloak operations and provider correct operation errors handling.
+ * Helps to perform keycloak operations and provide correct errors handling.
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
@@ -67,6 +67,14 @@ public class KeycloakServiceClient {
   public KeycloakServiceClient(KeycloakSettings keycloakSettings) {
     this.keycloakSettings = keycloakSettings;
   }
+
+  /**
+   * Generates URL for account linking redirect
+   * @param token  client jwt token
+   * @param oauthProvider provider name
+   * @param redirectAfterLogin URL to return after login
+   * @return URL to redirect client to perform account linking
+   */
 
   public String getAccountLinkingURL(Jwt token, String oauthProvider, String redirectAfterLogin) {
 
@@ -96,6 +104,20 @@ public class KeycloakServiceClient {
         .toString();
   }
 
+
+  /**
+   * Gets auth token from given identity provider.
+   *
+   * @param oauthProvider provider name
+   * @return KeycloakTokenResponse token response
+   * @throws ForbiddenException
+   * @throws BadRequestException
+   * @throws IOException
+   * @throws ConflictException
+   * @throws NotFoundException
+   * @throws ServerException
+   * @throws UnauthorizedException
+   */
   public KeycloakTokenResponse getIdentityProviderToken(String oauthProvider)
       throws ForbiddenException, BadRequestException, IOException, ConflictException,
           NotFoundException, ServerException, UnauthorizedException {
@@ -196,6 +218,9 @@ public class KeycloakServiceClient {
     }
   }
 
+  /**
+   * Converts key=value&foo=bar string into json
+   */
   private static String toJson(String source) {
     Map<String, String> queryPairs = new HashMap<>();
     Arrays.stream(source.split("&"))
