@@ -12,9 +12,12 @@ base_dir=$(cd "$(dirname "$0")"; pwd)
 DIR=$(cd "$(dirname "$0")"; pwd)
 # copy che theme
 cp -r "${DIR}"/../init/modules/keycloak/files/che "${DIR}"
+# copy user and realm json templates
+cp -r "${DIR}"/../init/modules/keycloak/templates/* "${DIR}"
 
 init --name:keycloak "$@"
 build
 
 # remove files
 rm -rf "${DIR}"/che
+rm -rf "${DIR}"/*.erb
