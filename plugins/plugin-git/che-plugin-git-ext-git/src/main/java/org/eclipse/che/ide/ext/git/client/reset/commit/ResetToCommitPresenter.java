@@ -176,6 +176,10 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
                   .then(
                       arg -> {
                         clientServerEventService.sendFileTrackingResumeEvent();
+                      })
+                  .catchError(
+                      arg -> {
+                        clientServerEventService.sendFileTrackingResumeEvent();
                       });
             })
         .catchError(
