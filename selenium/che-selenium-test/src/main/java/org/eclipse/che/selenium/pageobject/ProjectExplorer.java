@@ -67,7 +67,6 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,14 +79,11 @@ public class ProjectExplorer {
   private final Loader loader;
   private final ActionsFactory actionsFactory;
   private final NavigateToFile navigateToFile;
-  private final Menu menu;
   private final CodenvyEditor editor;
   private final TestWebElementRenderChecker testWebElementRenderChecker;
   private final BrowserLogsUtil browserLogsUtil;
   private final SeleniumWebDriverHelper helper;
   private final WebDriverWaitFactory waitFactory;
-  private WebDriverWait loadPageTimeout;
-  private WebDriverWait redrawUiElementsWait;
   private final int DEFAULT_TIMEOUT;
 
   @Inject
@@ -96,7 +92,6 @@ public class ProjectExplorer {
       Loader loader,
       ActionsFactory actionsFactory,
       NavigateToFile navigateToFile,
-      Menu menu,
       CodenvyEditor editor,
       TestWebElementRenderChecker testWebElementRenderChecker,
       BrowserLogsUtil browserLogsUtil,
@@ -106,14 +101,11 @@ public class ProjectExplorer {
     this.loader = loader;
     this.actionsFactory = actionsFactory;
     this.navigateToFile = navigateToFile;
-    this.menu = menu;
     this.editor = editor;
     this.testWebElementRenderChecker = testWebElementRenderChecker;
     this.browserLogsUtil = browserLogsUtil;
     this.helper = seleniumWebDriverHelper;
     this.waitFactory = webDriverWaitFactory;
-    loadPageTimeout = this.waitFactory.get(LOAD_PAGE_TIMEOUT_SEC);
-    redrawUiElementsWait = this.waitFactory.get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     this.DEFAULT_TIMEOUT = LOAD_PAGE_TIMEOUT_SEC;
     PageFactory.initElements(seleniumWebDriver, this);
   }
