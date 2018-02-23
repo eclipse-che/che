@@ -125,6 +125,8 @@ public class DashboardFactory {
     String BULK_CHECKBOX = "//md-checkbox[@aria-label='Factory list']";
     String DELETE_FACTORY_BTN = "delete-item-button";
     String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
+
+    String SEARCH_FACTORY_FIELD = "//input[@ng-placeholder='Search']";
   }
 
   private interface AddActionWindow {
@@ -177,6 +179,9 @@ public class DashboardFactory {
 
   @FindBy(xpath = Locators.DELETE_DIALOG_BUTTON)
   WebElement deleteDialogBtn;
+
+  @FindBy(xpath = Locators.SEARCH_FACTORY_FIELD)
+  WebElement searchFactoryField;
 
   /** wait factory menu in the navigation bar */
   public void waitFactoriesItemOnNavBar() {
@@ -438,5 +443,14 @@ public class DashboardFactory {
     redrawUiElementsTimeout
         .until(visibilityOfElementLocated(By.xpath(format(Locators.FACTORY_CHECKBOX, factoryName))))
         .click();
+  }
+
+  public void typeToSearchInput(String value) {
+    redrawUiElementsTimeout.until(visibilityOf(searchFactoryField)).clear();
+    searchFactoryField.sendKeys(value);
+  }
+
+  public void waitSearchFactoryByNameField() {
+    redrawUiElementsTimeout.until(visibilityOf(searchFactoryField));
   }
 }
