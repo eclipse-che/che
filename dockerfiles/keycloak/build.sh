@@ -10,7 +10,7 @@ base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
 
 DIR=$(cd "$(dirname "$0")"; pwd)
-# copy user and realm json templates
+# copy che theme
 cp -r "${DIR}"/../init/modules/keycloak/files/che "${DIR}"
 
 init --name:keycloak "$@"
