@@ -20,7 +20,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Loader;
-import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -31,14 +30,12 @@ public class NewFactory {
 
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
-  private final Dashboard dashboard;
   private final WebDriverWait redrawUiElementsTimeout;
 
   @Inject
-  public NewFactory(SeleniumWebDriver seleniumWebDriver, Loader loader, Dashboard dashboard) {
+  public NewFactory(SeleniumWebDriver seleniumWebDriver, Loader loader) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
-    this.dashboard = dashboard;
     this.redrawUiElementsTimeout =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
@@ -53,19 +50,15 @@ public class NewFactory {
 
   private interface Locators {
     String NEW_FACTORY_PAGE_TITLE_ID = "New_Factory_From";
-
     String FACTORY_NAME_ID = "new-factory-name-input";
     String NEW_FACTORY_ERROR_MESSAGE = "//div[@id='new-workspace-error-message']/div";
-
     String SEARCH_WORKSPACE_BUTTON = "//div[@id='search-factory']//md-icon";
     String SEARCH_WORKSPACE_FIELD = "//div[@id='search-factory']//input";
-
     String WORKSPACE_NAME_XPATH = "//a[@id='workspace-name' and text()='%s']";
-    String GIT_URL = "git-url-input";
+    String GIT_URL_ID = "git-url-input";
     String UPLOAD_FILE_BUTTON_ID = "upload-file-button";
     String MINIMAL_FACTORY_TEMPLATE_ID = "minimal-template-button";
     String COMPLETE_FACTORY_TEMPLATE_ID = "complete-template-button";
-
     String CREATE_BUTTON_ID = "create-factory-next-button";
   }
 
@@ -80,6 +73,9 @@ public class NewFactory {
 
   @FindBy(id = Locators.MINIMAL_FACTORY_TEMPLATE_ID)
   WebElement minimalTemplateButton;
+
+  @FindBy(id = Locators.UPLOAD_FILE_BUTTON_ID)
+  WebElement uploadFileButton;
 
   @FindBy(id = Locators.COMPLETE_FACTORY_TEMPLATE_ID)
   WebElement completeTemplateButton;
@@ -153,12 +149,11 @@ public class NewFactory {
   }
 
   public void waitUploadFileButton() {
-    redrawUiElementsTimeout.until(
-        visibilityOfElementLocated(By.id(Locators.UPLOAD_FILE_BUTTON_ID)));
+    redrawUiElementsTimeout.until(visibilityOf(uploadFileButton));
   }
 
   public void waitGitUrlField() {
-    redrawUiElementsTimeout.until(visibilityOfElementLocated(By.id(Locators.GIT_URL)));
+    redrawUiElementsTimeout.until(visibilityOfElementLocated(By.id(Locators.GIT_URL_ID)));
   }
 
   public void clickOnSearchFactoryButton() {

@@ -21,7 +21,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory;
+import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactories;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.factories.FactoryDetails;
@@ -46,7 +46,7 @@ public class CreateFactoryTest {
   private static final String NAME_IS_TOO_LONG = "The name has to be less than 20 characters long.";
 
   @Inject private TestFactoryServiceClient factoryServiceClient;
-  @Inject private DashboardFactory dashboardFactory;
+  @Inject private DashboardFactories dashboardFactories;
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private FactoryDetails factoryDetails;
   @Inject private NewFactory newFactory;
@@ -71,9 +71,9 @@ public class CreateFactoryTest {
 
   @Test
   public void checkNewFactoryFromPage() {
-    dashboardFactory.selectFactoriesOnNavBar();
-    dashboardFactory.waitAllFactoriesPage();
-    dashboardFactory.clickOnAddFactoryBtn();
+    dashboardFactories.selectFactoriesOnNavBar();
+    dashboardFactories.waitAllFactoriesPage();
+    dashboardFactories.clickOnAddFactoryBtn();
     newFactory.waitToolbarTitle();
 
     newFactory.typeFactoryName(FACTORY_CREATED_FROM_WORKSPACE_NAME);
@@ -93,9 +93,9 @@ public class CreateFactoryTest {
 
   @Test
   public void checkFactoryName() {
-    dashboardFactory.selectFactoriesOnNavBar();
-    dashboardFactory.waitAllFactoriesPage();
-    dashboardFactory.clickOnAddFactoryBtn();
+    dashboardFactories.selectFactoriesOnNavBar();
+    dashboardFactories.waitAllFactoriesPage();
+    dashboardFactories.clickOnAddFactoryBtn();
     newFactory.waitToolbarTitle();
 
     newFactory.clickOnWorkspaceFromList(WORKSPACE_NAME);
@@ -119,9 +119,9 @@ public class CreateFactoryTest {
 
   @Test
   public void createFactoryFromTemplates() {
-    dashboardFactory.selectFactoriesOnNavBar();
-    dashboardFactory.waitAllFactoriesPage();
-    dashboardFactory.clickOnAddFactoryBtn();
+    dashboardFactories.selectFactoriesOnNavBar();
+    dashboardFactories.waitAllFactoriesPage();
+    dashboardFactories.clickOnAddFactoryBtn();
 
     // create a factory from minimal template
     newFactory.waitToolbarTitle();
@@ -133,13 +133,13 @@ public class CreateFactoryTest {
     factoryDetails.waitFactoryName(MINIMAL_TEMPLATE_FACTORY_NAME);
     factoryDetails.clickOnBackToFactoriesListButton();
 
-    dashboardFactory.waitAllFactoriesPage();
-    dashboardFactory.waitFactoryName(MINIMAL_TEMPLATE_FACTORY_NAME);
-    assertEquals(dashboardFactory.getFactoryRamLimit(MINIMAL_TEMPLATE_FACTORY_NAME), "2048 MB");
+    dashboardFactories.waitAllFactoriesPage();
+    dashboardFactories.waitFactoryName(MINIMAL_TEMPLATE_FACTORY_NAME);
+    assertEquals(dashboardFactories.getFactoryRamLimit(MINIMAL_TEMPLATE_FACTORY_NAME), "2048 MB");
 
     // create a factory from complete template
-    dashboardFactory.waitAllFactoriesPage();
-    dashboardFactory.clickOnAddFactoryBtn();
+    dashboardFactories.waitAllFactoriesPage();
+    dashboardFactories.clickOnAddFactoryBtn();
     newFactory.waitToolbarTitle();
     newFactory.typeFactoryName(COMPLETE_TEMPLATE_FACTORY_NAME);
     newFactory.clickOnSourceTab(TabNames.TEMPLATE_TAB_ID);
@@ -149,17 +149,17 @@ public class CreateFactoryTest {
     factoryDetails.waitFactoryName(COMPLETE_TEMPLATE_FACTORY_NAME);
     factoryDetails.clickOnBackToFactoriesListButton();
 
-    dashboardFactory.waitAllFactoriesPage();
-    dashboardFactory.waitFactoryName(COMPLETE_TEMPLATE_FACTORY_NAME);
+    dashboardFactories.waitAllFactoriesPage();
+    dashboardFactories.waitFactoryName(COMPLETE_TEMPLATE_FACTORY_NAME);
     Assert.assertEquals(
-        dashboardFactory.getFactoryRamLimit(COMPLETE_TEMPLATE_FACTORY_NAME), "2048 MB");
+        dashboardFactories.getFactoryRamLimit(COMPLETE_TEMPLATE_FACTORY_NAME), "2048 MB");
   }
 
   @Test
   public void createFactoryFromWorkspace() {
-    dashboardFactory.selectFactoriesOnNavBar();
-    dashboardFactory.waitAllFactoriesPage();
-    dashboardFactory.clickOnAddFactoryBtn();
+    dashboardFactories.selectFactoriesOnNavBar();
+    dashboardFactories.waitAllFactoriesPage();
+    dashboardFactories.clickOnAddFactoryBtn();
 
     // create a new factory from a workspace
     newFactory.clickOnSourceTab(TabNames.WORKSPACE_TAB_ID);
@@ -170,17 +170,17 @@ public class CreateFactoryTest {
     factoryDetails.clickOnBackToFactoriesListButton();
 
     // check that the created factory exists
-    dashboardFactory.waitAllFactoriesPage();
-    dashboardFactory.waitFactoryName(FACTORY_CREATED_FROM_WORKSPACE_NAME);
+    dashboardFactories.waitAllFactoriesPage();
+    dashboardFactories.waitFactoryName(FACTORY_CREATED_FROM_WORKSPACE_NAME);
     assertEquals(
-        dashboardFactory.getFactoryRamLimit(FACTORY_CREATED_FROM_WORKSPACE_NAME), "3072 MB");
+        dashboardFactories.getFactoryRamLimit(FACTORY_CREATED_FROM_WORKSPACE_NAME), "3072 MB");
   }
 
   @Test
   public void checkWorkspaceFiltering() {
-    dashboardFactory.selectFactoriesOnNavBar();
-    dashboardFactory.waitAllFactoriesPage();
-    dashboardFactory.clickOnAddFactoryBtn();
+    dashboardFactories.selectFactoriesOnNavBar();
+    dashboardFactories.waitAllFactoriesPage();
+    dashboardFactories.clickOnAddFactoryBtn();
 
     newFactory.waitToolbarTitle();
     newFactory.clickOnSearchFactoryButton();

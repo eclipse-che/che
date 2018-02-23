@@ -11,10 +11,7 @@
 package org.eclipse.che.selenium.pageobject.dashboard;
 
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
@@ -40,26 +37,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Musienko Maxim */
 @Singleton
-public class DashboardFactory {
-
-  public enum SourcesTypes {
-    GIT("Git Repository"),
-    GITHUB("Github"),
-    WORKSPACES("Workspace"),
-    CONFIG_FILE("Config File"),
-    TEMPLATE("Template");
-
-    private final String type;
-
-    SourcesTypes(String type) {
-      this.type = type;
-    }
-
-    @Override
-    public String toString() {
-      return type;
-    }
-  }
+public class DashboardFactories {
 
   public enum AddAction {
     RUN_COMMAND("RunCommand"),
@@ -72,7 +50,7 @@ public class DashboardFactory {
   }
 
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
-  private final WebDriverWait redrawUiElementsTimeout;
+  private final WebDriverWait loadPageTimeoutSec;
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
   private final ActionsFactory actionsFactory;
@@ -80,7 +58,7 @@ public class DashboardFactory {
   private final String ideUrl;
 
   @Inject
-  public DashboardFactory(
+  public DashboardFactories(
       SeleniumWebDriverHelper seleniumWebDriverHelper,
       SeleniumWebDriver seleniumWebDriver,
       Loader loader,
@@ -93,13 +71,11 @@ public class DashboardFactory {
     this.actionsFactory = actionsFactory;
     this.dashboard = dashboard;
     this.ideUrl = ideUrlProvider.get().toString();
-    this.redrawUiElementsTimeout =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    this.loadPageTimeoutSec = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
   private interface Locators {
-
     String FACTORY_TAB_XPATH = "//span[text()='Factories']";
     String FACTORY_LIST_CONTAINER_CSS = "md-content.factories-list-factories";
     String WORKSPACE_ITEM_XPATH = "//div[@class='project-name']/a[text()='%s']";
@@ -115,17 +91,14 @@ public class DashboardFactory {
     String ADD_CONFIGURE_ACTION_XPATH = "//md-card[@che-title='Configure Actions']//button";
     String OPEN_FACTORY_BUTTON_XPATH = "//che-button-default[@che-button-title='Open']";
     String CONFIGURE_ACTION_TITLE_XPATH = "//div[text()='Configure Actions']";
-
     String FACTORY_ITEM = "//div[@id='%s']";
     String FACTORY_CHECKBOX = FACTORY_ITEM + "//md-checkbox";
     String FACTORY_NAME = FACTORY_ITEM + "//span[@name='factory-name']";
     String FACTORY_RAM_LIMIT = FACTORY_ITEM + "//span[@name='factory-ram-limit']";
     String FACTORY_ACTION = FACTORY_ITEM + "//span[@name='open-factory']";
-
     String BULK_CHECKBOX = "//md-checkbox[@aria-label='Factory list']";
-    String DELETE_FACTORY_BTN = "delete-item-button";
+    String DELETE_FACTORY_BTN_ID = "delete-item-button";
     String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
-
     String SEARCH_FACTORY_FIELD = "//input[@ng-placeholder='Search']";
   }
 
@@ -174,7 +147,7 @@ public class DashboardFactory {
   @FindBy(xpath = Locators.CONFIGURE_ACTION_TITLE_XPATH)
   WebElement configureActionTitle;
 
-  @FindBy(id = Locators.DELETE_FACTORY_BTN)
+  @FindBy(id = Locators.DELETE_FACTORY_BTN_ID)
   WebElement deleleFactoryButton;
 
   @FindBy(xpath = Locators.DELETE_DIALOG_BUTTON)
@@ -197,8 +170,7 @@ public class DashboardFactory {
 
   /** wait 'All factories' page with factories list */
   public void waitAllFactoriesPage() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(visibilityOf(factoryListContainer));
+    loadPageTimeoutSec.until(visibilityOf(factoryListContainer));
     waitAddFactoryBtn();
   }
 
@@ -221,9 +193,7 @@ public class DashboardFactory {
     // delay for animation page
     WaitUtils.sleepQuietly(1, TimeUnit.SECONDS);
     String locator = format(Locators.WORKSPACE_ITEM_XPATH, wsNama);
-    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(locator)))
-        .click();
+    loadPageTimeoutSec.until(visibilityOfElementLocated(By.xpath(locator))).click();
     // delay for redraw and setting selection
     WaitUtils.sleepQuietly(1, TimeUnit.SECONDS);
   }
@@ -233,21 +203,18 @@ public class DashboardFactory {
     WebElement jsonArea =
         seleniumWebDriverHelper.waitPresence(By.cssSelector(Locators.JSON_FACTORY_EDITOR_AREA_CSS));
     seleniumWebDriverHelper.moveCursorTo(jsonArea);
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until((WebDriver driver) -> jsonArea.getText().length() > LOAD_PAGE_TIMEOUT_SEC);
+    loadPageTimeoutSec.until(
+        (WebDriver driver) -> jsonArea.getText().length() > LOAD_PAGE_TIMEOUT_SEC);
   }
 
   /** click on 'Create factory button' */
   public void clickOnCreateFactoryBtn() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOf(createFactoryBtn))
-        .click();
+    loadPageTimeoutSec.until(visibilityOf(createFactoryBtn)).click();
   }
 
   /** wait any factory url after creation a factory */
   public void waitFactoryUrl() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.partialLinkText(ideUrl + "f?id=")));
+    loadPageTimeoutSec.until(visibilityOfElementLocated(By.partialLinkText(ideUrl + "f?id=")));
   }
 
   /**
@@ -256,9 +223,7 @@ public class DashboardFactory {
    * @param name name of factory to enter
    */
   public void setFactoryName(String name) {
-    WebElement field =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(visibilityOf(factoryNameField));
+    WebElement field = loadPageTimeoutSec.until(visibilityOf(factoryNameField));
     field.clear();
     field.sendKeys(name);
   }
@@ -271,23 +236,19 @@ public class DashboardFactory {
   public void waitSelectSourceWidgetAndSelect(String sourceType) {
     String locatorPref =
         "//span[@class[contains(.,'che-tab-label-title')]and text()='" + sourceType + "']";
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(locatorPref)))
-        .click();
+    loadPageTimeoutSec.until(visibilityOfElementLocated(By.xpath(locatorPref))).click();
   }
 
   /** click on the DOne button of Configure Button page */
   public void clickOnDoneBtn() {
     scrollOnDoneButton();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOf(doneBtn))
-        .click();
+    loadPageTimeoutSec.until(visibilityOf(doneBtn)).click();
   }
 
   /** click on current factory id Url */
   public void clickFactoryIDUrl() {
     waitFactoryUrl();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    loadPageTimeoutSec
         .until(visibilityOfElementLocated(By.partialLinkText(ideUrl + "f?id=")))
         .click();
   }
@@ -295,7 +256,7 @@ public class DashboardFactory {
   /** click on current factory id Url */
   public void clickNamedFactoryUrl() {
     waitFactoryUrl();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    loadPageTimeoutSec
         .until(visibilityOfElementLocated(By.partialLinkText(ideUrl + "f?name=")))
         .click();
   }
@@ -303,31 +264,25 @@ public class DashboardFactory {
   /** click on current factory id Url */
   public void clickFactoryNamedUrl() {
     waitFactoryUrl();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    loadPageTimeoutSec
         .until(visibilityOfElementLocated(By.partialLinkText(ideUrl + "f?name=")))
         .click();
   }
 
   /** Click on 'Workspaces' tab on 'Select Source' widget */
   public void clickWorkspacesTabOnSelectSource() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(elementToBeClickable(workspaceTabSelect))
-        .click();
+    loadPageTimeoutSec.until(elementToBeClickable(workspaceTabSelect)).click();
   }
 
   /** Click on 'Add' button on 'Configure Action' widget */
   public void clickOnAddConfigureActions() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(elementToBeClickable(addConfigureAction))
-        .click();
+    loadPageTimeoutSec.until(elementToBeClickable(addConfigureAction)).click();
   }
 
   /** Click on 'Open' button on the factory properties widget */
   public void clickOnOpenFactory() {
     dashboard.waitNotificationIsClosed();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(elementToBeClickable(openFactoryButton))
-        .click();
+    loadPageTimeoutSec.until(elementToBeClickable(openFactoryButton)).click();
   }
 
   /**
@@ -337,10 +292,10 @@ public class DashboardFactory {
    */
   public void selectAction(AddAction addAction) {
     WaitUtils.sleepQuietly(1);
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    loadPageTimeoutSec
         .until(presenceOfElementLocated(By.xpath(AddActionWindow.ACTION_XPATH)))
         .click();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    loadPageTimeoutSec
         .until(
             presenceOfElementLocated(
                 By.xpath(format(AddActionWindow.ACTION_SELECT_XPATH, addAction.actionName))))
@@ -353,23 +308,21 @@ public class DashboardFactory {
    * @param paramValue value of param
    */
   public void enterParamValue(String paramValue) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    loadPageTimeoutSec
         .until(presenceOfElementLocated(By.xpath(AddActionWindow.PARAM_XPATH)))
         .clear();
     loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    loadPageTimeoutSec
         .until(presenceOfElementLocated(By.xpath(AddActionWindow.PARAM_XPATH)))
         .sendKeys(paramValue);
     loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(textToBePresentInElementValue(By.xpath(AddActionWindow.PARAM_XPATH), paramValue));
+    loadPageTimeoutSec.until(
+        textToBePresentInElementValue(By.xpath(AddActionWindow.PARAM_XPATH), paramValue));
   }
 
   /** click 'Add' button on 'Add Action' window */
   public void clickAddOnAddAction() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(elementToBeClickable(By.xpath(AddActionWindow.ADD_XPATH)))
-        .click();
+    loadPageTimeoutSec.until(elementToBeClickable(By.xpath(AddActionWindow.ADD_XPATH))).click();
   }
 
   /** scroll on 'Done' button */
@@ -379,58 +332,54 @@ public class DashboardFactory {
   }
 
   public void waitFactoryName(String factoryName) {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(format(Locators.FACTORY_ITEM, factoryName))));
+    loadPageTimeoutSec.until(
+        visibilityOfElementLocated(By.xpath(format(Locators.FACTORY_ITEM, factoryName))));
   }
 
   public void selectFactory(String factoryName) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    loadPageTimeoutSec
         .until(visibilityOfElementLocated(By.xpath(format(Locators.FACTORY_NAME, factoryName))))
         .click();
   }
 
   public String getFactoryRamLimit(String factoryName) {
-    return new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+    return loadPageTimeoutSec
         .until(
             visibilityOfElementLocated(By.xpath(format(Locators.FACTORY_RAM_LIMIT, factoryName))))
         .getText();
   }
 
   public void clickOnOpenInIdeButton(String factoryName) {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+    loadPageTimeoutSec
         .until(visibilityOfElementLocated(By.xpath(format(Locators.FACTORY_ACTION, factoryName))))
         .click();
   }
 
   public void waitFactoryNotExists(String factoryName) {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(invisibilityOfElementLocated(By.xpath(format(Locators.FACTORY_ITEM, factoryName))));
+    loadPageTimeoutSec.until(
+        invisibilityOfElementLocated(By.xpath(format(Locators.FACTORY_ITEM, factoryName))));
   }
 
   public void waitBulkCheckbox() {
-    redrawUiElementsTimeout.until(visibilityOfElementLocated(By.xpath(Locators.BULK_CHECKBOX)));
+    loadPageTimeoutSec.until(visibilityOfElementLocated(By.xpath(Locators.BULK_CHECKBOX)));
   }
 
   public void selectAllFactoriesByBulk() {
-    redrawUiElementsTimeout
-        .until(visibilityOfElementLocated(By.xpath(Locators.BULK_CHECKBOX)))
-        .click();
+    loadPageTimeoutSec.until(visibilityOfElementLocated(By.xpath(Locators.BULK_CHECKBOX))).click();
   }
 
   public void clickOnDeleteFactoryBtn() {
-    redrawUiElementsTimeout.until(visibilityOf(deleleFactoryButton)).click();
+    loadPageTimeoutSec.until(visibilityOf(deleleFactoryButton)).click();
   }
 
   /** Click on the delete/remove button in the dialog window */
   public void clickOnDeleteButtonInDialogWindow() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOf(deleteDialogBtn))
-        .click();
+    loadPageTimeoutSec.until(visibilityOf(deleteDialogBtn)).click();
   }
 
   public boolean isFactoryChecked(String factoryName) {
     String attrValue =
-        redrawUiElementsTimeout
+        loadPageTimeoutSec
             .until(
                 visibilityOfElementLocated(
                     By.xpath(format(Locators.FACTORY_CHECKBOX, factoryName))))
@@ -440,17 +389,17 @@ public class DashboardFactory {
   }
 
   public void selectFactoryByCheckbox(String factoryName) {
-    redrawUiElementsTimeout
+    loadPageTimeoutSec
         .until(visibilityOfElementLocated(By.xpath(format(Locators.FACTORY_CHECKBOX, factoryName))))
         .click();
   }
 
   public void typeToSearchInput(String value) {
-    redrawUiElementsTimeout.until(visibilityOf(searchFactoryField)).clear();
+    loadPageTimeoutSec.until(visibilityOf(searchFactoryField)).clear();
     searchFactoryField.sendKeys(value);
   }
 
   public void waitSearchFactoryByNameField() {
-    redrawUiElementsTimeout.until(visibilityOf(searchFactoryField));
+    loadPageTimeoutSec.until(visibilityOf(searchFactoryField));
   }
 }
