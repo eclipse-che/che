@@ -271,8 +271,8 @@ else
     HTTP_PROTOCOL="http"
     WS_PROTOCOL="ws"
 fi
-IMAGE_POSTGRES=${IMAGE_POSTGRES:-"eclipse/che-postgres:nightly"}
-IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK:-"eclipse/che-keycloak:nightly"}
+export IMAGE_POSTGRES=${IMAGE_POSTGRES:-"eclipse/che-postgres:nightly"}
+export IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK:-"eclipse/che-keycloak:nightly"}
 CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
 CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
 CHE_IMAGE="${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}"
