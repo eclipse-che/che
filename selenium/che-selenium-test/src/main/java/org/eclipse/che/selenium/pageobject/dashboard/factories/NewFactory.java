@@ -57,6 +57,9 @@ public class NewFactory {
     String FACTORY_NAME_ID = "new-factory-name-input";
     String NEW_FACTORY_ERROR_MESSAGE = "//div[@id='new-workspace-error-message']/div";
 
+    String SEARCH_WORKSPACE_BUTTON = "//div[@id='search-factory']//md-icon";
+    String SEARCH_WORKSPACE_FIELD = "//div[@id='search-factory']//input";
+
     String WORKSPACE_NAME_XPATH = "//a[@id='workspace-name' and text()='%s']";
     String GIT_URL = "git-url-input";
     String UPLOAD_FILE_BUTTON_ID = "upload-file-button";
@@ -81,6 +84,12 @@ public class NewFactory {
   @FindBy(id = Locators.COMPLETE_FACTORY_TEMPLATE_ID)
   WebElement completeTemplateButton;
 
+  @FindBy(xpath = Locators.SEARCH_WORKSPACE_BUTTON)
+  WebElement searchWorkspaceButton;
+
+  @FindBy(xpath = Locators.SEARCH_WORKSPACE_FIELD)
+  WebElement searchWorkspaceField;
+
   public void waitToolbarTitle() {
     redrawUiElementsTimeout.until(visibilityOf(newFactoryPageTitle));
   }
@@ -94,6 +103,7 @@ public class NewFactory {
 
   public void clickOnSourceTab(String tabName) {
     redrawUiElementsTimeout.until(visibilityOfElementLocated(By.id(tabName))).click();
+    WaitUtils.sleepQuietly(1);
   }
 
   public void clickOnMinimalTemplateButton() {
@@ -102,6 +112,16 @@ public class NewFactory {
 
   public void clickOnCompleteTemplateButton() {
     redrawUiElementsTimeout.until(visibilityOf(completeTemplateButton)).click();
+  }
+
+  public void waitTemplateButtons() {
+    redrawUiElementsTimeout.until(visibilityOf(minimalTemplateButton));
+    redrawUiElementsTimeout.until(visibilityOf(completeTemplateButton));
+  }
+
+  public Boolean isCreateButtonEnabled() {
+    WebElement webElement = redrawUiElementsTimeout.until(visibilityOf(createButton));
+    return webElement.isEnabled();
   }
 
   public void clickOnCreateButton() {
@@ -116,6 +136,11 @@ public class NewFactory {
         .click();
   }
 
+  public void waitWorkspaceNameInList(String workspaceName) {
+    redrawUiElementsTimeout.until(
+        visibilityOfElementLocated(By.xpath(format(Locators.WORKSPACE_NAME_XPATH, workspaceName))));
+  }
+
   public String getErrorMessage() {
     return redrawUiElementsTimeout
         .until(visibilityOfElementLocated(By.xpath(Locators.NEW_FACTORY_ERROR_MESSAGE)))
@@ -125,5 +150,33 @@ public class NewFactory {
   public void waitErrorMessageNotVisible() {
     redrawUiElementsTimeout.until(
         invisibilityOfElementLocated(By.xpath(Locators.NEW_FACTORY_ERROR_MESSAGE)));
+  }
+
+  public void waitUploadFileButton() {
+    redrawUiElementsTimeout.until(
+        visibilityOfElementLocated(By.id(Locators.UPLOAD_FILE_BUTTON_ID)));
+  }
+
+  public void waitGitUrlField() {
+    redrawUiElementsTimeout.until(visibilityOfElementLocated(By.id(Locators.GIT_URL)));
+  }
+
+  public void clickOnSearchFactoryButton() {
+    redrawUiElementsTimeout.until(visibilityOf(searchWorkspaceButton)).click();
+  }
+
+  public void waitSearchFactoryField() {
+    redrawUiElementsTimeout.until(visibilityOf(searchWorkspaceField));
+  }
+
+  public void typeTextToSearchFactoryField(String text) {
+    redrawUiElementsTimeout.until(visibilityOf(searchWorkspaceField));
+    searchWorkspaceField.clear();
+    searchWorkspaceField.sendKeys(text);
+    WaitUtils.sleepQuietly(1);
+  }
+
+  public void waitWorkspacesListIsEmpty() {
+    redrawUiElementsTimeout.until(invisibilityOfElementLocated(By.id("workspace-name")));
   }
 }
