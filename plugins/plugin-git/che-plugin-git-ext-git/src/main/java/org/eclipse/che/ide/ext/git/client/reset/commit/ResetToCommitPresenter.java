@@ -24,6 +24,7 @@ import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.filewatcher.ClientServerEventService;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
@@ -48,6 +49,7 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
   private final GitOutputConsoleFactory gitOutputConsoleFactory;
   private final DialogFactory dialogFactory;
   private final ProcessesPanelPresenter consolesPanelPresenter;
+  private final ClientServerEventService clientServerEventService;
   private final GitServiceClient service;
   private final AppContext appContext;
   private final GitLocalizationConstant constant;
@@ -67,11 +69,13 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
       AppContext appContext,
       NotificationManager notificationManager,
       GitOutputConsoleFactory gitOutputConsoleFactory,
-      ProcessesPanelPresenter processesPanelPresenter) {
+      ProcessesPanelPresenter processesPanelPresenter,
+      ClientServerEventService clientServerEventService) {
     this.view = view;
     this.dialogFactory = dialogFactory;
     this.gitOutputConsoleFactory = gitOutputConsoleFactory;
     this.consolesPanelPresenter = processesPanelPresenter;
+    this.clientServerEventService = clientServerEventService;
     this.view.setDelegate(this);
     this.service = service;
     this.constant = constant;
@@ -157,6 +161,8 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
 
     final GitOutputConsole console = gitOutputConsoleFactory.create(RESET_COMMAND_NAME);
 
+    clientServerEventService.sendFileTrackingSuspendEvent();
+
     service
         .reset(project.getLocation(), selectedRevision.getId(), type, null)
         .then(
@@ -165,7 +171,12 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
               consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.resetSuccessfully());
 
-              project.synchronize();
+              project
+                  .synchronize()
+                  .then(
+                      arg -> {
+                        clientServerEventService.sendFileTrackingResumeEvent();
+                      });
             })
         .catchError(
             error -> {
