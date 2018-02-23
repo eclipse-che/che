@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.assistedinject.Assisted;
+import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -93,10 +94,11 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
             + kubernetesMachine.getName()
             + " -runtime-id "
             + String.format(
-                "%s:%s:%s",
+                "%s:%s:%s:%s",
                 runtimeIdentity.getWorkspaceId(),
                 runtimeIdentity.getEnvName(),
-                runtimeIdentity.getOwner())
+                runtimeIdentity.getOwnerName(),
+                runtimeIdentity.getOwnerId())
             + " -push-endpoint "
             + installerWebsocketEndpoint
             + " -push-logs-endpoint "
@@ -128,14 +130,26 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
     kubernetesMachine.exec("chmod", "+x", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE);
 
     LOG.debug("Bootstrapping {}:{}. Creating config file", runtimeIdentity, machineName);
-    kubernetesMachine.exec(
-        "sh",
-        "-c",
-        "cat > "
-            + BOOTSTRAPPER_DIR
-            + CONFIG_FILE
-            + " << 'EOF'\n"
-            + GSON.toJson(installers)
-            + "\nEOF");
+
+    kubernetesMachine.exec("sh", "-c", "rm " + BOOTSTRAPPER_DIR + CONFIG_FILE);
+
+    List<String> contentsToContatenate = new ArrayList<String>();
+    contentsToContatenate.add("[");
+    boolean firstOne = true;
+    for (Installer installer : installers) {
+      if (firstOne) {
+        firstOne = false;
+      } else {
+        contentsToContatenate.add(",");
+      }
+      contentsToContatenate.add(GSON.toJson(installer));
+    }
+    contentsToContatenate.add("]");
+    for (String content : contentsToContatenate) {
+      kubernetesMachine.exec(
+          "sh",
+          "-c",
+          "cat >> " + BOOTSTRAPPER_DIR + CONFIG_FILE + " << 'EOF'\n" + content + "\nEOF");
+    }
   }
 }

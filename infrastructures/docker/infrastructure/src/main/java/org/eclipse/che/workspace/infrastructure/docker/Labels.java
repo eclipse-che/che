@@ -34,6 +34,7 @@ public final class Labels {
   public static final String LABEL_WORKSPACE_ID = LABEL_PREFIX + "workspace.id";
   public static final String LABEL_WORKSPACE_ENV = LABEL_PREFIX + "workspace.env";
   public static final String LABEL_WORKSPACE_OWNER = LABEL_PREFIX + "workspace.owner";
+  public static final String LABEL_WORKSPACE_OWNER_ID = LABEL_PREFIX + "workspace.owner.id";
 
   private static final String LABEL_MACHINE_NAME = LABEL_PREFIX + "machine.name";
   private static final String LABEL_MACHINE_ATTRIBUTES = LABEL_PREFIX + "machine.attributes";
@@ -88,7 +89,8 @@ public final class Labels {
     public Serializer runtimeId(RuntimeIdentity runtimeId) {
       labels.put(LABEL_WORKSPACE_ID, runtimeId.getWorkspaceId());
       labels.put(LABEL_WORKSPACE_ENV, runtimeId.getEnvName());
-      labels.put(LABEL_WORKSPACE_OWNER, runtimeId.getOwner());
+      labels.put(LABEL_WORKSPACE_OWNER, runtimeId.getOwnerName());
+      labels.put(LABEL_WORKSPACE_OWNER_ID, runtimeId.getOwnerId());
       return this;
     }
 
@@ -159,7 +161,8 @@ public final class Labels {
       return new RuntimeIdentityImpl(
           labels.get(LABEL_WORKSPACE_ID),
           labels.get(LABEL_WORKSPACE_ENV),
-          labels.get(LABEL_WORKSPACE_OWNER));
+          labels.get(LABEL_WORKSPACE_OWNER),
+          labels.get(LABEL_WORKSPACE_OWNER_ID));
     }
 
     /** Retrieves server configuration from docker labels and returns (ref -> server config) map. */

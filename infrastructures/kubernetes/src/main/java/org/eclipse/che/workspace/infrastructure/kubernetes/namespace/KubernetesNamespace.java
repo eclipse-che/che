@@ -86,10 +86,10 @@ public class KubernetesNamespace {
     this.workspaceId = workspaceId;
     this.pods = new KubernetesPods(name, workspaceId, clientFactory);
     this.services = new KubernetesServices(name, workspaceId, clientFactory);
-    this.pvcs = new KubernetesPersistentVolumeClaims(name, clientFactory);
+    this.pvcs = new KubernetesPersistentVolumeClaims(name, workspaceId, clientFactory);
     this.ingresses = new KubernetesIngresses(name, workspaceId, clientFactory);
     if (doPrepare) {
-      doPrepare(name, clientFactory.create());
+      doPrepare(name, clientFactory.create(workspaceId));
     }
   }
 

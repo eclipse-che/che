@@ -13,11 +13,7 @@ import {CheEnvironmentRegistry} from '../../../../../components/api/environment/
 import {EnvironmentManager} from '../../../../../components/api/environment/environment-manager';
 import {IEnvironmentManagerMachine} from '../../../../../components/api/environment/environment-manager-machine';
 import {CheRecipeService} from '../../che-recipe.service';
-
-interface IPodItem {
-  spec: { containers: any };
-  [propName: string]: string | Object;
-}
+import {IPodItem} from '../../../../../components/api/environment/openshift-machine-recipe-parser';
 
 
 /**
@@ -143,21 +139,16 @@ export class EditMachineDialogController {
   onNameChange(name: string): void {
     this.machineName = name;
     const machineName = this.getFullName(name);
-    const environment = this.environmentManager.renameMachine(this.copyEnvironment, this.machine.name, machineName);
+    const environment = this.environmentManager.renameMachine(this.environment, this.originMachine.name, machineName);
     const machines = this.environmentManager.getMachines(environment);
-    this.copyEnvironment = this.environmentManager.getEnvironment(environment, machines);
-    const machine = machines.find((machine: IEnvironmentManagerMachine) => {
+    const machineIndex = machines.findIndex((machine: IEnvironmentManagerMachine) => {
       return machine.name === machineName;
     });
-    if (!machine || !machine.recipe) {
-      // return existing value
-      this.copyEnvironment = angular.copy(this.environment);
-      this.copyEnvironment = this.environmentManager.deleteMachine(this.copyEnvironment, this.originMachine.name);
-      this.copyEnvironment = this.environmentManager.addMachine(this.copyEnvironment, this.machine);
+    if (machineIndex === -1) {
       return;
     }
-
-    this.machine = machine;
+    this.machine.recipe = machines[machineIndex].recipe;
+    this.copyEnvironment = this.environmentManager.getEnvironment(environment, machines);
     this.stringifyMachineRecipe();
   }
 
@@ -229,10 +220,7 @@ export class EditMachineDialogController {
       this.checkMemoryLimitChanges();
       // update environment's machines
       const machines = this.environmentManager.getMachines(this.copyEnvironment).map((machine: IEnvironmentManagerMachine) => {
-        if (machine.name === this.machine.name) {
-          machine = this.machine;
-        }
-        return machine;
+        return machine.name === this.machine.name ? this.machine : machine;
       });
       this.copyEnvironment = this.environmentManager.getEnvironment(this.copyEnvironment, machines);
     } catch (e) {
@@ -292,16 +280,39 @@ export class EditMachineDialogController {
         this.copyEnvironment = angular.copy(this.environment);
         this.copyEnvironment = this.environmentManager.addMachine(this.copyEnvironment, this.machine);
       } else {
-        const originPod: IPodItem = angular.copy(this.originMachine.recipe);
-        delete originPod.spec;
-        const newPod: IPodItem = angular.copy(this.machine.recipe);
-        delete newPod.spec;
-        if (!angular.equals(originPod, newPod)) {
+        if (!angular.equals(this.getOpenshiftMachinePod(this.originMachine.recipe), this.getOpenshiftMachinePod(this.machine.recipe))) {
           this.copyEnvironment = angular.copy(this.environment);
           this.copyEnvironment = this.environmentManager.deleteMachine(this.copyEnvironment, this.originMachine.name);
           this.copyEnvironment = this.environmentManager.addMachine(this.copyEnvironment, this.machine);
+          const name = this.environmentManager.getMachineName(this.machine);
+          if (!this.copyEnvironment.machines[this.getFullName(name)]) {
+            this.onNameChange(name);
+          }
         }
       }
     }
+  }
+
+  /**
+   * Gets empty pod from openshift machine recipe.
+   * @param {IPodItem} machineRecipe
+   * @returns {IPodItem}
+   */
+  private getOpenshiftMachinePod(machineRecipe: IPodItem): IPodItem {
+    if (!machineRecipe || this.cheRecipeService.isOpenshift(this.environment.recipe) || !machineRecipe.metadata) {
+      return machineRecipe;
+    }
+    const pod = angular.copy(machineRecipe);
+    delete pod.spec;
+    if (!angular.isArray(machineRecipe.metadata.annotations)) {
+      return pod;
+    }
+    // remove container's name annotations
+    Object.keys(machineRecipe.metadata.annotations).forEach((annotation: string) => {
+      if (annotation.startsWith('org.eclipse.che.container')) {
+        delete pod.metadata.annotations[annotation];
+      }
+    });
+    return pod;
   }
 }

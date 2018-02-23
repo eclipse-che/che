@@ -127,6 +127,7 @@ public abstract class SeleniumTestHandler
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
   @Inject private TestGitHubServiceClient gitHubClientService;
   @Inject private TestWorkspaceLogsReader testWorkspaceLogsReader;
+  @Inject private SeleniumTestStatistics seleniumTestStatistics;
 
   private final Injector injector;
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
@@ -150,25 +151,43 @@ public abstract class SeleniumTestHandler
   }
 
   @Override
-  public void onTestStart(ITestResult result) {}
+  public void onTestStart(ITestResult result) {
+    // count several invocations of method (e.g. in case of data provider is used)
+    String invocationLabel = "";
+    if (result.getMethod().getCurrentInvocationCount() > 0) {
+      invocationLabel = format(" (run %d)", result.getMethod().getCurrentInvocationCount() + 1);
+    }
+
+    LOG.info(
+        "Starting test #{} {}.{}{}. {}",
+        seleniumTestStatistics.hitStart(),
+        result.getTestClass().getRealClass().getSimpleName(),
+        result.getMethod().getMethodName(),
+        invocationLabel,
+        seleniumTestStatistics.toString());
+  }
 
   @Override
   public void onTestSuccess(ITestResult result) {
+    seleniumTestStatistics.hitPass();
     onTestFinish(result);
   }
 
   @Override
   public void onTestFailure(ITestResult result) {
+    seleniumTestStatistics.hitFail();
     onTestFinish(result);
   }
 
   @Override
   public void onTestSkipped(ITestResult result) {
+    seleniumTestStatistics.hitSkip();
     onTestFinish(result);
   }
 
   @Override
   public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
+    seleniumTestStatistics.hitFail();
     onTestFinish(result);
   }
 
@@ -181,6 +200,8 @@ public abstract class SeleniumTestHandler
   @Override
   public void onStart(ISuite suite) {
     suite.setParentInjector(injector);
+    LOG.info(
+        "Starting suite '{}' with {} test methods.", suite.getName(), suite.getAllMethods().size());
   }
 
   /** Check if webdriver session can be created without errors. */
@@ -257,19 +278,27 @@ public abstract class SeleniumTestHandler
   /** Is invoked when test or configuration is finished. */
   private void onTestFinish(ITestResult result) {
     if (result.getStatus() == ITestResult.FAILURE || result.getStatus() == ITestResult.SKIP) {
+      String invocationLabel = "";
+      if (result.getMethod().getCurrentInvocationCount() > 1) {
+        invocationLabel = format(" (run %d)", result.getMethod().getCurrentInvocationCount());
+      }
+
       if (result.getThrowable() != null) {
         LOG.error(
-            "Test {} method {} failed because {}",
-            result.getTestClass().getName(),
+            "Test {}.{}{} failed. Error: {}",
+            result.getTestClass().getRealClass().getSimpleName(),
             result.getMethod().getMethodName(),
+            invocationLabel,
             result.getThrowable().getLocalizedMessage());
         LOG.debug(result.getThrowable().getLocalizedMessage(), result.getThrowable());
       } else {
         LOG.error(
-            "Test {} method {} failed ",
-            result.getTestClass().getName(),
-            result.getMethod().getMethodName());
+            "Test {}.{}{} failed without exception.",
+            result.getTestClass().getRealClass().getSimpleName(),
+            result.getMethod().getMethodName(),
+            invocationLabel);
       }
+
       captureScreenshot(result);
       captureHtmlSource(result);
       captureTestWorkspaceLogs(result);
@@ -286,7 +315,7 @@ public abstract class SeleniumTestHandler
         obj = field.get(testInstance);
       } catch (IllegalAccessException e) {
         LOG.error(
-            "Field {} is unaccessable in {}.", field.getName(), testInstance.getClass().getName());
+            "Field {} is inaccessible in {}.", field.getName(), testInstance.getClass().getName());
         continue;
       }
 
@@ -294,7 +323,7 @@ public abstract class SeleniumTestHandler
         continue;
       }
 
-      Path pathToStoreWorkspaceLogs = Paths.get(workspaceLogsDir, getTestDefinition(result));
+      Path pathToStoreWorkspaceLogs = Paths.get(workspaceLogsDir, getTestReference(result));
       testWorkspaceLogsReader.read((TestWorkspace) obj, pathToStoreWorkspaceLogs);
     }
   }
@@ -317,7 +346,7 @@ public abstract class SeleniumTestHandler
         obj = field.get(testInstance);
       } catch (IllegalAccessException e) {
         LOG.error(
-            "Field {} is unaccessable in {}.", field.getName(), testInstance.getClass().getName());
+            "Field {} is inaccessible in {}.", field.getName(), testInstance.getClass().getName());
         continue;
       }
 
@@ -380,7 +409,7 @@ public abstract class SeleniumTestHandler
         obj = field.get(testInstance);
       } catch (IllegalAccessException e) {
         LOG.error(
-            "Field {} is unaccessable in {}.", field.getName(), testInstance.getClass().getName());
+            "Field {} is inaccessible in {}.", field.getName(), testInstance.getClass().getName());
         continue;
       }
 
@@ -408,19 +437,19 @@ public abstract class SeleniumTestHandler
   }
 
   private void captureScreenshotFromWindow(ITestResult result, SeleniumWebDriver webDriver) {
-    String testDefinition = getTestDefinition(result);
-    String filename = NameGenerator.generate(testDefinition + "_", 8) + ".png";
+    String testReference = getTestReference(result);
+    String filename = NameGenerator.generate(testReference + "_", 8) + ".png";
     try {
       byte[] data = webDriver.getScreenshotAs(OutputType.BYTES);
       Path screenshot = Paths.get(screenshotsDir, filename);
       Files.createDirectories(screenshot.getParent());
       Files.copy(new ByteArrayInputStream(data), screenshot);
     } catch (WebDriverException | IOException e) {
-      LOG.error(format("Can't capture screenshot for test %s", testDefinition), e);
+      LOG.error(format("Can't capture screenshot for test %s", testReference), e);
     }
   }
 
-  private String getTestDefinition(ITestResult result) {
+  private String getTestReference(ITestResult result) {
     return result.getTestClass().getName() + "." + result.getMethod().getMethodName();
   }
 
@@ -436,8 +465,8 @@ public abstract class SeleniumTestHandler
   }
 
   private void dumpHtmlCodeFromTheCurrentPage(ITestResult result, SeleniumWebDriver webDriver) {
-    String testName = getTestDefinition(result);
-    String filename = NameGenerator.generate(testName + "_", 8) + ".html";
+    String testReference = getTestReference(result);
+    String filename = NameGenerator.generate(testReference + "_", 8) + ".html";
     try {
       String pageSource = webDriver.getPageSource();
       Path dumpDirectory = Paths.get(htmldumpsDir, filename);
@@ -445,7 +474,7 @@ public abstract class SeleniumTestHandler
       Files.write(
           dumpDirectory, pageSource.getBytes(Charset.forName("UTF-8")), StandardOpenOption.CREATE);
     } catch (WebDriverException | IOException e) {
-      LOG.error(format("Can't dump of html source for test %s", testName), e);
+      LOG.error(format("Can't dump of html source for test %s", testReference), e);
     }
   }
 

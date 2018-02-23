@@ -8,15 +8,17 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.core.model.workspace.runtime;
+package org.eclipse.che.multiuser.keycloak.shared.dto;
 
-/** @author gazarenkov */
-public interface RuntimeIdentity {
-  String getWorkspaceId();
+import org.eclipse.che.dto.shared.DTO;
 
-  String getEnvName();
+/** @author Max Shaposhnik (mshaposh@redhat.com) */
+@DTO
+public interface KeycloakErrorResponse {
 
-  String getOwnerName();
+  String getErrorMessage();
 
-  String getOwnerId();
+  void setErrorMessage(String errorMessage);
+
+  KeycloakErrorResponse withErrorMessage(String errorMessage);
 }
