@@ -19,7 +19,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import com.jayway.restassured.RestAssured;
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.GET;
@@ -77,7 +76,7 @@ public class KeycloakServiceClientTest {
     String token = "token123";
     String scope = "test_scope";
     String tokenType = "test_type";
-    keycloakService = new KeycloakService(token, scope, tokenType, null, null);
+    keycloakService = new KeycloakService(token, scope, tokenType, null);
     KeycloakTokenResponse response = keycloakServiceClient.getIdentityProviderToken("github");
     assertNotNull(response);
     assertEquals(response.getAccessToken(), token);
@@ -91,8 +90,7 @@ public class KeycloakServiceClientTest {
   )
   public void shouldThrowBadRequestException() throws Exception {
     keycloakService =
-        new KeycloakService(
-            null, null, null, "org.eclipse.che.api.core.BadRequestException", "Invalid token.");
+        new KeycloakService(null, null, null, new BadRequestException("Invalid token."));
     keycloakServiceClient.getIdentityProviderToken("github");
   }
 
@@ -101,9 +99,7 @@ public class KeycloakServiceClientTest {
     expectedExceptionsMessageRegExp = "Forbidden."
   )
   public void shouldThrowForbiddenException() throws Exception {
-    keycloakService =
-        new KeycloakService(
-            null, null, null, "org.eclipse.che.api.core.ForbiddenException", "Forbidden.");
+    keycloakService = new KeycloakService(null, null, null, new ForbiddenException("Forbidden."));
     keycloakServiceClient.getIdentityProviderToken("github");
   }
 
@@ -113,8 +109,7 @@ public class KeycloakServiceClientTest {
   )
   public void shouldThrowUnauthorizedException() throws Exception {
     keycloakService =
-        new KeycloakService(
-            null, null, null, "org.eclipse.che.api.core.UnauthorizedException", "Unauthorized.");
+        new KeycloakService(null, null, null, new UnauthorizedException("Unauthorized."));
     keycloakServiceClient.getIdentityProviderToken("github");
   }
 
@@ -123,9 +118,7 @@ public class KeycloakServiceClientTest {
     expectedExceptionsMessageRegExp = "Not found."
   )
   public void shouldThrowNotFoundException() throws Exception {
-    keycloakService =
-        new KeycloakService(
-            null, null, null, "org.eclipse.che.api.core.NotFoundException", "Not found.");
+    keycloakService = new KeycloakService(null, null, null, new NotFoundException("Not found."));
     keycloakServiceClient.getIdentityProviderToken("github");
   }
 
@@ -140,8 +133,8 @@ public class KeycloakServiceClientTest {
             null,
             null,
             null,
-            "org.eclipse.che.api.core.BadRequestException",
-            "User 1234-5678-90 is not associated with identity provider gitlab.");
+            new BadRequestException(
+                "User 1234-5678-90 is not associated with identity provider gitlab."));
     keycloakServiceClient.getIdentityProviderToken("github");
   }
 
@@ -151,32 +144,23 @@ public class KeycloakServiceClientTest {
     private String token;
     private String scope;
     private String tokenType;
-    private String exceptionClass;
-    private String exceptionMessage;
+    private ApiException exception;
 
-    public KeycloakService(
-        String token,
-        String scope,
-        String tokenType,
-        String exceptionClass,
-        String exceptionMessage) {
+    public KeycloakService(String token, String scope, String tokenType, ApiException exception) {
       this.token = token;
       this.scope = scope;
       this.tokenType = tokenType;
-      this.exceptionClass = exceptionClass;
-      this.exceptionMessage = exceptionMessage;
+      this.exception = exception;
     }
 
     @GET
     @Path("/broker/{provider}/token")
     @Produces(APPLICATION_JSON)
     public String getToken(@PathParam("provider") String provider) throws Exception {
-      if (exceptionClass == null) {
+      if (exception == null) {
         return "access_token=" + token + "&scope=" + scope + "&tokenType=" + tokenType;
       } else {
-        Class<?> exclass = Class.forName(exceptionClass);
-        Constructor<?> constr = exclass.getConstructor(String.class);
-        throw (Exception) constr.newInstance(exceptionMessage);
+        throw exception;
       }
     }
   }
