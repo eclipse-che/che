@@ -9,11 +9,12 @@
 base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
 
+DIR=$(cd "$(dirname "$0")"; pwd)
 # copy user and realm json templates
-cp -r ../init/modules/keycloak/templates/* .
+cp -r "${DIR}"/../init/modules/keycloak/templates/* "${DIR}"
 
 init --name:keycloak-util "$@"
 build
 
 # remove jsons
-rm *.erb
+rm "${DIR}"/*.erb
