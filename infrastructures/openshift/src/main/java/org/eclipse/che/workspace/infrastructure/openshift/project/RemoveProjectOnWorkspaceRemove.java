@@ -70,7 +70,7 @@ public class RemoveProjectOnWorkspaceRemove implements EventSubscriber<Workspace
   @VisibleForTesting
   void doRemoveProject(String projectName) throws InfrastructureException {
     try {
-      clientFactory.create().projects().withName(projectName).delete();
+      clientFactory.createOC(projectName).projects().withName(projectName).delete();
     } catch (KubernetesClientException e) {
       if (!(e.getCode() == 403)) {
         throw new KubernetesInfrastructureException(e);

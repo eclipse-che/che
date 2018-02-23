@@ -11,6 +11,7 @@
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.api.model.Route;
@@ -49,12 +50,13 @@ public class OpenShiftProject extends KubernetesNamespace {
       throws InfrastructureException {
     super(clientFactory, name, workspaceId, false);
     this.routes = new OpenShiftRoutes(name, workspaceId, clientFactory);
-    doPrepare(name, clientFactory.create());
+    doPrepare(name, clientFactory.create(workspaceId), clientFactory.createOC(workspaceId));
   }
 
-  private void doPrepare(String name, OpenShiftClient osClient) throws InfrastructureException {
+  private void doPrepare(String name, KubernetesClient kubeClient, OpenShiftClient osClient)
+      throws InfrastructureException {
     if (get(name, osClient) == null) {
-      create(name, osClient);
+      create(name, kubeClient, osClient);
     }
   }
 
@@ -68,16 +70,17 @@ public class OpenShiftProject extends KubernetesNamespace {
     doRemove(routes::delete, services()::delete, pods()::delete);
   }
 
-  private void create(String projectName, OpenShiftClient client) throws InfrastructureException {
+  private void create(String projectName, KubernetesClient kubeClient, OpenShiftClient ocClient)
+      throws InfrastructureException {
     try {
-      client
+      ocClient
           .projectrequests()
           .createNew()
           .withNewMetadata()
           .withName(projectName)
           .endMetadata()
           .done();
-      waitDefaultServiceAccount(projectName, client);
+      waitDefaultServiceAccount(projectName, kubeClient);
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
     }

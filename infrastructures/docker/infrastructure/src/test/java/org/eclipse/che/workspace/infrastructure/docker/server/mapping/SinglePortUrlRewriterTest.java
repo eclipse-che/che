@@ -47,7 +47,7 @@ public class SinglePortUrlRewriterTest {
     return new Object[][] {
       // External IP
       {
-        new RuntimeIdentityImpl("ws123", null, null),
+        new RuntimeIdentityImpl("ws123", null, null, null),
         "172.12.0.2",
         "127.0.0.1",
         "machine1",
@@ -58,7 +58,7 @@ public class SinglePortUrlRewriterTest {
       },
       // Internal IP, protocol, path param
       {
-        new RuntimeIdentityImpl("ws123", null, null),
+        new RuntimeIdentityImpl("ws123", null, null, null),
         "127.0.0.1",
         null,
         "machine1",
@@ -69,7 +69,7 @@ public class SinglePortUrlRewriterTest {
       },
       // Without machine name
       {
-        new RuntimeIdentityImpl("ws123", null, null),
+        new RuntimeIdentityImpl("ws123", null, null, null),
         "127.0.0.1",
         null,
         null,
@@ -80,7 +80,7 @@ public class SinglePortUrlRewriterTest {
       },
       // Without server
       {
-        new RuntimeIdentityImpl("ws123", null, null),
+        new RuntimeIdentityImpl("ws123", null, null, null),
         "127.0.0.1",
         null,
         "machine1",
@@ -101,6 +101,7 @@ public class SinglePortUrlRewriterTest {
     Provider<SinglePortHostnameBuilder> provider =
         () -> new SinglePortHostnameBuilder("172.12.0.2", "127.0.0.1", null);
     SinglePortUrlRewriter rewriter = new SinglePortUrlRewriter(8080, provider);
-    rewriter.rewriteURL(new RuntimeIdentityImpl("ws123", null, null), "machine1", "server", ":");
+    rewriter.rewriteURL(
+        new RuntimeIdentityImpl("ws123", null, null, null), "machine1", "server", ":");
   }
 }

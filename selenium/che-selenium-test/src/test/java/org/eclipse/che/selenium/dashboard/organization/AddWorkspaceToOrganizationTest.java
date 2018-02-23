@@ -18,6 +18,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -34,6 +35,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+@Test(groups = {TestGroup.MULTIUSER})
 public class AddWorkspaceToOrganizationTest {
 
   private static final String WORKSPACE_FOR_ADMIN_1 = generate("workspace", 4);
