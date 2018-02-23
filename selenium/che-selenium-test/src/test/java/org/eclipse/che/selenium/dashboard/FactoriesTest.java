@@ -43,8 +43,11 @@ public class FactoriesTest {
   private static final String CREATED_FROM_WORKSPACE_FACTORY_NAME =
       NameGenerator.generate("factory", 4);
   private static final String WORKSPACE_NAME = NameGenerator.generate("workspace", 4);
-  private static final String MIN_FACTORY_NAME = NameGenerator.generate("factory", 4);
-  private static final String MAX_FACTORY_NAME = NameGenerator.generate("factory", 4);
+  private static final String MIN_FACTORY_NAME = NameGenerator.generate("", 3);
+  private static final String MAX_FACTORY_NAME = NameGenerator.generate("", 20);
+  private static final String FACTORY1_NAME = NameGenerator.generate("factory1", 4);
+  private static final String FACTORY2_NAME = NameGenerator.generate("factory2", 4);
+  private static final String FACTORY3_NAME = NameGenerator.generate("factory3", 4);
   private static final String NAME_IS_TOO_SHORT = "The name has to be more than 3 characters long.";
   private static final String NAME_IS_TOO_LONG = "The name has to be less than 20 characters long.";
 
@@ -62,9 +65,9 @@ public class FactoriesTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    createFactoryByApi("factory1");
-    createFactoryByApi("factory2");
-    createFactoryByApi("factory3");
+    createFactoryByApi(FACTORY1_NAME);
+    createFactoryByApi(FACTORY2_NAME);
+    createFactoryByApi(FACTORY3_NAME);
 
     dashboard.open();
     createWorkspaceWithProject(WORKSPACE_NAME);
@@ -72,7 +75,7 @@ public class FactoriesTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    factoryServiceClient.deleteFactory(MINIMAL_TEMPLATE_FACTORY_NAME);
+    // TODO delete all factories
   }
 
   @Test
@@ -178,7 +181,7 @@ public class FactoriesTest {
     // check that the created factory exists
     dashboardFactory.waitAllFactoriesPage();
     dashboardFactory.waitFactoryName(CREATED_FROM_WORKSPACE_FACTORY_NAME);
-    Assert.assertEquals(
+    assertEquals(
         dashboardFactory.getFactoryRamLimit(CREATED_FROM_WORKSPACE_FACTORY_NAME), "3072 MB");
   }
 
@@ -190,7 +193,7 @@ public class FactoriesTest {
   }
 
   @Test
-  public void checkFactoryFiltering() {
+  public void checkWorkspaceFiltering() {
     dashboardFactory.selectFactoriesOnNavBar();
     dashboardFactory.waitAllFactoriesPage();
     dashboardFactory.clickOnAddFactoryBtn();
@@ -210,6 +213,63 @@ public class FactoriesTest {
     // filter by a unexisted workspace name
     newFactory.typeTextToSearchFactoryField(WORKSPACE_NAME.replace("r", "k"));
     newFactory.waitWorkspacesListIsEmpty();
+  }
+
+  @Test
+  public void checkFactoryFiltering() {
+    dashboardFactory.selectFactoriesOnNavBar();
+    dashboardFactory.waitAllFactoriesPage();
+
+    dashboardFactory.waitFactoryName(FACTORY1_NAME);
+    dashboardFactory.waitFactoryName(FACTORY2_NAME);
+
+    // TODO filter factories names
+  }
+
+  @Test
+  public void checkAllFactoriesPage() {
+    dashboardFactory.selectFactoriesOnNavBar();
+    dashboardFactory.waitAllFactoriesPage();
+
+    dashboardFactory.waitBulkCheckbox();
+    dashboardFactory.waitFactoryName(FACTORY1_NAME);
+
+    dashboardFactory.waitAddFactoryBtn();
+
+    // check select and unselect factories by Bulk
+    dashboardFactory.selectAllFactoriesByBulk();
+    Assert.assertTrue(dashboardFactory.isFactoryChecked(FACTORY1_NAME));
+    Assert.assertTrue(dashboardFactory.isFactoryChecked(FACTORY2_NAME));
+    dashboardFactory.selectAllFactoriesByBulk();
+    Assert.assertFalse(dashboardFactory.isFactoryChecked(FACTORY1_NAME));
+    Assert.assertFalse(dashboardFactory.isFactoryChecked(FACTORY2_NAME));
+
+    // check selecting factory by checkbox
+    dashboardFactory.selectFactoryByCheckbox(FACTORY1_NAME);
+    Assert.assertTrue(dashboardFactory.isFactoryChecked(FACTORY1_NAME));
+    dashboardFactory.selectFactoryByCheckbox(FACTORY1_NAME);
+    Assert.assertFalse(dashboardFactory.isFactoryChecked(FACTORY1_NAME));
+  }
+
+  @Test(priority = 1)
+  public void checkFactoryDeleting() {
+    dashboardFactory.selectFactoriesOnNavBar();
+    dashboardFactory.waitAllFactoriesPage();
+
+    // delete factory that is selected be checkbox
+    dashboardFactory.selectFactoryByCheckbox(FACTORY3_NAME);
+    Assert.assertTrue(dashboardFactory.isFactoryChecked(FACTORY3_NAME));
+    dashboardFactory.clickOnDeleteFactoryBtn();
+    dashboardFactory.clickOnDeleteButtonInDialogWindow();
+    dashboardFactory.waitFactoryNotExists(FACTORY3_NAME);
+
+    // select all factories and delete them
+    dashboardFactory.selectAllFactoriesByBulk();
+    dashboardFactory.clickOnDeleteFactoryBtn();
+    dashboardFactory.clickOnDeleteButtonInDialogWindow();
+
+    dashboardFactory.waitFactoryNotExists(FACTORY1_NAME);
+    dashboardFactory.waitFactoryNotExists(FACTORY2_NAME);
   }
 
   private void createWorkspaceWithProject(String workspaceName) {

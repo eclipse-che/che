@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementValue;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
@@ -71,6 +72,7 @@ public class DashboardFactory {
   }
 
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final WebDriverWait redrawUiElementsTimeout;
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
   private final ActionsFactory actionsFactory;
@@ -91,6 +93,8 @@ public class DashboardFactory {
     this.actionsFactory = actionsFactory;
     this.dashboard = dashboard;
     this.ideUrl = ideUrlProvider.get().toString();
+    this.redrawUiElementsTimeout =
+        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -113,9 +117,14 @@ public class DashboardFactory {
     String CONFIGURE_ACTION_TITLE_XPATH = "//div[text()='Configure Actions']";
 
     String FACTORY_ITEM = "//div[@id='%s']";
+    String FACTORY_CHECKBOX = FACTORY_ITEM + "//md-checkbox";
     String FACTORY_NAME = FACTORY_ITEM + "//span[@name='factory-name']";
     String FACTORY_RAM_LIMIT = FACTORY_ITEM + "//span[@name='factory-ram-limit']";
     String FACTORY_ACTION = FACTORY_ITEM + "//span[@name='open-factory']";
+
+    String BULK_CHECKBOX = "//md-checkbox[@aria-label='Factory list']";
+    String DELETE_FACTORY_BTN = "delete-item-button";
+    String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
   }
 
   private interface AddActionWindow {
@@ -163,6 +172,12 @@ public class DashboardFactory {
   @FindBy(xpath = Locators.CONFIGURE_ACTION_TITLE_XPATH)
   WebElement configureActionTitle;
 
+  @FindBy(id = Locators.DELETE_FACTORY_BTN)
+  WebElement deleleFactoryButton;
+
+  @FindBy(xpath = Locators.DELETE_DIALOG_BUTTON)
+  WebElement deleteDialogBtn;
+
   /** wait factory menu in the navigation bar */
   public void waitFactoriesItemOnNavBar() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
@@ -179,13 +194,17 @@ public class DashboardFactory {
   public void waitAllFactoriesPage() {
     new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
         .until(visibilityOf(factoryListContainer));
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(visibilityOf(addFactoryBtn));
+    waitAddFactoryBtn();
   }
 
   /** click on add factory button ('+' icon) */
   public void clickOnAddFactoryBtn() {
     waitAllFactoriesPage();
     addFactoryBtn.click();
+  }
+
+  public void waitAddFactoryBtn() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(visibilityOf(addFactoryBtn));
   }
 
   /**
@@ -375,6 +394,49 @@ public class DashboardFactory {
   public void clickOnOpenInIdeButton(String factoryName) {
     new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(format(Locators.FACTORY_ACTION, factoryName))))
+        .click();
+  }
+
+  public void waitFactoryNotExists(String factoryName) {
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        .until(invisibilityOfElementLocated(By.xpath(format(Locators.FACTORY_ITEM, factoryName))));
+  }
+
+  public void waitBulkCheckbox() {
+    redrawUiElementsTimeout.until(visibilityOfElementLocated(By.xpath(Locators.BULK_CHECKBOX)));
+  }
+
+  public void selectAllFactoriesByBulk() {
+    redrawUiElementsTimeout
+        .until(visibilityOfElementLocated(By.xpath(Locators.BULK_CHECKBOX)))
+        .click();
+  }
+
+  public void clickOnDeleteFactoryBtn() {
+    redrawUiElementsTimeout.until(visibilityOf(deleleFactoryButton)).click();
+  }
+
+  /** Click on the delete/remove button in the dialog window */
+  public void clickOnDeleteButtonInDialogWindow() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOf(deleteDialogBtn))
+        .click();
+  }
+
+  public boolean isFactoryChecked(String factoryName) {
+    String attrValue =
+        redrawUiElementsTimeout
+            .until(
+                visibilityOfElementLocated(
+                    By.xpath(format(Locators.FACTORY_CHECKBOX, factoryName))))
+            .getAttribute("aria-checked");
+
+    return Boolean.parseBoolean(attrValue);
+  }
+
+  public void selectFactoryByCheckbox(String factoryName) {
+    redrawUiElementsTimeout
+        .until(visibilityOfElementLocated(By.xpath(format(Locators.FACTORY_CHECKBOX, factoryName))))
         .click();
   }
 }
