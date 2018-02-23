@@ -22,10 +22,8 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.ALL_PROJECTS_XPATH;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.COLOURED_ITEM_TEMPLATE;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.CONTEXT_MENU_ID;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.EXPLORER_RIGHT_TAB_ID;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.PROJECT_EXPLORER_ITEM_TEMPLATE;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.PROJECT_EXPLORER_TREE_ITEMS;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerItemColors.BLUE;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerItemColors.DEFAULT;
@@ -42,7 +40,6 @@ import static org.openqa.selenium.Keys.LEFT;
 import static org.openqa.selenium.Keys.RIGHT;
 import static org.openqa.selenium.Keys.SHIFT;
 import static org.openqa.selenium.Keys.UP;
-import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
@@ -58,6 +55,7 @@ import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuItems;
 import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.openqa.selenium.By;
@@ -68,7 +66,6 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
@@ -139,22 +136,6 @@ public class ProjectExplorer {
     }
   }
 
-  protected interface Locators {
-    String PROJECT_EXPLORER_TREE_ITEMS = "gwt-debug-projectTree";
-    String EXPLORER_RIGHT_TAB_ID = "gwt-debug-partButton-Projects";
-    String CONTEXT_MENU_ID = "gwt-debug-contextMenu/newGroup";
-    String GO_BACK_BUTTON = "gwt-debug-goBackButton";
-    String COLLAPSE_ALL_BUTTON = "gwt-debug-collapseAllButton";
-    String ALL_PROJECTS_XPATH = "//div[@path=@project]";
-    String MENU_BUTTON_PART_STACK_ID = "gwt-debug-menuButton";
-    String REFRESH_CONTEXT_MENU_ID = "gwt-debug-contextMenu/refreshPathAction";
-    String PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL =
-        "//div[@id='gwt-debug-navPanel']//div[@id='gwt-debug-partButton-Projects']";
-    String PROJECT_EXPLORER_ITEM_TEMPLATE = "//div[@path='/%s']/div";
-    String COLOURED_ITEM_TEMPLATE =
-        "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']";
-  }
-
   /** Displaying folder types */
   public enum FolderTypes {
     SIMPLE_FOLDER("simpleFolder"),
@@ -192,29 +173,15 @@ public class ProjectExplorer {
     }
   }
 
-  @FindBy(id = PROJECT_EXPLORER_TREE_ITEMS)
-  WebElement projectExplorerTree;
-
-  @FindBy(id = EXPLORER_RIGHT_TAB_ID)
-  WebElement projectExplorerTab;
-
-  @FindBy(id = Locators.GO_BACK_BUTTON)
-  WebElement goBackBtn;
-
-  @FindBy(id = Locators.COLLAPSE_ALL_BUTTON)
-  WebElement collapseAllBtn;
-
-  @FindBy(xpath = ALL_PROJECTS_XPATH)
-  WebElement allProjects;
-
-  @FindBy(id = Locators.MENU_BUTTON_PART_STACK_ID)
-  WebElement refreshButtonPartStack;
-
-  @FindBy(id = Locators.REFRESH_CONTEXT_MENU_ID)
-  WebElement refreshContextMenuItem;
-
-  @FindBy(xpath = PROJECT_EXPLORER_TAB_IN_THE_LEFT_PANEL)
-  WebElement projectExplorerTabInTheLeftPanel;
+  /** Locators constants for project explorer elements */
+  protected interface Locators {
+    String PROJECT_EXPLORER_TREE_ITEMS = "gwt-debug-projectTree";
+    String EXPLORER_RIGHT_TAB_ID = "gwt-debug-partButton-Projects";
+    String ALL_PROJECTS_XPATH = "//div[@path=@project]";
+    String PROJECT_EXPLORER_ITEM_TEMPLATE = "//div[@path='/%s']/div";
+    String COLOURED_ITEM_TEMPLATE =
+        "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']";
+  }
 
   /**
    * Waits for visibility of the {@link WebElement} with specified {@code path} for a during {@code
@@ -274,7 +241,7 @@ public class ProjectExplorer {
    */
   public void clickOnEmptyAreaOfProjectTree(int timeOutForWaiting) {
     waitProjectExplorer(timeOutForWaiting);
-    helper.waitAndClick(projectExplorerTree);
+    helper.waitAndClick(By.id(PROJECT_EXPLORER_TREE_ITEMS));
   }
 
   /** wait appearance of the IDE Project Explorer */
@@ -646,7 +613,7 @@ public class ProjectExplorer {
   /**
    * Opens context menu on item with specified {@code path}
    *
-   * @param path item's path in format: "Test/src/pom.xml"
+   * @param path item's path in format: "Test/src/pom.xml".
    */
   public void openContextMenuByPathSelectedItem(String path) {
     waitItem(path);
@@ -659,12 +626,12 @@ public class ProjectExplorer {
     waitContextMenu();
   }
 
-  /** Waits on context menu visibility. */
+  /** Waits on context menu body's visibility. */
   public void waitContextMenu() {
     testWebElementRenderChecker.waitElementIsRendered(
         By.xpath("//tr[@id='gwt-debug-contextMenu/newGroup']/parent::tbody"));
 
-    helper.waitVisibility(By.id(CONTEXT_MENU_ID), WIDGET_TIMEOUT_SEC);
+    helper.waitVisibility(By.id(ContextMenuFirstLevelItems.NEW.get()), WIDGET_TIMEOUT_SEC);
   }
 
   /**
@@ -677,23 +644,30 @@ public class ProjectExplorer {
   }
 
   /**
-   * Click on item in 'New' menu
+   * Clicks on item from {@link
+   * org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems#NEW}
+   * sub menu
    *
-   * @param item item form {@code SubMenuNew}
+   * @param item item from {@link
+   *     org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew}
    */
   public void clickOnNewContextMenuItem(ContextMenuItems item) {
     helper.waitAndClick(By.xpath(format("//tr[@item-enabled='true' and @id='%s']", item.get())));
     waitContextMenuPopUpClosed();
   }
 
+  /**
+   * Waits until context menu, which includes {@link ContextMenuFirstLevelItems#NEW} item, be
+   * invisible
+   */
   public void waitContextMenuPopUpClosed() {
-    loadPageTimeout.until(invisibilityOfElementLocated(By.id(CONTEXT_MENU_ID)));
+    helper.waitInvisibility(By.id(ContextMenuFirstLevelItems.NEW.get()));
   }
 
   /**
-   * perform the multi-select by Ctrl keys
+   * Performs the multi-select by {@code Ctrl} key
    *
-   * @param path is the path to the selected item
+   * @param path item's path in format: "Test/src/pom.xml".
    */
   public void selectMultiFilesByCtrlKeys(String path) {
     Actions actions = actionsFactory.createAction(seleniumWebDriver);
@@ -703,16 +677,19 @@ public class ProjectExplorer {
     actions.keyUp(CONTROL).perform();
   }
 
-  /** Click on the 'Reveal in project explorer' in 'Options'menu */
+  /**
+   * Opens {@link ProjectExplorerOptionsMenuItem} menu and clicks on {@link
+   * ProjectExplorerOptionsMenuItem#REVEAL_RESOURCE}
+   */
   public void revealResourceByOptionsButton() {
     clickOnProjectExplorerOptionsButton();
     clickOnOptionsMenuItem(REVEAL_RESOURCE);
   }
 
   /**
-   * perform the multi-select by Shift key
+   * Performs the multi-select by {@code Shift} key
    *
-   * @param path is the path to the selected item
+   * @param path item's path in format: "Test/src/pom.xml".
    */
   public void selectMultiFilesByShiftKey(String path) {
     Actions actions = actionsFactory.createAction(seleniumWebDriver);
@@ -723,10 +700,12 @@ public class ProjectExplorer {
   }
 
   /**
-   * perform the multi-select by Shift key with check selected items
+   * Performs the multi-select by {@code Shift} key with check selected items.
    *
-   * @param clickItemPath is the path to the selected item
-   * @param selectedItemsPaths is the paths to the each selected items after click with shift button
+   * <p>Note! Before using this method, one item in project explorer must be selected.
+   *
+   * @param clickItemPath is the path to item which will be clicked in format: "Test/src/pom.xml".
+   * @param selectedItemsPaths is the paths to the each items which should be checked.
    */
   public void selectMultiFilesByShiftKeyWithCheckMultiselection(
       String clickItemPath, List<String> selectedItemsPaths) {
@@ -737,18 +716,42 @@ public class ProjectExplorer {
     actions.keyUp(SHIFT).perform();
   }
 
-  /** click on the 'collapse all' in the project explorer */
+  /**
+   * Performs the multi-select by {@code Shift} key with check selected items, for items between
+   * {@code firstItemPath} and {@code secondItemPath} including this two items.
+   *
+   * @param firstItemPath is the path to the first item which will be clicked in format:
+   *     "Test/src/pom.xml".
+   * @param secondItemPath is the path to the second item which will be clicked in format:
+   *     "Test/src/pom.xml".
+   * @param selectedItemsPaths is the paths to the each items which should be checked.
+   */
+  public void selectMultiFilesByShiftKeyWithCheckMultiselection(
+      String firstItemPath, String secondItemPath, List<String> selectedItemsPaths) {
+    waitAndSelectItem(firstItemPath);
+    waitItemIsSelected(firstItemPath);
+
+    Actions actions = actionsFactory.createAction(seleniumWebDriver);
+    actions.keyDown(SHIFT).perform();
+    waitAndSelectItem(secondItemPath);
+    waitAllItemsIsSelected(selectedItemsPaths);
+    actions.keyUp(SHIFT).perform();
+  }
+
+  /**
+   * Opens {@link ProjectExplorerOptionsMenuItem} and clicks on {@link
+   * ProjectExplorerOptionsMenuItem#COLLAPSE_ALL}
+   */
   public void collapseProjectTreeByOptionsButton() {
     clickOnProjectExplorerOptionsButton();
     clickOnOptionsMenuItem(COLLAPSE_ALL);
   }
 
-  /** click on the 'go back' in the project explorer */
-  public void clickGoBackButton() {
-    helper.waitAndClick(goBackBtn);
-  }
-
-  /** launch the 'Refactor Rename' form by keyboard after select a package or Java class */
+  /**
+   * Launches the 'Refactor Rename' form.
+   *
+   * <p>Note! Before using this method the project explorer's item should be selected
+   */
   public void launchRefactorByKeyboard() {
     loader.waitOnClosed();
     actionsFactory
@@ -759,16 +762,20 @@ public class ProjectExplorer {
         .perform();
   }
 
-  /** launch the 'Refactor Move' form by keyboard after select a package or Java class */
+  /**
+   * Launches the 'Refactor Move' form by keyboard.
+   *
+   * <p>Note! Before using this method the project explorer's item should be selected
+   */
   public void launchRefactorMoveByKeyboard() {
     loader.waitOnClosed();
     actionsFactory.createAction(seleniumWebDriver).sendKeys(F6).perform();
   }
 
   /**
-   * Returns all names of projects from tree of the project explorer
+   * Waits until all projects in project explorer be visible and gets their names
    *
-   * @return list of names
+   * @return names of all projects
    */
   public List<String> getNamesAllProjects() {
     return waitFactory
@@ -785,65 +792,74 @@ public class ProjectExplorer {
    * @return list of items
    */
   public List<String> getNamesOfAllOpenItems() {
-    return asList(projectExplorerTree.getText().split("\n"));
+    return asList(helper.waitVisibility(By.id(PROJECT_EXPLORER_TREE_ITEMS)).getText().split("\n"));
   }
 
-  /** perform right arrow key pressed in a browser */
+  /** Performs right arrow key pressed in a browser */
   public void sendToItemRightArrowKey() {
     helper.sendKeys(RIGHT.toString());
   }
 
-  /** perform left arrow key pressed in a browser */
+  /** Performs left arrow key pressed in a browser */
   public void sendToItemLeftArrowKey() {
     helper.sendKeys(LEFT.toString());
   }
 
-  /** perform up arrow key pressed in a browser */
+  /** Performs up arrow key pressed in a browser */
   public void sendToItemUpArrowKey() {
     helper.sendKeys(UP.toString());
   }
 
-  /** perform down arrow key pressed in a browser */
+  /** Performs down arrow key pressed in a browser */
   public void sendToItemDownArrowKey() {
     helper.sendKeys(ARROW_DOWN.toString());
   }
 
-  /** perform enter key pressed in a browser */
+  /** Performs enter key pressed in a browser */
   public void sendToItemEnterKey() {
     helper.sendKeys(ENTER.toString());
   }
 
-  /** wait refresh button and click this one */
+  /**
+   * Opens {@link ProjectExplorerOptionsMenuItem} and clicks on {@link
+   * ProjectExplorerOptionsMenuItem#REFRESH_MAIN}
+   */
   public void clickOnRefreshTreeButton() {
     clickOnProjectExplorerOptionsButton();
     clickOnOptionsMenuItem(REFRESH_MAIN);
   }
 
+  /**
+   * Waits during {@code userTimeout} until 'Import Project' link be visible and clicks on it.
+   *
+   * @param userTimeout waiting timeout in seconds
+   */
   public void clickOnImportProjectLink(int userTimeout) {
     waitProjectExplorer();
-    WebElement importProjectLink =
-        waitFactory
-            .get(userTimeout)
-            .until(
-                presenceOfNestedElementLocatedBy(
-                    projectExplorerTree, By.xpath("//div[text()='Import Project...']")));
-
-    helper.waitAndClick(importProjectLink);
+    waitFactory
+        .get(userTimeout)
+        .until(
+            presenceOfNestedElementLocatedBy(
+                By.id(PROJECT_EXPLORER_TREE_ITEMS), By.xpath("//div[text()='Import Project...']")))
+        .click();
   }
 
+  /**
+   * Waits during {@code userTimeout} until 'Create Project' link be visible and clicks on it.
+   *
+   * @param userTimeout waiting timeout in seconds
+   */
   public void clickOnCreateProjectLink(int userTimeout) {
     waitProjectExplorer();
-    WebElement createProjectLink =
-        waitFactory
-            .get(userTimeout)
-            .until(
-                presenceOfNestedElementLocatedBy(
-                    projectExplorerTree, By.xpath("//div[text()='Create Project...']")));
-
-    helper.waitAndClick(createProjectLink);
+    waitFactory
+        .get(userTimeout)
+        .until(
+            presenceOfNestedElementLocatedBy(
+                By.id(PROJECT_EXPLORER_TREE_ITEMS), By.xpath("//div[text()='Create Project...']")))
+        .click();
   }
 
-  /** invoke command from context menu. Work for Common scope commands only */
+  /** Invokes command from context menu. */
   public void invokeCommandWithContextMenu(
       ContextMenuCommandGoals commandsGoal, String pathToItem, String commandName) {
     try {
@@ -861,6 +877,7 @@ public class ProjectExplorer {
         REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
+  /** Invokes command from context menu. */
   public void invokeCommandWithContextMenu(
       ContextMenuCommandGoals commandsGoal,
       String pathToItem,
@@ -880,6 +897,12 @@ public class ProjectExplorer {
         .perform();
   }
 
+  /**
+   * Moves mouse`s cursor to item with specified {@code path}, and scrolls project explorer tree
+   * until this item be visible
+   *
+   * @param path item's path in format: "Test/src/pom.xml".
+   */
   public void scrollToItemByPath(String path) {
     waitItem(path);
     actionsFactory.createAction(seleniumWebDriver).moveToElement(waitAndGetItem(path)).perform();
@@ -1012,6 +1035,11 @@ public class ProjectExplorer {
     loader.waitOnClosed();
   }
 
+  /**
+   * Waits until item with specified {@code path} be selected
+   *
+   * @param path item's path in format: "Test/src/pom.xml".
+   */
   public void waitItemIsSelected(String path) {
     helper.waitVisibility(
         By.xpath(
@@ -1021,6 +1049,11 @@ public class ProjectExplorer {
         ELEMENT_TIMEOUT_SEC);
   }
 
+  /**
+   * Waits until all items with specified {@code paths} be selected
+   *
+   * @param paths items paths in format: "Test/src/pom.xml".
+   */
   public void waitAllItemsIsSelected(List<String> paths) {
     paths.forEach(this::waitItemIsSelected);
   }
