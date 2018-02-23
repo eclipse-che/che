@@ -22,7 +22,8 @@ spec:
         value: "${KC_HOST}"
       - name: CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD
         value: "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}"
-      image: "${IMAGE_KEYCLOAK_UTIL}"
+      image: "${IMAGE_KEYCLOAK}"
+      command: ["/scripts/keycloak_config.sh"]
       name: keycloak-util
       imagePullPolicy: Always
     restartPolicy: Never
