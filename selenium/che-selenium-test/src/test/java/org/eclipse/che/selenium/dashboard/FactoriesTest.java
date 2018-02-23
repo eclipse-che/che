@@ -21,7 +21,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory;
@@ -168,6 +167,7 @@ public class FactoriesTest {
     dashboardFactory.waitAllFactoriesPage();
     dashboardFactory.clickOnAddFactoryBtn();
 
+    // create a new factory from a workspace
     newFactory.clickOnSourceTab(TabNames.WORKSPACE_TAB_ID);
     newFactory.typeFactoryName(CREATED_FROM_WORKSPACE_FACTORY_NAME);
     newFactory.clickOnWorkspaceFromList(WORKSPACE_NAME);
@@ -175,6 +175,7 @@ public class FactoriesTest {
     factoryDetails.waitFactoryName(CREATED_FROM_WORKSPACE_FACTORY_NAME);
     factoryDetails.clickOnBackToFactoriesListButton();
 
+    // check that the created factory exists
     dashboardFactory.waitAllFactoriesPage();
     dashboardFactory.waitFactoryName(CREATED_FROM_WORKSPACE_FACTORY_NAME);
     Assert.assertEquals(
@@ -198,10 +199,16 @@ public class FactoriesTest {
     newFactory.clickOnSearchFactoryButton();
     newFactory.waitSearchFactoryField();
 
-    newFactory.typeTextToSearchFactoryField("wor");
+    // filter by full workspace name
+    newFactory.typeTextToSearchFactoryField(WORKSPACE_NAME);
     newFactory.waitWorkspaceNameInList(WORKSPACE_NAME);
 
-    newFactory.typeTextToSearchFactoryField("322223");
+    // filter by a part of workspace name
+    newFactory.typeTextToSearchFactoryField(WORKSPACE_NAME.substring(WORKSPACE_NAME.length() / 2));
+    newFactory.waitWorkspaceNameInList(WORKSPACE_NAME);
+
+    // filter by a unexisted workspace name
+    newFactory.typeTextToSearchFactoryField(WORKSPACE_NAME.replace("r", "k"));
     newFactory.waitWorkspacesListIsEmpty();
   }
 
