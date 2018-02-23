@@ -2,6 +2,7 @@
   <div ng-if="namespaceSelectorController.getNamespaces().length > 0"
        layout="row" layout-align="start center">
     <che-filter-selector che-values="namespaceSelectorController.getNamespaceLabels()"
+                         id="namespace-selector"
                          ng-model="label"
                          che-width="200px"
                          che-on-change="namespaceSelectorController.changeNamespace(value)"></che-filter-selector>

@@ -100,7 +100,7 @@ public class OpenShiftInternalRuntimeTest {
   private static final String M2_NAME = POD_NAME + '/' + CONTAINER_NAME_2;
 
   private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "usr1");
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "usr1", "id1");
 
   @Mock private OpenShiftRuntimeContext context;
   @Mock private EventService eventService;

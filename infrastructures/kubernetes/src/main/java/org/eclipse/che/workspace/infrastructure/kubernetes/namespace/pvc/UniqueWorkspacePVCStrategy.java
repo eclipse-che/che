@@ -174,7 +174,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   @Override
   public void cleanup(String workspaceId) throws InfrastructureException {
     clientFactory
-        .create()
+        .create(workspaceId)
         .persistentVolumeClaims()
         .inNamespace(namespaceName)
         .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)

@@ -36,7 +36,12 @@ spec:
           value: keycloak
         - name: POSTGRES_PASSWORD
           value: keycloak
-        image: ' '
+        - name: KEYCLOAK_USER
+          value: admin
+        - name: KEYCLOAK_PASSWORD
+          value: admin
+        image: '${IMAGE_KEYCLOAK}'
+        imagePullPolicy: Always
         name: keycloak
         livenessProbe:
           failureThreshold: 11
@@ -77,14 +82,4 @@ spec:
         persistentVolumeClaim:
           claimName: keycloak-log
   test: false
-  triggers:
-  - type: ConfigChange
-  - imageChangeParams:
-      automatic: true
-      containerNames:
-      - keycloak
-      from:
-        kind: ImageStreamTag
-        name: keycloak:latest
-    type: ImageChange
 status: {}

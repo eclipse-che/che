@@ -92,10 +92,11 @@ public class DockerBootstrapper extends AbstractBootstrapper {
             + machineName
             + " -runtime-id "
             + String.format(
-                "%s:%s:%s",
+                "%s:%s:%s:%s",
                 runtimeIdentity.getWorkspaceId(),
                 runtimeIdentity.getEnvName(),
-                runtimeIdentity.getOwner())
+                runtimeIdentity.getOwnerName(),
+                runtimeIdentity.getOwnerId())
             + " -push-endpoint "
             + installerWebsocketEndpoint
             + " -push-logs-endpoint "

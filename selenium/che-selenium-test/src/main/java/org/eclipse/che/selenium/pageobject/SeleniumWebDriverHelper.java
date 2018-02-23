@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
@@ -21,10 +20,12 @@ import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** @author Igor Okhrimenko */
 @Singleton
@@ -33,6 +34,7 @@ public class SeleniumWebDriverHelper {
   protected final SeleniumWebDriver seleniumWebDriver;
   protected final WebDriverWaitFactory webDriverWaitFactory;
   protected final ActionsFactory actionsFactory;
+  protected final Logger LOG = LoggerFactory.getLogger(SeleniumWebDriverHelper.class);
 
   @Inject
   protected SeleniumWebDriverHelper(
@@ -451,33 +453,29 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Checks visibility state of {@link WebElement} with provided locator {@link By}
+   * Checks visibility state of {@link WebElement} with provided locator {@code By}
    *
    * @param elementLocator
    * @return state of element visibility
    */
-  public boolean isVisibleDuringTimeout(By elementLocator) {
+  public boolean isVisible(By elementLocator) {
     try {
-      webDriverWaitFactory
-          .get(ATTACHING_ELEM_TO_DOM_SEC)
-          .until(visibilityOfElementLocated(elementLocator));
-      return true;
-    } catch (TimeoutException ex) {
+      return seleniumWebDriver.findElement(elementLocator).isDisplayed();
+    } catch (NoSuchElementException ex) {
       return false;
     }
   }
 
   /**
-   * Checks visibility state of provided {@link WebElement}
+   * Checks visibility state of provided {@code WebElement}
    *
    * @param webElement
    * @return state of element visibility
    */
-  public boolean isVisibleDuringTimeout(WebElement webElement) {
+  public boolean isVisible(WebElement webElement) {
     try {
-      webDriverWaitFactory.get(ATTACHING_ELEM_TO_DOM_SEC).until(visibilityOf(webElement));
-      return true;
-    } catch (TimeoutException ex) {
+      return webElement.isDisplayed();
+    } catch (NoSuchElementException ex) {
       return false;
     }
   }

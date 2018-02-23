@@ -68,7 +68,7 @@ public class CreateNewPackagesWithHelpCreationJavaClassTest {
   @Test
   public void createNewPackageFromContextMenuTest() throws Exception {
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.quickExpandWithJavaScript();
+    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + "/src/main/java");
     projectExplorer.selectItem(PROJECT_NAME + "/src/main/java");
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,

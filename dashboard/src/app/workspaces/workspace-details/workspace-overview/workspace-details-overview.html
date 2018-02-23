@@ -38,9 +38,10 @@
       <i class="fa-exclamation-triangle fa fa-2x"></i>{{workspaceDetailsOverviewController.getNamespaceEmptyMessage()}}
     </div>
     <div ng-if="workspaceDetailsOverviewController.getNamespaceLink()" class="namespace-link">
-      <span>{{workspaceDetailsOverviewController.getNamespaceLabel(workspaceDetailsOverviewController.namespaceId)}}</span>
+      <span id="namespace-name">{{workspaceDetailsOverviewController.getNamespaceLabel(workspaceDetailsOverviewController.namespaceId)}}</span>
       <div
         ng-click="workspaceDetailsOverviewController.namespaceOnClick(workspaceDetailsOverviewController.namespaceId)"
+        id="open-namespace-button"
         class="fa fa-arrow-circle-right"></div>
     </div>
   </che-label-container>

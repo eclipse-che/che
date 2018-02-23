@@ -40,7 +40,7 @@
         <span class="che-xs-header noselect" hide-gt-xs>Name</span>
         <div layout="row" flex>
           <workspace-status-indicator flex="none" che-status="workspaceItemCtrl.getWorkspaceStatus()"></workspace-status-indicator>
-          <div class="workspace-name-clip">
+          <div class="workspace-name-clip" id="ws-full-name-{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspace.config.name}}">
             <span uib-tooltip="{{'RUNNING' === workspaceItemCtrl.getWorkspaceStatus() ? 'Running' : 'Last modified: ' + (workspaceItemCtrl.workspace.attributes.updated | amTimeAgo)}}"
                   class="che-hover">
               <che-clip-the-middle>{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspace.config.name}}</che-clip-the-middle>

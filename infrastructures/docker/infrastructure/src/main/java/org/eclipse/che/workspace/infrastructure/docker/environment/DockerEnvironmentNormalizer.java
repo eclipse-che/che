@@ -44,7 +44,7 @@ public class DockerEnvironmentNormalizer {
           containerNameGenerator.generateContainerName(
               identity.getWorkspaceId(),
               containerConfig.getId(),
-              identity.getOwner(),
+              identity.getOwnerName(),
               containerEntry.getKey()));
     }
     normalizeNames(dockerEnvironment);

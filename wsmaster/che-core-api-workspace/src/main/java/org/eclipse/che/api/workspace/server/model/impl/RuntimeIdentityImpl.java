@@ -17,12 +17,14 @@ public final class RuntimeIdentityImpl implements RuntimeIdentity {
 
   private final String workspaceId;
   private final String envName;
-  private final String owner;
+  private final String ownerName;
+  private final String ownerId;
 
-  public RuntimeIdentityImpl(String workspaceId, String envName, String owner) {
+  public RuntimeIdentityImpl(String workspaceId, String envName, String ownerName, String ownerId) {
     this.workspaceId = workspaceId;
     this.envName = envName;
-    this.owner = owner;
+    this.ownerName = ownerName;
+    this.ownerId = ownerId;
   }
 
   @Override
@@ -36,8 +38,13 @@ public final class RuntimeIdentityImpl implements RuntimeIdentity {
   }
 
   @Override
-  public String getOwner() {
-    return owner;
+  public String getOwnerName() {
+    return ownerName;
+  }
+
+  @Override
+  public String getOwnerId() {
+    return ownerId;
   }
 
   @Override
@@ -59,7 +66,7 @@ public final class RuntimeIdentityImpl implements RuntimeIdentity {
         + " environment: "
         + envName
         + " owner: "
-        + owner
+        + ownerName
         + " }";
   }
 }

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2012-2017 Red Hat, Inc
+# Copyright (c) 2018 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -13,7 +13,7 @@ echo "[CHE] This script is going to wait until Keycloak is deployed and availabl
 command -v oc >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool oc (https://docs.openshift.org/latest/cli_reference/get_started_cli.html) is required but it's not installed. Aborting."; exit 1; }
 command -v jq >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool jq (https://stedolan.github.io/jq) is required but it's not installed. Aborting."; exit 1; }
 
-echo "[CHE] wait Keycloak pod booting..."
+echo "[CHE] Wait for Keycloak pod booting..."
 available=$(oc get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Available\") | .status")
 progressing=$(oc get dc keycloak -o json | jq ".status.conditions[] | select(.type == \"Progressing\") | .status")
 
