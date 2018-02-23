@@ -41,7 +41,7 @@ import org.testng.annotations.Test;
 public class BindMountProjectsVolumeProvisionerTest {
   private static final String WORKSPACE_ID = "wsId";
   private static final RuntimeIdentity RUNTIME_IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env", "owner");
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env", "owner", "id");
   private static final String MACHINE_1_NAME = "machine1";
   private static final String MACHINE_2_NAME = "machine2";
   private static final String MACHINE_3_NAME = "machine3";

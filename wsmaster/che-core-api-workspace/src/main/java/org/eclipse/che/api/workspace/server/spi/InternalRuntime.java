@@ -60,7 +60,7 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
 
   @Override
   public String getOwner() {
-    return context.getIdentity().getOwner();
+    return context.getIdentity().getOwnerName();
   }
 
   @Override

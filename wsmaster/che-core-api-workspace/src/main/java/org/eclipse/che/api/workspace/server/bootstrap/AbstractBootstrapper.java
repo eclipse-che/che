@@ -57,7 +57,7 @@ public abstract class AbstractBootstrapper {
             RuntimeIdentityDto runtimeId = event.getRuntimeId();
             if (event.getMachineName().equals(machineName)
                 && runtimeIdentity.getEnvName().equals(runtimeId.getEnvName())
-                && runtimeIdentity.getOwner().equals(runtimeId.getOwner())
+                && runtimeIdentity.getOwnerName().equals(runtimeId.getOwnerName())
                 && runtimeIdentity.getWorkspaceId().equals(runtimeId.getWorkspaceId())) {
 
               finishEventFuture.complete(event);

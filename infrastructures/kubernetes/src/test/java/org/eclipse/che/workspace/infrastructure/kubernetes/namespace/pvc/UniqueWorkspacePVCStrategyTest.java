@@ -17,6 +17,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategyTest.mockName;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -82,7 +83,7 @@ public class UniqueWorkspacePVCStrategyTest {
   private static final String VOLUME_2_NAME = "vol2";
 
   private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "usr1");
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "usr1", "id1");
 
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private KubernetesClientFactory clientFactory;
@@ -106,6 +107,7 @@ public class UniqueWorkspacePVCStrategyTest {
         new UniqueWorkspacePVCStrategy(
             NAMESPACE_NAME, PVC_NAME_PREFIX, PVC_QUANTITY, PVC_ACCESS_MODE, factory, clientFactory);
     when(clientFactory.create()).thenReturn(client);
+    when(clientFactory.create(anyString())).thenReturn(client);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     InternalMachineConfig machine1 = mock(InternalMachineConfig.class);

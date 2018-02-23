@@ -528,7 +528,10 @@ public class WorkspaceManagerTest {
       throws Exception {
     RuntimeIdentity identity =
         new RuntimeIdentityImpl(
-            workspace.getId(), workspace.getConfig().getDefaultEnv(), workspace.getNamespace());
+            workspace.getId(),
+            workspace.getConfig().getDefaultEnv(),
+            workspace.getNamespace(),
+            "id");
     //        doAnswer(inv -> {
     //            final WorkspaceImpl ws = (WorkspaceImpl)inv.getArguments()[0];
     //            ws.setStatus(status);
