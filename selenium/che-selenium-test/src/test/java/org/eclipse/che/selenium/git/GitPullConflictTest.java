@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
+import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestSshServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
@@ -47,26 +48,26 @@ import org.testng.annotations.Test;
 public class GitPullConflictTest {
   private static final String REPO_NAME = NameGenerator.generate("PullConflictTest-", 3);
   private static final String PROJECT_NAME = NameGenerator.generate("PullConflictProject-", 4);
-  private static final String pathToJavaFile = "src/main/java/commenttest";
+  private static final String PATH_TO_JAVA_FILE = "src/main/java/org/eclipse/qa/examples";
   private static final String COMMIT_MSG = "commit_changes";
 
-  private static final String firstMergeConflictMessage =
+  private static final String FIRST_MERGE_CONFLICT_MESSAGE =
       "Checkout operation failed, the following files would be overwritten by merge:\n"
-          + "GitPullTest.txt\n"
-          + "src/main/java/commenttest/JavaCommentsTest.java\n"
+          + "README.md\n"
+          + "src/main/java/org/eclipse/qa/examples/AppController.java\n"
           + "Could not pull. Commit your changes before merging.";
 
-  private static final String secondMergeConflictMessage =
+  private static final String SECOND_MERGE_CONFLICT_MESSAGE =
       "Could not pull because a merge conflict is detected in the files:\n"
-          + "GitPullTest.txt\n"
-          + "src/main/java/commenttest/JavaCommentsTest.java\n"
+          + "src/main/java/org/eclipse/qa/examples/AppController.java\n"
+          + "README.md\n"
           + "Automatic merge failed; fix conflicts and then commit the result.";
 
   private static final String CHANGE_STRING_1 =
       String.format("//first_change_%s", System.currentTimeMillis());
 
-  private static final String headConfPrefixConfMess =
-      "<<<<<<< HEAD\n" + "//second_change\n" + "=======\n" + CHANGE_STRING_1 + "\n" + ">>>>>>>";
+  private static final String HEAD_CONF_PREFIX_CONF_MESS =
+      String.format("<<<<<<< HEAD\n//second_change\n=======\n%s\n>>>>>>>", CHANGE_STRING_1);
 
   private GitHub gitHub;
   private GHRepository gitHubRepository;
@@ -83,6 +84,7 @@ public class GitPullConflictTest {
   @Named("github.password")
   private String gitHubPassword;
 
+  @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
   @Inject private Git git;
@@ -100,7 +102,8 @@ public class GitPullConflictTest {
     gitHubRepository = gitHub.createRepository(REPO_NAME).create();
     String commitMess = String.format("add-new-content %s ", System.currentTimeMillis());
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
-    Path entryPath = Paths.get(getClass().getResource("/projects/git-pull-conflict").getPath());
+    Path entryPath =
+        Paths.get(getClass().getResource("/projects/default-spring-project").getPath());
     gitHubClientService.addContentToRepository(entryPath, commitMess, gitHubRepository);
     ide.open(ws);
   }
@@ -111,11 +114,11 @@ public class GitPullConflictTest {
   }
 
   @Test
-  public void pullConflictsTest() throws IOException {
+  public void pullConflictsTest() throws Exception {
     // preconditions and import the test repo
-    String javaFileChange = "JavaCommentsTest";
-    String textFileChange = "GitPullTest.txt";
-    String changeContent_2 = "//second_change";
+    String javaFileChange = "AppController";
+    String textFileChange = "README.md";
+    String changeContent2 = "//second_change";
 
     projectExplorer.waitProjectExplorer();
     String repoUrl = String.format("https://github.com/%s/%s.git", gitHubUsername, REPO_NAME);
@@ -123,55 +126,49 @@ public class GitPullConflictTest {
 
     // change files in the test repo on GitHub
     changeContentOnGithubSide(
-        String.format("%s/%s.java", pathToJavaFile, javaFileChange), CHANGE_STRING_1);
+        String.format("%s/%s.java", PATH_TO_JAVA_FILE, javaFileChange), CHANGE_STRING_1);
     changeContentOnGithubSide(textFileChange, CHANGE_STRING_1);
 
     // change the same files in the editor
-    changeJavaFileForTest(javaFileChange, changeContent_2);
-    changeTextFileForTest(textFileChange, changeContent_2);
+    changeJavaFileForTest(javaFileChange, changeContent2);
+    changeTextFileForTest(textFileChange, changeContent2);
 
     // make pull and get the first conflict
     performPull();
     events.clickEventLogBtn();
-    events.waitExpectedMessage(firstMergeConflictMessage);
+    events.waitExpectedMessage(FIRST_MERGE_CONFLICT_MESSAGE);
 
     commitFiles();
 
     // Make pull again and get second conflict
     performPull();
     events.clickEventLogBtn();
-    events.waitExpectedMessage(secondMergeConflictMessage);
+    events.waitExpectedMessage(SECOND_MERGE_CONFLICT_MESSAGE);
 
     // Checking the message has present
     editor.selectTabByName(javaFileChange);
     editor.waitActive();
-    editor.waitTextIntoEditor(headConfPrefixConfMess);
+    editor.waitTextIntoEditor(HEAD_CONF_PREFIX_CONF_MESS);
     editor.selectTabByName(textFileChange);
     editor.waitActive();
-    editor.waitTextIntoEditor(headConfPrefixConfMess);
+    editor.waitTextIntoEditor(HEAD_CONF_PREFIX_CONF_MESS);
   }
 
-  private void changeJavaFileForTest(String fileName, String text) {
+  private void changeJavaFileForTest(String fileName, String text) throws Exception {
+    String path = String.format("%s/%s/%s.java", PROJECT_NAME, PATH_TO_JAVA_FILE, fileName);
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(
-        String.format("%s/%s/%s.java", PROJECT_NAME, pathToJavaFile, fileName));
+    projectExplorer.openItemByPath(path);
     editor.waitActive();
-    editor.deleteAllContent();
-    editor.typeTextIntoEditor(text);
-    editor.waitActive();
+    testProjectServiceClient.updateFile(ws.getId(), path, text);
     editor.waitTextIntoEditor(text);
-    editor.waitTabFileWithSavedStatus(fileName);
   }
 
-  private void changeTextFileForTest(String fileName, String text) {
-    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, fileName));
+  private void changeTextFileForTest(String fileName, String text) throws Exception {
+    String path = String.format("%s/%s", PROJECT_NAME, fileName);
+    projectExplorer.openItemByPath(path);
     editor.waitActive();
-    editor.setCursorToLine(1);
-    editor.selectLineAndDelete();
-    editor.typeTextIntoEditor(text);
-    editor.waitActive();
+    testProjectServiceClient.updateFile(ws.getId(), path, text);
     editor.waitTextIntoEditor(text);
-    editor.waitTabFileWithSavedStatus(fileName);
   }
 
   private void changeContentOnGithubSide(String pathToContent, String content) throws IOException {
