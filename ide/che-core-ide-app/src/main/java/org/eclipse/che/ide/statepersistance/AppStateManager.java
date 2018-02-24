@@ -10,6 +10,10 @@
  */
 package org.eclipse.che.ide.statepersistance;
 
+import static org.eclipse.che.ide.statepersistance.AppStateConstants.APP_STATE;
+import static org.eclipse.che.ide.statepersistance.AppStateConstants.PART_STACKS;
+import static org.eclipse.che.ide.statepersistance.AppStateConstants.PERSPECTIVES;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
@@ -24,9 +28,15 @@ import java.util.Optional;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.WindowActionEvent;
 import org.eclipse.che.ide.api.WindowActionHandler;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.parts.PartStackStateChangedEvent;
+import org.eclipse.che.ide.api.parts.PartStackType;
+import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.statepersistance.StateComponent;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
@@ -48,30 +58,41 @@ public class AppStateManager {
 
   private static final String WORKSPACE = "workspace";
 
+  private final Provider<PerspectiveManager> perspectiveManagerProvider;
   private final Provider<StateComponentRegistry> stateComponentRegistry;
 
   private final PreferencesManager preferencesManager;
   private final JsonFactory jsonFactory;
   private final PromiseProvider promises;
+  private EventBus eventBus;
   private final AppContext appContext;
   private JsonObject allWsState;
+  private final DelayedTask persistWorkspaceStateTask =
+      new DelayedTask() {
+        @Override
+        public void onExecute() {
+          persistWorkspaceState();
+        }
+      };
 
   @Inject
   public AppStateManager(
+      Provider<PerspectiveManager> perspectiveManagerProvider,
       Provider<StateComponentRegistry> stateComponentRegistryProvider,
       PreferencesManager preferencesManager,
       JsonFactory jsonFactory,
       PromiseProvider promises,
       EventBus eventBus,
       AppContext appContext) {
+    this.perspectiveManagerProvider = perspectiveManagerProvider;
     this.stateComponentRegistry = stateComponentRegistryProvider;
     this.preferencesManager = preferencesManager;
     this.jsonFactory = jsonFactory;
     this.promises = promises;
+    this.eventBus = eventBus;
     this.appContext = appContext;
 
-    // delay is required because we need to wait some time while different components initialized
-    eventBus.addHandler(WorkspaceReadyEvent.getType(), e -> restoreWorkspaceStateWithDelay());
+    eventBus.addHandler(WorkspaceReadyEvent.getType(), this::onWorkspaceReady);
 
     eventBus.addHandler(
         WindowActionEvent.TYPE,
@@ -90,7 +111,7 @@ public class AppStateManager {
   }
 
   public void readStateFromPreferences() {
-    final String json = preferencesManager.getValue(PREFERENCE_PROPERTY_NAME);
+    final String json = preferencesManager.getValue(APP_STATE);
     if (json == null) {
       allWsState = jsonFactory.createObject();
     } else {
@@ -103,13 +124,68 @@ public class AppStateManager {
     }
   }
 
-  private void restoreWorkspaceStateWithDelay() {
-    new Timer() {
-      @Override
-      public void run() {
-        restoreWorkspaceState();
-      }
-    }.schedule(1000);
+  /**
+   * Gets cached state for given {@code partStackType}. Use {@link #readStateFromPreferences()}
+   * first to get not cached state
+   */
+  @Nullable
+  public JsonObject getStateFor(PartStackType partStackType) {
+    String workspaceId = appContext.getWorkspace().getId();
+    if (!allWsState.hasKey(workspaceId)) {
+      return null;
+    }
+
+    JsonObject preferences = allWsState.getObject(workspaceId);
+    if (!preferences.hasKey(WORKSPACE)) {
+      return null;
+    }
+
+    JsonObject workspace = preferences.getObject(WORKSPACE);
+    if (!workspace.hasKey(WORKSPACE)) {
+      return null;
+    }
+
+    JsonObject workspaceState = workspace.getObject(WORKSPACE);
+    if (!workspaceState.hasKey(PERSPECTIVES)) {
+      return null;
+    }
+
+    String perspectiveId = perspectiveManagerProvider.get().getPerspectiveId();
+    JsonObject perspectives = workspaceState.getObject(PERSPECTIVES);
+    if (!perspectives.hasKey(perspectiveId)) {
+      return null;
+    }
+
+    JsonObject projectPerspective = perspectives.getObject(perspectiveId);
+    if (!projectPerspective.hasKey(PART_STACKS)) {
+      return null;
+    }
+
+    JsonObject partStacks = projectPerspective.getObject(PART_STACKS);
+    if (!partStacks.hasKey(partStackType.name())) {
+      return null;
+    }
+
+    return partStacks.getObject(partStackType.name());
+  }
+
+  private Promise<Void> restoreWorkspaceStateWithDelay() {
+    return AsyncPromiseHelper.createFromAsyncRequest(
+        callback ->
+            new Timer() {
+              @Override
+              public void run() {
+                restoreWorkspaceState()
+                    .then(
+                        arg -> {
+                          callback.onSuccess(null);
+                        })
+                    .catchError(
+                        arg -> {
+                          callback.onFailure(arg.getCause());
+                        });
+              }
+            }.schedule(1000));
   }
 
   @VisibleForTesting
@@ -171,7 +247,7 @@ public class AppStateManager {
 
   private Promise<Void> writeStateToPreferences(JsonObject state) {
     final String json = state.toJson();
-    preferencesManager.setValue(PREFERENCE_PROPERTY_NAME, json);
+    preferencesManager.setValue(APP_STATE, json);
     return preferencesManager
         .flushPreferences()
         .catchError(
@@ -185,5 +261,15 @@ public class AppStateManager {
   @Deprecated
   public boolean hasStateForWorkspace(String wsId) {
     return allWsState.hasKey(wsId);
+  }
+
+  private void onWorkspaceReady(WorkspaceReadyEvent workspaceReadyEvent) {
+    // delay is required because we need to wait some time while different components initialized
+    restoreWorkspaceStateWithDelay()
+        .then(
+            ignored -> {
+              eventBus.addHandler(
+                  PartStackStateChangedEvent.TYPE, event -> persistWorkspaceStateTask.delay(500));
+            });
   }
 }
