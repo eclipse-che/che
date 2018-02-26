@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard.factories;
 
-import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
@@ -34,13 +34,13 @@ public class FactoryDetails {
   }
 
   public interface Locators {
-    String FACTORY_NAME = "//span[contains(@class,'che-toolbar-title-label') and text()='%s']";
-    String BACK_TO_FACTORIES_LIST_BUTTON = "//a[contains(@class,'che-toolbar-control-button')]";
+    String FACTORY_NAME = "//span[contains(@class,'che-toolbar-title-label')";
+    String BACK_TO_FACTORIES_LIST_BUTTON = "//a[@title='All factories']";
   }
 
   public void waitFactoryName(String factoryName) {
     redrawUiElementsTimeout.until(
-        visibilityOfElementLocated(By.xpath(format(Locators.FACTORY_NAME, factoryName))));
+        textToBePresentInElementLocated(By.xpath(Locators.FACTORY_NAME), factoryName));
   }
 
   public void clickOnBackToFactoriesListButton() {
