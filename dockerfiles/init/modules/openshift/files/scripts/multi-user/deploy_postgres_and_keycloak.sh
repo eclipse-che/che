@@ -42,7 +42,7 @@ fi
 
 IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK:-"eclipse/che-keycloak:nightly"}
 
-for i in $(ls -Iconfig "$COMMAND_DIR"/keycloak ); do
+for i in $(ls "$COMMAND_DIR"/keycloak ); do
     cat "${COMMAND_DIR}"/keycloak/"${i}" | sed "s#\${IMAGE_KEYCLOAK}#${IMAGE_KEYCLOAK}#" | oc apply -f -
 done
 
