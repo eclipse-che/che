@@ -1,0 +1,29 @@
+# Copyright (c) 2018 Red Hat, Inc.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: keycloak-util
+  name: keycloak-util
+spec:
+    containers:
+    - env:
+      - name: CHE_HOST
+        value: "${CHE_HOST}"
+      - name: HTTP_PROTOCOL
+        value: "${HTTP_PROTOCOL}"
+      - name: KC_HOST
+        value: "${KC_HOST}"
+      - name: CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD
+        value: "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}"
+      image: "${IMAGE_KEYCLOAK}"
+      command: ["/scripts/keycloak_config.sh"]
+      name: keycloak-util
+      imagePullPolicy: Always
+    restartPolicy: Never

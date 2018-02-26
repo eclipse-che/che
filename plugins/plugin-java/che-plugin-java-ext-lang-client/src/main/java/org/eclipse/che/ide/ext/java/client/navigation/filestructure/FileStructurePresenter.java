@@ -108,6 +108,7 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
   @Override
   public void actionPerformed(final Member member) {
     view.close();
+    showInheritedMembers = false;
     if (member.isBinary()) {
 
       final Resource resource = context.getResource();

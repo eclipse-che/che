@@ -51,7 +51,7 @@ public class KubernetesIngresses {
     putLabel(ingress, CHE_WORKSPACE_ID_LABEL, workspaceId);
     try {
       return clientFactory
-          .create()
+          .create(workspaceId)
           .extensions()
           .ingresses()
           .inNamespace(namespace)
@@ -68,7 +68,12 @@ public class KubernetesIngresses {
     Watch watch = null;
     try {
       Resource<Ingress, DoneableIngress> ingressResource =
-          clientFactory.create().extensions().ingresses().inNamespace(namespace).withName(name);
+          clientFactory
+              .create(workspaceId)
+              .extensions()
+              .ingresses()
+              .inNamespace(namespace)
+              .withName(name);
 
       watch =
           ingressResource.watch(
@@ -117,7 +122,7 @@ public class KubernetesIngresses {
   public void delete() throws InfrastructureException {
     try {
       clientFactory
-          .create()
+          .create(workspaceId)
           .extensions()
           .ingresses()
           .inNamespace(namespace)

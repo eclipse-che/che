@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.valueOf;
+import static org.eclipse.che.selenium.pageobject.PanelSelector.PanelTypes.LEFT_BOTTOM;
 import static org.openqa.selenium.Keys.PAGE_DOWN;
 import static org.openqa.selenium.Keys.PAGE_UP;
 import static org.testng.Assert.fail;
@@ -28,6 +29,7 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
+import org.eclipse.che.selenium.pageobject.PanelSelector;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
@@ -71,6 +73,7 @@ public class WorkingWithTerminalTest {
   @Inject private MachineTerminal terminal;
   @Inject private Consoles consoles;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private PanelSelector panelSelector;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -87,6 +90,8 @@ public class WorkingWithTerminalTest {
   @BeforeMethod
   private void prepareNewTerminal() {
     try {
+      panelSelector.selectPanelTypeFromPanelSelector(LEFT_BOTTOM);
+
       projectExplorer.waitItem(PROJECT_NAME);
 
       if (terminal.terminalIsPresent()) {
@@ -206,8 +211,14 @@ public class WorkingWithTerminalTest {
 
     // check resize of the terminal
     for (String partOfContent : CHECK_MC_OPENING) {
-      terminal.waitExpectedTextIntoTerminal(partOfContent);
+      try {
+        terminal.waitExpectedTextIntoTerminal(partOfContent);
+      } catch (TimeoutException ex) {
+        // remove try-catch block after issue has been resolved
+        fail("Known issue https://github.com/eclipse/che-lib/issues/57");
+      }
     }
+
     terminal.waitExpectedTextIntoTerminal(".dockerenv");
     consoles.clickOnMaximizePanelIcon();
     loader.waitOnClosed();

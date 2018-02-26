@@ -96,7 +96,7 @@ public class KubernetesPods {
   public Pod create(Pod pod) throws InfrastructureException {
     putLabel(pod, CHE_WORKSPACE_ID_LABEL, workspaceId);
     try {
-      return clientFactory.create().pods().inNamespace(namespace).create(pod);
+      return clientFactory.create(workspaceId).pods().inNamespace(namespace).create(pod);
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
     }
@@ -110,7 +110,7 @@ public class KubernetesPods {
   public List<Pod> get() throws InfrastructureException {
     try {
       return clientFactory
-          .create()
+          .create(workspaceId)
           .pods()
           .inNamespace(namespace)
           .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
@@ -129,7 +129,7 @@ public class KubernetesPods {
   public Optional<Pod> get(String name) throws InfrastructureException {
     try {
       return Optional.ofNullable(
-          clientFactory.create().pods().inNamespace(namespace).withName(name).get());
+          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name).get());
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
     }
@@ -153,7 +153,7 @@ public class KubernetesPods {
     try {
 
       PodResource<Pod, DoneablePod> podResource =
-          clientFactory.create().pods().inNamespace(namespace).withName(name);
+          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name);
 
       watch =
           podResource.watch(
@@ -200,6 +200,61 @@ public class KubernetesPods {
   }
 
   /**
+   * Subscribes to pod events and returns the resulting future, which ends when a pod event that
+   * satisfies the predicate is received.
+   *
+   * <p>Note that the resulting future must be explicitly cancelled when its completion no longer
+   * important because of finalization allocated resources.
+   *
+   * @param name the pod name that should be watched
+   * @param predicate a function that performs pod state check
+   * @return completable future that is completed when one of the following conditions is met:
+   *     <ul>
+   *       <li>an event that satisfies predicate is received
+   *       <li>exception while getting pod resource occurred
+   *       <li>connection problem occurred
+   *     </ul>
+   *     otherwise, it must be explicitly closed
+   */
+  public CompletableFuture<Void> waitAsync(String name, Predicate<Pod> predicate) {
+    final CompletableFuture<Void> podRunningFuture = new CompletableFuture<>();
+    try {
+      final PodResource<Pod, DoneablePod> podResource =
+          clientFactory.create().pods().inNamespace(namespace).withName(name);
+      final Watch watch =
+          podResource.watch(
+              new Watcher<Pod>() {
+                @Override
+                public void eventReceived(Action action, Pod pod) {
+                  if (predicate.test(pod)) {
+                    podRunningFuture.complete(null);
+                  }
+                }
+
+                @Override
+                public void onClose(KubernetesClientException cause) {
+                  podRunningFuture.completeExceptionally(
+                      new InfrastructureException(
+                          "Waiting for pod '" + name + "' was interrupted"));
+                }
+              });
+
+      podRunningFuture.whenComplete((ok, ex) -> watch.close());
+      final Pod pod = podResource.get();
+      if (pod == null) {
+        podRunningFuture.completeExceptionally(
+            new InfrastructureException("Specified pod " + name + " doesn't exist"));
+      }
+      if (predicate.test(pod)) {
+        podRunningFuture.complete(null);
+      }
+    } catch (KubernetesClientException | InfrastructureException ex) {
+      podRunningFuture.completeExceptionally(ex);
+    }
+    return podRunningFuture;
+  }
+
+  /**
    * Starts watching the pods inside Kubernetes namespace and registers a specified handler for such
    * events. Note that watcher can be started only once so two times invocation of this method will
    * not produce new watcher and just register the event handlers.
@@ -222,7 +277,7 @@ public class KubernetesPods {
       try {
         podWatch =
             clientFactory
-                .create()
+                .create(workspaceId)
                 .pods()
                 .inNamespace(namespace)
                 .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
@@ -272,7 +327,8 @@ public class KubernetesPods {
             public void onClose(KubernetesClientException ignored) {}
           };
       try {
-        containerWatch = clientFactory.create().events().inNamespace(namespace).watch(watcher);
+        containerWatch =
+            clientFactory.create(workspaceId).events().inNamespace(namespace).watch(watcher);
       } catch (KubernetesClientException ex) {
         throw new KubernetesInfrastructureException(ex);
       }
@@ -321,7 +377,7 @@ public class KubernetesPods {
     final ExecWatchdog watchdog = new ExecWatchdog();
     try (ExecWatch watch =
         clientFactory
-            .create()
+            .create(workspaceId)
             .pods()
             .inNamespace(namespace)
             .withName(podName)
@@ -382,7 +438,7 @@ public class KubernetesPods {
       // pods are removed with some delay related to stopping of containers. It is need to wait them
       List<Pod> pods =
           clientFactory
-              .create()
+              .create(workspaceId)
               .pods()
               .inNamespace(namespace)
               .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
@@ -414,7 +470,7 @@ public class KubernetesPods {
   private CompletableFuture<Void> doDelete(String name) throws InfrastructureException {
     try {
       final PodResource<Pod, DoneablePod> podResource =
-          clientFactory.create().pods().inNamespace(namespace).withName(name);
+          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name);
       final CompletableFuture<Void> deleteFuture = new CompletableFuture<>();
       final Watch watch = podResource.watch(new DeleteWatcher(deleteFuture));
 

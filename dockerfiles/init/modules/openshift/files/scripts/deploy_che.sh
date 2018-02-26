@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2012-2017 Red Hat, Inc
+# Copyright (c) 2018 Red Hat, Inc.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -225,6 +225,7 @@ DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server"
 DEFAULT_CHE_IMAGE_TAG="nightly"
 DEFAULT_CHE_KEYCLOAK_OSO_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token"
 DEFAULT_KEYCLOAK_GITHUB_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/github/token"
+DEFAULT_CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD="true"
 
 COMMAND=${COMMAND:-${DEFAULT_COMMAND}}
 WAIT_FOR_CHE=${WAIT_FOR_CHE:-"false"}
@@ -270,6 +271,8 @@ else
     HTTP_PROTOCOL="http"
     WS_PROTOCOL="ws"
 fi
+export IMAGE_POSTGRES=${IMAGE_POSTGRES:-"eclipse/che-postgres:nightly"}
+export IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK:-"eclipse/che-keycloak:nightly"}
 CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
 CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
 CHE_IMAGE="${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}"
@@ -352,7 +355,7 @@ if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
     WAIT_FOR_PROJECT_TO_DELETE=true
     WAIT_FOR_PROJECT_TO_DELETE_MESSAGE="Waiting for project to be deleted fully(~15 seconds)..."
 
-    echo "Project \"${CHE_OPENSHIFT_PROJECT}\" does not exist...trying to creating it."
+    echo "Project \"${CHE_OPENSHIFT_PROJECT}\" does not exist...trying to create it."
     DEPLOYMENT_TIMEOUT_SEC=120
     POLLING_INTERVAL_SEC=2
     timeout_in=$((POLLING_INTERVAL_SEC+DEPLOYMENT_TIMEOUT_SEC))  
@@ -361,7 +364,7 @@ if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
     { # try
         timeout_in=$((timeout_in-POLLING_INTERVAL_SEC))
         if [ "$timeout_in" -le "0" ] ; then
-            echo "[CHE] **ERROR**: Timeout of $DEPLOYMENT_TIMEOUT_SEC waiting for project \"${CHE_OPENSHIFT_PROJECT}\" to be delete."
+            echo "[CHE] **ERROR**: Timeout of $DEPLOYMENT_TIMEOUT_SEC waiting for project \"${CHE_OPENSHIFT_PROJECT}\" to be deleted."
             exit 1
         fi  
         oc new-project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null && \
@@ -533,6 +536,10 @@ fi
 
 if [ "${WAIT_FOR_CHE}" == "true" ]; then
   wait_until_che_is_available
+fi
+
+if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
+"${COMMAND_DIR}"/multi-user/configure_keycloak.sh
 fi
 
 che_route=$(oc get route che -o jsonpath='{.spec.host}')

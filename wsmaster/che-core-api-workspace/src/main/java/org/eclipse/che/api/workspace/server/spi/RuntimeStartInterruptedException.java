@@ -25,6 +25,6 @@ public class RuntimeStartInterruptedException extends InfrastructureException {
     super(
         format(
             "Runtime start for identity 'workspace: %s, environment: %s, owner: %s' is interrupted",
-            identity.getWorkspaceId(), identity.getEnvName(), identity.getOwner()));
+            identity.getWorkspaceId(), identity.getEnvName(), identity.getOwnerName()));
   }
 }
