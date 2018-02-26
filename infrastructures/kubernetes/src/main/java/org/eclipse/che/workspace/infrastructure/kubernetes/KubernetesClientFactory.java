@@ -68,7 +68,7 @@ public class KubernetesClientFactory {
       @Named("che.infra.kubernetes.client.http.async_requests.max_per_host")
           int maxConcurrentRequestsPerHost,
       @Named("che.infra.kubernetes.client.http.connection_pool.max_idle") int maxIdleConnections,
-      @Named("che.infra.kubernetes.client.http.connection_pool.keep_alive.mins")
+      @Named("che.infra.kubernetes.client.http.connection_pool.keep_alive_min")
           int connectionPoolKeepAlive) {
     this.defaultConfig =
         buildDefaultConfig(masterUrl, username, password, oauthToken, doTrustCerts);
