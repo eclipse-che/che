@@ -40,7 +40,7 @@ public class SeleniumWebDriverHelper {
   protected final Logger LOG = LoggerFactory.getLogger(SeleniumWebDriverHelper.class);
 
   @Inject
-  protected SeleniumWebDriverHelper(
+  public SeleniumWebDriverHelper(
       SeleniumWebDriver seleniumWebDriver,
       WebDriverWaitFactory webDriverWaitFactory,
       ActionsFactory actionsFactory) {
