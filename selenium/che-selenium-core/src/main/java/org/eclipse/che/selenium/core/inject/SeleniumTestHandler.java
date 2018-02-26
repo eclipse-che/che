@@ -50,6 +50,7 @@ import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.user.InjectTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader;
@@ -93,6 +94,10 @@ public abstract class SeleniumTestHandler
   @Named("tests.htmldumps_dir")
   private String htmldumpsDir;
 
+  //  @Inject
+  //  @Named("tests.webDriverLogsDir")
+  //  private String webDriverLogsDir;
+
   @Inject
   @Named("tests.workspacelogs_dir")
   private String workspaceLogsDir;
@@ -128,6 +133,7 @@ public abstract class SeleniumTestHandler
   @Inject private TestGitHubServiceClient gitHubClientService;
   @Inject private TestWorkspaceLogsReader testWorkspaceLogsReader;
   @Inject private SeleniumTestStatistics seleniumTestStatistics;
+  @Inject private BrowserLogsUtil browserLogsUtil;
 
   private final Injector injector;
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
@@ -302,6 +308,7 @@ public abstract class SeleniumTestHandler
       captureScreenshot(result);
       captureHtmlSource(result);
       captureTestWorkspaceLogs(result);
+      //   getWebDriverLogs(result);
     }
   }
 
@@ -463,6 +470,20 @@ public abstract class SeleniumTestHandler
               captureScreenshotFromWindow(result, webDriver);
             });
   }
+
+  //  private void getWebDriverLogs(ITestResult result) {
+  //    try {
+  //      String filename = result.getName() + ".log";
+  //      Path webdriverLogDirectory = Paths.get(webDriverLogsDir, filename);
+  //      Files.createDirectories(webdriverLogDirectory.getParent());
+  //      Files.write(
+  //          webdriverLogDirectory,
+  //          browserLogsUtil.getCombinedLogs().getBytes(Charset.forName("UTF-8")),
+  //          StandardOpenOption.CREATE);
+  //    } catch (WebDriverException | IOException e) {
+  //      LOG.error(format("Can't get of the logs from WebDriwer for test %s", result), e);
+  //    }
+  //  }
 
   private void dumpHtmlCodeFromTheCurrentPage(ITestResult result, SeleniumWebDriver webDriver) {
     String testReference = getTestReference(result);

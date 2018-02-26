@@ -37,7 +37,7 @@ public class DialogAboutTest {
     ide.waitOpenedWorkspaceIsReadyToUse();
     menu.runCommand(HELP, ABOUT);
 
-    dialogAbout.waitVerifyTextElements("About");
+    dialogAbout.waitVerifyTextElements("Abo__ut");
     dialogAbout.waitVerifyTextElements("Version :");
     dialogAbout.waitVerifyTextElements("Revision :");
     dialogAbout.waitVerifyTextElements("Build Time :");
