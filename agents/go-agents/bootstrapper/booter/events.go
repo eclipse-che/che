@@ -79,8 +79,11 @@ type RuntimeID struct {
 	// Environment is a name of environment e.g. "default".
 	Environment string `json:"envName"`
 
-	// Owner is an identifier of user who is runtime owner.
-	Owner string `json:"owner"`
+	// OwnerName is the name of user who is runtime owner.
+	OwnerName string `json:"ownerName"`
+	
+	// OwnerId is an identifier of user who is runtime owner.
+	OwnerId string `json:"ownerId"`
 }
 
 // MachineEvent is a base event for bootstrapper events.

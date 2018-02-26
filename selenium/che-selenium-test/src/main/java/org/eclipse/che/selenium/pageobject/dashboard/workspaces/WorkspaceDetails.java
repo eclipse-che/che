@@ -71,6 +71,8 @@ public class WorkspaceDetails {
     String ADD_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Add']";
     String TOOLBAR_TITLE_NAME =
         "//div[contains(@class,'che-toolbar')]//span[contains(text(),'%s')]";
+    String ORGANIZATION_NAME_ID = "namespace-name";
+    String OPEN_ORGANIZATION_BUTTON_ID = "open-namespace-button";
   }
 
   public enum StateWorkspace {
@@ -243,5 +245,17 @@ public class WorkspaceDetails {
     new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(
             visibilityOfElementLocated(By.xpath(format(Locators.TOOLBAR_TITLE_NAME, titleName))));
+  }
+
+  public String getOrganizationName() {
+    return new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.id(Locators.ORGANIZATION_NAME_ID)))
+        .getText();
+  }
+
+  public void clickOnOpenOrganizationButton() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.id(Locators.OPEN_ORGANIZATION_BUTTON_ID)))
+        .click();
   }
 }

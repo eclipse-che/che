@@ -76,7 +76,7 @@ public class TestWorkspaceImpl implements TestWorkspace {
                 }
 
                 if (e instanceof IllegalStateException) {
-                  Assert.fail("Known issue https://github.com/eclipse/che/issues/8031", e);
+                  Assert.fail("Known issue https://github.com/eclipse/che/issues/8856", e);
                 } else {
                   throw new IllegalStateException(errorMessage, e);
                 }

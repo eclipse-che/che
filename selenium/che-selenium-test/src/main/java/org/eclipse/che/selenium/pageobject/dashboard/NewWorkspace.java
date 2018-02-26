@@ -76,6 +76,8 @@ public class NewWorkspace {
     String WORKSPACE_CREATED_DIALOG = "//md-dialog/che-popup[@title='Workspace Is Created']";
     String EDIT_WORKSPACE_DIALOG_BUTTON = "//che-button-primary//span[text()='Edit']";
     String OPEN_IN_IDE_DIALOG_BUTTON = "//che-button-default//span[text()='Open In IDE']";
+    String ORGANIZATIONS_LIST_ID = "namespace-selector";
+    String ORGANIZATION_ITEM = "//md-menu-item[text()='%s']";
   }
 
   @FindBy(id = Locators.FILTERS_STACK_BUTTON)
@@ -277,5 +279,19 @@ public class NewWorkspace {
     redrawUiElementsTimeout.until(visibilityOf(createWorkspaceButton)).click();
     waitWorkspaceIsCreatedDialogIsVisible();
     clickOnEditWorkspaceButton();
+  }
+
+  public void openOrganizationsList() {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(visibilityOfElementLocated(By.id(Locators.ORGANIZATIONS_LIST_ID)))
+        .click();
+  }
+
+  public void selectOrganizationFromList(String organizationName) {
+    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            visibilityOfElementLocated(
+                By.xpath(format(Locators.ORGANIZATION_ITEM, organizationName))))
+        .click();
   }
 }
