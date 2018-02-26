@@ -34,7 +34,7 @@ public class FactoryDetails {
   }
 
   public interface Locators {
-    String FACTORY_NAME = "//span[contains(@class,'che-toolbar-title-label')";
+    String FACTORY_NAME = "//span[contains(@class,'che-toolbar-title-label')]";
     String BACK_TO_FACTORIES_LIST_BUTTON = "//a[@title='All factories']";
   }
 
