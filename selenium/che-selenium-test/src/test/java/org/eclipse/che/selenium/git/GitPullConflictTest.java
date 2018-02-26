@@ -88,7 +88,7 @@ public class GitPullConflictTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
   @Inject private Git git;
-  @Inject private Events events;
+  @Inject private Events eventsPanel;
   @Inject private Loader loader;
   @Inject private CodenvyEditor editor;
   @Inject private Consoles consoles;
@@ -119,6 +119,9 @@ public class GitPullConflictTest {
     String javaFileChange = "AppController";
     String textFileChange = "README.md";
     String changeContent2 = "//second_change";
+    String pathJavaFile =
+        String.format("%s/%s/%s.java", PROJECT_NAME, PATH_TO_JAVA_FILE, javaFileChange);
+    String pathTextFile = String.format("%s/%s", PROJECT_NAME, textFileChange);
 
     projectExplorer.waitProjectExplorer();
     String repoUrl = String.format("https://github.com/%s/%s.git", gitHubUsername, REPO_NAME);
@@ -129,46 +132,30 @@ public class GitPullConflictTest {
         String.format("%s/%s.java", PATH_TO_JAVA_FILE, javaFileChange), CHANGE_STRING_1);
     changeContentOnGithubSide(textFileChange, CHANGE_STRING_1);
 
-    // change the same files in the editor
-    changeJavaFileForTest(javaFileChange, changeContent2);
-    changeTextFileForTest(textFileChange, changeContent2);
+    // change the java and text files in the editor
+    testProjectServiceClient.updateFile(ws.getId(), pathJavaFile, changeContent2);
+    testProjectServiceClient.updateFile(ws.getId(), pathTextFile, changeContent2);
 
-    // make pull and get the first conflict
+    // make pull and wait the first expected conflict message
     performPull();
-    events.clickEventLogBtn();
-    events.waitExpectedMessage(FIRST_MERGE_CONFLICT_MESSAGE);
+    eventsPanel.clickEventLogBtn();
+    eventsPanel.waitExpectedMessage(FIRST_MERGE_CONFLICT_MESSAGE);
 
     commitFiles();
 
-    // Make pull again and get second conflict
+    // make pull again and wait the second expected conflict message
     performPull();
-    events.clickEventLogBtn();
-    events.waitExpectedMessage(SECOND_MERGE_CONFLICT_MESSAGE);
+    eventsPanel.clickEventLogBtn();
+    eventsPanel.waitExpectedMessage(SECOND_MERGE_CONFLICT_MESSAGE);
 
-    // Checking the message has present
-    editor.selectTabByName(javaFileChange);
-    editor.waitActive();
-    editor.waitTextIntoEditor(HEAD_CONF_PREFIX_CONF_MESS);
-    editor.selectTabByName(textFileChange);
-    editor.waitActive();
-    editor.waitTextIntoEditor(HEAD_CONF_PREFIX_CONF_MESS);
-  }
-
-  private void changeJavaFileForTest(String fileName, String text) throws Exception {
-    String path = String.format("%s/%s/%s.java", PROJECT_NAME, PATH_TO_JAVA_FILE, fileName);
+    // wait the expected text in the editor
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(path);
+    projectExplorer.openItemByPath(pathJavaFile);
     editor.waitActive();
-    testProjectServiceClient.updateFile(ws.getId(), path, text);
-    editor.waitTextIntoEditor(text);
-  }
-
-  private void changeTextFileForTest(String fileName, String text) throws Exception {
-    String path = String.format("%s/%s", PROJECT_NAME, fileName);
-    projectExplorer.openItemByPath(path);
+    editor.waitTextIntoEditor(HEAD_CONF_PREFIX_CONF_MESS);
+    projectExplorer.openItemByPath(pathTextFile);
     editor.waitActive();
-    testProjectServiceClient.updateFile(ws.getId(), path, text);
-    editor.waitTextIntoEditor(text);
+    editor.waitTextIntoEditor(HEAD_CONF_PREFIX_CONF_MESS);
   }
 
   private void changeContentOnGithubSide(String pathToContent, String content) throws IOException {
@@ -179,6 +166,7 @@ public class GitPullConflictTest {
 
   private void performPull() {
     menu.runCommand(GIT, REMOTES_TOP, PULL);
+
     git.waitPullFormToOpen();
     git.clickPull();
     git.waitPullFormToClose();
@@ -188,9 +176,10 @@ public class GitPullConflictTest {
   private void commitFiles() {
     projectExplorer.selectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
+
     git.waitAndRunCommit(COMMIT_MSG);
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    events.clickEventLogBtn();
-    events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
+    eventsPanel.clickEventLogBtn();
+    eventsPanel.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
   }
 }
