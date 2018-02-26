@@ -63,8 +63,23 @@ public class OpenShiftClientFactory extends KubernetesClientFactory {
       @Nullable @Named("che.infra.kubernetes.username") String username,
       @Nullable @Named("che.infra.kubernetes.password") String password,
       @Nullable @Named("che.infra.kubernetes.oauth_token") String oauthToken,
-      @Nullable @Named("che.infra.kubernetes.trust_certs") Boolean doTrustCerts) {
-    super(masterUrl, username, password, oauthToken, doTrustCerts);
+      @Nullable @Named("che.infra.kubernetes.trust_certs") Boolean doTrustCerts,
+      @Named("che.infra.kubernetes.client.http.async_requests.max") int maxConcurrentRequests,
+      @Named("che.infra.kubernetes.client.http.async_requests.max_per_host")
+          int maxConcurrentRequestsPerHost,
+      @Named("che.infra.kubernetes.client.http.connection_pool.max_idle") int maxIdleConnections,
+      @Named("che.infra.kubernetes.client.http.connection_pool.keep_alive_min")
+          int connectionPoolKeepAlive) {
+    super(
+        masterUrl,
+        username,
+        password,
+        oauthToken,
+        doTrustCerts,
+        maxConcurrentRequests,
+        maxConcurrentRequestsPerHost,
+        maxIdleConnections,
+        connectionPoolKeepAlive);
   }
 
   protected Config buildDefaultConfig(
