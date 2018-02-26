@@ -10,10 +10,13 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server;
 
+import static java.lang.String.format;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.Subject;
 
 /**
  * Provides machine token from {@link MachineTokenRegistry}.
@@ -34,7 +37,19 @@ public class MachineTokenProviderImpl implements MachineTokenProvider {
 
   @Override
   public String getToken(String workspaceId) {
-    String currentUserId = EnvironmentContext.getCurrent().getSubject().getUserId();
-    return tokenRegistry.getOrCreateToken(currentUserId, workspaceId);
+    final Subject subject = EnvironmentContext.getCurrent().getSubject();
+    if (subject.isAnonymous()) {
+      throw new IllegalStateException(
+          format(
+              "Unable to get machine token of the workspace '%s' "
+                  + "because it does not exist for an anonymous user.",
+              workspaceId));
+    }
+    return getToken(subject.getUserId(), workspaceId);
+  }
+
+  @Override
+  public String getToken(String userId, String workspaceId) {
+    return tokenRegistry.getOrCreateToken(userId, workspaceId);
   }
 }

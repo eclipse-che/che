@@ -355,7 +355,7 @@ if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
     WAIT_FOR_PROJECT_TO_DELETE=true
     WAIT_FOR_PROJECT_TO_DELETE_MESSAGE="Waiting for project to be deleted fully(~15 seconds)..."
 
-    echo "Project \"${CHE_OPENSHIFT_PROJECT}\" does not exist...trying to creating it."
+    echo "Project \"${CHE_OPENSHIFT_PROJECT}\" does not exist...trying to create it."
     DEPLOYMENT_TIMEOUT_SEC=120
     POLLING_INTERVAL_SEC=2
     timeout_in=$((POLLING_INTERVAL_SEC+DEPLOYMENT_TIMEOUT_SEC))  
@@ -364,7 +364,7 @@ if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
     { # try
         timeout_in=$((timeout_in-POLLING_INTERVAL_SEC))
         if [ "$timeout_in" -le "0" ] ; then
-            echo "[CHE] **ERROR**: Timeout of $DEPLOYMENT_TIMEOUT_SEC waiting for project \"${CHE_OPENSHIFT_PROJECT}\" to be delete."
+            echo "[CHE] **ERROR**: Timeout of $DEPLOYMENT_TIMEOUT_SEC waiting for project \"${CHE_OPENSHIFT_PROJECT}\" to be deleted."
             exit 1
         fi  
         oc new-project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null && \

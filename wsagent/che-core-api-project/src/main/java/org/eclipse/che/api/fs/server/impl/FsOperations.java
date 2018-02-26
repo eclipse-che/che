@@ -11,7 +11,7 @@
 package org.eclipse.che.api.fs.server.impl;
 
 import static java.util.stream.Collectors.toSet;
-import static org.eclipse.che.commons.lang.IoUtil.readStream;
+import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -169,9 +169,7 @@ class FsOperations {
 
   void update(Path fsPath, InputStream content) throws ServerException {
     try {
-      byte[] bytes = readStream(content).getBytes();
-      Files.write(fsPath, bytes);
-      content.close();
+      copyInputStreamToFile(content, fsPath.toFile());
     } catch (IOException e) {
       throw new ServerException("Failed to update file: " + fsPath, e);
     }

@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.hc.probe.HttpProbeConfig;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.commons.env.EnvironmentContext;
 
 /**
  * Produces {@link HttpProbeConfig} for terminal agent liveness probes.
@@ -30,6 +31,12 @@ public class TerminalServerLivenessProbeConfigFactory implements HttpProbeConfig
 
   @Override
   public HttpProbeConfig get(String workspaceId, Server server)
+      throws InternalInfrastructureException {
+    return get(EnvironmentContext.getCurrent().getSubject().getUserId(), workspaceId, server);
+  }
+
+  @Override
+  public HttpProbeConfig get(String userId, String workspaceId, Server server)
       throws InternalInfrastructureException {
     URI uri;
     try {
