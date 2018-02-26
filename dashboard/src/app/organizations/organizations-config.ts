@@ -26,9 +26,11 @@ import {OrganizationsConfigService} from './organizations-config.service';
 import {OrganizationNotFound} from './organization-details/organization-not-found/organization-not-found.directive';
 import {OrganizationSelectMembersDialogController} from './organization-details/organization-select-members-dialog/organization-select-members-dialog.controller';
 import {OrganizationMemberItem} from './organization-details/organization-select-members-dialog/organization-member-item/organization-member-item.directive';
+import {ListOrganizationWorkspaces} from './organization-details/organization-workspaces/list-organization-workspaces.directive';
+import {ListOrganizationWorkspacesController} from './organization-details/organization-workspaces/list-organization-workspaces.controller';
 
 /**
- * The configuration of teams, defines controllers, directives and routing.
+ * The configuration of organizations, defines controllers, directives and routing.
  *
  * @author Oleksii Orel
  */
@@ -62,6 +64,9 @@ export class OrganizationsConfig {
 
     register.controller('OrganizationSelectMembersDialogController', OrganizationSelectMembersDialogController);
     register.directive('organizationMemberItem', OrganizationMemberItem);
+
+    register.controller('ListOrganizationWorkspacesController', ListOrganizationWorkspacesController);
+    register.directive('listOrganizationWorkspaces', ListOrganizationWorkspaces);
 
     const organizationDetailsLocationProvider = {
       title: (params: any) => {
