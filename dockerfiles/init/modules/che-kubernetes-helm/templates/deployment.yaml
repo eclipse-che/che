@@ -116,6 +116,16 @@ spec:
             configMapKeyRef:
               key: CHE_INFRA_KUBERNETES_USERNAME
               name: che
+        - name: CHE_INFRA_KUBERNETES_TLS__ENABLED
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_TLS__ENABLED
+              name: che
+        - name: CHE_INFRA_KUBERNETES_TLS__SECRET
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_TLS__SECRET
+              name: che
         - name: CHE_INFRA_KUBERNETES_NAMESPACE
           valueFrom:
             configMapKeyRef:

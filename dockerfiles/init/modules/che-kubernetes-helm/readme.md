@@ -45,7 +45,13 @@ The context of the commands below is the directory in which this readme file res
   helm upgrade --install <my-che-installation> --namespace che --set cheDomain=<minikube-ip> --set isHostBased=false ./ 
   ```
   master url: ``http://<minikube-ip>``
+
+- TLS (only path based):
   
+  ```
+  helm install --name <cert-manager-release-name> stable/cert-manager
+  helm upgrade --install che --namespace che --set global.cheDomain=che.<minikube-ip>.xip.io --set global.tlsEnabled=true --set global.isHostBased=false ./
+  ```  
 ## Deleting a Deployment
 You can delete a deployment using the following command:
 ``` bash

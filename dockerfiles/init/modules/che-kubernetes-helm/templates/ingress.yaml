@@ -17,15 +17,13 @@ spec:
   tls:
   - hosts:
     - {{ template "cheHost" . }}
-    secretName: che-tls
+    secretName: {{ .Values.tlsSecretName }}
 {{- end }}
   rules:
-  - http:
+  - host: {{ template "cheHost" . }}
+    http:
       paths:
       - backend:
           serviceName: che-host
           servicePort: 8080
         path: /
-{{- if .Values.isHostBased }}
-    host: {{ template "cheHost" . }}
-{{- end }}

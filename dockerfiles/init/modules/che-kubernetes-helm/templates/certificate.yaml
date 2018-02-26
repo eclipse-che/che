@@ -4,16 +4,16 @@ kind: Certificate
 metadata:
   name: che-host-cert
 spec:
-  secretName: che-tls
+  secretName: {{ .Values.tlsSecretName }}
   issuerRef:
     name: letsencrypt
-  commonName: {{ .Values.cheDomain }}
+  commonName: {{ template "cheHost" . }}
   dnsNames:
-      - {{ .Values.cheDomain }}
+      - {{ template "cheHost" . }}
   acme:
     config:
     - http01:
         ingressClass: nginx
       domains:
-      - {{ .Values.cheDomain }}
+      - {{ template "cheHost" . }}
 {{- end }}

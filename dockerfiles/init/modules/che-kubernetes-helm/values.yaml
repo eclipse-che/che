@@ -1,7 +1,7 @@
 cheDomain: 192.168.99.100.nip.io
 isHostBased: true
 tlsEnabled: false
-
+tlsSecretName: che-tls
 # the following section is for secure registries. when uncommented, a pull secret will be created
 #registry:
 #  host: my-secure-private-registry.com
