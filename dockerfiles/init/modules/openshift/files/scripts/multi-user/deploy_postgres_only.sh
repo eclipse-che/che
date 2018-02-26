@@ -6,10 +6,10 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
+if [ -z "${IMAGE_POSTGRES+x}" ]; then echo "[CHE] **ERROR**Env var IMAGE_POSTGRES is unset. You need to set it to continue. Aborting"; exit 1; fi
+
 COMMAND_DIR=$(dirname "$0")
 export CHE_EPHEMERAL=${CHE_EPHEMERAL:-false}
-
-IMAGE_POSTGRES=${IMAGE_POSTGRES:-"eclipse/che-postgres:nightly"}
 
 for i in $(ls "$COMMAND_DIR"/postgres ); do
     cat "${COMMAND_DIR}"/postgres/"${i}" | sed "s#\${IMAGE_POSTGRES}#${IMAGE_POSTGRES}#" | oc apply -f -
