@@ -71,10 +71,10 @@ public class CreateFactoryTest {
 
   @AfterClass
   public void tearDown() throws Exception {
+    workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
     factoryServiceClient.deleteFactory(MINIMAL_TEMPLATE_FACTORY_NAME);
     factoryServiceClient.deleteFactory(COMPLETE_TEMPLATE_FACTORY_NAME);
     factoryServiceClient.deleteFactory(FACTORY_CREATED_FROM_WORKSPACE_NAME);
-    workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
   }
 
   @Test
