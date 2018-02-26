@@ -40,7 +40,7 @@ fi
 
 # apply all yaml files from "$COMMAND_DIR"/keycloak/
 
-IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK:-"eclipse/che-keycloak:nightly"}
+if [ -z "${IMAGE_KEYCLOAK+x}" ]; then echo "[CHE] **ERROR**Env var IMAGE_KEYCLOAK is unset. You need to set it to continue. Aborting"; exit 1; fi
 
 for i in $(ls "$COMMAND_DIR"/keycloak ); do
     cat "${COMMAND_DIR}"/keycloak/"${i}" | sed "s#\${IMAGE_KEYCLOAK}#${IMAGE_KEYCLOAK}#" | oc apply -f -
