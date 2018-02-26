@@ -511,13 +511,11 @@ public class ProjectExplorer {
    * @param path item's path in format: 'Test/src/pom.xml'
    */
   public void openItemByPath(String path) {
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
     waitAndSelectItem(path);
     waitItemIsSelected(path);
 
     try {
-      action.moveToElement(waitAndGetItem(path)).perform();
-      action.doubleClick().perform();
+      seleniumWebDriverHelper.moveCursorToAndDoubleClick(waitAndGetItem(path));
     }
     // sometimes an element in the project explorer may not be attached to the DOM. We should
     // refresh all items.
@@ -527,8 +525,8 @@ public class ProjectExplorer {
       clickOnRefreshTreeButton();
       waitAndSelectItem(path);
       waitItemIsSelected(path);
-      action.moveToElement(waitAndGetItem(path)).perform();
-      action.doubleClick().perform();
+
+      seleniumWebDriverHelper.moveCursorToAndDoubleClick(waitAndGetItem(path));
     }
     loader.waitOnClosed();
   }
