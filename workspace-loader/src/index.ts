@@ -14,95 +14,183 @@ require('./style.css');
 
 import { WebsocketClient } from './json-rpc/websocket-client';
 import { CheJsonRpcMasterApi } from './json-rpc/che-json-rpc-master-api';
-import { getWorkspace, startWorkspace } from './workspace';
 import { Loader } from './loader/loader'
 
 const WEBSOCKET_CONTEXT = '/api/websocket';
 
-let websocketURL = websocketBaseURL() + WEBSOCKET_CONTEXT;
-let master = new CheJsonRpcMasterApi(new WebsocketClient());
-let loader = new Loader();
+export class WorkspaceLoader {
 
-/** Ask dashboard to show the IDE. */
-window.parent.postMessage("show-ide", "*");
+    loader: Loader;
+    workspace: che.IWorkspace;
+    startAfterStopping = false;
 
-master.connect(websocketURL).then(() => {
-    getWorkspace(getWorkspaceKey())
-        .then(handleWorkspace)
-        .catch(err => {console.error(err);});
-});
+    constructor(loader: Loader) {
+        this.loader = loader;
 
-function handleWorkspace(workspace: che.IWorkspace) {
-    let startAfterStopping = false;
-
-    if (workspace.status === 'RUNNING') {
-        openIDE(workspace);
-        return;
+        /** Ask dashboard to show the IDE. */
+        window.parent.postMessage("show-ide", "*");
     }
 
-    /** Handle machine status */
-    master.subscribeEnvironmentStatus(workspace.id, (message: any) => {
-        console.log('machine status', message);
-    });
+    /**
+     * Loads the workspace.
+     */
+    load(): void {
+        let workspaceKey = this.getWorkspaceKey();
 
-    /** Handle environment output */
-    master.subscribeEnvironmentOutput(workspace.id, (message: any) => {
-        loader.log(message.text);
-    });
-
-    /** Handle changing workspace status */
-    master.subscribeWorkspaceStatus(workspace.id, (message: any) => {
-        let status = message.status;
-
-        if (status === 'RUNNING') {
-            openIDE(workspace);
-        } else if (status === 'STOPPED' && startAfterStopping) {
-            startWorkspace(workspace);
+        if (!workspaceKey || workspaceKey === "") {
+            console.error("Workspace is not defined");
+            return;
         }
-    });
-
-    if (workspace.status === 'STOPPED') {
-        startWorkspace(workspace);
-    } else if (workspace.status === 'STOPPING') {
-        startAfterStopping = true;
+        
+        this.getWorkspace(workspaceKey)
+            .then((workspace) => {
+                this.workspace = workspace;
+                this.handleWorkspace();
+            })
+            .catch(err => {
+                console.error(err);
+            });
     }
-}
 
-/**
- * Opens IDE for the workspace.
- * 
- * @param workspace workspace
- */
-async function openIDE(workspace: che.IWorkspace) {
-    let startedWs = await getWorkspace(workspace.id);
-    let machines = startedWs.runtime.machines;
+    /**
+     * Returns workspace key from current address or empty string when it is undefined.
+     */
+    getWorkspaceKey(): string {
+        let result: string = window.location.pathname.substr(1);
+        return result.substr(result.indexOf('/') + 1, result.length);
+    }
 
-    let ideUrl: string;
-    Object.keys(machines).forEach((key) => {
-        let servers = machines[key].servers;
-        Object.keys(servers).forEach((key) => {
-            let att = servers[key].attributes;
-            if (att['type'] === 'ide') {
-                ideUrl = servers[key].url;
+    /**
+     * Returns base websocket URL.
+     */
+    websocketBaseURL(): string {
+        let wsProtocol = 'http:' === document.location.protocol ? 'ws' : 'wss';
+        return wsProtocol + '://' + document.location.host;
+    }
+
+    /**
+     * Get workspace by ID.
+     * 
+     * @param workspaceId workspace id
+     */
+    getWorkspace(workspaceId: string): Promise<che.IWorkspace> {
+        return new Promise((resolve, reject) => {
+            let request = new XMLHttpRequest();
+            request.open("GET", '/api/workspace/' + workspaceId);
+            request.send();
+            request.onreadystatechange = function () {
+                if (this.readyState !== 4) { return; }
+                if (this.status !== 200) {
+                    reject(this.status ? this.statusText : "Unknown error");
+                    return;
+                }
+                resolve(JSON.parse(this.responseText));
+            };
+        });        
+    }
+
+    /**
+     * Start current workspace.
+     */
+    startWorkspace(): Promise<che.IWorkspace> {
+        return new Promise((resolve, reject) => {
+            let request = new XMLHttpRequest();
+            request.open("POST", `/api/workspace/${this.workspace.id}/runtime`);
+            request.send();
+            request.onreadystatechange = function () {
+                if (this.readyState !== 4) { return; }
+                if (this.status !== 200) {
+                    reject(this.status ? this.statusText : "Unknown error");
+                    return;
+                }
+                resolve(JSON.parse(this.responseText));
+            };
+        });        
+    }
+
+    /**
+     * Handles workspace status.
+     */
+    handleWorkspace(): void {
+        if (this.workspace.status === 'RUNNING') {
+            this.openIDE();
+            return;
+        }
+
+        this.subscribeWorkspaceEvents().then(() => {
+            if (this.workspace.status === 'STOPPED') {
+                this.startWorkspace();
+            } else if (this.workspace.status === 'STOPPING') {
+                this.startAfterStopping = true;
             }
         });
-    });
-
-    if (!ideUrl) {
-        ideUrl = workspace.links.ide;
     }
 
-    document.location.assign(ideUrl);
-}
+    /**
+     * Shows environment outputs.
+     * 
+     * @param message output message
+     */
+    onEnvironmentOutput(message) : void {
+        this.loader.log(message);
+    }
 
-/** Returns base websocket URL. */
-function websocketBaseURL(): string {
-    let wsProtocol = 'http:' === document.location.protocol ? 'ws' : 'wss';
-    return wsProtocol + '://' + document.location.host;
-}
+    /**
+     * Handles changing of workspace status.
+     * 
+     * @param status workspace status
+     */
+    onWorkspaceStatusChanged(status) : void {
+        if (status === 'RUNNING') {
+            this.openIDE();
+        } else if (status === 'STOPPED' && this.startAfterStopping) {
+            this.startWorkspace();
+        }
+    }
 
-/** Returns workspace key from current address or empty string when it is undefined. */
-function getWorkspaceKey(): string {
-    let result: string = window.location.pathname.substr(1);
-    return result.substr(result.indexOf('/') + 1, result.length);
+    /**
+     * Subscribes to the workspace events.
+     */
+    subscribeWorkspaceEvents() : Promise<any> {
+        let master = new CheJsonRpcMasterApi(new WebsocketClient());
+        return new Promise((resolve) => {
+            master.connect(this.websocketBaseURL() + WEBSOCKET_CONTEXT).then(() => {
+
+                master.subscribeEnvironmentOutput(this.workspace.id, 
+                    (message: any) => this.onEnvironmentOutput(message.text));
+
+                master.subscribeWorkspaceStatus(this.workspace.id, 
+                    (message: any) => this.onWorkspaceStatusChanged(message.status));
+
+                resolve();
+            });
+        });
+    }
+
+    /**
+     * Opens IDE for the workspace.
+     */
+    openIDE() : void {
+        this.getWorkspace(this.workspace.id).then((workspace) => {
+            let machines = workspace.runtime.machines;
+            for (let machineName in machines) {
+                let servers = machines[machineName].servers;
+                for (let serverId in servers) {
+                    let attributes = servers[serverId].attributes;
+                    if (attributes['type'] === 'ide') {
+                        document.location.assign(servers[serverId].url);
+                        return;
+                    }
+                }
+            }
+
+            document.location.assign(workspace.links.ide);
+        });
+    }
+
+};
+
+/** Initialize */
+if (document.getElementById('workspace-console')) {
+    new WorkspaceLoader(new Loader()).load();
 }

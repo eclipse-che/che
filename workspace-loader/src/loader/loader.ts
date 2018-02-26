@@ -16,14 +16,16 @@ export class Loader {
      * Initializes the Loader.
      */
     constructor() {
-        document.getElementById('workspace-console').onclick = () => this.onclick();
-
+        /** Show the loader */
         setTimeout(() => {
             document.getElementById('workspace-loader').style.display = "block";
             setTimeout(() => {
                 document.getElementById('workspace-loader').style.opacity = "1";
             }, 1);
         }, 1);
+
+        /** Add click handler to maximize output */
+        document.getElementById('workspace-console').onclick = () => this.onclick();
     }
 
     /**
