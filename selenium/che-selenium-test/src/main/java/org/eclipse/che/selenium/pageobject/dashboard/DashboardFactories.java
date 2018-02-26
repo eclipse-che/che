@@ -98,7 +98,7 @@ public class DashboardFactories {
     String FACTORY_ACTION = FACTORY_ITEM + "//span[@name='open-factory']";
     String BULK_CHECKBOX = "//md-checkbox[@aria-label='Factory list']";
     String DELETE_FACTORY_BTN_ID = "delete-item-button";
-    String DELETE_DIALOG_BUTTON = "//md-dialog[@role='dialog']//button/span[text()='Delete']";
+    String DELETE_DIALOG_BUTTON_ID = "ok-dialog-button";
     String SEARCH_FACTORY_FIELD = "//input[@ng-placeholder='Search']";
   }
 
@@ -150,7 +150,7 @@ public class DashboardFactories {
   @FindBy(id = Locators.DELETE_FACTORY_BTN_ID)
   WebElement deleleFactoryButton;
 
-  @FindBy(xpath = Locators.DELETE_DIALOG_BUTTON)
+  @FindBy(id = Locators.DELETE_DIALOG_BUTTON_ID)
   WebElement deleteDialogBtn;
 
   @FindBy(xpath = Locators.SEARCH_FACTORY_FIELD)

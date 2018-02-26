@@ -59,7 +59,7 @@ public class NewFactory {
     String UPLOAD_FILE_BUTTON_ID = "upload-file-button";
     String MINIMAL_FACTORY_TEMPLATE_ID = "minimal-template-button";
     String COMPLETE_FACTORY_TEMPLATE_ID = "complete-template-button";
-    String CREATE_BUTTON_ID = "create-factory-next-button";
+    String CREATE_FACTORY_BUTTON_ID = "create-factory-next-button";
   }
 
   @FindBy(id = Locators.NEW_FACTORY_PAGE_TITLE_ID)
@@ -68,8 +68,8 @@ public class NewFactory {
   @FindBy(id = Locators.FACTORY_NAME_ID)
   WebElement factoryName;
 
-  @FindBy(id = Locators.CREATE_BUTTON_ID)
-  WebElement createButton;
+  @FindBy(id = Locators.CREATE_FACTORY_BUTTON_ID)
+  WebElement createFactoryButton;
 
   @FindBy(id = Locators.MINIMAL_FACTORY_TEMPLATE_ID)
   WebElement minimalTemplateButton;
@@ -115,13 +115,16 @@ public class NewFactory {
     redrawUiElementsTimeout.until(visibilityOf(completeTemplateButton));
   }
 
-  public Boolean isCreateButtonEnabled() {
-    WebElement webElement = redrawUiElementsTimeout.until(visibilityOf(createButton));
-    return webElement.isEnabled();
+  public Boolean isCreateFactoryButtonDisabled() {
+    String attrValue =
+        redrawUiElementsTimeout
+            .until(visibilityOf(createFactoryButton))
+            .getAttribute("aria-disabled");
+    return Boolean.parseBoolean(attrValue);
   }
 
-  public void clickOnCreateButton() {
-    redrawUiElementsTimeout.until(visibilityOf(createButton)).click();
+  public void clickOnCreateFactoryButton() {
+    redrawUiElementsTimeout.until(visibilityOf(createFactoryButton)).click();
   }
 
   public void clickOnWorkspaceFromList(String workspaceName) {

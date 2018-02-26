@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
@@ -51,31 +52,6 @@ public class FactoriesListTest {
   }
 
   @Test
-  public void checkFactoryFiltering() {
-    dashboardFactories.selectFactoriesOnNavBar();
-    dashboardFactories.waitAllFactoriesPage();
-    dashboardFactories.waitSearchFactoryByNameField();
-
-    dashboardFactories.waitFactoryName(FACTORY1_NAME);
-    dashboardFactories.waitFactoryName(FACTORY2_NAME);
-
-    // filter list by full factory name
-    dashboardFactories.typeToSearchInput(FACTORY1_NAME);
-    dashboardFactories.waitFactoryName(FACTORY1_NAME);
-    dashboardFactories.waitFactoryNotExists(FACTORY2_NAME);
-
-    // filter list by part factory name
-    dashboardFactories.typeToSearchInput("factory");
-    dashboardFactories.waitFactoryName(FACTORY1_NAME);
-    dashboardFactories.waitFactoryName(FACTORY2_NAME);
-
-    // filter by a nonexistent factory name
-    dashboardFactories.typeToSearchInput(generate("", 20));
-    dashboardFactories.waitFactoryNotExists(FACTORY1_NAME);
-    dashboardFactories.waitFactoryNotExists(FACTORY2_NAME);
-  }
-
-  @Test
   public void checkAllFactoriesPage() {
     dashboardFactories.selectFactoriesOnNavBar();
     dashboardFactories.waitAllFactoriesPage();
@@ -85,42 +61,54 @@ public class FactoriesListTest {
 
     dashboardFactories.waitAddFactoryBtn();
 
-    // check select and unselect factories by Bulk
+    // check selecting factories by Bulk
     dashboardFactories.selectAllFactoriesByBulk();
-    Assert.assertTrue(dashboardFactories.isFactoryChecked(FACTORY1_NAME));
-    Assert.assertTrue(dashboardFactories.isFactoryChecked(FACTORY2_NAME));
+    assertTrue(dashboardFactories.isFactoryChecked(FACTORY1_NAME));
+    assertTrue(dashboardFactories.isFactoryChecked(FACTORY2_NAME));
     dashboardFactories.selectAllFactoriesByBulk();
     Assert.assertFalse(dashboardFactories.isFactoryChecked(FACTORY1_NAME));
     Assert.assertFalse(dashboardFactories.isFactoryChecked(FACTORY2_NAME));
 
-    // check selecting factory by checkbox
+    // check selecting factories by checkbox
     dashboardFactories.selectFactoryByCheckbox(FACTORY1_NAME);
-    Assert.assertTrue(dashboardFactories.isFactoryChecked(FACTORY1_NAME));
+    assertTrue(dashboardFactories.isFactoryChecked(FACTORY1_NAME));
     dashboardFactories.selectFactoryByCheckbox(FACTORY1_NAME);
     Assert.assertFalse(dashboardFactories.isFactoryChecked(FACTORY1_NAME));
   }
 
-  @Test(priority = 1)
-  public void checkFactoryDeleting() {
+  @Test
+  public void checkFactoriesFiltering() {
+    dashboardFactories.selectFactoriesOnNavBar();
+    dashboardFactories.waitAllFactoriesPage();
+    dashboardFactories.waitSearchFactoryByNameField();
+
+    // filter the list by a full factory name
+    dashboardFactories.typeToSearchInput(FACTORY1_NAME);
+    dashboardFactories.waitFactoryName(FACTORY1_NAME);
+    dashboardFactories.waitFactoryNotExists(FACTORY2_NAME);
+
+    // filter the list by a part factory name
+    dashboardFactories.typeToSearchInput("factory");
+    dashboardFactories.waitFactoryName(FACTORY1_NAME);
+    dashboardFactories.waitFactoryName(FACTORY2_NAME);
+
+    // filter the list by a nonexistent factory name
+    dashboardFactories.typeToSearchInput(generate("", 20));
+    dashboardFactories.waitFactoryNotExists(FACTORY1_NAME);
+    dashboardFactories.waitFactoryNotExists(FACTORY2_NAME);
+  }
+
+  @Test
+  public void checkFactoriesDeleting() {
     dashboardFactories.selectFactoriesOnNavBar();
     dashboardFactories.waitAllFactoriesPage();
 
-    // delete factory that is selected be checkbox
+    // delete factory selected by checkbox
     dashboardFactories.selectFactoryByCheckbox(FACTORY3_NAME);
-    Assert.assertTrue(dashboardFactories.isFactoryChecked(FACTORY3_NAME));
+    assertTrue(dashboardFactories.isFactoryChecked(FACTORY3_NAME));
     dashboardFactories.clickOnDeleteFactoryBtn();
     dashboardFactories.clickOnDeleteButtonInDialogWindow();
     dashboardFactories.waitFactoryNotExists(FACTORY3_NAME);
-
-    // select all factories and delete them
-    dashboardFactories.selectAllFactoriesByBulk();
-    dashboardFactories.clickOnDeleteFactoryBtn();
-    dashboardFactories.clickOnDeleteButtonInDialogWindow();
-
-    dashboardFactories.waitFactoryNotExists(FACTORY1_NAME);
-    dashboardFactories.waitFactoryNotExists(FACTORY2_NAME);
-
-    // TODO check this method not delete others selenium tests factories
   }
 
   private void createFactoryByApi(String factoryName) throws Exception {
