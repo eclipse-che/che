@@ -21,6 +21,7 @@ import io.fabric8.kubernetes.client.utils.HttpClientUtils;
 import io.fabric8.kubernetes.client.utils.Utils;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -62,10 +63,24 @@ public class KubernetesClientFactory {
       @Nullable @Named("che.infra.kubernetes.username") String username,
       @Nullable @Named("che.infra.kubernetes.password") String password,
       @Nullable @Named("che.infra.kubernetes.oauth_token") String oauthToken,
-      @Nullable @Named("che.infra.kubernetes.trust_certs") Boolean doTrustCerts) {
+      @Nullable @Named("che.infra.kubernetes.trust_certs") Boolean doTrustCerts,
+      @Named("che.infra.kubernetes.client.http.async_requests.max") int maxConcurrentRequests,
+      @Named("che.infra.kubernetes.client.http.async_requests.max_per_host")
+          int maxConcurrentRequestsPerHost,
+      @Named("che.infra.kubernetes.client.http.connection_pool.max_idle") int maxIdleConnections,
+      @Named("che.infra.kubernetes.client.http.connection_pool.keep_alive_min")
+          int connectionPoolKeepAlive) {
     this.defaultConfig =
         buildDefaultConfig(masterUrl, username, password, oauthToken, doTrustCerts);
-    this.httpClient = HttpClientUtils.createHttpClient(defaultConfig);
+    OkHttpClient temporary = HttpClientUtils.createHttpClient(defaultConfig);
+    OkHttpClient.Builder builder = temporary.newBuilder();
+    ConnectionPool oldPool = temporary.connectionPool();
+    builder.connectionPool(
+        new ConnectionPool(maxIdleConnections, connectionPoolKeepAlive, TimeUnit.MINUTES));
+    oldPool.evictAll();
+    this.httpClient = builder.build();
+    httpClient.dispatcher().setMaxRequests(maxConcurrentRequests);
+    httpClient.dispatcher().setMaxRequestsPerHost(maxConcurrentRequestsPerHost);
   }
 
   /**
