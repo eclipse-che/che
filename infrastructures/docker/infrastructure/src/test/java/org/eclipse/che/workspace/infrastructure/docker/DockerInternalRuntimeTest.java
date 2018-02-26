@@ -93,6 +93,8 @@ public class DockerInternalRuntimeTest {
   private static final String SERVER_1 = "serv1";
   private static final String SERVER_URL = "https://localhost:443/path";
 
+  private static final int BOOTSTRAPPING_TIMEOUT_MINUTES = 5;
+
   @Mock private DockerBootstrapperFactory bootstrapperFactory;
   @Mock private DockerRuntimeContext runtimeContext;
   @Mock private EventService eventService;
@@ -135,7 +137,7 @@ public class DockerInternalRuntimeTest {
     ServersCheckerFactory serversCheckerFactory = mock(ServersCheckerFactory.class);
     when(serversCheckerFactory.create(any(), nullable(String.class), any()))
         .thenReturn(mock(ServersChecker.class));
-    when(workspaceProbesFactory.getProbes(eq(IDENTITY.getWorkspaceId()), anyString(), any()))
+    when(workspaceProbesFactory.getProbes(eq(IDENTITY), anyString(), any()))
         .thenReturn(workspaceProbes);
     when(dockerImagesBuilderFactory.create(any())).thenReturn(dockerImagesBuilder);
     when(dockerImagesBuilder.prepareImages(anyMap())).thenReturn(emptyMap());
@@ -152,7 +154,8 @@ public class DockerInternalRuntimeTest {
             mock(MachineLoggersFactory.class),
             probesScheduler,
             workspaceProbesFactory,
-            dockerImagesBuilderFactory);
+            dockerImagesBuilderFactory,
+            BOOTSTRAPPING_TIMEOUT_MINUTES);
   }
 
   @Test
@@ -218,7 +221,7 @@ public class DockerInternalRuntimeTest {
               any(),
               any(),
               any());
-      verify(bootstrapper, times(1)).bootstrap();
+      verify(bootstrapper, times(1)).bootstrap(BOOTSTRAPPING_TIMEOUT_MINUTES);
       verify(eventService, times(4)).publish(any(MachineStatusEvent.class));
       verifyEventsOrder(
           newEvent(DEV_MACHINE, STARTING, null),
@@ -342,9 +345,9 @@ public class DockerInternalRuntimeTest {
     mockContainerStart();
     WorkspaceProbes m1Probes = mock(WorkspaceProbes.class);
     WorkspaceProbes m2Probes = mock(WorkspaceProbes.class);
-    when(workspaceProbesFactory.getProbes(eq(IDENTITY.getWorkspaceId()), eq(DB_MACHINE), any()))
+    when(workspaceProbesFactory.getProbes(eq(IDENTITY), eq(DB_MACHINE), anyMap()))
         .thenReturn(m1Probes);
-    when(workspaceProbesFactory.getProbes(eq(IDENTITY.getWorkspaceId()), eq(DEV_MACHINE), any()))
+    when(workspaceProbesFactory.getProbes(eq(IDENTITY), eq(DEV_MACHINE), any()))
         .thenReturn(m2Probes);
 
     dockerRuntime.start(emptyMap());
@@ -368,7 +371,7 @@ public class DockerInternalRuntimeTest {
     mockInstallersBootstrap();
     mockContainerStart();
     WorkspaceProbes m1Probes = mock(WorkspaceProbes.class);
-    when(workspaceProbesFactory.getProbes(eq(IDENTITY.getWorkspaceId()), eq(DB_MACHINE), any()))
+    when(workspaceProbesFactory.getProbes(eq(IDENTITY), eq(DB_MACHINE), any()))
         .thenReturn(m1Probes);
     dockerRuntime.start(emptyMap());
     verify(probesScheduler).schedule(eq(m1Probes), probeResultConsumerCaptor.capture());
@@ -457,7 +460,7 @@ public class DockerInternalRuntimeTest {
             anyList(),
             nullable(DockerMachine.class)))
         .thenReturn(bootstrapper);
-    doNothing().when(bootstrapper).bootstrap();
+    doNothing().when(bootstrapper).bootstrap(BOOTSTRAPPING_TIMEOUT_MINUTES);
   }
 
   private void mockInstallersBootstrapFailed(InfrastructureException exception) throws Exception {
@@ -467,7 +470,7 @@ public class DockerInternalRuntimeTest {
             anyList(),
             nullable(DockerMachine.class)))
         .thenReturn(bootstrapper);
-    doThrow(exception).when(bootstrapper).bootstrap();
+    doThrow(exception).when(bootstrapper).bootstrap(BOOTSTRAPPING_TIMEOUT_MINUTES);
   }
 
   private InstallerImpl newInstaller(int i) {

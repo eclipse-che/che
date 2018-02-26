@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
@@ -77,6 +78,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
   private final ProbeScheduler probeScheduler;
   private final WorkspaceProbesFactory probesFactory;
   private final ParallelDockerImagesBuilderFactory imagesBuilderFactory;
+  private final int bootstrappingTimeoutMinutes;
 
   /**
    * Creates non running runtime. Normally created by {@link
@@ -95,7 +97,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       MachineLoggersFactory loggers,
       ProbeScheduler probeScheduler,
       WorkspaceProbesFactory probesFactory,
-      ParallelDockerImagesBuilderFactory imagesBuilderFactory) {
+      ParallelDockerImagesBuilderFactory imagesBuilderFactory,
+      @Named("che.infra.docker.bootstrapper.timeout_min") int bootstrappingTimeoutMinutes) {
     this(
         context,
         urlRewriter,
@@ -109,7 +112,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         loggers,
         probeScheduler,
         probesFactory,
-        imagesBuilderFactory);
+        imagesBuilderFactory,
+        bootstrappingTimeoutMinutes);
   }
 
   /**
@@ -132,7 +136,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       DockerMachineStopDetector stopDetector,
       ProbeScheduler probeScheduler,
       WorkspaceProbesFactory probesFactory,
-      ParallelDockerImagesBuilderFactory imagesBuilderFactory)
+      ParallelDockerImagesBuilderFactory imagesBuilderFactory,
+      @Named("che.infra.docker.bootstrapper.timeout_min") int bootstrappingTimeoutMinutes)
       throws InfrastructureException {
     this(
         context,
@@ -147,7 +152,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         loggers,
         probeScheduler,
         probesFactory,
-        imagesBuilderFactory);
+        imagesBuilderFactory,
+        bootstrappingTimeoutMinutes);
 
     for (ContainerListEntry container : containers) {
       DockerMachine machine = machineCreator.create(container);
@@ -172,7 +178,8 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       MachineLoggersFactory loggers,
       ProbeScheduler probeScheduler,
       WorkspaceProbesFactory probesFactory,
-      ParallelDockerImagesBuilderFactory imagesBuilderFactory) {
+      ParallelDockerImagesBuilderFactory imagesBuilderFactory,
+      int bootstrappingTimeoutMinutes) {
     super(context, urlRewriter, warnings, running);
     this.networks = networks;
     this.containerStarter = machineStarter;
@@ -180,6 +187,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     this.bootstrapperFactory = bootstrapperFactory;
     this.serverCheckerFactory = serverCheckerFactory;
     this.probesFactory = probesFactory;
+    this.bootstrappingTimeoutMinutes = bootstrappingTimeoutMinutes;
     this.properties = new HashMap<>();
     this.startSynchronizer = new StartSynchronizer();
     this.runtimeMachines = new RuntimeMachines();
@@ -290,13 +298,12 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         runtimeMachines.getMachines().entrySet()) {
       String name = entry.getKey();
       DockerMachine machine = entry.getValue();
-      ServersChecker checker =
-          serverCheckerFactory.create(getContext().getIdentity(), name, machine.getServers());
+      RuntimeIdentity runtimeId = getContext().getIdentity();
+      ServersChecker checker = serverCheckerFactory.create(runtimeId, name, machine.getServers());
       checker.checkOnce(new ServerReadinessHandler(name));
 
       probeScheduler.schedule(
-          probesFactory.getProbes(
-              getContext().getIdentity().getWorkspaceId(), name, machine.getServers()),
+          probesFactory.getProbes(runtimeId, name, machine.getServers()),
           new ServerLivenessHandler());
     }
   }
@@ -340,8 +347,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     checkInterruption();
     // continuous checking
     probeScheduler.schedule(
-        probesFactory.getProbes(identity.getWorkspaceId(), name, machine.getServers()),
-        new ServerLivenessHandler());
+        probesFactory.getProbes(identity, name, machine.getServers()), new ServerLivenessHandler());
   }
 
   private void bootstrapInstallers(String name, DockerMachine machine)
@@ -351,7 +357,9 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
 
     if (!machineCfg.getInstallers().isEmpty()) {
       checkInterruption();
-      bootstrapperFactory.create(name, identity, machineCfg.getInstallers(), machine).bootstrap();
+      bootstrapperFactory
+          .create(name, identity, machineCfg.getInstallers(), machine)
+          .bootstrap(bootstrappingTimeoutMinutes);
     }
   }
 
