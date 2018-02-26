@@ -225,7 +225,10 @@ public class EditorMultiPartStackPresenter
   @Override
   public void openPreviousActivePart() {
     if (activeEditor != null) {
-      getPartStackByPart(activeEditor).openPreviousActivePart();
+      EditorPartStack partStack = getPartStackByPart(activeEditor);
+      if (partStack != null) {
+        partStack.openPreviousActivePart();
+      }
     }
   }
 

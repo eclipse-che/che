@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.workspace.server.hc.probe.server.ExecServerLivenessProbeConfigFactory;
 import org.eclipse.che.api.workspace.server.hc.probe.server.HttpProbeConfigFactory;
@@ -61,19 +62,19 @@ public class WorkspaceProbesFactory {
    *
    * @throws InfrastructureException when the operation fails
    */
-  public WorkspaceProbes getProbes(String workspaceId, Runtime runtime)
+  public WorkspaceProbes getProbes(RuntimeIdentity runtimeId, Runtime runtime)
       throws InfrastructureException {
     List<ProbeFactory> factories = new ArrayList<>();
     try {
       for (Entry<String, ? extends Machine> entry : runtime.getMachines().entrySet()) {
-        fillProbes(workspaceId, entry.getKey(), factories, entry.getValue().getServers());
+        fillProbes(runtimeId, entry.getKey(), factories, entry.getValue().getServers());
       }
     } catch (MalformedURLException e) {
       throw new InternalInfrastructureException(
           "Server liveness probes creation failed. Error: " + e.getMessage());
     }
 
-    return new WorkspaceProbes(workspaceId, factories);
+    return new WorkspaceProbes(runtimeId.getWorkspaceId(), factories);
   }
 
   /**
@@ -82,27 +83,32 @@ public class WorkspaceProbesFactory {
    * @throws InfrastructureException when the operation fails
    */
   public WorkspaceProbes getProbes(
-      String workspaceId, String machineName, Map<String, ? extends Server> servers)
+      RuntimeIdentity runtimeId, String machineName, Map<String, ? extends Server> servers)
       throws InfrastructureException {
     List<ProbeFactory> factories = new ArrayList<>();
     try {
-      fillProbes(workspaceId, machineName, factories, servers);
+      fillProbes(runtimeId, machineName, factories, servers);
     } catch (MalformedURLException e) {
       throw new InternalInfrastructureException(
           "Server liveness probes creation failed. Error: " + e.getMessage());
     }
-    return new WorkspaceProbes(workspaceId, factories);
+    return new WorkspaceProbes(runtimeId.getWorkspaceId(), factories);
   }
 
   private void fillProbes(
-      String workspaceId,
+      RuntimeIdentity runtimeId,
       String machineName,
       List<ProbeFactory> factories,
       Map<String, ? extends Server> servers)
       throws InfrastructureException, MalformedURLException {
     for (Entry<String, ? extends Server> entry : servers.entrySet()) {
       ProbeFactory probeFactory =
-          getProbeFactory(workspaceId, machineName, entry.getKey(), entry.getValue());
+          getProbeFactory(
+              runtimeId.getOwnerId(),
+              runtimeId.getWorkspaceId(),
+              machineName,
+              entry.getKey(),
+              entry.getValue());
       if (probeFactory != null) {
         factories.add(probeFactory);
       }
@@ -110,15 +116,14 @@ public class WorkspaceProbesFactory {
   }
 
   private ProbeFactory getProbeFactory(
-      String workspaceId, String machineName, String serverRef, Server server)
+      String userId, String workspaceId, String machineName, String serverRef, Server server)
       throws InfrastructureException, MalformedURLException {
     // workaround needed because we don't have server readiness check in the model
     HttpProbeConfigFactory configFactory = probeConfigFactories.get(serverRef);
     if (configFactory == null) {
       return null;
     }
-
-    return new HttpProbeFactory(
-        workspaceId, machineName, serverRef, configFactory.get(workspaceId, server));
+    final HttpProbeConfig httpProbeConfig = configFactory.get(userId, workspaceId, server);
+    return new HttpProbeFactory(workspaceId, machineName, serverRef, httpProbeConfig);
   }
 }
