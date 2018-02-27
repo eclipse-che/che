@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: che-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    #nginx.ingress.kubernetes.io/rewrite-target: "/"
     kubernetes.io/ingress.class: "nginx"
 {{- if .Values.tlsEnabled }}
     kubernetes.io/tls-acme: "true"
