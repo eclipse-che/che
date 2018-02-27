@@ -13,10 +13,10 @@ package org.eclipse.che.selenium.dashboard;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
-import static org.eclipse.che.selenium.pageobject.dashboard.factories.NewFactory.TabNames.CONFIG_TAB_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.factories.NewFactory.TabNames.GIT_TAB_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.factories.NewFactory.TabNames.TEMPLATE_TAB_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.factories.NewFactory.TabNames.WORKSPACE_TAB_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.factories.CreateFactoryPage.TabNames.CONFIG_TAB_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.factories.CreateFactoryPage.TabNames.GIT_TAB_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.factories.CreateFactoryPage.TabNames.TEMPLATE_TAB_ID;
+import static org.eclipse.che.selenium.pageobject.dashboard.factories.CreateFactoryPage.TabNames.WORKSPACE_TAB_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPED;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -32,7 +32,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactories;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.factories.FactoryDetails;
-import org.eclipse.che.selenium.pageobject.dashboard.factories.NewFactory;
+import org.eclipse.che.selenium.pageobject.dashboard.factories.CreateFactoryPage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.AfterClass;
@@ -46,8 +46,8 @@ public class CreateFactoryTest {
   private static final String FACTORY_CREATED_FROM_WORKSPACE_NAME = generate("factory", 4);
   private static final String MIN_FACTORY_NAME = generate("", 3);
   private static final String MAX_FACTORY_NAME = generate("", 20);
-  private static final String NAME_IS_TOO_SHORT = "The name has to be more than 3 characters long.";
-  private static final String NAME_IS_TOO_LONG = "The name has to be less than 20 characters long.";
+  private static final String TOO_SHORT_NAME = "The name has to be more than 3 characters long.";
+  private static final String TOO_LONG_NAME = "The name has to be less than 20 characters long.";
   private static final String WORKSPACE_NAME = generate("workspace", 4);
 
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
@@ -59,7 +59,7 @@ public class CreateFactoryTest {
   @Inject private NewWorkspace newWorkspace;
   @Inject private TestUser defaultTestUser;
   @Inject private Workspaces workspaces;
-  @Inject private NewFactory newFactory;
+  @Inject private CreateFactoryPage createFactoryPage;
   @Inject private Dashboard dashboard;
   @Inject private Loader loader;
 
@@ -82,22 +82,22 @@ public class CreateFactoryTest {
     dashboardFactories.selectFactoriesOnNavBar();
     dashboardFactories.waitAllFactoriesPage();
     dashboardFactories.clickOnAddFactoryBtn();
-    newFactory.waitToolbarTitle();
+    createFactoryPage.waitToolbarTitle();
 
-    // open tabs and check it fields
-    newFactory.clickOnSourceTab(WORKSPACE_TAB_ID);
-    assertTrue(newFactory.isCreateFactoryButtonDisabled());
-    newFactory.clickOnWorkspaceFromList(WORKSPACE_NAME);
-    assertFalse(newFactory.isCreateFactoryButtonDisabled());
+    // open tabs and check their fields
+    createFactoryPage.clickOnSourceTab(WORKSPACE_TAB_ID);
+    assertTrue(createFactoryPage.isCreateFactoryButtonDisabled());
+    createFactoryPage.clickOnWorkspaceFromList(WORKSPACE_NAME);
+    assertFalse(createFactoryPage.isCreateFactoryButtonDisabled());
 
-    newFactory.clickOnSourceTab(GIT_TAB_ID);
-    newFactory.waitGitUrlField();
+    createFactoryPage.clickOnSourceTab(GIT_TAB_ID);
+    createFactoryPage.waitGitUrlField();
 
-    newFactory.clickOnSourceTab(CONFIG_TAB_ID);
-    newFactory.waitUploadFileButton();
+    createFactoryPage.clickOnSourceTab(CONFIG_TAB_ID);
+    createFactoryPage.waitUploadFileButton();
 
-    newFactory.clickOnSourceTab(TEMPLATE_TAB_ID);
-    newFactory.waitTemplateButtons();
+    createFactoryPage.clickOnSourceTab(TEMPLATE_TAB_ID);
+    createFactoryPage.waitTemplateButtons();
   }
 
   @Test
@@ -105,23 +105,23 @@ public class CreateFactoryTest {
     dashboardFactories.selectFactoriesOnNavBar();
     dashboardFactories.waitAllFactoriesPage();
     dashboardFactories.clickOnAddFactoryBtn();
-    newFactory.waitToolbarTitle();
+    createFactoryPage.waitToolbarTitle();
 
-    newFactory.clickOnWorkspaceFromList(WORKSPACE_NAME);
+    createFactoryPage.clickOnWorkspaceFromList(WORKSPACE_NAME);
 
     // type valid factory names and check that the Create button is enabled
-    newFactory.typeFactoryName(MIN_FACTORY_NAME);
-    newFactory.waitErrorMessageNotVisible();
-    assertFalse(newFactory.isCreateFactoryButtonDisabled());
-    newFactory.typeFactoryName(MAX_FACTORY_NAME);
-    newFactory.waitErrorMessageNotVisible();
-    assertFalse(newFactory.isCreateFactoryButtonDisabled());
+    createFactoryPage.typeFactoryName(MIN_FACTORY_NAME);
+    createFactoryPage.waitErrorMessageNotVisible();
+    assertFalse(createFactoryPage.isCreateFactoryButtonDisabled());
+    createFactoryPage.typeFactoryName(MAX_FACTORY_NAME);
+    createFactoryPage.waitErrorMessageNotVisible();
+    assertFalse(createFactoryPage.isCreateFactoryButtonDisabled());
 
     // type incorrect factory names and check error messages
-    newFactory.typeFactoryName(generate("", 2));
-    assertEquals(newFactory.getErrorMessage(), NAME_IS_TOO_SHORT);
-    newFactory.typeFactoryName(generate("", 21));
-    assertEquals(newFactory.getErrorMessage(), NAME_IS_TOO_LONG);
+    createFactoryPage.typeFactoryName(generate("", 2));
+    assertEquals(createFactoryPage.getErrorMessage(), TOO_SHORT_NAME);
+    createFactoryPage.typeFactoryName(generate("", 21));
+    assertEquals(createFactoryPage.getErrorMessage(), TOO_LONG_NAME);
   }
 
   @Test
@@ -131,12 +131,12 @@ public class CreateFactoryTest {
     dashboardFactories.clickOnAddFactoryBtn();
 
     // create a factory from minimal template
-    newFactory.waitToolbarTitle();
-    newFactory.typeFactoryName(MINIMAL_TEMPLATE_FACTORY_NAME);
-    newFactory.clickOnSourceTab(TEMPLATE_TAB_ID);
-    newFactory.waitTemplateButtons();
-    newFactory.clickOnMinimalTemplateButton();
-    newFactory.clickOnCreateFactoryButton();
+    createFactoryPage.waitToolbarTitle();
+    createFactoryPage.typeFactoryName(MINIMAL_TEMPLATE_FACTORY_NAME);
+    createFactoryPage.clickOnSourceTab(TEMPLATE_TAB_ID);
+    createFactoryPage.waitTemplateButtons();
+    createFactoryPage.clickOnMinimalTemplateButton();
+    createFactoryPage.clickOnCreateFactoryButton();
     factoryDetails.waitFactoryName(MINIMAL_TEMPLATE_FACTORY_NAME);
     factoryDetails.clickOnBackToFactoriesListButton();
 
@@ -147,12 +147,12 @@ public class CreateFactoryTest {
     // create a factory from complete template
     dashboardFactories.waitAllFactoriesPage();
     dashboardFactories.clickOnAddFactoryBtn();
-    newFactory.waitToolbarTitle();
-    newFactory.typeFactoryName(COMPLETE_TEMPLATE_FACTORY_NAME);
-    newFactory.clickOnSourceTab(TEMPLATE_TAB_ID);
-    newFactory.waitTemplateButtons();
-    newFactory.clickOnCompleteTemplateButton();
-    newFactory.clickOnCreateFactoryButton();
+    createFactoryPage.waitToolbarTitle();
+    createFactoryPage.typeFactoryName(COMPLETE_TEMPLATE_FACTORY_NAME);
+    createFactoryPage.clickOnSourceTab(TEMPLATE_TAB_ID);
+    createFactoryPage.waitTemplateButtons();
+    createFactoryPage.clickOnCompleteTemplateButton();
+    createFactoryPage.clickOnCreateFactoryButton();
     factoryDetails.waitFactoryName(COMPLETE_TEMPLATE_FACTORY_NAME);
     factoryDetails.clickOnBackToFactoriesListButton();
 
@@ -168,10 +168,10 @@ public class CreateFactoryTest {
     dashboardFactories.clickOnAddFactoryBtn();
 
     // create a new factory from a workspace
-    newFactory.clickOnSourceTab(WORKSPACE_TAB_ID);
-    newFactory.typeFactoryName(FACTORY_CREATED_FROM_WORKSPACE_NAME);
-    newFactory.clickOnWorkspaceFromList(WORKSPACE_NAME);
-    newFactory.clickOnCreateFactoryButton();
+    createFactoryPage.clickOnSourceTab(WORKSPACE_TAB_ID);
+    createFactoryPage.typeFactoryName(FACTORY_CREATED_FROM_WORKSPACE_NAME);
+    createFactoryPage.clickOnWorkspaceFromList(WORKSPACE_NAME);
+    createFactoryPage.clickOnCreateFactoryButton();
     factoryDetails.waitFactoryName(FACTORY_CREATED_FROM_WORKSPACE_NAME);
     factoryDetails.clickOnBackToFactoriesListButton();
 
@@ -188,21 +188,22 @@ public class CreateFactoryTest {
     dashboardFactories.waitAllFactoriesPage();
     dashboardFactories.clickOnAddFactoryBtn();
 
-    newFactory.waitToolbarTitle();
-    newFactory.clickOnSearchFactoryButton();
-    newFactory.waitSearchFactoryField();
+    createFactoryPage.waitToolbarTitle();
+    createFactoryPage.clickOnSearchFactoryButton();
+    createFactoryPage.waitSearchFactoryField();
 
     // filter by full workspace name
-    newFactory.typeTextToSearchFactoryField(WORKSPACE_NAME);
-    newFactory.waitWorkspaceNameInList(WORKSPACE_NAME);
+    createFactoryPage.typeTextToSearchFactoryField(WORKSPACE_NAME);
+    createFactoryPage.waitWorkspaceNameInList(WORKSPACE_NAME);
 
     // filter by a part of workspace name
-    newFactory.typeTextToSearchFactoryField(WORKSPACE_NAME.substring(WORKSPACE_NAME.length() / 2));
-    newFactory.waitWorkspaceNameInList(WORKSPACE_NAME);
+    createFactoryPage
+        .typeTextToSearchFactoryField(WORKSPACE_NAME.substring(WORKSPACE_NAME.length() / 2));
+    createFactoryPage.waitWorkspaceNameInList(WORKSPACE_NAME);
 
     // filter by a nonexistent workspace name
-    newFactory.typeTextToSearchFactoryField(generate("", 8));
-    newFactory.waitWorkspacesListIsEmpty();
+    createFactoryPage.typeTextToSearchFactoryField(generate("", 8));
+    createFactoryPage.waitWorkspacesListIsEmpty();
   }
 
   private void createWorkspaceWithProject(String workspaceName) {

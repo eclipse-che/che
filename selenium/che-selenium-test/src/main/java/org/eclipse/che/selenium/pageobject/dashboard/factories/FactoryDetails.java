@@ -23,29 +23,29 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class FactoryDetails {
 
   private final SeleniumWebDriver seleniumWebDriver;
-  private final WebDriverWait redrawUiElementsTimeout;
+  private final WebDriverWait redrawUiElementsTimeoutWait;
 
   @Inject
   public FactoryDetails(SeleniumWebDriver seleniumWebDriver) {
     this.seleniumWebDriver = seleniumWebDriver;
-    this.redrawUiElementsTimeout =
+    this.redrawUiElementsTimeoutWait =
         new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
   public interface Locators {
-    String FACTORY_NAME = "//span[contains(@class,'che-toolbar-title-label')]";
-    String BACK_TO_FACTORIES_LIST_BUTTON = "//a[@title='All factories']";
+    String FACTORY_NAME_XPATH = "//span[contains(@class,'che-toolbar-title-label')]";
+    String ALL_FACTORIES_BUTTON_XPATH = "//a[@title='All factories']";
   }
 
   public void waitFactoryName(String factoryName) {
-    redrawUiElementsTimeout.until(
-        textToBePresentInElementLocated(By.xpath(Locators.FACTORY_NAME), factoryName));
+    redrawUiElementsTimeoutWait.until(
+        textToBePresentInElementLocated(By.xpath(Locators.FACTORY_NAME_XPATH), factoryName));
   }
 
   public void clickOnBackToFactoriesListButton() {
-    redrawUiElementsTimeout
-        .until(visibilityOfElementLocated(By.xpath(Locators.BACK_TO_FACTORIES_LIST_BUTTON)))
+    redrawUiElementsTimeoutWait
+        .until(visibilityOfElementLocated(By.xpath(Locators.ALL_FACTORIES_BUTTON_XPATH)))
         .click();
   }
 }

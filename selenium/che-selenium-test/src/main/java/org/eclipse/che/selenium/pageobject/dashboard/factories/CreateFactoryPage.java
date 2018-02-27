@@ -26,14 +26,14 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class NewFactory {
+public class CreateFactoryPage {
 
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
   private final WebDriverWait redrawUiElementsTimeout;
 
   @Inject
-  public NewFactory(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public CreateFactoryPage(SeleniumWebDriver seleniumWebDriver, Loader loader) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.redrawUiElementsTimeout =
