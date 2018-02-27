@@ -68,7 +68,7 @@ public final class TestProjectExplorerContextMenuConstants {
     C_PLUS_PLUS_FILE("gwt-debug-contextMenu/New/newCppFile"),
     H_FILE("gwt-debug-contextMenu/New/newHFile");
 
-    private String itemId;
+    private final String itemId;
 
     SubMenuNew(String itemId) {
       this.itemId = itemId;

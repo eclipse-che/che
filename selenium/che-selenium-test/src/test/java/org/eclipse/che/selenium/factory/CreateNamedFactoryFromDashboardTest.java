@@ -32,20 +32,21 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory;
+import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactories;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-public class CreateNamedFactoryFromDashBoard {
-  private static final String PROJECT_NAME = CreateNamedFactoryFromDashBoard.class.getSimpleName();
+public class CreateNamedFactoryFromDashboardTest {
+  private static final String PROJECT_NAME =
+      CreateNamedFactoryFromDashboardTest.class.getSimpleName();
   private static final String FACTORY_NAME = NameGenerator.generate("factory", 4);
 
   @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
   @Inject private TestUser user;
-  @Inject private DashboardFactory dashboardFactory;
+  @Inject private DashboardFactories dashboardFactories;
   @Inject private Dashboard dashboard;
   @Inject private LoadingBehaviorPage loadingBehaviorPage;
   @Inject private ProjectExplorer projectExplorer;
@@ -79,15 +80,15 @@ public class CreateNamedFactoryFromDashBoard {
   public void createFactoryFromDashBoard() throws ExecutionException, InterruptedException {
     String currentWin = seleniumWebDriver.getWindowHandle();
     dashboard.open();
-    dashboardFactory.selectFactoryOnNavBar();
-    dashboardFactory.waitAllFactoriesPage();
-    dashboardFactory.clickOnAddFactoryBtn();
-    dashboardFactory.selectWorkspaceForCreation(testWorkspace.getName());
-    dashboardFactory.setFactoryName(FACTORY_NAME);
-    dashboardFactory.clickOnCreateFactoryBtn();
-    dashboardFactory.waitJsonFactoryIsNotEmpty();
+    dashboardFactories.selectFactoriesOnNavBar();
+    dashboardFactories.waitAllFactoriesPage();
+    dashboardFactories.clickOnAddFactoryBtn();
+    dashboardFactories.selectWorkspaceForCreation(testWorkspace.getName());
+    dashboardFactories.setFactoryName(FACTORY_NAME);
+    dashboardFactories.clickOnCreateFactoryBtn();
+    dashboardFactories.waitJsonFactoryIsNotEmpty();
     dashboard.waitNotificationIsClosed();
-    dashboardFactory.clickFactoryIDUrl();
+    dashboardFactories.clickFactoryIDUrl();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
     seleniumWebDriver.switchFromDashboardIframeToIde();

@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
@@ -112,5 +113,17 @@ public class KubernetesMachine implements Machine {
             podName,
             timeoutMin,
             p -> (KUBERNETES_POD_STATUS_RUNNING.equals(p.getStatus().getPhase())));
+  }
+
+  /**
+   * Returns the future, which ends when machine is considered as running.
+   *
+   * <p>Note that the resulting future must be explicitly cancelled when its completion no longer
+   * important because of finalization allocated resources.
+   */
+  public CompletableFuture<Void> waitRunningAsync() {
+    return namespace
+        .pods()
+        .waitAsync(podName, p -> (KUBERNETES_POD_STATUS_RUNNING.equals(p.getStatus().getPhase())));
   }
 }

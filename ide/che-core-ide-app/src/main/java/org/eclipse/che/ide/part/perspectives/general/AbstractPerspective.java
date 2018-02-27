@@ -15,6 +15,13 @@ import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 import static org.eclipse.che.ide.api.parts.PartStackType.INFORMATION;
 import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
 import static org.eclipse.che.ide.api.parts.PartStackType.TOOLING;
+import static org.eclipse.che.ide.statepersistance.AppStateConstants.ACTIVE_PART;
+import static org.eclipse.che.ide.statepersistance.AppStateConstants.HIDDEN_STATE;
+import static org.eclipse.che.ide.statepersistance.AppStateConstants.PART_CLASS_NAME;
+import static org.eclipse.che.ide.statepersistance.AppStateConstants.PART_STACKS;
+import static org.eclipse.che.ide.statepersistance.AppStateConstants.PART_STACK_PARTS;
+import static org.eclipse.che.ide.statepersistance.AppStateConstants.PART_STACK_SIZE;
+import static org.eclipse.che.ide.statepersistance.AppStateConstants.PART_STACK_STATE;
 
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
@@ -332,9 +339,9 @@ public abstract class AbstractPerspective
     JsonObject state = Json.createObject();
     JsonObject partStacks = Json.createObject();
     if (activePart != null) {
-      state.put("ACTIVE_PART", activePart.getClass().getName());
+      state.put(ACTIVE_PART, activePart.getClass().getName());
     }
-    state.put("PART_STACKS", partStacks);
+    state.put(PART_STACKS, partStacks);
 
     partStacks.put(
         PartStackType.INFORMATION.name(),
@@ -352,24 +359,23 @@ public abstract class AbstractPerspective
   private JsonObject getPartStackState(
       PartStack partStack, WorkBenchPartController partController) {
     JsonObject state = Json.createObject();
-    state.put("SIZE", partController.getSize());
-    state.put("STATE", partStack.getPartStackState().name());
+    state.put(PART_STACK_SIZE, partController.getSize());
+    state.put(PART_STACK_STATE, partStack.getPartStackState().name());
 
     if (partStack.getParts().isEmpty()) {
-      state.put("HIDDEN", true);
+      state.put(HIDDEN_STATE, true);
     } else {
       if (partStack.getActivePart() != null) {
-        state.put("ACTIVE_PART", partStack.getActivePart().getClass().getName());
+        state.put(ACTIVE_PART, partStack.getActivePart().getClass().getName());
       }
-
-      state.put("HIDDEN", partController.isHidden());
+      state.put(HIDDEN_STATE, partController.isHidden());
 
       JsonArray parts = Json.createArray();
-      state.put("PARTS", parts);
+      state.put(PART_STACK_PARTS, parts);
       int i = 0;
       for (PartPresenter entry : partStack.getParts()) {
         JsonObject presenterState = Json.createObject();
-        presenterState.put("CLASS", entry.getClass().getName());
+        presenterState.put(PART_CLASS_NAME, entry.getClass().getName());
         parts.set(i++, presenterState);
       }
     }
@@ -378,8 +384,8 @@ public abstract class AbstractPerspective
 
   @Override
   public Promise<Void> loadState(@NotNull JsonObject state) {
-    if (state.hasKey("PART_STACKS")) {
-      JsonObject partStacksState = state.getObject("PART_STACKS");
+    if (state.hasKey(PART_STACKS)) {
+      JsonObject partStacksState = state.getObject(PART_STACKS);
 
       // Don't restore part dimensions if perspective is maximized.
       boolean perspectiveMaximized = isPerspectiveMaximized(partStacksState);
@@ -411,8 +417,8 @@ public abstract class AbstractPerspective
     }
 
     // restore perspective's active part
-    if (state.hasKey("ACTIVE_PART")) {
-      String activePart = state.getString("ACTIVE_PART");
+    if (state.hasKey(ACTIVE_PART)) {
+      String activePart = state.getString(ACTIVE_PART);
       Provider<PartPresenter> provider = dynaProvider.getProvider(activePart);
       if (provider != null) {
         setActivePart(provider.get());
@@ -431,8 +437,8 @@ public abstract class AbstractPerspective
   private boolean isPerspectiveMaximized(JsonObject partStacksState) {
     for (String partStackType : partStacksState.keys()) {
       JsonObject partStackState = partStacksState.getObject(partStackType);
-      if (partStackState.hasKey("STATE")
-          && PartStack.State.MAXIMIZED.name().equals(partStackState.getString("STATE"))) {
+      if (partStackState.hasKey(PART_STACK_STATE)
+          && PartStack.State.MAXIMIZED.name().equals(partStackState.getString(PART_STACK_STATE))) {
         return true;
       }
     }
@@ -453,13 +459,14 @@ public abstract class AbstractPerspective
       WorkBenchPartController controller,
       JsonObject partStackState,
       boolean skipRestoreDimensions) {
-    if (partStackState.hasKey("PARTS")) {
-      JsonArray parts = partStackState.get("PARTS");
+
+    if (partStackState.hasKey(PART_STACK_PARTS)) {
+      JsonArray parts = partStackState.get(PART_STACK_PARTS);
 
       for (int i = 0; i < parts.length(); i++) {
         JsonObject value = parts.get(i);
-        if (value.hasKey("CLASS")) {
-          String className = value.getString("CLASS");
+        if (value.hasKey(PART_CLASS_NAME)) {
+          String className = value.getString(PART_CLASS_NAME);
           Provider<PartPresenter> provider = dynaProvider.getProvider(className);
           if (provider != null) {
             PartPresenter partPresenter = provider.get();
@@ -472,8 +479,8 @@ public abstract class AbstractPerspective
     }
 
     // restore part stack's active part
-    if (partStackState.hasKey("ACTIVE_PART")) {
-      String activePart = partStackState.getString("ACTIVE_PART");
+    if (partStackState.hasKey(ACTIVE_PART)) {
+      String activePart = partStackState.getString(ACTIVE_PART);
       Provider<PartPresenter> provider = dynaProvider.getProvider(activePart);
       if (provider != null) {
         partStack.setActivePart(provider.get());
@@ -490,13 +497,15 @@ public abstract class AbstractPerspective
       return;
     }
 
-    if (partStackState.hasKey("HIDDEN") && partStackState.getBoolean("HIDDEN")) {
+    if (partStackState.hasKey(HIDDEN_STATE) && partStackState.getBoolean(HIDDEN_STATE)) {
+
       partStack.hide();
+      controller.setHidden(true);
       return;
     }
 
-    if (partStackState.hasKey("SIZE")) {
-      double size = partStackState.getNumber("SIZE");
+    if (partStackState.hasKey(PART_STACK_SIZE)) {
+      double size = partStackState.getNumber(PART_STACK_SIZE);
 
       // Size of the part must not be less 100 pixels.
       if (size <= MIN_PART_SIZE) {

@@ -30,7 +30,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** @author Igor Okhrimenko */
+/** @author Ihor Okhrimenko */
 @Singleton
 public class SeleniumWebDriverHelper {
   protected final int DEFAULT_TIMEOUT = LOAD_PAGE_TIMEOUT_SEC;
@@ -40,7 +40,7 @@ public class SeleniumWebDriverHelper {
   protected final Logger LOG = LoggerFactory.getLogger(SeleniumWebDriverHelper.class);
 
   @Inject
-  protected SeleniumWebDriverHelper(
+  public SeleniumWebDriverHelper(
       SeleniumWebDriver seleniumWebDriver,
       WebDriverWaitFactory webDriverWaitFactory,
       ActionsFactory actionsFactory) {

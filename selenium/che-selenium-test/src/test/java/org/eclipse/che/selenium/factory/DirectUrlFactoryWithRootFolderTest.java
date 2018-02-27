@@ -33,7 +33,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-public class DirectUrlFactoryWithRootFolder {
+public class DirectUrlFactoryWithRootFolderTest {
   private static final String EXPECTED_PROJECT = "quickstart";
 
   @Inject
@@ -60,18 +60,13 @@ public class DirectUrlFactoryWithRootFolder {
 
   @AfterClass
   public void tearDown() throws Exception {
-    try {
-      testFactoryWithRootFolder.delete();
-    } catch (org.eclipse.che.api.core.NotFoundException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("https://github.com/eclipse/che/issues/8667");
-    }
+    testFactoryWithRootFolder.delete();
   }
 
   @Test
   public void factoryWithDirectUrlWithRootFolder() throws Exception {
     String expectedMessInTheEventsPanel = "Project " + EXPECTED_PROJECT + " imported";
-    List<String> expectedItemsAfterClonning =
+    List<String> expectedItemsAfterCloning =
         Arrays.asList(
             "CHANGELOG.md",
             "Dockerfile",
@@ -110,7 +105,7 @@ public class DirectUrlFactoryWithRootFolder {
             .getByName(seleniumWebDriver.getWorkspaceNameFromBrowserUrl(), testUser.getName())
             .getId();
     List<String> visibleItems = projectExplorer.getNamesOfAllOpenItems();
-    assertTrue(visibleItems.containsAll(expectedItemsAfterClonning));
+    assertTrue(visibleItems.containsAll(expectedItemsAfterCloning));
     String currentTypeOfProject = projectServiceClient.getFirstProject(currentWsId).getType();
     assertTrue(currentTypeOfProject.equals("blank"));
   }
