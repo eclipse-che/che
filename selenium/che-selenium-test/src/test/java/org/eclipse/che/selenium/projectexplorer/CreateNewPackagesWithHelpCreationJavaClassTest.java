@@ -16,7 +16,6 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -53,7 +52,6 @@ public class CreateNewPackagesWithHelpCreationJavaClassTest {
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private HttpJsonRequestFactory httpJsonRequestFactory;
   @Inject private TestApiEndpointUrlProvider testApiEndpointUrlProvider;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private WebDriverLogsReader webDriverLogsReader;
 
   @BeforeClass
