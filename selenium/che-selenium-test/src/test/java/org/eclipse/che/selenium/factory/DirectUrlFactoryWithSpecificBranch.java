@@ -89,21 +89,10 @@ public class DirectUrlFactoryWithSpecificBranch {
         "Project: gitPullTest | cloned from: gitPullTest | remote branch: refs/remotes/origin/contrib-12092015 | local branch: contrib-12092015",
         UPDATING_PROJECT_TIMEOUT_SEC);
 
-    try {
-      projectExplorer.selectItem("gitPullTest");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8616");
-    }
-
+    projectExplorer.selectItem("gitPullTest");
     pullRequestPanel.waitOpenPanel();
 
-    try {
-      projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");
-    } catch (WebDriverException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8616");
-    }
+    projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");
     projectExplorer.waitItem("gitPullTest/my-lib/pom.xml");
 
     String wsId =

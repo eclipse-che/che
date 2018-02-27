@@ -75,6 +75,9 @@
             <class name="org.eclipse.che.selenium.git.RevertCommitTest"/>
             <class name="org.eclipse.che.selenium.git.WorkingWithPullConflictsTest"/>
             <class name="org.eclipse.che.selenium.dashboard.ImportProjectFromGitHubTest"/>
+            <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithKeepDirectory"/>
+            <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithRootFolder"/>
+            <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithSpecificBranch"/>
         </classes>
     </test>
 </suite>

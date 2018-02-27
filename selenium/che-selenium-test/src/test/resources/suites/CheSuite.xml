@@ -94,9 +94,6 @@
           <class name="org.eclipse.che.selenium.editor.SplitEditorFeatureTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerUserCreatePolicyTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerClickCreatePolicyTest"/>
-          <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithKeepDirectory"/>
-          <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithRootFolder"/>
-          <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithSpecificBranch"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithMultiModuleTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSincePolicyTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithUntilPolicyTest"/>
