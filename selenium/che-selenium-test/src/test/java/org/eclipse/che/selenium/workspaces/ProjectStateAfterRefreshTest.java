@@ -50,15 +50,17 @@ public class ProjectStateAfterRefreshTest {
   }
 
   @Test
-  public void checkRestoreStateOfProjectAfterRefreshTest() throws Exception {
+  public void checkRestoreStateOfProjectAfterRefreshTest() {
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
 
-    consoles.closeProcessesArea();
     openFilesInEditor();
     checkFilesAreOpened();
+
     seleniumWebDriver.navigate().refresh();
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    projectExplorer.waitItem(PROJECT_NAME);
 
     try {
       checkFilesAreOpened();
@@ -70,23 +72,21 @@ public class ProjectStateAfterRefreshTest {
     editor.closeAllTabsByContextMenu();
   }
 
-  @Test(priority = 1)
-  public void checkRestoreStateOfProjectIfPomXmlFileOpened() throws Exception {
-    projectExplorer.waitProjectExplorer();
+  @Test
+  public void checkRestoreStateOfProjectIfPomXmlFileOpened() {
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.selectItem(PROJECT_NAME);
-
     projectExplorer.quickExpandWithJavaScript();
+
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsp");
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     editor.waitActive();
-    projectExplorer.waitProjectExplorer();
 
     seleniumWebDriver.navigate().refresh();
-
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
 
     try {
