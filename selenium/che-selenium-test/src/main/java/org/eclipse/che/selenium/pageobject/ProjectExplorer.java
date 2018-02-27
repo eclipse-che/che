@@ -14,6 +14,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.COMMANDS;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
@@ -380,7 +381,7 @@ public class ProjectExplorer {
   /**
    * Waits item with specified {@code name} in project explorer tree area.
    *
-   * <p>Note! Items must not repeats.
+   * <p>Note! Item must be unique.
    *
    * <p>For example: in a project can be some folder. Into each folder can be a file with same name.
    * This method will be track only first item.
@@ -396,7 +397,7 @@ public class ProjectExplorer {
    * Waits item with specified {@code name} in project explorer tree area, during specified {@code
    * timeOut}
    *
-   * <p>Note! Items must not repeats.
+   * <p>Note! Item must be unique.
    *
    * <p>For example: in a project can be some folder. Into each folder can be a file with same name.
    * This method will be track only first item.
@@ -480,13 +481,13 @@ public class ProjectExplorer {
         By.xpath(format("//div [@name='External Libraries' and @project='/%s']", modulePath)));
   }
 
-  /** Wait disappearance external maven Libraries relative module */
-  public void waitLibrariesIsNotPresent(String modulePath) {
+  /** Waits disappearance external maven Libraries relative module */
+  public void waitLibrariesAreNotPresent(String modulePath) {
     seleniumWebDriverHelper.waitInvisibility(
         By.xpath(format("//div [@name='External Libraries' and @project='/%s']", modulePath)));
   }
 
-  /** Select external maven Library relative module */
+  /** Selects external maven Library relative module */
   public void selectLibraries(String modulePath) {
     waitLibraries(modulePath).click();
   }
@@ -642,12 +643,11 @@ public class ProjectExplorer {
   }
 
   /**
-   * Clicks on item from {@link
-   * org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems#NEW}
-   * sub menu
+   * Clicks on item from {@link SubMenuNew}.
    *
-   * @param item item from {@link
-   *     org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew}
+   * <p>This is submenu which displays after click on {@link ContextMenuFirstLevelItems#NEW}.
+   *
+   * @param item
    */
   public void clickOnNewContextMenuItem(ContextMenuItems item) {
     seleniumWebDriverHelper.waitAndClick(
