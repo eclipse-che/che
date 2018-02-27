@@ -31,12 +31,13 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactories;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
-import org.eclipse.che.selenium.pageobject.dashboard.factories.FactoryDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.factories.CreateFactoryPage;
+import org.eclipse.che.selenium.pageobject.dashboard.factories.FactoryDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class CreateFactoryTest {
@@ -77,13 +78,17 @@ public class CreateFactoryTest {
     factoryServiceClient.deleteFactory(FACTORY_CREATED_FROM_WORKSPACE_NAME);
   }
 
-  @Test
-  public void checkNewFactoryPage() {
+  @BeforeMethod
+  private void openNewFactoryPage() {
+    // open the New Factory page before starting each test method
     dashboardFactories.selectFactoriesOnNavBar();
     dashboardFactories.waitAllFactoriesPage();
     dashboardFactories.clickOnAddFactoryBtn();
     createFactoryPage.waitToolbarTitle();
+  }
 
+  @Test
+  public void checkNewFactoryPage() {
     // open tabs and check their fields
     createFactoryPage.clickOnSourceTab(WORKSPACE_TAB_ID);
     assertTrue(createFactoryPage.isCreateFactoryButtonDisabled());
@@ -101,12 +106,8 @@ public class CreateFactoryTest {
   }
 
   @Test
-  public void checkFactoryName() {
-    dashboardFactories.selectFactoriesOnNavBar();
-    dashboardFactories.waitAllFactoriesPage();
-    dashboardFactories.clickOnAddFactoryBtn();
-    createFactoryPage.waitToolbarTitle();
-
+  public void shouldHandleIncorrectFactoryNames() {
+    // select created workspace from list of workspaces
     createFactoryPage.clickOnWorkspaceFromList(WORKSPACE_NAME);
 
     // type valid factory names and check that the Create button is enabled
@@ -125,11 +126,7 @@ public class CreateFactoryTest {
   }
 
   @Test
-  public void checkCreatingFactoryFromTemplates() {
-    dashboardFactories.selectFactoriesOnNavBar();
-    dashboardFactories.waitAllFactoriesPage();
-    dashboardFactories.clickOnAddFactoryBtn();
-
+  public void shouldCreateFactoryFromTemplate() {
     // create a factory from minimal template
     createFactoryPage.waitToolbarTitle();
     createFactoryPage.typeFactoryName(MINIMAL_TEMPLATE_FACTORY_NAME);
@@ -162,11 +159,7 @@ public class CreateFactoryTest {
   }
 
   @Test
-  public void checkCreatingFactoryFromWorkspace() {
-    dashboardFactories.selectFactoriesOnNavBar();
-    dashboardFactories.waitAllFactoriesPage();
-    dashboardFactories.clickOnAddFactoryBtn();
-
+  public void shouldCreatingFactoryFromWorkspace() {
     // create a new factory from a workspace
     createFactoryPage.clickOnSourceTab(WORKSPACE_TAB_ID);
     createFactoryPage.typeFactoryName(FACTORY_CREATED_FROM_WORKSPACE_NAME);
@@ -184,11 +177,7 @@ public class CreateFactoryTest {
 
   @Test
   public void checkWorkspaceFiltering() {
-    dashboardFactories.selectFactoriesOnNavBar();
-    dashboardFactories.waitAllFactoriesPage();
-    dashboardFactories.clickOnAddFactoryBtn();
-
-    createFactoryPage.waitToolbarTitle();
+    // click on the search button and wait search field visible
     createFactoryPage.clickOnSearchFactoryButton();
     createFactoryPage.waitSearchFactoryField();
 
@@ -197,8 +186,8 @@ public class CreateFactoryTest {
     createFactoryPage.waitWorkspaceNameInList(WORKSPACE_NAME);
 
     // filter by a part of workspace name
-    createFactoryPage
-        .typeTextToSearchFactoryField(WORKSPACE_NAME.substring(WORKSPACE_NAME.length() / 2));
+    createFactoryPage.typeTextToSearchFactoryField(
+        WORKSPACE_NAME.substring(WORKSPACE_NAME.length() / 2));
     createFactoryPage.waitWorkspaceNameInList(WORKSPACE_NAME);
 
     // filter by a nonexistent workspace name
