@@ -16,7 +16,7 @@ import static org.openqa.selenium.logging.LogType.PERFORMANCE;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.net.URL;
+
 import java.util.List;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.logging.LogEntry;
@@ -81,7 +81,7 @@ public class BrowserLogsUtil {
               String networkValue = jsonMessageNode.get("method").getAsString();
 
               if (networkValue.equals("Network.requestWillBeSent")) {
-                data.append(getRequestsSentOnChe(jsonMessageNode));
+                data.append(extractCheRequests(jsonMessageNode));
 
               } else if (networkValue.equals("Network.responseReceived")) {
                 data.append(extractCheResponces(jsonMessageNode));
@@ -97,7 +97,7 @@ public class BrowserLogsUtil {
    * @param requestMessage json representation of the message object from the log
    * @return info about request from the WebDriver
    */
-  private static String getRequestsSentOnChe(JsonObject requestMessage) {
+  private static String extractCheRequests(JsonObject requestMessage) {
     JsonObject requestNode = requestMessage.getAsJsonObject("params").getAsJsonObject("request");
     StringBuilder requestInfo = new StringBuilder();
     if (isNodeFromCheTraffic(requestNode)) {
