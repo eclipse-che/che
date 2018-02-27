@@ -34,18 +34,18 @@ export class WorkspaceLoader {
     /**
      * Loads the workspace.
      */
-    load(): void {
+    load(): Promise<void> {
         let workspaceKey = this.getWorkspaceKey();
 
         if (!workspaceKey || workspaceKey === "") {
             console.error("Workspace is not defined");
             return;
         }
-        
-        this.getWorkspace(workspaceKey)
+
+        return this.getWorkspace(workspaceKey)
             .then((workspace) => {
                 this.workspace = workspace;
-                this.handleWorkspace();
+                return this.handleWorkspace();
             })
             .catch(err => {
                 console.error(err);
@@ -111,13 +111,13 @@ export class WorkspaceLoader {
     /**
      * Handles workspace status.
      */
-    handleWorkspace(): void {
+    handleWorkspace(): Promise<void> {
         if (this.workspace.status === 'RUNNING') {
             this.openIDE();
             return;
         }
 
-        this.subscribeWorkspaceEvents().then(() => {
+        return this.subscribeWorkspaceEvents().then(() => {
             if (this.workspace.status === 'STOPPED') {
                 this.startWorkspace();
             } else if (this.workspace.status === 'STOPPING') {
@@ -155,7 +155,6 @@ export class WorkspaceLoader {
         let master = new CheJsonRpcMasterApi(new WebsocketClient());
         return new Promise((resolve) => {
             master.connect(this.websocketBaseURL() + WEBSOCKET_CONTEXT).then(() => {
-
                 master.subscribeEnvironmentOutput(this.workspace.id, 
                     (message: any) => this.onEnvironmentOutput(message.text));
 

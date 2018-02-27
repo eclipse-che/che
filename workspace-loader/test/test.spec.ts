@@ -1,5 +1,6 @@
 /// <reference path="../node_modules/@types/jasmine/index.d.ts" />
 /// <reference path="../src/custom.d.ts" />
+
 'use strict';
 
 import {WorkspaceLoader} from '../src/index';
@@ -189,17 +190,15 @@ describe('Workspace Loader', () => {
             spyOn(workspaceLoader, "subscribeWorkspaceEvents").and.callFake(() => {
                 return new Promise((resolve) => {
                     resolve();
-
-                    setTimeout(() => {
-                        done();
-                    }, 1);
                 });
             });
     
             spyOn(workspaceLoader, "startWorkspace");
             spyOn(workspaceLoader, "openIDE");
 
-            workspaceLoader.load();
+            workspaceLoader.load().then(() => {
+                done();
+            });
         });
 
         it('> must be called', () => {
