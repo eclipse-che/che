@@ -12,6 +12,7 @@ package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
@@ -24,53 +25,72 @@ import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Events;
+import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.PullRequestPanel;
+import org.openqa.selenium.NoSuchElementException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class DirectUrlFactoryWithKeepDirectory {
-
+public class DirectUrlFactoryWithSpecificBranchTest {
   @Inject
   @Named("github.username")
   private String gitHubUsername;
 
+  @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
+  @Inject private TestUser testUser;
   @Inject private TestFactoryInitializer testFactoryInitializer;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private Events events;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
-  @Inject private TestProjectServiceClient projectServiceClient;
-  @Inject private TestUser testUser;
-  @Inject private Dashboard dashboard;
+  @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private PullRequestPanel pullRequestPanel;
 
-  private TestFactory testFactoryWithKeepDir;
+  private TestFactory testFactoryWithSpecificBranch;
 
   @BeforeClass
   public void setUp() throws Exception {
-    testFactoryWithKeepDir =
+    testFactoryWithSpecificBranch =
         testFactoryInitializer.fromUrl(
-            "https://github.com/" + gitHubUsername + "/gitPullTest/tree/master/my-lib");
+            "https://github.com/" + gitHubUsername + "/gitPullTest/tree/contrib-12092015");
   }
 
   @AfterClass
   public void tearDown() throws Exception {
-    testFactoryWithKeepDir.delete();
+    if (workspaceServiceClient.exists(gitHubUsername, testUser.getName())) {
+      testFactoryWithSpecificBranch.delete();
+    }
   }
 
   @Test
-  public void factoryWithDirectUrlWithKeepDirectory() throws Exception {
-    testFactoryWithKeepDir.authenticateAndOpen();
+  public void factoryWithDirectUrlWithSpecificBranch() throws Exception {
+    try {
+      testFactoryWithSpecificBranch.authenticateAndOpen();
+    } catch (NoSuchElementException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("https://github.com/eclipse/che/issues/8671");
+    }
+
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitProgressPopupPanelClose();
     events.clickEventLogBtn();
-    events.waitExpectedMessage("Project gitPullTest imported", UPDATING_PROJECT_TIMEOUT_SEC);
 
-    projectExplorer.waitItem("gitPullTest");
-    projectExplorer.quickExpandWithJavaScript();
+    events.waitExpectedMessage("Project gitPullTest imported", UPDATING_PROJECT_TIMEOUT_SEC);
+    events.waitExpectedMessage(
+        "Successfully configured and cloned source code of gitPullTest.",
+        UPDATING_PROJECT_TIMEOUT_SEC);
+    events.waitExpectedMessage(
+        "Project: gitPullTest | cloned from: gitPullTest | remote branch: refs/remotes/origin/contrib-12092015 | local branch: contrib-12092015",
+        UPDATING_PROJECT_TIMEOUT_SEC);
+
+    projectExplorer.selectItem("gitPullTest");
+    pullRequestPanel.waitOpenPanel();
+
+    projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");
     projectExplorer.waitItem("gitPullTest/my-lib/pom.xml");
 
     String wsId =
@@ -80,9 +100,10 @@ public class DirectUrlFactoryWithKeepDirectory {
 
     List<String> visibleItems = projectExplorer.getNamesOfAllOpenItems();
     assertTrue(
-        visibleItems.containsAll(ImmutableList.of("gitPullTest", "my-lib", "src", "pom.xml")));
+        visibleItems.containsAll(
+            ImmutableList.of("gitPullTest", "my-lib", "my-webapp", "src", "pom.xml")));
 
-    String projectType = projectServiceClient.getFirstProject(wsId).getType();
+    String projectType = testProjectServiceClient.getFirstProject(wsId).getType();
     assertTrue(projectType.equals("blank"));
   }
 }
