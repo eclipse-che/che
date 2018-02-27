@@ -28,6 +28,7 @@
                      ng-minlength="3"
                      ng-maxlength="20"
                      ng-pattern="/^[ A-Za-z0-9_\-\.]+$/"
+                     id="new-factory-name-input"
                      unique-factory-name="">
         <div ng-message="pattern">Factory name may contain digits, latin letters, spaces, _ , . , - and should start only with digits, latin letters or underscores</div>
         <div ng-message="minlength">The name has to be more than 3 characters long.</div>
@@ -44,7 +45,7 @@
                  class="factory-select-source-details">
           <md-tab md-on-select="createFactoryCtrl.clearFactoryContent()">
             <md-tab-label>
-              <span class="che-tab-label-title">Workspace</span>
+              <span class="che-tab-label-title" id="new-factory-workspace-tab">Workspace</span>
             </md-tab-label>
             <md-tab-body>
               <cdvy-factory-from-workspace cdvy-factory-content="createFactoryCtrl.factoryContent"
@@ -54,7 +55,7 @@
           </md-tab>
           <md-tab md-on-select="createFactoryCtrl.clearFactoryContent()">
             <md-tab-label>
-              <span class="che-tab-label-title">Git</span>
+              <span class="che-tab-label-title" id="new-factory-git-tab">Git</span>
             </md-tab-label>
             <md-tab-body>
               <div layout="row" layout-align="start center" class="create-factory-git-content">
@@ -65,7 +66,7 @@
           </md-tab>
           <md-tab md-on-select="createFactoryCtrl.clearFactoryContent()">
             <md-tab-label>
-              <span class="che-tab-label-title">Config</span>
+              <span class="che-tab-label-title" id="new-factory-config-tab">Config</span>
             </md-tab-label>
             <md-tab-body>
               <div layout-fill layout="row" layout-align="start center">
@@ -78,7 +79,7 @@
           <md-tab md-on-select="createFactoryCtrl.clearFactoryContent(); templateSelected = true;"
                   md-on-deselect="templateSelected = false;">
             <md-tab-label>
-              <span class="che-tab-label-title">Template</span>
+              <span class="che-tab-label-title" id="new-factory-template-tab">Template</span>
             </md-tab-label>
             <md-tab-body>
               <div layout-fill layout="row" layout-align="start center" ng-if="templateSelected">

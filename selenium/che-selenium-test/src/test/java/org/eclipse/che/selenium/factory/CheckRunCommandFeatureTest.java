@@ -14,7 +14,7 @@ import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SU
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
-import static org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory.AddAction.RUN_COMMAND;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardFactories.AddAction.RUN_COMMAND;
 
 import com.google.inject.Inject;
 import java.util.concurrent.ExecutionException;
@@ -33,7 +33,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory;
+import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactories;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -46,7 +46,7 @@ public class CheckRunCommandFeatureTest {
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Dashboard dashboard;
-  @Inject private DashboardFactory dashboardFactory;
+  @Inject private DashboardFactories dashboardFactories;
   @Inject private Ide ide;
   @Inject private LoadingBehaviorPage loadingBehaviorPage;
   @Inject private CodenvyEditor editor;
@@ -78,14 +78,14 @@ public class CheckRunCommandFeatureTest {
     projectExplorer.waitItem(PROJECT_NAME);
     dashboard.open();
     dashboard.selectFactoriesOnDashbord();
-    dashboardFactory.clickOnAddFactoryBtn();
-    dashboardFactory.selectWorkspaceForCreation(testWorkspace.getName());
-    dashboardFactory.setFactoryName(FACTORY_NAME);
-    dashboardFactory.clickOnCreateFactoryBtn();
-    dashboardFactory.selectAction(RUN_COMMAND);
-    dashboardFactory.enterParamValue(NAME_BUILD_COMMAND);
-    dashboardFactory.clickAddOnAddAction();
-    dashboardFactory.clickOnOpenFactory();
+    dashboardFactories.clickOnAddFactoryBtn();
+    dashboardFactories.selectWorkspaceForCreation(testWorkspace.getName());
+    dashboardFactories.setFactoryName(FACTORY_NAME);
+    dashboardFactories.clickOnCreateFactoryBtn();
+    dashboardFactories.selectAction(RUN_COMMAND);
+    dashboardFactories.enterParamValue(NAME_BUILD_COMMAND);
+    dashboardFactories.clickAddOnAddAction();
+    dashboardFactories.clickOnOpenFactory();
     String currentWin = seleniumWebDriver.getWindowHandle();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();

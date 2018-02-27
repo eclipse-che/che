@@ -14,7 +14,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
-import static org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory.AddAction.OPEN_FILE;
+import static org.eclipse.che.selenium.pageobject.dashboard.DashboardFactories.AddAction.OPEN_FILE;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -31,7 +31,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactory;
+import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactories;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -44,7 +44,7 @@ public class CheckOpenFileFeatureTest {
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Dashboard dashboard;
-  @Inject private DashboardFactory dashboardFactory;
+  @Inject private DashboardFactories dashboardFactories;
   @Inject private Ide ide;
   @Inject private LoadingBehaviorPage loadingBehaviorPage;
   @Inject private CodenvyEditor editor;
@@ -74,14 +74,14 @@ public class CheckOpenFileFeatureTest {
     projectExplorer.waitItem(PROJECT_NAME);
     dashboard.open();
     dashboard.selectFactoriesOnDashbord();
-    dashboardFactory.clickOnAddFactoryBtn();
-    dashboardFactory.selectWorkspaceForCreation(testWorkspace.getName());
-    dashboardFactory.setFactoryName(FACTORY_NAME);
-    dashboardFactory.clickOnCreateFactoryBtn();
-    dashboardFactory.selectAction(OPEN_FILE);
-    dashboardFactory.enterParamValue(OPEN_FILE_URL);
-    dashboardFactory.clickAddOnAddAction();
-    dashboardFactory.clickOnOpenFactory();
+    dashboardFactories.clickOnAddFactoryBtn();
+    dashboardFactories.selectWorkspaceForCreation(testWorkspace.getName());
+    dashboardFactories.setFactoryName(FACTORY_NAME);
+    dashboardFactories.clickOnCreateFactoryBtn();
+    dashboardFactories.selectAction(OPEN_FILE);
+    dashboardFactories.enterParamValue(OPEN_FILE_URL);
+    dashboardFactories.clickAddOnAddAction();
+    dashboardFactories.clickOnOpenFactory();
     String currentWin = seleniumWebDriver.getWindowHandle();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();

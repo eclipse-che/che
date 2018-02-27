@@ -10,8 +10,10 @@
  */
 package org.eclipse.che.api.languageserver.registry;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.inject.Singleton;
 import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
@@ -27,8 +29,8 @@ public class DefaultLanguages {
     register("bibtex", "bib", "text/plain");
     register("clojure", "clj", "text/x-clojure");
     register("coffeescript", "coffee", "text/x-coffeescript");
-    register("c", "c", "text/x-csrc");
-    register("cpp", "cpp", "text/x-c++src");
+    register("c", Arrays.asList("c", "h"), "text/x-csrc");
+    register("cpp", Arrays.asList("cpp", "hpp", "cc", "hh"), "text/x-c++src");
     register("csharp", "cs", "text/x-csharp");
     register("css", "css", "text/css");
     register("diff", "diff", "text/x-diff");
@@ -79,6 +81,14 @@ public class DefaultLanguages {
     languageDescription.setLanguageId(id);
     languageDescription.setMimeType(mimeType);
     languageDescription.setFileExtensions(Collections.singletonList(extension));
+    languages.add(languageDescription);
+  }
+
+  private void register(String id, List<String> extensions, String mimeType) {
+    LanguageDescription languageDescription = new LanguageDescription();
+    languageDescription.setLanguageId(id);
+    languageDescription.setMimeType(mimeType);
+    languageDescription.setFileExtensions(extensions);
     languages.add(languageDescription);
   }
 

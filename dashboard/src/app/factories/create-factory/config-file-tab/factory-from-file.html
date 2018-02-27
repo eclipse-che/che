@@ -14,6 +14,7 @@
   <che-label-container che-label-name="File">
     <div layout="row">
       <button ng-disabled="factoryFromFileCtrl.uploader.queue.length > 0 || factoryFromFileCtrl.uploader.isUploading" tabindex="0"
+              id="upload-file-button"
               md-theme="default" ng-click="clickUpload()"
               class="md-accent md-raised md-hue-2 md-button">
         <span class="ng-scope">Upload file</span>

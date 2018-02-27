@@ -10,12 +10,9 @@
  */
 package org.eclipse.che.selenium.git;
 
-import static org.testng.Assert.fail;
-
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.client.TestGitHubKeyUploader;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -31,7 +28,6 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.WarningDialog;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.git.Git;
-import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -62,11 +58,9 @@ public class GitCompareTest {
   @Inject private AskDialog askDialog;
   @Inject private WarningDialog warningDialog;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
-  @Inject private TestGitHubKeyUploader testGitHubKeyUploader;
 
   @BeforeClass
   public void prepare() throws Exception {
-    testGitHubKeyUploader.updateGithubKey();
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
 
     ide.open(ws);
@@ -194,7 +188,7 @@ public class GitCompareTest {
         TestMenuCommandsConstants.Git.Compare.COMPARE_WITH_BRANCH);
     git.waitGitCompareBranchFormIsOpen();
     git.selectBranchIntoGitCompareBranchForm("newbranch");
-    clickOnCompareBranchFormButton();
+    git.clickOnCompareBranchFormButton();
     loader.waitOnClosed();
     git.waitGitCompareFormIsOpen();
     git.waitExpTextIntoCompareLeftEditor("// <<< checking compare content >>>");
@@ -209,7 +203,7 @@ public class GitCompareTest {
         TestMenuCommandsConstants.Git.Compare.COMPARE_WITH_BRANCH);
     git.waitGitCompareBranchFormIsOpen();
     git.selectBranchIntoGitCompareBranchForm("origin/master");
-    clickOnCompareBranchFormButton();
+    git.clickOnCompareBranchFormButton();
     loader.waitOnClosed();
     git.waitGitCompareFormIsOpen();
     git.waitExpTextIntoCompareLeftEditor("// <<< checking compare content >>>");
@@ -258,14 +252,5 @@ public class GitCompareTest {
     askDialog.containsText(expectedText);
     askDialog.clickOkBtn();
     loader.waitOnClosed();
-  }
-
-  private void clickOnCompareBranchFormButton() {
-    try {
-      git.clickOnCompareBranchFormButton();
-    } catch (WebDriverException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7887", ex);
-    }
   }
 }

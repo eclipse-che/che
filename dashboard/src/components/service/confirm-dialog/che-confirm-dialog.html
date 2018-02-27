@@ -3,9 +3,11 @@
     <div>{{cheConfirmDialogController.content}}</div>
     <div layout="row" flex layout-align="end end">
       <che-button-primary che-button-title="{{cheConfirmDialogController.resolveButtonTitle}}"
+                          id="ok-dialog-button"
                           ng-click="cheConfirmDialogController.hide()">
       </che-button-primary>
       <che-button-notice che-button-title="{{cheConfirmDialogController.rejectButtonTitle}}"
+                         id="cancel-dialog-button"
                          ng-click="cheConfirmDialogController.cancel()">
       </che-button-notice>
     </div>
