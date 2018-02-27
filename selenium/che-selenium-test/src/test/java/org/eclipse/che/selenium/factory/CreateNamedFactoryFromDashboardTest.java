@@ -38,8 +38,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-public class CreateNamedFactoryFromDashBoard {
-  private static final String PROJECT_NAME = CreateNamedFactoryFromDashBoard.class.getSimpleName();
+public class CreateNamedFactoryFromDashboardTest {
+  private static final String PROJECT_NAME =
+      CreateNamedFactoryFromDashboardTest.class.getSimpleName();
   private static final String FACTORY_NAME = NameGenerator.generate("factory", 4);
 
   @Inject private TestWorkspace testWorkspace;

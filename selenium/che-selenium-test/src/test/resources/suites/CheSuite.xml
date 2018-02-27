@@ -100,7 +100,7 @@
           <class name="org.eclipse.che.selenium.factory.CheckOpenFileFeatureTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckRunCommandFeatureTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckWelcomePanelOnCodenvyTest"/>
-          <class name="org.eclipse.che.selenium.factory.CreateNamedFactoryFromDashBoard"/>
+          <class name="org.eclipse.che.selenium.factory.CreateNamedFactoryFromDashboardTest"/>
           <class name="org.eclipse.che.selenium.factory.CreateFactoryFromUiWithKeepDirTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSparseCheckoutTest"/>
           <class name="org.eclipse.che.selenium.filewatcher.EditFilesWithTabsTest"/>
