@@ -77,6 +77,9 @@ declare namespace che {
         protocol: string;
         path?: string;
         properties?: any;
+        attributes?: {
+            [attrName: string]: string | number;
+        };        
     }
 
     export interface IEnvironmentMachineVolume {

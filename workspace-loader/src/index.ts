@@ -45,11 +45,42 @@ export class WorkspaceLoader {
         return this.getWorkspace(workspaceKey)
             .then((workspace) => {
                 this.workspace = workspace;
-                return this.handleWorkspace();
+
+                if (this.hasPreconfiguredIDE()) {
+                    return this.handleWorkspace();
+                } else {
+                    return new Promise<void>((resolve) => {
+                        this.openURL(workspace.links.ide);
+                        resolve();
+                    });
+                }
             })
             .catch(err => {
                 console.error(err);
             });
+    }
+
+    /**
+     * Determines whether the workspace has preconfigured IDE.
+     */
+    hasPreconfiguredIDE() : boolean {
+        if (this.workspace.config.defaultEnv && this.workspace.config.environments) {
+            let defaultEnvironment = this.workspace.config.defaultEnv;
+            let environment = this.workspace.config.environments[defaultEnvironment];
+
+            let machines = environment.machines;
+            for (let machineName in machines) {
+                let servers = machines[machineName].servers;
+                for (let serverName in servers) {
+                    let attributes = servers[serverName].attributes;
+                    if (attributes['type'] === 'ide') {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -151,7 +182,7 @@ export class WorkspaceLoader {
     /**
      * Subscribes to the workspace events.
      */
-    subscribeWorkspaceEvents() : Promise<any> {
+    subscribeWorkspaceEvents() : Promise<void> {
         let master = new CheJsonRpcMasterApi(new WebsocketClient());
         return new Promise((resolve) => {
             master.connect(this.websocketBaseURL() + WEBSOCKET_CONTEXT).then(() => {
@@ -177,14 +208,28 @@ export class WorkspaceLoader {
                 for (let serverId in servers) {
                     let attributes = servers[serverId].attributes;
                     if (attributes['type'] === 'ide') {
-                        document.location.assign(servers[serverId].url);
+                        this.openURL(servers[serverId].url);
                         return;
                     }
                 }
             }
 
-            document.location.assign(workspace.links.ide);
+            this.openURL(workspace.links.ide);
         });
+    }
+
+    /**
+     * Schedule opening URL.
+     * Scheduling prevents appearing an error net::ERR_CONNECTION_REFUSED instead opening the URL.
+     * 
+     * @param url url to be opened
+     */
+    openURL(url) : void {
+        // Preconfigured IDE may use dedicated port. In this case Chrome browser fails 
+        // with error net::ERR_CONNECTION_REFUSED. Timer helps to open the URL without errors.
+        setTimeout(() => {
+            window.location.href = url;
+        }, 1000);
     }
 
 };
