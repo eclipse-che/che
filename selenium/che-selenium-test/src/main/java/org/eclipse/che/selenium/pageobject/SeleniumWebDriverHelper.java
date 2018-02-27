@@ -152,8 +152,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until {@link WebElement} with provided locator {@link By} be invisible
+   * Waits until {@link WebElement} with provided locator {@link By} be invisible.
    *
+   * @throw {@link org.openqa.selenium.TimeoutException} - if visible during timeout.
    * @param elementLocator
    * @param timeout waiting time in seconds
    */
@@ -162,8 +163,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until {@link WebElement} with provided locator {@link By} be invisible
+   * Waits until {@link WebElement} with provided locator {@link By} be invisible.
    *
+   * @throw {@link org.openqa.selenium.TimeoutException} - if visible during timeout.
    * @param elementLocator
    */
   public void waitInvisibility(By elementLocator) {
@@ -171,8 +173,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until provided {@link WebElement} be invisible
+   * Waits until provided {@link WebElement} be invisible.
    *
+   * @throw {@link org.openqa.selenium.TimeoutException} - if visible during timeout.
    * @param webElement
    * @param timeout waiting time in seconds
    */
@@ -181,8 +184,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until provided {@link WebElement} be invisible
+   * Waits until provided {@link WebElement} be invisible.
    *
+   * @throw {@link org.openqa.selenium.TimeoutException} - if visible during timeout.
    * @param webElement
    */
   public void waitInvisibility(WebElement webElement) {
