@@ -16,17 +16,24 @@ import static org.openqa.selenium.logging.LogType.PERFORMANCE;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.List;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.logging.LogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
+public class WebDriverLogsReader {
+  private static final Logger LOG = LoggerFactory.getLogger(WebDriverLogsReader.class);
+  private SeleniumWebDriver seleniumWebDriver;
 
-public class BrowserLogsUtil {
-  private static final Logger LOG = LoggerFactory.getLogger(BrowserLogsUtil.class);
-
+  @Inject
+  public WebDriverLogsReader(SeleniumWebDriver seleniumWebDriver) {
+    this.seleniumWebDriver = seleniumWebDriver;
+  }
   /**
    * read logs from browser console
    *
@@ -46,7 +53,7 @@ public class BrowserLogsUtil {
   }
 
   /** store browser logs to the test logs */
-  public static void logBrowserLogs(WebDriver seleniumWebDriver) {
+  public void logBrowserLogs() {
     readBrowserLogs(seleniumWebDriver)
         .forEach(logEntry -> LOG.info("{} {}", logEntry.getLevel(), logEntry.getMessage()));
   }
@@ -56,7 +63,7 @@ public class BrowserLogsUtil {
    *
    * @return logs from browser console and requests/responses on CHE api
    */
-  public static String getCombinedLogs(WebDriver seleniumWebDriver) {
+  public String getCombinedLogs() {
     StringBuilder combinedLogs =
         new StringBuilder("Browser console logs:\n").append("---------------------\n");
     readBrowserLogs(seleniumWebDriver)
@@ -68,25 +75,31 @@ public class BrowserLogsUtil {
     return combinedLogs.append(readNetworkLogs(seleniumWebDriver)).toString();
   }
 
+  /**
+   * combine the Network and Browser logs
+   *
+   * @return logs from browser console and requests/responses on CHE api
+   */
+  public static String getCombinedLogs(SeleniumWebDriver seleniumWebDriver) {
+    return new WebDriverLogsReader(seleniumWebDriver).getCombinedLogs();
+  }
+
   /** filter data and get requests/responses that has been sent on CHE /api/ URL */
   public static String readNetworkLogs(WebDriver seleniumWebDriver) {
     StringBuilder data = new StringBuilder("Network logs: \n").append("---------------\n");
     JsonParser jsonParser = new JsonParser();
-    readPerformanceLogs(seleniumWebDriver)
-        .forEach(
-            logEntry -> {
-              JsonElement jsonElement = jsonParser.parse(logEntry.getMessage());
-              JsonObject jsonMessageNode =
-                  jsonElement.getAsJsonObject().get("message").getAsJsonObject();
-              String networkValue = jsonMessageNode.get("method").getAsString();
+    for (LogEntry logEntry : readPerformanceLogs(seleniumWebDriver)) {
+      JsonElement jsonElement = jsonParser.parse(logEntry.getMessage());
+      JsonObject jsonMessageNode = jsonElement.getAsJsonObject().get("message").getAsJsonObject();
+      String networkValue = jsonMessageNode.get("method").getAsString();
 
-              if (networkValue.equals("Network.requestWillBeSent")) {
-                data.append(extractCheRequests(jsonMessageNode));
+      if (networkValue.equals("Network.requestWillBeSent")) {
+        data.append(extractCheRequests(jsonMessageNode));
 
-              } else if (networkValue.equals("Network.responseReceived")) {
-                data.append(extractCheResponces(jsonMessageNode));
-              }
-            });
+      } else if (networkValue.equals("Network.responseReceived")) {
+        data.append(extractCheResponces(jsonMessageNode));
+      }
+    }
     return data.toString();
   }
 

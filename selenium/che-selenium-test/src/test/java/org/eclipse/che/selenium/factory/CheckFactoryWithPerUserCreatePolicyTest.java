@@ -20,7 +20,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
-import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
+import org.eclipse.che.selenium.core.utils.WebDriverLogsReader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -38,7 +38,7 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestFactoryInitializer testFactoryInitializer;
   @Inject private SeleniumWebDriver seleniumWebDriver;
-  @Inject private BrowserLogsUtil browserLogsUtil;
+  @Inject private WebDriverLogsReader browserLogsUtil;
   private TestFactory testFactory;
   private final Logger LOG = LoggerFactory.getLogger(CheckFactoryWithPerUserCreatePolicyTest.class);
 

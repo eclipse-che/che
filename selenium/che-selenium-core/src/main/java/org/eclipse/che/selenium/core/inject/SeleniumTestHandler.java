@@ -50,7 +50,7 @@ import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.user.InjectTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
+import org.eclipse.che.selenium.core.utils.WebDriverLogsReader;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader;
@@ -485,7 +485,7 @@ public abstract class SeleniumTestHandler
       Files.createDirectories(webdriverLogsDirectory.getParent());
       Files.write(
           webdriverLogsDirectory,
-          BrowserLogsUtil.getCombinedLogs(webDriver).getBytes(Charset.forName("UTF-8")),
+          WebDriverLogsReader.getCombinedLogs(webDriver).getBytes(Charset.forName("UTF-8")),
           StandardOpenOption.CREATE);
     } catch (WebDriverException | IOException e) {
       LOG.error(format("Can't get of the logs from WebDriver for test %s", result), e);

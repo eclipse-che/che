@@ -20,7 +20,6 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.utils.BrowserLogsUtil.logBrowserLogs;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.ALL_PROJECTS_XPATH;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.CONTEXT_MENU_ID;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.EXPLORER_RIGHT_TAB_ID;
@@ -55,7 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
-import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
+import org.eclipse.che.selenium.core.utils.WebDriverLogsReader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -86,6 +85,7 @@ public class ProjectExplorer {
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private WebDriverWait loadPageTimeout;
   private WebDriverWait redrawUiElementsWait;
+  private WebDriverLogsReader webDriverLogsReader;
 
   @Inject
   public ProjectExplorer(
@@ -96,7 +96,7 @@ public class ProjectExplorer {
       Menu menu,
       CodenvyEditor editor,
       TestWebElementRenderChecker testWebElementRenderChecker,
-      BrowserLogsUtil browserLogsUtil,
+      WebDriverLogsReader webDriverLogsReader,
       SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
@@ -105,6 +105,7 @@ public class ProjectExplorer {
     this.menu = menu;
     this.editor = editor;
     this.testWebElementRenderChecker = testWebElementRenderChecker;
+    this.webDriverLogsReader = webDriverLogsReader;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     loadPageTimeout = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     redrawUiElementsWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
@@ -252,7 +253,7 @@ public class ProjectExplorer {
       // remove try-catch block after issue has been resolved
 
       if (seleniumWebDriverHelper.isVisible(By.id("ide-loader-progress-bar"))) {
-        logBrowserLogs(seleniumWebDriver);
+        webDriverLogsReader.logBrowserLogs();
         fail("Known issue https://github.com/eclipse/che/issues/8468", ex);
       }
       throw ex;
