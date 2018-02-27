@@ -156,22 +156,18 @@ public class SeleniumWebDriverHelper {
    *
    * @param elementLocator
    * @param timeout waiting time in seconds
-   * @return {@code true} - if not visible,
-   *     <p>throws {@link org.openqa.selenium.TimeoutException} - if visible after timeout.
    */
-  public boolean waitInvisibility(By elementLocator, int timeout) {
-    return webDriverWaitFactory.get(timeout).until(invisibilityOfElementLocated(elementLocator));
+  public void waitInvisibility(By elementLocator, int timeout) {
+    webDriverWaitFactory.get(timeout).until(invisibilityOfElementLocated(elementLocator));
   }
 
   /**
    * Waits until {@link WebElement} with provided locator {@link By} be invisible
    *
    * @param elementLocator
-   * @return {@code true} - if not visible,
-   *     <p>throws {@link org.openqa.selenium.TimeoutException} - if visible after timeout.
    */
-  public boolean waitInvisibility(By elementLocator) {
-    return waitInvisibility(elementLocator, DEFAULT_TIMEOUT);
+  public void waitInvisibility(By elementLocator) {
+    waitInvisibility(elementLocator, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -179,22 +175,18 @@ public class SeleniumWebDriverHelper {
    *
    * @param webElement
    * @param timeout waiting time in seconds
-   * @return {@code true} - if not visible,
-   *     <p>throws {@link org.openqa.selenium.TimeoutException} - if visible after timeout.
    */
-  public boolean waitInvisibility(WebElement webElement, int timeout) {
-    return webDriverWaitFactory.get(timeout).until(invisibilityOfAllElements(asList(webElement)));
+  public void waitInvisibility(WebElement webElement, int timeout) {
+    webDriverWaitFactory.get(timeout).until(invisibilityOfAllElements(asList(webElement)));
   }
 
   /**
    * Waits until provided {@link WebElement} be invisible
    *
    * @param webElement
-   * @return {@code true} - if not visible,
-   *     <p>throws {@link org.openqa.selenium.TimeoutException} - if visible after timeout.
    */
-  public boolean waitInvisibility(WebElement webElement) {
-    return waitInvisibility(webElement, DEFAULT_TIMEOUT);
+  public void waitInvisibility(WebElement webElement) {
+    waitInvisibility(webElement, DEFAULT_TIMEOUT);
   }
 
   /**
