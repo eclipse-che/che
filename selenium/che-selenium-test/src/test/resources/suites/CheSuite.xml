@@ -122,6 +122,9 @@
           <class name="org.eclipse.che.selenium.git.GitColorsTest"/>
           <class name="org.eclipse.che.selenium.git.InitializeAndDeleteLocalRepositoryTest"/>
           <class name="org.eclipse.che.selenium.git.SetGitCommitterTest"/>
+          <class name="org.eclipse.che.selenium.git.GitPullConflictTest"/>
+          <class name="org.eclipse.che.selenium.git.GitPullTest"/>
+          <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
           <class name="org.eclipse.che.selenium.gwt.CheckSimpleGwtAppTest"/>
           <class name="org.eclipse.che.selenium.intelligencecommand.MacrosCommandsEditorTest"/>
           <class name="org.eclipse.che.selenium.intelligencecommand.AutocompleteCommandsEditorTest"/>
