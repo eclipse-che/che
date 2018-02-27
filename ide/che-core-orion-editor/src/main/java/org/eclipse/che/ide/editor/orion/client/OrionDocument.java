@@ -88,6 +88,7 @@ public class OrionDocument extends AbstractDocument {
 
   private void fireDocumentChangeEvent(final ModelChangedEventOverlay param) {
     int startOffset = param.start();
+
     int addedCharCount = param.addedCharCount();
     int removedCharCount = param.removedCharCount();
 
