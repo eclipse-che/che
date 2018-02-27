@@ -20,7 +20,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.factories.CreateFact
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPED;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
@@ -88,21 +87,13 @@ public class CreateFactoryTest {
   }
 
   @Test
-  public void checkNewFactoryPage() {
+  public void checkGitAndConfigTabs() {
     // open tabs and check their fields
-    createFactoryPage.clickOnSourceTab(WORKSPACE_TAB_ID);
-    assertTrue(createFactoryPage.isCreateFactoryButtonDisabled());
-    createFactoryPage.clickOnWorkspaceFromList(WORKSPACE_NAME);
-    assertFalse(createFactoryPage.isCreateFactoryButtonDisabled());
-
     createFactoryPage.clickOnSourceTab(GIT_TAB_ID);
     createFactoryPage.waitGitUrlField();
 
     createFactoryPage.clickOnSourceTab(CONFIG_TAB_ID);
     createFactoryPage.waitUploadFileButton();
-
-    createFactoryPage.clickOnSourceTab(TEMPLATE_TAB_ID);
-    createFactoryPage.waitTemplateButtons();
   }
 
   @Test
