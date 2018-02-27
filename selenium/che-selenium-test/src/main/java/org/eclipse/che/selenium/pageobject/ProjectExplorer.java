@@ -20,7 +20,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADE
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.utils.BrowserLogsUtil.storeLogsToConsoleOutput;
+import static org.eclipse.che.selenium.core.utils.BrowserLogsUtil.logBrowserLogs;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.ALL_PROJECTS_XPATH;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.CONTEXT_MENU_ID;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.EXPLORER_RIGHT_TAB_ID;
@@ -252,7 +252,7 @@ public class ProjectExplorer {
       // remove try-catch block after issue has been resolved
 
       if (seleniumWebDriverHelper.isVisible(By.id("ide-loader-progress-bar"))) {
-        storeLogsToConsoleOutput(seleniumWebDriver);
+        logBrowserLogs(seleniumWebDriver);
         fail("Known issue https://github.com/eclipse/che/issues/8468", ex);
       }
       throw ex;

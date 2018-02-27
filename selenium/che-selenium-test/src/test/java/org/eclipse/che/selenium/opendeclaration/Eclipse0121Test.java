@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.opendeclaration;
 
-import static org.eclipse.che.selenium.core.utils.BrowserLogsUtil.storeLogsToConsoleOutput;
+import static org.eclipse.che.selenium.core.utils.BrowserLogsUtil.logBrowserLogs;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -73,7 +73,7 @@ public class Eclipse0121Test {
       logExternalLibraries();
       logProjectTypeChecking();
       logProjectLanguageChecking();
-      storeLogsToConsoleOutput(seleniumWebDriver);
+      logBrowserLogs(seleniumWebDriver);
 
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7161", ex);

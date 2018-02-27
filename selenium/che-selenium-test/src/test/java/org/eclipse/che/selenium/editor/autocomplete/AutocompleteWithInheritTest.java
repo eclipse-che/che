@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
-import static org.eclipse.che.selenium.core.utils.BrowserLogsUtil.storeLogsToConsoleOutput;
+import static org.eclipse.che.selenium.core.utils.BrowserLogsUtil.logBrowserLogs;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.TASK_MARKER_OVERVIEW;
 import static org.testng.Assert.fail;
@@ -124,7 +124,7 @@ public class AutocompleteWithInheritTest {
       logExternalLibraries();
       logProjectTypeChecking();
       logProjectLanguageChecking();
-      storeLogsToConsoleOutput(seleniumWebDriver);
+      logBrowserLogs(seleniumWebDriver);
 
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7161", ex);

@@ -95,7 +95,7 @@ public abstract class SeleniumTestHandler
   private String htmldumpsDir;
 
   @Inject
-  @Named("tests.webDriverLogsDir")
+  @Named("tests.webdriverlogs_dir")
   private String webDriverLogsDir;
 
   @Inject
@@ -474,17 +474,17 @@ public abstract class SeleniumTestHandler
     Set<SeleniumWebDriver> webDrivers = new HashSet<>();
     Object testInstance = result.getInstance();
     collectInjectedWebDrivers(testInstance, webDrivers);
-    webDrivers.forEach(webDriver -> getWebDriverLog(result, webDriver));
+    webDrivers.forEach(webDriver -> storeWebDriverLog(result, webDriver));
   }
 
-  private void getWebDriverLog(ITestResult result, SeleniumWebDriver webDriver) {
+  private void storeWebDriverLog(ITestResult result, SeleniumWebDriver webDriver) {
     try {
       String testReference = getTestReference(result);
       String filename = NameGenerator.generate(testReference + "_", 4) + ".log";
-      Path webdriverLogDirectory = Paths.get(webDriverLogsDir, filename);
-      Files.createDirectories(webdriverLogDirectory.getParent());
+      Path webdriverLogsDirectory = Paths.get(webDriverLogsDir, filename);
+      Files.createDirectories(webdriverLogsDirectory.getParent());
       Files.write(
-          webdriverLogDirectory,
+          webdriverLogsDirectory,
           BrowserLogsUtil.getCombinedLogs(webDriver).getBytes(Charset.forName("UTF-8")),
           StandardOpenOption.CREATE);
     } catch (WebDriverException | IOException e) {

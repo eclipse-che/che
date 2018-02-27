@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
-import static org.eclipse.che.selenium.core.utils.BrowserLogsUtil.storeLogsToConsoleOutput;
+import static org.eclipse.che.selenium.core.utils.BrowserLogsUtil.logBrowserLogs;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -101,7 +101,7 @@ public class CreateNewPackagesWithHelpCreationJavaClassTest {
       projectExplorer.waitItemInVisibleArea("TestClass2.java");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      storeLogsToConsoleOutput(seleniumWebDriver);
+      logBrowserLogs(seleniumWebDriver);
       fail("Known issue https://github.com/eclipse/che/issues/8122");
     }
   }

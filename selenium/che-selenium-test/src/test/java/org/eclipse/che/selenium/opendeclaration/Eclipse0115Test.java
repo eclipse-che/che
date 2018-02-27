@@ -77,7 +77,7 @@ public class Eclipse0115Test {
       logExternalLibraries();
       logProjectTypeChecking();
       logProjectLanguageChecking();
-      BrowserLogsUtil.storeLogsToConsoleOutput(webDriver);
+      BrowserLogsUtil.logBrowserLogs(webDriver);
 
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7161", ex);
