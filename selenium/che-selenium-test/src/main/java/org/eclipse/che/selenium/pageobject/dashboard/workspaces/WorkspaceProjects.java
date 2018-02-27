@@ -79,6 +79,7 @@ public class WorkspaceProjects {
             visibilityOfElementLocated(
                 By.xpath(String.format(Locators.PROJECT_BY_NAME, projectName))))
         .click();
+    waitProjectDetailsPage();
   }
 
   /** click on 'DELETE' button in settings of project */
@@ -86,7 +87,6 @@ public class WorkspaceProjects {
     new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(By.xpath(Locators.DELETE_PROJECT)))
         .click();
-    waitProjectDetailsPage();
   }
 
   /** click on 'DELETE IT!' button in the confirming window */
