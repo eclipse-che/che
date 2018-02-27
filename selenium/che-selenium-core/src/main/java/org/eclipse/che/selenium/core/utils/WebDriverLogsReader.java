@@ -59,11 +59,11 @@ public class WebDriverLogsReader {
   }
 
   /**
-   * combine the Network and Browser logs
+   * get all available logs of web driver
    *
    * @return logs from browser console and requests/responses on CHE api
    */
-  public String getCombinedLogs() {
+  public String getAllLogs() {
     StringBuilder combinedLogs =
         new StringBuilder("Browser console logs:\n").append("---------------------\n");
     readBrowserLogs(seleniumWebDriver)
@@ -80,8 +80,8 @@ public class WebDriverLogsReader {
    *
    * @return logs from browser console and requests/responses on CHE api
    */
-  public static String getCombinedLogs(SeleniumWebDriver seleniumWebDriver) {
-    return new WebDriverLogsReader(seleniumWebDriver).getCombinedLogs();
+  public static String getAllLogs(SeleniumWebDriver seleniumWebDriver) {
+    return new WebDriverLogsReader(seleniumWebDriver).getAllLogs();
   }
 
   /** filter data and get requests/responses that has been sent on CHE /api/ URL */
@@ -97,7 +97,7 @@ public class WebDriverLogsReader {
         data.append(extractCheRequests(jsonMessageNode));
 
       } else if (networkValue.equals("Network.responseReceived")) {
-        data.append(extractCheResponces(jsonMessageNode));
+        data.append(extractCheResponses(jsonMessageNode));
       }
     }
     return data.toString();
@@ -131,7 +131,7 @@ public class WebDriverLogsReader {
    * @param requestMessage json representation of the message object from the log
    * @return info about request from the WebDriver
    */
-  private static String extractCheResponces(JsonObject requestMessage) {
+  private static String extractCheResponses(JsonObject requestMessage) {
     JsonObject responseNode = requestMessage.getAsJsonObject("params").getAsJsonObject("response");
     StringBuilder responceInfo = new StringBuilder();
     if (isNodeFromCheTraffic(responseNode)) {
