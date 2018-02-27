@@ -10,8 +10,7 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.STOP_WORKSPACE;
-import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -20,14 +19,11 @@ import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -42,8 +38,6 @@ public class ProjectStateAfterRefreshTest {
   @Inject private Consoles consoles;
   @Inject private CodenvyEditor editor;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private Menu menu;
-  @Inject private ToastLoader toastLoader;
   @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
@@ -51,42 +45,22 @@ public class ProjectStateAfterRefreshTest {
     URL resource =
         ProjectStateAfterRefreshTest.this.getClass().getResource("/projects/guess-project");
     testProjectServiceClient.importProject(
-        workspace.getId(),
-        Paths.get(resource.toURI()),
-        PROJECT_NAME,
-        ProjectTemplates.MAVEN_SPRING);
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
     ide.open(workspace);
   }
 
   @Test
-  public void checkRestoreStateOfProjectAfterRefreshTest() throws Exception {
+  public void checkRestoreStateOfProjectAfterRefreshTest() {
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
-    consoles.closeProcessesArea();
+
     openFilesInEditor();
     checkFilesAreOpened();
+
     seleniumWebDriver.navigate().refresh();
-    try {
-      checkFilesAreOpened();
-    } catch (TimeoutException ex) {
-      // Remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7551");
-    }
-    editor.closeAllTabsByContextMenu();
-  }
-
-  @Test(priority = 1)
-  public void checkRestoreStateAfterStoppingWorkspaceTest() throws Exception {
-    // check state project without snapshot
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.quickExpandWithJavaScript();
-    openFilesInEditor();
-    menu.runCommand(WORKSPACE, STOP_WORKSPACE);
-    toastLoader.waitToastLoaderIsOpen();
-    toastLoader.waitExpectedTextInToastLoader("Workspace is not running");
-    toastLoader.clickOnStartButton();
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    projectExplorer.waitItem(PROJECT_NAME);
 
     try {
       checkFilesAreOpened();
@@ -98,23 +72,23 @@ public class ProjectStateAfterRefreshTest {
     editor.closeAllTabsByContextMenu();
   }
 
-  @Test(priority = 2)
-  public void checkRestoreStateOfProjectIfPomXmlFileOpened() throws Exception {
-    projectExplorer.waitProjectExplorer();
+  @Test
+  public void checkRestoreStateOfProjectIfPomXmlFileOpened() {
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
+
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsp");
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     editor.waitActive();
-    projectExplorer.waitProjectExplorer();
 
     seleniumWebDriver.navigate().refresh();
-
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
+
     try {
       editor.waitTabIsPresent("qa-spring-sample");
     } catch (TimeoutException ex) {
@@ -124,6 +98,7 @@ public class ProjectStateAfterRefreshTest {
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsp");
+
     editor.closeAllTabsByContextMenu();
   }
 
