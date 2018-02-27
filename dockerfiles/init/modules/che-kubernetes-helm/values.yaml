@@ -1,6 +1,7 @@
 cheDomain: 192.168.99.100.nip.io
 isHostBased: true
 tlsEnabled: false
+multiuser: false
 
 # the following section is for secure registries. when uncommented, a pull secret will be created
 #registry:

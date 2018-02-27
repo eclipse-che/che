@@ -1,0 +1,5 @@
+dependencies:
+  - name: che-postgres
+    repository: file://./charts/che-postgres/
+    version: 1.0.0
+    condition: multiuser
