@@ -96,16 +96,13 @@
           <class name="org.eclipse.che.selenium.editor.SplitEditorFeatureTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerUserCreatePolicyTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerClickCreatePolicyTest"/>
-          <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithKeepDirectory"/>
-          <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithRootFolder"/>
-          <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithSpecificBranch"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithMultiModuleTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSincePolicyTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithUntilPolicyTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckOpenFileFeatureTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckRunCommandFeatureTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckWelcomePanelOnCodenvyTest"/>
-          <class name="org.eclipse.che.selenium.factory.CreateNamedFactoryFromDashBoard"/>
+          <class name="org.eclipse.che.selenium.factory.CreateNamedFactoryFromDashboardTest"/>
           <class name="org.eclipse.che.selenium.factory.CreateFactoryFromUiWithKeepDirTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSparseCheckoutTest"/>
           <class name="org.eclipse.che.selenium.filewatcher.EditFilesWithTabsTest"/>

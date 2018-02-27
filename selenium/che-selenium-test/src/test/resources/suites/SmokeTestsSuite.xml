@@ -47,7 +47,7 @@
             <class name="org.eclipse.che.selenium.projectexplorer.CreateProjectTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.dependencies.UpdateListOfLibraryTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.ShowFileReferenceTest"/>
-            <class name="org.eclipse.che.selenium.factory.CreateNamedFactoryFromDashBoard"/>
+            <class name="org.eclipse.che.selenium.factory.CreateNamedFactoryFromDashboardTest"/>
             <class name="org.eclipse.che.selenium.mavenplugin.CheckMavenPluginTest"/>
         </classes>
     </test>
