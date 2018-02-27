@@ -96,7 +96,7 @@ public class NavigateToFileTest {
     launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 2);
   }
 
-  @Test(dataProvider = "dataForCheckingFilesCreatedWithoutIDE")
+  @Test(dataProvider = "dataToNavigateToFileCreatedOutsideIDE")
   public void shouldNavigateToFileWithJustCreatedFiles(
       String inputValueForChecking, Map<Integer, String> expectedValues) throws Exception {
 
@@ -120,15 +120,22 @@ public class NavigateToFileTest {
     assertTrue(navigateToFile.getText().isEmpty());
   }
 
-  @Test(dataProvider = "dataForCheckingFindingFileWithSymbols")
+  @Test(dataProvider = "dataToCheckNavigateByNameWithSpecialSymbols")
   public void shouldDisplayFilesFoundByMask(
       String inputValueForChecking, Map<Integer, String> expectedValues) {
+    launchNavigateToFileFromUIAndTypeValue(inputValueForChecking);
+
     try {
-      launchNavigateToFileAndCheckSuggestionsList(inputValueForChecking, expectedValues);
+      // check that suggestion list visible
+      navigateToFile.waitSuggestedPanel();
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/8735");
     }
+
+    waitExpectedItemsInNavigateToFileDropdown(expectedValues);
+    navigateToFile.closeNavigateToFileForm();
+    navigateToFile.waitFormToClose();
   }
 
   private void addHiddenFoldersAndFileThroughProjectService() throws Exception {
@@ -172,16 +179,6 @@ public class NavigateToFileTest {
     editor.closeFileByNameWithSaving(openedFileNameInTheTab);
   }
 
-  private void launchNavigateToFileAndCheckSuggestionsList(
-      String navigatingValue, Map<Integer, String> expectedItems) {
-
-    launchNavigateToFileFromUIAndTypeValue(navigatingValue);
-    navigateToFile.waitSuggestedPanel();
-    waitExpectedItemsInNavigateToFileDropdown(expectedItems);
-    navigateToFile.closeNavigateToFileForm();
-    navigateToFile.waitFormToClose();
-  }
-
   private void launchNavigateToFileFromUIAndTypeValue(String navigatingValue) {
     loader.waitOnClosed();
     menu.runCommand(ASSISTANT, NAVIGATE_TO_FILE);
@@ -218,7 +215,7 @@ public class NavigateToFileTest {
   }
 
   @DataProvider
-  private Object[][] dataForCheckingFilesCreatedWithoutIDE() {
+  private Object[][] dataToNavigateToFileCreatedOutsideIDE() {
     return new Object[][] {
       {
         "c",
@@ -229,7 +226,7 @@ public class NavigateToFileTest {
   }
 
   @DataProvider
-  private Object[][] dataForCheckingFindingFileWithSymbols() {
+  private Object[][] dataToCheckNavigateByNameWithSpecialSymbols() {
     return new Object[][] {
       {
         "*.java",
