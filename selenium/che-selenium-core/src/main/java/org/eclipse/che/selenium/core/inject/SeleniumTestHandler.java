@@ -474,10 +474,10 @@ public abstract class SeleniumTestHandler
     Set<SeleniumWebDriver> webDrivers = new HashSet<>();
     Object testInstance = result.getInstance();
     collectInjectedWebDrivers(testInstance, webDrivers);
-    webDrivers.forEach(webDriver -> storeWebDriverLog(result, webDriver));
+    webDrivers.forEach(webDriver -> storeWebDriverLogs(result, webDriver));
   }
 
-  private void storeWebDriverLog(ITestResult result, SeleniumWebDriver webDriver) {
+  private void storeWebDriverLogs(ITestResult result, SeleniumWebDriver webDriver) {
     try {
       String testReference = getTestReference(result);
       String filename = NameGenerator.generate(testReference + "_", 4) + ".log";
