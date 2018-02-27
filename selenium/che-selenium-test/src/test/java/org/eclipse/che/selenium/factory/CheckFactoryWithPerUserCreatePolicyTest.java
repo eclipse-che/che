@@ -74,7 +74,6 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
     try {
       seleniumWebDriver.switchFromDashboardIframeToIde();
     } catch (TimeoutException ex) {
-      browserLogsUtil.storeLogs();
       LOG.info(
           String.format(
               CheckFactoryWithPerUserCreatePolicyTest.class.getSimpleName(),

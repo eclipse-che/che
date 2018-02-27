@@ -94,9 +94,9 @@ public abstract class SeleniumTestHandler
   @Named("tests.htmldumps_dir")
   private String htmldumpsDir;
 
-  //  @Inject
-  //  @Named("tests.webDriverLogsDir")
-  //  private String webDriverLogsDir;
+  @Inject
+  @Named("tests.webDriverLogsDir")
+  private String webDriverLogsDir;
 
   @Inject
   @Named("tests.workspacelogs_dir")
@@ -133,7 +133,6 @@ public abstract class SeleniumTestHandler
   @Inject private TestGitHubServiceClient gitHubClientService;
   @Inject private TestWorkspaceLogsReader testWorkspaceLogsReader;
   @Inject private SeleniumTestStatistics seleniumTestStatistics;
-  @Inject private BrowserLogsUtil browserLogsUtil;
 
   private final Injector injector;
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
@@ -308,7 +307,7 @@ public abstract class SeleniumTestHandler
       captureScreenshot(result);
       captureHtmlSource(result);
       captureTestWorkspaceLogs(result);
-      //   getWebDriverLogs(result);
+      storeWebDriverLogs(result);
     }
   }
 
@@ -471,19 +470,27 @@ public abstract class SeleniumTestHandler
             });
   }
 
-  //  private void getWebDriverLogs(ITestResult result) {
-  //    try {
-  //      String filename = result.getName() + ".log";
-  //      Path webdriverLogDirectory = Paths.get(webDriverLogsDir, filename);
-  //      Files.createDirectories(webdriverLogDirectory.getParent());
-  //      Files.write(
-  //          webdriverLogDirectory,
-  //          browserLogsUtil.getCombinedLogs().getBytes(Charset.forName("UTF-8")),
-  //          StandardOpenOption.CREATE);
-  //    } catch (WebDriverException | IOException e) {
-  //      LOG.error(format("Can't get of the logs from WebDriwer for test %s", result), e);
-  //    }
-  //  }
+  private void storeWebDriverLogs(ITestResult result) {
+    Set<SeleniumWebDriver> webDrivers = new HashSet<>();
+    Object testInstance = result.getInstance();
+    collectInjectedWebDrivers(testInstance, webDrivers);
+    webDrivers.forEach(webDriver -> getWebDriverLog(result, webDriver));
+  }
+
+  private void getWebDriverLog(ITestResult result, SeleniumWebDriver webDriver) {
+    try {
+      String testReference = getTestReference(result);
+      String filename = NameGenerator.generate(testReference + "_", 4) + ".log";
+      Path webdriverLogDirectory = Paths.get(webDriverLogsDir, filename);
+      Files.createDirectories(webdriverLogDirectory.getParent());
+      Files.write(
+          webdriverLogDirectory,
+          BrowserLogsUtil.getCombinedLogs(webDriver).getBytes(Charset.forName("UTF-8")),
+          StandardOpenOption.CREATE);
+    } catch (WebDriverException | IOException e) {
+      LOG.error(format("Can't get of the logs from WebDriver for test %s", result), e);
+    }
+  }
 
   private void dumpHtmlCodeFromTheCurrentPage(ITestResult result, SeleniumWebDriver webDriver) {
     String testReference = getTestReference(result);

@@ -10,17 +10,18 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.utils.BrowserLogsUtil.storeLogsToConsoleOutput;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -52,7 +53,7 @@ public class CreateNewPackagesWithHelpCreationJavaClassTest {
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private HttpJsonRequestFactory httpJsonRequestFactory;
   @Inject private TestApiEndpointUrlProvider testApiEndpointUrlProvider;
-  @Inject private BrowserLogsUtil browserLogsUtil;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -100,7 +101,7 @@ public class CreateNewPackagesWithHelpCreationJavaClassTest {
       projectExplorer.waitItemInVisibleArea("TestClass2.java");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      browserLogsUtil.storeLogs();
+      storeLogsToConsoleOutput(seleniumWebDriver);
       fail("Known issue https://github.com/eclipse/che/issues/8122");
     }
   }

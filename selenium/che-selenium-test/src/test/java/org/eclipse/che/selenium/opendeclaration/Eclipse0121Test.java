@@ -10,15 +10,16 @@
  */
 package org.eclipse.che.selenium.opendeclaration;
 
+import static org.eclipse.che.selenium.core.utils.BrowserLogsUtil.storeLogsToConsoleOutput;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -47,7 +48,7 @@ public class Eclipse0121Test {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private BrowserLogsUtil browserLogsUtil;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -72,7 +73,7 @@ public class Eclipse0121Test {
       logExternalLibraries();
       logProjectTypeChecking();
       logProjectLanguageChecking();
-      browserLogsUtil.storeLogs();
+      storeLogsToConsoleOutput(seleniumWebDriver);
 
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7161", ex);
