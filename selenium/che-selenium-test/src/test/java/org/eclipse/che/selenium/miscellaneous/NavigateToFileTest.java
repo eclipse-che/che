@@ -35,6 +35,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NavigateToFile;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -95,7 +96,7 @@ public class NavigateToFileTest {
     launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 2);
   }
 
-  @Test(dataProvider = "dataForCheckingFilesCreatedWithoutIDE")
+  @Test(dataProvider = "dataToNavigateToFileCreatedOutsideIDE")
   public void shouldNavigateToFileWithJustCreatedFiles(
       String inputValueForChecking, Map<Integer, String> expectedValues) throws Exception {
 
@@ -119,6 +120,24 @@ public class NavigateToFileTest {
     assertTrue(navigateToFile.getText().isEmpty());
   }
 
+  @Test(dataProvider = "dataToCheckNavigateByNameWithSpecialSymbols")
+  public void shouldDisplayFilesFoundByMask(
+      String inputValueForChecking, Map<Integer, String> expectedValues) {
+    launchNavigateToFileFromUIAndTypeValue(inputValueForChecking);
+
+    try {
+      // check that suggestion list visible
+      navigateToFile.waitSuggestedPanel();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/8735");
+    }
+
+    waitExpectedItemsInNavigateToFileDropdown(expectedValues);
+    navigateToFile.closeNavigateToFileForm();
+    navigateToFile.waitFormToClose();
+  }
+
   private void addHiddenFoldersAndFileThroughProjectService() throws Exception {
     testProjectServiceClient.createFolder(
         workspace.getId(), PROJECT_NAME + "/" + HIDDEN_FOLDER_NAME);
@@ -139,7 +158,6 @@ public class NavigateToFileTest {
 
     // extract the path (without opened class)
     String dropdownVerificationPath = expectedItems.get(numValueFromDropDawnList).split(" ")[1];
-
     String openedFileWithExtension = expectedItems.get(numValueFromDropDawnList).split(" ")[0];
 
     // extract the name of opened files that display in a tab (the ".java" extension are not shown
@@ -188,12 +206,6 @@ public class NavigateToFileTest {
             2, "AppController.java (/NavigateFile_2/src/main/java/org/eclipse/qa/examples)")
       },
       {
-        "i",
-        ImmutableMap.of(
-            1, "index.jsp (/NavigateFile/src/main/webapp)",
-            2, "index.jsp (/NavigateFile_2/src/main/webapp)")
-      },
-      {
         "R",
         ImmutableMap.of(
             1, "README.md (/NavigateFile)",
@@ -203,12 +215,48 @@ public class NavigateToFileTest {
   }
 
   @DataProvider
-  private Object[][] dataForCheckingFilesCreatedWithoutIDE() {
+  private Object[][] dataToNavigateToFileCreatedOutsideIDE() {
     return new Object[][] {
       {
         "c",
         ImmutableMap.of(
             1, "createdFrom.api (/NavigateFile)", 2, "createdFrom.con (/NavigateFile_2)")
+      }
+    };
+  }
+
+  @DataProvider
+  private Object[][] dataToCheckNavigateByNameWithSpecialSymbols() {
+    return new Object[][] {
+      {
+        "*.java",
+        ImmutableMap.of(
+            1, "AppController.java (/NavigateFile/src/main/java/org/eclipse/qa/examples)",
+            2, "AppController.java (/NavigateFile_2/src/main/java/org/eclipse/qa/examples)")
+      },
+      {
+        "ind*.jsp",
+        ImmutableMap.of(
+            1, "index.jsp (/NavigateFile/src/main/webapp)",
+            2, "index.jsp (/NavigateFile_2/src/main/webapp)")
+      },
+      {
+        "*R*.md",
+        ImmutableMap.of(
+            1, "README.md (/NavigateFile)",
+            2, "README.md (/NavigateFile_2)")
+      },
+      {
+        "we?.xml",
+        ImmutableMap.of(
+            1, "web.xml (/NavigateFile)",
+            2, "web.xml (/NavigateFile_2)")
+      },
+      {
+        "gu?ss_n?m.j?p",
+        ImmutableMap.of(
+            1, "web.xml (/NavigateFile)",
+            2, "web.xml (/NavigateFile_2)")
       }
     };
   }

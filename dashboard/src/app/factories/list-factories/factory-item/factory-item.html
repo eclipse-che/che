@@ -12,6 +12,7 @@
 -->
 <che-list-item flex ng-mouseover="hover=true" ng-mouseout="hover=false">
   <div flex="100"
+       id="{{factoryItemController.factory.name ? factoryItemController.factory.name : factoryItemController.getFactoryLinks()[0]}}"
        layout="row"
        layout-align="start stretch"
        class="che-list-item-row">
@@ -33,14 +34,14 @@
            ng-click="factoryItemController.redirectToFactoryDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>Factory</span>
         <span uib-tooltip="Created: {{factoryItemController.factory.creator.created | amDateFormat:'dddd, MMMM Do, YYYY'}}"
-              class="che-hover">{{factoryItemController.factory.name ? factoryItemController.factory.name : factoryItemController.getFactoryLinks()[0]}}</span>
+              class="che-hover" name="factory-name">{{factoryItemController.factory.name ? factoryItemController.factory.name : factoryItemController.getFactoryLinks()[0]}}</span>
       </div>
       <div flex-gt-xs="60" ng-click="factoryItemController.redirectToFactoryDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>RAM</span>
-        <span class="factory-consumed-value">{{factoryItemController.getMemoryLimit()}}</span>
+        <span class="factory-consumed-value" name="factory-ram-limit">{{factoryItemController.getMemoryLimit()}}</span>
       </div>
       <div flex-gt-xs="15">
-        <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
+        <span class="che-xs-header noselect" name="open-factory" hide-gt-xs>Actions</span>
         <span class="che-list-actions">
           <a uib-tooltip="Open in IDE" ng-href="#/load-factory/{{factoryItemController.factory.id}}">
             <span class="fa fa-chevron-circle-right factory-action"></span>

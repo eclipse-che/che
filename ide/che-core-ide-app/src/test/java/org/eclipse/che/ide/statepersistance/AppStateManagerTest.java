@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.statepersistance;
 
+import static org.eclipse.che.ide.statepersistance.AppStateConstants.APP_STATE;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -31,6 +32,7 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.statepersistance.StateComponent;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
@@ -55,6 +57,7 @@ public class AppStateManagerTest {
 
   @Mock private StateComponentRegistry stateComponentRegistry;
   @Mock private Provider<StateComponentRegistry> stateComponentRegistryProvider;
+  @Mock private Provider<PerspectiveManager> perspectiveManagerProvider;
   @Mock private StateComponent component1;
   @Mock private StateComponent component2;
   @Mock private Provider<StateComponent> component1Provider;
@@ -97,10 +100,11 @@ public class AppStateManagerTest {
     when(component1.getId()).thenReturn("component1");
     when(component2.getId()).thenReturn("component2");
     when(preferencesManager.flushPreferences()).thenReturn(promise);
-    when(preferencesManager.getValue(AppStateManager.PREFERENCE_PROPERTY_NAME)).thenReturn("");
+    when(preferencesManager.getValue(APP_STATE)).thenReturn("");
     when(jsonFactory.parse(anyString())).thenReturn(pref = Json.createObject());
     appStateManager =
         new AppStateManager(
+            perspectiveManagerProvider,
             stateComponentRegistryProvider,
             preferencesManager,
             jsonFactory,
@@ -160,7 +164,7 @@ public class AppStateManagerTest {
     pref.put(WS_ID, Json.createObject());
     appStateManager.restoreWorkspaceState();
 
-    verify(preferencesManager).getValue(AppStateManager.PREFERENCE_PROPERTY_NAME);
+    verify(preferencesManager).getValue(APP_STATE);
   }
 
   @Test

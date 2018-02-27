@@ -140,7 +140,7 @@ public class Workspaces {
         visibilityOfElementLocated(By.xpath(Locators.NO_WORKSPACE_FOUND)));
   }
 
-  // select workspaces by checkboxes
+  // select workspace by checkbox
   public void selectWorkspaceByCheckbox(String workspaceName) {
     redrawUiElementsTimeout
         .until(
