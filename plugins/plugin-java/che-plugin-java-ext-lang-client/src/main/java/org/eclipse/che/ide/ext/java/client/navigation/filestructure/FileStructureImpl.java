@@ -10,9 +10,6 @@
  */
 package org.eclipse.che.ide.ext.java.client.navigation.filestructure;
 
-import static com.google.common.collect.Iterables.all;
-import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
-
 import com.google.common.base.Predicate;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
@@ -25,7 +22,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import elemental.events.Event;
-import java.util.Collections;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -44,6 +40,12 @@ import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 import org.eclipse.che.ide.util.input.SignalEvent;
 import org.eclipse.che.ide.util.input.SignalEventUtils;
+import org.eclipse.che.ide.util.loging.Log;
+
+import java.util.Collections;
+
+import static com.google.common.collect.Iterables.all;
+import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
 
 /**
  * Implementation of {@link FileStructure} view.
@@ -112,6 +114,7 @@ final class FileStructureImpl extends Window implements FileStructure {
   /** {@inheritDoc} */
   @Override
   public void setStructure(CompilationUnit compilationUnit, boolean showInheritedMembers) {
+    Log.info(getClass(), compilationUnit.toString());
     showInheritedLabel.setText(
         showInheritedMembers
             ? locale.hideInheritedMembersLabel()

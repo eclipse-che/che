@@ -10,12 +10,8 @@
  */
 package org.eclipse.che.ide.ext.java.client.navigation.service;
 
-import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
-import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -32,6 +28,11 @@ import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
+
+import java.util.List;
+
+import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 
 /** @author Evgen Vidolob */
 @Singleton
@@ -272,7 +273,7 @@ public class JavaNavigationServiceImpl implements JavaNavigationService {
     return requestFactory
         .createGetRequest(url)
         .header(ACCEPT, APPLICATION_JSON)
-        .loader(loaderFactory.newLoader("Getting information about ..."))
+        .loader(loaderFactory.newLoader("Getting information about " + fqn))
         .send(unmarshallerFactory.newUnmarshaller(CompilationUnit.class));
   }
 
