@@ -218,7 +218,7 @@ public class ProjectExplorer {
   }
 
   /** Clicks on project explorer tab and waits its appearance. */
-  public void openAndWaitProjectExplorer() {
+  public void openAndWait() {
     clickOnProjectExplorerTab();
     waitProjectExplorer();
   }

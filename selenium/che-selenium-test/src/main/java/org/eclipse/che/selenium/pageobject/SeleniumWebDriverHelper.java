@@ -157,7 +157,7 @@ public class SeleniumWebDriverHelper {
    * @param elementLocator
    * @param timeout waiting time in seconds
    * @return {@code true} - if not visible,
-   *     <p>throws {@link org.openqa.selenium.TimeoutException} - if visible.
+   *     <p>throws {@link org.openqa.selenium.TimeoutException} - if visible after timeout.
    */
   public boolean waitInvisibility(By elementLocator, int timeout) {
     return webDriverWaitFactory.get(timeout).until(invisibilityOfElementLocated(elementLocator));
@@ -168,7 +168,7 @@ public class SeleniumWebDriverHelper {
    *
    * @param elementLocator
    * @return {@code true} - if not visible,
-   *     <p>throws {@link org.openqa.selenium.TimeoutException} - if visible.
+   *     <p>throws {@link org.openqa.selenium.TimeoutException} - if visible after timeout.
    */
   public boolean waitInvisibility(By elementLocator) {
     return waitInvisibility(elementLocator, DEFAULT_TIMEOUT);
@@ -180,7 +180,7 @@ public class SeleniumWebDriverHelper {
    * @param webElement
    * @param timeout waiting time in seconds
    * @return {@code true} - if not visible,
-   *     <p>throws {@link org.openqa.selenium.TimeoutException} - if visible.
+   *     <p>throws {@link org.openqa.selenium.TimeoutException} - if visible after timeout.
    */
   public boolean waitInvisibility(WebElement webElement, int timeout) {
     return webDriverWaitFactory.get(timeout).until(invisibilityOfAllElements(asList(webElement)));
@@ -191,7 +191,7 @@ public class SeleniumWebDriverHelper {
    *
    * @param webElement
    * @return {@code true} - if not visible,
-   *     <p>throws {@link org.openqa.selenium.TimeoutException} - if visible.
+   *     <p>throws {@link org.openqa.selenium.TimeoutException} - if visible after timeout.
    */
   public boolean waitInvisibility(WebElement webElement) {
     return waitInvisibility(webElement, DEFAULT_TIMEOUT);
