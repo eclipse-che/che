@@ -251,6 +251,26 @@ public class SearcherTest {
   }
 
   @Test
+  public void shouldBeAbleToSearchByFileNamePattern()
+      throws InvalidQueryException, QueryExecutionException, IOException {
+    // given
+    contentBuilder
+        .createFolder("folder")
+        .createFile("xxx.txt", TEST_CONTENT[2])
+        .createFile("yyy.txt", TEST_CONTENT[1])
+        .createFile("zzz.txt", TEST_CONTENT[2]);
+    searcher.add(contentBuilder.getCurrentFolder());
+    // when
+    // then
+    assertFind(new QueryExpression().setName("x??.txt"), "/folder/xxx.txt");
+    assertFind(
+        new QueryExpression().setName("*.txt"),
+        "/folder/xxx.txt",
+        "/folder/yyy.txt",
+        "/folder/zzz.txt");
+  }
+
+  @Test
   public void shouldBeAbleToSearchWithPositions()
       throws InvalidQueryException, QueryExecutionException, IOException {
     // given
