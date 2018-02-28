@@ -16,26 +16,29 @@ import static org.openqa.selenium.logging.LogType.PERFORMANCE;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.net.URL;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.List;
-import org.openqa.selenium.WebDriver;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.logging.LogEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Read and store browser logs to the test logs. Log level and type are defined in {@link
- * org.eclipse.che.selenium.core.SeleniumWebDriver#doCreateDriver(URL)}
- */
-public class BrowserLogsUtil {
-  private static final Logger LOG = LoggerFactory.getLogger(BrowserLogsUtil.class);
+@Singleton
+public class WebDriverLogsReader {
+  private static final Logger LOG = LoggerFactory.getLogger(WebDriverLogsReader.class);
+  private SeleniumWebDriver seleniumWebDriver;
 
+  @Inject
+  public WebDriverLogsReader(SeleniumWebDriver seleniumWebDriver) {
+    this.seleniumWebDriver = seleniumWebDriver;
+  }
   /**
    * read logs from browser console
    *
    * @return log messages from browser console
    */
-  public static List<LogEntry> getConsoleLogs(WebDriver seleniumWebDriver) {
+  public List<LogEntry> readBrowserLogs() {
     return seleniumWebDriver.manage().logs().get(BROWSER).getAll();
   }
 
@@ -44,14 +47,31 @@ public class BrowserLogsUtil {
    *
    * @return all types of performance logs
    */
-  public static List<LogEntry> getPerformanceLogs(WebDriver seleniumWebDriver) {
+  public List<LogEntry> readPerformanceLogs() {
     return seleniumWebDriver.manage().logs().get(PERFORMANCE).getAll();
   }
 
   /** store browser logs to the test logs */
-  public static void storeLogsToConsoleOutput(WebDriver seleniumWebDriver) {
-    getConsoleLogs(seleniumWebDriver)
+  public void logBrowserLogs() {
+    readBrowserLogs()
         .forEach(logEntry -> LOG.info("{} {}", logEntry.getLevel(), logEntry.getMessage()));
+  }
+
+  /**
+   * get all available logs of web driver
+   *
+   * @return logs from browser console and requests/responses on CHE api
+   */
+  public String getAllLogs() {
+    StringBuilder combinedLogs =
+        new StringBuilder("Browser console logs:\n").append("---------------------\n");
+    readBrowserLogs()
+        .forEach(
+            logEntry ->
+                combinedLogs
+                    .append(String.format("%s  %s \n", logEntry.getLevel(), logEntry.getMessage()))
+                    .append("\n"));
+    return combinedLogs.append(readNetworkLogs()).toString();
   }
 
   /**
@@ -59,37 +79,26 @@ public class BrowserLogsUtil {
    *
    * @return logs from browser console and requests/responses on CHE api
    */
-  public static String getCombinedLogs(WebDriver seleniumWebDriver) {
-    StringBuilder combinedLogs =
-        new StringBuilder("Browser console logs:\n").append("---------------------\n");
-    getConsoleLogs(seleniumWebDriver)
-        .forEach(
-            logEntry ->
-                combinedLogs
-                    .append(String.format("%s  %s \n", logEntry.getLevel(), logEntry.getMessage()))
-                    .append("\n"));
-    return combinedLogs.append(getNetworkDataSentOnCheApi(seleniumWebDriver)).toString();
+  public String getAllLogs(SeleniumWebDriver seleniumWebDriver) {
+    return new WebDriverLogsReader(seleniumWebDriver).getAllLogs();
   }
 
   /** filter data and get requests/responses that has been sent on CHE /api/ URL */
-  public static String getNetworkDataSentOnCheApi(WebDriver seleniumWebDriver) {
+  public String readNetworkLogs() {
     StringBuilder data = new StringBuilder("Network logs: \n").append("---------------\n");
     JsonParser jsonParser = new JsonParser();
-    getPerformanceLogs(seleniumWebDriver)
-        .forEach(
-            logEntry -> {
-              JsonElement jsonElement = jsonParser.parse(logEntry.getMessage());
-              JsonObject jsonMessageNode =
-                  jsonElement.getAsJsonObject().get("message").getAsJsonObject();
-              String networkValue = jsonMessageNode.get("method").getAsString();
+    for (LogEntry logEntry : readPerformanceLogs()) {
+      JsonElement jsonElement = jsonParser.parse(logEntry.getMessage());
+      JsonObject jsonMessageNode = jsonElement.getAsJsonObject().get("message").getAsJsonObject();
+      String networkValue = jsonMessageNode.get("method").getAsString();
 
-              if (networkValue.equals("Network.requestWillBeSent")) {
-                data.append(getRequestsSentOnChe(jsonMessageNode));
+      if (networkValue.equals("Network.requestWillBeSent")) {
+        data.append(extractCheRequests(jsonMessageNode));
 
-              } else if (networkValue.equals("Network.responseReceived")) {
-                data.append(getResponsesSentOnChe(jsonMessageNode));
-              }
-            });
+      } else if (networkValue.equals("Network.responseReceived")) {
+        data.append(extractCheResponses(jsonMessageNode));
+      }
+    }
     return data.toString();
   }
 
@@ -100,10 +109,10 @@ public class BrowserLogsUtil {
    * @param requestMessage json representation of the message object from the log
    * @return info about request from the WebDriver
    */
-  private static String getRequestsSentOnChe(JsonObject requestMessage) {
+  private static String extractCheRequests(JsonObject requestMessage) {
     JsonObject requestNode = requestMessage.getAsJsonObject("params").getAsJsonObject("request");
     StringBuilder requestInfo = new StringBuilder();
-    if (isLogEntryContainsApiUrl(requestNode)) {
+    if (isNodeFromCheTraffic(requestNode)) {
       requestInfo
           .append("Request Info :---------------> \n")
           .append("Method: " + requestNode.get("method"))
@@ -121,10 +130,10 @@ public class BrowserLogsUtil {
    * @param requestMessage json representation of the message object from the log
    * @return info about request from the WebDriver
    */
-  private static String getResponsesSentOnChe(JsonObject requestMessage) {
+  private static String extractCheResponses(JsonObject requestMessage) {
     JsonObject responseNode = requestMessage.getAsJsonObject("params").getAsJsonObject("response");
     StringBuilder responceInfo = new StringBuilder();
-    if (isLogEntryContainsApiUrl(responseNode)) {
+    if (isNodeFromCheTraffic(responseNode)) {
       responceInfo
           .append("Response Info : <--------------- \n")
           .append("Method: " + responseNode.get("status"))
@@ -135,7 +144,7 @@ public class BrowserLogsUtil {
     return responceInfo.toString();
   }
 
-  private static boolean isLogEntryContainsApiUrl(JsonObject node) {
+  private static boolean isNodeFromCheTraffic(JsonObject node) {
     return (node.get("url").isJsonNull()) ? false : node.get("url").getAsString().contains("/api/");
   }
 }

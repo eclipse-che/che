@@ -50,7 +50,7 @@ import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.user.InjectTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
+import org.eclipse.che.selenium.core.utils.WebDriverLogsReader;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader;
@@ -95,7 +95,7 @@ public abstract class SeleniumTestHandler
   private String htmldumpsDir;
 
   @Inject
-  @Named("tests.webDriverLogsDir")
+  @Named("tests.webdriverlogs_dir")
   private String webDriverLogsDir;
 
   @Inject
@@ -474,21 +474,23 @@ public abstract class SeleniumTestHandler
     Set<SeleniumWebDriver> webDrivers = new HashSet<>();
     Object testInstance = result.getInstance();
     collectInjectedWebDrivers(testInstance, webDrivers);
-    webDrivers.forEach(webDriver -> getWebDriverLog(result, webDriver));
+    webDrivers.forEach(webDriver -> storeWebDriverLogs(result, webDriver));
   }
 
-  private void getWebDriverLog(ITestResult result, SeleniumWebDriver webDriver) {
+  private void storeWebDriverLogs(ITestResult result, SeleniumWebDriver webDriver) {
     try {
       String testReference = getTestReference(result);
       String filename = NameGenerator.generate(testReference + "_", 4) + ".log";
-      Path webdriverLogDirectory = Paths.get(webDriverLogsDir, filename);
-      Files.createDirectories(webdriverLogDirectory.getParent());
+      Path webdriverLogsDirectory = Paths.get(webDriverLogsDir, filename);
+      Files.createDirectories(webdriverLogsDirectory.getParent());
       Files.write(
-          webdriverLogDirectory,
-          BrowserLogsUtil.getCombinedLogs(webDriver).getBytes(Charset.forName("UTF-8")),
+          webdriverLogsDirectory,
+          new WebDriverLogsReader(webDriver)
+              .getAllLogs(webDriver)
+              .getBytes(Charset.forName("UTF-8")),
           StandardOpenOption.CREATE);
     } catch (WebDriverException | IOException e) {
-      LOG.error(format("Can't get of the logs from WebDriver for test %s", result), e);
+      LOG.error(format("Can't store web driver logs related to test %s.", result), e);
     }
   }
 

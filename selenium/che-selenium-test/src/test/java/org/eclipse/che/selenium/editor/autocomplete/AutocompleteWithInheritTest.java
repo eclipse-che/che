@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
-import static org.eclipse.che.selenium.core.utils.BrowserLogsUtil.storeLogsToConsoleOutput;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.TASK_MARKER_OVERVIEW;
 import static org.testng.Assert.fail;
@@ -22,6 +21,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
+import org.eclipse.che.selenium.core.utils.WebDriverLogsReader;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType;
@@ -62,6 +62,7 @@ public class AutocompleteWithInheritTest {
   @Inject private MavenPluginStatusBar mavenPluginStatusBar;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private WebDriverLogsReader webDriverLogsReader;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -124,7 +125,7 @@ public class AutocompleteWithInheritTest {
       logExternalLibraries();
       logProjectTypeChecking();
       logProjectLanguageChecking();
-      storeLogsToConsoleOutput(seleniumWebDriver);
+      webDriverLogsReader.logBrowserLogs();
 
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7161", ex);
