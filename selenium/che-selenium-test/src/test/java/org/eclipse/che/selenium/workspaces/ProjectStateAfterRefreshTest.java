@@ -76,7 +76,7 @@ public class ProjectStateAfterRefreshTest {
   public void checkRestoreStateOfProjectIfPomXmlFileOpened() {
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
 
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");

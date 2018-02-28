@@ -10,11 +10,12 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.EDIT;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -211,7 +212,7 @@ public class OpenFileWithHelpContextMenuTest {
     loader.waitOnClosed();
     projectExplorer.waitItem(pathToFile);
     projectExplorer.openContextMenuByPathSelectedItem(pathToFile);
-    projectExplorer.clickOnNewContextMenuItem(TestProjectExplorerContextMenuConstants.EDIT);
+    projectExplorer.clickOnNewContextMenuItem(EDIT);
     loader.waitOnClosed();
     editor.waitTabIsPresent(fileName);
     loader.waitOnClosed();

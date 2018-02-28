@@ -10,9 +10,15 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.NEW;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.C_FILE;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.C_PLUS_PLUS_FILE;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.H_FILE;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.PYTHON_FILE;
+
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuItems;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -75,57 +81,29 @@ public class CreateProjectsForArtikPluginTest {
   @Test
   public void createCProjectTest() throws Exception {
     createProject(NAME_C_PROJECT, TYPE_OF_PROJECT_C);
-    createAndCheckNewFile(
-        NAME_C_PROJECT,
-        NAME_C_FILE,
-        TestProjectExplorerContextMenuConstants.SubMenuNew.C_FILE,
-        ".c");
+    createAndCheckNewFile(NAME_C_PROJECT, NAME_C_FILE, C_FILE, ".c");
     checkTextInEditorForFile(TEXT_IN_C_FILE, NAME_C_FILE + ".c");
-    createAndCheckNewFile(
-        NAME_C_PROJECT,
-        NAME_H_FILE,
-        TestProjectExplorerContextMenuConstants.SubMenuNew.H_FILE,
-        ".h");
+    createAndCheckNewFile(NAME_C_PROJECT, NAME_H_FILE, H_FILE, ".h");
     checkTextInEditorForFile(TEXT_IN_H_FILE, NAME_H_FILE + ".h");
-    createAndCheckNewFile(
-        NAME_C_PROJECT,
-        NAME_CPP_FILE,
-        TestProjectExplorerContextMenuConstants.SubMenuNew.C_PLUS_PLUS_FILE,
-        ".cpp");
+    createAndCheckNewFile(NAME_C_PROJECT, NAME_CPP_FILE, C_PLUS_PLUS_FILE, ".cpp");
     checkTextInEditorForFile(TEXT_IN_CPP_FILE, NAME_CPP_FILE + ".cpp");
   }
 
   @Test
   public void createCPlusPlusProjectTest() throws Exception {
     createProject(NAME_CPP_PROJECT, TYPE_OF_PROJECT_CPP);
-    createAndCheckNewFile(
-        NAME_CPP_PROJECT,
-        NAME_C_FILE,
-        TestProjectExplorerContextMenuConstants.SubMenuNew.C_FILE,
-        ".c");
+    createAndCheckNewFile(NAME_CPP_PROJECT, NAME_C_FILE, C_FILE, ".c");
     checkTextInEditorForFile(TEXT_IN_C_FILE, NAME_C_FILE + ".c");
-    createAndCheckNewFile(
-        NAME_CPP_PROJECT,
-        NAME_H_FILE,
-        TestProjectExplorerContextMenuConstants.SubMenuNew.H_FILE,
-        ".h");
+    createAndCheckNewFile(NAME_CPP_PROJECT, NAME_H_FILE, H_FILE, ".h");
     checkTextInEditorForFile(TEXT_IN_H_FILE, NAME_H_FILE + ".h");
-    createAndCheckNewFile(
-        NAME_CPP_PROJECT,
-        NAME_CPP_FILE,
-        TestProjectExplorerContextMenuConstants.SubMenuNew.C_PLUS_PLUS_FILE,
-        ".cpp");
+    createAndCheckNewFile(NAME_CPP_PROJECT, NAME_CPP_FILE, C_PLUS_PLUS_FILE, ".cpp");
     checkTextInEditorForFile(TEXT_IN_CPP_FILE, NAME_CPP_FILE + ".cpp");
   }
 
   @Test
   public void createPythonProjectTest() throws Exception {
     createProject(NAME_PYTHON_PROJECT, TYPE_OF_PROJECT_PYTHON);
-    createAndCheckNewFile(
-        NAME_PYTHON_PROJECT,
-        NAME_PYTHON_FILE,
-        TestProjectExplorerContextMenuConstants.SubMenuNew.PYTHON_FILE,
-        ".py");
+    createAndCheckNewFile(NAME_PYTHON_PROJECT, NAME_PYTHON_FILE, PYTHON_FILE, ".py");
     checkTextInEditorForFile(TEXT_IN_PYTHON_FILE, NAME_PYTHON_FILE + ".py");
   }
 
@@ -142,17 +120,17 @@ public class CreateProjectsForArtikPluginTest {
   }
 
   private void createAndCheckNewFile(
-      String projectName, String fileName, String type, String fileExt) {
+      String projectName, String fileName, ContextMenuItems type, String fileExt) {
 
-    projectExplorer.selectItem(projectName);
+    projectExplorer.waitAndSelectItem(projectName);
     projectExplorer.openContextMenuByPathSelectedItem(projectName);
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
+    projectExplorer.clickOnItemInContextMenu(NEW);
     projectExplorer.clickOnItemInContextMenu(type);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(fileName);
     askForValueDialog.clickOkBtn();
     loader.waitOnClosed();
-    projectExplorer.waitItemInVisibleArea(fileName + fileExt);
+    projectExplorer.waitVisibilityByName(fileName + fileExt);
     projectExplorer.openItemByPath(projectName + "/" + fileName + fileExt);
   }
 

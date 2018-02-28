@@ -81,7 +81,7 @@ public class AmendCommitTest {
   public void checkAmendPreviousCommit() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
     askDialog.confirmAndWaitClosed();
@@ -91,13 +91,13 @@ public class AmendCommitTest {
     loader.waitOnClosed();
 
     // perform init commit
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit("init");
     loader.waitOnClosed();
 
     // edit java file and commit the change
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_FILE);
     editor.waitActive();
@@ -111,14 +111,14 @@ public class AmendCommitTest {
     git.waitGitStatusBarWithMess(NOTHING_TO_COMMIT);
 
     // view git history
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.SHOW_HISTORY);
     loader.waitOnClosed();
     git.waitTextInHistoryForm(COMMIT_MESSAGE);
     git.closeGitHistoryForm();
 
     // only amend commit message
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunAmendCommitMessage(AMEND_COMMIT_MESS);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.SHOW_HISTORY);
@@ -141,7 +141,7 @@ public class AmendCommitTest {
     git.waitGitStatusBarWithMess(NOTHING_TO_COMMIT);
 
     // view git history
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.SHOW_HISTORY);
     loader.waitOnClosed();
     git.waitTextInHistoryForm(AMEND_COMMIT);

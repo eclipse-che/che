@@ -160,7 +160,7 @@ public class ImportRecursiveSubmoduleTest {
 
   private void openSubmoduleOne(String projectName) throws Exception {
     projectExplorer.openItemByPath(projectName);
-    projectExplorer.selectItem(projectName + "/" + SUBMODULE_NAME_1);
+    projectExplorer.waitAndSelectItem(projectName + "/" + SUBMODULE_NAME_1);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.CONVERT_TO_PROJECT);
@@ -176,12 +176,12 @@ public class ImportRecursiveSubmoduleTest {
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         projectName + "/" + SUBMODULE_NAME_1 + "/src/main/java/com.codenvy.example.spring",
         "GreetingController.java");
-    projectExplorer.waitItemInVisibleArea("HelloWorld.java");
+    projectExplorer.waitVisibilityByName("HelloWorld.java");
     editor.closeFileByNameWithSaving("GreetingController");
   }
 
   private void openSubmoduleTwo(String projectName) throws Exception {
-    projectExplorer.selectItem(projectName + "/" + SUBMODULE_NAME_2);
+    projectExplorer.waitAndSelectItem(projectName + "/" + SUBMODULE_NAME_2);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.CONVERT_TO_PROJECT);
@@ -198,8 +198,8 @@ public class ImportRecursiveSubmoduleTest {
         projectName + "/" + SUBMODULE_NAME_2 + "/src/main/java/com.company.example", "A.java");
     projectExplorer.openItemByPath(
         projectName + "/" + SUBMODULE_NAME_2 + "/src/main/java/commenttest");
-    projectExplorer.waitItemInVisibleArea("GitPullTest.java");
-    projectExplorer.waitItemInVisibleArea("JavaCommentsTest.java");
+    projectExplorer.waitVisibilityByName("GitPullTest.java");
+    projectExplorer.waitVisibilityByName("JavaCommentsTest.java");
     editor.closeFileByNameWithSaving("A");
   }
 }

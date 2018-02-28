@@ -10,13 +10,14 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.SHOW_REFERENCES;
+
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Random;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -55,8 +56,7 @@ public class ShowFileReferenceTest {
     projectExplorer.expandPathInProjectExplorerAndOpenFile(PATH_FOR_EXPAND, "AppController.java");
     projectExplorer.openContextMenuByPathSelectedItem(FILE_PATH);
 
-    projectExplorer.clickOnItemInContextMenu(
-        TestProjectExplorerContextMenuConstants.SHOW_REFERENCES);
+    projectExplorer.clickOnItemInContextMenu(SHOW_REFERENCES);
   }
 
   @Test

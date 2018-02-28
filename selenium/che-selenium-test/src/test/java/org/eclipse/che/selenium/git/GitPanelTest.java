@@ -137,7 +137,7 @@ public class GitPanelTest {
 
   @Test(priority = 2, enabled = false)
   public void checkChangesNumber() {
-    projectExplorer.openPanel();
+    projectExplorer.openAndWait();
 
     projectExplorer.quickExpandWithJavaScript();
     editFile(NODE_JS_EDITED_FILE_NAME);
@@ -209,10 +209,10 @@ public class GitPanelTest {
   @Test(priority = 6, enabled = false)
   public void shouldAddNewRepositoryIntoPanelWhenNewProjectUnderGitCreated() {
     assertEquals(gitPanel.countRepositories(), 2);
-    projectExplorer.openPanel();
+    projectExplorer.openAndWait();
 
     createProject(NEW_PROJECT_NAME, Wizard.SamplesName.CONSOLE_JAVA_SIMPLE);
-    projectExplorer.selectItem(NEW_PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(NEW_PROJECT_NAME);
 
     gitPanel.openPanel();
     gitPanel.waitRepositories(3);
@@ -221,9 +221,9 @@ public class GitPanelTest {
 
   @Test(priority = 7, enabled = false)
   public void shouldRemoveRepositoryFromPanelWhenProjectUnderGitDeleted() {
-    projectExplorer.openPanel();
+    projectExplorer.openAndWait();
 
-    projectExplorer.selectItem(NEW_PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(NEW_PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     askDialog.waitFormToOpen();
     askDialog.clickOkBtn();
@@ -237,9 +237,9 @@ public class GitPanelTest {
 
   @Test(priority = 8, enabled = false)
   public void shouldRemoveRepositoryFromPanelWhenGitRepositoryDeletedFromProject() {
-    projectExplorer.openPanel();
+    projectExplorer.openAndWait();
 
-    projectExplorer.selectItem(NODE_JS_GIT_PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(NODE_JS_GIT_PROJECT_NAME);
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.DELETE_REPOSITORY);
     askDialog.acceptDialogWithText(
@@ -254,9 +254,9 @@ public class GitPanelTest {
   @Test(priority = 9, enabled = false)
   public void shouldAddNewRepositoryIntoPanelWhenProjectAddedUnderGit() {
     assertEquals(gitPanel.countRepositories(), 1);
-    projectExplorer.openPanel();
+    projectExplorer.openAndWait();
 
-    projectExplorer.selectItem(NODE_JS_GIT_PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(NODE_JS_GIT_PROJECT_NAME);
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
     askDialog.acceptDialogWithText(
@@ -270,9 +270,9 @@ public class GitPanelTest {
 
   @Test(priority = 10, enabled = false)
   public void shouldRenameRepositoryWhenProjectUnderGitRenamed() {
-    projectExplorer.openPanel();
+    projectExplorer.openAndWait();
 
-    projectExplorer.selectItem(JAVA_SPRING_GIT_PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(JAVA_SPRING_GIT_PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.RENAME);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.clearInput();
@@ -291,7 +291,7 @@ public class GitPanelTest {
   @Test(priority = 11, enabled = false)
   public void shouldDisplayCleanRepositoryAfterCommit() {
     assertFalse(gitPanel.isRepositoryClean(RENAMED_JAVA_SPRING_GIT_PROJECT_NAME));
-    projectExplorer.openPanel();
+    projectExplorer.openAndWait();
 
     commitAllChangesInProject(RENAMED_JAVA_SPRING_GIT_PROJECT_NAME, "Some changes");
 
@@ -301,7 +301,7 @@ public class GitPanelTest {
 
   @Test(priority = 12, enabled = false)
   public void shouldUpdatePanelIfFilesChangedFromExternalSource() {
-    projectExplorer.openPanel();
+    projectExplorer.openAndWait();
 
     // change two files from editor and checkout with force from terminal
     editFile(JAVA_SPRING_EDITED_FILE1_NAME);
@@ -332,7 +332,7 @@ public class GitPanelTest {
   public void shouldOpenGitPanelWithHotKey() {
     assertEquals(gitPanel.countRepositories(), 2);
 
-    projectExplorer.openPanel();
+    projectExplorer.openAndWait();
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitProjectExplorer();
     seleniumWebDriver.findElement(By.id("gwt-debug-projectTree")).sendKeys(Keys.ALT + "g");
@@ -340,7 +340,7 @@ public class GitPanelTest {
     gitPanel.waitRepositoryToBeClean(NODE_JS_GIT_PROJECT_NAME);
     gitPanel.waitRepositoryToHaveChanges(RENAMED_JAVA_SPRING_GIT_PROJECT_NAME, 1);
 
-    projectExplorer.openPanel();
+    projectExplorer.openAndWait();
     projectExplorer.waitProjectExplorer();
     seleniumWebDriver.findElement(By.id("gwt-debug-projectTree")).sendKeys(Keys.ALT + "g");
     gitPanel.waitRepositories(2);
@@ -350,7 +350,7 @@ public class GitPanelTest {
 
   /** Creates git repository for non-under-git project */
   private void createGitRepositoryInProject(String projectName) {
-    projectExplorer.selectVisibleItem(projectName);
+    projectExplorer.waitAndSelectItemByName(projectName);
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
     askDialog.waitFormToOpen();
@@ -360,7 +360,7 @@ public class GitPanelTest {
 
   /** Commits all changes with given message for specified project. */
   private void commitAllChangesInProject(String projectName, String message) {
-    projectExplorer.selectVisibleItem(projectName);
+    projectExplorer.waitAndSelectItemByName(projectName);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit(message);
   }
@@ -373,14 +373,14 @@ public class GitPanelTest {
   }
 
   private void deleteFile(String visibleFileName) {
-    projectExplorer.selectVisibleItem(visibleFileName);
+    projectExplorer.waitAndSelectItemByName(visibleFileName);
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     askDialog.acceptDialogWithText("Delete file \"" + visibleFileName + "\"?");
   }
 
   private void createFileAndAddToIndex(String projectName, String fileName) {
     // create file
-    projectExplorer.selectItem(projectName);
+    projectExplorer.waitAndSelectItem(projectName);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
@@ -390,7 +390,7 @@ public class GitPanelTest {
     askForValueDialog.clickOkBtn();
 
     // add the file into index
-    projectExplorer.selectVisibleItem(fileName);
+    projectExplorer.waitAndSelectItemByName(fileName);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitAddToIndexFormToOpen();
     git.waitAddToIndexFileName("Add file " + fileName + " to index?");

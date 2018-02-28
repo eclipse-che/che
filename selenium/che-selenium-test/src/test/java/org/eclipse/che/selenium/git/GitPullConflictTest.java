@@ -174,7 +174,7 @@ public class GitPullConflictTest {
   }
 
   private void commitFiles() {
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
 
     git.waitAndRunCommit(COMMIT_MSG);

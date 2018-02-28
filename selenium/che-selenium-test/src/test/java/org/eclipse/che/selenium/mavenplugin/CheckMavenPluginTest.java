@@ -69,7 +69,7 @@ public class CheckMavenPluginTest {
   @Test
   public void shouldAccessClassCreatedInAnotherModule() {
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.selectItem(PROJECT_NAME + "/my-lib/src/main/java/hello");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/my-lib/src/main/java/hello");
     createNewFileFromMenuFile("TestClass", AskForValueDialog.JavaFiles.CLASS, ".java");
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
@@ -89,13 +89,13 @@ public class CheckMavenPluginTest {
     editor.goToCursorPositionVisible(26, 32);
     editor.typeTextIntoEditor("--");
     try {
-      projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", SIMPLE_FOLDER);
+      projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME + "/my-lib", SIMPLE_FOLDER);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7109");
     }
 
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-webapp", SIMPLE_FOLDER);
+    projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME + "/my-webapp", SIMPLE_FOLDER);
   }
 
   @Test(priority = 2)
@@ -119,9 +119,8 @@ public class CheckMavenPluginTest {
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", PROJECT_FOLDER);
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(
-        PROJECT_NAME + "/my-webapp", PROJECT_FOLDER);
+    projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME + "/my-lib", PROJECT_FOLDER);
+    projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME + "/my-webapp", PROJECT_FOLDER);
     editor.closeAllTabs();
   }
 
@@ -153,6 +152,6 @@ public class CheckMavenPluginTest {
     loader.waitOnClosed();
     askDialog.createJavaFileByNameAndType(name, item);
     loader.waitOnClosed();
-    projectExplorer.waitItemInVisibleArea(name + fileExt);
+    projectExplorer.waitVisibilityByName(name + fileExt);
   }
 }

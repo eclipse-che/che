@@ -79,7 +79,7 @@ public class CodeAssistAfterMoveItemTest {
     editor.waitMarkerDisappears(ERROR_MARKER, 33);
 
     // move item 'A5' into package 'p1'
-    projectExplorer.selectItem(pathToPackageInChePrefix + "/r/A5.java");
+    projectExplorer.waitAndSelectItem(pathToPackageInChePrefix + "/r/A5.java");
     projectExplorer.launchRefactorMoveByKeyboard();
     refactor.waitMoveItemFormIsOpen();
     refactor.clickOnExpandIconTree(PROJECT_NAME);

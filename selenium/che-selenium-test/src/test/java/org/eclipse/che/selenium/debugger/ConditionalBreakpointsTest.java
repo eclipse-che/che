@@ -120,7 +120,7 @@ public class ConditionalBreakpointsTest {
         "HelloWorld.java", 15, new BreakpointConfigurationImpl("i == 3"));
     editor.waitConditionalBreakpoint(15, false);
 
-    projectExplorer.selectItem(PROJECT);
+    projectExplorer.waitAndSelectItem(PROJECT);
 
     startDebug();
 

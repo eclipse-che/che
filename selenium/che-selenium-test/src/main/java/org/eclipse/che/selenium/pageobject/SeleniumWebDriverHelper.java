@@ -10,7 +10,10 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfAllElements;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
@@ -27,7 +30,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** @author Igor Okhrimenko */
+/** @author Ihor Okhrimenko */
 @Singleton
 public class SeleniumWebDriverHelper {
   protected final int DEFAULT_TIMEOUT = LOAD_PAGE_TIMEOUT_SEC;
@@ -37,7 +40,7 @@ public class SeleniumWebDriverHelper {
   protected final Logger LOG = LoggerFactory.getLogger(SeleniumWebDriverHelper.class);
 
   @Inject
-  protected SeleniumWebDriverHelper(
+  public SeleniumWebDriverHelper(
       SeleniumWebDriver seleniumWebDriver,
       WebDriverWaitFactory webDriverWaitFactory,
       ActionsFactory actionsFactory) {
@@ -149,6 +152,48 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
+   * Waits until {@link WebElement} with provided locator {@link By} be invisible.
+   *
+   * @throw {@link org.openqa.selenium.TimeoutException} - if visible during timeout.
+   * @param elementLocator
+   * @param timeout waiting time in seconds
+   */
+  public void waitInvisibility(By elementLocator, int timeout) {
+    webDriverWaitFactory.get(timeout).until(invisibilityOfElementLocated(elementLocator));
+  }
+
+  /**
+   * Waits until {@link WebElement} with provided locator {@link By} be invisible.
+   *
+   * @throw {@link org.openqa.selenium.TimeoutException} - if visible during timeout.
+   * @param elementLocator
+   */
+  public void waitInvisibility(By elementLocator) {
+    waitInvisibility(elementLocator, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits until provided {@link WebElement} be invisible.
+   *
+   * @throw {@link org.openqa.selenium.TimeoutException} - if visible during timeout.
+   * @param webElement
+   * @param timeout waiting time in seconds
+   */
+  public void waitInvisibility(WebElement webElement, int timeout) {
+    webDriverWaitFactory.get(timeout).until(invisibilityOfAllElements(asList(webElement)));
+  }
+
+  /**
+   * Waits until provided {@link WebElement} be invisible.
+   *
+   * @throw {@link org.openqa.selenium.TimeoutException} - if visible during timeout.
+   * @param webElement
+   */
+  public void waitInvisibility(WebElement webElement) {
+    waitInvisibility(webElement, DEFAULT_TIMEOUT);
+  }
+
+  /**
    * Waits until {@link WebElement} with provided locator {@link By} be attached to DOM it does not
    * mean that element is visible
    *
@@ -174,7 +219,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Type text in the {@link WebElement} with provided locator {@link By}
+   * Types {@code text} in the {@link WebElement} with provided locator {@link By}
    *
    * @param elementLocator
    * @param text
@@ -184,13 +229,22 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Type text in the provided {@link WebElement}
+   * Types {@code text} in the provided {@link WebElement}
    *
    * @param webElement
    * @param text
    */
   public void sendKeysTo(WebElement webElement, String text) {
     waitVisibility(webElement).sendKeys(text);
+  }
+
+  /**
+   * Types {@code text}
+   *
+   * @param text
+   */
+  public void sendKeys(String text) {
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(text).perform();
   }
 
   /**

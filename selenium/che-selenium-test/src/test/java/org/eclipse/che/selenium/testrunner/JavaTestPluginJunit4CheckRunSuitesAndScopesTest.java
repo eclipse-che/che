@@ -106,7 +106,7 @@ public class JavaTestPluginJunit4CheckRunSuitesAndScopesTest {
             + " at org.junit.Assert.assertTrue(Assert.java:41)";
 
     projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_JUNIT4_TEST_CLASSES);
-    projectExplorer.selectItem(JUNIT4_PROJECT);
+    projectExplorer.waitAndSelectItem(JUNIT4_PROJECT);
     // when
     menu.runCommand(
         TestMenuCommandsConstants.Run.RUN_MENU,

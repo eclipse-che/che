@@ -120,7 +120,8 @@ public class WorkspaceServiceTest {
 
   @BeforeMethod
   public void setup() {
-    service = new WorkspaceService(API_ENDPOINT, wsManager, machineTokenProvider, linksGenerator);
+    service =
+        new WorkspaceService(API_ENDPOINT, true, wsManager, machineTokenProvider, linksGenerator);
   }
 
   @Test
@@ -1128,7 +1129,10 @@ public class WorkspaceServiceTest {
     final Map<String, String> settings =
         new Gson().fromJson(response.print(), new TypeToken<Map<String, String>>() {}.getType());
     assertEquals(
-        settings, singletonMap(Constants.SUPPORTED_RECIPE_TYPES, "dockerimage,dockerfile"));
+        settings,
+        ImmutableMap.of(
+            Constants.SUPPORTED_RECIPE_TYPES, "dockerimage,dockerfile",
+            Constants.CHE_WORKSPACE_AUTO_START, "true"));
   }
 
   private static String unwrapError(Response response) {

@@ -71,7 +71,7 @@ public class CommandsEditorTest {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company/nba/MainClass.java");
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
     // open the 'Commands Explorer' and choose java command
     loader.waitOnClosed();

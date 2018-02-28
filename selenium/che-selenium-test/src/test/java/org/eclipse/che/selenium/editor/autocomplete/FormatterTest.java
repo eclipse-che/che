@@ -105,7 +105,7 @@ public class FormatterTest {
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
-    projectExplorer.selectVisibleItem("AppController.java");
+    projectExplorer.waitAndSelectItemByName("AppController.java");
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
 
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.FORMAT);

@@ -139,7 +139,7 @@ public class PushingChangesTest {
     editor.waitWhileFileIsClosed("GreetingController");
 
     // Commit changes
-    projectExplorer.selectVisibleItem("GreetingController.java");
+    projectExplorer.waitAndSelectItemByName("GreetingController.java");
     menu.runCommand(GIT, COMMIT);
     git.waitAndRunCommit(COMMIT_MESSAGE);
     loader.waitOnClosed();
@@ -182,7 +182,7 @@ public class PushingChangesTest {
     git.waitResetWindowClose();
 
     // Commit changes and push directly from commit window
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(GIT, COMMIT);
     git.waitAndRunCommitWithPush(COMMIT_MESSAGE, "origin/master");
     loader.waitOnClosed();
@@ -192,7 +192,7 @@ public class PushingChangesTest {
     events.waitExpectedMessage(PUSH_MSG);
 
     // Amend commit
-    projectExplorer.selectVisibleItem("GreetingController.java");
+    projectExplorer.waitAndSelectItemByName("GreetingController.java");
     menu.runCommand(GIT, COMMIT);
     git.waitAndRunAmendCommitMessage(COMMIT_MESSAGE);
     loader.waitOnClosed();

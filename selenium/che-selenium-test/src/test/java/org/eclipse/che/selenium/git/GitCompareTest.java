@@ -89,7 +89,7 @@ public class GitCompareTest {
     editor.waitTextIntoEditor("// <<< checking compare content >>>");
 
     // check the 'git compare' with the latest repository version
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT,
         TestMenuCommandsConstants.Git.Compare.COMPARE_TOP,
@@ -105,7 +105,7 @@ public class GitCompareTest {
     git.closeGroupGitCompareForm();
 
     // check git compare after adding and deleting java class
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/com/codenvy/example/spring");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/com/codenvy/example/spring");
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
@@ -116,12 +116,12 @@ public class GitCompareTest {
     askForValueDialog.clickOkBtnNewJavaClass();
     askForValueDialog.waitNewJavaClassClose();
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/com/codenvy/example/spring/A.java");
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitAddToIndexFormToOpen();
     git.confirmAddToIndexForm();
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT,
         TestMenuCommandsConstants.Git.Compare.COMPARE_TOP,
@@ -130,13 +130,13 @@ public class GitCompareTest {
     git.waitGroupGitCompareIsOpen();
     git.waitExpTextInGroupGitCompare(TEXT_GROUP);
     git.closeGroupGitCompareForm();
-    projectExplorer.selectItem(
+    projectExplorer.waitAndSelectItem(
         PROJECT_NAME + "/src/main/java/com/codenvy/example/spring/HelloWorld.java");
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     loader.waitOnClosed();
     acceptDialogWithText("Delete file \"HelloWorld.java\"?");
     loader.waitOnClosed();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT,
         TestMenuCommandsConstants.Git.Compare.COMPARE_TOP,
@@ -162,14 +162,14 @@ public class GitCompareTest {
     editor.waitTextIntoEditor("//***che***codenvy***");
 
     // check the 'git compare' after commit
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit("Update Java class");
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
     loader.waitOnClosed();
-    projectExplorer.selectItem(
+    projectExplorer.waitAndSelectItem(
         PROJECT_NAME + "/src/main/java/com/codenvy/example/spring/GreetingController.java");
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT,
@@ -212,7 +212,7 @@ public class GitCompareTest {
 
     // check the 'git compare' for revision
     projectExplorer.waitProjectExplorer();
-    projectExplorer.selectItem(
+    projectExplorer.waitAndSelectItem(
         PROJECT_NAME + "/src/main/java/com/codenvy/example/spring/GreetingController.java");
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT,
@@ -236,7 +236,7 @@ public class GitCompareTest {
   }
 
   private void createBranch() {
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
     git.waitBranchInTheList("master");
     git.waitDisappearBranchName("newbranch");

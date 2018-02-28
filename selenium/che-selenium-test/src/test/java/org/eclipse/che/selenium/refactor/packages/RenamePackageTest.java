@@ -249,7 +249,7 @@ public class RenamePackageTest {
     // check the 'Cancel' button
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples");
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples");
     loader.waitOnClosed();
     projectExplorer.launchRefactorByKeyboard();
     loader.waitOnClosed();
@@ -266,7 +266,7 @@ public class RenamePackageTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test0/r/A.java");
     editor.waitActive();
     editor.waitTextNotPresentIntoEditor(TEST0_P1_OUT);
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test0/r");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/test0/r");
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
@@ -283,7 +283,7 @@ public class RenamePackageTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitRenamePackageFormIsClosed();
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/src/main/java/test0/r/A.java");
+    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/src/main/java/test0/r/A.java");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test0/p1/A.java");
     editor.waitTextIntoEditor(TEST0_P1_OUT);
     editor.closeFileByNameWithSaving("A");
@@ -295,7 +295,7 @@ public class RenamePackageTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test1/r/A.java");
     editor.waitActive();
     editor.waitTextNotPresentIntoEditor(TEST1_P1_OUT);
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test1/r");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/test1/r");
     projectExplorer.launchRefactorByKeyboard();
     refactor.waitRenamePackageFormIsOpen();
     refactor.sendKeysIntoField("test1.p1");
@@ -306,7 +306,7 @@ public class RenamePackageTest {
     refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(false);
     refactor.clickOkButtonRefactorForm();
     refactor.waitRenamePackageFormIsClosed();
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/src/main/java/test1/r/A.java");
+    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/src/main/java/test1/r/A.java");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test1/p1/A.java");
     editor.waitTextIntoEditor(TEST1_P1_OUT);
     editor.closeFileByNameWithSaving("A");
@@ -321,7 +321,7 @@ public class RenamePackageTest {
     editor.waitTextNotPresentIntoEditor(TEST2_FRED_OUT);
     editor.closeFileByNameWithSaving("A");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test2/r");
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test2/r");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/test2/r");
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
@@ -336,7 +336,7 @@ public class RenamePackageTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitRenamePackageFormIsClosed();
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/src/main/java/test2/r");
+    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/src/main/java/test2/r");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test2/p1");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test2/fred/A.java");
     loader.waitOnClosed();
@@ -351,7 +351,7 @@ public class RenamePackageTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test3/fred/A.java");
     editor.waitActive();
     editor.waitTextNotPresentIntoEditor(TEST3_R_OUT);
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test3/fred");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/test3/fred");
     projectExplorer.launchRefactorByKeyboard();
     refactor.waitRenamePackageFormIsOpen();
     refactor.sendKeysIntoField("test3.r");
@@ -364,7 +364,7 @@ public class RenamePackageTest {
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitRenamePackageFormIsClosed();
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/src/main/java/test3/fred");
+    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/src/main/java/test3/fred");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test3/r");
     editor.waitTextIntoEditor(TEST3_R_OUT);
     editor.closeFileByNameWithSaving("A");
@@ -387,7 +387,7 @@ public class RenamePackageTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test4/r/p1/A.java");
     editor.waitTextNotPresentIntoEditor(TEST4_Q_OUT);
     editor.closeFileByNameWithSaving("A");
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test4/r/p1");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/test4/r/p1");
     projectExplorer.launchRefactorByKeyboard();
     refactor.waitRenamePackageFormIsOpen();
     loader.waitOnClosed();
@@ -404,8 +404,8 @@ public class RenamePackageTest {
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test4/r");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test4/q");
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test4/r");
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/src/main/java/test4/r/p1");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/test4/r");
+    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/src/main/java/test4/r/p1");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test4/q/A.java");
     loader.waitOnClosed();
     editor.waitTextIntoEditor(TEST4_Q_OUT);
@@ -421,7 +421,7 @@ public class RenamePackageTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test5/r/A.java");
     editor.waitActive();
     editor.waitTextNotPresentIntoEditor(TEST5_P1_OUT);
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test5/r");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/test5/r");
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
@@ -449,7 +449,7 @@ public class RenamePackageTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test6/r/A.java");
     editor.waitActive();
     editor.waitTextNotPresentIntoEditor(TEST6_P1_OUT);
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test6/r");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/test6/r");
     projectExplorer.launchRefactorByKeyboard();
     refactor.waitRenamePackageFormIsOpen();
     loader.waitOnClosed();
@@ -479,7 +479,7 @@ public class RenamePackageTest {
     editor.waitTextIntoEditor(TEST7_R_S_IN);
     editor.closeFileByNameWithSaving("A");
     editor.closeFileByNameWithSaving("B");
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/test7/r");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/test7/r");
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
@@ -513,7 +513,7 @@ public class RenamePackageTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/java/lang/reflect/Klass.java");
     editor.waitActive();
     editor.waitTextIntoEditor(TEST8_IN);
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/java/lang/reflect");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/java/lang/reflect");
     projectExplorer.launchRefactorByKeyboard();
     refactor.waitRenamePackageFormIsOpen();
     loader.waitOnClosed();
@@ -545,7 +545,7 @@ public class RenamePackageTest {
     editor.waitActive();
     editor.waitTextIntoEditor(TEST9_HIERAR_IN);
     editor.closeFileByNameWithSaving("MyA");
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/my");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/my");
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
@@ -574,7 +574,7 @@ public class RenamePackageTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/m_y/pack/C.java");
     editor.waitActive();
     editor.waitTextIntoEditor(TEST10_HIERAR_IN);
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/m_y/pack");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/m_y/pack");
     projectExplorer.launchRefactorByKeyboard();
     refactor.waitRenamePackageFormIsOpen();
     loader.waitOnClosed();
@@ -600,7 +600,7 @@ public class RenamePackageTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/my_/pack/C.java");
     editor.waitActive();
     editor.waitTextIntoEditor(TEST11_DISABLED_IMPORT_IN);
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/my_/pack");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/my_/pack");
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
@@ -629,7 +629,7 @@ public class RenamePackageTest {
     editor.waitActive();
     editor.waitTextIntoEditor(TEST12_RENAME_WITH_RESOURCE_IN);
     editor.closeFileByNameWithSaving("Textfile.txt");
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/mine/pack");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/mine/pack");
     projectExplorer.launchRefactorByKeyboard();
     refactor.waitRenamePackageFormIsOpen();
     loader.waitOnClosed();

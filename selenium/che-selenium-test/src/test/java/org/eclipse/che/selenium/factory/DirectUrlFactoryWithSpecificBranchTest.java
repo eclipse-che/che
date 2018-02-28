@@ -87,7 +87,7 @@ public class DirectUrlFactoryWithSpecificBranchTest {
         "Project: gitPullTest | cloned from: gitPullTest | remote branch: refs/remotes/origin/contrib-12092015 | local branch: contrib-12092015",
         UPDATING_PROJECT_TIMEOUT_SEC);
 
-    projectExplorer.selectItem("gitPullTest");
+    projectExplorer.waitAndSelectItem("gitPullTest");
     pullRequestPanel.waitOpenPanel();
 
     projectExplorer.expandPathInProjectExplorer("gitPullTest/my-lib");

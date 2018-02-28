@@ -13,7 +13,7 @@ package org.eclipse.che.selenium.miscellaneous;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.DELETE;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.DELETE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
@@ -76,7 +76,7 @@ public class ResolveDependencyAfterRecreateProjectTest {
     createProjectFromUI(PROJECT_NAME2);
 
     projectExplorer.waitItem(PROJECT_NAME2);
-    projectExplorer.selectVisibleItem(PROJECT_NAME2);
+    projectExplorer.waitAndSelectItemByName(PROJECT_NAME2);
     projectExplorer.expandPathInProjectExplorer(PROJECT_NAME2 + PATH_TO_EXPAND);
 
     try {

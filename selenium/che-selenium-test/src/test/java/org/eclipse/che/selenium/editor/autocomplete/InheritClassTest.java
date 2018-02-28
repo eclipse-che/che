@@ -70,14 +70,14 @@ public class InheritClassTest {
     projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
     loader.waitOnClosed();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
     projectExplorer.openItemByPath(COMMON_PACKAGE + "/AppController.java");
 
     // create java class in the different package with GreetingController.java
     projectExplorer.waitProjectExplorer();
-    projectExplorer.selectItem(COMMON_PACKAGE);
+    projectExplorer.waitAndSelectItem(COMMON_PACKAGE);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
@@ -86,7 +86,7 @@ public class InheritClassTest {
     editor.waitTabIsPresent("CodenvyTest");
     loader.waitOnClosed();
 
-    projectExplorer.selectItem(COMMON_PACKAGE);
+    projectExplorer.waitAndSelectItem(COMMON_PACKAGE);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
