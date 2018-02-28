@@ -66,10 +66,8 @@ import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 
-/** @author Musienko Maxim */
 @Singleton
 public class CodenvyEditor {
-
   public static final String CLOSE_ALL_TABS = "gwt-debug-contextMenu/closeAllEditors";
   public static final String VCS_RULER = "//div[@class='ruler vcs']/div";
   public static final Logger LOG = getLogger(CodenvyEditor.class);
@@ -208,7 +206,6 @@ public class CodenvyEditor {
     REFACTORING("contextMenu/Refactoring"),
     REFACTORING_MOVE("contextMenu/Refactoring/Move"),
     REFACTORING_RENAME("contextMenu/Refactoring/Rename"),
-
     UNDO("contextMenu/Undo"),
     REDO("contextMenu/Redo"),
     FORMAT("contextMenu/Format"),
