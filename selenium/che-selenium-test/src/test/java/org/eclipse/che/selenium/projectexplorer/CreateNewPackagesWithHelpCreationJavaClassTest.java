@@ -69,7 +69,7 @@ public class CreateNewPackagesWithHelpCreationJavaClassTest {
   public void createNewPackageFromContextMenuTest() throws Exception {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + "/src/main/java");
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java");
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
@@ -83,7 +83,7 @@ public class CreateNewPackagesWithHelpCreationJavaClassTest {
 
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/tu/TestClass1.java");
 
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java");
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
@@ -97,7 +97,7 @@ public class CreateNewPackagesWithHelpCreationJavaClassTest {
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test/ua");
 
     try {
-      projectExplorer.waitItemInVisibleArea("TestClass2.java");
+      projectExplorer.waitVisibilityByName("TestClass2.java");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       browserLogsUtil.storeLogs();

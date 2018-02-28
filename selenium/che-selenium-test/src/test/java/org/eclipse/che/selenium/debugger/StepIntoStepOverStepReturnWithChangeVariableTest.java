@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.debugger;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -106,7 +107,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
   public void shutDownTomCatAndCleanWebApp() {
     editor.closeAllTabs();
     debugPanel.stopDebuggerWithUiAndCleanUpTomcat(CLEAN_TOMCAT);
-    projectExplorer.clickOnProjectExplorerTabInTheLeftPanel();
+    projectExplorer.clickOnProjectExplorerTab();
   }
 
   @Test
@@ -184,9 +185,8 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     String absPathToClass = PROJECT + "/src/main/java/org/eclipse/qa/examples/AppController.java";
     projectExplorer.waitItem(PROJECT);
     loader.waitOnClosed();
-    projectExplorer.selectItem(PROJECT);
-    projectExplorer.invokeCommandWithContextMenu(
-        ProjectExplorer.CommandsGoal.COMMON, PROJECT, BUILD);
+    projectExplorer.waitAndSelectItem(PROJECT);
+    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT, BUILD);
     consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
     projectExplorer.quickRevealToItemWithJavaScript(absPathToClass);
     projectExplorer.openItemByPath(absPathToClass);

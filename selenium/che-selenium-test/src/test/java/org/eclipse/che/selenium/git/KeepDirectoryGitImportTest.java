@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.selenium.git;
 
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.GO_BACK;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.GO_INTO;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.GO_BACK;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.GO_INTO;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -94,10 +94,10 @@ public class KeepDirectoryGitImportTest {
         PROJECT_NAME,
         DIRECTORY_NAME_1);
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectVisibleItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItemByName(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     loader.waitOnClosed();
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/my-webapp");
+    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/my-webapp");
     projectExplorer.waitItem(PROJECT_NAME + "/my-lib");
     expandDirectoryMyLib(PROJECT_NAME);
   }
@@ -110,7 +110,7 @@ public class KeepDirectoryGitImportTest {
         PROJECT_NAME,
         DIRECTORY_NAME_2);
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectVisibleItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItemByName(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME + "/my-lib");
     projectExplorer.openItemByPath(PROJECT_NAME + "/my-lib");
@@ -121,15 +121,15 @@ public class KeepDirectoryGitImportTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/my-lib/src/test/java/hello/SayHelloTest.java");
     loader.waitOnClosed();
     editor.waitActive();
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/my-lib/src/main");
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/my-webapp");
+    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/my-lib/src/main");
+    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/my-webapp");
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/my-lib/src/test");
     projectExplorer.clickOnItemInContextMenu(GO_INTO);
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME + "/src/my-lib");
-    projectExplorer.waitItemInVisibleArea("test");
-    projectExplorer.waitItemInVisibleArea("java");
-    projectExplorer.waitItemInVisibleArea("hello");
-    projectExplorer.waitItemInVisibleArea("SayHelloTest.java");
+    projectExplorer.waitVisibilityByName("test");
+    projectExplorer.waitVisibilityByName("java");
+    projectExplorer.waitVisibilityByName("hello");
+    projectExplorer.waitVisibilityByName("SayHelloTest.java");
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/my-lib/src/test");
     projectExplorer.clickOnItemInContextMenu(GO_BACK);
     projectExplorer.waitItem(PROJECT_NAME + "/my-lib/src");
@@ -161,10 +161,10 @@ public class KeepDirectoryGitImportTest {
     loader.waitOnClosed();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectVisibleItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItemByName(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     loader.waitOnClosed();
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME + "/my-lib");
+    projectExplorer.waitItemInvisibility(PROJECT_NAME + "/my-lib");
     projectExplorer.waitItem(PROJECT_NAME + "/my-webapp");
     projectExplorer.openItemByPath(PROJECT_NAME + "/my-webapp");
     projectExplorer.openItemByPath(PROJECT_NAME + "/my-webapp/src");
@@ -175,8 +175,8 @@ public class KeepDirectoryGitImportTest {
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/my-webapp");
     projectExplorer.clickOnItemInContextMenu(GO_INTO);
     loader.waitOnClosed();
-    projectExplorer.waitItemInVisibleArea("my-webapp");
-    projectExplorer.waitItemIsDisappeared(PROJECT_NAME);
+    projectExplorer.waitVisibilityByName("my-webapp");
+    projectExplorer.waitItemInvisibility(PROJECT_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/my-webapp");
     projectExplorer.clickOnItemInContextMenu(GO_BACK);
     projectExplorer.waitItem(PROJECT_NAME);

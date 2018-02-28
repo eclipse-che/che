@@ -97,7 +97,7 @@ public class CreateNamedFactoryFromDashboardTest {
     events.waitExpectedMessage(CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE);
     events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
     notificationsPopupPanel.waitPopupPanelsAreClosed();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
     projectExplorer.openItemByPath(PROJECT_NAME);
     mavenPluginStatusBar.waitClosingInfoPanel();

@@ -30,6 +30,7 @@ import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
@@ -422,7 +423,7 @@ public class Consoles {
   }
 
   public void startCommandFromProcessesArea(
-      String machineName, String commandGoal, String commandName) {
+      String machineName, ContextMenuCommandGoals commandGoal, String commandName) {
     WebElement machine =
         redrawDriverWait.until(
             visibilityOfElementLocated(By.xpath(format(MACHINE_NAME, machineName))));
@@ -431,7 +432,7 @@ public class Consoles {
     actionsFactory.createAction(seleniumWebDriver).moveToElement(machine).contextClick().perform();
     redrawDriverWait.until(visibilityOf(commandsMenuItem)).click();
 
-    redrawDriverWait.until(visibilityOfElementLocated(By.id(commandGoal))).click();
+    redrawDriverWait.until(visibilityOfElementLocated(By.id(commandGoal.get()))).click();
     redrawDriverWait
         .until(visibilityOfElementLocated(By.xpath(format(COMMAND_NAME, commandName))))
         .click();

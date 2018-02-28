@@ -20,12 +20,13 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.P
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.FOLDER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
@@ -87,7 +88,7 @@ public class RunPlainJavaProjectTest {
     // check library into configure classpath form
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
     configureClasspath.waitConfigureClasspathFormIsOpen();
     configureClasspath.waitExpectedTextJarsAndFolderArea(
@@ -107,14 +108,14 @@ public class RunPlainJavaProjectTest {
     codenvyEditor.waitTextIntoEditor("import org.mockito.Mockito;");
 
     // Create new java class into new package
-    projectExplorer.selectItem(PROJECT_NAME + "/src");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src");
     menu.runCommand(PROJECT, NEW, PACKAGE);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(NEW_PACKAGE);
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    projectExplorer.waitItemInVisibleArea(NEW_PACKAGE);
-    projectExplorer.selectItem(PROJECT_NAME + "/src/base/test");
+    projectExplorer.waitVisibilityByName(NEW_PACKAGE);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/base/test");
     menu.runCommand(TestMenuCommandsConstants.Project.PROJECT, NEW, JAVA_CLASS);
     loader.waitOnClosed();
     askForValueDialog.waitNewJavaClassOpen();
@@ -135,7 +136,7 @@ public class RunPlainJavaProjectTest {
     codenvyEditor.waitTextIntoEditor("import base.test.A;");
 
     // open the 'Commands Explorer' and choose java command
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     loader.waitOnClosed();
     commandsExplorer.openCommandsExplorer();
     commandsExplorer.waitCommandExplorerIsOpened();
@@ -164,14 +165,13 @@ public class RunPlainJavaProjectTest {
     consoles.waitExpectedTextIntoConsole(CONSOLE_MESS);
 
     // add the folder 'bin'
-    projectExplorer.clickOnProjectExplorerTabInTheLeftPanel();
+    projectExplorer.clickOnProjectExplorerTab();
     commandsExplorer.waitCommandExplorerIsClosed();
     projectExplorer.waitProjectExplorer();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
-    projectExplorer.clickOnNewContextMenuItem(
-        TestProjectExplorerContextMenuConstants.SubMenuNew.FOLDER);
+    projectExplorer.clickOnItemInContextMenu(ContextMenuFirstLevelItems.NEW);
+    projectExplorer.clickOnNewContextMenuItem(FOLDER);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText("bin");
     askForValueDialog.clickOkBtn();
@@ -220,7 +220,7 @@ public class RunPlainJavaProjectTest {
     projectWizard.clickSaveButton();
     loader.waitOnClosed();
     projectWizard.waitCloseProjectConfigForm();
-    projectExplorer.waitItemInVisibleArea(nameApp);
+    projectExplorer.waitVisibilityByName(nameApp);
     loader.waitOnClosed();
   }
 }

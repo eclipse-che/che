@@ -79,7 +79,7 @@ public class FailMoveItemTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A17.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    projectExplorer.selectItem(pathToPackageInChePrefix + "/r/A17.java");
+    projectExplorer.waitAndSelectItem(pathToPackageInChePrefix + "/r/A17.java");
     projectExplorer.launchRefactorMoveByKeyboard();
     refactor.waitMoveItemFormIsOpen();
     refactor.clickOnExpandIconTree(PROJECT_NAME);

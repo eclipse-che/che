@@ -99,7 +99,7 @@ public class MultimoduleProjectDebuggingTest {
     // goto root item in the Project Explorer to have proper value of ${current.project.path} when
     // executing maven command.
     projectExplorer.waitVisibleItem(PROJECT);
-    projectExplorer.selectItem(PROJECT);
+    projectExplorer.waitAndSelectItem(PROJECT);
 
     // start application in debug mode
     commandsPalette.openCommandPalette();

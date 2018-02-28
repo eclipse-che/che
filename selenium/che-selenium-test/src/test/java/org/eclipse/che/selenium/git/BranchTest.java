@@ -106,7 +106,7 @@ public class BranchTest {
     // perform init commit
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
     loader.waitOnClosed();
@@ -114,7 +114,7 @@ public class BranchTest {
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_INITIALIZED_SUCCESS);
     events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_INITIALIZED_SUCCESS);
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit("init");
     loader.waitOnClosed();
@@ -139,7 +139,7 @@ public class BranchTest {
     loader.waitOnClosed();
 
     // Create Hello.java class
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples");
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
@@ -148,14 +148,14 @@ public class BranchTest {
     askForValueDialog.typeTextInFieldName("Hello");
     askForValueDialog.clickOkBtnNewJavaClass();
     askForValueDialog.waitNewJavaClassClose();
-    projectExplorer.waitItemInVisibleArea("Hello.java");
+    projectExplorer.waitVisibilityByName("Hello.java");
     projectExplorer.openItemByVisibleNameInExplorer("Hello.java");
     loader.waitOnClosed();
     editor.closeFileByNameWithSaving("Hello");
     editor.waitWhileFileIsClosed("Hello");
 
     // Create script.js file
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/webapp");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/webapp");
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
@@ -166,13 +166,13 @@ public class BranchTest {
     askForValueDialog.waitFormToClose();
 
     // Check status
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main");
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
     loader.waitOnClosed();
     git.waitGitStatusBarWithMess(STATUS_MESSAGE_BEFORE_ADD);
 
     // add all files to index and check status
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main");
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitAddToIndexFormToOpen();
     git.confirmAddToIndexForm();
@@ -201,7 +201,7 @@ public class BranchTest {
     editor.waitTextNotPresentIntoEditor(CHANGE_CONTENT_1);
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME + HELLO_JAVA_PATH);
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME + SCRIPT_FILE_PATH);
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main");
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
     git.waitGitStatusBarWithMess(STATUS_MASTER_BRANCH);
     loader.waitOnClosed();
@@ -245,7 +245,7 @@ public class BranchTest {
     loader.waitOnClosed();
 
     // Add all files to index and check status
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main");
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     events.clickEventLogBtn();

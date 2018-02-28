@@ -89,7 +89,7 @@ public class QuickFixAndCodeAssistantFeaturesTest {
     // ide.getEditor().selectItemIntoAutocompleteAndPasteByDoubleClick("null"); //TODO cursor
     // disappears IDEX-3353
     editor.enterAutocompleteProposal("null");
-    projectExplorer.selectVisibleItem(
+    projectExplorer.waitAndSelectItemByName(
         "AppController.java"); // TODO because the cursor disappears after click in the autocomplete
     // panel
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");

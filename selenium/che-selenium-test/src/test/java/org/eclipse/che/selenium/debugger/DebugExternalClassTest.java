@@ -10,6 +10,9 @@
  */
 package org.eclipse.che.selenium.debugger;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.MAVEN;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.REIMPORT;
+
 import com.google.inject.Inject;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
@@ -17,7 +20,6 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -95,9 +97,8 @@ public class DebugExternalClassTest {
     // perform command "Maven > Reimport" to avoid "Type with fully qualified name:
     // ch.qos.logback.classic.Logger was not found" error
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT);
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.MAVEN);
-    projectExplorer.clickOnNewContextMenuItem(
-        ProjectExplorer.PROJECT_EXPLORER_CONTEXT_MENU_MAVEN.REIMPORT);
+    projectExplorer.clickOnItemInContextMenu(MAVEN);
+    projectExplorer.clickOnNewContextMenuItem(REIMPORT);
   }
 
   @BeforeMethod

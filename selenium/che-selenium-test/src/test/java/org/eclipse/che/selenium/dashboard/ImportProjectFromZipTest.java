@@ -82,7 +82,7 @@ public class ImportProjectFromZipTest {
 
     ide.waitOpenedWorkspaceIsReadyToUse();
     explorer.waitItem(PROJECT_NAME);
-    explorer.selectItem(PROJECT_NAME);
+    explorer.waitAndSelectItem(PROJECT_NAME);
     explorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
   }
 }

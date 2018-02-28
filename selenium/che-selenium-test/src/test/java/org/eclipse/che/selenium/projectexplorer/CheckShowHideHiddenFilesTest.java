@@ -67,7 +67,7 @@ public class CheckShowHideHiddenFilesTest {
         TestMenuCommandsConstants.Project.SHOW_HIDE_HIDDEN_FILES);
     loader.waitOnClosed();
     editor.waitTabIsPresent("classpath");
-    projectExplorer.waitItemIsDisappeared(PATH_TO_CODENVY_FOLDER);
+    projectExplorer.waitItemInvisibility(PATH_TO_CODENVY_FOLDER);
   }
 
   private void createProject(String projectName) {

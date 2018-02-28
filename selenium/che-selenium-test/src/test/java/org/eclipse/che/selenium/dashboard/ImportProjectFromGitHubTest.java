@@ -98,7 +98,7 @@ public class ImportProjectFromGitHubTest {
 
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(projectName);
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(projectName, PROJECT_FOLDER);
+    projectExplorer.waitDefinedTypeOfFolder(projectName, PROJECT_FOLDER);
   }
 
   private void connectGithubAccount() {

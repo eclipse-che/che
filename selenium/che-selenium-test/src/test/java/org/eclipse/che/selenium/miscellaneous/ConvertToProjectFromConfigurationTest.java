@@ -13,8 +13,8 @@ package org.eclipse.che.selenium.miscellaneous;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.CONFIGURATION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.FOLDER;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.CONVERT_TO_PROJECT;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.NEW;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.CONVERT_TO_PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.NEW;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.FILE;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.JAVASCRIPT_FILE;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
@@ -31,6 +31,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuItems;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -93,7 +94,7 @@ public class ConvertToProjectFromConfigurationTest {
     // create folder with php file and convert to project
     createNewFolder(PROJECT_NAME + "/src/main/webapp", PHP_FOLDER_NAME);
     createNewFile("file.php", pathToPhpFile, FILE);
-    projectExplorer.waitItemInVisibleArea("file.php");
+    projectExplorer.waitVisibilityByName("file.php");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/phpFolder/file.php");
     editor.waitActive();
     actionsFactory
@@ -109,7 +110,7 @@ public class ConvertToProjectFromConfigurationTest {
     wizard.waitCloseProjectConfigForm();
 
     projectExplorer.waitItem(pathToPhpFile);
-    projectExplorer.selectItem(pathToPhpFile);
+    projectExplorer.waitAndSelectItem(pathToPhpFile);
     menu.runCommand(PROJECT, CONFIGURATION);
     wizard.waitOpenProjectConfigForm();
     wizard.waitTextParentDirectoryName("/" + PROJECT_NAME + "/src/main/webapp");
@@ -123,7 +124,7 @@ public class ConvertToProjectFromConfigurationTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/WEB-INF");
     createNewFolder(PROJECT_NAME + "/src/main/webapp/WEB-INF", JS_FOLDER_NAME);
     createNewFile("fileJS", pathToJsFile, JAVASCRIPT_FILE);
-    projectExplorer.waitItemInVisibleArea("fileJS.js");
+    projectExplorer.waitVisibilityByName("fileJS.js");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsFolder/fileJS.js");
     editor.waitActive();
     actionsFactory
@@ -139,7 +140,7 @@ public class ConvertToProjectFromConfigurationTest {
     wizard.waitCloseProjectConfigForm();
 
     projectExplorer.waitItem(pathToJsFile);
-    projectExplorer.selectItem(pathToJsFile);
+    projectExplorer.waitAndSelectItem(pathToJsFile);
     menu.runCommand(PROJECT, CONFIGURATION);
     wizard.waitOpenProjectConfigForm();
     wizard.waitTextParentDirectoryName("/" + PROJECT_NAME + "/src/main/webapp/WEB-INF");
@@ -151,18 +152,18 @@ public class ConvertToProjectFromConfigurationTest {
   }
 
   public void createNewFolder(String path, String folderName) {
-    projectExplorer.selectItem(path);
+    projectExplorer.waitAndSelectItem(path);
     menu.runCommand(PROJECT, TestMenuCommandsConstants.Project.New.NEW, FOLDER);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(folderName);
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    projectExplorer.waitItemInVisibleArea(folderName);
+    projectExplorer.waitVisibilityByName(folderName);
     loader.waitOnClosed();
   }
 
   private void convertToProject(String folderName, String parentDirectory) {
-    projectExplorer.selectVisibleItem(folderName);
+    projectExplorer.waitAndSelectItemByName(folderName);
     projectExplorer.openContextMenuByPathSelectedItem(parentDirectory + "/" + folderName);
     projectExplorer.clickOnItemInContextMenu(CONVERT_TO_PROJECT);
     wizard.waitOpenProjectConfigForm();
@@ -170,8 +171,9 @@ public class ConvertToProjectFromConfigurationTest {
     wizard.waitTextProjectNameInput(folderName);
   }
 
-  private void createNewFile(String name, String pathToFile, String type) throws Exception {
-    projectExplorer.selectItem(pathToFile);
+  private void createNewFile(String name, String pathToFile, ContextMenuItems type)
+      throws Exception {
+    projectExplorer.waitAndSelectItem(pathToFile);
     projectExplorer.openContextMenuByPathSelectedItem(pathToFile);
     projectExplorer.clickOnItemInContextMenu(NEW);
     projectExplorer.clickOnItemInContextMenu(type);
