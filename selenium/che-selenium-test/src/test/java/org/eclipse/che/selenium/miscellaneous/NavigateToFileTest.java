@@ -249,14 +249,14 @@ public class NavigateToFileTest {
       {
         "we?.xml",
         ImmutableMap.of(
-            1, "web.xml (/NavigateFile)",
-            2, "web.xml (/NavigateFile_2)")
+            1, "web.xml (/NavigateFile/src/main/webapp/WEB-INF)",
+            2, "web.xml (/NavigateFile_2/src/main/webapp/WEB-INF)")
       },
       {
         "gu?ss_n?m.j?p",
         ImmutableMap.of(
-            1, "web.xml (/NavigateFile)",
-            2, "web.xml (/NavigateFile_2)")
+            1, "guess_num.jsp (/NavigateFile/src/main/webapp/WEB-INF/jsp)",
+            2, "guess_num.jsp (/NavigateFile_2/src/main/webapp/WEB-INF/jsp)")
       }
     };
   }
