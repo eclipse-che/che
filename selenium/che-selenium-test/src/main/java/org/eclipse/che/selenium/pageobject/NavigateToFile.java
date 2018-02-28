@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.Keys.ALT;
@@ -160,7 +159,7 @@ public class NavigateToFile {
                 visibilityOfElementLocated(
                     By.xpath(format(Locators.FILE_NAME_LIST_SELECT, nameOfFile))));
     webElement.click();
-    WaitUtils.sleepQuietly(500, MILLISECONDS);
+    testWebElementRenderChecker.waitElementIsRendered(webElement);
     actionsFactory.createAction(seleniumWebDriver).doubleClick(webElement).perform();
   }
 
