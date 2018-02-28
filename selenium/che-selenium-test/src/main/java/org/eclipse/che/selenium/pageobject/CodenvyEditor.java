@@ -229,17 +229,11 @@ public class CodenvyEditor {
     }
   }
 
-  @FindBy(id = Locators.EDITOR_TABS_PANEL)
-  private WebElement editorTabsPanel;
-
   @FindAll({@FindBy(id = Locators.ACTIVE_LINE_NUMBER)})
   private List<WebElement> activeLineNumbers;
 
   @FindBy(xpath = Locators.AUTOCOMPLETE_CONTAINER)
   private WebElement autocompleteContainer;
-
-  @FindBy(id = Locators.NOTIFICATION_PANEL_ID)
-  private WebElement notificationPanel;
 
   @FindBy(xpath = Locators.PROPOSITION_CONTAINER)
   private WebElement propositionContainer;
