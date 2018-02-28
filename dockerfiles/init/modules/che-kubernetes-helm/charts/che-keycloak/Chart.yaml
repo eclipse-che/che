@@ -1,0 +1,4 @@
+apiVersion: v1
+description: A Helm chart for Keycloak, used by Che
+name: che-keycloak
+version: 1.0.0

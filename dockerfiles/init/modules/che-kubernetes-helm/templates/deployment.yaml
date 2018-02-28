@@ -14,11 +14,42 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations:
-        pod.alpha.kubernetes.io/init-containers: '[{"image":"busybox","imagePullPolicy":"IfNotPresent","name":"fmp-volume-permission","command":["chmod","777","/data"],"volumeMounts":[{"mountPath":"/data","name":"che-data-volume"}]}]'
+#      annotations:
+#        pod.alpha.kubernetes.io/init-containers: '[{
+#        	"image": "busybox",
+#        	"imagePullPolicy": "IfNotPresent",
+#        	"name": "fmp-volume-permission",
+#        	"command": ["chmod", "777", "/data"],
+#        	"volumeMounts": [{
+#        		"mountPath": "/data",
+#        		"name": "che-data-volume"
+#        	}]
+#        },
+#        {
+#          "name": "wait-for-postgres",
+#          "image": "docker.io/guydaich/che-init",
+#          "imagePullPolicy":"IfNotPresent",
+#          "command": ["sh", "-c", "adresses_length=0; until [ $adresses_length -gt 0 ]; do echo waiting for postgres to be ready...; sleep 2; endpoints=`curl -s --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"     https://kubernetes.default/api/v1/namespaces/eclipse-che/endpoints/postgres`; adresses_length=`echo $endpoints | jq -r \".subsets[]?.addresses // [] | length\"`; done;"]
+#        }]'
       labels:
         app: che
     spec:
+      initContainers:
+      - name: wait-for-postgres
+        image: docker.io/guydaich/che-init
+        command: ["sh", "-c", "adresses_length=0; until [ $adresses_length -gt 0 ]; do echo waiting for postgres to be ready...; sleep 2; endpoints=`curl -s --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"     https://kubernetes.default/api/v1/namespaces/$POD_NAMESPACE/endpoints/postgres`; adresses_length=`echo $endpoints | jq -r \".subsets[]?.addresses // [] | length\"`; done;"]
+        env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+      - name: fmp-volume-permission
+        image: busybox
+        command: ["chmod", "777", "/data"]
+        volumeMounts: [{
+              "mountPath": "/data",
+              "name": "che-data-volume"
+        }]
       containers:
       - env:
         - name: CHE_DOMAIN
@@ -115,6 +146,21 @@ spec:
           valueFrom:
             configMapKeyRef:
               key: CHE_INFRA_KUBERNETES_USERNAME
+              name: che
+        - name: CHE_KEYCLOAK_AUTH__SERVER__URL
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_KEYCLOAK_AUTH__SERVER__URL
+              name: che
+        - name: CHE_KEYCLOAK_CLIENT__ID
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_KEYCLOAK_CLIENT__ID
+              name: che
+        - name: CHE_KEYCLOAK_REALM
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_KEYCLOAK_REALM
               name: che
         - name: CHE_INFRA_KUBERNETES_NAMESPACE
           valueFrom:

@@ -1,4 +1,4 @@
-{{- if .Values.tlsEnabled }}
+{{- if .Values.global.tlsEnabled }}
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Issuer
 metadata:

@@ -34,6 +34,13 @@ The context of the commands below is the directory in which this readme file res
   ```bash
   helm upgrade --install <my-che-installation> --namespace <my-che-namespace> --set cheDomain=<my-hostname> --set cheImage=<my-image> ./
   ```
+
+- Multi user deployment
+
+  ```bash
+  helm upgrade --install <che-release> --namespace <che-namespace> --set global.multiuser=true --set global.cheDomain=<minikube-ip>.xip.io ./
+  ```
+  
 ## Deleting a Deployment
 You can delete a deployment using the following command:
 ``` bash

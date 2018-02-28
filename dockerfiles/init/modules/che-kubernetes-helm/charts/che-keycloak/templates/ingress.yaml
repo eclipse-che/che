@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: che-ingress
+  name: keycloak-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     kubernetes.io/ingress.class: "nginx"
@@ -16,16 +16,14 @@ spec:
 {{- if .Values.global.tlsEnabled }}
   tls:
   - hosts:
-    - {{ template "cheHost" . }}
-    secretName: che-tls
+    - {{ template "keycloakHost" . }}
+    secretName: keycloak-tls
 {{- end }}
   rules:
-  - http:
+  - host: {{ template "keycloakHost" . }}
+    http:
       paths:
       - backend:
-          serviceName: che-host
-          servicePort: 8080
+          serviceName: keycloak
+          servicePort: 5050
         path: /
-{{- if .Values.global.isHostBased }}
-    host: {{ template "cheHost" . }}
-{{- end }}

@@ -1,4 +1,4 @@
-{{- if .Values.tlsEnabled }}
+{{- if .Values.global.tlsEnabled }}
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
@@ -7,13 +7,13 @@ spec:
   secretName: che-tls
   issuerRef:
     name: letsencrypt
-  commonName: {{ .Values.cheDomain }}
+  commonName: {{ .Values.global.cheDomain }}
   dnsNames:
-      - {{ .Values.cheDomain }}
+      - {{ .Values.global.cheDomain }}
   acme:
     config:
     - http01:
         ingressClass: nginx
       domains:
-      - {{ .Values.cheDomain }}
+      - {{ .Values.global.cheDomain }}
 {{- end }}
