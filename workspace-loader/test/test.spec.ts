@@ -1,5 +1,15 @@
-/// <reference path="../node_modules/@types/jasmine/index.d.ts" />
-/// <reference path="../src/custom.d.ts" />
+/*
+ * Copyright (c) 2018-2018 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+
+ /// <reference path="../src/custom.d.ts" />
 
 'use strict';
 
@@ -7,6 +17,8 @@ import {WorkspaceLoader} from '../src/index';
 import { Loader } from '../src/loader/loader';
 
 describe('Workspace Loader', () => {
+
+    let fakeWorkspaceConfig: che.IWorkspace;
 
     beforeEach(function() {
         document.body.innerHTML = `<div id="workspace-loader">
@@ -20,14 +32,44 @@ describe('Workspace Loader', () => {
                 <div id="workspace-console">
                 <div id="workspace-console-container"></div>
             </div>`;
+
+        fakeWorkspaceConfig = {
+            status: 'STOPPED',
+            links: {
+                ide: "test url"
+            },
+            config: {
+                defaultEnv: "default",
+                "environments": {
+                    "default": {
+                        machines: {
+                            machine: {
+                                servers: {
+                                    server1: {
+                                        attributes: {
+                                            type: "ide"
+                                        },
+                                        port: 0,
+                                        protocol: ""
+                                    }
+                                }
+                            },
+                        },
+                        recipe: {
+                            type: ""
+                        }
+                    }
+                }
+            }
+        } as che.IWorkspace;
     });
 
-    it('> must have "workspace-loader" in DOM >', () => {
+    it('must have "workspace-loader" in DOM', () => {
         const loader = document.getElementById('workspace-loader');
         expect(loader).toBeTruthy();
     });
 
-    it('> test when workspace key is not specified', () => {
+    it('test when workspace key is not specified', () => {
         let loader = new Loader();
         let workspaceLoader = new WorkspaceLoader(loader);
 
@@ -40,7 +82,7 @@ describe('Workspace Loader', () => {
         expect(workspaceLoader.getWorkspace).not.toHaveBeenCalled();
     });
 
-    it('> test getWorkspace with test value', () => {
+    it('test getWorkspace with test value', () => {
         let loader = new Loader();
         let workspaceLoader = new WorkspaceLoader(loader);
 
@@ -48,8 +90,7 @@ describe('Workspace Loader', () => {
 
         spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
             return new Promise((resolve) => {
-                const workspace = {status: 'STOPPED'} as che.IWorkspace;
-                resolve(workspace);
+                resolve(fakeWorkspaceConfig);
             });
         });
 
@@ -59,7 +100,7 @@ describe('Workspace Loader', () => {
         expect(workspaceLoader.getWorkspace).toHaveBeenCalledWith("foo/bar");
     });
 
-    describe('> must handle workspace', () => {
+    describe('must open IDE directly when workspace does not have IDE server', () => {
         let workspaceLoader;
 
         beforeEach((done) => {
@@ -70,7 +111,46 @@ describe('Workspace Loader', () => {
     
             spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
                 return new Promise((resolve) => {
-                    resolve(null);
+                    fakeWorkspaceConfig.config.environments["default"].machines = {};
+                    resolve(fakeWorkspaceConfig);
+                });
+            });
+    
+            spyOn(workspaceLoader, "handleWorkspace");
+
+            spyOn(workspaceLoader, "openURL").and.callFake(() => {
+                done();
+            });
+
+            workspaceLoader.load();
+        });
+
+        it('basic workspace function must be called', () => {
+            expect(workspaceLoader.getWorkspaceKey).toHaveBeenCalled();
+            expect(workspaceLoader.getWorkspace).toHaveBeenCalledWith("foo/bar");
+        });
+
+        it('handleWorkspace must not be called', () => {
+            expect(workspaceLoader.handleWorkspace).not.toHaveBeenCalled();
+        });
+
+        it('must open IDE with `test url`', () => {
+            expect(workspaceLoader.openURL).toHaveBeenCalledWith("test url");
+        });
+    });
+
+    describe('must handle workspace when it has IDE server', () => {
+        let workspaceLoader;
+
+        beforeEach((done) => {
+            let loader = new Loader();
+            workspaceLoader = new WorkspaceLoader(loader);
+    
+            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
+    
+            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
+                return new Promise((resolve) => {
+                    resolve(fakeWorkspaceConfig);
                 });
             });
     
@@ -81,14 +161,17 @@ describe('Workspace Loader', () => {
             workspaceLoader.load();
         });
 
-        it('> must be called', () => {
+        it('basic workspace function must be called', () => {
             expect(workspaceLoader.getWorkspaceKey).toHaveBeenCalled();
             expect(workspaceLoader.getWorkspace).toHaveBeenCalledWith("foo/bar");
+        });
+
+        it('must be called', () => {
             expect(workspaceLoader.handleWorkspace).toHaveBeenCalled();
         });
     });
 
-    describe('> must open IDE for RUNNING workspace', () => {
+    describe('must open IDE for RUNNING workspace', () => {
         let workspaceLoader;
 
         beforeEach((done) => {
@@ -99,11 +182,8 @@ describe('Workspace Loader', () => {
     
             spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
                 return new Promise((resolve) => {
-                    const workspace = {
-                        status: 'RUNNING'
-                    } as che.IWorkspace;
-    
-                    resolve(workspace);
+                    fakeWorkspaceConfig.status = 'RUNNING';
+                    resolve(fakeWorkspaceConfig);
                 });
             });
 
@@ -116,8 +196,11 @@ describe('Workspace Loader', () => {
             workspaceLoader.load();
         });
 
-        it('> must be called', () => {
+        it('must not subscribe to events', () => {
             expect(workspaceLoader.subscribeWorkspaceEvents).not.toHaveBeenCalled();
+        });
+        
+        it('must open IDE immediately', () => {
             expect(workspaceLoader.openIDE).toHaveBeenCalled();
         });
     });
@@ -133,11 +216,8 @@ describe('Workspace Loader', () => {
     
             spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
                 return new Promise((resolve) => {
-                    const workspace = {
-                        status: 'STOPPED'
-                    } as che.IWorkspace;
-    
-                    resolve(workspace);
+                    fakeWorkspaceConfig.status = 'STOPPED';
+                    resolve(fakeWorkspaceConfig);
                 });
             });
 
@@ -155,20 +235,26 @@ describe('Workspace Loader', () => {
 
             workspaceLoader.load();
         });
-
-        it('> must be called', () => {
-            expect(workspaceLoader.subscribeWorkspaceEvents).toHaveBeenCalled();
-            expect(workspaceLoader.startWorkspace).toHaveBeenCalled();
+        
+        it('openIDE must not be called if status is STOPPED', () => {
             expect(workspaceLoader.openIDE).not.toHaveBeenCalled();
+        });
+        
+        it('must subscribe to events', () => {
+            expect(workspaceLoader.subscribeWorkspaceEvents).toHaveBeenCalled();
+        });
+        
+        it('must start the workspace', () => {
+            expect(workspaceLoader.startWorkspace).toHaveBeenCalled();
+        });
 
+        it('openIDE must be called when workspace become RUNNING', () => {
             workspaceLoader.onWorkspaceStatusChanged("RUNNING");
-
             expect(workspaceLoader.openIDE).toHaveBeenCalled();
         });
     });
 
-
-    describe('> must restart STOPPING workspace', () => {
+    describe('must restart STOPPING workspace', () => {
         let workspaceLoader;
 
         beforeEach((done) => {
@@ -179,11 +265,8 @@ describe('Workspace Loader', () => {
     
             spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
                 return new Promise((resolve) => {
-                    const workspace = {
-                        status: 'STOPPING'
-                    } as che.IWorkspace;
-    
-                    resolve(workspace);
+                    fakeWorkspaceConfig.status = 'STOPPING';
+                    resolve(fakeWorkspaceConfig);
                 });
             });
 
@@ -201,16 +284,19 @@ describe('Workspace Loader', () => {
             });
         });
 
-        it('> must be called', () => {
+        it('must start the workspace after stopping', () => {
             expect(workspaceLoader.startAfterStopping).toEqual(true);
+        });
+        
 
+        it('must start workspace when workspace status become STOPPED', () => {
             workspaceLoader.onWorkspaceStatusChanged("STOPPED");
-
             expect(workspaceLoader.startWorkspace).toHaveBeenCalled();
             expect(workspaceLoader.openIDE).not.toHaveBeenCalled();
+        });
 
+        it('must open IDE when workspace become RUNNING', () => {
             workspaceLoader.onWorkspaceStatusChanged("RUNNING");
-
             expect(workspaceLoader.openIDE).toHaveBeenCalled();
         });
     });
