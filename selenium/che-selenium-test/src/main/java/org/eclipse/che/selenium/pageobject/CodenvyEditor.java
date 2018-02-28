@@ -153,82 +153,62 @@ public class CodenvyEditor {
   }
 
   /** Class introduce base Xpath locators for DOM navigation inside editor */
-  public static final class Locators {
-    private Locators() {}
-
-    public static final String CONTEXT_MENU = "//div[@id='menu-lock-layer-id']/div[2]";
-    public static final String EDITOR_TABS_PANEL = "gwt-debug-multiSplitPanel-tabsPanel";
-    public static final String ACTIVE_LINE_NUMBER = "gwt-debug-cursorPosition";
-    public static final String POSITION_CURSOR_NUMBER =
+  public interface Locators {
+    String CONTEXT_MENU = "//div[@id='menu-lock-layer-id']/div[2]";
+    String EDITOR_TABS_PANEL = "gwt-debug-multiSplitPanel-tabsPanel";
+    String ACTIVE_LINE_NUMBER = "gwt-debug-cursorPosition";
+    String POSITION_CURSOR_NUMBER =
         "//div[@id='gwt-debug-editorPartStack-contentPanel']//div[text()='%s']";
-    public static final String ACTIVE_EDITOR_ENTRY_POINT =
+    String ACTIVE_EDITOR_ENTRY_POINT =
         "//div[@id='gwt-debug-editorPartStack-contentPanel']//div[@active]";
-    public static final String ORION_ACTIVE_EDITOR_CONTAINER_XPATH =
+    String ORION_ACTIVE_EDITOR_CONTAINER_XPATH =
         ACTIVE_EDITOR_ENTRY_POINT + "//div[@class='textviewContent' and @contenteditable='true']";
-    public static final String ORION_CONTENT_ACTIVE_EDITOR_XPATH =
-        ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "/div";
-    public static final String ACTIVE_LINES_XPATH =
+    String ORION_CONTENT_ACTIVE_EDITOR_XPATH = ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "/div";
+    String ACTIVE_LINES_XPATH =
         "//div[@class='textviewSelection']/preceding::div[@class='annotationLine currentLine'][1]";
-    public static final String ACTIVE_LINE_HIGHLIGHT =
+    String ACTIVE_LINE_HIGHLIGHT =
         "//div[@class='annotationLine currentLine' and @role='presentation']";
-    public static final String ACTIVE_TAB_FILE_NAME = "//div[@active]/descendant::div[text()='%s']";
-    public static final String ACTIVE_TAB_UNSAVED_FILE_NAME =
-        "//div[@active and @unsaved]//div[text()='%s']";
-    public static final String TAB_FILE_NAME_XPATH =
+    String ACTIVE_TAB_FILE_NAME = "//div[@active]/descendant::div[text()='%s']";
+    String ACTIVE_TAB_UNSAVED_FILE_NAME = "//div[@active and @unsaved]//div[text()='%s']";
+    String TAB_FILE_NAME_XPATH =
         "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']";
-    public static final String TAB_FILE_NAME_AND_STYLE =
+    String TAB_FILE_NAME_AND_STYLE =
         "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s' and @style='%s']";
-    public static final String TAB_FILE_CLOSE_ICON =
+    String TAB_FILE_CLOSE_ICON =
         "//div[@id='gwt-debug-editorMultiPartStack-contentPanel']//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']/following::div[1]";
-
-    public static final String ALL_TABS_XPATH =
+    String ALL_TABS_XPATH =
         "//div[@id='gwt-debug-editorMultiPartStack-contentPanel']//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[string-length(text())>0]";
-    public static final String TAB_WITH_UNSAVED_STATUS =
+    String TAB_WITH_UNSAVED_STATUS =
         "//div[@id='gwt-debug-editor-tab' and @unsaved]//div[text()='%s']";
-    public static final String SELECTED_ITEM_IN_EDITOR =
-        "//div[@contenteditable='true']//span[contains(text(), '%s')]";
-
-    public static final String ASSIST_CONTENT_CONTAINER =
-        "//div[@class='contentassist']/following-sibling::div";
-    public static final String AUTOCOMPLETE_CONTAINER =
-        "//div[text()='Proposals:']//following::div/ulist";
-    public static final String PROPOSITION_CONTAINER = "//div[@id='gwt_root']/following::div/ulist";
-    public static final String SHOW_HINTS_POP_UP = "//div[@class='popupContent']/div[1]";
-
-    public static final String RULER_ANNOTATIONS = "//div[@class='ruler annotations']";
-    public static final String RULER_OVERVIEW = "//div[@class='ruler overview']";
-    public static final String RULER_LINES = "//div[@class='ruler lines']";
-    public static final String RULER_FOLDING = "//div[@class='ruler folding']";
-
-    public static final String IMPLEMENTATION_CONTAINER =
+    String SELECTED_ITEM_IN_EDITOR = "//div[@contenteditable='true']//span[contains(text(), '%s')]";
+    String ASSIST_CONTENT_CONTAINER = "//div[@class='contentassist']/following-sibling::div";
+    String AUTOCOMPLETE_CONTAINER = "//div[text()='Proposals:']//following::div/ulist";
+    String PROPOSITION_CONTAINER = "//div[@id='gwt_root']/following::div/ulist";
+    String SHOW_HINTS_POP_UP = "//div[@class='popupContent']/div[1]";
+    String RULER_ANNOTATIONS = "//div[@class='ruler annotations']";
+    String RULER_OVERVIEW = "//div[@class='ruler overview']";
+    String RULER_LINES = "//div[@class='ruler lines']";
+    String RULER_FOLDING = "//div[@class='ruler folding']";
+    String IMPLEMENTATION_CONTAINER =
         "//div[contains(text(), 'Choose Implementation of %s')]/parent::div";
-    public static final String IMPLEMENTATION_CONTENT =
+    String IMPLEMENTATION_CONTENT =
         "//div[contains(text(), 'Choose Implementation of')]/following::div";
-    public static final String IMPLEMENTATIONS_ITEM =
+    String IMPLEMENTATIONS_ITEM =
         "//div[contains(text(), 'Choose Implementation of')]/following::span[text()='%s']";
-    public static final String PUNCTUATION_SEPARATOR =
-        "//span[contains(@class,'punctuation separator space')]";
-    public static final String TEXT_VIEW_RULER = "//div[@class='textviewInnerRightRuler']";
-
-    public static final String DOWNLOAD_SOURCES_LINK = "//anchor[text()='Download sources']";
-
-    public static final String TAB_LIST_BUTTON = "gwt-debug-editorMenu";
-    public static final String ITEM_TAB_LIST =
-        "//div[@class='popupContent']//div[text()='%s']/parent::div";
-
-    public static final String NOTIFICATION_PANEL_ID = "gwt-debug-leftNotificationGutter";
-    public static final String DEBUGGER_PREFIX_XPATH =
-        "//div[@class[contains(., 'rulerLines')] and text()='%d']";
-    public static final String DEBUGGER_BREAK_POINT_INACTIVE =
-        "//div[@class='breakpoint inactive' and text()='%d']";
-    public static final String DEBUGGER_BREAK_POINT_ACTIVE =
-        "//div[@class='breakpoint active' and text()='%d']";
-    public static final String DEBUGGER_BREAKPOINT_CONDITION =
+    String PUNCTUATION_SEPARATOR = "//span[contains(@class,'punctuation separator space')]";
+    String TEXT_VIEW_RULER = "//div[@class='textviewInnerRightRuler']";
+    String DOWNLOAD_SOURCES_LINK = "//anchor[text()='Download sources']";
+    String TAB_LIST_BUTTON = "gwt-debug-editorMenu";
+    String ITEM_TAB_LIST = "//div[@class='popupContent']//div[text()='%s']/parent::div";
+    String NOTIFICATION_PANEL_ID = "gwt-debug-leftNotificationGutter";
+    String DEBUGGER_PREFIX_XPATH = "//div[@class[contains(., 'rulerLines')] and text()='%d']";
+    String DEBUGGER_BREAK_POINT_INACTIVE = "//div[@class='breakpoint inactive' and text()='%d']";
+    String DEBUGGER_BREAK_POINT_ACTIVE = "//div[@class='breakpoint active' and text()='%d']";
+    String DEBUGGER_BREAKPOINT_CONDITION =
         "//div[@class='breakpoint %s condition' and text()='%d']";
-    public static final String DEBUGGER_BREAKPOINT_DISABLED =
-        "//div[@class='breakpoint disabled' and text()='%d']";
-    public static final String JAVA_DOC_POPUP = "//div[@class='gwt-PopupPanel']//iframe";
-    public static final String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
+    String DEBUGGER_BREAKPOINT_DISABLED = "//div[@class='breakpoint disabled' and text()='%d']";
+    String JAVA_DOC_POPUP = "//div[@class='gwt-PopupPanel']//iframe";
+    String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
         "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
   }
 
