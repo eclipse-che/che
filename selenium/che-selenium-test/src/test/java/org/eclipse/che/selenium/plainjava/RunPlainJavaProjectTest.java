@@ -21,7 +21,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.P
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.FOLDER;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Marker.ERROR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;

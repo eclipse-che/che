@@ -22,7 +22,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocat
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.REFACTORING_MOVE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.REFACTORING_RENAME;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.UNDO;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Marker.ERROR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;

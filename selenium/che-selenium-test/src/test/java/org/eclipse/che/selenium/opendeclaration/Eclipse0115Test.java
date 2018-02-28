@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.opendeclaration;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Marker.WARNING;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;

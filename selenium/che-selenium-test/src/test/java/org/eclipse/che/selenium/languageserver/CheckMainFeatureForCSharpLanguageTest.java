@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.languageserver;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Marker.ERROR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.inject.Inject;
 import java.util.List;

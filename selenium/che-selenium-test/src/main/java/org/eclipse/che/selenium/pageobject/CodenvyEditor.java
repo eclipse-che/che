@@ -186,7 +186,7 @@ public class CodenvyEditor {
   }
 
   /** Editor`s markers types */
-  public enum Marker {
+  public enum MarkerLocator {
     ERROR_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation error']"),
     WARNING_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation warning']"),
     TASK_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation task']"),
@@ -196,7 +196,7 @@ public class CodenvyEditor {
 
     private final String itemLocator;
 
-    Marker(String itemLocator) {
+    MarkerLocator(String itemLocator) {
       this.itemLocator = itemLocator;
     }
 
@@ -613,10 +613,10 @@ public class CodenvyEditor {
   /**
    * Waits a marker with specified {@code markerType} on the defined {@code position}
    *
-   * @param markerType marker's type, defined in {@link Marker}
+   * @param markerType marker's type, defined in {@link MarkerLocator}
    * @param position line`s number where marker is expected
    */
-  public void waitMarkerInPosition(Marker markerType, int position) {
+  public void waitMarkerInPosition(MarkerLocator markerType, int position) {
     elemDriverWait.until(visibilityOfElementLocated(By.xpath(format(markerType.get(), position))));
     setCursorToLine(position);
     expectedNumberOfActiveLine(position);
@@ -708,10 +708,10 @@ public class CodenvyEditor {
   /**
    * Waits marker with specified {@code markerType} on the defined {@code position} and click on it
    *
-   * @param markerType marker's type, defined in {@link Marker}
+   * @param markerType marker's type, defined in {@link MarkerLocator}
    * @param position line's number, where marker is expected
    */
-  public void waitMarkerInPositionAndClick(Marker markerType, int position) {
+  public void waitMarkerInPositionAndClick(MarkerLocator markerType, int position) {
     loadPageDriverWait
         .until(visibilityOfElementLocated(By.xpath(format(markerType.get(), position))))
         .click();
@@ -721,10 +721,10 @@ public class CodenvyEditor {
    * Waits until marker with specified {@code markerType} be invisible on the defined {@code
    * position}
    *
-   * @param markerType marker's type, defined in {@link Marker}
+   * @param markerType marker's type, defined in {@link MarkerLocator}
    * @param position line's number, where marker should not be displayed
    */
-  public void waitMarkerInvisibility(Marker markerType, int position) {
+  public void waitMarkerInvisibility(MarkerLocator markerType, int position) {
     elemDriverWait.until(
         invisibilityOfElementLocated(By.xpath(format(markerType.get(), position))));
     expectedNumberOfActiveLine(position);
@@ -733,9 +733,9 @@ public class CodenvyEditor {
   /**
    * Waits until all markers with specified {@code markerType} be invisible
    *
-   * @param markerType marker's type, defined in {@link Marker}
+   * @param markerType marker's type, defined in {@link MarkerLocator}
    */
-  public void waitAllMarkersInvisibility(Marker markerType) {
+  public void waitAllMarkersInvisibility(MarkerLocator markerType) {
     loaderDriverWait.until(
         (ExpectedCondition<Boolean>)
             driver -> driver.findElements(By.xpath(markerType.get())).size() == 0);
@@ -744,9 +744,9 @@ public class CodenvyEditor {
   /**
    * Waits until at list one marker with specified {@code markerType} be visible
    *
-   * @param markerType marker's type, defined in {@link Marker}
+   * @param markerType marker's type, defined in {@link MarkerLocator}
    */
-  public void waitCodeAssistMarkers(Marker markerType) {
+  public void waitCodeAssistMarkers(MarkerLocator markerType) {
     elemDriverWait.until(
         (ExpectedCondition<Boolean>)
             driver -> driver.findElements(By.xpath(markerType.get())).size() > 0);
@@ -802,9 +802,9 @@ public class CodenvyEditor {
    * Moves mouse to the marker with specified {@code markerType} and waits until 'assist content
    * container' be visible.
    *
-   * @param markerType marker's type, defined in {@link Marker}
+   * @param markerType marker's type, defined in {@link MarkerLocator}
    */
-  public void moveToMarkerAndWaitAssistContent(Marker markerType) {
+  public void moveToMarkerAndWaitAssistContent(MarkerLocator markerType) {
     WebElement element = seleniumWebDriver.findElement(By.xpath(markerType.get()));
     actionsFactory.createAction(seleniumWebDriver).moveToElement(element).perform();
     waitAnnotationCodeAssistIsOpen();
@@ -1574,10 +1574,10 @@ public class CodenvyEditor {
   /**
    * Gets quantity of visible markers with specified {@code markerType}
    *
-   * @param markerType marker's type, defined in {@link Marker}
+   * @param markerType marker's type, defined in {@link MarkerLocator}
    * @return markers quantity
    */
-  public int getMarkersQuantity(Marker markerType) {
+  public int getMarkersQuantity(MarkerLocator markerType) {
     redrawDriverWait.until(visibilityOfElementLocated(By.xpath(Locators.RULER_OVERVIEW)));
     List<WebElement> annotationList =
         redrawDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(markerType.get())));
@@ -1587,9 +1587,9 @@ public class CodenvyEditor {
   /**
    * Waits until annotations with specified {@code markerType} visible
    *
-   * @param markerType marker's type, defined in {@link Marker}
+   * @param markerType marker's type, defined in {@link MarkerLocator}
    */
-  public void waitAnnotationsAreNotPresent(Marker markerType) {
+  public void waitAnnotationsAreNotPresent(MarkerLocator markerType) {
     redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(markerType.get())));
   }
 

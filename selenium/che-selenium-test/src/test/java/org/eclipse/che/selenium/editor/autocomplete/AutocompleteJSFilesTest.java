@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Marker.INFO;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.INFO;
 
 import com.google.inject.Inject;
 import java.net.URL;

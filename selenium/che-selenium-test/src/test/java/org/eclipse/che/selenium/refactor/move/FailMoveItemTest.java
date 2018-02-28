@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.refactor.move;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Marker.ERROR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;

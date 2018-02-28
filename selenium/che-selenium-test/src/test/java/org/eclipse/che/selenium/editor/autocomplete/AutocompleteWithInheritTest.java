@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Marker.ERROR;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Marker.TASK_OVERVIEW;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.TASK_OVERVIEW;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -23,7 +23,7 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.CodenvyEditor.Marker;
+import org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
@@ -118,7 +118,7 @@ public class AutocompleteWithInheritTest {
 
   private void waitErrorMarkerInPosition() throws Exception {
     try {
-      editor.waitMarkerInPosition(Marker.ERROR, 13);
+      editor.waitMarkerInPosition(MarkerLocator.ERROR, 13);
     } catch (TimeoutException ex) {
       logExternalLibraries();
       logProjectTypeChecking();

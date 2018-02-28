@@ -18,7 +18,7 @@ import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextM
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuBuildPath.USE_AS_SOURCE_FOLDER;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.JAVA_CLASS;
 import static org.eclipse.che.selenium.pageobject.AskForValueDialog.JavaFiles.CLASS;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Marker.ERROR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.JAVA_SOURCE_FOLDER;
 
 import com.google.inject.Inject;

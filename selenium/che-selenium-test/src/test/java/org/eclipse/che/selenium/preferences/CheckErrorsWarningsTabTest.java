@@ -11,10 +11,10 @@
 package org.eclipse.che.selenium.preferences;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Marker.ERROR;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Marker.ERROR_OVERVIEW;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Marker.WARNING;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Marker.WARNING_OVERVIEW;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR_OVERVIEW;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING_OVERVIEW;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
