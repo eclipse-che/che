@@ -54,7 +54,7 @@ public class SinglePortHostnameBuilder {
    * @return composite hostname
    */
   public String build(String serverName, String machineName, String workspaceID) {
-    StringJoiner joiner = new StringJoiner(".");
+    StringJoiner joiner = new StringJoiner("_");
     if (serverName != null) {
       joiner.add(normalize(serverName));
     }
@@ -64,8 +64,8 @@ public class SinglePortHostnameBuilder {
     if (workspaceID != null) {
       joiner.add(normalize(workspaceID));
     }
-    joiner.add(wildcardDomain);
-    return joiner.toString();
+    // joiner.add(wildcardDomain);
+    return joiner.toString() + "." + wildcardDomain;
   }
 
   /**
@@ -74,8 +74,13 @@ public class SinglePortHostnameBuilder {
    * @return wildcard domain
    */
   private String getWildcardDomain(String localAddress, String wildcardHost) {
-    return String.format(
-        "%s.%s", getExternalIp(localAddress), wildcardHost == null ? "nip.io" : wildcardHost);
+    // todo: reenable nip.io etc if these are selected (not null) as wildcard (no ip added right
+    // now)
+    return wildcardHost == null
+        ? String.format("%s.%s", getExternalIp(localAddress), "nip.io")
+        : wildcardHost;
+    // return String.format(
+    //     "%s.%s", getExternalIp(localAddress), wildcardHost == null ? "nip.io" : wildcardHost);
   }
 
   private String getExternalIp(String localAddress) {

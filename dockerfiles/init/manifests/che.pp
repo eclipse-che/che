@@ -40,6 +40,8 @@ node default {
   #
   $che_single_port = getValue("CHE_SINGLE_PORT","false")
   $che_single_port_wildcard_domain_host = getValue("CHE_SINGLEPORT_WILDCARD__DOMAIN_HOST","nip.io")
+  $che_single_port_custom_dns = getValue("CHE_SINGLEPORT_CUSTOM_DNS","false")
+
 
   ###############################
   # Che multiuser
@@ -66,6 +68,7 @@ node default {
   $system_super_privileged_mode=getValue("SYSTEM_SUPER__PRIVILEGED__MODE", "false")
 
   $che_keycloak_admin_require_update_password=getValue("CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD", "true")
+  $che_keycloak_auth__server__url=getValue("CHE_KEYCLOAK_AUTH__SERVER__URL","")
 
   ###############################
   # Include base module
