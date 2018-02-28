@@ -74,7 +74,8 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
         final String port = serverEntry.getValue().getPort().split("/")[0];
 
         containerLabels.put(format("traefik.%s.port", serviceName), port);
-        containerLabels.put(format("traefik.%s.frontend.entryPoints", serviceName), "http");
+        containerLabels.put(
+            format("traefik.%s.frontend.entryPoints", serviceName), "http,https,ws,wss");
         containerLabels.put(format("traefik.%s.frontend.rule", serviceName), "Host:" + host);
         // Needed to activate per-service rules
         containerLabels.put("traefik.frontend.rule", machineName);
@@ -94,10 +95,11 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
    * exec-agent-http-dev-machine-workspaceao6k83hkdav975g5
    */
   private String getServiceName(String host) {
-    int idx =
-        (externalIpOfContainers != null && host.contains(externalIpOfContainers))
-            ? host.indexOf(externalIpOfContainers)
-            : host.indexOf(internalIpOfContainers);
-    return host.substring(0, idx - 1).replaceAll("\\.", "-");
+    // int idx =
+    //     (externalIpOfContainers != null && host.contains(externalIpOfContainers))
+    //         ? host.indexOf(externalIpOfContainers)
+    //         : host.indexOf(internalIpOfContainers);
+    // return host.substring(0, idx - 1).replaceAll("\\.", "-");
+    return host.replaceAll("\\.", "-");
   }
 }
