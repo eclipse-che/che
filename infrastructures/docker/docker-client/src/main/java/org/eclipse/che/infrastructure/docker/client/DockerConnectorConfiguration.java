@@ -85,11 +85,11 @@ public class DockerConnectorConfiguration {
   private static final Logger LOG = LoggerFactory.getLogger(DockerConnectorConfiguration.class);
 
   @Inject(optional = true)
-  @Named("docker.client.daemon_url")
+  @Named("che.infra.docker.daemon_url")
   private URI dockerDaemonUri = dockerDaemonUri();
 
   @Inject(optional = true)
-  @Named("docker.client.certificates_folder")
+  @Named("che.infra.docker.certificates_folder")
   private String dockerCertificatesDirectoryPath = dockerMachineCertsDirectoryPath();
 
   /** Helper used to resolve ip address of the docker host ip from a docker container. */
