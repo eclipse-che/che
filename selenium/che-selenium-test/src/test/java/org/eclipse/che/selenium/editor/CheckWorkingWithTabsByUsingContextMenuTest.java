@@ -18,6 +18,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.CodenvyEditor.TabActionLocator;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -68,7 +69,7 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
     // close all tab by using context menu
     openTabsInEditor();
     editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
-    editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.CLOSE_ALL);
+    editor.runActionForTabFromContextMenu(TabActionLocator.CLOSE_ALL);
     editor.waitTabIsNotPresent(NAME_TO_JAVA_CLASS);
     editor.waitTabIsNotPresent(NAME_TO_CSS);
     editor.waitTabIsNotPresent(NAME_TO_XML);
@@ -77,7 +78,7 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
     // close one tab by using context menu
     openTabsInEditor();
     editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
-    editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.CLOSE);
+    editor.runActionForTabFromContextMenu(TabActionLocator.CLOSE);
     editor.waitTabIsNotPresent(NAME_TO_JAVA_CLASS);
     editor.waitTabIsPresent(NAME_TO_CSS);
     editor.waitTabIsPresent(NAME_TO_XML);
@@ -87,7 +88,7 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
     // close other tabs by using context menu
     openTabsInEditor();
     editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
-    editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.CLOSE_OTHER);
+    editor.runActionForTabFromContextMenu(TabActionLocator.CLOSE_OTHER);
     editor.waitTabIsPresent(NAME_TO_JAVA_CLASS);
     editor.waitTabIsNotPresent(NAME_TO_CSS);
     editor.waitTabIsNotPresent(NAME_TO_XML);
@@ -97,7 +98,7 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
     // close other tabs by using context menu
     openTabsInEditor();
     editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
-    editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.CLOSE_OTHER);
+    editor.runActionForTabFromContextMenu(TabActionLocator.CLOSE_OTHER);
     editor.waitTabIsPresent(NAME_TO_JAVA_CLASS);
     editor.waitTabIsNotPresent(NAME_TO_CSS);
     editor.waitTabIsNotPresent(NAME_TO_XML);
@@ -107,11 +108,11 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
     // pin and close all tabs without pinned by using context menu
     openTabsInEditor();
     editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
-    editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.PIN_UNPIN_TAB);
+    editor.runActionForTabFromContextMenu(TabActionLocator.PIN_UNPIN_TAB);
     editor.openContextMenuForTabByName(NAME_TO_CSS);
-    editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.PIN_UNPIN_TAB);
+    editor.runActionForTabFromContextMenu(TabActionLocator.PIN_UNPIN_TAB);
     editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
-    editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.CLOSE_ALL_BUT_PINNED);
+    editor.runActionForTabFromContextMenu(TabActionLocator.CLOSE_ALL_BUT_PINNED);
     editor.waitTabIsPresent(NAME_TO_JAVA_CLASS);
     editor.waitTabIsPresent(NAME_TO_CSS);
     editor.waitTabIsNotPresent(NAME_TO_XML);
@@ -121,14 +122,14 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
     // reopen closed tab by using context menu
     openTabsInEditor();
     editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
-    editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.CLOSE);
+    editor.runActionForTabFromContextMenu(TabActionLocator.CLOSE);
     editor.waitTabIsNotPresent(NAME_TO_JAVA_CLASS);
     editor.waitTabIsPresent(NAME_TO_CSS);
     editor.waitTabIsPresent(NAME_TO_XML);
     editor.waitTabIsPresent(NAME_TO_HTML);
     editor.selectTabByName(NAME_TO_CSS);
     editor.openContextMenuForTabByName(NAME_TO_CSS);
-    editor.runActionForTabFromContextMenu(CodenvyEditor.TabAction.REOPEN_CLOSED_TAB);
+    editor.runActionForTabFromContextMenu(TabActionLocator.REOPEN_CLOSED_TAB);
     editor.waitTabIsPresent(NAME_TO_JAVA_CLASS);
     editor.waitTabIsPresent(NAME_TO_CSS);
     editor.waitTabIsPresent(NAME_TO_XML);

@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.editor;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabAction;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabActionLocator;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -71,12 +71,12 @@ public class SplitEditorFeatureTest {
   public void checkSplitEditorWindow() {
     editor.waitActive();
     editor.openContextMenuForTabByName(NAME_JAVA_CLASS);
-    editor.runActionForTabFromContextMenu(TabAction.SPIT_HORISONTALLY);
+    editor.runActionForTabFromContextMenu(TabActionLocator.SPIT_HORISONTALLY);
 
     editor.waitCountTabsWithProvidedName(2, NAME_JAVA_CLASS);
 
     editor.selectTabByIndexEditorWindowAndOpenMenu(0, NAME_JAVA_CLASS);
-    editor.runActionForTabFromContextMenu(TabAction.SPLIT_VERTICALLY);
+    editor.runActionForTabFromContextMenu(TabActionLocator.SPLIT_VERTICALLY);
     editor.waitCountTabsWithProvidedName(3, NAME_JAVA_CLASS);
 
     editor.selectTabByIndexEditorWindow(1, NAME_JAVA_CLASS);
