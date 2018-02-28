@@ -97,14 +97,14 @@ public class CheckErrorsWarningsTabTest {
     consoles.closeProcessesArea();
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.WARNING);
-    Assert.assertEquals(editor.getQuantityMarkers(WARNING_MARKER_OVERVIEW), 13);
-    Assert.assertEquals(editor.getQuantityMarkers(WARNING_MARKER), 22);
+    Assert.assertEquals(editor.getMarkersQuantity(WARNING_MARKER_OVERVIEW), 13);
+    Assert.assertEquals(editor.getMarkersQuantity(WARNING_MARKER), 22);
 
     editor.waitAnnotationsAreNotPresent(ERROR_MARKER_OVERVIEW);
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.ERROR);
-    Assert.assertEquals(editor.getQuantityMarkers(ERROR_MARKER_OVERVIEW), 13);
-    Assert.assertEquals(editor.getQuantityMarkers(ERROR_MARKER), 22);
+    Assert.assertEquals(editor.getMarkersQuantity(ERROR_MARKER_OVERVIEW), 13);
+    Assert.assertEquals(editor.getMarkersQuantity(ERROR_MARKER), 22);
     editor.waitAnnotationsAreNotPresent(WARNING_MARKER_OVERVIEW);
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.IGNORE);

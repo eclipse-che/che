@@ -70,7 +70,7 @@ public class ResolveDependencyAfterRecreateProjectTest {
     projectExplorer.expandPathInProjectExplorer(PROJECT_NAME1 + PATH_TO_EXPAND);
     projectExplorer.openItemByPath(PROJECT_NAME1 + PATH_TO_FILE);
     editor.waitActive();
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR_MARKER);
 
     removeProjectFromUI();
     createProjectFromUI(PROJECT_NAME2);
@@ -87,7 +87,7 @@ public class ResolveDependencyAfterRecreateProjectTest {
     }
 
     editor.waitActive();
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR_MARKER);
   }
 
   private void removeProjectFromUI() {

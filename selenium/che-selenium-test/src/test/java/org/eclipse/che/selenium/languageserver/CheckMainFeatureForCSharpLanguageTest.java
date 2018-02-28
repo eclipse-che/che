@@ -90,7 +90,7 @@ public class CheckMainFeatureForCSharpLanguageTest {
     editor.launchAutocomplete();
     editor.enterAutocompleteProposal("Build() ");
     editor.typeTextIntoEditor(";");
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR_MARKER);
   }
 
   private void checkLanguageServerInitStateAndLaunch() {

@@ -154,7 +154,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
         PROJECT_NAME + "/" + KEEPED_DIR + "/src/main/java/hello", "GreetingController.java");
 
     mavenPluginStatusBar.waitClosingInfoPanel(UPDATING_PROJECT_TIMEOUT_SEC);
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR_MARKER);
   }
 
   private void makeKeepDirectoryFromGitUrl(String url, String projectName, String folderName) {
@@ -187,7 +187,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
     }
     editor.closeAutocomplete();
     editor.typeTextIntoEditor(" greeting =null;");
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR_MARKER);
   }
 
   private void checkOpenDeclaration() throws IOException {

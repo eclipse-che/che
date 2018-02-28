@@ -81,7 +81,7 @@ public class AutocompleteWithInheritTest {
     mavenPluginStatusBar.waitClosingInfoPanel();
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         PROJECT_NAME + "/src/main/java/example", BASE_CLASS + ".java");
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR_MARKER);
     projectExplorer.openItemByVisibleNameInExplorer(EXTENDED_CLASS + ".java");
     editor.returnFocusInCurrentLine();
     waitErrorMarkerInPosition();
@@ -90,7 +90,7 @@ public class AutocompleteWithInheritTest {
     editor.waitTextIntoFixErrorProposition("Add constructor 'InheritClass(int,String)'");
     editor.selectFirstItemIntoFixErrorPropByEnter();
     editor.waitTextIntoEditor(contentAfterFix);
-    editor.waitMarkerDisappears(ERROR_MARKER, 13);
+    editor.waitMarkerInvisibility(ERROR_MARKER, 13);
     editor.waitMarkerInPosition(TASK_MARKER_OVERVIEW, 18);
     editor.waitTabFileWithSavedStatus(EXTENDED_CLASS);
     editor.selectTabByName(BASE_CLASS);
@@ -113,7 +113,7 @@ public class AutocompleteWithInheritTest {
     editor.launchPropositionAssistPanel();
     editor.waitTextIntoFixErrorProposition("Change type of 'testString' to 'int'");
     editor.selectFirstItemIntoFixErrorPropByDoubleClick();
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR_MARKER);
   }
 
   private void waitErrorMarkerInPosition() throws Exception {

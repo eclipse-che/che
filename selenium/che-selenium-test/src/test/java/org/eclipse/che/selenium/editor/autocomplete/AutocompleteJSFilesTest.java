@@ -142,7 +142,7 @@ public class AutocompleteJSFilesTest {
     editor.waitMarkerInPositionAndClick(INFO_MARKER, 11);
     editor.clickOnElementByXpath("//button[text()='Add missing semicolon']");
 
-    editor.waitAllMarkersDisappear(INFO_MARKER);
+    editor.waitAllMarkersInvisibility(INFO_MARKER);
     loader.waitOnClosed();
   }
 }

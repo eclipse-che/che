@@ -77,7 +77,7 @@ public class CheckMavenPluginTest {
     editor.setCursorToLine(14);
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass = new TestClass();");
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR_MARKER);
   }
 
   @Test(priority = 1)
@@ -108,7 +108,7 @@ public class CheckMavenPluginTest {
     editor.goToCursorPositionVisible(17, 1);
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass2 = new TestClass();");
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR_MARKER);
   }
 
   private void includeModulesInTheParentPom() {

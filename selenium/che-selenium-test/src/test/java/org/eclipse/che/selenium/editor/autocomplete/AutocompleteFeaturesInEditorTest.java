@@ -189,6 +189,6 @@ public class AutocompleteFeaturesInEditorTest {
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
     editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
-    editor.waitMarkerDisappears(ERROR_MARKER, 36);
+    editor.waitMarkerInvisibility(ERROR_MARKER, 36);
   }
 }

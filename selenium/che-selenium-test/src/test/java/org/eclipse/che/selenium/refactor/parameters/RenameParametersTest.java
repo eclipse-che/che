@@ -163,7 +163,7 @@ public class RenameParametersTest {
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("i");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
-    editor.waitMarkerDisappears(ERROR_MARKER, 14);
+    editor.waitMarkerInvisibility(ERROR_MARKER, 14);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }

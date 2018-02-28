@@ -71,11 +71,11 @@ public class EditorValidationTest {
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     editor.waitActive();
     // validation warnings
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR_MARKER);
     editor.setCursorToLine(28);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor("\n");
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR_MARKER);
     editor.typeTextIntoEditor(TEXT_FOR_WARNING);
     editor.waitMarkerInPosition(WARNING_MARKER, 29);
     editor.waitAnnotationCodeAssistIsClosed();

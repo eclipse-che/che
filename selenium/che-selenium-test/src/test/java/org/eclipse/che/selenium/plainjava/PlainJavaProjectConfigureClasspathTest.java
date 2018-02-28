@@ -199,6 +199,6 @@ public class PlainJavaProjectConfigureClasspathTest {
     codenvyEditor.waitErrorPropositionPanelClosed();
     codenvyEditor.waitTextIntoEditor("import org.mockito.Mockito;");
     codenvyEditor.setCursorToLine(19);
-    codenvyEditor.waitMarkerDisappears(ERROR_MARKER, 19);
+    codenvyEditor.waitMarkerInvisibility(ERROR_MARKER, 19);
   }
 }

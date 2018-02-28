@@ -76,7 +76,7 @@ public class CodeAssistAfterMoveItemTest {
     editor.enterTextIntoFixErrorPropByDoubleClick("Import 'A5' (r)");
     loader.waitOnClosed();
     editor.waitTextIntoEditor("import r.A5;");
-    editor.waitMarkerDisappears(ERROR_MARKER, 33);
+    editor.waitMarkerInvisibility(ERROR_MARKER, 33);
 
     // move item 'A5' into package 'p1'
     projectExplorer.waitAndSelectItem(pathToPackageInChePrefix + "/r/A5.java");

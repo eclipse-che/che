@@ -99,7 +99,7 @@ public class OrganizeImportsTest {
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.ORGANIZE_IMPORTS);
     loader.waitOnClosed();
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR_MARKER);
     Assert.assertTrue(
         editor.checkWhatTextLinePresentOnce(
             "import org.springframework.web.servlet.ModelAndView;"));
@@ -148,7 +148,7 @@ public class OrganizeImportsTest {
     organizeImports.selectImport(NAME_OF_B_PACKAGE);
     organizeImports.clickOnNextButton();
     organizeImports.clickOnFinishButton();
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR_MARKER);
     loader.waitOnClosed();
 
     projectExplorer.waitItem(PATH_TO_CLASS_IN_SPRING_PACKAGE);

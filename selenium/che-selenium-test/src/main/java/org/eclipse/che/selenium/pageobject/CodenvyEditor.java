@@ -74,38 +74,50 @@ public class CodenvyEditor {
   public static final String VCS_RULER = "//div[@class='ruler vcs']/div";
   public static final Logger LOG = getLogger(CodenvyEditor.class);
 
-  public static final class EditorContextMenu {
-    public static final String REFACTORING = "contextMenu/Refactoring";
-    public static final String REFACTORING_MOVE = "contextMenu/Refactoring/Move";
-    public static final String REFACTORING_RENAME = "contextMenu/Refactoring/Rename";
+  /** Editor's context menu items */
+  public enum EditorContextMenu {
+    REFACTORING("contextMenu/Refactoring"),
+    REFACTORING_MOVE("contextMenu/Refactoring/Move"),
+    REFACTORING_RENAME("contextMenu/Refactoring/Rename"),
 
-    public static final String UNDO = "contextMenu/Undo";
-    public static final String REDO = "contextMenu/Redo";
-    public static final String FORMAT = "contextMenu/Format";
-    public static final String QUICK_DOC = "contextMenu/Quick Documentation";
-    public static final String QUICK_FIX = "contextMenu/Quick Fix";
-    public static final String OPEN_DECLARATION = "contextMenu/Open Declaration";
-    public static final String NAVIGATE_FILE_STRUCTURE = "contextMenu/Navigate File Structure";
-    public static final String FIND = "contextMenu/Find";
-    public static final String CLOSE = "contextMenu/Close";
+    UNDO("contextMenu/Undo"),
+    REDO("contextMenu/Redo"),
+    FORMAT("contextMenu/Format"),
+    QUICK_DOC("contextMenu/Quick Documentation"),
+    QUICK_FIX("contextMenu/Quick Fix"),
+    OPEN_DECLARATION("contextMenu/Open Declaration"),
+    NAVIGATE_FILE_STRUCTURE("contextMenu/Navigate File Structure"),
+    FIND("contextMenu/Find"),
+    CLOSE("contextMenu/Close");
 
-    private EditorContextMenu() {}
+    private final String itemId;
+
+    EditorContextMenu(String itemId) {
+      this.itemId = itemId;
+    }
+
+    private String get() {
+      return this.itemId;
+    }
   }
 
-  public static final class MarkersType {
-    public static final String ERROR_MARKER_OVERVIEW =
-        "//div[@class='ruler annotations']/div[@class='annotation error']";
-    public static final String WARNING_MARKER_OVERVIEW =
-        "//div[@class='ruler annotations']/div[@class='annotation warning']";
-    public static final String TASK_MARKER_OVERVIEW =
-        "//div[@class='ruler annotations']/div[@class='annotation task']";
-    public static final String ERROR_MARKER =
-        "//div[@class='ruler overview']/div[@class='annotationOverview error']";
-    public static final String WARNING_MARKER =
-        "//div[@class='ruler overview']/div[@class='annotationOverview warning']";
-    public static final String INFO_MARKER = "//div[@class='annotationHTML info']";
+  public enum MarkersType {
+    ERROR_MARKER_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation error']"),
+    WARNING_MARKER_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation warning']"),
+    TASK_MARKER_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation task']"),
+    ERROR_MARKER("//div[@class='ruler overview']/div[@class='annotationOverview error']"),
+    WARNING_MARKER("//div[@class='ruler overview']/div[@class='annotationOverview warning']"),
+    INFO_MARKER("//div[@class='annotationHTML info']");
 
-    private MarkersType() {}
+    private final String itemLocator;
+
+    MarkersType(String itemLocator) {
+      this.itemLocator = itemLocator;
+    }
+
+    private String get() {
+      return this.itemLocator;
+    }
   }
 
   protected final SeleniumWebDriver seleniumWebDriver;
@@ -623,13 +635,13 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait the marker
+   * Waits a marker with specified {@code markerType} on the defined {@code position}
    *
-   * @param markerType is the type of the marker
-   * @param position is the number position
+   * @param markerType marker's type, defined in {@link MarkersType}
+   * @param position line`s number where marker is expected
    */
-  public void waitMarkerInPosition(String markerType, int position) {
-    elemDriverWait.until(visibilityOfElementLocated(By.xpath(format(markerType, position))));
+  public void waitMarkerInPosition(MarkersType markerType, int position) {
+    elemDriverWait.until(visibilityOfElementLocated(By.xpath(format(markerType.get(), position))));
     setCursorToLine(position);
     expectedNumberOfActiveLine(position);
   }
@@ -718,48 +730,50 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait the marker and click him
+   * Waits marker with specified {@code markerType} on the defined {@code position} and click on it
    *
-   * @param markerType is the type of the marker
-   * @param position is the number position
+   * @param markerType marker's type, defined in {@link MarkersType}
+   * @param position line's number, where marker is expected
    */
-  public void waitMarkerInPositionAndClick(String markerType, int position) {
+  public void waitMarkerInPositionAndClick(MarkersType markerType, int position) {
     loadPageDriverWait
-        .until(visibilityOfElementLocated(By.xpath(format(markerType, position))))
+        .until(visibilityOfElementLocated(By.xpath(format(markerType.get(), position))))
         .click();
   }
 
   /**
-   * wait the 'marker' disappears
+   * Waits until marker with specified {@code markerType} be invisible on the defined {@code
+   * position}
    *
-   * @param markerType is the type of the marker
-   * @param position is the number position
+   * @param markerType marker's type, defined in {@link MarkersType}
+   * @param position line's number, where marker should not be displayed
    */
-  public void waitMarkerDisappears(String markerType, int position) {
-    elemDriverWait.until(invisibilityOfElementLocated(By.xpath(format(markerType, position))));
+  public void waitMarkerInvisibility(MarkersType markerType, int position) {
+    elemDriverWait.until(
+        invisibilityOfElementLocated(By.xpath(format(markerType.get(), position))));
     expectedNumberOfActiveLine(position);
   }
 
   /**
-   * wait while all markers disappear
+   * Waits until all markers with specified {@code markerType} be invisible
    *
-   * @param markerType is type of the marker
+   * @param markerType marker's type, defined in {@link MarkersType}
    */
-  public void waitAllMarkersDisappear(String markerType) {
+  public void waitAllMarkersInvisibility(MarkersType markerType) {
     loaderDriverWait.until(
         (ExpectedCondition<Boolean>)
-            driver -> driver.findElements(By.xpath(markerType)).size() == 0);
+            driver -> driver.findElements(By.xpath(markerType.get())).size() == 0);
   }
 
   /**
-   * wait while all markers appear
+   * Waits until at list one marker with specified {@code markerType} be visible
    *
-   * @param markerType is type of the marker
+   * @param markerType marker's type, defined in {@link MarkersType}
    */
-  public void waitCodeAssistMarkers(String markerType) {
+  public void waitCodeAssistMarkers(MarkersType markerType) {
     elemDriverWait.until(
         (ExpectedCondition<Boolean>)
-            driver -> driver.findElements(By.xpath(markerType)).size() > 0);
+            driver -> driver.findElements(By.xpath(markerType.get())).size() > 0);
   }
 
   /** @return text from autocomplete */
@@ -808,9 +822,14 @@ public class CodenvyEditor {
         .click();
   }
 
-  /** move the mouse to the marker and wait the 'assist content container' */
-  public void moveToMarkerAndWaitAssistContent(String markerType) {
-    WebElement element = seleniumWebDriver.findElement(By.xpath(markerType));
+  /**
+   * Moves mouse to the marker with specified {@code markerType} and waits until 'assist content
+   * container' be visible.
+   *
+   * @param markerType marker's type, defined in {@link MarkersType}
+   */
+  public void moveToMarkerAndWaitAssistContent(MarkersType markerType) {
+    WebElement element = seleniumWebDriver.findElement(By.xpath(markerType.get()));
     actionsFactory.createAction(seleniumWebDriver).moveToElement(element).perform();
     waitAnnotationCodeAssistIsOpen();
   }
@@ -1577,25 +1596,25 @@ public class CodenvyEditor {
   }
 
   /**
-   * returns the quantity of annotations submitted to the left ruler in editor
+   * Gets quantity of visible markers with specified {@code markerType}
    *
-   * @param markerType type of marker
-   * @return quantity of annotations
+   * @param markerType marker's type, defined in {@link MarkersType}
+   * @return markers quantity
    */
-  public int getQuantityMarkers(String markerType) {
+  public int getMarkersQuantity(MarkersType markerType) {
     redrawDriverWait.until(visibilityOfElementLocated(By.xpath(Locators.RULER_OVERVIEW)));
     List<WebElement> annotationList =
-        redrawDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(markerType)));
+        redrawDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(markerType.get())));
     return annotationList.size();
   }
 
   /**
-   * wait that annotations are not present
+   * Waits until annotations with specified {@code markerType} visible
    *
-   * @param markerType type of marker
+   * @param markerType marker's type, defined in {@link MarkersType}
    */
-  public void waitAnnotationsAreNotPresent(String markerType) {
-    redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(markerType)));
+  public void waitAnnotationsAreNotPresent(MarkersType markerType) {
+    redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(markerType.get())));
   }
 
   /**
@@ -1861,12 +1880,12 @@ public class CodenvyEditor {
   }
 
   /**
-   * click on element from context menu by name
+   * Clicks on {@code item} in context menu
    *
-   * @param item is a name into context menu
+   * @param item editor context menu item which defined in {@link EditorContextMenu}
    */
-  public void clickOnItemInContextMenu(String item) {
-    redrawDriverWait.until(visibilityOfElementLocated(By.id(item))).click();
+  public void clickOnItemInContextMenu(EditorContextMenu item) {
+    redrawDriverWait.until(visibilityOfElementLocated(By.id(item.get()))).click();
     loader.waitOnClosed();
   }
 

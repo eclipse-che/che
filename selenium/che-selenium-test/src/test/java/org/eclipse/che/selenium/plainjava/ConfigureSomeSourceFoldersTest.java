@@ -81,7 +81,7 @@ public class ConfigureSomeSourceFoldersTest {
     createNewJavaClass(newJavaClassName);
     projectExplorer.waitItem(PROJECT_NAME + "/source/" + newJavaClassName + ".java");
     codenvyEditor.waitTextIntoEditor("public class NewClass {");
-    codenvyEditor.waitAllMarkersDisappear(ERROR_MARKER);
+    codenvyEditor.waitAllMarkersInvisibility(ERROR_MARKER);
     codenvyEditor.goToCursorPositionVisible(2, 24);
     codenvyEditor.typeTextIntoEditor(Keys.ENTER.toString());
     String methodForChecking =
@@ -89,7 +89,7 @@ public class ConfigureSomeSourceFoldersTest {
             + "        return \"Message from source folder\";\n"
             + "    ";
     codenvyEditor.typeTextIntoEditor(methodForChecking);
-    codenvyEditor.waitAllMarkersDisappear(ERROR_MARKER);
+    codenvyEditor.waitAllMarkersInvisibility(ERROR_MARKER);
     projectExplorer.openItemByPath(PROJECT_NAME + "/src");
     projectExplorer.waitItem(PROJECT_NAME + "/src/Main.java");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/Main.java");

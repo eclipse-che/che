@@ -221,7 +221,7 @@ public class ContextMenuEditorTest {
     editor.selectFirstItemIntoFixErrorPropByEnter();
     editor.setCursorToLine(28);
     editor.waitTextIntoEditor("int s = 5;");
-    editor.waitMarkerDisappears(ERROR_MARKER, 28);
+    editor.waitMarkerInvisibility(ERROR_MARKER, 28);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
   }
 
