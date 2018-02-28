@@ -165,19 +165,23 @@ public class CodenvyEditor {
   }
 
   public enum TabAction {
-    CLOSE("contextMenu/Close"),
-    CLOSE_ALL("contextMenu/Close All"),
-    CLOSE_OTHER("contextMenu/Close Other"),
-    CLOSE_ALL_BUT_PINNED("contextMenu/Close All But Pinned"),
-    REOPEN_CLOSED_TAB("contextMenu/Reopen Closed Tab"),
-    PIN_UNPIN_TAB("contextMenu/Pin/Unpin Tab"),
-    SPLIT_VERTICALLY("contextMenu/Split Pane In Two Columns"),
-    SPIT_HORISONTALLY("contextMenu/Split Pane In Two Rows");
+    CLOSE(By.id("contextMenu/Close")),
+    CLOSE_ALL(By.id("contextMenu/Close All")),
+    CLOSE_OTHER(By.id("contextMenu/Close Other")),
+    CLOSE_ALL_BUT_PINNED(By.id("contextMenu/Close All But Pinned")),
+    REOPEN_CLOSED_TAB(By.id("contextMenu/Reopen Closed Tab")),
+    PIN_UNPIN_TAB(By.id("contextMenu/Pin/Unpin Tab")),
+    SPLIT_VERTICALLY(By.id("contextMenu/Split Pane In Two Columns")),
+    SPIT_HORISONTALLY(By.id("contextMenu/Split Pane In Two Rows"));
 
-    private final String id;
+    private final By id;
 
-    TabAction(String id) {
+    TabAction(By id) {
       this.id = id;
+    }
+
+    private By get() {
+      return this.id;
     }
   }
 
@@ -203,27 +207,27 @@ public class CodenvyEditor {
 
   /** Editor's context menu items */
   public enum EditorContextMenu {
-    REFACTORING("contextMenu/Refactoring"),
-    REFACTORING_MOVE("contextMenu/Refactoring/Move"),
-    REFACTORING_RENAME("contextMenu/Refactoring/Rename"),
-    UNDO("contextMenu/Undo"),
-    REDO("contextMenu/Redo"),
-    FORMAT("contextMenu/Format"),
-    QUICK_DOC("contextMenu/Quick Documentation"),
-    QUICK_FIX("contextMenu/Quick Fix"),
-    OPEN_DECLARATION("contextMenu/Open Declaration"),
-    NAVIGATE_FILE_STRUCTURE("contextMenu/Navigate File Structure"),
-    FIND("contextMenu/Find"),
-    CLOSE("contextMenu/Close");
+    REFACTORING(By.id("contextMenu/Refactoring")),
+    REFACTORING_MOVE(By.id("contextMenu/Refactoring/Move")),
+    REFACTORING_RENAME(By.id("contextMenu/Refactoring/Rename")),
+    UNDO(By.id("contextMenu/Undo")),
+    REDO(By.id("contextMenu/Redo")),
+    FORMAT(By.id("contextMenu/Format")),
+    QUICK_DOC(By.id("contextMenu/Quick Documentation")),
+    QUICK_FIX(By.id("contextMenu/Quick Fix")),
+    OPEN_DECLARATION(By.id("contextMenu/Open Declaration")),
+    NAVIGATE_FILE_STRUCTURE(By.id("contextMenu/Navigate File Structure")),
+    FIND(By.id("contextMenu/Find")),
+    CLOSE(By.id("contextMenu/Close"));
 
-    private final String itemId;
+    private final By itemLocator;
 
-    EditorContextMenu(String itemId) {
-      this.itemId = itemId;
+    EditorContextMenu(By itemLocator) {
+      this.itemLocator = itemLocator;
     }
 
-    private String get() {
-      return this.itemId;
+    private By get() {
+      return this.itemLocator;
     }
   }
 
@@ -448,7 +452,7 @@ public class CodenvyEditor {
 
   /** Run action for tab from the context menu */
   public void runActionForTabFromContextMenu(TabAction tabAction) {
-    redrawDriverWait.until(visibilityOfElementLocated(By.id(tabAction.id))).click();
+    redrawDriverWait.until(visibilityOfElementLocated(tabAction.get())).click();
   }
 
   /** type text by into orion editor with pause 1 sec. */
@@ -1857,7 +1861,7 @@ public class CodenvyEditor {
    * @param item editor context menu item which defined in {@link EditorContextMenu}
    */
   public void clickOnItemInContextMenu(EditorContextMenu item) {
-    redrawDriverWait.until(visibilityOfElementLocated(By.id(item.get()))).click();
+    redrawDriverWait.until(visibilityOfElementLocated(item.get())).click();
     loader.waitOnClosed();
   }
 
