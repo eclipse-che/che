@@ -74,52 +74,6 @@ public class CodenvyEditor {
   public static final String VCS_RULER = "//div[@class='ruler vcs']/div";
   public static final Logger LOG = getLogger(CodenvyEditor.class);
 
-  /** Editor's context menu items */
-  public enum EditorContextMenu {
-    REFACTORING("contextMenu/Refactoring"),
-    REFACTORING_MOVE("contextMenu/Refactoring/Move"),
-    REFACTORING_RENAME("contextMenu/Refactoring/Rename"),
-
-    UNDO("contextMenu/Undo"),
-    REDO("contextMenu/Redo"),
-    FORMAT("contextMenu/Format"),
-    QUICK_DOC("contextMenu/Quick Documentation"),
-    QUICK_FIX("contextMenu/Quick Fix"),
-    OPEN_DECLARATION("contextMenu/Open Declaration"),
-    NAVIGATE_FILE_STRUCTURE("contextMenu/Navigate File Structure"),
-    FIND("contextMenu/Find"),
-    CLOSE("contextMenu/Close");
-
-    private final String itemId;
-
-    EditorContextMenu(String itemId) {
-      this.itemId = itemId;
-    }
-
-    private String get() {
-      return this.itemId;
-    }
-  }
-
-  public enum MarkersType {
-    ERROR_MARKER_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation error']"),
-    WARNING_MARKER_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation warning']"),
-    TASK_MARKER_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation task']"),
-    ERROR_MARKER("//div[@class='ruler overview']/div[@class='annotationOverview error']"),
-    WARNING_MARKER("//div[@class='ruler overview']/div[@class='annotationOverview warning']"),
-    INFO_MARKER("//div[@class='annotationHTML info']");
-
-    private final String itemLocator;
-
-    MarkersType(String itemLocator) {
-      this.itemLocator = itemLocator;
-    }
-
-    private String get() {
-      return this.itemLocator;
-    }
-  }
-
   protected final SeleniumWebDriver seleniumWebDriver;
   protected final Loader loader;
   protected final ActionsFactory actionsFactory;
@@ -226,6 +180,53 @@ public class CodenvyEditor {
 
     TabAction(String id) {
       this.id = id;
+    }
+  }
+
+  /** Editor`s markers types */
+  public enum MarkersType {
+    ERROR_MARKER_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation error']"),
+    WARNING_MARKER_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation warning']"),
+    TASK_MARKER_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation task']"),
+    ERROR_MARKER("//div[@class='ruler overview']/div[@class='annotationOverview error']"),
+    WARNING_MARKER("//div[@class='ruler overview']/div[@class='annotationOverview warning']"),
+    INFO_MARKER("//div[@class='annotationHTML info']");
+
+    private final String itemLocator;
+
+    MarkersType(String itemLocator) {
+      this.itemLocator = itemLocator;
+    }
+
+    private String get() {
+      return this.itemLocator;
+    }
+  }
+
+  /** Editor's context menu items */
+  public enum EditorContextMenu {
+    REFACTORING("contextMenu/Refactoring"),
+    REFACTORING_MOVE("contextMenu/Refactoring/Move"),
+    REFACTORING_RENAME("contextMenu/Refactoring/Rename"),
+
+    UNDO("contextMenu/Undo"),
+    REDO("contextMenu/Redo"),
+    FORMAT("contextMenu/Format"),
+    QUICK_DOC("contextMenu/Quick Documentation"),
+    QUICK_FIX("contextMenu/Quick Fix"),
+    OPEN_DECLARATION("contextMenu/Open Declaration"),
+    NAVIGATE_FILE_STRUCTURE("contextMenu/Navigate File Structure"),
+    FIND("contextMenu/Find"),
+    CLOSE("contextMenu/Close");
+
+    private final String itemId;
+
+    EditorContextMenu(String itemId) {
+      this.itemId = itemId;
+    }
+
+    private String get() {
+      return this.itemId;
     }
   }
 
