@@ -120,8 +120,15 @@ public class ProjectTreeChangeHandler {
               ProjectTreeChangeHandler.this
                   .appContext
                   .getWorkspaceRoot()
-                  .synchronize(
-                      new ExternalResourceDelta(commonUpdatePath, commonUpdatePath, UPDATED)));
+                  .getContainer(commonUpdatePath)
+                  .thenPromise(
+                      container -> {
+                        if (container.isPresent()) {
+                          return container.get().synchronize();
+                        }
+
+                        return promises.resolve(null);
+                      }));
     }
 
     private int getStatus(FileWatcherEventType eventType) {

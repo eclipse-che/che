@@ -46,8 +46,7 @@ public class InitRepositoryPresenterTest extends BaseTest {
             notificationManager,
             gitOutputConsoleFactory,
             processesPanelPresenter,
-            service,
-            appContext);
+            service);
 
     when(service.init(any(Path.class), anyBoolean())).thenReturn(voidPromise);
     when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
@@ -65,8 +64,6 @@ public class InitRepositoryPresenterTest extends BaseTest {
     verify(console).print(eq(constant.initSuccess()));
     verify(processesPanelPresenter).addCommandOutput(eq(console));
     verify(notificationManager).notify(anyString());
-
-    verify(project).synchronize();
   }
 
   @Test

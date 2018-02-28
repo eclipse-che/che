@@ -66,7 +66,6 @@ public class MergePresenterTest extends BaseTest {
             view,
             service,
             constant,
-            appContext,
             notificationManager,
             dialogFactory,
             gitOutputConsoleFactory,

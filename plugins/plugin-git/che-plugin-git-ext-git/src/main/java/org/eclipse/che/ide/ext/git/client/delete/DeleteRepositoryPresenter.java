@@ -68,8 +68,6 @@ public class DeleteRepositoryPresenter {
               console.print(constant.deleteGitRepositorySuccess());
               consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.deleteGitRepositorySuccess());
-
-              appContext.getRootProject().synchronize();
             })
         .catchError(
             error -> {

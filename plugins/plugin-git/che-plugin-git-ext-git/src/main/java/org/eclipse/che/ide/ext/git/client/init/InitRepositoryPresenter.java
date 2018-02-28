@@ -16,7 +16,6 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
@@ -41,7 +40,6 @@ public class InitRepositoryPresenter {
   private final GitServiceClient service;
   private final GitLocalizationConstant constant;
   private final NotificationManager notificationManager;
-  private final AppContext appContext;
 
   @Inject
   public InitRepositoryPresenter(
@@ -49,14 +47,12 @@ public class InitRepositoryPresenter {
       NotificationManager notificationManager,
       GitOutputConsoleFactory gitOutputConsoleFactory,
       ProcessesPanelPresenter consolesPanelPresenter,
-      GitServiceClient service,
-      AppContext appContext) {
+      GitServiceClient service) {
     this.constant = constant;
     this.notificationManager = notificationManager;
     this.gitOutputConsoleFactory = gitOutputConsoleFactory;
     this.consolesPanelPresenter = consolesPanelPresenter;
     this.service = service;
-    this.appContext = appContext;
   }
 
   public void initRepository(final Project project) {
@@ -69,8 +65,6 @@ public class InitRepositoryPresenter {
               console.print(constant.initSuccess());
               consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.initSuccess());
-
-              project.synchronize();
             })
         .catchError(
             error -> {
