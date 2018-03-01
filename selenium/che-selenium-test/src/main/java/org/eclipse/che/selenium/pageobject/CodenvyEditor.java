@@ -104,7 +104,7 @@ public class CodenvyEditor {
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
-  /** Class introduce base Xpath locators for DOM navigation inside editor */
+  /** Interface introduce base locators for DOM navigation inside editor */
   public interface Locators {
     String CONTEXT_MENU = "//div[@id='menu-lock-layer-id']/div[2]";
     String EDITOR_TABS_PANEL = "gwt-debug-multiSplitPanel-tabsPanel";
@@ -164,66 +164,70 @@ public class CodenvyEditor {
         "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
   }
 
-  public enum TabAction {
-    CLOSE("contextMenu/Close"),
-    CLOSE_ALL("contextMenu/Close All"),
-    CLOSE_OTHER("contextMenu/Close Other"),
-    CLOSE_ALL_BUT_PINNED("contextMenu/Close All But Pinned"),
-    REOPEN_CLOSED_TAB("contextMenu/Reopen Closed Tab"),
-    PIN_UNPIN_TAB("contextMenu/Pin/Unpin Tab"),
-    SPLIT_VERTICALLY("contextMenu/Split Pane In Two Columns"),
-    SPIT_HORISONTALLY("contextMenu/Split Pane In Two Rows");
+  public enum TabActionLocator {
+    CLOSE(By.id("contextMenu/Close")),
+    CLOSE_ALL(By.id("contextMenu/Close All")),
+    CLOSE_OTHER(By.id("contextMenu/Close Other")),
+    CLOSE_ALL_BUT_PINNED(By.id("contextMenu/Close All But Pinned")),
+    REOPEN_CLOSED_TAB(By.id("contextMenu/Reopen Closed Tab")),
+    PIN_UNPIN_TAB(By.id("contextMenu/Pin/Unpin Tab")),
+    SPLIT_VERTICALLY(By.id("contextMenu/Split Pane In Two Columns")),
+    SPIT_HORISONTALLY(By.id("contextMenu/Split Pane In Two Rows"));
 
-    private final String id;
+    private final By id;
 
-    TabAction(String id) {
+    TabActionLocator(By id) {
       this.id = id;
+    }
+
+    private By get() {
+      return this.id;
     }
   }
 
   /** Editor`s markers types */
-  public enum MarkersType {
-    ERROR_MARKER_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation error']"),
-    WARNING_MARKER_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation warning']"),
-    TASK_MARKER_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation task']"),
-    ERROR_MARKER("//div[@class='ruler overview']/div[@class='annotationOverview error']"),
-    WARNING_MARKER("//div[@class='ruler overview']/div[@class='annotationOverview warning']"),
-    INFO_MARKER("//div[@class='annotationHTML info']");
+  public enum MarkerLocator {
+    ERROR_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation error']"),
+    WARNING_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation warning']"),
+    TASK_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation task']"),
+    ERROR("//div[@class='ruler overview']/div[@class='annotationOverview error']"),
+    WARNING("//div[@class='ruler overview']/div[@class='annotationOverview warning']"),
+    INFO("//div[@class='annotationHTML info']");
 
-    private final String itemLocator;
+    private final String locator;
 
-    MarkersType(String itemLocator) {
-      this.itemLocator = itemLocator;
+    MarkerLocator(String locator) {
+      this.locator = locator;
     }
 
     private String get() {
-      return this.itemLocator;
+      return this.locator;
     }
   }
 
   /** Editor's context menu items */
-  public enum EditorContextMenu {
-    REFACTORING("contextMenu/Refactoring"),
-    REFACTORING_MOVE("contextMenu/Refactoring/Move"),
-    REFACTORING_RENAME("contextMenu/Refactoring/Rename"),
-    UNDO("contextMenu/Undo"),
-    REDO("contextMenu/Redo"),
-    FORMAT("contextMenu/Format"),
-    QUICK_DOC("contextMenu/Quick Documentation"),
-    QUICK_FIX("contextMenu/Quick Fix"),
-    OPEN_DECLARATION("contextMenu/Open Declaration"),
-    NAVIGATE_FILE_STRUCTURE("contextMenu/Navigate File Structure"),
-    FIND("contextMenu/Find"),
-    CLOSE("contextMenu/Close");
+  public enum ContextMenuLocator {
+    REFACTORING(By.id("contextMenu/Refactoring")),
+    REFACTORING_MOVE(By.id("contextMenu/Refactoring/Move")),
+    REFACTORING_RENAME(By.id("contextMenu/Refactoring/Rename")),
+    UNDO(By.id("contextMenu/Undo")),
+    REDO(By.id("contextMenu/Redo")),
+    FORMAT(By.id("contextMenu/Format")),
+    QUICK_DOC(By.id("contextMenu/Quick Documentation")),
+    QUICK_FIX(By.id("contextMenu/Quick Fix")),
+    OPEN_DECLARATION(By.id("contextMenu/Open Declaration")),
+    NAVIGATE_FILE_STRUCTURE(By.id("contextMenu/Navigate File Structure")),
+    FIND(By.id("contextMenu/Find")),
+    CLOSE(By.id("contextMenu/Close"));
 
-    private final String itemId;
+    private final By itemLocator;
 
-    EditorContextMenu(String itemId) {
-      this.itemId = itemId;
+    ContextMenuLocator(By itemLocator) {
+      this.itemLocator = itemLocator;
     }
 
-    private String get() {
-      return this.itemId;
+    private By get() {
+      return this.itemLocator;
     }
   }
 
@@ -447,8 +451,8 @@ public class CodenvyEditor {
   }
 
   /** Run action for tab from the context menu */
-  public void runActionForTabFromContextMenu(TabAction tabAction) {
-    redrawDriverWait.until(visibilityOfElementLocated(By.id(tabAction.id))).click();
+  public void runActionForTabFromContextMenu(TabActionLocator tabAction) {
+    redrawDriverWait.until(visibilityOfElementLocated(tabAction.get())).click();
   }
 
   /** type text by into orion editor with pause 1 sec. */
@@ -607,13 +611,14 @@ public class CodenvyEditor {
   }
 
   /**
-   * Waits a marker with specified {@code markerType} on the defined {@code position}
+   * Waits a marker with specified {@code markerLocator} on the defined {@code position}
    *
-   * @param markerType marker's type, defined in {@link MarkersType}
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
    * @param position line`s number where marker is expected
    */
-  public void waitMarkerInPosition(MarkersType markerType, int position) {
-    elemDriverWait.until(visibilityOfElementLocated(By.xpath(format(markerType.get(), position))));
+  public void waitMarkerInPosition(MarkerLocator markerLocator, int position) {
+    elemDriverWait.until(
+        visibilityOfElementLocated(By.xpath(format(markerLocator.get(), position))));
     setCursorToLine(position);
     expectedNumberOfActiveLine(position);
   }
@@ -702,50 +707,51 @@ public class CodenvyEditor {
   }
 
   /**
-   * Waits marker with specified {@code markerType} on the defined {@code position} and click on it
+   * Waits marker with specified {@code markerLocator} on the defined {@code position} and click on
+   * it
    *
-   * @param markerType marker's type, defined in {@link MarkersType}
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
    * @param position line's number, where marker is expected
    */
-  public void waitMarkerInPositionAndClick(MarkersType markerType, int position) {
+  public void waitMarkerInPositionAndClick(MarkerLocator markerLocator, int position) {
     loadPageDriverWait
-        .until(visibilityOfElementLocated(By.xpath(format(markerType.get(), position))))
+        .until(visibilityOfElementLocated(By.xpath(format(markerLocator.get(), position))))
         .click();
   }
 
   /**
-   * Waits until marker with specified {@code markerType} be invisible on the defined {@code
+   * Waits until marker with specified {@code markerLocator} be invisible on the defined {@code
    * position}
    *
-   * @param markerType marker's type, defined in {@link MarkersType}
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
    * @param position line's number, where marker should not be displayed
    */
-  public void waitMarkerInvisibility(MarkersType markerType, int position) {
+  public void waitMarkerInvisibility(MarkerLocator markerLocator, int position) {
     elemDriverWait.until(
-        invisibilityOfElementLocated(By.xpath(format(markerType.get(), position))));
+        invisibilityOfElementLocated(By.xpath(format(markerLocator.get(), position))));
     expectedNumberOfActiveLine(position);
   }
 
   /**
-   * Waits until all markers with specified {@code markerType} be invisible
+   * Waits until all markers with specified {@code markerLocator} be invisible
    *
-   * @param markerType marker's type, defined in {@link MarkersType}
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
-  public void waitAllMarkersInvisibility(MarkersType markerType) {
+  public void waitAllMarkersInvisibility(MarkerLocator markerLocator) {
     loaderDriverWait.until(
         (ExpectedCondition<Boolean>)
-            driver -> driver.findElements(By.xpath(markerType.get())).size() == 0);
+            driver -> driver.findElements(By.xpath(markerLocator.get())).size() == 0);
   }
 
   /**
-   * Waits until at list one marker with specified {@code markerType} be visible
+   * Waits until at list one marker with specified {@code markerLocator} be visible
    *
-   * @param markerType marker's type, defined in {@link MarkersType}
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
-  public void waitCodeAssistMarkers(MarkersType markerType) {
+  public void waitCodeAssistMarkers(MarkerLocator markerLocator) {
     elemDriverWait.until(
         (ExpectedCondition<Boolean>)
-            driver -> driver.findElements(By.xpath(markerType.get())).size() > 0);
+            driver -> driver.findElements(By.xpath(markerLocator.get())).size() > 0);
   }
 
   /** @return text from autocomplete */
@@ -795,13 +801,13 @@ public class CodenvyEditor {
   }
 
   /**
-   * Moves mouse to the marker with specified {@code markerType} and waits until 'assist content
+   * Moves mouse to the marker with specified {@code markerLocator} and waits until 'assist content
    * container' be visible.
    *
-   * @param markerType marker's type, defined in {@link MarkersType}
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
-  public void moveToMarkerAndWaitAssistContent(MarkersType markerType) {
-    WebElement element = seleniumWebDriver.findElement(By.xpath(markerType.get()));
+  public void moveToMarkerAndWaitAssistContent(MarkerLocator markerLocator) {
+    WebElement element = seleniumWebDriver.findElement(By.xpath(markerLocator.get()));
     actionsFactory.createAction(seleniumWebDriver).moveToElement(element).perform();
     waitAnnotationCodeAssistIsOpen();
   }
@@ -1568,25 +1574,25 @@ public class CodenvyEditor {
   }
 
   /**
-   * Gets quantity of visible markers with specified {@code markerType}
+   * Gets quantity of visible markers with specified {@code markerLocator}
    *
-   * @param markerType marker's type, defined in {@link MarkersType}
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
    * @return markers quantity
    */
-  public int getMarkersQuantity(MarkersType markerType) {
+  public int getMarkersQuantity(MarkerLocator markerLocator) {
     redrawDriverWait.until(visibilityOfElementLocated(By.xpath(Locators.RULER_OVERVIEW)));
     List<WebElement> annotationList =
-        redrawDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(markerType.get())));
+        redrawDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(markerLocator.get())));
     return annotationList.size();
   }
 
   /**
-   * Waits until annotations with specified {@code markerType} visible
+   * Waits until annotations with specified {@code markerLocator} visible
    *
-   * @param markerType marker's type, defined in {@link MarkersType}
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
-  public void waitAnnotationsAreNotPresent(MarkersType markerType) {
-    redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(markerType.get())));
+  public void waitAnnotationsAreNotPresent(MarkerLocator markerLocator) {
+    redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(markerLocator.get())));
   }
 
   /**
@@ -1854,10 +1860,10 @@ public class CodenvyEditor {
   /**
    * Clicks on {@code item} in context menu
    *
-   * @param item editor context menu item which defined in {@link EditorContextMenu}
+   * @param item editor context menu item which defined in {@link ContextMenuLocator}
    */
-  public void clickOnItemInContextMenu(EditorContextMenu item) {
-    redrawDriverWait.until(visibilityOfElementLocated(By.id(item.get()))).click();
+  public void clickOnItemInContextMenu(ContextMenuLocator item) {
+    redrawDriverWait.until(visibilityOfElementLocated(item.get())).click();
     loader.waitOnClosed();
   }
 

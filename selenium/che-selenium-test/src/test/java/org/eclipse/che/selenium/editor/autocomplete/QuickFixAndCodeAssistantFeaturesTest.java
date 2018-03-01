@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.WARNING_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -68,7 +68,7 @@ public class QuickFixAndCodeAssistantFeaturesTest {
 
     editor.setCursorToLine(28);
     editor.typeTextIntoEditor(TEXT_FOR_WARNING);
-    editor.waitMarkerInPosition(WARNING_MARKER, 28);
+    editor.waitMarkerInPosition(WARNING, 28);
     editor.launchPropositionAssistPanel();
     editor.waitTextIntoFixErrorProposition("Remove 'l', keep assignments with side effects");
     editor.waitTextIntoFixErrorProposition("Remove 'l' and all assignments");
@@ -94,7 +94,7 @@ public class QuickFixAndCodeAssistantFeaturesTest {
     // panel
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
     editor.typeTextIntoEditor(";");
-    editor.waitMarkerInPosition(ERROR_MARKER, 29);
+    editor.waitMarkerInPosition(ERROR, 29);
     editor.launchPropositionAssistPanel();
     editor.waitTextIntoFixErrorProposition("Change to 'ClassDesc' (javax.rmi.CORBA)");
     editor.waitTextIntoFixErrorProposition("Change to 'ClassUtils' (org.springframework.util)");

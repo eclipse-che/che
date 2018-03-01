@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -133,7 +133,7 @@ public class InheritClassTest {
     editor.typeTextIntoEditor(Keys.ENTER.toString());
 
     editor.typeTextIntoEditor(" Code");
-    editor.waitCodeAssistMarkers(ERROR_MARKER);
+    editor.waitCodeAssistMarkers(ERROR);
     editor.launchAutocompleteAndWaitContainer();
     editor.waitTextIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
     editor.waitTextIntoAutocompleteContainer("CodenvyTestInherite - org.eclipse.qa.examples");
