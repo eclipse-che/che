@@ -209,7 +209,7 @@ public class WsMasterModule extends AbstractModule {
     final Map<String, String> persistenceProperties = new HashMap<>();
     persistenceProperties.put(PersistenceUnitProperties.TARGET_SERVER, "None");
     persistenceProperties.put(PersistenceUnitProperties.LOGGING_LOGGER, "DefaultLogger");
-    persistenceProperties.put(PersistenceUnitProperties.LOGGING_LEVEL, "CONFIG");
+    persistenceProperties.put(PersistenceUnitProperties.LOGGING_LEVEL, "SEVERE");
     persistenceProperties.put(
         PersistenceUnitProperties.NON_JTA_DATASOURCE, "java:/comp/env/jdbc/che");
     bindConstant().annotatedWith(Names.named("jndi.datasource.name")).to("java:/comp/env/jdbc/che");
