@@ -10,9 +10,11 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
+import static io.jsonwebtoken.SignatureAlgorithm.RS512;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -20,9 +22,14 @@ import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.DefaultClaims;
 import io.jsonwebtoken.impl.DefaultHeader;
 import io.jsonwebtoken.impl.DefaultJwt;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.FilterChain;
@@ -36,6 +43,8 @@ import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
+import org.eclipse.che.multiuser.machine.authentication.shared.Constants;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -47,6 +56,7 @@ import org.testng.annotations.Test;
 @Listeners(value = {MockitoTestNGListener.class})
 public class KeycloakEnvironmentInitalizationFilterTest {
 
+  @Mock private SignatureKeyManager keyManager;
   @Mock private KeycloakUserManager userManager;
   @Mock private RequestTokenExtractor tokenExtractor;
   @Mock private PermissionChecker permissionChecker;
@@ -66,14 +76,26 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     EnvironmentContext.setCurrent(context);
     filter =
         new KeycloakEnvironmentInitalizationFilter(userManager, tokenExtractor, permissionChecker);
+    filter.signatureKeyManager = keyManager;
+    final KeyPair kp = new KeyPair(mock(PublicKey.class), mock(PrivateKey.class));
+    when(keyManager.getKeyPair()).thenReturn(kp);
   }
 
   @Test
   public void shouldSkipRequestsWithMachineTokens() throws Exception {
-
-    EnvironmentContext context = EnvironmentContext.getCurrent();
-    // given
-    when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("machine123123token");
+    final KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+    kpg.initialize(1024);
+    final KeyPair keyPair = kpg.generateKeyPair();
+    when(keyManager.getKeyPair()).thenReturn(keyPair);
+    final Map<String, Object> header = new HashMap<>();
+    header.put("kind", Constants.MACHINE_TOKEN_KIND);
+    final String token =
+        Jwts.builder()
+            .setPayload("payload")
+            .setHeader(header)
+            .signWith(RS512, keyPair.getPrivate())
+            .compact();
+    when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn(token);
 
     // when
     filter.doFilter(request, response, chain);
@@ -81,7 +103,6 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     // then
     verify(chain).doFilter(eq(request), eq(response));
     verifyNoMoreInteractions(userManager);
-    verifyNoMoreInteractions(context);
   }
 
   @Test

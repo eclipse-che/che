@@ -10,10 +10,20 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
+import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.MACHINE_TOKEN_KIND;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import java.security.PublicKey;
+import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 
 /**
  * Base abstract class for the Keycloak-related servlet filters.
@@ -23,10 +33,23 @@ import javax.servlet.http.HttpServletRequest;
  */
 public abstract class AbstractKeycloakFilter implements Filter {
 
+  @Inject protected SignatureKeyManager signatureKeyManager;
+
+  /** when a request came from a machine with valid token then auth is not required */
   protected boolean shouldSkipAuthentication(HttpServletRequest request, String token) {
-    return (token != null && token.startsWith("machine"))
-        || (request.getRequestURI() != null
-            && request.getRequestURI().endsWith("api/keycloak/OIDCKeycloak.js"));
+    if (token == null) {
+      return false;
+    }
+    try {
+      final PublicKey publicKey = signatureKeyManager.getKeyPair().getPublic();
+      final Jwt jwt = Jwts.parser().setSigningKey(publicKey).parse(token);
+      return MACHINE_TOKEN_KIND.equals(jwt.getHeader().get("kind"))
+          || (request.getRequestURI() != null
+              && request.getRequestURI().endsWith("api/keycloak/OIDCKeycloak.js"));
+    } catch (ExpiredJwtException | MalformedJwtException | SignatureException ex) {
+      // given token is not signed by particular signature key so it must be checked in another way
+      return false;
+    }
   }
 
   @Override
