@@ -206,6 +206,20 @@ public interface Resource extends Comparable<Resource> {
   }
 
   /**
+   * Returns whether this resource has an error or not.
+   *
+   * @return true if this resource has an error, false otherwise.
+   */
+  boolean hasError();
+
+  /**
+   * Set the hasError property of this resource.
+   *
+   * @param hasError the new value to set.
+   */
+  void setHasError(boolean hasError);
+
+  /**
    * Copies resource to given {@code destination} path. Copy operation performs asynchronously and
    * result of current operation will be provided in {@code Promise} result. Destination path should
    * have write access.

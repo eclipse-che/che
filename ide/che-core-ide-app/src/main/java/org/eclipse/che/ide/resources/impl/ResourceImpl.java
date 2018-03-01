@@ -45,12 +45,23 @@ abstract class ResourceImpl implements Resource {
 
   protected final ResourceManager resourceManager;
   protected final Path path;
+  private boolean hasError;
 
   protected Marker[] markers = new Marker[0];
 
   protected ResourceImpl(Path path, ResourceManager resourceManager) {
     this.path = checkNotNull(path.removeTrailingSeparator(), "Null path occurred");
     this.resourceManager = checkNotNull(resourceManager, "Null project manager occurred");
+  }
+
+  @Override
+  public boolean hasError() {
+    return hasError;
+  }
+
+  @Override
+  public void setHasError(boolean hasError) {
+    this.hasError = hasError;
   }
 
   /** {@inheritDoc} */

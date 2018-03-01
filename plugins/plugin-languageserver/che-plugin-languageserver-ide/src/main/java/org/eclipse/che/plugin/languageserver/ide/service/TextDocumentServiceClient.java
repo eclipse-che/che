@@ -24,6 +24,9 @@ import org.eclipse.che.api.languageserver.shared.model.RenameResult;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.resources.tree.ResourceNode;
+import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.CompletionItem;
@@ -50,10 +53,13 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 public class TextDocumentServiceClient {
 
   private final RequestTransmitter requestTransmitter;
+  private final Tree tree;
 
   @Inject
-  public TextDocumentServiceClient(RequestTransmitter requestTransmitter) {
+  public TextDocumentServiceClient(
+      RequestTransmitter requestTransmitter, ProjectExplorerPresenter projectExplorer) {
     this.requestTransmitter = requestTransmitter;
+    this.tree = projectExplorer.getTree();
   }
 
   /**
@@ -168,6 +174,16 @@ public class TextDocumentServiceClient {
    * @return
    */
   public void didChange(DidChangeTextDocumentParams params) {
+    tree.getNodeStorage()
+        .getAll()
+        .stream()
+        .filter(node -> node instanceof ResourceNode)
+        .map(node -> ((ResourceNode) node))
+        .forEach(
+            node -> {
+              node.getData().setHasError(false);
+              tree.refresh(node);
+            });
     transmitDtoAndReceiveNothing(params, "textDocument/didChange");
   }
 
