@@ -8,11 +8,13 @@
 cheImage: eclipse/che-server:nightly
 cheImagePullPolicy: Always
 
-cheKeycloakClientId: che-public
-cheKeyCloakRealm: che
+cheKeycloakClientId: "che-public"
+cheKeycloakRealm: "che"
 
 global:
   tlsEnabled: false
   multiuser: false
   isHostBased: true
   cheDomain: 192.168.99.100.nip.io
+  # See --annotations-prefix flag (https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/cli-arguments.md)
+  ingressAnnotationsPrefix: "nginx."
