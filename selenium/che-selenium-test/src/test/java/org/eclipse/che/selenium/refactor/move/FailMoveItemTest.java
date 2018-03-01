@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.refactor.move;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
@@ -90,7 +90,7 @@ public class FailMoveItemTest {
     refactor.waitMoveItemFormIsClosed();
     editor.waitTextIntoEditor(contentFromOutA);
     editor.clickOnSelectedElementInEditor("r.A17");
-    editor.waitMarkerInPosition(ERROR_MARKER, 14);
+    editor.waitMarkerInPosition(ERROR, 14);
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A17.java");
     editor.closeFileByNameWithSaving("A17");
   }

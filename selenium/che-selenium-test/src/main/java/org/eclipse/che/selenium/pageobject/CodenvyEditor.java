@@ -66,47 +66,11 @@ import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 
-/** @author Musienko Maxim */
 @Singleton
 public class CodenvyEditor {
-
   public static final String CLOSE_ALL_TABS = "gwt-debug-contextMenu/closeAllEditors";
   public static final String VCS_RULER = "//div[@class='ruler vcs']/div";
   public static final Logger LOG = getLogger(CodenvyEditor.class);
-
-  public static final class EditorContextMenu {
-    public static final String REFACTORING = "contextMenu/Refactoring";
-    public static final String REFACTORING_MOVE = "contextMenu/Refactoring/Move";
-    public static final String REFACTORING_RENAME = "contextMenu/Refactoring/Rename";
-
-    public static final String UNDO = "contextMenu/Undo";
-    public static final String REDO = "contextMenu/Redo";
-    public static final String FORMAT = "contextMenu/Format";
-    public static final String QUICK_DOC = "contextMenu/Quick Documentation";
-    public static final String QUICK_FIX = "contextMenu/Quick Fix";
-    public static final String OPEN_DECLARATION = "contextMenu/Open Declaration";
-    public static final String NAVIGATE_FILE_STRUCTURE = "contextMenu/Navigate File Structure";
-    public static final String FIND = "contextMenu/Find";
-    public static final String CLOSE = "contextMenu/Close";
-
-    private EditorContextMenu() {}
-  }
-
-  public static final class MarkersType {
-    public static final String ERROR_MARKER_OVERVIEW =
-        "//div[@class='ruler annotations']/div[@class='annotation error']";
-    public static final String WARNING_MARKER_OVERVIEW =
-        "//div[@class='ruler annotations']/div[@class='annotation warning']";
-    public static final String TASK_MARKER_OVERVIEW =
-        "//div[@class='ruler annotations']/div[@class='annotation task']";
-    public static final String ERROR_MARKER =
-        "//div[@class='ruler overview']/div[@class='annotationOverview error']";
-    public static final String WARNING_MARKER =
-        "//div[@class='ruler overview']/div[@class='annotationOverview warning']";
-    public static final String INFO_MARKER = "//div[@class='annotationHTML info']";
-
-    private MarkersType() {}
-  }
 
   protected final SeleniumWebDriver seleniumWebDriver;
   protected final Loader loader;
@@ -140,114 +104,138 @@ public class CodenvyEditor {
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
-  /** Class introduce base Xpath locators for DOM navigation inside editor */
-  public static final class Locators {
-    private Locators() {}
-
-    public static final String CONTEXT_MENU = "//div[@id='menu-lock-layer-id']/div[2]";
-    public static final String EDITOR_TABS_PANEL = "gwt-debug-multiSplitPanel-tabsPanel";
-    public static final String ACTIVE_LINE_NUMBER = "gwt-debug-cursorPosition";
-    public static final String POSITION_CURSOR_NUMBER =
+  /** Interface introduce base locators for DOM navigation inside editor */
+  public interface Locators {
+    String CONTEXT_MENU = "//div[@id='menu-lock-layer-id']/div[2]";
+    String EDITOR_TABS_PANEL = "gwt-debug-multiSplitPanel-tabsPanel";
+    String ACTIVE_LINE_NUMBER = "gwt-debug-cursorPosition";
+    String POSITION_CURSOR_NUMBER =
         "//div[@id='gwt-debug-editorPartStack-contentPanel']//div[text()='%s']";
-    public static final String ACTIVE_EDITOR_ENTRY_POINT =
+    String ACTIVE_EDITOR_ENTRY_POINT =
         "//div[@id='gwt-debug-editorPartStack-contentPanel']//div[@active]";
-    public static final String ORION_ACTIVE_EDITOR_CONTAINER_XPATH =
+    String ORION_ACTIVE_EDITOR_CONTAINER_XPATH =
         ACTIVE_EDITOR_ENTRY_POINT + "//div[@class='textviewContent' and @contenteditable='true']";
-    public static final String ORION_CONTENT_ACTIVE_EDITOR_XPATH =
-        ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "/div";
-    public static final String ACTIVE_LINES_XPATH =
+    String ORION_CONTENT_ACTIVE_EDITOR_XPATH = ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "/div";
+    String ACTIVE_LINES_XPATH =
         "//div[@class='textviewSelection']/preceding::div[@class='annotationLine currentLine'][1]";
-    public static final String ACTIVE_LINE_HIGHLIGHT =
+    String ACTIVE_LINE_HIGHLIGHT =
         "//div[@class='annotationLine currentLine' and @role='presentation']";
-    public static final String ACTIVE_TAB_FILE_NAME = "//div[@active]/descendant::div[text()='%s']";
-    public static final String ACTIVE_TAB_UNSAVED_FILE_NAME =
-        "//div[@active and @unsaved]//div[text()='%s']";
-    public static final String TAB_FILE_NAME_XPATH =
+    String ACTIVE_TAB_FILE_NAME = "//div[@active]/descendant::div[text()='%s']";
+    String ACTIVE_TAB_UNSAVED_FILE_NAME = "//div[@active and @unsaved]//div[text()='%s']";
+    String TAB_FILE_NAME_XPATH =
         "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']";
-    public static final String TAB_FILE_NAME_AND_STYLE =
+    String TAB_FILE_NAME_AND_STYLE =
         "//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s' and @style='%s']";
-    public static final String TAB_FILE_CLOSE_ICON =
+    String TAB_FILE_CLOSE_ICON =
         "//div[@id='gwt-debug-editorMultiPartStack-contentPanel']//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[text()='%s']/following::div[1]";
-
-    public static final String ALL_TABS_XPATH =
+    String ALL_TABS_XPATH =
         "//div[@id='gwt-debug-editorMultiPartStack-contentPanel']//div[@id='gwt-debug-multiSplitPanel-tabsPanel']//div[string-length(text())>0]";
-    public static final String TAB_WITH_UNSAVED_STATUS =
+    String TAB_WITH_UNSAVED_STATUS =
         "//div[@id='gwt-debug-editor-tab' and @unsaved]//div[text()='%s']";
-    public static final String SELECTED_ITEM_IN_EDITOR =
-        "//div[@contenteditable='true']//span[contains(text(), '%s')]";
-
-    public static final String ASSIST_CONTENT_CONTAINER =
-        "//div[@class='contentassist']/following-sibling::div";
-    public static final String AUTOCOMPLETE_CONTAINER =
-        "//div[text()='Proposals:']//following::div/ulist";
-    public static final String PROPOSITION_CONTAINER = "//div[@id='gwt_root']/following::div/ulist";
-    public static final String SHOW_HINTS_POP_UP = "//div[@class='popupContent']/div[1]";
-
-    public static final String RULER_ANNOTATIONS = "//div[@class='ruler annotations']";
-    public static final String RULER_OVERVIEW = "//div[@class='ruler overview']";
-    public static final String RULER_LINES = "//div[@class='ruler lines']";
-    public static final String RULER_FOLDING = "//div[@class='ruler folding']";
-
-    public static final String IMPLEMENTATION_CONTAINER =
+    String SELECTED_ITEM_IN_EDITOR = "//div[@contenteditable='true']//span[contains(text(), '%s')]";
+    String ASSIST_CONTENT_CONTAINER = "//div[@class='contentassist']/following-sibling::div";
+    String AUTOCOMPLETE_CONTAINER = "//div[text()='Proposals:']//following::div/ulist";
+    String PROPOSITION_CONTAINER = "//div[@id='gwt_root']/following::div/ulist";
+    String SHOW_HINTS_POP_UP = "//div[@class='popupContent']/div[1]";
+    String RULER_ANNOTATIONS = "//div[@class='ruler annotations']";
+    String RULER_OVERVIEW = "//div[@class='ruler overview']";
+    String RULER_LINES = "//div[@class='ruler lines']";
+    String RULER_FOLDING = "//div[@class='ruler folding']";
+    String IMPLEMENTATION_CONTAINER =
         "//div[contains(text(), 'Choose Implementation of %s')]/parent::div";
-    public static final String IMPLEMENTATION_CONTENT =
+    String IMPLEMENTATION_CONTENT =
         "//div[contains(text(), 'Choose Implementation of')]/following::div";
-    public static final String IMPLEMENTATIONS_ITEM =
+    String IMPLEMENTATIONS_ITEM =
         "//div[contains(text(), 'Choose Implementation of')]/following::span[text()='%s']";
-    public static final String PUNCTUATION_SEPARATOR =
-        "//span[contains(@class,'punctuation separator space')]";
-    public static final String TEXT_VIEW_RULER = "//div[@class='textviewInnerRightRuler']";
-
-    public static final String DOWNLOAD_SOURCES_LINK = "//anchor[text()='Download sources']";
-
-    public static final String TAB_LIST_BUTTON = "gwt-debug-editorMenu";
-    public static final String ITEM_TAB_LIST =
-        "//div[@class='popupContent']//div[text()='%s']/parent::div";
-
-    public static final String NOTIFICATION_PANEL_ID = "gwt-debug-leftNotificationGutter";
-    public static final String DEBUGGER_PREFIX_XPATH =
-        "//div[@class[contains(., 'rulerLines')] and text()='%d']";
-    public static final String DEBUGGER_BREAK_POINT_INACTIVE =
-        "//div[@class='breakpoint inactive' and text()='%d']";
-    public static final String DEBUGGER_BREAK_POINT_ACTIVE =
-        "//div[@class='breakpoint active' and text()='%d']";
-    public static final String DEBUGGER_BREAKPOINT_CONDITION =
+    String PUNCTUATION_SEPARATOR = "//span[contains(@class,'punctuation separator space')]";
+    String TEXT_VIEW_RULER = "//div[@class='textviewInnerRightRuler']";
+    String DOWNLOAD_SOURCES_LINK = "//anchor[text()='Download sources']";
+    String TAB_LIST_BUTTON = "gwt-debug-editorMenu";
+    String ITEM_TAB_LIST = "//div[@class='popupContent']//div[text()='%s']/parent::div";
+    String NOTIFICATION_PANEL_ID = "gwt-debug-leftNotificationGutter";
+    String DEBUGGER_PREFIX_XPATH = "//div[@class[contains(., 'rulerLines')] and text()='%d']";
+    String DEBUGGER_BREAK_POINT_INACTIVE = "//div[@class='breakpoint inactive' and text()='%d']";
+    String DEBUGGER_BREAK_POINT_ACTIVE = "//div[@class='breakpoint active' and text()='%d']";
+    String DEBUGGER_BREAKPOINT_CONDITION =
         "//div[@class='breakpoint %s condition' and text()='%d']";
-    public static final String DEBUGGER_BREAKPOINT_DISABLED =
-        "//div[@class='breakpoint disabled' and text()='%d']";
-    public static final String JAVA_DOC_POPUP = "//div[@class='gwt-PopupPanel']//iframe";
-    public static final String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
+    String DEBUGGER_BREAKPOINT_DISABLED = "//div[@class='breakpoint disabled' and text()='%d']";
+    String JAVA_DOC_POPUP = "//div[@class='gwt-PopupPanel']//iframe";
+    String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
         "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
   }
 
-  public enum TabAction {
-    CLOSE("contextMenu/Close"),
-    CLOSE_ALL("contextMenu/Close All"),
-    CLOSE_OTHER("contextMenu/Close Other"),
-    CLOSE_ALL_BUT_PINNED("contextMenu/Close All But Pinned"),
-    REOPEN_CLOSED_TAB("contextMenu/Reopen Closed Tab"),
-    PIN_UNPIN_TAB("contextMenu/Pin/Unpin Tab"),
-    SPLIT_VERTICALLY("contextMenu/Split Pane In Two Columns"),
-    SPIT_HORISONTALLY("contextMenu/Split Pane In Two Rows");
+  public enum TabActionLocator {
+    CLOSE(By.id("contextMenu/Close")),
+    CLOSE_ALL(By.id("contextMenu/Close All")),
+    CLOSE_OTHER(By.id("contextMenu/Close Other")),
+    CLOSE_ALL_BUT_PINNED(By.id("contextMenu/Close All But Pinned")),
+    REOPEN_CLOSED_TAB(By.id("contextMenu/Reopen Closed Tab")),
+    PIN_UNPIN_TAB(By.id("contextMenu/Pin/Unpin Tab")),
+    SPLIT_VERTICALLY(By.id("contextMenu/Split Pane In Two Columns")),
+    SPIT_HORISONTALLY(By.id("contextMenu/Split Pane In Two Rows"));
 
-    private final String id;
+    private final By id;
 
-    TabAction(String id) {
+    TabActionLocator(By id) {
       this.id = id;
+    }
+
+    private By get() {
+      return this.id;
     }
   }
 
-  @FindBy(id = Locators.EDITOR_TABS_PANEL)
-  private WebElement editorTabsPanel;
+  /** Editor`s markers types */
+  public enum MarkerLocator {
+    ERROR_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation error']"),
+    WARNING_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation warning']"),
+    TASK_OVERVIEW("//div[@class='ruler annotations']/div[@class='annotation task']"),
+    ERROR("//div[@class='ruler overview']/div[@class='annotationOverview error']"),
+    WARNING("//div[@class='ruler overview']/div[@class='annotationOverview warning']"),
+    INFO("//div[@class='annotationHTML info']");
+
+    private final String locator;
+
+    MarkerLocator(String locator) {
+      this.locator = locator;
+    }
+
+    private String get() {
+      return this.locator;
+    }
+  }
+
+  /** Editor's context menu items */
+  public enum ContextMenuLocator {
+    REFACTORING(By.id("contextMenu/Refactoring")),
+    REFACTORING_MOVE(By.id("contextMenu/Refactoring/Move")),
+    REFACTORING_RENAME(By.id("contextMenu/Refactoring/Rename")),
+    UNDO(By.id("contextMenu/Undo")),
+    REDO(By.id("contextMenu/Redo")),
+    FORMAT(By.id("contextMenu/Format")),
+    QUICK_DOC(By.id("contextMenu/Quick Documentation")),
+    QUICK_FIX(By.id("contextMenu/Quick Fix")),
+    OPEN_DECLARATION(By.id("contextMenu/Open Declaration")),
+    NAVIGATE_FILE_STRUCTURE(By.id("contextMenu/Navigate File Structure")),
+    FIND(By.id("contextMenu/Find")),
+    CLOSE(By.id("contextMenu/Close"));
+
+    private final By itemLocator;
+
+    ContextMenuLocator(By itemLocator) {
+      this.itemLocator = itemLocator;
+    }
+
+    private By get() {
+      return this.itemLocator;
+    }
+  }
 
   @FindAll({@FindBy(id = Locators.ACTIVE_LINE_NUMBER)})
   private List<WebElement> activeLineNumbers;
 
   @FindBy(xpath = Locators.AUTOCOMPLETE_CONTAINER)
   private WebElement autocompleteContainer;
-
-  @FindBy(id = Locators.NOTIFICATION_PANEL_ID)
-  private WebElement notificationPanel;
 
   @FindBy(xpath = Locators.PROPOSITION_CONTAINER)
   private WebElement propositionContainer;
@@ -463,8 +451,8 @@ public class CodenvyEditor {
   }
 
   /** Run action for tab from the context menu */
-  public void runActionForTabFromContextMenu(TabAction tabAction) {
-    redrawDriverWait.until(visibilityOfElementLocated(By.id(tabAction.id))).click();
+  public void runActionForTabFromContextMenu(TabActionLocator tabAction) {
+    redrawDriverWait.until(visibilityOfElementLocated(tabAction.get())).click();
   }
 
   /** type text by into orion editor with pause 1 sec. */
@@ -623,13 +611,14 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait the marker
+   * Waits a marker with specified {@code markerLocator} on the defined {@code position}
    *
-   * @param markerType is the type of the marker
-   * @param position is the number position
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
+   * @param position line`s number where marker is expected
    */
-  public void waitMarkerInPosition(String markerType, int position) {
-    elemDriverWait.until(visibilityOfElementLocated(By.xpath(format(markerType, position))));
+  public void waitMarkerInPosition(MarkerLocator markerLocator, int position) {
+    elemDriverWait.until(
+        visibilityOfElementLocated(By.xpath(format(markerLocator.get(), position))));
     setCursorToLine(position);
     expectedNumberOfActiveLine(position);
   }
@@ -718,48 +707,51 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait the marker and click him
+   * Waits marker with specified {@code markerLocator} on the defined {@code position} and click on
+   * it
    *
-   * @param markerType is the type of the marker
-   * @param position is the number position
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
+   * @param position line's number, where marker is expected
    */
-  public void waitMarkerInPositionAndClick(String markerType, int position) {
+  public void waitMarkerInPositionAndClick(MarkerLocator markerLocator, int position) {
     loadPageDriverWait
-        .until(visibilityOfElementLocated(By.xpath(format(markerType, position))))
+        .until(visibilityOfElementLocated(By.xpath(format(markerLocator.get(), position))))
         .click();
   }
 
   /**
-   * wait the 'marker' disappears
+   * Waits until marker with specified {@code markerLocator} be invisible on the defined {@code
+   * position}
    *
-   * @param markerType is the type of the marker
-   * @param position is the number position
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
+   * @param position line's number, where marker should not be displayed
    */
-  public void waitMarkerDisappears(String markerType, int position) {
-    elemDriverWait.until(invisibilityOfElementLocated(By.xpath(format(markerType, position))));
+  public void waitMarkerInvisibility(MarkerLocator markerLocator, int position) {
+    elemDriverWait.until(
+        invisibilityOfElementLocated(By.xpath(format(markerLocator.get(), position))));
     expectedNumberOfActiveLine(position);
   }
 
   /**
-   * wait while all markers disappear
+   * Waits until all markers with specified {@code markerLocator} be invisible
    *
-   * @param markerType is type of the marker
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
-  public void waitAllMarkersDisappear(String markerType) {
+  public void waitAllMarkersInvisibility(MarkerLocator markerLocator) {
     loaderDriverWait.until(
         (ExpectedCondition<Boolean>)
-            driver -> driver.findElements(By.xpath(markerType)).size() == 0);
+            driver -> driver.findElements(By.xpath(markerLocator.get())).size() == 0);
   }
 
   /**
-   * wait while all markers appear
+   * Waits until at list one marker with specified {@code markerLocator} be visible
    *
-   * @param markerType is type of the marker
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
-  public void waitCodeAssistMarkers(String markerType) {
+  public void waitCodeAssistMarkers(MarkerLocator markerLocator) {
     elemDriverWait.until(
         (ExpectedCondition<Boolean>)
-            driver -> driver.findElements(By.xpath(markerType)).size() > 0);
+            driver -> driver.findElements(By.xpath(markerLocator.get())).size() > 0);
   }
 
   /** @return text from autocomplete */
@@ -808,9 +800,14 @@ public class CodenvyEditor {
         .click();
   }
 
-  /** move the mouse to the marker and wait the 'assist content container' */
-  public void moveToMarkerAndWaitAssistContent(String markerType) {
-    WebElement element = seleniumWebDriver.findElement(By.xpath(markerType));
+  /**
+   * Moves mouse to the marker with specified {@code markerLocator} and waits until 'assist content
+   * container' be visible.
+   *
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
+   */
+  public void moveToMarkerAndWaitAssistContent(MarkerLocator markerLocator) {
+    WebElement element = seleniumWebDriver.findElement(By.xpath(markerLocator.get()));
     actionsFactory.createAction(seleniumWebDriver).moveToElement(element).perform();
     waitAnnotationCodeAssistIsOpen();
   }
@@ -1577,25 +1574,25 @@ public class CodenvyEditor {
   }
 
   /**
-   * returns the quantity of annotations submitted to the left ruler in editor
+   * Gets quantity of visible markers with specified {@code markerLocator}
    *
-   * @param markerType type of marker
-   * @return quantity of annotations
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
+   * @return markers quantity
    */
-  public int getQuantityMarkers(String markerType) {
+  public int getMarkersQuantity(MarkerLocator markerLocator) {
     redrawDriverWait.until(visibilityOfElementLocated(By.xpath(Locators.RULER_OVERVIEW)));
     List<WebElement> annotationList =
-        redrawDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(markerType)));
+        redrawDriverWait.until(presenceOfAllElementsLocatedBy(By.xpath(markerLocator.get())));
     return annotationList.size();
   }
 
   /**
-   * wait that annotations are not present
+   * Waits until annotations with specified {@code markerLocator} visible
    *
-   * @param markerType type of marker
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
-  public void waitAnnotationsAreNotPresent(String markerType) {
-    redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(markerType)));
+  public void waitAnnotationsAreNotPresent(MarkerLocator markerLocator) {
+    redrawDriverWait.until(invisibilityOfElementLocated(By.xpath(markerLocator.get())));
   }
 
   /**
@@ -1861,12 +1858,12 @@ public class CodenvyEditor {
   }
 
   /**
-   * click on element from context menu by name
+   * Clicks on {@code item} in context menu
    *
-   * @param item is a name into context menu
+   * @param item editor context menu item which defined in {@link ContextMenuLocator}
    */
-  public void clickOnItemInContextMenu(String item) {
-    redrawDriverWait.until(visibilityOfElementLocated(By.id(item))).click();
+  public void clickOnItemInContextMenu(ContextMenuLocator item) {
+    redrawDriverWait.until(visibilityOfElementLocated(item.get())).click();
     loader.waitOnClosed();
   }
 

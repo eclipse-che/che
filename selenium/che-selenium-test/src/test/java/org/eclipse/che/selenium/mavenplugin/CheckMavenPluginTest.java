@@ -12,7 +12,7 @@ package org.eclipse.che.selenium.mavenplugin;
 
 import static java.nio.file.Paths.get;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.SIMPLE_FOLDER;
 import static org.testng.Assert.fail;
@@ -77,7 +77,7 @@ public class CheckMavenPluginTest {
     editor.setCursorToLine(14);
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass = new TestClass();");
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR);
   }
 
   @Test(priority = 1)
@@ -108,7 +108,7 @@ public class CheckMavenPluginTest {
     editor.goToCursorPositionVisible(17, 1);
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass2 = new TestClass();");
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR);
   }
 
   private void includeModulesInTheParentPom() {

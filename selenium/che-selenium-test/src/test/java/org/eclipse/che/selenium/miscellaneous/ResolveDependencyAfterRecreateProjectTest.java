@@ -14,7 +14,7 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.DELETE;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
 import static org.testng.Assert.fail;
@@ -70,7 +70,7 @@ public class ResolveDependencyAfterRecreateProjectTest {
     projectExplorer.expandPathInProjectExplorer(PROJECT_NAME1 + PATH_TO_EXPAND);
     projectExplorer.openItemByPath(PROJECT_NAME1 + PATH_TO_FILE);
     editor.waitActive();
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR);
 
     removeProjectFromUI();
     createProjectFromUI(PROJECT_NAME2);
@@ -87,7 +87,7 @@ public class ResolveDependencyAfterRecreateProjectTest {
     }
 
     editor.waitActive();
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR);
   }
 
   private void removeProjectFromUI() {

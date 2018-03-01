@@ -15,7 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextM
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuBuildPath.CONFIGURE_CLASSPATH;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuBuildPath.UNMARK_AS_SOURCE_FOLDER;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuBuildPath.USE_AS_SOURCE_FOLDER;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -193,12 +193,12 @@ public class PlainJavaProjectConfigureClasspathTest {
     codenvyEditor.typeTextIntoEditor(Keys.TAB.toString());
     codenvyEditor.typeTextIntoEditor("Mockito mockito = new Mockito();");
     codenvyEditor.waitTextIntoEditor("Mockito mockito = new Mockito();");
-    codenvyEditor.waitMarkerInPosition(ERROR_MARKER, 17);
+    codenvyEditor.waitMarkerInPosition(ERROR, 17);
     codenvyEditor.launchPropositionAssistPanel();
     codenvyEditor.enterTextIntoFixErrorPropByDoubleClick("Import 'Mockito' (org.mockito)");
     codenvyEditor.waitErrorPropositionPanelClosed();
     codenvyEditor.waitTextIntoEditor("import org.mockito.Mockito;");
     codenvyEditor.setCursorToLine(19);
-    codenvyEditor.waitMarkerDisappears(ERROR_MARKER, 19);
+    codenvyEditor.waitMarkerInvisibility(ERROR, 19);
   }
 }

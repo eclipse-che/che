@@ -21,7 +21,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.P
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.FOLDER;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -102,7 +102,7 @@ public class RunPlainJavaProjectTest {
     codenvyEditor.typeTextIntoEditor(Keys.TAB.toString());
     codenvyEditor.typeTextIntoEditor("Mockito mockito = new Mockito();");
     codenvyEditor.waitTextIntoEditor("Mockito mockito = new Mockito();");
-    codenvyEditor.waitMarkerInPosition(ERROR_MARKER, 9);
+    codenvyEditor.waitMarkerInPosition(ERROR, 9);
     codenvyEditor.launchPropositionAssistPanel();
     codenvyEditor.enterTextIntoFixErrorPropByDoubleClick("Import 'Mockito' (org.mockito)");
     codenvyEditor.waitTextIntoEditor("import org.mockito.Mockito;");
@@ -129,7 +129,7 @@ public class RunPlainJavaProjectTest {
     codenvyEditor.typeTextIntoEditor(Keys.TAB.toString());
     codenvyEditor.typeTextIntoEditor("A a = new A();");
     codenvyEditor.waitTextIntoEditor("A a = new A();");
-    codenvyEditor.waitMarkerInPosition(ERROR_MARKER, 12);
+    codenvyEditor.waitMarkerInPosition(ERROR, 12);
     codenvyEditor.launchPropositionAssistPanel();
     codenvyEditor.enterTextIntoFixErrorPropByDoubleClick("Import 'A' (base.test)");
     codenvyEditor.waitErrorPropositionPanelClosed();

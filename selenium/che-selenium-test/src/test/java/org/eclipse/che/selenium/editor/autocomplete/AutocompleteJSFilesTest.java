@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.INFO_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.INFO;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -139,10 +139,10 @@ public class AutocompleteJSFilesTest {
     editor.typeTextIntoEditorWithoutDelayForSaving(Keys.END.toString());
     editor.typeTextIntoEditorWithoutDelayForSaving(Keys.BACK_SPACE.toString());
 
-    editor.waitMarkerInPositionAndClick(INFO_MARKER, 11);
+    editor.waitMarkerInPositionAndClick(INFO, 11);
     editor.clickOnElementByXpath("//button[text()='Add missing semicolon']");
 
-    editor.waitAllMarkersDisappear(INFO_MARKER);
+    editor.waitAllMarkersInvisibility(INFO);
     loader.waitOnClosed();
   }
 }

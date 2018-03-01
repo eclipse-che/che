@@ -16,7 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.CONVERT_TO_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -154,7 +154,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
         PROJECT_NAME + "/" + KEEPED_DIR + "/src/main/java/hello", "GreetingController.java");
 
     mavenPluginStatusBar.waitClosingInfoPanel(UPDATING_PROJECT_TIMEOUT_SEC);
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR);
   }
 
   private void makeKeepDirectoryFromGitUrl(String url, String projectName, String folderName) {
@@ -187,7 +187,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
     }
     editor.closeAutocomplete();
     editor.typeTextIntoEditor(" greeting =null;");
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR);
   }
 
   private void checkOpenDeclaration() throws IOException {

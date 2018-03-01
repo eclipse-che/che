@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.refactor.move;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -68,7 +68,7 @@ public class CodeAssistAfterMoveItemTest {
     editor.typeTextIntoEditor("A5 a = new A5();");
     loader.waitOnClosed();
     editor.waitTextIntoEditor("A5 a = new A5();");
-    editor.waitMarkerInPosition(ERROR_MARKER, 31);
+    editor.waitMarkerInPosition(ERROR, 31);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.launchPropositionAssistPanel();
     loader.waitOnClosed();
@@ -76,7 +76,7 @@ public class CodeAssistAfterMoveItemTest {
     editor.enterTextIntoFixErrorPropByDoubleClick("Import 'A5' (r)");
     loader.waitOnClosed();
     editor.waitTextIntoEditor("import r.A5;");
-    editor.waitMarkerDisappears(ERROR_MARKER, 33);
+    editor.waitMarkerInvisibility(ERROR, 33);
 
     // move item 'A5' into package 'p1'
     projectExplorer.waitAndSelectItem(pathToPackageInChePrefix + "/r/A5.java");
@@ -94,7 +94,7 @@ public class CodeAssistAfterMoveItemTest {
     editor.setCursorToLine(16);
     editor.deleteCurrentLine();
     loader.waitOnClosed();
-    editor.waitMarkerInPosition(ERROR_MARKER, 32);
+    editor.waitMarkerInPosition(ERROR, 32);
     editor.goToCursorPositionVisible(32, 5);
     editor.launchPropositionAssistPanel();
     loader.waitOnClosed();

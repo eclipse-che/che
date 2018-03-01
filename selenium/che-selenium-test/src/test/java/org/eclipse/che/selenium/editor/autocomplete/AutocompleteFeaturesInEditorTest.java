@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
@@ -185,10 +185,10 @@ public class AutocompleteFeaturesInEditorTest {
   private void reparseEditorCode() {
     editor.setCursorToLine(36);
     editor.typeTextIntoEditor("a;");
-    editor.waitMarkerInPosition(ERROR_MARKER, 36);
+    editor.waitMarkerInPosition(ERROR, 36);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
     editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
-    editor.waitMarkerDisappears(ERROR_MARKER, 36);
+    editor.waitMarkerInvisibility(ERROR, 36);
   }
 }
