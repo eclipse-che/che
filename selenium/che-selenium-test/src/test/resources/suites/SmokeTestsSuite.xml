@@ -28,7 +28,6 @@
             <class name="org.eclipse.che.selenium.editor.autocomplete.OpenDeclarationTest"/>
             <class name="org.eclipse.che.selenium.git.CommitFilesByMultiSelectTest"/>
             <class name="org.eclipse.che.selenium.git.PushingChangesTest"/>
-            <class name="org.eclipse.che.selenium.git.WorkingWithPullConflictsTest"/>
             <class name="org.eclipse.che.selenium.git.KeepDirectoryGitImportTest"/>
             <class name="org.eclipse.che.selenium.miscellaneous.FileStructureBaseOperationTest"/>
             <class name="org.eclipse.che.selenium.miscellaneous.FindUsagesBaseOperationTest"/>
@@ -48,7 +47,7 @@
             <class name="org.eclipse.che.selenium.projectexplorer.CreateProjectTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.dependencies.UpdateListOfLibraryTest"/>
             <class name="org.eclipse.che.selenium.projectexplorer.ShowFileReferenceTest"/>
-            <class name="org.eclipse.che.selenium.factory.CreateNamedFactoryFromDashBoard"/>
+            <class name="org.eclipse.che.selenium.factory.CreateNamedFactoryFromDashboardTest"/>
             <class name="org.eclipse.che.selenium.mavenplugin.CheckMavenPluginTest"/>
         </classes>
     </test>

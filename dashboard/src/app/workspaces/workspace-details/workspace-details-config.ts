@@ -175,7 +175,7 @@ export class WorkspaceDetailsConfig {
     // config routes
     register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
       $routeProvider
-        .accessWhen('/workspace/:namespace*/:workspaceName/:projectName', {
+        .accessWhen('/project/:namespace*/:workspaceName/:projectName', {
           title: (params: any) => {
             return params.workspaceName + ' | ' + params.projectName;
           },

@@ -32,7 +32,8 @@ spec:
           value: "pgchepassword"
         - name: "CHE_POSTGRES_DATABASE"
           value: "dbche"
-        image: ' '
+        image: '${IMAGE_POSTGRES}'
+        imagePullPolicy: Always
         name: postgres
         livenessProbe:
           failureThreshold: 3
@@ -68,14 +69,4 @@ spec:
         persistentVolumeClaim:
           claimName: postgres-data
   test: false
-  triggers:
-  - type: ConfigChange
-  - imageChangeParams:
-      automatic: true
-      containerNames:
-      - postgres
-      from:
-        kind: ImageStreamTag
-        name: postgres:latest
-    type: ImageChange
 status: {}

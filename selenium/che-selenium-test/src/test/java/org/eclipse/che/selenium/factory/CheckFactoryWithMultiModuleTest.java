@@ -74,11 +74,10 @@ public class CheckFactoryWithMultiModuleTest {
     projectExplorer.waitProjectExplorer();
     notifications.waitExpectedMessageOnProgressPanelAndClosed(
         "Project " + PROJECT_NAME + " imported");
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
     projectExplorer.openItemByPath(PROJECT_NAME);
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PROJECT_NAME + "/my-lib", PROJECT_FOLDER);
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(
-        PROJECT_NAME + "/my-webapp", PROJECT_FOLDER);
+    projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME + "/my-lib", PROJECT_FOLDER);
+    projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME + "/my-webapp", PROJECT_FOLDER);
   }
 }

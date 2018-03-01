@@ -124,7 +124,7 @@ public class DeleteFilesTest {
 
   private void deleteFromMenuFile(String deleteText, String pathToFile) {
     loader.waitOnClosed();
-    projectExplorer.selectItem(pathToFile);
+    projectExplorer.waitAndSelectItem(pathToFile);
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     loader.waitOnClosed();
     askDialog.acceptDialogWithText(deleteText);

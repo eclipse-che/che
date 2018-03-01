@@ -80,7 +80,7 @@ public class CheckBreakPointStateTest {
     editor.setInactiveBreakpoint(9);
     debugPanel.openDebugPanel();
     debugPanel.waitContentInBreakPointPanel(expectedBreakpointsForAdditionalClass);
-    projectExplorer.selectItem(PATH_TO_PROJECT_WITH_TWO_CLASSES + "AdditonalClass.java");
+    projectExplorer.waitAndSelectItem(PATH_TO_PROJECT_WITH_TWO_CLASSES + "AdditonalClass.java");
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     loader.waitOnClosed();
     askDialog.confirmAndWaitClosed();
@@ -93,7 +93,7 @@ public class CheckBreakPointStateTest {
     editor.setInactiveBreakpoint(31);
     debugPanel.openDebugPanel();
     debugPanel.waitContentInBreakPointPanel(expectedBreakpointsForGreetingClass);
-    projectExplorer.selectItem(PROJECT_NAME_2 + "/src/main/java");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME_2 + "/src/main/java");
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     loader.waitOnClosed();
     askDialog.confirmAndWaitClosed();
@@ -114,7 +114,7 @@ public class CheckBreakPointStateTest {
     editor.setInactiveBreakpoint(34);
     debugPanel.openDebugPanel();
     debugPanel.waitContentInBreakPointPanel(expectedBreakpointsForGreetingClass);
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     loader.waitOnClosed();
     askDialog.confirmAndWaitClosed();

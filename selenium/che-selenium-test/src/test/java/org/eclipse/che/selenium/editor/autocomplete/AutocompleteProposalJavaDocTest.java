@@ -65,7 +65,7 @@ public class AutocompleteProposalJavaDocTest {
     ide.open(workspace);
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT);
-    projectExplorer.selectItem(PROJECT);
+    projectExplorer.waitAndSelectItem(PROJECT);
     notificationsPopupPanel.waitProgressPopupPanelClose();
 
     projectExplorer.expandPathInProjectExplorerAndOpenFile(

@@ -86,7 +86,7 @@ public class GitChangeMarkersTest {
     events.waitExpectedMessage(GIT_INITIALIZED_SUCCESS);
 
     // perform init commit
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit("init");
     loader.waitOnClosed();
@@ -121,7 +121,7 @@ public class GitChangeMarkersTest {
   @Test(priority = 3)
   public void testMarkersAfterCommit() {
     // perform  commit
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit("commit");
     loader.waitOnClosed();
@@ -154,7 +154,7 @@ public class GitChangeMarkersTest {
     editor.waitGitModificationMarkerInPosition(13, 13);
 
     // Remove file from index
-    projectExplorer.selectItem(PROJECT_NAME + "/src/com/company/Main.java");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/com/company/Main.java");
     menu.runCommand(GIT, REMOVE_FROM_INDEX);
     git.waitRemoveFromIndexFileName("Main");
     git.selectRemoveOnlyFromIndexCheckBox();
@@ -179,7 +179,7 @@ public class GitChangeMarkersTest {
   @Test(priority = 7)
   public void testChangeMarkersOnAddedFile() {
     // Create new file
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(PROJECT, NEW, FILE);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText("newFile");

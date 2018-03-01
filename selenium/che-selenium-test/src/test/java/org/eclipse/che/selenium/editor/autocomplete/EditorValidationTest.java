@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.WARNING_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -71,15 +71,15 @@ public class EditorValidationTest {
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     editor.waitActive();
     // validation warnings
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR);
     editor.setCursorToLine(28);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor("\n");
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR);
     editor.typeTextIntoEditor(TEXT_FOR_WARNING);
-    editor.waitMarkerInPosition(WARNING_MARKER, 29);
+    editor.waitMarkerInPosition(WARNING, 29);
     editor.waitAnnotationCodeAssistIsClosed();
-    editor.moveToMarkerAndWaitAssistContent(WARNING_MARKER);
+    editor.moveToMarkerAndWaitAssistContent(WARNING);
     loader.waitOnClosed();
     editor.waitTextIntoAnnotationAssist("The value of the local variable l is not used");
     editor.waitTextIntoAnnotationAssist("The value of the local variable n is not used");
@@ -96,10 +96,10 @@ public class EditorValidationTest {
     editor.setCursorToLine(30);
     editor.waitActive();
     editor.typeTextIntoEditor(TEXT_FOR_ERROR);
-    editor.waitMarkerInPosition(ERROR_MARKER, 30);
+    editor.waitMarkerInPosition(ERROR, 30);
     editor.waitActive();
     editor.waitAnnotationCodeAssistIsClosed();
-    editor.moveToMarkerAndWaitAssistContent(ERROR_MARKER);
+    editor.moveToMarkerAndWaitAssistContent(ERROR);
     editor.waitTextIntoAnnotationAssist("Type mismatch: cannot convert from double to Integer");
     editor.waitTextIntoAnnotationAssist("Keys cannot be resolved to a variable");
     loader.waitOnClosed();

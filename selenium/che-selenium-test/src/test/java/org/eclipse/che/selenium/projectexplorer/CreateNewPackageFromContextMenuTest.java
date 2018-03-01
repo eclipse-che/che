@@ -10,11 +10,13 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.NEW;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.JAVA_PACKAGE;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
@@ -59,16 +61,15 @@ public class CreateNewPackageFromContextMenuTest {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
-    projectExplorer.selectItem(PROJECT_NAME + "/" + SOURCE_FOLDER);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/" + SOURCE_FOLDER);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/" + SOURCE_FOLDER);
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
-    projectExplorer.clickOnNewContextMenuItem(
-        TestProjectExplorerContextMenuConstants.SubMenuNew.JAVA_PACKAGE);
+    projectExplorer.clickOnItemInContextMenu(NEW);
+    projectExplorer.clickOnNewContextMenuItem(JAVA_PACKAGE);
 
     askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(NEW_PACKAGE_NAME);
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    projectExplorer.waitItemInVisibleArea(NEW_PACKAGE_NAME);
+    projectExplorer.waitVisibilityByName(NEW_PACKAGE_NAME);
   }
 }

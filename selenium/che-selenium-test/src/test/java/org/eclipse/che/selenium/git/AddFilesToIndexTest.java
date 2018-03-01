@@ -118,13 +118,13 @@ public class AddFilesToIndexTest {
 
     // perform init commit
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit("init");
     loader.waitOnClosed();
 
     // check state of the index
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_NOTHING_TO_ADD);
     events.clickEventLogBtn();
@@ -140,7 +140,7 @@ public class AddFilesToIndexTest {
     loader.waitOnClosed();
 
     // Add this file to index
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/webapp/index.jsp");
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     events.clickEventLogBtn();
@@ -160,7 +160,7 @@ public class AddFilesToIndexTest {
     loader.waitOnClosed();
 
     // Create new.css file
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/webapp");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/webapp");
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
@@ -170,7 +170,7 @@ public class AddFilesToIndexTest {
     askForValueDialog.clickOkBtn();
 
     // Add all files to index
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitAddToIndexFormToOpen();
     git.waitAddToIndexFileName("Add content of folder " + PROJECT_NAME + " to index?");
@@ -211,13 +211,13 @@ public class AddFilesToIndexTest {
     // Check status and add to index all files
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
     git.waitGitStatusBarWithMess(STATUS_MESSAGE_AFTER_EDIT);
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
 
     // delete README file and add to index
     deleteFromMenuFile();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
@@ -226,7 +226,7 @@ public class AddFilesToIndexTest {
 
   private void deleteFromMenuFile() {
     loader.waitOnClosed();
-    projectExplorer.selectItem(PROJECT_NAME + "/README.md");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/README.md");
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     loader.waitOnClosed();
     askDialog.acceptDialogWithText("Delete file \"README.md\"?");

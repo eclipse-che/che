@@ -139,7 +139,9 @@ export class EditMachineDialogController {
   onNameChange(name: string): void {
     this.machineName = name;
     const machineName = this.getFullName(name);
-    const environment = this.environmentManager.renameMachine(this.environment, this.originMachine.name, machineName);
+    const oldEnvironment = this.isAdd ? this.copyEnvironment : this.environment;
+    const oldMachineName = this.isAdd ? this.machine.name : this.originMachine.name;
+    const environment = this.environmentManager.renameMachine(oldEnvironment, oldMachineName, machineName);
     const machines = this.environmentManager.getMachines(environment);
     const machineIndex = machines.findIndex((machine: IEnvironmentManagerMachine) => {
       return machine.name === machineName;

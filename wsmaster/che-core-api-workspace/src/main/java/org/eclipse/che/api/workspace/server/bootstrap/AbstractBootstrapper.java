@@ -28,8 +28,8 @@ import org.eclipse.che.api.workspace.shared.dto.event.BootstrapperStatusEvent;
  * @author Sergii Leshchenko
  */
 public abstract class AbstractBootstrapper {
+
   private final String machineName;
-  private final int bootstrappingTimeoutMinutes;
   private final EventService eventService;
   private final EventSubscriber<BootstrapperStatusEvent> bootstrapperStatusListener;
   private final String installerEndpoint;
@@ -39,12 +39,10 @@ public abstract class AbstractBootstrapper {
   public AbstractBootstrapper(
       String machineName,
       RuntimeIdentity runtimeIdentity,
-      int bootstrappingTimeoutMinutes,
       String outputEndpoint,
       String installerEndpoint,
       EventService eventService) {
     this.machineName = machineName;
-    this.bootstrappingTimeoutMinutes = bootstrappingTimeoutMinutes;
     this.eventService = eventService;
     this.installerEndpoint = outputEndpoint;
     this.outputEndpoint = installerEndpoint;
@@ -74,7 +72,8 @@ public abstract class AbstractBootstrapper {
    * @throws InfrastructureException when any other error occurs while bootstrapping
    * @throws InterruptedException when the bootstrapping process was interrupted
    */
-  public void bootstrap() throws InfrastructureException, InterruptedException {
+  public void bootstrap(int bootstrappingTimeoutMinutes)
+      throws InfrastructureException, InterruptedException {
     if (finishEventFuture != null) {
       throw new IllegalStateException("Bootstrap method must be called only once.");
     }
@@ -98,6 +97,50 @@ public abstract class AbstractBootstrapper {
     } finally {
       eventService.unsubscribe(bootstrapperStatusListener, BootstrapperStatusEvent.class);
     }
+  }
+
+  /**
+   * Asynchronously starts machine bootstrapping, subscribes to bootstrapper status events and
+   * returns the future that contains the result of machine booting.
+   *
+   * <p>Note that the resulting future must be explicitly cancelled when its completion no longer
+   * important because of finalization allocated resources.
+   *
+   * @return completable future that is completed when one of the following conditions is met:
+   *     <ul>
+   *       <li>bootstrapping status event is received
+   *       <li>exception while performing async bootstrap occurred
+   *     </ul>
+   *     otherwise, it must be explicitly closed
+   */
+  public CompletableFuture<Void> bootstrapAsync() {
+    if (finishEventFuture != null) {
+      throw new IllegalStateException("Bootstrap method must be called only once.");
+    }
+    // This completable future is used to avoid checking the event state outside this of method
+    final CompletableFuture<Void> bootstrapFuture = new CompletableFuture<>();
+
+    finishEventFuture = new CompletableFuture<>();
+    finishEventFuture.whenComplete(
+        (ok, ex) -> {
+          if (ex != null) {
+            bootstrapFuture.completeExceptionally(ex);
+          } else if (ok != null && BootstrapperStatus.FAILED.equals(ok.getStatus())) {
+            bootstrapFuture.completeExceptionally(new InfrastructureException(ok.getError()));
+          } else {
+            bootstrapFuture.complete(null);
+          }
+          eventService.unsubscribe(bootstrapperStatusListener, BootstrapperStatusEvent.class);
+        });
+    bootstrapFuture.whenComplete((ok, ex) -> finishEventFuture.cancel(true));
+
+    eventService.subscribe(bootstrapperStatusListener, BootstrapperStatusEvent.class);
+    try {
+      doBootstrapAsync(installerEndpoint, outputEndpoint);
+    } catch (InfrastructureException ex) {
+      finishEventFuture.completeExceptionally(ex);
+    }
+    return bootstrapFuture;
   }
 
   /**

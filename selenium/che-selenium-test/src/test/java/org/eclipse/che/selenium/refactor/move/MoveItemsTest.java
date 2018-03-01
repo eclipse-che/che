@@ -84,7 +84,7 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A0.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    projectExplorer.selectVisibleItem("A0.java");
+    projectExplorer.waitAndSelectItemByName("A0.java");
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
@@ -116,7 +116,7 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A1.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    projectExplorer.selectItem(pathToPackageInChePrefix + "/r/A1.java");
+    projectExplorer.waitAndSelectItem(pathToPackageInChePrefix + "/r/A1.java");
     projectExplorer.launchRefactorMoveByKeyboard();
     refactor.waitMoveItemFormIsOpen();
     refactor.clickOnExpandIconTree(PROJECT_NAME);
@@ -140,7 +140,7 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/fred2/B2.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInB);
-    projectExplorer.selectItem(pathToPackageInChePrefix + "/r/A2.java");
+    projectExplorer.waitAndSelectItem(pathToPackageInChePrefix + "/r/A2.java");
     editor.closeFileByNameWithSaving("B2");
     editor.closeFileByNameWithSaving("A2");
     menu.runCommand(
@@ -175,7 +175,7 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/fred3/B3.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInB);
-    projectExplorer.selectItem(pathToPackageInChePrefix + "/r/r/A3.java");
+    projectExplorer.waitAndSelectItem(pathToPackageInChePrefix + "/r/r/A3.java");
     projectExplorer.launchRefactorMoveByKeyboard();
     refactor.waitMoveItemFormIsOpen();
     refactor.clickOnExpandIconTree(PROJECT_NAME);
@@ -199,7 +199,7 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A5.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    projectExplorer.selectItem(pathToPackageInChePrefix + "/r/A5.java");
+    projectExplorer.waitAndSelectItem(pathToPackageInChePrefix + "/r/A5.java");
     projectExplorer.launchRefactorMoveByKeyboard();
     refactor.waitMoveItemFormIsOpen();
     refactor.clickOnExpandIconTree(PROJECT_NAME);
@@ -221,7 +221,7 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A6.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    projectExplorer.selectItem(pathToPackageInChePrefix + "/r/A6.java");
+    projectExplorer.waitAndSelectItem(pathToPackageInChePrefix + "/r/A6.java");
     projectExplorer.launchRefactorMoveByKeyboard();
     refactor.waitMoveItemFormIsOpen();
     refactor.clickOnExpandIconTree(PROJECT_NAME);
@@ -241,7 +241,7 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A7.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    projectExplorer.selectItem(pathToPackageInChePrefix + "/r/A7.java");
+    projectExplorer.waitAndSelectItem(pathToPackageInChePrefix + "/r/A7.java");
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
@@ -266,7 +266,7 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/java/lang/reflect/Klass.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    projectExplorer.selectItem(pathToPackageInChePrefix + "/java/lang/reflect/Klass.java");
+    projectExplorer.waitAndSelectItem(pathToPackageInChePrefix + "/java/lang/reflect/Klass.java");
     projectExplorer.launchRefactorMoveByKeyboard();
     refactor.waitMoveItemFormIsOpen();
     refactor.clickOnExpandIconTree(PROJECT_NAME);
@@ -287,7 +287,7 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A9.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
-    projectExplorer.selectItem(pathToPackageInChePrefix + "/r/A9.java");
+    projectExplorer.waitAndSelectItem(pathToPackageInChePrefix + "/r/A9.java");
     projectExplorer.launchRefactorMoveByKeyboard();
     refactor.waitMoveItemFormIsOpen();
     refactor.clickOnExpandIconTree(PROJECT_NAME);

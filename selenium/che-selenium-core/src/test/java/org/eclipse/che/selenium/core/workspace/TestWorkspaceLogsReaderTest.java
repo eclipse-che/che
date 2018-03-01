@@ -57,7 +57,8 @@ public class TestWorkspaceLogsReaderTest {
   private static final String TEST_READ_SECOND_LOG_COMMAND = "echo 'read-log-2'";
   private static final String UNKNOWN_COMMAND = "command-435f4q6we3as5va5s";
   private static final String TEST_WORKSPACE_ID = "workspace-id";
-  private static final Path PATH_TO_STORE_LOGS = Paths.get("path-to-store-logs");
+  private static final Path PATH_TO_STORE_LOGS =
+      Paths.get(TestWorkspaceLogsReaderTest.class.getResource("").getPath());
   private static final WorkspaceStatus WRONG_WORKSPACE_STATUS = WorkspaceStatus.STOPPED;
   private static final NullPointerException EXCEPTION_TO_BE_THROWN = new NullPointerException();
 

@@ -14,9 +14,9 @@ import static org.eclipse.che.selenium.core.constant.TestGitConstants.CONFIGURIN
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_FACTORY;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.CONVERT_TO_PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.CONVERT_TO_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -148,13 +148,13 @@ public class CreateFactoryFromUiWithKeepDirTest {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7253");
     }
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         PROJECT_NAME + "/" + KEEPED_DIR + "/src/main/java/hello", "GreetingController.java");
 
     mavenPluginStatusBar.waitClosingInfoPanel(UPDATING_PROJECT_TIMEOUT_SEC);
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR);
   }
 
   private void makeKeepDirectoryFromGitUrl(String url, String projectName, String folderName) {
@@ -187,7 +187,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
     }
     editor.closeAutocomplete();
     editor.typeTextIntoEditor(" greeting =null;");
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR);
   }
 
   private void checkOpenDeclaration() throws IOException {

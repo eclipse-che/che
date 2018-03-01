@@ -21,7 +21,7 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType;
+import org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -118,7 +118,7 @@ public class ShowHintsCommandTest {
 
   private void waitErrorMarkerInPosition() throws Exception {
     try {
-      editor.waitMarkerInPosition(MarkersType.ERROR_MARKER, 33);
+      editor.waitMarkerInPosition(MarkerLocator.ERROR, 33);
     } catch (TimeoutException ex) {
       logExternalLibraries();
       logProjectTypeChecking();

@@ -14,7 +14,6 @@ import static java.util.Collections.emptyList;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.util.NameUtils.getFileExtension;
 
-import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -99,10 +98,7 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
     }
 
     ProjectSearchRequestDto requestParams =
-        dtoFactory
-            .createDto(ProjectSearchRequestDto.class)
-            .withPath("")
-            .withName(URL.encodePathSegment(fileName + "*"));
+        dtoFactory.createDto(ProjectSearchRequestDto.class).withPath("").withName(fileName + "*");
     if (timer != null) {
       timer.cancel();
     }

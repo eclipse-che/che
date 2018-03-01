@@ -141,14 +141,14 @@ public class CreateNewNotJavaFilesTest {
   private void createNewFile(String pathFromItem, String name, String type, String fileExt)
       throws Exception {
 
-    projectExplorer.selectItem(pathFromItem);
+    projectExplorer.waitAndSelectItem(pathFromItem);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT, TestMenuCommandsConstants.Project.New.NEW, type);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(name);
     askForValueDialog.clickOkBtn();
     loader.waitOnClosed();
-    projectExplorer.waitItemInVisibleArea(name + fileExt);
+    projectExplorer.waitVisibilityByName(name + fileExt);
   }
 
   private void checkDefaultTextInCodeMirrorEditorForFile(String defaultText, String fileName)
