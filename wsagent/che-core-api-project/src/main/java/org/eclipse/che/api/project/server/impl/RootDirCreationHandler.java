@@ -12,9 +12,11 @@ package org.eclipse.che.api.project.server.impl;
 
 import static org.eclipse.che.api.fs.server.WsPathUtils.ROOT;
 
+import java.nio.file.Paths;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.search.server.excludes.HiddenItemPathMatcher;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
 
 /** Detects and makes directories created in VFS root as blank projects */
@@ -22,12 +24,16 @@ import org.eclipse.che.api.watcher.server.FileWatcherManager;
 public class RootDirCreationHandler {
   private final FileWatcherManager fileWatcherManager;
   private final ProjectConfigRegistry projectConfigRegistry;
+  private HiddenItemPathMatcher hiddenItemPathMatcher;
 
   @Inject
   public RootDirCreationHandler(
-      FileWatcherManager fileWatcherManager, ProjectConfigRegistry projectConfigRegistry) {
+      FileWatcherManager fileWatcherManager,
+      ProjectConfigRegistry projectConfigRegistry,
+      HiddenItemPathMatcher hiddenItemPathMatcher) {
     this.fileWatcherManager = fileWatcherManager;
     this.projectConfigRegistry = projectConfigRegistry;
+    this.hiddenItemPathMatcher = hiddenItemPathMatcher;
   }
 
   @PostConstruct
@@ -36,6 +42,8 @@ public class RootDirCreationHandler {
   }
 
   private void consumeCreate(String wsPath) {
-    projectConfigRegistry.putIfAbsent(wsPath, true, true);
+    if (!hiddenItemPathMatcher.matches(Paths.get(wsPath))) {
+      projectConfigRegistry.putIfAbsent(wsPath, true, true);
+    }
   }
 }
