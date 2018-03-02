@@ -158,7 +158,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until all of {@link WebElement}, which are found by {@code elementsLocator}, be visible,
+   * Waits until all of {@link WebElement}, which are found by {@code elementsLocator}, are visible,
    * and gets them;
    *
    * @param elementsLocator common locator for multiple elements
@@ -172,7 +172,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during specified {@code timeout} until all of {@link WebElement}, which are found by
-   * {@code elementsLocator}, be visible and gets them.
+   * {@code elementsLocator}, are visible and gets them.
    *
    * @param elementsLocator common locator for multiple elements
    * @param timeout waiting time in seconds
@@ -187,7 +187,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until all of specified {@code elements}, be visible.
+   * Waits until all of specified {@code elements}, are visible.
    *
    * @param elements web elements which should check
    * @return provided {@code elements},
@@ -199,7 +199,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits during specified {@code timeout} until all of provided {@code elements}, be visible.
+   * Waits during specified {@code timeout} until all of provided {@code elements}, are visible.
    *
    * @param elements web elements which should check
    * @param timeout waiting time in seconds
