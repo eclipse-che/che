@@ -98,7 +98,7 @@ services:
 <% end -%>
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - '<%= scope.lookupvar('che::che_instance') -%>/config/traefik/traefik.toml:/etc/traefik/traefik.toml'
+      - '<%= scope.lookupvar('che::che_instance') -%>/config/traefik:/etc/traefik'
     restart: always
 <% end -%>
 
