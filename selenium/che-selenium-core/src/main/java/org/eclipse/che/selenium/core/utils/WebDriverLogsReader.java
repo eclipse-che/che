@@ -109,7 +109,7 @@ public class WebDriverLogsReader {
    * @param requestMessage json representation of the message object from the log
    * @return info about request from the WebDriver
    */
-  private static String extractCheRequests(JsonObject requestMessage) {
+  private String extractCheRequests(JsonObject requestMessage) {
     JsonObject requestNode = requestMessage.getAsJsonObject("params").getAsJsonObject("request");
     StringBuilder requestInfo = new StringBuilder();
     if (isNodeFromCheTraffic(requestNode)) {
@@ -130,7 +130,7 @@ public class WebDriverLogsReader {
    * @param requestMessage json representation of the message object from the log
    * @return info about request from the WebDriver
    */
-  private static String extractCheResponses(JsonObject requestMessage) {
+  private String extractCheResponses(JsonObject requestMessage) {
     JsonObject responseNode = requestMessage.getAsJsonObject("params").getAsJsonObject("response");
     StringBuilder responceInfo = new StringBuilder();
     if (isNodeFromCheTraffic(responseNode)) {
@@ -144,7 +144,7 @@ public class WebDriverLogsReader {
     return responceInfo.toString();
   }
 
-  private static boolean isNodeFromCheTraffic(JsonObject node) {
+  private boolean isNodeFromCheTraffic(JsonObject node) {
     return (node.get("url").isJsonNull()) ? false : node.get("url").getAsString().contains("/api/");
   }
 }
