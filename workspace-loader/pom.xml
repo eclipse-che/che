@@ -144,21 +144,26 @@
                                         <exec dir="${basedir}" executable="npm" failonerror="true">
                                             <arg value="install" />
                                         </exec>
+                                        <!-- build workspace loader -->
+                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                            <arg value="run" />
+                                            <arg value="build" />
+                                        </exec>
                                     </target>
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>compilation</id>
+                                <id>test-workspace-loader</id>
                                 <phase>test</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <!-- build workspace loader -->
+                                        <!-- test workspace loader -->
                                         <exec dir="${basedir}" executable="npm" failonerror="true">
                                             <arg value="run" />
-                                            <arg value="build" />
+                                            <arg value="test" />
                                         </exec>
                                     </target>
                                 </configuration>

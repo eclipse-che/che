@@ -17,6 +17,7 @@ COPY . /workspace-loader/
 
 RUN cd /workspace-loader && \
     npm run build && \
+    npm run test && \
     cd target && \
     tar zcf /tmp/workspace-loader.tar.gz dist
 
