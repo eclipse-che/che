@@ -10,10 +10,16 @@
  */
 package org.eclipse.che.ide.navigation;
 
+import static java.util.Collections.emptyList;
+import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
+import static org.eclipse.che.ide.util.NameUtils.getFileExtension;
+
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Comparator;
+import java.util.List;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.project.shared.dto.ProjectSearchRequestDto;
 import org.eclipse.che.api.project.shared.dto.ProjectSearchResponseDto;
@@ -23,13 +29,6 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
-
-import java.util.Comparator;
-import java.util.List;
-
-import static java.util.Collections.emptyList;
-import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
-import static org.eclipse.che.ide.util.NameUtils.getFileExtension;
 
 /**
  * Presenter for file navigation (find file by name and open it).

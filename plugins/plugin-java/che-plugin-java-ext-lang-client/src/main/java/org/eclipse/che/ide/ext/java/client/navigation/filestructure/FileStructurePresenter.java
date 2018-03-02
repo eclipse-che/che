@@ -89,17 +89,22 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
 
       final String fqn = JavaUtil.resolveFQN((Container) srcFolder.get(), (Resource) file);
 
-      Log.info(getClass(), "Going to take information for " + fqn + " at " + System.currentTimeMillis());
+      Log.info(
+          getClass(), "Going to take information for " + fqn + " at " + System.currentTimeMillis());
       javaNavigationService
           .getCompilationUnit(project.get().getLocation(), fqn, showInheritedMembers)
           .then(
               unit -> {
-                Log.info(getClass(), ">>>>> Got information for " + fqn + " at " + System.currentTimeMillis());
+                Log.info(
+                    getClass(),
+                    ">>>>> Got information for " + fqn + " at " + System.currentTimeMillis());
                 view.setTitleCaption(editorPartPresenter.getEditorInput().getFile().getName());
                 view.setStructure(unit, showInheritedMembers);
                 view.showDialog();
                 showInheritedMembers = !showInheritedMembers;
-                Log.info(getClass(), ">>>>> Shown information for " + fqn + " at " + System.currentTimeMillis());
+                Log.info(
+                    getClass(),
+                    ">>>>> Shown information for " + fqn + " at " + System.currentTimeMillis());
               })
           .catchError(
               arg -> {
