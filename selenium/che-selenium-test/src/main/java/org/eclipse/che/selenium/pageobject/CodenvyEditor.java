@@ -114,7 +114,6 @@ public class CodenvyEditor {
   private final TestWebElementRenderChecker testWebElementRenderChecker;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final WebDriverWaitFactory webDriverWaitFactory;
-  private final int DEFAULT_TIMEOUT = LOAD_PAGE_TIMEOUT_SEC;
 
   @Inject
   public CodenvyEditor(
@@ -390,7 +389,7 @@ public class CodenvyEditor {
   public void waitTextIntoEditor(final String text) {
     try {
       webDriverWaitFactory
-          .get(DEFAULT_TIMEOUT)
+          .get()
           .until((ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
     } catch (Exception ex) {
       LOG.warn(ex.getLocalizedMessage());
@@ -409,7 +408,7 @@ public class CodenvyEditor {
    */
   public void waitTextNotPresentIntoEditor(final String text) {
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until(
             (ExpectedCondition<Boolean>) webDriver -> !(getVisibleTextFromEditor().contains(text)));
   }
@@ -665,7 +664,7 @@ public class CodenvyEditor {
   /** Wait for no Git change markers in the opened editor. */
   public void waitNoGitChangeMarkers() {
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver ->
@@ -682,7 +681,7 @@ public class CodenvyEditor {
    */
   public void waitGitInsertionMarkerInPosition(int startLine, int endLine) {
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver -> {
@@ -741,7 +740,7 @@ public class CodenvyEditor {
   private List<WebElement> getListGitMarkers() {
     List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
     List<WebElement> subList = rulerVcsElements.subList(1, rulerVcsElements.size() - 1);
-    webDriverWaitFactory.get(DEFAULT_TIMEOUT).until(visibilityOfAllElements(subList));
+    webDriverWaitFactory.get().until(visibilityOfAllElements(subList));
     return rulerVcsElements;
   }
 
@@ -776,7 +775,7 @@ public class CodenvyEditor {
    */
   public void waitAllMarkersInvisibility(MarkerLocator markerLocator) {
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> driver.findElements(By.xpath(markerLocator.get())).size() == 0);
@@ -972,7 +971,7 @@ public class CodenvyEditor {
         propositionContainer.findElement(By.xpath(format("//li//span[text()=\"%s\"]", item))));
 
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until(
             visibilityOfNestedElementsLocatedBy(
                 propositionContainer,
@@ -1021,7 +1020,7 @@ public class CodenvyEditor {
    */
   public void waitExpTextIntoShowHintsPopUp(String expText) {
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver -> getTextFromShowHintsPopUp().contains(expText));
@@ -1049,7 +1048,7 @@ public class CodenvyEditor {
    */
   public void waitActiveTabFileName(String nameOfFile) {
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until(presenceOfElementLocated(By.xpath(format(ACTIVE_TAB_FILE_NAME, nameOfFile))));
   }
 
@@ -1097,7 +1096,7 @@ public class CodenvyEditor {
     final String currentStateEditorColor =
         isEditorFocused ? "rgba(255, 255, 255, 1)" : "rgba(170, 170, 170, 1)";
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver ->
@@ -1124,7 +1123,7 @@ public class CodenvyEditor {
    */
   public void waitTabIsPresent(String nameOfFile) {
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until(visibilityOfAllElementsLocatedBy(By.xpath(format(TAB_FILE_NAME_XPATH, nameOfFile))));
 
     loader.waitOnClosed();
@@ -1297,9 +1296,7 @@ public class CodenvyEditor {
 
   /** check text present in javadoc popup */
   public void checkTextToBePresentInJavaDocPopUp(String text) {
-    webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
-        .until(frameToBeAvailableAndSwitchToIt(By.xpath(JAVA_DOC_POPUP)));
+    webDriverWaitFactory.get().until(frameToBeAvailableAndSwitchToIt(By.xpath(JAVA_DOC_POPUP)));
     waitTextInJavaDoc(text);
     seleniumWebDriver.switchTo().parentFrame();
   }
@@ -1311,15 +1308,13 @@ public class CodenvyEditor {
   private void waitTextInJavaDoc(String expectedText) {
     try {
       webDriverWaitFactory
-          .get(DEFAULT_TIMEOUT)
+          .get()
           .until(textToBePresentInElementLocated(By.tagName("body"), expectedText));
     } catch (TimeoutException ex) {
       seleniumWebDriver.switchTo().parentFrame();
+      webDriverWaitFactory.get().until(frameToBeAvailableAndSwitchToIt(By.xpath(JAVA_DOC_POPUP)));
       webDriverWaitFactory
-          .get(DEFAULT_TIMEOUT)
-          .until(frameToBeAvailableAndSwitchToIt(By.xpath(JAVA_DOC_POPUP)));
-      webDriverWaitFactory
-          .get(DEFAULT_TIMEOUT)
+          .get()
           .until(textToBePresentInElementLocated(By.tagName("body"), expectedText));
     }
   }
@@ -1331,20 +1326,16 @@ public class CodenvyEditor {
    * @param textLink text of link
    */
   public void checkTextAfterGoToLinkInJavaDocPopUp(String text, String textLink) {
-    webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
-        .until(frameToBeAvailableAndSwitchToIt(By.xpath(JAVA_DOC_POPUP)));
+    webDriverWaitFactory.get().until(frameToBeAvailableAndSwitchToIt(By.xpath(JAVA_DOC_POPUP)));
 
     WebElement link =
         webDriverWaitFactory
-            .get(DEFAULT_TIMEOUT)
+            .get()
             .until(elementToBeClickable(By.xpath(format("//a[text()='%s']", textLink))));
 
     seleniumWebDriver.get(link.getAttribute("href"));
 
-    webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
-        .until(textToBePresentInElementLocated(By.tagName("body"), text));
+    webDriverWaitFactory.get().until(textToBePresentInElementLocated(By.tagName("body"), text));
 
     seleniumWebDriver.navigate().back();
     seleniumWebDriver.switchTo().parentFrame();
@@ -1369,7 +1360,7 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.waitVisibility(activeLineXpath);
 
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until((ExpectedCondition<Boolean>) driver -> activeLineXpath.getText().contains(text));
   }
 
@@ -1394,7 +1385,7 @@ public class CodenvyEditor {
     waitActive();
     return getCursorPositionFromWebElement(
         webDriverWaitFactory
-            .get(DEFAULT_TIMEOUT)
+            .get()
             .until(visibilityOfElementLocated(By.xpath(xpathToCurrentActiveCursorPosition))));
   }
 
@@ -1435,7 +1426,7 @@ public class CodenvyEditor {
   public void expectedNumberOfActiveLine(final int expectedLine) {
     waitActive();
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until((ExpectedCondition<Boolean>) driver -> expectedLine == getPositionVisible());
   }
 
@@ -1456,7 +1447,7 @@ public class CodenvyEditor {
    */
   public void waitSpecifiedValueForLineAndChar(final int linePosition, final int charPosition) {
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver ->
@@ -1540,7 +1531,7 @@ public class CodenvyEditor {
    */
   public void waitTextInImplementationForm(String expText) {
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> getTextFromImplementationForm().contains(expText));
@@ -1593,7 +1584,7 @@ public class CodenvyEditor {
    * @param xPath is Xpath of web element
    */
   public void clickOnElementByXpath(String xPath) {
-    webDriverWaitFactory.get(DEFAULT_TIMEOUT).until(elementToBeClickable(By.xpath(xPath))).click();
+    webDriverWaitFactory.get().until(elementToBeClickable(By.xpath(xPath))).click();
   }
 
   /**
@@ -1606,7 +1597,7 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.waitVisibility(By.xpath(RULER_OVERVIEW));
     List<WebElement> annotationList =
         webDriverWaitFactory
-            .get(DEFAULT_TIMEOUT)
+            .get()
             .until(presenceOfAllElementsLocatedBy(By.xpath(markerLocator.get())));
 
     return annotationList.size();
@@ -1680,7 +1671,7 @@ public class CodenvyEditor {
   /** wait the all punctuation separators are present */
   public void waitAllPunctuationSeparatorsArePresent() {
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until(visibilityOfAllElementsLocatedBy(By.xpath(PUNCTUATION_SEPARATOR)));
   }
 
@@ -1742,7 +1733,7 @@ public class CodenvyEditor {
 
   public void waitCountTabsWithProvidedName(int countTabs, String tabName) {
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> countTabs == getAllTabsWithProvidedName(tabName).size());
@@ -1781,7 +1772,7 @@ public class CodenvyEditor {
   public void selectTabByIndexEditorWindowAndOpenMenu(int index, String tabName) {
     List<WebElement> windowList =
         webDriverWaitFactory
-            .get(DEFAULT_TIMEOUT)
+            .get()
             .until(presenceOfAllElementsLocatedBy(By.xpath(format(TAB_FILE_CLOSE_ICON, tabName))));
     actionsFactory.createAction(seleniumWebDriver).contextClick(windowList.get(index)).perform();
   }
@@ -1793,9 +1784,7 @@ public class CodenvyEditor {
    */
   public boolean tabIsPresentOnce(String expectTab) {
     List<WebElement> windowList =
-        webDriverWaitFactory
-            .get(DEFAULT_TIMEOUT)
-            .until(presenceOfAllElementsLocatedBy(By.id(EDITOR_TABS_PANEL)));
+        webDriverWaitFactory.get().until(presenceOfAllElementsLocatedBy(By.id(EDITOR_TABS_PANEL)));
     int counter = 0;
     for (WebElement webElement : windowList) {
       if (webElement.getText().contains(expectTab)) {
@@ -1839,7 +1828,7 @@ public class CodenvyEditor {
 
           for (int a = 0; a < nestedElements.size(); a++) {
             webDriverWaitFactory
-                .get(DEFAULT_TIMEOUT)
+                .get()
                 .until(presenceOfNestedElementLocatedBy(line, By.xpath(format("span[%s]", a + 1))));
           }
 
@@ -1912,7 +1901,7 @@ public class CodenvyEditor {
     waitJavaDocPopupSrcAttributeIsNotEmpty();
 
     webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> {
@@ -1984,7 +1973,7 @@ public class CodenvyEditor {
 
   private List<WebElement> getAllTabsWithProvidedName(String tabName) {
     return webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
+        .get()
         .until(
             visibilityOfAllElementsLocatedBy(
                 By.xpath(
