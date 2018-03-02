@@ -27,7 +27,6 @@
     thread_pool.keep_alive_time="30000" />
 
   <kubernetes.KUBE_PING
-    namespace="${OPENSHIFT_KUBE_PING_NAMESPACE:eclipse-che}"
     labels="app=che" />
 
   <MERGE2 min_interval="10000"
