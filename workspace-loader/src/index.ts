@@ -50,7 +50,7 @@ export class WorkspaceLoader {
                     return this.handleWorkspace();
                 } else {
                     return new Promise<void>((resolve) => {
-                        this.openURL(workspace.links.ide);
+                        this.openURL(workspace.links.ide + this.getQueryString());
                         resolve();
                     });
                 }
@@ -97,6 +97,13 @@ export class WorkspaceLoader {
     websocketBaseURL(): string {
         let wsProtocol = 'http:' === document.location.protocol ? 'ws' : 'wss';
         return wsProtocol + '://' + document.location.host;
+    }
+
+    /**
+     * Returns query string.
+     */
+    getQueryString(): string {
+        return location.search;
     }
 
     /**

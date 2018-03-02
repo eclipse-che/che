@@ -108,6 +108,7 @@ describe('Workspace Loader', () => {
             workspaceLoader = new WorkspaceLoader(loader);
     
             spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
+            spyOn(workspaceLoader, 'getQueryString').and.returnValue("");
     
             spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
                 return new Promise((resolve) => {
@@ -136,6 +137,37 @@ describe('Workspace Loader', () => {
 
         it('must open IDE with `test url`', () => {
             expect(workspaceLoader.openURL).toHaveBeenCalledWith("test url");
+        });
+    });
+
+    describe('must open default IDE with query parameters when workspace does not have IDE server', () => {
+        let workspaceLoader;
+
+        beforeEach((done) => {
+            let loader = new Loader();
+            workspaceLoader = new WorkspaceLoader(loader);
+    
+            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
+            spyOn(workspaceLoader, 'getQueryString').and.returnValue("?param=value");
+    
+            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
+                return new Promise((resolve) => {
+                    fakeWorkspaceConfig.config.environments["default"].machines = {};
+                    resolve(fakeWorkspaceConfig);
+                });
+            });
+    
+            spyOn(workspaceLoader, "handleWorkspace");
+
+            spyOn(workspaceLoader, "openURL").and.callFake(() => {
+                done();
+            });
+
+            workspaceLoader.load();
+        });
+
+        it('must open IDE with `test url` and query param `param=value`', () => {
+            expect(workspaceLoader.openURL).toHaveBeenCalledWith("test url?param=value");
         });
     });
 
