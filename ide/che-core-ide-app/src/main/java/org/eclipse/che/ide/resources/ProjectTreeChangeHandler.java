@@ -12,9 +12,11 @@ package org.eclipse.che.ide.resources;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
+import static org.eclipse.che.ide.resource.Path.commonPath;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,6 +29,7 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.ExternalResourceDelta;
+import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.resource.Path;
 
 /**
@@ -93,42 +96,95 @@ public class ProjectTreeChangeHandler {
 
     private void processSingleChange(FileChange fileChange) {
       if (isNullOrEmpty(fileChange.getPath())) {
-        chainPromise.thenPromise(
-            arg -> ProjectTreeChangeHandler.this.appContext.getWorkspaceRoot().synchronize());
+        chainPromise =
+            chainPromise
+                .thenPromise(
+                    arg ->
+                        ProjectTreeChangeHandler.this
+                            .appContext
+                            .getWorkspaceRoot()
+                            .synchronize()
+                            .thenPromise(
+                                arg1 -> ProjectTreeChangeHandler.this.promises.resolve(null)))
+                .catchErrorPromise(err -> ProjectTreeChangeHandler.this.promises.resolve(null));
       } else {
-        chainPromise.thenPromise(
-            arg -> {
-              Path newPath = Path.valueOf(fileChange.getPath());
-              Path oldPath = Path.valueOf(fileChange.getPath());
-              int status = getStatus(fileChange.getType());
+        chainPromise =
+            chainPromise
+                .thenPromise(
+                    arg -> {
+                      Path newPath = Path.valueOf(fileChange.getPath());
+                      Path oldPath = Path.valueOf(fileChange.getPath());
+                      int status = getStatus(fileChange.getType());
 
-              return ProjectTreeChangeHandler.this
-                  .appContext
-                  .getWorkspaceRoot()
-                  .synchronize(new ExternalResourceDelta(newPath, oldPath, status));
-            });
+                      return ProjectTreeChangeHandler.this
+                          .appContext
+                          .getWorkspaceRoot()
+                          .synchronize(new ExternalResourceDelta(newPath, oldPath, status))
+                          .thenPromise(
+                              arg1 -> ProjectTreeChangeHandler.this.promises.resolve(null));
+                    })
+                .catchErrorPromise(err -> ProjectTreeChangeHandler.this.promises.resolve(null));
       }
     }
 
     private void processMultipleChanges(List<FileChange> fileChanges) {
-      List<Path> paths =
-          fileChanges.stream().map(FileChange::getPath).map(Path::valueOf).collect(toList());
-      Path commonUpdatePath = Path.commonPath(paths.toArray(new Path[paths.size()]));
+      List<FileChange> deleteChanges =
+          fileChanges.stream().filter(change -> change.getType() == DELETED).collect(toList());
 
-      chainPromise.thenPromise(
-          arg ->
-              ProjectTreeChangeHandler.this
-                  .appContext
-                  .getWorkspaceRoot()
-                  .getContainer(commonUpdatePath)
-                  .thenPromise(
-                      container -> {
-                        if (container.isPresent()) {
-                          return container.get().synchronize();
-                        }
+      chainPromise =
+          chainPromise
+              .thenPromise(
+                  arg ->
+                      ProjectTreeChangeHandler.this
+                          .appContext
+                          .getWorkspaceRoot()
+                          .synchronize(
+                              deleteChanges
+                                  .stream()
+                                  .map(
+                                      change ->
+                                          new ExternalResourceDelta(
+                                              Path.valueOf(change.getPath()),
+                                              Path.valueOf(change.getPath()),
+                                              REMOVED))
+                                  .toArray(ResourceDelta[]::new))
+                          .thenPromise(
+                              arg1 -> ProjectTreeChangeHandler.this.promises.resolve(null)))
+              .catchErrorPromise(err -> ProjectTreeChangeHandler.this.promises.resolve(null));
 
-                        return promises.resolve(null);
-                      }));
+      Path[] updatePaths =
+          fileChanges
+              .stream()
+              .filter(change -> change.getType() != DELETED)
+              .map(FileChange::getPath)
+              .map(Path::valueOf)
+              .toArray(Path[]::new);
+
+      if (updatePaths.length == 0) {
+        return;
+      }
+
+      Path commonUpdatePath = commonPath(updatePaths);
+
+      chainPromise =
+          chainPromise
+              .thenPromise(
+                  arg ->
+                      ProjectTreeChangeHandler.this
+                          .appContext
+                          .getWorkspaceRoot()
+                          .getContainer(commonUpdatePath)
+                          .thenPromise(
+                              container -> {
+                                if (container.isPresent()) {
+                                  return container.get().synchronize();
+                                }
+
+                                return promises.resolve(null);
+                              })
+                          .thenPromise(
+                              arg1 -> ProjectTreeChangeHandler.this.promises.resolve(null)))
+              .catchErrorPromise(err -> ProjectTreeChangeHandler.this.promises.resolve(null));
     }
 
     private int getStatus(FileWatcherEventType eventType) {
