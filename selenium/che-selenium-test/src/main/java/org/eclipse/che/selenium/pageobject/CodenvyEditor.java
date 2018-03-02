@@ -58,6 +58,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentI
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfNestedElementsLocatedBy;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.inject.Inject;
@@ -959,7 +960,23 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.waitAndClick(
         propositionContainer.findElement(By.xpath(format("//li//span[text()=\"%s\"]", item))));
 
+    waitProposalItemSelection(item);
+
     seleniumWebDriverHelper.sendKeys(ENTER.toString());
+  }
+
+  /**
+   * Waits until {@code item} from "Proposal Container" will be selected
+   *
+   * @param item item's visible name
+   */
+  public void waitProposalItemSelection(String item) {
+    webDriverWaitFactory
+        .get()
+        .until(
+            visibilityOfNestedElementsLocatedBy(
+                propositionContainer,
+                By.xpath(format("//li[@selected='true']//span[text()=\"%s\"]", item))));
   }
 
   /**
