@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.assistant;
 
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -29,7 +28,6 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.OrganizeImports;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.openqa.selenium.TimeoutException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -112,13 +110,7 @@ public class OrganizeImportsTest {
     loader.waitOnClosed();
     editor.goToCursorPositionVisible(20, 8);
     editor.launchPropositionAssistPanel();
-    try {
-      editor.enterTextIntoFixErrorPropByEnter("Organize imports");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8972");
-    }
-
+    editor.enterTextIntoFixErrorPropByEnter("Organize imports");
     loader.waitOnClosed();
 
     try {

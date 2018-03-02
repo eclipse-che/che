@@ -58,7 +58,6 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentI
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfNestedElementsLocatedBy;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.inject.Inject;
@@ -959,13 +958,6 @@ public class CodenvyEditor {
   public void enterTextIntoFixErrorPropByEnter(String item) {
     seleniumWebDriverHelper.waitAndClick(
         propositionContainer.findElement(By.xpath(format("//li//span[text()=\"%s\"]", item))));
-
-    webDriverWaitFactory
-        .get()
-        .until(
-            visibilityOfNestedElementsLocatedBy(
-                propositionContainer,
-                By.xpath(format("//li[@selected='true']//span[text()=\"%s\"]", item))));
 
     seleniumWebDriverHelper.sendKeys(ENTER.toString());
   }
