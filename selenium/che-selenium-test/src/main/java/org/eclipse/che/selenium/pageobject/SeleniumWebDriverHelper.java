@@ -162,7 +162,9 @@ public class SeleniumWebDriverHelper {
    * and gets them;
    *
    * @param elementsLocator common locator for multiple elements
-   * @return all elements which found by specified {@code elementLocator}
+   * @return all elements which found by specified {@code elementLocator},
+   *     <p>throws {@link org.openqa.selenium.TimeoutException} if at least one of the found
+   *     elements is not visible after timeout;
    */
   public List<WebElement> waitAllVisibility(By elementsLocator) {
     return waitAllVisibility(elementsLocator, DEFAULT_TIMEOUT);
@@ -174,7 +176,9 @@ public class SeleniumWebDriverHelper {
    *
    * @param elementsLocator common locator for multiple elements
    * @param timeout waiting time in seconds
-   * @return all elements which found by specified {@code elementLocator}
+   * @return all elements which found by specified {@code elementLocator},
+   *     <p>throws {@link org.openqa.selenium.TimeoutException} if at least one of the found
+   *     elements is not visible after timeout;
    */
   public List<WebElement> waitAllVisibility(By elementsLocator, int timeout) {
     return webDriverWaitFactory
@@ -188,7 +192,7 @@ public class SeleniumWebDriverHelper {
    * @param elements web elements which should check
    * @return provided {@code elements},
    *     <p>throws {@link org.openqa.selenium.TimeoutException} if at least one of the specified
-   *     {@code elements} not visible after timeout;
+   *     {@code elements} is not visible after timeout;
    */
   public List<WebElement> waitAllVisibility(List<WebElement> elements) {
     return waitAllVisibility(elements, DEFAULT_TIMEOUT);
@@ -201,7 +205,7 @@ public class SeleniumWebDriverHelper {
    * @param timeout waiting time in seconds
    * @return provided {@code elements},
    *     <p>throws {@link org.openqa.selenium.TimeoutException} if at least one of the specified
-   *     {@code elements} not visible after timeout;
+   *     {@code elements} is not visible after timeout;
    */
   public List<WebElement> waitAllVisibility(List<WebElement> elements, int timeout) {
     return webDriverWaitFactory.get(timeout).until(visibilityOfAllElements(elements));
@@ -211,7 +215,9 @@ public class SeleniumWebDriverHelper {
    * Waits visibility and gets {@link WebElement} for all of the {@code elementsLocators}
    *
    * @param elementsLocators locators for all elements which should be found
-   * @return all found elements
+   * @return all found elements,
+   *     <p>throws {@link org.openqa.selenium.TimeoutException} if at least one of the specified
+   *     {@code elements} is not visible after timeout;
    */
   public List<WebElement> waitAllVisibilityBy(List<By> elementsLocators) {
     return waitAllVisibilityBy(elementsLocators, DEFAULT_TIMEOUT);
