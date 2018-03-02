@@ -15,7 +15,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ACTIVE_TAB_FILE_NAME;
@@ -93,7 +92,6 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 
 @Singleton
@@ -107,10 +105,6 @@ public class CodenvyEditor {
   protected final ActionsFactory actionsFactory;
   protected final AskForValueDialog askForValueDialog;
 
-  private final WebDriverWait redrawDriverWait;
-  private final WebDriverWait elemDriverWait;
-  private final WebDriverWait loadPageDriverWait;
-  private final WebDriverWait loaderDriverWait;
   private final TestWebElementRenderChecker testWebElementRenderChecker;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final WebDriverWaitFactory webDriverWaitFactory;
@@ -131,10 +125,6 @@ public class CodenvyEditor {
     this.testWebElementRenderChecker = testWebElementRenderChecker;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.webDriverWaitFactory = webDriverWaitFactory;
-    redrawDriverWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
-    elemDriverWait = new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC);
-    loadPageDriverWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
-    loaderDriverWait = new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -1396,11 +1386,13 @@ public class CodenvyEditor {
    * @param charPosition expected char position
    */
   public void waitCursorPosition(final int linePosition, final int charPosition) {
-    redrawDriverWait.until(
-        (ExpectedCondition<Boolean>)
-            webDriver ->
-                (getCursorPositionsFromActive().first == linePosition)
-                    && (getCursorPositionsFromActive().second == charPosition));
+    webDriverWaitFactory
+        .get()
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver ->
+                    (getCursorPositionsFromActive().first == linePosition)
+                        && (getCursorPositionsFromActive().second == charPosition));
   }
 
   private Pair<Integer, Integer> getCursorPositionFromWebElement(WebElement webElement) {
