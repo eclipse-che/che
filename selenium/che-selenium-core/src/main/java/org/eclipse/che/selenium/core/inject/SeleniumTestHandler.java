@@ -41,6 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import javax.annotation.PreDestroy;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
@@ -50,7 +51,7 @@ import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.user.InjectTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.core.utils.WebDriverLogsReader;
+import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReaderFactory;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader;
@@ -133,6 +134,7 @@ public abstract class SeleniumTestHandler
   @Inject private TestGitHubServiceClient gitHubClientService;
   @Inject private TestWorkspaceLogsReader testWorkspaceLogsReader;
   @Inject private SeleniumTestStatistics seleniumTestStatistics;
+  @Inject private WebDriverLogsReaderFactory webDriverLogsReaderFactory;
 
   private final Injector injector;
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
@@ -485,11 +487,12 @@ public abstract class SeleniumTestHandler
       Files.createDirectories(webdriverLogsDirectory.getParent());
       Files.write(
           webdriverLogsDirectory,
-          new WebDriverLogsReader(webDriver)
-              .getAllLogs(webDriver)
+          webDriverLogsReaderFactory
+              .create(webDriver)
+              .getAllLogs()
               .getBytes(Charset.forName("UTF-8")),
           StandardOpenOption.CREATE);
-    } catch (WebDriverException | IOException e) {
+    } catch (WebDriverException | IOException | JsonParseException e) {
       LOG.error(format("Can't store web driver logs related to test %s.", result), e);
     }
   }

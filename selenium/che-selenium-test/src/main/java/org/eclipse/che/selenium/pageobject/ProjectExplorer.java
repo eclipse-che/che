@@ -54,7 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
-import org.eclipse.che.selenium.core.utils.WebDriverLogsReader;
+import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReader;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -251,9 +251,7 @@ public class ProjectExplorer {
           .until(visibilityOfElementLocated(By.id(PROJECT_EXPLORER_TREE_ITEMS)));
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-
       if (seleniumWebDriverHelper.isVisible(By.id("ide-loader-progress-bar"))) {
-        webDriverLogsReader.logBrowserLogs();
         fail("Known issue https://github.com/eclipse/che/issues/8468", ex);
       }
       throw ex;

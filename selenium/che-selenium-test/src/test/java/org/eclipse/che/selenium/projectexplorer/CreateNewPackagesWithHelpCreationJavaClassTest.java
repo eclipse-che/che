@@ -20,7 +20,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
-import org.eclipse.che.selenium.core.utils.WebDriverLogsReader;
+import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReader;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -100,7 +100,6 @@ public class CreateNewPackagesWithHelpCreationJavaClassTest {
       projectExplorer.waitItemInVisibleArea("TestClass2.java");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      webDriverLogsReader.logBrowserLogs();
       fail("Known issue https://github.com/eclipse/che/issues/8122");
     }
   }
