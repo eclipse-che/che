@@ -52,7 +52,7 @@ public class BackgroundLoaderPresenter implements BackgroundLoaderView.ActionDel
 
   /** Change the value of resolved modules of the project. */
   public void updateProgressBar(ProgressReportDto progress) {
-    view.setOperationLabel(progress.getStatus());
+    view.setOperationLabel(progress.getTask());
     int totalWork = progress.getTotalWork();
     if (totalWork > 0) {
       double percent = ((double) progress.getWorkDone() / totalWork);

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.ext.java.client.progressor;
 
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.ext.java.shared.Constants.PROGRESS_OUTPUT_SUBSCRIBE;
 import static org.eclipse.che.ide.ext.java.shared.Constants.PROGRESS_REPORT_METHOD;
@@ -22,6 +23,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceRunningEvent;
 import org.eclipse.che.ide.ext.java.shared.dto.progressor.ProgressReportDto;
 
@@ -31,21 +33,27 @@ import org.eclipse.che.ide.ext.java.shared.dto.progressor.ProgressReportDto;
 @Singleton
 public class ProgressorJsonRpcHandler {
   private final RequestHandlerConfigurator configurator;
+  private final RequestTransmitter requestTransmitter;
 
   private Set<Consumer<ProgressReportDto>> progressReportConsumers = new HashSet<>();
 
   @Inject
   public ProgressorJsonRpcHandler(
       RequestHandlerConfigurator configurator,
+      AppContext appContext,
       EventBus eventBus,
       RequestTransmitter requestTransmitter) {
     this.configurator = configurator;
+    this.requestTransmitter = requestTransmitter;
 
     handleMavenServerMessages();
-    eventBus.addHandler(WorkspaceRunningEvent.TYPE, e -> subscribe(requestTransmitter));
+    eventBus.addHandler(WorkspaceRunningEvent.TYPE, e -> subscribe());
+    if (appContext.getWorkspace().getStatus() == RUNNING) {
+      subscribe();
+    }
   }
 
-  private void subscribe(RequestTransmitter requestTransmitter) {
+  private void subscribe() {
     requestTransmitter
         .newRequest()
         .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
@@ -59,7 +67,7 @@ public class ProgressorJsonRpcHandler {
    *
    * @param consumer new consumer
    */
-  public void addProgressReportHandler(Consumer<ProgressReportDto> consumer) {
+  void addProgressReportHandler(Consumer<ProgressReportDto> consumer) {
     progressReportConsumers.add(consumer);
   }
 
