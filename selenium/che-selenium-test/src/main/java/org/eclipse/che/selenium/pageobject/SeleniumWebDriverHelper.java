@@ -208,7 +208,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Wait visibility and get {@link WebElement} for all of the {@code elementsLocators}
+   * Waits visibility and gets {@link WebElement} for all of the {@code elementsLocators}
    *
    * @param elementsLocators locators for all elements which should be found
    * @return all found elements
@@ -218,7 +218,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Wait visibility during timeout and get {@link WebElement} for all of the {@code
+   * Waits visibility during timeout and gets {@link WebElement} for all of the {@code
    * elementsLocators}
    *
    * @param elementsLocators locators for all elements which should be found
@@ -340,26 +340,26 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until all {@link WebElement} with provided locator {@link By} be attached to DOM it does
-   * not mean that elements are visible.
+   * Waits until all {@link WebElement} with provided {@code elementsLocator} be attached to DOM it
+   * does not mean that elements are visible.
    *
-   * @param elementLocator common locator for multiple elements
+   * @param elementsLocator common locator for multiple elements
    * @return all found elements
    */
-  public List<WebElement> waitAllPresence(By elementLocator) {
-    return waitAllPresence(elementLocator, DEFAULT_TIMEOUT);
+  public List<WebElement> waitAllPresence(By elementsLocator) {
+    return waitAllPresence(elementsLocator, DEFAULT_TIMEOUT);
   }
 
   /**
-   * Waits during {@code timeout} until all {@link WebElement} with provided locator {@link By} be
-   * attached to DOM it does not mean that elements are visible.
+   * Waits during {@code timeout} until all {@link WebElement} with provided {@code elementsLocator}
+   * be attached to DOM it does not mean that elements are visible.
    *
-   * @param elementLocator common locator for multiple elements
+   * @param elementsLocator common locator for multiple elements
    * @param timeout waiting timeout in seconds
    * @return all found elements
    */
-  public List<WebElement> waitAllPresence(By elementLocator, int timeout) {
-    return webDriverWaitFactory.get(timeout).until(presenceOfAllElementsLocatedBy(elementLocator));
+  public List<WebElement> waitAllPresence(By elementsLocator, int timeout) {
+    return webDriverWaitFactory.get(timeout).until(presenceOfAllElementsLocatedBy(elementsLocator));
   }
 
   /**
@@ -603,7 +603,7 @@ public class SeleniumWebDriverHelper {
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
   }
 
-  /** Performs mouse left button's double click . */
+  /** Performs mouse's left button double click . */
   public void doubleClick() {
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
   }
@@ -657,7 +657,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Moves cursor to {@link WebElement} with provided {@code elementLocator} which attached to DOM
-   * and performs mouse right button's click.
+   * and performs mouse's right button click.
    *
    * <p>Note! It does not mean that element is visible.
    *
@@ -669,8 +669,8 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Moves cursor to specified {@link WebElement} which attached to DOM and performs mouse right
-   * button's click.
+   * Moves cursor to specified {@link WebElement} which attached to DOM and performs mouse's right
+   * button click.
    *
    * <p>Note! It does not mean that element is visible.
    *
