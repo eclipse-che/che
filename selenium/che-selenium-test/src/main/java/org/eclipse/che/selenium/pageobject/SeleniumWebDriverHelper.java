@@ -167,8 +167,8 @@ public class SeleniumWebDriverHelper {
    *     <p>throws {@link org.openqa.selenium.TimeoutException} if at least one of the found
    *     elements is not visible after timeout;
    */
-  public List<WebElement> waitAllVisibility(By elementsLocator) {
-    return waitAllVisibility(elementsLocator, DEFAULT_TIMEOUT);
+  public List<WebElement> waitVisibilityOfAllElements(By elementsLocator) {
+    return waitVisibilityOfAllElements(elementsLocator, DEFAULT_TIMEOUT);
   }
 
   /**
@@ -181,7 +181,7 @@ public class SeleniumWebDriverHelper {
    *     <p>throws {@link org.openqa.selenium.TimeoutException} if at least one of the found
    *     elements is not visible after timeout;
    */
-  public List<WebElement> waitAllVisibility(By elementsLocator, int timeout) {
+  public List<WebElement> waitVisibilityOfAllElements(By elementsLocator, int timeout) {
     return webDriverWaitFactory
         .get(timeout)
         .until(visibilityOfAllElementsLocatedBy(elementsLocator));
@@ -348,25 +348,25 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until all {@link WebElement} with provided {@code elementsLocator} be attached to DOM it
-   * does not mean that elements are visible.
+   * Waits until all {@link WebElement} with provided {@code elementsLocator} are attached to DOM.
+   * It does not mean that elements are visible.
    *
    * @param elementsLocator common locator for multiple elements
    * @return all found elements
    */
-  public List<WebElement> waitAllPresence(By elementsLocator) {
-    return waitAllPresence(elementsLocator, DEFAULT_TIMEOUT);
+  public List<WebElement> waitPresenceOfAllElements(By elementsLocator) {
+    return waitPresenceOfAllElements(elementsLocator, DEFAULT_TIMEOUT);
   }
 
   /**
    * Waits during {@code timeout} until all {@link WebElement} with provided {@code elementsLocator}
-   * be attached to DOM it does not mean that elements are visible.
+   * be attached to DOM. It does not mean that elements are visible.
    *
    * @param elementsLocator common locator for multiple elements
    * @param timeout waiting timeout in seconds
    * @return all found elements
    */
-  public List<WebElement> waitAllPresence(By elementsLocator, int timeout) {
+  public List<WebElement> waitPresenceOfAllElements(By elementsLocator, int timeout) {
     return webDriverWaitFactory.get(timeout).until(presenceOfAllElementsLocatedBy(elementsLocator));
   }
 
