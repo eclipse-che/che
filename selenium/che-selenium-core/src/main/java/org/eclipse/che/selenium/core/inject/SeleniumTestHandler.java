@@ -480,8 +480,9 @@ public abstract class SeleniumTestHandler
   }
 
   private void storeWebDriverLogs(ITestResult result, SeleniumWebDriver webDriver) {
+    String testReference = getTestReference(result);
+    
     try {
-      String testReference = getTestReference(result);
       String filename = NameGenerator.generate(testReference + "_", 4) + ".log";
       Path webdriverLogsDirectory = Paths.get(webDriverLogsDir, filename);
       Files.createDirectories(webdriverLogsDirectory.getParent());
@@ -493,7 +494,7 @@ public abstract class SeleniumTestHandler
               .getBytes(Charset.forName("UTF-8")),
           StandardOpenOption.CREATE);
     } catch (WebDriverException | IOException | JsonParseException e) {
-      LOG.error(format("Can't store web driver logs related to test %s.", result), e);
+      LOG.error(format("Can't store web driver logs related to test %s.", testReference), e);
     }
   }
 
