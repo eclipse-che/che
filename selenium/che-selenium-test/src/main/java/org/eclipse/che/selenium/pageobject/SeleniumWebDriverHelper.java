@@ -128,7 +128,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until {@link WebElement} with provided {@code elementLocator} be visible
+   * Waits until {@link WebElement} with provided {@code elementLocator} be visible.
    *
    * @param elementLocator locator of element which should be checked
    * @return found element
@@ -138,7 +138,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits during {@code timeout} until provided {@code webElement} be visible
+   * Waits during {@code timeout} until provided {@code webElement} be visible.
    *
    * @param webElement element which should be checked
    * @param timeout waiting time in seconds
@@ -149,7 +149,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until provided {@code webElement} be visible
+   * Waits until provided {@code webElement} be visible.
    *
    * @param webElement element which should be checked
    * @return found element
@@ -409,7 +409,7 @@ public class SeleniumWebDriverHelper {
   /**
    * Waits visibility of {@link WebElement} with provided {@code elementLocator} and gets text.
    *
-   * @param elementLocator locator of element from which text should be read
+   * @param elementLocator locator of element from which text should be got
    * @return element text by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetValue(By elementLocator) {
@@ -568,7 +568,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits visibility of {@link WebElement} with provided {@code elementLocator} and clicks once on
-   * it by {@link WebElement#click()}
+   * it by {@link WebElement#click()}.
    *
    * @param elementLocator locator of element which should be clicked
    */
@@ -578,7 +578,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits visibility of provided {@code webElement} and clicks once on it by {@link
-   * WebElement#click()}
+   * WebElement#click()}.
    *
    * @param webElement element which should be clicked
    * @param timeout waiting time in seconds
@@ -589,7 +589,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits visibility of provided {@code webElement} and clicks once on it by {@link
-   * WebElement#click()}
+   * WebElement#click()}.
    *
    * @param webElement element which should be clicked
    */
@@ -642,7 +642,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Moves cursor to provided {@code webElement}, waits visibility and clicks once on it by {@link
-   * org.openqa.selenium.interactions.Action}
+   * org.openqa.selenium.interactions.Action}.
    *
    * @param webElement element which should be clicked
    */
@@ -704,7 +704,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Checks visibility state of {@link WebElement} with provided {@code elementLocator}
+   * Checks visibility state of {@link WebElement} with provided {@code elementLocator}.
    *
    * @param elementLocator locator of element which should be checked
    * @return state of element visibility
@@ -718,7 +718,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Checks visibility state of provided {@code webElement}
+   * Checks visibility state of provided {@code webElement}.
    *
    * @param webElement element which should be checked
    * @return state of element visibility
