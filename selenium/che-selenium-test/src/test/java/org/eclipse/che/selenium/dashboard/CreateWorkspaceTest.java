@@ -27,6 +27,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Serhii Skoryk */
@@ -56,8 +57,10 @@ public class CreateWorkspaceTest {
   @BeforeClass
   public void setUp() {
     dashboard.open();
+  }
 
-    dashboard.waitDashboardToolbarTitle();
+  @BeforeMethod
+  private void openNewWorkspacePage() {
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
