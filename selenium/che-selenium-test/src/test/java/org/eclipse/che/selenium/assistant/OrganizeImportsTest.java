@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.assistant;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -92,14 +92,14 @@ public class OrganizeImportsTest {
     editor.waitActive();
     editor.setCursorToLine(15);
     editor.deleteCurrentLine();
-    editor.waitMarkerInPosition(ERROR_MARKER, 24);
-    editor.waitMarkerInPosition(ERROR_MARKER, 36);
+    editor.waitMarkerInPosition(ERROR, 24);
+    editor.waitMarkerInPosition(ERROR, 36);
     loader.waitOnClosed();
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.ORGANIZE_IMPORTS);
     loader.waitOnClosed();
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR);
     Assert.assertTrue(
         editor.checkWhatTextLinePresentOnce(
             "import org.springframework.web.servlet.ModelAndView;"));
@@ -132,8 +132,8 @@ public class OrganizeImportsTest {
     createNewStructure();
     editor.setCursorToLine(35);
     editor.typeTextIntoEditor(CALL_TEST_TEXT);
-    editor.waitMarkerInPosition(ERROR_MARKER, 36);
-    editor.waitMarkerInPosition(ERROR_MARKER, 37);
+    editor.waitMarkerInPosition(ERROR, 36);
+    editor.waitMarkerInPosition(ERROR, 37);
 
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
@@ -148,7 +148,7 @@ public class OrganizeImportsTest {
     organizeImports.selectImport(NAME_OF_B_PACKAGE);
     organizeImports.clickOnNextButton();
     organizeImports.clickOnFinishButton();
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR);
     loader.waitOnClosed();
 
     projectExplorer.waitItem(PATH_TO_CLASS_IN_SPRING_PACKAGE);

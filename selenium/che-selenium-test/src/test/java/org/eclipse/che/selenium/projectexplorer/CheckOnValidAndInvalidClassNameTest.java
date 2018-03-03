@@ -10,13 +10,14 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.NEW;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.JAVA_CLASS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
@@ -89,10 +90,9 @@ public class CheckOnValidAndInvalidClassNameTest {
   private void createJavaClassByPath(String classPath, String className) {
     projectExplorer.openContextMenuByPathSelectedItem(classPath);
     projectExplorer.waitContextMenu();
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
+    projectExplorer.clickOnItemInContextMenu(NEW);
     projectExplorer.waitContextMenu();
-    projectExplorer.clickOnNewContextMenuItem(
-        TestProjectExplorerContextMenuConstants.SubMenuNew.JAVA_CLASS);
+    projectExplorer.clickOnNewContextMenuItem(JAVA_CLASS);
     askForValueDialog.waitNewJavaClassOpen();
     askForValueDialog.typeTextInFieldName(className);
     askForValueDialog.clickOkBtnNewJavaClass();
@@ -102,10 +102,9 @@ public class CheckOnValidAndInvalidClassNameTest {
   private void tryToCreateJavaClassWithNotValidNameByPath(String elementPath, String className) {
     projectExplorer.openContextMenuByPathSelectedItem(elementPath);
     projectExplorer.waitContextMenu();
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
+    projectExplorer.clickOnItemInContextMenu(NEW);
     projectExplorer.waitContextMenu();
-    projectExplorer.clickOnNewContextMenuItem(
-        TestProjectExplorerContextMenuConstants.SubMenuNew.JAVA_CLASS);
+    projectExplorer.clickOnNewContextMenuItem(JAVA_CLASS);
     askForValueDialog.waitNewJavaClassOpen();
     askForValueDialog.typeTextInFieldName(className);
     askForValueDialog.waitErrorMessageInJavaClass();

@@ -63,8 +63,6 @@
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest"/>
             <class name="org.eclipse.che.selenium.git.FetchUpdatesAndMergeRemoteBranchIntoLocalTest"/>
-            <class name="org.eclipse.che.selenium.git.GitPullTest"/>
-            <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
             <class name="org.eclipse.che.selenium.git.ImportProjectIntoSpecifiedBranchTest"/>
             <class name="org.eclipse.che.selenium.git.ImportRecursiveSubmoduleTest"/>
             <class name="org.eclipse.che.selenium.git.KeepDirectoryGitImportTest"/>
@@ -73,8 +71,10 @@
             <class name="org.eclipse.che.selenium.git.PushChangeNotUpdatedRepoTest"/>
             <class name="org.eclipse.che.selenium.git.PushingChangesTest"/>
             <class name="org.eclipse.che.selenium.git.RevertCommitTest"/>
-            <class name="org.eclipse.che.selenium.git.WorkingWithPullConflictsTest"/>
             <class name="org.eclipse.che.selenium.dashboard.ImportProjectFromGitHubTest"/>
+            <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithKeepDirectoryTest"/>
+            <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithRootFolderTest"/>
+            <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithSpecificBranchTest"/>
         </classes>
     </test>
 </suite>

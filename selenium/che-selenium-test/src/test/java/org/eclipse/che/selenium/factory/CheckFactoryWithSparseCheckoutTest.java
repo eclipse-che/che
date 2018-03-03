@@ -72,7 +72,7 @@ public class CheckFactoryWithSparseCheckoutTest {
     events.clickEventLogBtn();
     events.waitOpened();
     events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME + "/my-lib");

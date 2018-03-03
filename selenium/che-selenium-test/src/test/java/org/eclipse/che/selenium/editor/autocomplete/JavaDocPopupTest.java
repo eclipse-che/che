@@ -201,7 +201,7 @@ public class JavaDocPopupTest {
   }
 
   private void createClass(String className, String pathParent) {
-    projectExplorer.selectItem(pathParent);
+    projectExplorer.waitAndSelectItem(pathParent);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
@@ -209,6 +209,6 @@ public class JavaDocPopupTest {
     loader.waitOnClosed();
     askForValueDialog.createJavaFileByNameAndType(className, AskForValueDialog.JavaFiles.CLASS);
     loader.waitOnClosed();
-    projectExplorer.waitItemInVisibleArea(className + ".java");
+    projectExplorer.waitVisibilityByName(className + ".java");
   }
 }

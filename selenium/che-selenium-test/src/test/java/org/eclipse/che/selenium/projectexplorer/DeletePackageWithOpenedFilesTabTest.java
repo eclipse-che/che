@@ -72,7 +72,7 @@ public class DeletePackageWithOpenedFilesTabTest {
     editor.waitActive();
     editor.selectTabByName("AppController");
 
-    projectExplorer.selectItem(PATH_TO_PACKAGE1);
+    projectExplorer.waitAndSelectItem(PATH_TO_PACKAGE1);
     deletePackage();
     projectExplorer.waitRemoveItemsByPath(PATH_TO_PACKAGE1);
     projectExplorer.waitRemoveItemsByPath(PATH_TO_PACKAGE1 + "/AppController.java");
@@ -90,7 +90,7 @@ public class DeletePackageWithOpenedFilesTabTest {
     editor.waitActive();
     editor.selectTabByName("web.xml");
 
-    projectExplorer.selectItem(PATH_TO_PACKAGE2);
+    projectExplorer.waitAndSelectItem(PATH_TO_PACKAGE2);
     deletePackage();
     projectExplorer.waitRemoveItemsByPath(PATH_TO_PACKAGE2);
     projectExplorer.waitRemoveItemsByPath(PATH_TO_PACKAGE2 + "/index.jsp");
@@ -105,7 +105,7 @@ public class DeletePackageWithOpenedFilesTabTest {
     openJavaFile(PATH_TO_PACKAGE3 + "/Test3.java", "Test3");
     openJavaFile(PATH_TO_PACKAGE3 + "/Test4.java", "Test4");
 
-    projectExplorer.selectItem(PATH_TO_PACKAGE3);
+    projectExplorer.waitAndSelectItem(PATH_TO_PACKAGE3);
     deletePackage();
     projectExplorer.waitRemoveItemsByPath(PATH_TO_PACKAGE3);
     projectExplorer.waitRemoveItemsByPath(PATH_TO_PACKAGE3 + "/Test1.java");

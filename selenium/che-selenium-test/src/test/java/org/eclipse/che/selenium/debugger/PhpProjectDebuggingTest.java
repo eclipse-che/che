@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.debugger;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON;
+
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -88,7 +90,7 @@ public class PhpProjectDebuggingTest {
   public void startDebug() {
     // goto root item in the Project Explorer to have proper value of ${current.project.path} when
     // executing maven command.
-    projectExplorer.selectItem(PROJECT);
+    projectExplorer.waitAndSelectItem(PROJECT);
   }
 
   @AfterMethod
@@ -96,8 +98,7 @@ public class PhpProjectDebuggingTest {
     debugPanel.removeAllBreakpoints();
     menu.runCommand(
         TestMenuCommandsConstants.Run.RUN_MENU, TestMenuCommandsConstants.Run.END_DEBUG_SESSION);
-    projectExplorer.invokeCommandWithContextMenu(
-        ProjectExplorer.CommandsGoal.COMMON, PROJECT, STOP_APACHE_COMMAND_NAME);
+    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT, STOP_APACHE_COMMAND_NAME);
 
     // remove debug configuration
     menu.runCommand(
@@ -126,8 +127,7 @@ public class PhpProjectDebuggingTest {
     editor.closeAllTabs();
 
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
-    projectExplorer.invokeCommandWithContextMenu(
-        ProjectExplorer.CommandsGoal.COMMON, PROJECT, DEBUG_PHP_SCRIPT_COMMAND_NAME);
+    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT, DEBUG_PHP_SCRIPT_COMMAND_NAME);
 
     debugPanel.openDebugPanel();
 
@@ -176,8 +176,7 @@ public class PhpProjectDebuggingTest {
     editor.closeAllTabs();
 
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
-    projectExplorer.invokeCommandWithContextMenu(
-        ProjectExplorer.CommandsGoal.COMMON, PROJECT, START_APACHE_COMMAND_NAME);
+    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT, START_APACHE_COMMAND_NAME);
 
     startWebPhpScriptInDebugMode();
 

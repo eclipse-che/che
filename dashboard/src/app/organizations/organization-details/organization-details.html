@@ -189,6 +189,18 @@
       </md-tab-body>
     </md-tab>
 
+    <!-- Workspaces Tab -->
+    <md-tab md-on-select="organizationDetailsController.onSelectTab(organizationDetailsController.tab.Workspaces);">
+      <md-tab-label>
+        <span class="che-tab-label-title">Workspaces</span>
+      </md-tab-label>
+      <md-tab-body>
+        <list-organization-workspaces
+          ng-if="organizationDetailsController.organization"
+          organization="organizationDetailsController.organization"></list-organization-workspaces>
+      </md-tab-body>
+    </md-tab>
+
   </md-tabs>
 </md-content>
 

@@ -121,15 +121,15 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     typeTextAndSaveIntoJavaClass(MESSAGE_FOR_CHANGE_CONTENT, FILE_FOR_CHANGE_2);
 
     // Add to index
-    projectExplorer.selectItem(PROJECT_1);
+    projectExplorer.waitAndSelectItem(PROJECT_1);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
 
     // Remove file css from index
-    projectExplorer.waitItemInVisibleArea(NEW_FILE_NAME);
-    projectExplorer.selectItem(PROJECT_1 + "/" + NEW_FILE_NAME);
+    projectExplorer.waitVisibilityByName(NEW_FILE_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_1 + "/" + NEW_FILE_NAME);
     menu.runAndWaitCommand(
         TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.REMOVE_FROM_INDEX);
     git.waitRemoveFromIndexFormToOpen();
@@ -138,16 +138,16 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_REMOVE_FROM_INDEX_SUCCESS);
     events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_REMOVE_FROM_INDEX_SUCCESS);
-    projectExplorer.waitItemIsDisappeared(PROJECT_1 + "/" + NEW_FILE_NAME);
+    projectExplorer.waitItemInvisibility(PROJECT_1 + "/" + NEW_FILE_NAME);
 
     // Commit changes into master branch with specific comment
-    projectExplorer.selectItem(PROJECT_1);
+    projectExplorer.waitAndSelectItem(PROJECT_1);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit(COMMIT_MESSAGE);
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
     events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    projectExplorer.selectItem(PROJECT_1);
+    projectExplorer.waitAndSelectItem(PROJECT_1);
 
     // Push changes to "master" branch of test remote repository
     menu.runCommand(
@@ -169,7 +169,7 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     // master local branch.
     projectExplorer.openItemByPath(PROJECT_1);
     loader.waitOnClosed();
-    projectExplorer.selectItem(PROJECT_2);
+    projectExplorer.waitAndSelectItem(PROJECT_2);
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT,
         TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP,
@@ -188,7 +188,7 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     projectExplorer.openItemByPath(
         PROJECT_2 + "/src/main/java/commenttest/" + FILE_FOR_CHANGE_2 + ".java");
     editor.waitTextNotPresentIntoEditor("//" + MESSAGE_FOR_CHANGE_CONTENT);
-    projectExplorer.waitItemInVisibleArea(NEW_FILE_NAME);
+    projectExplorer.waitVisibilityByName(NEW_FILE_NAME);
 
     // Open "Git > Merge..." window, choose remote branch master and merge
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.MERGE);
@@ -208,7 +208,7 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
     projectExplorer.openItemByPath(
         PROJECT_2 + "/src/main/java/commenttest/" + FILE_FOR_CHANGE_2 + ".java");
     editor.waitTextIntoEditor(MESSAGE_FOR_CHANGE_CONTENT);
-    projectExplorer.waitItemIsDisappeared(PROJECT_2 + "/" + NEW_FILE_NAME);
+    projectExplorer.waitItemInvisibility(PROJECT_2 + "/" + NEW_FILE_NAME);
 
     // Merge remote branch master again
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.MERGE);
@@ -219,7 +219,7 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
 
     // View and check git history
     consoles.closeProcessesArea();
-    projectExplorer.selectItem(PROJECT_2);
+    projectExplorer.waitAndSelectItem(PROJECT_2);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.SHOW_HISTORY);
     git.waitTextInHistoryForm(COMMIT_MESSAGE);
     git.clickOnHistoryRowInСommitsList(0);

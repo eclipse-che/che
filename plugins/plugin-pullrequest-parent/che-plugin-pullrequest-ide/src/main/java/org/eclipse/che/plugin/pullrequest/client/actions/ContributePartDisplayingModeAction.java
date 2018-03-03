@@ -78,6 +78,7 @@ public class ContributePartDisplayingModeAction extends AbstractPerspectiveActio
 
     workspaceAgent.openPart(contributePartPresenter, TOOLING);
     workspaceAgent.setActivePart(contributePartPresenter);
+    contributePartPresenter.showContent();
   }
 
   @Override

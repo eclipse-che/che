@@ -59,6 +59,7 @@ import org.eclipse.che.plugin.pullrequest.client.workflow.Context;
 import org.eclipse.che.plugin.pullrequest.client.workflow.Step;
 import org.eclipse.che.plugin.pullrequest.client.workflow.WorkflowExecutor;
 import org.eclipse.che.plugin.pullrequest.client.workflow.WorkflowStatus;
+import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -67,6 +68,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  * @author Kevin Pollet
  */
 @Singleton
+@DynaObject
 public class ContributePartPresenter extends BasePresenter
     implements ContributePartView.ActionDelegate,
         StepHandler,

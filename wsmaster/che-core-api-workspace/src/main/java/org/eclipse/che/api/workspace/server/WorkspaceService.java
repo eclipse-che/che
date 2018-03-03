@@ -16,6 +16,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
@@ -85,14 +86,17 @@ public class WorkspaceService extends Service {
   private final MachineTokenProvider machineTokenProvider;
   private final WorkspaceLinksGenerator linksGenerator;
   private final String apiEndpoint;
+  private final boolean cheWorkspaceAutoStart;
 
   @Inject
   public WorkspaceService(
       @Named("che.api") String apiEndpoint,
+      @Named(CHE_WORKSPACE_AUTO_START) boolean cheWorkspaceAutoStart,
       WorkspaceManager workspaceManager,
       MachineTokenProvider machineTokenProvider,
       WorkspaceLinksGenerator linksGenerator) {
     this.apiEndpoint = apiEndpoint;
+    this.cheWorkspaceAutoStart = cheWorkspaceAutoStart;
     this.workspaceManager = workspaceManager;
     this.machineTokenProvider = machineTokenProvider;
     this.linksGenerator = linksGenerator;
@@ -685,7 +689,9 @@ public class WorkspaceService extends Service {
   public Map<String, String> getSettings() {
     return ImmutableMap.of(
         Constants.SUPPORTED_RECIPE_TYPES,
-        Joiner.on(",").join(workspaceManager.getSupportedRecipes()));
+        Joiner.on(",").join(workspaceManager.getSupportedRecipes()),
+        CHE_WORKSPACE_AUTO_START,
+        Boolean.toString(cheWorkspaceAutoStart));
   }
 
   private static Map<String, String> parseAttrs(List<String> attributes)

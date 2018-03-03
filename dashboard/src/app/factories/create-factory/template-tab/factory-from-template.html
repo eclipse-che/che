@@ -15,9 +15,11 @@
     <div layout="column">
       <che-toggle ng-model="factoryFromTemplateController.templateName">
         <che-toggle-button ng-click="factoryFromTemplateController.updateFactoryContent()"
+                           id="minimal-template-button"
                            che-font-icon="material-design icon-ic_unfold_less_24px"
                            che-title="minimal"></che-toggle-button>
         <che-toggle-button ng-click="factoryFromTemplateController.updateFactoryContent()"
+                           id="complete-template-button"
                            che-font-icon="material-design icon-ic_unfold_more_24px"
                            che-title="complete"></che-toggle-button>
       </che-toggle>

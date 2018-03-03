@@ -10,11 +10,13 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.NEW;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.JAVA_CLASS;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
@@ -89,17 +91,16 @@ public class CreateNewJavaFilesFromContextMenuTest {
   }
 
   private void createNewFile(String name, AskForValueDialog.JavaFiles item) {
-    projectExplorer.selectItem(PATH_TO_FILES);
+    projectExplorer.waitAndSelectItem(PATH_TO_FILES);
 
     // create new File from context menu
     projectExplorer.openContextMenuByPathSelectedItem(PATH_TO_FILES);
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
-    projectExplorer.clickOnNewContextMenuItem(
-        TestProjectExplorerContextMenuConstants.SubMenuNew.JAVA_CLASS);
+    projectExplorer.clickOnItemInContextMenu(NEW);
+    projectExplorer.clickOnNewContextMenuItem(JAVA_CLASS);
 
     askForValueDialog.createJavaFileByNameAndType(name, item);
 
-    projectExplorer.waitItemInVisibleArea(name + ".java");
+    projectExplorer.waitVisibilityByName(name + ".java");
 
     editor.waitActive();
     loader.waitOnClosed();

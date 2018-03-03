@@ -65,7 +65,7 @@ public class CheckoutToRemoteBranchWhichAlreadyHasLinkedLocalBranchTest {
     projectExplorer.waitProjectExplorer();
     String repoUrl = "https://github.com/" + gitHubUsername + "/gitPullTest.git";
     git.importJavaApp(repoUrl, PROJECT_NAME, Wizard.TypeProject.MAVEN);
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
     // Open branches form
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);

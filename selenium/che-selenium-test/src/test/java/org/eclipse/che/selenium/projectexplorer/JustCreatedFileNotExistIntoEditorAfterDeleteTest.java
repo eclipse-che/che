@@ -63,7 +63,7 @@ public class JustCreatedFileNotExistIntoEditorAfterDeleteTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.selectVisibleItem("webapp");
+    projectExplorer.waitAndSelectItemByName("webapp");
     loader.waitOnClosed();
 
     // create new file
@@ -83,7 +83,7 @@ public class JustCreatedFileNotExistIntoEditorAfterDeleteTest {
     editor.waitTabIsPresent("fileForeTest.jsp");
 
     // delete new file
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/webapp/fileForeTest.jsp");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/webapp/fileForeTest.jsp");
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
 
     askDialog.waitFormToOpen();

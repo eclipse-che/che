@@ -171,6 +171,12 @@ export class CreateWorkspaceSvc {
       this.addProjectCommands(workspaceConfig, projectTemplates);
       return this.cheWorkspace.createWorkspaceFromConfig(namespaceId, workspaceConfig, attributes).then((workspace: che.IWorkspace) => {
         this.projectSourceSelectorService.clearTemplatesList();
+        const workspaces = this.cheWorkspace.getWorkspaces();
+        if (workspaces.findIndex((_workspace: che.IWorkspace) => {
+            return _workspace.id === workspace.id;
+          }) === -1) {
+          workspaces.push(workspace);
+        }
         this.cheWorkspace.getWorkspacesById().set(workspace.id, workspace);
         this.cheWorkspace.startUpdateWorkspaceStatus(workspace.id);
 

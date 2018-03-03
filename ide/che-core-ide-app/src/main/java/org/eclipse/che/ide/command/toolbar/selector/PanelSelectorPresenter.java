@@ -14,35 +14,27 @@ import static org.eclipse.che.ide.api.parts.PartStack.State.HIDDEN;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 import javax.inject.Singleton;
 import org.eclipse.che.ide.api.mvp.Presenter;
-import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackStateChangedEvent;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 
 /** Presenter to manage Panel selector widget and perspective layout. */
 @Singleton
 public class PanelSelectorPresenter implements Presenter, PanelSelectorView.ActionDelegate {
 
-  private final Provider<WorkspaceAgent> workspaceAgentProvider;
   private PanelSelectorView view;
   private PerspectiveManager perspectiveManager;
 
   @Inject
   public PanelSelectorPresenter(
-      PanelSelectorView view,
-      PerspectiveManager perspectiveManager,
-      EventBus eventBus,
-      Provider<WorkspaceAgent> workspaceAgentProvider) {
+      PanelSelectorView view, PerspectiveManager perspectiveManager, EventBus eventBus) {
     this.view = view;
     this.perspectiveManager = perspectiveManager;
-    this.workspaceAgentProvider = workspaceAgentProvider;
 
     view.setDelegate(this);
 
@@ -109,8 +101,6 @@ public class PanelSelectorPresenter implements Presenter, PanelSelectorView.Acti
       return;
     }
 
-    PartPresenter activePart = workspaceAgentProvider.get().getActivePart();
-
     PartStack editorPartStack = perspective.getPartStack(PartStackType.EDITING);
     editorPartStack.restore();
 
@@ -150,7 +140,8 @@ public class PanelSelectorPresenter implements Presenter, PanelSelectorView.Acti
 
     updateButtonState();
 
-    workspaceAgentProvider.get().setActivePart(activePart);
+    // set focus to the active editor if it exists
+    editorPartStack.openPreviousActivePart();
   }
 
   /** Updates icon for panel selector button displaying the current state of panels. */
