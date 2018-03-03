@@ -346,8 +346,8 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until all {@link WebElement} with provided {@code elementsLocator} are attached to DOM it
-   * does not mean that elements are visible.
+   * Waits until all {@link WebElement} with provided {@code elementsLocator} are attached to DOM.
+   * It does not mean that elements are visible.
    *
    * @param elementsLocator common locator for multiple elements
    * @return all found elements
@@ -358,7 +358,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during {@code timeout} until all {@link WebElement} with provided {@code elementsLocator}
-   * be attached to DOM it does not mean that elements are visible.
+   * be attached to DOM. It does not mean that elements are visible.
    *
    * @param elementsLocator common locator for multiple elements
    * @param timeout waiting timeout in seconds
