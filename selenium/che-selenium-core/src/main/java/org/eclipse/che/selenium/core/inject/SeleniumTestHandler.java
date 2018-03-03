@@ -481,13 +481,13 @@ public abstract class SeleniumTestHandler
 
   private void storeWebDriverLogs(ITestResult result, SeleniumWebDriver webDriver) {
     String testReference = getTestReference(result);
-    
+
     try {
       String filename = NameGenerator.generate(testReference + "_", 4) + ".log";
-      Path webdriverLogsDirectory = Paths.get(webDriverLogsDir, filename);
-      Files.createDirectories(webdriverLogsDirectory.getParent());
+      Path webDriverLogsDirectory = Paths.get(webDriverLogsDir, filename);
+      Files.createDirectories(webDriverLogsDirectory.getParent());
       Files.write(
-          webdriverLogsDirectory,
+          webDriverLogsDirectory,
           webDriverLogsReaderFactory
               .create(webDriver)
               .getAllLogs()

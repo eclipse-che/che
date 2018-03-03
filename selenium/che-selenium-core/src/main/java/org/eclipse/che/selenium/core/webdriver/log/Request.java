@@ -10,7 +10,11 @@
  */
 package org.eclipse.che.selenium.core.webdriver.log;
 
-/** @author Dmytro Nochevnov */
+/**
+ * This is POJO to extract `request` value from web driver network log entry.
+ *
+ * @author Dmytro Nochevnov
+ */
 public interface Request {
   String getUrl();
 

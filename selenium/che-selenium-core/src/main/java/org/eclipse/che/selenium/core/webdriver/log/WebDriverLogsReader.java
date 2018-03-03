@@ -53,33 +53,33 @@ public class WebDriverLogsReader {
   }
 
   /**
-   * read logs from browser console
+   * Reads logs of browser from web driver.
    *
    * @return log messages from browser console
    */
-  public LogEntries readBrowserLogs() {
+  private LogEntries readBrowserLogs() {
     return seleniumWebDriver.manage().logs().get(BROWSER);
   }
 
   /**
-   * get all logs from the active webdriver session
+   * Reads performance logs from web driver.
    *
    * @return all types of performance logs
    */
-  public LogEntries readPerformanceLogs() {
+  private LogEntries readPerformanceLogs() {
     return seleniumWebDriver.manage().logs().get(PERFORMANCE);
   }
 
   /**
-   * get all available logs of web driver
+   * Gets all logs of web driver.
    *
-   * @return logs from browser console and requests/responses on CHE api
+   * @return logs from browser console and Eclipse Che network logs
    */
   public String getAllLogs() throws JsonParseException {
-    return getBrowserLogs() + "\n" + readNetworkLogs();
+    return prepareBrowserLogs() + "\n" + prepareCheNetworkLogs();
   }
 
-  private String getBrowserLogs() {
+  private String prepareBrowserLogs() {
     StringBuilder browserLogsOutput =
         new StringBuilder("Browser console logs:\n").append("---------------------\n");
 
@@ -97,9 +97,9 @@ public class WebDriverLogsReader {
   }
 
   /** filter data and get requests/responses that have been sent on CHE URL */
-  private String readNetworkLogs() throws JsonParseException {
+  private String prepareCheNetworkLogs() throws JsonParseException {
     StringBuilder networkLogsOutput =
-        new StringBuilder("Network logs: \n").append("---------------\n");
+        new StringBuilder("Eclipse Che network logs: \n").append("-------------------------\n");
     Map<String, List<Log>> networkLogs = new HashMap<>();
     for (LogEntry logEntry : readPerformanceLogs()) {
       Log log = JsonHelper.fromJson(logEntry.getMessage(), Log.class, null);
@@ -124,6 +124,10 @@ public class WebDriverLogsReader {
     return networkLogsOutput.toString();
   }
 
+  /**
+   * Go through the {@code networkLogs} related to the certain {@code requestId} and return {@code
+   * true} if at least one of them has url from Che traffic.
+   */
   private boolean isLogFromCheTraffic(String requestId, Map<String, List<Log>> networkLogs) {
     return networkLogs
             .get(requestId)

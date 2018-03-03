@@ -15,7 +15,11 @@ import static java.lang.String.format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/** @author Dmytro Nochevnov */
+/**
+ * This class deals with web driver log entry.
+ *
+ * @author Dmytro Nochevnov
+ */
 public class Log {
   private Message message;
   private long timestamp;
