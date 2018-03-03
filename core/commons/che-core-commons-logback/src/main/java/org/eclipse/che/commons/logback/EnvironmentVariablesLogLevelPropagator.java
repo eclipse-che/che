@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.commons.logback;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -50,7 +52,7 @@ public class EnvironmentVariablesLogLevelPropagator extends ContextAwareBase
     String loggerName = parts[0];
     String levelStr = parts[1];
 
-    if (loggerName == null || levelStr == null || levelStr.isEmpty() || loggerName.isEmpty()) {
+    if (isNullOrEmpty(loggerName) || isNullOrEmpty(levelStr)) {
       return;
     }
 
