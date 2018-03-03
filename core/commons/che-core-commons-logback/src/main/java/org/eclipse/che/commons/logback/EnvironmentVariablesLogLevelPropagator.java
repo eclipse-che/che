@@ -42,19 +42,18 @@ public class EnvironmentVariablesLogLevelPropagator extends ContextAwareBase
   }
 
   private void setLoggerLevel(String loggerConfig) {
-    String[] parts = loggerConfig.split("=");
+    String[] parts = loggerConfig.split("=", 2);
 
     if (parts.length < 2) {
       return;
     }
     String loggerName = parts[0];
     String levelStr = parts[1];
-    if (loggerName == null) {
+
+    if (loggerName == null || levelStr == null || levelStr.isEmpty() || loggerName.isEmpty()) {
       return;
     }
-    if (levelStr == null) {
-      return;
-    }
+
     loggerName = loggerName.trim();
     levelStr = levelStr.trim();
 
