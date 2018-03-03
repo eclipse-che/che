@@ -16,6 +16,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
@@ -40,37 +41,42 @@ public class InitRepositoryPresenter {
   private final GitServiceClient service;
   private final GitLocalizationConstant constant;
   private final NotificationManager notificationManager;
+  private final AppContext appContext;
 
   @Inject
   public InitRepositoryPresenter(
-      GitLocalizationConstant constant,
-      NotificationManager notificationManager,
-      GitOutputConsoleFactory gitOutputConsoleFactory,
-      ProcessesPanelPresenter consolesPanelPresenter,
-      GitServiceClient service) {
+          GitLocalizationConstant constant,
+          NotificationManager notificationManager,
+          GitOutputConsoleFactory gitOutputConsoleFactory,
+          ProcessesPanelPresenter consolesPanelPresenter,
+          GitServiceClient service,
+          AppContext appContext) {
     this.constant = constant;
     this.notificationManager = notificationManager;
     this.gitOutputConsoleFactory = gitOutputConsoleFactory;
     this.consolesPanelPresenter = consolesPanelPresenter;
     this.service = service;
+    this.appContext = appContext;
   }
 
   public void initRepository(final Project project) {
     final GitOutputConsole console = gitOutputConsoleFactory.create(INIT_COMMAND_NAME);
 
     service
-        .init(project.getLocation(), false)
-        .then(
-            ignored -> {
-              console.print(constant.initSuccess());
-              consolesPanelPresenter.addCommandOutput(console);
-              notificationManager.notify(constant.initSuccess());
-            })
-        .catchError(
-            error -> {
-              handleError(error.getCause(), console);
-              consolesPanelPresenter.addCommandOutput(console);
-            });
+            .init(project.getLocation(), false)
+            .then(
+                    ignored -> {
+                      console.print(constant.initSuccess());
+                      consolesPanelPresenter.addCommandOutput(console);
+                      notificationManager.notify(constant.initSuccess());
+
+                      project.synchronize();
+                    })
+            .catchError(
+                    error -> {
+                      handleError(error.getCause(), console);
+                      consolesPanelPresenter.addCommandOutput(console);
+                    });
   }
 
   /**
@@ -80,9 +86,9 @@ public class InitRepositoryPresenter {
    */
   private void handleError(@NotNull Throwable e, GitOutputConsole console) {
     String errorMessage =
-        (e.getMessage() != null && !e.getMessage().isEmpty())
-            ? e.getMessage()
-            : constant.initFailed();
+            (e.getMessage() != null && !e.getMessage().isEmpty())
+                    ? e.getMessage()
+                    : constant.initFailed();
     console.printError(errorMessage);
     notificationManager.notify(constant.initFailed(), FAIL, FLOAT_MODE);
   }
