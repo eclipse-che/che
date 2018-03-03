@@ -43,12 +43,12 @@ public class DeleteRepositoryPresenter {
 
   @Inject
   public DeleteRepositoryPresenter(
-          GitServiceClient service,
-          GitLocalizationConstant constant,
-          GitOutputConsoleFactory gitOutputConsoleFactory,
-          ProcessesPanelPresenter processesPanelPresenter,
-          AppContext appContext,
-          NotificationManager notificationManager) {
+      GitServiceClient service,
+      GitLocalizationConstant constant,
+      GitOutputConsoleFactory gitOutputConsoleFactory,
+      ProcessesPanelPresenter processesPanelPresenter,
+      AppContext appContext,
+      NotificationManager notificationManager) {
     this.service = service;
     this.constant = constant;
     this.gitOutputConsoleFactory = gitOutputConsoleFactory;
@@ -62,20 +62,20 @@ public class DeleteRepositoryPresenter {
     final GitOutputConsole console = gitOutputConsoleFactory.create(DELETE_REPO_COMMAND_NAME);
 
     service
-            .deleteRepository(project.getLocation())
-            .then(
-                    ignored -> {
-                      console.print(constant.deleteGitRepositorySuccess());
-                      consolesPanelPresenter.addCommandOutput(console);
-                      notificationManager.notify(constant.deleteGitRepositorySuccess());
+        .deleteRepository(project.getLocation())
+        .then(
+            ignored -> {
+              console.print(constant.deleteGitRepositorySuccess());
+              consolesPanelPresenter.addCommandOutput(console);
+              notificationManager.notify(constant.deleteGitRepositorySuccess());
 
-                      appContext.getRootProject().synchronize();
-                    })
-            .catchError(
-                    error -> {
-                      console.printError(error.getMessage());
-                      consolesPanelPresenter.addCommandOutput(console);
-                      notificationManager.notify(constant.failedToDeleteRepository(), FAIL, FLOAT_MODE);
-                    });
+              appContext.getRootProject().synchronize();
+            })
+        .catchError(
+            error -> {
+              console.printError(error.getMessage());
+              consolesPanelPresenter.addCommandOutput(console);
+              notificationManager.notify(constant.failedToDeleteRepository(), FAIL, FLOAT_MODE);
+            });
   }
 }

@@ -45,12 +45,12 @@ public class InitRepositoryPresenter {
 
   @Inject
   public InitRepositoryPresenter(
-          GitLocalizationConstant constant,
-          NotificationManager notificationManager,
-          GitOutputConsoleFactory gitOutputConsoleFactory,
-          ProcessesPanelPresenter consolesPanelPresenter,
-          GitServiceClient service,
-          AppContext appContext) {
+      GitLocalizationConstant constant,
+      NotificationManager notificationManager,
+      GitOutputConsoleFactory gitOutputConsoleFactory,
+      ProcessesPanelPresenter consolesPanelPresenter,
+      GitServiceClient service,
+      AppContext appContext) {
     this.constant = constant;
     this.notificationManager = notificationManager;
     this.gitOutputConsoleFactory = gitOutputConsoleFactory;
@@ -63,20 +63,20 @@ public class InitRepositoryPresenter {
     final GitOutputConsole console = gitOutputConsoleFactory.create(INIT_COMMAND_NAME);
 
     service
-            .init(project.getLocation(), false)
-            .then(
-                    ignored -> {
-                      console.print(constant.initSuccess());
-                      consolesPanelPresenter.addCommandOutput(console);
-                      notificationManager.notify(constant.initSuccess());
+        .init(project.getLocation(), false)
+        .then(
+            ignored -> {
+              console.print(constant.initSuccess());
+              consolesPanelPresenter.addCommandOutput(console);
+              notificationManager.notify(constant.initSuccess());
 
-                      project.synchronize();
-                    })
-            .catchError(
-                    error -> {
-                      handleError(error.getCause(), console);
-                      consolesPanelPresenter.addCommandOutput(console);
-                    });
+              project.synchronize();
+            })
+        .catchError(
+            error -> {
+              handleError(error.getCause(), console);
+              consolesPanelPresenter.addCommandOutput(console);
+            });
   }
 
   /**
@@ -86,9 +86,9 @@ public class InitRepositoryPresenter {
    */
   private void handleError(@NotNull Throwable e, GitOutputConsole console) {
     String errorMessage =
-            (e.getMessage() != null && !e.getMessage().isEmpty())
-                    ? e.getMessage()
-                    : constant.initFailed();
+        (e.getMessage() != null && !e.getMessage().isEmpty())
+            ? e.getMessage()
+            : constant.initFailed();
     console.printError(errorMessage);
     notificationManager.notify(constant.initFailed(), FAIL, FLOAT_MODE);
   }

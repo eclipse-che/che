@@ -41,13 +41,13 @@ public class InitRepositoryPresenterTest extends BaseTest {
     super.disarm();
 
     presenter =
-            new InitRepositoryPresenter(
-                    constant,
-                    notificationManager,
-                    gitOutputConsoleFactory,
-                    processesPanelPresenter,
-                    service,
-                    appContext);
+        new InitRepositoryPresenter(
+            constant,
+            notificationManager,
+            gitOutputConsoleFactory,
+            processesPanelPresenter,
+            service,
+            appContext);
 
     when(service.init(any(Path.class), anyBoolean())).thenReturn(voidPromise);
     when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
@@ -81,6 +81,6 @@ public class InitRepositoryPresenterTest extends BaseTest {
     verify(console).printError(anyObject());
     verify(processesPanelPresenter).addCommandOutput(eq(console));
     verify(notificationManager)
-            .notify(anyString(), any(StatusNotification.Status.class), anyObject());
+        .notify(anyString(), any(StatusNotification.Status.class), anyObject());
   }
 }
