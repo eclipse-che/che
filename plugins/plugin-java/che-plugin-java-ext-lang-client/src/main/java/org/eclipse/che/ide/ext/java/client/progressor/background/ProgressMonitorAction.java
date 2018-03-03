@@ -24,11 +24,11 @@ import org.eclipse.che.ide.api.action.Presentation;
  * @author Valeriy Svydenko
  */
 @Singleton
-public class DependencyResolverAction extends BaseAction implements CustomComponentAction {
+public class ProgressMonitorAction extends BaseAction implements CustomComponentAction {
   private final BackgroundLoaderPresenter loader;
 
   @Inject
-  public DependencyResolverAction(BackgroundLoaderPresenter loader) {
+  public ProgressMonitorAction(BackgroundLoaderPresenter loader) {
     this.loader = loader;
     loader.hide();
   }

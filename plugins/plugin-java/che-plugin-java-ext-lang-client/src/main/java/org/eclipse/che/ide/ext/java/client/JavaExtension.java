@@ -43,7 +43,7 @@ import org.eclipse.che.ide.ext.java.client.action.QuickDocumentationAction;
 import org.eclipse.che.ide.ext.java.client.action.QuickFixAction;
 import org.eclipse.che.ide.ext.java.client.action.UnmarkDirAsSourceAction;
 import org.eclipse.che.ide.ext.java.client.progressor.ProgressMessagesHandler;
-import org.eclipse.che.ide.ext.java.client.progressor.background.DependencyResolverAction;
+import org.eclipse.che.ide.ext.java.client.progressor.background.ProgressMonitorAction;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.CutJavaSourceAction;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.MoveAction;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.RenameRefactoringAction;
@@ -92,7 +92,7 @@ public class JavaExtension {
       MarkDirAsSourceAction markDirAsSourceAction,
       UnmarkDirAsSourceAction unmarkDirAsSourceAction,
       MarkDirectoryAsGroup markDirectoryAsGroup,
-      DependencyResolverAction dependencyResolverAction,
+      ProgressMonitorAction progressMonitorAction,
       ProgressMessagesHandler progressMessagesHandler,
       OrganizeImportsAction organizeImportsAction,
       RenameRefactoringAction renameRefactoringAction,
@@ -168,7 +168,7 @@ public class JavaExtension {
     // add resolver widget on right part of bottom panel
     final DefaultActionGroup rightStatusPanelGroup =
         (DefaultActionGroup) actionManager.getAction(GROUP_RIGHT_STATUS_PANEL);
-    rightStatusPanelGroup.add(dependencyResolverAction);
+    rightStatusPanelGroup.add(progressMonitorAction);
 
     DefaultActionGroup editorContextMenuGroup =
         (DefaultActionGroup) actionManager.getAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU);

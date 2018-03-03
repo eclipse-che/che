@@ -17,8 +17,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.ext.java.client.progressor.background.BackgroundLoaderPresenter;
@@ -35,7 +35,7 @@ public class ProgressMessagesHandler {
   private static final int DELAY_MS = 20_000; // wait before check if task was update
   private final EventBus eventBus;
   private final BackgroundLoaderPresenter progressResolver;
-  private Map<String, Pair<ProgressReportDto, Long>> progresses = new HashMap<>();
+  private Map<String, Pair<ProgressReportDto, Long>> progresses = new LinkedHashMap<>();
 
   private ProgressReportDto currentProgress;
 
@@ -80,6 +80,9 @@ public class ProgressMessagesHandler {
     progresses.put(taskId, Pair.of(progress, currentTimeMillis()));
     progressResolver.addProgress(progress);
 
+    if (currentProgress == null) {
+      currentProgress = progress;
+    }
     String currentTaskId = currentProgress.getId();
 
     if (taskId.equals(currentTaskId)) {
