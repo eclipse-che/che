@@ -326,7 +326,9 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during {@code timeout} until {@link WebElement} with provided {@code elementLocator} be
-   * attached to DOM, it does not mean that element is visible.
+   * attached to DOM.
+   *
+   * <p>Note! It does not mean that element is visible.
    *
    * @param elementLocator locator of element which should be checked
    * @param timeout waiting time in seconds
@@ -337,8 +339,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until {@link WebElement} with provided {@code elementLocator} be attached to DOM, it does
-   * not mean that element is visible.
+   * Waits until {@link WebElement} with provided {@code elementLocator} be attached to DOM.
+   *
+   * <p>Note! It does not mean that element is visible.
    *
    * @param elementLocator
    * @return found element
@@ -349,7 +352,8 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits until all {@link WebElement} with provided {@code elementsLocator} are attached to DOM.
-   * It does not mean that elements are visible.
+   *
+   * <p>Note! It does not mean that elements are visible.
    *
    * @param elementsLocator common locator for multiple elements
    * @return all found elements
@@ -360,7 +364,9 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during {@code timeout} until all {@link WebElement} with provided {@code elementsLocator}
-   * be attached to DOM. It does not mean that elements are visible.
+   * be attached to DOM.
+   *
+   * <p>Note! It does not mean that elements are visible.
    *
    * @param elementsLocator common locator for multiple elements
    * @param timeout waiting timeout in seconds
@@ -413,7 +419,7 @@ public class SeleniumWebDriverHelper {
   /**
    * Waits visibility of provided {@code webElement} and gets text.
    *
-   * @param webElement
+   * @param webElement element, text from which should be got
    * @return element text by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetValue(WebElement webElement) {
@@ -423,7 +429,7 @@ public class SeleniumWebDriverHelper {
   /**
    * Waits visibility of {@link WebElement} with provided {@code elementLocator} and gets text.
    *
-   * @param elementLocator element from which text should be read
+   * @param elementLocator element from which text should be got
    * @return element text by {@link WebElement#getText()}
    */
   public String waitVisibilityAndGetText(By elementLocator) {
@@ -433,7 +439,7 @@ public class SeleniumWebDriverHelper {
   /**
    * Waits visibility of provided {@code webElement} and gets text.
    *
-   * @param webElement element from which text should be read
+   * @param webElement element from which text should be got
    * @return element text by {@link WebElement#getText()}
    */
   public String waitVisibilityAndGetText(WebElement webElement) {
@@ -470,7 +476,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during {@code timeout} until text extracted from specified {@code webElement} by {@link
-   * WebElement#getAttribute(String)} be equivalent to provided provided {@code expectedValue}.
+   * WebElement#getAttribute(String)} be equivalent to provided {@code expectedValue}.
    *
    * @param webElement element in which text should be checked
    * @param expectedValue expected text which should be present in the element
@@ -647,8 +653,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Moves cursor to {@link WebElement} with provided {@code elementLocator} which attached to DOM,
-   * but it does not mean that element is visible.
+   * Moves cursor to {@link WebElement} with provided {@code elementLocator} which attached to DOM.
+   *
+   * <p>Note! It does not mean that element is visible.
    *
    * @param elementLocator element to which cursor should be moved
    */
@@ -660,8 +667,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Moves cursor to provided {@code webElement} which attached to DOM, but it does not mean that
-   * element is visible.
+   * Moves cursor to provided {@code webElement} which attached to DOM.
+   *
+   * <p>Note! It does not mean that element is visible.
    *
    * @param webElement element to which cursor should be moved
    */
