@@ -40,7 +40,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author aleksandr shmaraev */
-public class FetchAndMergeRemoteBranchToLocalTest {
+public class FetchAndMergeRemoteBranchIntoLocalTest {
   private static final String REPO_NAME = NameGenerator.generate("FetchAndMergeTest-", 3);
   private static final String PROJECT_NAME = NameGenerator.generate("FetchAndMergeTest-", 4);
   private static final String CHANGE_CONTENT =
