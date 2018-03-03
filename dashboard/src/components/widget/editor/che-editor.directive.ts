@@ -38,6 +38,7 @@ export class CheEditor implements ng.IDirective {
     editorContent: '=',
     editorState: '=?',
     editorMode: '@?',
+    editorReadOnly: '=?',
     validator: '&?',
     onContentChange: '&?'
   };
