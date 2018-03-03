@@ -117,6 +117,7 @@
           <class name="org.eclipse.che.selenium.git.CommitFilesByMultiSelectTest"/>
           <class name="org.eclipse.che.selenium.git.CommitFilesTest"/>
           <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest"/>
+          <class name="org.eclipse.che.selenium.git.FetchAndMergeRemoteBranchToLocalTest"/>
           <class name="org.eclipse.che.selenium.git.GitChangeMarkersTest"/>
           <class name="org.eclipse.che.selenium.git.GitColorsTest"/>
           <class name="org.eclipse.che.selenium.git.InitializeAndDeleteLocalRepositoryTest"/>
