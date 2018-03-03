@@ -71,10 +71,12 @@ public class EnvironmentVariablesLogLevelPropagator extends ContextAwareBase
     }
   }
 
+  @Override
   public void stop() {
     isStarted = false;
   }
 
+  @Override
   public boolean isStarted() {
     return isStarted;
   }
