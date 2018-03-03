@@ -17,10 +17,7 @@ import {CheJsonRpcApi} from '../json-rpc/che-json-rpc-api.factory';
 import {IObservableCallbackFn, Observable} from '../../utils/observable';
 import {CheBranding} from '../../branding/che-branding.factory';
 import {CheEnvironmentManager} from '../environment/che-environment-manager.factory';
-import {ComposeEnvironmentManager} from '../environment/compose-environment-manager';
-import {DockerFileEnvironmentManager} from '../environment/docker-file-environment-manager';
-import {DockerImageEnvironmentManager} from '../environment/docker-image-environment-manager';
-import {OpenshiftEnvironmentManager} from '../environment/openshift-environment-manager';
+import {CheRecipeTypes} from '../recipe/che-recipe-types';
 
 const WS_AGENT_HTTP_LINK: string = 'wsagent/http';
 const WS_AGENT_WS_LINK: string = 'wsagent/ws';
@@ -59,12 +56,11 @@ export enum WorkspaceStatus {
  */
 export class CheWorkspace {
 
-  static $inject = ['$resource', '$http', '$q', 'cheJsonRpcApi', '$websocket', '$location', 'proxySettings', 'userDashboardConfig', 'lodash', 'cheEnvironmentRegistry', '$log', 'cheBranding', 'keycloakAuth', 'cheEnvironmentManager'];
+  static $inject = ['$resource', '$http', '$q', 'cheJsonRpcApi', '$websocket', '$location', 'proxySettings', 'userDashboardConfig', 'lodash', 'cheEnvironmentRegistry', 'cheBranding', 'keycloakAuth', 'cheEnvironmentManager'];
 
   private $resource: ng.resource.IResourceService;
   private $http: ng.IHttpService;
   private $q: ng.IQService;
-  private $log: ng.ILogService;
   private $websocket: any;
   private cheJsonRpcMasterApi: CheJsonRpcMasterApi;
   private listeners: Array<any>;
@@ -102,7 +98,6 @@ export class CheWorkspace {
               userDashboardConfig: any,
               lodash: any,
               cheEnvironmentRegistry: CheEnvironmentRegistry,
-              $log: ng.ILogService,
               cheBranding: CheBranding,
               keycloakAuth: any,
               cheEnvironmentManager: CheEnvironmentManager) {
@@ -111,7 +106,6 @@ export class CheWorkspace {
     this.$q = $q;
     this.$resource = $resource;
     this.$http = $http;
-    this.$log = $log;
     this.$websocket = $websocket;
     this.lodash = lodash;
 
@@ -151,10 +145,7 @@ export class CheWorkspace {
       }
     );
 
-    cheEnvironmentRegistry.addEnvironmentManager('compose', new ComposeEnvironmentManager($log));
-    cheEnvironmentRegistry.addEnvironmentManager('dockerfile', new DockerFileEnvironmentManager($log));
-    cheEnvironmentRegistry.addEnvironmentManager('dockerimage', new DockerImageEnvironmentManager($log));
-    cheEnvironmentRegistry.addEnvironmentManager('openshift', new OpenshiftEnvironmentManager($log));
+    let recipeTypes: Array<string> = CheRecipeTypes.getValues();
 
     let keycloakToken = keycloakAuth.isPresent ? '?token=' + keycloakAuth.keycloak.token : '';
     const CONTEXT_FETCHER_ID = 'websocketContextFetcher';
@@ -165,6 +156,16 @@ export class CheWorkspace {
       cheBranding.unregisterCallback(CONTEXT_FETCHER_ID);
     };
     cheBranding.registerCallback(CONTEXT_FETCHER_ID, callback.bind(this));
+
+    this.fetchWorkspaceSettings().finally(() => {
+      // update recipe types
+      recipeTypes = lodash.uniq(recipeTypes.concat(this.getSupportedRecipeTypes()));
+      recipeTypes.forEach((recipeType: string) => {
+        // add environment managers
+        const environmentManager = cheEnvironmentManager.create(recipeType);
+        cheEnvironmentRegistry.addEnvironmentManager(recipeType, environmentManager);
+      });
+    });
 
     this.checkWorkspaceLoader(userDashboardConfig.developmentMode, proxySettings);
   }

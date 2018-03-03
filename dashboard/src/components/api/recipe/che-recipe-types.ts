@@ -29,6 +29,10 @@ class CheRecipeTypesStatic {
     return 'compose';
   }
 
+  static get KUBERNETES(): string {
+    return 'kubernetes';
+  }
+
   static get OPENSHIFT(): string {
     return 'openshift';
   }
@@ -38,6 +42,7 @@ class CheRecipeTypesStatic {
       CheRecipeTypesStatic.DOCKERFILE,
       CheRecipeTypesStatic.DOCKERIMAGE,
       CheRecipeTypesStatic.COMPOSE,
+      CheRecipeTypesStatic.KUBERNETES,
       CheRecipeTypesStatic.OPENSHIFT
     ];
   }

@@ -9,7 +9,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {IPodItem, OpenshiftMachineRecipeParser} from './openshift-machine-recipe-parser';
+import {IPodItem, KubernetesMachineRecipeParser} from './kubernetes-machine-recipe-parser';
 import {IParser} from './parser';
 
 export interface IPodList {
@@ -18,12 +18,12 @@ export interface IPodList {
 }
 
 /**
- * Wrapper for jsyaml and simple validator for openshift environment recipe.
+ * Wrapper for jsyaml and simple validator for kubernetes environment recipe.
  *
  *  @author Oleksii Orel
  */
-export class OpenshiftEnvironmentRecipeParser implements IParser {
-  private machineRecipeParser = new OpenshiftMachineRecipeParser();
+export class KubernetesEnvironmentRecipeParser implements IParser {
+  private machineRecipeParser = new KubernetesMachineRecipeParser();
   private recipeByContent: Map<string, IPodList> = new Map();
   private recipeKeys: Array<string> = [];
 
