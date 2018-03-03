@@ -18,10 +18,28 @@ import ch.qos.logback.core.spi.ContextAwareBase;
 import ch.qos.logback.core.spi.LifeCycle;
 import java.util.Arrays;
 
+/**
+ * Class searches environment variable CHE_LOGGER_CONFIG Value of this variable is expected in such
+ * format:
+ *
+ * <p>CHE_LOGGER_CONFIG=logger1_name=logger1_level,logger2_name=logger2_level
+ *
+ * <p>In case if some logger name or logger level are omitted this pair will be silently ignored.
+ */
 public class EnvironmentVariablesLogLevelPropagator extends ContextAwareBase
     implements LoggerContextListener, LifeCycle {
 
   private boolean isStarted;
+
+  @Override
+  public void start() {
+
+    String config = System.getenv("CHE_LOGGER_CONFIG");
+    if (config != null && !config.isEmpty()) {
+      Arrays.stream(config.split(",")).map(String::trim).forEach(this::setLoggerLevel);
+    }
+    isStarted = true;
+  }
 
   private void setLoggerLevel(String loggerConfig) {
     int i = loggerConfig.indexOf('=');
@@ -51,16 +69,6 @@ public class EnvironmentVariablesLogLevelPropagator extends ContextAwareBase
         logger.setLevel(level);
       }
     }
-  }
-
-  @Override
-  public void start() {
-
-    String config = System.getenv("CHE_LOGGER_CONFIG");
-    if (config != null && !config.isEmpty()) {
-      Arrays.stream(config.split(",")).map(String::trim).forEach(this::setLoggerLevel);
-    }
-    isStarted = true;
   }
 
   public void stop() {
