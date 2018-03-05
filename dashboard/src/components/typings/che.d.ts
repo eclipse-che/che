@@ -165,6 +165,7 @@ declare namespace che {
       DOCKERFILE: string;
       DOCKERIMAGE: string;
       COMPOSE: string;
+      KUBERNETES: string;
       OPENSHIFT: string;
       getValues(): Array<string>;
     }
