@@ -16,7 +16,6 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -62,7 +61,6 @@ public class ShowHintsCommandTest {
   @Inject private CodenvyEditor editor;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Consoles console;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
 
   @BeforeClass
   public void prepare() throws Exception {
