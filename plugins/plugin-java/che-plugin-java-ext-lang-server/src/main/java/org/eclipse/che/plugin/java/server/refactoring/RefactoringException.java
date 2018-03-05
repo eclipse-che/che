@@ -24,6 +24,4 @@ public class RefactoringException extends Exception {
   public RefactoringException(Exception exception) {
     super(exception);
   }
-
 }
-
