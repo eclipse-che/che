@@ -84,7 +84,7 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
     cleanNetworks();
   }
 
-  /** Cleans up CHE docker containers which don't belong to a running machine anymore. */
+  /** Cleans up CHE docker containers which belong to running machines . */
   @VisibleForTesting
   void cleanContainers() {
     List<String> activeContainers = new ArrayList<>();
@@ -98,18 +98,12 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
         if (!isNullOrEmpty(machineName) && !isNullOrEmpty(workspaceId)) {
           try {
             WorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
-            if (workspace.getRuntime() != null) {
-              Map<String, ? extends Machine> map = workspace.getRuntime().getMachines();
-              if (map != null && map.containsKey(machineName)) {
-                // container belongs to a running machine in a workspace
-                activeContainers.add(containerName);
-                continue;
-              } else {
-                cleanUpContainer(container);
-              }
+            if (workspace.getRuntime() != null && workspace.getRuntime().getMachines().containsKey(machineName)) {
+              activeContainers.add(containerName);
+              continue;
             }
           } catch (NotFoundException e) {
-            // container will be cleaned up below
+            // cleanup container
           } catch (Exception e) {
             LOG.error(
                 format(
