@@ -116,7 +116,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits during {@code timeout}, until {@link WebElement} with provided {@code elementLocator} be
+   * Waits during {@code timeout}, until {@link WebElement} with provided {@code elementLocator} is
    * visible
    *
    * @param elementLocator locator of element which should be checked
@@ -128,7 +128,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until {@link WebElement} with provided {@code elementLocator} be visible.
+   * Waits until {@link WebElement} with provided {@code elementLocator} is visible.
    *
    * @param elementLocator locator of element which should be checked
    * @return found element
@@ -138,7 +138,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits during {@code timeout} until provided {@code webElement} be visible.
+   * Waits during {@code timeout} until provided {@code webElement} is visible.
    *
    * @param webElement element which should be checked
    * @param timeout waiting time in seconds
@@ -149,7 +149,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until provided {@code webElement} be visible.
+   * Waits until provided {@code webElement} is visible.
    *
    * @param webElement element which should be checked
    * @return found element
@@ -240,7 +240,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits during {@code timeout}, until {@link WebElement} with provided {@code elementLocator} be
+   * Waits during {@code timeout}, until {@link WebElement} with provided {@code elementLocator} is
    * invisible.
    *
    * @param elementLocator locator of element which should be checked
@@ -252,7 +252,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until {@link WebElement} with provided {@code elementLocator} be invisible.
+   * Waits until {@link WebElement} with provided {@code elementLocator} is invisible.
    *
    * @param elementLocator locator of element which should be checked
    * @throw {@link org.openqa.selenium.TimeoutException} - if visible during timeout.
@@ -262,7 +262,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits during {@code timeout} until provided {@code webElement} be invisible.
+   * Waits during {@code timeout} until provided {@code webElement} is invisible.
    *
    * @param webElement element which should be checked
    * @param timeout waiting time in seconds
@@ -273,7 +273,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until provided {@code webElement} be invisible.
+   * Waits until provided {@code webElement} is invisible.
    *
    * @param webElement element which should be checked
    * @throw {@link org.openqa.selenium.TimeoutException} - if visible during timeout.
@@ -325,7 +325,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits during {@code timeout} until {@link WebElement} with provided {@code elementLocator} be
+   * Waits during {@code timeout} until {@link WebElement} with provided {@code elementLocator} is
    * attached to DOM.
    *
    * <p>Note! It does not mean that element is visible.
@@ -339,7 +339,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until {@link WebElement} with provided {@code elementLocator} be attached to DOM.
+   * Waits until {@link WebElement} with provided {@code elementLocator} is attached to DOM.
    *
    * <p>Note! It does not mean that element is visible.
    *
@@ -364,7 +364,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during {@code timeout} until all {@link WebElement} with provided {@code elementsLocator}
-   * be attached to DOM.
+   * is attached to DOM.
    *
    * <p>Note! It does not mean that elements are visible.
    *
@@ -377,7 +377,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until {@link WebElement} with specified {@code elementLocator} be visible, and types text
+   * Waits until {@link WebElement} with specified {@code elementLocator} is visible, and types text
    * in it.
    *
    * @param elementLocator locator of element in which {@code text} should be sent
@@ -388,7 +388,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until {@code webElement} be visible, and types text in it.
+   * Waits until {@code webElement} is visible, and types text in it.
    *
    * @param webElement element in which {@code text} should be sent
    * @param text text for sending
@@ -448,7 +448,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during {@code timeout} until text extracted from {@link WebElement} with specified {@code
-   * elementLocator} by {@link WebElement#getAttribute(String)} be equivalent to provided {@code
+   * elementLocator} by {@link WebElement#getAttribute(String)} is equivalent to provided {@code
    * expectedValue}.
    *
    * @param elementLocator locator of element in which text should be checked
@@ -465,7 +465,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits until text extracted from {@link WebElement} with specified {@code elementLocator} by
-   * {@link WebElement#getAttribute(String)} be equivalent to provided {@code expectedValue}.
+   * {@link WebElement#getAttribute(String)} is equivalent to provided {@code expectedValue}.
    *
    * @param elementLocator locator of element in which text should be checked
    * @param expectedValue expected text which should be present in the element
@@ -476,7 +476,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during {@code timeout} until text extracted from specified {@code webElement} by {@link
-   * WebElement#getAttribute(String)} be equivalent to provided {@code expectedValue}.
+   * WebElement#getAttribute(String)} is equivalent to provided {@code expectedValue}.
    *
    * @param webElement element in which text should be checked
    * @param expectedValue expected text which should be present in the element
@@ -492,7 +492,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits until text extracted from specified {@code webElement} by {@link
-   * WebElement#getAttribute(String)} be equivalent to provided {@code expectedValue}.
+   * WebElement#getAttribute(String)} is equivalent to provided {@code expectedValue}.
    *
    * @param webElement element in which text should be checked
    * @param expectedValue expected text which should be present in the element
@@ -503,7 +503,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during {@code timeout} until text extracted from {@link WebElement} with specified {@code
-   * elementLocator} by {@link WebElement#getText()} be equivalent to provided {@code expectedText}.
+   * elementLocator} by {@link WebElement#getText()} is equivalent to provided {@code expectedText}.
    *
    * @param elementLocator locator of element in which text should be checked
    * @param expectedText expected text which should be present in the element
@@ -519,7 +519,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits until text extracted from {@link WebElement} with specified {@code elementLocator} by
-   * {@link WebElement#getText()} be equivalent to provided {@code expectedText}.
+   * {@link WebElement#getText()} is equivalent to provided {@code expectedText}.
    *
    * @param elementLocator locator of element in which text should be checked
    * @param expectedText expected text which should be present in the element
@@ -530,7 +530,7 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during {@code timeout} until text extracted from specified {@code webElement} by {@link
-   * WebElement#getText()} be equivalent to provided {@code expectedText}.
+   * WebElement#getText()} is equivalent to provided {@code expectedText}.
    *
    * @param webElement element in which text should be checked
    * @param expectedText expected text which should be present in the element
@@ -545,7 +545,7 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until text extracted from {@code webElement} by {@link WebElement#getText()} be
+   * Waits until text extracted from {@code webElement} by {@link WebElement#getText()} is
    * equivalent to provided {@code expectedText}.
    *
    * @param webElement element in which text should be checked
