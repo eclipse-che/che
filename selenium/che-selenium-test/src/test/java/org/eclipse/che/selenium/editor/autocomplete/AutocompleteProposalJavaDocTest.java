@@ -18,7 +18,6 @@ import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -51,7 +50,6 @@ public class AutocompleteProposalJavaDocTest {
   @Inject private CodenvyEditor editor;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private BrowserLogsUtil browserLogsUtil;
 
   @BeforeClass
   public void setup() throws Exception {
@@ -217,7 +215,6 @@ public class AutocompleteProposalJavaDocTest {
       logExternalLibraries();
       logProjectTypeChecking();
       logProjectLanguageChecking();
-      browserLogsUtil.storeLogs();
 
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7161", ex);

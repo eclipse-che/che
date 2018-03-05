@@ -830,7 +830,7 @@ storeTestReport() {
     if [[ -f ${TMP_SUITE_PATH} ]]; then
         cp ${TMP_SUITE_PATH} target/suite;
     fi
-    zip -qr ${report} target/screenshots target/htmldumps target/workspace-logs target/site target/failsafe-reports target/log target/bin target/suite
+    zip -qr ${report} target/screenshots target/htmldumps target/workspace-logs target/webdriver-logs target/site target/failsafe-reports target/log target/bin target/suite
 
     echo -e "[TEST] Tests results and reports are saved to ${BLUE}${report}${NO_COLOUR}"
     echo "[TEST]"
