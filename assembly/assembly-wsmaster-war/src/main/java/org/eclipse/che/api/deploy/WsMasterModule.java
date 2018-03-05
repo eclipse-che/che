@@ -12,6 +12,7 @@ package org.eclipse.che.api.deploy;
 
 import static com.google.inject.matcher.Matchers.subclassesOf;
 import static org.eclipse.che.inject.Matchers.names;
+import static org.eclipse.che.multiuser.api.permission.server.SystemDomain.SYSTEM_DOMAIN_ACTIONS;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -71,6 +72,7 @@ import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakModule;
 import org.eclipse.che.multiuser.machine.authentication.server.MachineAuthModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationApiModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationJpaModule;
+import org.eclipse.che.multiuser.permission.user.UserServicePermissionsFilter;
 import org.eclipse.che.multiuser.resource.api.ResourceModule;
 import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
 import org.eclipse.che.security.PBKDF2PasswordEncryptor;
@@ -278,8 +280,13 @@ public class WsMasterModule extends AbstractModule {
 
     // Permission filters
     bind(org.eclipse.che.multiuser.permission.system.SystemServicePermissionsFilter.class);
+
+    Multibinder<String> binder =
+        Multibinder.newSetBinder(binder(), String.class, Names.named(SYSTEM_DOMAIN_ACTIONS));
+    binder.addBinding().toInstance(UserServicePermissionsFilter.MANAGE_USERS_ACTION);
     bind(org.eclipse.che.multiuser.permission.user.UserProfileServicePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.user.UserServicePermissionsFilter.class);
+
     bind(org.eclipse.che.multiuser.permission.factory.FactoryPermissionsFilter.class);
     bind(
         org.eclipse.che.multiuser.permission.installer.InstallerRegistryServicePermissionsFilter
