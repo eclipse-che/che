@@ -10,14 +10,12 @@
  */
 package org.eclipse.che.plugin.java.server.refactoring;
 
-import org.eclipse.che.api.core.ServerException;
-
 /**
  * Throws when we can't perform refactoring
  *
  * @author Evgen Vidolob
  */
-public class RefactoringException extends ServerException {
+public class RefactoringException extends Exception {
 
   public RefactoringException(String message) {
     super(message);
@@ -26,4 +24,6 @@ public class RefactoringException extends ServerException {
   public RefactoringException(Exception exception) {
     super(exception);
   }
+
 }
+

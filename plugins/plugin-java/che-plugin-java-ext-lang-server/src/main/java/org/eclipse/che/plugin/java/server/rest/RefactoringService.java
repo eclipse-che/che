@@ -48,8 +48,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaModel;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Service for all Java refactorings
@@ -60,7 +58,6 @@ import org.slf4j.LoggerFactory;
 public class RefactoringService {
   private static final JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
   private RefactoringManager manager;
-  private static final Logger LOG = LoggerFactory.getLogger(RefactoringService.class);
 
   @Inject
   public RefactoringService(RefactoringManager manager) {
@@ -81,11 +78,6 @@ public class RefactoringService {
   @Produces("text/plain")
   public String createMoveRefactoring(CreateMoveRefactoring cmr)
       throws JavaModelException, RefactoringException {
-    LOG.info(
-        "createMoveRefactoring started in "
-            + System.currentTimeMillis()
-            + " ms with "
-            + cmr.toString());
     IJavaProject javaProject = model.getJavaProject(cmr.getProjectPath());
     IJavaElement[] javaElements;
     try {
@@ -112,11 +104,6 @@ public class RefactoringService {
       javaElements = cmr.getElements().stream().map(map).toArray(IJavaElement[]::new);
 
     } catch (IllegalArgumentException e) {
-      LOG.error(
-          "createMoveRefactoring fail in "
-              + System.currentTimeMillis()
-              + " ms with exception "
-              + e.getMessage());
       if (e.getCause() instanceof JavaModelException) {
         throw (JavaModelException) e.getCause();
       } else {
@@ -124,18 +111,9 @@ public class RefactoringService {
       }
     }
     if (RefactoringAvailabilityTester.isMoveAvailable(new IResource[0], javaElements)) {
-      String moveRefactoringSession = manager.createMoveRefactoringSession(javaElements);
-      LOG.info(
-          "createMoveRefactoring finished in "
-              + System.currentTimeMillis()
-              + " ms with session id "
-              + moveRefactoringSession);
-      return moveRefactoringSession;
+      return manager.createMoveRefactoringSession(javaElements);
     }
-    LOG.error(
-        "createMoveRefactoring finished in "
-            + System.currentTimeMillis()
-            + " ms with with  RefactoringException");
+
     throw new RefactoringException("Can't create move refactoring.");
   }
 
@@ -260,11 +238,6 @@ public class RefactoringService {
   @Consumes("application/json")
   public RenameRefactoringSession createRenameRefactoring(CreateRenameRefactoring settings)
       throws CoreException, RefactoringException {
-    LOG.info(
-        "createRenameRefactoring started in "
-            + System.currentTimeMillis()
-            + " ms with "
-            + settings.toString());
     IJavaProject javaProject = model.getJavaProject(settings.getProjectPath());
     IJavaElement elementToRename;
     ICompilationUnit cu = null;
@@ -284,22 +257,11 @@ public class RefactoringService {
         elementToRename = null;
     }
     if (elementToRename == null) {
-      LOG.error(
-          "createRenameRefactoring fail in "
-              + System.currentTimeMillis()
-              + " ms with RefactoringException: Can't find java element to rename. ");
       throw new RefactoringException("Can't find java element to rename.");
     }
 
-    RenameRefactoringSession renameRefactoring =
-        manager.createRenameRefactoring(
-            elementToRename, cu, settings.getOffset(), settings.isRefactorLightweight());
-    LOG.info(
-        "createRenameRefactoring finished in "
-            + System.currentTimeMillis()
-            + " ms with "
-            + renameRefactoring.toString());
-    return renameRefactoring;
+    return manager.createRenameRefactoring(
+        elementToRename, cu, settings.getOffset(), settings.isRefactorLightweight());
   }
 
   /**
