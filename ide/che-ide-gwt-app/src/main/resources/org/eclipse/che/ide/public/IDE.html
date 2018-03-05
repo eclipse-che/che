@@ -104,6 +104,7 @@
                 
                 script.onerror = script.onabort = function() {
                     console.error("Cannot load " + script.src);
+                    Loader.startLoading();
                 };
                                     
                 document.head.appendChild(script);
@@ -135,9 +136,13 @@
              * Show loader and load compilation-mapping.txt file to determine which IDE JavaScript file will be loaded
              */
             this.startLoading = function() {
-                setTimeout(function() {
+                setTimeout(() => {
                     document.getElementById("ide-loader").style.opacity = 1;
                 }, 1);
+
+                setTimeout(() => {
+                    window.parent.postMessage("show-ide", "*");
+                }, 250);                
 
                 var msg = "Cannot load compilation mappings";
 
@@ -362,9 +367,8 @@
             };
         };
 
-        setTimeout(function() {
+        setTimeout(() => {
             Loader.loadKeycloakSettings();
-            window.parent.postMessage("show-ide", "*");
         }, 1);
 
     </script>
