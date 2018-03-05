@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
@@ -43,7 +42,6 @@ import org.eclipse.che.infrastructure.docker.client.json.network.ContainerInNetw
 import org.eclipse.che.infrastructure.docker.client.json.network.Network;
 import org.eclipse.che.infrastructure.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.workspace.infrastructure.docker.Labels;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -205,7 +203,7 @@ public class DockerAbandonedResourcesCleanerTest {
 
   @Test
   public void
-  cleanerShouldKillAndRemoveContainerIfThisContainerIsRunningAndDoesntBelongToRunningWorkspace()
+      cleanerShouldKillAndRemoveContainerIfThisContainerIsRunningAndDoesntBelongToRunningWorkspace()
           throws Exception {
     cleaner.cleanContainers();
 

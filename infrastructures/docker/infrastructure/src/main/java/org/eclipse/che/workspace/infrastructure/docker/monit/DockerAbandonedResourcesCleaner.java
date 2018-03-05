@@ -19,12 +19,10 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -98,7 +96,8 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
         if (!isNullOrEmpty(machineName) && !isNullOrEmpty(workspaceId)) {
           try {
             WorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
-            if (workspace.getRuntime() != null && workspace.getRuntime().getMachines().containsKey(machineName)) {
+            if (workspace.getRuntime() != null
+                && workspace.getRuntime().getMachines().containsKey(machineName)) {
               activeContainers.add(containerName);
               continue;
             }
