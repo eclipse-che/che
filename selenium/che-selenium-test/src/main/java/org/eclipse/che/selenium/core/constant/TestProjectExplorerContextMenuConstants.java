@@ -13,61 +13,126 @@ package org.eclipse.che.selenium.core.constant;
 /** */
 public final class TestProjectExplorerContextMenuConstants {
 
-  /** First level context menu items */
-  public static final String NEW = "gwt-debug-contextMenu/newGroup";
-
-  public static final String COMMANDS = "gwt-debug-contextMenu/commandsActionGroup";
-  public static final String PREVIEW = "gwt-debug-contextMenu/previewHTML";
-  public static final String SHOW_REFERENCES = "gwt-debug-contextMenu/showReference";
-  public static final String GO_INTO = "gwt-debug-contextMenu/goInto";
-  public static final String GO_BACK = "gwt-debug-contextMenu/goInto";
-  public static final String CUT = "gwt-debug-contextMenu/cut";
-  public static final String PASTE = "gwt-debug-contextMenu/paste";
-  public static final String RENAME = "gwt-debug-contextMenu/renameResource";
-  public static final String DELETE = "gwt-debug-contextMenu/deleteItem";
-  public static final String DOWNLOAD = "gwt-debug-contextMenu/downloadItemAction";
-  public static final String CONVERT_TO_PROJECT = "gwt-debug-contextMenu/convertFolderToProject";
-  public static final String BUILD_PATH = "gwt-debug-contextMenu/markDirectoryAsSourceGroup";
-  public static final String EDIT = "gwt-debug-contextMenu/editFile";
-  public static final String MAVEN = "gwt-debug-contextMenu/mavenGroupContextMenu";
-  public static final String REFRESH = "gwt-debug-contextMenu/refreshPathAction";
-  public static final String REIMPORT =
-      "gwt-debug-contextMenu/Maven/reimportMavenDependenciesAction";
-  public static final String TEST = "gwt-debug-contextMenu/TestingContextGroup";
-
-  /** Submenu for new items */
-  public static final class SubMenuNew {
-    public static final String JAVA_CLASS = "gwt-debug-contextMenu/New/newJavaClass";
-    public static final String JAVA_PACKAGE = "gwt-debug-contextMenu/New/newJavaPackage";
-    public static final String FILE = "gwt-debug-contextMenu/New/newFile";
-    public static final String FOLDER = "gwt-debug-contextMenu/New/newFolder";
-    public static final String XML_FILE = "gwt-debug-contextMenu/New/newXmlFile";
-    public static final String CSS_FILE = "gwt-debug-contextMenu/New/newCssFile";
-    public static final String LESS_FILE = "gwt-debug-contextMenu/New/newLessFile";
-    public static final String HTML_FILE = "gwt-debug-contextMenu/New/newHtmlFile";
-    public static final String JAVASCRIPT_FILE = "gwt-debug-contextMenu/New/newJavaScriptFile";
-    public static final String PYTHON_FILE = "gwt-debug-contextMenu/New/pythonFile";
-    public static final String C_FILE = "gwt-debug-contextMenu/New/newCFile";
-    public static final String C_PLUS_PLUS_FILE = "gwt-debug-contextMenu/New/newCppFile";
-    public static final String H_FILE = "gwt-debug-contextMenu/New/newHFile";
+  public interface ContextMenuItems {
+    String get();
   }
 
-  /** Submenu for Build Path Configuration (use for Java project only) */
-  public static final class SubMenuBuildPath {
-    public static final String USE_AS_SOURCE_FOLDER =
-        "gwt-debug-contextMenu/Build Path/markDirectoryAsSource";
-    public static final String UNMARK_AS_SOURCE_FOLDER =
-        "gwt-debug-contextMenu/Build Path/unmarkDirectoryAsSource";
-    public static final String CONFIGURE_CLASSPATH =
-        "gwt-debug-contextMenu/Build Path/projectProperties";
+  /** First level of project explorer's context menu items */
+  public enum ContextMenuFirstLevelItems implements ContextMenuItems {
+    NEW("gwt-debug-contextMenu/newGroup"),
+    COMMANDS("gwt-debug-contextMenu/commandsActionGroup"),
+    PREVIEW("gwt-debug-contextMenu/previewHTML"),
+    SHOW_REFERENCES("gwt-debug-contextMenu/showReference"),
+    GO_INTO("gwt-debug-contextMenu/goInto"),
+    GO_BACK("gwt-debug-contextMenu/goInto"),
+    CUT("gwt-debug-contextMenu/cut"),
+    PASTE("gwt-debug-contextMenu/paste"),
+    RENAME("gwt-debug-contextMenu/renameResource"),
+    DELETE("gwt-debug-contextMenu/deleteItem"),
+    DOWNLOAD("gwt-debug-contextMenu/downloadItemAction"),
+    CONVERT_TO_PROJECT("gwt-debug-contextMenu/convertFolderToProject"),
+    BUILD_PATH("gwt-debug-contextMenu/markDirectoryAsSourceGroup"),
+    EDIT("gwt-debug-contextMenu/editFile"),
+    MAVEN("gwt-debug-contextMenu/mavenGroupContextMenu"),
+    REFRESH("gwt-debug-contextMenu/refreshPathAction"),
+    REIMPORT("gwt-debug-contextMenu/Maven/reimportMavenDependenciesAction"),
+    TEST("gwt-debug-contextMenu/TestingContextGroup"),
+    ADD_TO_FILE_WATCHER_EXCLUDES("gwt-debug-contextMenu/Add to File Watcher excludes"),
+    REMOVE_FROM_FILE_WATCHER_EXCLUDES("gwt-debug-contextMenu/Remove from File Watcher excludes");
+
+    private final String itemId;
+
+    ContextMenuFirstLevelItems(String itemId) {
+      this.itemId = itemId;
+    }
+
+    @Override
+    public String get() {
+      return this.itemId;
+    }
   }
 
-  /** Submenu for Test Runner */
-  public static class SubMenuTest {
-    public static final String TEST_NG_CLASS = "contextMenu/Run Test/TestNG Class";
-    public static final String TEST_NG_PROJECT = "topmenu/Run/Test/TestNG Project";
-    public static final String TEST_NG_XML_SUITE = "topmenu/Run/Test/TestNG XML Suite";
-    public static final String JUNIT_CLASS = "contextMenu/Run Test/JUnit Class";
-    public static final String JUNIT_PROJECT = "topmenu/Run/Test/JUnit Project";
+  /** Submenu for "new" project explorer context menu items */
+  public enum SubMenuNew implements ContextMenuItems {
+    JAVA_CLASS("gwt-debug-contextMenu/New/newJavaClass"),
+    JAVA_PACKAGE("gwt-debug-contextMenu/New/newJavaPackage"),
+    FILE("gwt-debug-contextMenu/New/newFile"),
+    FOLDER("gwt-debug-contextMenu/New/newFolder"),
+    XML_FILE("gwt-debug-contextMenu/New/newXmlFile"),
+    CSS_FILE("gwt-debug-contextMenu/New/newCssFile"),
+    LESS_FILE("gwt-debug-contextMenu/New/newLessFile"),
+    HTML_FILE("gwt-debug-contextMenu/New/newHtmlFile"),
+    JAVASCRIPT_FILE("gwt-debug-contextMenu/New/newJavaScriptFile"),
+    PYTHON_FILE("gwt-debug-contextMenu/New/pythonFile"),
+    C_FILE("gwt-debug-contextMenu/New/newCFile"),
+    C_PLUS_PLUS_FILE("gwt-debug-contextMenu/New/newCppFile"),
+    H_FILE("gwt-debug-contextMenu/New/newHFile");
+
+    private final String itemId;
+
+    SubMenuNew(String itemId) {
+      this.itemId = itemId;
+    }
+
+    @Override
+    public String get() {
+      return this.itemId;
+    }
+  }
+
+  /** Submenu for (uses for Java project only) */
+  public enum SubMenuBuildPath implements ContextMenuItems {
+    USE_AS_SOURCE_FOLDER("gwt-debug-contextMenu/Build Path/markDirectoryAsSource"),
+    UNMARK_AS_SOURCE_FOLDER("gwt-debug-contextMenu/Build Path/unmarkDirectoryAsSource"),
+    CONFIGURE_CLASSPATH("gwt-debug-contextMenu/Build Path/projectProperties");
+
+    private final String itemId;
+
+    SubMenuBuildPath(String itemId) {
+      this.itemId = itemId;
+    }
+
+    @Override
+    public String get() {
+      return this.itemId;
+    }
+  }
+
+  /** Submenu for {@link ContextMenuFirstLevelItems#TEST} */
+  public enum SubMenuTest implements ContextMenuItems {
+    TEST_NG_CLASS("contextMenu/Run Test/TestNG Class"),
+    TEST_NG_PROJECT("topmenu/Run/Test/TestNG Project"),
+    TEST_NG_XML_SUITE("topmenu/Run/Test/TestNG XML Suite"),
+    JUNIT_CLASS("contextMenu/Run Test/JUnit Class"),
+    JUNIT_PROJECT("topmenu/Run/Test/JUnit Project");
+
+    private final String itemId;
+
+    SubMenuTest(String itemId) {
+      this.itemId = itemId;
+    }
+
+    @Override
+    public String get() {
+      return this.itemId;
+    }
+  }
+
+  /** Submenu for {@link ContextMenuFirstLevelItems#COMMANDS} */
+  public enum ContextMenuCommandGoals implements ContextMenuItems {
+    COMMON("gwt-debug-contextMenu/Commands/goal_Common"),
+    BUILD("gwt-debug-contextMenu/Commands/goal_Build"),
+    RUN("gwt-debug-contextMenu/Commands/goal_Run");
+
+    private final String itemId;
+
+    ContextMenuCommandGoals(String itemId) {
+      this.itemId = itemId;
+    }
+
+    @Override
+    public String get() {
+      return itemId;
+    }
   }
 }

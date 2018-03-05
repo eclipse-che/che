@@ -63,7 +63,7 @@ public class CheckErrorMessageWhenCreationDuplicateFolderOrFileTest {
   public void checkDuplicatedFile() throws Exception {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
-    projectExplorer.waitItemInVisibleArea(DUPLICATED_FILE_NAME);
+    projectExplorer.waitVisibilityByName(DUPLICATED_FILE_NAME);
     loader.waitOnClosed();
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,

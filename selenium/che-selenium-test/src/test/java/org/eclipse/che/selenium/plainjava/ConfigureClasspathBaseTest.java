@@ -62,7 +62,7 @@ public class ConfigureClasspathBaseTest {
     configureClasspath.closeConfigureClasspathFormByIcon();
 
     // check the 'Java Build Path' header
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
     configureClasspath.waitConfigureClasspathFormIsOpen();
     configureClasspath.waitExpectedTextJavaBuildPathArea("Libraries");
@@ -76,7 +76,7 @@ public class ConfigureClasspathBaseTest {
     configureClasspath.clickOnDoneBtnConfigureClasspath();
 
     // check the 'JARs and folders' area for 'my-lib' module
-    projectExplorer.selectItem(PROJECT_NAME + "/my-lib");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/my-lib");
     menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
     configureClasspath.waitConfigureClasspathFormIsOpen();
     configureClasspath.selectSourceCategory();
@@ -91,7 +91,7 @@ public class ConfigureClasspathBaseTest {
     configureClasspath.closeConfigureClasspathFormByIcon();
 
     // check the 'JARs and folders' area for 'my-webapp' module
-    projectExplorer.selectItem(PROJECT_NAME + "/my-webapp");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/my-webapp");
     menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
     configureClasspath.waitConfigureClasspathFormIsOpen();
     configureClasspath.selectSourceCategory();

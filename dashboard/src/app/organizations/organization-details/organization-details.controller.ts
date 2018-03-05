@@ -11,7 +11,7 @@
 'use strict';
 import {OrganizationsPermissionService} from '../organizations-permission.service';
 
-enum Tab {Settings, Members, Organization}
+enum Tab {Settings, Members, Organization, Workspaces}
 
 /**
  * Controller for a managing organization details.

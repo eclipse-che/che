@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.languageserver;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.inject.Inject;
 import java.util.List;
@@ -83,14 +83,14 @@ public class CheckMainFeatureForCSharpLanguageTest {
     for (int i = 0; i < 9; i++) {
       editor.typeTextIntoEditor(Keys.BACK_SPACE.toString());
     }
-    editor.waitMarkerInPosition(ERROR_MARKER, 23);
-    editor.waitMarkerInPosition(ERROR_MARKER, 21);
+    editor.waitMarkerInPosition(ERROR, 23);
+    editor.waitMarkerInPosition(ERROR, 21);
     editor.goToCursorPositionVisible(23, 49);
     editor.typeTextIntoEditor(".");
     editor.launchAutocomplete();
     editor.enterAutocompleteProposal("Build() ");
     editor.typeTextIntoEditor(";");
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR);
   }
 
   private void checkLanguageServerInitStateAndLaunch() {

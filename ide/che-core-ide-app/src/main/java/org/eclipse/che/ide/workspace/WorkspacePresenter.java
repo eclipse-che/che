@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.ide.workspace;
 
+import static org.eclipse.che.ide.statepersistance.AppStateConstants.PERSPECTIVES;
+
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -168,7 +170,7 @@ public class WorkspacePresenter
   public JsonObject getState() {
     JsonObject state = Json.createObject();
     JsonObject perspectivesJs = Json.createObject();
-    state.put("perspectives", perspectivesJs);
+    state.put(PERSPECTIVES, perspectivesJs);
     Map<String, Perspective> perspectives = perspectiveManagerProvider.get().getPerspectives();
     for (Map.Entry<String, Perspective> entry : perspectives.entrySet()) {
       // store only default perspective
@@ -181,8 +183,8 @@ public class WorkspacePresenter
 
   @Override
   public Promise<Void> loadState(JsonObject state) {
-    if (state.hasKey("perspectives")) {
-      JsonObject perspectives = state.getObject("perspectives");
+    if (state.hasKey(PERSPECTIVES)) {
+      JsonObject perspectives = state.getObject(PERSPECTIVES);
       Map<String, Perspective> perspectiveMap = perspectiveManagerProvider.get().getPerspectives();
       ArrayOf<Promise<?>> perspectivePromises = Collections.arrayOf();
       for (String key : perspectives.keys()) {

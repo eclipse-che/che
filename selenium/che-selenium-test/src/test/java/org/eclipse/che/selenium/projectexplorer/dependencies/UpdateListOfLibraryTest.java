@@ -10,13 +10,15 @@
  */
 package org.eclipse.che.selenium.projectexplorer.dependencies;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.MAVEN;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.REIMPORT;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -110,12 +112,11 @@ public class UpdateListOfLibraryTest {
     addNewDependency();
 
     mavenPluginStatusBar.waitClosingInfoPanel();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
     projectExplorer.waitContextMenu();
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.MAVEN);
-    projectExplorer.clickOnItemInContextMenu(
-        ProjectExplorer.PROJECT_EXPLORER_CONTEXT_MENU_MAVEN.REIMPORT);
+    projectExplorer.clickOnItemInContextMenu(MAVEN);
+    projectExplorer.clickOnItemInContextMenu(REIMPORT);
     projectExplorer.waitLibraryIsPresent("jackson-core-2.4.3.jar");
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
@@ -124,12 +125,11 @@ public class UpdateListOfLibraryTest {
     deleteDependency();
 
     mavenPluginStatusBar.waitClosingInfoPanel();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
     projectExplorer.waitContextMenu();
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.MAVEN);
-    projectExplorer.clickOnItemInContextMenu(
-        ProjectExplorer.PROJECT_EXPLORER_CONTEXT_MENU_MAVEN.REIMPORT);
+    projectExplorer.clickOnItemInContextMenu(MAVEN);
+    projectExplorer.clickOnItemInContextMenu(REIMPORT);
     projectExplorer.waitLibraryIsNotPresent("servlet-api-2.5.jar");
   }
 

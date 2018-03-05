@@ -56,6 +56,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -136,6 +137,8 @@ public class KubernetesInternalRuntime<
       final List<CompletableFuture<Void>> machinesFutures = new ArrayList<>();
       // futures that must be cancelled explicitly
       final List<CompletableFuture<?>> toCancelFutures = new CopyOnWriteArrayList<>();
+      final EnvironmentContext currentContext = EnvironmentContext.getCurrent();
+
       for (KubernetesMachine machine : machines.values()) {
         final CompletableFuture<Void> machineRunningFuture = machine.waitRunningAsync();
         toCancelFutures.add(machineRunningFuture);
@@ -147,10 +150,10 @@ public class KubernetesInternalRuntime<
                 .thenComposeAsync(checkFailure(failure), executor)
                 .thenRun(publishRunningStatus(machine))
                 .thenCompose(checkFailure(failure))
-                .thenCompose(bootstrap(toCancelFutures, machine))
+                .thenCompose(setContext(currentContext, bootstrap(toCancelFutures, machine)))
                 // see comments above why executor is explicitly put into arguments
                 .thenComposeAsync(checkFailure(failure), executor)
-                .thenCompose(checkServers(toCancelFutures, machine))
+                .thenCompose(setContext(currentContext, checkServers(toCancelFutures, machine)))
                 .exceptionally(publishFailedStatus(failure, machine));
         machinesFutures.add(machineBootChain);
       }
@@ -173,6 +176,18 @@ public class KubernetesInternalRuntime<
       }
       wrapAndRethrow(e);
     }
+  }
+
+  /** Returns new function that wraps given with set/unset context logic */
+  private <T, R> Function<T, R> setContext(EnvironmentContext context, Function<T, R> func) {
+    return funcArgument -> {
+      try {
+        EnvironmentContext.setCurrent(context);
+        return func.apply(funcArgument);
+      } finally {
+        EnvironmentContext.reset();
+      }
+    };
   }
 
   /**

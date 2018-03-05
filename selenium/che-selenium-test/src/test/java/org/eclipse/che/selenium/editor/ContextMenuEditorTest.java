@@ -10,19 +10,19 @@
  */
 package org.eclipse.che.selenium.editor;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.EditorContextMenu.CLOSE;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.EditorContextMenu.FIND;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.EditorContextMenu.FORMAT;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.EditorContextMenu.NAVIGATE_FILE_STRUCTURE;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.EditorContextMenu.OPEN_DECLARATION;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.EditorContextMenu.QUICK_DOC;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.EditorContextMenu.QUICK_FIX;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.EditorContextMenu.REDO;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.EditorContextMenu.REFACTORING;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.EditorContextMenu.REFACTORING_MOVE;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.EditorContextMenu.REFACTORING_RENAME;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.EditorContextMenu.UNDO;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.CLOSE;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.FIND;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.FORMAT;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.NAVIGATE_FILE_STRUCTURE;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.OPEN_DECLARATION;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.QUICK_DOC;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.QUICK_FIX;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.REDO;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.REFACTORING;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.REFACTORING_MOVE;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.REFACTORING_RENAME;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.UNDO;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
@@ -213,7 +213,7 @@ public class ContextMenuEditorTest {
     editor.setCursorToLine(28);
     editor.typeTextIntoEditor("String s = 5;");
     editor.waitTextIntoEditor("String s = 5;");
-    editor.waitMarkerInPosition(ERROR_MARKER, 28);
+    editor.waitMarkerInPosition(ERROR, 28);
     editor.openContextMenuOnElementInEditor("5");
     editor.clickOnItemInContextMenu(QUICK_FIX);
     editor.waitContextMenuIsNotPresent();
@@ -221,7 +221,7 @@ public class ContextMenuEditorTest {
     editor.selectFirstItemIntoFixErrorPropByEnter();
     editor.setCursorToLine(28);
     editor.waitTextIntoEditor("int s = 5;");
-    editor.waitMarkerDisappears(ERROR_MARKER, 28);
+    editor.waitMarkerInvisibility(ERROR, 28);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
   }
 

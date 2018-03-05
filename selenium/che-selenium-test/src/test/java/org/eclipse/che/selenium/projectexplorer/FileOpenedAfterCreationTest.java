@@ -65,7 +65,7 @@ public class FileOpenedAfterCreationTest {
     projectExplorer.quickExpandWithJavaScript();
     notificationsPopupPanel.waitProgressPopupPanelClose();
     loader.waitOnClosed();
-    projectExplorer.selectVisibleItem("webapp");
+    projectExplorer.waitAndSelectItemByName("webapp");
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
@@ -80,7 +80,7 @@ public class FileOpenedAfterCreationTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     loader.waitOnClosed();
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples");
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,

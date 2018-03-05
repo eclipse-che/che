@@ -58,6 +58,8 @@
           <class name="org.eclipse.che.selenium.dashboard.WorkspaceDetailsComposeTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.WorkspacesListTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.CreateFactoryTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.FactoriesListTest"/>
           <class name="org.eclipse.che.selenium.debugger.ChangeVariableWithEvaluatingTest"/>
           <class name="org.eclipse.che.selenium.debugger.CheckBreakPointStateTest"/>
           <class name="org.eclipse.che.selenium.debugger.CppProjectDebuggingTest"/>
@@ -94,16 +96,13 @@
           <class name="org.eclipse.che.selenium.editor.SplitEditorFeatureTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerUserCreatePolicyTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerClickCreatePolicyTest"/>
-          <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithKeepDirectory"/>
-          <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithRootFolder"/>
-          <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithSpecificBranch"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithMultiModuleTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSincePolicyTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithUntilPolicyTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckOpenFileFeatureTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckRunCommandFeatureTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckWelcomePanelOnCodenvyTest"/>
-          <class name="org.eclipse.che.selenium.factory.CreateNamedFactoryFromDashBoard"/>
+          <class name="org.eclipse.che.selenium.factory.CreateNamedFactoryFromDashboardTest"/>
           <class name="org.eclipse.che.selenium.factory.CreateFactoryFromUiWithKeepDirTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSparseCheckoutTest"/>
           <class name="org.eclipse.che.selenium.filewatcher.EditFilesWithTabsTest"/>
@@ -122,6 +121,9 @@
           <class name="org.eclipse.che.selenium.git.GitColorsTest"/>
           <class name="org.eclipse.che.selenium.git.InitializeAndDeleteLocalRepositoryTest"/>
           <class name="org.eclipse.che.selenium.git.SetGitCommitterTest"/>
+          <class name="org.eclipse.che.selenium.git.GitPullConflictTest"/>
+          <class name="org.eclipse.che.selenium.git.GitPullTest"/>
+          <class name="org.eclipse.che.selenium.git.GitCompareTest"/>
           <class name="org.eclipse.che.selenium.gwt.CheckSimpleGwtAppTest"/>
           <class name="org.eclipse.che.selenium.intelligencecommand.MacrosCommandsEditorTest"/>
           <class name="org.eclipse.che.selenium.intelligencecommand.AutocompleteCommandsEditorTest"/>

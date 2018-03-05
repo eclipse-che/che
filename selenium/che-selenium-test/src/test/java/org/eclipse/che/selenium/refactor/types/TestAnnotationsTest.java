@@ -72,7 +72,7 @@ public class TestAnnotationsTest {
     setFieldsForTest("testAnnotation1");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitTextIntoEditor(contentFromInA);
-    projectExplorer.selectItem(pathToCurrentPackage + "/A.java");
+    projectExplorer.waitAndSelectItem(pathToCurrentPackage + "/A.java");
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,

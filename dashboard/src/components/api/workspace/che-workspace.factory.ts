@@ -287,7 +287,6 @@ export class CheWorkspace {
       workspaces.length = 0;
       response.data.forEach((workspace: che.IWorkspace) => {
         workspaces.push(workspace);
-        this.updateWorkspacesList(workspace);
       });
     }, (error: any) => {
       if (error && error.status === 304) {

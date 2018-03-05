@@ -99,7 +99,7 @@ public class CheckoutToRemoteBranchTest {
     importProjectFromRemoteRepo(cloneUrl, PROJECT_NAME);
 
     projectExplorer.waitProjectExplorer();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     uniqueValue = String.valueOf(System.currentTimeMillis());
 
     // Open branches and check it and status
@@ -113,8 +113,8 @@ public class CheckoutToRemoteBranchTest {
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/src/main/java/helloworld/GreetingController.java");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
-    projectExplorer.waitItemInVisibleArea("GreetingController.java");
-    projectExplorer.waitItemInVisibleArea("index.jsp");
+    projectExplorer.waitVisibilityByName("GreetingController.java");
+    projectExplorer.waitVisibilityByName("index.jsp");
     editor.closeFileByNameWithSaving("index.jsp");
     editor.waitWhileFileIsClosed("index.jsp");
 
@@ -155,7 +155,7 @@ public class CheckoutToRemoteBranchTest {
     editor.waitWhileFileIsClosed("index.jsp");
 
     // Add all files to index and commit
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main");
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     events.clickEventLogBtn();
@@ -194,7 +194,7 @@ public class CheckoutToRemoteBranchTest {
         TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
     importProjectFromRemoteRepo(cloneUrl, PROJECT_NAME2);
     projectExplorer.waitItem(PROJECT_NAME2);
-    projectExplorer.selectItem(PROJECT_NAME2);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME2);
     checkoutToSecondRemoteBranch();
 
     // Checking, that present earlier changes
@@ -214,7 +214,7 @@ public class CheckoutToRemoteBranchTest {
     editor.waitWhileFileIsClosed("index.jsp");
 
     // Call and checking show history
-    projectExplorer.selectItem(PROJECT_NAME2 + "/src");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME2 + "/src");
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
     loader.waitOnClosed();
     git.closeGitInfoPanel();

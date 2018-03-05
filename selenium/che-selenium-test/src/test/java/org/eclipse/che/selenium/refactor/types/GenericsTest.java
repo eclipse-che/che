@@ -82,7 +82,7 @@ public class GenericsTest {
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     Assert.assertEquals(editor.getVisibleTextFromEditor(), contentFromInA);
     editor.waitTextIntoEditor(contentFromInA);
-    projectExplorer.selectItem(pathToCurrentPackage + "/A.java");
+    projectExplorer.waitAndSelectItem(pathToCurrentPackage + "/A.java");
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,

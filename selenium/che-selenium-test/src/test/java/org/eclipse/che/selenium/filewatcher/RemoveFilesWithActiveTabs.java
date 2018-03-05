@@ -109,7 +109,7 @@ public class RemoveFilesWithActiveTabs {
   public void checkDeletionWithSingleOpenedTabFromIde() throws Exception {
     String deletedClass = "AppController.java";
     String expectedMessage = "File '" + deletedClass + "' is removed";
-    projectExplorer1.selectVisibleItem(deletedClass);
+    projectExplorer1.waitAndSelectItemByName(deletedClass);
     menu1.runCommand(EDIT, DELETE);
     projectExplorer2.openItemByVisibleNameInExplorer(deletedClass);
     editor2.waitActive();
@@ -131,7 +131,7 @@ public class RemoveFilesWithActiveTabs {
     projectExplorer1.openItemByPath(PROJECT_NAME + "/" + nameFiletxt1);
     projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameReadmeFile);
     projectExplorer2.openItemByPath(PROJECT_NAME + "/" + nameFiletxt1);
-    projectExplorer1.selectItem(PROJECT_NAME + "/" + nameReadmeFile);
+    projectExplorer1.waitAndSelectItem(PROJECT_NAME + "/" + nameReadmeFile);
     projectExplorer1.selectMultiFilesByCtrlKeys(PROJECT_NAME + "/" + nameFiletxt1);
     menu1.runCommand(EDIT, DELETE);
 

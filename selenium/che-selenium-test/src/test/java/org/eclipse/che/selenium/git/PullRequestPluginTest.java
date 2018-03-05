@@ -141,7 +141,7 @@ public class PullRequestPluginTest {
     importWidget.waitAndTypeImporterAsGitInfo(secondProjectUrl, SECOND_PROJECT_NAME);
     configureTypeOfProject();
     explorer.waitItem(FIRST_PROJECT_NAME);
-    explorer.selectItem(FIRST_PROJECT_NAME);
+    explorer.waitAndSelectItem(FIRST_PROJECT_NAME);
     loader.waitOnClosed();
 
     // switch between project
@@ -149,7 +149,7 @@ public class PullRequestPluginTest {
     pullRequestPanel.waitRepoUrl(firstProjectUrl);
     pullRequestPanel.waitBranchName(MAIN_BRANCH);
     pullRequestPanel.waitProjectName(FIRST_PROJECT_NAME);
-    explorer.selectItem(SECOND_PROJECT_NAME);
+    explorer.waitAndSelectItem(SECOND_PROJECT_NAME);
     pullRequestPanel.waitRepoUrl(secondProjectUrl);
     pullRequestPanel.waitBranchName(MAIN_BRANCH);
     pullRequestPanel.waitProjectName(SECOND_PROJECT_NAME);
@@ -158,7 +158,7 @@ public class PullRequestPluginTest {
   @Test(priority = 1)
   public void createPullRequest() {
     explorer.waitItem(FIRST_PROJECT_NAME);
-    explorer.selectItem(FIRST_PROJECT_NAME);
+    explorer.waitAndSelectItem(FIRST_PROJECT_NAME);
     explorer.openItemByPath(FIRST_PROJECT_NAME);
     explorer.openItemByPath(FIRST_PROJECT_NAME + "/README.md");
 
@@ -221,7 +221,7 @@ public class PullRequestPluginTest {
     explorer.waitProjectExplorer();
     explorer.waitItem(FIRST_PROJECT_NAME);
     explorer.waitItem(SECOND_PROJECT_NAME);
-    explorer.selectItem(FIRST_PROJECT_NAME);
+    explorer.waitAndSelectItem(FIRST_PROJECT_NAME);
     explorer.openItemByPath(FIRST_PROJECT_NAME);
     explorer.openItemByPath(FIRST_PROJECT_NAME + "/README.md");
     editor.waitActive();

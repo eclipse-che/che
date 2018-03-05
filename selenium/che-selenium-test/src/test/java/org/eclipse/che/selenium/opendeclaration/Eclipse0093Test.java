@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.opendeclaration;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.WARNING_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -72,7 +72,7 @@ public class Eclipse0093Test {
 
   private void waitMarkerInPosition() throws Exception {
     try {
-      editor.waitMarkerInPosition(WARNING_MARKER, 12);
+      editor.waitMarkerInPosition(WARNING, 12);
     } catch (TimeoutException ex) {
       logExternalLibraries();
       logProjectTypeChecking();

@@ -86,7 +86,7 @@ public class ThreadDumpTest {
     // open project tree
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.waitVisibleItem(PROJECT);
-    projectExplorer.selectItem(PROJECT);
+    projectExplorer.waitAndSelectItem(PROJECT);
 
     startDebuggingApp();
   }

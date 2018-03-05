@@ -74,7 +74,7 @@ public class ClosingSeveralOpenFilesTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/README.md");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp" + "/index.jsp");
     loader.waitOnClosed();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     editor.closeAllTabsByContextMenu();
     editor.waitWhileAllFilesWillClosed();
   }
