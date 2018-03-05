@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class WebDriverLogsReader {
+  public static final String LOG_TIME_FORMAT = "yyyy-MM-dd hh:mm:ss,SSS";
   private static final Logger LOG = LoggerFactory.getLogger(WebDriverLogsReader.class);
 
   private final SeleniumWebDriver seleniumWebDriver;
@@ -144,7 +145,6 @@ public class WebDriverLogsReader {
   }
 
   private String formatTime(long timestamp) {
-    SimpleDateFormat dt = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss,SSS");
-    return dt.format(new Date(timestamp));
+    return new SimpleDateFormat(LOG_TIME_FORMAT).format(new Date(timestamp));
   }
 }

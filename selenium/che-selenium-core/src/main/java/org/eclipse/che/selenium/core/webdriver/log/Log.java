@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.core.webdriver.log;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReader.LOG_TIME_FORMAT;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -127,8 +128,7 @@ public class Log {
   }
 
   private String formatTime(long timestamp) {
-    SimpleDateFormat dt = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss,SSS");
-    return dt.format(new Date(timestamp));
+    return new SimpleDateFormat(LOG_TIME_FORMAT).format(new Date(timestamp));
   }
 
   @Override
