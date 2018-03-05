@@ -98,6 +98,8 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
     String pathToJavaFile = "src/main/java/org/eclipse/qa/examples";
     String pathToJspFile = "src/main/webapp";
     String originMaster = "origin/master";
+    String fetchMess =
+        String.format("%s/%s/%s.git", "Fetched from https://github.com", gitHubUsername, REPO_NAME);
     String mergeMess1 = "Fast-forward Merged commits:";
     String mergeMess2 = "New HEAD commit: ";
     String mergeMess3 = "Already up-to-date";
@@ -113,6 +115,7 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
     changeContentOnGithubSide(textFile, CHANGE_CONTENT);
 
     performFetch();
+    git.waitGitStatusBarWithMess(fetchMess);
 
     // open project and check that content is not changed
     projectExplorer.quickExpandWithJavaScript();
