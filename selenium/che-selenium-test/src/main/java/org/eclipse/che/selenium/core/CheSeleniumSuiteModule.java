@@ -49,6 +49,7 @@ import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFacto
 import org.eclipse.che.selenium.core.user.CheDefaultTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.user.TestUserFactory;
+import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReaderFactory;
 import org.eclipse.che.selenium.core.workspace.CheTestWorkspaceUrlResolver;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
@@ -97,6 +98,7 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     install(new FactoryModuleBuilder().build(TestWorkspaceServiceClientFactory.class));
     install(new FactoryModuleBuilder().build(TestUserFactory.class));
     install(new FactoryModuleBuilder().build(TestUserServiceClientFactory.class));
+    install(new FactoryModuleBuilder().build(WebDriverLogsReaderFactory.class));
 
     bind(PageObjectsInjector.class).to(PageObjectsInjectorImpl.class);
 

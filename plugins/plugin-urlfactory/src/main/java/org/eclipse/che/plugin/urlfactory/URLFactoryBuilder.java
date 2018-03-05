@@ -11,12 +11,12 @@
 package org.eclipse.che.plugin.urlfactory;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharStreams;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -108,7 +108,9 @@ public class URLFactoryBuilder {
     }
     MachineConfigDto machine =
         newDto(MachineConfigDto.class)
-            .withInstallers(singletonList("org.eclipse.che.ws-agent"))
+            .withInstallers(
+                ImmutableList.of(
+                    "org.eclipse.che.ws-agent", "org.eclipse.che.exec", "org.eclipse.che.terminal"))
             .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, DEFAULT_MEMORY_LIMIT_BYTES));
 
     // setup environment

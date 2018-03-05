@@ -19,7 +19,6 @@ import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -47,7 +46,6 @@ public class Eclipse0093Test {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private BrowserLogsUtil browserLogsUtil;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -74,12 +72,10 @@ public class Eclipse0093Test {
     try {
       editor.waitMarkerInPosition(WARNING, 12);
     } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
       logExternalLibraries();
       logProjectTypeChecking();
       logProjectLanguageChecking();
-      browserLogsUtil.storeLogs();
-
-      // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7161", ex);
     }
   }

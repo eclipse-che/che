@@ -37,11 +37,11 @@ export interface IPodItemContainer {
 }
 
 /**
- * Wrapper for jsyaml and simple validator for openshift machine recipe.
+ * Wrapper for jsyaml and simple validator for kubernetes machine recipe.
  *
  *  @author Oleksii Orel
  */
-export class OpenshiftMachineRecipeParser implements IParser {
+export class KubernetesMachineRecipeParser implements IParser {
   private recipeByContent: Map<string, IPodItem> = new Map();
   private recipeKeys: Array<string> = [];
 

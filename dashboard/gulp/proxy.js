@@ -22,7 +22,7 @@ var serverOptions = {
 
 var options = minimist(process.argv.slice(2), serverOptions);
 
-var patterns = ['/api', '/ext', '/ws', '/datasource', '/java-ca', '/im', '/che', '/admin'];
+var patterns = ['/api', '/ext', '/ws', '/datasource', '/java-ca', '/im', '/che', '/admin', '/workspace-loader'];
 
 var proxies = [];
 
@@ -36,6 +36,8 @@ patterns.forEach(function(pattern) {
     proxyOptions.route = '/admin';
   } else if (pattern === '/ext') {
     proxyOptions.route = '/ext';
+  } else if (pattern === '/workspace-loader') {
+    proxyOptions.route = '/workspace-loader';
   } else {
     proxyOptions.route = '/api';
   }

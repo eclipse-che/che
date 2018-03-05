@@ -11,7 +11,6 @@
 package org.eclipse.che.plugin.urlfactory;
 
 import static java.lang.Boolean.FALSE;
-import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -22,6 +21,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
+import com.google.common.collect.ImmutableList;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
@@ -59,7 +59,9 @@ public class URLFactoryBuilderTest {
         newDto(RecipeDto.class).withContent(DEFAULT_DOCKER_IMAGE).withType("dockerimage");
     MachineConfigDto machine =
         newDto(MachineConfigDto.class)
-            .withInstallers(singletonList("org.eclipse.che.ws-agent"))
+            .withInstallers(
+                ImmutableList.of(
+                    "org.eclipse.che.ws-agent", "org.eclipse.che.exec", "org.eclipse.che.terminal"))
             .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, DEFAULT_MEMORY_LIMIT_BYTES));
 
     // setup environment
@@ -95,7 +97,9 @@ public class URLFactoryBuilderTest {
             .withContentType("text/x-dockerfile");
     MachineConfigDto machine =
         newDto(MachineConfigDto.class)
-            .withInstallers(singletonList("org.eclipse.che.ws-agent"))
+            .withInstallers(
+                ImmutableList.of(
+                    "org.eclipse.che.ws-agent", "org.eclipse.che.exec", "org.eclipse.che.terminal"))
             .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, DEFAULT_MEMORY_LIMIT_BYTES));
 
     // setup environment
@@ -129,7 +133,9 @@ public class URLFactoryBuilderTest {
         newDto(RecipeDto.class).withContent(DEFAULT_DOCKER_IMAGE).withType("dockerimage");
     MachineConfigDto machine =
         newDto(MachineConfigDto.class)
-            .withInstallers(singletonList("org.eclipse.che.ws-agent"))
+            .withInstallers(
+                ImmutableList.of(
+                    "org.eclipse.che.ws-agent", "org.eclipse.che.exec", "org.eclipse.che.terminal"))
             .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, DEFAULT_MEMORY_LIMIT_BYTES));
 
     // setup environment
