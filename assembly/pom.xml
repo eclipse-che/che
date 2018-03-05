@@ -29,6 +29,7 @@
         <module>assembly-wsagent-server</module>
         <module>assembly-ide-war</module>
         <module>assembly-wsmaster-war</module>
+        <module>assembly-workspace-loader-war</module>
         <module>assembly-main</module>
     </modules>
 </project>
