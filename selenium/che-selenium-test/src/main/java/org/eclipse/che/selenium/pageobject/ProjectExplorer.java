@@ -58,7 +58,6 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuItems;
-import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -82,7 +81,6 @@ public class ProjectExplorer {
   private final NavigateToFile navigateToFile;
   private final CodenvyEditor editor;
   private final TestWebElementRenderChecker testWebElementRenderChecker;
-  private final BrowserLogsUtil browserLogsUtil;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final WebDriverWaitFactory waitFactory;
   private final int DEFAULT_TIMEOUT;
@@ -95,7 +93,6 @@ public class ProjectExplorer {
       NavigateToFile navigateToFile,
       CodenvyEditor editor,
       TestWebElementRenderChecker testWebElementRenderChecker,
-      BrowserLogsUtil browserLogsUtil,
       SeleniumWebDriverHelper seleniumWebDriverHelper,
       WebDriverWaitFactory webDriverWaitFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
@@ -104,7 +101,6 @@ public class ProjectExplorer {
     this.navigateToFile = navigateToFile;
     this.editor = editor;
     this.testWebElementRenderChecker = testWebElementRenderChecker;
-    this.browserLogsUtil = browserLogsUtil;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.waitFactory = webDriverWaitFactory;
     this.DEFAULT_TIMEOUT = LOAD_PAGE_TIMEOUT_SEC;
@@ -255,7 +251,6 @@ public class ProjectExplorer {
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       if (seleniumWebDriverHelper.isVisible(By.id("ide-loader-progress-bar"))) {
-        browserLogsUtil.storeLogs();
         fail("Known issue https://github.com/eclipse/che/issues/8468", ex);
       }
 

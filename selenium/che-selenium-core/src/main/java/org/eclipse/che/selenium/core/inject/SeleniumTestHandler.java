@@ -41,6 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import javax.annotation.PreDestroy;
 import javax.validation.constraints.NotNull;
+import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
@@ -50,6 +51,7 @@ import org.eclipse.che.selenium.core.pageobject.InjectPageObject;
 import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.user.InjectTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.webdriver.log.WebDriverLogsReaderFactory;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader;
@@ -94,6 +96,10 @@ public abstract class SeleniumTestHandler
   private String htmldumpsDir;
 
   @Inject
+  @Named("tests.webdriverlogs_dir")
+  private String webDriverLogsDir;
+
+  @Inject
   @Named("tests.workspacelogs_dir")
   private String workspaceLogsDir;
 
@@ -128,6 +134,7 @@ public abstract class SeleniumTestHandler
   @Inject private TestGitHubServiceClient gitHubClientService;
   @Inject private TestWorkspaceLogsReader testWorkspaceLogsReader;
   @Inject private SeleniumTestStatistics seleniumTestStatistics;
+  @Inject private WebDriverLogsReaderFactory webDriverLogsReaderFactory;
 
   private final Injector injector;
   private final Map<Long, Object> runningTests = new ConcurrentHashMap<>();
@@ -302,6 +309,7 @@ public abstract class SeleniumTestHandler
       captureScreenshot(result);
       captureHtmlSource(result);
       captureTestWorkspaceLogs(result);
+      storeWebDriverLogs(result);
     }
   }
 
@@ -462,6 +470,32 @@ public abstract class SeleniumTestHandler
               webDriver.switchTo().window(currentWin);
               captureScreenshotFromWindow(result, webDriver);
             });
+  }
+
+  private void storeWebDriverLogs(ITestResult result) {
+    Set<SeleniumWebDriver> webDrivers = new HashSet<>();
+    Object testInstance = result.getInstance();
+    collectInjectedWebDrivers(testInstance, webDrivers);
+    webDrivers.forEach(webDriver -> storeWebDriverLogs(result, webDriver));
+  }
+
+  private void storeWebDriverLogs(ITestResult result, SeleniumWebDriver webDriver) {
+    String testReference = getTestReference(result);
+
+    try {
+      String filename = NameGenerator.generate(testReference + "_", 4) + ".log";
+      Path webDriverLogsDirectory = Paths.get(webDriverLogsDir, filename);
+      Files.createDirectories(webDriverLogsDirectory.getParent());
+      Files.write(
+          webDriverLogsDirectory,
+          webDriverLogsReaderFactory
+              .create(webDriver)
+              .getAllLogs()
+              .getBytes(Charset.forName("UTF-8")),
+          StandardOpenOption.CREATE);
+    } catch (WebDriverException | IOException | JsonParseException e) {
+      LOG.error(format("Can't store web driver logs related to test %s.", testReference), e);
+    }
   }
 
   private void dumpHtmlCodeFromTheCurrentPage(ITestResult result, SeleniumWebDriver webDriver) {
