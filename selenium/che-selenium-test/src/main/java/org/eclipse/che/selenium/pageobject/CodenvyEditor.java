@@ -197,6 +197,7 @@ public class CodenvyEditor {
     SPLIT_VERTICALLY(By.id("contextMenu/Split Pane In Two Columns")),
     SPIT_HORISONTALLY(By.id("contextMenu/Split Pane In Two Rows"));
 
+    @SuppressWarnings("ImmutableEnumChecker")
     private final By id;
 
     TabActionLocator(By id) {
@@ -243,6 +244,7 @@ public class CodenvyEditor {
     FIND(By.id("contextMenu/Find")),
     CLOSE(By.id("contextMenu/Close"));
 
+    @SuppressWarnings("ImmutableEnumChecker")
     private final By itemLocator;
 
     ContextMenuLocator(By itemLocator) {
