@@ -52,8 +52,8 @@ export class WorkspaceDetailsOverviewController {
    * Default constructor that is using resource
    */
   constructor($q: ng.IQService, $route: ng.route.IRouteService, $timeout: ng.ITimeoutService, $location: ng.ILocationService,
-    cheWorkspace: CheWorkspace, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService,
-    namespaceSelectorSvc: NamespaceSelectorSvc, workspaceDetailsService: WorkspaceDetailsService) {
+              cheWorkspace: CheWorkspace, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService,
+              namespaceSelectorSvc: NamespaceSelectorSvc, workspaceDetailsService: WorkspaceDetailsService) {
     this.$q = $q;
     this.$route = $route;
     this.$timeout = $timeout;
@@ -109,13 +109,20 @@ export class WorkspaceDetailsOverviewController {
   fillInListOfUsedNames(): void {
     this.isLoading = true;
     const defer = this.$q.defer();
-    this.namespaceId = this.namespaceSelectorSvc.getNamespaceId();
-    if (this.namespaceId) {
+    let namespace = this.namespaceSelectorSvc.getNamespaceById(this.namespaceId);
+    if (namespace && namespace.label) {
+      this.namespaceSelectorSvc.onNamespaceChanged(namespace.label);
       defer.resolve();
     } else {
-      this.namespaceSelectorSvc.fetchNamespaces().then((namespaceId: string) => {
-        this.namespaceId = namespaceId;
-        defer.resolve();
+      this.namespaceSelectorSvc.fetchNamespaces().then(() => {
+        namespace = this.namespaceSelectorSvc.getNamespaceById(this.namespaceId);
+        if (namespace && namespace.label) {
+          this.namespaceSelectorSvc.onNamespaceChanged(namespace.label);
+          defer.resolve();
+        }
+        // set default
+        this.namespaceId = this.namespaceSelectorSvc.getNamespaceId();
+        defer.reject();
       }, (error: any) => {
         defer.reject(error);
       });
