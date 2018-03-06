@@ -598,20 +598,19 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Moves cursor to {@link WebElement} with provided {@code elementLocator}, waits visibility and
-   * clicks twice on it by {@link org.openqa.selenium.interactions.Action}. Gets rid of {@link
+   * Moves cursor to {@link WebElement} with provided {@code elementLocator}, and clicks twice on it
+   * by {@link org.openqa.selenium.interactions.Action}. Gets rid of {@link
    * org.openqa.selenium.StaleElementReferenceException} by using {@link Actions#doubleClick()}.
    *
    * @param elementLocator locator of element which should be clicked
    */
   public void moveCursorToAndDoubleClick(By elementLocator) {
     moveCursorTo(elementLocator);
-    waitVisibility(elementLocator);
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
   }
 
   /**
-   * Moves cursor to provided {@code webElement}, waits visibility and clicks twice on it by {@link
+   * Moves cursor to provided {@code webElement}, and clicks twice on it by {@link
    * org.openqa.selenium.interactions.Action}. Gets rid of {@link
    * org.openqa.selenium.StaleElementReferenceException} by using {@link Actions#doubleClick()}.
    *
@@ -619,7 +618,6 @@ public class SeleniumWebDriverHelper {
    */
   public void moveCursorToAndDoubleClick(WebElement webElement) {
     moveCursorTo(webElement);
-    waitVisibility(webElement);
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
   }
 
@@ -636,19 +634,17 @@ public class SeleniumWebDriverHelper {
    */
   public void moveCursorToAndClick(By elementLocator) {
     moveCursorTo(elementLocator);
-    waitVisibility(elementLocator);
     actionsFactory.createAction(seleniumWebDriver).click().perform();
   }
 
   /**
-   * Moves cursor to provided {@code webElement}, waits visibility and clicks once on it by {@link
+   * Moves cursor to provided {@code webElement}, and clicks once on it by {@link
    * org.openqa.selenium.interactions.Action}.
    *
    * @param webElement element which should be clicked
    */
   public void moveCursorToAndClick(WebElement webElement) {
     moveCursorTo(webElement);
-    waitVisibility(webElement);
     actionsFactory.createAction(seleniumWebDriver).click().perform();
   }
 
