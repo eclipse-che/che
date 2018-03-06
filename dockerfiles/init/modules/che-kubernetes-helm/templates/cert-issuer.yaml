@@ -1,7 +1,7 @@
 {{- if and .Values.global.tls }}
 {{- if and .Values.global.tls.enabled .Values.global.tls.useCertManager }}
 apiVersion: certmanager.k8s.io/v1alpha1
-kind: Issuer
+kind: ClusterIssuer
 metadata:
   name: letsencrypt
 spec:
