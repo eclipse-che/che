@@ -38,6 +38,7 @@ module.exports = merge(common, {
                 ws: true,
             },
             '/api/workspace': "http://localhost:8080",
+            '/api/keycloak': 'http://localhost:8080'
         }
     },
     plugins:[
