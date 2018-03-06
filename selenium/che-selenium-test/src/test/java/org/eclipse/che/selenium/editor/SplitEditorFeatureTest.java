@@ -70,7 +70,7 @@ public class SplitEditorFeatureTest {
   @Test
   public void checkSplitEditorWindow() {
     editor.waitActive();
-    editor.openContextMenuForTabByName(NAME_JAVA_CLASS);
+    editor.openAndWaitContextMenuForTabByName(NAME_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(TabActionLocator.SPIT_HORISONTALLY);
 
     editor.waitCountTabsWithProvidedName(2, NAME_JAVA_CLASS);

@@ -11,9 +11,9 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
+import static java.util.Comparator.comparingInt;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -30,6 +30,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEME
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATION_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.JAVA_DOC_POPUP;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.POSITION_CURSOR_NUMBER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.PROPOSITION_CONTAINER;
@@ -39,6 +40,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.RULER_F
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.RULER_LINES;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.RULER_OVERVIEW;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.SELECTED_ITEM_IN_EDITOR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_CONTEXT_MENU_BODY;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_FILE_CLOSE_ICON;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_FILE_NAME_AND_STYLE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_FILE_NAME_XPATH;
@@ -68,7 +70,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -132,6 +133,7 @@ public class CodenvyEditor {
     String CONTEXT_MENU = "//div[@id='menu-lock-layer-id']/div[2]";
     String EDITOR_TABS_PANEL = "gwt-debug-multiSplitPanel-tabsPanel";
     String ACTIVE_LINE_NUMBER = "gwt-debug-cursorPosition";
+    String TAB_CONTEXT_MENU_BODY = "//*[@id='gwt-debug-contextMenu/closeAllEditors']/parent::tbody";
     String POSITION_CURSOR_NUMBER =
         "//div[@id='gwt-debug-editorPartStack-contentPanel']//div[text()='%s']";
     String ACTIVE_EDITOR_ENTRY_POINT =
@@ -141,8 +143,7 @@ public class CodenvyEditor {
     String ORION_CONTENT_ACTIVE_EDITOR_XPATH = ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "/div";
     String ACTIVE_LINES_XPATH =
         "//div[@class='textviewSelection']/preceding::div[@class='annotationLine currentLine'][1]";
-    String ACTIVE_LINE_HIGHLIGHT =
-        "//div[@class='annotationLine currentLine' and @role='presentation']";
+    String ACTIVE_LINE_HIGHLIGHT = "//div[@class='annotationLine currentLine']";
     String ACTIVE_TAB_FILE_NAME = "//div[@active]/descendant::div[text()='%s']";
     String ACTIVE_TAB_UNSAVED_FILE_NAME = "//div[@active and @unsaved]//div[text()='%s']";
     String TAB_FILE_NAME_XPATH =
@@ -280,7 +281,7 @@ public class CodenvyEditor {
   @FindBy(xpath = Locators.SHOW_HINTS_POP_UP)
   private WebElement showHintsPopUp;
 
-  @FindBy(xpath = Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH)
+  @FindBy(xpath = ORION_ACTIVE_EDITOR_CONTAINER_XPATH)
   private WebElement activeEditorContainer;
 
   @FindBy(xpath = Locators.AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP)
@@ -326,13 +327,13 @@ public class CodenvyEditor {
    */
   public String getTextFromSplitEditor(int indexOfEditor) {
     waitActive();
-    List<WebElement> lines =
-        webDriverWaitFactory
-            .get(ELEMENT_TIMEOUT_SEC)
-            .until(
-                presenceOfAllElementsLocatedBy(
-                    By.xpath(Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH)));
-    List<WebElement> inner = lines.get(indexOfEditor - 1).findElements(By.tagName("div"));
+    List<WebElement> inner =
+        seleniumWebDriverHelper
+            .waitPresenceOfAllElements(
+                By.xpath(ORION_ACTIVE_EDITOR_CONTAINER_XPATH), ELEMENT_TIMEOUT_SEC)
+            .get(indexOfEditor - 1)
+            .findElements(By.tagName("div"));
+
     return getTextFromOrionLines(inner);
   }
 
@@ -378,17 +379,10 @@ public class CodenvyEditor {
    * @param text expected text
    */
   public void waitTextIntoEditor(final String text) {
-    try {
-      webDriverWaitFactory
-          .get()
-          .until((ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
-    } catch (Exception ex) {
-      LOG.warn(ex.getLocalizedMessage());
-      WaitUtils.sleepQuietly(REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
-      webDriverWaitFactory
-          .get(ATTACHING_ELEM_TO_DOM_SEC)
-          .until((ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
-    }
+    webDriverWaitFactory
+        .get(ELEMENT_TIMEOUT_SEC)
+        .until((ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
+
     loader.waitOnClosed();
   }
 
@@ -445,30 +439,28 @@ public class CodenvyEditor {
   /** get all open editor tabs and close this */
   public void closeAllTabs() {
     loader.waitOnClosed();
-    List<WebElement> tabs;
-    tabs =
-        webDriverWaitFactory
-            .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(visibilityOfAllElementsLocatedBy(By.xpath(ALL_TABS_XPATH)));
-    for (WebElement tab : tabs) {
-      closeFileByNameWithSaving(tab.getText());
-    }
-    webDriverWaitFactory
-        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(invisibilityOfElementLocated(By.xpath(ALL_TABS_XPATH)));
+
+    seleniumWebDriverHelper
+        .waitVisibilityOfAllElements(By.xpath(ALL_TABS_XPATH), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .forEach(tab -> closeFileByNameWithSaving(tab.getText()));
+
+    seleniumWebDriverHelper.waitInvisibility(
+        By.xpath(ALL_TABS_XPATH), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** close all tabs by using context menu */
   public void closeAllTabsByContextMenu() {
-    List<WebElement> tabs;
-    tabs =
-        webDriverWaitFactory
-            .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(visibilityOfAllElementsLocatedBy(By.xpath(ALL_TABS_XPATH)));
+    List<WebElement> tabs =
+        seleniumWebDriverHelper.waitVisibilityOfAllElements(
+            By.xpath(ALL_TABS_XPATH), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+
     WebElement tab =
         seleniumWebDriverHelper.waitVisibility(
             By.xpath(format(TAB_FILE_CLOSE_ICON, tabs.get(tabs.size() - 1).getText())));
-    actionsFactory.createAction(seleniumWebDriver).contextClick(tab).perform();
+
+    seleniumWebDriverHelper.moveCursorToAndContextClick(tab);
+
+    testWebElementRenderChecker.waitElementIsRendered(By.xpath(TAB_CONTEXT_MENU_BODY));
     seleniumWebDriverHelper.waitAndClick(By.id(CLOSE_ALL_TABS));
     seleniumWebDriverHelper.waitInvisibility(By.xpath(ALL_TABS_XPATH));
   }
@@ -478,10 +470,12 @@ public class CodenvyEditor {
    *
    * @param tabName name of tab
    */
-  public void openContextMenuForTabByName(String tabName) {
+  public void openAndWaitContextMenuForTabByName(String tabName) {
     WebElement tab =
         seleniumWebDriverHelper.waitVisibility(By.xpath(format(TAB_FILE_CLOSE_ICON, tabName)));
-    actionsFactory.createAction(seleniumWebDriver).contextClick(tab).perform();
+
+    seleniumWebDriverHelper.moveCursorToAndContextClick(tab);
+    testWebElementRenderChecker.waitElementIsRendered(By.xpath(TAB_CONTEXT_MENU_BODY));
   }
 
   /** Run action for tab from the context menu */
@@ -517,24 +511,19 @@ public class CodenvyEditor {
   }
 
   /** returns focus in the end of current line (in active tab) */
-  // TODO in some cases (for example if we do step into in debug mode and opens editor after that,
-  // focus will be lost). But this problem should be fixed. After the we can remove this method
   public void returnFocusInCurrentLine() {
     List<WebElement> lines =
         seleniumWebDriver.findElements(By.xpath(Locators.ACTIVE_LINE_HIGHLIGHT));
-    Collections.sort(
-        lines, (o1, o2) -> Integer.compare(o1.getLocation().getX(), o2.getLocation().getX()));
-    lines = lines.subList(0, lines.size() / 2); // filter lines from preview
-    for (WebElement line : lines) {
-      if (line.isDisplayed()) {
-        try {
-          int lineWidth = line.getSize().getWidth();
-          Actions action = actionsFactory.createAction(seleniumWebDriver);
-          action.moveToElement(line, lineWidth - 1, 0).click().perform();
-        } catch (Exception ignore) {
-        }
-      }
-    }
+
+    lines.sort(comparingInt(o -> o.getLocation().getX()));
+
+    lines
+        .subList(0, lines.size() / 2)
+        .forEach(
+            line -> {
+              seleniumWebDriverHelper.moveCursorTo(line);
+              actionsFactory.createAction(seleniumWebDriver).click();
+            });
   }
 
   /**
@@ -1042,8 +1031,7 @@ public class CodenvyEditor {
         By.xpath("//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[text()]"),
         ELEMENT_TIMEOUT_SEC);
 
-    seleniumWebDriverHelper.waitInvisibility(
-        By.xpath(Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH));
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(ORION_ACTIVE_EDITOR_CONTAINER_XPATH));
   }
 
   /**
