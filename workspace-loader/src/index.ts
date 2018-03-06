@@ -278,7 +278,8 @@ export class WorkspaceLoader {
     subscribeWorkspaceEvents() : Promise<void> {
         let master = new CheJsonRpcMasterApi(new WebsocketClient());
         return new Promise((resolve) => {
-            master.connect(this.websocketBaseURL() + WEBSOCKET_CONTEXT).then(() => {
+            const entryPoint = this.websocketBaseURL() + WEBSOCKET_CONTEXT + this.getAuthenticationToken();
+            master.connect(entryPoint).then(() => {
                 master.subscribeEnvironmentOutput(this.workspace.id, 
                     (message: any) => this.onEnvironmentOutput(message.text));
 
@@ -340,6 +341,10 @@ export class WorkspaceLoader {
 
             resolve(xhr);
         });
+    }
+
+    getAuthenticationToken(): string {
+        return this.keycloak && this.keycloak.token ? '?token=' + this.keycloak.token : '';
     }
 
 }
