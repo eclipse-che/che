@@ -28,7 +28,7 @@ interface ISharedWorkspaceUser extends che.IUser {
  */
 export class ShareWorkspaceController {
 
-  static $inject = ['cheWorkspace', 'cheUser', 'cheNotification', '$mdDialog', '$document', '$mdConstant', '$route', '$q', 'lodash',
+  static $inject = ['cheWorkspace', 'cheUser', 'chePermissions', 'cheNotification', '$mdDialog', '$document', '$mdConstant', '$route', '$q', 'lodash',
    'confirmDialogService', 'cheTeam', '$log', '$scope', 'cheListHelperFactory'];
 
   /**
