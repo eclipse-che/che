@@ -266,11 +266,18 @@ public class RefactoringService {
             + " ms with "
             + settings.toString());
     IJavaProject javaProject = model.getJavaProject(settings.getProjectPath());
+
+    LOG.info("Java Project: " + javaProject.getProject().exists());
     IJavaElement elementToRename;
     ICompilationUnit cu = null;
     switch (settings.getType()) {
       case COMPILATION_UNIT:
         elementToRename = javaProject.findType(settings.getPath()).getCompilationUnit();
+        LOG.info(
+            "elementToRename: "
+                + elementToRename.getElementName()
+                + " :: "
+                + elementToRename.toString());
         break;
       case PACKAGE:
         elementToRename =

@@ -285,10 +285,13 @@ public class RefactoringManager {
     // package fragments are always renamed with wizard
     RenameRefactoringSession session = DtoFactory.newDto(RenameRefactoringSession.class);
     String id = String.format("rename-%s", sessionId.getAndIncrement());
+    LOG.info("RefactoringManager.createRenameRefactoring create session id" + id);
     session.setSessionId(id);
     session.setOldName(element.getElementName());
     session.setWizardType(getWizardType(element));
     if (lightweight && !(element instanceof IPackageFragment)) {
+      LOG.info(
+          "RefactoringManager.createRenameRefactoring going to create RenameLinkedModeRefactoringSession");
       RenameLinkedModeRefactoringSession refactoringSession =
           new RenameLinkedModeRefactoringSession(element, cu, offset);
       LinkedModeModel model = refactoringSession.getModel();
@@ -296,14 +299,18 @@ public class RefactoringManager {
         session.setLinkedModeModel(model);
       }
       sessions.put(id, refactoringSession);
+      LOG.info("RefactoringManager.createRenameRefactoring return session 1" + session.toString());
       return session;
     } else {
+      LOG.info("RefactoringManager.createRenameRefactoring going to create RenameSession ");
       RenameSupport renameSupport =
           createRenameSupport(element, null, RenameSupport.UPDATE_REFERENCES);
       if (renameSupport != null && renameSupport.preCheck().isOK()) {
         RenameRefactoring refactoring = renameSupport.getfRefactoring();
         RenameSession renameSession = new RenameSession(refactoring);
         sessions.put(id, renameSession);
+        LOG.info(
+            "RefactoringManager.createRenameRefactoring return session 2" + session.toString());
         return session;
       }
       throw new RefactoringException(
