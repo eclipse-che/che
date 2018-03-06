@@ -23,7 +23,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.progressor.ProgressReportDto;
 
-/** Send maven events using JSON RPC to the clients. */
+/** Send jdt.ls events using JSON RPC to the clients. */
 @Singleton
 public class ProcessorJsonRpcCommunication {
   private final Set<String> endpointIds = newConcurrentHashSet();
