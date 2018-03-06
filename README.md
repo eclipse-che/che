@@ -1,6 +1,7 @@
 # Eclipse Che - Eclipse Next-Generation IDE
 [![Eclipse License](https://img.shields.io/badge/license-Eclipse-brightgreen.svg)](https://github.com/codenvy/che/blob/master/LICENSE)
 [![Build Status](https://ci.codenvycorp.com/buildStatus/icon?job=che-master-ci)](https://ci.codenvycorp.com/job/che-master-ci)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Feclipse%2Fche.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Feclipse%2Fche?ref=badge_shield)
 <a href="https://sonarcloud.io/dashboard?id=org.eclipse.che%3Ache-parent%3Amaster">
 <img src="https://sonarcloud.io/images/project_badges/sonarcloud-black.svg" width="94" height="20" href="" />
 </a>
@@ -37,3 +38,6 @@ If you are interested in fixing issues and contributing directly to the code bas
 
 ### License
 Che is open sourced under the Eclipse Public License 1.0.
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Feclipse%2Fche.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Feclipse%2Fche?ref=badge_large)
