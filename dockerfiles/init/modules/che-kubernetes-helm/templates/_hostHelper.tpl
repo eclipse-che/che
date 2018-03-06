@@ -1,7 +1,9 @@
 {{- define "cheHost" }}
-{{- if .Values.isHostBased }}
-{{- printf "master.%s" .Values.cheDomain }}
+{{- if eq .Values.global.serverStrategy "default-host" }}
+{{- printf "%s" .Values.global.ingressDomain }}
+{{- else if eq .Values.global.serverStrategy "single-host" }}
+{{- printf "che.%s" .Values.global.ingressDomain }}
 {{- else }}
-{{- printf "%s" .Values.cheDomain }}
+{{- printf "master.%s" .Values.global.ingressDomain }}
 {{- end }}
 {{- end }}

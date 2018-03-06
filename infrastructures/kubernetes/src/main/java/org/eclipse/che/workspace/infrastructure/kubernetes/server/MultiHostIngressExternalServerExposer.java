@@ -47,18 +47,19 @@ import org.slf4j.LoggerFactory;
  * @author Sergii Leshchenko
  * @author Guy Daich
  */
-public class IngressHostExternalServerExposer
+public class MultiHostIngressExternalServerExposer
     implements ExternalServerExposerStrategy<KubernetesEnvironment> {
 
-  public static final String HOST_STRATEGY = "host";
+  public static final String MULTI_HOST_STRATEGY = "multi-host";
   private final String domain;
   private final Map<String, String> ingressAnnotations;
-  private static final Logger LOG = LoggerFactory.getLogger(IngressHostExternalServerExposer.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(MultiHostIngressExternalServerExposer.class);
 
   @Inject
-  public IngressHostExternalServerExposer(
+  public MultiHostIngressExternalServerExposer(
       @Named("infra.kubernetes.ingress.annotations") Map<String, String> ingressAnnotations,
-      @Named("che.domain") String domain) {
+      @Named("che.infra.kubernetes.ingress.domain") String domain) {
     if (ingressAnnotations == null) {
       LOG.warn(
           "Ingresses annotations are absent. Make sure that workspace ingresses don't need "

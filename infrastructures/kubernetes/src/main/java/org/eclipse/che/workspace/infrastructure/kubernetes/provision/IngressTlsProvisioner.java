@@ -31,20 +31,16 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  *
  * @author Guy Daich
  */
-public class ExternalServerIngressTlsProvisioner
-    implements ConfigurationProvisioner<KubernetesEnvironment> {
+public class IngressTlsProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
 
   protected final boolean isTlsEnabled;
   protected final String tlsSecret;
-  protected final String cheHost;
 
   @Inject
-  public ExternalServerIngressTlsProvisioner(
+  public IngressTlsProvisioner(
       @Named("che.infra.kubernetes.tls_enabled") boolean isTlsEnabled,
-      @Named("che.infra.kubernetes.tls_secret") String tlsSecret,
-      @Named("che.host") String cheHost) {
+      @Named("che.infra.kubernetes.tls_secret") String tlsSecret) {
     this.isTlsEnabled = isTlsEnabled;
-    this.cheHost = cheHost;
     this.tlsSecret = tlsSecret;
   }
 
@@ -63,8 +59,9 @@ public class ExternalServerIngressTlsProvisioner
   }
 
   private void enableTLS(Ingress ingress) {
+    String host = ingress.getSpec().getRules().get(0).getHost();
     IngressTLS ingressTLS =
-        new IngressTLSBuilder().withHosts(cheHost).withSecretName(tlsSecret).build();
+        new IngressTLSBuilder().withHosts(host).withSecretName(tlsSecret).build();
     List<IngressTLS> ingressTLSList = new ArrayList<>(Arrays.asList(ingressTLS));
     ingress.getSpec().setTls(ingressTLSList);
   }

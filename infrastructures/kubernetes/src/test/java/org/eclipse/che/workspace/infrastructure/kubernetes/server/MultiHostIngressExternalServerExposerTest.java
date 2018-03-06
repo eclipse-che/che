@@ -13,7 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
@@ -35,13 +35,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Guy Daich */
-public class IngressPathExternalServerExposerTest {
+public class MultiHostIngressExternalServerExposerTest {
 
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
   public static final String MACHINE_NAME = "pod/main";
   public static final String SERVICE_NAME = SERVER_PREFIX + "12345678" + "-" + MACHINE_NAME;
+  public static final String DOMAIN = "che.com";
 
-  private IngressPathExternalServerExposer pathExternalServerExposer;
+  private MultiHostIngressExternalServerExposer externalServerExposer;
   private KubernetesEnvironment kubernetesEnvironment;
   private Container container;
 
@@ -60,7 +61,7 @@ public class IngressPathExternalServerExposerTest {
 
     kubernetesEnvironment =
         KubernetesEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
-    pathExternalServerExposer = new IngressPathExternalServerExposer(emptyMap());
+    externalServerExposer = new MultiHostIngressExternalServerExposer(emptyMap(), DOMAIN);
   }
 
   @Test
@@ -68,18 +69,19 @@ public class IngressPathExternalServerExposerTest {
     // given
     ServerConfigImpl httpServerConfig =
         new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
+    IntOrString targetPort = new IntOrString(8080);
     ServicePort servicePort =
         new ServicePortBuilder()
             .withName("server-8080")
             .withPort(8080)
             .withProtocol("TCP")
-            .withTargetPort(new IntOrString(8080))
+            .withTargetPort(targetPort)
             .build();
     Map<String, ServicePort> portToServicePort = ImmutableMap.of("8080/tcp", servicePort);
     Map<String, ServerConfig> serversToExpose = ImmutableMap.of("http-server", httpServerConfig);
 
     // when
-    pathExternalServerExposer.exposeExternalServers(
+    externalServerExposer.exposeExternalServers(
         kubernetesEnvironment, MACHINE_NAME, SERVICE_NAME, portToServicePort, serversToExpose);
 
     // then
@@ -100,12 +102,14 @@ public class IngressPathExternalServerExposerTest {
         new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
     ServerConfigImpl wsServerConfig =
         new ServerConfigImpl("8080/tcp", "ws", "/connect", ATTRIBUTES_MAP);
+    IntOrString targetPort = new IntOrString(8080);
+
     ServicePort servicePort =
         new ServicePortBuilder()
             .withName("server-8080")
             .withPort(8080)
             .withProtocol("TCP")
-            .withTargetPort(new IntOrString(8080))
+            .withTargetPort(targetPort)
             .build();
     Map<String, ServicePort> portToServicePort = ImmutableMap.of("8080/tcp", servicePort);
 
@@ -115,7 +119,7 @@ public class IngressPathExternalServerExposerTest {
             "ws-server", wsServerConfig);
 
     // when
-    pathExternalServerExposer.exposeExternalServers(
+    externalServerExposer.exposeExternalServers(
         kubernetesEnvironment, MACHINE_NAME, SERVICE_NAME, portToServicePort, serversToExpose);
 
     // then
@@ -145,19 +149,21 @@ public class IngressPathExternalServerExposerTest {
         new ServerConfigImpl("8080/tcp", "http", "/api", ATTRIBUTES_MAP);
     ServerConfigImpl wsServerConfig =
         new ServerConfigImpl("8081/tcp", "ws", "/connect", ATTRIBUTES_MAP);
+    IntOrString httpTargetPort = new IntOrString(8080);
+    IntOrString wsTargetPort = new IntOrString(8081);
     ServicePort httpServicePort =
         new ServicePortBuilder()
             .withName("server-8080")
             .withPort(8080)
             .withProtocol("TCP")
-            .withTargetPort(new IntOrString(8080))
+            .withTargetPort(httpTargetPort)
             .build();
     ServicePort wsServicePort =
         new ServicePortBuilder()
             .withName("server-8081")
             .withPort(8081)
             .withProtocol("TCP")
-            .withTargetPort(new IntOrString(8081))
+            .withTargetPort(wsTargetPort)
             .build();
     Map<String, ServicePort> portToServicePort =
         ImmutableMap.of("8080/tcp", httpServicePort, "8081/tcp", wsServicePort);
@@ -168,7 +174,7 @@ public class IngressPathExternalServerExposerTest {
             "ws-server", wsServerConfig);
 
     // when
-    pathExternalServerExposer.exposeExternalServers(
+    externalServerExposer.exposeExternalServers(
         kubernetesEnvironment, MACHINE_NAME, SERVICE_NAME, portToServicePort, serversToExpose);
 
     // then
@@ -203,6 +209,8 @@ public class IngressPathExternalServerExposerTest {
     // ensure that required ingress is created
     Ingress ingress = kubernetesEnvironment.getIngresses().get(serviceName + "-server-" + port);
     IngressRule ingressRule = ingress.getSpec().getRules().get(0);
+    assertEquals(ingressRule.getHost(), serviceName + "-" + servicePort.getName() + "." + DOMAIN);
+    assertEquals(ingressRule.getHttp().getPaths().get(0).getPath(), "/");
     IngressBackend backend = ingressRule.getHttp().getPaths().get(0).getBackend();
     assertEquals(backend.getServiceName(), serviceName);
     assertEquals(backend.getServicePort().getStrVal(), servicePort.getName());

@@ -17,7 +17,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ExternalServerIngressTlsProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
@@ -47,7 +47,7 @@ public class KubernetesEnvironmentProvisioner {
   private final InstallerServersPortProvisioner installerServersPortProvisioner;
   private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
   private final SecurityContextProvisioner securityContextProvisioner;
-  private final ExternalServerIngressTlsProvisioner externalServerIngressTlsProvisioner;
+  private final IngressTlsProvisioner externalServerIngressTlsProvisioner;
 
   @Inject
   public KubernetesEnvironmentProvisioner(
@@ -61,7 +61,7 @@ public class KubernetesEnvironmentProvisioner {
       InstallerServersPortProvisioner installerServersPortProvisioner,
       LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
       SecurityContextProvisioner securityContextProvisioner,
-      ExternalServerIngressTlsProvisioner externalServerIngressTlsProvisioner) {
+      IngressTlsProvisioner externalServerIngressTlsProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;

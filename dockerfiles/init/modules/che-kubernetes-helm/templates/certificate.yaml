@@ -1,10 +1,11 @@
-{{- if .Values.tlsEnabled }}
+{{- if and .Values.global.tls }}
+{{- if and .Values.global.tls.enabled .Values.global.tls.useCertManager }}
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
   name: che-host-cert
 spec:
-  secretName: {{ .Values.tlsSecretName }}
+  secretName: {{ .Values.global.tls.secretName }}
   issuerRef:
     name: letsencrypt
   commonName: {{ template "cheHost" . }}
@@ -16,4 +17,5 @@ spec:
         ingressClass: nginx
       domains:
       - {{ template "cheHost" . }}
+{{- end }}
 {{- end }}

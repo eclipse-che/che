@@ -21,11 +21,6 @@ spec:
     spec:
       containers:
       - env:
-        - name: CHE_DOMAIN
-          valueFrom:
-            configMapKeyRef:
-              key: CHE_DOMAIN
-              name: che
         - name: CHE_HOST
           valueFrom:
             configMapKeyRef:
@@ -55,6 +50,11 @@ spec:
           valueFrom:
             configMapKeyRef:
               key: CHE_INFRASTRUCTURE_ACTIVE
+              name: che
+        - name: CHE_INFRA_KUBERNETES_INGRESS_DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_INFRA_KUBERNETES_INGRESS_DOMAIN
               name: che
         - name: CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL
           valueFrom:

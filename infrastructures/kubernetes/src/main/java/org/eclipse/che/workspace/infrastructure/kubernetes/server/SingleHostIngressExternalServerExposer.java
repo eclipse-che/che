@@ -25,13 +25,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Provides a path-based strategy for exposing service ports outside the cluster using Ingress
- * Ingresses will be created without an explicit host (defaulting to *).
+ * Ingresses will be created with a common host name for all workspaces.
  *
  * <p>This strategy uses different Ingress path entries <br>
  * Each external server is exposed with a unique path prefix.
  *
  * <p>This strategy imposes limitation on user-developed applications. <br>
- * It should only be used for local development with a single IP address
  *
  * <pre>
  *   Path-Based Ingress exposing service's port:
@@ -39,7 +38,8 @@ import org.slf4j.LoggerFactory;
  * ...
  * spec:
  *   rules:
- *     - http:
+ *     - host: CHE_HOST
+ *       http:
  *         paths:
  *           - path: service123/webapp        ---->> Service.metadata.name + / + Service.spec.ports[0].name
  *             backend:
@@ -50,22 +50,26 @@ import org.slf4j.LoggerFactory;
  * @author Sergii Leshchenko
  * @author Guy Daich
  */
-public class DefaultHostIngressExternalServerExposer
+public class SingleHostIngressExternalServerExposer
     implements ExternalServerExposerStrategy<KubernetesEnvironment> {
 
-  public static final String DEFAULT_HOST_STRATEGY = "default-host";
+  public static final String SINGLE_HOST_STRATEGY = "single-host";
   private final Map<String, String> ingressAnnotations;
-  private static final Logger LOG = LoggerFactory.getLogger(DefaultHostIngressExternalServerExposer.class);
+  private final String cheHost;
+  private static final Logger LOG =
+      LoggerFactory.getLogger(SingleHostIngressExternalServerExposer.class);
 
   @Inject
-  public DefaultHostIngressExternalServerExposer(
-      @Named("infra.kubernetes.ingress.annotations") Map<String, String> ingressAnnotations) {
+  public SingleHostIngressExternalServerExposer(
+      @Named("infra.kubernetes.ingress.annotations") Map<String, String> ingressAnnotations,
+      @Named("che.host") String cheHost) {
     if (ingressAnnotations == null) {
       LOG.warn(
           "Ingresses annotations are absent. Make sure that workspace ingresses don't need "
               + "to be configured according to ingress controller.");
     }
     this.ingressAnnotations = ingressAnnotations;
+    this.cheHost = cheHost;
   }
 
   @Override
@@ -88,6 +92,7 @@ public class DefaultHostIngressExternalServerExposer
 
       Ingress ingress =
           new ExternalServerIngressBuilder()
+              .withHost(cheHost)
               .withPath(generateExternalServerIngressPath(serviceName, servicePort))
               .withName(generateExternalServerIngressName(serviceName, servicePort))
               .withMachineName(machineName)

@@ -12,8 +12,9 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy.UNIQUE_STRATEGY;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.IngressHostExternalServerExposer.HOST_STRATEGY;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.IngressPathExternalServerExposer.PATH_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.DefaultHostIngressExternalServerExposer.DEFAULT_HOST_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.MultiHostIngressExternalServerExposer.MULTI_HOST_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.SingleHostIngressExternalServerExposer.SINGLE_HOST_STRATEGY;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -38,11 +39,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.KubernetesCheApiEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.LogsRootEnvVariableProvider;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.DefaultHostIngressExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.ExternalServerExposerStrategyProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.IngressAnnotationsProvider;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.IngressHostExternalServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.IngressPathExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.MultiHostIngressExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.SingleHostIngressExternalServerExposer;
 
 /** @author Sergii Leshchenko */
 public class KubernetesInfraModule extends AbstractModule {
@@ -73,8 +75,15 @@ public class KubernetesInfraModule extends AbstractModule {
 
     MapBinder<String, ExternalServerExposerStrategy> ingressStrategies =
         MapBinder.newMapBinder(binder(), String.class, ExternalServerExposerStrategy.class);
-    ingressStrategies.addBinding(HOST_STRATEGY).to(IngressHostExternalServerExposer.class);
-    ingressStrategies.addBinding(PATH_STRATEGY).to(IngressPathExternalServerExposer.class);
+    ingressStrategies
+        .addBinding(MULTI_HOST_STRATEGY)
+        .to(MultiHostIngressExternalServerExposer.class);
+    ingressStrategies
+        .addBinding(SINGLE_HOST_STRATEGY)
+        .to(SingleHostIngressExternalServerExposer.class);
+    ingressStrategies
+        .addBinding(DEFAULT_HOST_STRATEGY)
+        .to(DefaultHostIngressExternalServerExposer.class);
     bind(ExternalServerExposerStrategy.class)
         .toProvider(ExternalServerExposerStrategyProvider.class);
 

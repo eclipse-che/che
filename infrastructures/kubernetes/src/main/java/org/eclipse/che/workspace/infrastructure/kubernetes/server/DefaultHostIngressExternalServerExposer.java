@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Provides a path-based strategy for exposing service ports outside the cluster using Ingress
+ * Ingresses will be created without an explicit host (defaulting to *).
  *
  * <p>This strategy uses different Ingress path entries <br>
  * Each external server is exposed with a unique path prefix.
@@ -49,15 +50,16 @@ import org.slf4j.LoggerFactory;
  * @author Sergii Leshchenko
  * @author Guy Daich
  */
-public class IngressPathExternalServerExposer
+public class DefaultHostIngressExternalServerExposer
     implements ExternalServerExposerStrategy<KubernetesEnvironment> {
 
-  public static final String PATH_STRATEGY = "path";
+  public static final String DEFAULT_HOST_STRATEGY = "default-host";
   private final Map<String, String> ingressAnnotations;
-  private static final Logger LOG = LoggerFactory.getLogger(IngressPathExternalServerExposer.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(DefaultHostIngressExternalServerExposer.class);
 
   @Inject
-  public IngressPathExternalServerExposer(
+  public DefaultHostIngressExternalServerExposer(
       @Named("infra.kubernetes.ingress.annotations") Map<String, String> ingressAnnotations) {
     if (ingressAnnotations == null) {
       LOG.warn(
