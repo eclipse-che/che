@@ -30,4 +30,7 @@ public interface HttpProbeConfigFactory {
    * @throws InternalInfrastructureException when server probe creation failed
    */
   HttpProbeConfig get(String workspaceId, Server server) throws InternalInfrastructureException;
+
+  HttpProbeConfig get(String userId, String workspaceId, Server server)
+      throws InternalInfrastructureException;
 }

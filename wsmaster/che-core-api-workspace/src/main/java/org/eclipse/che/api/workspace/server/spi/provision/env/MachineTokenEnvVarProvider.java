@@ -36,6 +36,9 @@ public class MachineTokenEnvVarProvider implements EnvVarProvider {
 
   @Override
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) throws MachineTokenException {
-    return Pair.of(MACHINE_TOKEN, machineTokenProvider.getToken(runtimeIdentity.getWorkspaceId()));
+    return Pair.of(
+        MACHINE_TOKEN,
+        machineTokenProvider.getToken(
+            runtimeIdentity.getOwnerId(), runtimeIdentity.getWorkspaceId()));
   }
 }

@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.refactor.parameters;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -163,7 +163,7 @@ public class RenameParametersTest {
     editor.launchLocalRefactor();
     editor.typeTextIntoEditor("i");
     editor.typeTextIntoEditor(Keys.ENTER.toString());
-    editor.waitMarkerDisappears(ERROR_MARKER, 14);
+    editor.waitMarkerInvisibility(ERROR, 14);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
   }

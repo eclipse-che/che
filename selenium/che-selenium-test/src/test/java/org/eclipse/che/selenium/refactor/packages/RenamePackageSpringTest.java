@@ -81,7 +81,7 @@ public class RenamePackageSpringTest {
     loader.waitOnClosed();
 
     // check the project tree is not wrap after renaming the package
-    projectExplorer.selectItem(PROJECT_NAME_1 + "/src/main/java/org/eclipse/qa/examples");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME_1 + "/src/main/java/org/eclipse/qa/examples");
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
@@ -98,7 +98,7 @@ public class RenamePackageSpringTest {
     projectExplorer.openItemByPath(
         PROJECT_NAME_1 + "/src/main/java/org/eclipse/dev/examples/AppController.java");
     editor.waitTextIntoEditor(NEW_NAME_PACKAGE);
-    projectExplorer.selectItem(PROJECT_NAME_1 + "/src/main/java/org/eclipse/dev/examples");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME_1 + "/src/main/java/org/eclipse/dev/examples");
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,
@@ -121,7 +121,7 @@ public class RenamePackageSpringTest {
     // check the warning dialog for static main method
     projectExplorer.waitItem(PROJECT_NAME_2);
     notificationsPopupPanel.waitProgressPopupPanelClose();
-    projectExplorer.selectItem(PROJECT_NAME_2 + "/src/main/java/org/eclipse/qa/examples");
+    projectExplorer.waitAndSelectItem(PROJECT_NAME_2 + "/src/main/java/org/eclipse/qa/examples");
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,

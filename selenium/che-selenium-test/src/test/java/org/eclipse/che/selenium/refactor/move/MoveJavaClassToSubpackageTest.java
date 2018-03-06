@@ -53,7 +53,7 @@ public class MoveJavaClassToSubpackageTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.selectItem(
+    projectExplorer.waitAndSelectItem(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java");
     projectExplorer.launchRefactorMoveByKeyboard();
     refactor.waitMoveItemFormIsOpen();

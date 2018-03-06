@@ -209,12 +209,12 @@ public class PushChangeNotUpdatedRepoTest {
 
   private void addToIndexAndCommitAll(String commitMessage, String project) {
     projectExplorer.waitProjectExplorer();
-    projectExplorer.selectItem(project);
+    projectExplorer.waitAndSelectItem(project);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     events.clickEventLogBtn();
     events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
-    projectExplorer.selectItem(project);
+    projectExplorer.waitAndSelectItem(project);
 
     // commit
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);

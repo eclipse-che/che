@@ -13,8 +13,8 @@ package org.eclipse.che.selenium.miscellaneous;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.CommandsGoal.COMMON;
 
 import com.google.inject.Inject;
 import java.net.URL;

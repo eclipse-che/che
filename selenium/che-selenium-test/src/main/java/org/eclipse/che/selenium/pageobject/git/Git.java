@@ -911,7 +911,7 @@ public class Git {
    * @param fileName - name of the new file
    */
   public void createNewFileAndPushItToGitHub(String path, String fileName) {
-    projectExplorer.selectItem(path);
+    projectExplorer.waitAndSelectItem(path);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,

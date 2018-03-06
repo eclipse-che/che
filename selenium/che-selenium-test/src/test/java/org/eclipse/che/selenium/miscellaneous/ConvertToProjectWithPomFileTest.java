@@ -10,10 +10,11 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.CONVERT_TO_PROJECT;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.NEW;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.CONVERT_TO_PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.NEW;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.XML_FILE;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.SIMPLE_FOLDER;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -24,6 +25,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuItems;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
@@ -78,7 +80,7 @@ public class ConvertToProjectWithPomFileTest {
     ide.open(workspace);
 
     ide.waitOpenedWorkspaceIsReadyToUse();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
   }
 
   @BeforeMethod
@@ -92,7 +94,7 @@ public class ConvertToProjectWithPomFileTest {
 
     // create a folder and check message if the path is wrong
     createNewFolder(PROJECT_NAME, NEW_FOLDER_NAME);
-    projectExplorer.selectVisibleItem(NEW_FOLDER_NAME);
+    projectExplorer.waitAndSelectItemByName(NEW_FOLDER_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/" + NEW_FOLDER_NAME);
     projectExplorer.clickOnItemInContextMenu(CONVERT_TO_PROJECT);
     wizard.waitOpenProjectConfigForm();
@@ -118,14 +120,14 @@ public class ConvertToProjectWithPomFileTest {
     // this timeout is needed for waiting that the Editor tab name of 'pom.xml' file is changed
     WaitUtils.sleepQuietly(5);
     editor.waitTabIsPresent("pom.xml");
-    projectExplorer.waitFolderDefinedTypeOfFolderByPath(PATH_TO_POM_FILE, "simpleFolder");
+    projectExplorer.waitDefinedTypeOfFolder(PATH_TO_POM_FILE, SIMPLE_FOLDER);
 
     editor.closeAllTabs();
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitProjectExplorer();
 
     try {
-      projectExplorer.waitFolderDefinedTypeOfFolderByPath(PATH_TO_POM_FILE, "simpleFolder");
+      projectExplorer.waitDefinedTypeOfFolder(PATH_TO_POM_FILE, SIMPLE_FOLDER);
     } catch (TimeoutException ex) {
       // Remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7551");
@@ -158,7 +160,7 @@ public class ConvertToProjectWithPomFileTest {
   }
 
   private void createNewFolder(String path, String folderName) {
-    projectExplorer.selectItem(path);
+    projectExplorer.waitAndSelectItem(path);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
@@ -167,12 +169,12 @@ public class ConvertToProjectWithPomFileTest {
     askForValueDialog.typeAndWaitText(folderName);
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    projectExplorer.waitItemInVisibleArea(folderName);
+    projectExplorer.waitVisibilityByName(folderName);
     loader.waitOnClosed();
   }
 
-  private void createNewFile(String name, String pathToFile, String type) {
-    projectExplorer.selectItem(pathToFile);
+  private void createNewFile(String name, String pathToFile, ContextMenuItems type) {
+    projectExplorer.waitAndSelectItem(pathToFile);
     projectExplorer.openContextMenuByPathSelectedItem(pathToFile);
     projectExplorer.clickOnItemInContextMenu(NEW);
     projectExplorer.clickOnItemInContextMenu(type);

@@ -10,12 +10,14 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.NEW;
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.FOLDER;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
@@ -68,8 +70,8 @@ public class CreateProjectInSelectedFolderTest {
     explorer.waitProjectExplorer();
     explorer.openItemByPath(PROJECT_NAME);
     explorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
-    explorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.NEW);
-    explorer.clickOnNewContextMenuItem(TestProjectExplorerContextMenuConstants.SubMenuNew.FOLDER);
+    explorer.clickOnItemInContextMenu(NEW);
+    explorer.clickOnNewContextMenuItem(FOLDER);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.typeAndWaitText(FOLDER_NAME);
     askForValueDialog.clickOkBtn();

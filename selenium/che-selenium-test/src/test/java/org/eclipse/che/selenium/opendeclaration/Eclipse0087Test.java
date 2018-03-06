@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.opendeclaration;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.WARNING_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -56,7 +56,7 @@ public class Eclipse0087Test {
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test/Test.java");
     editor.waitActive();
-    editor.waitMarkerInPosition(WARNING_MARKER, 12);
+    editor.waitMarkerInPosition(WARNING, 12);
     editor.goToCursorPositionVisible(12, 45);
     editor.typeTextIntoEditor(Keys.F4.toString());
     editor.waitTabIsPresent("Myclass0087");

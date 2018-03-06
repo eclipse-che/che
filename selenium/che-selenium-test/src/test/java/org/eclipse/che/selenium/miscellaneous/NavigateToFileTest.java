@@ -95,7 +95,7 @@ public class NavigateToFileTest {
     launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 2);
   }
 
-  @Test(dataProvider = "dataForCheckingFilesCreatedWithoutIDE")
+  @Test(dataProvider = "dataToNavigateToFileCreatedOutsideIDE")
   public void shouldNavigateToFileWithJustCreatedFiles(
       String inputValueForChecking, Map<Integer, String> expectedValues) throws Exception {
 
@@ -119,6 +119,16 @@ public class NavigateToFileTest {
     assertTrue(navigateToFile.getText().isEmpty());
   }
 
+  @Test(dataProvider = "dataToCheckNavigateByNameWithSpecialSymbols")
+  public void shouldDisplayFilesFoundByMask(
+      String inputValueForChecking, Map<Integer, String> expectedValues) {
+    launchNavigateToFileFromUIAndTypeValue(inputValueForChecking);
+    navigateToFile.waitSuggestedPanel();
+    waitExpectedItemsInNavigateToFileDropdown(expectedValues);
+    navigateToFile.closeNavigateToFileForm();
+    navigateToFile.waitFormToClose();
+  }
+
   private void addHiddenFoldersAndFileThroughProjectService() throws Exception {
     testProjectServiceClient.createFolder(
         workspace.getId(), PROJECT_NAME + "/" + HIDDEN_FOLDER_NAME);
@@ -139,7 +149,6 @@ public class NavigateToFileTest {
 
     // extract the path (without opened class)
     String dropdownVerificationPath = expectedItems.get(numValueFromDropDawnList).split(" ")[1];
-
     String openedFileWithExtension = expectedItems.get(numValueFromDropDawnList).split(" ")[0];
 
     // extract the name of opened files that display in a tab (the ".java" extension are not shown
@@ -153,7 +162,7 @@ public class NavigateToFileTest {
       navigateToFile.selectFileByName(dropdownVerificationPath);
     } catch (WebDriverException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8465");
+      fail("Known issue https://github.com/eclipse/che/issues/8465", ex);
     }
 
     editor.waitActive();
@@ -188,12 +197,6 @@ public class NavigateToFileTest {
             2, "AppController.java (/NavigateFile_2/src/main/java/org/eclipse/qa/examples)")
       },
       {
-        "i",
-        ImmutableMap.of(
-            1, "index.jsp (/NavigateFile/src/main/webapp)",
-            2, "index.jsp (/NavigateFile_2/src/main/webapp)")
-      },
-      {
         "R",
         ImmutableMap.of(
             1, "README.md (/NavigateFile)",
@@ -203,12 +206,48 @@ public class NavigateToFileTest {
   }
 
   @DataProvider
-  private Object[][] dataForCheckingFilesCreatedWithoutIDE() {
+  private Object[][] dataToNavigateToFileCreatedOutsideIDE() {
     return new Object[][] {
       {
         "c",
         ImmutableMap.of(
             1, "createdFrom.api (/NavigateFile)", 2, "createdFrom.con (/NavigateFile_2)")
+      }
+    };
+  }
+
+  @DataProvider
+  private Object[][] dataToCheckNavigateByNameWithSpecialSymbols() {
+    return new Object[][] {
+      {
+        "*.java",
+        ImmutableMap.of(
+            1, "AppController.java (/NavigateFile/src/main/java/org/eclipse/qa/examples)",
+            2, "AppController.java (/NavigateFile_2/src/main/java/org/eclipse/qa/examples)")
+      },
+      {
+        "ind*.jsp",
+        ImmutableMap.of(
+            1, "index.jsp (/NavigateFile/src/main/webapp)",
+            2, "index.jsp (/NavigateFile_2/src/main/webapp)")
+      },
+      {
+        "*R*.md",
+        ImmutableMap.of(
+            1, "README.md (/NavigateFile)",
+            2, "README.md (/NavigateFile_2)")
+      },
+      {
+        "we?.xml",
+        ImmutableMap.of(
+            1, "web.xml (/NavigateFile/src/main/webapp/WEB-INF)",
+            2, "web.xml (/NavigateFile_2/src/main/webapp/WEB-INF)")
+      },
+      {
+        "gu?ss_n?m.j?p",
+        ImmutableMap.of(
+            1, "guess_num.jsp (/NavigateFile/src/main/webapp/WEB-INF/jsp)",
+            2, "guess_num.jsp (/NavigateFile_2/src/main/webapp/WEB-INF/jsp)")
       }
     };
   }

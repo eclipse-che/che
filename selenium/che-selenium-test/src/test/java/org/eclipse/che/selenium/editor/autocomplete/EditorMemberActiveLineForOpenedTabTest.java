@@ -101,7 +101,8 @@ public class EditorMemberActiveLineForOpenedTabTest {
     editor.selectTabByName("sqlFile.sql");
     editor.waitActive();
     editor.expectedNumberOfActiveLine(3);
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/sqlFile.sql");
+    projectExplorer.waitAndSelectItem(
+        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/sqlFile.sql");
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     loader.waitOnClosed();
     askDialog.acceptDialogWithText(DELETE_TEXT_FOR_SQL);
@@ -111,7 +112,7 @@ public class EditorMemberActiveLineForOpenedTabTest {
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/sqlFile.sql");
     editor.selectTabByName("another");
     editor.expectedNumberOfActiveLine(5);
-    projectExplorer.selectItem(
+    projectExplorer.waitAndSelectItem(
         PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/LessFile.less");
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     loader.waitOnClosed();
@@ -123,7 +124,8 @@ public class EditorMemberActiveLineForOpenedTabTest {
     editor.selectTabByName("another");
     loader.waitOnClosed();
     editor.expectedNumberOfActiveLine(5);
-    projectExplorer.selectItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/another");
+    projectExplorer.waitAndSelectItem(
+        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/another");
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     loader.waitOnClosed();
     askDialog.acceptDialogWithText(DELETE_TEXT_FOR_TEXT_FILE);

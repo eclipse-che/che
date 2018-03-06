@@ -16,6 +16,8 @@ import {DockerImageEnvironmentManager} from './docker-image-environment-manager'
 import {DockerFileEnvironmentManager} from './docker-file-environment-manager';
 import {ComposeEnvironmentManager} from './compose-environment-manager';
 import {OpenshiftEnvironmentManager} from './openshift-environment-manager';
+import {DefaultEnvironmentManager} from './default-environment-manager';
+import {KubernetesEnvironmentManager} from './kubernetes-environment-manager';
 
 export class CheEnvironmentManager {
 
@@ -44,8 +46,12 @@ export class CheEnvironmentManager {
         return new DockerFileEnvironmentManager(this.$log);
       case CheRecipeTypes.COMPOSE:
         return new ComposeEnvironmentManager(this.$log);
+      case CheRecipeTypes.KUBERNETES:
+        return new KubernetesEnvironmentManager(this.$log);
       case CheRecipeTypes.OPENSHIFT:
         return new OpenshiftEnvironmentManager(this.$log);
+      default:
+        return new DefaultEnvironmentManager(this.$log, environmentType);
     }
   }
 

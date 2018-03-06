@@ -150,7 +150,7 @@ public class GitPullTest {
   private void checkPullAfterRemovingContent(
       String tabNameOpenedFile, String pathToItemInProjectExplorer) {
     editor.waitTextNotPresentIntoEditor(tabNameOpenedFile);
-    projectExplorer.waitLibrariesIsNotPresent(pathToItemInProjectExplorer);
+    projectExplorer.waitLibrariesAreNotPresent(pathToItemInProjectExplorer);
   }
 
   private void changeContentOnGithubSide(String pathToContent, String content) throws IOException {

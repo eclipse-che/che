@@ -93,7 +93,7 @@ public class GenerateEffectivePomTest {
       String modulePath, List<String> expectedText, String nameOfTab) {
     projectExplorer.openItemByPath(modulePath);
     loader.waitOnClosed();
-    projectExplorer.selectItem(modulePath);
+    projectExplorer.waitAndSelectItem(modulePath);
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.GENERATE_EFFECTIVE_POM);

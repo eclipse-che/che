@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.HashMap;
@@ -25,6 +27,10 @@ public class WebDriverWaitFactory {
   @Inject
   public WebDriverWaitFactory(SeleniumWebDriver seleniumWebDriver) {
     this.seleniumWebDriver = seleniumWebDriver;
+  }
+
+  public WebDriverWait get() {
+    return get(LOAD_PAGE_TIMEOUT_SEC);
   }
 
   public WebDriverWait get(int timeout) {

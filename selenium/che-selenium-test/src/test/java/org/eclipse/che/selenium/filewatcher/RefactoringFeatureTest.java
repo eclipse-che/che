@@ -131,7 +131,7 @@ public class RefactoringFeatureTest {
     String pathToRenamedItem =
         String.format(
             PROJECT_NAME + "%s%s", "/src/main/java/org/eclipse/qa/examples/", renamedClassName);
-    projectExplorer2.selectItem(pathToRenamedItem);
+    projectExplorer2.waitAndSelectItem(pathToRenamedItem);
     menu2.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING,

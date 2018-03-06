@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.opendeclaration;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.WARNING_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -19,7 +19,6 @@ import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -47,7 +46,6 @@ public class Eclipse0093Test {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private BrowserLogsUtil browserLogsUtil;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -72,14 +70,12 @@ public class Eclipse0093Test {
 
   private void waitMarkerInPosition() throws Exception {
     try {
-      editor.waitMarkerInPosition(WARNING_MARKER, 12);
+      editor.waitMarkerInPosition(WARNING, 12);
     } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
       logExternalLibraries();
       logProjectTypeChecking();
       logProjectLanguageChecking();
-      browserLogsUtil.storeLogs();
-
-      // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7161", ex);
     }
   }

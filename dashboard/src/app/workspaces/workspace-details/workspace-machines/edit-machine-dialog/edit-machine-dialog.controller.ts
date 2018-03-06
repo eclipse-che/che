@@ -13,7 +13,8 @@ import {CheEnvironmentRegistry} from '../../../../../components/api/environment/
 import {EnvironmentManager} from '../../../../../components/api/environment/environment-manager';
 import {IEnvironmentManagerMachine} from '../../../../../components/api/environment/environment-manager-machine';
 import {CheRecipeService} from '../../che-recipe.service';
-import {IPodItem} from '../../../../../components/api/environment/openshift-machine-recipe-parser';
+import {IPodItem} from '../../../../../components/api/environment/kubernetes-machine-recipe-parser';
+import {CheRecipeTypes} from '../../../../../components/api/recipe/che-recipe-types';
 
 
 /**
@@ -41,6 +42,7 @@ export class EditMachineDialogController {
   private environment: che.IWorkspaceEnvironment;
   private copyEnvironment: che.IWorkspaceEnvironment;
   private editorMode: string;
+  private isEditorReadOnly: boolean;
 
   /**
    * Environment recipe service.
@@ -74,6 +76,7 @@ export class EditMachineDialogController {
     if (!this.environmentManager) {
       return;
     }
+    this.isEditorReadOnly = CheRecipeTypes.getValues().indexOf(this.environmentManager.type) === -1;
     this.editorMode = this.environmentManager.editorMode;
 
     if (this.isAdd) {
@@ -139,7 +142,9 @@ export class EditMachineDialogController {
   onNameChange(name: string): void {
     this.machineName = name;
     const machineName = this.getFullName(name);
-    const environment = this.environmentManager.renameMachine(this.environment, this.originMachine.name, machineName);
+    const oldEnvironment = this.isAdd ? this.copyEnvironment : this.environment;
+    const oldMachineName = this.isAdd ? this.machine.name : this.originMachine.name;
+    const environment = this.environmentManager.renameMachine(oldEnvironment, oldMachineName, machineName);
     const machines = this.environmentManager.getMachines(environment);
     const machineIndex = machines.findIndex((machine: IEnvironmentManagerMachine) => {
       return machine.name === machineName;
@@ -245,6 +250,9 @@ export class EditMachineDialogController {
    * @returns {string}
    */
   private getFullName(name: string): string {
+    if (!this.originMachine.name) {
+      return name;
+    }
     const oldName = this.environmentManager.getMachineName(this.originMachine);
     return this.originMachine.name.replace(new RegExp(oldName + '$'), name);
   }

@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -82,20 +84,18 @@ public class CheckHiddenFolderAndFileCreatedFromCommandTest {
   @Test
   public void checkHiddenFolderAndFile() throws Exception {
     projectExplorer.waitProjectExplorer();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
 
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project
             .SHOW_HIDE_HIDDEN_FILES); // all hidden files and folders are visible
-    projectExplorer.invokeCommandWithContextMenu(
-        ProjectExplorer.CommandsGoal.COMMON, PROJECT_NAME, COMMAND_CREATE_FOLDER_NAME);
+    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, COMMAND_CREATE_FOLDER_NAME);
     loader.waitOnClosed();
     projectExplorer.waitItem(PATH_TO_FOLDER);
     projectExplorer.openItemByPath(PATH_TO_FOLDER); // the created hidden folder is visible
-    projectExplorer.invokeCommandWithContextMenu(
-        ProjectExplorer.CommandsGoal.COMMON, PROJECT_NAME, COMMAND_CREATE_FILE_NAME);
+    projectExplorer.invokeCommandWithContextMenu(COMMON, PROJECT_NAME, COMMAND_CREATE_FILE_NAME);
     loader.waitOnClosed();
     projectExplorer.waitItem(PATH_TO_FILE);
     projectExplorer.openItemByPath(PATH_TO_FILE); // the created hidden file is visible

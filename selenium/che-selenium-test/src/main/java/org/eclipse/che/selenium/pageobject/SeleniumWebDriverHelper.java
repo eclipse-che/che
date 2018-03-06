@@ -10,13 +10,21 @@
  */
 package org.eclipse.che.selenium.pageobject;
 
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfAllElements;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.openqa.selenium.By;
@@ -24,10 +32,11 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** @author Igor Okhrimenko */
+/** @author Ihor Okhrimenko */
 @Singleton
 public class SeleniumWebDriverHelper {
   protected final int DEFAULT_TIMEOUT = LOAD_PAGE_TIMEOUT_SEC;
@@ -37,7 +46,7 @@ public class SeleniumWebDriverHelper {
   protected final Logger LOG = LoggerFactory.getLogger(SeleniumWebDriverHelper.class);
 
   @Inject
-  protected SeleniumWebDriverHelper(
+  public SeleniumWebDriverHelper(
       SeleniumWebDriver seleniumWebDriver,
       WebDriverWaitFactory webDriverWaitFactory,
       ActionsFactory actionsFactory) {
@@ -107,9 +116,10 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until {@link WebElement} with provided locator {@link By} be visible
+   * Waits during {@code timeout}, until {@link WebElement} with provided {@code elementLocator} is
+   * visible
    *
-   * @param elementLocator
+   * @param elementLocator locator of element which should be checked
    * @param timeout waiting time in seconds
    * @return found element
    */
@@ -118,9 +128,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until {@link WebElement} with provided locator {@link By} be visible
+   * Waits until {@link WebElement} with provided {@code elementLocator} is visible.
    *
-   * @param elementLocator
+   * @param elementLocator locator of element which should be checked
    * @return found element
    */
   public WebElement waitVisibility(By elementLocator) {
@@ -128,9 +138,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until provided {@link WebElement} be visible
+   * Waits during {@code timeout} until provided {@code webElement} is visible.
    *
-   * @param webElement
+   * @param webElement element which should be checked
    * @param timeout waiting time in seconds
    * @return found element
    */
@@ -139,9 +149,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until provided {@link WebElement} be visible
+   * Waits until provided {@code webElement} is visible.
    *
-   * @param webElement
+   * @param webElement element which should be checked
    * @return found element
    */
   public WebElement waitVisibility(WebElement webElement) {
@@ -149,10 +159,178 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until {@link WebElement} with provided locator {@link By} be attached to DOM it does not
-   * mean that element is visible
+   * Waits until all of {@link WebElement}, which are found by {@code elementsLocator}, are visible,
+   * and gets them;
    *
-   * @param elementLocator
+   * @param elementsLocator common locator for multiple elements
+   * @return all elements which found by specified {@code elementLocator},
+   *     <p>throws {@link org.openqa.selenium.TimeoutException} if at least one of the found
+   *     elements is not visible after timeout;
+   */
+  public List<WebElement> waitVisibilityOfAllElements(By elementsLocator) {
+    return waitVisibilityOfAllElements(elementsLocator, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during specified {@code timeout} until all of {@link WebElement}, which are found by
+   * {@code elementsLocator}, are visible and gets them.
+   *
+   * @param elementsLocator common locator for multiple elements
+   * @param timeout waiting time in seconds
+   * @return all elements which found by specified {@code elementLocator},
+   *     <p>throws {@link org.openqa.selenium.TimeoutException} if at least one of the found
+   *     elements is not visible after timeout;
+   */
+  public List<WebElement> waitVisibilityOfAllElements(By elementsLocator, int timeout) {
+    return webDriverWaitFactory
+        .get(timeout)
+        .until(visibilityOfAllElementsLocatedBy(elementsLocator));
+  }
+
+  /**
+   * Waits until all of specified {@code elements}, are visible.
+   *
+   * @param elements web elements which should check
+   * @return provided {@code elements},
+   *     <p>throws {@link org.openqa.selenium.TimeoutException} if at least one of the specified
+   *     {@code elements} is not visible after timeout;
+   */
+  public List<WebElement> waitAllVisibility(List<WebElement> elements) {
+    return waitAllVisibility(elements, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during specified {@code timeout} until all of provided {@code elements}, are visible.
+   *
+   * @param elements web elements which should check
+   * @param timeout waiting time in seconds
+   * @return provided {@code elements},
+   *     <p>throws {@link org.openqa.selenium.TimeoutException} if at least one of the specified
+   *     {@code elements} is not visible after timeout;
+   */
+  public List<WebElement> waitAllVisibility(List<WebElement> elements, int timeout) {
+    return webDriverWaitFactory.get(timeout).until(visibilityOfAllElements(elements));
+  }
+
+  /**
+   * Waits visibility and gets {@link WebElement} for all of the {@code elementsLocators}
+   *
+   * @param elementsLocators locators for all elements which should be found
+   * @return all found elements,
+   *     <p>throws {@link org.openqa.selenium.TimeoutException} if at least one of the specified
+   *     {@code elements} is not visible after timeout;
+   */
+  public List<WebElement> waitAllVisibilityBy(List<By> elementsLocators) {
+    return waitAllVisibilityBy(elementsLocators, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits visibility during timeout and gets {@link WebElement} for all of the {@code
+   * elementsLocators}
+   *
+   * @param elementsLocators locators for all elements which should be found
+   * @param timeout waiting timeout in seconds
+   * @return all found elements
+   */
+  public List<WebElement> waitAllVisibilityBy(List<By> elementsLocators, int timeout) {
+    return elementsLocators
+        .stream()
+        .map((elementLocator -> waitVisibility(elementLocator, timeout)))
+        .collect(toList());
+  }
+
+  /**
+   * Waits during {@code timeout}, until {@link WebElement} with provided {@code elementLocator} is
+   * invisible.
+   *
+   * @param elementLocator locator of element which should be checked
+   * @param timeout waiting time in seconds
+   * @throw {@link org.openqa.selenium.TimeoutException} - if visible during timeout.
+   */
+  public void waitInvisibility(By elementLocator, int timeout) {
+    webDriverWaitFactory.get(timeout).until(invisibilityOfElementLocated(elementLocator));
+  }
+
+  /**
+   * Waits until {@link WebElement} with provided {@code elementLocator} is invisible.
+   *
+   * @param elementLocator locator of element which should be checked
+   * @throw {@link org.openqa.selenium.TimeoutException} - if visible during timeout.
+   */
+  public void waitInvisibility(By elementLocator) {
+    waitInvisibility(elementLocator, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} until provided {@code webElement} is invisible.
+   *
+   * @param webElement element which should be checked
+   * @param timeout waiting time in seconds
+   * @throw {@link org.openqa.selenium.TimeoutException} - if visible during timeout.
+   */
+  public void waitInvisibility(WebElement webElement, int timeout) {
+    webDriverWaitFactory.get(timeout).until(invisibilityOfAllElements(asList(webElement)));
+  }
+
+  /**
+   * Waits until provided {@code webElement} is invisible.
+   *
+   * @param webElement element which should be checked
+   * @throw {@link org.openqa.selenium.TimeoutException} - if visible during timeout.
+   */
+  public void waitInvisibility(WebElement webElement) {
+    waitInvisibility(webElement, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits until each item from specified {@code elements} be invisible.
+   *
+   * @param elements web elements which should be checked
+   */
+  public void waitAllInvisibility(List<WebElement> elements) {
+    webDriverWaitFactory
+        .get(DEFAULT_TIMEOUT)
+        .until(ExpectedConditions.invisibilityOfAllElements(elements));
+  }
+
+  /**
+   * Waits during {@code timeout} until each item from specified {@code elements} be invisible.
+   *
+   * @param elements web elements which should be checked
+   * @param timeout waiting timeout in seconds
+   */
+  public void waitAllInvisibility(List<WebElement> elements, int timeout) {
+    webDriverWaitFactory.get(timeout).until(ExpectedConditions.invisibilityOfAllElements(elements));
+  }
+
+  /**
+   * Waits until each {@link WebElement}, which defined by locator from {@code elementsLocators}, be
+   * invisible.
+   *
+   * @param elementsLocators locators of each elements which should be checked
+   */
+  public void waitAllInvisibilityBy(List<By> elementsLocators) {
+    waitAllInvisibilityBy(elementsLocators, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits until each {@link WebElement}, which defined by locator from {@code elementsLocators}, be
+   * invisible.
+   *
+   * @param elementsLocators locators of each elements which should be checked
+   * @param timeout waiting timeout in seconds
+   */
+  public void waitAllInvisibilityBy(List<By> elementsLocators, int timeout) {
+    elementsLocators.forEach(element -> waitInvisibility(element, timeout));
+  }
+
+  /**
+   * Waits during {@code timeout} until {@link WebElement} with provided {@code elementLocator} is
+   * attached to DOM.
+   *
+   * <p>Note! It does not mean that element is visible.
+   *
+   * @param elementLocator locator of element which should be checked
    * @param timeout waiting time in seconds
    * @return found element
    */
@@ -161,42 +339,77 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until {@link WebElement} with provided locator {@link By} be attached to DOM it does not
-   * mean that element is visible
+   * Waits until {@link WebElement} with provided {@code elementLocator} is attached to DOM.
+   *
+   * <p>Note! It does not mean that element is visible.
    *
    * @param elementLocator
    * @return found element
    */
   public WebElement waitPresence(By elementLocator) {
-    return webDriverWaitFactory
-        .get(DEFAULT_TIMEOUT)
-        .until(presenceOfElementLocated(elementLocator));
+    return waitPresence(elementLocator, DEFAULT_TIMEOUT);
   }
 
   /**
-   * Type text in the {@link WebElement} with provided locator {@link By}
+   * Waits until all {@link WebElement} with provided {@code elementsLocator} are attached to DOM.
    *
-   * @param elementLocator
-   * @param text
+   * <p>Note! It does not mean that elements are visible.
+   *
+   * @param elementsLocator common locator for multiple elements
+   * @return all found elements
+   */
+  public List<WebElement> waitPresenceOfAllElements(By elementsLocator) {
+    return waitPresenceOfAllElements(elementsLocator, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} until all {@link WebElement} with provided {@code elementsLocator}
+   * is attached to DOM.
+   *
+   * <p>Note! It does not mean that elements are visible.
+   *
+   * @param elementsLocator common locator for multiple elements
+   * @param timeout waiting timeout in seconds
+   * @return all found elements
+   */
+  public List<WebElement> waitPresenceOfAllElements(By elementsLocator, int timeout) {
+    return webDriverWaitFactory.get(timeout).until(presenceOfAllElementsLocatedBy(elementsLocator));
+  }
+
+  /**
+   * Waits until {@link WebElement} with specified {@code elementLocator} is visible, and types text
+   * in it.
+   *
+   * @param elementLocator locator of element in which {@code text} should be sent
+   * @param text text for sending
    */
   public void sendKeysTo(By elementLocator, String text) {
     waitVisibility(elementLocator).sendKeys(text);
   }
 
   /**
-   * Type text in the provided {@link WebElement}
+   * Waits until {@code webElement} is visible, and types text in it.
    *
-   * @param webElement
-   * @param text
+   * @param webElement element in which {@code text} should be sent
+   * @param text text for sending
    */
   public void sendKeysTo(WebElement webElement, String text) {
     waitVisibility(webElement).sendKeys(text);
   }
 
   /**
-   * Waits visibility of {@link WebElement} with provided locator {@link By} and get text
+   * Types {@code text}
    *
-   * @param elementLocator
+   * @param text text for sending
+   */
+  public void sendKeys(String text) {
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(text).perform();
+  }
+
+  /**
+   * Waits visibility of {@link WebElement} with provided {@code elementLocator} and gets text.
+   *
+   * @param elementLocator locator of element from which text should be got
    * @return element text by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetValue(By elementLocator) {
@@ -204,9 +417,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits visibility of provided {@link WebElement} and get text
+   * Waits visibility of provided {@code webElement} and gets text.
    *
-   * @param webElement
+   * @param webElement element, text from which should be got
    * @return element text by {@link WebElement#getAttribute(String)}
    */
   public String waitVisibilityAndGetValue(WebElement webElement) {
@@ -214,19 +427,19 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits visibility of {@link WebElement} with provided locator {@link By} and get text
+   * Waits visibility of {@link WebElement} with provided {@code elementLocator} and gets text.
    *
-   * @param fieldLocator
+   * @param elementLocator element from which text should be got
    * @return element text by {@link WebElement#getText()}
    */
-  public String waitVisibilityAndGetText(By fieldLocator) {
-    return waitVisibility(fieldLocator).getText();
+  public String waitVisibilityAndGetText(By elementLocator) {
+    return waitVisibility(elementLocator).getText();
   }
 
   /**
-   * Waits visibility of provided {@link WebElement} and get text
+   * Waits visibility of provided {@code webElement} and gets text.
    *
-   * @param webElement
+   * @param webElement element from which text should be got
    * @return element text by {@link WebElement#getText()}
    */
   public String waitVisibilityAndGetText(WebElement webElement) {
@@ -234,11 +447,12 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until text extracted by {@link WebElement#getAttribute(String)} be equivalent to provided
-   * text
+   * Waits during {@code timeout} until text extracted from {@link WebElement} with specified {@code
+   * elementLocator} by {@link WebElement#getAttribute(String)} is equivalent to provided {@code
+   * expectedValue}.
    *
-   * @param elementLocator
-   * @param expectedValue
+   * @param elementLocator locator of element in which text should be checked
+   * @param expectedValue expected text which should be present in the element
    * @param timeout waiting time in seconds
    */
   public void waitValue(By elementLocator, String expectedValue, int timeout) {
@@ -250,22 +464,22 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until text extracted by {@link WebElement#getAttribute(String)} be equivalent to provided
-   * text
+   * Waits until text extracted from {@link WebElement} with specified {@code elementLocator} by
+   * {@link WebElement#getAttribute(String)} is equivalent to provided {@code expectedValue}.
    *
-   * @param elementLocator
-   * @param expectedValue
+   * @param elementLocator locator of element in which text should be checked
+   * @param expectedValue expected text which should be present in the element
    */
   public void waitValue(By elementLocator, String expectedValue) {
     waitValue(elementLocator, expectedValue, DEFAULT_TIMEOUT);
   }
 
   /**
-   * Waits until text extracted by {@link WebElement#getAttribute(String)} be equivalent to provided
-   * text
+   * Waits during {@code timeout} until text extracted from specified {@code webElement} by {@link
+   * WebElement#getAttribute(String)} is equivalent to provided {@code expectedValue}.
    *
-   * @param webElement
-   * @param expectedValue
+   * @param webElement element in which text should be checked
+   * @param expectedValue expected text which should be present in the element
    * @param timeout waiting time in seconds
    */
   public void waitValue(WebElement webElement, String expectedValue, int timeout) {
@@ -277,21 +491,22 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until text extracted by {@link WebElement#getAttribute(String)} be equivalent to provided
-   * text
+   * Waits until text extracted from specified {@code webElement} by {@link
+   * WebElement#getAttribute(String)} is equivalent to provided {@code expectedValue}.
    *
-   * @param webElement
-   * @param expectedValue
+   * @param webElement element in which text should be checked
+   * @param expectedValue expected text which should be present in the element
    */
   public void waitValue(WebElement webElement, String expectedValue) {
     waitValue(webElement, expectedValue, DEFAULT_TIMEOUT);
   }
 
   /**
-   * Waits until text extracted by {@link WebElement#getText()} be equivalent to provided text
+   * Waits during {@code timeout} until text extracted from {@link WebElement} with specified {@code
+   * elementLocator} by {@link WebElement#getText()} is equivalent to provided {@code expectedText}.
    *
-   * @param elementLocator
-   * @param expectedText
+   * @param elementLocator locator of element in which text should be checked
+   * @param expectedText expected text which should be present in the element
    * @param timeout waiting time in seconds
    */
   public void waitText(By elementLocator, String expectedText, int timeout) {
@@ -303,20 +518,22 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until text extracted by {@link WebElement#getText()} be equivalent to provided text
+   * Waits until text extracted from {@link WebElement} with specified {@code elementLocator} by
+   * {@link WebElement#getText()} is equivalent to provided {@code expectedText}.
    *
-   * @param elementLocator
-   * @param expectedText
+   * @param elementLocator locator of element in which text should be checked
+   * @param expectedText expected text which should be present in the element
    */
   public void waitText(By elementLocator, String expectedText) {
     waitText(elementLocator, expectedText, DEFAULT_TIMEOUT);
   }
 
   /**
-   * Waits until text extracted by {@link WebElement#getText()} be equivalent to provided text
+   * Waits during {@code timeout} until text extracted from specified {@code webElement} by {@link
+   * WebElement#getText()} is equivalent to provided {@code expectedText}.
    *
-   * @param webElement
-   * @param expectedText
+   * @param webElement element in which text should be checked
+   * @param expectedText expected text which should be present in the element
    * @param timeout waiting time in seconds
    */
   public void waitText(WebElement webElement, String expectedText, int timeout) {
@@ -328,20 +545,21 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until text extracted by {@link WebElement#getText()} be equivalent to provided text
+   * Waits until text extracted from {@code webElement} by {@link WebElement#getText()} is
+   * equivalent to provided {@code expectedText}.
    *
-   * @param webElement
-   * @param expectedText
+   * @param webElement element in which text should be checked
+   * @param expectedText expected text which should be present in the element
    */
   public void waitText(WebElement webElement, String expectedText) {
     waitText(webElement, expectedText, DEFAULT_TIMEOUT);
   }
 
   /**
-   * Waits visibility of {@link WebElement} with provided locator {@link By} and clicks once on it
-   * by {@link WebElement#click()}
+   * Waits during {@code timeout} of visibility the {@link WebElement} with provided {@code
+   * elementLocator} and clicks once on it by {@link WebElement#click()}.
    *
-   * @param elementLocator
+   * @param elementLocator locator of element which should be clicked
    * @param timeout waiting time in seconds
    */
   public void waitAndClick(By elementLocator, int timeout) {
@@ -349,20 +567,20 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits visibility of {@link WebElement} with provided locator {@link By} and clicks once on it
-   * by {@link WebElement#click()}
+   * Waits visibility of {@link WebElement} with provided {@code elementLocator} and clicks once on
+   * it by {@link WebElement#click()}.
    *
-   * @param elementLocator
+   * @param elementLocator locator of element which should be clicked
    */
   public void waitAndClick(By elementLocator) {
     waitAndClick(elementLocator, DEFAULT_TIMEOUT);
   }
 
   /**
-   * Waits visibility of provided {@link WebElement} and clicks once on it by {@link
-   * WebElement#click()}
+   * Waits visibility of provided {@code webElement} and clicks once on it by {@link
+   * WebElement#click()}.
    *
-   * @param webElement
+   * @param webElement element which should be clicked
    * @param timeout waiting time in seconds
    */
   public void waitAndClick(WebElement webElement, int timeout) {
@@ -370,21 +588,21 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits visibility of provided {@link WebElement} and clicks once on it by {@link
-   * WebElement#click()}
+   * Waits visibility of provided {@code webElement} and clicks once on it by {@link
+   * WebElement#click()}.
    *
-   * @param webElement
+   * @param webElement element which should be clicked
    */
   public void waitAndClick(WebElement webElement) {
     waitAndClick(webElement, DEFAULT_TIMEOUT);
   }
 
   /**
-   * Moves cursor to provided {@link WebElement} and clicks twice on it by {@link
-   * org.openqa.selenium.interactions.Action}. Gets rid of {@link
+   * Moves cursor to {@link WebElement} with provided {@code elementLocator}, waits visibility and
+   * clicks twice on it by {@link org.openqa.selenium.interactions.Action}. Gets rid of {@link
    * org.openqa.selenium.StaleElementReferenceException} by using {@link Actions#doubleClick()}.
    *
-   * @param elementLocator
+   * @param elementLocator locator of element which should be clicked
    */
   public void moveCursorToAndDoubleClick(By elementLocator) {
     moveCursorTo(elementLocator);
@@ -393,11 +611,11 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Moves cursor to provided {@link WebElement} and clicks twice on it by {@link
+   * Moves cursor to provided {@code webElement}, waits visibility and clicks twice on it by {@link
    * org.openqa.selenium.interactions.Action}. Gets rid of {@link
    * org.openqa.selenium.StaleElementReferenceException} by using {@link Actions#doubleClick()}.
    *
-   * @param webElement
+   * @param webElement element which should be clicked
    */
   public void moveCursorToAndDoubleClick(WebElement webElement) {
     moveCursorTo(webElement);
@@ -405,11 +623,16 @@ public class SeleniumWebDriverHelper {
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
   }
 
+  /** Performs mouse's left button double click . */
+  public void doubleClick() {
+    actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
+  }
+
   /**
-   * Moves cursor to {@link WebElement} with provided locator {@link By} and clicks once on it by
-   * {@link org.openqa.selenium.interactions.Action}
+   * Moves cursor to {@link WebElement} with provided {@code elementLocator} and clicks once on it
+   * by {@link org.openqa.selenium.interactions.Action}.
    *
-   * @param elementLocator
+   * @param elementLocator locator of element which should be clicked
    */
   public void moveCursorToAndClick(By elementLocator) {
     moveCursorTo(elementLocator);
@@ -418,10 +641,10 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Moves cursor to provided {@link WebElement} and clicks once on it by {@link
-   * org.openqa.selenium.interactions.Action}
+   * Moves cursor to provided {@code webElement}, waits visibility and clicks once on it by {@link
+   * org.openqa.selenium.interactions.Action}.
    *
-   * @param webElement
+   * @param webElement element which should be clicked
    */
   public void moveCursorToAndClick(WebElement webElement) {
     moveCursorTo(webElement);
@@ -430,10 +653,11 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Moves cursor to WebElement with provided locator which attached to DOM but it does not mean
-   * that element is visible
+   * Moves cursor to {@link WebElement} with provided {@code elementLocator} which attached to DOM.
    *
-   * @param elementLocator {@link By}
+   * <p>Note! It does not mean that element is visible.
+   *
+   * @param elementLocator element to which cursor should be moved
    */
   public void moveCursorTo(By elementLocator) {
     actionsFactory
@@ -443,19 +667,46 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Moves cursor to provided WebElement which attached to DOM but it does not mean that element is
-   * visible
+   * Moves cursor to provided {@code webElement} which attached to DOM.
    *
-   * @param webElement
+   * <p>Note! It does not mean that element is visible.
+   *
+   * @param webElement element to which cursor should be moved
    */
   public void moveCursorTo(WebElement webElement) {
     actionsFactory.createAction(seleniumWebDriver).moveToElement(webElement).perform();
   }
 
   /**
-   * Checks visibility state of {@link WebElement} with provided locator {@code By}
+   * Moves cursor to {@link WebElement} with provided {@code elementLocator} which attached to DOM
+   * and performs mouse's right button click.
    *
-   * @param elementLocator
+   * <p>Note! It does not mean that element is visible.
+   *
+   * @param elementLocator locator of {@link WebElement} for which context menu will be opened.
+   */
+  public void moveCursorToAndContextClick(By elementLocator) {
+    moveCursorTo(elementLocator);
+    actionsFactory.createAction(seleniumWebDriver).contextClick().perform();
+  }
+
+  /**
+   * Moves cursor to specified {@code webElement} which attached to DOM and performs mouse's right
+   * button click.
+   *
+   * <p>Note! It does not mean that element is visible.
+   *
+   * @param element {@link WebElement} for which context menu will be opened.
+   */
+  public void moveCursorToAndContextClick(WebElement element) {
+    moveCursorTo(element);
+    actionsFactory.createAction(seleniumWebDriver).contextClick().perform();
+  }
+
+  /**
+   * Checks visibility state of {@link WebElement} with provided {@code elementLocator}.
+   *
+   * @param elementLocator locator of element which should be checked
    * @return state of element visibility
    */
   public boolean isVisible(By elementLocator) {
@@ -467,9 +718,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Checks visibility state of provided {@code WebElement}
+   * Checks visibility state of provided {@code webElement}.
    *
-   * @param webElement
+   * @param webElement element which should be checked
    * @return state of element visibility
    */
   public boolean isVisible(WebElement webElement) {

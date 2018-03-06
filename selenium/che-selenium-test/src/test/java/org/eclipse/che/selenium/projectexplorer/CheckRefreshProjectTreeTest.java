@@ -10,11 +10,12 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.REFRESH;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -65,7 +66,7 @@ public class CheckRefreshProjectTreeTest {
     createFile(PATH_TO_FILE_1, FILE_NAME, FILE_CONTENT);
     loader.waitOnClosed();
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/src/main/webapp");
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.REFRESH);
+    projectExplorer.clickOnItemInContextMenu(REFRESH);
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/new_file");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/new_file");
     editor.waitTextIntoEditor(FILE_CONTENT);
@@ -75,7 +76,7 @@ public class CheckRefreshProjectTreeTest {
     createFile(PATH_TO_FILE_2, FILE_NAME, FILE_TEXT);
     loader.waitOnClosed();
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/src/main/webapp/WEB-INF");
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.REFRESH);
+    projectExplorer.clickOnItemInContextMenu(REFRESH);
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/webapp/WEB-INF/new_file");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/WEB-INF/new_file");
     editor.waitTextIntoEditor(FILE_TEXT);

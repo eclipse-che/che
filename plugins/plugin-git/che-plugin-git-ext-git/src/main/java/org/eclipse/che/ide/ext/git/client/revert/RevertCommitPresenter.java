@@ -24,7 +24,6 @@ import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.RevertResult;
 import org.eclipse.che.api.git.shared.RevertResult.RevertStatus;
 import org.eclipse.che.api.git.shared.Revision;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
@@ -48,7 +47,6 @@ public class RevertCommitPresenter implements ActionDelegate {
   private final GitLocalizationConstant constant;
   private final GitOutputConsoleFactory gitOutputConsoleFactory;
   private final ProcessesPanelPresenter consolesPanelPresenter;
-  private final AppContext appContext;
   private final NotificationManager notificationManager;
 
   private Revision selectedRevision;
@@ -64,7 +62,6 @@ public class RevertCommitPresenter implements ActionDelegate {
       GitLocalizationConstant constant,
       GitOutputConsoleFactory gitOutputConsoleFactory,
       ProcessesPanelPresenter consolesPanelPresenter,
-      AppContext appContext,
       NotificationManager notificationManager) {
     this.view = view;
     this.service = service;
@@ -72,7 +69,6 @@ public class RevertCommitPresenter implements ActionDelegate {
     this.constant = constant;
     this.gitOutputConsoleFactory = gitOutputConsoleFactory;
     this.consolesPanelPresenter = consolesPanelPresenter;
-    this.appContext = appContext;
     this.notificationManager = notificationManager;
 
     this.view.setDelegate(this);
@@ -159,8 +155,6 @@ public class RevertCommitPresenter implements ActionDelegate {
 
               consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.revertCommitSuccessfully());
-
-              project.synchronize();
             })
         .catchError(
             error -> {

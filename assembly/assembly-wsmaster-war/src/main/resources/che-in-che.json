@@ -83,7 +83,7 @@
           }
         },
         {
-          "commandLine": "cd ${current.project.eldest.parent.path}\n mvn gwt:codeserver -pl :assembly-ide-war -am -Psdm-in-che -Dskip-enforce -Dskip-validate-sources -Dche.dto.skip -Dmaven.main.skip -Dmaven.resources.skip -Dmaven.buildNumber.skip",
+          "commandLine": "cd ${current.project.eldest.parent.path} && mvn gwt:codeserver -pl :assembly-ide-war -am -Psdm-in-che -Dskip-enforce -Dskip-validate-sources -Dche.dto.skip -Dmaven.main.skip -Dmaven.resources.skip -Dmaven.buildNumber.skip",
           "name": "GWT SDM",
           "type": "gwt_sdm_che",
           "attributes": {
@@ -92,7 +92,7 @@
           }
         },
         {
-          "commandLine": "cd /home/user/tomcat8/bin\n export SERVER_PORT=8080\n export JPDA_ADDRESS=9000\n ./catalina.sh jpda run",
+          "commandLine": "cd /home/user/tomcat8/bin && export SERVER_PORT=8080 && export JPDA_ADDRESS=9000 && ./catalina.sh jpda run",
           "name": "Tomcat8-IDE Start",
           "type": "custom",
           "attributes": {
@@ -110,7 +110,7 @@
           }
         },
         {
-          "commandLine": "cd ${current.project.eldest.parent.path}\n mvn clean install -pl :assembly-wsagent-war -am\n cp ${current.project.eldest.parent.path}/assembly/assembly-wsagent-war/target/*.war /home/user/tomcat8/webapps/ROOT.war",
+          "commandLine": "cd ${current.project.eldest.parent.path} && mvn clean install -pl :assembly-wsagent-war -am && cp ${current.project.eldest.parent.path}/assembly/assembly-wsagent-war/target/*.war /home/user/tomcat8/webapps/ROOT.war",
           "name": "Deploy Workspace Agent",
           "type": "custom",
           "attributes": {
@@ -119,7 +119,7 @@
           }
         },
         {
-          "commandLine": "cd ${current.project.eldest.parent.path}\n mvn clean install -pl :assembly-ide-war -am\n cp ${current.project.eldest.parent.path}/assembly/assembly-ide-war/target/*.war /home/user/tomcat8/webapps/ide.war",
+          "commandLine": "cd ${current.project.eldest.parent.path} && mvn clean install -pl :assembly-ide-war -am && cp ${current.project.eldest.parent.path}/assembly/assembly-ide-war/target/*.war /home/user/tomcat8/webapps/ide.war",
           "name": "Deploy IDE",
           "type": "custom",
           "attributes": {
@@ -128,8 +128,17 @@
           }
         },
         {
-          "commandLine": "cp ${current.project.path}/target/*.jar /home/user/tomcat8/webapps/ROOT/WEB-INF/lib/\n echo \"Artifact copied. It takes a few seconds for Tomcat to hot deploy it.\"",
+          "commandLine": "cp ${current.project.path}/target/*.jar /home/user/tomcat8/webapps/ROOT/WEB-INF/lib/ && echo \"Artifact copied. It takes a few seconds for Tomcat to hot deploy it.\"",
           "name": "Hot Deploy Workspace Agent",
+          "type": "custom",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": ""
+          }
+        },
+        {
+          "commandLine": "cd ${current.project.eldest.parent.path} && mvn sortpom:sort fmt:format",
+          "name": "Sort POM & Do Format",
           "type": "custom",
           "attributes": {
             "goal": "Run",

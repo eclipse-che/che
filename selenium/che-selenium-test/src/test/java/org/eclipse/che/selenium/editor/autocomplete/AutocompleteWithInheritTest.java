@@ -10,8 +10,8 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.TASK_MARKER_OVERVIEW;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.TASK_OVERVIEW;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -20,10 +20,9 @@ import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.utils.BrowserLogsUtil;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType;
+import org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
@@ -60,7 +59,6 @@ public class AutocompleteWithInheritTest {
   @Inject private CodenvyEditor editor;
   @Inject private MavenPluginStatusBar mavenPluginStatusBar;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private BrowserLogsUtil browserLogsUtil;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -81,7 +79,7 @@ public class AutocompleteWithInheritTest {
     mavenPluginStatusBar.waitClosingInfoPanel();
     projectExplorer.expandPathInProjectExplorerAndOpenFile(
         PROJECT_NAME + "/src/main/java/example", BASE_CLASS + ".java");
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR);
     projectExplorer.openItemByVisibleNameInExplorer(EXTENDED_CLASS + ".java");
     editor.returnFocusInCurrentLine();
     waitErrorMarkerInPosition();
@@ -90,8 +88,8 @@ public class AutocompleteWithInheritTest {
     editor.waitTextIntoFixErrorProposition("Add constructor 'InheritClass(int,String)'");
     editor.selectFirstItemIntoFixErrorPropByEnter();
     editor.waitTextIntoEditor(contentAfterFix);
-    editor.waitMarkerDisappears(ERROR_MARKER, 13);
-    editor.waitMarkerInPosition(TASK_MARKER_OVERVIEW, 18);
+    editor.waitMarkerInvisibility(ERROR, 13);
+    editor.waitMarkerInPosition(TASK_OVERVIEW, 18);
     editor.waitTabFileWithSavedStatus(EXTENDED_CLASS);
     editor.selectTabByName(BASE_CLASS);
     loader.waitOnClosed();
@@ -113,17 +111,16 @@ public class AutocompleteWithInheritTest {
     editor.launchPropositionAssistPanel();
     editor.waitTextIntoFixErrorProposition("Change type of 'testString' to 'int'");
     editor.selectFirstItemIntoFixErrorPropByDoubleClick();
-    editor.waitAllMarkersDisappear(ERROR_MARKER);
+    editor.waitAllMarkersInvisibility(ERROR);
   }
 
   private void waitErrorMarkerInPosition() throws Exception {
     try {
-      editor.waitMarkerInPosition(MarkersType.ERROR_MARKER, 13);
+      editor.waitMarkerInPosition(MarkerLocator.ERROR, 13);
     } catch (TimeoutException ex) {
       logExternalLibraries();
       logProjectTypeChecking();
       logProjectLanguageChecking();
-      browserLogsUtil.storeLogs();
 
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7161", ex);

@@ -148,7 +148,5 @@ public abstract class BaseTest {
     when(promiseError.getMessage()).thenReturn("error");
     when(promiseError.getCause()).thenReturn(throwable);
     when(throwable.getMessage()).thenReturn("error");
-
-    when(project.synchronize()).thenReturn(synchronizePromise);
   }
 }

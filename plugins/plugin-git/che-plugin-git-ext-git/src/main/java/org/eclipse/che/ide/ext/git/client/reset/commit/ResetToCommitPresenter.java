@@ -23,7 +23,6 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Revision;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
@@ -49,7 +48,6 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
   private final DialogFactory dialogFactory;
   private final ProcessesPanelPresenter consolesPanelPresenter;
   private final GitServiceClient service;
-  private final AppContext appContext;
   private final GitLocalizationConstant constant;
   private final NotificationManager notificationManager;
 
@@ -64,7 +62,6 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
       GitServiceClient service,
       GitLocalizationConstant constant,
       DialogFactory dialogFactory,
-      AppContext appContext,
       NotificationManager notificationManager,
       GitOutputConsoleFactory gitOutputConsoleFactory,
       ProcessesPanelPresenter processesPanelPresenter) {
@@ -75,7 +72,6 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
     this.view.setDelegate(this);
     this.service = service;
     this.constant = constant;
-    this.appContext = appContext;
     this.notificationManager = notificationManager;
   }
 
@@ -127,8 +123,6 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
                 view.setRevisions(revisions);
                 view.setMixMode(true);
                 view.showDialog();
-
-                project.synchronize();
               }
             })
         .catchError(
@@ -164,8 +158,6 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
               console.print(constant.resetSuccessfully());
               consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(constant.resetSuccessfully());
-
-              project.synchronize();
             })
         .catchError(
             error -> {

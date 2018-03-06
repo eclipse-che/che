@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.DELETE;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -19,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
@@ -85,7 +85,7 @@ public class DeleteProjectsTest {
   public void shouldDeleteProjectByContextMenu() {
     projectExplorer.waitItem(PROJECT_NAMES.get(0));
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAMES.get(0));
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.DELETE);
+    projectExplorer.clickOnItemInContextMenu(DELETE);
     acceptDeletion(PROJECT_NAMES.get(0));
     checkErrorMessageNotPresentInConsole();
   }
@@ -93,7 +93,7 @@ public class DeleteProjectsTest {
   @Test(priority = 1)
   public void shouldDeleteProjectByMenuFile() {
     projectExplorer.waitItem(PROJECT_NAMES.get(1));
-    projectExplorer.selectItem(PROJECT_NAMES.get(1));
+    projectExplorer.waitAndSelectItem(PROJECT_NAMES.get(1));
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     acceptDeletion(PROJECT_NAMES.get(1));
     checkErrorMessageNotPresentInConsole();
@@ -105,7 +105,7 @@ public class DeleteProjectsTest {
     projectExplorer.openItemByPath(PROJECT_NAMES.get(3));
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT_NAMES.get(3));
-    projectExplorer.selectItem(PROJECT_NAMES.get(3));
+    projectExplorer.waitAndSelectItem(PROJECT_NAMES.get(3));
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     acceptDeletion(PROJECT_NAMES.get(3));
     projectExplorer.waitDisappearItemByPath(PROJECT_NAMES.get(3));
@@ -118,9 +118,9 @@ public class DeleteProjectsTest {
     projectExplorer.openItemByPath(PROJECT_NAMES.get(4));
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT_NAMES.get(4));
-    projectExplorer.selectItem(PROJECT_NAMES.get(4));
+    projectExplorer.waitAndSelectItem(PROJECT_NAMES.get(4));
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAMES.get(4));
-    projectExplorer.clickOnItemInContextMenu(TestProjectExplorerContextMenuConstants.DELETE);
+    projectExplorer.clickOnItemInContextMenu(DELETE);
     acceptDeletion(PROJECT_NAMES.get(4));
     projectExplorer.waitDisappearItemByPath(PROJECT_NAMES.get(4));
     checkErrorMessageNotPresentInConsole();
@@ -128,7 +128,7 @@ public class DeleteProjectsTest {
 
   private void deleteFromDeleteIcon(String pathToProject) {
     loader.waitOnClosed();
-    projectExplorer.selectItem(pathToProject);
+    projectExplorer.waitAndSelectItem(pathToProject);
     ideMainDockPanel.clickDeleteIcon();
     loader.waitOnClosed();
   }

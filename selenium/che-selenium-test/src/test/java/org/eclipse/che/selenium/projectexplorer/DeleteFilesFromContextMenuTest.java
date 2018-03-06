@@ -10,11 +10,12 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.DELETE;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
@@ -127,7 +128,7 @@ public class DeleteFilesFromContextMenuTest {
     loader.waitOnClosed();
     projectExplorer.waitItem(pathToFile);
     projectExplorer.openContextMenuByPathSelectedItem(pathToFile);
-    projectExplorer.clickOnNewContextMenuItem(TestProjectExplorerContextMenuConstants.DELETE);
+    projectExplorer.clickOnNewContextMenuItem(DELETE);
     loader.waitOnClosed();
     askDialog.acceptDialogWithText(deleteText);
     checkDeletion(pathToFile);

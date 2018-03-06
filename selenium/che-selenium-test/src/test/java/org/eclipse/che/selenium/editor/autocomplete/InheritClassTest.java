@@ -10,7 +10,7 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkersType.ERROR_MARKER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -70,14 +70,14 @@ public class InheritClassTest {
     projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
     loader.waitOnClosed();
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
     projectExplorer.openItemByPath(COMMON_PACKAGE + "/AppController.java");
 
     // create java class in the different package with GreetingController.java
     projectExplorer.waitProjectExplorer();
-    projectExplorer.selectItem(COMMON_PACKAGE);
+    projectExplorer.waitAndSelectItem(COMMON_PACKAGE);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
@@ -86,7 +86,7 @@ public class InheritClassTest {
     editor.waitTabIsPresent("CodenvyTest");
     loader.waitOnClosed();
 
-    projectExplorer.selectItem(COMMON_PACKAGE);
+    projectExplorer.waitAndSelectItem(COMMON_PACKAGE);
     menu.runCommand(
         TestMenuCommandsConstants.Project.PROJECT,
         TestMenuCommandsConstants.Project.New.NEW,
@@ -133,7 +133,7 @@ public class InheritClassTest {
     editor.typeTextIntoEditor(Keys.ENTER.toString());
 
     editor.typeTextIntoEditor(" Code");
-    editor.waitCodeAssistMarkers(ERROR_MARKER);
+    editor.waitCodeAssistMarkers(ERROR);
     editor.launchAutocompleteAndWaitContainer();
     editor.waitTextIntoAutocompleteContainer("CodenvyTest - org.eclipse.qa.examples");
     editor.waitTextIntoAutocompleteContainer("CodenvyTestInherite - org.eclipse.qa.examples");

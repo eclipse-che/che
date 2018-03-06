@@ -82,7 +82,7 @@ public class CheckFindActionFeatureInCheTest {
     ide.open(testWorkspace);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitVisibleItem(PROJECT_NAME);
-    projectExplorer.selectItem(PROJECT_NAME);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.FIND_ACTION);
