@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
-import static java.util.Comparator.comparingInt;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
@@ -508,22 +507,6 @@ public class CodenvyEditor {
   public void typeTextIntoEditor(String text, int line) {
     setCursorToLine(line);
     typeTextIntoEditor(text);
-  }
-
-  /** returns focus in the end of current line (in active tab) */
-  public void returnFocusInCurrentLine() {
-    List<WebElement> lines =
-        seleniumWebDriver.findElements(By.xpath(Locators.ACTIVE_LINE_HIGHLIGHT));
-
-    lines.sort(comparingInt(o -> o.getLocation().getX()));
-
-    lines
-        .subList(0, lines.size() / 2)
-        .forEach(
-            line -> {
-              seleniumWebDriverHelper.moveCursorTo(line);
-              actionsFactory.createAction(seleniumWebDriver).click();
-            });
   }
 
   /**

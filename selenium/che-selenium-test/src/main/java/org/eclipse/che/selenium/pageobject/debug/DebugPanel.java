@@ -375,7 +375,6 @@ public class DebugPanel {
    * @param numOfPosition
    */
   public void waitBreakPointHighlighterInDefinedPosition(int numOfPosition) {
-    editor.returnFocusInCurrentLine();
     editor.waitActive();
     List<WebElement> editorLines =
         seleniumWebDriver.findElements(
