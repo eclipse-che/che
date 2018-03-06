@@ -67,6 +67,13 @@ public class GitRevertCommit {
         .click();
   }
 
+  public void clickCancelButton() {
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        .until(ExpectedConditions.visibilityOf(cancelButton))
+        .click();
+    waitRevertPanelClosed();
+  }
+
   public String getTopCommitRevision() {
     loader.waitOnClosed();
     return new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
