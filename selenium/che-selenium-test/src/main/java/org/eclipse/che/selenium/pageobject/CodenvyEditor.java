@@ -701,7 +701,8 @@ public class CodenvyEditor {
    * @return the list of git markers web-elements
    */
   private List<WebElement> getListGitMarkers() {
-    List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
+    List<WebElement> rulerVcsElements =
+        seleniumWebDriverHelper.waitPresenceOfAllElements(By.xpath(VCS_RULER));
     List<WebElement> subList = rulerVcsElements.subList(1, rulerVcsElements.size() - 1);
     webDriverWaitFactory.get().until(visibilityOfAllElements(subList));
     return rulerVcsElements;
