@@ -15,17 +15,13 @@ newly created [OAuth application](https://github.com/settings/developers).
 #### 2. Add configuration file
 
 Set `CHE_LOCAL_CONF_DIR` environment variable and point to the folder where selenium tests configuration will be stored.
-Create file `selenium.properties` in that folder with the following content:
+Create file with `.properties` extension in that folder with the following content:
 ```
 # GitHub account credentials
 github.username=<MAIN_GITHUB_USERNAME>
 github.password=<MAIN_GITHUB_PASSWORD>
 github.auxiliary.username=<AUXILIARY_GITHUB_USERNAME>
 github.auxiliary.password=<AUXILIARY_GITHUB_PASSWORD>
-
-# Google account credentials (IMAP has to be enabled)
-google.user=<GOOGLE_USER>
-google.password=<GOOGLE_PASSWORD>
 ```
 
 In case of running of tests for Eclipse Che in Multi User mode you can set your own credentials of test user or admin instead of default ones
@@ -91,6 +87,7 @@ Define tests scope:
     --test=<TEST_CLASS>                 Single test to run
     --suite=<SUITE>                     Test suite to run, found:
                                             * CheSuite.xml
+    --exclude=<TEST_GROUPS_TO_EXCLUDE>  Comma-separated list of test groups to exclude from execution.
 
 Handle failing tests:
     --failed-tests                      Rerun failed tests that left after the previous try
@@ -132,5 +129,3 @@ HOW TO of usage:
     Analyse tests results:
         ./selenium-tests.sh --compare-with-ci [BUILD NUMBER]
 ```
-
-

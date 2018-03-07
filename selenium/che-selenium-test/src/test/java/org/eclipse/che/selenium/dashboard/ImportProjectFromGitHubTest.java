@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -34,6 +35,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+@Test(groups = TestGroup.GITHUB)
 public class ImportProjectFromGitHubTest {
   private static final String WORKSPACE = NameGenerator.generate("ImtMvnPrjGitHub", 4);
   private static final String GITHUB_PROJECT_NAME = "AngularJS";
@@ -41,11 +43,11 @@ public class ImportProjectFromGitHubTest {
   private String projectName;
   private String ideWin;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.password")
   private String gitHubPassword;
 

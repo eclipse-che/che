@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -52,6 +53,7 @@ import org.testng.annotations.Test;
  * @author Andrey Chizhikov
  * @author Aleksandr Shmaraiev
  */
+@Test(groups = TestGroup.GITHUB)
 public class PullRequestPluginTest {
   private static final String FIRST_PROJECT_NAME = "pull-request-plugin-test";
   private static final String SECOND_PROJECT_NAME = "second-project-for-switching";
@@ -72,11 +74,11 @@ public class PullRequestPluginTest {
   @Inject private Ide ide;
   @Inject private TestUser productUser;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.password")
   private String gitHubPassword;
 

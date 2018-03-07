@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.git;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubKeyUploader;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
@@ -34,6 +35,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author aleksandr shmaraev */
+@Test(groups = TestGroup.GITHUB)
 public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
 
   private static final String PROJECT_1 = NameGenerator.generate("first_projectFetch_", 4);
@@ -55,11 +57,11 @@ public class FetchUpdatesAndMergeRemoteBranchIntoLocalTest {
   @Inject private Ide ide;
   @Inject private TestUser productUser;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.password")
   private String gitHubPassword;
 

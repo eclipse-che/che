@@ -78,6 +78,8 @@ initVariables() {
     PRODUCT_HOST=$(detectDockerInterfaceIp)
     PRODUCT_PORT=8080
 
+    SUPPORTED_INFRASTRUCTURES=(docker openshift)
+
     unset DEBUG_OPTIONS
     unset MAVEN_OPTIONS
     unset TMP_SUITE_PATH
@@ -85,6 +87,7 @@ initVariables() {
     unset TMP_DIR
     unset NEW_DEFAULT_USER_ID
     unset NEW_SECOND_USER_ID
+    unset EXCLUDE_PARAM
 }
 
 cleanUpEnvironment() {
@@ -158,6 +161,8 @@ checkParameters() {
         elif [[ "$var" =~ ^-[[:alpha:]]$ ]]; then :
         elif [[ "$var" == --skip-sources-validation ]]; then :
         elif [[ "$var" == --multiuser ]]; then :
+        elif [[ "$var" =~ --exclude=.* ]]; then :
+
         else
             printHelp
             echo "[TEST] Unrecognized or misused parameter "${var}
@@ -213,6 +218,9 @@ applyCustomOptions() {
 
         elif [[ "$var" == --multiuser ]]; then
             CHE_MULTIUSER=true
+
+        elif [[ "$var" =~ --exclude=.* ]]; then
+            EXCLUDE_PARAM=$(echo "$var" | sed -e "s/--exclude=//g")
 
         fi
     done
@@ -455,20 +463,21 @@ HOW TO of usage:
 printRunOptions() {
     echo "[TEST]"
     echo "[TEST] =========== RUN OPTIONS ==========================="
-    echo "[TEST] Mode                : "${MODE}
-    echo "[TEST] Rerun attempts      : "${RERUN_ATTEMPTS}
+    echo "[TEST] Mode                : ${MODE}"
+    echo "[TEST] Rerun attempts      : ${RERUN_ATTEMPTS}"
     echo "[TEST] ==================================================="
-    echo "[TEST] Product Protocol    : "${PRODUCT_PROTOCOL}
-    echo "[TEST] Product Host        : "${PRODUCT_HOST}
-    echo "[TEST] Product Port        : "${PRODUCT_PORT}
-    echo "[TEST] Product Config      : "$(getTestGroups)
-    echo "[TEST] Tests               : "${TESTS_SCOPE}
-    echo "[TEST] Threads             : "${THREADS}
-    echo "[TEST] Workspace pool size : "${WORKSPACE_POOL_SIZE}
-    echo "[TEST] Web browser         : "${BROWSER}
-    echo "[TEST] Web driver ver      : "${WEBDRIVER_VERSION}
-    echo "[TEST] Web driver port     : "${WEBDRIVER_PORT}
-    echo "[TEST] Additional opts     : "${GRID_OPTIONS}" "${DEBUG_OPTIONS}" "${MAVEN_OPTIONS}
+    echo "[TEST] Product Protocol    : ${PRODUCT_PROTOCOL}"
+    echo "[TEST] Product Host        : ${PRODUCT_HOST}"
+    echo "[TEST] Product Port        : ${PRODUCT_PORT}"
+    echo "[TEST] Product Config      : $(getProductConfig)"
+    echo "[TEST] Tests               : ${TESTS_SCOPE}"
+    echo "[TEST] Tests to exclude    : $(getTestGroupsToExclude)"
+    echo "[TEST] Threads             : ${THREADS}"
+    echo "[TEST] Workspace pool size : ${WORKSPACE_POOL_SIZE}"
+    echo "[TEST] Web browser         : ${BROWSER}"
+    echo "[TEST] Web driver ver      : ${WEBDRIVER_VERSION}"
+    echo "[TEST] Web driver port     : ${WEBDRIVER_PORT}"
+    echo "[TEST] Additional opts     : ${GRID_OPTIONS} ${DEBUG_OPTIONS} ${MAVEN_OPTIONS}"
     echo "[TEST] ==================================================="
 }
 
@@ -705,14 +714,14 @@ runTests() {
                 -Dbrowser=${BROWSER} \
                 -Dche.threads=${THREADS} \
                 -Dche.workspace_pool_size=${WORKSPACE_POOL_SIZE} \
-                -DtestGroups="$(getTestGroups)" \
+                -DtestGroupsToExclude="$(getTestGroupsToExclude)" \
                 ${DEBUG_OPTIONS} \
                 ${GRID_OPTIONS} \
                 ${MAVEN_OPTIONS}
 }
 
-# Return list of test groups in comma-separated view
-getTestGroups() {
+# Return list of product features
+getProductConfig() {
   local testGroups=${CHE_INFRASTRUCTURE}
 
   if [[ ${CHE_MULTIUSER} == true ]]; then
@@ -722,6 +731,28 @@ getTestGroups() {
   fi
 
   echo ${testGroups}
+}
+
+# Prepare list of test groups to exclude:
+# It consists of "--exclude" parameter value + list of groups which don't comply with product config
+getTestGroupsToExclude() {
+    local excludeParamArray=(${EXCLUDE_PARAM//,/ })
+
+    local productConfig=$(getProductConfig)
+    local productConfigArray=(${productConfig//,/ })
+
+    local allSupportedGroups=(${SUPPORTED_INFRASTRUCTURES[@]} singluser multiuser)
+
+    for productConfigGroup in ${productConfigArray[*]}; do
+        for i in ${!allSupportedGroups[@]}; do
+            if [[ "${productConfigGroup}" = "${allSupportedGroups[i]}" ]]; then
+                unset allSupportedGroups[i]
+            fi
+        done
+    done
+
+    local testGroupsToExclude=("${excludeParamArray[@]}" "${allSupportedGroups[@]}")
+    echo $(IFS=$','; echo "${testGroupsToExclude[*]}")
 }
 
 # Reruns failed tests
