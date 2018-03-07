@@ -48,6 +48,5 @@
   <MFC max_credits="2M"
     min_threshold="0.4"/>
   <FRAG2 frag_size="60K"/>
-  <!--RSVP resend_interval="2000" timeout="10000"/-->
   <pbcast.STATE_TRANSFER/>
 </config>
