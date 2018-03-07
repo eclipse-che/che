@@ -82,7 +82,7 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
     cleanNetworks();
   }
 
-  /** Cleans up CHE docker containers which belong to running machines . */
+  /** Cleans up CHE inactive machine docker containers. */
   @VisibleForTesting
   void cleanContainers() {
     List<String> activeContainers = new ArrayList<>();
