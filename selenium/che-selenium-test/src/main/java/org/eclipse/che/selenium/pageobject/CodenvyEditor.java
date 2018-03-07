@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.pageobject;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -25,6 +26,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGE
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAK_POINT_ACTIVE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_PREFIX_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.EDITOR_TABS_PANEL;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.HIGHLIGHT_ITEM;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATIONS_ITEM;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATION_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
@@ -46,14 +48,16 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_FIL
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_LIST_BUTTON;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_WITH_UNSAVED_STATUS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TEXT_VIEW_RULER;
+import static org.openqa.selenium.Keys.ALT;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.ESCAPE;
+import static org.openqa.selenium.Keys.LEFT_CONTROL;
+import static org.openqa.selenium.Keys.SPACE;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
-import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
@@ -185,6 +189,7 @@ public class CodenvyEditor {
     String JAVA_DOC_POPUP = "//div[@class='gwt-PopupPanel']//iframe";
     String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
         "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
+    String HIGHLIGHT_ITEM = "//li[@selected='true']//span[text()='%s']";
   }
 
   public enum TabActionLocator {
@@ -568,7 +573,7 @@ public class CodenvyEditor {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     action.keyDown(CONTROL).perform();
-    typeTextIntoEditor(Keys.SPACE.toString());
+    typeTextIntoEditor(SPACE.toString());
     action.keyUp(CONTROL).perform();
     waitAutocompleteContainer();
   }
@@ -578,7 +583,7 @@ public class CodenvyEditor {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     action.keyDown(CONTROL).perform();
-    typeTextIntoEditor(Keys.SPACE.toString());
+    typeTextIntoEditor(SPACE.toString());
     action.keyUp(CONTROL).perform();
   }
 
@@ -738,11 +743,7 @@ public class CodenvyEditor {
    * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
   public void waitAllMarkersInvisibility(MarkerLocator markerLocator) {
-    webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> driver.findElements(By.xpath(markerLocator.get())).size() == 0);
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(markerLocator.get()));
   }
 
   /**
@@ -751,11 +752,8 @@ public class CodenvyEditor {
    * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
   public void waitCodeAssistMarkers(MarkerLocator markerLocator) {
-    webDriverWaitFactory
-        .get(ELEMENT_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> driver.findElements(By.xpath(markerLocator.get())).size() > 0);
+    seleniumWebDriverHelper.waitVisibilityOfAllElements(
+        By.xpath(markerLocator.get()), ELEMENT_TIMEOUT_SEC);
   }
 
   /** @return text from autocomplete */
@@ -771,11 +769,7 @@ public class CodenvyEditor {
    */
   public void enterAutocompleteProposal(String item) {
     selectAutocompleteProposal(item);
-    WebElement highlightEItem =
-        autocompleteContainer.findElement(
-            By.xpath("//li[@selected='true']//span[text()=\"" + item + "\"]"));
-
-    seleniumWebDriverHelper.waitVisibility(highlightEItem);
+    seleniumWebDriverHelper.waitVisibility(By.xpath(format(HIGHLIGHT_ITEM, item)));
     seleniumWebDriverHelper.sendKeys(ENTER.toString());
   }
 
@@ -786,11 +780,9 @@ public class CodenvyEditor {
    */
   public void selectItemIntoAutocompleteAndPasteByDoubleClick(String item) {
     selectAutocompleteProposal(item);
-    WebElement highlightEItem =
-        autocompleteContainer.findElement(
-            By.xpath("//li[@selected='true']//span[text()=\"" + item + "\"]"));
-    seleniumWebDriverHelper.waitVisibility(highlightEItem);
-    actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
+
+    seleniumWebDriverHelper.waitVisibility(By.xpath(format(HIGHLIGHT_ITEM, item)));
+    seleniumWebDriverHelper.doubleClick();
   }
 
   /**
@@ -810,8 +802,7 @@ public class CodenvyEditor {
    * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
   public void moveToMarkerAndWaitAssistContent(MarkerLocator markerLocator) {
-    WebElement element = seleniumWebDriver.findElement(By.xpath(markerLocator.get()));
-    seleniumWebDriverHelper.moveCursorTo(element);
+    seleniumWebDriverHelper.moveCursorTo(By.xpath(markerLocator.get()));
     waitAnnotationCodeAssistIsOpen();
   }
 
@@ -832,14 +823,12 @@ public class CodenvyEditor {
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver -> {
-                  List<WebElement> items =
-                      seleniumWebDriver.findElements(By.xpath(ASSIST_CONTENT_CONTAINER + "//span"));
-                  for (WebElement item : items) {
-                    if (item.getText().contains(expectedText)) {
-                      return true;
-                    }
-                  }
-                  return false;
+                  return seleniumWebDriverHelper
+                      .waitVisibilityOfAllElements(By.xpath(ASSIST_CONTENT_CONTAINER + "//span"))
+                      .stream()
+                      .map(item -> item.getText().contains(expectedText))
+                      .collect(toList())
+                      .contains(true);
                 });
   }
 
@@ -859,7 +848,7 @@ public class CodenvyEditor {
   /** @return text from proposition assist panel */
   public String getAllVisibleTextFromProposition() {
     waitPropositionAssistContainer();
-    return propositionContainer.getText();
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(propositionContainer);
   }
 
   /** wait assist proposition container is open */
@@ -876,9 +865,9 @@ public class CodenvyEditor {
   public void launchPropositionAssistPanel() {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(Keys.ALT).perform();
-    action.sendKeys(ENTER.toString()).perform();
-    action.keyUp(Keys.ALT).perform();
+    action.keyDown(ALT).perform();
+    action.sendKeys(ENTER).perform();
+    action.keyUp(ALT).perform();
     waitPropositionAssistContainer();
   }
 
@@ -886,9 +875,9 @@ public class CodenvyEditor {
   public void launchPropositionAssistPanelForJSFiles() {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(Keys.LEFT_CONTROL).perform();
-    action.sendKeys(Keys.SPACE.toString()).perform();
-    action.keyUp(Keys.LEFT_CONTROL).perform();
+    action.keyDown(LEFT_CONTROL).perform();
+    action.sendKeys(SPACE).perform();
+    action.keyUp(LEFT_CONTROL).perform();
   }
 
   /**
@@ -922,7 +911,7 @@ public class CodenvyEditor {
    */
   public void enterTextIntoFixErrorPropByDoubleClick(String expectedItem) {
     seleniumWebDriverHelper.moveCursorToAndDoubleClick(
-        By.xpath(format(PROPOSITION_CONTAINER + "/li/span[text()=\"%s\"]", expectedItem)));
+        By.xpath(format(PROPOSITION_CONTAINER + "/li/span[text()='%s']", expectedItem)));
   }
 
   /**
@@ -932,7 +921,7 @@ public class CodenvyEditor {
    */
   public void enterTextIntoFixErrorPropByEnter(String item) {
     seleniumWebDriverHelper.waitAndClick(
-        propositionContainer.findElement(By.xpath(format("//li//span[text()=\"%s\"]", item))));
+        propositionContainer.findElement(By.xpath(format("//li//span[text()='%s']", item))));
 
     seleniumWebDriverHelper.sendKeys(ENTER.toString());
   }
@@ -950,14 +939,12 @@ public class CodenvyEditor {
 
   /** invoke the 'Show hints' to all parameters on the overloaded constructor or method */
   public void callShowHintsPopUp() {
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    loader.waitOnClosed();
-    action.keyDown(CONTROL).sendKeys("p").perform();
-
-    testWebElementRenderChecker.waitElementIsRendered(By.xpath("//div[@class='gwt-PopupPanel']"));
-
-    action.keyUp(CONTROL).perform();
-    loader.waitOnClosed();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(CONTROL)
+        .sendKeys("p")
+        .keyUp(CONTROL)
+        .perform();
   }
 
   /** wait the 'Show hints' pop up panel is opened */
@@ -985,7 +972,8 @@ public class CodenvyEditor {
 
   /** get text from the 'Show hints' pop up panel */
   public String getTextFromShowHintsPopUp() {
-    return seleniumWebDriverHelper.waitVisibility(showHintsPopUp).getText();
+    testWebElementRenderChecker.waitElementIsRendered(By.xpath("//div[@class='gwt-PopupPanel']"));
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(showHintsPopUp);
   }
 
   /**
@@ -1004,9 +992,7 @@ public class CodenvyEditor {
    * @param nameOfFile is specified file name
    */
   public void waitActiveTabFileName(String nameOfFile) {
-    webDriverWaitFactory
-        .get()
-        .until(presenceOfElementLocated(By.xpath(format(ACTIVE_TAB_FILE_NAME, nameOfFile))));
+    seleniumWebDriverHelper.waitPresence(By.xpath(format(ACTIVE_TAB_FILE_NAME, nameOfFile)));
   }
 
   /** check that files have been closed. (Check disappears all text areas and tabs) */
@@ -1468,13 +1454,7 @@ public class CodenvyEditor {
   public void launchImplementationFormByKeyboard() {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action
-        .keyDown(CONTROL)
-        .keyDown(Keys.ALT)
-        .sendKeys("b")
-        .keyUp(Keys.ALT)
-        .keyUp(CONTROL)
-        .perform();
+    action.keyDown(CONTROL).keyDown(ALT).sendKeys("b").keyUp(ALT).keyUp(CONTROL).perform();
   }
 
   /** close the forms in the editor by 'Escape' */
