@@ -48,6 +48,11 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_FIL
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_LIST_BUTTON;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_WITH_UNSAVED_STATUS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TEXT_VIEW_RULER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.BLUE;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.FOCUSED_DEFAULT;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.GREEN;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.UNFOCUSED_DEFAULT;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.YELLOW;
 import static org.openqa.selenium.Keys.ALT;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.ENTER;
@@ -258,6 +263,24 @@ public class CodenvyEditor {
 
     private By get() {
       return this.itemLocator;
+    }
+  }
+
+  public enum TabColor {
+    YELLOW("color: rgb(224, 185, 29);"),
+    GREEN("color: rgb(114, 173, 66);"),
+    BLUE("color: rgb(49, 147, 212);"),
+    FOCUSED_DEFAULT("rgba(255, 255, 255, 1)"),
+    UNFOCUSED_DEFAULT("rgba(170, 170, 170, 1)");
+
+    private final String color;
+
+    TabColor(String color) {
+      this.color = color;
+    }
+
+    private String get() {
+      return this.color;
     }
   }
 
@@ -1013,41 +1036,52 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(TAB_FILE_NAME_XPATH, nameOfFile)));
   }
 
-  public void waitYellowTab(String fileName) {
+  public void waitTabWithNameAndColor(String fileName, TabColor tabColor) {
     seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(TAB_FILE_NAME_AND_STYLE, fileName, "color: rgb(224, 185, 29);")));
+        By.xpath(format(TAB_FILE_NAME_AND_STYLE, fileName, tabColor.get())));
+  }
+
+  public void waitYellowTab(String fileName) {
+    waitTabWithNameAndColor(fileName, YELLOW);
   }
 
   public void waitGreenTab(String fileName) {
-    seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(TAB_FILE_NAME_AND_STYLE, fileName, "color: rgb(114, 173, 66);")));
+    waitTabWithNameAndColor(fileName, GREEN);
   }
 
   public void waitBlueTab(String fileName) {
-    seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(TAB_FILE_NAME_AND_STYLE, fileName, "color: rgb(49, 147, 212);")));
+    waitTabWithNameAndColor(fileName, BLUE);
   }
 
   public void waitDefaultColorTab(final String fileName) {
     waitActive();
-    boolean isEditorFocused =
-        !(seleniumWebDriver
-                .findElement(By.xpath(format(TAB_FILE_NAME_XPATH + "/parent::div", fileName)))
-                .getAttribute("focused")
-            == null);
-    final String currentStateEditorColor =
-        isEditorFocused ? "rgba(255, 255, 255, 1)" : "rgba(170, 170, 170, 1)";
+
+    /*    boolean isEditorFocused =
+    !(seleniumWebDriver
+            .findElement(By.xpath(format(TAB_FILE_NAME_XPATH + "/parent::div", fileName)))
+            .getAttribute("focused")
+        == null);*/
+
+    final String expectedColor =
+        isFocused(fileName) ? FOCUSED_DEFAULT.get() : UNFOCUSED_DEFAULT.get();
+
     webDriverWaitFactory
         .get()
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver ->
-                    seleniumWebDriver
-                        .findElement(By.xpath(format(TAB_FILE_NAME_XPATH, fileName)))
+                    seleniumWebDriverHelper
+                        .waitVisibility(By.xpath(format(TAB_FILE_NAME_XPATH, fileName)))
                         .getCssValue("color")
-                        .equals(currentStateEditorColor));
+                        .equals(expectedColor));
   }
 
+  public boolean isFocused(String fileName) {
+    return seleniumWebDriverHelper
+            .waitVisibility(By.xpath(format(TAB_FILE_NAME_XPATH + "/parent::div", fileName)))
+            .getAttribute("focused")
+        != null;
+  }
   /**
    * wait tab with expected name is not present
    *
