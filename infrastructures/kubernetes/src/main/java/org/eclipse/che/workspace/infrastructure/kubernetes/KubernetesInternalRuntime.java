@@ -40,7 +40,6 @@ import java.util.function.Function;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Warning;
-import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
@@ -342,7 +341,7 @@ public class KubernetesInternalRuntime<
   }
 
   @Override
-  public Map<String, ? extends Machine> getInternalMachines() {
+  public Map<String, ? extends KubernetesMachine> getInternalMachines() {
     return ImmutableMap.copyOf(machines);
   }
 
