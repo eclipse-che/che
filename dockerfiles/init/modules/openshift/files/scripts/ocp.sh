@@ -66,7 +66,7 @@ export CHE_INFRA_KUBERNETES_MASTER__URL=${CHE_INFRA_KUBERNETES_MASTER__URL:-${OP
 DEFAULT_ENABLE_SSL="false"
 export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
 
-DEFAULT_CHE_IMAGE_TAG="nightly"
+DEFAULT_CHE_IMAGE_TAG="6.2.0"
 export CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
 
 DEFAULT_IMAGE_PULL_POLICY="Always"
@@ -75,10 +75,10 @@ export IMAGE_PULL_POLICY=${IMAGE_PULL_POLICY:-${DEFAULT_IMAGE_PULL_POLICY}}
 DEFAULT_CHE_IMAGE_REPO="eclipse/che-server"
 export CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
 
-DEFAULT_IMAGE_INIT="eclipse/che-init:nightly"
+DEFAULT_IMAGE_INIT="eclipse/che-init:6.2.0"
 export IMAGE_INIT=${IMAGE_INIT:-${DEFAULT_IMAGE_INIT}}
 
-DEFAULT_CHE_CLI_IMAGE="eclipse/che-cli:nightly"
+DEFAULT_CHE_CLI_IMAGE="eclipse/che-cli:6.2.0"
 export CHE_CLI_IMAGE=${CHE_CLI_IMAGE:-${DEFAULT_CHE_CLI_IMAGE}}
 
 DEFAULT_CONFIG_DIR="/tmp/che-config"
@@ -242,7 +242,7 @@ remove_che_from_ocp() {
 }
 
 detectIP() {
-    docker run --rm --net host eclipse/che-ip:nightly
+    docker run --rm --net host eclipse/che-ip:6.2.0
 }
 
 parse_args() {
