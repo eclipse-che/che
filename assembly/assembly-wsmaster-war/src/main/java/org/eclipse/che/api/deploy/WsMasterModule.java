@@ -220,6 +220,14 @@ public class WsMasterModule extends AbstractModule {
           PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
           "org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler");
 
+      if (OpenShiftInfrastructure.NAME.equals(infrastructure)
+          || KubernetesInfrastructure.NAME.equals(infrastructure)) {
+        persistenceProperties.put(
+            PersistenceUnitProperties.COORDINATION_PROTOCOL, CacheCoordinationProtocol.JGROUPS);
+        persistenceProperties.put(
+            PersistenceUnitProperties.COORDINATION_JGROUPS_CONFIG, "jgroups/che-tcp.xml");
+      }
+
       configureMultiUserMode(persistenceProperties, infrastructure);
     } else {
       persistenceProperties.put(
@@ -266,13 +274,6 @@ public class WsMasterModule extends AbstractModule {
 
   private void configureMultiUserMode(
       Map<String, String> persistenceProperties, String infrastructure) {
-    if (OpenShiftInfrastructure.NAME.equals(infrastructure)
-        || KubernetesInfrastructure.NAME.equals(infrastructure)) {
-      persistenceProperties.put(
-          PersistenceUnitProperties.COORDINATION_PROTOCOL, CacheCoordinationProtocol.JGROUPS);
-      persistenceProperties.put(
-          PersistenceUnitProperties.COORDINATION_JGROUPS_CONFIG, "jgroups/che-tcp.xml");
-    }
     bind(TemplateProcessor.class).to(STTemplateProcessorImpl.class);
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
 
