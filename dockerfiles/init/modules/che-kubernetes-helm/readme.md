@@ -42,14 +42,14 @@ Currenty, only minikube deployment is supported.
 Only Che will be deployed.
 
   ```bash
-  helm upgrade --install <che-release> --namespace <che-namespace> --global.cheDomain=<domain> ./
+  helm upgrade --install <che-release> --namespace <che-namespace> --set global.cheDomain=<domain> ./
   ```
   
 ##### Multi User 
 Che, KeyCloak and Postgres will be deployed.
 
   ```bash
-  helm upgrade --install <che-release> --namespace <che-namespace> --set global.multiuser=true --global.cheDomain=<domain> ./
+  helm upgrade --install <che-release> --namespace <che-namespace> --set global.multiuser=true --set global.cheDomain=<domain> ./
   ```
   
 ##### No Host:
@@ -57,7 +57,7 @@ Che, KeyCloak and Postgres will be deployed.
  Path based routing to Che, Secondary servers (KeyCloak) and Workspace servers.
 
   ```bash
-  helm upgrade --install <che-release> --namespace <che-namespace> --set global.isHostbased=false --global.cheDomain=<minikube-ip> ./
+  helm upgrade --install <che-release> --namespace <che-namespace> --set global.isHostbased=false --set global.cheDomain=<minikube-ip> ./
    Master: http://<minikube-ip>/
    Workspaces: http://<minikube-ip>/<path-to-server>
    Keycloak (if multiuser) : http://<minikube-ip>/auth/
@@ -69,7 +69,7 @@ Che, KeyCloak and Postgres will be deployed.
  KeyCloak : dedicated hostname 
    
    ```bash
-   helm upgrade --install <che-release> --namespace <che-namespace> --global.cheDomain=<minikube-ip>.xip.io ./
+   helm upgrade --install <che-release> --namespace <che-namespace> --set global.cheDomain=<minikube-ip>.xip.io ./
    Master: http://master.<minikube-ip>.xip.io
    Workspaces: http://<minikube-ip>/<path-to-server>
    Keycloak (if multiuser): http://keycloak.<minikube-ip>.xip.io/
