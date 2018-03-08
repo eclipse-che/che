@@ -1,7 +1,6 @@
 # the following section is for secure registries. when uncommented, a pull secret will be created
 #registry:
 #  host: my-secure-private-registry.com
-#  host: my-secure-private-registry.com
 #  username: myUser
 #  password: myPass
 
