@@ -1,3 +1,10 @@
+# Copyright (c) 2012-2017 Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
 # Certificates can be created automatically using cert-manager's ingress-shim:
 #   https://github.com/jetstack/cert-manager/blob/master/docs/user-guides/ingress-shim.md
 # This would simplify issuing identical certificates for workspaces residing in their own namespaces (see CHE_INFRA_KUBERNETES_NAMESPACE environment variable).
@@ -24,4 +31,5 @@ spec:
       domains:
       - {{ template "cheHost" . }}
 {{- end }}
+      - {{ .Values.global.cheDomain }}
 {{- end }}

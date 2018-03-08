@@ -1,3 +1,10 @@
+# Copyright (c) 2012-2017 Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -24,6 +31,11 @@ data:
   CHE_INFRA_KUBERNETES_OAUTH__TOKEN: ""
   CHE_INFRA_KUBERNETES_PASSWORD: ""
   CHE_INFRA_KUBERNETES_USERNAME: ""
+{{- if .Values.global.multiuser }}
+  CHE_KEYCLOAK_AUTH__SERVER__URL: {{ template "keycloakAuthUrl" . }}
+  CHE_KEYCLOAK_CLIENT__ID: {{ .Values.cheKeycloakClientId }}
+  CHE_KEYCLOAK_REALM: {{ .Values.cheKeycloakRealm }}
+{{- end }}
   CHE_INFRA_KUBERNETES_NAMESPACE: {{ .Values.global.cheNamespace }}
 {{- if and .Values.global.tls .Values.global.tls.enabled }}
   CHE_INFRA_KUBERNETES_TLS__ENABLED: {{ .Values.global.tls.enabled }}
@@ -40,7 +52,7 @@ data:
   CHE_LOCAL_CONF_DIR: /etc/conf
   CHE_LOGS_DIR: /data/logs
   CHE_LOG_LEVEL: "INFO"
-  CHE_MULTIUSER: "false"
+  CHE_MULTIUSER: {{ .Values.global.multiuser | quote }}
   CHE_OAUTH_GITHUB_CLIENTID: ""
   CHE_OAUTH_GITHUB_CLIENTSECRET: ""
   CHE_PREDEFINED_STACKS_RELOAD__ON__START: "false"
@@ -52,6 +64,4 @@ data:
   CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON: '{"kubernetes.io/ingress.class": "nginx", "{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/rewrite-target": "/","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/ssl-redirect": "false","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-connect-timeout": "3600","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-read-timeout": "3600"}'
 {{- end }}
   CHE_INFRA_KUBERNETES_SERVER__STRATEGY: {{ .Values.global.serverStrategy }}
-
-
 

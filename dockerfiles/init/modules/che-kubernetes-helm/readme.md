@@ -21,7 +21,7 @@ In case you're specifying a hostname, simply pass it as the value of the `ingres
 
 If you must use an ip address (e.g. your corporate policy prevents you from using nip.io), you would also have to set `isHostBased` to `false`.
 
-### Perform the Actual Deployment
+### Deploying with Helm
 The context of the commands below is the directory in which this readme file resides
 
 - Override default values by changing the values.yaml file and then typing:
@@ -36,6 +36,20 @@ The context of the commands below is the directory in which this readme file res
   ```
 
 #### Deployment Options
+
+##### Single User 
+Only Che will be deployed.
+
+  ```bash
+  helm upgrade --install <che-release> --namespace <che-namespace> --set global.ingressDomain=<domain> ./
+  ```
+  
+##### Multi User 
+Che, KeyCloak and Postgres will be deployed.
+
+  ```bash
+  helm upgrade --install <che-release> --namespace <che-namespace> --set global.multiuser=true --set global.ingressDomain=<domain> ./
+  ```
 
 ##### Routing
 
