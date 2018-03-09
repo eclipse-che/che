@@ -83,9 +83,27 @@ checkNewVersion = false
 address = ":7070"
 <% end -%>
 
+
+# if CHE_HOST_PROTOCOL == https (or ENABLE_SSL, whatever makes most sense)
+
+<% if scope.lookupvar('che::che_protocol') == 'https' -%>
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+    [entryPoints.http.redirect]
+    entryPoint = "https"
+  [entryPoints.https]
+  address = ":<%= scope.lookupvar('che::che_port') -%>"
+    [entryPoints.https.tls]
+      [[entryPoints.https.tls.certificates]]
+# these files are mounted from instance/config/traefik
+#      certFile = "/etc/traefik/che.crt"
+#      keyFile = "/etc/traefik/che.pem"
+<% else -%>
 [entryPoints]
   [entryPoints.http]
   address = ":<%= scope.lookupvar('che::che_port') -%>"
+<% end -%>
 
 [docker]
 watch = true

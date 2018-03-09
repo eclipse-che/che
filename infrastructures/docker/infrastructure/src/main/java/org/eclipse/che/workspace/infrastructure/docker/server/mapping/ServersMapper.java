@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -35,6 +36,7 @@ public class ServersMapper {
 
   private final String hostname;
   private final String machineName;
+  private final String cheHostProtocol;
 
   /**
    * Creates mapper using given {@code hostname} as hostname for all the servers urls which are
@@ -44,6 +46,17 @@ public class ServersMapper {
   public ServersMapper(String hostname, String machineName) {
     this.hostname = hostname;
     this.machineName = machineName;
+    // default to http
+    this.cheHostProtocol = "http";
+  }
+
+  public ServersMapper(
+      @Nullable @Named("che.host.protocol") String cheHostProtocol,
+      String hostname,
+      String machineName) {
+    this.hostname = hostname;
+    this.machineName = machineName;
+    this.cheHostProtocol = cheHostProtocol;
   }
 
   /**
@@ -109,7 +122,7 @@ public class ServersMapper {
           mapped.put(
               ref,
               new ServerImpl()
-                  .withUrl(makeUrl(port, cfg.getProtocol(), cfg.getPath(), hostname))
+                  .withUrl(makeUrl(port, cfg, hostname))
                   .withAttributes(cfg.getAttributes()));
         }
       }
@@ -155,6 +168,12 @@ public class ServersMapper {
    * |------------------------------------------------------------------------|
    * </pre>
    */
+  private String makeUrl(ContainerPort port, ServerConfig cfg, String hostname)
+      throws InternalInfrastructureException {
+    // now we can grab the config
+    return makeUrl(port, cfg.getProtocol(), cfg.getPath(), hostname);
+  }
+
   private String makeUrl(ContainerPort port, String protocol, String path, String hostname)
       throws InternalInfrastructureException {
     if (protocol == null) {
@@ -175,6 +194,9 @@ public class ServersMapper {
     int serverPort = port.getPublicPort() != 0 ? port.getPublicPort() : port.getPrivatePort();
 
     try {
+      // URI(String scheme, String userInfo, String host, int port, String path, String query,
+      // String fragment)
+      // need to insert the same url as generated in SinglePortLabelsProvider here
       return new URI(protocol, null, hostname, serverPort, path, null, null).toString();
     } catch (URISyntaxException e) {
       throw new InternalInfrastructureException(
