@@ -1,0 +1,90 @@
+# Copyright (c) 2012-2017 Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: keycloak
+  name: keycloak
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        io.kompose.service: keycloak
+    spec:
+      initContainers:
+      - name: wait-for-postgres
+        image: alpine:3.5
+        command: ["sh", "-c", "apk --no-cache add curl jq ; adresses_length=0; until [ $adresses_length -gt 0 ]; do echo waiting for postgres to be ready...; sleep 2; endpoints=`curl -s --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"     https://kubernetes.default/api/v1/namespaces/$POD_NAMESPACE/endpoints/postgres`; adresses_length=`echo $endpoints | jq -r \".subsets[]?.addresses // [] | length\"`; done;"]
+        env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+      containers:
+      - env:
+        - name: POSTGRES_PORT_5432_TCP_ADDR
+          value: postgres
+        - name: POSTGRES_PORT_5432_TCP_PORT
+          value: "5432"
+        - name: POSTGRES_DATABASE
+          value: keycloak
+        - name: POSTGRES_USER
+          value: keycloak
+        - name: POSTGRES_PASSWORD
+          value: keycloak
+        - name: KEYCLOAK_USER
+          value: admin
+        - name: KEYCLOAK_PASSWORD
+          value: admin
+        - name: CHE_HOST
+          value: {{ template "cheHost" . }}
+        image: {{ .Values.image }}
+        imagePullPolicy: Always
+        name: keycloak
+        livenessProbe:
+          failureThreshold: 11
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          tcpSocket:
+            port: 8080
+          timeoutSeconds: 30
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: auth/js/keycloak.js
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 1
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            memory: 1536Mi
+          requests:
+            memory: 1024Mi
+        volumeMounts:
+        - mountPath: /opt/jboss/keycloak/standalone/data
+          name: keycloak-data
+        - mountPath: /opt/jboss/keycloak/standalone/log
+          name: keycloak-log
+      restartPolicy: Always
+      volumes:
+      - name: keycloak-data
+        persistentVolumeClaim:
+          claimName: keycloak-data
+      - name: keycloak-log
+        persistentVolumeClaim:
+          claimName: keycloak-log
+  test: false
+status: {}

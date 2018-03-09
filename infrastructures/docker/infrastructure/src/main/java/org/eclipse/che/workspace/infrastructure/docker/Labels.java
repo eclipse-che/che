@@ -35,8 +35,8 @@ public final class Labels {
   public static final String LABEL_WORKSPACE_ENV = LABEL_PREFIX + "workspace.env";
   public static final String LABEL_WORKSPACE_OWNER = LABEL_PREFIX + "workspace.owner";
   public static final String LABEL_WORKSPACE_OWNER_ID = LABEL_PREFIX + "workspace.owner.id";
+  public static final String LABEL_MACHINE_NAME = LABEL_PREFIX + "machine.name";
 
-  private static final String LABEL_MACHINE_NAME = LABEL_PREFIX + "machine.name";
   private static final String LABEL_MACHINE_ATTRIBUTES = LABEL_PREFIX + "machine.attributes";
   private static final String SERVER_PORT_LABEL_FMT = LABEL_PREFIX + "server.%s.port";
   private static final String SERVER_PROTOCOL_LABEL_FMT = LABEL_PREFIX + "server.%s.protocol";
