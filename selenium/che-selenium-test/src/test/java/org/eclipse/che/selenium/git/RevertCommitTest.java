@@ -47,7 +47,6 @@ import org.testng.annotations.Test;
 public class RevertCommitTest {
   private static final String REPO_NAME = NameGenerator.generate("GitRevert-", 3);
   private static final String PROJECT_NAME = NameGenerator.generate("GitRevertProject-", 4);
-  private static final String COMMIT_MSG = "update file.html";
 
   private GitHub gitHub;
   private GHRepository gitHubRepository;
