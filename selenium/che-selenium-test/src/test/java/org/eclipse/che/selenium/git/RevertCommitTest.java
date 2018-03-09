@@ -42,6 +42,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+/** @author Anatolii Bazko */
 /** @author aleksandr shmaraev */
 public class RevertCommitTest {
   private static final String REPO_NAME = NameGenerator.generate("GitRevert-", 3);
@@ -91,33 +92,40 @@ public class RevertCommitTest {
 
   @Test
   public void shouldRevertCommit() throws Exception {
-    // preconditions and import the test repo
-    String jsFile = "app.js";
+    // preconditions import the test repo
+    String newFile = "newFile.xml";
     String htmlFile = "file.html";
     String changeContent = "<! change content>";
-    String pathToJsFile = String.format("%s/%s", PROJECT_NAME, jsFile);
+    String messCreateFile = "create newFile.xml";
+    String messUpdateFile = "update file.html";
+    String pathToNewFile = String.format("%s/%s", PROJECT_NAME, newFile);
     String pathToHtmlFile = String.format("%s/%s", PROJECT_NAME, htmlFile);
 
+    // import the test repo
     projectExplorer.waitProjectExplorer();
     String repoUrl = String.format("https://github.com/%s/%s.git", gitHubUsername, REPO_NAME);
     git.importJavaApp(repoUrl, PROJECT_NAME, BLANK);
 
+    // create new file and perform commit
+    testProjectServiceClient.createFileInProject(ws.getId(), PROJECT_NAME, newFile, changeContent);
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.waitItem(pathToJsFile);
+    projectExplorer.waitItem(pathToNewFile);
+
+    commitFiles(messCreateFile);
 
     // perform git revert and check author and comment
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
     performGitRevert();
 
-    // check that 'app.js' is disappear from the project tree
-    projectExplorer.waitDisappearItemByPath(pathToJsFile);
+    // check that 'newFile.xml' is disappear from the project tree
+    projectExplorer.waitDisappearItemByPath(pathToNewFile);
 
     // update the 'file.html' and commit change
     testProjectServiceClient.updateFile(ws.getId(), pathToHtmlFile, changeContent);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
-    commitFiles();
+    commitFiles(messUpdateFile);
 
     // perform revert and check that 'change content' is not present in the editor
     performGitRevert();
@@ -148,11 +156,11 @@ public class RevertCommitTest {
     gitRevertCommit.clickCancelButton();
   }
 
-  private void commitFiles() {
+  private void commitFiles(String commiitMess) {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
 
-    git.waitAndRunCommit(COMMIT_MSG);
+    git.waitAndRunCommit(commiitMess);
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
   }
 }
