@@ -415,6 +415,7 @@ Define tests scope:
     --test=<TEST_CLASS>                 Single test to run
     --suite=<SUITE>                     Test suite to run, found:
 "$(for x in $(ls -1 src/test/resources/suites); do echo "                                            * "$x; done)"
+    --exclude=<TEST_GROUPS_TO_EXCLUDE>  Comma-separated list of test groups to exclude from execution.
 
 Handle failing tests:
     --failed-tests                      Rerun failed tests that left after the previous try
