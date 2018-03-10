@@ -40,8 +40,7 @@ node default {
   #
   $che_single_port = getValue("CHE_SINGLE_PORT","false")
   $che_single_port_wildcard_domain_host = getValue("CHE_SINGLEPORT_WILDCARD__DOMAIN_HOST","nip.io")
-  $che_single_port_custom_dns = getValue("CHE_SINGLEPORT_CUSTOM_DNS","false")
-
+  $che_single_port_wildcard_domain_ipless = getValue("CHE_SINGLEPORT_WILDCARD__DOMAIN_IPLESS","false")
 
   ###############################
   # Che multiuser

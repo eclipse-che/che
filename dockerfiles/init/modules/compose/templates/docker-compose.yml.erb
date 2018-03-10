@@ -162,7 +162,7 @@ services:
     labels:
       traefik.keycloak.frontend.entryPoints: "http"
       traefik.keycloak.port: "8080"
-<% if scope.lookupvar('che::che_single_port') == 'true' and scope.lookupvar('che::che_single_port_custom_dns') == 'true' -%>
+<% if scope.lookupvar('che::che_single_port') == 'true' and scope.lookupvar('che::che_single_port_wildcard_domain_ipless') == 'true' -%>
       traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::che_single_port_wildcard_domain_host') -%>"
 <% elsif ! @che_docker_ip_external.empty? -%>
       traefik.keycloak.frontend.rule: "Host:keycloak.<%= scope.lookupvar('che::che_docker_ip_external') -%>.<%= scope.lookupvar('che::che_single_port_wildcard_domain_host') -%>"
