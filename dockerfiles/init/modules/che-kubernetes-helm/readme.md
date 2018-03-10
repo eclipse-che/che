@@ -41,68 +41,43 @@ The context of the commands below is the directory in which this readme file res
 Only Che will be deployed.
 
   ```bash
-  helm upgrade --install <che-release> --namespace <che-namespace> --set global.ingressDomain=<domain> ./
+  helm upgrade --install <che-release-name> --namespace <che-namespace> --set global.ingressDomain=<domain> ./
   ```
   
 ##### Multi User 
 Che, KeyCloak and Postgres will be deployed.
 
   ```bash
-  helm upgrade --install <che-release> --namespace <che-namespace> --set global.multiuser=true --set global.ingressDomain=<domain> ./
+  helm upgrade --install <che-release-name> --namespace <che-namespace> -f ./values/multi-user.yaml --set global.ingressDomain=<domain> ./
   ```
 
-##### Routing
-
-- No Hostname 
-
-All Ingress specs are created without a host attribute (defaults to *).   
-
+#### Default Host
+All Ingress specs are created without a host attribute (defaults to *).
+Path based routing to all components.
+Multi User configuration is enabled. 
+ 
   ```bash
-  helm upgrade --install <my-che-installation> --namespace che --set global.ingressDomain=<minikube-ip>  --set global.serverStrategy=default-host ./
-      Master: http://<minikube-ip>/
-      Workspace servers: http://<minikube-ip>/<path-to-server>
-      Keycloak: http://<minikube-ip>/auth/
+  helm upgrade --install <che-release-name> --namespace <che-namespace> -f ./values/default-host.yaml --set global.ingressDomain=<domain> ./
   ```
-- Single Host
+ 
+* Master: `http://<minikube-ip>/`
+* Keycloak:  `http://<minikube-ip>/auth/`
+* Workspaces servers: `http://<minikube-ip>/<path-to-server>`
 
-All Ingress specs are created with the same host. Path based routing.
-Can be used in conjunction with cert-manager for TLS, with a single certificate.
-Useful for development and testing in cloud environments.
-
-  ```bash
-  helm upgrade --install <che-release> --namespace <che-namespace> --set global.ingressDomain=<minikube-ip>.xip.io --set global.serverStrategy=single-host ./
-    Master: http://che.<minikube-ip>.xip.io/
-    Workspaces servers: http://che.<minikube-ip>.xip.io/<path-to-server>
-    Keycloak: http://che.<minikube-ip>.xip.io/auth/
-  ```
-
-- Multiple Hosts
-helm upgrade --install che --namespace che --set global.ingressDomain=che.192.168.99.100.xip.io --set global.serverStrategy=multi-host --set cheImage=guydaich/che-server:tls ./
-All Ingress specs are created with a unique host. 
-Host based routing. 
-
-  ```bash
-  helm upgrade --install <che-release> --namespace <che-namespace> --set global.ingressDomain=<minikube-ip>.xip.io --set global.serverStrategy=multi-host ./
-    Master: http://master.<minikube-ip>.xip.io
-    Workspaces: http://<server-hostname>.<minikube-ip>.xip.io
-    Keycloak: http://keycloak.<minikube-ip>.xip.io/
-  ```
-
-##### TLS
-
-- Cert-Manager
-
-Currently, limited to Single Host routing.   
-
-helm upgrade --install che --namespace che --set global.ingressDomain=<mydomain> --set global.serverStrategy=single-host --set global.cheNamespace=che --set global.tls.enabled=true --set global.tls.useStaging=false --set cheImage=guydaich/che-server:tls ./
+#### TLS-enabled
+Cert-Manager is used to issue LetsEncrypt certificates.
+To avoid rate-limit issues, we use a single hostname for all ingresses.
+Path based routing to all components.
+Multi User configuration is enabled. 
 
   ```bash
   helm install --name <cert-manager-release-name> stable/cert-manager
-  helm upgrade --install che --namespace che --set global.ingressDomain=<domain> --set global.tls.enabled=true --set global.serverStrategy=single-host ./
-    Master: https://che.domain/
-    Workspaces servers: https://che.domain/<path-to-server>
-    Keycloak: https://che.domain/auth/
-  ```    
+  helm upgrade --install <che-release-name> --namespace <che-namespace> -f ./values/tls.yaml --set global.ingressDomain=<your-domain> ./
+  ```
+
+* Master: `https://che-<che-namespace>.your-domain/`
+* Keycloak:  `https://che-<che-namespace>.your-domain/auth/`
+* Workspaces servers: `https://<che-namespace>.your-domain/<path-to-server>`
 
 ## Deleting a Deployment
 You can delete a deployment using the following command:

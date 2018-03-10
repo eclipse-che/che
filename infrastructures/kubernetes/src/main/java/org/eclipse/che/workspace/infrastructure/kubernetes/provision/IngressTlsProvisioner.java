@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressTLS;
 import io.fabric8.kubernetes.api.model.extensions.IngressTLSBuilder;
@@ -34,14 +36,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 public class IngressTlsProvisioner implements ConfigurationProvisioner<KubernetesEnvironment> {
 
   protected final boolean isTlsEnabled;
-  protected final String tlsSecret;
+  protected final String tlsSecretName;
 
   @Inject
   public IngressTlsProvisioner(
       @Named("che.infra.kubernetes.tls_enabled") boolean isTlsEnabled,
-      @Named("che.infra.kubernetes.tls_secret") String tlsSecret) {
+      @Named("che.infra.kubernetes.tls_secret") String tlsSecretName) {
     this.isTlsEnabled = isTlsEnabled;
-    this.tlsSecret = tlsSecret;
+    this.tlsSecretName = tlsSecretName;
   }
 
   @Override
@@ -60,8 +62,18 @@ public class IngressTlsProvisioner implements ConfigurationProvisioner<Kubernete
 
   private void enableTLS(Ingress ingress) {
     String host = ingress.getSpec().getRules().get(0).getHost();
-    IngressTLS ingressTLS =
-        new IngressTLSBuilder().withHosts(host).withSecretName(tlsSecret).build();
+
+    IngressTLSBuilder ingressTLSBuilder =
+        new IngressTLSBuilder().withHosts(host).withSecretName(tlsSecretName);
+
+    // according to ingress tls spec, secret name is optional
+    // when working in single-host mode, nginx controller wil reuse the che-master secret
+    // https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/api/extensions/v1beta1/types.go
+    if (!isNullOrEmpty(tlsSecretName)) {
+      ingressTLSBuilder.withSecretName(tlsSecretName);
+    }
+
+    IngressTLS ingressTLS = ingressTLSBuilder.build();
     List<IngressTLS> ingressTLSList = new ArrayList<>(Arrays.asList(ingressTLS));
     ingress.getSpec().setTls(ingressTLSList);
   }

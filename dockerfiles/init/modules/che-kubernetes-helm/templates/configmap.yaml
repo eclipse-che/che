@@ -38,7 +38,7 @@ data:
 {{- end }}
   CHE_INFRA_KUBERNETES_NAMESPACE: {{ .Values.global.cheNamespace }}
 {{- if and .Values.global.tls .Values.global.tls.enabled }}
-  CHE_INFRA_KUBERNETES_TLS__ENABLED: {{ .Values.global.tls.enabled }}
+  CHE_INFRA_KUBERNETES_TLS__ENABLED: {{ .Values.global.tls.enabled | quote}}
   CHE_INFRA_KUBERNETES_TLS__SECRET: {{ .Values.global.tls.secretName }}
 {{- else }}
   CHE_INFRA_KUBERNETES_TLS__ENABLED: "false"

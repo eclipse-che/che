@@ -36,6 +36,7 @@ spec:
         image: {{ .Values.image }}
         securityContext:
           runAsUser: 26
+          fsGroup: 26
         imagePullPolicy: Always
         name: postgres
         livenessProbe:

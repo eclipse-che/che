@@ -46,6 +46,9 @@ spec:
         - name: CHE_HOST
           value: {{ template "cheHost" . }}
         image: {{ .Values.image }}
+        securityContext:
+          runAsUser: 0
+          fsGroup: 0
         imagePullPolicy: Always
         name: keycloak
         livenessProbe:
