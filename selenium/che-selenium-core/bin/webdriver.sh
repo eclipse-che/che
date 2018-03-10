@@ -742,7 +742,7 @@ getTestGroupsToExclude() {
     local productConfig=$(getProductConfig)
     local productConfigArray=(${productConfig//,/ })
 
-    local allSupportedGroups=(${SUPPORTED_INFRASTRUCTURES[@]} singluser multiuser)
+    local allSupportedGroups=(${SUPPORTED_INFRASTRUCTURES[@]} singleuser multiuser)
 
     for productConfigGroup in ${productConfigArray[*]}; do
         for i in ${!allSupportedGroups[@]}; do
