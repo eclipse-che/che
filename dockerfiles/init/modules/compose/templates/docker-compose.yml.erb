@@ -160,7 +160,7 @@ services:
       - POSTGRES_DATABASE=keycloak
       - POSTGRES_USER=keycloak
       - POSTGRES_PASSWORD=keycloak
-<% if scope.lookupvar('che::che_single_port') == 'true' -%> 
+<% if scope.lookupvar('che::che_single_port') == 'true' -%>
       - PROXY_ADDRESS_FORWARDING=true
 <% end -%>
     links:
