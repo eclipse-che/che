@@ -41,7 +41,7 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
   private final String externalIpOfContainers;
   private final String dockerNetwork;
   private final String cheHostProtocol;
-  private final Boolean singleportCustomDns;
+  private final Boolean singleportWildcardIPless;
   private final String singleportWildcardDomainHost;
 
   @Inject
@@ -50,13 +50,13 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
       @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
       @Nullable @Named("che.docker.network") String dockerNetwork,
       @Nullable @Named("che.host.protocol") String cheHostProtocol,
-      @Nullable @Named("che.singleport.custom.dns") Boolean singleportCustomDns,
+      @Nullable @Named("che.singleport.wildcard_domain.ipless") Boolean singleportWildcardIPless,
       @Nullable @Named("che.singleport.wildcard_domain.host") String singleportWildcardDomainHost,
       Provider<SinglePortHostnameBuilder> hostnameBuilderProvider) {
     this.hostnameBuilderProvider = hostnameBuilderProvider;
     this.internalIpOfContainers = internalIpOfContainers;
     this.externalIpOfContainers = externalIpOfContainers;
-    this.singleportCustomDns = singleportCustomDns;
+    this.singleportWildcardIPless = singleportWildcardIPless;
     this.cheHostProtocol = cheHostProtocol;
     this.singleportWildcardDomainHost = singleportWildcardDomainHost;
     this.dockerNetwork = dockerNetwork;

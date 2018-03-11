@@ -97,8 +97,8 @@ address = ":7070"
     [entryPoints.https.tls]
       [[entryPoints.https.tls.certificates]]
 # these files are mounted from instance/config/traefik
-#      certFile = "/etc/traefik/che.crt"
-#      keyFile = "/etc/traefik/che.pem"
+      certFile = "/etc/traefik/che.crt"
+      keyFile = "/etc/traefik/che.pem"
 <% else -%>
 [entryPoints]
   [entryPoints.http]
