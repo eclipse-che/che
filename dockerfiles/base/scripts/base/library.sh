@@ -39,9 +39,9 @@ get_display_url() {
   fi
 
   if ! is_docker_for_mac && ! is_docker_for_windows; then
-    echo "http://${CHE_HOST_LOCAL}:${CHE_PORT}"
+    echo "${CHE_HOST_PROTOCOL}://${CHE_HOST_LOCAL}:${CHE_PORT}"
   else
-    echo "http://localhost:${CHE_PORT}"
+    echo "${CHE_HOST_PROTOCOL}://localhost:${CHE_PORT}"
   fi
 }
 
@@ -56,9 +56,9 @@ get_debug_display_url() {
   fi
 
   if ! is_docker_for_mac && ! is_docker_for_windows; then
-    echo "http://${CHE_HOST}:${CHE_DEBUG_PORT_LOCAL}"
+    echo "${CHE_HOST_PROTOCOL}://${CHE_HOST}:${CHE_DEBUG_PORT_LOCAL}"
   else
-    echo "http://localhost:${CHE_DEBUG_PORT_LOCAL}"
+    echo "${CHE_HOST_PROTOCOL}://localhost:${CHE_DEBUG_PORT_LOCAL}"
   fi
 }
 
