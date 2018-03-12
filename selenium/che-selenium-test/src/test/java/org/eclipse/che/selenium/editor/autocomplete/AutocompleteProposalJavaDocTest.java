@@ -49,7 +49,6 @@ public class AutocompleteProposalJavaDocTest {
   @Inject private CodenvyEditor editor;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private BrowserLogsUtil browserLogsUtil;
   @Inject private Consoles consoles;
 
   @BeforeClass
