@@ -12,23 +12,22 @@ package org.eclipse.che.selenium.git;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.REVERT_COMMIT;
-import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.BLANK;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.io.IOException;
-import java.nio.file.Path;
+import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -36,20 +35,15 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.git.GitRevertCommit;
 import org.eclipse.che.selenium.pageobject.git.GitStatusBar;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/** @author Anatolii Bazko */
-/** @author aleksandr shmaraev */
+/**
+ * @author Anatolii Bazko
+ * @author aleksandr shmaraev
+ */
 public class RevertCommitTest {
-  private static final String REPO_NAME = NameGenerator.generate("GitRevert-", 3);
   private static final String PROJECT_NAME = NameGenerator.generate("GitRevertProject-", 4);
-
-  private GitHub gitHub;
-  private GHRepository gitHubRepository;
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
@@ -59,51 +53,42 @@ public class RevertCommitTest {
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject
-  @Named("github.password")
-  private String gitHubPassword;
-
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private ProjectExplorer projectExplorer;
+  @Inject private AskDialog askDialog;
   @Inject private Menu menu;
   @Inject private Git git;
   @Inject private CodenvyEditor editor;
   @Inject private GitRevertCommit gitRevertCommit;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
-  @Inject private TestGitHubServiceClient gitHubClientService;
   @Inject private GitStatusBar gitStatusBar;
 
   @BeforeClass
   public void prepare() throws Exception {
-    gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
-    gitHubRepository = gitHub.createRepository(REPO_NAME).create();
-    String commitMess = String.format("add-new-content %s ", System.currentTimeMillis());
+    URL resource = getClass().getResource("/projects/git-pull-test");
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
-    Path entryPath = Paths.get(getClass().getResource("/projects/git-pull-test").getPath());
-    gitHubClientService.addContentToRepository(entryPath, commitMess, gitHubRepository);
+    testProjectServiceClient.importProject(
+        ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING);
     ide.open(ws);
-  }
-
-  @AfterClass
-  public void deleteRepo() throws IOException {
-    gitHubRepository.delete();
   }
 
   @Test
   public void shouldRevertCommit() throws Exception {
-    // preconditions import the test repo
+    // preconditions
     String newFile = "newFile.xml";
     String htmlFile = "file.html";
     String changeContent = "<! change content>";
+    String messInitRepo = "init";
     String messCreateFile = "create newFile.xml";
     String messUpdateFile = "update file.html";
     String pathToNewFile = String.format("%s/%s", PROJECT_NAME, newFile);
     String pathToHtmlFile = String.format("%s/%s", PROJECT_NAME, htmlFile);
 
-    // import the test repo
+    // perform git initialize repository
     projectExplorer.waitProjectExplorer();
-    String repoUrl = String.format("https://github.com/%s/%s.git", gitHubUsername, REPO_NAME);
-    git.importJavaApp(repoUrl, PROJECT_NAME, BLANK);
+
+    gitInitRepo();
+    commitFiles(messInitRepo);
 
     // create new file and perform commit
     testProjectServiceClient.createFileInProject(ws.getId(), PROJECT_NAME, newFile, changeContent);
@@ -132,6 +117,15 @@ public class RevertCommitTest {
     projectExplorer.openItemByPath(pathToHtmlFile);
     editor.waitActive();
     editor.waitTextNotPresentIntoEditor(changeContent);
+  }
+
+  private void gitInitRepo() {
+    menu.runCommand(
+        TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
+    askDialog.waitFormToOpen();
+    askDialog.clickOkBtn();
+    askDialog.waitFormToClose();
+    git.waitGitStatusBarWithMess(TestGitConstants.GIT_INITIALIZED_SUCCESS);
   }
 
   private void performGitRevert() {
