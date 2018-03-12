@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.macro.Macro;
@@ -102,6 +103,7 @@ public class SourcepathMacro implements Macro {
                   }
 
                   return classpath.toString();
-                });
+                })
+        .catchError(PromiseError::getMessage);
   }
 }
