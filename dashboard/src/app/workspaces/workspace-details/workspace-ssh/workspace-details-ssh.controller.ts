@@ -21,7 +21,7 @@ import {CheSsh} from '../../../../components/api/che-ssh.factory';
  */
 export class WorkspaceDetailsSshCtrl {
 
-  static $inject = ['$route', 'cheSsh', 'cheWorkspace', 'cheNotification', '$mdDialog', '$log', '$q'];
+  static $inject = ['$route', 'cheSsh', 'cheWorkspace', 'cheNotification', '$mdDialog', '$log', '$q', '$timeout'];
 
   /**
    * Workspace.
@@ -62,6 +62,10 @@ export class WorkspaceDetailsSshCtrl {
   private workspaceId: string;
 
   private sshKeyPair : any;
+  /**
+   * Loading state of the page.
+   */
+  private isLoading: boolean;
 
   /**
    * True if one machine has ssh agent enabled.
@@ -79,13 +83,15 @@ export class WorkspaceDetailsSshCtrl {
               cheNotification: CheNotification,
               $mdDialog: ng.material.IDialogService,
               $log: ng.ILogService,
-              $q: ng.IQService) {
+              $q: ng.IQService,
+              $timeout : ng.ITimeoutService) {
     this.cheWorkspace = cheWorkspace;
     this.cheSsh = cheSsh;
     this.cheNotification = cheNotification;
     this.$mdDialog = $mdDialog;
     this.$log = $log;
     this.$q = $q;
+    this.$timeout = $timeout;
 
     this.machineSshAgents = [];
     this.namespace = $route.current.params.namespace;
@@ -102,10 +108,12 @@ export class WorkspaceDetailsSshCtrl {
     this.workspace = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
     this.workspaceId = this.workspace.id;
 
+    this.isLoading = true;
+
     // get ssh key
     this.cheSsh.fetchKey('workspace', this.workspaceId).finally(() => {
       this.sshKeyPair = this.cheSsh.getKey('workspace', this.workspaceId);
-
+      this.isLoading = false;
     });
 
     let defaultEnv : string = this.workspace.config.defaultEnv;
@@ -127,11 +135,15 @@ export class WorkspaceDetailsSshCtrl {
    * Remove the default workspace keypair
    */
   removeDefaultKey() {
+    this.isLoading = true;
     this.cheSsh.removeKey('workspace', this.workspaceId).then(
       () => {
         this.$timeout(() => {
           this.updateData();
         }, 3000);
+      }, (error: any) => {
+        this.isLoading = false;
+        this.$log.error('Cannot remove default key: ', error);
       });
   }
 
@@ -139,10 +151,14 @@ export class WorkspaceDetailsSshCtrl {
    * Generate a new default workspace keypair
    */
   generateDefaultKey() {
+    this.isLoading = true;
     this.cheSsh.generateKey('workspace', this.workspaceId).then(() => {
       this.$timeout(() => {
         this.updateData();
       }, 3000);
+    }, (error: any) => {
+      this.isLoading = false;
+      this.$log.error('Cannot generate default key: ', error);
     });
   }
 

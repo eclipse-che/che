@@ -70,6 +70,8 @@ interface INumberSpinnerScope extends ng.IScope {
  * @author Oleksii Kurinnyi
  */
 export class CheNumberSpinner {
+  static $inject = ['$timeout', '$interval'];
+
   $interval: ng.IIntervalService;
   $timeout: ng.ITimeoutService;
 

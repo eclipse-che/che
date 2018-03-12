@@ -21,7 +21,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.editor.events.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitServiceClient;
@@ -362,12 +361,6 @@ public class ComparePresenter implements CompareView.ActionDelegate {
         .updateContent(content)
         .then(
             ignored -> {
-              final Container parent = comparedFile.getParent();
-
-              if (parent != null) {
-                parent.synchronize();
-              }
-
               eventBus.fireEvent(new FileContentUpdateEvent(comparedFile.getLocation().toString()));
             })
         .catchError(

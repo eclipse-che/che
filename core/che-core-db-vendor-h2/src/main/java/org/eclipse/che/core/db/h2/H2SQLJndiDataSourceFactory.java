@@ -31,12 +31,20 @@ public class H2SQLJndiDataSourceFactory extends JNDIDataSourceFactory {
 
   public H2SQLJndiDataSourceFactory() throws Exception {
     super(
-        firstNonNull(System.getenv("CHE_JDBC_USERNAME"), DEFAULT_USERNAME),
-        firstNonNull(System.getenv("CHE_JDBC_PASSWORD"), DEFAULT_PASSWORD),
-        firstNonNull(System.getenv("CHE_JDBC_URL"), DEFAULT_URL),
-        firstNonNull(System.getenv("CHE_JDBC_DRIVER__CLASS__NAME"), DEFAULT_DRIVER__CLASS__NAME),
-        firstNonNull(System.getenv("CHE_JDBC_MAX__TOTAL"), DEFAULT_MAX__TOTAL),
-        firstNonNull(System.getenv("CHE_JDBC_MAX__IDLE"), DEFAULT_MAX__IDLE),
-        firstNonNull(System.getenv("CHE_JDBC_MAX__WAIT__MILLIS"), DEFAULT_MAX__WAIT__MILLIS));
+        firstNonNull(
+            nullStringToNullReference(System.getenv("CHE_JDBC_USERNAME")), DEFAULT_USERNAME),
+        firstNonNull(
+            nullStringToNullReference(System.getenv("CHE_JDBC_PASSWORD")), DEFAULT_PASSWORD),
+        firstNonNull(nullStringToNullReference(System.getenv("CHE_JDBC_URL")), DEFAULT_URL),
+        firstNonNull(
+            nullStringToNullReference(System.getenv("CHE_JDBC_DRIVER__CLASS__NAME")),
+            DEFAULT_DRIVER__CLASS__NAME),
+        firstNonNull(
+            nullStringToNullReference(System.getenv("CHE_JDBC_MAX__TOTAL")), DEFAULT_MAX__TOTAL),
+        firstNonNull(
+            nullStringToNullReference(System.getenv("CHE_JDBC_MAX__IDLE")), DEFAULT_MAX__IDLE),
+        firstNonNull(
+            nullStringToNullReference(System.getenv("CHE_JDBC_MAX__WAIT__MILLIS")),
+            DEFAULT_MAX__WAIT__MILLIS));
   }
 }

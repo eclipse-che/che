@@ -10,6 +10,7 @@
  */
 'use strict';
 import {CheRecipeTypes} from '../../../components/api/recipe/che-recipe-types';
+import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
 
 
 /**
@@ -18,6 +19,16 @@ import {CheRecipeTypes} from '../../../components/api/recipe/che-recipe-types';
  * @author Oleksii Orel
  */
 export class StackValidationService {
+  static $inject = ['cheWorkspace'];
+
+  private cheWorkspace: CheWorkspace;
+
+  /**
+   * Default constructor that is using resource
+   */
+  constructor(cheWorkspace: CheWorkspace) {
+    this.cheWorkspace = cheWorkspace;
+  }
 
   /**
    * Return result of recipe validation.
@@ -268,7 +279,7 @@ export class StackValidationService {
       if (!recipe.contentType) {
         errors.push('Unknown recipe contentType.');
       }
-    } else {
+    } else if (this.cheWorkspace.getSupportedRecipeTypes().indexOf(recipe.type) === -1) {
       isValid = false;
       errors.push('Unknown recipe type.');
     }

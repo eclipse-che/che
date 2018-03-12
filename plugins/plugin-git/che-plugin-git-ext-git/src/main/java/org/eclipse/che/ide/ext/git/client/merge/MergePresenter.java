@@ -26,7 +26,6 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.MergeResult;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.commons.exception.ServerException;
@@ -55,7 +54,6 @@ public class MergePresenter implements MergeView.ActionDelegate {
   private final ProcessesPanelPresenter consolesPanelPresenter;
   private final GitServiceClient service;
   private final GitLocalizationConstant constant;
-  private final AppContext appContext;
   private final NotificationManager notificationManager;
 
   private Reference selectedReference;
@@ -66,7 +64,6 @@ public class MergePresenter implements MergeView.ActionDelegate {
       MergeView view,
       GitServiceClient service,
       GitLocalizationConstant constant,
-      AppContext appContext,
       NotificationManager notificationManager,
       DialogFactory dialogFactory,
       GitOutputConsoleFactory gitOutputConsoleFactory,
@@ -78,7 +75,6 @@ public class MergePresenter implements MergeView.ActionDelegate {
     this.view.setDelegate(this);
     this.service = service;
     this.constant = constant;
-    this.appContext = appContext;
     this.notificationManager = notificationManager;
   }
 
@@ -152,8 +148,6 @@ public class MergePresenter implements MergeView.ActionDelegate {
               console.print(formMergeMessage(result));
               consolesPanelPresenter.addCommandOutput(console);
               notificationManager.notify(formMergeMessage(result));
-
-              project.synchronize();
             })
         .catchError(
             error -> {
