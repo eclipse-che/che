@@ -77,16 +77,16 @@ public class ProjectServiceVcsStatusInjector {
             .filter(itemReference -> "file".equals(itemReference.getType()))
             .findAny();
     if (itemReferenceOptional.isPresent()) {
-      String project = normalizeProjectPath(itemReferenceOptional.get().getProject());
+      String project = itemReferenceOptional.get().getProject();
       Optional<VcsStatusProvider> vcsStatusProviderOptional = getVcsStatusProvider(project);
       if (vcsStatusProviderOptional.isPresent()) {
         List<String> itemReferenceFiles =
             itemReferences
                 .stream()
                 .filter(itemReference -> "file".equals(itemReference.getType()))
-                .map(itemReference -> normalizeFilePath(itemReference.getPath()))
+                .map(this::getFilePathWithoutProject)
                 .collect(Collectors.toList());
-        Map<String, VcsStatusProvider.VcsStatus> status =
+        Map<String, VcsStatusProvider.VcsStatus> statusMap =
             vcsStatusProviderOptional.get().getStatus(project, itemReferenceFiles);
 
         itemReferences
@@ -95,7 +95,7 @@ public class ProjectServiceVcsStatusInjector {
             .forEach(
                 itemReference -> {
                   Map<String, String> attributes = new HashMap<>(itemReference.getAttributes());
-                  attributes.put("vcs.status", status.get(itemReference.getPath()).toString());
+                  attributes.put("vcs.status", statusMap.get(itemReference.getPath()).toString());
                   itemReference.setAttributes(attributes);
                 });
       }
@@ -117,18 +117,17 @@ public class ProjectServiceVcsStatusInjector {
             .filter(treeElement -> "file".equals(treeElement.getNode().getType()))
             .findAny();
     if (treeElementOptional.isPresent()) {
-      String project = normalizeProjectPath(treeElementOptional.get().getNode().getProject());
-      String projectWsPath = absolutize(project);
-      Optional<VcsStatusProvider> vcsStatusProviderOptional = getVcsStatusProvider(projectWsPath);
+      String project = treeElementOptional.get().getNode().getProject();
+      Optional<VcsStatusProvider> vcsStatusProviderOptional = getVcsStatusProvider(project);
       if (vcsStatusProviderOptional.isPresent()) {
-        List<String> treeElementFiles =
+        List<String> paths =
             treeElements
                 .stream()
                 .filter(treeElement -> "file".equals(treeElement.getNode().getType()))
-                .map(treeElement -> normalizeFilePath(treeElement.getNode().getPath()))
+                .map(treeElement -> getFilePathWithoutProject(treeElement.getNode()))
                 .collect(Collectors.toList());
         Map<String, VcsStatusProvider.VcsStatus> status =
-            vcsStatusProviderOptional.get().getStatus(projectWsPath, treeElementFiles);
+            vcsStatusProviderOptional.get().getStatus(project, paths);
 
         treeElements
             .stream()
@@ -147,23 +146,17 @@ public class ProjectServiceVcsStatusInjector {
     return treeElements;
   }
 
-  private String normalizeFilePath(String filePath) {
-    String normalizedPath = filePath.startsWith("/") ? filePath.substring(1) : filePath;
-    return normalizedPath.substring(normalizedPath.indexOf("/") + 1);
+  private String getFilePathWithoutProject(ItemReference itemReference) {
+    String projectPath = itemReference.getProject();
+    String itemPath = absolutize(itemReference.getPath());
+    return itemPath.substring(itemPath.indexOf(projectPath) + projectPath.length() + 1);
   }
 
-  private String normalizeProjectPath(String projectPath) {
-    if (projectPath.startsWith("/")) {
-      projectPath = projectPath.substring(1);
-    }
-    return projectPath;
-  }
-
-  private Optional<VcsStatusProvider> getVcsStatusProvider(String projectWsPath)
-      throws ServerException, NotFoundException {
+  private Optional<VcsStatusProvider> getVcsStatusProvider(String project)
+      throws NotFoundException {
     List<String> vcsAttributes =
         projectManager
-            .get(projectWsPath)
+            .get(absolutize(project))
             .orElseThrow(() -> new NotFoundException("Can't find project"))
             .getAttributes()
             .get(VCS_PROVIDER_NAME);
