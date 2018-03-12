@@ -1016,7 +1016,8 @@ public class CodenvyEditor {
 
   /** Scroll autocomplete form to the bottom */
   public void scrollAutocompleteFormToBottom() {
-    redrawDriverWait
+    webDriverWaitFactory
+        .get(ELEMENT_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath(Locators.AUTOCOMPLETE_CONTAINER + "/li[2]")))
