@@ -255,7 +255,8 @@ public class SeleniumWebDriver
     switch (browser) {
       case GOOGLE_CHROME:
         LoggingPreferences loggingPreferences = new LoggingPreferences();
-        loggingPreferences.enable(LogType.BROWSER, Level.SEVERE);
+        loggingPreferences.enable(LogType.PERFORMANCE, Level.ALL);
+        loggingPreferences.enable(LogType.BROWSER, Level.ALL);
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--no-sandbox");

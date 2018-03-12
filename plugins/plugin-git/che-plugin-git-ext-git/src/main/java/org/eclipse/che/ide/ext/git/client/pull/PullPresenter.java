@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.ide.ext.git.client.pull;
 
-import static org.eclipse.che.api.core.ErrorCodes.MERGE_CONFLICT;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -169,15 +168,11 @@ public class PullPresenter extends GitAuthActionPresenter implements PullView.Ac
               if (response.getCommandOutput().contains("Already up-to-date")) {
                 notification.setTitle(locale.pullUpToDate());
               } else {
-                project.synchronize();
                 notification.setTitle(locale.pullSuccess(view.getRepositoryUrl()));
               }
             })
         .catchError(
             error -> {
-              if (getErrorCode(error.getCause()) == MERGE_CONFLICT) {
-                project.synchronize();
-              }
               notification.setStatus(FAIL);
               handleError(error.getCause(), PULL_COMMAND_NAME, notification);
             });

@@ -10,6 +10,10 @@
       Red Hat, Inc. - initial API and implementation
 
 -->
+<div class="progress-line">
+  <md-progress-linear md-mode="indeterminate"
+                      ng-show="workspaceDetailsSshCtrl.isLoading"></md-progress-linear>
+</div>
 <md-content flex class="workspace-ssh-content">
 
   <div layout="row" flex class="workspace-ssh-content-invalid-notification" ng-if="workspaceDetailsSshCtrl.workspace.status !== 'RUNNING'">
@@ -33,11 +37,13 @@
                      class=""></che-text-info>
 
       <che-button-danger che-button-title="Remove default SSH key"
+                         ng-disabled="workspaceDetailsSshCtrl.isLoading"
                          ng-click="workspaceDetailsSshCtrl.removeDefaultKey()"></che-button-danger>
     </div>
 
     <div layout="column" ng-if="!workspaceDetailsSshCtrl.sshKeyPair">
       <che-button-primary che-button-title="Generate"
+                          ng-disabled="workspaceDetailsSshCtrl.isLoading"
                           ng-click="workspaceDetailsSshCtrl.generateDefaultKey()"></che-button-primary>
       <span class="workspace-ssh-content-notice">This workspace does not have a generated SSH key. We can generate a new one here or you can add your own in the IDE.</span>
       <span ng-if="workspaceDetailsSshCtrl.workspace.status === 'RUNNING'">Note: Workspace is currently in RUNNING state. It will require a restart of the workspace in order to be taken into account.</span>

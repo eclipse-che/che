@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.2.0-SNAPSHOT</version>
+        <version>6.3.0-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-main</artifactId>
     <packaging>pom</packaging>
@@ -25,6 +25,11 @@
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-ide-war</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>assembly-workspace-loader-war</artifactId>
             <type>war</type>
         </dependency>
         <dependency>

@@ -1,3 +1,10 @@
+# Copyright (c) 2012-2017 Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -14,11 +21,27 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations:
-        pod.alpha.kubernetes.io/init-containers: '[{"image":"busybox","imagePullPolicy":"IfNotPresent","name":"fmp-volume-permission","command":["chmod","777","/data"],"volumeMounts":[{"mountPath":"/data","name":"che-data-volume"}]}]'
       labels:
         app: che
     spec:
+      initContainers:
+{{- if .Values.global.multiuser }}
+      - name: wait-for-postgres
+        image: alpine:3.5
+        command: ["sh", "-c", "apk --no-cache add curl jq ; adresses_length=0; until [ $adresses_length -gt 0 ]; do echo waiting for postgres to be ready...; sleep 2; endpoints=`curl -s --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"     https://kubernetes.default/api/v1/namespaces/$POD_NAMESPACE/endpoints/postgres`; adresses_length=`echo $endpoints | jq -r \".subsets[]?.addresses // [] | length\"`; done;"]
+        env:
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+{{- end }}
+      - name: fmp-volume-permission
+        image: busybox
+        command: ["chmod", "777", "/data"]
+        volumeMounts: [{
+              "mountPath": "/data",
+              "name": "che-data-volume"
+        }]
       containers:
       - env:
         - name: CHE_DOMAIN
@@ -116,6 +139,23 @@ spec:
             configMapKeyRef:
               key: CHE_INFRA_KUBERNETES_USERNAME
               name: che
+{{- if .Values.global.multiuser }}
+        - name: CHE_KEYCLOAK_AUTH__SERVER__URL
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_KEYCLOAK_AUTH__SERVER__URL
+              name: che
+        - name: CHE_KEYCLOAK_CLIENT__ID
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_KEYCLOAK_CLIENT__ID
+              name: che
+        - name: CHE_KEYCLOAK_REALM
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_KEYCLOAK_REALM
+              name: che
+{{- end }}
         - name: CHE_INFRA_KUBERNETES_NAMESPACE
           valueFrom:
             configMapKeyRef:

@@ -1,7 +1,7 @@
 {{- define "cheHost" }}
-{{- if .Values.isHostBased }}
-{{- printf "master.%s" .Values.cheDomain }}
+{{- if .Values.global.isHostBased }}
+{{- printf "master.%s" .Values.global.cheDomain }}
 {{- else }}
-{{- printf "%s" .Values.cheDomain }}
+{{- printf "%s" .Values.global.cheDomain }}
 {{- end }}
 {{- end }}

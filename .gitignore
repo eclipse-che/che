@@ -17,6 +17,8 @@ maven-eclipse.xml
 *.iws
 .idea/
 
+.vscode/
+
 # Compiled source #
 ###################
 !*.com/

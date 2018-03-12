@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.monit;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -18,7 +19,6 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,7 +33,7 @@ import org.eclipse.che.infrastructure.docker.client.json.Filters;
 import org.eclipse.che.infrastructure.docker.client.json.network.Network;
 import org.eclipse.che.infrastructure.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.infrastructure.docker.client.params.network.GetNetworksParams;
-import org.eclipse.che.workspace.infrastructure.docker.container.ContainerNameGenerator;
+import org.eclipse.che.workspace.infrastructure.docker.Labels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,18 +59,15 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
 
   private final WorkspaceManager workspaceManager;
   private final DockerConnector dockerConnector;
-  private final ContainerNameGenerator nameGenerator;
   private final WorkspaceRuntimes runtimes;
 
   @Inject
   public DockerAbandonedResourcesCleaner(
       WorkspaceManager workspaceManager,
       DockerConnector dockerConnector,
-      ContainerNameGenerator nameGenerator,
       WorkspaceRuntimes workspaceRuntimes) {
     this.workspaceManager = workspaceManager;
     this.dockerConnector = dockerConnector;
-    this.nameGenerator = nameGenerator;
     this.runtimes = workspaceRuntimes;
   }
 
@@ -85,27 +82,27 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
     cleanNetworks();
   }
 
-  /** Cleans up CHE docker containers which don't tracked by API any more. */
+  /** Cleans up CHE inactive machine docker containers. */
   @VisibleForTesting
   void cleanContainers() {
     List<String> activeContainers = new ArrayList<>();
     try {
       for (ContainerListEntry container : dockerConnector.listContainers()) {
         String containerName = container.getNames()[0];
-        Optional<ContainerNameGenerator.ContainerNameInfo> optional =
-            nameGenerator.parse(containerName);
-        if (optional.isPresent()) {
+
+        String machineName = container.getLabels().get(Labels.LABEL_MACHINE_NAME);
+        String workspaceId = container.getLabels().get(Labels.LABEL_WORKSPACE_ID);
+
+        if (!isNullOrEmpty(machineName) && !isNullOrEmpty(workspaceId)) {
           try {
-            // container is orphaned if not found exception is thrown
-            WorkspaceImpl workspace =
-                workspaceManager.getWorkspace(optional.get().getWorkspaceId());
-            // if there is no such machine container will be cleaned up below
-            if (workspace.getRuntime().getMachines().containsKey(optional.get().getMachineId())) {
+            WorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
+            if (workspace.getRuntime() != null
+                && workspace.getRuntime().getMachines().containsKey(machineName)) {
               activeContainers.add(containerName);
               continue;
             }
           } catch (NotFoundException e) {
-            // container will be cleaned up below
+            // cleanup container
           } catch (Exception e) {
             LOG.error(
                 format(
