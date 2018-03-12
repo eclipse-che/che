@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
 public class Eclipse0120Test {
   private static final String PROJECT_NAME = NameGenerator.generate("Eclipse0120Test-", 4);
   private static final String PATH_TO_EXPAND =
-      String.format("%s/%s", PROJECT_NAME, "src/main/java/org.eclipse.qa.examples");
+      PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples";
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
