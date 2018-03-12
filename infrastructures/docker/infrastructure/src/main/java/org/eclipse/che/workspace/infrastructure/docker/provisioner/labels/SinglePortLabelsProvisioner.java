@@ -40,25 +40,16 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
   private final String internalIpOfContainers;
   private final String externalIpOfContainers;
   private final String dockerNetwork;
-  private final String cheHostProtocol;
-  private final Boolean singleportWildcardIPless;
-  private final String singleportWildcardDomainHost;
 
   @Inject
   public SinglePortLabelsProvisioner(
       @Nullable @Named("che.docker.ip") String internalIpOfContainers,
       @Nullable @Named("che.docker.ip.external") String externalIpOfContainers,
       @Nullable @Named("che.docker.network") String dockerNetwork,
-      @Nullable @Named("che.host.protocol") String cheHostProtocol,
-      @Nullable @Named("che.singleport.wildcard_domain.ipless") Boolean singleportWildcardIPless,
-      @Nullable @Named("che.singleport.wildcard_domain.host") String singleportWildcardDomainHost,
       Provider<SinglePortHostnameBuilder> hostnameBuilderProvider) {
     this.hostnameBuilderProvider = hostnameBuilderProvider;
     this.internalIpOfContainers = internalIpOfContainers;
     this.externalIpOfContainers = externalIpOfContainers;
-    this.singleportWildcardIPless = singleportWildcardIPless;
-    this.cheHostProtocol = cheHostProtocol;
-    this.singleportWildcardDomainHost = singleportWildcardDomainHost;
     this.dockerNetwork = dockerNetwork;
   }
 
@@ -100,7 +91,7 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
   /**
    * Constructs unique traefik service name - contains server, machine names and workspace ID. Dots
    * is not allowed and replaced by dashes. Result is like:
-   * exec-agent-http-dev-machine-workspaceao6k83hkdav975g5
+   * exec-agent-http_dev-machine_workspaceao6k83hkdav975g5
    */
   private String getServiceName(String host) {
     int idx =
