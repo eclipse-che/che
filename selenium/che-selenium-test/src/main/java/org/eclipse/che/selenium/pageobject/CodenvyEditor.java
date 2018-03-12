@@ -22,8 +22,10 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ALL_TAB
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ASSIST_CONTENT_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.AUTOCOMPLETE_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.CONTEXT_MENU;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAKPOINT_CONDITION;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAKPOINT_DISABLED;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAK_POINT_ACTIVE;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAK_POINT_INACTIVE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_PREFIX_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.EDITOR_TABS_PANEL;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.HIGHLIGHT_ITEM;
@@ -54,10 +56,15 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.GREEN;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.UNFOCUSED_DEFAULT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.YELLOW;
 import static org.openqa.selenium.Keys.ALT;
+import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.CONTROL;
+import static org.openqa.selenium.Keys.DELETE;
+import static org.openqa.selenium.Keys.END;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.ESCAPE;
+import static org.openqa.selenium.Keys.HOME;
 import static org.openqa.selenium.Keys.LEFT_CONTROL;
+import static org.openqa.selenium.Keys.SHIFT;
 import static org.openqa.selenium.Keys.SPACE;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
 import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
@@ -81,6 +88,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.ws.rs.DELETE;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
@@ -934,7 +942,7 @@ public class CodenvyEditor {
    */
   public void enterTextIntoFixErrorPropByDoubleClick(String expectedItem) {
     seleniumWebDriverHelper.moveCursorToAndDoubleClick(
-        By.xpath(format(PROPOSITION_CONTAINER + "/li/span[text()='%s']", expectedItem)));
+        By.xpath(format(PROPOSITION_CONTAINER + "/li/span[text()=\"%s\"]", expectedItem)));
   }
 
   /**
@@ -944,7 +952,7 @@ public class CodenvyEditor {
    */
   public void enterTextIntoFixErrorPropByEnter(String item) {
     seleniumWebDriverHelper.waitAndClick(
-        propositionContainer.findElement(By.xpath(format("//li//span[text()='%s']", item))));
+        propositionContainer.findElement(By.xpath(format("//li//span[text()=\"%s\"]", item))));
 
     seleniumWebDriverHelper.sendKeys(ENTER.toString());
   }
@@ -1056,12 +1064,6 @@ public class CodenvyEditor {
   public void waitDefaultColorTab(final String fileName) {
     waitActive();
 
-    /*    boolean isEditorFocused =
-    !(seleniumWebDriver
-            .findElement(By.xpath(format(TAB_FILE_NAME_XPATH + "/parent::div", fileName)))
-            .getAttribute("focused")
-        == null);*/
-
     final String expectedColor =
         isFocused(fileName) ? FOCUSED_DEFAULT.get() : UNFOCUSED_DEFAULT.get();
 
@@ -1092,19 +1094,6 @@ public class CodenvyEditor {
         By.xpath(format(TAB_FILE_NAME_XPATH, nameOfFile)), ELEMENT_TIMEOUT_SEC);
   }
 
-  /**
-   * wait tab with expected name is present
-   *
-   * @param nameOfFile name of appearing tab
-   */
-  public void waitTabIsPresent(String nameOfFile) {
-    webDriverWaitFactory
-        .get()
-        .until(visibilityOfAllElementsLocatedBy(By.xpath(format(TAB_FILE_NAME_XPATH, nameOfFile))));
-
-    loader.waitOnClosed();
-  }
-
   public String getAssociatedPathFromTheTab(String nameOfOpenedFile) {
     return seleniumWebDriverHelper
         .waitVisibility(By.xpath(format(TAB_FILE_NAME_XPATH, nameOfOpenedFile)))
@@ -1115,65 +1104,79 @@ public class CodenvyEditor {
    * wait tab with expected name is present
    *
    * @param nameOfFile name of appearing tab
+   */
+  public void waitTabIsPresent(String nameOfFile) {
+    waitTabIsPresent(nameOfFile, LOAD_PAGE_TIMEOUT_SEC);
+  }
+
+  /**
+   * wait tab with expected name is present
+   *
+   * @param nameOfFile name of appearing tab
    * @param customTimeout time waiting of tab in editor. Set in seconds.
    */
   public void waitTabIsPresent(String nameOfFile, int customTimeout) {
-    webDriverWaitFactory
-        .get(customTimeout)
-        .until(visibilityOfAllElementsLocatedBy(By.xpath(format(TAB_FILE_NAME_XPATH, nameOfFile))));
+    seleniumWebDriverHelper.waitVisibilityOfAllElements(
+        By.xpath(format(TAB_FILE_NAME_XPATH, nameOfFile)), customTimeout);
 
     loader.waitOnClosed();
   }
 
-  // TODO this will be able to after adding feature 'Go to line' and 'Delete line'
   public void selectLineAndDelete(int numberOfLine) {
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     setCursorToLine(numberOfLine);
-    typeTextIntoEditor(Keys.HOME.toString());
-    action.keyDown(Keys.SHIFT).perform();
-    typeTextIntoEditor(Keys.END.toString());
-    action.keyUp(Keys.SHIFT).perform();
-    typeTextIntoEditor(Keys.DELETE.toString());
+    typeTextIntoEditor(HOME.toString());
+    action.keyDown(SHIFT).perform();
+    typeTextIntoEditor(END.toString());
+    action.keyUp(SHIFT).perform();
+    typeTextIntoEditor(DELETE.toString());
     loader.waitOnClosed();
   }
 
-  // TODO this will be able to after adding feature 'Go to line' and 'Delete line'
   public void selectLineAndDelete() {
     Actions action = actionsFactory.createAction(seleniumWebDriver);
-    typeTextIntoEditor(Keys.HOME.toString());
-    action.keyDown(Keys.SHIFT).perform();
-    typeTextIntoEditor(Keys.END.toString());
-    action.keyUp(Keys.SHIFT).perform();
-    typeTextIntoEditor(Keys.DELETE.toString());
+    typeTextIntoEditor(HOME.toString());
+    action.keyDown(SHIFT).perform();
+    typeTextIntoEditor(END.toString());
+    action.keyUp(SHIFT).perform();
+    typeTextIntoEditor(DELETE.toString());
   }
 
   /** Deletes current line with Ctrl+D */
   public void deleteCurrentLine() {
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(CONTROL).perform();
-    action.sendKeys("d").perform();
-    action.keyUp(CONTROL).perform();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(CONTROL)
+        .sendKeys("d")
+        .keyUp(CONTROL)
+        .perform();
+
     loader.waitOnClosed();
   }
 
   /** Deletes current line with Ctrl+D and inserts new line instead */
   public void deleteCurrentLineAndInsertNew() {
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(CONTROL).perform();
-    action.sendKeys("d").perform();
-    action.keyUp(CONTROL).perform();
-    action.sendKeys(Keys.ARROW_UP.toString()).perform();
-    action.sendKeys(Keys.END.toString()).perform();
-    action.sendKeys(ENTER.toString()).perform();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(CONTROL)
+        .sendKeys("d")
+        .keyUp(CONTROL)
+        .sendKeys(ARROW_UP)
+        .sendKeys(END)
+        .sendKeys(ENTER)
+        .perform();
   }
 
   /** delete all content with ctrl+A and del keys */
   public void deleteAllContent() {
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(CONTROL).perform();
-    action.sendKeys("a").perform();
-    action.keyUp(CONTROL).perform();
-    action.sendKeys(Keys.DELETE.toString()).perform();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(CONTROL)
+        .sendKeys("a")
+        .keyUp(CONTROL)
+        .sendKeys(DELETE)
+        .perform();
+
     waitEditorIsEmpty();
   }
 
@@ -1189,7 +1192,7 @@ public class CodenvyEditor {
    */
   public void waitBreakPointWithInactiveState(int position) {
     seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(Locators.DEBUGGER_BREAK_POINT_INACTIVE, position)));
+        By.xpath(format(DEBUGGER_BREAK_POINT_INACTIVE, position)));
   }
 
   /**
@@ -1236,16 +1239,13 @@ public class CodenvyEditor {
 
   public void waitInactiveBreakpoint(int position) {
     seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(Locators.DEBUGGER_BREAK_POINT_INACTIVE, position)));
+        By.xpath(format(DEBUGGER_BREAK_POINT_INACTIVE, position)));
   }
 
   public void waitConditionalBreakpoint(int lineNumber, boolean active) {
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(
-            format(
-                Locators.DEBUGGER_BREAKPOINT_CONDITION,
-                active ? "active" : "inactive",
-                lineNumber)));
+            format(DEBUGGER_BREAKPOINT_CONDITION, active ? "active" : "inactive", lineNumber)));
   }
 
   public void waitDisabledBreakpoint(int lineNumber) {
@@ -1257,12 +1257,12 @@ public class CodenvyEditor {
   public void waitEditorIsEmpty() {
     webDriverWaitFactory
         .get(ELEMENT_TIMEOUT_SEC)
-        .until((WebDriver driver) -> getVisibleTextFromEditor().isEmpty());
+        .until((ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().isEmpty());
   }
 
   /** wait javadoc popup opened */
   public void waitJavaDocPopUpOpened() {
-    seleniumWebDriverHelper.waitVisibility(javaDocPopUp, ELEMENT_TIMEOUT_SEC);
+    seleniumWebDriverHelper.waitVisibility(By.xpath(JAVA_DOC_POPUP), ELEMENT_TIMEOUT_SEC);
   }
 
   /** wait javadoc popup closed */
@@ -1446,7 +1446,7 @@ public class CodenvyEditor {
   public void launchLocalRefactor() {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(Keys.SHIFT).sendKeys(Keys.F6).keyUp(Keys.SHIFT).perform();
+    action.keyDown(SHIFT).sendKeys(Keys.F6).keyUp(SHIFT).perform();
     loader.waitOnClosed();
   }
 
@@ -1593,10 +1593,10 @@ public class CodenvyEditor {
     setCursorToLine(numberOfLine);
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     action.keyDown(CONTROL).perform();
-    action.keyDown(Keys.SHIFT).perform();
-    action.sendKeys(Keys.END.toString()).perform();
+    action.keyDown(SHIFT).perform();
+    action.sendKeys(END.toString()).perform();
     action.keyUp(CONTROL).perform();
-    action.keyUp(Keys.SHIFT).perform();
+    action.keyUp(SHIFT).perform();
     action.sendKeys(Keys.DELETE).perform();
   }
 
