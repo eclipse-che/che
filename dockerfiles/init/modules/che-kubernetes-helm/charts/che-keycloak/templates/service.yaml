@@ -6,14 +6,15 @@
 #
 
 apiVersion: v1
-kind: PersistentVolumeClaim
+kind: Service
 metadata:
-  labels:
-    app: che
-  name: che-data-volume
+  name: "keycloak"
 spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
+  ports:
+  - name: "5050"
+    port: 5050
+    targetPort: 8080
+  selector:
+    io.kompose.service: keycloak
+status:
+  loadBalancer: {}

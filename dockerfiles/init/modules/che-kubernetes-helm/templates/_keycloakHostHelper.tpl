@@ -1,6 +1,6 @@
-{{- define "cheHost" }}
+{{- define "keycloakHost" }}
 {{- if .Values.global.isHostBased }}
-{{- printf "master.%s" .Values.global.cheDomain }}
+{{- printf "keycloak.%s" .Values.global.cheDomain }}
 {{- else }}
 {{- printf "%s" .Values.global.cheDomain }}
 {{- end }}
