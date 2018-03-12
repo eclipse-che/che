@@ -22,7 +22,7 @@ import org.eclipse.che.inject.ConfigurationException;
 
 /**
  * Produces host names in form:
- * [serverName].[machineName].[workspaceId].<external_or_internal_address>.<wildcardNipDomain> If
+ * [serverName]_[machineName]_[workspaceId].<external_or_internal_address>.<wildcardNipDomain> If
  * some of the server name or machine name or workspace id is null, they will be not included.
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
@@ -39,7 +39,6 @@ public class SinglePortHostnameBuilder {
 
   public SinglePortHostnameBuilder(
       String externalAddress, String internalAddress, String wildcardHost) {
-
     this.wildcardDomain =
         externalAddress != null
             ? getWildcardDomain(externalAddress, wildcardHost)
@@ -65,12 +64,12 @@ public class SinglePortHostnameBuilder {
     if (workspaceID != null) {
       joiner.add(normalize(workspaceID));
     }
-    // joiner.add(wildcardDomain);
     return joiner.toString() + "." + wildcardDomain;
   }
 
   /**
    * Gets a Wildcard domain based on the ip using an external provider like nip.io
+   * or by providing an IP-less DNS yourself
    *
    * @return wildcard domain
    */
@@ -80,7 +79,7 @@ public class SinglePortHostnameBuilder {
     } else if (wildcardHost.contains("nip.io") || wildcardHost.contains("xip.io")) {
       return String.format("%s.%s", getExternalIp(localAddress), wildcardHost);
     } else {
-      // custom dns
+      // IP-less DNS
       return wildcardHost;
     }
   }
