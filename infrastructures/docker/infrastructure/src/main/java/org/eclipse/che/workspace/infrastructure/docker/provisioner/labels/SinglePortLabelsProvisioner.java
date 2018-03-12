@@ -94,15 +94,12 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
    * exec-agent-http_dev-machine_workspaceao6k83hkdav975g5
    */
   private String getServiceName(String host) {
-    int idx =
-        (externalIpOfContainers != null && host.contains(externalIpOfContainers))
-            ? host.indexOf(externalIpOfContainers)
-            : host.indexOf(internalIpOfContainers);
+    int idx = host.indexOf(".");
     if (idx > 1) {
-      return host.substring(0, idx - 1).replaceAll("\\.", "-");
+      return host.substring(0, idx - 1);
     } else {
-      // the hostname does not contain the external or internal IPs
-      return host.replaceAll("\\.", "-");
+      // the hostname does not contain the external or internal IPs (or in general any dots)
+      return host;
     }
   }
 }
