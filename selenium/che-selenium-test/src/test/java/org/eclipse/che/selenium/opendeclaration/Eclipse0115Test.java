@@ -37,7 +37,6 @@ import org.testng.annotations.Test;
  */
 public class Eclipse0115Test {
 
-  private static final String PATH_TO_PACKAGE_PREFIX = "/src/main/java/org/eclipse/qa/examples/";
   private static final Logger LOG = LoggerFactory.getLogger(Eclipse0115Test.class);
   private static final String PROJECT_NAME =
       NameGenerator.generate(Eclipse0115Test.class.getSimpleName(), 4);
@@ -48,7 +47,6 @@ public class Eclipse0115Test {
   @Inject private CodenvyEditor editor;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Consoles consoles;
-  @Inject private BrowserLogsUtil browserLogsUtil;
 
   @BeforeClass
   public void prepare() throws Exception {
