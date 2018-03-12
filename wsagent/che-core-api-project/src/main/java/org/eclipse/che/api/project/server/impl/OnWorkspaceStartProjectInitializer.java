@@ -28,10 +28,9 @@ import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
-import org.eclipse.che.api.project.shared.RegisteredProject;
-import org.eclipse.che.api.search.server.excludes.HiddenItemPathMatcher;
 import org.eclipse.che.api.project.server.notification.BeforeProjectInitializedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectInitializedEvent;
+import org.eclipse.che.api.search.server.excludes.HiddenItemPathMatcher;
 
 @Singleton
 public class OnWorkspaceStartProjectInitializer {
@@ -50,7 +49,6 @@ public class OnWorkspaceStartProjectInitializer {
       ProjectConfigRegistry projectConfigRegistry,
       ProjectHandlerRegistry projectHandlerRegistry,
       HiddenItemPathMatcher hiddenItemPathMatcher,
-      ProjectHandlerRegistry projectHandlerRegistry,
       EventService eventService) {
     this.fsManager = fsManager;
     this.projectSynchronizer = projectSynchronizer;
@@ -88,7 +86,6 @@ public class OnWorkspaceStartProjectInitializer {
       throws ServerException, ConflictException, NotFoundException, ForbiddenException {
 
     for (RegisteredProject project : projectConfigRegistry.getAll()) {
-
       if (project.getBaseFolder() == null) {
         continue;
       }
