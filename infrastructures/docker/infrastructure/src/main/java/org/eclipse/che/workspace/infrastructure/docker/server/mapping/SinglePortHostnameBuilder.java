@@ -68,8 +68,8 @@ public class SinglePortHostnameBuilder {
   }
 
   /**
-   * Gets a Wildcard domain based on the ip using an external provider like nip.io
-   * or by providing an IP-less DNS yourself
+   * Gets a Wildcard domain based on the ip using an external provider like nip.io or by providing
+   * an IP-less DNS yourself
    *
    * @return wildcard domain
    */
