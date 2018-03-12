@@ -107,7 +107,7 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
         (externalIpOfContainers != null && host.contains(externalIpOfContainers))
             ? host.indexOf(externalIpOfContainers)
             : host.indexOf(internalIpOfContainers);
-    if (idx <= 1) {
+    if (idx > 1) {
       return host.substring(0, idx - 1).replaceAll("\\.", "-");
     } else {
       // the hostname does not contain the external or internal IPs
