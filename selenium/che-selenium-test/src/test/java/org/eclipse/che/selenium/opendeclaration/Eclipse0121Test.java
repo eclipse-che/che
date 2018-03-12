@@ -43,7 +43,6 @@ public class Eclipse0121Test {
   @Inject private CodenvyEditor editor;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Consoles consoles;
-  @Inject private BrowserLogsUtil browserLogsUtil;
 
   @BeforeClass
   public void prepare() throws Exception {
