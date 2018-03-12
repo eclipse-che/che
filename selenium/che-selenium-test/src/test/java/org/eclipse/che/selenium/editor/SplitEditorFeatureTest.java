@@ -65,7 +65,6 @@ public class SplitEditorFeatureTest {
     createProject(PROJECT_NAME);
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    projectExplorer.selectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_JAVA_FILE);
     loader.waitOnClosed();
