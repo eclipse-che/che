@@ -29,7 +29,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGE
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAK_POINT_INACTIVE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_PREFIX_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.EDITOR_TABS_PANEL;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.HIGHLIGHT_ITEM;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.HIGHLIGHT_ITEM_PATTERN;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATIONS_ITEM;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATION_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
@@ -156,7 +156,7 @@ public class CodenvyEditor {
     String ORION_CONTENT_ACTIVE_EDITOR_XPATH = ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "/div";
     String ACTIVE_LINES_XPATH =
         "//div[@class='textviewSelection']/preceding::div[@class='annotationLine currentLine'][1]";
-    String ACTIVE_LINE_HIGHLIGHT = "//div[@class='annotationLine currentLine']";
+    String ACTIVE_LINE_HIGHLIGHT_CLASSNAME = "annotationLine currentLine";
     String ACTIVE_TAB_FILE_NAME = "//div[@active]/descendant::div[text()='%s']";
     String ACTIVE_TAB_UNSAVED_FILE_NAME = "//div[@active and @unsaved]//div[text()='%s']";
     String TAB_FILE_NAME_XPATH =
@@ -199,7 +199,7 @@ public class CodenvyEditor {
     String JAVA_DOC_POPUP = "//div[@class='gwt-PopupPanel']//iframe";
     String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
         "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
-    String HIGHLIGHT_ITEM = "//li[@selected='true']//span[text()='%s']";
+    String HIGHLIGHT_ITEM_PATTERN = "//li[@selected='true']//span[text()='%s']";
   }
 
   public enum TabActionLocator {
@@ -797,7 +797,7 @@ public class CodenvyEditor {
    */
   public void enterAutocompleteProposal(String item) {
     selectAutocompleteProposal(item);
-    seleniumWebDriverHelper.waitVisibility(By.xpath(format(HIGHLIGHT_ITEM, item)));
+    seleniumWebDriverHelper.waitVisibility(By.xpath(format(HIGHLIGHT_ITEM_PATTERN, item)));
     seleniumWebDriverHelper.sendKeys(ENTER.toString());
   }
 
@@ -809,7 +809,7 @@ public class CodenvyEditor {
   public void selectItemIntoAutocompleteAndPasteByDoubleClick(String item) {
     selectAutocompleteProposal(item);
 
-    seleniumWebDriverHelper.waitVisibility(By.xpath(format(HIGHLIGHT_ITEM, item)));
+    seleniumWebDriverHelper.waitVisibility(By.xpath(format(HIGHLIGHT_ITEM_PATTERN, item)));
     seleniumWebDriverHelper.doubleClick();
   }
 
@@ -1062,7 +1062,7 @@ public class CodenvyEditor {
     waitActive();
 
     final String expectedColor =
-        waitAndCheckFocus(fileName) ? FOCUSED_DEFAULT.get() : UNFOCUSED_DEFAULT.get();
+        waitTabVisibilityAndCheckFocus(fileName) ? FOCUSED_DEFAULT.get() : UNFOCUSED_DEFAULT.get();
 
     webDriverWaitFactory
         .get()
@@ -1075,11 +1075,11 @@ public class CodenvyEditor {
                         .equals(expectedColor));
   }
 
-  public boolean waitAndCheckFocus(String fileName) {
-    return seleniumWebDriverHelper
+  public boolean waitTabVisibilityAndCheckFocus(String fileName) {
+    return null
+        != seleniumWebDriverHelper
             .waitVisibility(By.xpath(format(TAB_FILE_NAME_XPATH + "/parent::div", fileName)))
-            .getAttribute("focused")
-        != null;
+            .getAttribute("focused");
   }
   /**
    * wait tab with expected name is not present
