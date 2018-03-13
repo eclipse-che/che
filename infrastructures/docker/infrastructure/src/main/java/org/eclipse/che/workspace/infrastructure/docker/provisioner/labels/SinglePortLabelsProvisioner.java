@@ -87,7 +87,7 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
           // rewrite to use https and wss
           if (protocol.equals("ws") || protocol.equals("http")) {
             containerLabels.put(
-                format("traefik.%s.frontend.entryPoints", serviceName), "https,wss");
+                format("traefik.%s.frontend.entryPoints", serviceName), "http,https,ws,wss");
           } else {
             // not a protocol traefik understands
             containerLabels.put(format("traefik.%s.frontend.entryPoints", serviceName), protocol);

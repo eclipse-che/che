@@ -60,7 +60,7 @@ services:
     labels:
       traefik.che.frontend.backend: "che-server"
 <% if scope.lookupvar('che::che_protocol') == 'https' -%>
-      traefik.che.frontend.entryPoints: "https"
+      traefik.che.frontend.entryPoints: "https,http,ws,wss"
 <% else -%>
       traefik.che.frontend.entryPoints: "http"
 <% end -%>
@@ -168,7 +168,7 @@ services:
 <% if scope.lookupvar('che::che_single_port') == 'true' -%>
     labels:
 <% if scope.lookupvar('che::che_protocol') == 'https' -%>
-      traefik.keycloak.frontend.entryPoints: "https"
+      traefik.keycloak.frontend.entryPoints: "https,http,ws,wss"
 <% else -%>
       traefik.keycloak.frontend.entryPoints: "http"
 <% end -%>

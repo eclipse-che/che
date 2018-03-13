@@ -25,6 +25,8 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerPort;
 import org.eclipse.che.infrastructure.docker.client.json.NetworkSettings;
 import org.eclipse.che.infrastructure.docker.client.json.PortBinding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Maps container ports bindings to machine servers.
@@ -33,6 +35,7 @@ import org.eclipse.che.infrastructure.docker.client.json.PortBinding;
  * @author Alexander Garagatyi
  */
 public class ServersMapper {
+  private static final Logger LOG = LoggerFactory.getLogger(ServersMapper.class);
 
   private final String hostname;
   private final String machineName;
@@ -171,11 +174,29 @@ public class ServersMapper {
   private String makeUrl(ContainerPort port, ServerConfig cfg, String hostname)
       throws InternalInfrastructureException {
     // now we can grab the config
+
+    LOG.debug(
+        "ContainerPort: "
+            + port.toString()
+            + "\n ServerConfig: "
+            + cfg.toString()
+            + "\n Hostname: "
+            + hostname);
+    LOG.debug("URL result: \t" + makeUrl(port, cfg.getProtocol(), cfg.getPath(), hostname));
     return makeUrl(port, cfg.getProtocol(), cfg.getPath(), hostname);
   }
 
   private String makeUrl(ContainerPort port, String protocol, String path, String hostname)
       throws InternalInfrastructureException {
+    LOG.debug(
+        "Port: "
+            + port.toString()
+            + "\n Protocol: "
+            + protocol
+            + "\n Path: "
+            + path
+            + "\n Hostname: "
+            + hostname);
     if (protocol == null) {
       if (port.getType() == null) {
         protocol = "tcp";
@@ -183,6 +204,14 @@ public class ServersMapper {
         protocol = port.getType();
       }
     }
+
+    //    if ("https".equals(this.cheHostProtocol)) {
+    //    	if ("http".equals(protocol)) {
+    //        	protocol = "https";
+    //        } else if ("ws".equals(protocol)) {
+    //        	protocol = "wss";
+    //        }
+    //    }
 
     // null -> "", "path" -> "/path"
     if (path == null) {
