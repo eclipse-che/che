@@ -260,17 +260,17 @@ public class JavaLanguageExtensionServiceClient {
   /**
    * Gets entry.
    *
-   * @param params external libraries parameters {@link ExternalLibrariesParameters}
+   * @param resourceUri
    * @return entry {@link JarEntry}
    */
-  public Promise<JarEntry> libraryEntry(ExternalLibrariesParameters params) {
+  public Promise<JarEntry> libraryEntry(String resourceUri) {
     return Promises.create(
         (resolve, reject) ->
             requestTransmitter
                 .newRequest()
                 .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
                 .methodName(EXTERNAL_LIBRARY_ENTRY)
-                .paramsAsDto(params)
+                .paramsAsString(resourceUri)
                 .sendAndReceiveResultAsDto(JarEntry.class, REQUEST_TIMEOUT)
                 .onSuccess(resolve::apply)
                 .onTimeout(() -> onTimeout(reject))
