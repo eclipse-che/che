@@ -38,7 +38,7 @@ export class KeycloakLoader {
                     if (request.status == 200) {
                         resolve(this.injectKeycloakScript(JSON.parse(request.responseText)));
                     } else {
-                        reject(msg);
+                        reject(null);
                     }
                 };
 
@@ -352,7 +352,9 @@ export class WorkspaceLoader {
 /** Initialize */
 if (document.getElementById('workspace-console')) {
     new KeycloakLoader().loadKeycloakSettings().catch((error: any) => {
-        console.log(error);
+        if (error) {
+            console.log(error);
+        }
     }).then((keycloak: any) => {
         new WorkspaceLoader(new Loader(), keycloak).load();
     });

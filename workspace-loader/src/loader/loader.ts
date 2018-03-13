@@ -34,9 +34,14 @@ export class Loader {
      * @param message message to log
      */
     log(message: string): void {
+        let container = document.getElementById("workspace-console-container");
+        if (container.childElementCount > 500) {
+            container.removeChild(container.firstChild)
+        }
+
         let element = document.createElement("pre");
         element.innerHTML = message;
-        document.getElementById("workspace-console-container").appendChild(element);
+        container.appendChild(element);
         element.scrollIntoView();
     }
 
