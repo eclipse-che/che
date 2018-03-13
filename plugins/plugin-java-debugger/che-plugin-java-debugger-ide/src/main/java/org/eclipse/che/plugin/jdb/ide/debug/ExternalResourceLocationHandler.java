@@ -20,12 +20,10 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.ide.ext.java.client.tree.JavaNodeFactory;
 import org.eclipse.che.ide.ext.java.client.tree.library.JarFileNode;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.plugin.debugger.ide.debug.FileResourceLocationHandler;
 
 /**
@@ -36,19 +34,16 @@ import org.eclipse.che.plugin.debugger.ide.debug.FileResourceLocationHandler;
 @Singleton
 public class ExternalResourceLocationHandler extends FileResourceLocationHandler {
 
-  private DtoFactory dtoFactory;
   private JavaLanguageExtensionServiceClient service;
   private final JavaNodeFactory nodeFactory;
 
   @Inject
   public ExternalResourceLocationHandler(
       EditorAgent editorAgent,
-      DtoFactory dtoFactory,
       AppContext appContext,
       JavaLanguageExtensionServiceClient service,
       JavaNodeFactory nodeFactory) {
     super(editorAgent, appContext);
-    this.dtoFactory = dtoFactory;
     this.service = service;
 
     this.nodeFactory = nodeFactory;
@@ -79,9 +74,6 @@ public class ExternalResourceLocationHandler extends FileResourceLocationHandler
   private void findExternalResource(
       final Location location, final AsyncCallback<VirtualFile> callback) {
 
-    final String className = extractOuterClassFqn(location.getTarget());
-    final String libId = location.getExternalResourceId();
-
     Resource resource = appContext.getResource();
     if (resource == null) {
       callback.onFailure(new IllegalStateException("Resource is undefined"));
@@ -94,34 +86,21 @@ public class ExternalResourceLocationHandler extends FileResourceLocationHandler
       return;
     }
 
-    ExternalLibrariesParameters params = dtoFactory.createDto(ExternalLibrariesParameters.class);
-    params.setProjectUri(project.getPath());
-    params.setNodeId(libId);
-    params.setNodePath(className);
     service
-        .libraryEntry(params)
+        .libraryEntry(location.getTarget())
         .then(
             jarEntry -> {
               final JarFileNode file =
                   nodeFactory.newJarFileNode(
-                      jarEntry, libId, Path.valueOf(project.getPath()), null);
+                      jarEntry,
+                      location.getExternalResourceId(),
+                      Path.valueOf(project.getPath()),
+                      null);
               callback.onSuccess(file);
             })
         .catchError(
             error -> {
               callback.onFailure(error.getCause());
             });
-  }
-
-  private String extractOuterClassFqn(String fqn) {
-    // handle fqn in case of nested classes
-    if (fqn.contains("$")) {
-      return fqn.substring(0, fqn.indexOf("$"));
-    }
-    // handle fqn in case lambda expressions
-    if (fqn.contains("$$")) {
-      return fqn.substring(0, fqn.indexOf("$$"));
-    }
-    return fqn;
   }
 }

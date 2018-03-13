@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.java.languageserver;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.fixJdtUri;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.prefixURI;
 import static org.eclipse.che.api.languageserver.service.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.ide.ext.java.shared.Constants.CLASS_PATH_TREE;
@@ -209,7 +210,7 @@ public class JavaLanguageServerExtensionService {
     requestHandler
         .newConfiguration()
         .methodName(EXTERNAL_LIBRARY_ENTRY)
-        .paramsAsDto(ExternalLibrariesParameters.class)
+        .paramsAsString()
         .resultAsDto(JarEntry.class)
         .withFunction(this::getLibraryEntry);
 
@@ -591,10 +592,9 @@ public class JavaLanguageServerExtensionService {
     return doGetList(GET_CLASS_PATH_TREE_COMMAND, projectUri, type);
   }
 
-  private JarEntry getLibraryEntry(ExternalLibrariesParameters params) {
-    params.setProjectUri(prefixURI(params.getProjectUri()));
+  private JarEntry getLibraryEntry(String resourceUri) {
     Type type = new TypeToken<JarEntry>() {}.getType();
-    return doGetOne(GET_LIBRARY_ENTRY_COMMAND, singletonList(params), type);
+    return doGetOne(GET_LIBRARY_ENTRY_COMMAND, singletonList(fixJdtUri(resourceUri)), type);
   }
 
   private List<String> executeFindTestsCommand(
