@@ -472,7 +472,7 @@ printRunOptions() {
     echo "[TEST] Product Port        : ${PRODUCT_PORT}"
     echo "[TEST] Product Config      : $(getProductConfig)"
     echo "[TEST] Tests               : ${TESTS_SCOPE}"
-    echo "[TEST] Tests to exclude    : $(getTestGroupsToExclude)"
+    echo "[TEST] Tests to exclude    : $(getExcludedGroups)"
     echo "[TEST] Threads             : ${THREADS}"
     echo "[TEST] Workspace pool size : ${WORKSPACE_POOL_SIZE}"
     echo "[TEST] Web browser         : ${BROWSER}"
@@ -715,7 +715,7 @@ runTests() {
                 -Dbrowser=${BROWSER} \
                 -Dche.threads=${THREADS} \
                 -Dche.workspace_pool_size=${WORKSPACE_POOL_SIZE} \
-                -DtestGroupsToExclude="$(getTestGroupsToExclude)" \
+                -DexcludedGroups="$(getExcludedGroups)" \
                 ${DEBUG_OPTIONS} \
                 ${GRID_OPTIONS} \
                 ${MAVEN_OPTIONS}
@@ -734,26 +734,26 @@ getProductConfig() {
   echo ${testGroups}
 }
 
-# Prepare list of test groups to exclude:
+# Prepare list of test groups to exclude.
 # It consists of "--exclude" parameter value + list of groups which don't comply with product config
-getTestGroupsToExclude() {
+getExcludedGroups() {
     local excludeParamArray=(${EXCLUDE_PARAM//,/ })
 
     local productConfig=$(getProductConfig)
     local productConfigArray=(${productConfig//,/ })
 
-    local allSupportedGroups=(${SUPPORTED_INFRASTRUCTURES[@]} singleuser multiuser)
+    local uncomplyingGroups=(${SUPPORTED_INFRASTRUCTURES[@]} singleuser multiuser)
 
     for productConfigGroup in ${productConfigArray[*]}; do
-        for i in ${!allSupportedGroups[@]}; do
-            if [[ "${productConfigGroup}" = "${allSupportedGroups[i]}" ]]; then
-                unset allSupportedGroups[i]
+        for i in ${!uncomplyingGroups[@]}; do
+            if [[ "${productConfigGroup}" == "${uncomplyingGroups[i]}" ]]; then
+                unset uncomplyingGroups[i]
             fi
         done
     done
 
-    local testGroupsToExclude=("${excludeParamArray[@]}" "${allSupportedGroups[@]}")
-    echo $(IFS=$','; echo "${testGroupsToExclude[*]}")
+    local excludedGroups=("${uncomplyingGroups[@]}" "${excludeParamArray[@]}")
+    echo $(IFS=$','; echo "${excludedGroups[*]}")
 }
 
 # Reruns failed tests

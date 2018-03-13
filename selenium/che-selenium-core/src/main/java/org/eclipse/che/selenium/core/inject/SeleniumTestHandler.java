@@ -131,8 +131,8 @@ public abstract class SeleniumTestHandler
   private String gitHubPassword;
 
   @Inject(optional = true)
-  @Named("sys.testGroupsToExclude")
-  private String testGroupsToExclude;
+  @Named("sys.excludedGroups")
+  private String excludedGroups;
 
   @Inject private TestUser defaultTestUser;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
@@ -156,7 +156,7 @@ public abstract class SeleniumTestHandler
 
   private void revokeGithubOauthToken() {
     // do not revoke if github tests are not being executed
-    if (testGroupsToExclude == null || testGroupsToExclude.contains(TestGroup.GITHUB)) {
+    if (excludedGroups == null || excludedGroups.contains(TestGroup.GITHUB)) {
       return;
     }
 

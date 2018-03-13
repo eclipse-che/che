@@ -22,14 +22,14 @@
                 <script language="beanshell">
                     <![CDATA[
     boolean isTestGroupsAgreedWithRequestedGroups() {
-      testGroupsToExcludeVal = System.getProperty("testGroupsToExclude");
-      if (testGroupsToExcludeVal == null || testGroupsToExcludeVal.isEmpty() || groups.isEmpty()) {
+      excludedGroupsVal = System.getProperty("excludedGroups");
+      if (excludedGroupsVal == null || excludedGroupsVal.isEmpty() || groups.isEmpty()) {
         return true;
       }
 
-      testGroupsToExclude = testGroupsToExcludeVal.split(",");
+      excludedGroups = excludedGroupsVal.split(",");
       for (String group: groups.keySet()) {
-        if (Arrays.asList(testGroupsToExclude).contains(group)) {
+        if (Arrays.asList(excludedGroups).contains(group)) {
           return false;
         }
       }
