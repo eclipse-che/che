@@ -42,7 +42,7 @@ import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 public class ServersChecker {
   // Is used to define servers which will be checked by this server checker class.
   private static final Set<String> LIVENESS_SERVERS =
-      ImmutableSet.of("wsagent/http", "exec-agent/http", "terminal");
+      ImmutableSet.of("wsagent/http", "exec-agent/http", "terminal", "theia");
   private final RuntimeIdentity runtimeIdentity;
   private final String machineName;
   private final Map<String, ? extends Server> servers;
