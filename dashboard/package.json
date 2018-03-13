@@ -74,5 +74,8 @@
     "typings": "typings install",
     "build": "gulp build",
     "test": "gulp test"
+  },
+  "dependencies": {
+    "workspace-client": "git://github.com/akurinnoy/workspace-client.git"
   }
 }

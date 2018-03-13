@@ -283,7 +283,7 @@ declare namespace che {
       [rel: string]: string;
     };
     temporary?: boolean;
-    status?: string;
+    status: string;
     namespace?: string;
     attributes?: IWorkspaceAttributes;
     config: IWorkspaceConfig;
@@ -302,11 +302,11 @@ declare namespace che {
 
   export interface IWorkspaceConfig {
     name?: string;
-    defaultEnv?: string;
+    defaultEnv: string;
     environments: {
       [envName: string]: IWorkspaceEnvironment
     };
-    projects?: Array <any>;
+    projects: Array <any>;
     commands?: Array <any>;
   }
 
@@ -362,11 +362,12 @@ declare namespace che {
   }
 
   export interface IWorkspaceWarning {
-    code?: number;
+    code: number;
     message: string;
   }
 
   export interface IWorkspaceRuntimeMachine {
+    status: string;
     attributes: { [propName: string]: string };
     servers: { [serverName: string]: IWorkspaceRuntimeMachineServer };
   }
@@ -558,5 +559,9 @@ declare namespace che {
     permissions?: IPermissions;
     name?: string;
     isPending?: boolean;
+  }
+
+  export interface IWorkspaceSettings {
+    supportedRecipeTypes: string;
   }
 }

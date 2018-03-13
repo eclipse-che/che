@@ -22,7 +22,7 @@ var $ = require('gulp-load-plugins')();
 
 function webpackWrapper(watch, test, callback) {
   var webpackOptions = {
-    resolve: { extensions: ['', '.ts'] },
+    resolve: { extensions: ['', '.ts', '.js'] },
     watch: watch,
     module: {
       preLoaders: [{ test: /\.ts$/, exclude: /node_modules/, loader: 'tslint-loader'}],

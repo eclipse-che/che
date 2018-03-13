@@ -21,11 +21,12 @@ export class CheWorkspaceBuilder {
   constructor() {
     this.workspace = {
       temporary: false,
+      status: 'STOPPED',
       config: {
         environments: {},
         projects: []
-      }
-    };
+      } as che.IWorkspaceConfig
+    } as che.IWorkspace;
   }
 
   withName(name: string): CheWorkspaceBuilder {

@@ -41,11 +41,15 @@ import {CheTeam} from './che-team.factory';
 import {CheTeamEventsManager} from './che-team-events-manager.factory';
 import {CheInvite} from './che-invite.factory';
 import {NpmRegistry} from './npm-registry.factory';
+import {CheWorkspaceClientService} from './workspace/che-workspace-client.service';
+import {CheWorkspaceClientBackend} from './test/che-workspace-client-backend';
 
 export class ApiConfig {
 
   constructor(register: che.IRegisterService) {
     register.factory('cheWorkspace', CheWorkspace);
+    register.service('cheWorkspaceClient', CheWorkspaceClientService);
+    register.service('cheWorkspaceClientBackend', CheWorkspaceClientBackend);
     register.factory('cheProjectTemplate', CheProjectTemplate);
     register.factory('cheFactory', CheFactory);
     register.factory('cheProfile', CheProfile);
