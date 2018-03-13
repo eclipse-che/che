@@ -70,9 +70,7 @@ public class TestWorkspaceImpl implements TestWorkspace {
                 try {
                   workspaceServiceClient.delete(name, owner.getName());
                 } catch (Exception e1) {
-                  throw new IllegalStateException(
-                      format("Failed to remove workspace name='%s' when start is failed.", name),
-                      e);
+                  LOG.error("Failed to remove workspace name='{}' when start is failed.", name);
                 }
 
                 if (e instanceof IllegalStateException) {
