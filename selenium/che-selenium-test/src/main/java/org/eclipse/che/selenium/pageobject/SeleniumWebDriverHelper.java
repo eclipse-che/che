@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.pageobject;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfAllElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
@@ -729,5 +730,44 @@ public class SeleniumWebDriverHelper {
     } catch (NoSuchElementException ex) {
       return false;
     }
+  }
+
+  /**
+   * Waits during {@code timeout} until frame which defined by {@code frameLocator} is available and
+   * switches to it.
+   *
+   * @param frameLocator locator of the frame to which should be switched
+   * @param timeout waiting time in seconds
+   */
+  public void waitAndSwitchToFrame(By frameLocator, int timeout) {
+    webDriverWaitFactory.get(timeout).until(frameToBeAvailableAndSwitchToIt(frameLocator));
+  }
+
+  /**
+   * Waits until frame which defined by {@code frameLocator} is available and switches to it.
+   *
+   * @param frameLocator locator of the frame to which should be switched
+   */
+  public void waitAndSwitchToFrame(By frameLocator) {
+    waitAndSwitchToFrame(frameLocator, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} until {@code frame} is available and switches to it.
+   *
+   * @param frame web element which defines frame
+   * @param timeout waiting time in seconds
+   */
+  public void waitAndSwitchToFrame(WebElement frame, int timeout) {
+    webDriverWaitFactory.get(timeout).until(frameToBeAvailableAndSwitchToIt(frame));
+  }
+
+  /**
+   * Waits until {@code frame} is available and switches to it.
+   *
+   * @param frame web element which defines frame
+   */
+  public void waitAndSwitchToFrame(WebElement frame) {
+    waitAndSwitchToFrame(frame, DEFAULT_TIMEOUT);
   }
 }
