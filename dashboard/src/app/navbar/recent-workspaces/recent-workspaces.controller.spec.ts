@@ -14,6 +14,7 @@ import {CheAPIBuilder} from '../../../components/api/builder/che-api-builder.fac
 import {CheHttpBackend} from '../../../components/api/test/che-http-backend';
 import IdeSvc from '../../ide/ide.service';
 import {CheBranding} from '../../../components/branding/che-branding.factory';
+import {CheWorkspaceClientBackend} from '../../../components/api/test/che-workspace-client-backend';
 
 /**
  * Test of the NavbarRecentWorkspacesController
@@ -27,20 +28,21 @@ describe('NavbarRecentWorkspacesController', () => {
   /**
    * API builder
    */
-  let apiBuilder: CheAPIBuilder;
+  let cheApiBuilder: CheAPIBuilder;
 
   /**
    * Backend for handling http operations
    */
-  let httpBackend: ng.IHttpBackendService;
+  let $httpBackend: ng.IHttpBackendService;
 
   /**
    * Che backend
    */
-  let cheBackend: CheHttpBackend;
-
+  let cheHttpBackend: CheHttpBackend;
 
   let workspaces: Array<che.IWorkspace>;
+
+  let cheWorkspaceClientBackend, moxiosBackend;
 
   /**
    *  setup module
@@ -50,16 +52,49 @@ describe('NavbarRecentWorkspacesController', () => {
   /**
    * Inject factory and http backend
    */
-  beforeEach(inject(($rootScope: ng.IRootScopeService, cheWorkspace: CheWorkspace, cheBranding: CheBranding, cheAPIBuilder: CheAPIBuilder, cheHttpBackend: CheHttpBackend, $controller: any, ideSvc: IdeSvc, $window: ng.IWindowService, $log: ng.ILogService) => {
-    apiBuilder = cheAPIBuilder;
-    cheBackend = cheHttpBackend;
-    httpBackend = cheHttpBackend.getHttpBackend();
+  let $rootScope, cheWorkspace, cheBranding, $controller, ideSvc, $window, $log;
+  beforeEach(inject((_$rootScope_: ng.IRootScopeService,
+                     _cheWorkspace_: CheWorkspace,
+                     _cheBranding_: CheBranding,
+                     _cheAPIBuilder_: CheAPIBuilder,
+                     _cheHttpBackend_: CheHttpBackend,
+                     _$controller_: any,
+                     _ideSvc_: IdeSvc,
+                     _$window_: ng.IWindowService,
+                     _cheWorkspaceClientBackend_: CheWorkspaceClientBackend,
+                     _$log_: ng.ILogService) => {
+    $rootScope = _$rootScope_;
+    cheWorkspace = _cheWorkspace_;
+    $controller = _$controller_;
+    cheBranding = _cheBranding_;
+    ideSvc = _ideSvc_;
+    $window = _$window_;
+    $log = _$log_;
 
-    let scope = $rootScope.$new();
-    navbarRecentWorkspacesController = $controller('NavbarRecentWorkspacesController', {
-      ideSvc: IdeSvc, cheWorkspace: cheWorkspace, cheBranding: cheBranding, $window: $window, $log: $log, $scope: scope, $rootScope: $rootScope
-    });
+    cheApiBuilder = _cheAPIBuilder_;
+    cheHttpBackend = _cheHttpBackend_;
+    $httpBackend = _cheHttpBackend_.getHttpBackend();
 
+    cheWorkspaceClientBackend = _cheWorkspaceClientBackend_;
+    moxiosBackend = cheWorkspaceClientBackend.getBackend();
+
+    moxiosBackend.install();
+  }));
+
+  afterEach(() => {
+    moxiosBackend.uninstall();
+
+    $httpBackend.verifyNoOutstandingRequest();
+
+    /*
+     * temporary disabled
+     * produces the error below:
+     * Error: [$rootScope:inprog] $digest already in progress
+     */
+    // httpBackend.verifyNoOutstandingExpectation();
+  });
+
+  beforeEach(() => {
     workspaces = [];
     for (let i = 0; i < 20; ++i) {
       let wrkspId = 'workspaceId' + i;
@@ -67,7 +102,7 @@ describe('NavbarRecentWorkspacesController', () => {
       let wrkspCreateDate = new Date(2001, 1, 1, i, 1).toString();
       let wrkspUpdateDate = new Date(2001, 1, 1, i, 2).toString();
       let wrkspAttr = <che.IWorkspaceAttributes>{'created': Date.parse(wrkspCreateDate), 'updated': Date.parse(wrkspUpdateDate)};
-      let workspace = apiBuilder.getWorkspaceBuilder().withId(wrkspId).withAttributes(wrkspAttr).withName(wrkspName).build();
+      let workspace = cheApiBuilder.getWorkspaceBuilder().withId(wrkspId).withAttributes(wrkspAttr).withName(wrkspName).build();
       workspaces.push(workspace);
     }
     // shuffle the workspaces
@@ -76,30 +111,27 @@ describe('NavbarRecentWorkspacesController', () => {
     });
     // providing request
     // add workspaces on Http backend
-    cheBackend.addWorkspaces(workspaces);
+    cheWorkspaceClientBackend.addWorkspaces(workspaces);
 
     // setup backend
-    cheBackend.setup();
+    cheWorkspaceClientBackend.setup();
+    cheHttpBackend.setup();
+
+    $httpBackend.flush();
 
     // fetch workspaces
     cheWorkspace.fetchWorkspaces();
-
-    // flush command
-    httpBackend.flush();
-  }));
-
-  /**
-   * Check assertion after the test
-   */
-  afterEach(() => {
-    httpBackend.verifyNoOutstandingExpectation();
-    httpBackend.verifyNoOutstandingRequest();
   });
 
-  /**
-   * Check sorting rule for recent workspaces
-   */
-  it('Check very recent workspaces', inject(() => {
+  it(`Check very recent workspaces`, (done: () => {}) => {
+
+    moxiosBackend.wait(() => {
+
+      let scope = $rootScope.$new();
+      navbarRecentWorkspacesController = $controller('NavbarRecentWorkspacesController', {
+        ideSvc: IdeSvc, cheWorkspace: cheWorkspace, cheBranding: cheBranding, $window: $window, $log: $log, $scope: scope, $rootScope: $rootScope
+      });
+
       // get recentWorkspaces
       let recentWorkspaces = navbarRecentWorkspacesController.getRecentWorkspaces();
 
@@ -134,6 +166,10 @@ describe('NavbarRecentWorkspacesController', () => {
       // check the last one workspace is equal to the very recent workspace and not equal to the last test workspace
       expect(recentWorkspaces[lastPosition].id).not.toEqual(testWorkspaces[lastPosition].id);
       expect(recentWorkspaces[lastPosition].id).toEqual(veryRecentWorkspaceId);
-    })
-  );
+
+      done();
+    });
+
+  });
+
 });

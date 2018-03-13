@@ -18,6 +18,12 @@ import {IObservableCallbackFn, Observable} from '../../utils/observable';
 import {CheBranding} from '../../branding/che-branding.factory';
 import {CheEnvironmentManager} from '../environment/che-environment-manager.factory';
 import {CheRecipeTypes} from '../recipe/che-recipe-types';
+import {
+  CheWorkspaceClientService,
+  IRequestError,
+  IRestAPIWrapper,
+  IWorkspaceCreateQueryParams
+} from './che-workspace-client.service';
 
 const WS_AGENT_HTTP_LINK: string = 'wsagent/http';
 const WS_AGENT_WS_LINK: string = 'wsagent/ws';
@@ -56,7 +62,7 @@ export enum WorkspaceStatus {
  */
 export class CheWorkspace {
 
-  static $inject = ['$resource', '$http', '$q', 'cheJsonRpcApi', '$websocket', '$location', 'proxySettings', 'userDashboardConfig', 'lodash', 'cheEnvironmentRegistry', 'cheBranding', 'keycloakAuth', 'cheEnvironmentManager'];
+  static $inject = ['$resource', '$http', '$q', 'cheJsonRpcApi', '$websocket', '$location', 'proxySettings', 'userDashboardConfig', 'lodash', 'cheEnvironmentRegistry', 'cheBranding', 'keycloakAuth', 'cheEnvironmentManager', 'cheWorkspaceClient'];
 
   private $resource: ng.resource.IResourceService;
   private $http: ng.IHttpService;
@@ -83,7 +89,9 @@ export class CheWorkspace {
   /**
    * Map with promises.
    */
-  private workspacePromises: Map<string, ng.IHttpPromise<any>> = new Map();
+  private workspacePromises: Map<string, ng.IHttpPromise<any>|ng.IPromise<any>> = new Map();
+
+  private workspaceRestClient: IRestAPIWrapper;
 
   /**
    * Default constructor that is using resource
@@ -100,7 +108,10 @@ export class CheWorkspace {
               cheEnvironmentRegistry: CheEnvironmentRegistry,
               cheBranding: CheBranding,
               keycloakAuth: any,
-              cheEnvironmentManager: CheEnvironmentManager) {
+              cheEnvironmentManager: CheEnvironmentManager,
+              cheWorkspaceClient: CheWorkspaceClientService) {
+    this.workspaceRestClient = cheWorkspaceClient.restClient;
+
     this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR'];
     // keep resource
     this.$q = $q;
@@ -131,17 +142,9 @@ export class CheWorkspace {
     // remote call
     this.remoteWorkspaceAPI = <ICHELicenseResource<any>>this.$resource('/api/workspace', {}, {
         // having 2 methods for creation to ensure namespace parameter won't be send at all if value is null or undefined
-        create: {method: 'POST', url: '/api/workspace'},
-        createWithNamespace: {method: 'POST', url: '/api/workspace?namespace=:namespace'},
-        deleteWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId'},
-        updateWorkspace: {method: 'PUT', url: '/api/workspace/:workspaceId'},
         addProject: {method: 'POST', url: '/api/workspace/:workspaceId/project'},
         deleteProject: {method: 'DELETE', url: '/api/workspace/:workspaceId/project/:path'},
-        stopWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId/runtime'},
-        startWorkspace: {method: 'POST', url: '/api/workspace/:workspaceId/runtime?environment=:envName'},
-        startTemporaryWorkspace: {method: 'POST', url: '/api/workspace/runtime?temporary=true'},
-        addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'},
-        getSettings: {method: 'GET', url: '/api/workspace/settings'}
+        addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'}
       }
     );
 
@@ -284,12 +287,12 @@ export class CheWorkspace {
    * @param namespace namespace
    */
   fetchWorkspacesByNamespace(namespace: string): ng.IPromise<any> {
-    let promise = this.$http.get('/api/workspace/namespace/' + namespace);
-    let resultPromise = promise.then((response: { data: che.IWorkspace[] }) => {
+    const promise = this.workspaceRestClient.getAllByNamespace(namespace);
+    let resultPromise = promise.then((data: che.IWorkspace[]) => {
       const workspaces = this.getWorkspacesByNamespace(namespace);
 
       workspaces.length = 0;
-      response.data.forEach((workspace: che.IWorkspace) => {
+      data.forEach((workspace: che.IWorkspace) => {
         workspaces.push(workspace);
       });
     }, (error: any) => {
@@ -326,7 +329,7 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>}
    */
   fetchWorkspaces(): ng.IPromise<any> {
-    let promise = this.remoteWorkspaceAPI.query().$promise;
+    const promise = this.workspaceRestClient.getAll();
     let updatedPromise = promise.then((data: Array<che.IWorkspace>) => {
       this.workspaces.length = 0;
       this.workspacesById.clear();
@@ -334,16 +337,16 @@ export class CheWorkspace {
       data.forEach((workspace: che.IWorkspace) => {
         this.updateWorkspacesList(workspace);
       });
-      return this.workspaces;
-    }, (error: any) => {
+      return this.$q.when(this.workspaces);
+    }, (error: IRequestError) => {
       if (error && error.status === 304) {
-        return this.workspaces;
+        return this.$q.when(this.workspaces);
       }
       return this.$q.reject(error);
     });
 
-    let callbackPromises = updatedPromise.then((data: any) => {
-      let promises = [];
+    const callbackPromises = updatedPromise.then((data: che.IWorkspace[]) => {
+      const promises = [];
       promises.push(updatedPromise);
 
       this.listeners.forEach((listener: any) => {
@@ -365,16 +368,10 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>}
    */
   fetchWorkspaceDetails(workspaceKey: string): ng.IPromise<any> {
-    const workspacePromisesKey = 'fetchWorkspaceDetails' + workspaceKey;
-    if (this.workspacePromises.has(workspacePromisesKey)) {
-      return this.workspacePromises.get(workspacePromisesKey);
-    }
     const defer = this.$q.defer();
-    const promise: ng.IHttpPromise<any> = this.$http.get('/api/workspace/' + workspaceKey);
-    this.workspacePromises.set(workspacePromisesKey, promise);
-
-    promise.then((response: ng.IHttpPromiseCallbackArg<che.IWorkspace>) => {
-      const workspace = response.data;
+    const promise = this.workspaceRestClient.getById(workspaceKey);
+    promise.then((data: che.IWorkspace) => {
+      const workspace = data;
       this.workspacesById.set(workspace.id, workspace);
       this.updateWorkspacesList(workspace);
       defer.resolve();
@@ -384,8 +381,6 @@ export class CheWorkspace {
         return;
       }
       defer.reject(error);
-    }).finally(() => {
-      this.workspacePromises.delete(workspacePromisesKey);
     });
 
     return defer.promise;
@@ -494,27 +489,26 @@ export class CheWorkspace {
   }
 
   createWorkspace(namespace: string, workspaceName: string, source: any, ram: number, attributes: any): ng.IPromise<any> {
-    let data = this.formWorkspaceConfig({}, workspaceName, source, ram);
-    let attrs = this.lodash.map(this.lodash.pairs(attributes || {}), (item: any) => {
+    const data = this.formWorkspaceConfig({}, workspaceName, source, ram);
+    const attrs = this.lodash.map(this.lodash.pairs(attributes || {}), (item: any) => {
       return item[0] + ':' + item[1];
     });
-    let promise = namespace ? this.remoteWorkspaceAPI.createWithNamespace({
-      namespace: namespace,
-      attribute: attrs
-    }, data).$promise :
-      this.remoteWorkspaceAPI.create({attribute: attrs}, data).$promise;
-    return promise;
+    const params: IWorkspaceCreateQueryParams = { attribute: attrs };
+    if (namespace) {
+      params.namespace = namespace;
+    }
+    return this.workspaceRestClient.create(data, params);
   }
 
   createWorkspaceFromConfig(namespace: string, workspaceConfig: che.IWorkspaceConfig, attributes: any): ng.IPromise<any> {
-    let attrs = this.lodash.map(this.lodash.pairs(attributes || {}), (item: any) => {
+    const attrs = this.lodash.map(this.lodash.pairs(attributes || {}), (item: any) => {
       return item[0] + ':' + item[1];
     });
-    return namespace ? this.remoteWorkspaceAPI.createWithNamespace({
-      namespace: namespace,
-      attribute: attrs
-    }, workspaceConfig).$promise :
-      this.remoteWorkspaceAPI.create({attribute: attrs}, workspaceConfig).$promise;
+    const params: IWorkspaceCreateQueryParams = { attribute: attrs };
+    if (namespace) {
+      params.namespace = namespace;
+    }
+    return this.workspaceRestClient.create(workspaceConfig, params);
   }
 
   /**
@@ -539,7 +533,7 @@ export class CheWorkspace {
       return this.workspacePromises.get(workspacePromisesKey);
     }
 
-    const promise = this.remoteWorkspaceAPI.startWorkspace({workspaceId: workspaceId, envName: envName}, {}).$promise;
+    const promise = this.workspaceRestClient.start(workspaceId, envName);
     this.workspacePromises.set(workspacePromisesKey, promise);
     promise.finally(() => {
       this.workspacePromises.delete(workspacePromisesKey);
@@ -554,7 +548,7 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>} promise
    */
   startTemporaryWorkspace(workspaceConfig: che.IWorkspaceConfig): ng.IPromise<any> {
-    return this.remoteWorkspaceAPI.startTemporaryWorkspace({}, workspaceConfig).$promise;
+    return this.workspaceRestClient.startTemporary(workspaceConfig);
   }
 
   /**
@@ -567,9 +561,7 @@ export class CheWorkspace {
     if (this.workspacePromises.has(workspacePromisesKey)) {
       return this.workspacePromises.get(workspacePromisesKey);
     }
-    const promise = this.remoteWorkspaceAPI.stopWorkspace({
-      workspaceId: workspaceId
-    }, {}).$promise;
+    const promise = this.workspaceRestClient.stop(workspaceId);
     this.workspacePromises.set(workspacePromisesKey, promise);
     promise.finally(() => {
       this.workspacePromises.delete(workspacePromisesKey);
@@ -585,8 +577,8 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>}
    */
   updateWorkspace(workspaceId: string, data: che.IWorkspace): ng.IPromise<any> {
-    let defer = this.$q.defer();
-    let promise = this.remoteWorkspaceAPI.updateWorkspace({workspaceId: workspaceId}, data).$promise;
+    const defer = this.$q.defer();
+    const promise = this.workspaceRestClient.update(workspaceId, data);
     promise.then((data: che.IWorkspace) => {
       this.updateWorkspacesList(data);
       this.startUpdateWorkspaceStatus(data.id);
@@ -604,8 +596,8 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>}
    */
   deleteWorkspaceConfig(workspaceId: string): ng.IPromise<any> {
-    let defer = this.$q.defer();
-    let promise = this.remoteWorkspaceAPI.deleteWorkspace({workspaceId: workspaceId}).$promise;
+    const defer = this.$q.defer();
+    const promise = this.workspaceRestClient.delete(workspaceId);
     promise.then(() => {
       this.listeners.forEach((listener: any) => {
         listener.onDeleteWorkspace(workspaceId);
@@ -715,7 +707,7 @@ export class CheWorkspace {
    * @returns {IPromise<any>}
    */
   fetchWorkspaceSettings(): ng.IPromise<any> {
-    const promise = this.remoteWorkspaceAPI.getSettings().$promise;
+    const promise = this.workspaceRestClient.getSettings();
     return promise.then((settings: IWorkspaceSettings) => {
       this.workspaceSettings = settings;
       return this.workspaceSettings;

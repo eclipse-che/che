@@ -11,6 +11,8 @@
 'use strict';
 import {CheWorkspace} from './che-workspace.factory';
 import {CheAPIBuilder} from '../builder/che-api-builder.factory';
+import {CheWorkspaceClientBackend} from '../test/che-workspace-client-backend';
+import {IBackend} from './che-workspace-client.service';
 import {CheHttpBackend} from '../test/che-http-backend';
 
 /**
@@ -18,97 +20,95 @@ import {CheHttpBackend} from '../test/che-http-backend';
  */
 describe('CheWorkspace', () => {
 
-    /**
-     * Workspace Factory for the test
-     */
-    let factory;
+  /**
+   * Workspace Factory for the test
+   */
+  let cheWorkspace: CheWorkspace;
 
-    /**
-     * API builder.
-     */
-    let apiBuilder;
+  /**
+   * API builder.
+   */
+  let cheApiBuilder: CheAPIBuilder;
 
-    /**
-     * Backend for handling http operations
-     */
-    let httpBackend;
+  /**
+   * Backend for handling http operations
+   */
+  let moxiosBackend: IBackend;
+  let cheHttpBackend: CheHttpBackend;
 
-    /**
-     * Che backend
-     */
-    let cheBackend;
+  /**
+   * Che workspace client backend
+   */
+  let cheWorkspaceClientBackend: CheWorkspaceClientBackend;
 
-    /**
-     * Listener used for the tests
-     */
-    function Listener() {
-        this.workspaces = [];
-        this.onChangeWorkspaces = (remoteWorkspaces: Array<any>) => {
-            this.workspaces = remoteWorkspaces;
-        };
-        this.getWorkspaces = () => {
-            return this.workspaces;
-        };
-    }
+  /**
+   * Listener used for the tests
+   */
+  function Listener() {
+    this.workspaces = [];
+    this.onChangeWorkspaces = (remoteWorkspaces: Array<any>) => {
+      this.workspaces = remoteWorkspaces;
+    };
+    this.getWorkspaces = () => {
+      return this.workspaces;
+    };
+  }
 
-    /**
-     *  setup module
-     */
-    beforeEach(angular.mock.module('userDashboard'));
+  /**
+   *  setup module
+   */
+  beforeEach(angular.mock.module('userDashboard'));
 
-    /**
-     * Inject factory and http backend
-     */
-    beforeEach(inject((cheWorkspace: CheWorkspace, cheAPIBuilder: CheAPIBuilder, cheHttpBackend: CheHttpBackend) => {
-        factory = cheWorkspace;
-        apiBuilder = cheAPIBuilder;
-        cheBackend = cheHttpBackend;
-        httpBackend = cheHttpBackend.getHttpBackend();
-    }));
+  /**
+   * Inject factory and http backend
+   */
+  beforeEach(inject((_cheWorkspace_: CheWorkspace,
+                     _cheAPIBuilder_: CheAPIBuilder,
+                     _cheHttpBackend_: CheHttpBackend,
+                     _cheWorkspaceClientBackend_: CheWorkspaceClientBackend) => {
+    cheWorkspace = _cheWorkspace_;
+    cheApiBuilder = _cheAPIBuilder_;
+    cheHttpBackend = _cheHttpBackend_;
+    cheWorkspaceClientBackend = _cheWorkspaceClientBackend_;
+    moxiosBackend = cheWorkspaceClientBackend.getBackend();
 
-    /**
-     * Check assertion after the test
-     */
-    afterEach(() => {
-        httpBackend.verifyNoOutstandingExpectation();
-        httpBackend.verifyNoOutstandingRequest();
-    });
+    moxiosBackend.install();
+  }));
 
+  afterEach(() => {
+    moxiosBackend.uninstall();
+  });
 
-    /**
-     * Check that we're able to fetch workspaces and calls the listeners
-     */
-    it('Fetch Workspaces', () => {
-        // setup tests objects
-        let workspace1 = apiBuilder.getWorkspaceBuilder().withId('123').withName('testWorkspace').build();
-        let tmpWorkspace2 = apiBuilder.getWorkspaceBuilder().withId('456').withName('tmpWorkspace').withTemporary(true).build();
+  /**
+   * Check that we're able to fetch workspaces and calls the listeners
+   */
+  it('Fetch Workspaces', (done: () => {}) => {
+      // setup tests objects
+      let workspace1 = cheApiBuilder.getWorkspaceBuilder().withId('123').withName('testWorkspace').build();
+      let tmpWorkspace2 = cheApiBuilder.getWorkspaceBuilder().withId('456').withName('tmpWorkspace').withTemporary(true).build();
 
-        // add the listener
-        let listener = new Listener();
-        factory.addListener(listener);
+      // add the listener
+      let listener = new Listener();
+      cheWorkspace.addListener(listener);
 
-        // no workspaces now on factory or on listener
-        expect(factory.getWorkspaces().length).toEqual(0);
-        expect(listener.getWorkspaces().length).toEqual(0);
+      // no workspaces now on factory or on listener
+      expect(cheWorkspace.getWorkspaces().length).toEqual(0);
+      expect(listener.getWorkspaces().length).toEqual(0);
 
-        // expecting a GET
-        httpBackend.expectGET('/api/workspace');
+      // providing request
+      // add workspaces on Http backend
+      cheWorkspaceClientBackend.addWorkspaces([workspace1, tmpWorkspace2]);
 
-        // providing request
-        // add workspaces on Http backend
-        cheBackend.addWorkspaces([workspace1, tmpWorkspace2]);
+      // setup backend
+      cheWorkspaceClientBackend.setup();
+      cheHttpBackend.setup();
 
-        // setup backend
-        cheBackend.setup();
+      // fetch workspaces
+      cheWorkspace.fetchWorkspaces();
 
-        // fetch workspaces
-        factory.fetchWorkspaces();
-
-        // flush command
-        httpBackend.flush();
-
+      moxiosBackend.wait(() => {
         // now, check workspaces
-        let workspaces = factory.getWorkspaces();
+        let workspaces = cheWorkspace.getWorkspaces();
 
         // check we have only one workspace (temporary workspace is excluded)
         expect(workspaces.length).toEqual(1);
@@ -120,7 +120,10 @@ describe('CheWorkspace', () => {
         // check the callback has been called without temporary workspace
         expect(listener.getWorkspaces().length).toEqual(1);
         expect(listener.getWorkspaces()[0].config.name).toEqual(workspace1.config.name);
-       }
-    );
+
+        done();
+      });
+    }
+  );
 
 });
