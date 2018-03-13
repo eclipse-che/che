@@ -96,4 +96,12 @@ public class LanguageServiceUtils {
   public static String fixUri(String uri) {
     return isProjectUri(uri) ? removePrefixUri(uri) : uri;
   }
+
+  public static String fixJdtUri(String uri) {
+    if (uri.startsWith("jdt:/") && !uri.startsWith("jdt://")) {
+      uri = uri.replace("jdt:/", "jdt://");
+    }
+
+    return uri;
+  }
 }
