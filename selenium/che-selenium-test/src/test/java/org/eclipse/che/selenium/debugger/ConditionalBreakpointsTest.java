@@ -91,7 +91,6 @@ public class ConditionalBreakpointsTest {
     editor.setBreakpoint(15);
     editor.waitInactiveBreakpoint(15);
 
-    projectExplorer.openItemByVisibleNameInExplorer("External Libraries");
     projectExplorer.openItemByVisibleNameInExplorer("rt.jar");
     projectExplorer.openItemByVisibleNameInExplorer("com");
     projectExplorer.openItemByVisibleNameInExplorer("oracle");
