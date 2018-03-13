@@ -42,7 +42,9 @@ export class Loader {
         let element = document.createElement("pre");
         element.innerHTML = message;
         container.appendChild(element);
-        element.scrollIntoView();
+        if (element.scrollIntoView) {
+            element.scrollIntoView();
+        }
     }
 
     onclick(): void {
