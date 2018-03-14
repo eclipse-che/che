@@ -112,8 +112,8 @@ watch = true
 
 <% if scope.lookupvar('che::https_certificate_provider').include? "letsencrypt" -%>
 [acme]
-email = "admin@che"
-storage = "acme.json"
+email = "admin@<%= scope.lookupvar('che::che_ip') %>"
+storage = "/etc/traefik/acme.json"
 entryPoint = "https"
 OnHostRule = true
 <% if scope.lookupvar('che::https_certificate_provider') == 'letsencrypt-staging' -%>
