@@ -81,7 +81,6 @@ public class AutocompleteWithInheritTest {
         PROJECT_NAME + "/src/main/java/example", BASE_CLASS + ".java");
     editor.waitAllMarkersInvisibility(ERROR);
     projectExplorer.openItemByVisibleNameInExplorer(EXTENDED_CLASS + ".java");
-    editor.returnFocusInCurrentLine();
     waitErrorMarkerInPosition();
     editor.setCursorToLine(13);
     editor.launchPropositionAssistPanel();
