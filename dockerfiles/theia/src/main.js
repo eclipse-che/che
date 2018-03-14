@@ -25,7 +25,6 @@ if (fs.existsSync(theiaPath)) {
 }
 else {
     let pluginString = process.env.THEIA_PLUGINS;
-    console.log("Run with plugins " + pluginString);
     let pluginList = [];
     if (pluginString && pluginString.length !== 0) {
         let arr = pluginString.split(',');
@@ -40,7 +39,6 @@ else {
         fs.writeFileSync(theiaPath, JSON.stringify(theiaConfig));
         handlePromise(callYarn().then(callBuild).then(callRun));
     } else {
-        console.log("Launch default Theia");
         cp.execSync(`rsync -rv ${defaultTheia}/ ${theiaRoot} --exclude 'node_modules' --exclude 'yarn.lock'`);
         handlePromise(callRun());
     }
