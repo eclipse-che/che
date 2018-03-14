@@ -60,7 +60,6 @@ public class LocalCheDockerEnvironmentProvisionerTest {
     provisioner =
         new LocalCheDockerEnvironmentProvisioner(
             true,
-            "http",
             settingsProvisioners,
             projectsVolumeProvisioner,
             installerConfigProvisioner,
