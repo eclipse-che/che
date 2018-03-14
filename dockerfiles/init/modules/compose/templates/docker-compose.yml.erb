@@ -97,6 +97,10 @@ services:
       traefik.enable: "false"
     ports:
       - '<%= scope.lookupvar('che::che_port') -%>:<%= scope.lookupvar('che::che_port') -%>'
+<% if scope.lookupvar('che::che_protocol') == 'https' -%>
+<%# enable http -> https redirect %>
+      - '80:80'
+<% end -%>
 <% if scope.lookupvar('che::che_env') == 'development' -%>
       - '7070:7070'
 <% end -%>
@@ -168,7 +172,7 @@ services:
 <% if scope.lookupvar('che::che_single_port') == 'true' -%>
     labels:
 <% if scope.lookupvar('che::che_protocol') == 'https' -%>
-      traefik.keycloak.frontend.entryPoints: "https,http,ws,wss"
+      traefik.keycloak.frontend.entryPoints: "https,wss"
 <% else -%>
       traefik.keycloak.frontend.entryPoints: "http"
 <% end -%>
