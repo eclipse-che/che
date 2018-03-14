@@ -39,7 +39,6 @@ import org.eclipse.che.workspace.infrastructure.docker.provisioner.volume.Volume
 public class LocalCheDockerEnvironmentProvisioner implements DockerEnvironmentProvisioner {
 
   private final boolean isSinglePortEnabled;
-  private final String cheHostProtocol;
   private final ContainerSystemSettingsProvisionersApplier dockerSettingsProvisioners;
   private final BindMountProjectsVolumeProvisioner hostMountingProjectsVolumeProvisioner;
   private final LocalInstallersBinariesVolumeProvisioner installersBinariesVolumeProvisioner;
@@ -55,7 +54,6 @@ public class LocalCheDockerEnvironmentProvisioner implements DockerEnvironmentPr
   @Inject
   public LocalCheDockerEnvironmentProvisioner(
       @Named("che.single.port") boolean isSinglePortEnabled,
-      @Named("che.host.protocol") String cheHostProtocol,
       ContainerSystemSettingsProvisionersApplier dockerSettingsProvisioners,
       BindMountProjectsVolumeProvisioner hostMountingProjectsVolumeProvisioner,
       LocalInstallersBinariesVolumeProvisioner installersBinariesVolumeProvisioner,
@@ -69,7 +67,6 @@ public class LocalCheDockerEnvironmentProvisioner implements DockerEnvironmentPr
       VolumesConverter volumesConverter) {
 
     this.isSinglePortEnabled = isSinglePortEnabled;
-    this.cheHostProtocol = cheHostProtocol;
     this.dockerSettingsProvisioners = dockerSettingsProvisioners;
     this.hostMountingProjectsVolumeProvisioner = hostMountingProjectsVolumeProvisioner;
     this.installersBinariesVolumeProvisioner = installersBinariesVolumeProvisioner;
@@ -103,13 +100,6 @@ public class LocalCheDockerEnvironmentProvisioner implements DockerEnvironmentPr
     dockerApiEnvProvisioner.provision(internalEnv, identity);
     if (isSinglePortEnabled) {
       singlePortLabelsProvisioner.provision(internalEnv, identity);
-    }
-    // detect protocol
-    if (cheHostProtocol.equals("https")) {
-
-    } else {
-      // default, probably http
-
     }
   }
 }

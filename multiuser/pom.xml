@@ -24,12 +24,12 @@
     <packaging>pom</packaging>
     <name>Che Multiuser :: Parent</name>
     <modules>
-        <!-- <module>sql-schema</module> -->
-        <!-- <module>api</module> -->
+        <module>sql-schema</module>
+        <module>api</module>
         <module>permission</module>
         <module>keycloak</module>
         <module>machine-auth</module>
-        <!-- <module>personal-account</module> -->
-        <!-- <module>integration-tests</module> -->
+        <module>personal-account</module>
+        <module>integration-tests</module>
     </modules>
 </project>

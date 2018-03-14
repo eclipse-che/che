@@ -81,13 +81,12 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
                 .build(serverEntry.getKey(), machineName, identity.getWorkspaceId());
         final String serviceName = getServiceName(host);
         final String port = serverEntry.getValue().getPort().split("/")[0];
-        // final String protocol = serverEntry.getValue().getPort().split("/")[1];
         final String protocol = serverEntry.getValue().getProtocol();
         if (cheHostProtocol.equals("https")) {
           // rewrite to use https and wss
           if (protocol.equals("ws") || protocol.equals("http")) {
             containerLabels.put(
-                format("traefik.%s.frontend.entryPoints", serviceName), "http,https,ws,wss");
+                format("traefik.%s.frontend.entryPoints", serviceName), "https,wss");
           } else {
             // not a protocol traefik understands
             containerLabels.put(format("traefik.%s.frontend.entryPoints", serviceName), protocol);

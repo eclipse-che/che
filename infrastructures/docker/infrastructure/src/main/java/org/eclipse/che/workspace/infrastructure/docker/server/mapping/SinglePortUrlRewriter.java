@@ -56,16 +56,6 @@ public class SinglePortUrlRewriter implements URLRewriter {
         hostnameBuilderprovider.get().build(serverName, machineName, identity.getWorkspaceId());
     try {
       UriBuilder uriBUilder = UriBuilder.fromUri(url).host(host);
-      //      if ("https".equals(cheHostProtocol)) {
-      //
-      //          if (url.contains("https://") || url.contains("wss://")) {
-      //        	  uriBUilder.port(443);
-      //          }
-      //
-      //      }
-      //      if (chePort != 80 && chePort != 443) {
-      //          uriBUilder.port(chePort);
-      //        }
       url = uriBUilder.build().toString();
       if ("https".equals(cheHostProtocol)) {
         url = url.replace("ws://", "wss://");
