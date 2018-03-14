@@ -449,8 +449,10 @@ public class CodenvyEditor {
   }
 
   /**
-   * select tab by name, click on close icon and wait while content will be saved and orion
-   * disappear file should be unchanged
+   * Waits until changes in the editor's tab with specified {@code nameFile} is saved and closes
+   * this tab.
+   *
+   * @param nameFile visible name of the editor's tab which should be checked
    */
   public void closeFileByNameWithSaving(String nameFile) {
     loader.waitOnClosed();
@@ -462,24 +464,25 @@ public class CodenvyEditor {
   }
 
   /**
-   * click on close icon in the file
+   * Waits visibility of the "Close" icon in the editor's tab with specified {@code fileName} and
+   * clicks on it.
    *
-   * @param fileName name of File which must be close
+   * @param fileName visible name of the editor's tab which should be closed
    */
   public void clickOnCloseFileIcon(String fileName) {
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(TAB_FILE_CLOSE_ICON, fileName)));
   }
 
   /**
-   * checks if some tab is opened in the Editor
+   * Checks that at list one editor's tab is open.
    *
-   * @return true if any tab is open
+   * @return true - if at list one tab is open in the editor, false - if not
    */
   public boolean isAnyTabsOpened() {
     return seleniumWebDriverHelper.isVisible(someOpenedTab);
   }
 
-  /** get all open editor tabs and close this */
+  /** Gets all open editor's tabs and closes they with checking the files saving */
   public void closeAllTabs() {
     loader.waitOnClosed();
 
@@ -491,7 +494,7 @@ public class CodenvyEditor {
         By.xpath(ALL_TABS_XPATH), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
-  /** close all tabs by using context menu */
+  /** Closes all tabs by using context menu */
   public void closeAllTabsByContextMenu() {
     List<WebElement> tabs =
         seleniumWebDriverHelper.waitVisibilityOfAllElements(
@@ -509,9 +512,9 @@ public class CodenvyEditor {
   }
 
   /**
-   * Open context menu for tab by name
+   * Opens context menu for editor's tab with specified {@code tabName}.
    *
-   * @param tabName name of tab
+   * @param tabName visible name of the editor's tab
    */
   public void openAndWaitContextMenuForTabByName(String tabName) {
     WebElement tab =
@@ -521,12 +524,20 @@ public class CodenvyEditor {
     testWebElementRenderChecker.waitElementIsRendered(By.xpath(TAB_CONTEXT_MENU_BODY));
   }
 
-  /** Run action for tab from the context menu */
+  /**
+   * Runs action for tab from the context menu.
+   *
+   * @param tabAction item from tab's context menu
+   */
   public void runActionForTabFromContextMenu(TabActionLocator tabAction) {
     seleniumWebDriverHelper.waitAndClick(tabAction.get());
   }
 
-  /** type text by into orion editor with pause 1 sec. */
+  /**
+   * Types {@code text} into orion editor with pause 1 sec.
+   *
+   * @param text text which should be typed
+   */
   public void typeTextIntoEditor(String text) {
     loader.waitOnClosed();
     seleniumWebDriverHelper.sendKeys(text);
@@ -534,19 +545,19 @@ public class CodenvyEditor {
   }
 
   /**
-   * type text into orion editor pause for saving on server side is not set
+   * Types specified {@code text} into editor without pause for saving.
    *
-   * @param text text to type
+   * @param text text which should be typed
    */
   public void typeTextIntoEditorWithoutDelayForSaving(String text) {
     seleniumWebDriverHelper.sendKeys(text);
   }
 
   /**
-   * type text into specific line editor. Cursor will be activated id the end of the line. Line must
-   * not be empty. Not recommended to use
+   * Types specified {@code text} into defined editor's {@code line}.
    *
-   * @param text text to type
+   * @param text text which should be typed
+   * @param line the line's number in which text should be typed
    */
   public void typeTextIntoEditor(String text, int line) {
     setCursorToLine(line);
@@ -554,9 +565,9 @@ public class CodenvyEditor {
   }
 
   /**
-   * set cursor in specified line
+   * Sets cursor to specified {@code positionLine}.
    *
-   * @param positionLine is the specified number line
+   * @param positionLine line's number in which cursor should be placed
    */
   public void setCursorToLine(int positionLine) {
     loader.waitOnClosed();
@@ -572,10 +583,10 @@ public class CodenvyEditor {
   }
 
   /**
-   * set cursor in specified position for current visible editor
+   * Sets cursor to specified {@code positionLine} and {@code positionChar} and checks result.
    *
-   * @param positionLine is the specified number line
-   * @param positionChar is the specified number char
+   * @param positionLine line's number in which cursor should be placed
+   * @param positionChar char's number in which cursor should be placed
    */
   public void goToCursorPositionVisible(int positionLine, int positionChar) {
     openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
@@ -584,10 +595,10 @@ public class CodenvyEditor {
   }
 
   /**
-   * set cursor in specified position for current active and focused editor
+   * Sets cursor to specified {@code positionLine} and {@code positionChar} and checks result.
    *
-   * @param positionLine is the specified number line
-   * @param positionChar is the specified number char
+   * @param positionLine line's number in which cursor should be placed
+   * @param positionChar char's number in which cursor should be placed
    */
   public void goToPosition(int positionLine, int positionChar) {
     openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
@@ -595,6 +606,12 @@ public class CodenvyEditor {
     waitCursorPosition(positionLine, positionChar);
   }
 
+  /**
+   * Sets cursor to specified {@code positionLine} and {@code positionChar}.
+   *
+   * @param positionLine line's number in which cursor should be placed
+   * @param positionChar char's number in which cursor should be placed
+   */
   private void openGoToLineFormAndSetCursorToPosition(int positionLine, int positionChar) {
     loader.waitOnClosed();
     seleniumWebDriverHelper.sendKeys(Keys.chord(CONTROL, "l"));
@@ -607,7 +624,9 @@ public class CodenvyEditor {
     askForValueDialog.waitFormToClose();
   }
 
-  /** launch code assistant with ctrl+space keys and wait container is open */
+  /**
+   * Launches code assistant by "ctrl" + "space" keys combination and waits until container is open.
+   */
   public void launchAutocompleteAndWaitContainer() {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
@@ -617,7 +636,7 @@ public class CodenvyEditor {
     waitAutocompleteContainer();
   }
 
-  /** launch code assistant with ctrl+space keys */
+  /** Launches code assistant with "ctrl" + "space" keys combination. */
   public void launchAutocomplete() {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
@@ -626,33 +645,33 @@ public class CodenvyEditor {
     action.keyUp(CONTROL).perform();
   }
 
-  /** type ESC key into editor and wait closing of the autocomplete */
+  /** Closes autocomplete container by "Escape" button and checks that container is closed. */
   public void closeAutocomplete() {
     typeTextIntoEditor(ESCAPE.toString());
     waitAutocompleteContainerIsClosed();
   }
 
-  /** wait while autocomplete form opened */
+  /** Waits until autocomplete form is opened. */
   public void waitAutocompleteContainer() {
     seleniumWebDriverHelper.waitVisibility(autocompleteContainer, ELEMENT_TIMEOUT_SEC);
   }
 
-  /** wait while autocomplete form will closed */
+  /** Waits until autocomplete form is closed. */
   public void waitAutocompleteContainerIsClosed() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(AUTOCOMPLETE_CONTAINER));
   }
 
   /**
-   * wait specified text in autocomplete
+   * Waits specified {@code expectedText} in autocomplete container.
    *
-   * @param value
+   * @param expectedText text which should be present in the container
    */
-  public void waitTextIntoAutocompleteContainer(final String value) {
+  public void waitTextIntoAutocompleteContainer(final String expectedText) {
     webDriverWaitFactory
         .get(ELEMENT_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
-                webDriver -> getAllVisibleTextFromAutocomplete().contains(value));
+                webDriver -> getAllVisibleTextFromAutocomplete().contains(expectedText));
   }
 
   /**
@@ -668,7 +687,7 @@ public class CodenvyEditor {
     expectedNumberOfActiveLine(position);
   }
 
-  /** Wait for no Git change markers in the opened editor. */
+  /** Waits for no Git change markers in the opened editor. */
   public void waitNoGitChangeMarkers() {
     webDriverWaitFactory
         .get()
@@ -681,7 +700,8 @@ public class CodenvyEditor {
   }
 
   /**
-   * Wait for Git insertion marker in the opened editor.
+   * Waits for Git insertion marker between {@code startLine} and {@code endLine} including this two
+   * lines.
    *
    * @param startLine line number of the markers start
    * @param endLine line number of the markers end
@@ -703,7 +723,8 @@ public class CodenvyEditor {
   }
 
   /**
-   * Wait for Git modification marker in the opened editor.
+   * Waits for Git modification marker between {@code startLine} and {@code endLine} including this
+   * two lines.
    *
    * @param startLine line number of the markers start
    * @param endLine line number of the markers end
@@ -725,9 +746,9 @@ public class CodenvyEditor {
   }
 
   /**
-   * Wait for Git deletion marker in the opened editor.
+   * Waits for Git deletion marker in the specified {@code line}.
    *
-   * @param line line number of the marker
+   * @param line line's number in which the marker should be displayed
    */
   public void waitGitDeletionMarkerInPosition(int line) {
     webDriverWaitFactory
