@@ -29,9 +29,9 @@ import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
 public class Eclipse0120Test {
-  private static final String PATH_TO_PACKAGE_PREFIX = "/src/main/java/org/eclipse/qa/examples/";
-  private static final String PROJECT_NAME =
-      NameGenerator.generate(Eclipse0120Test.class.getSimpleName(), 4);
+  private static final String PROJECT_NAME = NameGenerator.generate("Eclipse0120Test-", 4);
+  private static final String PATH_TO_EXPAND =
+      PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples";
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
@@ -52,8 +52,7 @@ public class Eclipse0120Test {
   public void test0120() throws Exception {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(PROJECT_NAME + PATH_TO_PACKAGE_PREFIX + "Test.java");
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(PATH_TO_EXPAND, "Test.java");
     editor.waitActive();
     editor.waitMarkerInPosition(WARNING, 16);
     editor.goToCursorPositionVisible(16, 42);

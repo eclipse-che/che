@@ -20,6 +20,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.G
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.FILE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -36,6 +37,7 @@ import org.eclipse.che.selenium.pageobject.*;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -99,7 +101,12 @@ public class GitColorsTest {
     // Check file to be in default color
     projectExplorer.openItemByPath(PROJECT_NAME + "/README.md");
     projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/README.md");
-    editor.waitDefaultColorTab("README.md");
+    try {
+      editor.waitDefaultColorTab("README.md");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/9067");
+    }
 
     // Remove file from index
     menu.runCommand(GIT, REMOVE_FROM_INDEX);
