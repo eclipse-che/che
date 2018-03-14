@@ -323,16 +323,16 @@ public class CodenvyEditor {
   private WebElement someOpenedTab;
 
   /**
-   * wait active editor
+   * Waits during {@code timeout} until current editor's tab is ready to work.
    *
-   * @param userTimeOut timeout defined of the user
+   * @param timeout waiting time in seconds
    */
-  public void waitActive(int userTimeOut) {
+  public void waitActive(int timeout) {
     loader.waitOnClosed();
-    seleniumWebDriverHelper.waitVisibility(activeEditorContainer, userTimeOut);
+    seleniumWebDriverHelper.waitVisibility(activeEditorContainer, timeout);
   }
 
-  /** wait active editor */
+  /** Waits until current editor's tab is ready to work. */
   public void waitActive() {
     loader.waitOnClosed();
     seleniumWebDriverHelper.waitVisibility(activeEditorContainer, ELEMENT_TIMEOUT_SEC);
