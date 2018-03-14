@@ -68,7 +68,6 @@ import static org.openqa.selenium.Keys.HOME;
 import static org.openqa.selenium.Keys.LEFT_CONTROL;
 import static org.openqa.selenium.Keys.SHIFT;
 import static org.openqa.selenium.Keys.SPACE;
-import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
@@ -428,7 +427,7 @@ public class CodenvyEditor {
   }
 
   /**
-   * Waits until {@code text} is not present in editor
+   * Waits until {@code text} is not present in editor.
    *
    * @param text text which should not be present in the editor
    */
@@ -440,14 +439,13 @@ public class CodenvyEditor {
   }
 
   /**
-   * Waits until editor's tab with specified {@code nameOfFile} is closed
+   * Waits until editor's tab with specified {@code nameOfFile} is closed.
    *
    * @param nameOfFile visible name of the editor's tab
    */
   public void waitWhileFileIsClosed(String nameOfFile) {
-    webDriverWaitFactory
-        .get(ELEMENT_TIMEOUT_SEC)
-        .until(invisibilityOfElementLocated(By.xpath(format(TAB_FILE_NAME_XPATH, nameOfFile))));
+    seleniumWebDriverHelper.waitInvisibility(
+        By.xpath(format(TAB_FILE_NAME_XPATH, nameOfFile)), ELEMENT_TIMEOUT_SEC);
   }
 
   /**
