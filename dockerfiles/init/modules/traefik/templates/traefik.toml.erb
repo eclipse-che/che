@@ -95,10 +95,12 @@ address = ":7070"
   [entryPoints.https]
   address = ":<%= scope.lookupvar('che::che_port') -%>"
     [entryPoints.https.tls]
+<% if scope.lookupvar('che::https_certificate_provider') == 'file' -%>
       [[entryPoints.https.tls.certificates]]
-# these files are mounted from instance/config/traefik
+      # these files are mounted from instance/config/traefik/
       certFile = "/etc/traefik/che.crt"
       keyFile = "/etc/traefik/che.pem"
+<% end -%>
 <% else -%>
 [entryPoints]
   [entryPoints.http]
@@ -107,3 +109,16 @@ address = ":7070"
 
 [docker]
 watch = true
+
+<% if scope.lookupvar('che::https_certificate_provider').include? "letsencrypt" -%>
+[acme]
+email = "admin@che"
+storage = "acme.json"
+entryPoint = "https"
+OnHostRule = true
+<% if scope.lookupvar('che::https_certificate_provider') == 'letsencrypt-staging' -%>
+caServer = "https://acme-staging.api.letsencrypt.org/directory"
+<% end -%>
+[acme.httpChallenge]
+entryPoint = "http"
+<% end -%>

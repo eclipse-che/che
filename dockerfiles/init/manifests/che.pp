@@ -37,6 +37,11 @@ node default {
   $no_proxy_for_che_workspaces = getValue("CHE_WORKSPACE_NO__PROXY","")
 
   ###############################
+  # HTTPS configuration
+  # options: letsencrypt-staging, letsencrypt, file
+  $https_certificate_provider = getValue("CHE_HTTPS_CERTIFICATE_PROVIDER", "letsencrypt-staging")
+
+  ###############################
   # Single port configuration
   #
   $che_single_port = getValue("CHE_SINGLE_PORT","false")
@@ -68,7 +73,6 @@ node default {
   $system_super_privileged_mode=getValue("SYSTEM_SUPER__PRIVILEGED__MODE", "false")
 
   $che_keycloak_admin_require_update_password=getValue("CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD", "true")
-  $che_keycloak_auth__server__url=getValue("CHE_KEYCLOAK_AUTH__SERVER__URL","")
 
   ###############################
   # Include base module
