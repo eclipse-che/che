@@ -19,6 +19,7 @@ import org.eclipse.che.api.git.shared.FileChangedEventDto;
 import org.eclipse.che.api.git.shared.StatusChangedEventDto;
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStateUpdateDto;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.vcs.VcsStatus;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.GitEventSubscribable;
@@ -27,6 +28,7 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.ProjectTreeChangeHandler;
 import org.eclipse.che.ide.resources.tree.FileNode;
+import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 
 /**
@@ -90,12 +92,16 @@ public class ProjectExplorerTreeColorizer implements GitEventsSubscriber {
                     && statusChangedEventDto
                         .getProjectName()
                         .equals(getRootPath(((FileNode) node).getData().getLocation())))
+        .map(node -> (FileNode) node)
+        .map(ResourceNode::getData)
+        .map(Resource::getLocation)
+        .map(Path::toString)
         .forEach(
-            node ->
+            location ->
                 treeChangeHandler.handleFileChange(
                     dtoFactory
                         .createDto(ProjectTreeStateUpdateDto.class)
-                        .withPath(((FileNode) node).getData().getLocation().toString())
+                        .withPath(location)
                         .withType(FileWatcherEventType.MODIFIED)));
   }
 }
