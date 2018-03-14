@@ -22,7 +22,7 @@ import org.eclipse.che.inject.ConfigurationException;
 
 /**
  * Produces host names in form:
- * [serverName]_[machineName]_[workspaceId].<external_or_internal_address>.<wildcardNipDomain> If
+ * [serverName]-[machineName]-[workspaceId].<external_or_internal_address>.<wildcardNipDomain> If
  * some of the server name or machine name or workspace id is null, they will be not included.
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
@@ -54,7 +54,7 @@ public class SinglePortHostnameBuilder {
    * @return composite hostname
    */
   public String build(String serverName, String machineName, String workspaceID) {
-    StringJoiner joiner = new StringJoiner("_");
+    StringJoiner joiner = new StringJoiner("-");
     if (serverName != null) {
       joiner.add(normalize(serverName));
     }
