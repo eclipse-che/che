@@ -338,9 +338,9 @@ public class CodenvyEditor {
   }
 
   /**
-   * get text from active tab of orion editor
+   * Gets visible text from active editor's tab
    *
-   * @return text from active tab of orion editor
+   * @return visible text from editor's tab
    */
   public String getVisibleTextFromEditor() {
     waitActive();
@@ -352,9 +352,10 @@ public class CodenvyEditor {
   }
 
   /**
-   * get visible text from split editor
+   * Gets visible text from split editor's tab with specified {@code indexOfEditor}.
    *
-   * @param indexOfEditor index of editor that was split
+   * @param indexOfEditor index of editor's tab which should be read, numeration starts since "1"
+   * @return visible text from chosen editor's tab
    */
   public String getTextFromSplitEditor(int indexOfEditor) {
     waitActive();
@@ -369,15 +370,17 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait expected text in orion editor
+   * Waits during {@code timeout} until specified {@code expectedText} is present in editor.
    *
-   * @param text expected text
-   * @param customTimeout time for waiting , that was defined by user
+   * @param expectedText text which should be present in the editor
+   * @param timeout waiting time in seconds
    */
-  public void waitTextIntoEditor(final String text, final int customTimeout) {
+  public void waitTextIntoEditor(final String expectedText, final int timeout) {
     webDriverWaitFactory
-        .get(customTimeout)
-        .until((ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> getVisibleTextFromEditor().contains(expectedText));
   }
 
   /**
@@ -405,14 +408,16 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait expected text in orion editor
+   * Waits until specified {@code expectedText} is present in editor.
    *
-   * @param text expected text
+   * @param expectedText text which should be present in the editor
    */
-  public void waitTextIntoEditor(final String text) {
+  public void waitTextIntoEditor(final String expectedText) {
     webDriverWaitFactory
         .get(ELEMENT_TIMEOUT_SEC)
-        .until((ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> getVisibleTextFromEditor().contains(expectedText));
 
     loader.waitOnClosed();
   }
