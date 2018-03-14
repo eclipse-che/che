@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestSshServiceClient;
@@ -40,6 +41,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author aleksandr shmaraev */
+@Test(groups = TestGroup.GITHUB)
 public class FetchAndMergeRemoteBranchIntoLocalTest {
   private static final String REPO_NAME = NameGenerator.generate("FetchAndMergeTest-", 3);
   private static final String PROJECT_NAME = NameGenerator.generate("FetchAndMergeTest-", 4);
@@ -53,11 +55,11 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
   @Inject private Ide ide;
   @Inject private TestUser productUser;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.password")
   private String gitHubPassword;
 
