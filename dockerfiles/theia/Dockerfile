@@ -29,4 +29,3 @@ ARG GITHUB_TOKEN
 ENV USE_LOCAL_GIT=true \
     GITHUB_TOKEN=${GITHUB_TOKEN}
 ENTRYPOINT ["node", "/theia_launcher/theia_launcher.js"]
-# ENTRYPOINT ["tail", "-f", "/dev/null"]

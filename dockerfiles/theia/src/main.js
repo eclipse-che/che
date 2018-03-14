@@ -20,10 +20,10 @@ const defaultConfig = require(`${defaultTheia}/package.json`);
 process.chdir(theiaRoot);
 
 let theiaConfig;
-//if (fs.existsSync(theiaPath)) {
-//    handlePromise(callRun());
-//}
-//else {
+if (fs.existsSync(theiaPath)) {
+    handlePromise(callRun());
+}
+else {
     let pluginString = process.env.THEIA_PLUGINS;
     console.log("Run with plugins " + pluginString);
     let pluginList = [];
@@ -45,7 +45,7 @@ let theiaConfig;
         handlePromise(callRun());
     }
 
-//}
+}
 
 function promisify(command, p) {
     return new Promise((resolve, reject) => {
