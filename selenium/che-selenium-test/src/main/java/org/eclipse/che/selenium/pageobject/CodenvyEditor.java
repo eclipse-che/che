@@ -384,6 +384,15 @@ public class CodenvyEditor {
   }
 
   /**
+   * Waits until specified {@code expectedText} is present in editor.
+   *
+   * @param expectedText text which should be present in the editor
+   */
+  public void waitTextIntoEditor(final String expectedText) {
+    waitTextIntoEditor(expectedText, ELEMENT_TIMEOUT_SEC);
+  }
+
+  /**
    * wait text into split editor with defined index
    *
    * @param numOfEditor number of the split editor
@@ -405,21 +414,6 @@ public class CodenvyEditor {
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> !getTextFromSplitEditor(numOfEditor).contains(text));
-  }
-
-  /**
-   * Waits until specified {@code expectedText} is present in editor.
-   *
-   * @param expectedText text which should be present in the editor
-   */
-  public void waitTextIntoEditor(final String expectedText) {
-    webDriverWaitFactory
-        .get(ELEMENT_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> getVisibleTextFromEditor().contains(expectedText));
-
-    loader.waitOnClosed();
   }
 
   /**
