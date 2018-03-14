@@ -67,7 +67,6 @@ node default {
   $system_super_privileged_mode=getValue("SYSTEM_SUPER__PRIVILEGED__MODE", "false")
 
   $che_keycloak_admin_require_update_password=getValue("CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD", "true")
-  $che_keycloak_auth__server__url=getValue("CHE_KEYCLOAK_AUTH__SERVER__URL","")
 
   ###############################
   # Include base module
