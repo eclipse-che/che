@@ -393,33 +393,44 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait text into split editor with defined index
+   * Waits during {@code timeout} until specified {@code expectedText} is present in the editor's
+   * tab with defined {@code indexOfEditor}.
    *
-   * @param numOfEditor number of the split editor
-   * @param customTimeout timeout defined by user
+   * @param indexOfEditor index of editor's tab, text from which should be checked, numeration
+   *     starts since "1"
+   * @param timeout waiting time in seconds
    */
   public void waitTextInDefinedSplitEditor(
-      int numOfEditor, final int customTimeout, String expectedText) {
+      int indexOfEditor, final int timeout, String expectedText) {
     webDriverWaitFactory
-        .get(customTimeout)
+        .get(timeout)
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> getTextFromSplitEditor(numOfEditor).contains(expectedText));
-  }
-
-  public void waitTextIsNotPresentInDefinedSplitEditor(
-      int numOfEditor, final int customTimeout, String text) {
-    webDriverWaitFactory
-        .get(customTimeout)
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> !getTextFromSplitEditor(numOfEditor).contains(text));
+                driver -> getTextFromSplitEditor(indexOfEditor).contains(expectedText));
   }
 
   /**
-   * wait expected text is not present in orion editor
+   * Waits during {@code timeout} until specified {@code text} is not present in the editor's tab
+   * with defined {@code indexOfEditor}.
    *
-   * @param text expected text
+   * @param indexOfEditor index of editor's tab, text from which should be checked, numeration
+   *     starts since "1"
+   * @param timeout waiting time in seconds
+   * @param text text which should not be present in the chosen editor's tab
+   */
+  public void waitTextIsNotPresentInDefinedSplitEditor(
+      int indexOfEditor, final int timeout, String text) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> !getTextFromSplitEditor(indexOfEditor).contains(text));
+  }
+
+  /**
+   * Waits until {@code text} is not present in editor
+   *
+   * @param text text which should not be present in the editor
    */
   public void waitTextNotPresentIntoEditor(final String text) {
     webDriverWaitFactory
@@ -428,7 +439,11 @@ public class CodenvyEditor {
             (ExpectedCondition<Boolean>) webDriver -> !(getVisibleTextFromEditor().contains(text)));
   }
 
-  /** wait closing of tab with specified name */
+  /**
+   * Waits until editor's tab with specified {@code nameOfFile} is closed
+   *
+   * @param nameOfFile visible name of the editor's tab
+   */
   public void waitWhileFileIsClosed(String nameOfFile) {
     webDriverWaitFactory
         .get(ELEMENT_TIMEOUT_SEC)
