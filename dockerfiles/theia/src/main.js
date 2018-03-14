@@ -14,16 +14,18 @@ const cp = require("child_process");
 const theiaRoot = '/home/theia';
 const theiaPath = theiaRoot + '/package.json';
 
-const defaultConfig = require('/home/default/theia/package.json');
+const defaultTheia = `/home/default/theia`;
+const defaultConfig = require(`${defaultTheia}/package.json`);
 
 process.chdir(theiaRoot);
 
 let theiaConfig;
-if (fs.existsSync(theiaPath)) {
-    handlePromise(callRun());
-}
-else {
+//if (fs.existsSync(theiaPath)) {
+//    handlePromise(callRun());
+//}
+//else {
     let pluginString = process.env.THEIA_PLUGINS;
+    console.log("Run with plugins " + pluginString);
     let pluginList = [];
     if (pluginString && pluginString.length !== 0) {
         let arr = pluginString.split(',');
@@ -38,12 +40,12 @@ else {
         fs.writeFileSync(theiaPath, JSON.stringify(theiaConfig));
         handlePromise(callYarn().then(callBuild).then(callRun));
     } else {
-        const defaultTheia = `/home/default/theia`;
-        cp.execSync(`cp -r ${defaultTheia}/* ${theiaRoot}`);
+        console.log("Launch default Theia");
+        cp.execSync(`rsync -rv ${defaultTheia}/ ${theiaRoot} --exclude 'node_modules' --exclude 'yarn.lock'`);
         handlePromise(callRun());
     }
 
-}
+//}
 
 function promisify(command, p) {
     return new Promise((resolve, reject) => {
