@@ -43,6 +43,7 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
   private final String cheHostProtocol;
   private final Boolean singleportWildcardIPless;
   private final String singleportWildcardDomainHost;
+  private final String cheHttpsCertificateProvider;
 
   @Inject
   public SinglePortLabelsProvisioner(
@@ -52,6 +53,7 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
       @Nullable @Named("che.host.protocol") String cheHostProtocol,
       @Nullable @Named("che.singleport.wildcard_domain.ipless") Boolean singleportWildcardIPless,
       @Nullable @Named("che.singleport.wildcard_domain.host") String singleportWildcardDomainHost,
+      @Nullable @Named("che.https.certificate.provider") String cheHttpsCertificateProvider,
       Provider<SinglePortHostnameBuilder> hostnameBuilderProvider) {
     this.hostnameBuilderProvider = hostnameBuilderProvider;
     this.internalIpOfContainers = internalIpOfContainers;
@@ -59,6 +61,7 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
     this.singleportWildcardIPless = singleportWildcardIPless;
     this.cheHostProtocol = cheHostProtocol;
     this.singleportWildcardDomainHost = singleportWildcardDomainHost;
+    this.cheHttpsCertificateProvider = cheHttpsCertificateProvider;
     this.dockerNetwork = dockerNetwork;
   }
 
@@ -85,8 +88,14 @@ public class SinglePortLabelsProvisioner implements ConfigurationProvisioner {
         if (cheHostProtocol.equals("https")) {
           // rewrite to use https and wss
           if (protocol.equals("ws") || protocol.equals("http")) {
-            containerLabels.put(
-                format("traefik.%s.frontend.entryPoints", serviceName), "https,wss");
+            if (cheHttpsCertificateProvider.contains("letsencrypt")) {
+              // http needed for ACME http challenge
+              containerLabels.put(
+                  format("traefik.%s.frontend.entryPoints", serviceName), "https,wss,http");
+            } else {
+              containerLabels.put(
+                  format("traefik.%s.frontend.entryPoints", serviceName), "https,wss");
+            }
           } else {
             // not a protocol traefik understands
             containerLabels.put(format("traefik.%s.frontend.entryPoints", serviceName), protocol);
