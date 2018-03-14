@@ -39,6 +39,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
+@Test(groups = TestGroup.GITHUB)
 public class AuthorizeOnGithubFromPreferencesTest {
   private static final String GITHUB_COM = "github.com";
   private static final Logger LOG =
@@ -47,11 +48,11 @@ public class AuthorizeOnGithubFromPreferencesTest {
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.password")
   private String gitHubPassword;
 

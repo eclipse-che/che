@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 public abstract class AbstractKeycloakFilter implements Filter {
 
   protected boolean shouldSkipAuthentication(HttpServletRequest request, String token) {
-    return request.getScheme().startsWith("ws") || (token != null && token.startsWith("machine"));
+    return token != null && token.startsWith("machine");
   }
 
   @Override

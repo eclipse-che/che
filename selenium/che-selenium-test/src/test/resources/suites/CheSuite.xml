@@ -22,14 +22,14 @@
                 <script language="beanshell">
                     <![CDATA[
     boolean isTestGroupsAgreedWithRequestedGroups() {
-      String testGroupsVal = System.getProperty("testGroups");
-      if (testGroupsVal == null || testGroupsVal.trim().isEmpty() || groups.isEmpty()){
+      excludedGroupsVal = System.getProperty("excludedGroups");
+      if (excludedGroupsVal == null || excludedGroupsVal.isEmpty() || groups.isEmpty()) {
         return true;
       }
 
-      String[] testGroups = testGroupsVal.split(",");
+      excludedGroups = excludedGroupsVal.split(",");
       for (String group: groups.keySet()) {
-        if (!Arrays.asList(testGroups).contains(group)) {
+        if (Arrays.asList(excludedGroups).contains(group)) {
           return false;
         }
       }
@@ -117,6 +117,7 @@
           <class name="org.eclipse.che.selenium.git.CommitFilesByMultiSelectTest"/>
           <class name="org.eclipse.che.selenium.git.CommitFilesTest"/>
           <class name="org.eclipse.che.selenium.git.CreateAndDeleteLocalBranchTest"/>
+          <class name="org.eclipse.che.selenium.git.FetchAndMergeRemoteBranchIntoLocalTest"/>
           <class name="org.eclipse.che.selenium.git.GitChangeMarkersTest"/>
           <class name="org.eclipse.che.selenium.git.GitColorsTest"/>
           <class name="org.eclipse.che.selenium.git.InitializeAndDeleteLocalRepositoryTest"/>

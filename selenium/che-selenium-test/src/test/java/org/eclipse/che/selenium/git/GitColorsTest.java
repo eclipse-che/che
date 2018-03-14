@@ -20,11 +20,13 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.G
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.FILE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
@@ -36,10 +38,12 @@ import org.eclipse.che.selenium.pageobject.*;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Igor Vnokur */
+@Test(groups = TestGroup.GITHUB)
 public class GitColorsTest {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
 
@@ -47,7 +51,7 @@ public class GitColorsTest {
   @Inject private Ide ide;
   @Inject private TestUser productUser;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
 
@@ -99,7 +103,12 @@ public class GitColorsTest {
     // Check file to be in default color
     projectExplorer.openItemByPath(PROJECT_NAME + "/README.md");
     projectExplorer.waitDefaultColorNode(PROJECT_NAME + "/README.md");
-    editor.waitDefaultColorTab("README.md");
+    try {
+      editor.waitDefaultColorTab("README.md");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/9067");
+    }
 
     // Remove file from index
     menu.runCommand(GIT, REMOVE_FROM_INDEX);

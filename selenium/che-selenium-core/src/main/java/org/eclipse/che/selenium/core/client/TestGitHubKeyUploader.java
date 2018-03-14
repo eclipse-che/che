@@ -13,32 +13,29 @@ package org.eclipse.che.selenium.core.client;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import org.eclipse.che.api.core.ConflictException;
 import org.slf4j.Logger;
 
 /** @author Dmytro Nochevnov */
+@Singleton
 public class TestGitHubKeyUploader {
   public static final String GITHUB_COM = "github.com";
 
   private static final Logger LOG = getLogger(TestGitHubKeyUploader.class);
 
-  private final TestGitHubServiceClient testGitHubServiceClient;
-  private final TestSshServiceClient testSshServiceClient;
-  private final String gitHubUsername;
-  private final String gitHubPassword;
+  @Inject private TestGitHubServiceClient testGitHubServiceClient;
 
-  @Inject
-  public TestGitHubKeyUploader(
-      TestGitHubServiceClient testGitHubServiceClient,
-      TestSshServiceClient testSshServiceClient,
-      @Named("github.username") String gitHubUsername,
-      @Named("github.password") String gitHubPassword) {
-    this.testGitHubServiceClient = testGitHubServiceClient;
-    this.testSshServiceClient = testSshServiceClient;
-    this.gitHubUsername = gitHubUsername;
-    this.gitHubPassword = gitHubPassword;
-  }
+  @Inject private TestSshServiceClient testSshServiceClient;
+
+  @Inject(optional = true)
+  @Named("github.username")
+  private String gitHubUsername;
+
+  @Inject(optional = true)
+  @Named("github.password")
+  private String gitHubPassword;
 
   public synchronized void updateGithubKey() throws Exception {
     testSshServiceClient.deleteVCSKey(GITHUB_COM);

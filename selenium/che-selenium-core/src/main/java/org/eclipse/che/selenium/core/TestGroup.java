@@ -8,17 +8,13 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-//first_change1418333979848
+package org.eclipse.che.selenium.core;
 
-package commenttest;
-
-import java.util.ArrayList;
-
-final class JavaCommentsTest
-{
-   private ArrayList<Integer> numbers = new ArrayList<Integer>();
-
-   public ArrayList<Integer> getNumbers() {
-      return numbers;
-   }
+/** @author Dmytro Nochevnov */
+public interface TestGroup {
+  String MULTIUSER = "multiuser";
+  String SINGLEUSER = "singleuser";
+  String OPENSHIFT = "openshift";
+  String DOCKER = "docker";
+  String GITHUB = "github";
 }

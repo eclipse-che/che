@@ -51,7 +51,6 @@ public class CheckoutReferenceTest extends BaseTest {
         new CheckoutReferencePresenter(
             view,
             service,
-            appContext,
             constant,
             notificationManager,
             gitOutputConsoleFactory,

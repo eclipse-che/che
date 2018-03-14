@@ -12,6 +12,7 @@ package org.eclipse.che.api.git;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.fs.server.WsPathUtils.SEPARATOR;
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
 import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.ADDED;
 import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.MODIFIED;
@@ -91,7 +92,7 @@ public class GitStatusProvider implements VcsStatusProvider {
     try {
       RegisteredProject project =
           projectManager
-              .getClosest(wsPath)
+              .getClosest(absolutize(wsPath))
               .orElseThrow(() -> new NotFoundException("Can't find project"));
       String projectFsPath = pathTransformer.transform(project.getPath()).toString();
       Status status = gitConnectionFactory.getConnection(projectFsPath).status(paths);

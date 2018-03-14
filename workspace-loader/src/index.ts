@@ -18,15 +18,95 @@ import { Loader } from './loader/loader'
 
 const WEBSOCKET_CONTEXT = '/api/websocket';
 
+declare const Keycloak: Function;
+export class KeycloakLoader {
+    /**
+     * Load keycloak settings
+     */
+    public loadKeycloakSettings(): Promise<any> {
+        const msg = "Cannot load keycloak settings. This is normal for single-user mode.";
+
+        return new Promise((resolve, reject) => {
+            try {
+                const request = new XMLHttpRequest();
+
+                request.onerror = request.onabort = function () {
+                    reject(msg);
+                };
+
+                request.onload = () => {
+                    if (request.status == 200) {
+                        resolve(this.injectKeycloakScript(JSON.parse(request.responseText)));
+                    } else {
+                        reject(null);
+                    }
+                };
+
+                const url = "/api/keycloak/settings";
+                request.open("GET", url, true);
+                request.send();
+            } catch (e) {
+                reject(msg + e.message);
+            }
+        });
+    }
+
+    /**
+     * Injects keycloak javascript
+     */
+    private injectKeycloakScript(keycloakSettings: any): Promise<any> {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            (script as any).language = 'javascript';
+            script.async = true;
+            script.src = keycloakSettings['che.keycloak.auth_server_url'] + '/js/keycloak.js';
+
+            script.onload = () => {
+                resolve(this.initKeycloak(keycloakSettings));
+            };
+
+            script.onerror = script.onabort = () => {
+                reject('Cannot load ' + script.src);
+            };
+
+            document.head.appendChild(script);
+        });
+    }
+
+    /**
+     * Initialize keycloak and load the IDE
+     */
+    private initKeycloak(keycloakSettings: any): Promise<any> {
+        return new Promise((resolve, reject) => {
+            const keycloak = Keycloak({
+                url: keycloakSettings['che.keycloak.auth_server_url'],
+                realm: keycloakSettings['che.keycloak.realm'],
+                clientId: keycloakSettings['che.keycloak.client_id']
+            });
+
+            window['_keycloak'] = keycloak;
+
+            keycloak
+                .init({onLoad: 'login-required', checkLoginIframe: false})
+                .success(() => {
+                    resolve(keycloak);
+                })
+                .error(() => {
+                    reject('[Keycloak] Failed to initialize Keycloak');
+                });
+        });
+    }
+
+}
+
 export class WorkspaceLoader {
 
-    loader: Loader;
     workspace: che.IWorkspace;
     startAfterStopping = false;
 
-    constructor(loader: Loader) {
-        this.loader = loader;
-
+    constructor(private readonly loader: Loader,
+                private readonly keycloak: any) {
         /** Ask dashboard to show the IDE. */
         window.parent.postMessage("show-ide", "*");
     }
@@ -112,38 +192,42 @@ export class WorkspaceLoader {
      * @param workspaceId workspace id
      */
     getWorkspace(workspaceId: string): Promise<che.IWorkspace> {
-        return new Promise((resolve, reject) => {
-            let request = new XMLHttpRequest();
-            request.open("GET", '/api/workspace/' + workspaceId);
-            request.send();
-            request.onreadystatechange = function () {
-                if (this.readyState !== 4) { return; }
-                if (this.status !== 200) {
-                    reject(this.status ? this.statusText : "Unknown error");
-                    return;
-                }
-                resolve(JSON.parse(this.responseText));
-            };
-        });        
+        const request = new XMLHttpRequest();
+        request.open("GET", '/api/workspace/' + workspaceId);
+        return this.setAuthorizationHeader(request).then((xhr: XMLHttpRequest) => {
+            return new Promise<che.IWorkspace>((resolve, reject) => {
+                xhr.send();
+                xhr.onreadystatechange = () => {
+                    if (xhr.readyState !== 4) { return; }
+                    if (xhr.status !== 200) {
+                        reject(xhr.status ? xhr.statusText : "Unknown error");
+                        return;
+                    }
+                    resolve(JSON.parse(xhr.responseText));
+                };
+            });
+        });
     }
 
     /**
      * Start current workspace.
      */
     startWorkspace(): Promise<che.IWorkspace> {
-        return new Promise((resolve, reject) => {
-            let request = new XMLHttpRequest();
-            request.open("POST", `/api/workspace/${this.workspace.id}/runtime`);
-            request.send();
-            request.onreadystatechange = function () {
-                if (this.readyState !== 4) { return; }
-                if (this.status !== 200) {
-                    reject(this.status ? this.statusText : "Unknown error");
-                    return;
-                }
-                resolve(JSON.parse(this.responseText));
-            };
-        });        
+        const request = new XMLHttpRequest();
+        request.open("POST", `/api/workspace/${this.workspace.id}/runtime`);
+        return this.setAuthorizationHeader(request).then((xhr: XMLHttpRequest) => {
+            return new Promise<che.IWorkspace>((resolve, reject) => {
+                xhr.send();
+                xhr.onreadystatechange = () => {
+                    if (xhr.readyState !== 4) { return; }
+                    if (xhr.status !== 200) {
+                        reject(xhr.status ? xhr.statusText : "Unknown error");
+                        return;
+                    }
+                    resolve(JSON.parse(xhr.responseText));
+                };
+            });
+        });
     }
 
     /**
@@ -192,7 +276,8 @@ export class WorkspaceLoader {
     subscribeWorkspaceEvents() : Promise<void> {
         let master = new CheJsonRpcMasterApi(new WebsocketClient());
         return new Promise((resolve) => {
-            master.connect(this.websocketBaseURL() + WEBSOCKET_CONTEXT).then(() => {
+            const entryPoint = this.websocketBaseURL() + WEBSOCKET_CONTEXT + this.getAuthenticationToken();
+            master.connect(entryPoint).then(() => {
                 master.subscribeEnvironmentOutput(this.workspace.id, 
                     (message: any) => this.onEnvironmentOutput(message.text));
 
@@ -236,12 +321,39 @@ export class WorkspaceLoader {
         // with error net::ERR_CONNECTION_REFUSED. Timer helps to open the URL without errors.
         setTimeout(() => {
             window.location.href = url;
-        }, 1000);
+        }, 100);
     }
 
-};
+    setAuthorizationHeader(xhr: XMLHttpRequest): Promise<XMLHttpRequest> {
+        return new Promise((resolve, reject) => {
+            if (this.keycloak && this.keycloak.token) {
+                this.keycloak.updateToken(5).success(() => {
+                    xhr.setRequestHeader('Authorization', 'Bearer ' + this.keycloak.token);
+                    resolve(xhr);
+                }).error(() => {
+                    console.log('Failed to refresh token');
+                    this.keycloak.login();
+                    reject();
+                });
+            }
+
+            resolve(xhr);
+        });
+    }
+
+    getAuthenticationToken(): string {
+        return this.keycloak && this.keycloak.token ? '?token=' + this.keycloak.token : '';
+    }
+
+}
 
 /** Initialize */
 if (document.getElementById('workspace-console')) {
-    new WorkspaceLoader(new Loader()).load();
+    new KeycloakLoader().loadKeycloakSettings().catch((error: any) => {
+        if (error) {
+            console.log(error);
+        }
+    }).then((keycloak: any) => {
+        new WorkspaceLoader(new Loader(), keycloak).load();
+    });
 }
