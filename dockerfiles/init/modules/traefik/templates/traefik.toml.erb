@@ -77,6 +77,9 @@ checkNewVersion = false
 # Default: ["http"]
 #
 # defaultEntryPoints = ["http", "https"]
+<% if scope.lookupvar('che::https_certificate_provider').include? "letsencrypt" -%>
+defaultEntryPoints = ["http", "https"]
+<% end -%>
 
 <% if scope.lookupvar('che::che_env') == 'development' -%>
 [web]
