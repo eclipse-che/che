@@ -334,8 +334,7 @@ public class CodenvyEditor {
 
   /** Waits until current editor's tab is ready to work. */
   public void waitActive() {
-    loader.waitOnClosed();
-    seleniumWebDriverHelper.waitVisibility(activeEditorContainer, ELEMENT_TIMEOUT_SEC);
+    waitActive(ELEMENT_TIMEOUT_SEC);
   }
 
   /**
