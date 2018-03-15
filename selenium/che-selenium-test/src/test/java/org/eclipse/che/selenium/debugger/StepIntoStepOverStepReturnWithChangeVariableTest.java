@@ -12,12 +12,14 @@ package org.eclipse.che.selenium.debugger;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
@@ -145,7 +147,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
       debugPanel.waitDebugHighlightedText("result = \"Sorry, you failed. Try again later!\";");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      machineTerminal.launchScriptAndGetInfo(ws, PROJECT, testProjectServiceClient);
+      machineTerminal.logApplicationInfo(PROJECT, ws);
       fail("Known issue: https://github.com/eclipse/che/issues/8105", ex);
     }
 
@@ -164,7 +166,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     debugPanel.typeAndSaveTextAreaDialog("\"7\"");
     debugPanel.waitTextInVariablesPanel("numGuessByUser=\"7\"");
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RESUME_BTN_ID);
-    assertTrue(instToRequestThread.get().contains("<html>"));
+    assertTrue(instToRequestThread.get(LOADER_TIMEOUT_SEC, TimeUnit.SECONDS).contains("<html>"));
   }
 
   @Test(priority = 1)

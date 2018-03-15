@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.debugger;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -18,6 +19,7 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -156,10 +158,14 @@ public class ChangeVariableWithEvaluatingTest {
     // this auxiliary method for investigate problem that was described in the issue:
     // https://github.com/eclipse/che/issues/8105
     try {
-      assertTrue(instToRequestThread.get().contains("Sorry, you failed. Try again later!"));
+      machineTerminal.logApplicationInfo(PROJECT_NAME_CHANGE_VARIABLE, ws);
+
+      assertTrue(
+          instToRequestThread
+              .get(LOADER_TIMEOUT_SEC, TimeUnit.SECONDS)
+              .contains("Sorry, you failed. Try again later!"));
     } catch (AssertionError ex) {
-      machineTerminal.launchScriptAndGetInfo(
-          ws, PROJECT_NAME_CHANGE_VARIABLE, testProjectServiceClient);
+      machineTerminal.logApplicationInfo(PROJECT_NAME_CHANGE_VARIABLE, ws);
       fail("Known issue: https://github.com/eclipse/che/issues/8105");
     }
   }

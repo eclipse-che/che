@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.pageobject.debug;
 
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -235,7 +235,9 @@ public class DebugPanel {
    */
   public void clickOnButton(String buttonIdLocator) {
     loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+
+    // we need to have long timeout for debug-related commands
+    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(id(buttonIdLocator)));
     seleniumWebDriver.findElement(id(buttonIdLocator)).click();
     loader.waitOnClosed();
@@ -355,7 +357,7 @@ public class DebugPanel {
     String locatorWithHiglightedText =
         "//div[@id='gwt-debug-editorPartStack-contentPanel']//div[@active]//div[@class='textviewContent' and @contenteditable='true']//span[@debugid='debug-line']";
     List<WebElement> hilightedElements =
-        new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
             .until(
                 ExpectedConditions.presenceOfAllElementsLocatedBy(
                     xpath(locatorWithHiglightedText)));
