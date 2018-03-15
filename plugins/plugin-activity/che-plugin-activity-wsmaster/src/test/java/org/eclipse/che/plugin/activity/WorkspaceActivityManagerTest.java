@@ -49,6 +49,7 @@ public class WorkspaceActivityManagerTest {
 
   @Mock private Account account;
   @Mock private WorkspaceImpl workspace;
+  @Mock private JpaWorkspaceActivityDao jpaWorkspaceActivityDao;
 
   @Mock private EventService eventService;
 
@@ -57,7 +58,8 @@ public class WorkspaceActivityManagerTest {
   @BeforeMethod
   private void setUp() throws Exception {
     activityManager =
-        new WorkspaceActivityManager(workspaceManager, eventService, EXPIRE_PERIOD_MS);
+        new WorkspaceActivityManager(
+            workspaceManager, jpaWorkspaceActivityDao, eventService, EXPIRE_PERIOD_MS);
 
     when(account.getName()).thenReturn("accountName");
     when(account.getId()).thenReturn("account123");

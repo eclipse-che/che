@@ -15,8 +15,8 @@ import static org.eclipse.che.activity.shared.Constants.ACTIVITY_CHECKER;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -29,6 +29,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
+import org.eclipse.che.commons.schedule.ScheduleDelay;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ public class WorkspaceActivityManager {
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceActivityManager.class);
 
   private final long timeout;
-  private final Map<String, Long> activeWorkspaces;
+  private final JpaWorkspaceActivityDao activityDao;
   private final EventService eventService;
   private final EventSubscriber<?> workspaceEventsSubscriber;
 
@@ -59,12 +60,13 @@ public class WorkspaceActivityManager {
   @Inject
   public WorkspaceActivityManager(
       WorkspaceManager workspaceManager,
+      JpaWorkspaceActivityDao activityDao,
       EventService eventService,
       @Named("che.workspace.agent.dev.inactive_stop_timeout_ms") long timeout) {
-    this.timeout = timeout;
+    this.timeout = timeout > 0 ? timeout : -1;
     this.workspaceManager = workspaceManager;
     this.eventService = eventService;
-    this.activeWorkspaces = new ConcurrentHashMap<>();
+    this.activityDao = activityDao;
     this.workspaceEventsSubscriber =
         new EventSubscriber<WorkspaceStatusEvent>() {
           @Override
@@ -84,7 +86,11 @@ public class WorkspaceActivityManager {
                 update(event.getWorkspaceId(), System.currentTimeMillis());
                 break;
               case STOPPED:
-                activeWorkspaces.remove(event.getWorkspaceId());
+                try {
+                  activityDao.removeExpiration(event.getWorkspaceId());
+                } catch (ServerException e) {
+                  LOG.error(e.getLocalizedMessage(), e);
+                }
                 break;
               default:
                 // do nothing
@@ -100,44 +106,46 @@ public class WorkspaceActivityManager {
    * @param activityTime moment in which the activity occurred
    */
   public void update(String wsId, long activityTime) {
-    try {
-      long timeout = getIdleTimeout(wsId);
-      if (timeout > 0) {
-        activeWorkspaces.put(wsId, activityTime + timeout);
-      }
-    } catch (NotFoundException | ServerException e) {
-      LOG.error(e.getLocalizedMessage(), e);
-    }
-  }
-
-  protected long getIdleTimeout(String workspaceId) throws NotFoundException, ServerException {
     if (timeout > 0) {
-      return timeout;
-    } else {
-      return -1;
+      try {
+        activityDao.setExpiration(new WorkspaceExpiration(wsId, activityTime + timeout));
+      } catch (ServerException e) {
+        LOG.error(e.getLocalizedMessage(), e);
+      }
     }
   }
 
+  @ScheduleDelay(
+    initialDelayParameterName = "che.workspace.activity_check_scheduler_delay_s",
+    delay = 10
+  )
   @ScheduleRate(periodParameterName = "che.workspace.activity_check_scheduler_period_s")
   private void invalidate() {
-    final long currentTime = System.currentTimeMillis();
-    for (Map.Entry<String, Long> workspaceExpireEntry : activeWorkspaces.entrySet()) {
-      if (workspaceExpireEntry.getValue() <= currentTime) {
+    List<WorkspaceExpiration> expiredList = new ArrayList<>();
+    try {
+      expiredList = activityDao.findExpired(System.currentTimeMillis());
+    } catch (ServerException e) {
+      LOG.error(e.getLocalizedMessage(), e);
+    }
+    for (WorkspaceExpiration expiration : expiredList) {
+      String workspaceId = expiration.getWorkspaceId();
+      try {
+        Workspace workspace = workspaceManager.getWorkspace(workspaceId);
+        workspace.getAttributes().put(WORKSPACE_STOPPED_BY, ACTIVITY_CHECKER);
+        workspaceManager.updateWorkspace(workspaceId, workspace);
+        workspaceManager.stopWorkspace(workspaceId, emptyMap());
+      } catch (NotFoundException ignored) {
+        // workspace no longer exists, no need to do anything
+      } catch (ConflictException e) {
+        LOG.warn(e.getLocalizedMessage());
+      } catch (Exception ex) {
+        LOG.error(ex.getLocalizedMessage());
+        LOG.debug(ex.getLocalizedMessage(), ex);
+      } finally {
         try {
-          String workspaceId = workspaceExpireEntry.getKey();
-          Workspace workspace = workspaceManager.getWorkspace(workspaceId);
-          workspace.getAttributes().put(WORKSPACE_STOPPED_BY, ACTIVITY_CHECKER);
-          workspaceManager.updateWorkspace(workspaceId, workspace);
-          workspaceManager.stopWorkspace(workspaceId, emptyMap());
-        } catch (NotFoundException ignored) {
-          // workspace no longer exists, no need to do anything
-        } catch (ConflictException e) {
-          LOG.warn(e.getLocalizedMessage());
-        } catch (Exception ex) {
-          LOG.error(ex.getLocalizedMessage());
-          LOG.debug(ex.getLocalizedMessage(), ex);
-        } finally {
-          activeWorkspaces.remove(workspaceExpireEntry.getKey());
+          activityDao.removeExpiration(workspaceId);
+        } catch (ServerException e) {
+          LOG.error(e.getLocalizedMessage(), e);
         }
       }
     }
