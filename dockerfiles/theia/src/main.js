@@ -14,7 +14,8 @@ const cp = require("child_process");
 const theiaRoot = '/home/theia';
 const theiaPath = theiaRoot + '/package.json';
 
-const defaultConfig = require('/home/default/theia/package.json');
+const defaultTheiaPath = `/home/default/theia`;
+const defaultConfig = require(`${defaultTheiaPath}/package.json`);
 
 process.chdir(theiaRoot);
 
@@ -46,8 +47,7 @@ else {
         fs.writeFileSync(theiaPath, JSON.stringify(theiaConfig));
         handlePromise(callYarn().then(callBuild).then(callRun));
     } else {
-        const defaultTheia = `/home/default/theia`;
-        cp.execSync(`cp -r ${defaultTheia}/\* ${theiaRoot}`);
+        cp.execSync(`rsync -rv ${defaultTheiaPath}/ ${theiaRoot} --exclude 'node_modules' --exclude 'yarn.lock'`);
         handlePromise(callRun());
     }
 
