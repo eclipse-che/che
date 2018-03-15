@@ -21,7 +21,7 @@ RUN yarn && \
     rm -rf * && \
     cd /home/default/theia && \
     yarn && \
-    yarn theia build && \
+    yarn theia build  && \
     ln -sf /home/default/theia/node_modules /home/theia/node_modules && \
     ln -sf /home/default/theia/yarn.lock /home/theia/yarn.lock
 EXPOSE 3000
