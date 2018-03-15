@@ -12,20 +12,16 @@ Go to [OAuth application page](https://github.com/settings/applications/new) and
 Substitute `CHE_OAUTH_GITHUB_CLIENTID` and `CHE_OAUTH_GITHUB_CLIENTSECRET` properties in `che.env` with `Client ID` and `Client Secret` taken from 
 newly created [OAuth application](https://github.com/settings/developers).
 
-#### 2. Add configuration file
-
-Set `CHE_LOCAL_CONF_DIR` environment variable and point to the folder where selenium tests configuration will be stored.
-Create file `selenium.properties` in that folder with the following content:
+#### 2. Configure selenium tests
+In case of running GitHub-related tests (which are run by default) you need to define GitHub test users credentials. Set `CHE_LOCAL_CONF_DIR` environment variable 
+and point to the folder where selenium tests configuration will be stored. Then create file with `.properties` extension in that folder 
+with the following content:
 ```
 # GitHub account credentials
 github.username=<MAIN_GITHUB_USERNAME>
 github.password=<MAIN_GITHUB_PASSWORD>
 github.auxiliary.username=<AUXILIARY_GITHUB_USERNAME>
 github.auxiliary.password=<AUXILIARY_GITHUB_PASSWORD>
-
-# Google account credentials (IMAP has to be enabled)
-google.user=<GOOGLE_USER>
-google.password=<GOOGLE_PASSWORD>
 ```
 
 In case of running of tests for Eclipse Che in Multi User mode you can set your own credentials of test user or admin instead of default ones
@@ -88,10 +84,12 @@ Modes (defines environment to run tests):
                                         Default value is in range [2,5] and depends on available RAM.
 
 Define tests scope:
-    --test=<TEST_CLASS>                 Single test to run
-    --suite=<SUITE>                     Test suite to run, found:
-                                            * CheSuite.xml
-
+    --test=<TEST_CLASS>                 Single test/package to run.
+                                        For example: '--test=DialogAboutTest', '--test=org.eclipse.che.selenium.git.**'. 
+    --suite=<SUITE>                     Test suite to run. Default suite is CheSuite.xml.
+    --exclude=<TEST_GROUPS_TO_EXCLUDE>  Comma-separated list of test groups to exclude from execution.
+                                        For example, use '--exclude=github' to exclude GitHub-related tests.
+                                        
 Handle failing tests:
     --failed-tests                      Rerun failed tests that left after the previous try
     --regression-tests                  Rerun regression tests that left after the previous try
@@ -132,5 +130,3 @@ HOW TO of usage:
     Analyse tests results:
         ./selenium-tests.sh --compare-with-ci [BUILD NUMBER]
 ```
-
-

@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextM
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -38,6 +39,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
+@Test(groups = TestGroup.GITHUB)
 public class KeepDirectoryGitImportTest {
   public static final String PROJECT_NAME = NameGenerator.generate("KeepDirectoryProject", 4);
   public static final String DIRECTORY_NAME_1 = "my-lib";
@@ -47,11 +49,11 @@ public class KeepDirectoryGitImportTest {
   @Inject private Ide ide;
   @Inject private TestUser productUser;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.password")
   private String gitHubPassword;
 

@@ -78,6 +78,8 @@ initVariables() {
     PRODUCT_HOST=$(detectDockerInterfaceIp)
     PRODUCT_PORT=8080
 
+    SUPPORTED_INFRASTRUCTURES=(docker openshift)
+
     unset DEBUG_OPTIONS
     unset MAVEN_OPTIONS
     unset TMP_SUITE_PATH
@@ -85,6 +87,7 @@ initVariables() {
     unset TMP_DIR
     unset NEW_DEFAULT_USER_ID
     unset NEW_SECOND_USER_ID
+    unset EXCLUDE_PARAM
 }
 
 cleanUpEnvironment() {
@@ -158,6 +161,8 @@ checkParameters() {
         elif [[ "$var" =~ ^-[[:alpha:]]$ ]]; then :
         elif [[ "$var" == --skip-sources-validation ]]; then :
         elif [[ "$var" == --multiuser ]]; then :
+        elif [[ "$var" =~ --exclude=.* ]]; then :
+
         else
             printHelp
             echo "[TEST] Unrecognized or misused parameter "${var}
@@ -213,6 +218,9 @@ applyCustomOptions() {
 
         elif [[ "$var" == --multiuser ]]; then
             CHE_MULTIUSER=true
+
+        elif [[ "$var" =~ --exclude=.* ]]; then
+            EXCLUDE_PARAM=$(echo "$var" | sed -e "s/--exclude=//g")
 
         fi
     done
@@ -404,9 +412,12 @@ Modes (defines environment to run tests):
                                         Default value is in range [2,5] and depends on available RAM.
 
 Define tests scope:
-    --test=<TEST_CLASS>                 Single test to run
+    --test=<TEST_CLASS>                 Single test/package to run.
+                                        For example: '--test=DialogAboutTest', '--test=org.eclipse.che.selenium.git.**'.
     --suite=<SUITE>                     Test suite to run, found:
 "$(for x in $(ls -1 src/test/resources/suites); do echo "                                            * "$x; done)"
+    --exclude=<TEST_GROUPS_TO_EXCLUDE>  Comma-separated list of test groups to exclude from execution.
+                                        For example, use '--exclude=github' to exclude GitHub-related tests.
 
 Handle failing tests:
     --failed-tests                      Rerun failed tests that left after the previous try
@@ -455,20 +466,21 @@ HOW TO of usage:
 printRunOptions() {
     echo "[TEST]"
     echo "[TEST] =========== RUN OPTIONS ==========================="
-    echo "[TEST] Mode                : "${MODE}
-    echo "[TEST] Rerun attempts      : "${RERUN_ATTEMPTS}
+    echo "[TEST] Mode                : ${MODE}"
+    echo "[TEST] Rerun attempts      : ${RERUN_ATTEMPTS}"
     echo "[TEST] ==================================================="
-    echo "[TEST] Product Protocol    : "${PRODUCT_PROTOCOL}
-    echo "[TEST] Product Host        : "${PRODUCT_HOST}
-    echo "[TEST] Product Port        : "${PRODUCT_PORT}
-    echo "[TEST] Product Config      : "$(getTestGroups)
-    echo "[TEST] Tests               : "${TESTS_SCOPE}
-    echo "[TEST] Threads             : "${THREADS}
-    echo "[TEST] Workspace pool size : "${WORKSPACE_POOL_SIZE}
-    echo "[TEST] Web browser         : "${BROWSER}
-    echo "[TEST] Web driver ver      : "${WEBDRIVER_VERSION}
-    echo "[TEST] Web driver port     : "${WEBDRIVER_PORT}
-    echo "[TEST] Additional opts     : "${GRID_OPTIONS}" "${DEBUG_OPTIONS}" "${MAVEN_OPTIONS}
+    echo "[TEST] Product Protocol    : ${PRODUCT_PROTOCOL}"
+    echo "[TEST] Product Host        : ${PRODUCT_HOST}"
+    echo "[TEST] Product Port        : ${PRODUCT_PORT}"
+    echo "[TEST] Product Config      : $(getProductConfig)"
+    echo "[TEST] Tests               : ${TESTS_SCOPE}"
+    echo "[TEST] Tests to exclude    : $(getExcludedGroups)"
+    echo "[TEST] Threads             : ${THREADS}"
+    echo "[TEST] Workspace pool size : ${WORKSPACE_POOL_SIZE}"
+    echo "[TEST] Web browser         : ${BROWSER}"
+    echo "[TEST] Web driver ver      : ${WEBDRIVER_VERSION}"
+    echo "[TEST] Web driver port     : ${WEBDRIVER_PORT}"
+    echo "[TEST] Additional opts     : ${GRID_OPTIONS} ${DEBUG_OPTIONS} ${MAVEN_OPTIONS}"
     echo "[TEST] ==================================================="
 }
 
@@ -705,14 +717,14 @@ runTests() {
                 -Dbrowser=${BROWSER} \
                 -Dche.threads=${THREADS} \
                 -Dche.workspace_pool_size=${WORKSPACE_POOL_SIZE} \
-                -DtestGroups="$(getTestGroups)" \
+                -DexcludedGroups="$(getExcludedGroups)" \
                 ${DEBUG_OPTIONS} \
                 ${GRID_OPTIONS} \
                 ${MAVEN_OPTIONS}
 }
 
-# Return list of test groups in comma-separated view
-getTestGroups() {
+# Return list of product features
+getProductConfig() {
   local testGroups=${CHE_INFRASTRUCTURE}
 
   if [[ ${CHE_MULTIUSER} == true ]]; then
@@ -722,6 +734,28 @@ getTestGroups() {
   fi
 
   echo ${testGroups}
+}
+
+# Prepare list of test groups to exclude.
+# It consists of "--exclude" parameter value + list of groups which don't comply with product config
+getExcludedGroups() {
+    local excludeParamArray=(${EXCLUDE_PARAM//,/ })
+
+    local productConfig=$(getProductConfig)
+    local productConfigArray=(${productConfig//,/ })
+
+    local uncomplyingGroups=(${SUPPORTED_INFRASTRUCTURES[@]} singleuser multiuser)
+
+    for productConfigGroup in ${productConfigArray[*]}; do
+        for i in ${!uncomplyingGroups[@]}; do
+            if [[ "${productConfigGroup}" == "${uncomplyingGroups[i]}" ]]; then
+                unset uncomplyingGroups[i]
+            fi
+        done
+    done
+
+    local excludedGroups=("${uncomplyingGroups[@]}" "${excludeParamArray[@]}")
+    echo $(IFS=$','; echo "${excludedGroups[*]}")
 }
 
 # Reruns failed tests

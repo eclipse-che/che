@@ -44,6 +44,7 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.constant.TestBrowser;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
@@ -121,13 +122,17 @@ public abstract class SeleniumTestHandler
   @Named("sys.driver.version")
   private String webDriverVersion;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.password")
   private String gitHubPassword;
+
+  @Inject(optional = true)
+  @Named("sys.excludedGroups")
+  private String excludedGroups;
 
   @Inject private TestUser defaultTestUser;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
@@ -150,6 +155,11 @@ public abstract class SeleniumTestHandler
   }
 
   private void revokeGithubOauthToken() {
+    // do not revoke if github tests are not being executed
+    if (excludedGroups == null || excludedGroups.contains(TestGroup.GITHUB)) {
+      return;
+    }
+
     try {
       gitHubClientService.deleteAllGrants(gitHubUsername, gitHubPassword);
     } catch (Exception e) {

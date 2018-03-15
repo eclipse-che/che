@@ -250,7 +250,7 @@
                                 </property>
                             </systemProperties>
                             <systemPropertyVariables>
-                                <testGroups>${testGroups}</testGroups>
+                                <excludedGroups>${excludedGroups}</excludedGroups>
                             </systemPropertyVariables>
                         </configuration>
                     </execution>

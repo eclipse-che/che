@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
@@ -27,6 +28,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Mihail Kuznyetsov */
+@Test(groups = TestGroup.GITHUB)
 public class CheckFactoryWithSparseCheckoutTest {
   private static final String PROJECT_NAME = "java-multimodule2";
 
@@ -36,7 +38,7 @@ public class CheckFactoryWithSparseCheckoutTest {
   @Inject private Dashboard dashboard;
   @Inject private PullRequestPanel pullRequestPanel;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
 

@@ -22,6 +22,7 @@ import com.google.inject.name.Named;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
@@ -43,6 +44,7 @@ import org.testng.annotations.Test;
  * @author Anatolii Bazko
  * @author Aleksandr Shmaraiev
  */
+@Test(groups = TestGroup.GITHUB)
 public class RevertCommitTest {
   private static final String PROJECT_NAME = NameGenerator.generate("GitRevertProject-", 4);
 
@@ -50,9 +52,13 @@ public class RevertCommitTest {
   @Inject private Ide ide;
   @Inject private TestUser productUser;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
+
+  @Inject(optional = true)
+  @Named("github.password")
+  private String gitHubPassword;
 
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private ProjectExplorer projectExplorer;

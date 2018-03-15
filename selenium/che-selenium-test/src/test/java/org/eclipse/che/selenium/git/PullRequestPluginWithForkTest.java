@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -39,6 +40,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
+@Test(groups = TestGroup.GITHUB)
 public class PullRequestPluginWithForkTest {
   private static final Logger LOG = getLogger(PullRequestPluginWithForkTest.class);
 
@@ -58,19 +60,19 @@ public class PullRequestPluginWithForkTest {
   @Inject private Ide ide;
   @Inject private TestUser productUser;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.password")
   private String gitHubPassword;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.auxiliary.username")
   private String githubUserCloneName;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.auxiliary.password")
   private String githubUserClonePassword;
 

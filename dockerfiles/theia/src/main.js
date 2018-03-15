@@ -14,7 +14,8 @@ const cp = require("child_process");
 const theiaRoot = '/home/theia';
 const theiaPath = theiaRoot + '/package.json';
 
-const defaultConfig = require('/home/default/theia/package.json');
+const defaultTheiaPath = `/home/default/theia`;
+const defaultConfig = require(`${defaultTheiaPath}/package.json`);
 
 process.chdir(theiaRoot);
 
@@ -31,6 +32,14 @@ else {
         theiaConfig = defaultConfig;
         let dep = theiaConfig.dependencies;
         for (let d of pluginList) {
+            // check if plugin has a version using format pluginName:versionNumber
+            if (d.indexOf(":") > -1) {
+                let newDep = d.split(":");
+                let depName = newDep[0].trim();
+                let depVersion = newDep[1].trim();
+                dep[depName] = depVersion;
+                continue;
+            }
             if (!dep.hasOwnProperty(d)) {
                 dep[d] = "latest";
             }
@@ -38,8 +47,7 @@ else {
         fs.writeFileSync(theiaPath, JSON.stringify(theiaConfig));
         handlePromise(callYarn().then(callBuild).then(callRun));
     } else {
-        const defaultTheia = `/home/default/theia`;
-        cp.execSync(`cp -r ${defaultTheia}/* ${theiaRoot}`);
+        cp.execSync(`rsync -rv ${defaultTheiaPath}/ ${theiaRoot} --exclude 'node_modules' --exclude 'yarn.lock'`);
         handlePromise(callRun());
     }
 
