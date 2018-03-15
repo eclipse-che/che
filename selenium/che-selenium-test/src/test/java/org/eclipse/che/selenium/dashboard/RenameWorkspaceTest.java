@@ -94,7 +94,7 @@ public class RenameWorkspaceTest {
 
   private void renameWorkspace(String name) {
     workspaceOverview.enterNameWorkspace(name);
-    workspaceOverview.waitWorkspaceNameIsValid();
+    workspaceOverview.checkOnWorkspaceNameErrorAbsence();
     assertFalse(workspaceOverview.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_SHORT));
     assertFalse(workspaceOverview.isWorkspaceNameErrorMessageEquals(WS_NAME_TOO_LONG));
     saveAndWaitWorkspaceRestarted();
