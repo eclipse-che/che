@@ -40,6 +40,7 @@ public class CreateWorkspaceOnDashboardTest {
 
   private static final String WS_NAME = generate("workspace", 4);
   private static final String PROJECT_NAME = "web-java-spring";
+  private static final String PATH_TO_EXPAND = "/src/main/java/org.eclipse.che.examples";
   private static final String PATH_JAVA_FILE =
       PROJECT_NAME + "/src/main/java/org/eclipse/che/examples/GreetingController.java";
 
@@ -93,8 +94,7 @@ public class CreateWorkspaceOnDashboardTest {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
     // open a file in the Editor
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.waitItem(PATH_JAVA_FILE);
+    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + PATH_TO_EXPAND);
     projectExplorer.openItemByPath(PATH_JAVA_FILE);
     editor.waitActive();
     editor.waitTabIsPresent("GreetingController");
