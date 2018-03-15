@@ -31,6 +31,7 @@ else {
         theiaConfig = defaultConfig;
         let dep = theiaConfig.dependencies;
         for (let d of pluginList) {
+            // check if plugin has a version using format pluginName:versionNumber
             if (d.indexOf(":") > -1) {
                 let newDep = d.split(":");
                 let depName = newDep[0].trim();
