@@ -10,7 +10,9 @@
  */
 package org.eclipse.che.selenium.git;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.COMMIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.REVERT_COMMIT;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -23,7 +25,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -40,7 +41,7 @@ import org.testng.annotations.Test;
 
 /**
  * @author Anatolii Bazko
- * @author aleksandr shmaraev
+ * @author Aleksandr Shmaraiev
  */
 public class RevertCommitTest {
   private static final String PROJECT_NAME = NameGenerator.generate("GitRevertProject-", 4);
@@ -78,9 +79,9 @@ public class RevertCommitTest {
     String newFile = "newFile.xml";
     String htmlFile = "file.html";
     String changeContent = "<! change content>";
-    String messInitRepo = "init";
-    String messCreateFile = "create newFile.xml";
-    String messUpdateFile = "update file.html";
+    String initRepoMessage = "init";
+    String createFileMessage = "create newFile.xml";
+    String updateFileMessage = "update file.html";
     String pathToNewFile = String.format("%s/%s", PROJECT_NAME, newFile);
     String pathToHtmlFile = String.format("%s/%s", PROJECT_NAME, htmlFile);
 
@@ -88,14 +89,14 @@ public class RevertCommitTest {
     projectExplorer.waitProjectExplorer();
 
     gitInitRepo();
-    commitFiles(messInitRepo);
+    commitFiles(initRepoMessage);
 
     // create new file and perform commit
     testProjectServiceClient.createFileInProject(ws.getId(), PROJECT_NAME, newFile, changeContent);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.waitItem(pathToNewFile);
 
-    commitFiles(messCreateFile);
+    commitFiles(createFileMessage);
 
     // perform git revert and check author and comment
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
@@ -109,7 +110,7 @@ public class RevertCommitTest {
     testProjectServiceClient.updateFile(ws.getId(), pathToHtmlFile, changeContent);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
-    commitFiles(messUpdateFile);
+    commitFiles(updateFileMessage);
 
     // perform revert and check that 'change content' is not present in the editor
     performGitRevert();
@@ -120,8 +121,7 @@ public class RevertCommitTest {
   }
 
   private void gitInitRepo() {
-    menu.runCommand(
-        TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
+    menu.runCommand(GIT, INITIALIZE_REPOSITORY);
     askDialog.waitFormToOpen();
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
@@ -148,6 +148,7 @@ public class RevertCommitTest {
         gitRevertCommit.getTopCommitAuthor(),
         gitHubUsername,
         "Known issue https://github.com/eclipse/che/issues/9066");
+
     assertTrue(gitRevertCommit.getTopCommitComment().contains("Revert \"" + comment + "\""));
 
     gitRevertCommit.clickCancelButton();
@@ -155,7 +156,7 @@ public class RevertCommitTest {
 
   private void commitFiles(String commiitMess) {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
+    menu.runCommand(GIT, COMMIT);
 
     git.waitAndRunCommit(commiitMess);
     git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
