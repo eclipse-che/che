@@ -11,14 +11,12 @@
 package org.eclipse.che.plugin.activity;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertEquals;
 
-import java.lang.reflect.Field;
-import java.util.Map;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -49,7 +47,7 @@ public class WorkspaceActivityManagerTest {
 
   @Mock private Account account;
   @Mock private WorkspaceImpl workspace;
-  @Mock private JpaWorkspaceActivityDao jpaWorkspaceActivityDao;
+  @Mock private WorkspaceActivityDao workspaceActivityDao;
 
   @Mock private EventService eventService;
 
@@ -59,7 +57,7 @@ public class WorkspaceActivityManagerTest {
   private void setUp() throws Exception {
     activityManager =
         new WorkspaceActivityManager(
-            workspaceManager, jpaWorkspaceActivityDao, eventService, EXPIRE_PERIOD_MS);
+            workspaceManager, workspaceActivityDao, eventService, EXPIRE_PERIOD_MS);
 
     when(account.getName()).thenReturn("accountName");
     when(account.getId()).thenReturn("account123");
@@ -73,31 +71,11 @@ public class WorkspaceActivityManagerTest {
   public void shouldAddNewActiveWorkspace() throws Exception {
     final String wsId = "testWsId";
     final long activityTime = 1000L;
-    final Map<String, Long> activeWorkspaces = getActiveWorkspaces(activityManager);
-    boolean wsAlreadyAdded = activeWorkspaces.containsKey(wsId);
 
     activityManager.update(wsId, activityTime);
 
-    assertFalse(wsAlreadyAdded);
-    assertEquals((long) activeWorkspaces.get(wsId), activityTime + EXPIRE_PERIOD_MS);
-    assertFalse(activeWorkspaces.isEmpty());
-  }
-
-  @Test
-  public void shouldUpdateTheWorkspaceExpirationIfItWasPreviouslyActive() throws Exception {
-    final String wsId = "testWsId";
-    final long activityTime = 1000L;
-    final long newActivityTime = 2000L;
-    final Map<String, Long> activeWorkspaces = getActiveWorkspaces(activityManager);
-    boolean wsAlreadyAdded = activeWorkspaces.containsKey(wsId);
-    activityManager.update(wsId, activityTime);
-
-    activityManager.update(wsId, newActivityTime);
-    final long workspaceStopTime = activeWorkspaces.get(wsId);
-
-    assertFalse(wsAlreadyAdded);
-    assertFalse(activeWorkspaces.isEmpty());
-    assertEquals(newActivityTime + EXPIRE_PERIOD_MS, workspaceStopTime);
+    WorkspaceExpiration expected = new WorkspaceExpiration(wsId, activityTime + EXPIRE_PERIOD_MS);
+    verify(workspaceActivityDao, times(1)).setExpiration(eq(expected));
   }
 
   @Test
@@ -106,14 +84,13 @@ public class WorkspaceActivityManagerTest {
     activityManager.subscribe();
     verify(eventService).subscribe(captor.capture());
     final EventSubscriber<WorkspaceStatusEvent> subscriber = captor.getValue();
-
     subscriber.onEvent(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
             .withStatus(WorkspaceStatus.RUNNING)
             .withWorkspaceId(wsId));
-    final Map<String, Long> activeWorkspaces = getActiveWorkspaces(activityManager);
-
-    assertTrue(activeWorkspaces.containsKey(wsId));
+    ArgumentCaptor<WorkspaceExpiration> captor = ArgumentCaptor.forClass(WorkspaceExpiration.class);
+    verify(workspaceActivityDao, times(1)).setExpiration(captor.capture());
+    assertEquals(captor.getValue().getWorkspaceId(), wsId);
   }
 
   @Test
@@ -125,26 +102,11 @@ public class WorkspaceActivityManagerTest {
     verify(eventService).subscribe(captor.capture());
     final EventSubscriber<WorkspaceStatusEvent> subscriber = captor.getValue();
 
-    final Map<String, Long> activeWorkspaces = getActiveWorkspaces(activityManager);
-    final boolean contains = activeWorkspaces.containsKey(wsId);
     subscriber.onEvent(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
             .withStatus(WorkspaceStatus.STOPPED)
             .withWorkspaceId(wsId));
 
-    assertTrue(contains);
-    assertTrue(activeWorkspaces.isEmpty());
-  }
-
-  @SuppressWarnings("unchecked")
-  private Map<String, Long> getActiveWorkspaces(WorkspaceActivityManager workspaceActivityManager)
-      throws Exception {
-    for (Field field : workspaceActivityManager.getClass().getDeclaredFields()) {
-      field.setAccessible(true);
-      if (field.getName().equals("activeWorkspaces")) {
-        return (Map<String, Long>) field.get(workspaceActivityManager);
-      }
-    }
-    throw new IllegalAccessException();
+    verify(workspaceActivityDao, times(1)).removeExpiration(eq(wsId));
   }
 }

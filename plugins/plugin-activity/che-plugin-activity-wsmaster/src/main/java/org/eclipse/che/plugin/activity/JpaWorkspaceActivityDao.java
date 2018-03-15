@@ -27,6 +27,7 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
 
   @Inject private Provider<EntityManager> managerProvider;
 
+  @Override
   public void setExpiration(WorkspaceExpiration expiration) throws ServerException {
     requireNonNull(expiration, "Required non-null expiration object");
     try {
@@ -36,6 +37,7 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
     }
   }
 
+  @Override
   public void removeExpiration(String workspaceId) throws ServerException {
     requireNonNull(workspaceId, "Required non-null id");
     try {
@@ -45,7 +47,7 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
     }
   }
 
-
+  @Override
   public List<WorkspaceExpiration> findExpired(long timestamp) throws ServerException {
     requireNonNull(timestamp, "Required non-null timestamp");
     try {

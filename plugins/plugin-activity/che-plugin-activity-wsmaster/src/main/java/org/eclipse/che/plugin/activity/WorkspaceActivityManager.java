@@ -51,7 +51,7 @@ public class WorkspaceActivityManager {
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceActivityManager.class);
 
   private final long timeout;
-  private final JpaWorkspaceActivityDao activityDao;
+  private final WorkspaceActivityDao activityDao;
   private final EventService eventService;
   private final EventSubscriber<?> workspaceEventsSubscriber;
 
@@ -60,7 +60,7 @@ public class WorkspaceActivityManager {
   @Inject
   public WorkspaceActivityManager(
       WorkspaceManager workspaceManager,
-      JpaWorkspaceActivityDao activityDao,
+      WorkspaceActivityDao activityDao,
       EventService eventService,
       @Named("che.workspace.agent.dev.inactive_stop_timeout_ms") long timeout) {
     this.timeout = timeout > 0 ? timeout : -1;
