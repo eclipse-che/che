@@ -31,6 +31,14 @@ else {
         theiaConfig = defaultConfig;
         let dep = theiaConfig.dependencies;
         for (let d of pluginList) {
+            // check if plugin has a version using format pluginName:versionNumber
+            if (d.indexOf(":") > -1) {
+                let newDep = d.split(":");
+                let depName = newDep[0].trim();
+                let depVersion = newDep[1].trim();
+                dep[depName] = depVersion;
+                continue;
+            }
             if (!dep.hasOwnProperty(d)) {
                 dep[d] = "latest";
             }
@@ -39,7 +47,7 @@ else {
         handlePromise(callYarn().then(callBuild).then(callRun));
     } else {
         const defaultTheia = `/home/default/theia`;
-        cp.execSync(`cp -r ${defaultTheia}/* ${theiaRoot}`);
+        cp.execSync(`cp -r ${defaultTheia}/\* ${theiaRoot}`);
         handlePromise(callRun());
     }
 
