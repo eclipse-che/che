@@ -40,7 +40,7 @@ cli_init() {
       che_cli_env_arr_index=$[$che_cli_env_arr_index+1]
   done
 
-    if is_initialized; then
+  if is_initialized; then
     CHE_HOST_LOCAL=$(get_value_of_var_from_env_file ${CHE_PRODUCT_NAME}_HOST)
     CHE_HOST_ENV=$(get_value_of_var_from_env ${CHE_PRODUCT_NAME}_HOST)
     if [[ "${CHE_HOST_ENV}" != "" ]] && 

@@ -136,15 +136,8 @@
         <!--
         <Valve className="org.apache.catalina.authenticator.SingleSignOn" />
         -->
-        <!--<Valve className="org.apache.catalina.valves.RemoteIpValve" 
-          protocolHeader="X-Forwarded-Proto" 
-          internalProxies="\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"
-        />-->
-	<Valve className="org.apache.catalina.valves.RemoteIpValve"
-           remoteIpHeader="x-forwarded-for"
-           remoteIpProxiesHeader="x-forwarded-by"
-           protocolHeader="x-forwarded-proto"
-    	/>
+        <Valve className="org.apache.catalina.valves.RemoteIpValve" protocolHeader="X-Forwarded-Proto"
+            internalProxies="\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"/>
 
         <Valve className="ch.qos.logback.access.tomcat.LogbackValve" quiet="true" />
 

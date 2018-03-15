@@ -205,14 +205,6 @@ public class ServersMapper {
       }
     }
 
-    //    if ("https".equals(this.cheHostProtocol)) {
-    //    	if ("http".equals(protocol)) {
-    //        	protocol = "https";
-    //        } else if ("ws".equals(protocol)) {
-    //        	protocol = "wss";
-    //        }
-    //    }
-
     // null -> "", "path" -> "/path"
     if (path == null) {
       path = "";
