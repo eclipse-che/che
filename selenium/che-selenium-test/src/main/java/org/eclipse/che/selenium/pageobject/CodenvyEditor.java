@@ -1440,10 +1440,10 @@ public class CodenvyEditor {
   }
 
   /**
-   * check text after go to link in javadoc at popup
+   * Checks text after clicking on link in javadoc's popup
    *
-   * @param text
-   * @param textLink text of link
+   * @param text text which should be present in the page which opened after clicking on the link
+   * @param textLink visible link's text
    */
   public void checkTextAfterGoToLinkInJavaDocPopUp(String text, String textLink) {
     seleniumWebDriverHelper.waitAndSwitchToFrame(By.xpath(JAVA_DOC_POPUP));
@@ -1463,7 +1463,7 @@ public class CodenvyEditor {
     seleniumWebDriver.switchTo().parentFrame();
   }
 
-  /** open JavaDoc popup */
+  /** Opens javadoc's popup */
   public void openJavaDocPopUp() {
     loader.waitOnClosed();
     actionsFactory
@@ -1475,11 +1475,11 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait the text in active line of current tab
+   * Waits until {@code expectedText} is present in the current active line of the current tab.
    *
-   * @param text is the text of elements active line
+   * @param expectedText text which should be present in the checking line
    */
-  public void waitTextElementsActiveLine(final String text) {
+  public void waitTextElementsActiveLine(final String expectedText) {
     waitActive();
 
     webDriverWaitFactory
@@ -1489,10 +1489,14 @@ public class CodenvyEditor {
                 driver ->
                     seleniumWebDriverHelper
                         .waitVisibilityAndGetText(By.xpath(ACTIVE_LINES_XPATH))
-                        .contains(text));
+                        .contains(expectedText));
   }
 
-  /** get positions of the current line and char */
+  /**
+   * Gets current cursor position, it means line's number and char's number.
+   *
+   * @return cursor position which defined in line's number and char's number.
+   */
   public Pair<Integer, Integer> getCurrentCursorPositionsFromVisible() {
     waitActive();
     WebElement currentActiveElement =
@@ -1501,11 +1505,11 @@ public class CodenvyEditor {
   }
 
   /**
-   * Check that editor active and focused on first step. After that get cursor position. Note! For
-   * correct work a editor must be active.
+   * Waits active and focused editor's tab and gets cursor position.
    *
-   * @return char and line position from current visible, active and focused editor (usual uses with
-   *     split editor)
+   * <p>Note! For correct work, the editor's tab which should be checked, should be active.
+   *
+   * @return cursor position which defined in line's number and char's number.
    */
   public Pair<Integer, Integer> getCursorPositionsFromActive() {
     String xpathToCurrentActiveCursorPosition =
@@ -1516,10 +1520,11 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait specified values for Line and Char cursor positions in the Codenvy editor
+   * Waits until cursor is placed in the position which specified {@code linePosition} and {@code
+   * charPosition}.
    *
-   * @param linePosition expected line position
-   * @param charPosition expected char position
+   * @param linePosition line's number in which cursor should be placed
+   * @param charPosition char's position in which cursor should be placed
    */
   public void waitCursorPosition(final int linePosition, final int charPosition) {
     webDriverWaitFactory
@@ -1540,38 +1545,38 @@ public class CodenvyEditor {
     return new Pair<Integer, Integer>(currentCursorPositions[0], currentCursorPositions[1]);
   }
 
-  /** get number of current active line */
+  /** Gets number of the current line in which cursor is placed */
   public int getPositionVisible() {
     waitActive();
     return getCurrentCursorPositionsFromVisible().first;
   }
 
   /**
-   * check that active line has expected number
+   * Checks that active line has specified {@code lineNumber}.
    *
-   * @param expectedLine expected number of active line
+   * @param lineNumber line's number which should be active
    */
-  public void expectedNumberOfActiveLine(final int expectedLine) {
+  public void expectedNumberOfActiveLine(final int lineNumber) {
     waitActive();
     webDriverWaitFactory
         .get()
-        .until((ExpectedCondition<Boolean>) driver -> expectedLine == getPositionVisible());
+        .until((ExpectedCondition<Boolean>) driver -> lineNumber == getPositionVisible());
   }
 
   /**
-   * get Char value for cursor from the codenvy - editor
+   * Gets number of the char's position on which cursor is placed.
    *
-   * @return char value
+   * @return number of the char's position on which cursor is placed
    */
   public int getPositionOfChar() {
     return getCurrentCursorPositionsFromVisible().second;
   }
 
   /**
-   * wait specified values for Line and Char cursor positions in the Codenvy editor
+   * Waits until cursor is placed in specified {@code linePosition} and {@code charPosition}.
    *
-   * @param linePosition expected line position
-   * @param charPosition expected char position
+   * @param linePosition line's number in which cursor is expected
+   * @param charPosition char's number in which cursor is expected
    */
   public void waitSpecifiedValueForLineAndChar(final int linePosition, final int charPosition) {
     webDriverWaitFactory
@@ -1584,15 +1589,15 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait specified values for Line and Char cursor positions in the Codenvy editor
+   * Waits until cursor is placed in specified {@code lineAndChar} position.
    *
-   * @param lineAndChar expected line and char position. For example: 1:25
+   * @param lineAndChar expected line and char position in format "1:25"
    */
   public void waitSpecifiedValueForLineAndChar(String lineAndChar) {
     seleniumWebDriverHelper.waitVisibility(By.xpath(format(POSITION_CURSOR_NUMBER, lineAndChar)));
   }
 
-  /** launch refactor for local variables by keyboard */
+  /** Launches refactor for local variables by keyboard */
   public void launchLocalRefactor() {
     loader.waitOnClosed();
     actionsFactory
@@ -1606,8 +1611,8 @@ public class CodenvyEditor {
   }
 
   /**
-   * the first invocation of launchLocalRefactor() runs local refactoring, the second invocation
-   * opens "Refactor" form
+   * The first invocation of launchLocalRefactor() runs local refactoring, the second invocation
+   * opens "Refactor" form.
    */
   public void launchRefactorForm() {
     launchLocalRefactor();
@@ -1615,9 +1620,9 @@ public class CodenvyEditor {
   }
 
   /**
-   * click on the selected element in the editor
+   * Clicks on the selected element in the editor.
    *
-   * @param nameElement name of element
+   * @param nameElement visible name of the element
    */
   public void clickOnSelectedElementInEditor(String nameElement) {
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(SELECTED_ITEM_IN_EDITOR, nameElement)));
@@ -1626,7 +1631,7 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait the 'Implementation(s)' form is open
+   * Waits until the 'Implementation(s)' form is open.
    *
    * @param fileName is name of the selected file
    */
@@ -1634,12 +1639,12 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.waitVisibility(By.xpath(format(IMPLEMENTATION_CONTAINER, fileName)));
   }
 
-  /** wait the 'Implementation(s)' form is closed */
+  /** Waits until the 'Implementation(s)' form is closed */
   public void waitImplementationFormIsClosed(String fileName) {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(format(IMPLEMENTATION_CONTAINER, fileName)));
   }
 
-  /** launch the 'Implementation(s)' form by keyboard */
+  /** Launches the 'Implementation(s)' form by keyboard */
   public void launchImplementationFormByKeyboard() {
     loader.waitOnClosed();
     actionsFactory
@@ -1652,67 +1657,67 @@ public class CodenvyEditor {
         .perform();
   }
 
-  /** close the forms in the editor by 'Escape' */
+  /** Performs "Escape" button pushing. Mainly, may be used for closing forms in the editor. */
   public void cancelFormInEditorByEscape() {
     typeTextIntoEditor(ESCAPE.toString());
   }
 
   /**
-   * wait expected text in the 'Implementation' form
+   * Waits until {@code expectedText} text is present in the 'Implementation' form.
    *
-   * @param expText expected value
+   * @param expectedText text which should be present in the form
    */
-  public void waitTextInImplementationForm(String expText) {
+  public void waitTextInImplementationForm(String expectedText) {
     webDriverWaitFactory
         .get()
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> getTextFromImplementationForm().contains(expText));
+                driver -> getTextFromImplementationForm().contains(expectedText));
   }
 
-  /** get text from 'Implementation(s)' form */
+  /** Gets visible text from the 'Implementation(s)' form */
   public String getTextFromImplementationForm() {
     return seleniumWebDriverHelper.waitVisibility(implementationContent).getText();
   }
 
   /**
-   * perform 'double click on the item in the 'Implementation' form
+   * Performs double click on the specified {@code itemName} in the 'Implementation' form.
    *
-   * @param fileName is name of item
+   * @param itemName visible name of the element which should be clicked
    */
-  public void chooseImplementationByDoubleClick(String fileName) {
+  public void chooseImplementationByDoubleClick(String itemName) {
     seleniumWebDriverHelper.moveCursorToAndDoubleClick(
-        By.xpath(format(IMPLEMENTATIONS_ITEM, fileName)));
+        By.xpath(format(IMPLEMENTATIONS_ITEM, itemName)));
   }
 
   /**
-   * select defined implementation in the 'Implementation' form
+   * Selects defined {@code itemName} in the 'Implementation' form
    *
-   * @param fileName is name of item
+   * @param itemName visible name of the element which should be clicked
    */
-  public void selectImplementationByClick(String fileName) {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(format(IMPLEMENTATIONS_ITEM, fileName)));
+  public void selectImplementationByClick(String itemName) {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(format(IMPLEMENTATIONS_ITEM, itemName)));
   }
 
   /**
-   * check what text line is present once
+   * Checks that specified {@code text} is present only once.
    *
-   * @param line text line
-   * @return true if text line present once or false in other cases
+   * @param text text which should be checked
+   * @return true - if text is present only once, false - if not
    */
-  public boolean checkWhatTextLinePresentOnce(String line) {
+  public boolean checkWhatTextLinePresentOnce(String text) {
     String visibleTextFromEditor = getVisibleTextFromEditor();
-    int index = visibleTextFromEditor.indexOf(line);
+    int index = visibleTextFromEditor.indexOf(text);
     if (index > 0) {
       return !visibleTextFromEditor
           .substring(index + 1, visibleTextFromEditor.length())
-          .contains(line);
+          .contains(text);
     }
     return false;
   }
 
   /**
-   * click on web element by Xpath
+   * Clicks on web element by Xpath
    *
    * @param xPath is Xpath of web element
    */
@@ -1744,9 +1749,9 @@ public class CodenvyEditor {
   }
 
   /**
-   * remove line and everything after it
+   * Removes all file's content since specified {@code numberOfLine} to the end of file.
    *
-   * @param numberOfLine number of line
+   * @param numberOfLine number of line since which the file's content should be removed
    */
   public void removeLineAndAllAfterIt(int numberOfLine) {
     setCursorToLine(numberOfLine);
@@ -1761,73 +1766,73 @@ public class CodenvyEditor {
         .perform();
   }
 
-  /** wait the ruler overview is present */
+  /** Waits until the ruler overview is present. */
   public void waitRulerOverviewIsPresent() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(RULER_OVERVIEW));
   }
 
-  /** wait the ruler overview is not present */
+  /** Waits until the ruler overview is not present. */
   public void waitRulerOverviewIsNotPresent() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(RULER_OVERVIEW));
   }
 
-  /** wait the ruler annotation is present */
+  /** Waits until the ruler annotation is present. */
   public void waitRulerAnnotationsIsPresent() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(RULER_ANNOTATIONS));
   }
 
-  /** wait the ruler annotation is not present */
+  /** Waits until the ruler annotation is not present. */
   public void waitRulerAnnotationsIsNotPresent() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(RULER_ANNOTATIONS));
   }
 
-  /** wait the ruler line is present */
+  /** Waits until the ruler line is present. */
   public void waitRulerLineIsPresent() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(RULER_LINES));
   }
 
-  /** wait the ruler line is not present */
+  /** Waits until the ruler line is not present. */
   public void waitRulerLineIsNotPresent() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(RULER_LINES));
   }
 
-  /** wait the ruler folding is present */
+  /** Waits until the ruler folding is present. */
   public void waitRulerFoldingIsPresent() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(RULER_FOLDING));
   }
 
-  /** wait the ruler folding is not present */
+  /** Waits until the ruler folding is not present. */
   public void waitRulerFoldingIsNotPresent() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(RULER_FOLDING));
   }
 
-  /** wait the all punctuation separators are present */
+  /** Waits until the all punctuation separators are present. */
   public void waitAllPunctuationSeparatorsArePresent() {
     seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(PUNCTUATION_SEPARATOR));
   }
 
-  /** wait the all punctuation separators are not present */
+  /** Waits until the all punctuation separators are not present. */
   public void waitAllPunctuationSeparatorsAreNotPresent() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(PUNCTUATION_SEPARATOR));
   }
 
-  /** wait the text view ruler is present */
+  /** Waits until the text view ruler is present. */
   public void waitTextViewRulerIsPresent() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(TEXT_VIEW_RULER));
   }
 
-  /** wait the text view ruler is not present */
+  /** Waits until the text view ruler is not present. */
   public void waitTextViewRulerIsNotPresent() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(TEXT_VIEW_RULER));
   }
 
-  /** click on 'Download sources' link in the editor */
+  /** Clicks on 'Download sources' link in the editor. */
   public void clickOnDownloadSourcesLink() {
     seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.DOWNLOAD_SOURCES_LINK));
   }
 
   /**
-   * Change width of window for the Editor.
+   * Changes width of the editor's window.
    *
    * @param xOffset horizontal move offset.
    */
@@ -1839,24 +1844,28 @@ public class CodenvyEditor {
     actionsFactory.createAction(seleniumWebDriver).dragAndDropBy(moveElement, xOffset, 0).perform();
   }
 
-  /** Open list of the tabs Note: This possible if opened tabs don't fit in the tab bar. */
+  /**
+   * Opens list of the tabs.
+   *
+   * <p>Note! This is possible if opened tabs don't fit in the tab bar.
+   */
   public void openTabList() {
     seleniumWebDriverHelper.waitAndClick(By.id(TAB_LIST_BUTTON));
   }
 
   /**
-   * Wait the tab is present in the tab list
+   * Waits until the editor's tab with specified {@code tabName} is present in the tab list.
    *
-   * @param tabName name of tab
+   * @param tabName visible name of the editor's tab which should be checked
    */
   public void waitTabIsPresentInTabList(String tabName) {
     seleniumWebDriverHelper.waitVisibility(By.xpath(format(ITEM_TAB_LIST, tabName)));
   }
 
   /**
-   * Wait the tab is not present in the tab list
+   * Waits until the tab with specified {@code tabName} is not present in the tab list.
    *
-   * @param tabName name of tab
+   * @param tabName visible name of the editor's tab which should be checked
    */
   public void waitTabIsNotPresentInTabList(String tabName) {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(format(ITEM_TAB_LIST, tabName)));
@@ -1871,19 +1880,21 @@ public class CodenvyEditor {
   }
 
   /**
-   * Click on tab in the tab list
+   * Clicks on the tab with specified {@code tabName} in the tab list.
    *
-   * @param tabName name of tab
+   * @param tabName visible name of the editor's tab which should be checked
    */
   public void clickOnTabInTabList(String tabName) {
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(ITEM_TAB_LIST, tabName)));
   }
 
   /**
-   * Select tab by index of editor window after split
+   * Selects editor's tab by specified {@code index} and {@code tabName}.
    *
-   * @param index index of editor window
-   * @param tabName name of tab
+   * <p>Note! Is used for split editor.
+   *
+   * @param index index of the window which should be selected, numeration starts since "0"
+   * @param tabName visible name of the editor's tab which should be selected
    */
   public void selectTabByIndexEditorWindow(int index, String tabName) {
     seleniumWebDriverHelper
@@ -1893,10 +1904,13 @@ public class CodenvyEditor {
   }
 
   /**
-   * Select tab by index of editor window after split and open context menu
+   * Selects editor's tab by specified {@code index} and {@code tabName} and opens context menu for
+   * this tab.
    *
-   * @param index index of editor window
-   * @param tabName name of tab
+   * <p>Note! Is used for split editor.
+   *
+   * @param index index of the window which should be selected, numeration starts since "0"
+   * @param tabName visible name of the editor's tab for which menu should be opened
    */
   public void selectTabByIndexEditorWindowAndOpenMenu(int index, String tabName) {
     List<WebElement> windowList =
@@ -1907,16 +1921,16 @@ public class CodenvyEditor {
   }
 
   /**
-   * Check the tab of file is present once in editor
+   * Checks the editor's tab with specified {@code tabName} is present only once in the editor.
    *
-   * @param expectTab expect name of tab
+   * @param tabName visible name of the editor's tab for which menu should be opened
    */
-  public boolean tabIsPresentOnce(String expectTab) {
+  public boolean tabIsPresentOnce(String tabName) {
     return 1
         == seleniumWebDriverHelper
             .waitPresenceOfAllElements(By.id(EDITOR_TABS_PANEL))
             .stream()
-            .filter(element -> element.getText().contains(expectTab))
+            .filter(element -> element.getText().contains(tabName))
             .collect(toList())
             .size();
   }
@@ -1966,7 +1980,7 @@ public class CodenvyEditor {
     return stringBuilder.deleteCharAt(stringBuilder.length() - 1);
   }
 
-  /** open context menu into editor */
+  /** Opens context menu into editor */
   public void openContextMenuInEditor() {
     actionsFactory
         .createAction(seleniumWebDriver)
@@ -1977,9 +1991,9 @@ public class CodenvyEditor {
   }
 
   /**
-   * open context menu on the selected element into editor
+   * Opens context menu for the specified {@code selectedItem} in the editor.
    *
-   * @param selectedElement is the selected element into editor
+   * @param selectedElement visible text in the editor on which context click should be perform
    */
   public void openContextMenuOnElementInEditor(String selectedElement) {
     actionsFactory
@@ -1992,18 +2006,18 @@ public class CodenvyEditor {
     waitContextMenu();
   }
 
-  /** wait context menu form is open */
+  /** Waits until context menu form is open. */
   public void waitContextMenu() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(CONTEXT_MENU));
   }
 
-  /** wait context menu form is not present */
+  /** Waits until context menu form is not present. */
   public void waitContextMenuIsNotPresent() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(CONTEXT_MENU));
   }
 
   /**
-   * Clicks on {@code item} in context menu
+   * Clicks on {@code item} in context menu.
    *
    * @param item editor context menu item which defined in {@link ContextMenuLocator}
    */
@@ -2023,6 +2037,11 @@ public class CodenvyEditor {
     return getJavaDocPopupText();
   }
 
+  /**
+   * Waits until specified {@code expectedText} is present in javadoc.
+   *
+   * @param expectedText text which should be present in javadoc
+   */
   public void waitContextMenuJavaDocText(String expectedText) {
     waitJavaDocPopupSrcAttributeIsNotEmpty();
 
