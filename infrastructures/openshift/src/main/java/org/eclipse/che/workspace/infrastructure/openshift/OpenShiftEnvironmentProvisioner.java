@@ -18,6 +18,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
@@ -47,6 +48,7 @@ public class OpenShiftEnvironmentProvisioner {
   private final RamLimitProvisioner ramLimitProvisioner;
   private final InstallerServersPortProvisioner installerServersPortProvisioner;
   private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
+  private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
 
   @Inject
   public OpenShiftEnvironmentProvisioner(
@@ -59,7 +61,8 @@ public class OpenShiftEnvironmentProvisioner {
       WorkspaceVolumesStrategy volumesStrategy,
       RamLimitProvisioner ramLimitProvisioner,
       InstallerServersPortProvisioner installerServersPortProvisioner,
-      LogsVolumeMachineProvisioner logsVolumeMachineProvisioner) {
+      LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
+      PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -70,6 +73,7 @@ public class OpenShiftEnvironmentProvisioner {
     this.ramLimitProvisioner = ramLimitProvisioner;
     this.installerServersPortProvisioner = installerServersPortProvisioner;
     this.logsVolumeMachineProvisioner = logsVolumeMachineProvisioner;
+    this.podTerminationGracePeriodProvisioner = podTerminationGracePeriodProvisioner;
   }
 
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
@@ -92,5 +96,6 @@ public class OpenShiftEnvironmentProvisioner {
     uniqueNamesProvisioner.provision(osEnv, identity);
     routeTlsProvisioner.provision(osEnv, identity);
     ramLimitProvisioner.provision(osEnv, identity);
+    podTerminationGracePeriodProvisioner.provision(osEnv, identity);
   }
 }
