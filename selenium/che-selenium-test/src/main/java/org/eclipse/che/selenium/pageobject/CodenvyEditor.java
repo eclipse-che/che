@@ -1416,7 +1416,7 @@ public class CodenvyEditor {
   /**
    * Waits until javadoc body is visible and checks presence of {@code expectedText}.
    *
-   * <p>Note! WebDriver should be switched to the javadoc frame.
+   * <p>Note! {@link SeleniumWebDriver} should be switched to the javadoc frame.
    *
    * <p>Please use {@link CodenvyEditor#switchToJavaDocFrame()} method for switching to javadoc
    * frame.
