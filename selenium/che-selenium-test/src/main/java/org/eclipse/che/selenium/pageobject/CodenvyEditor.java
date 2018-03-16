@@ -1350,38 +1350,51 @@ public class CodenvyEditor {
                 DEBUGGER_BREAKPOINT_CONDITION, activeState ? "active" : "inactive", lineNumber)));
   }
 
-  /** @param lineNumber */
+  /**
+   * Waits until breakpoint with "disabled" status is present in the line with specified {@code
+   * lineNumber}.
+   *
+   * @param lineNumber number of line in which breakpoint should be placed
+   */
   public void waitDisabledBreakpoint(int lineNumber) {
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(format(DEBUGGER_BREAKPOINT_DISABLED, lineNumber)));
   }
 
-  /** wait while editor will be empty */
+  /** Waits until current editor's tab is without visible text. */
   public void waitEditorIsEmpty() {
     webDriverWaitFactory
         .get(ELEMENT_TIMEOUT_SEC)
         .until((ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().isEmpty());
   }
 
-  /** wait javadoc popup opened */
+  /** Waits until javadoc popup is opened. */
   public void waitJavaDocPopUpOpened() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(JAVA_DOC_POPUP), ELEMENT_TIMEOUT_SEC);
   }
 
-  /** wait javadoc popup closed */
+  /** Waits until javadoc popup is closed */
   public void waitJavaDocPopUpClosed() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(JAVA_DOC_POPUP));
   }
 
-  /** check text present in javadoc popup */
-  public void checkTextToBePresentInJavaDocPopUp(String text) {
-    waitTextInJavaDoc(text);
+  /**
+   * Waits until {@code expectedText} is present in javadoc's popup body, and switches to parent
+   * frame.
+   */
+  public void checkTextToBePresentInJavaDocPopUp(String expectedText) {
+    waitTextInJavaDoc(expectedText);
     seleniumWebDriver.switchTo().parentFrame();
   }
 
   /**
-   * sometimes javadoc invoces with delays, in this case empty frame displaying first, and text
-   * waits in this frame even if javadoc was loaded successfuly
+   * Waits until {@code expectedText} is present in javadoc's body.
+   *
+   * <p>Note! Sometimes javadoc displays with delays, in this case empty frame displaying first, and
+   * method waits {@code expectedText} in this empty frame even if javadoc with {@code expectedText}
+   * was loaded successfully. That's why frame switching is used in the wait logic.
+   *
+   * @param expectedText visible text which should be present in javadoc
    */
   private void waitTextInJavaDoc(String expectedText) {
     webDriverWaitFactory
@@ -1400,6 +1413,17 @@ public class CodenvyEditor {
                 });
   }
 
+  /**
+   * Waits until javadoc body is visible and checks presence of {@code expectedText}.
+   *
+   * <p>Note! WebDriver should be switched to the javadoc frame.
+   *
+   * <p>Please use {@link CodenvyEditor#switchToJavaDocFrame()} method for switching to javadoc
+   * frame.
+   *
+   * @param expectedText text which should be present in javadoc body
+   * @return true - if {@code expectedText} is present in javadoc body, false - if not
+   */
   public boolean waitAndCheckTextPresenceInJavaDoc(String expectedText) {
     return seleniumWebDriverHelper
         .waitVisibility(By.tagName("body"))
