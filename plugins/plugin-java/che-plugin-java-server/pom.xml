@@ -148,6 +148,7 @@
                         <classe>org.eclipse.lsp4j.Range</classe>
                         <classe>org.eclipse.lsp4j.Position</classe>
                         <classe>org.eclipse.lsp4j.WorkspaceEdit</classe>
+                        <classe>org.eclipse.lsp4j.ResourceChange</classe>
                         <classe>org.eclipse.lsp4j.TextEdit</classe>
                         <classe>org.eclipse.lsp4j.TextDocumentEdit</classe>
                         <classe>org.eclipse.lsp4j.VersionedTextDocumentIdentifier</classe>
