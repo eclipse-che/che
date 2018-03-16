@@ -517,8 +517,6 @@ public class ProjectServiceApi {
 
     fsManager.unzip(wsPath, zip, skipFirstLevel);
 
-    eventService.publish(new ProjectCreatedEvent(wsPath));
-
     return Response.created(
             serviceContext
                 .getBaseUriBuilder()
