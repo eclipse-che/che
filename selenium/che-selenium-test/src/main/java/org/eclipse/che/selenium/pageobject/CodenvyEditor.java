@@ -1402,7 +1402,7 @@ public class CodenvyEditor {
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> {
-                  seleniumWebDriverHelper.waitAndSwitchToFrame(By.xpath(JAVA_DOC_POPUP));
+                  waitAvailabilityAndSwitchToJavaDocFrame();
 
                   if (waitAndCheckTextPresenceInJavaDoc(expectedText)) {
                     return true;
@@ -1418,8 +1418,8 @@ public class CodenvyEditor {
    *
    * <p>Note! {@link SeleniumWebDriver} should be switched to the javadoc frame.
    *
-   * <p>Please use {@link CodenvyEditor#switchToJavaDocFrame()} method for switching to javadoc
-   * frame.
+   * <p>Please use {@link CodenvyEditor#waitAvailabilityAndSwitchToJavaDocFrame()} method for
+   * switching to javadoc frame.
    *
    * @param expectedText text which should be present in javadoc body
    * @return true - if {@code expectedText} is present in javadoc body, false - if not
@@ -1429,6 +1429,14 @@ public class CodenvyEditor {
         .waitVisibility(By.tagName("body"))
         .getText()
         .contains(expectedText);
+  }
+
+  /**
+   * Waits until frame, which contains javadoc popup, is available and switches the {@link
+   * SeleniumWebDriver} to it.
+   */
+  public void waitAvailabilityAndSwitchToJavaDocFrame() {
+    seleniumWebDriverHelper.waitAndSwitchToFrame(By.xpath(JAVA_DOC_POPUP));
   }
 
   /**
