@@ -323,9 +323,9 @@ public class SeleniumWebDriver
   }
 
   public void switchFromDashboardIframeToIde(int timeout) {
-    new WebDriverWait(this, timeout)
-        .until(visibilityOfElementLocated(By.id("ide-application-iframe")));
-    new WebDriverWait(this, ATTACHING_ELEM_TO_DOM_SEC)
+    wait(timeout).until(visibilityOfElementLocated(By.id("ide-application-iframe")));
+
+    wait(ATTACHING_ELEM_TO_DOM_SEC)
         .until(
             (ExpectedCondition<Boolean>)
                 driver ->
@@ -333,8 +333,8 @@ public class SeleniumWebDriver
                             .executeScript("return angular.element('body').scope().showIDE"))
                         .toString()
                         .equals("true"));
-    new WebDriverWait(this, timeout)
-        .until(frameToBeAvailableAndSwitchToIt(By.id("ide-application-iframe")));
+
+    wait(timeout).until(frameToBeAvailableAndSwitchToIt(By.id("ide-application-iframe")));
   }
 
   public WebDriverWait wait(int timeOutInSeconds) {
