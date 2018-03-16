@@ -39,6 +39,7 @@ init() {
   ARGS=""
   OPTIONS=""
   DOCKERFILE=""
+  BUILD_ARG=""
 
   while [ $# -gt 0 ]; do
     case $1 in
@@ -68,6 +69,9 @@ init() {
         shift ;;
       --dockerfile:*)
         DOCKERFILE="${1#*:}"
+        shift ;;
+      --build-arg:*)
+        BUILD_ARG="--build-arg ${1#*:}"
         shift ;;
       --*)
         printf "${RED}Unknown parameter: $1${NC}\n"; exit 2 ;;
@@ -116,7 +120,7 @@ build_image() {
   printf "${BOLD}Building Docker Image ${IMAGE_NAME} from $DIR directory with tag $TAG${NC}\n"
   # Replace macros in Dockerfiles
   cat ${DIR}/${DOCKERFILE} | sed s/\$\{BUILD_ORGANIZATION\}/${ORGANIZATION}/ | sed s/\$\{BUILD_PREFIX\}/${PREFIX}/ | sed s/\$\{BUILD_TAG\}/${TAG}/ > ${DIR}/.Dockerfile
-  cd "${DIR}" && docker build -f ${DIR}/.Dockerfile -t ${IMAGE_NAME} .
+  cd "${DIR}" && docker build -f ${DIR}/.Dockerfile -t ${IMAGE_NAME} ${BUILD_ARG} .
   rm ${DIR}/.Dockerfile
   if [ $? -eq 0 ]; then
     printf "Build of ${BLUE}${IMAGE_NAME} ${GREEN}[OK]${NC}\n"
