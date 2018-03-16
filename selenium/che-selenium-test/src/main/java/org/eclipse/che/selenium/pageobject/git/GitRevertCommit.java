@@ -73,27 +73,20 @@ public class GitRevertCommit {
 
   public String getTopCommitRevision() {
     loader.waitOnClosed();
-    return seleniumWebDriverHelper
-        .waitVisibility(revertPanel, ELEMENT_TIMEOUT_SEC)
-        .getText()
-        .split("\n")[1]
-        .replaceAll("\\.", "");
-  }
-
-  public String getTopCommitComment() {
-    loader.waitOnClosed();
-    return seleniumWebDriverHelper
-        .waitVisibility(revertPanel, ELEMENT_TIMEOUT_SEC)
-        .getText()
-        .split("\n")[4];
+    int numberOfTopRevisionCell = 1;
+    return getRevertCommitTableContent().split("\n")[numberOfTopRevisionCell];
   }
 
   public String getTopCommitAuthor() {
     loader.waitOnClosed();
-    return seleniumWebDriverHelper
-        .waitVisibility(revertPanel, ELEMENT_TIMEOUT_SEC)
-        .getText()
-        .split("\n")[3];
+    int numberOfTopAuthorCell = 3;
+    return getRevertCommitTableContent().split("\n")[numberOfTopAuthorCell];
+  }
+
+  public String getTopCommitComment() {
+    loader.waitOnClosed();
+    int numberOfTopCommitCell = 4;
+    return getRevertCommitTableContent().split("\n")[numberOfTopCommitCell];
   }
 
   public void selectRevision(String revision) {
@@ -101,5 +94,10 @@ public class GitRevertCommit {
         By.xpath(
             format("//div[@id='%s']//*[contains(text(),'%s')]", REVERT_COMMIT_PANEL, revision)),
         REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+  }
+
+  /** Returns all cells from top left to bottom right divided by "\n" */
+  private String getRevertCommitTableContent() {
+    return seleniumWebDriverHelper.waitVisibility(revertPanel, ELEMENT_TIMEOUT_SEC).getText();
   }
 }
