@@ -164,7 +164,8 @@ public class ChangeVariableWithEvaluatingTest {
           "Actual application response content was: " + appicationReponse);
     } catch (AssertionError ex) {
       machineTerminal.logApplicationInfo(PROJECT_NAME_CHANGE_VARIABLE, ws);
-      fail("Known issue: https://github.com/eclipse/che/issues/8105");
+      LOG.info("Application response content: " + requestToApplication.get());
+      fail("Known issue: https://github.com/eclipse/che/issues/8105", ex);
     }
   }
 

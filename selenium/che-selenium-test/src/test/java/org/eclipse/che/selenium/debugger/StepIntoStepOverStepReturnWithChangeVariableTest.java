@@ -42,12 +42,16 @@ import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class StepIntoStepOverStepReturnWithChangeVariableTest {
+  private static final Logger LOG =
+      LoggerFactory.getLogger(StepIntoStepOverStepReturnWithChangeVariableTest.class);
   private static final String PROJECT = NameGenerator.generate("project", 4);
   private static final String START_DEBUG = "startDebug";
   private static final String CLEAN_TOMCAT = "cleanTomcat";
@@ -148,6 +152,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       machineTerminal.logApplicationInfo(PROJECT, ws);
+      LOG.info("Application response content: " + requestToApplication.get());
       fail("Known issue: https://github.com/eclipse/che/issues/8105", ex);
     }
 
@@ -168,7 +173,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RESUME_BTN_ID);
     String applicationResponse = requestToApplication.get(LOADER_TIMEOUT_SEC, TimeUnit.SECONDS);
     assertTrue(
-        applicationResponse.contains("<html>"),
+        applicationResponse.contains("Sorry, you failed. Try again later!"),
         "Actual application response content was: " + applicationResponse);
   }
 
