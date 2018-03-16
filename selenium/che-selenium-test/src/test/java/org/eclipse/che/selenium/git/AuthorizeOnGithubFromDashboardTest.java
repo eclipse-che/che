@@ -33,15 +33,16 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
+@Test(groups = TestGroup.GITHUB)
 public class AuthorizeOnGithubFromDashboardTest {
   private static final Logger LOG =
       LoggerFactory.getLogger(AuthorizeOnGithubFromDashboardTest.class);
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.password")
   private String gitHubPassword;
 

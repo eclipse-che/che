@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.net.URL;
 import java.nio.file.Paths;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
@@ -39,6 +40,7 @@ import org.testng.annotations.Test;
  * @author aleksandr shmaraev
  * @author igor vinokur
  */
+@Test(groups = TestGroup.GITHUB)
 public class CommitFilesTest {
   private static final String PROJECT_NAME = CommitFilesTest.class.getSimpleName();
   private static final String NEW_NAME_PACKAGE = "org.eclipse.dev.examples";
@@ -63,7 +65,7 @@ public class CommitFilesTest {
   @Inject private Ide ide;
   @Inject private TestUser productUser;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
 

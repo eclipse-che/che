@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.git;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubKeyUploader;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
@@ -33,8 +34,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 06.12.15. */
+@Test(groups = TestGroup.GITHUB)
 public class PushChangeNotUpdatedRepoTest {
-
   private static final String PROJECT_1 = NameGenerator.generate("PushChangeNotUpdatedRepo1-", 4);
   private static final String PROJECT_2 = NameGenerator.generate("PushChangeNotUpdatedRepo2-", 4);
   private static final String IMPORT_SUCCESS_1 = "Project " + PROJECT_1 + " imported";
@@ -50,11 +51,11 @@ public class PushChangeNotUpdatedRepoTest {
   @Inject private Ide ide;
   @Inject private TestUser productUser;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.password")
   private String gitHubPassword;
 
