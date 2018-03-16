@@ -1,5 +1,5 @@
 <che-popup title="{{addMemberController.members.length > 0 ? 'Select developers to invite' : 'No members in team'}}"
-           on-close="addMemberController.abort()" ng-if="!addMemberController.isLoading">
+           on-close="addMemberController.abort()" ng-if="!addMemberController.isLoading" id="add-members-dialog">
   <div layout="column" class="add-workspace-members">
 
     <che-list-header che-hide-header="!addMemberController.members || addMemberController.members.length === 0">
@@ -30,7 +30,7 @@
         </div>
       </div>
     </che-list-header>
-    <che-list ng-show="addMemberController.cheListHelper.visibleItemsNumber > 0" class="members-list">
+    <che-list ng-show="addMemberController.cheListHelper.visibleItemsNumber > 0" class="members-list" id="add-members-list">
       <member-item
         ng-repeat="member in addMemberController.cheListHelper.getVisibleItems()"
         callback="addMemberController"
@@ -53,6 +53,7 @@
         che-button-title="Share" name="shareButton"
         ng-click="addMemberController.shareWorkspace()"></che-button-primary>
       <che-button-notice che-button-title="Close"
+                         name="close-dialog-button"
                          ng-click="addMemberController.abort()"></che-button-notice>
     </div>
   </div>

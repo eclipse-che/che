@@ -67,6 +67,12 @@ public class ShareWorkspacesTest {
     workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
     workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
     workspaceDetails.selectTabInWorkspaceMenu(TabNames.SHARE);
+
+    workspaceShare.waitMemberNameInShareList("admin@admin.com");
+
+    workspaceShare.clickOnAddDeveloperButton();
+    workspaceShare.waitInviteMemberDialog();
+    workspaceShare.closeInviteMemberDialog();
   }
 
   @Test
