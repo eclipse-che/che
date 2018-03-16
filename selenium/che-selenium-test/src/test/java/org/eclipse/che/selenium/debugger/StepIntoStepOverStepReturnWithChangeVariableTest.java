@@ -136,7 +136,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
                 .replace("tcp", "http")
             + "/spring/guess";
     String requestMess = "numGuess=6&submit=Ok";
-    CompletableFuture<String> instToRequestThread =
+    CompletableFuture<String> requestToApplication =
         debugUtils.gotoDebugAppAndSendRequest(
             appUrl, requestMess, APPLICATION_FORM_URLENCODED, 200);
     editor.waitActiveBreakpoint(34);
@@ -166,7 +166,10 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     debugPanel.typeAndSaveTextAreaDialog("\"7\"");
     debugPanel.waitTextInVariablesPanel("numGuessByUser=\"7\"");
     debugPanel.clickOnButton(DebugPanel.DebuggerActionButtons.RESUME_BTN_ID);
-    assertTrue(instToRequestThread.get(LOADER_TIMEOUT_SEC, TimeUnit.SECONDS).contains("<html>"));
+    String applicationResponse = requestToApplication.get(LOADER_TIMEOUT_SEC, TimeUnit.SECONDS);
+    assertTrue(
+        applicationResponse.contains("<html>"),
+        "Actual application response content was: " + applicationResponse);
   }
 
   @Test(priority = 1)

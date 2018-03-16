@@ -134,7 +134,7 @@ public class ChangeVariableWithEvaluatingTest {
             + "/spring/guess";
     String requestMess = "numGuess=11&submit=Ok";
     editor.waitActiveBreakpoint(34);
-    CompletableFuture<String> instToRequestThread =
+    CompletableFuture<String> requestToApplication =
         debuggerUtils.gotoDebugAppAndSendRequest(
             appUrl, requestMess, APPLICATION_FORM_URLENCODED, 200);
     debugPanel.openDebugPanel();
@@ -158,12 +158,10 @@ public class ChangeVariableWithEvaluatingTest {
     // this auxiliary method for investigate problem that was described in the issue:
     // https://github.com/eclipse/che/issues/8105
     try {
-      machineTerminal.logApplicationInfo(PROJECT_NAME_CHANGE_VARIABLE, ws);
-
+      String appicationReponse = requestToApplication.get(LOADER_TIMEOUT_SEC, TimeUnit.SECONDS);
       assertTrue(
-          instToRequestThread
-              .get(LOADER_TIMEOUT_SEC, TimeUnit.SECONDS)
-              .contains("Sorry, you failed. Try again later!"));
+          appicationReponse.contains("Sorry, you failed. Try again later!"),
+          "Actual application response content was: " + appicationReponse);
     } catch (AssertionError ex) {
       machineTerminal.logApplicationInfo(PROJECT_NAME_CHANGE_VARIABLE, ws);
       fail("Known issue: https://github.com/eclipse/che/issues/8105");
