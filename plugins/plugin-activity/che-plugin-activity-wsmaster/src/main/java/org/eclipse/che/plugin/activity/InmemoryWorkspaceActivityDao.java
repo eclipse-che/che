@@ -10,28 +10,35 @@
  */
 package org.eclipse.che.plugin.activity;
 
-import org.eclipse.che.api.core.ServerException;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import javax.inject.Singleton;
 
+/** @author Max Shaposhnik (mshaposh@redhat.com) */
+@Singleton
 public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
 
   private final Map<String, Long> activeWorkspaces = new ConcurrentHashMap<>();
 
   @Override
-  public void setExpiration(WorkspaceExpiration expiration) throws ServerException {
-      activeWorkspaces.put(expiration.getWorkspaceId(), expiration.getExpiration());
+  public void setExpiration(WorkspaceExpiration expiration) {
+    activeWorkspaces.put(expiration.getWorkspaceId(), expiration.getExpiration());
   }
 
   @Override
-  public void removeExpiration(String workspaceId) throws ServerException {
-      activeWorkspaces.remove(workspaceId);
+  public void removeExpiration(String workspaceId) {
+    activeWorkspaces.remove(workspaceId);
   }
 
   @Override
-  public List<WorkspaceExpiration> findExpired(long timestamp) throws ServerException {
-    return activeWorkspaces.entrySet().stream().filter(e -> e.getValue() < timestamp).map(e ->)
+  public List<WorkspaceExpiration> findExpired(long timestamp) {
+    return activeWorkspaces
+        .entrySet()
+        .stream()
+        .filter(e -> e.getValue() < timestamp)
+        .map(e -> new WorkspaceExpiration(e.getKey(), e.getValue()))
+        .collect(Collectors.toList());
   }
 }

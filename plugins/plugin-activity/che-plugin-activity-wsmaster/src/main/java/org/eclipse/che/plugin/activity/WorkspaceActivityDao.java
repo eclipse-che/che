@@ -16,9 +16,9 @@ import org.eclipse.che.api.core.ServerException;
 /** @author Max Shaposhnik (mshaposh@redhat.com) */
 public interface WorkspaceActivityDao {
 
-  void setExpiration(WorkspaceExpiration expiration);
+  void setExpiration(WorkspaceExpiration expiration) throws ServerException;
 
-  void removeExpiration(String workspaceId);
+  void removeExpiration(String workspaceId) throws ServerException;
 
-  List<WorkspaceExpiration> findExpired(long timestamp);
+  List<WorkspaceExpiration> findExpired(long timestamp) throws ServerException;
 }
