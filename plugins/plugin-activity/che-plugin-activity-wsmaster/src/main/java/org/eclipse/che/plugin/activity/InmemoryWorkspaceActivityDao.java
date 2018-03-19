@@ -12,11 +12,16 @@ package org.eclipse.che.plugin.activity;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
 
-/** @author Max Shaposhnik (mshaposh@redhat.com) */
+/**
+ * Inmemory workspaces expiration times storage.
+ *
+ * @author Max Shaposhnik (mshaposh@redhat.com)
+ */
 @Singleton
 public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
 
@@ -33,12 +38,12 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
   }
 
   @Override
-  public List<WorkspaceExpiration> findExpired(long timestamp) {
+  public List<String> findExpired(long timestamp) {
     return activeWorkspaces
         .entrySet()
         .stream()
         .filter(e -> e.getValue() < timestamp)
-        .map(e -> new WorkspaceExpiration(e.getKey(), e.getValue()))
+        .map(Entry::getKey)
         .collect(Collectors.toList());
   }
 }

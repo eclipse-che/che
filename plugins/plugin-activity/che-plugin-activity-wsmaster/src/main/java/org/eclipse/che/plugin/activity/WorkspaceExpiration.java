@@ -20,7 +20,11 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 
-/** @author Max Shaposhnik (mshaposh@redhat.com) */
+/**
+ *  Data object for storing workspace expiration times.
+ *
+ * @author Max Shaposhnik (mshaposh@redhat.com)
+ */
 @Entity(name = "WorkspaceExpiration")
 @NamedQueries({
   @NamedQuery(

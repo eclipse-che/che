@@ -65,7 +65,6 @@
         <class>org.eclipse.che.multiuser.organization.spi.impl.OrganizationDistributedResourcesImpl</class>
 
         <class>org.eclipse.che.plugin.activity.WorkspaceExpiration</class>
-
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
     </persistence-unit>
 </persistence>

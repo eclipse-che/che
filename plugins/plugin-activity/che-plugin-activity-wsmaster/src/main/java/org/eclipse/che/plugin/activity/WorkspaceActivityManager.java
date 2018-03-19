@@ -121,14 +121,13 @@ public class WorkspaceActivityManager {
   )
   @ScheduleRate(periodParameterName = "che.workspace.activity_check_scheduler_period_s")
   private void invalidate() {
-    List<WorkspaceExpiration> expiredList = new ArrayList<>();
+    List<String> expiredList = new ArrayList<>();
     try {
       expiredList = activityDao.findExpired(System.currentTimeMillis());
     } catch (ServerException e) {
       LOG.error(e.getLocalizedMessage(), e);
     }
-    for (WorkspaceExpiration expiration : expiredList) {
-      String workspaceId = expiration.getWorkspaceId();
+    for (String workspaceId : expiredList) {
       try {
         Workspace workspace = workspaceManager.getWorkspace(workspaceId);
         workspace.getAttributes().put(WORKSPACE_STOPPED_BY, ACTIVITY_CHECKER);

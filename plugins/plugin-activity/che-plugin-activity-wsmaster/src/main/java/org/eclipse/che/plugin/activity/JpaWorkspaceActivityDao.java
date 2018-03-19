@@ -21,7 +21,11 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import org.eclipse.che.api.core.ServerException;
 
-/** @author Max Shaposhnik (mshaposh@redhat.com) */
+/**
+ * JPA workspaces expiration times storage.
+ *
+ * @author Max Shaposhnik (mshaposh@redhat.com)
+ */
 @Singleton
 public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
 
@@ -48,7 +52,7 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   }
 
   @Override
-  public List<WorkspaceExpiration> findExpired(long timestamp) throws ServerException {
+  public List<String> findExpired(long timestamp) throws ServerException {
     requireNonNull(timestamp, "Required non-null timestamp");
     try {
       return doFindExpired(timestamp);
@@ -58,16 +62,14 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   }
 
   @Transactional
-  protected List<WorkspaceExpiration> doFindExpired(long timestamp) {
+  protected List<String> doFindExpired(long timestamp) {
     return managerProvider
         .get()
         .createNamedQuery("WorkspaceExpiration.getExpired", WorkspaceExpiration.class)
         .setParameter("expiration", timestamp)
         .getResultList()
         .stream()
-        .map(
-            expiration ->
-                new WorkspaceExpiration(expiration.getWorkspaceId(), expiration.getExpiration()))
+        .map(WorkspaceExpiration::getWorkspaceId)
         .collect(Collectors.toList());
   }
 
