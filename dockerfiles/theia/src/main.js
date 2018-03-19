@@ -11,46 +11,151 @@
  */
 const fs = require("fs");
 const cp = require("child_process");
-const theiaRoot = '/home/theia';
-const theiaPath = theiaRoot + '/package.json';
 
-const defaultTheiaPath = `/home/default/theia`;
-const defaultConfig = require(`${defaultTheiaPath}/package.json`);
+const theiaRoot = '/home/theia';
+const defaultTheiaRoot = '/home/default/theia';
+const gitPluginsRoot = '/tmp/theia-plugins-from-git-repos';
+
+cp.execSync(`rm -rf ${gitPluginsRoot}; mkdir -p ${gitPluginsRoot}`);
 
 process.chdir(theiaRoot);
+prepareTheia();
 
-let theiaConfig;
-if (fs.existsSync(theiaPath)) {
-    handlePromise(callRun());
-}
-else {
-    let pluginString = process.env.THEIA_PLUGINS;
-    let pluginList = [];
-    if (pluginString && pluginString.length !== 0) {
-        let arr = pluginString.split(',');
-        pluginList = [...arr];
-        theiaConfig = defaultConfig;
-        let dep = theiaConfig.dependencies;
-        for (let d of pluginList) {
-            // check if plugin has a version using format pluginName:versionNumber
-            if (d.indexOf(":") > -1) {
-                let newDep = d.split(":");
-                let depName = newDep[0].trim();
-                let depVersion = newDep[1].trim();
-                dep[depName] = depVersion;
-                continue;
-            }
-            if (!dep.hasOwnProperty(d)) {
-                dep[d] = "latest";
-            }
-        }
-        fs.writeFileSync(theiaPath, JSON.stringify(theiaConfig));
-        handlePromise(callYarn().then(callBuild).then(callRun));
-    } else {
-        cp.execSync(`rsync -rv ${defaultTheiaPath}/ ${theiaRoot} --exclude 'node_modules' --exclude 'yarn.lock'`);
-        handlePromise(callRun());
+/** Rebuilds if needed and runs Theia */
+function prepareTheia() {
+    const extraPlagins = getExtraTheiaPlugins();
+    let currentPlugins = getTheiaPlugins();
+    let newPlugins = getDefaultTheiaPlugins();
+
+    if (Object.keys(currentPlugins).length === 0) {
+        // first run
+        copyDefaultTheiaBuild();
+        currentPlugins = getTheiaPlugins();
     }
 
+    for (let pluginName in extraPlagins) {
+        newPlugins[pluginName] = extraPlagins[pluginName];
+    }
+
+    if (!isPluginsEqual(currentPlugins, newPlugins)) {
+        console.log('Plugins set changed. Rebuilding Theia...');
+        rebuildTheiaWithNewPluginsAndRun(newPlugins);
+    } else {
+        handlePromise(callRun());
+    }
+}
+
+function isPluginsEqual(pls1, pls2) {
+    if (Object.keys(pls1).length !== Object.keys(pls2).length) {
+        return false;
+    }
+
+    for (let dep in pls1) {
+        if (pls1[dep] !== pls2[dep]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function copyDefaultTheiaBuild() {
+    cp.execSync(`rsync -rv ${defaultTheiaRoot}/ ${theiaRoot} --exclude 'node_modules' --exclude 'yarn.lock'`);
+}
+
+function rebuildTheiaWithNewPluginsAndRun(newPlugins) {
+    let theiaPackageJson = require(`${theiaRoot}/package.json`);
+    theiaPackageJson['dependencies'] = newPlugins;
+    fs.writeFileSync('package.json', JSON.stringify(theiaPackageJson), 'utf8');
+    cp.execSync(`rm -rf ${theiaRoot}/src-gen`);
+
+    handlePromise(callYarn().then(callBuild).then(callRun));
+}
+
+/** Returns standard (default) Theia dependencies */
+function getDefaultTheiaPlugins() {
+    const defaultTheiaPackageJson = require(`${defaultTheiaRoot}/package.json`);
+    return defaultTheiaPackageJson['dependencies'];
+}
+
+/** Returns current (after previous launch) Theia plugins or empty object on first start */
+function getTheiaPlugins() {
+    if (!fs.existsSync(`${theiaRoot}/package.json`)) {
+        return {};
+    }
+    const theiaPackageJson = require(`${theiaRoot}/package.json`);
+    return theiaPackageJson['dependencies'];
+}
+
+/** Returns extra Theia plugins which is set via THEIA_PLUGINS env variable */
+function getExtraTheiaPlugins() {
+    let plugins = {};
+    const currentPluginsString = process.env.THEIA_PLUGINS;
+    if (currentPluginsString) {
+        for (let plugin of currentPluginsString.split(',')) {
+            const colonPos = plugin.indexOf(':');
+            if (colonPos !== -1) {
+                const pluginName = plugin.substring(0, colonPos).trim();
+                const pluginVersion = plugin.substring(colonPos + 1).trim();
+                if (pluginVersion.startsWith('git://') || pluginVersion.startsWith('https://')) {
+                    addPluginFromGitRepository(plugins, pluginName, pluginVersion);
+                } else {
+                    plugins[pluginName] = pluginVersion;
+                }
+            } else {
+                plugins[plugin] = 'latest';
+            }
+        }
+    }
+    return plugins;
+}
+
+/**
+ * Clones git repository and adds the plugin as local.
+ * This is done becouse Theia requires npm package.json (not lerna) which is located, in most cases, in subdirectory of repository.
+ */
+function addPluginFromGitRepository(plugins, pluginName, gitRepository) {
+    const pluginPath = gitPluginsRoot + '/' + pluginName + '/';
+    try {
+        cp.execSync(`git clone --depth=1 --quiet ${gitRepository} ${pluginPath}`);
+    } catch (error) {
+        // failed to clone repository
+        try {
+            cp.execSync(`git clone --depth=1 --quiet ${gitRepository} ${pluginPath}`);
+        } catch (error) {
+            // failed again, skip plugin
+            return;
+        }
+    }
+
+    const rootPackageJson = require(pluginPath + 'package.json');
+    if (rootPackageJson['name'] === pluginName && !fs.existsSync(pluginPath + 'lerna.json')) {
+        plugins[pluginName] = gitRepository;
+    } else {
+        const dirs = fs.readdirSync(pluginPath).filter(item => !item.startsWith('.') && fs.lstatSync(pluginPath + item).isDirectory());
+        for (let dirName of dirs) {
+            const pluginTargetDir = pluginPath + dirName;
+            const packageJsonPath = pluginTargetDir + '/package.json';
+            if (fs.existsSync(packageJsonPath)) {
+                let packageJson = require(packageJsonPath);
+                if (packageJson['name'] === pluginName) {
+                    if (!fs.existsSync(pluginTargetDir + '/lib')) {
+                        // plugin hasn't built
+                        try {
+                            console.log('Building plugin: ' + pluginName);
+                            cp.execSync(`cd ${pluginTargetDir} && yarn`);
+                        } catch (error) {
+                            console.error('Skipping ' + pluginName + ' plugin because of following error: ' + error);
+                            // plugin build failed, skip this plugin to not to break Theia build
+                            return;
+                        }
+                    }
+                    plugins[pluginName] = pluginTargetDir;
+                    break;
+                }
+            }
+        }
+    }
 }
 
 function promisify(command, p) {

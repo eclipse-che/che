@@ -15,7 +15,6 @@ WORKDIR /home/theia
 # have default Theia build in the workspace in case no plugins are requested
 ADD https://raw.githubusercontent.com/theia-ide/theia-apps/master/theia-full-docker/latest.package.json /home/theia/package.json
 ADD theia-default-package.json /home/default/theia/package.json
-ADD src/main.js /theia_launcher/theia_launcher.js
 RUN yarn && \
     yarn theia build && \
     rm -rf * && \
@@ -24,6 +23,8 @@ RUN yarn && \
     yarn theia build && \
     ln -sf /home/default/theia/node_modules /home/theia/node_modules && \
     ln -sf /home/default/theia/yarn.lock /home/theia/yarn.lock
+ADD src/main.js /theia_launcher/theia_launcher.js
+RUN mkdir -p /home/default/time && touch /home/default/time/$(date +"%T")
 EXPOSE 3000
 ARG GITHUB_TOKEN
 ENV USE_LOCAL_GIT=true \
