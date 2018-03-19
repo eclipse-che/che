@@ -353,7 +353,7 @@ public class CodenvyEditor {
   /**
    * Gets visible text from split editor's tab with specified {@code indexOfEditor}.
    *
-   * @param indexOfEditor index of editor's tab which should be read, numeration starts since "1"
+   * @param indexOfEditor index of editor's tab which should be read, starting from "1"
    * @return visible text from chosen editor's tab
    */
   public String getTextFromSplitEditor(int indexOfEditor) {
@@ -396,7 +396,7 @@ public class CodenvyEditor {
    * tab with defined {@code indexOfEditor}.
    *
    * @param indexOfEditor index of editor's tab, text from which should be checked, numeration
-   *     starts since "1"
+   *     starts from "1"
    * @param timeout waiting time in seconds
    */
   public void waitTextInDefinedSplitEditor(
@@ -413,7 +413,7 @@ public class CodenvyEditor {
    * with defined {@code indexOfEditor}.
    *
    * @param indexOfEditor index of editor's tab, text from which should be checked, numeration
-   *     starts since "1"
+   *     starts from "1"
    * @param timeout waiting time in seconds
    * @param text text which should not be present in the chosen editor's tab
    */
@@ -441,7 +441,7 @@ public class CodenvyEditor {
   /**
    * Waits until editor's tab with specified {@code nameOfFile} is closed.
    *
-   * @param nameOfFile visible name of the editor's tab
+   * @param nameOfFile title of the editor's tab
    */
   public void waitWhileFileIsClosed(String nameOfFile) {
     seleniumWebDriverHelper.waitInvisibility(
@@ -452,7 +452,7 @@ public class CodenvyEditor {
    * Waits until changes in the editor's tab with specified {@code nameFile} is saved and closes
    * this tab.
    *
-   * @param nameFile visible name of the editor's tab which should be checked
+   * @param nameFile title of the editor's tab which should be checked
    */
   public void closeFileByNameWithSaving(String nameFile) {
     loader.waitOnClosed();
@@ -467,16 +467,16 @@ public class CodenvyEditor {
    * Waits visibility of the "Close" icon in the editor's tab with specified {@code fileName} and
    * clicks on it.
    *
-   * @param fileName visible name of the editor's tab which should be closed
+   * @param fileName title of the editor's tab which should be closed
    */
   public void clickOnCloseFileIcon(String fileName) {
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(TAB_FILE_CLOSE_ICON, fileName)));
   }
 
   /**
-   * Checks that at list one editor's tab is open.
+   * Checks that at list one editor's tab is opened.
    *
-   * @return true - if at list one tab is open in the editor, false - if not
+   * @return true - if at list one tab is opened in the editor, false - if not
    */
   public boolean isAnyTabsOpened() {
     return seleniumWebDriverHelper.isVisible(someOpenedTab);
@@ -514,7 +514,7 @@ public class CodenvyEditor {
   /**
    * Opens context menu for editor's tab with specified {@code tabName}.
    *
-   * @param tabName visible name of the editor's tab
+   * @param tabName title of the editor's tab
    */
   public void openAndWaitContextMenuForTabByName(String tabName) {
     WebElement tab =
@@ -557,7 +557,7 @@ public class CodenvyEditor {
    * Types specified {@code text} into defined editor's {@code line}.
    *
    * @param text text which should be typed
-   * @param line the line's number in which text should be typed
+   * @param line the line's number where text should be typed
    */
   public void typeTextIntoEditor(String text, int line) {
     setCursorToLine(line);
@@ -567,7 +567,7 @@ public class CodenvyEditor {
   /**
    * Sets cursor to specified {@code positionLine}.
    *
-   * @param positionLine line's number in which cursor should be placed
+   * @param positionLine line's number where cursor should be placed
    */
   public void setCursorToLine(int positionLine) {
     loader.waitOnClosed();
@@ -585,8 +585,8 @@ public class CodenvyEditor {
   /**
    * Sets cursor to specified {@code positionLine} and {@code positionChar} and checks result.
    *
-   * @param positionLine line's number in which cursor should be placed
-   * @param positionChar char's number in which cursor should be placed
+   * @param positionLine line's number where cursor should be placed
+   * @param positionChar char's number where cursor should be placed
    */
   public void goToCursorPositionVisible(int positionLine, int positionChar) {
     openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
@@ -597,8 +597,8 @@ public class CodenvyEditor {
   /**
    * Sets cursor to specified {@code positionLine} and {@code positionChar} and checks result.
    *
-   * @param positionLine line's number in which cursor should be placed
-   * @param positionChar char's number in which cursor should be placed
+   * @param positionLine line's number where cursor should be placed
+   * @param positionChar char's number where cursor should be placed
    */
   public void goToPosition(int positionLine, int positionChar) {
     openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
@@ -609,8 +609,8 @@ public class CodenvyEditor {
   /**
    * Sets cursor to specified {@code positionLine} and {@code positionChar}.
    *
-   * @param positionLine line's number in which cursor should be placed
-   * @param positionChar char's number in which cursor should be placed
+   * @param positionLine line's number where cursor should be placed
+   * @param positionChar char's number where cursor should be placed
    */
   private void openGoToLineFormAndSetCursorToPosition(int positionLine, int positionChar) {
     loader.waitOnClosed();
@@ -625,7 +625,8 @@ public class CodenvyEditor {
   }
 
   /**
-   * Launches code assistant by "ctrl" + "space" keys combination and waits until container is open.
+   * Launches code assistant by "ctrl" + "space" keys combination and waits until container is
+   * opened.
    */
   public void launchAutocompleteAndWaitContainer() {
     loader.waitOnClosed();
@@ -636,7 +637,7 @@ public class CodenvyEditor {
     waitAutocompleteContainer();
   }
 
-  /** Launches code assistant with "ctrl" + "space" keys combination. */
+  /** Launches code assistant by "ctrl" + "space" keys pressing. */
   public void launchAutocomplete() {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
@@ -687,7 +688,7 @@ public class CodenvyEditor {
     expectedNumberOfActiveLine(position);
   }
 
-  /** Waits for no Git change markers in the opened editor. */
+  /** Waits for "no Git change" markers in the opened editor. */
   public void waitNoGitChangeMarkers() {
     webDriverWaitFactory
         .get()
@@ -700,8 +701,7 @@ public class CodenvyEditor {
   }
 
   /**
-   * Waits for Git insertion marker between {@code startLine} and {@code endLine} including this two
-   * lines.
+   * Waits for "Git insertion" marker between {@code startLine} and {@code endLine}, inclusive.
    *
    * @param startLine line number of the markers start
    * @param endLine line number of the markers end
@@ -723,8 +723,8 @@ public class CodenvyEditor {
   }
 
   /**
-   * Waits for Git modification marker between {@code startLine} and {@code endLine} including this
-   * two lines.
+   * Waits for "Git modification" marker between {@code startLine} and {@code endLine} including
+   * this two lines.
    *
    * @param startLine line number of the markers start
    * @param endLine line number of the markers end
@@ -746,9 +746,9 @@ public class CodenvyEditor {
   }
 
   /**
-   * Waits for Git deletion marker in the specified {@code line}.
+   * Waits for "Git deletion" marker in the specified {@code line}.
    *
-   * @param line line's number in which the marker should be displayed
+   * @param line line's number where the marker should be displayed
    */
   public void waitGitDeletionMarkerInPosition(int line) {
     webDriverWaitFactory
@@ -866,7 +866,7 @@ public class CodenvyEditor {
     waitAnnotationCodeAssistIsOpen();
   }
 
-  /** Waits until annotations code assist is open. */
+  /** Waits until annotations code assist is opened. */
   public void waitAnnotationCodeAssistIsOpen() {
     seleniumWebDriverHelper.waitVisibility(assistContentContainer, ELEMENT_TIMEOUT_SEC);
   }
@@ -915,7 +915,7 @@ public class CodenvyEditor {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(propositionContainer);
   }
 
-  /** Waits until assist proposition container is open. */
+  /** Waits until assist proposition container is opened. */
   public void waitPropositionAssistContainer() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(PROPOSITION_CONTAINER), ELEMENT_TIMEOUT_SEC);
   }
@@ -1046,7 +1046,7 @@ public class CodenvyEditor {
   /**
    * Waits while open file tab with specified name becomes without '*' unsaved status.
    *
-   * @param nameOfFile visible name of the tab which should be checked
+   * @param nameOfFile title of the tab which should be checked
    */
   public void waitTabFileWithSavedStatus(String nameOfFile) {
     seleniumWebDriverHelper.waitInvisibility(
@@ -1056,13 +1056,13 @@ public class CodenvyEditor {
   /**
    * Waits active tab with specified {@code nameOfFile}.
    *
-   * @param nameOfFile visible name of the tab which should be checked
+   * @param nameOfFile title of the tab which should be checked
    */
   public void waitActiveTabFileName(String nameOfFile) {
     seleniumWebDriverHelper.waitPresence(By.xpath(format(ACTIVE_TAB_FILE_NAME, nameOfFile)));
   }
 
-  /** Checks that all files have been closed. (Checks disappears all text areas and tabs) */
+  /** Checks that all files have been closed. (Checks disappearance of all text areas and tabs) */
   public void waitWhileAllFilesWillClosed() {
     seleniumWebDriverHelper.waitInvisibility(
         By.xpath("//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[text()]"),
@@ -1074,7 +1074,7 @@ public class CodenvyEditor {
   /**
    * Selects editor's tab with specified {@code nameOfFile}.
    *
-   * @param nameOfFile visible name of the tab which should be selected
+   * @param nameOfFile title of the tab which should be selected
    */
   public void selectTabByName(String nameOfFile) {
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(TAB_FILE_NAME_XPATH, nameOfFile)));
@@ -1083,8 +1083,8 @@ public class CodenvyEditor {
   /**
    * Waits until editor's tab with specified {@code fileName} and {@code tabColor} is visible.
    *
-   * @param fileName visible name of the tab which should be checked
-   * @param tabColor color, in which editor's tab should be colored
+   * @param fileName title of the tab which should be checked
+   * @param tabColor color which editor's tab should be colored by
    */
   public void waitTabWithNameAndColor(String fileName, TabColor tabColor) {
     seleniumWebDriverHelper.waitVisibility(
@@ -1094,7 +1094,7 @@ public class CodenvyEditor {
   /**
    * Waits until editor's tab with specified {@code fileName} is in yellow color.
    *
-   * @param fileName visible name of editor's tab which should be checked
+   * @param fileName title of editor's tab which should be checked
    */
   public void waitYellowTab(String fileName) {
     waitTabWithNameAndColor(fileName, YELLOW);
@@ -1103,7 +1103,7 @@ public class CodenvyEditor {
   /**
    * Waits until editor's tab with specified {@code fileName} is in green color.
    *
-   * @param fileName visible name of editor's tab which should be checked
+   * @param fileName title of editor's tab which should be checked
    */
   public void waitGreenTab(String fileName) {
     waitTabWithNameAndColor(fileName, GREEN);
@@ -1112,7 +1112,7 @@ public class CodenvyEditor {
   /**
    * Waits until editor's tab with specified {@code fileName} is in blue color.
    *
-   * @param fileName visible name of editor's tab which should be checked
+   * @param fileName title of editor's tab which should be checked
    */
   public void waitBlueTab(String fileName) {
     waitTabWithNameAndColor(fileName, BLUE);
@@ -1123,7 +1123,7 @@ public class CodenvyEditor {
    *
    * <p>Note! Default color depends on tab's focus.
    *
-   * @param fileName visible name of editor's tab which should be checked
+   * @param fileName title of editor's tab which should be checked
    */
   public void waitDefaultColorTab(final String fileName) {
     waitActive();
@@ -1145,7 +1145,7 @@ public class CodenvyEditor {
   /**
    * Waits until editor's tab with specified {@code fileName} is visible and focused.
    *
-   * @param fileName visible name of editor's tab which should be checked
+   * @param fileName title of editor's tab which should be checked
    * @return true - if tab is focused, false - if not
    */
   public boolean waitTabVisibilityAndCheckFocus(String fileName) {
@@ -1157,7 +1157,7 @@ public class CodenvyEditor {
   /**
    * Waits until editor's tab with specified {@code nameOfFile} is not present.
    *
-   * @param nameOfFile visible name of editor's tab which should be checked
+   * @param nameOfFile title of editor's tab which should be checked
    */
   public void waitTabIsNotPresent(String nameOfFile) {
     seleniumWebDriverHelper.waitInvisibility(
@@ -1168,7 +1168,7 @@ public class CodenvyEditor {
    * Gets value of the "path" attribute from {@link WebElement} which defined by {@code
    * nameOfOpenedFile}.
    *
-   * @param nameOfOpenedFile visible name of file from which "path" attribute should be got
+   * @param nameOfOpenedFile title of file from which "path" attribute should be got
    * @return value of the "path" attribute
    */
   public String getAssociatedPathFromTheTab(String nameOfOpenedFile) {
@@ -1190,7 +1190,7 @@ public class CodenvyEditor {
    * Waits during {@code timeout} until editor's tab with specified {@code nameOfFile} is present in
    * editor.
    *
-   * @param nameOfFile visible name of editor's tab which should be checked
+   * @param nameOfFile title of editor's tab which should be checked
    * @param timeout waiting time in seconds
    */
   public void waitTabIsPresent(String nameOfFile, int timeout) {
@@ -1226,7 +1226,7 @@ public class CodenvyEditor {
     typeTextIntoEditor(DELETE.toString());
   }
 
-  /** Deletes current editor's line with Ctrl+D. */
+  /** Deletes current editor's line by "Ctrl"+"D" keys pressing. */
   public void deleteCurrentLine() {
     actionsFactory
         .createAction(seleniumWebDriver)
@@ -1238,7 +1238,7 @@ public class CodenvyEditor {
     loader.waitOnClosed();
   }
 
-  /** Deletes current line with Ctrl+D and inserts new line instead. */
+  /** Deletes current line by "Ctrl"+"D" keys pressing and inserts new line instead. */
   public void deleteCurrentLineAndInsertNew() {
     actionsFactory
         .createAction(seleniumWebDriver)
@@ -1251,7 +1251,7 @@ public class CodenvyEditor {
         .perform();
   }
 
-  /** Deletes all editor's content by key combination "ctrl"+"A" and "Delete" key. */
+  /** Deletes all editor's content by "Ctrl"+"A" keys pressing and "Delete" key pressing. */
   public void deleteAllContent() {
     actionsFactory
         .createAction(seleniumWebDriver)
@@ -1272,7 +1272,7 @@ public class CodenvyEditor {
   /**
    * Waits until breakpoint with inactive state is in defined {@code position}.
    *
-   * @param position number of line in which breakpoint should be present
+   * @param position number of line where breakpoint should be present
    */
   public void waitBreakPointWithInactiveState(int position) {
     seleniumWebDriverHelper.waitVisibility(
@@ -1282,7 +1282,7 @@ public class CodenvyEditor {
   /**
    * Sets breakpoint on specified {@code position} in the IDE breakpoint panel.
    *
-   * @param position number of line in which breakpoint should be placed
+   * @param position number of line where breakpoint should be placed
    */
   public void setInactiveBreakpoint(int position) {
     waitActive();
@@ -1296,7 +1296,7 @@ public class CodenvyEditor {
    * Sets breakpoint on specified {@code position} in the IDE breakpoint panel and waits on active
    * state of it.
    *
-   * @param position number of line in which breakpoint should be placed
+   * @param position number of line where breakpoint should be placed
    */
   public void setBreakPointAndWaitActiveState(int position) {
     waitActive();
@@ -1309,7 +1309,7 @@ public class CodenvyEditor {
   /**
    * Sets breakpoint to the specified {@code position} in the editor.
    *
-   * @param position number of line in which breakpoint should be placed
+   * @param position number of line where breakpoint should be placed
    */
   public void setBreakpoint(int position) {
     waitActive();
@@ -1320,7 +1320,7 @@ public class CodenvyEditor {
   /**
    * Waits until breakpoint with active state is in defined {@code position}.
    *
-   * @param position number of line in which breakpoint should be placed
+   * @param position number of line where breakpoint should be placed
    */
   public void waitActiveBreakpoint(int position) {
     seleniumWebDriverHelper.waitVisibility(By.xpath(format(DEBUGGER_BREAK_POINT_ACTIVE, position)));
@@ -1329,7 +1329,7 @@ public class CodenvyEditor {
   /**
    * Waits until breakpoint with inactive state is in defined {@code position}.
    *
-   * @param position number of line in which breakpoint should be placed
+   * @param position number of line where breakpoint should be placed
    */
   public void waitInactiveBreakpoint(int position) {
     seleniumWebDriverHelper.waitVisibility(
@@ -1340,7 +1340,7 @@ public class CodenvyEditor {
    * Waits until breakpoint with specified {@code activeState} is present in defined {@code
    * lineNumber}.
    *
-   * @param lineNumber number of line in which breakpoint should be placed
+   * @param lineNumber number of line where breakpoint should be placed
    * @param activeState state of breakpoint
    */
   public void waitConditionalBreakpoint(int lineNumber, boolean activeState) {
@@ -1354,7 +1354,7 @@ public class CodenvyEditor {
    * Waits until breakpoint with "disabled" status is present in the line with specified {@code
    * lineNumber}.
    *
-   * @param lineNumber number of line in which breakpoint should be placed
+   * @param lineNumber number of line where breakpoint should be placed
    */
   public void waitDisabledBreakpoint(int lineNumber) {
     seleniumWebDriverHelper.waitVisibility(
@@ -1507,7 +1507,7 @@ public class CodenvyEditor {
   /**
    * Waits active and focused editor's tab and gets cursor position.
    *
-   * <p>Note! For correct work, the editor's tab which should be checked, should be active.
+   * <p>Note! Before usage, ensure the checking editor's tab is active.
    *
    * @return cursor position which defined in line's number and char's number.
    */
@@ -1523,8 +1523,8 @@ public class CodenvyEditor {
    * Waits until cursor is placed in the position which specified {@code linePosition} and {@code
    * charPosition}.
    *
-   * @param linePosition line's number in which cursor should be placed
-   * @param charPosition char's position in which cursor should be placed
+   * @param linePosition line's number where cursor should be placed
+   * @param charPosition char's position where cursor should be placed
    */
   public void waitCursorPosition(final int linePosition, final int charPosition) {
     webDriverWaitFactory
@@ -1545,7 +1545,7 @@ public class CodenvyEditor {
     return new Pair<Integer, Integer>(currentCursorPositions[0], currentCursorPositions[1]);
   }
 
-  /** Gets number of the current line in which cursor is placed */
+  /** Gets number of the current line where cursor is placed */
   public int getPositionVisible() {
     waitActive();
     return getCurrentCursorPositionsFromVisible().first;
@@ -1575,8 +1575,8 @@ public class CodenvyEditor {
   /**
    * Waits until cursor is placed in specified {@code linePosition} and {@code charPosition}.
    *
-   * @param linePosition line's number in which cursor is expected
-   * @param charPosition char's number in which cursor is expected
+   * @param linePosition line's number where cursor is expected
+   * @param charPosition char's number where cursor is expected
    */
   public void waitSpecifiedValueForLineAndChar(final int linePosition, final int charPosition) {
     webDriverWaitFactory
@@ -1631,7 +1631,7 @@ public class CodenvyEditor {
   }
 
   /**
-   * Waits until the 'Implementation(s)' form is open.
+   * Waits until the 'Implementation(s)' form is opened.
    *
    * @param fileName is name of the selected file
    */
@@ -1675,7 +1675,7 @@ public class CodenvyEditor {
                 driver -> getTextFromImplementationForm().contains(expectedText));
   }
 
-  /** Gets visible text from the 'Implementation(s)' form */
+  /** Gets visible text from the 'Implementation(s)' form. */
   public String getTextFromImplementationForm() {
     return seleniumWebDriverHelper.waitVisibility(implementationContent).getText();
   }
@@ -1691,7 +1691,7 @@ public class CodenvyEditor {
   }
 
   /**
-   * Selects defined {@code itemName} in the 'Implementation' form
+   * Selects specified {@code itemName} in the 'Implementation' form.
    *
    * @param itemName visible name of the element which should be clicked
    */
@@ -1856,7 +1856,7 @@ public class CodenvyEditor {
   /**
    * Waits until the editor's tab with specified {@code tabName} is present in the tab list.
    *
-   * @param tabName visible name of the editor's tab which should be checked
+   * @param tabName title of the editor's tab which should be checked
    */
   public void waitTabIsPresentInTabList(String tabName) {
     seleniumWebDriverHelper.waitVisibility(By.xpath(format(ITEM_TAB_LIST, tabName)));
@@ -1865,7 +1865,7 @@ public class CodenvyEditor {
   /**
    * Waits until the tab with specified {@code tabName} is not present in the tab list.
    *
-   * @param tabName visible name of the editor's tab which should be checked
+   * @param tabName title of the editor's tab which should be checked
    */
   public void waitTabIsNotPresentInTabList(String tabName) {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(format(ITEM_TAB_LIST, tabName)));
@@ -1882,19 +1882,17 @@ public class CodenvyEditor {
   /**
    * Clicks on the tab with specified {@code tabName} in the tab list.
    *
-   * @param tabName visible name of the editor's tab which should be checked
+   * @param tabName title of the editor's tab which should be checked
    */
   public void clickOnTabInTabList(String tabName) {
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(ITEM_TAB_LIST, tabName)));
   }
 
   /**
-   * Selects editor's tab by specified {@code index} and {@code tabName}.
+   * Selects window of certain {@code index} of split editor's tab with specified {@code tabName}.
    *
-   * <p>Note! Is used for split editor.
-   *
-   * @param index index of the window which should be selected, numeration starts since "0"
-   * @param tabName visible name of the editor's tab which should be selected
+   * @param index index of the window of split tab which should be selected, starting from "0"
+   * @param tabName title of the editor's tab which is split
    */
   public void selectTabByIndexEditorWindow(int index, String tabName) {
     seleniumWebDriverHelper
@@ -1904,13 +1902,11 @@ public class CodenvyEditor {
   }
 
   /**
-   * Selects editor's tab by specified {@code index} and {@code tabName} and opens context menu for
-   * this tab.
+   * Selects window of certain {@code index} of split editor's tab with specified {@code tabName}
+   * and opens context menu for this tab.
    *
-   * <p>Note! Is used for split editor.
-   *
-   * @param index index of the window which should be selected, numeration starts since "0"
-   * @param tabName visible name of the editor's tab for which menu should be opened
+   * @param index index of the window which should be selected, starting from "0"
+   * @param tabName title of the editor's tab for which menu should be opened
    */
   public void selectTabByIndexEditorWindowAndOpenMenu(int index, String tabName) {
     List<WebElement> windowList =
@@ -1923,7 +1919,7 @@ public class CodenvyEditor {
   /**
    * Checks the editor's tab with specified {@code tabName} is present only once in the editor.
    *
-   * @param tabName visible name of the editor's tab for which menu should be opened
+   * @param tabName title of the editor's tab for which menu should be opened
    */
   public boolean tabIsPresentOnce(String tabName) {
     return 1
@@ -1993,7 +1989,7 @@ public class CodenvyEditor {
   /**
    * Opens context menu for the specified {@code selectedItem} in the editor.
    *
-   * @param selectedElement visible text in the editor on which context click should be perform
+   * @param selectedElement visible text in the editor on which context click should be performed
    */
   public void openContextMenuOnElementInEditor(String selectedElement) {
     actionsFactory
@@ -2006,7 +2002,7 @@ public class CodenvyEditor {
     waitContextMenu();
   }
 
-  /** Waits until context menu form is open. */
+  /** Waits until context menu form is opened. */
   public void waitContextMenu() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(CONTEXT_MENU));
   }
