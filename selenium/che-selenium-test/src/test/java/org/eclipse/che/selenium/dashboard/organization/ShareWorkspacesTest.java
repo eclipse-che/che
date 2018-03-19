@@ -28,6 +28,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceShare;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -35,6 +36,14 @@ import org.testng.annotations.Test;
 public class ShareWorkspacesTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
+  private static final String SYSTEM_ADMIN_PERMISSIONS =
+      "read, use, run, configure, setPermissions, delete";
+  private static final String ADMIN_PERMISSIONS = "read, use, run, configure, setPermissions";
+  private static final String MEMBER_PERMISSIONS = "read, use, run, configure";
+
+  private String systemAdminName;
+  private String adminName;
+  private String memberName;
 
   @InjectTestOrganization(prefix = "org")
   private TestOrganization org;
@@ -48,12 +57,17 @@ public class ShareWorkspacesTest {
   @Inject private NewWorkspace newWorkspace;
   @Inject private Workspaces workspaces;
   @Inject private TestUser testUser;
+  @Inject private TestUser testUser2;
   @Inject private WorkspaceShare workspaceShare;
 
   @BeforeClass
   public void setUp() throws Exception {
     org.addAdmin(adminTestUser.getId());
     org.addMember(testUser.getId());
+    org.addAdmin(testUser2.getId());
+    systemAdminName = adminTestUser.getEmail();
+    memberName = testUser.getEmail();
+    adminName = testUser2.getEmail();
 
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
     createWorkspace(org.getName(), WORKSPACE_NAME);
@@ -68,11 +82,28 @@ public class ShareWorkspacesTest {
     workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
     workspaceDetails.selectTabInWorkspaceMenu(TabNames.SHARE);
 
-    workspaceShare.waitMemberNameInShareList("admin@admin.com");
+    workspaceShare.waitMemberNameInShareList(systemAdminName);
+    Assert.assertEquals(
+        workspaceShare.getMemberPermissions(systemAdminName), SYSTEM_ADMIN_PERMISSIONS);
 
+    // TODO check/uncheck members
+    workspaceShare.clickOnMemberCheckbox(systemAdminName);
+    Assert.assertEquals(workspaceShare.isMemberCheckedInList(systemAdminName), "true");
+
+    // add a new member
     workspaceShare.clickOnAddDeveloperButton();
     workspaceShare.waitInviteMemberDialog();
-    workspaceShare.closeInviteMemberDialog();
+    workspaceShare.selectAllMembersInDialogByBulk();
+    workspaceShare.clickOnShareWorkspaceButton();
+
+    // check the added member permission
+    workspaceShare.waitMemberNameInShareList(memberName);
+    Assert.assertEquals(workspaceShare.getMemberPermissions(memberName), ADMIN_PERMISSIONS);
+
+    // remove the member from the members list
+    workspaceShare.clickOnRemoveMemberButton(memberName);
+    workspaceDetails.clickOnDeleteButtonInDialogWindow();
+    workspaceShare.waitMemberNameNotExistsInShareList(memberName);
   }
 
   @Test

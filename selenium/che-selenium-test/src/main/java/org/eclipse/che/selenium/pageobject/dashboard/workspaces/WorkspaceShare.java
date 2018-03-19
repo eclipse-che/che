@@ -12,8 +12,6 @@ package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
@@ -38,42 +36,74 @@ public class WorkspaceShare {
   private interface Locators {
     String ADD_DEVELOPER_BTN = "//che-button-primary[@che-button-title='Add Developer']";
     String BULK_SELECTION = "share-workspace-bulk-selection";
+    String DELETE_MEMBERS_BUTTON = "delete-item-button";
 
     String MEMBER_ITEM = "//div[@id='member-name-%s']";
     String MEMBER_NAME_XPATH = MEMBER_ITEM + "//span[@name='member-name']";
-    String MEMBER_CHECKBOX_XPATH = MEMBER_ITEM + "//span[@name='remove-member']";
+    String MEMBER_CHECKBOX_XPATH = MEMBER_ITEM + "//md-checkbox";
     String MEMBER_PERMISSIONS_XPATH = MEMBER_ITEM + "//span[@name='member-permissions']";;
     String REMOVE_MEMBER_ICON = MEMBER_ITEM + "//div[@name='remove-member']";
 
-    String INVITE_MEMBER_DIALOG = "//che-popup[@id='add-members-dialog']";
+    String INVITE_MEMBER_DIALOG = "add-members-dialog";
     String CLOSE_DIALOG_BUTTON_NAME = "close-dialog-button";
-    String SELECT_MEMBER_DIALOG_BUTTON = "//che-button-primary[@che-button-title='Share']";
-    String SHARE_WORKSPACE_DIALOG_BUTTON_NAME = "shareButton";
+    String SELECT_ALL_MEMBERS_BY_BULK_DIALOG = "//md-checkbox[@aria-label='Member list']";
+    String SHARE_WORKSPACE_DIALOG_BUTTON = "shareButton";
 
     String NO_MEMBERS_IN_ORGANIZATION_DIALOG = "//md-dialog";
 
     String FILTER_MEMBERS_BY_NAME_FIELD = "";
-
-    String INPUT_SHARE_DIALOG = "//md-chips[contains(@class,'share-user-input')]//input";
-    String SHARE_BTN_DIALOG = "//che-button-primary[@aria-disabled='false']//span[text()='Share']";
-    String DEVELOPER_SHARE_ITEM = "//span[text()='%s']";
-    String WARNING_DIALOG_DELETE = "//div[@class='ng-binding' and text()=\"%s\"]";
   }
 
+  /**
+   * Wait the email of developer is present in 'Share' tab
+   *
+   * @param name the email of developer
+   */
   public void waitMemberNameInShareList(String name) {
     seleniumWebDriverHelper.waitVisibility(By.xpath(format(Locators.MEMBER_NAME_XPATH, name)));
+  }
+
+  public void waitMemberNameNotExistsInShareList(String name) {
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(format(Locators.MEMBER_NAME_XPATH, name)));
   }
 
   public void clickOnAddDeveloperButton() {
     seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.ADD_DEVELOPER_BTN));
   }
 
+  public String getMemberPermissions(String name) {
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(
+        By.xpath(format(Locators.MEMBER_PERMISSIONS_XPATH, name)));
+  }
+
+  public void clickOnMemberCheckbox(String name) {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(format(Locators.MEMBER_CHECKBOX_XPATH, name)));
+  }
+
+  public String isMemberCheckedInList(String name) {
+    return seleniumWebDriverHelper
+        .waitVisibility(By.xpath(format(Locators.MEMBER_CHECKBOX_XPATH, name)))
+        .getAttribute("aria-checked");
+  }
+
+  public void clickOnRemoveMemberButton(String name) {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(format(Locators.REMOVE_MEMBER_ICON, name)));
+  }
+
   public void waitInviteMemberDialog() {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.INVITE_MEMBER_DIALOG));
+    seleniumWebDriverHelper.waitVisibility(By.id(Locators.INVITE_MEMBER_DIALOG));
+  }
+
+  public void selectAllMembersInDialogByBulk() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.SELECT_ALL_MEMBERS_BY_BULK_DIALOG));
+  }
+
+  public void clickOnShareWorkspaceButton() {
+    seleniumWebDriverHelper.waitAndClick(By.name(Locators.SHARE_WORKSPACE_DIALOG_BUTTON));
   }
 
   public void closeInviteMemberDialog() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.INVITE_MEMBER_DIALOG));
+    seleniumWebDriverHelper.waitAndClick(By.id(Locators.INVITE_MEMBER_DIALOG));
   }
 
   public void waitNoMembersDialog() {
@@ -82,23 +112,6 @@ public class WorkspaceShare {
 
   public void closeNoMembersDialog() {
     seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.NO_MEMBERS_IN_ORGANIZATION_DIALOG));
-  }
-
-  /**
-   * Adds developer to share list
-   *
-   * @param email is an email of developer into sharing list
-   */
-  public void addDeveloperToShareList(String email) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(Locators.ADD_DEVELOPER_BTN)))
-        .click();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(Locators.INPUT_SHARE_DIALOG)))
-        .sendKeys(email + ",");
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(Locators.SHARE_BTN_DIALOG)))
-        .click();
   }
 
   /**
@@ -111,34 +124,5 @@ public class WorkspaceShare {
         .until(
             visibilityOfElementLocated(By.xpath(String.format(Locators.REMOVE_MEMBER_ICON, email))))
         .click();
-  }
-
-  /** Wait the text into warning dialog delete or remove */
-  public void waitTextInWarningDialogDelete(String expText) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(String.format(Locators.WARNING_DIALOG_DELETE, expText))));
-  }
-
-  /**
-   * Wait the email of developer is present in 'Share' tab
-   *
-   * @param email the email of developer
-   */
-  public void waitDeveloperIsPresentInShareTab(String email) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(format(Locators.DEVELOPER_SHARE_ITEM, email))));
-  }
-
-  /**
-   * Wait the email of developer is not present in 'Share' tab
-   *
-   * @param email the email of developer
-   */
-  public void waitDeveloperIsNotPresentInShareTab(String email) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            invisibilityOfElementLocated(By.xpath(format(Locators.DEVELOPER_SHARE_ITEM, email))));
   }
 }
