@@ -13,8 +13,10 @@ package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
+import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementValue;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
@@ -86,6 +88,11 @@ public class WorkspaceOverview {
 
   public Boolean isWorkspaceNameErrorMessageEquals(String message) {
     return errorMessages.getText().equals(message);
+  }
+
+  public void checkOnWorkspaceNameErrorAbsence() {
+    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        .until(invisibilityOfElementLocated(By.xpath("//che-error-messages/div")));
   }
 
   public void enterNameWorkspace(String nameWorkspace) {

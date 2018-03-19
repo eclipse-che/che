@@ -87,7 +87,8 @@ public class FromJsonGenerator extends ConversionGenerator {
   }
 
   private void generateMapConversion(
-      String indent, PrintWriter out, String varName, String jsonValName, Type paramType) {
+      String indent, PrintWriter out, String varName, String jsonValName, Type inputParamType) {
+    Type paramType = inputParamType;
     if (!(paramType instanceof ParameterizedType)) {
       paramType = ((Class<?>) paramType).getGenericSuperclass();
     }
@@ -95,11 +96,18 @@ public class FromJsonGenerator extends ConversionGenerator {
     Type containedType = genericType.getActualTypeArguments()[1];
     String objectName = varName + "o";
     String containedName = objectName + "X";
+    String typeName = inputParamType.getTypeName();
+    String instantiateTypeName = typeName;
+    if (getRawClass(inputParamType).isInterface()) {
+      if (inputParamType instanceof ParameterizedType) {
+        instantiateTypeName = String.format("HashMap<String, %1$s>", containedType.getTypeName());
+      } else {
+        throw new RuntimeException(
+            "Unsupported Map Conversion. Generator needs to be updated for new LSP4J construct");
+      }
+    }
     out.println(
-        indent
-            + String.format(
-                "HashMap<String, %1$s> %2$s= new HashMap<String, %3$s>();",
-                containedType.getTypeName(), varName, containedType.getTypeName()));
+        indent + String.format("%1$s %2$s= new %3$s();", typeName, varName, instantiateTypeName));
     out.println(
         indent
             + String.format(
