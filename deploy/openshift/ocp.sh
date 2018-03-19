@@ -34,11 +34,6 @@ export JQ_BINARY_DOWNLOAD_URL=${JQ_BINARY_DOWNLOAD_URL:-${DEFAULT_JQ_BINARY_DOWN
 DEFAULT_CHE_MULTIUSER="false"
 export CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
 
-#Using local scripts is error prone and should only be used temporarly while developing Che.
-#If unsure leave the default value true set.
-DEFAULT_CHE_OPENSHIFT_GENERATE_SCRIPTS=true
-export CHE_OPENSHIFT_GENERATE_SCRIPTS=${CHE_OPENSHIFT_GENERATE_SCRIPTS:-${DEFAULT_CHE_OPENSHIFT_GENERATE_SCRIPTS}}
-
 DEFAULT_OPENSHIFT_USERNAME="developer"
 export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
 
@@ -74,9 +69,6 @@ export IMAGE_PULL_POLICY=${IMAGE_PULL_POLICY:-${DEFAULT_IMAGE_PULL_POLICY}}
 
 DEFAULT_CHE_IMAGE_REPO="eclipse/che-server"
 export CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
-
-DEFAULT_IMAGE_INIT="eclipse/che-init:nightly"
-export IMAGE_INIT=${IMAGE_INIT:-${DEFAULT_IMAGE_INIT}}
 
 DEFAULT_CHE_CLI_IMAGE="eclipse/che-cli:nightly"
 export CHE_CLI_IMAGE=${CHE_CLI_IMAGE:-${DEFAULT_CHE_CLI_IMAGE}}
@@ -178,21 +170,6 @@ run_ocp() {
 }
 
 deploy_che_to_ocp() {
-    OPENSHIFT_SCRIPTS_FOLDER="${CONFIG_DIR}/instance/config/openshift/scripts/"
-    #Repull init image only if IMAGE_PULL_POLICY is set to Always
-    if [ $IMAGE_PULL_POLICY == "Always" ]; then
-        docker pull "$IMAGE_INIT"
-    fi
-    #Only generate scripts and config files if CHE_OPENSHIFT_GENERATE_SCRIPTS=true
-    if [ $CHE_OPENSHIFT_GENERATE_SCRIPTS == true ]; then
-      echo "OCP generating temporary scripts and configuration files at ${OPENSHIFT_SCRIPTS_FOLDER} ."
-      #wipeout config folder
-      docker run -v "${CONFIG_DIR}":/to_remove alpine sh -c "rm -rf /to_remove/" || true
-      docker run -t --rm -v /var/run/docker.sock:/var/run/docker.sock -v "${CONFIG_DIR}":/data -e IMAGE_INIT="$IMAGE_INIT" -e CHE_MULTIUSER="$CHE_MULTIUSER" ${CHE_CLI_IMAGE} config --skip:pull --skip:nightly
-      cd ${OPENSHIFT_SCRIPTS_FOLDER}
-    else
-      echo "OCP using existing scripts and configuration files in current folder."
-    fi
     if [[ ! -f "deploy_che.sh" ]]; then
       CURRENT_PWD=$(pwd)
       echo "OCP script deploy_che.sh does not exist in ${CURRENT_PWD} ."
@@ -257,8 +234,7 @@ parse_args() {
     ENV vars
     CHE_IMAGE_TAG - set che-server image tag, default: nightly
     CHE_CLI_IMAGE - set che-cli image, default: eclipse/che-cli:nightly 
-    IMAGE_INIT - set che-cli image, default: eclipse/che-init:nightly
-    CHE_MULTIUSER - set CHE multi user mode, default: false (single user) 
+    CHE_MULTIUSER - set CHE multi user mode, default: false (single user)
     OC_PUBLIC_HOSTNAME - set ocp hostname to admin console, default: host ip
     OC_PUBLIC_IP - set ocp hostname for routing suffix, default: host ip
     DNS_PROVIDER - set ocp DNS provider for routing suffix, default: nip.io

@@ -1,6 +1,6 @@
 # Deploy single user Che to k8s
 Tested on minikube with vm providers Virtualbox and kvm2. Note that Che with workspaces requires quite a lot
-of RAM. Initial tests were done with 10GB, but it is definitely more than it is needed to start Che 
+of RAM. Initial tests were done with 10GB, but it is definitely more than it is needed to start Che
 and couple of workspaces.
 
 IP of VM is supposed to be `192.168.99.100`. `nip.io` is also used for handling hosts resolution.

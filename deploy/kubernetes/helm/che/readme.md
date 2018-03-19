@@ -38,22 +38,22 @@ The context of the commands below is the directory in which this readme file res
 #### Deployment types
 Currenty, only minikube deployment is supported.
 
-##### Single User 
+##### Single User
 Only Che will be deployed.
 
   ```bash
   helm upgrade --install <che-release> --namespace <che-namespace> --set global.cheDomain=<domain> ./
   ```
-  
-##### Multi User 
+
+##### Multi User
 Che, KeyCloak and Postgres will be deployed.
 
   ```bash
   helm upgrade --install <che-release> --namespace <che-namespace> --set global.multiuser=true --set global.cheDomain=<domain> ./
   ```
-  
+
 ##### No Host:
- Ingress will serve requests on minikube-ip. 
+ Ingress will serve requests on minikube-ip.
  Path based routing to Che, Secondary servers (KeyCloak) and Workspace servers.
 
   ```bash
@@ -62,25 +62,25 @@ Che, KeyCloak and Postgres will be deployed.
    Workspaces: http://<minikube-ip>/<path-to-server>
    Keycloak (if multiuser) : http://<minikube-ip>/auth/
   ```
-  
-##### Host (partial): 
+
+##### Host (partial):
  WS Master Ingress will serve requests on provided domain
- Workspaces: Ingress will serve requests on minikube-ip, Path Based routing to workspaces. 
- KeyCloak : dedicated hostname 
-   
+ Workspaces: Ingress will serve requests on minikube-ip, Path Based routing to workspaces.
+ KeyCloak : dedicated hostname
+
    ```bash
    helm upgrade --install <che-release> --namespace <che-namespace> --set global.cheDomain=<minikube-ip>.xip.io ./
    Master: http://master.<minikube-ip>.xip.io
    Workspaces: http://<minikube-ip>/<path-to-server>
    Keycloak (if multiuser): http://keycloak.<minikube-ip>.xip.io/
    ```
- 
+
 
 ##### Future options:
-- Path Based: single hostname for all components (che, keycloak, WS servers) 
+- Path Based: single hostname for all components (che, keycloak, WS servers)
 - Host Based: unique host for each component
 - TLS
-  
+
 ## Deleting a Deployment
 You can delete a deployment using the following command:
 ``` bash
