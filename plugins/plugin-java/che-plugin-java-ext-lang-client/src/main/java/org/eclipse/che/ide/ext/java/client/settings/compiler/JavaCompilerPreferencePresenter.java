@@ -38,13 +38,10 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
@@ -70,7 +67,8 @@ public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePrese
   private final Provider<NotificationManager> notificationManagerProvider;
   private final JavaLocalizationConstant locale;
 
-  private final List<PropertyWidget> widgets;
+  private List<ErrorWarningsOptions> options;
+  private Map<String, PropertyWidget> widgets;
 
   @Inject
   public JavaCompilerPreferencePresenter(
@@ -86,8 +84,9 @@ public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePrese
     this.preferencesManager = preferencesManager;
     this.notificationManagerProvider = notificationManagerProvider;
     this.locale = locale;
+    this.widgets = new HashMap<>();
 
-    this.widgets = new ArrayList<>();
+    fillUpOptions();
   }
 
   @Inject
@@ -95,14 +94,14 @@ public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePrese
     eventBus.addHandler(WorkspaceRunningEvent.TYPE, this);
 
     if (appContext.getWorkspace().getStatus() == RUNNING) {
-      addErrorWarningsPanel();
+      updateErrorWarningsPanel();
     }
   }
 
   /** {@inheritDoc} */
   @Override
   public boolean isDirty() {
-    for (PropertyWidget widget : widgets) {
+    for (PropertyWidget widget : widgets.values()) {
       String propertyName = widget.getOptionId().toString();
       String changedValue = widget.getSelectedValue();
 
@@ -116,27 +115,33 @@ public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePrese
   /** {@inheritDoc} */
   @Override
   public void storeChanges() {
-    for (PropertyWidget widget : widgets) {
-      String propertyName = widget.getOptionId().toString();
-      String selectedValue = widget.getSelectedValue();
+    widgets
+        .values()
+        .forEach(
+            widget -> {
+              String propertyName = widget.getOptionId().toString();
+              String selectedValue = widget.getSelectedValue();
 
-      if (!selectedValue.equals(preferencesManager.getValue(propertyName))) {
-        preferencesManager.setValue(propertyName, selectedValue);
-      }
-    }
+              if (!selectedValue.equals(preferencesManager.getValue(propertyName))) {
+                preferencesManager.setValue(propertyName, selectedValue);
+              }
+            });
   }
 
   /** {@inheritDoc} */
   @Override
   public void revertChanges() {
-    for (PropertyWidget widget : widgets) {
-      String propertyId = widget.getOptionId().toString();
-      String previousValue = preferencesManager.getValue(propertyId);
+    widgets
+        .values()
+        .forEach(
+            widget -> {
+              String propertyId = widget.getOptionId().toString();
+              String previousValue = preferencesManager.getValue(propertyId);
 
-      if (!widget.getSelectedValue().equals(previousValue)) {
-        widget.selectPropertyValue(previousValue);
-      }
-    }
+              if (!widget.getSelectedValue().equals(previousValue)) {
+                widget.selectPropertyValue(previousValue);
+              }
+            });
   }
 
   /** {@inheritDoc} */
@@ -151,65 +156,69 @@ public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePrese
     container.setWidget(view);
   }
 
-  private void addErrorWarningsPanel() {
+  @Override
+  public void onWorkspaceRunning(WorkspaceRunningEvent event) {
+    updateErrorWarningsPanel();
+  }
+
+  private void updateErrorWarningsPanel() {
     preferencesManager
         .loadPreferences()
         .then(
-            new Operation<Map<String, String>>() {
-              @Override
-              public void apply(Map<String, String> properties) throws OperationException {
-                List<ErrorWarningsOptions> options =
-                    asList(
-                        COMPILER_UNUSED_LOCAL,
-                        COMPILER_UNUSED_IMPORT,
-                        DEAD_CODE,
-                        METHOD_WITH_CONSTRUCTOR_NAME,
-                        UNNECESSARY_ELSE_STATEMENT,
-                        COMPARING_IDENTICAL_VALUES,
-                        NO_EFFECT_ASSIGNMENT,
-                        MISSING_SERIAL_VERSION_UID,
-                        TYPE_PARAMETER_HIDE_ANOTHER_TYPE,
-                        FIELD_HIDES_ANOTHER_VARIABLE,
-                        MISSING_DEFAULT_CASE,
-                        UNUSED_PRIVATE_MEMBER,
-                        UNCHECKED_TYPE_OPERATION,
-                        USAGE_OF_RAW_TYPE,
-                        MISSING_OVERRIDE_ANNOTATION,
-                        NULL_POINTER_ACCESS,
-                        POTENTIAL_NULL_POINTER_ACCESS,
-                        REDUNDANT_NULL_CHECK);
-                for (ErrorWarningsOptions option : options) {
-                  createAndAddWidget(option);
-                }
-              }
+            properties -> {
+              options.forEach(this::provideWidget);
             })
         .catchError(
-            new Operation<PromiseError>() {
-              @Override
-              public void apply(PromiseError arg) throws OperationException {
-                notificationManagerProvider
-                    .get()
-                    .notify(
-                        locale.unableToLoadJavaCompilerErrorsWarningsSettings(), FAIL, FLOAT_MODE);
-              }
+            error -> {
+              notificationManagerProvider
+                  .get()
+                  .notify(
+                      locale.unableToLoadJavaCompilerErrorsWarningsSettings(), FAIL, FLOAT_MODE);
             });
   }
 
-  private void createAndAddWidget(@NotNull ErrorWarningsOptions option) {
+  /** Creates a new widget when widget does not exist for given option, updates widget otherwise */
+  private void provideWidget(@NotNull ErrorWarningsOptions option) {
+    String optionId = option.toString();
+    String value = preferencesManager.getValue(optionId);
+
+    if (widgets.containsKey(optionId)) {
+      PropertyWidget widget = widgets.get(optionId);
+      widget.selectPropertyValue(value);
+      return;
+    }
+
     PropertyWidget widget = propertyFactory.create(option);
 
-    String value = preferencesManager.getValue(option.toString());
     widget.selectPropertyValue(value);
 
     widget.setDelegate(JavaCompilerPreferencePresenter.this);
 
-    widgets.add(widget);
+    widgets.put(optionId, widget);
 
     view.addProperty(widget);
   }
 
-  @Override
-  public void onWorkspaceRunning(WorkspaceRunningEvent event) {
-    addErrorWarningsPanel();
+  private void fillUpOptions() {
+    options =
+        asList(
+            COMPILER_UNUSED_LOCAL,
+            COMPILER_UNUSED_IMPORT,
+            DEAD_CODE,
+            METHOD_WITH_CONSTRUCTOR_NAME,
+            UNNECESSARY_ELSE_STATEMENT,
+            COMPARING_IDENTICAL_VALUES,
+            NO_EFFECT_ASSIGNMENT,
+            MISSING_SERIAL_VERSION_UID,
+            TYPE_PARAMETER_HIDE_ANOTHER_TYPE,
+            FIELD_HIDES_ANOTHER_VARIABLE,
+            MISSING_DEFAULT_CASE,
+            UNUSED_PRIVATE_MEMBER,
+            UNCHECKED_TYPE_OPERATION,
+            USAGE_OF_RAW_TYPE,
+            MISSING_OVERRIDE_ANNOTATION,
+            NULL_POINTER_ACCESS,
+            POTENTIAL_NULL_POINTER_ACCESS,
+            REDUNDANT_NULL_CHECK);
   }
 }

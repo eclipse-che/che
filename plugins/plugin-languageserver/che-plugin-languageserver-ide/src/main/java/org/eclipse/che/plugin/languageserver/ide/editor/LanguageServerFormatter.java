@@ -188,7 +188,7 @@ public class LanguageServerFormatter implements ContentFormatter {
   }
 
   private FormattingOptions getFormattingOptions() {
-    FormattingOptions options = dtoFactory.createDto(FormattingOptions.class);
+    FormattingOptions options = new FormattingOptions();
     options.setInsertSpaces(Boolean.parseBoolean(getEditorProperty(EditorProperties.EXPAND_TAB)));
     options.setTabSize(Integer.parseInt(getEditorProperty(EditorProperties.TAB_SIZE)));
     return options;

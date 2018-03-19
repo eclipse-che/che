@@ -33,6 +33,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -101,12 +102,11 @@ public final class DtoFactory {
   // It helps avoid reflection when need create copy of exited DTO instance.
   private final Map<Class<?>, DtoProvider<?>> dtoImpl2Providers = new ConcurrentHashMap<>();
   private final Gson dtoGson =
-      new GsonBuilder()
-          .registerTypeAdapterFactory(
-              new NullAsEmptyTAF<>(Collection.class, Collections.emptyList()))
-          .registerTypeAdapterFactory(new NullAsEmptyTAF<>(Map.class, Collections.emptyMap()))
-          .registerTypeAdapterFactory(new DtoInterfaceTAF())
-          .create();
+      buildDtoParser(
+          ServiceLoader.load(TypeAdapterFactory.class).iterator(),
+          new NullAsEmptyTAF<>(Collection.class, Collections.emptyList()),
+          new NullAsEmptyTAF<>(Map.class, Collections.emptyMap()),
+          new DtoInterfaceTAF());
 
   /**
    * Created deep copy of DTO object.
@@ -490,4 +490,19 @@ public final class DtoFactory {
   }
 
   private DtoFactory() {}
+
+  private static Gson buildDtoParser(
+      Iterator<TypeAdapterFactory> factoryIterator, TypeAdapterFactory... factories) {
+    GsonBuilder builder = new GsonBuilder();
+
+    for (Iterator<TypeAdapterFactory> it = factoryIterator; it.hasNext(); ) {
+      TypeAdapterFactory factory = it.next();
+      builder.registerTypeAdapterFactory(factory);
+    }
+
+    for (TypeAdapterFactory factory : factories) {
+      builder.registerTypeAdapterFactory(factory);
+    }
+    return builder.create();
+  }
 }

@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.api.languageserver.dto;
 
+import com.google.gson.JsonElement;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -25,12 +26,16 @@ import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.ParameterInf
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.WorkspaceEditDto;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.DocumentFormattingParams;
+import org.eclipse.lsp4j.FormattingOptions;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkedString;
 import org.eclipse.lsp4j.ParameterInformation;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
@@ -81,6 +86,88 @@ public class DtoConversionTest {
     String jsonString = originalDto.toJson();
     WorkspaceEditDto convertedDto = WorkspaceEditDto.fromJson(jsonString);
     Assert.assertTrue(reflectionEquals(originalDto, convertedDto));
+  }
+
+  @Test
+  public void testDocumentFormattingParamsDeserializerWithGson() throws Exception {
+    FormattingOptions formattingOptions = new FormattingOptions(4, true);
+    TextDocumentIdentifier textDocument =
+        DtoFactory.getInstance().createDto(TextDocumentIdentifier.class);
+    textDocument.setUri("/console-java-simple/src/main/java/org/eclipse/che/examples/A.java");
+    DocumentFormattingParams documentFormattingParams =
+        DtoFactory.getInstance().createDto(DocumentFormattingParams.class);
+    documentFormattingParams.setOptions(formattingOptions);
+    documentFormattingParams.setTextDocument(textDocument);
+    JsonElement json = DtoFactory.getInstance().toJsonElement(documentFormattingParams);
+
+    DocumentFormattingParams params =
+        DtoFactory.getInstance().createDtoFromJson(json.toString(), DocumentFormattingParams.class);
+
+    Assert.assertTrue(params.getOptions().isInsertSpaces());
+  }
+
+  @Test
+  public void testDocumentFormattingParamsDeserializerWithDto() throws Exception {
+    FormattingOptions formattingOptions = new FormattingOptions(4, true);
+    TextDocumentIdentifier textDocument =
+        DtoFactory.getInstance().createDto(TextDocumentIdentifier.class);
+    textDocument.setUri("/console-java-simple/src/main/java/org/eclipse/che/examples/A.java");
+    DocumentFormattingParams documentFormattingParams =
+        DtoFactory.getInstance().createDto(DocumentFormattingParams.class);
+    documentFormattingParams.setOptions(formattingOptions);
+    documentFormattingParams.setTextDocument(textDocument);
+    JsonElement json = DtoFactory.getInstance().toJsonElement(documentFormattingParams);
+
+    DocumentFormattingParams params =
+        DtoFactory.getInstance().createDtoFromJson(json, DocumentFormattingParams.class);
+
+    Assert.assertTrue(params.getOptions().isInsertSpaces());
+  }
+
+  /** Test the Either conversion by using a Hover object. */
+  @Test
+  public void testEitherDeserializerWithDto() throws Exception {
+    Hover hover = DtoFactory.getInstance().createDto(Hover.class);
+    MarkedString markedString = DtoFactory.getInstance().createDto(MarkedString.class);
+    markedString.setLanguage("Language");
+    markedString.setValue("Value");
+    List<Either<String, MarkedString>> list = new ArrayList<>();
+    list.add(Either.forRight(markedString));
+    list.add(Either.forLeft("normal String"));
+    hover.setContents(list);
+
+    JsonElement json = DtoFactory.getInstance().toJsonElement(hover);
+
+    Hover params = DtoFactory.getInstance().createDtoFromJson(json, Hover.class);
+
+    Assert.assertTrue(params.getContents().get(0).isRight());
+    Assert.assertEquals("Value", params.getContents().get(0).getRight().getValue());
+    Assert.assertEquals("Language", params.getContents().get(0).getRight().getLanguage());
+    Assert.assertTrue(params.getContents().get(1).isLeft());
+    Assert.assertEquals("normal String", params.getContents().get(1).getLeft());
+  }
+
+  /** Test the Either conversion by using a Hover object. */
+  @Test
+  public void testEitherDeserializerWithGson() throws Exception {
+    Hover hover = DtoFactory.getInstance().createDto(Hover.class);
+    MarkedString markedString = DtoFactory.getInstance().createDto(MarkedString.class);
+    markedString.setLanguage("Language");
+    markedString.setValue("Value");
+    List<Either<String, MarkedString>> list = new ArrayList<>();
+    list.add(Either.forRight(markedString));
+    list.add(Either.forLeft("normal String"));
+    hover.setContents(list);
+
+    JsonElement json = DtoFactory.getInstance().toJsonElement(hover);
+
+    Hover params = DtoFactory.getInstance().createDtoFromJson(json.toString(), Hover.class);
+
+    Assert.assertTrue(params.getContents().get(0).isRight());
+    Assert.assertEquals("Value", params.getContents().get(0).getRight().getValue());
+    Assert.assertEquals("Language", params.getContents().get(0).getRight().getLanguage());
+    Assert.assertTrue(params.getContents().get(1).isLeft());
+    Assert.assertEquals("normal String", params.getContents().get(1).getLeft());
   }
 
   @Test
