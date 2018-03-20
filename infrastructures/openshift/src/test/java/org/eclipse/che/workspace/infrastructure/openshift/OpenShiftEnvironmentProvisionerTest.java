@@ -20,8 +20,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeM
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftServersConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftUniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProvisioner;
 import org.mockito.InOrder;
@@ -46,7 +46,7 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private RuntimeIdentity runtimeIdentity;
   @Mock private RouteTlsProvisioner tlsRouteProvisioner;
   @Mock private EnvVarsConverter envVarsProvisioner;
-  @Mock private OpenShiftServersConverter serversProvisioner;
+  @Mock private ServersConverter serversProvisioner;
   @Mock private RestartPolicyRewriter restartPolicyRewriter;
   @Mock private RamLimitProvisioner ramLimitProvisioner;
   @Mock private LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;

@@ -30,7 +30,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServ
  *
  * @author Sergii Leshchenko
  * @author Alexander Garagatyi
- * @see OpenShiftServerExposer
+ * @see OpenShiftExternalServerExposer
  * @see Annotations
  */
 public class OpenShiftServerResolver extends KubernetesServerResolver {
