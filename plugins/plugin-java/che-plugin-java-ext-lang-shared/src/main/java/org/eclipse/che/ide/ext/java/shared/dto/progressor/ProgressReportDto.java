@@ -45,10 +45,10 @@ public interface ProgressReportDto {
   void setWorkDone(int workDone);
 
   /** @return the task type */
-  String getType();
+  String getSubTask();
 
-  /** @param type the task type to set */
-  void setType(String type);
+  /** @param subTask the subTask to set */
+  void setSubTask(String subTask);
 
   /** @return the report id */
   String getId();

@@ -58,7 +58,7 @@ public class ProcessorJsonRpcCommunication {
     reportDto.setTask(report.getTask());
     reportDto.setTotalWork(report.getTotalWork());
     reportDto.setWorkDone(report.getWorkDone());
-    reportDto.setType(report.getTaskType());
+    reportDto.setSubTask(report.getSubTask());
 
     endpointIds.forEach(
         it ->

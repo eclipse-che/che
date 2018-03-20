@@ -25,13 +25,13 @@ public class ProgressReport {
   @Expose
   private String id;
 
-  @SerializedName("type")
-  @Expose
-  private String taskType;
-
   @SerializedName("task")
   @Expose
   private String task;
+
+  @SerializedName("subTask")
+  @Expose
+  private String subTask;
 
   @SerializedName("status")
   @Expose
@@ -103,23 +103,18 @@ public class ProgressReport {
     this.workDone = workDone;
   }
 
-  /** @return the task type */
-  public String getTaskType() {
-    return taskType;
-  }
-
-  /** @param type the task type to set */
-  public void setTaskType(String type) {
-    this.taskType = type;
-  }
-
-  /** @return the report id */
+  /** @return the progress id */
   public String getId() {
     return id;
   }
 
-  /** @param id the report id to set */
-  public void setId(String id) {
-    this.id = id;
+  /** @return the subTask name */
+  public String getSubTask() {
+    return subTask;
+  }
+
+  /** @param subTask the subTask to set */
+  public void setSubTask(String subTask) {
+    this.subTask = subTask;
   }
 }

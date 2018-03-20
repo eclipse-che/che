@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.ide.ext.java.client.progressor;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.gwt.dom.client.Style.Unit.PCT;
 
 import com.google.gwt.uibinder.client.UiBinder;
@@ -40,7 +41,9 @@ public class ProgressViewImpl implements ProgressView {
 
   @Override
   public void updateProgressBar(ProgressReportDto progressor) {
-    operationLabel.setText(progressor.getStatus());
+    String label =
+        isNullOrEmpty(progressor.getSubTask()) ? progressor.getStatus() : progressor.getSubTask();
+    operationLabel.setText(label);
     int totalWork = progressor.getTotalWork();
     if (totalWork > 0) {
       double percent = ((double) progressor.getWorkDone() / progressor.getTotalWork());
