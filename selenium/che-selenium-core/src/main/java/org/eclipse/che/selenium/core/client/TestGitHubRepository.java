@@ -79,9 +79,9 @@ public class TestGitHubRepository {
             });
   }
 
-  public void delete(Path folder, String commitMessage) throws IOException {
+  public void deleteFolder(Path folder, String deleteCommitMessage) throws IOException {
     for (GHContent ghContent : ghRepository.getDirectoryContent(folder.toString())) {
-      ghContent.delete(commitMessage);
+      ghContent.delete(deleteCommitMessage);
     }
   }
 

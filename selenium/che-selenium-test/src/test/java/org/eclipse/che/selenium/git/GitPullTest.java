@@ -109,7 +109,7 @@ public class GitPullTest {
     checkPullAfterUpdatingContent(htmlFileName, currentTimeInMillis);
     checkPullAfterUpdatingContent(readmeTxtFileName, currentTimeInMillis);
 
-    testRepo.delete(Paths.get(folderWithPlainFilesPath), "remove file");
+    testRepo.deleteFolder(Paths.get(folderWithPlainFilesPath), "remove file");
 
     performPull();
     checkPullAfterRemovingContent(
