@@ -23,6 +23,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
@@ -31,7 +32,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -39,10 +39,13 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Aleksandr Shmaraiev */
 @Singleton
-public class CommandsEditor extends CodenvyEditor {
+public class CommandsEditor {
 
   private final WebDriverWait redrawWait;
   private final WebDriverWait elemDriverWait;
+  private final CodenvyEditor editor;
+  private final ActionsFactory actionsFactory;
+  private final SeleniumWebDriver seleniumWebDriver;
 
   @Inject
   public CommandsEditor(
@@ -52,18 +55,14 @@ public class CommandsEditor extends CodenvyEditor {
       AskForValueDialog askForValueDialog,
       TestWebElementRenderChecker testWebElementRenderChecker,
       SeleniumWebDriverHelper seleniumWebDriverHelper,
-      WebDriverWaitFactory webDriverWaitFactory) {
-    super(
-        seleniumWebDriver,
-        loader,
-        actionsFactory,
-        askForValueDialog,
-        testWebElementRenderChecker,
-        seleniumWebDriverHelper,
-        webDriverWaitFactory);
+      WebDriverWaitFactory webDriverWaitFactory,
+      CodenvyEditor editor) {
     PageFactory.initElements(seleniumWebDriver, this);
     redrawWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     elemDriverWait = new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC);
+    this.editor = editor;
+    this.actionsFactory = actionsFactory;
+    this.seleniumWebDriver = seleniumWebDriver;
   }
 
   public static final class CommandsEditorType {
@@ -145,6 +144,86 @@ public class CommandsEditor extends CodenvyEditor {
   @FindBy(xpath = CommandsLocators.COMMAND_MACROS_INPUT_FIELD)
   WebElement macrosInputField;
 
+  // -------------------------------------------------------------------------------
+
+  public void waitActive() {
+    editor.waitActive();
+  }
+
+  public void waitActive(int timeout) {
+    editor.waitActive(timeout);
+  }
+
+  public void cancelFormInEditorByEscape() {
+    editor.cancelFormInEditorByEscape();
+  }
+
+  public void typeTextIntoEditor(String text) {
+    editor.typeTextIntoEditor(text);
+  }
+
+  public void waitTextIntoEditor(final String expectedText) {
+    editor.waitTextIntoEditor(expectedText);
+  }
+
+  public void selectLineAndDelete() {
+    editor.selectLineAndDelete();
+  }
+
+  public void waitTabIsPresent(String nameOfFile) {
+    editor.waitTabIsPresent(nameOfFile);
+  }
+
+  public void waitTabFileWithSavedStatus(String nameOfFile) {
+    editor.waitTabFileWithSavedStatus(nameOfFile);
+  }
+
+  public void selectTabByName(String nameOfFile) {
+    editor.selectTabByName(nameOfFile);
+  }
+
+  public void waitActiveTabFileName(String nameOfFile) {
+    editor.waitActiveTabFileName(nameOfFile);
+  }
+
+  public void launchAutocompleteAndWaitContainer() {
+    editor.launchAutocompleteAndWaitContainer();
+  }
+
+  public void waitTextIntoAutocompleteContainer(final String expectedText) {
+    editor.waitTextIntoAutocompleteContainer(expectedText);
+  }
+
+  public void selectAutocompleteProposal(String item) {
+    editor.selectAutocompleteProposal(item);
+  }
+
+  public void enterAutocompleteProposal(String item) {
+    editor.enterAutocompleteProposal(item);
+  }
+
+  public void waitAutocompleteContainerIsClosed() {
+    editor.waitAutocompleteContainerIsClosed();
+  }
+
+  public void selectItemIntoAutocompleteAndPasteByDoubleClick(String item) {
+    editor.selectItemIntoAutocompleteAndPasteByDoubleClick(item);
+  }
+
+  public void closeAutocomplete() {
+    editor.closeAutocomplete();
+  }
+
+  public void launchAutocomplete() {
+    editor.launchAutocomplete();
+  }
+
+  public void waitTabIsNotPresent(String nameOfFile) {
+    editor.waitTabIsNotPresent(nameOfFile);
+  }
+
+  // -------------------------------------------------------------------------------
+
   public void clickOnRunButton() {
     redrawWait.until(visibilityOf(runButton)).click();
   }
@@ -196,7 +275,7 @@ public class CommandsEditor extends CodenvyEditor {
 
   public void setFocusIntoTypeCommandsEditor(String commandsEditorType) {
     redrawWait.until(visibilityOfElementLocated(By.xpath(commandsEditorType))).click();
-    waitActive();
+    editor.waitActive();
   }
 
   public void waitTextIntoDescriptionMacrosForm(String expText) {
@@ -278,28 +357,11 @@ public class CommandsEditor extends CodenvyEditor {
         .contains("rgb(37, 108, 159)");
   }
 
-  @Override
   public void deleteAllContent() {
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(Keys.CONTROL).perform();
-    action.sendKeys("a").perform();
-    action.keyUp(Keys.CONTROL).perform();
-    action.sendKeys(Keys.DELETE.toString()).perform();
+    editor.deleteAllContent();
   }
 
-  @Override
   public void setCursorToLine(int positionLine) {
-    loader.waitOnClosed();
-    actionsFactory
-        .createAction(seleniumWebDriver)
-        .sendKeys(Keys.chord(Keys.CONTROL, "l"))
-        .perform();
-    askForValueDialog.waitFormToOpen();
-    loader.waitOnClosed();
-    askForValueDialog.typeAndWaitText(String.valueOf(positionLine));
-    loader.waitOnClosed();
-    askForValueDialog.clickOkBtn();
-    askForValueDialog.waitFormToClose();
-    waitActive();
+    editor.setCursorToLine(positionLine);
   }
 }
