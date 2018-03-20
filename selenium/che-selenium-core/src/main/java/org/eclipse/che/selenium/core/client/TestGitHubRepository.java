@@ -49,7 +49,7 @@ public class TestGitHubRepository {
       try {
         repo = gitHub.getRepository(repo.getFullName());
         break;
-      } catch (Exception e) {
+      } catch (IOException e) {
         LOG.info("Waiting for {} to be created", repo.getFullName());
         Thread.sleep(TimeUnit.SECONDS.toMillis(1));
       }
