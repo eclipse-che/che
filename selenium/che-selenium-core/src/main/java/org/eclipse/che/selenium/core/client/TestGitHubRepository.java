@@ -10,13 +10,14 @@
  */
 package org.eclipse.che.selenium.core.client;
 
+import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.kohsuke.github.GHContent;
 import org.kohsuke.github.GHRepository;
@@ -50,8 +51,8 @@ public class TestGitHubRepository {
         repo = gitHub.getRepository(repo.getFullName());
         break;
       } catch (IOException e) {
-        LOG.info("Waiting for {} to be created", repo.getFullName());
-        Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+        LOG.info("Waiting for {} to be created", repo.getHtmlUrl());
+        sleepQuietly(1);
       }
     }
 
