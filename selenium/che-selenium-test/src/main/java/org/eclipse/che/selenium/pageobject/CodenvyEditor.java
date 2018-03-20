@@ -1154,8 +1154,9 @@ public class CodenvyEditor {
             .waitVisibility(By.xpath(format(TAB_FILE_NAME_XPATH + "/parent::div", fileName)))
             .getAttribute("focused");
   }
+
   /**
-   * Waits until editor's tab with specified {@code nameOfFile} is not present.
+   * Waits until editor's tab with specified {@code nameOfFile} is not presented.
    *
    * @param nameOfFile title of editor's tab which should be checked
    */
