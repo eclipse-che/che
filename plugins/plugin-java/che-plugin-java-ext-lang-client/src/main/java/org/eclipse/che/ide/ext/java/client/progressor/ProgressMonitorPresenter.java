@@ -10,12 +10,15 @@
  */
 package org.eclipse.che.ide.ext.java.client.progressor;
 
+import static java.lang.System.currentTimeMillis;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.ide.ext.java.client.inject.factories.ProgressWidgetFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.progressor.ProgressReportDto;
+import org.eclipse.che.ide.util.Pair;
 
 /**
  * Presenter of the window which describes information about all running tasks.
@@ -24,10 +27,12 @@ import org.eclipse.che.ide.ext.java.shared.dto.progressor.ProgressReportDto;
  */
 @Singleton
 public class ProgressMonitorPresenter {
+  private static final long UPDATE_PERIOD = 1_000L; // don't update more often then 1 sec
+
   private final ProgressMonitorView view;
   private final ProgressWidgetFactory progressFactory;
 
-  private Map<String, ProgressView> progresses = new HashMap<>();
+  private Map<String, Pair<ProgressView, Long>> progresses = new HashMap<>();
 
   @Inject
   public ProgressMonitorPresenter(ProgressMonitorView view, ProgressWidgetFactory progressFactory) {
@@ -50,10 +55,15 @@ public class ProgressMonitorPresenter {
     if (!progresses.containsKey(taskId)) {
       return;
     }
-    ProgressView progressView = progresses.get(taskId);
+    Pair<ProgressView, Long> updatedView = progresses.get(taskId);
+    ProgressView progressView = updatedView.getFirst();
     if (progress.isComplete()) {
       view.remove(progressView);
       progresses.remove(taskId);
+      return;
+    }
+    Long updated = updatedView.getSecond();
+    if (currentTimeMillis() - updated < UPDATE_PERIOD) {
       return;
     }
     progressView.updateProgressBar(progress);
@@ -77,7 +87,7 @@ public class ProgressMonitorPresenter {
     }
     ProgressView progressView = progressFactory.create();
     progressView.updateProgressBar(progress);
-    progresses.put(taskId, progressView);
+    progresses.put(taskId, Pair.of(progressView, currentTimeMillis()));
     view.add(progressView);
   }
 
@@ -91,6 +101,6 @@ public class ProgressMonitorPresenter {
     if (!progresses.containsKey(taskId)) {
       return;
     }
-    view.remove(progresses.remove(taskId));
+    view.remove(progresses.remove(taskId).getFirst());
   }
 }

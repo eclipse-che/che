@@ -46,7 +46,7 @@ public class ProgressorJsonRpcHandler {
     this.configurator = configurator;
     this.requestTransmitter = requestTransmitter;
 
-    handleMavenServerMessages();
+    handleProgressesReports();
     eventBus.addHandler(WorkspaceRunningEvent.TYPE, e -> subscribe());
     if (appContext.getWorkspace().getStatus() == RUNNING) {
       subscribe();
@@ -71,7 +71,7 @@ public class ProgressorJsonRpcHandler {
     progressReportConsumers.add(consumer);
   }
 
-  private void handleMavenServerMessages() {
+  private void handleProgressesReports() {
     configurator
         .newConfiguration()
         .methodName(PROGRESS_REPORT_METHOD)

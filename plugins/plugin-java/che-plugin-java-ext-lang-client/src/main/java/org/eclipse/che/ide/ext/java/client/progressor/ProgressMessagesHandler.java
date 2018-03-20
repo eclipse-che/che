@@ -34,7 +34,7 @@ import org.eclipse.che.ide.util.Pair;
 public class ProgressMessagesHandler {
   private static final int DELAY_MS = 20_000; // wait before check if task was update
   private final EventBus eventBus;
-  private final BackgroundLoaderPresenter progressResolver;
+  private final BackgroundLoaderPresenter backgroundLoader;
   private Map<String, Pair<ProgressReportDto, Long>> progresses = new LinkedHashMap<>();
 
   private ProgressReportDto currentProgress;
@@ -43,29 +43,29 @@ public class ProgressMessagesHandler {
   public ProgressMessagesHandler(
       EventBus eventBus,
       ProgressorJsonRpcHandler progressorJsonRpcHandler,
-      BackgroundLoaderPresenter progressResolver) {
+      BackgroundLoaderPresenter backgroundLoader) {
     this.eventBus = eventBus;
-    this.progressResolver = progressResolver;
+    this.backgroundLoader = backgroundLoader;
 
     progressorJsonRpcHandler.addProgressReportHandler(this::handleProgressNotification);
     handleOperations();
   }
 
   private void handleOperations() {
-    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> progressResolver.hide());
+    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> backgroundLoader.hide());
   }
 
   private void handleProgressNotification(ProgressReportDto progress) {
     if (isNullOrEmpty(progress.getId())) {
       return;
     }
-    String taskId = progress.getId();
+    String progressId = progress.getId();
 
-    if (taskFinished(progress)) {
-      progresses.remove(taskId);
-      progressResolver.updateProgressBar(progress);
-      progressResolver.removeProgress(progress);
-      updateCurrentTask();
+    if (progressFinished(progress)) {
+      progresses.remove(progressId);
+      backgroundLoader.updateProgressBar(progress);
+      backgroundLoader.removeProgress(progress);
+      updateCurrentProgress();
       return;
     }
 
@@ -74,22 +74,22 @@ public class ProgressMessagesHandler {
     }
 
     if (progresses.isEmpty()) {
-      addFirstProgress(progress);
+      startProcessesCleaner();
     }
 
-    progresses.put(taskId, Pair.of(progress, currentTimeMillis()));
-    progressResolver.addProgress(progress);
+    progresses.put(progressId, Pair.of(progress, currentTimeMillis()));
+    backgroundLoader.addProgress(progress);
 
     if (currentProgress == null) {
-      currentProgress = progress;
+      startProcessesCleaner();
     }
     String currentTaskId = currentProgress.getId();
 
-    if (taskId.equals(currentTaskId)) {
+    if (progressId.equals(currentTaskId)) {
       currentProgress = progress;
-      progressResolver.updateProgressBar(currentProgress);
+      backgroundLoader.updateProgressBar(currentProgress);
     }
-    progressResolver.show();
+    backgroundLoader.show();
   }
 
   private void startProcessesCleaner() {
@@ -104,11 +104,11 @@ public class ProgressMessagesHandler {
                 ProgressReportDto progress = entry.getValue().getFirst();
                 if ((currentTimeMillis() - lastUpdate) > DELAY_MS) {
                   it.remove();
-                  progressResolver.removeProgress(progress);
+                  backgroundLoader.removeProgress(progress);
                   String currentTaskId = currentProgress.getId();
                   String taskId = progress.getId();
                   if (currentTaskId.equals(taskId)) {
-                    updateCurrentTask();
+                    updateCurrentProgress();
                   }
                 }
               }
@@ -117,23 +117,17 @@ public class ProgressMessagesHandler {
             DELAY_MS);
   }
 
-  private void updateCurrentTask() {
+  private void updateCurrentProgress() {
     if (!progresses.isEmpty()) {
       currentProgress = progresses.values().iterator().next().getFirst();
-      progressResolver.updateProgressBar(currentProgress);
+      backgroundLoader.updateProgressBar(currentProgress);
     } else {
-      progressResolver.hide();
+      backgroundLoader.hide();
     }
   }
 
-  private boolean taskFinished(ProgressReportDto progress) {
+  private boolean progressFinished(ProgressReportDto progress) {
     return progresses.containsKey(progress.getId())
         && (progress.isComplete() || progress.getTotalWork() == progress.getWorkDone());
-  }
-
-  private void addFirstProgress(ProgressReportDto progress) {
-    currentProgress = progress;
-    progresses.put(currentProgress.getId(), Pair.of(progress, currentTimeMillis()));
-    startProcessesCleaner();
   }
 }
