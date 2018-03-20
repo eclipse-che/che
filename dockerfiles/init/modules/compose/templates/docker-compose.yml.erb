@@ -123,6 +123,10 @@ services:
 <% if scope.lookupvar('che::che_single_port') == 'false' -%>
     expose:
       - '5432'
+<% if scope.lookupvar('che::che_env') == 'development' -%>
+    ports:
+      - '5432:5432'
+<% end -%>
 <% end -%>
     restart: always
     healthcheck:
