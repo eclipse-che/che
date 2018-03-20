@@ -43,7 +43,7 @@ public class ShareWorkspacesTest {
   private static final String WORKSPACE_NAME = generate("workspace", 4);
   private static final String ADMIN_PERMISSIONS =
       "read, use, run, configure, setPermissions, delete";
-  private static final String MEMBER_PERMISSIONS = "read, use, run, configure, setPermissions";
+  private static final String MEMBER_PERMISSIONS = "read, use, run, configure";
 
   private String systemAdminName;
   private String memberName;
