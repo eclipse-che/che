@@ -11,7 +11,7 @@
 package org.eclipse.che.selenium.pageobject.debug;
 
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.MINIMUM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
@@ -34,6 +34,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Loader;
+import org.eclipse.che.selenium.pageobject.WebDriverWaitFactory;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsExplorer;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -43,7 +44,6 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * Page Object for Debugger panel.
@@ -54,11 +54,12 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @Singleton
 public class DebugPanel {
 
-  private SeleniumWebDriver seleniumWebDriver;
-  private Loader loader;
-  private CodenvyEditor editor;
-  private CommandsExplorer commandsExplorer;
-  private ActionsFactory actionsFactory;
+  private final SeleniumWebDriver seleniumWebDriver;
+  private final Loader loader;
+  private final CodenvyEditor editor;
+  private final CommandsExplorer commandsExplorer;
+  private final ActionsFactory actionsFactory;
+  private final WebDriverWaitFactory webDriverWaitFactory;
 
   @Inject
   public DebugPanel(
@@ -66,12 +67,14 @@ public class DebugPanel {
       Loader loader,
       CodenvyEditor editor,
       CommandsExplorer commandsExplorer,
-      ActionsFactory actionsFactory) {
+      ActionsFactory actionsFactory,
+      WebDriverWaitFactory webDriverWaitFactory) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.editor = editor;
     this.commandsExplorer = commandsExplorer;
     this.actionsFactory = actionsFactory;
+    this.webDriverWaitFactory = webDriverWaitFactory;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -164,7 +167,8 @@ public class DebugPanel {
 
   /** Wait while debugger panel will be clear for all breakpoints */
   public void waitWhileAllBreakPointsOnEditorPanelDisapper() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(cssSelector("div.breakpoint")));
   }
 
@@ -174,7 +178,8 @@ public class DebugPanel {
    * @param content
    */
   public void waitContentInBreakPointPanel(final String content) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(LOAD_PAGE_TIMEOUT_SEC)
         .until(
             (WebDriver webDriver) -> {
               return breakpointPanel.getText().contains(content);
@@ -183,7 +188,8 @@ public class DebugPanel {
 
   /** Wait disappearance any breakpoints from debugger breakpoints panel */
   public void waitBreakPointsPanelIsEmpty() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             (WebDriver webDriver) -> {
               return breakpointPanel.getText().isEmpty();
@@ -192,7 +198,7 @@ public class DebugPanel {
 
   /** Wait while the Variables panel appears */
   public void waitVariablesPanel() {
-    new WebDriverWait(seleniumWebDriver, 20).until(ExpectedConditions.visibilityOf(debuggerTree));
+    webDriverWaitFactory.get(20).until(ExpectedConditions.visibilityOf(debuggerTree));
   }
 
   /**
@@ -202,7 +208,8 @@ public class DebugPanel {
    */
   public void waitTextInVariablesPanel(final String text) {
     waitVariablesPanel();
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(LOAD_PAGE_TIMEOUT_SEC)
         .until((ExpectedCondition<Boolean>) (webDriver -> debuggerTree.getText().contains(text)));
   }
 
@@ -213,13 +220,15 @@ public class DebugPanel {
    */
   public void waitTextIsNotPresentInVariablesPanel(final String text) {
     waitVariablesPanel();
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(LOAD_PAGE_TIMEOUT_SEC)
         .until((ExpectedCondition<Boolean>) (webDriver -> !debuggerTree.getText().contains(text)));
   }
 
   /** Select node in debugger tree by node {@code text} */
   public void selectNodeInDebuggerTree(String nodeText) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             visibilityOfElementLocated(
                 xpath(format(Locators.VARIABLES_TREE_SELECT_NODE, nodeText))));
@@ -235,7 +244,9 @@ public class DebugPanel {
    */
   public void clickOnButton(String buttonIdLocator) {
     loader.waitOnClosed();
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+
+    webDriverWaitFactory
+        .get(LOADER_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(id(buttonIdLocator)));
     seleniumWebDriver.findElement(id(buttonIdLocator)).click();
     loader.waitOnClosed();
@@ -243,12 +254,13 @@ public class DebugPanel {
 
   /** Wait appearance text area form */
   public void waitAppearTextAreaForm() {
-    new WebDriverWait(seleniumWebDriver, 20).until(ExpectedConditions.visibilityOf(textAreaForm));
+    webDriverWaitFactory.get(20).until(ExpectedConditions.visibilityOf(textAreaForm));
   }
 
   /** Wait disappear text area form */
   public void waitDisappearTextAreaForm() {
-    new WebDriverWait(seleniumWebDriver, 20)
+    webDriverWaitFactory
+        .get(20)
         .until(
             ExpectedConditions.invisibilityOfElementLocated(
                 xpath(LocatorsTextAreaDialogWindow.TEXTAREA)));
@@ -285,10 +297,12 @@ public class DebugPanel {
   public void typeEvaluateExpression(String expression) {
     String exprFieldLocator =
         "//div[text()='Enter an expression:']/parent::div/following-sibling::div/input";
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(LOAD_PAGE_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(xpath(exprFieldLocator)))
         .clear();
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(LOAD_PAGE_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(xpath(exprFieldLocator)))
         .sendKeys(expression);
   }
@@ -301,9 +315,11 @@ public class DebugPanel {
   public void waitExpectedResultInEvaluateExpression(final String expVal) {
     final String locator = "//div[text()='Result:']/parent::div/following-sibling::div/textarea";
     WebElement webElement =
-        new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+        webDriverWaitFactory
+            .get(LOAD_PAGE_TIMEOUT_SEC)
             .until(visibilityOfElementLocated(xpath(locator)));
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(LOAD_PAGE_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver -> {
@@ -314,7 +330,8 @@ public class DebugPanel {
   /** Click on evaluate exp. button */
   public void clickEvaluateBtn() {
     String locator = "//button[text()='Evaluate']";
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(LOAD_PAGE_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(xpath(locator)))
         .click();
   }
@@ -322,10 +339,12 @@ public class DebugPanel {
   /** Click on close evaluate exp. button */
   public void clickCloseEvaluateBtn() {
     String locator = "//button[text()='Evaluate']/preceding-sibling::button";
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(LOAD_PAGE_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(xpath(locator)))
         .click();
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(LOAD_PAGE_TIMEOUT_SEC)
         .until(ExpectedConditions.invisibilityOfElementLocated(xpath(locator)));
   }
 
@@ -355,14 +374,16 @@ public class DebugPanel {
     String locatorWithHiglightedText =
         "//div[@id='gwt-debug-editorPartStack-contentPanel']//div[@active]//div[@class='textviewContent' and @contenteditable='true']//span[@debugid='debug-line']";
     List<WebElement> hilightedElements =
-        new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
+        webDriverWaitFactory
+            .get(LOADER_TIMEOUT_SEC)
             .until(
                 ExpectedConditions.presenceOfAllElementsLocatedBy(
                     xpath(locatorWithHiglightedText)));
     for (WebElement hilightedElement : hilightedElements) {
       highLightedText.append(hilightedElement.getText());
     }
-    new WebDriverWait(seleniumWebDriver, MINIMUM_SEC)
+    webDriverWaitFactory
+        .get(MINIMUM_SEC)
         .until(
             (WebDriver driver) -> {
               return highLightedText.toString().contains(text);
@@ -380,7 +401,8 @@ public class DebugPanel {
         seleniumWebDriver.findElements(
             xpath(
                 "//div[@id='gwt-debug-editorPartStack-contentPanel']//div[@active]//div[@class='textviewContent' and @contenteditable='true']/div"));
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(LOAD_PAGE_TIMEOUT_SEC)
         .until(
             (WebDriver driver) -> {
               try {
@@ -452,7 +474,8 @@ public class DebugPanel {
   }
 
   public void waitFramesListPanelReady() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until((Function<WebDriver, Object>) webDriver -> !frames.getText().isEmpty());
   }
 
@@ -463,14 +486,16 @@ public class DebugPanel {
 
   /** Waits */
   public void waitThreadListPanelReady() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until((Function<WebDriver, Object>) webDriver -> !threads.getText().isEmpty());
   }
 
   public void selectFrame(int frameIndex) {
     waitFramesListPanelReady();
 
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(xpath("//td[text()='" + getFrames()[frameIndex] + "']")))
         .click();
   }
@@ -497,7 +522,8 @@ public class DebugPanel {
     waitThreadListPanelReady();
 
     threads.click();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    webDriverWaitFactory
+        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(visibilityOfElementLocated(xpath("//*[contains(text(),'\"" + threadName + "\"@')]")))
         .click();
     threads.click();
