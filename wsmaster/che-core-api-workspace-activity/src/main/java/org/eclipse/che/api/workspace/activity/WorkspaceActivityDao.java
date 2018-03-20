@@ -22,7 +22,7 @@ public interface WorkspaceActivityDao {
 
   /**
    * Sets workspace expiration time. Any running workspace must prolongate expiration time
-   * periodically, otherwise it will be stopped.
+   * periodically, otherwise it will be stopped by passing that time.
    *
    * @param expiration WorkspaceExpiration object
    * @throws ServerException when operation failed
@@ -30,7 +30,7 @@ public interface WorkspaceActivityDao {
   void setExpiration(WorkspaceExpiration expiration) throws ServerException;
 
   /**
-   * Removes workspace expiration on it's stop.
+   * Removes workspace expiration time on it's stop.
    *
    * @param workspaceId workspace id to remove expiration
    * @throws ServerException when operation failed
