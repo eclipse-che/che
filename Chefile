@@ -18,7 +18,7 @@ workspace.commands[3].commandLine="sudo docker rm -f che-in-che-server"
 
 # Name of the workspace
 workspace.name="che"
-
+# testing commit
 # Memory for this workspace
 workspace.ram=3092
 
