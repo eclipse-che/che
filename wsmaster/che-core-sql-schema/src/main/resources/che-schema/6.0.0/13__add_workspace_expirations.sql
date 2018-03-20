@@ -17,3 +17,4 @@ CREATE TABLE workspace_expiration (
 ALTER TABLE workspace_expiration ADD CONSTRAINT ws_expiration_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspace (id);
 --indexes
 CREATE INDEX index_ws_expiration_workspace_id ON workspace_expiration (workspace_id);
+CREATE INDEX index_ws_expiration_expiration ON workspace_expiration (expiration);
