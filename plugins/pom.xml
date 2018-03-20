@@ -25,7 +25,6 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: Parent</name>
     <modules>
-        <module>plugin-activity</module>
         <module>plugin-product-info</module>
         <module>plugin-help</module>
         <module>plugin-web</module>

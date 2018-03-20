@@ -24,16 +24,16 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-workspace-activity-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-wsagent-core</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-swagger-module</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-activity-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>

@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.sql.DataSource;
 import org.eclipse.che.agent.exec.client.ExecAgentClientFactory;
+import org.eclipse.che.api.workspace.activity.ActivityPermissionsFilter;
+import org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
@@ -187,7 +189,7 @@ public class WsMasterModule extends AbstractModule {
 
     bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 
-    install(new org.eclipse.che.plugin.activity.inject.WorkspaceActivityModule());
+    install(new WorkspaceActivityModule());
 
     install(new org.eclipse.che.api.core.rest.CoreRestModule());
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
@@ -291,7 +293,7 @@ public class WsMasterModule extends AbstractModule {
     bind(
         org.eclipse.che.multiuser.permission.installer.InstallerRegistryServicePermissionsFilter
             .class);
-    bind(org.eclipse.che.plugin.activity.ActivityPermissionsFilter.class);
+    bind(ActivityPermissionsFilter.class);
     bind(AdminPermissionInitializer.class).asEagerSingleton();
     bind(
         org.eclipse.che.multiuser.permission.resource.filters.ResourceServicePermissionsFilter
