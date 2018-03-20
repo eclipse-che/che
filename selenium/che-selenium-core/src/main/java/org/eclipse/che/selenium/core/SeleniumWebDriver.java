@@ -11,8 +11,11 @@
 package org.eclipse.che.selenium.core;
 
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
+import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
+import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -45,7 +48,6 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -317,13 +319,22 @@ public class SeleniumWebDriver
   }
 
   public void switchFromDashboardIframeToIde() {
-    new WebDriverWait(this, LOADER_TIMEOUT_SEC * 6)
-        .until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(By.id("ide-application-iframe")));
+    switchFromDashboardIframeToIde(APPLICATION_START_TIMEOUT_SEC);
   }
 
   public void switchFromDashboardIframeToIde(int timeout) {
-    new WebDriverWait(this, timeout)
-        .until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(By.id("ide-application-iframe")));
+    wait(timeout).until(visibilityOfElementLocated(By.id("ide-application-iframe")));
+
+    wait(ATTACHING_ELEM_TO_DOM_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    (((JavascriptExecutor) driver)
+                            .executeScript("return angular.element('body').scope().showIDE"))
+                        .toString()
+                        .equals("true"));
+
+    wait(timeout).until(frameToBeAvailableAndSwitchToIt(By.id("ide-application-iframe")));
   }
 
   public WebDriverWait wait(int timeOutInSeconds) {

@@ -38,7 +38,7 @@ export class KeycloakLoader {
                     if (request.status == 200) {
                         resolve(this.injectKeycloakScript(JSON.parse(request.responseText)));
                     } else {
-                        reject(msg);
+                        reject(null);
                     }
                 };
 
@@ -107,8 +107,6 @@ export class WorkspaceLoader {
 
     constructor(private readonly loader: Loader,
                 private readonly keycloak: any) {
-        this.loader = loader;
-
         /** Ask dashboard to show the IDE. */
         window.parent.postMessage("show-ide", "*");
     }
@@ -323,7 +321,7 @@ export class WorkspaceLoader {
         // with error net::ERR_CONNECTION_REFUSED. Timer helps to open the URL without errors.
         setTimeout(() => {
             window.location.href = url;
-        }, 1000);
+        }, 100);
     }
 
     setAuthorizationHeader(xhr: XMLHttpRequest): Promise<XMLHttpRequest> {
@@ -352,7 +350,9 @@ export class WorkspaceLoader {
 /** Initialize */
 if (document.getElementById('workspace-console')) {
     new KeycloakLoader().loadKeycloakSettings().catch((error: any) => {
-        console.log(error);
+        if (error) {
+            console.log(error);
+        }
     }).then((keycloak: any) => {
         new WorkspaceLoader(new Loader(), keycloak).load();
     });

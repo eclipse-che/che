@@ -166,7 +166,8 @@ public class ToDtoGenerator extends ConversionGenerator {
   }
 
   private void generateMapConversion(
-      String indent, PrintWriter out, String varName, String valueAccess, Type paramType) {
+      String indent, PrintWriter out, String varName, String valueAccess, Type inputParamType) {
+    Type paramType = inputParamType;
     if (!(paramType instanceof ParameterizedType)) {
       paramType = ((Class<?>) paramType).getGenericSuperclass();
     }
@@ -174,11 +175,18 @@ public class ToDtoGenerator extends ConversionGenerator {
     Type containedType = genericType.getActualTypeArguments()[1];
     Type valueType = genericType.getActualTypeArguments()[1];
     String containedName = varName + "X";
+    String typeName = inputParamType.getTypeName();
+    String instantiateTypeName = typeName;
+    if (getRawClass(inputParamType).isInterface()) {
+      if (inputParamType instanceof ParameterizedType) {
+        instantiateTypeName = String.format("HashMap<String, %1$s>", containedType.getTypeName());
+      } else {
+        throw new RuntimeException(
+            "Unsupported Map Conversion. Generator needs to be updated for new LSP4J construct");
+      }
+    }
     out.println(
-        indent
-            + String.format(
-                "HashMap<String, %1$s> %2$s= new HashMap<String, %3$s>();",
-                containedType.getTypeName(), varName, containedType.getTypeName()));
+        indent + String.format("%1$s %2$s= new %3$s();", typeName, varName, instantiateTypeName));
     out.println(
         String.format(
             indent + "for (Entry<String, %1$s> %2$s : %3$s.entrySet()) {",

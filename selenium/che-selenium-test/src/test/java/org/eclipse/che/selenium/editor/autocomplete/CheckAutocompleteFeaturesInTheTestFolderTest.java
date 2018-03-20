@@ -121,7 +121,6 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
   }
 
   private void checkAutocompletion() {
-    editor.returnFocusInCurrentLine();
     editor.goToCursorPositionVisible(29, 25);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitSpecifiedValueForLineAndChar(30, 9);

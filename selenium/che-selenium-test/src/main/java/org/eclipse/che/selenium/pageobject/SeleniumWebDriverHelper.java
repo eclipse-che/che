@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.pageobject;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfAllElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
@@ -598,20 +599,19 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Moves cursor to {@link WebElement} with provided {@code elementLocator}, waits visibility and
-   * clicks twice on it by {@link org.openqa.selenium.interactions.Action}. Gets rid of {@link
+   * Moves cursor to {@link WebElement} with provided {@code elementLocator}, and clicks twice on it
+   * by {@link org.openqa.selenium.interactions.Action}. Gets rid of {@link
    * org.openqa.selenium.StaleElementReferenceException} by using {@link Actions#doubleClick()}.
    *
    * @param elementLocator locator of element which should be clicked
    */
   public void moveCursorToAndDoubleClick(By elementLocator) {
     moveCursorTo(elementLocator);
-    waitVisibility(elementLocator);
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
   }
 
   /**
-   * Moves cursor to provided {@code webElement}, waits visibility and clicks twice on it by {@link
+   * Moves cursor to provided {@code webElement}, and clicks twice on it by {@link
    * org.openqa.selenium.interactions.Action}. Gets rid of {@link
    * org.openqa.selenium.StaleElementReferenceException} by using {@link Actions#doubleClick()}.
    *
@@ -619,7 +619,6 @@ public class SeleniumWebDriverHelper {
    */
   public void moveCursorToAndDoubleClick(WebElement webElement) {
     moveCursorTo(webElement);
-    waitVisibility(webElement);
     actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
   }
 
@@ -636,19 +635,17 @@ public class SeleniumWebDriverHelper {
    */
   public void moveCursorToAndClick(By elementLocator) {
     moveCursorTo(elementLocator);
-    waitVisibility(elementLocator);
     actionsFactory.createAction(seleniumWebDriver).click().perform();
   }
 
   /**
-   * Moves cursor to provided {@code webElement}, waits visibility and clicks once on it by {@link
+   * Moves cursor to provided {@code webElement}, and clicks once on it by {@link
    * org.openqa.selenium.interactions.Action}.
    *
    * @param webElement element which should be clicked
    */
   public void moveCursorToAndClick(WebElement webElement) {
     moveCursorTo(webElement);
-    waitVisibility(webElement);
     actionsFactory.createAction(seleniumWebDriver).click().perform();
   }
 
@@ -729,5 +726,44 @@ public class SeleniumWebDriverHelper {
     } catch (NoSuchElementException ex) {
       return false;
     }
+  }
+
+  /**
+   * Waits during {@code timeout} until frame which defined by {@code frameLocator} is available and
+   * switches to it.
+   *
+   * @param frameLocator locator of the frame to which should be switched
+   * @param timeout waiting time in seconds
+   */
+  public void waitAndSwitchToFrame(By frameLocator, int timeout) {
+    webDriverWaitFactory.get(timeout).until(frameToBeAvailableAndSwitchToIt(frameLocator));
+  }
+
+  /**
+   * Waits until frame which defined by {@code frameLocator} is available and switches to it.
+   *
+   * @param frameLocator locator of the frame to which should be switched
+   */
+  public void waitAndSwitchToFrame(By frameLocator) {
+    waitAndSwitchToFrame(frameLocator, DEFAULT_TIMEOUT);
+  }
+
+  /**
+   * Waits during {@code timeout} until {@code frame} is available and switches to it.
+   *
+   * @param frame web element which defines frame
+   * @param timeout waiting time in seconds
+   */
+  public void waitAndSwitchToFrame(WebElement frame, int timeout) {
+    webDriverWaitFactory.get(timeout).until(frameToBeAvailableAndSwitchToIt(frame));
+  }
+
+  /**
+   * Waits until {@code frame} is available and switches to it.
+   *
+   * @param frame web element which defines frame
+   */
+  public void waitAndSwitchToFrame(WebElement frame) {
+    waitAndSwitchToFrame(frame, DEFAULT_TIMEOUT);
   }
 }

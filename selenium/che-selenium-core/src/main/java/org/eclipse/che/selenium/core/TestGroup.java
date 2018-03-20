@@ -16,4 +16,5 @@ public interface TestGroup {
   String SINGLEUSER = "singleuser";
   String OPENSHIFT = "openshift";
   String DOCKER = "docker";
+  String GITHUB = "github";
 }
