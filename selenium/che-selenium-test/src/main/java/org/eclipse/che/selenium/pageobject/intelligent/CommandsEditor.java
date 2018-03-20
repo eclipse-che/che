@@ -144,8 +144,6 @@ public class CommandsEditor {
   @FindBy(xpath = CommandsLocators.COMMAND_MACROS_INPUT_FIELD)
   WebElement macrosInputField;
 
-  // -------------------------------------------------------------------------------
-
   public void waitActive() {
     editor.waitActive();
   }
@@ -166,12 +164,20 @@ public class CommandsEditor {
     editor.waitTextIntoEditor(expectedText);
   }
 
+  public void waitTextIntoEditor(final String expectedText, final int timeout) {
+    editor.waitTextIntoEditor(expectedText, timeout);
+  }
+
   public void selectLineAndDelete() {
     editor.selectLineAndDelete();
   }
 
   public void waitTabIsPresent(String nameOfFile) {
     editor.waitTabIsPresent(nameOfFile);
+  }
+
+  public void waitTabIsPresent(String nameOfFile, int timeout) {
+    editor.waitTabIsPresent(nameOfFile, timeout);
   }
 
   public void waitTabFileWithSavedStatus(String nameOfFile) {
@@ -206,8 +212,8 @@ public class CommandsEditor {
     editor.waitAutocompleteContainerIsClosed();
   }
 
-  public void selectItemIntoAutocompleteAndPasteByDoubleClick(String item) {
-    editor.selectItemIntoAutocompleteAndPasteByDoubleClick(item);
+  public void selectItemIntoAutocompleteAndPerformDoubleClick(String item) {
+    editor.selectItemIntoAutocompleteAndPerformDoubleClick(item);
   }
 
   public void closeAutocomplete() {
@@ -221,8 +227,6 @@ public class CommandsEditor {
   public void waitTabIsNotPresent(String nameOfFile) {
     editor.waitTabIsNotPresent(nameOfFile);
   }
-
-  // -------------------------------------------------------------------------------
 
   public void clickOnRunButton() {
     redrawWait.until(visibilityOf(runButton)).click();

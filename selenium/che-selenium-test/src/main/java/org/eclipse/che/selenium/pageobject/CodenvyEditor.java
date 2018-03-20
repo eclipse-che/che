@@ -838,7 +838,7 @@ public class CodenvyEditor {
    *
    * @param item item in the autocomplete proposal container.
    */
-  public void selectItemIntoAutocompleteAndPasteByDoubleClick(String item) {
+  public void selectItemIntoAutocompleteAndPerformDoubleClick(String item) {
     selectAutocompleteProposal(item);
 
     seleniumWebDriverHelper.waitVisibility(By.xpath(format(HIGHLIGHT_ITEM_PATTERN, item)));
