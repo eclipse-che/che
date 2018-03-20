@@ -10,6 +10,7 @@
  */
 package org.eclipse.che.selenium.core.client;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 
 import com.google.inject.Inject;
@@ -27,6 +28,8 @@ import org.slf4j.LoggerFactory;
 
 /** @author Dmytro Nochevnov */
 public class TestGitHubRepository {
+
+  private static final int REPO_CREATION_TIMEOUT_SEC = 6;
   private final String repoName = NameGenerator.generate("EclipseCheTestRepo-", 5);
   private static final Logger LOG = LoggerFactory.getLogger(TestGitHubRepository.class);
 
@@ -44,21 +47,31 @@ public class TestGitHubRepository {
 
   private GHRepository create() throws IOException, InterruptedException {
     GHRepository repo = gitHub.createRepository(repoName).create();
+    ensureRepositoryCreated(repo);
 
-    // ensure repository exists
-    for (int attempts = 0; attempts < 5; attempts++) {
+    LOG.info("GitHub repo {} has been created", repo.getHtmlUrl());
+    return repo;
+  }
+
+  private void ensureRepositoryCreated(GHRepository repo) throws IOException {
+    Throwable lastIOException = null;
+
+    for (int i = 0; i < REPO_CREATION_TIMEOUT_SEC; i++) {
       try {
-        repo = gitHub.getRepository(repo.getFullName());
-        break;
+        gitHub.getRepository(repo.getFullName());
+        return;
       } catch (IOException e) {
+        lastIOException = e;
         LOG.info("Waiting for {} to be created", repo.getHtmlUrl());
-        sleepQuietly(1);
+        sleepQuietly(1);  // sleep one second
       }
     }
 
-    LOG.info("GitHub repo {} has been created", repo.getHtmlUrl());
-
-    return repo;
+    throw new IOException(
+        format(
+            "GitHub repo %s hasn't been created in %s seconds",
+            repo.getHtmlUrl(), REPO_CREATION_TIMEOUT_SEC),
+        lastIOException);
   }
 
   public String getName() {
