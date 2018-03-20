@@ -63,7 +63,7 @@ public class TestGitHubRepository {
       } catch (IOException e) {
         lastIOException = e;
         LOG.info("Waiting for {} to be created", repo.getHtmlUrl());
-        sleepQuietly(1);  // sleep one second
+        sleepQuietly(1); // sleep one second
       }
     }
 
