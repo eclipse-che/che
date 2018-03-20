@@ -29,7 +29,6 @@ import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.schedule.ScheduleDelay;
-import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,9 +117,8 @@ public class WorkspaceActivityManager {
 
   @ScheduleDelay(
     initialDelayParameterName = "che.workspace.activity_check_scheduler_delay_s",
-    delay = 10
+    delayParameterName = "che.workspace.activity_check_scheduler_period_s"
   )
-  @ScheduleRate(periodParameterName = "che.workspace.activity_check_scheduler_period_s")
   private void invalidate() {
     List<String> expiredList = new ArrayList<>();
     try {
