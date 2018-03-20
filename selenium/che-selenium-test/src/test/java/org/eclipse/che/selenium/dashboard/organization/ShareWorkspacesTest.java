@@ -12,13 +12,18 @@ package org.eclipse.che.selenium.dashboard.organization;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
@@ -28,21 +33,19 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceShare;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @Test(groups = {TestGroup.MULTIUSER})
 public class ShareWorkspacesTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
-  private static final String SYSTEM_ADMIN_PERMISSIONS =
+  private static final String ADMIN_PERMISSIONS =
       "read, use, run, configure, setPermissions, delete";
-  private static final String ADMIN_PERMISSIONS = "read, use, run, configure, setPermissions";
-  private static final String MEMBER_PERMISSIONS = "read, use, run, configure";
+  private static final String MEMBER_PERMISSIONS = "read, use, run, configure, setPermissions";
 
   private String systemAdminName;
-  private String adminName;
   private String memberName;
 
   @InjectTestOrganization(prefix = "org")
@@ -57,40 +60,65 @@ public class ShareWorkspacesTest {
   @Inject private NewWorkspace newWorkspace;
   @Inject private Workspaces workspaces;
   @Inject private TestUser testUser;
-  @Inject private TestUser testUser2;
   @Inject private WorkspaceShare workspaceShare;
 
   @BeforeClass
   public void setUp() throws Exception {
     org.addAdmin(adminTestUser.getId());
     org.addMember(testUser.getId());
-    org.addAdmin(testUser2.getId());
     systemAdminName = adminTestUser.getEmail();
     memberName = testUser.getEmail();
-    adminName = testUser2.getEmail();
 
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
     createWorkspace(org.getName(), WORKSPACE_NAME);
   }
 
-  @Test
-  public void checkShareWorkspaceTab() {
+  @BeforeMethod
+  public void openShareWorkspaceTab() {
     navigationBar.waitNavigationBar();
 
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
     workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
     workspaceDetails.selectTabInWorkspaceMenu(TabNames.SHARE);
+  }
 
+  @Test
+  public void checkShareWorkspaceTab() {
     workspaceShare.waitMemberNameInShareList(systemAdminName);
-    Assert.assertEquals(
-        workspaceShare.getMemberPermissions(systemAdminName), SYSTEM_ADMIN_PERMISSIONS);
+    assertEquals(workspaceShare.getMemberPermissions(systemAdminName), ADMIN_PERMISSIONS);
 
-    // TODO check/uncheck members
+    // check selecting a member by checkbox
     workspaceShare.clickOnMemberCheckbox(systemAdminName);
-    Assert.assertEquals(workspaceShare.isMemberCheckedInList(systemAdminName), "true");
+    assertTrue(workspaceShare.isMemberCheckedInList(systemAdminName));
+    workspaceShare.clickOnMemberCheckbox(systemAdminName);
+    assertFalse(workspaceShare.isMemberCheckedInList(systemAdminName));
 
-    // add a new member
+    // check selecting members by Bulk
+    workspaceShare.clickOnBulk();
+    assertTrue(workspaceShare.isMemberCheckedInList(systemAdminName));
+    workspaceShare.clickOnBulk();
+    assertFalse(workspaceShare.isMemberCheckedInList(systemAdminName));
+  }
+
+  @Test
+  public void checkMembersFiltering() {
+    // filter members by a full name
+    workspaceShare.typeToSearchInput(systemAdminName);
+    workspaceShare.waitMemberNameInShareList(systemAdminName);
+
+    // filter members by a part name
+    workspaceShare.typeToSearchInput(systemAdminName.substring(systemAdminName.length() / 2));
+    workspaceShare.waitMemberNameInShareList(systemAdminName);
+
+    // filter members by a nonexistent name
+    workspaceShare.typeToSearchInput(NameGenerator.generate("", 8));
+    workspaceShare.waitMemberNameNotExistsInShareList(systemAdminName);
+  }
+
+  @Test
+  public void checkSharingWorkspaceWithMember() {
+    // invite a developer to workspace
     workspaceShare.clickOnAddDeveloperButton();
     workspaceShare.waitInviteMemberDialog();
     workspaceShare.selectAllMembersInDialogByBulk();
@@ -98,16 +126,20 @@ public class ShareWorkspacesTest {
 
     // check the added member permission
     workspaceShare.waitMemberNameInShareList(memberName);
-    Assert.assertEquals(workspaceShare.getMemberPermissions(memberName), ADMIN_PERMISSIONS);
+    assertEquals(workspaceShare.getMemberPermissions(memberName), MEMBER_PERMISSIONS);
 
-    // remove the member from the members list
+    // check the 'No members in team' dialog
+    workspaceShare.clickOnAddDeveloperButton();
+    workspaceShare.waitNoMembersDialog();
+    workspaceDetails.clickOnCloseButtonInDialogWindow();
+
+    // remove the added member from the members list
+    workspaceShare.waitMemberNameInShareList(memberName);
+    WaitUtils.sleepQuietly(2);
     workspaceShare.clickOnRemoveMemberButton(memberName);
     workspaceDetails.clickOnDeleteButtonInDialogWindow();
     workspaceShare.waitMemberNameNotExistsInShareList(memberName);
   }
-
-  @Test
-  public void shareWorkspaceWithMember() {}
 
   private void createWorkspace(String organizationName, String workspaceName) {
     dashboard.selectWorkspacesItemOnDashboard();
