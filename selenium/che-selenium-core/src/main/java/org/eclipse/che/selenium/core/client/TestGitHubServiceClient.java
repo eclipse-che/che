@@ -20,10 +20,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import javax.xml.bind.DatatypeConverter;
@@ -32,7 +29,6 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.dto.server.JsonStringMapImpl;
 import org.eclipse.che.plugin.github.shared.GitHubKey;
-import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
 
 /** @author Mihail Kuznyetsov. */
@@ -228,21 +224,5 @@ public class TestGitHubServiceClient {
     byte[] nameAndPass = (username + ":" + password).getBytes("UTF-8");
     String base64 = DatatypeConverter.printBase64Binary(nameAndPass);
     return "Basic " + base64;
-  }
-
-  public void addContentToRepository(Path repoRoot, String commitMessage, GHRepository ghRepository)
-      throws IOException {
-    Files.walk(repoRoot)
-        .filter(Files::isRegularFile)
-        .forEach(
-            it -> {
-              try {
-                byte[] contentBytes = Files.readAllBytes(it);
-                String relativePath = repoRoot.relativize(it).toString();
-                ghRepository.createContent(contentBytes, commitMessage, relativePath);
-              } catch (IOException e) {
-                throw new UncheckedIOException(e);
-              }
-            });
   }
 }

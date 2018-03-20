@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestSshServiceClient;
@@ -34,8 +35,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -43,25 +42,18 @@ import org.testng.annotations.Test;
 /** @author aleksandr shmaraev */
 @Test(groups = TestGroup.GITHUB)
 public class FetchAndMergeRemoteBranchIntoLocalTest {
-  private static final String REPO_NAME = NameGenerator.generate("FetchAndMergeTest-", 3);
   private static final String PROJECT_NAME = NameGenerator.generate("FetchAndMergeTest-", 4);
   private static final String CHANGE_CONTENT =
       String.format("//change_content-%s", String.valueOf(System.currentTimeMillis()));
 
-  private GitHub gitHub;
-  private GHRepository gitHubRepository;
-
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
   @Inject private TestUser productUser;
+  @Inject private TestGitHubRepository testRepo;
 
   @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
-
-  @Inject(optional = true)
-  @Named("github.password")
-  private String gitHubPassword;
 
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private ProjectExplorer projectExplorer;
@@ -77,18 +69,18 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
 
   @BeforeClass
   public void prepare() throws Exception {
-    gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
-    gitHubRepository = gitHub.createRepository(REPO_NAME).create();
     String commitMess = String.format("add-new-content-%s ", System.currentTimeMillis());
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
+
     Path entryPath = Paths.get(getClass().getResource("/projects/guess-project").getPath());
-    gitHubClientService.addContentToRepository(entryPath, commitMess, gitHubRepository);
+    testRepo.addContent(entryPath, commitMess);
+
     ide.open(ws);
   }
 
   @AfterClass
   public void deleteRepo() throws IOException {
-    gitHubRepository.delete();
+    testRepo.delete();
   }
 
   @Test
@@ -100,15 +92,13 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
     String pathToJavaFile = "src/main/java/org/eclipse/qa/examples";
     String pathToJspFile = "src/main/webapp";
     String originMaster = "origin/master";
-    String fetchMess =
-        String.format("%s/%s/%s.git", "Fetched from https://github.com", gitHubUsername, REPO_NAME);
+    String fetchMess = String.format("Fetched from %s", testRepo.getHtmlUrl());
     String mergeMess1 = "Fast-forward Merged commits:";
     String mergeMess2 = "New HEAD commit: ";
     String mergeMess3 = "Already up-to-date";
 
     projectExplorer.waitProjectExplorer();
-    String repoUrl = String.format("https://github.com/%s/%s.git", gitHubUsername, REPO_NAME);
-    git.importJavaApp(repoUrl, PROJECT_NAME, MAVEN);
+    git.importJavaApp(testRepo.getHtmlUrl(), PROJECT_NAME, MAVEN);
 
     // change content in the test repo on GitHub
     deleteFileOnGithubSide(String.format("%s/%s", pathToJspFile, jspFile), "delete index.jsp");
@@ -160,13 +150,11 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
   }
 
   private void deleteFileOnGithubSide(String pathToContent, String commitMess) throws IOException {
-    gitHubRepository.getFileContent(pathToContent).delete(commitMess);
+    testRepo.getFileContent(pathToContent).delete(commitMess);
   }
 
   private void changeContentOnGithubSide(String pathToContent, String content) throws IOException {
-    gitHubRepository
-        .getFileContent(String.format("/%s", pathToContent))
-        .update(content, "add " + content);
+    testRepo.getFileContent(String.format("/%s", pathToContent)).update(content, "add " + content);
   }
 
   private void performFetch() {
