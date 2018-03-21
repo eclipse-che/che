@@ -50,4 +50,4 @@ wsagent/che-core-api-project/src/main/java/org/eclipse/che/api/search/server/** 
 wsagent/che-core-api-project/src/test/java/org/eclipse/che/api/search/** @skabashnyuk
 
 # deploy
-deploy/** @riuvshin @l0rd @garagatyi
+deploy/** @riuvshin @l0rd @garagatyi @eivantsov @sleshchenko
