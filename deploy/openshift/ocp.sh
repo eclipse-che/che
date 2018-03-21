@@ -11,6 +11,7 @@ set -e
 init() {
 
 LOCAL_IP_ADDRESS=$(detectIP)
+BASE_DIR=$(cd "$(dirname "$0")"; pwd)
 
 #OS specific defaults
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -170,7 +171,7 @@ run_ocp() {
 }
 
 deploy_che_to_ocp() {
-    bash deploy/openshift/deploy_che.sh --wait-che ${DEPLOY_SCRIPT_ARGS}
+    bash ${BASE_DIR}/deploy/openshift/deploy_che.sh --wait-che ${DEPLOY_SCRIPT_ARGS}
 }
 
 destroy_ocp() {
