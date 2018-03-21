@@ -171,7 +171,7 @@ run_ocp() {
 }
 
 deploy_che_to_ocp() {
-    bash ${BASE_DIR}/deploy/openshift/deploy_che.sh --wait-che ${DEPLOY_SCRIPT_ARGS}
+    bash ${BASE_DIR}/deploy_che.sh --wait-che ${DEPLOY_SCRIPT_ARGS}
 }
 
 destroy_ocp() {
