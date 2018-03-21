@@ -13,6 +13,8 @@ package org.eclipse.che.selenium.pageobject.intelligent;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ACTIVE_EDITOR_ENTRY_POINT;
+import static org.openqa.selenium.Keys.CONTROL;
+import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
@@ -46,6 +48,8 @@ public class CommandsEditor {
   private final CodenvyEditor editor;
   private final ActionsFactory actionsFactory;
   private final SeleniumWebDriver seleniumWebDriver;
+  private final AskForValueDialog askForValueDialog;
+  private final Loader loader;
 
   @Inject
   public CommandsEditor(
@@ -57,12 +61,14 @@ public class CommandsEditor {
       SeleniumWebDriverHelper seleniumWebDriverHelper,
       WebDriverWaitFactory webDriverWaitFactory,
       CodenvyEditor editor) {
-    PageFactory.initElements(seleniumWebDriver, this);
     redrawWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     elemDriverWait = new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC);
     this.editor = editor;
     this.actionsFactory = actionsFactory;
     this.seleniumWebDriver = seleniumWebDriver;
+    this.askForValueDialog = askForValueDialog;
+    this.loader = loader;
+    PageFactory.initElements(seleniumWebDriver, this);
   }
 
   public static final class CommandsEditorType {
@@ -447,10 +453,24 @@ public class CommandsEditor {
   }
 
   public void deleteAllContent() {
-    editor.deleteAllContent();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(CONTROL)
+        .sendKeys("a")
+        .keyUp(CONTROL)
+        .sendKeys(DELETE)
+        .perform();
   }
 
   public void setCursorToLine(int positionLine) {
-    editor.setCursorToLine(positionLine);
+    loader.waitOnClosed();
+    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.chord(CONTROL, "l")).perform();
+    askForValueDialog.waitFormToOpen();
+    loader.waitOnClosed();
+    askForValueDialog.typeAndWaitText(String.valueOf(positionLine));
+    loader.waitOnClosed();
+    askForValueDialog.clickOkBtn();
+    askForValueDialog.waitFormToClose();
+    editor.waitActive();
   }
 }
