@@ -41,13 +41,9 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
-/** @author Aleksandr Shmaraiev */
+/** @author Ihor Okhrimenko */
 @Singleton
 public class CommandsEditor {
-
-  // redrawWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
-  // elemDriverWait = new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC);
-
   private final CodenvyEditor editor;
   private final ActionsFactory actionsFactory;
   private final SeleniumWebDriver seleniumWebDriver;
@@ -348,7 +344,7 @@ public class CommandsEditor {
   }
 
   public void typeTextIntoNameCommandField(String nameCommand) {
-    seleniumWebDriverHelper.setText(nameCommandField, nameCommand);
+    seleniumWebDriverHelper.setValue(nameCommandField, nameCommand);
   }
 
   public void waitTextIntoNameCommandField(String expectedText) {
