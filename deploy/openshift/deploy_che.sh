@@ -8,7 +8,7 @@
 # This script is meant for quick & easy install of Che on OpenShift via:
 #
 #  ``` bash
-#   DEPLOY_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/dockerfiles/cli/scripts/openshift/deploy_che.sh
+#   DEPLOY_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/deploy/openshift/deploy_che.sh
 #   curl -fsSL ${DEPLOY_SCRIPT_URL} -o get-che.sh
 #   bash get-che.sh --wait-che
 #   ```

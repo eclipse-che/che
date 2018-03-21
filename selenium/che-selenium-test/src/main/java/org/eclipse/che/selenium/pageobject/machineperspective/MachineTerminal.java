@@ -24,7 +24,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
-import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -322,42 +321,21 @@ public class MachineTerminal {
   // TODO should be removed after fixing: https://github.com/eclipse/che/issues/8105
   // this auxiliary method for investigate problem that was described in the issue:
   // https://github.com/eclipse/che/issues/8105
-  public void launchScriptAndGetInfo(
-      TestWorkspace ws, String currentProject, TestProjectServiceClient testProjectServiceClient) {
+  public void logApplicationInfo(String projectName, TestWorkspace ws) {
     try {
-      String ideCommnandName = "checkApp";
-      String bashFileName = "check-app-state.sh";
-      String terminalCommandForCheckResult =
-          String.format(
-              "cd /projects/%s && chmod +x %s && ./%s", currentProject, bashFileName, bashFileName);
-      commandServiceClient.createCommand(
-          terminalCommandForCheckResult, ideCommnandName, CUSTOM, ws.getId());
-      String bashScript =
-          "#!/bin/bash\n"
-              + "\n"
-              + "URL=$1\n"
-              + "pid=$(pgrep -f \"user/tomcat8\")\n"
-              + "echo \"PID: $pid\"\n"
-              + "\n"
-              + "test() {\n"
-              + "    app_content=$(curl -s $1)\n"
-              + "    if [[ $app_content == *\"hello\"* ]];then\n"
-              + "        echo \"test passed with $1\"\n"
-              + "    else\n"
-              + "        echo \"test failed with $1\"\n"
-              + "    fi\n"
-              + "}";
+      String getApplicationInfoCommand = format("ps -up $(pgrep -f \"%s\" | head -1)", projectName);
+      String getApplicationInfoCommandName = "getApplicationInfo";
 
-      testProjectServiceClient.createFileInProject(
-          ws.getId(), currentProject, bashFileName, bashScript);
+      commandServiceClient.createCommand(
+          getApplicationInfoCommand, getApplicationInfoCommandName, CUSTOM, ws.getId());
       seleniumWebDriver.navigate().refresh();
       commandsPalette.openCommandPalette();
-      commandsPalette.startCommandByDoubleClick(ideCommnandName);
-      consoles.waitExpectedTextIntoConsole("PID");
-      String webAppPIDs = consoles.getVisibleTextFromCommandConsole();
-      LOG.warn("@@@ The PID list from run Web application is: " + webAppPIDs);
+      commandsPalette.startCommandByDoubleClick(getApplicationInfoCommandName);
+
+      String applicationInfo = consoles.getVisibleTextFromCommandConsole();
+      LOG.warn("@@@ Web application info: {}", applicationInfo);
     } catch (Exception ex) {
-      LOG.error("@@@ Cannot catch the info about PID", ex);
+      LOG.error("@@@ Cannot catch the info about application.", ex);
     }
   }
 }

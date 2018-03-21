@@ -11,6 +11,7 @@
 package org.eclipse.che.selenium.debugger;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -18,6 +19,7 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -132,7 +134,7 @@ public class ChangeVariableWithEvaluatingTest {
             + "/spring/guess";
     String requestMess = "numGuess=11&submit=Ok";
     editor.waitActiveBreakpoint(34);
-    CompletableFuture<String> instToRequestThread =
+    CompletableFuture<String> requestToApplication =
         debuggerUtils.gotoDebugAppAndSendRequest(
             appUrl, requestMess, APPLICATION_FORM_URLENCODED, 200);
     debugPanel.openDebugPanel();
@@ -156,11 +158,14 @@ public class ChangeVariableWithEvaluatingTest {
     // this auxiliary method for investigate problem that was described in the issue:
     // https://github.com/eclipse/che/issues/8105
     try {
-      assertTrue(instToRequestThread.get().contains("Sorry, you failed. Try again later!"));
+      String appicationReponse = requestToApplication.get(LOADER_TIMEOUT_SEC, TimeUnit.SECONDS);
+      assertTrue(
+          appicationReponse.contains("Sorry, you failed. Try again later!"),
+          "Actual application response content was: " + appicationReponse);
     } catch (AssertionError ex) {
-      machineTerminal.launchScriptAndGetInfo(
-          ws, PROJECT_NAME_CHANGE_VARIABLE, testProjectServiceClient);
-      fail("Known issue: https://github.com/eclipse/che/issues/8105");
+      machineTerminal.logApplicationInfo(PROJECT_NAME_CHANGE_VARIABLE, ws);
+      LOG.info("Application response content: " + requestToApplication.get());
+      fail("Known issue: https://github.com/eclipse/che/issues/8105", ex);
     }
   }
 
