@@ -44,5 +44,7 @@
         <module>integration-tests</module>
         <module>che-core-api-system</module>
         <module>che-core-api-system-shared</module>
+        <module>che-core-api-logger-shared</module>
+        <module>che-core-api-logger</module>
     </modules>
 </project>

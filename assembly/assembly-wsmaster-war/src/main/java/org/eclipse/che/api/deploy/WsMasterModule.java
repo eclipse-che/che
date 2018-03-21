@@ -138,6 +138,7 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
     install(new FactoryModuleBuilder().build(ExecAgentClientFactory.class));
+    bind(org.eclipse.che.api.logger.LoggerService.class);
 
     Multibinder<InternalEnvironmentProvisioner> internalEnvironmentProvisioners =
         Multibinder.newSetBinder(binder(), InternalEnvironmentProvisioner.class);
@@ -264,6 +265,7 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
+
   }
 
   private void configureMultiUserMode() {
@@ -286,6 +288,8 @@ public class WsMasterModule extends AbstractModule {
     binder.addBinding().toInstance(UserServicePermissionsFilter.MANAGE_USERS_ACTION);
     bind(org.eclipse.che.multiuser.permission.user.UserProfileServicePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.user.UserServicePermissionsFilter.class);
+    bind(org.eclipse.che.multiuser.permission.logger.LoggerServicePermissionsFilter.class);
+
 
     bind(org.eclipse.che.multiuser.permission.factory.FactoryPermissionsFilter.class);
     bind(

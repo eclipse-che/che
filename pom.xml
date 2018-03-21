@@ -414,6 +414,16 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-logger</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-logger-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-model</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -971,6 +981,11 @@
             <dependency>
                 <groupId>org.eclipse.che.multiuser</groupId>
                 <artifactId>che-multiuser-permission-installer</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-permission-logger</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
