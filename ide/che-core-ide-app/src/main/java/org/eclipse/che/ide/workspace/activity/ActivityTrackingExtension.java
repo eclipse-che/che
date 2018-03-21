@@ -8,7 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.workspace.activity.ide;
+package org.eclipse.che.ide.workspace.activity;
 
 import static com.google.gwt.core.client.ScriptInjector.TOP_WINDOW;
 

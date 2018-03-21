@@ -27,11 +27,6 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-workspace-activity-ide</artifactId>
-            <type>gwt-lib</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-ide-core</artifactId>
             <type>gwt-lib</type>
         </dependency>
