@@ -1,553 +1,298 @@
 #!/bin/bash
-# Copyright (c) 2018 Red Hat, Inc.
+# Copyright (c) 2012-2017 Red Hat, Inc
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 #
-# This script is meant for quick & easy install of Che on OpenShift via:
-#
-#  ``` bash
-#   DEPLOY_SCRIPT_URL=https://raw.githubusercontent.com/eclipse/che/master/deploy/openshift/deploy_che.sh
-#   curl -fsSL ${DEPLOY_SCRIPT_URL} -o get-che.sh
-#   bash get-che.sh --wait-che
-#   ```
-#
-# For more deployment options: https://www.eclipse.org/che/docs/setup/openshift/index.html
 
 set -e
 
-# --------------------------------------------------------
-# Check pre-requisites
-# --------------------------------------------------------
-command -v oc >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool oc (https://docs.openshift.org/latest/cli_reference/get_started_cli.html) is required but it's not installed. Aborting."; exit 1; }
-command -v jq >/dev/null 2>&1 || { echo >&2 "[CHE] [ERROR] Command line tool jq (https://stedolan.github.io/jq) is required but it's not installed. Aborting."; exit 1; }
+init() {
 
-# ----------------
-# helper functions
-# ----------------
+LOCAL_IP_ADDRESS=$(detectIP)
+BASE_DIR=$(cd "$(dirname "$0")"; pwd)
 
-# inject_che_config injects che configuration in ENV format in deploy config
-# first arg is a marker string, second is a path to the file with parameters in KV format which will be inserted after marker
-inject_che_config() {
-    while IFS= read -r line
-    do
-      printf '%s\n' "$line"
-      if [[ "$line" == *"$1"* ]];then
-          while read l; do
-            #ignore comments and empty lines
-            if [[ "$l" != "#"* ]] && [[ ! -z "$l" ]]; then
-                # properly extract key and value from config map file
-                KEY=$(echo $l | cut -d ' ' -f1 | cut -d ':' -f1)
-                VALUE=$(eval echo $l | cut -d ':' -f2- | cut -d ' ' -f2-)
-                # put key and value in proper format in to a yaml file after marker line
-                printf '%s\n' "          - name: $KEY"
-                printf '%s\n' "            value: \"$VALUE\""
-            fi
-          done <$2
-      fi
-    done < /dev/stdin
-}
-
-wait_until_che_is_available() {
-    if [ -z "${CHE_API_ENDPOINT+x}" ]; then
-        echo -n "[CHE] Inferring \$CHE_API_ENDPOINT..."
-        che_host=$(oc get route che -o jsonpath='{.spec.host}')
-        if [ -z "${che_host}" ]; then echo >&2 "[CHE] [ERROR] Failed to infer environment variable \$CHE_API_ENDPOINT. Aborting. Please set it and run ${0} script again."; exit 1; fi
-        if [[ $(oc get route che -o jsonpath='{.spec.tls}') ]]; then protocol="https" ; else protocol="http"; fi
-        CHE_API_ENDPOINT="${protocol}://${che_host}/api"
-        echo "done (${CHE_API_ENDPOINT})"
-    fi
-
-    available=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
-    progressing=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
-
-    DEPLOYMENT_TIMEOUT_SEC=300
-    POLLING_INTERVAL_SEC=5
-    end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
-    while [ "${available}" != "\"True\"" ] && [ ${SECONDS} -lt ${end} ]; do
-      available=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
-      progressing=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
-      timeout_in=$((end-SECONDS))
-      echo "[CHE] Deployment is in progress...(Available.status=${available}, Progressing.status=${progressing}, Timeout in ${timeout_in}s)"
-      sleep ${POLLING_INTERVAL_SEC}
-    done
-
-    if [ "${progressing}" == "\"True\"" ]; then
-      echo "[CHE] Che deployed successfully"
-    elif [ "${progressing}" == "False" ]; then
-      echo "[CHE] [ERROR] Che deployment failed. Aborting. Run command 'oc rollout status che' to get more details."
-      exit 1
-    elif [ ${SECONDS} -lt ${end} ]; then
-      echo "[CHE] [ERROR] Deployment timeout. Aborting."
-      exit 1
-    fi
-
-    che_http_status=$(curl -s -o /dev/null -I -w "%{http_code}" "${CHE_API_ENDPOINT}/system/state")
-    if [ "${che_http_status}" == "200" ]; then
-      echo "[CHE] Che is up and running"
-    else
-      echo "[CHE] [ERROR] Che is not responding (HTTP status= ${che_http_status})"
-      exit 1
-    fi
-}
-
-# --------------
-# Print Che logo 
-# --------------
-
-echo
-cat <<EOF
-[0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [38;5;52m1[38;5;94m0[38;5;136m1[38;5;215m0[38;5;215m0[38;5;136m0[38;5;94m0[38;5;58m0[0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m 
-[0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [38;5;58m0[38;5;136m1[38;5;179m1[38;5;221m0[38;5;221m0[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m0[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m1[38;5;179m1[38;5;136m0[38;5;58m1[0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m 
-[0m [0m [0m [0m [0m [0m [0m [38;5;52m0[38;5;94m1[38;5;136m0[38;5;179m0[38;5;221m1[38;5;221m0[38;5;221m0[38;5;221m1[38;5;221m0[38;5;221m0[38;5;221m1[38;5;221m0[38;5;221m0[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m1[38;5;179m0[38;5;136m1[38;5;94m1[38;5;52m0[0m [0m [0m [0m [0m [0m [0m 
-[0m [0m [0m [38;5;58m1[38;5;136m1[38;5;179m0[38;5;215m0[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m0[38;5;221m0[38;5;221m0[38;5;221m1[38;5;221m0[38;5;221m0[38;5;221m0[38;5;221m0[38;5;221m0[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m0[38;5;221m0[38;5;215m0[38;5;179m0[38;5;100m0[38;5;58m1[0m [0m [0m 
-[38;5;136m0[38;5;179m1[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m0[38;5;221m1[38;5;221m0[38;5;221m0[38;5;221m1[38;5;221m1[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m1[38;5;221m1[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m0[38;5;221m0[38;5;221m1[38;5;221m1[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m0[38;5;221m0[38;5;221m1[38;5;221m0[38;5;221m0[38;5;136m0[38;5;52m1
-[38;5;221m1[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m0[38;5;215m0[38;5;179m0[38;5;179m0[38;5;215m1[38;5;221m1[38;5;221m0[38;5;221m0[38;5;221m0[38;5;221m0[38;5;221m0[38;5;221m1[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m0[38;5;215m1[38;5;179m1[38;5;100m1[38;5;58m0[0m [0m [0m 
-[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m0[38;5;221m0[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m0[38;5;221m1[38;5;221m0[38;5;221m0[38;5;179m1[38;5;136m0[38;5;94m0[38;5;52m1[0m [0m [0m [0m [38;5;52m1[38;5;94m0[38;5;136m0[38;5;179m1[38;5;221m1[38;5;221m1[38;5;221m0[38;5;179m1[38;5;136m0[38;5;94m0[38;5;52m0[0m [0m [0m [0m [0m [0m [0m 
-[38;5;221m1[38;5;221m0[38;5;221m1[38;5;221m1[38;5;221m0[38;5;221m0[38;5;221m0[38;5;221m1[38;5;221m0[38;5;215m1[38;5;179m0[38;5;136m0[38;5;58m0[0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [38;5;58m0[0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m 
-[38;5;221m1[38;5;221m0[38;5;221m0[38;5;221m1[38;5;221m0[38;5;179m1[38;5;136m0[38;5;94m1[38;5;52m1[0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [38;5;17m0[38;5;59m1[38;5;60m1[38;5;60m0
-[38;5;221m1[38;5;179m0[38;5;180m1[38;5;138m0[38;5;102m0[38;5;60m0[38;5;23m0[38;5;17m1[0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [38;5;17m1[38;5;60m1[38;5;60m0[38;5;67m1[38;5;103m1[38;5;103m1[38;5;103m1[38;5;67m1
-[38;5;103m1[38;5;67m1[38;5;61m1[38;5;67m1[38;5;67m0[38;5;67m1[38;5;103m1[38;5;103m1[38;5;67m1[38;5;60m0[38;5;60m1[38;5;23m1[0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [38;5;23m1[38;5;60m1[38;5;60m1[38;5;67m0[38;5;103m1[38;5;103m1[38;5;67m1[38;5;67m1[38;5;67m0[38;5;67m0[38;5;67m0[38;5;67m1
-[38;5;67m1[38;5;67m0[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m0[38;5;67m0[38;5;67m1[38;5;67m0[38;5;67m0[38;5;103m0[38;5;103m1[38;5;103m1[38;5;67m0[38;5;60m1[38;5;59m0[38;5;17m1[0m [0m [0m [0m [0m [0m [38;5;17m0[38;5;59m0[38;5;60m0[38;5;67m0[38;5;67m0[38;5;103m1[38;5;103m1[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m0[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m1
-[38;5;103m0[38;5;67m1[38;5;67m1[38;5;67m0[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m0[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m0[38;5;103m0[38;5;103m0[38;5;67m0[38;5;60m0[38;5;60m0[38;5;60m0[38;5;60m1[38;5;67m0[38;5;103m1[38;5;103m1[38;5;67m0[38;5;67m0[38;5;67m1[38;5;67m0[38;5;67m1[38;5;67m0[38;5;67m1[38;5;67m0[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m1[38;5;103m1
-[38;5;59m1[38;5;60m1[38;5;67m0[38;5;67m1[38;5;103m0[38;5;103m0[38;5;67m0[38;5;67m0[38;5;67m0[38;5;67m1[38;5;67m1[38;5;67m0[38;5;67m1[38;5;67m0[38;5;67m0[38;5;67m1[38;5;67m0[38;5;67m0[38;5;67m0[38;5;103m0[38;5;103m1[38;5;67m0[38;5;67m0[38;5;67m1[38;5;67m0[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m0[38;5;67m1[38;5;67m0[38;5;67m1[38;5;67m1[38;5;103m0[38;5;103m1[38;5;67m1[38;5;67m0[38;5;60m1[38;5;59m1
-[0m [0m [0m [0m [38;5;23m0[38;5;60m0[38;5;60m0[38;5;67m0[38;5;103m0[38;5;103m0[38;5;67m0[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m0[38;5;67m0[38;5;67m1[38;5;67m0[38;5;67m0[38;5;67m0[38;5;67m0[38;5;67m0[38;5;67m1[38;5;67m1[38;5;67m1[38;5;67m0[38;5;67m1[38;5;67m1[38;5;67m1[38;5;103m1[38;5;103m0[38;5;67m0[38;5;60m0[38;5;60m0[38;5;23m0[0m [0m [0m [0m 
-[0m [0m [0m [0m [0m [0m [0m [0m [38;5;17m0[38;5;59m0[38;5;60m0[38;5;67m1[38;5;103m1[38;5;103m0[38;5;103m1[38;5;67m0[38;5;67m1[38;5;67m1[38;5;67m0[38;5;67m1[38;5;67m0[38;5;67m0[38;5;67m0[38;5;67m1[38;5;67m0[38;5;103m0[38;5;103m0[38;5;103m1[38;5;67m1[38;5;60m1[38;5;60m1[38;5;17m0[0m [0m [0m [0m [0m [0m [0m [0m 
-[0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [38;5;17m1[38;5;59m1[38;5;60m0[38;5;60m1[38;5;67m0[38;5;103m1[38;5;103m1[38;5;67m1[38;5;67m0[38;5;103m0[38;5;103m0[38;5;67m0[38;5;60m1[38;5;60m0[38;5;59m0[38;5;17m1[0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m 
-[0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [38;5;17m0[38;5;60m0[38;5;60m0[38;5;60m1[38;5;60m0[38;5;17m1[0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m [0m 
-[0m
-EOF
-echo
-
-# --------------------------------------------------------
-# Parse options
-# --------------------------------------------------------
-for key in "$@"
-do
-case $key in
-    -c | --command)
-    COMMAND="$2"
-    shift
-    ;;
-    --wait-che)
-    WAIT_FOR_CHE=true
-    shift
-    ;;
-    *)
-            # unknown option
-    ;;
-esac
-done
-
-# OPENSHIFT_FLAVOR can be minishift or osio or ocp
-# TODO Set flavour via a parameter
-DEFAULT_OPENSHIFT_FLAVOR="minishift"
-OPENSHIFT_FLAVOR=${OPENSHIFT_FLAVOR:-${DEFAULT_OPENSHIFT_FLAVOR}}
-DEFAULT_DNS_PROVIDER="nip.io"
-DNS_PROVIDER=${DNS_PROVIDER:-${DEFAULT_DNS_PROVIDER}}
-
-# If OpenShift flavor is MiniShift check its availability
-if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
-  if [ -z "${MINISHIFT_IP}" ]; then
-    # ---------------------------
-    # Set minishift configuration
-    # ---------------------------
-    echo -n "[CHE] Checking if minishift is running..."
-    minishift status | grep -q "Running" ||(echo "Minishift is not running. Aborting"; exit 1)
-    echo "done!"
-    MINISHIFT_IP="$(minishift ip)"
-  fi
+#OS specific defaults
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
+    DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-mac.zip"
+    DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-osx-amd64"
+else
+    DEFAULT_OC_PUBLIC_HOSTNAME="$LOCAL_IP_ADDRESS"
+    DEFAULT_OC_PUBLIC_IP="$LOCAL_IP_ADDRESS"
+    DEFAULT_OC_BINARY_DOWNLOAD_URL="https://github.com/openshift/origin/releases/download/v3.7.0/openshift-origin-client-tools-v3.7.0-7ed6862-linux-64bit.tar.gz"
+    DEFAULT_JQ_BINARY_DOWNLOAD_URL="https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64"
 fi
 
-# -----------------------------------------------
-# Set defaults for different flavors of OpenShift
-# -----------------------------------------------
-if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
-  # ----------------------
-  # Set minishift configuration
-  # ----------------------
-  DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT=""
-  DEFAULT_CHE_INFRA_KUBERNETES_PVC_STRATEGY="unique"
-  DEFAULT_OPENSHIFT_ENDPOINT="https://${MINISHIFT_IP}:8443/"
-  DEFAULT_OPENSHIFT_USERNAME="developer"
-  DEFAULT_OPENSHIFT_PASSWORD="developer"
-  DEFAULT_CHE_OPENSHIFT_PROJECT="eclipse-che"
-  DEFAULT_OPENSHIFT_ROUTING_SUFFIX="${MINISHIFT_IP}.${DNS_PROVIDER}"
-  DEFAULT_CHE_DEBUG_SERVER="true"
-  DEFAULT_OC_SKIP_TLS="true"
-  DEFAULT_CHE_APPLY_RESOURCE_QUOTAS="false"
-  DEFAULT_IMAGE_PULL_POLICY="IfNotPresent"
-  DEFAULT_ENABLE_SSL="false"
-  DEFAULT_CHE_LOG_LEVEL="INFO"
-  DEFAULT_CHE_PREDEFINED_STACKS_RELOAD="false"
-  DEFAULT_CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS="true"
-elif [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then
-  # ----------------------
-  # Set osio configuration
-  # ----------------------
-  if [ -z "${OPENSHIFT_TOKEN+x}" ]; then echo "[CHE] **ERROR** Env var OPENSHIFT_TOKEN is unset. You need to set it with your OSO token to continue. To retrieve your token: https://console.starter-us-east-2.openshift.com/console/command-line. Aborting"; exit 1; fi
-  DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
-  DEFAULT_CHE_INFRA_KUBERNETES_PVC_STRATEGY="common"
-  DEFAULT_OPENSHIFT_ENDPOINT="https://api.starter-us-east-2.openshift.com"
-  DEFAULT_CHE_OPENSHIFT_PROJECT="$(oc get projects -o=custom-columns=NAME:.metadata.name --no-headers | grep "\\-che$")"
-  DEFAULT_OPENSHIFT_ROUTING_SUFFIX="8a09.starter-us-east-2.openshiftapps.com"
-  DEFAULT_CHE_DEBUG_SERVER="false"
-  DEFAULT_OC_SKIP_TLS="false"
-  DEFAULT_ENABLE_SSL="true"
-  DEFAULT_CHE_LOG_LEVEL="INFO"
-  DEFAULT_CHE_PREDEFINED_STACKS_RELOAD="true"
-  DEFAULT_CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS="false"
-elif [ "${OPENSHIFT_FLAVOR}" == "ocp" ]; then
-  # ----------------------
-  # Set ocp configuration
-  # ----------------------
-  DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT=""
-  DEFAULT_CHE_INFRA_KUBERNETES_PVC_STRATEGY="unique"
-  DEFAULT_OPENSHIFT_USERNAME="developer"
-  DEFAULT_OPENSHIFT_PASSWORD="developer"
-  DEFAULT_CHE_OPENSHIFT_PROJECT="eclipse-che"
-  DEFAULT_CHE_DEBUG_SERVER="false"
-  DEFAULT_OC_SKIP_TLS="false"
-  DEFAULT_ENABLE_SSL="true"
-  DEFAULT_CHE_LOG_LEVEL="INFO"
-  DEFAULT_CHE_PREDEFINED_STACKS_RELOAD="true"
-  DEFAULT_CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS="true"
-fi
+export OC_PUBLIC_HOSTNAME=${OC_PUBLIC_HOSTNAME:-${DEFAULT_OC_PUBLIC_HOSTNAME}}
+export OC_PUBLIC_IP=${OC_PUBLIC_IP:-${DEFAULT_OC_PUBLIC_IP}}
 
-# --------------------------------------------------------
-# Set configuration common to any flavor of OpenShift
-# --------------------------------------------------------
-CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
-DEFAULT_COMMAND="deploy"
+export OC_BINARY_DOWNLOAD_URL=${OC_BINARY_DOWNLOAD_URL:-${DEFAULT_OC_BINARY_DOWNLOAD_URL}}
+export JQ_BINARY_DOWNLOAD_URL=${JQ_BINARY_DOWNLOAD_URL:-${DEFAULT_JQ_BINARY_DOWNLOAD_URL}}
+
 DEFAULT_CHE_MULTIUSER="false"
-DEFAULT_CHE_IMAGE_REPO="docker.io/eclipse/che-server"
+export CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
+
+DEFAULT_OPENSHIFT_USERNAME="developer"
+export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
+
+DEFAULT_OPENSHIFT_PASSWORD="developer"
+export OPENSHIFT_PASSWORD=${OPENSHIFT_PASSWORD:-${DEFAULT_OPENSHIFT_PASSWORD}}
+
+DNS_PROVIDERS=(
+xip.io
+nip.codenvy-stg.com
+)
+DEFAULT_DNS_PROVIDER="nip.io"
+export DNS_PROVIDER=${DNS_PROVIDER:-${DEFAULT_DNS_PROVIDER}}
+
+export OPENSHIFT_ROUTING_SUFFIX="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
+
+DEFAULT_CHE_OPENSHIFT_PROJECT="eclipse-che"
+export CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PROJECT}}
+
+export OPENSHIFT_FLAVOR="ocp"
+
+DEFAULT_OPENSHIFT_ENDPOINT="https://${OC_PUBLIC_HOSTNAME}:8443"
+export OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
+export CHE_INFRA_KUBERNETES_MASTER__URL=${CHE_INFRA_KUBERNETES_MASTER__URL:-${OPENSHIFT_ENDPOINT}}
+
+DEFAULT_ENABLE_SSL="false"
+export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
+
 DEFAULT_CHE_IMAGE_TAG="nightly"
-DEFAULT_CHE_KEYCLOAK_OSO_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token"
-DEFAULT_KEYCLOAK_GITHUB_ENDPOINT="https://sso.openshift.io/auth/realms/fabric8/broker/github/token"
-DEFAULT_CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD="true"
+export CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
 
-COMMAND=${COMMAND:-${DEFAULT_COMMAND}}
-WAIT_FOR_CHE=${WAIT_FOR_CHE:-"false"}
-CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
-if [ "${CHE_MULTIUSER}" == "true" ]; then
-  CHE_DEDICATED_KEYCLOAK=${CHE_DEDICATED_KEYCLOAK:-"true"}
-else
-  CHE_DEDICATED_KEYCLOAK="false"
-fi
+DEFAULT_IMAGE_PULL_POLICY="Always"
+export IMAGE_PULL_POLICY=${IMAGE_PULL_POLICY:-${DEFAULT_IMAGE_PULL_POLICY}}
 
-OPENSHIFT_ENDPOINT=${OPENSHIFT_ENDPOINT:-${DEFAULT_OPENSHIFT_ENDPOINT}}
-if [ -z "${OPENSHIFT_TOKEN+x}" ]; then
-  OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
-  OPENSHIFT_PASSWORD=${OPENSHIFT_PASSWORD:-${DEFAULT_OPENSHIFT_PASSWORD}}
-fi
+DEFAULT_CHE_IMAGE_REPO="eclipse/che-server"
+export CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
 
-CHE_OAUTH_GITHUB_CLIENTID=${CHE_OAUTH_GITHUB_CLIENTID:-}
-CHE_OAUTH_GITHUB_CLIENTSECRET=${CHE_OAUTH_GITHUB_CLIENTSECRET:-}
-CHE_INFRA_OPENSHIFT_PROJECT=${CHE_INFRA_OPENSHIFT_PROJECT:-${DEFAULT_CHE_INFRA_OPENSHIFT_PROJECT}}
-if [ -z ${CHE_INFRA_KUBERNETES_USERNAME+x} ]; then CHE_INFRA_KUBERNETES_USERNAME=$OPENSHIFT_USERNAME; fi
-if [ -z ${CHE_INFRA_KUBERNETES_PASSWORD+x} ]; then CHE_INFRA_KUBERNETES_PASSWORD=$OPENSHIFT_PASSWORD; fi
-if [ -z ${CHE_INFRA_KUBERNETES_OAUTH__TOKEN+x} ]; then CHE_INFRA_KUBERNETES_OAUTH__TOKEN=$OPENSHIFT_TOKEN; fi
-CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS=${CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS:-${DEFAULT_CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS}}
+DEFAULT_CHE_CLI_IMAGE="eclipse/che-cli:nightly"
+export CHE_CLI_IMAGE=${CHE_CLI_IMAGE:-${DEFAULT_CHE_CLI_IMAGE}}
 
-OPENSHIFT_ROUTING_SUFFIX=${OPENSHIFT_ROUTING_SUFFIX:-${DEFAULT_OPENSHIFT_ROUTING_SUFFIX}}
-DEFAULT_OPENSHIFT_NAMESPACE_URL="${CHE_OPENSHIFT_PROJECT}.${OPENSHIFT_ROUTING_SUFFIX}"
-OPENSHIFT_NAMESPACE_URL=${OPENSHIFT_NAMESPACE_URL:-${DEFAULT_OPENSHIFT_NAMESPACE_URL}}
+DEFAULT_CONFIG_DIR="/tmp/che-config"
+export CONFIG_DIR=${CONFIG_DIR:-${DEFAULT_CONFIG_DIR}}
 
-CHE_LOG_LEVEL=${CHE_LOG_LEVEL:-${DEFAULT_CHE_LOG_LEVEL}}
-ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
-WORKSPACE_MEMORY_REQUEST=${WORKSPACE_MEMORY_REQUEST:-${DEFAULT_WORKSPACE_MEMORY_REQUEST}}
-CHE_PREDEFINED_STACKS_RELOAD=${CHE_PREDEFINED_STACKS_RELOAD:-${DEFAULT_CHE_PREDEFINED_STACKS_RELOAD}}
-CHE_DEBUG_SERVER=${CHE_DEBUG_SERVER:-${DEFAULT_CHE_DEBUG_SERVER}}
-OC_SKIP_TLS=${OC_SKIP_TLS:-${DEFAULT_OC_SKIP_TLS}}
-CHE_APPLY_RESOURCE_QUOTAS=${CHE_APPLY_RESOURCE_QUOTAS:-${DEFAULT_CHE_APPLY_RESOURCE_QUOTAS}}
-IMAGE_PULL_POLICY=${IMAGE_PULL_POLICY:-${DEFAULT_IMAGE_PULL_POLICY}}
-CHE_INFRA_KUBERNETES_PVC_STRATEGY=${CHE_INFRA_KUBERNETES_PVC_STRATEGY:-${DEFAULT_CHE_INFRA_KUBERNETES_PVC_STRATEGY}}
-CHE_HOST="${OPENSHIFT_NAMESPACE_URL}"
-if [ "${ENABLE_SSL}" == "true" ]; then
-    HTTP_PROTOCOL="https"
-    WS_PROTOCOL="wss"
-else
-    HTTP_PROTOCOL="http"
-    WS_PROTOCOL="ws"
-fi
-export IMAGE_POSTGRES=${IMAGE_POSTGRES:-"eclipse/che-postgres:nightly"}
-export IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK:-"eclipse/che-keycloak:nightly"}
-CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
-CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
-CHE_IMAGE="${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}"
-# Escape slashes in CHE_IMAGE to use it with sed later
-# e.g. docker.io/rhchestage => docker.io\/rhchestage
-CHE_IMAGE_SANITIZED=$(echo "${CHE_IMAGE}" | sed 's/\//\\\//g')
-# Keycloak production endpoints are used by default
-CHE_KEYCLOAK_OSO_ENDPOINT=${CHE_KEYCLOAK_OSO_ENDPOINT:-${DEFAULT_CHE_KEYCLOAK_OSO_ENDPOINT}}
-KEYCLOAK_GITHUB_ENDPOINT=${KEYCLOAK_GITHUB_ENDPOINT:-${DEFAULT_KEYCLOAK_GITHUB_ENDPOINT}}
-
-get_che_pod_config() {
-DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-openshift.yml
-CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
-DEFAULT_CHE_CONFIG_FILE_PATH=./che-config
-CHE_CONFIG_FILE_PATH=${CHE_CONFIG_FILE_PATH:-${DEFAULT_CHE_CONFIG_FILE_PATH}}
-cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
-    sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
-    sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
-    inject_che_config "#CHE_MASTER_CONFIG" "${CHE_CONFIG_FILE_PATH}"
 }
 
-# ---------------------------------------
-# Verify that we have all env var are set
-# ---------------------------------------
-if ([ -z "${OPENSHIFT_USERNAME+x}" ] ||
-    [ -z "${OPENSHIFT_PASSWORD+x}" ]) &&
-    [ -z "${OPENSHIFT_TOKEN+x}" ]; then echo "[CHE] **ERROR** Env var OPENSHIFT_USERNAME, OPENSHIFT_PASSWORD and OPENSHIFT_TOKEN are unset. You need to set username/password or token to continue. Aborting"; exit 1; fi
+test_dns_provider() {
+    #add current $DNS_PROVIDER to the providers list to respect environment settings
+    DNS_PROVIDERS=("$DNS_PROVIDER" "${DNS_PROVIDERS[@]}")
+    for i in ${DNS_PROVIDERS[@]}
+        do
+        if [[ $(dig +short +time=5 +tries=1 10.0.0.1.$i) = "10.0.0.1" ]]; then
+            echo "Test $i - works OK, using it as DNS provider"
+            export DNS_PROVIDER="$i"
+            break;
+         else
+            echo "Test $i DNS provider failed, trying next one."
+        fi
+        done
+}
 
-if [ -z "${OPENSHIFT_ENDPOINT+x}" ]; then echo "[CHE] **ERROR**Env var OPENSHIFT_ENDPOINT is unset. You need to set it to continue. Aborting"; exit 1; fi
-if [ -z "${OPENSHIFT_NAMESPACE_URL+x}" ]; then echo "[CHE] **ERROR**Env var OPENSHIFT_NAMESPACE_URL is unset. You need to set it to continue. Aborting"; exit 1; fi
-
-# -----------------------------------
-# Logging on to the OpenShift cluster
-# -----------------------------------
-echo -n "[CHE] Logging on using OpenShift endpoint \"${OPENSHIFT_ENDPOINT}\"..."
-if [ -z "${OPENSHIFT_TOKEN+x}" ]; then
-  oc login "${OPENSHIFT_ENDPOINT}" --insecure-skip-tls-verify="${OC_SKIP_TLS}" -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}" > /dev/null
-  OPENSHIFT_TOKEN=$(oc whoami -t)
-else
-  oc login "${OPENSHIFT_ENDPOINT}" --insecure-skip-tls-verify="${OC_SKIP_TLS}" --token="${OPENSHIFT_TOKEN}"  > /dev/null
-fi
-echo "done!"
-
-# -------------------------------------------------------------
-# If command == cleanup then delete all openshift objects
-# -------------------------------------------------------------
-if [ "${COMMAND}" == "cleanup" ]; then
-  echo "[CHE] Deleting all OpenShift objects..."
-  oc delete all --all
-  echo "[CHE] Cleanup successfully started. Use \"oc get all\" to verify that all resources have been deleted."
-  exit 0
-# -------------------------------------------------------------
-# If command == rollupdate then update Che
-# -------------------------------------------------------------
-elif [ "${COMMAND}" == "rollupdate" ]; then
-  echo "[CHE] Update CHE pod"
-  get_che_pod_config | oc apply -f -
-  echo "[CHE] Update successfully started"
-  exit 0
-# ----------------------------------------------------------------
-# At this point command should be "deploy" otherwise it's an error
-# ----------------------------------------------------------------
-elif [ "${COMMAND}" != "deploy" ]; then
-  echo "[CHE] **ERROR**: Command \"${COMMAND}\" is not a valid command. Aborting."
-  exit 1
-fi
-
-# --------------------------
-# Create project (if needed)
-# --------------------------
-echo -n "[CHE] Checking if project \"${CHE_OPENSHIFT_PROJECT}\" exists..."
-if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
-
-    if [ "${COMMAND}" == "cleanup" ] || [ "${COMMAND}" == "rollupdate" ]; then echo "**ERROR** project doesn't exist. Aborting"; exit 1; fi
-    if [ "${OPENSHIFT_FLAVOR}" == "osio" ]; then echo "**ERROR** project doesn't exist on OSIO. Aborting"; exit 1; fi
-
-    # OpenShift will not get project but project still exists for a period after being deleted.
-    # The following will loop until it can create successfully.
-
-    WAIT_FOR_PROJECT_TO_DELETE=true
-    WAIT_FOR_PROJECT_TO_DELETE_MESSAGE="Waiting for project to be deleted fully(~15 seconds)..."
-
-    echo "Project \"${CHE_OPENSHIFT_PROJECT}\" does not exist...trying to create it."
-    DEPLOYMENT_TIMEOUT_SEC=120
-    POLLING_INTERVAL_SEC=2
-    timeout_in=$((POLLING_INTERVAL_SEC+DEPLOYMENT_TIMEOUT_SEC))  
-    while $WAIT_FOR_PROJECT_TO_DELETE
-    do
-    { # try
-        timeout_in=$((timeout_in-POLLING_INTERVAL_SEC))
-        if [ "$timeout_in" -le "0" ] ; then
-            echo "[CHE] **ERROR**: Timeout of $DEPLOYMENT_TIMEOUT_SEC waiting for project \"${CHE_OPENSHIFT_PROJECT}\" to be deleted."
-            exit 1
-        fi  
-        oc new-project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null && \
-        WAIT_FOR_PROJECT_TO_DELETE=false # Only excutes if project creation is successfully
-    } || { # catch
-        echo -n $WAIT_FOR_PROJECT_TO_DELETE_MESSAGE
-        WAIT_FOR_PROJECT_TO_DELETE_MESSAGE="."
-        sleep $POLLING_INTERVAL_SEC
-    }
-    done
-    echo "Project \"${CHE_OPENSHIFT_PROJECT}\" creation done!"
-else
-    echo "Project \"${CHE_OPENSHIFT_PROJECT}\" already exists. Please remove project before running this script."
-    exit 1
-fi
-
-# -------------------------------------------------------------
-# create CHE service and route
-# -------------------------------------------------------------
-echo "[CHE] Creating serviceaccount, service and route for CHE pod"
- echo "apiVersion: v1
-kind: List
-items:
-- apiVersion: v1
-  kind: ServiceAccount
-  metadata:
-    labels:
-      app: che
-    name: che
-- apiVersion: v1
-  kind: Service
-  metadata:
-    labels:
-      app: che
-    name: che-host
-  spec:
-    ports:
-    - name: http
-      port: 8080
-      protocol: TCP
-      targetPort: 8080
-    selector:
-      app: che
-- apiVersion: v1
-  kind: Route
-  metadata:
-    labels:
-      app: che
-    name: che
-  spec:
-    tls:
-      insecureEdgeTerminationPolicy: Redirect
-      termination: edge
-    to:
-      kind: Service
-      name: che-host" | \
-if [ "${ENABLE_SSL}" == "false" ]; then grep -v -e "tls:" -e "insecureEdgeTerminationPolicy: Redirect" -e "termination: edge" ; else cat -; fi | \
-oc apply -f -
-
-# -------------------------------------------------------------
-# Deploying secondary servers
-# for postgres and optionally Keycloak
-# -------------------------------------------------------------
-
-COMMAND_DIR=$(dirname "$0")
-
-if [[ "${CHE_MULTIUSER}" == "true" ]] && [[ "${COMMAND}" == "deploy" ]]; then
-    if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
-        "${COMMAND_DIR}"/multi-user/deploy_postgres_and_keycloak.sh
+get_tools() {
+    TOOLS_DIR="/tmp"
+    OC_BINARY="$TOOLS_DIR/oc"
+    JQ_BINARY="$TOOLS_DIR/jq"
+    OC_VERSION=$(echo $DEFAULT_OC_BINARY_DOWNLOAD_URL | cut -d '/' -f 8)
+    #OS specific extract archives
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        OC_PACKAGE="openshift-origin-client-tools.zip"
+        ARCH="unzip -d $TOOLS_DIR"
+        EXTRA_ARGS=""
     else
-        "${COMMAND_DIR}"/multi-user/deploy_postgres_only.sh
+        OC_PACKAGE="openshift-origin-client-tools.tar.gz"
+        ARCH="tar --strip 1 -xzf"
+        EXTRA_ARGS="-C $TOOLS_DIR"
     fi
-fi
 
-# -------------------------------------------------------------
-# Setting Keycloak-related environment variables
-# Done here since the Openshift project should be available
-# TODO Maybe this should go into a config map, but I don't know
-# How we would manage the retrieval of the Keycloak route
-# external URL.
-# -------------------------------------------------------------
+    download_oc() {
+        echo "download oc client $OC_VERSION"
+        wget -q -O $TOOLS_DIR/$OC_PACKAGE $OC_BINARY_DOWNLOAD_URL
+        eval "$ARCH" "$TOOLS_DIR"/"$OC_PACKAGE" "$EXTRA_ARGS" &>/dev/null
+        rm -f "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE "${TOOLS_DIR:-/tmp}"/"$OC_PACKAGE"
+    }
 
-if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
-  CHE_KEYCLOAK_SERVER_ROUTE=$(oc get route keycloak -o jsonpath='{.spec.host}' || echo "")
-  if [ "${CHE_KEYCLOAK_SERVER_ROUTE}" == "" ]; then
-    echo "[CHE] **ERROR**: The dedicated Keycloak server should be deployed and visible through a route before starting the Che server"
-    exit 1
-  fi
+    if [[ ! -f $OC_BINARY ]]; then
+        download_oc
+    else
+        # here we check is installed version is same version defined in script, if not we update version to one that defined in script.
+        if [[ $($OC_BINARY version 2> /dev/null | grep "oc v" | cut -d " " -f2 | cut -d '+' -f1 || true) != *"$OC_VERSION"* ]]; then
+            rm -f "$OC_BINARY" "$TOOLS_DIR"/README.md "$TOOLS_DIR"/LICENSE
+            download_oc
+        fi
+    fi
 
-  CHE_POSTRES_SERVICE=$(oc get service postgres || echo "")
-  if [ "${CHE_POSTRES_SERVICE}" == "" ]; then
-    echo "[CHE] **ERROR**: The dedicated Postgres server should be started in Openshift project ${CHE_OPENSHIFT_PROJECT} before starting the Che server"
-    exit 1
-  fi
+    if [ ! -f $JQ_BINARY ]; then
+        echo "download jq..."
+        wget -q -O $JQ_BINARY $JQ_BINARY_DOWNLOAD_URL
+        chmod +x $JQ_BINARY
+    fi
+    export PATH=${PATH}:${TOOLS_DIR}
+}
 
-  CHE_KEYCLOAK_AUTH__SERVER__URL=${CHE_KEYCLOAK_AUTH__SERVER__URL:-"${HTTP_PROTOCOL}://${CHE_KEYCLOAK_SERVER_ROUTE}/auth"}
-  CHE_KEYCLOAK_REALM=${CHE_KEYCLOAK_REALM:-"che"}
-  CHE_KEYCLOAK_CLIENT__ID=${CHE_KEYCLOAK_CLIENT__ID:-"che-public"}
-else
-  CHE_KEYCLOAK_AUTH__SERVER__URL=${CHE_KEYCLOAK_AUTH__SERVER__URL:-"https://sso.openshift.io/auth"}
-  CHE_KEYCLOAK_REALM=${CHE_KEYCLOAK_REALM:-"fabric8"}
-  CHE_KEYCLOAK_CLIENT__ID=${CHE_KEYCLOAK_CLIENT__ID:-"openshiftio-public"}
-fi
+ocp_is_booted() {
+    # we have to wait before docker registry will be started as it is staring as last container and it should be running before we perform che deploy.
+    ocp_registry_container_id=$(docker ps -a  | grep openshift/origin-docker-registry | cut -d ' ' -f1)
+    if [ ! -z "$ocp_registry_container_id" ];then
+        ocp_registry_container_status=$(docker inspect "$ocp_registry_container_id" | $JQ_BINARY .[0] | $JQ_BINARY -r '.State.Status')
+    else
+        return 1
+    fi
+    if [[ "${ocp_registry_container_status}" == "running" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
 
-# -------------------------------------------------------------
-# Verify that Che ServiceAccount has admin rights at project level
-# -------------------------------------------------------------
-## TODO we should create Che SA if it doesn't exist
-## TODO we should check if che has admin rights before creating the role biding
-## TODO if we are not in minishift we should fail if che SA doesn't have admin rights
-if [[ "${OPENSHIFT_FLAVOR}" =~ ^(minishift|ocp)$ ]]; then
-  echo -n "[CHE] Setting admin role to \"che\" service account..."
-  echo "apiVersion: v1
-kind: RoleBinding
-metadata:
-  name: che
-roleRef:
-  name: admin
-subjects:
-- kind: ServiceAccount
-  name: che" | oc apply -f -
-fi
+wait_ocp() {
+  OCP_BOOT_TIMEOUT=120
+  echo "[OCP] wait for ocp full boot..."
+  ELAPSED=0
+  until ocp_is_booted; do
+    if [ ${ELAPSED} -eq "${OCP_BOOT_TIMEOUT}" ];then
+        echo "OCP didn't started in $OCP_BOOT_TIMEOUT secs, exit"
+        exit 1
+    fi
+    sleep 2
+    ELAPSED=$((ELAPSED+1))
+  done
+}
 
-# ----------------------------------------------
-# Get latest version of fabric8 tenant templates
-# ----------------------------------------------
-# TODO make it possible to use a local Che template instead of always downloading it from maven central
-echo -n "[CHE] Retrieving latest version of fabric8 tenant Che template..."
-OSIO_VERSION=$(curl -sSL http://central.maven.org/maven2/io/fabric8/tenant/apps/che/maven-metadata.xml | grep latest | sed -e 's,.*<latest>\([^<]*\)</latest>.*,\1,g')
-echo "done! (v.${OSIO_VERSION})"
+run_ocp() {
+    test_dns_provider
+    $OC_BINARY cluster up --public-hostname="${OC_PUBLIC_HOSTNAME}" --routing-suffix="${OC_PUBLIC_IP}.${DNS_PROVIDER}"
+    wait_ocp
+}
 
-# --------------------------------------
-# Applying resource quotas on minishift
-# --------------------------------------
-if [ "${CHE_APPLY_RESOURCE_QUOTAS}" == "true" ] && [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
- # Only cluster admin can set limitranges / resourcequotas
- oc login "${OPENSHIFT_ENDPOINT}" -u system:admin &> /dev/null
- echo "[CHE] Applying resource quotas for ${CHE_OPENSHIFT_PROJECT}"
- curl -sSL http://central.maven.org/maven2/io/fabric8/tenant/packages/fabric8-tenant-che-quotas-oso/"${OSIO_VERSION}"/fabric8-tenant-che-quotas-oso-"${OSIO_VERSION}"-openshift.yml |
- oc apply --force=true -f-
- echo "[CHE] Resource quotas have been successfully applied"
- oc login "${OPENSHIFT_ENDPOINT}" --token="${OPENSHIFT_TOKEN}"  &> /dev/null
-fi
+deploy_che_to_ocp() {
+    bash ${BASE_DIR}/deploy_che.sh --wait-che ${DEPLOY_SCRIPT_ARGS}
+}
 
-# ----------------------------------------------
-# Start the deployment
-# ----------------------------------------------
-echo
-echo "[CHE] Deploying Che on ${OPENSHIFT_FLAVOR} (image ${CHE_IMAGE})"
-get_che_pod_config | oc apply --force=true -f -
-echo
+destroy_ocp() {
+    $OC_BINARY login -u system:admin
+    $OC_BINARY delete pvc --all
+    $OC_BINARY delete all --all
+    $OC_BINARY cluster down
+}
 
-# --------------------------------
-# Setup debugging routes if needed
-# --------------------------------
-if [ "${CHE_DEBUG_SERVER}" == "true" ]; then
+remove_che_from_ocp() {
+	echo "[CHE] Checking if project \"${CHE_OPENSHIFT_PROJECT}\" exists before removing..."
+	WAIT_FOR_PROJECT_TO_DELETE=true
+	CHE_REMOVE_PROJECT=true
+	DELETE_OPENSHIFT_PROJECT_MESSAGE="[CHE] Removing Project \"${CHE_OPENSHIFT_PROJECT}\"."
+	if $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
+		echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" exists."
+		while $WAIT_FOR_PROJECT_TO_DELETE
+		do
+		{ # try
+			echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
+			if $CHE_REMOVE_PROJECT; then
+				$OC_BINARY delete project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
+				CHE_REMOVE_PROJECT=false
+			fi
+			DELETE_OPENSHIFT_PROJECT_MESSAGE="."
+			if ! $OC_BINARY get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
+				WAIT_FOR_PROJECT_TO_DELETE=false
+			fi
+			echo -n $DELETE_OPENSHIFT_PROJECT_MESSAGE
+		} || { # catch
+			echo "[CHE] Could not find project \"${CHE_OPENSHIFT_PROJECT}\" to delete."
+			WAIT_FOR_PROJECT_TO_DELETE=false
+		}
+		done
+		echo "Done!"
+	else
+		echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" does NOT exists."
+	fi
 
-  if oc get svc che-debug &> /dev/null; then
-    echo -n "[CHE] Deleting old che-debug service..."
-    oc delete svc che-debug
-    echo "done"
-  fi
+}
 
-  echo -n "[CHE] Creating an OS route to debug Che wsmaster..."
-  oc expose dc che --name=che-debug --target-port=http-debug --port=8000 --type=NodePort
-  NodePort=$(oc get service che-debug -o jsonpath='{.spec.ports[0].nodePort}')
-  echo "[CHE] Remote wsmaster debugging URL: ${MINISHIFT_IP}:${NodePort}"
-fi
+detectIP() {
+    docker run --rm --net host eclipse/che-ip:nightly
+}
 
-if [ "${WAIT_FOR_CHE}" == "true" ]; then
-  wait_until_che_is_available
-fi
+parse_args() {
+    HELP="valid args:
+    --help - this help menu
+    --run-ocp - run ocp cluster
+    --destroy - destroy ocp cluster
+    --deploy-che - deploy che to ocp
+    --multiuser - deploy che in multiuser mode
+    --remove-che - remove existing che project
+    ===================================
+    ENV vars
+    CHE_IMAGE_TAG - set che-server image tag, default: nightly
+    CHE_CLI_IMAGE - set che-cli image, default: eclipse/che-cli:nightly
+    CHE_MULTIUSER - set CHE multi user mode, default: false (single user)
+    OC_PUBLIC_HOSTNAME - set ocp hostname to admin console, default: host ip
+    OC_PUBLIC_IP - set ocp hostname for routing suffix, default: host ip
+    DNS_PROVIDER - set ocp DNS provider for routing suffix, default: nip.io
+    OPENSHIFT_TOKEN - set ocp token for authentication
+"
 
-if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
-"${COMMAND_DIR}"/multi-user/configure_keycloak.sh
-fi
+    DEPLOY_SCRIPT_ARGS=""
 
-che_route=$(oc get route che -o jsonpath='{.spec.host}')
-echo
-echo "[CHE] Che deployment has been successufully bootstrapped"
-echo "[CHE] -> To check OpenShift deployment logs: 'oc get events -w'"
-echo "[CHE] -> To check Che server logs: 'oc logs -f dc/che'"
-echo "[CHE] -> Once the deployment is completed Che will be available at: "
-echo "[CHE]    ${HTTP_PROTOCOL}://${che_route}"
-echo
-echo
+    if [ $# -eq 0 ]; then
+        echo "No arguments supplied"
+        echo -e "$HELP"
+        exit 1
+    fi
+
+    if [[ "$@" == *"--multiuser"* ]]; then
+      CHE_MULTIUSER=true
+    fi
+
+    if [[ "$@" == *"--update"* ]]; then
+      DEPLOY_SCRIPT_ARGS="-c rollupdate"
+    fi
+
+    if [[ "$@" == *"--remove-che"* ]]; then
+      remove_che_from_ocp
+    fi
+
+    for i in "${@}"
+    do
+        case $i in
+           --run-ocp)
+               run_ocp
+               shift
+           ;;
+           --destroy)
+               destroy_ocp
+               shift
+           ;;
+           --deploy-che)
+               deploy_che_to_ocp
+               shift
+           ;;
+           --multiuser)
+               shift
+           ;;
+           --update)
+               shift
+           ;;
+           --remove-che)
+               shift
+           ;;
+           --help)
+               echo -e "$HELP"
+               exit 1
+           ;;
+           *)
+               echo "You've passed wrong arg."
+               echo -e "$HELP"
+               exit 1
+           ;;
+        esac
+    done
+}
+
+init
+get_tools
+parse_args "$@"
