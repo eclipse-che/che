@@ -1,9 +1,23 @@
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.selenium.workspaces;
 
-import com.google.inject.Inject;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.*;
+import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
+import static org.testng.AssertJUnit.assertEquals;
 
+import com.google.inject.Inject;
+import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -12,13 +26,6 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import javax.inject.Named;
-
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.*;
-import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
-import static org.testng.AssertJUnit.assertEquals;
 
 public class CheckStoppingWsByTimeoutTest {
 
@@ -32,11 +39,11 @@ public class CheckStoppingWsByTimeoutTest {
 
   @Inject
   @Named("che.workspace_agent_dev_inactive_stop_timeout_ms")
-  private int stoppingTimeoutInactiveWorkspace;
+  private int cheWorkspaceAgentDevInactiveStopTimeoutMilliseconds;
 
   @Inject
   @Named("che.workspace.activity_check_scheduler_period_s")
-  private int cheWorkspaceActivityCheckSchedulerPeriodInSecond;
+  private int cheWorkspaceActivityCheckSchedulerPeriodInSeconds;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -60,8 +67,8 @@ public class CheckStoppingWsByTimeoutTest {
   }
 
   private int getCommonTimeout() {
-    return stoppingTimeoutInactiveWorkspace
+    return cheWorkspaceAgentDevInactiveStopTimeoutMilliseconds
         + TOASTLOADER_WIDGET_LATENCY_TIMEOUT_IN_MILLISEC
-        + cheWorkspaceActivityCheckSchedulerPeriodInSecond * 1000;
+        + cheWorkspaceActivityCheckSchedulerPeriodInSeconds * 1000;
   }
 }
