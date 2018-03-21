@@ -264,6 +264,8 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
+    bind(org.eclipse.che.api.logger.LoggerService.class);
+
   }
 
   private void configureMultiUserMode() {
