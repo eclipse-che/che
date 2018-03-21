@@ -265,7 +265,6 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
-
   }
 
   private void configureMultiUserMode() {
@@ -289,7 +288,6 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.multiuser.permission.user.UserProfileServicePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.user.UserServicePermissionsFilter.class);
     bind(org.eclipse.che.multiuser.permission.logger.LoggerServicePermissionsFilter.class);
-
 
     bind(org.eclipse.che.multiuser.permission.factory.FactoryPermissionsFilter.class);
     bind(
