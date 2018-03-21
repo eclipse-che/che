@@ -93,7 +93,7 @@ wait_until_che_is_available() {
 }
 
 # --------------
-# Print Che logo 
+# Print Che logo
 # --------------
 
 echo
@@ -359,7 +359,7 @@ if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
     echo "Project \"${CHE_OPENSHIFT_PROJECT}\" does not exist...trying to create it."
     DEPLOYMENT_TIMEOUT_SEC=120
     POLLING_INTERVAL_SEC=2
-    timeout_in=$((POLLING_INTERVAL_SEC+DEPLOYMENT_TIMEOUT_SEC))  
+    timeout_in=$((POLLING_INTERVAL_SEC+DEPLOYMENT_TIMEOUT_SEC))
     while $WAIT_FOR_PROJECT_TO_DELETE
     do
     { # try
@@ -367,7 +367,7 @@ if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
         if [ "$timeout_in" -le "0" ] ; then
             echo "[CHE] **ERROR**: Timeout of $DEPLOYMENT_TIMEOUT_SEC waiting for project \"${CHE_OPENSHIFT_PROJECT}\" to be deleted."
             exit 1
-        fi  
+        fi
         oc new-project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null && \
         WAIT_FOR_PROJECT_TO_DELETE=false # Only excutes if project creation is successfully
     } || { # catch
