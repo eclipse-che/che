@@ -19,6 +19,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.OVERVIEW;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.PROJECTS;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.SERVERS;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.SSH;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -41,7 +42,9 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceMachine
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceServers;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceSsh;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -82,6 +85,7 @@ public class WorkspaceDetailsSingleMachineTest {
   @Inject private WorkspaceOverview workspaceOverview;
   @Inject private TestWorkspace testWorkspace;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private WorkspaceSsh workspaceSsh;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -107,7 +111,7 @@ public class WorkspaceDetailsSingleMachineTest {
     workspaceServiceClient.delete(workspaceName, testUser.getName());
   }
 
-  @Test
+  //  @Test
   public void checkOverviewTab() {
     workspaceOverview.checkNameWorkspace(workspaceName);
     workspaceOverview.isDeleteWorkspaceButtonExists();
@@ -119,7 +123,7 @@ public class WorkspaceDetailsSingleMachineTest {
     workspaceOverview.clickOnHideWorkspaceJsonFileBtn();
   }
 
-  @Test
+  //  @Test
   public void checkWorkingWithInstallers() {
     workspaceDetails.selectTabInWorkspaceMenu(INSTALLERS);
     assertTrue(workspaceInstallers.isInstallerStateNotChangeable("Workspace API"));
@@ -154,7 +158,7 @@ public class WorkspaceDetailsSingleMachineTest {
         });
   }
 
-  @Test
+  //  @Test
   public void checkWorkingWithServers() {
     workspaceDetails.selectTabInWorkspaceMenu(SERVERS);
 
@@ -179,7 +183,7 @@ public class WorkspaceDetailsSingleMachineTest {
     createServer("agent", "8082", "https");
   }
 
-  @Test
+  //  @Test
   public void checkWorkingWithProjects() {
     workspaceDetails.selectTabInWorkspaceMenu(PROJECTS);
 
@@ -198,6 +202,24 @@ public class WorkspaceDetailsSingleMachineTest {
     // check that project exists(workspace will restart)
     workspaceProjects.waitProjectIsPresent(WEB_JAVA_SPRING);
     workspaceProjects.waitProjectIsPresent(CONSOLE_JAVA_SIMPLE);
+  }
+
+  @Test
+  public void checkSshTab() {
+    workspaceDetails.selectTabInWorkspaceMenu(SSH);
+
+    // check ssh key exist
+    Assert.assertTrue(workspaceSsh.isPrivateKeyExists());
+    Assert.assertTrue(workspaceSsh.isPublicKeyExists());
+
+    // remove ssh key
+    workspaceSsh.clickOnRemoveDefaultSshKeyButton();
+    workspaceSsh.waitSshKeyNotExists();
+
+    // generate ssh key
+    workspaceSsh.clickOnGenerateButton();
+    Assert.assertTrue(workspaceSsh.isPrivateKeyExists());
+    Assert.assertTrue(workspaceSsh.isPublicKeyExists());
   }
 
   private void addNewProject(String projectName) {
