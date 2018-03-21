@@ -80,8 +80,8 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
       manager.persist(expiration);
     } else {
       manager.merge(expiration);
-      manager.flush();
     }
+    manager.flush();
   }
 
   @Transactional
