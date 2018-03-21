@@ -226,9 +226,11 @@ public class WorkspaceDetailsSingleMachineTest {
   }
 
   @Test
-  public void checkVolumeTab() {
+  public void checkVolumesTab() {
     String volumeName = "project";
+    String newVolumeName = "projects";
     String volumePath = "/project";
+    String newVolumePath = "/projects";
 
     workspaceDetails.selectTabInWorkspaceMenu(VOLUMES);
 
@@ -242,16 +244,16 @@ public class WorkspaceDetailsSingleMachineTest {
 
     // edit volume
     workspacesVolumes.clickOnEditVolumeButton(volumeName);
-    workspacesVolumes.enterVolumeName("projects");
-    workspacesVolumes.enterVolumePath("/projects");
+    workspacesVolumes.enterVolumeName(newVolumeName);
+    workspacesVolumes.enterVolumePath(newVolumePath);
     workspaceDetails.clickOnUpdateButtonInDialogWindow();
-    workspacesVolumes.checkVolumeExists("projects", "/projects");
+    workspacesVolumes.checkVolumeExists(newVolumeName, newVolumePath);
     clickOnSaveButton();
 
     // remove volume
-    workspacesVolumes.clickOnRemoveVolumeButton("projects");
+    workspacesVolumes.clickOnRemoveVolumeButton(newVolumeName);
     workspaceDetails.clickOnDeleteButtonInDialogWindow();
-    workspacesVolumes.waitVolumeNotExists("projects");
+    workspacesVolumes.waitVolumeNotExists(newVolumeName);
     clickOnSaveButton();
   }
 
