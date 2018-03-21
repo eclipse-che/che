@@ -22,7 +22,6 @@ RUN yarn && \
     yarn && \
     yarn theia build
 ADD src/main.js /theia_launcher/theia_launcher.js
-RUN mkdir -p /home/default/time && touch /home/default/time/$(date +"%T")
 EXPOSE 3000
 ARG GITHUB_TOKEN
 ENV USE_LOCAL_GIT=true \
