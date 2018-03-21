@@ -62,15 +62,11 @@ public class KeycloakSettings {
       @Nullable @Named(GITHUB_ENDPOINT_SETTING) String gitHubEndpoint) {
 
     if (serverURL == null && oidcProvider == null) {
-        LOG.error("Either the '" + AUTH_SERVER_URL_SETTING + "' or '" + OIDC_PROVIDER_SETTING + "' property should be set");
-        this.settings = Collections.unmodifiableMap(new HashMap<String, String>());
-        return;
+        throw new RuntimeException("Either the '" + AUTH_SERVER_URL_SETTING + "' or '" + OIDC_PROVIDER_SETTING + "' property should be set");
     }
     
     if (oidcProvider == null && realm == null) {
-        LOG.error("The '" + REALM_SETTING + "' property should be set");
-        this.settings = Collections.unmodifiableMap(new HashMap<String, String>());
-        return;
+        throw new RuntimeException("The '" + REALM_SETTING + "' property should be set");
     }
     
     String wellKnownEndpoint = oidcProvider != null ? oidcProvider : serverURL + "/realms/" + realm;
