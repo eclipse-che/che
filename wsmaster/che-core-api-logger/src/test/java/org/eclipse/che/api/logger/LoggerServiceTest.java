@@ -129,7 +129,7 @@ public class LoggerServiceTest {
 
     assertEquals(response.getStatusCode(), 200);
 
-    List<LoggerDto> loggers = this.loggerService.getLoggers();
+    List<LoggerDto> loggers = this.loggerService.getLoggers(0, 30);
     assertTrue(loggers.contains(toCreateLoggerDto));
   }
 
@@ -149,8 +149,36 @@ public class LoggerServiceTest {
 
     assertEquals(response.getStatusCode(), 200);
 
-    List<LoggerDto> loggers = this.loggerService.getLoggers();
+    List<LoggerDto> loggers = this.loggerService.getLoggers(0, 30);
     assertTrue(loggers.contains(toUpdateLoggerDto));
+  }
+
+  @Test(dependsOnMethods = "shouldCreateLogger")
+  public void shouldGetLoggerPaginateSkip() {
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .when()
+            .get(SECURE_PATH + "/logger/?skipCount=100");
+
+    assertEquals(response.getStatusCode(), 200);
+    List<LoggerDto> loggers = unwrapDtoList(response, LoggerDto.class);
+    assertEquals(loggers.size(), 0);
+  }
+
+  @Test(dependsOnMethods = "shouldCreateLogger")
+  public void shouldGetLoggerPaginateLimit() {
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .when()
+            .get(SECURE_PATH + "/logger/?maxItems=1");
+
+    assertEquals(response.getStatusCode(), 200);
+    List<LoggerDto> loggers = unwrapDtoList(response, LoggerDto.class);
+    assertEquals(loggers.size(), 1);
   }
 
   private static <T> List<T> unwrapDtoList(Response response, Class<T> dtoClass) {

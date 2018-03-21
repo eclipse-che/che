@@ -24,12 +24,14 @@ import io.swagger.annotations.ApiResponses;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.logger.shared.dto.LoggerDto;
@@ -68,13 +70,21 @@ public class LoggerService extends Service {
   @ApiResponses({
     @ApiResponse(code = 200, message = "The loggers successfully fetched"),
   })
-  public List<LoggerDto> getLoggers() {
+  public List<LoggerDto> getLoggers(
+      @ApiParam("The number of the items to skip") @DefaultValue("0") @QueryParam("skipCount")
+          Integer skipCount,
+      @ApiParam("The limit of the items in the response, default is 30")
+          @DefaultValue("30")
+          @QueryParam("maxItems")
+          Integer maxItems) {
     LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
     return loggerContext
         .getLoggerList()
         .stream()
         .filter(log -> log.getLevel() != null || log.iteratorForAppenders().hasNext())
+        .skip(skipCount)
+        .limit(maxItems)
         .map(this::asDto)
         .collect(Collectors.toList());
   }
