@@ -11,6 +11,7 @@ set -e
 init() {
 
 LOCAL_IP_ADDRESS=$(detectIP)
+BASE_DIR=$(cd "$(dirname "$0")"; pwd)
 
 #OS specific defaults
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -170,13 +171,7 @@ run_ocp() {
 }
 
 deploy_che_to_ocp() {
-    if [[ ! -f "deploy_che.sh" ]]; then
-      CURRENT_PWD=$(pwd)
-      echo "OCP script deploy_che.sh does not exist in ${CURRENT_PWD} ."
-      exit 1
-    else
-      bash deploy_che.sh --wait-che ${DEPLOY_SCRIPT_ARGS}
-    fi
+    bash ${BASE_DIR}/deploy_che.sh --wait-che ${DEPLOY_SCRIPT_ARGS}
 }
 
 destroy_ocp() {
