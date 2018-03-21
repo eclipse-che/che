@@ -10,6 +10,13 @@
  */
 package org.eclipse.che.ide.navigation;
 
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_DOWN;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_ENTER;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_ESCAPE;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_PAGEDOWN;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_PAGEUP;
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_UP;
+
 import com.google.common.base.Strings;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyDownEvent;
@@ -30,6 +37,8 @@ import com.google.inject.Singleton;
 import elemental.dom.Element;
 import elemental.html.TableCellElement;
 import elemental.html.TableElement;
+import java.util.Collections;
+import java.util.List;
 import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
@@ -37,16 +46,6 @@ import org.eclipse.che.ide.api.editor.codeassist.AutoCompleteResources;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.util.dom.Elements;
-
-import java.util.Collections;
-import java.util.List;
-
-import static com.google.gwt.event.dom.client.KeyCodes.KEY_DOWN;
-import static com.google.gwt.event.dom.client.KeyCodes.KEY_ENTER;
-import static com.google.gwt.event.dom.client.KeyCodes.KEY_ESCAPE;
-import static com.google.gwt.event.dom.client.KeyCodes.KEY_PAGEDOWN;
-import static com.google.gwt.event.dom.client.KeyCodes.KEY_PAGEUP;
-import static com.google.gwt.event.dom.client.KeyCodes.KEY_UP;
 
 /**
  * The implementation of {@link NavigateToFileView} view.
