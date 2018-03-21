@@ -74,14 +74,14 @@ public class ProgressMessagesHandler {
     }
 
     if (progresses.isEmpty()) {
-      startProcessesCleaner();
+      addFirstProgress(progress);
     }
 
     progresses.put(progressId, Pair.of(progress, currentTimeMillis()));
     backgroundLoader.addProgress(progress);
 
     if (currentProgress == null) {
-      startProcessesCleaner();
+      currentProgress = progress;
     }
     String currentTaskId = currentProgress.getId();
 
@@ -129,5 +129,11 @@ public class ProgressMessagesHandler {
   private boolean progressFinished(ProgressReportDto progress) {
     return progresses.containsKey(progress.getId())
         && (progress.isComplete() || progress.getTotalWork() == progress.getWorkDone());
+  }
+
+  private void addFirstProgress(ProgressReportDto progress) {
+    currentProgress = progress;
+    progresses.put(currentProgress.getId(), Pair.of(progress, currentTimeMillis()));
+    startProcessesCleaner();
   }
 }

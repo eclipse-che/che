@@ -14,6 +14,7 @@ import static javax.ws.rs.core.UriBuilder.fromUri;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.languageserver.registry.LanguageRecognizer.UNIDENTIFIED;
 
+import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.URI;
@@ -548,6 +549,17 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     initializeParams.setRootUri(rootUri);
 
     initializeParams.setCapabilities(CLIENT_CAPABILITIES);
+
+    prepareInitializeOptions(initializeParams);
+
     return initializeParams;
+  }
+
+  private void prepareInitializeOptions(InitializeParams initializeParams) {
+    ImmutableMap<String, String> capabilities = ImmutableMap.of("progressReportProvider", "true");
+    ImmutableMap<String, Object> extendedCapabilities =
+        ImmutableMap.of("extendedClientCapabilities", capabilities);
+
+    initializeParams.setInitializationOptions(extendedCapabilities);
   }
 }
