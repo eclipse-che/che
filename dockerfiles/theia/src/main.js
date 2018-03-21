@@ -16,19 +16,17 @@ const theiaRoot = '/home/theia';
 const defaultTheiaRoot = '/home/default/theia';
 const gitPluginsRoot = '/tmp/theia-plugins-from-git-repos';
 
-cp.execSync(`rm -rf ${gitPluginsRoot}; mkdir -p ${gitPluginsRoot}`);
-
-process.chdir(theiaRoot);
 prepareTheia();
 
 /** Rebuilds if needed and runs Theia */
 function prepareTheia() {
+    process.chdir(theiaRoot);
+
     const extraPlagins = getExtraTheiaPlugins();
     let currentPlugins = getTheiaPlugins();
     let newPlugins = getDefaultTheiaPlugins();
 
     if (Object.keys(currentPlugins).length === 0) {
-        // first run
         copyDefaultTheiaBuild();
         currentPlugins = getTheiaPlugins();
     }
@@ -41,7 +39,7 @@ function prepareTheia() {
         console.log('Plugins set changed. Rebuilding Theia...');
         rebuildTheiaWithNewPluginsAndRun(newPlugins);
     } else {
-        handlePromise(callRun());
+        handleError(callRun());
     }
 }
 
@@ -60,16 +58,22 @@ function isPluginsEqual(pls1, pls2) {
 }
 
 function copyDefaultTheiaBuild() {
-    cp.execSync(`rsync -rv ${defaultTheiaRoot}/ ${theiaRoot} --exclude 'node_modules' --exclude 'yarn.lock'`);
+    cp.execSync(`cp -r ${defaultTheiaRoot}/node_modules ${theiaRoot} && cp ${defaultTheiaRoot}/yarn.lock ${defaultTheiaRoot}/package.json ${theiaRoot}`);
 }
 
 function rebuildTheiaWithNewPluginsAndRun(newPlugins) {
     let theiaPackageJson = require(`${theiaRoot}/package.json`);
     theiaPackageJson['dependencies'] = newPlugins;
-    fs.writeFileSync('package.json', JSON.stringify(theiaPackageJson), 'utf8');
+    fs.writeFileSync(`${theiaRoot}/package.json`, JSON.stringify(theiaPackageJson), 'utf8');
     cp.execSync(`rm -rf ${theiaRoot}/src-gen`);
 
-    handlePromise(callYarn().then(callBuild).then(callRun));
+    handleError(callYarn()
+        .then(callBuild).catch(error => {
+            // invalidate broken build and force rebuild next time
+            cp.execSync(`rm -rf ${theiaRoot}/package.json`);
+            throw error;
+        })
+        .then(callRun));
 }
 
 /** Returns standard (default) Theia dependencies */
@@ -93,6 +97,10 @@ function getExtraTheiaPlugins() {
     const currentPluginsString = process.env.THEIA_PLUGINS;
     if (currentPluginsString) {
         for (let plugin of currentPluginsString.split(',')) {
+            plugin = plugin.trim();
+            if (plugin === '') {
+                continue;
+            }
             const colonPos = plugin.indexOf(':');
             if (colonPos !== -1) {
                 const pluginName = plugin.substring(0, colonPos).trim();
@@ -124,6 +132,7 @@ function addPluginFromGitRepository(plugins, pluginName, gitRepository) {
             cp.execSync(`git clone --depth=1 --quiet ${gitRepository} ${pluginPath}`);
         } catch (error) {
             // failed again, skip plugin
+            console.error('Failed to get plugin: ' + pluginName + '. Skipping... Is the url specified properly?');
             return;
         }
     }
@@ -139,22 +148,21 @@ function addPluginFromGitRepository(plugins, pluginName, gitRepository) {
             if (fs.existsSync(packageJsonPath)) {
                 let packageJson = require(packageJsonPath);
                 if (packageJson['name'] === pluginName) {
-                    if (!fs.existsSync(pluginTargetDir + '/lib')) {
-                        // plugin hasn't built
+                    if (!fs.existsSync(pluginTargetDir + '/node_mudules') || !fs.existsSync(pluginTargetDir + '/lib')) {
                         try {
                             console.log('Building plugin: ' + pluginName);
                             cp.execSync(`cd ${pluginTargetDir} && yarn`);
                         } catch (error) {
                             console.error('Skipping ' + pluginName + ' plugin because of following error: ' + error);
-                            // plugin build failed, skip this plugin to not to break Theia build
                             return;
                         }
                     }
                     plugins[pluginName] = pluginTargetDir;
-                    break;
+                    return;
                 }
             }
         }
+        console.error(pluginName + ' is not valid plugin. Skipping.');
     }
 }
 
@@ -182,7 +190,7 @@ function callBuild() {
 function callRun() {
     return promisify('yarn theia start', cp.spawn('yarn', ['theia', 'start', '/projects', '--hostname=0.0.0.0']));
 }
-function handlePromise(p) {
+function handleError(p) {
     p.catch(error => {
         console.error(error);
     }).catch(() => {
