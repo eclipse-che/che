@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -62,13 +61,18 @@ public class KeycloakSettings {
       @Nullable @Named(GITHUB_ENDPOINT_SETTING) String gitHubEndpoint) {
 
     if (serverURL == null && oidcProvider == null) {
-        throw new RuntimeException("Either the '" + AUTH_SERVER_URL_SETTING + "' or '" + OIDC_PROVIDER_SETTING + "' property should be set");
+      throw new RuntimeException(
+          "Either the '"
+              + AUTH_SERVER_URL_SETTING
+              + "' or '"
+              + OIDC_PROVIDER_SETTING
+              + "' property should be set");
     }
-    
+
     if (oidcProvider == null && realm == null) {
-        throw new RuntimeException("The '" + REALM_SETTING + "' property should be set");
+      throw new RuntimeException("The '" + REALM_SETTING + "' property should be set");
     }
-    
+
     String wellKnownEndpoint = oidcProvider != null ? oidcProvider : serverURL + "/realms/" + realm;
     if (!wellKnownEndpoint.endsWith("/")) {
       wellKnownEndpoint = wellKnownEndpoint + "/";
@@ -88,10 +92,8 @@ public class KeycloakSettings {
           new TypeReference<Map<String, Object>>() {};
       openIdConfiguration = new ObjectMapper().reader().readValue(parser, typeReference);
     } catch (IOException e) {
-      LOG.error(
+      throw new RuntimeException(
           "Exception while retrieving OpenId configuration from endpoint: " + wellKnownEndpoint, e);
-      this.settings = Collections.unmodifiableMap(new HashMap<>());
-      return;
     }
 
     LOG.info("openid configuration = {}", openIdConfiguration);
@@ -104,10 +106,11 @@ public class KeycloakSettings {
       settings.put(PROFILE_ENDPOINT_SETTING, serverURL + "/realms/" + realm + "/account");
       settings.put(PASSWORD_ENDPOINT_SETTING, serverURL + "/realms/" + realm + "/account/password");
       settings.put(
-                   LOGOUT_ENDPOINT_SETTING,
-                   serverURL + "/realms/" + realm + "/protocol/openid-connect/logout");
-               settings.put(
-                   TOKEN_ENDPOINT_SETTING, serverURL + "/realms/" + realm + "/protocol/openid-connect/token");
+          LOGOUT_ENDPOINT_SETTING,
+          serverURL + "/realms/" + realm + "/protocol/openid-connect/logout");
+      settings.put(
+          TOKEN_ENDPOINT_SETTING,
+          serverURL + "/realms/" + realm + "/protocol/openid-connect/token");
     }
     String endSessionEndpoint = (String) openIdConfiguration.get("end_session_endpoint");
     if (endSessionEndpoint != null) {
