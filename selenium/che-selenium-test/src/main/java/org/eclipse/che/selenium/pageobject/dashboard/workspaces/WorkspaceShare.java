@@ -36,7 +36,6 @@ public class WorkspaceShare {
     String ADD_DEVELOPER_BTN_XPATH = "//che-button-primary[@che-button-title='Add Developer']";
     String BULK_SELECTION_ID = "share-workspace-bulk-selection";
     String FILTER_MEMBERS_BY_NAME_FIELD_XPATH = "//input[@ng-placeholder='Search']";
-
     String MEMBER_ITEM_XPATH = "//div[@id='member-name-%s']";
     String MEMBER_NAME_XPATH = MEMBER_ITEM_XPATH + "//span[@name='member-name']";
     String MEMBER_CHECKBOX_XPATH = MEMBER_ITEM_XPATH + "//md-checkbox";
@@ -98,6 +97,10 @@ public class WorkspaceShare {
 
   public void waitInviteMemberDialog() {
     seleniumWebDriverHelper.waitVisibility(By.id(Locators.INVITE_MEMBER_DIALOG_ID));
+  }
+
+  public void waitInviteMemberDialogClosed() {
+    seleniumWebDriverHelper.waitInvisibility(By.id(Locators.INVITE_MEMBER_DIALOG_ID));
   }
 
   public void selectAllMembersInDialogByBulk() {

@@ -23,12 +23,9 @@ import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationListPage;
-import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceShare;
@@ -38,7 +35,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @Test(groups = {TestGroup.MULTIUSER})
-public class ShareWorkspacesTest {
+public class ShareWorkspaceTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
   private static final String ADMIN_PERMISSIONS =
@@ -48,13 +45,10 @@ public class ShareWorkspacesTest {
   private String systemAdminName;
   private String memberName;
 
-  @InjectTestOrganization(prefix = "org")
-  private TestOrganization org;
+  @InjectTestOrganization private TestOrganization org;
 
-  @Inject private OrganizationListPage organizationListPage;
   @Inject private CheMultiuserAdminDashboard dashboard;
   @Inject private WorkspaceDetails workspaceDetails;
-  @Inject private OrganizationPage organizationPage;
   @Inject private NavigationBar navigationBar;
   @Inject private AdminTestUser adminTestUser;
   @Inject private NewWorkspace newWorkspace;
@@ -88,7 +82,7 @@ public class ShareWorkspacesTest {
     workspaceShare.waitMemberNameInShareList(systemAdminName);
     assertEquals(workspaceShare.getMemberPermissions(systemAdminName), ADMIN_PERMISSIONS);
 
-    // check selecting a member by checkbox
+    // check selecting member by checkbox
     workspaceShare.clickOnMemberCheckbox(systemAdminName);
     assertTrue(workspaceShare.isMemberCheckedInList(systemAdminName));
     workspaceShare.clickOnMemberCheckbox(systemAdminName);
@@ -118,7 +112,7 @@ public class ShareWorkspacesTest {
 
   @Test
   public void checkSharingWorkspaceWithMember() {
-    // invite a developer to workspace
+    // invite a member to workspace
     workspaceShare.clickOnAddDeveloperButton();
     workspaceShare.waitInviteMemberDialog();
     workspaceShare.selectAllMembersInDialogByBulk();
@@ -134,8 +128,8 @@ public class ShareWorkspacesTest {
     workspaceDetails.clickOnCloseButtonInDialogWindow();
 
     // remove the added member from the members list
+    workspaceShare.waitInviteMemberDialogClosed();
     workspaceShare.waitMemberNameInShareList(memberName);
-    WaitUtils.sleepQuietly(2);
     workspaceShare.clickOnRemoveMemberButton(memberName);
     workspaceDetails.clickOnDeleteButtonInDialogWindow();
     workspaceShare.waitMemberNameNotExistsInShareList(memberName);
