@@ -53,6 +53,7 @@ public class WorkspaceDetails {
     String CONFIG = "Config";
     String SSH = "SSH";
     String SHARE = "Share";
+    String VOLUMES = "Volumes";
   }
 
   private interface Locators {

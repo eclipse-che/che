@@ -10,6 +10,8 @@
  */
 package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
@@ -29,35 +31,35 @@ public class WorkspaceSsh {
   }
 
   private interface Locators {
-    String GENERATE_BUTTON_XPATH = "//che-button-primary[@che-button-title='Generate']";
-    String REMOVE_DEFAULT_SSH_KEY_XPATH =
-        "//che-button-danger[@che-button-title='Remove default SSH key']";
-    String PRIVATE_KEY_XPATH = "//div[@che-label-name='Private key']//div[2]//span";
-    String PUBLIC_KEY_XPATH = "//div[@che-label-name='Public key']//div[2]//span";
-    String SSH_KEY_NOT_GENERATED_XPATH = "//span[@class='workspace-ssh-content-notice']";
+    String GENERATE_BUTTON_ID = "generate-ssh-key-button";
+    String REMOVE_DEFAULT_SSH_KEY_ID = "remove-default-ssh-key-button";
+    String PRIVATE_KEY_ID = "private-key-text";
+    String PUBLIC_KEY_ID = "public-key-text";
+    String SSH_KEY_NOT_GENERATED_ID = "ssh-key-not-generated-message";
   }
 
   public void clickOnGenerateButton() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.GENERATE_BUTTON_XPATH), 20);
+    seleniumWebDriverHelper.waitAndClick(By.id(Locators.GENERATE_BUTTON_ID), ELEMENT_TIMEOUT_SEC);
   }
 
   public void clickOnRemoveDefaultSshKeyButton() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.REMOVE_DEFAULT_SSH_KEY_XPATH), 20);
+    seleniumWebDriverHelper.waitAndClick(
+        By.id(Locators.REMOVE_DEFAULT_SSH_KEY_ID), ELEMENT_TIMEOUT_SEC);
   }
 
   public Boolean isPrivateKeyExists() {
     return seleniumWebDriverHelper
-        .waitVisibilityAndGetText(By.xpath(Locators.PRIVATE_KEY_XPATH))
+        .waitVisibilityAndGetText(By.id(Locators.PRIVATE_KEY_ID))
         .contains("-----BEGIN RSA PRIVATE KEY-----");
   }
 
   public Boolean isPublicKeyExists() {
     return seleniumWebDriverHelper
-        .waitVisibilityAndGetText(By.xpath(Locators.PUBLIC_KEY_XPATH))
+        .waitVisibilityAndGetText(By.id(Locators.PUBLIC_KEY_ID))
         .contains("ssh-rsa");
   }
 
   public void waitSshKeyNotExists() {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.SSH_KEY_NOT_GENERATED_XPATH));
+    seleniumWebDriverHelper.waitVisibility(By.id(Locators.SSH_KEY_NOT_GENERATED_ID));
   }
 }

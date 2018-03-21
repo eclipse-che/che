@@ -20,6 +20,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.PROJECTS;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.SERVERS;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.SSH;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.VOLUMES;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -44,6 +45,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProject
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceServers;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceSsh;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspacesVolumes;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -86,6 +88,7 @@ public class WorkspaceDetailsSingleMachineTest {
   @Inject private TestWorkspace testWorkspace;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private WorkspaceSsh workspaceSsh;
+  @Inject private WorkspacesVolumes workspacesVolumes;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -111,7 +114,7 @@ public class WorkspaceDetailsSingleMachineTest {
     workspaceServiceClient.delete(workspaceName, testUser.getName());
   }
 
-  //  @Test
+  @Test
   public void checkOverviewTab() {
     workspaceOverview.checkNameWorkspace(workspaceName);
     workspaceOverview.isDeleteWorkspaceButtonExists();
@@ -123,7 +126,7 @@ public class WorkspaceDetailsSingleMachineTest {
     workspaceOverview.clickOnHideWorkspaceJsonFileBtn();
   }
 
-  //  @Test
+  @Test
   public void checkWorkingWithInstallers() {
     workspaceDetails.selectTabInWorkspaceMenu(INSTALLERS);
     assertTrue(workspaceInstallers.isInstallerStateNotChangeable("Workspace API"));
@@ -158,7 +161,7 @@ public class WorkspaceDetailsSingleMachineTest {
         });
   }
 
-  //  @Test
+  @Test
   public void checkWorkingWithServers() {
     workspaceDetails.selectTabInWorkspaceMenu(SERVERS);
 
@@ -183,7 +186,7 @@ public class WorkspaceDetailsSingleMachineTest {
     createServer("agent", "8082", "https");
   }
 
-  //  @Test
+  @Test
   public void checkWorkingWithProjects() {
     workspaceDetails.selectTabInWorkspaceMenu(PROJECTS);
 
@@ -220,6 +223,36 @@ public class WorkspaceDetailsSingleMachineTest {
     workspaceSsh.clickOnGenerateButton();
     Assert.assertTrue(workspaceSsh.isPrivateKeyExists());
     Assert.assertTrue(workspaceSsh.isPublicKeyExists());
+  }
+
+  @Test
+  public void checkVolumeTab() {
+    String volumeName = "project";
+    String volumePath = "/project";
+
+    workspaceDetails.selectTabInWorkspaceMenu(VOLUMES);
+
+    // create volume
+    workspacesVolumes.clickOnAddVolumeButton();
+    workspacesVolumes.enterVolumeName(volumeName);
+    workspacesVolumes.enterVolumePath(volumePath);
+    workspaceDetails.clickOnAddButtonInDialogWindow();
+    workspacesVolumes.checkVolumeExists(volumeName, volumePath);
+    clickOnSaveButton();
+
+    // edit volume
+    workspacesVolumes.clickOnEditVolumeButton(volumeName);
+    workspacesVolumes.enterVolumeName("projects");
+    workspacesVolumes.enterVolumePath("/projects");
+    workspaceDetails.clickOnUpdateButtonInDialogWindow();
+    workspacesVolumes.checkVolumeExists("projects", "/projects");
+    clickOnSaveButton();
+
+    // remove volume
+    workspacesVolumes.clickOnRemoveVolumeButton("projects");
+    workspaceDetails.clickOnDeleteButtonInDialogWindow();
+    workspacesVolumes.waitVolumeNotExists("projects");
+    clickOnSaveButton();
   }
 
   private void addNewProject(String projectName) {
