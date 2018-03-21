@@ -8,10 +8,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.activity;
-
-import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.DOMAIN_ID;
-import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.USE;
+package org.eclipse.che.multiuser.permission.workspace.activity;
 
 import javax.ws.rs.Path;
 import org.eclipse.che.api.core.ApiException;
@@ -19,6 +16,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
+import org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain;
 import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericResourceMethod;
 
@@ -44,12 +42,12 @@ public class ActivityPermissionsFilter extends CheMethodInvokerFilter {
       case "active":
         {
           workspaceId = ((String) arguments[0]);
-          action = USE;
+          action = WorkspaceDomain.USE;
           break;
         }
       default:
         throw new ForbiddenException("The user does not have permission to perform this operation");
     }
-    currentSubject.checkPermission(DOMAIN_ID, workspaceId, action);
+    currentSubject.checkPermission(WorkspaceDomain.DOMAIN_ID, workspaceId, action);
   }
 }

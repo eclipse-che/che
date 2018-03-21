@@ -8,11 +8,9 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.activity;
+package org.eclipse.che.multiuser.permission.workspace.activity;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.DOMAIN_ID;
-import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.USE;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
@@ -25,8 +23,10 @@ import static org.testng.Assert.assertEquals;
 
 import com.jayway.restassured.response.Response;
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.workspace.activity.WorkspaceActivityService;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.core.Filter;
 import org.everrest.core.GenericContainerRequest;
@@ -61,7 +61,9 @@ public class ActivityPermissionsFilterTest {
   @Test
   public void shouldCheckPermissionsOnGettingMachineById() throws Exception {
 
-    when(subject.hasPermission(eq(DOMAIN_ID), eq("workspace123"), eq(USE))).thenReturn(true);
+    when(subject.hasPermission(
+            eq(WorkspaceDomain.DOMAIN_ID), eq("workspace123"), eq(WorkspaceDomain.USE)))
+        .thenReturn(true);
 
     final Response response =
         given()
@@ -72,17 +74,19 @@ public class ActivityPermissionsFilterTest {
 
     assertEquals(response.getStatusCode(), 204);
     verify(service).active(eq("workspace123"));
-    verify(subject).checkPermission(DOMAIN_ID, "workspace123", USE);
+    verify(subject).checkPermission(WorkspaceDomain.DOMAIN_ID, "workspace123", WorkspaceDomain.USE);
   }
 
   @Test
   public void shouldThrowExceptionWhenUpdatingNotOwnedWorkspace() throws Exception {
 
-    when(subject.hasPermission(eq(DOMAIN_ID), eq("workspace123"), eq(USE))).thenReturn(false);
+    when(subject.hasPermission(
+            eq(WorkspaceDomain.DOMAIN_ID), eq("workspace123"), eq(WorkspaceDomain.USE)))
+        .thenReturn(false);
     doThrow(
             new ForbiddenException(
                 "The user does not have permission to "
-                    + USE
+                    + WorkspaceDomain.USE
                     + " workspace with id 'workspace123'"))
         .when(subject)
         .checkPermission(anyString(), anyString(), anyString());
