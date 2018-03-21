@@ -36,12 +36,52 @@ const UNSUBSCRIBE: string = 'unsubscribe';
  * @author Ann Shumilova
  */
 export class CheJsonRpcMasterApi {
+  private $log: ng.ILogService;
+  private $timeout: ng.ITimeoutService;
   private cheJsonRpcApi: CheJsonRpcApiClient;
   private clientId: string;
 
-  constructor (client: ICommunicationClient, entrypoint: string) {
+  private maxReconnectionAttempts = 5;
+  private reconnectionAttemptNumber = 0;
+  private reconnectionDelay = 30000;
+
+  constructor (client: ICommunicationClient,
+               entrypoint: string,
+               $log: ng.ILogService,
+               $timeout: ng.ITimeoutService) {
+    this.$log = $log;
+    this.$timeout = $timeout;
+
+    client.addListener('open', () => this.onConnectionOpen());
+    client.addListener('close', () => this.onConnectionClose(entrypoint));
+
     this.cheJsonRpcApi = new CheJsonRpcApiClient(client);
     this.connect(entrypoint);
+  }
+
+  onConnectionOpen(): void {
+    this.$log.log('WebSocket connection is opened.');
+    this.reconnectionAttemptNumber = 0;
+  }
+
+  onConnectionClose(entrypoint: string): void {
+    this.$log.warn('WebSocket connection is closed.');
+    if (this.reconnectionAttemptNumber === this.maxReconnectionAttempts) {
+      this.$log.warn('The maximum number of attempts to reconnect WebSocket has been reached.');
+      return;
+    }
+
+    this.reconnectionAttemptNumber++;
+    // let very first reconnection happens immediately after the connection is closed.
+    const delay = this.reconnectionAttemptNumber === 1 ? 0 : this.reconnectionDelay;
+
+    if (delay) {
+      this.$log.warn(`WebSocket will be reconnected in ${delay} ms...`);
+    }
+    this.$timeout(() => {
+      this.$log.warn(`WebSocket is reconnecting, attempt #${this.reconnectionAttemptNumber} out of ${this.maxReconnectionAttempts}...`);
+      this.connect(entrypoint);
+    }, delay);
   }
 
   /**
@@ -51,6 +91,18 @@ export class CheJsonRpcMasterApi {
    * @returns {IPromise<IHttpPromiseCallbackArg<any>>}
    */
   connect(entrypoint: string): ng.IPromise<any> {
+    if (this.clientId) {
+      let clientId = `clientId=${this.clientId}`;
+      // in case of reconnection
+      // we need to test entrypoint on existing query parameters
+      // to add already gotten clientId
+      if (/\?/.test(entrypoint) === false) {
+        clientId = '?' + clientId;
+      } else {
+        clientId = '&' + clientId;
+      }
+      entrypoint += clientId;
+    }
     return this.cheJsonRpcApi.connect(entrypoint).then(() => {
       return this.fetchClientId();
     });
