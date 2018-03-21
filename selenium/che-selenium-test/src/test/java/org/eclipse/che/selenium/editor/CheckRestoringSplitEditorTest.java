@@ -135,7 +135,7 @@ public class CheckRestoringSplitEditorTest {
     projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
     loader.waitOnClosed();
     editor.waitActive();
-    editor.openContextMenuForTabByName(javaClassTab);
+    editor.openAndWaitContextMenuForTabByName(javaClassTab);
     editor.runActionForTabFromContextMenu(SPIT_HORISONTALLY);
     editor.selectTabByIndexEditorWindowAndOpenMenu(0, javaClassTab);
     editor.runActionForTabFromContextMenu(SPLIT_VERTICALLY);

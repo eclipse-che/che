@@ -15,6 +15,7 @@ import com.google.inject.name.Named;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
@@ -32,6 +33,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** Created by aleksandr shmaraev on 25.11.15 */
+@Test(groups = TestGroup.GITHUB)
 public class CreateAndDeleteLocalBranchTest {
   private static final String PROJECT_NAME = NameGenerator.generate("CreateLocalBranch", 4);
   private static final String MASTER_BRANCH = "master";
@@ -41,7 +43,7 @@ public class CreateAndDeleteLocalBranchTest {
   @Inject private Ide ide;
   @Inject private TestUser user;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
 

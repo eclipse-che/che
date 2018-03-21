@@ -18,12 +18,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.pageobject.Loader;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Anatolii Bazko */
 @Singleton
@@ -32,13 +31,17 @@ public class GitRevertCommit {
   private static final String REVERT_BUTTON = "git-revert";
   private static final String CANCEL_BUTTON = "git-revert-cancel";
 
-  private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
 
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+
   @Inject
-  public GitRevertCommit(SeleniumWebDriver seleniumWebDriver, Loader loader) {
-    this.seleniumWebDriver = seleniumWebDriver;
+  public GitRevertCommit(
+      SeleniumWebDriver seleniumWebDriver,
+      Loader loader,
+      SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.loader = loader;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -52,54 +55,49 @@ public class GitRevertCommit {
   private WebElement cancelButton;
 
   public void waitRevertPanelOpened() {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(revertPanel));
+    seleniumWebDriverHelper.waitVisibility(revertPanel, ELEMENT_TIMEOUT_SEC);
   }
 
   public void waitRevertPanelClosed() {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(REVERT_COMMIT_PANEL)));
+    seleniumWebDriverHelper.waitInvisibility(By.id(REVERT_COMMIT_PANEL), ELEMENT_TIMEOUT_SEC);
   }
 
   public void clickRevertButton() {
-    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(revertButton))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(revertButton, ELEMENT_TIMEOUT_SEC);
+  }
+
+  public void clickCancelButton() {
+    seleniumWebDriverHelper.waitAndClick(cancelButton, ELEMENT_TIMEOUT_SEC);
+    waitRevertPanelClosed();
   }
 
   public String getTopCommitRevision() {
     loader.waitOnClosed();
-    return new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(revertPanel))
-        .getText()
-        .split("\n")[1]
-        .replaceAll("\\.", "");
-  }
-
-  public String getTopCommitComment() {
-    loader.waitOnClosed();
-    return new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(revertPanel))
-        .getText()
-        .split("\n")[4];
+    int numberOfTopRevisionCell = 1;
+    return getRevertCommitTableContent().split("\n")[numberOfTopRevisionCell];
   }
 
   public String getTopCommitAuthor() {
     loader.waitOnClosed();
-    return new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(revertPanel))
-        .getText()
-        .split("\n")[3];
+    int numberOfTopAuthorCell = 3;
+    return getRevertCommitTableContent().split("\n")[numberOfTopAuthorCell];
+  }
+
+  public String getTopCommitComment() {
+    loader.waitOnClosed();
+    int numberOfTopCommitCell = 4;
+    return getRevertCommitTableContent().split("\n")[numberOfTopCommitCell];
   }
 
   public void selectRevision(String revision) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.visibilityOfElementLocated(
-                By.xpath(
-                    format(
-                        "//div[@id='%s']//*[contains(text(),'%s')]",
-                        REVERT_COMMIT_PANEL, revision))))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(
+            format("//div[@id='%s']//*[contains(text(),'%s')]", REVERT_COMMIT_PANEL, revision)),
+        REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+  }
+
+  /** Returns all cells from top left to bottom right divided by "\n" */
+  private String getRevertCommitTableContent() {
+    return seleniumWebDriverHelper.waitVisibility(revertPanel, ELEMENT_TIMEOUT_SEC).getText();
   }
 }

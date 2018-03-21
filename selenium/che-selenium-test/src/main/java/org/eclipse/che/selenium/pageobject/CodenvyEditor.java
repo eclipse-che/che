@@ -13,23 +13,29 @@ package org.eclipse.che.selenium.pageobject;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ACTIVE_LINES_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ACTIVE_TAB_FILE_NAME;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ALL_TABS_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ASSIST_CONTENT_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.AUTOCOMPLETE_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.CONTEXT_MENU;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAKPOINT_CONDITION;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAKPOINT_DISABLED;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAK_POINT_ACTIVE;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_BREAK_POINT_INACTIVE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.DEBUGGER_PREFIX_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.EDITOR_TABS_PANEL;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.HIGHLIGHT_ITEM_PATTERN;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATIONS_ITEM;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATION_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.JAVA_DOC_POPUP;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.POSITION_CURSOR_NUMBER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.PROPOSITION_CONTAINER;
@@ -39,25 +45,35 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.RULER_F
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.RULER_LINES;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.RULER_OVERVIEW;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.SELECTED_ITEM_IN_EDITOR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_CONTEXT_MENU_BODY;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_FILE_CLOSE_ICON;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_FILE_NAME_AND_STYLE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_FILE_NAME_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_LIST_BUTTON;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_WITH_UNSAVED_STATUS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TEXT_VIEW_RULER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.BLUE;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.FOCUSED_DEFAULT;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.GREEN;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.UNFOCUSED_DEFAULT;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.YELLOW;
+import static org.openqa.selenium.Keys.ALT;
+import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.CONTROL;
+import static org.openqa.selenium.Keys.DELETE;
+import static org.openqa.selenium.Keys.END;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.ESCAPE;
-import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
-import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
-import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
+import static org.openqa.selenium.Keys.F6;
+import static org.openqa.selenium.Keys.HOME;
+import static org.openqa.selenium.Keys.LEFT_CONTROL;
+import static org.openqa.selenium.Keys.SHIFT;
+import static org.openqa.selenium.Keys.SPACE;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
-import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.inject.Inject;
@@ -68,7 +84,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -80,7 +95,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -132,6 +146,7 @@ public class CodenvyEditor {
     String CONTEXT_MENU = "//div[@id='menu-lock-layer-id']/div[2]";
     String EDITOR_TABS_PANEL = "gwt-debug-multiSplitPanel-tabsPanel";
     String ACTIVE_LINE_NUMBER = "gwt-debug-cursorPosition";
+    String TAB_CONTEXT_MENU_BODY = "//*[@id='gwt-debug-contextMenu/closeAllEditors']/parent::tbody";
     String POSITION_CURSOR_NUMBER =
         "//div[@id='gwt-debug-editorPartStack-contentPanel']//div[text()='%s']";
     String ACTIVE_EDITOR_ENTRY_POINT =
@@ -141,8 +156,7 @@ public class CodenvyEditor {
     String ORION_CONTENT_ACTIVE_EDITOR_XPATH = ORION_ACTIVE_EDITOR_CONTAINER_XPATH + "/div";
     String ACTIVE_LINES_XPATH =
         "//div[@class='textviewSelection']/preceding::div[@class='annotationLine currentLine'][1]";
-    String ACTIVE_LINE_HIGHLIGHT =
-        "//div[@class='annotationLine currentLine' and @role='presentation']";
+    String ACTIVE_LINE_HIGHLIGHT_CLASSNAME = "annotationLine currentLine";
     String ACTIVE_TAB_FILE_NAME = "//div[@active]/descendant::div[text()='%s']";
     String ACTIVE_TAB_UNSAVED_FILE_NAME = "//div[@active and @unsaved]//div[text()='%s']";
     String TAB_FILE_NAME_XPATH =
@@ -185,6 +199,7 @@ public class CodenvyEditor {
     String JAVA_DOC_POPUP = "//div[@class='gwt-PopupPanel']//iframe";
     String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
         "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
+    String HIGHLIGHT_ITEM_PATTERN = "//li[@selected='true']//span[text()='%s']";
   }
 
   public enum TabActionLocator {
@@ -256,6 +271,24 @@ public class CodenvyEditor {
     }
   }
 
+  public enum TabColor {
+    YELLOW("color: rgb(224, 185, 29);"),
+    GREEN("color: rgb(114, 173, 66);"),
+    BLUE("color: rgb(49, 147, 212);"),
+    FOCUSED_DEFAULT("rgba(255, 255, 255, 1)"),
+    UNFOCUSED_DEFAULT("rgba(170, 170, 170, 1)");
+
+    private final String color;
+
+    TabColor(String color) {
+      this.color = color;
+    }
+
+    private String get() {
+      return this.color;
+    }
+  }
+
   @FindAll({@FindBy(id = Locators.ACTIVE_LINE_NUMBER)})
   private List<WebElement> activeLineNumbers;
 
@@ -274,13 +307,13 @@ public class CodenvyEditor {
   @FindBy(xpath = Locators.IMPLEMENTATION_CONTENT)
   private WebElement implementationContent;
 
-  @FindBy(xpath = Locators.ACTIVE_LINES_XPATH)
+  @FindBy(xpath = ACTIVE_LINES_XPATH)
   private WebElement activeLineXpath;
 
   @FindBy(xpath = Locators.SHOW_HINTS_POP_UP)
   private WebElement showHintsPopUp;
 
-  @FindBy(xpath = Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH)
+  @FindBy(xpath = ORION_ACTIVE_EDITOR_CONTAINER_XPATH)
   private WebElement activeEditorContainer;
 
   @FindBy(xpath = Locators.AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP)
@@ -290,25 +323,24 @@ public class CodenvyEditor {
   private WebElement someOpenedTab;
 
   /**
-   * wait active editor
+   * Waits during {@code timeout} until current editor's tab is ready to work.
    *
-   * @param userTimeOut timeout defined of the user
+   * @param timeout waiting time in seconds
    */
-  public void waitActive(int userTimeOut) {
+  public void waitActive(int timeout) {
     loader.waitOnClosed();
-    seleniumWebDriverHelper.waitVisibility(activeEditorContainer, userTimeOut);
+    seleniumWebDriverHelper.waitVisibility(activeEditorContainer, timeout);
   }
 
-  /** wait active editor */
+  /** Waits until current editor's tab is ready to work. */
   public void waitActive() {
-    loader.waitOnClosed();
-    seleniumWebDriverHelper.waitVisibility(activeEditorContainer, ELEMENT_TIMEOUT_SEC);
+    waitActive(ELEMENT_TIMEOUT_SEC);
   }
 
   /**
-   * get text from active tab of orion editor
+   * Gets visible text from active editor's tab
    *
-   * @return text from active tab of orion editor
+   * @return visible text from editor's tab
    */
   public String getVisibleTextFromEditor() {
     waitActive();
@@ -320,82 +352,85 @@ public class CodenvyEditor {
   }
 
   /**
-   * get visible text from split editor
+   * Gets visible text from split editor's tab with specified {@code indexOfEditor}.
    *
-   * @param indexOfEditor index of editor that was split
+   * @param indexOfEditor index of editor's tab which should be read, starting from "1"
+   * @return visible text from chosen editor's tab
    */
   public String getTextFromSplitEditor(int indexOfEditor) {
     waitActive();
-    List<WebElement> lines =
-        webDriverWaitFactory
-            .get(ELEMENT_TIMEOUT_SEC)
-            .until(
-                presenceOfAllElementsLocatedBy(
-                    By.xpath(Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH)));
-    List<WebElement> inner = lines.get(indexOfEditor - 1).findElements(By.tagName("div"));
+    List<WebElement> inner =
+        seleniumWebDriverHelper
+            .waitPresenceOfAllElements(
+                By.xpath(ORION_ACTIVE_EDITOR_CONTAINER_XPATH), ELEMENT_TIMEOUT_SEC)
+            .get(indexOfEditor - 1)
+            .findElements(By.tagName("div"));
+
     return getTextFromOrionLines(inner);
   }
 
   /**
-   * wait expected text in orion editor
+   * Waits during {@code timeout} until specified {@code expectedText} is present in editor.
    *
-   * @param text expected text
-   * @param customTimeout time for waiting , that was defined by user
+   * @param expectedText text which should be present in the editor
+   * @param timeout waiting time in seconds
    */
-  public void waitTextIntoEditor(final String text, final int customTimeout) {
+  public void waitTextIntoEditor(final String expectedText, final int timeout) {
     webDriverWaitFactory
-        .get(customTimeout)
-        .until((ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> getVisibleTextFromEditor().contains(expectedText));
   }
 
   /**
-   * wait text into split editor with defined index
+   * Waits until specified {@code expectedText} is present in editor.
    *
-   * @param numOfEditor number of the split editor
-   * @param customTimeout timeout defined by user
+   * @param expectedText text which should be present in the editor
+   */
+  public void waitTextIntoEditor(final String expectedText) {
+    waitTextIntoEditor(expectedText, ELEMENT_TIMEOUT_SEC);
+  }
+
+  /**
+   * Waits during {@code timeout} until specified {@code expectedText} is present in the editor's
+   * tab with defined {@code indexOfEditor}.
+   *
+   * @param indexOfEditor index of editor's tab, text from which should be checked, numeration
+   *     starts from "1"
+   * @param timeout waiting time in seconds
    */
   public void waitTextInDefinedSplitEditor(
-      int numOfEditor, final int customTimeout, String expectedText) {
+      int indexOfEditor, final int timeout, String expectedText) {
     webDriverWaitFactory
-        .get(customTimeout)
+        .get(timeout)
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> getTextFromSplitEditor(numOfEditor).contains(expectedText));
-  }
-
-  public void waitTextIsNotPresentInDefinedSplitEditor(
-      int numOfEditor, final int customTimeout, String text) {
-    webDriverWaitFactory
-        .get(customTimeout)
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> !getTextFromSplitEditor(numOfEditor).contains(text));
+                driver -> getTextFromSplitEditor(indexOfEditor).contains(expectedText));
   }
 
   /**
-   * wait expected text in orion editor
+   * Waits during {@code timeout} until specified {@code text} is not present in the editor's tab
+   * with defined {@code indexOfEditor}.
    *
-   * @param text expected text
+   * @param indexOfEditor index of editor's tab, text from which should be checked, numeration
+   *     starts from "1"
+   * @param timeout waiting time in seconds
+   * @param text text which should not be present in the chosen editor's tab
    */
-  public void waitTextIntoEditor(final String text) {
-    try {
-      webDriverWaitFactory
-          .get()
-          .until((ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
-    } catch (Exception ex) {
-      LOG.warn(ex.getLocalizedMessage());
-      WaitUtils.sleepQuietly(REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
-      webDriverWaitFactory
-          .get(ATTACHING_ELEM_TO_DOM_SEC)
-          .until((ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().contains(text));
-    }
-    loader.waitOnClosed();
+  public void waitTextIsNotPresentInDefinedSplitEditor(
+      int indexOfEditor, final int timeout, String text) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> !getTextFromSplitEditor(indexOfEditor).contains(text));
   }
 
   /**
-   * wait expected text is not present in orion editor
+   * Waits until {@code text} is not present in editor.
    *
-   * @param text expected text
+   * @param text text which should not be present in the editor
    */
   public void waitTextNotPresentIntoEditor(final String text) {
     webDriverWaitFactory
@@ -404,16 +439,21 @@ public class CodenvyEditor {
             (ExpectedCondition<Boolean>) webDriver -> !(getVisibleTextFromEditor().contains(text)));
   }
 
-  /** wait closing of tab with specified name */
+  /**
+   * Waits until editor's tab with specified {@code nameOfFile} is closed.
+   *
+   * @param nameOfFile title of the editor's tab
+   */
   public void waitWhileFileIsClosed(String nameOfFile) {
-    webDriverWaitFactory
-        .get(ELEMENT_TIMEOUT_SEC)
-        .until(invisibilityOfElementLocated(By.xpath(format(TAB_FILE_NAME_XPATH, nameOfFile))));
+    seleniumWebDriverHelper.waitInvisibility(
+        By.xpath(format(TAB_FILE_NAME_XPATH, nameOfFile)), ELEMENT_TIMEOUT_SEC);
   }
 
   /**
-   * select tab by name, click on close icon and wait while content will be saved and orion
-   * disappear file should be unchanged
+   * Waits until changes in the editor's tab with specified {@code nameFile} is saved and closes
+   * this tab.
+   *
+   * @param nameFile title of the editor's tab which should be checked
    */
   public void closeFileByNameWithSaving(String nameFile) {
     loader.waitOnClosed();
@@ -425,71 +465,80 @@ public class CodenvyEditor {
   }
 
   /**
-   * click on close icon in the file
+   * Waits visibility of the "Close" icon in the editor's tab with specified {@code fileName} and
+   * clicks on it.
    *
-   * @param fileName name of File which must be close
+   * @param fileName title of the editor's tab which should be closed
    */
   public void clickOnCloseFileIcon(String fileName) {
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(TAB_FILE_CLOSE_ICON, fileName)));
   }
 
   /**
-   * checks if some tab is opened in the Editor
+   * Checks that at list one editor's tab is opened.
    *
-   * @return true if any tab is open
+   * @return true - if at list one tab is opened in the editor, false - if not
    */
   public boolean isAnyTabsOpened() {
     return seleniumWebDriverHelper.isVisible(someOpenedTab);
   }
 
-  /** get all open editor tabs and close this */
+  /** Gets all open editor's tabs and closes they with checking the files saving */
   public void closeAllTabs() {
     loader.waitOnClosed();
-    List<WebElement> tabs;
-    tabs =
-        webDriverWaitFactory
-            .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(visibilityOfAllElementsLocatedBy(By.xpath(ALL_TABS_XPATH)));
-    for (WebElement tab : tabs) {
-      closeFileByNameWithSaving(tab.getText());
-    }
-    webDriverWaitFactory
-        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(invisibilityOfElementLocated(By.xpath(ALL_TABS_XPATH)));
+
+    seleniumWebDriverHelper
+        .waitVisibilityOfAllElements(By.xpath(ALL_TABS_XPATH), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .forEach(tab -> closeFileByNameWithSaving(tab.getText()));
+
+    seleniumWebDriverHelper.waitInvisibility(
+        By.xpath(ALL_TABS_XPATH), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
-  /** close all tabs by using context menu */
+  /** Closes all tabs by using context menu */
   public void closeAllTabsByContextMenu() {
-    List<WebElement> tabs;
-    tabs =
-        webDriverWaitFactory
-            .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(visibilityOfAllElementsLocatedBy(By.xpath(ALL_TABS_XPATH)));
+    List<WebElement> tabs =
+        seleniumWebDriverHelper.waitVisibilityOfAllElements(
+            By.xpath(ALL_TABS_XPATH), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+
     WebElement tab =
         seleniumWebDriverHelper.waitVisibility(
             By.xpath(format(TAB_FILE_CLOSE_ICON, tabs.get(tabs.size() - 1).getText())));
-    actionsFactory.createAction(seleniumWebDriver).contextClick(tab).perform();
+
+    seleniumWebDriverHelper.moveCursorToAndContextClick(tab);
+
+    testWebElementRenderChecker.waitElementIsRendered(By.xpath(TAB_CONTEXT_MENU_BODY));
     seleniumWebDriverHelper.waitAndClick(By.id(CLOSE_ALL_TABS));
     seleniumWebDriverHelper.waitInvisibility(By.xpath(ALL_TABS_XPATH));
   }
 
   /**
-   * Open context menu for tab by name
+   * Opens context menu for editor's tab with specified {@code tabName}.
    *
-   * @param tabName name of tab
+   * @param tabName title of the editor's tab
    */
-  public void openContextMenuForTabByName(String tabName) {
+  public void openAndWaitContextMenuForTabByName(String tabName) {
     WebElement tab =
         seleniumWebDriverHelper.waitVisibility(By.xpath(format(TAB_FILE_CLOSE_ICON, tabName)));
-    actionsFactory.createAction(seleniumWebDriver).contextClick(tab).perform();
+
+    seleniumWebDriverHelper.moveCursorToAndContextClick(tab);
+    testWebElementRenderChecker.waitElementIsRendered(By.xpath(TAB_CONTEXT_MENU_BODY));
   }
 
-  /** Run action for tab from the context menu */
+  /**
+   * Runs action for tab from the context menu.
+   *
+   * @param tabAction item from tab's context menu
+   */
   public void runActionForTabFromContextMenu(TabActionLocator tabAction) {
     seleniumWebDriverHelper.waitAndClick(tabAction.get());
   }
 
-  /** type text by into orion editor with pause 1 sec. */
+  /**
+   * Types {@code text} into orion editor with pause 1 sec.
+   *
+   * @param text text which should be typed
+   */
   public void typeTextIntoEditor(String text) {
     loader.waitOnClosed();
     seleniumWebDriverHelper.sendKeys(text);
@@ -497,50 +546,29 @@ public class CodenvyEditor {
   }
 
   /**
-   * type text into orion editor pause for saving on server side is not set
+   * Types specified {@code text} into editor without pause for saving.
    *
-   * @param text text to type
+   * @param text text which should be typed
    */
   public void typeTextIntoEditorWithoutDelayForSaving(String text) {
     seleniumWebDriverHelper.sendKeys(text);
   }
 
   /**
-   * type text into specific line editor. Cursor will be activated id the end of the line. Line must
-   * not be empty. Not recommended to use
+   * Types specified {@code text} into defined editor's {@code line}.
    *
-   * @param text text to type
+   * @param text text which should be typed
+   * @param line the line's number where text should be typed
    */
   public void typeTextIntoEditor(String text, int line) {
     setCursorToLine(line);
     typeTextIntoEditor(text);
   }
 
-  /** returns focus in the end of current line (in active tab) */
-  // TODO in some cases (for example if we do step into in debug mode and opens editor after that,
-  // focus will be lost). But this problem should be fixed. After the we can remove this method
-  public void returnFocusInCurrentLine() {
-    List<WebElement> lines =
-        seleniumWebDriver.findElements(By.xpath(Locators.ACTIVE_LINE_HIGHLIGHT));
-    Collections.sort(
-        lines, (o1, o2) -> Integer.compare(o1.getLocation().getX(), o2.getLocation().getX()));
-    lines = lines.subList(0, lines.size() / 2); // filter lines from preview
-    for (WebElement line : lines) {
-      if (line.isDisplayed()) {
-        try {
-          int lineWidth = line.getSize().getWidth();
-          Actions action = actionsFactory.createAction(seleniumWebDriver);
-          action.moveToElement(line, lineWidth - 1, 0).click().perform();
-        } catch (Exception ignore) {
-        }
-      }
-    }
-  }
-
   /**
-   * set cursor in specified line
+   * Sets cursor to specified {@code positionLine}.
    *
-   * @param positionLine is the specified number line
+   * @param positionLine line's number where cursor should be placed
    */
   public void setCursorToLine(int positionLine) {
     loader.waitOnClosed();
@@ -556,10 +584,10 @@ public class CodenvyEditor {
   }
 
   /**
-   * set cursor in specified position for current visible editor
+   * Sets cursor to specified {@code positionLine} and {@code positionChar} and checks result.
    *
-   * @param positionLine is the specified number line
-   * @param positionChar is the specified number char
+   * @param positionLine line's number where cursor should be placed
+   * @param positionChar char's number where cursor should be placed
    */
   public void goToCursorPositionVisible(int positionLine, int positionChar) {
     openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
@@ -568,10 +596,10 @@ public class CodenvyEditor {
   }
 
   /**
-   * set cursor in specified position for current active and focused editor
+   * Sets cursor to specified {@code positionLine} and {@code positionChar} and checks result.
    *
-   * @param positionLine is the specified number line
-   * @param positionChar is the specified number char
+   * @param positionLine line's number where cursor should be placed
+   * @param positionChar char's number where cursor should be placed
    */
   public void goToPosition(int positionLine, int positionChar) {
     openGoToLineFormAndSetCursorToPosition(positionLine, positionChar);
@@ -579,6 +607,12 @@ public class CodenvyEditor {
     waitCursorPosition(positionLine, positionChar);
   }
 
+  /**
+   * Sets cursor to specified {@code positionLine} and {@code positionChar}.
+   *
+   * @param positionLine line's number where cursor should be placed
+   * @param positionChar char's number where cursor should be placed
+   */
   private void openGoToLineFormAndSetCursorToPosition(int positionLine, int positionChar) {
     loader.waitOnClosed();
     seleniumWebDriverHelper.sendKeys(Keys.chord(CONTROL, "l"));
@@ -591,52 +625,55 @@ public class CodenvyEditor {
     askForValueDialog.waitFormToClose();
   }
 
-  /** launch code assistant with ctrl+space keys and wait container is open */
+  /**
+   * Launches code assistant by "ctrl" + "space" keys combination and waits until container is
+   * opened.
+   */
   public void launchAutocompleteAndWaitContainer() {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     action.keyDown(CONTROL).perform();
-    typeTextIntoEditor(Keys.SPACE.toString());
+    typeTextIntoEditor(SPACE.toString());
     action.keyUp(CONTROL).perform();
     waitAutocompleteContainer();
   }
 
-  /** launch code assistant with ctrl+space keys */
+  /** Launches code assistant by "ctrl" + "space" keys pressing. */
   public void launchAutocomplete() {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     action.keyDown(CONTROL).perform();
-    typeTextIntoEditor(Keys.SPACE.toString());
+    typeTextIntoEditor(SPACE.toString());
     action.keyUp(CONTROL).perform();
   }
 
-  /** type ESC key into editor and wait closing of the autocomplete */
+  /** Closes autocomplete container by "Escape" button and checks that container is closed. */
   public void closeAutocomplete() {
     typeTextIntoEditor(ESCAPE.toString());
     waitAutocompleteContainerIsClosed();
   }
 
-  /** wait while autocomplete form opened */
+  /** Waits until autocomplete form is opened. */
   public void waitAutocompleteContainer() {
     seleniumWebDriverHelper.waitVisibility(autocompleteContainer, ELEMENT_TIMEOUT_SEC);
   }
 
-  /** wait while autocomplete form will closed */
+  /** Waits until autocomplete form is closed. */
   public void waitAutocompleteContainerIsClosed() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(AUTOCOMPLETE_CONTAINER));
   }
 
   /**
-   * wait specified text in autocomplete
+   * Waits specified {@code expectedText} in autocomplete container.
    *
-   * @param value
+   * @param expectedText text which should be present in the container
    */
-  public void waitTextIntoAutocompleteContainer(final String value) {
+  public void waitTextIntoAutocompleteContainer(final String expectedText) {
     webDriverWaitFactory
         .get(ELEMENT_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
-                webDriver -> getAllVisibleTextFromAutocomplete().contains(value));
+                webDriver -> getAllVisibleTextFromAutocomplete().contains(expectedText));
   }
 
   /**
@@ -652,7 +689,7 @@ public class CodenvyEditor {
     expectedNumberOfActiveLine(position);
   }
 
-  /** Wait for no Git change markers in the opened editor. */
+  /** Waits for "no Git change" markers in the opened editor. */
   public void waitNoGitChangeMarkers() {
     webDriverWaitFactory
         .get()
@@ -665,7 +702,7 @@ public class CodenvyEditor {
   }
 
   /**
-   * Wait for Git insertion marker in the opened editor.
+   * Waits for "Git insertion" marker between {@code startLine} and {@code endLine}, inclusive.
    *
    * @param startLine line number of the markers start
    * @param endLine line number of the markers end
@@ -687,7 +724,8 @@ public class CodenvyEditor {
   }
 
   /**
-   * Wait for Git modification marker in the opened editor.
+   * Waits for "Git modification" marker between {@code startLine} and {@code endLine} including
+   * this two lines.
    *
    * @param startLine line number of the markers start
    * @param endLine line number of the markers end
@@ -709,9 +747,9 @@ public class CodenvyEditor {
   }
 
   /**
-   * Wait for Git deletion marker in the opened editor.
+   * Waits for "Git deletion" marker in the specified {@code line}.
    *
-   * @param line line number of the marker
+   * @param line line's number where the marker should be displayed
    */
   public void waitGitDeletionMarkerInPosition(int line) {
     webDriverWaitFactory
@@ -729,7 +767,8 @@ public class CodenvyEditor {
    * @return the list of git markers web-elements
    */
   private List<WebElement> getListGitMarkers() {
-    List<WebElement> rulerVcsElements = seleniumWebDriver.findElements(By.xpath(VCS_RULER));
+    List<WebElement> rulerVcsElements =
+        seleniumWebDriverHelper.waitPresenceOfAllElements(By.xpath(VCS_RULER));
     List<WebElement> subList = rulerVcsElements.subList(1, rulerVcsElements.size() - 1);
     webDriverWaitFactory.get().until(visibilityOfAllElements(subList));
     return rulerVcsElements;
@@ -765,11 +804,7 @@ public class CodenvyEditor {
    * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
   public void waitAllMarkersInvisibility(MarkerLocator markerLocator) {
-    webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> driver.findElements(By.xpath(markerLocator.get())).size() == 0);
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(markerLocator.get()));
   }
 
   /**
@@ -778,11 +813,8 @@ public class CodenvyEditor {
    * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
   public void waitCodeAssistMarkers(MarkerLocator markerLocator) {
-    webDriverWaitFactory
-        .get(ELEMENT_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> driver.findElements(By.xpath(markerLocator.get())).size() > 0);
+    seleniumWebDriverHelper.waitVisibilityOfAllElements(
+        By.xpath(markerLocator.get()), ELEMENT_TIMEOUT_SEC);
   }
 
   /** @return text from autocomplete */
@@ -792,38 +824,32 @@ public class CodenvyEditor {
   }
 
   /**
-   * Go to the item in autocomplete proposals list and press enter key.
+   * Selects specified {@code item} in the autocomplete proposal container, and presses "ENTER".
    *
-   * @param item item in the autocomplete proposals list.
+   * @param item item in the autocomplete proposal container.
    */
   public void enterAutocompleteProposal(String item) {
     selectAutocompleteProposal(item);
-    WebElement highlightEItem =
-        autocompleteContainer.findElement(
-            By.xpath("//li[@selected='true']//span[text()=\"" + item + "\"]"));
-
-    seleniumWebDriverHelper.waitVisibility(highlightEItem);
+    seleniumWebDriverHelper.waitVisibility(By.xpath(format(HIGHLIGHT_ITEM_PATTERN, item)));
     seleniumWebDriverHelper.sendKeys(ENTER.toString());
   }
 
   /**
-   * select the item into autocomplete container and send double click to item
+   * Selects specified {@code item} in the autocomplete container and sends double click to item.
    *
-   * @param item item in the autocomplete proposals list.
+   * @param item item in the autocomplete proposal container.
    */
   public void selectItemIntoAutocompleteAndPasteByDoubleClick(String item) {
     selectAutocompleteProposal(item);
-    WebElement highlightEItem =
-        autocompleteContainer.findElement(
-            By.xpath("//li[@selected='true']//span[text()=\"" + item + "\"]"));
-    seleniumWebDriverHelper.waitVisibility(highlightEItem);
-    actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
+
+    seleniumWebDriverHelper.waitVisibility(By.xpath(format(HIGHLIGHT_ITEM_PATTERN, item)));
+    seleniumWebDriverHelper.doubleClick();
   }
 
   /**
-   * Select item by clicking on it in autocomplete container.
+   * Selects specified {@code item} in the autocomplete container.
    *
-   * @param item item from autocomplete list.
+   * @param item item from autocomplete container.
    */
   public void selectAutocompleteProposal(String item) {
     seleniumWebDriverHelper.waitAndClick(
@@ -831,96 +857,97 @@ public class CodenvyEditor {
   }
 
   /**
-   * Moves mouse to the marker with specified {@code markerLocator} and waits until 'assist content
-   * container' be visible.
+   * Moves mouse to the marker with specified {@code markerLocator} and waits until "assist content
+   * container" is visible.
    *
    * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
   public void moveToMarkerAndWaitAssistContent(MarkerLocator markerLocator) {
-    WebElement element = seleniumWebDriver.findElement(By.xpath(markerLocator.get()));
-    seleniumWebDriverHelper.moveCursorTo(element);
+    seleniumWebDriverHelper.moveCursorTo(By.xpath(markerLocator.get()));
     waitAnnotationCodeAssistIsOpen();
   }
 
-  /** wait annotations code assist is open */
+  /** Waits until annotations code assist is opened. */
   public void waitAnnotationCodeAssistIsOpen() {
     seleniumWebDriverHelper.waitVisibility(assistContentContainer, ELEMENT_TIMEOUT_SEC);
   }
 
-  /** wait annotations code assist is closed */
+  /** Waits until annotations code assist is closed. */
   public void waitAnnotationCodeAssistIsClosed() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(ASSIST_CONTENT_CONTAINER));
   }
 
-  /** wait specified text in annotation code assist */
+  /** Waits until specified {@code expectedText} is present in annotation code assist. */
   public void waitTextIntoAnnotationAssist(final String expectedText) {
     webDriverWaitFactory
         .get(ELEMENT_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver -> {
-                  List<WebElement> items =
-                      seleniumWebDriver.findElements(By.xpath(ASSIST_CONTENT_CONTAINER + "//span"));
-                  for (WebElement item : items) {
-                    if (item.getText().contains(expectedText)) {
-                      return true;
-                    }
-                  }
-                  return false;
+                  return seleniumWebDriverHelper
+                      .waitVisibilityOfAllElements(By.xpath(ASSIST_CONTENT_CONTAINER + "//span"))
+                      .stream()
+                      .map(item -> item.getText().contains(expectedText))
+                      .collect(toList())
+                      .contains(true);
                 });
   }
 
   /**
-   * wait specified text in proposition assist panel
+   * Waits until specified {@code expectedText} is present in proposition assist panel.
    *
-   * @param value expected text in error proposition
+   * @param expectedText expected text in error proposition
    */
-  public void waitTextIntoFixErrorProposition(final String value) {
+  public void waitTextIntoFixErrorProposition(final String expectedText) {
     webDriverWaitFactory
         .get(ELEMENT_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
-                webDriver -> getAllVisibleTextFromProposition().contains(value));
+                webDriver -> getAllVisibleTextFromProposition().contains(expectedText));
   }
 
-  /** @return text from proposition assist panel */
+  /**
+   * Gets all visible text from proposition container.
+   *
+   * @return text from proposition assist container
+   */
   public String getAllVisibleTextFromProposition() {
     waitPropositionAssistContainer();
-    return propositionContainer.getText();
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(propositionContainer);
   }
 
-  /** wait assist proposition container is open */
+  /** Waits until assist proposition container is opened. */
   public void waitPropositionAssistContainer() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(PROPOSITION_CONTAINER), ELEMENT_TIMEOUT_SEC);
   }
 
-  /** wait assist proposition container is closed */
+  /** Waits until assist proposition container is closed */
   public void waitErrorPropositionPanelClosed() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(PROPOSITION_CONTAINER));
   }
 
-  /** launch the 'code assist proposition' container */
+  /** Launches the "code assist proposition" container */
   public void launchPropositionAssistPanel() {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(Keys.ALT).perform();
-    action.sendKeys(ENTER.toString()).perform();
-    action.keyUp(Keys.ALT).perform();
+    action.keyDown(ALT).perform();
+    action.sendKeys(ENTER).perform();
+    action.keyUp(ALT).perform();
     waitPropositionAssistContainer();
   }
 
-  /** launch the 'code assist proposition' container in JS files */
+  /** Launches the "code assist proposition" container in JS files */
   public void launchPropositionAssistPanelForJSFiles() {
     loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(Keys.LEFT_CONTROL).perform();
-    action.sendKeys(Keys.SPACE.toString()).perform();
-    action.keyUp(Keys.LEFT_CONTROL).perform();
+    action.keyDown(LEFT_CONTROL).perform();
+    action.sendKeys(SPACE).perform();
+    action.keyUp(LEFT_CONTROL).perform();
   }
 
   /**
-   * selected the first item into the 'assist proposition' container and send double click to the
-   * first item
+   * Applies the first item in the "assist proposition" container by single click and performs
+   * double click to it.
    */
   public void selectFirstItemIntoFixErrorPropByDoubleClick() {
     String tmpLocator = PROPOSITION_CONTAINER + "/li";
@@ -931,8 +958,8 @@ public class CodenvyEditor {
   }
 
   /**
-   * selected the first item into the 'assist proposition' container and send enter key to the first
-   * item
+   * Applies the first item in the "assist proposition" container by single click and sends "enter"
+   * key to it.
    */
   public void selectFirstItemIntoFixErrorPropByEnter() {
     String tmpLocator = PROPOSITION_CONTAINER + "/li";
@@ -943,19 +970,21 @@ public class CodenvyEditor {
   }
 
   /**
-   * select the expectedItem into assist proposition container and send double click to expectedItem
+   * Applies specified {@code item} in the assist proposition container by moving cursor and
+   * performs double click on item.
    *
-   * @param expectedItem
+   * @param item visible name of the item which should be applied
    */
-  public void enterTextIntoFixErrorPropByDoubleClick(String expectedItem) {
+  public void enterTextIntoFixErrorPropByDoubleClick(String item) {
     seleniumWebDriverHelper.moveCursorToAndDoubleClick(
-        By.xpath(format(PROPOSITION_CONTAINER + "/li/span[text()=\"%s\"]", expectedItem)));
+        By.xpath(format(PROPOSITION_CONTAINER + "/li/span[text()=\"%s\"]", item)));
   }
 
   /**
-   * click on the item into proposition container and send enter key to item
+   * Applies specified {@code item} in the proposition container by single click and sends "Enter"
+   * key to it.
    *
-   * @param item
+   * @param item visible name of the item which should be applied
    */
   public void enterTextIntoFixErrorPropByEnter(String item) {
     seleniumWebDriverHelper.waitAndClick(
@@ -965,9 +994,10 @@ public class CodenvyEditor {
   }
 
   /**
-   * in Js file editor click on the item into proposition container and send enter key to item
+   * Applies specified {@code item} with defined {@code description} in Js file editor by single
+   * click and sends "Enter" key to it.
    *
-   * @param item
+   * @param item visible name of the item which should be applied
    */
   public void enterTextIntoFixErrorPropByEnterForJsFiles(String item, String description) {
     seleniumWebDriverHelper.waitAndClick(
@@ -975,32 +1005,30 @@ public class CodenvyEditor {
             format("//span[text()='%s']/span[text()='%s']/ancestor::div[1]", description, item)));
   }
 
-  /** invoke the 'Show hints' to all parameters on the overloaded constructor or method */
+  /** Invokes the 'Show hints' popup panel. */
   public void callShowHintsPopUp() {
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    loader.waitOnClosed();
-    action.keyDown(CONTROL).sendKeys("p").perform();
-
-    testWebElementRenderChecker.waitElementIsRendered(By.xpath("//div[@class='gwt-PopupPanel']"));
-
-    action.keyUp(CONTROL).perform();
-    loader.waitOnClosed();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(CONTROL)
+        .sendKeys("p")
+        .keyUp(CONTROL)
+        .perform();
   }
 
-  /** wait the 'Show hints' pop up panel is opened */
+  /** Waits until the 'Show hints' popup panel is opened. */
   public void waitShowHintsPopUpOpened() {
     seleniumWebDriverHelper.waitVisibility(showHintsPopUp);
   }
 
-  /** wait the 'Show hints' pop up panel is closed */
+  /** Waits until the 'Show hints' popup panel is closed. */
   public void waitShowHintsPopUpClosed() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(Locators.SHOW_HINTS_POP_UP));
   }
 
   /**
-   * wait expected text into the 'Show hints' pop up panel
+   * Waits expected text in the 'Show hints' popup panel.
    *
-   * @param expText expected value
+   * @param expText text which should be present in the popup panel
    */
   public void waitExpTextIntoShowHintsPopUp(String expText) {
     webDriverWaitFactory
@@ -1010,15 +1038,16 @@ public class CodenvyEditor {
                 webDriver -> getTextFromShowHintsPopUp().contains(expText));
   }
 
-  /** get text from the 'Show hints' pop up panel */
+  /** Gets visible text from the 'Show hints' popup panel. */
   public String getTextFromShowHintsPopUp() {
-    return seleniumWebDriverHelper.waitVisibility(showHintsPopUp).getText();
+    testWebElementRenderChecker.waitElementIsRendered(By.xpath("//div[@class='gwt-PopupPanel']"));
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(showHintsPopUp);
   }
 
   /**
-   * wait while open file tab with specified name becomes without '*' unsaved status
+   * Waits while open file tab with specified name becomes without '*' unsaved status.
    *
-   * @param nameOfFile name of tab for checking
+   * @param nameOfFile title of the tab which should be checked
    */
   public void waitTabFileWithSavedStatus(String nameOfFile) {
     seleniumWebDriverHelper.waitInvisibility(
@@ -1026,74 +1055,110 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait the active tab file name
+   * Waits active tab with specified {@code nameOfFile}.
    *
-   * @param nameOfFile is specified file name
+   * @param nameOfFile title of the tab which should be checked
    */
   public void waitActiveTabFileName(String nameOfFile) {
-    webDriverWaitFactory
-        .get()
-        .until(presenceOfElementLocated(By.xpath(format(ACTIVE_TAB_FILE_NAME, nameOfFile))));
+    seleniumWebDriverHelper.waitPresence(By.xpath(format(ACTIVE_TAB_FILE_NAME, nameOfFile)));
   }
 
-  /** check that files have been closed. (Check disappears all text areas and tabs) */
+  /** Checks that all files have been closed. (Checks disappearance of all text areas and tabs) */
   public void waitWhileAllFilesWillClosed() {
     seleniumWebDriverHelper.waitInvisibility(
         By.xpath("//div[@id='gwt-debug-editorPartStack-tabsPanel']//div[text()]"),
         ELEMENT_TIMEOUT_SEC);
 
-    seleniumWebDriverHelper.waitInvisibility(
-        By.xpath(Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH));
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(ORION_ACTIVE_EDITOR_CONTAINER_XPATH));
   }
 
   /**
-   * select open file tab with click
+   * Selects editor's tab with specified {@code nameOfFile}.
    *
-   * @param nameOfFile name of tab for select
+   * @param nameOfFile title of the tab which should be selected
    */
   public void selectTabByName(String nameOfFile) {
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(TAB_FILE_NAME_XPATH, nameOfFile)));
   }
 
+  /**
+   * Waits until editor's tab with specified {@code fileName} and {@code tabColor} is visible.
+   *
+   * @param fileName title of the tab which should be checked
+   * @param tabColor color which editor's tab should be colored by
+   */
+  public void waitTabWithNameAndColor(String fileName, TabColor tabColor) {
+    seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format(TAB_FILE_NAME_AND_STYLE, fileName, tabColor.get())));
+  }
+
+  /**
+   * Waits until editor's tab with specified {@code fileName} is in yellow color.
+   *
+   * @param fileName title of editor's tab which should be checked
+   */
   public void waitYellowTab(String fileName) {
-    seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(TAB_FILE_NAME_AND_STYLE, fileName, "color: rgb(224, 185, 29);")));
+    waitTabWithNameAndColor(fileName, YELLOW);
   }
 
+  /**
+   * Waits until editor's tab with specified {@code fileName} is in green color.
+   *
+   * @param fileName title of editor's tab which should be checked
+   */
   public void waitGreenTab(String fileName) {
-    seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(TAB_FILE_NAME_AND_STYLE, fileName, "color: rgb(114, 173, 66);")));
+    waitTabWithNameAndColor(fileName, GREEN);
   }
 
+  /**
+   * Waits until editor's tab with specified {@code fileName} is in blue color.
+   *
+   * @param fileName title of editor's tab which should be checked
+   */
   public void waitBlueTab(String fileName) {
-    seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(TAB_FILE_NAME_AND_STYLE, fileName, "color: rgb(49, 147, 212);")));
+    waitTabWithNameAndColor(fileName, BLUE);
   }
 
+  /**
+   * Waits until editor's tab with specified {@code fileName} is in default color.
+   *
+   * <p>Note! Default color depends on tab's focus.
+   *
+   * @param fileName title of editor's tab which should be checked
+   */
   public void waitDefaultColorTab(final String fileName) {
     waitActive();
-    boolean isEditorFocused =
-        !(seleniumWebDriver
-                .findElement(By.xpath(format(TAB_FILE_NAME_XPATH + "/parent::div", fileName)))
-                .getAttribute("focused")
-            == null);
-    final String currentStateEditorColor =
-        isEditorFocused ? "rgba(255, 255, 255, 1)" : "rgba(170, 170, 170, 1)";
+
+    final String expectedColor =
+        waitTabVisibilityAndCheckFocus(fileName) ? FOCUSED_DEFAULT.get() : UNFOCUSED_DEFAULT.get();
+
     webDriverWaitFactory
         .get()
         .until(
             (ExpectedCondition<Boolean>)
                 webDriver ->
-                    seleniumWebDriver
-                        .findElement(By.xpath(format(TAB_FILE_NAME_XPATH, fileName)))
+                    seleniumWebDriverHelper
+                        .waitVisibility(By.xpath(format(TAB_FILE_NAME_XPATH, fileName)))
                         .getCssValue("color")
-                        .equals(currentStateEditorColor));
+                        .equals(expectedColor));
   }
 
   /**
-   * wait tab with expected name is not present
+   * Waits until editor's tab with specified {@code fileName} is visible and focused.
    *
-   * @param nameOfFile name of closing tab
+   * @param fileName title of editor's tab which should be checked
+   * @return true - if tab is focused, false - if not
+   */
+  public boolean waitTabVisibilityAndCheckFocus(String fileName) {
+    return null
+        != seleniumWebDriverHelper
+            .waitVisibility(By.xpath(format(TAB_FILE_NAME_XPATH + "/parent::div", fileName)))
+            .getAttribute("focused");
+  }
+  /**
+   * Waits until editor's tab with specified {@code nameOfFile} is not present.
+   *
+   * @param nameOfFile title of editor's tab which should be checked
    */
   public void waitTabIsNotPresent(String nameOfFile) {
     seleniumWebDriverHelper.waitInvisibility(
@@ -1101,18 +1166,12 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait tab with expected name is present
+   * Gets value of the "path" attribute from {@link WebElement} which defined by {@code
+   * nameOfOpenedFile}.
    *
-   * @param nameOfFile name of appearing tab
+   * @param nameOfOpenedFile title of file from which "path" attribute should be got
+   * @return value of the "path" attribute
    */
-  public void waitTabIsPresent(String nameOfFile) {
-    webDriverWaitFactory
-        .get()
-        .until(visibilityOfAllElementsLocatedBy(By.xpath(format(TAB_FILE_NAME_XPATH, nameOfFile))));
-
-    loader.waitOnClosed();
-  }
-
   public String getAssociatedPathFromTheTab(String nameOfOpenedFile) {
     return seleniumWebDriverHelper
         .waitVisibility(By.xpath(format(TAB_FILE_NAME_XPATH, nameOfOpenedFile)))
@@ -1120,90 +1179,111 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait tab with expected name is present
+   * Waits until editor's tab with specified {@code nameOfFile} is present in editor.
    *
-   * @param nameOfFile name of appearing tab
-   * @param customTimeout time waiting of tab in editor. Set in seconds.
+   * @param nameOfFile name of editor's tab which should be checked
    */
-  public void waitTabIsPresent(String nameOfFile, int customTimeout) {
-    webDriverWaitFactory
-        .get(customTimeout)
-        .until(visibilityOfAllElementsLocatedBy(By.xpath(format(TAB_FILE_NAME_XPATH, nameOfFile))));
+  public void waitTabIsPresent(String nameOfFile) {
+    waitTabIsPresent(nameOfFile, LOAD_PAGE_TIMEOUT_SEC);
+  }
+
+  /**
+   * Waits during {@code timeout} until editor's tab with specified {@code nameOfFile} is present in
+   * editor.
+   *
+   * @param nameOfFile title of editor's tab which should be checked
+   * @param timeout waiting time in seconds
+   */
+  public void waitTabIsPresent(String nameOfFile, int timeout) {
+    seleniumWebDriverHelper.waitVisibilityOfAllElements(
+        By.xpath(format(TAB_FILE_NAME_XPATH, nameOfFile)), timeout);
 
     loader.waitOnClosed();
   }
 
-  // TODO this will be able to after adding feature 'Go to line' and 'Delete line'
+  /**
+   * Deletes line with specified {@code numberOfLine}.
+   *
+   * @param numberOfLine number of line which should be deleted
+   */
   public void selectLineAndDelete(int numberOfLine) {
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     setCursorToLine(numberOfLine);
-    typeTextIntoEditor(Keys.HOME.toString());
-    action.keyDown(Keys.SHIFT).perform();
-    typeTextIntoEditor(Keys.END.toString());
-    action.keyUp(Keys.SHIFT).perform();
-    typeTextIntoEditor(Keys.DELETE.toString());
+    typeTextIntoEditor(HOME.toString());
+    action.keyDown(SHIFT).perform();
+    typeTextIntoEditor(END.toString());
+    action.keyUp(SHIFT).perform();
+    typeTextIntoEditor(DELETE.toString());
     loader.waitOnClosed();
   }
 
-  // TODO this will be able to after adding feature 'Go to line' and 'Delete line'
+  /** Deletes current editor's line. */
   public void selectLineAndDelete() {
     Actions action = actionsFactory.createAction(seleniumWebDriver);
-    typeTextIntoEditor(Keys.HOME.toString());
-    action.keyDown(Keys.SHIFT).perform();
-    typeTextIntoEditor(Keys.END.toString());
-    action.keyUp(Keys.SHIFT).perform();
-    typeTextIntoEditor(Keys.DELETE.toString());
+    typeTextIntoEditor(HOME.toString());
+    action.keyDown(SHIFT).perform();
+    typeTextIntoEditor(END.toString());
+    action.keyUp(SHIFT).perform();
+    typeTextIntoEditor(DELETE.toString());
   }
 
-  /** Deletes current line with Ctrl+D */
+  /** Deletes current editor's line by "Ctrl"+"D" keys pressing. */
   public void deleteCurrentLine() {
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(CONTROL).perform();
-    action.sendKeys("d").perform();
-    action.keyUp(CONTROL).perform();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(CONTROL)
+        .sendKeys("d")
+        .keyUp(CONTROL)
+        .perform();
+
     loader.waitOnClosed();
   }
 
-  /** Deletes current line with Ctrl+D and inserts new line instead */
+  /** Deletes current line by "Ctrl"+"D" keys pressing and inserts new line instead. */
   public void deleteCurrentLineAndInsertNew() {
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(CONTROL).perform();
-    action.sendKeys("d").perform();
-    action.keyUp(CONTROL).perform();
-    action.sendKeys(Keys.ARROW_UP.toString()).perform();
-    action.sendKeys(Keys.END.toString()).perform();
-    action.sendKeys(ENTER.toString()).perform();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(CONTROL)
+        .sendKeys("d")
+        .keyUp(CONTROL)
+        .sendKeys(ARROW_UP)
+        .sendKeys(END)
+        .sendKeys(ENTER)
+        .perform();
   }
 
-  /** delete all content with ctrl+A and del keys */
+  /** Deletes all editor's content by "Ctrl"+"A" keys pressing and "Delete" key pressing. */
   public void deleteAllContent() {
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(CONTROL).perform();
-    action.sendKeys("a").perform();
-    action.keyUp(CONTROL).perform();
-    action.sendKeys(Keys.DELETE.toString()).perform();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(CONTROL)
+        .sendKeys("a")
+        .keyUp(CONTROL)
+        .sendKeys(DELETE)
+        .perform();
+
     waitEditorIsEmpty();
   }
 
-  /** wait while the IDE line panel with number of line will be visible */
+  /** Waits until the IDE line panel with numbers of lines is visible. */
   public void waitDebugerLineIsVisible(int line) {
     seleniumWebDriverHelper.waitVisibility(By.xpath(format(DEBUGGER_PREFIX_XPATH, line)));
   }
 
   /**
-   * wait breakpoint with inactive state in defined position
+   * Waits until breakpoint with inactive state is in defined {@code position}.
    *
-   * @param position the position in the codenvy - editor
+   * @param position number of line where breakpoint should be present
    */
   public void waitBreakPointWithInactiveState(int position) {
     seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(Locators.DEBUGGER_BREAK_POINT_INACTIVE, position)));
+        By.xpath(format(DEBUGGER_BREAK_POINT_INACTIVE, position)));
   }
 
   /**
-   * set breakpoint on specified position on the IDE breakpoint panel
+   * Sets breakpoint on specified {@code position} in the IDE breakpoint panel.
    *
-   * @param position position of the breakpoint
+   * @param position number of line where breakpoint should be placed
    */
   public void setInactiveBreakpoint(int position) {
     waitActive();
@@ -1214,10 +1294,10 @@ public class CodenvyEditor {
   }
 
   /**
-   * Set breakpoint on specified position on the IDE breakpoint panel and wait on active state of
-   * it.
+   * Sets breakpoint on specified {@code position} in the IDE breakpoint panel and waits on active
+   * state of it.
    *
-   * @param position position of the breakpoint
+   * @param position number of line where breakpoint should be placed
    */
   public void setBreakPointAndWaitActiveState(int position) {
     waitActive();
@@ -1227,6 +1307,11 @@ public class CodenvyEditor {
     waitActiveBreakpoint(position);
   }
 
+  /**
+   * Sets breakpoint to the specified {@code position} in the editor.
+   *
+   * @param position number of line where breakpoint should be placed
+   */
   public void setBreakpoint(int position) {
     waitActive();
     waitDebugerLineIsVisible(position);
@@ -1234,88 +1319,143 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait breakpoint with active state in defined position
+   * Waits until breakpoint with active state is in defined {@code position}.
    *
-   * @param position the position in the codenvy - editor
+   * @param position number of line where breakpoint should be placed
    */
   public void waitActiveBreakpoint(int position) {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(format(DEBUGGER_BREAK_POINT_ACTIVE, position)));
+    seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format(DEBUGGER_BREAK_POINT_ACTIVE, position)), LOADER_TIMEOUT_SEC);
   }
 
+  /**
+   * Waits until breakpoint with inactive state is in defined {@code position}.
+   *
+   * @param position number of line where breakpoint should be placed
+   */
   public void waitInactiveBreakpoint(int position) {
     seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(Locators.DEBUGGER_BREAK_POINT_INACTIVE, position)));
+        By.xpath(format(DEBUGGER_BREAK_POINT_INACTIVE, position)), LOADER_TIMEOUT_SEC);
   }
 
-  public void waitConditionalBreakpoint(int lineNumber, boolean active) {
+  /**
+   * Waits until breakpoint with specified {@code activeState} is present in defined {@code
+   * lineNumber}.
+   *
+   * @param lineNumber number of line where breakpoint should be placed
+   * @param activeState state of breakpoint
+   */
+  public void waitConditionalBreakpoint(int lineNumber, boolean activeState) {
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(
-            format(
-                Locators.DEBUGGER_BREAKPOINT_CONDITION,
-                active ? "active" : "inactive",
-                lineNumber)));
+            format(DEBUGGER_BREAKPOINT_CONDITION, activeState ? "active" : "inactive", lineNumber)),
+        LOADER_TIMEOUT_SEC);
   }
 
+  /**
+   * Waits until breakpoint with "disabled" status is present in the line with specified {@code
+   * lineNumber}.
+   *
+   * @param lineNumber number of line where breakpoint should be placed
+   */
   public void waitDisabledBreakpoint(int lineNumber) {
     seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(DEBUGGER_BREAKPOINT_DISABLED, lineNumber)));
+        By.xpath(format(DEBUGGER_BREAKPOINT_DISABLED, lineNumber)), LOADER_TIMEOUT_SEC);
   }
 
-  /** wait while editor will be empty */
+  /** Waits until current editor's tab is without visible text. */
   public void waitEditorIsEmpty() {
     webDriverWaitFactory
         .get(ELEMENT_TIMEOUT_SEC)
-        .until((WebDriver driver) -> getVisibleTextFromEditor().isEmpty());
+        .until((ExpectedCondition<Boolean>) driver -> getVisibleTextFromEditor().isEmpty());
   }
 
-  /** wait javadoc popup opened */
+  /** Waits until javadoc popup is opened. */
   public void waitJavaDocPopUpOpened() {
-    seleniumWebDriverHelper.waitVisibility(javaDocPopUp, ELEMENT_TIMEOUT_SEC);
+    seleniumWebDriverHelper.waitVisibility(By.xpath(JAVA_DOC_POPUP), ELEMENT_TIMEOUT_SEC);
   }
 
-  /** wait javadoc popup closed */
+  /** Waits until javadoc popup is closed */
   public void waitJavaDocPopUpClosed() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(JAVA_DOC_POPUP));
   }
 
-  /** check text present in javadoc popup */
-  public void checkTextToBePresentInJavaDocPopUp(String text) {
-    webDriverWaitFactory.get().until(frameToBeAvailableAndSwitchToIt(By.xpath(JAVA_DOC_POPUP)));
-    waitTextInJavaDoc(text);
+  /**
+   * Waits until {@code expectedText} is present in javadoc's popup body, and switches to parent
+   * frame.
+   */
+  public void checkTextToBePresentInJavaDocPopUp(String expectedText) {
+    waitTextInJavaDoc(expectedText);
     seleniumWebDriver.switchTo().parentFrame();
   }
 
   /**
-   * sometimes javadoc invoces with delays, in this case empty frame displaying first, and text
-   * waits in this frame even if javadoc was loaded successfuly
+   * Waits until {@code expectedText} is present in javadoc's body.
+   *
+   * <p>Note! Sometimes javadoc displays with delays, in this case empty frame displaying first, and
+   * method waits {@code expectedText} in this empty frame even if javadoc with {@code expectedText}
+   * was loaded successfully. That's why frame switching is used in the wait logic.
+   *
+   * @param expectedText visible text which should be present in javadoc
    */
   private void waitTextInJavaDoc(String expectedText) {
-    try {
-      webDriverWaitFactory
-          .get()
-          .until(textToBePresentInElementLocated(By.tagName("body"), expectedText));
-    } catch (TimeoutException ex) {
-      seleniumWebDriver.switchTo().parentFrame();
-      webDriverWaitFactory.get().until(frameToBeAvailableAndSwitchToIt(By.xpath(JAVA_DOC_POPUP)));
-      webDriverWaitFactory
-          .get()
-          .until(textToBePresentInElementLocated(By.tagName("body"), expectedText));
-    }
+    webDriverWaitFactory
+        .get()
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> {
+                  waitAvailabilityAndSwitchToJavaDocFrame();
+
+                  if (waitAndCheckTextPresenceInJavaDoc(expectedText)) {
+                    return true;
+                  }
+
+                  seleniumWebDriver.switchTo().parentFrame();
+                  return false;
+                });
   }
 
   /**
-   * check text after go to link in javadoc at popup
+   * Waits until javadoc body is visible and checks presence of {@code expectedText}.
    *
-   * @param text
-   * @param textLink text of link
+   * <p>Note! {@link SeleniumWebDriver} should be switched to the javadoc frame.
+   *
+   * <p>Please use {@link CodenvyEditor#waitAvailabilityAndSwitchToJavaDocFrame()} method for
+   * switching to javadoc frame.
+   *
+   * @param expectedText text which should be present in javadoc body
+   * @return true - if {@code expectedText} is present in javadoc body, false - if not
+   */
+  public boolean waitAndCheckTextPresenceInJavaDoc(String expectedText) {
+    return seleniumWebDriverHelper
+        .waitVisibility(By.tagName("body"))
+        .getText()
+        .contains(expectedText);
+  }
+
+  /**
+   * Waits until frame, which contains javadoc popup, is available and switches the {@link
+   * SeleniumWebDriver} to it.
+   */
+  public void waitAvailabilityAndSwitchToJavaDocFrame() {
+    seleniumWebDriverHelper.waitAndSwitchToFrame(By.xpath(JAVA_DOC_POPUP));
+  }
+
+  /**
+   * Checks text after clicking on link in javadoc's popup
+   *
+   * @param text text which should be present in the page which opened after clicking on the link
+   * @param textLink visible link's text
    */
   public void checkTextAfterGoToLinkInJavaDocPopUp(String text, String textLink) {
-    webDriverWaitFactory.get().until(frameToBeAvailableAndSwitchToIt(By.xpath(JAVA_DOC_POPUP)));
+    seleniumWebDriverHelper.waitAndSwitchToFrame(By.xpath(JAVA_DOC_POPUP));
 
     WebElement link =
-        webDriverWaitFactory
-            .get()
-            .until(elementToBeClickable(By.xpath(format("//a[text()='%s']", textLink))));
+        seleniumWebDriverHelper.waitVisibility(By.xpath(format("//a[text()='%s']", textLink)));
+
+    webDriverWaitFactory
+        .get()
+        .until((ExpectedCondition<Boolean>) driver -> !link.getAttribute("href").isEmpty());
 
     seleniumWebDriver.get(link.getAttribute("href"));
 
@@ -1325,30 +1465,40 @@ public class CodenvyEditor {
     seleniumWebDriver.switchTo().parentFrame();
   }
 
-  /** open JavaDoc popup */
+  /** Opens javadoc's popup */
   public void openJavaDocPopUp() {
     loader.waitOnClosed();
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(CONTROL).perform();
-    action.sendKeys(Keys.chord("q")).perform();
-    action.keyUp(CONTROL).perform();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(CONTROL)
+        .sendKeys(Keys.chord("q"))
+        .keyUp(CONTROL)
+        .perform();
   }
 
   /**
-   * wait the text in active line of current tab
+   * Waits until {@code expectedText} is present in the current active line of the current tab.
    *
-   * @param text is the text of elements active line
+   * @param expectedText text which should be present in the checking line
    */
-  public void waitTextElementsActiveLine(final String text) {
+  public void waitTextElementsActiveLine(final String expectedText) {
     waitActive();
-    seleniumWebDriverHelper.waitVisibility(activeLineXpath);
 
     webDriverWaitFactory
         .get()
-        .until((ExpectedCondition<Boolean>) driver -> activeLineXpath.getText().contains(text));
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    seleniumWebDriverHelper
+                        .waitVisibilityAndGetText(By.xpath(ACTIVE_LINES_XPATH))
+                        .contains(expectedText));
   }
 
-  /** get positions of the current line and char */
+  /**
+   * Gets current cursor position, it means line's number and char's number.
+   *
+   * @return cursor position which defined in line's number and char's number.
+   */
   public Pair<Integer, Integer> getCurrentCursorPositionsFromVisible() {
     waitActive();
     WebElement currentActiveElement =
@@ -1357,27 +1507,26 @@ public class CodenvyEditor {
   }
 
   /**
-   * Check that editor active and focused on first step. After that get cursor position. Note! For
-   * correct work a editor must be active.
+   * Waits active and focused editor's tab and gets cursor position.
    *
-   * @return char and line position from current visible, active and focused editor (usual uses with
-   *     split editor)
+   * <p>Note! Before usage, ensure the checking editor's tab is active.
+   *
+   * @return cursor position which defined in line's number and char's number.
    */
   public Pair<Integer, Integer> getCursorPositionsFromActive() {
     String xpathToCurrentActiveCursorPosition =
         "//div[@active and @focused]/parent::div[@id='gwt-debug-multiSplitPanel-tabsPanel']/div[@active and @focused]/parent::div[@id='gwt-debug-multiSplitPanel-tabsPanel']/parent::div/parent::div/following-sibling::div//div[@active]//div[@id='gwt-debug-cursorPosition']";
     waitActive();
     return getCursorPositionFromWebElement(
-        webDriverWaitFactory
-            .get()
-            .until(visibilityOfElementLocated(By.xpath(xpathToCurrentActiveCursorPosition))));
+        seleniumWebDriverHelper.waitVisibility(By.xpath(xpathToCurrentActiveCursorPosition)));
   }
 
   /**
-   * wait specified values for Line and Char cursor positions in the Codenvy editor
+   * Waits until cursor is placed in the position which specified {@code linePosition} and {@code
+   * charPosition}.
    *
-   * @param linePosition expected line position
-   * @param charPosition expected char position
+   * @param linePosition line's number where cursor should be placed
+   * @param charPosition char's position where cursor should be placed
    */
   public void waitCursorPosition(final int linePosition, final int charPosition) {
     webDriverWaitFactory
@@ -1398,38 +1547,38 @@ public class CodenvyEditor {
     return new Pair<Integer, Integer>(currentCursorPositions[0], currentCursorPositions[1]);
   }
 
-  /** get number of current active line */
+  /** Gets number of the current line where cursor is placed */
   public int getPositionVisible() {
     waitActive();
     return getCurrentCursorPositionsFromVisible().first;
   }
 
   /**
-   * check that active line has expected number
+   * Checks that active line has specified {@code lineNumber}.
    *
-   * @param expectedLine expected number of active line
+   * @param lineNumber line's number which should be active
    */
-  public void expectedNumberOfActiveLine(final int expectedLine) {
+  public void expectedNumberOfActiveLine(final int lineNumber) {
     waitActive();
     webDriverWaitFactory
         .get()
-        .until((ExpectedCondition<Boolean>) driver -> expectedLine == getPositionVisible());
+        .until((ExpectedCondition<Boolean>) driver -> lineNumber == getPositionVisible());
   }
 
   /**
-   * get Char value for cursor from the codenvy - editor
+   * Gets number of the char's position on which cursor is placed.
    *
-   * @return char value
+   * @return number of the char's position on which cursor is placed
    */
   public int getPositionOfChar() {
     return getCurrentCursorPositionsFromVisible().second;
   }
 
   /**
-   * wait specified values for Line and Char cursor positions in the Codenvy editor
+   * Waits until cursor is placed in specified {@code linePosition} and {@code charPosition}.
    *
-   * @param linePosition expected line position
-   * @param charPosition expected char position
+   * @param linePosition line's number where cursor is expected
+   * @param charPosition char's number where cursor is expected
    */
   public void waitSpecifiedValueForLineAndChar(final int linePosition, final int charPosition) {
     webDriverWaitFactory
@@ -1442,25 +1591,30 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait specified values for Line and Char cursor positions in the Codenvy editor
+   * Waits until cursor is placed in specified {@code lineAndChar} position.
    *
-   * @param lineAndChar expected line and char position. For example: 1:25
+   * @param lineAndChar expected line and char position in format "1:25"
    */
   public void waitSpecifiedValueForLineAndChar(String lineAndChar) {
     seleniumWebDriverHelper.waitVisibility(By.xpath(format(POSITION_CURSOR_NUMBER, lineAndChar)));
   }
 
-  /** launch refactor for local variables by keyboard */
+  /** Launches refactor for local variables by keyboard */
   public void launchLocalRefactor() {
     loader.waitOnClosed();
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(Keys.SHIFT).sendKeys(Keys.F6).keyUp(Keys.SHIFT).perform();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(SHIFT)
+        .sendKeys(F6)
+        .keyUp(SHIFT)
+        .perform();
+
     loader.waitOnClosed();
   }
 
   /**
-   * the first invocation of launchLocalRefactor() runs local refactoring, the second invocation
-   * opens "Refactor" form
+   * The first invocation of launchLocalRefactor() runs local refactoring, the second invocation
+   * opens "Refactor" form.
    */
   public void launchRefactorForm() {
     launchLocalRefactor();
@@ -1468,9 +1622,9 @@ public class CodenvyEditor {
   }
 
   /**
-   * click on the selected element in the editor
+   * Clicks on the selected element in the editor.
    *
-   * @param nameElement name of element
+   * @param nameElement visible name of the element
    */
   public void clickOnSelectedElementInEditor(String nameElement) {
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(SELECTED_ITEM_IN_EDITOR, nameElement)));
@@ -1479,7 +1633,7 @@ public class CodenvyEditor {
   }
 
   /**
-   * wait the 'Implementation(s)' form is open
+   * Waits until the 'Implementation(s)' form is opened.
    *
    * @param fileName is name of the selected file
    */
@@ -1487,90 +1641,90 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.waitVisibility(By.xpath(format(IMPLEMENTATION_CONTAINER, fileName)));
   }
 
-  /** wait the 'Implementation(s)' form is closed */
+  /** Waits until the 'Implementation(s)' form is closed */
   public void waitImplementationFormIsClosed(String fileName) {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(format(IMPLEMENTATION_CONTAINER, fileName)));
   }
 
-  /** launch the 'Implementation(s)' form by keyboard */
+  /** Launches the 'Implementation(s)' form by keyboard */
   public void launchImplementationFormByKeyboard() {
     loader.waitOnClosed();
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action
+    actionsFactory
+        .createAction(seleniumWebDriver)
         .keyDown(CONTROL)
-        .keyDown(Keys.ALT)
+        .keyDown(ALT)
         .sendKeys("b")
-        .keyUp(Keys.ALT)
+        .keyUp(ALT)
         .keyUp(CONTROL)
         .perform();
   }
 
-  /** close the forms in the editor by 'Escape' */
+  /** Performs "Escape" button pushing. Mainly, may be used for closing forms in the editor. */
   public void cancelFormInEditorByEscape() {
     typeTextIntoEditor(ESCAPE.toString());
   }
 
   /**
-   * wait expected text in the 'Implementation' form
+   * Waits until {@code expectedText} text is present in the 'Implementation' form.
    *
-   * @param expText expected value
+   * @param expectedText text which should be present in the form
    */
-  public void waitTextInImplementationForm(String expText) {
+  public void waitTextInImplementationForm(String expectedText) {
     webDriverWaitFactory
         .get()
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> getTextFromImplementationForm().contains(expText));
+                driver -> getTextFromImplementationForm().contains(expectedText));
   }
 
-  /** get text from 'Implementation(s)' form */
+  /** Gets visible text from the 'Implementation(s)' form. */
   public String getTextFromImplementationForm() {
     return seleniumWebDriverHelper.waitVisibility(implementationContent).getText();
   }
 
   /**
-   * perform 'double click on the item in the 'Implementation' form
+   * Performs double click on the specified {@code itemName} in the 'Implementation' form.
    *
-   * @param fileName is name of item
+   * @param itemName visible name of the element which should be clicked
    */
-  public void chooseImplementationByDoubleClick(String fileName) {
+  public void chooseImplementationByDoubleClick(String itemName) {
     seleniumWebDriverHelper.moveCursorToAndDoubleClick(
-        By.xpath(format(IMPLEMENTATIONS_ITEM, fileName)));
+        By.xpath(format(IMPLEMENTATIONS_ITEM, itemName)));
   }
 
   /**
-   * select defined implementation in the 'Implementation' form
+   * Selects specified {@code itemName} in the 'Implementation' form.
    *
-   * @param fileName is name of item
+   * @param itemName visible name of the element which should be clicked
    */
-  public void selectImplementationByClick(String fileName) {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(format(IMPLEMENTATIONS_ITEM, fileName)));
+  public void selectImplementationByClick(String itemName) {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(format(IMPLEMENTATIONS_ITEM, itemName)));
   }
 
   /**
-   * check what text line is present once
+   * Checks that specified {@code text} is present only once.
    *
-   * @param line text line
-   * @return true if text line present once or false in other cases
+   * @param text text which should be checked
+   * @return true - if text is present only once, false - if not
    */
-  public boolean checkWhatTextLinePresentOnce(String line) {
+  public boolean checkWhatTextLinePresentOnce(String text) {
     String visibleTextFromEditor = getVisibleTextFromEditor();
-    int index = visibleTextFromEditor.indexOf(line);
+    int index = visibleTextFromEditor.indexOf(text);
     if (index > 0) {
       return !visibleTextFromEditor
           .substring(index + 1, visibleTextFromEditor.length())
-          .contains(line);
+          .contains(text);
     }
     return false;
   }
 
   /**
-   * click on web element by Xpath
+   * Clicks on web element by Xpath
    *
    * @param xPath is Xpath of web element
    */
   public void clickOnElementByXpath(String xPath) {
-    webDriverWaitFactory.get().until(elementToBeClickable(By.xpath(xPath))).click();
+    seleniumWebDriverHelper.waitAndClick(By.xpath(xPath));
   }
 
   /**
@@ -1581,12 +1735,10 @@ public class CodenvyEditor {
    */
   public int getMarkersQuantity(MarkerLocator markerLocator) {
     seleniumWebDriverHelper.waitVisibility(By.xpath(RULER_OVERVIEW));
-    List<WebElement> annotationList =
-        webDriverWaitFactory
-            .get()
-            .until(presenceOfAllElementsLocatedBy(By.xpath(markerLocator.get())));
 
-    return annotationList.size();
+    return seleniumWebDriverHelper
+        .waitVisibilityOfAllElements(By.xpath(markerLocator.get()))
+        .size();
   }
 
   /**
@@ -1599,90 +1751,90 @@ public class CodenvyEditor {
   }
 
   /**
-   * remove line and everything after it
+   * Removes all file's content since specified {@code numberOfLine} to the end of file.
    *
-   * @param numberOfLine number of line
+   * @param numberOfLine number of line since which the file's content should be removed
    */
   public void removeLineAndAllAfterIt(int numberOfLine) {
     setCursorToLine(numberOfLine);
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(CONTROL).perform();
-    action.keyDown(Keys.SHIFT).perform();
-    action.sendKeys(Keys.END.toString()).perform();
-    action.keyUp(CONTROL).perform();
-    action.keyUp(Keys.SHIFT).perform();
-    action.sendKeys(Keys.DELETE).perform();
+    actionsFactory
+        .createAction(seleniumWebDriver)
+        .keyDown(CONTROL)
+        .keyDown(SHIFT)
+        .sendKeys(END)
+        .keyUp(CONTROL)
+        .keyUp(SHIFT)
+        .sendKeys(DELETE)
+        .perform();
   }
 
-  /** wait the ruler overview is present */
+  /** Waits until the ruler overview is present. */
   public void waitRulerOverviewIsPresent() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(RULER_OVERVIEW));
   }
 
-  /** wait the ruler overview is not present */
+  /** Waits until the ruler overview is not present. */
   public void waitRulerOverviewIsNotPresent() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(RULER_OVERVIEW));
   }
 
-  /** wait the ruler annotation is present */
+  /** Waits until the ruler annotation is present. */
   public void waitRulerAnnotationsIsPresent() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(RULER_ANNOTATIONS));
   }
 
-  /** wait the ruler annotation is not present */
+  /** Waits until the ruler annotation is not present. */
   public void waitRulerAnnotationsIsNotPresent() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(RULER_ANNOTATIONS));
   }
 
-  /** wait the ruler line is present */
+  /** Waits until the ruler line is present. */
   public void waitRulerLineIsPresent() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(RULER_LINES));
   }
 
-  /** wait the ruler line is not present */
+  /** Waits until the ruler line is not present. */
   public void waitRulerLineIsNotPresent() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(RULER_LINES));
   }
 
-  /** wait the ruler folding is present */
+  /** Waits until the ruler folding is present. */
   public void waitRulerFoldingIsPresent() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(RULER_FOLDING));
   }
 
-  /** wait the ruler folding is not present */
+  /** Waits until the ruler folding is not present. */
   public void waitRulerFoldingIsNotPresent() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(RULER_FOLDING));
   }
 
-  /** wait the all punctuation separators are present */
+  /** Waits until the all punctuation separators are present. */
   public void waitAllPunctuationSeparatorsArePresent() {
-    webDriverWaitFactory
-        .get()
-        .until(visibilityOfAllElementsLocatedBy(By.xpath(PUNCTUATION_SEPARATOR)));
+    seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(PUNCTUATION_SEPARATOR));
   }
 
-  /** wait the all punctuation separators are not present */
+  /** Waits until the all punctuation separators are not present. */
   public void waitAllPunctuationSeparatorsAreNotPresent() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(PUNCTUATION_SEPARATOR));
   }
 
-  /** wait the text view ruler is present */
+  /** Waits until the text view ruler is present. */
   public void waitTextViewRulerIsPresent() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(TEXT_VIEW_RULER));
   }
 
-  /** wait the text view ruler is not present */
+  /** Waits until the text view ruler is not present. */
   public void waitTextViewRulerIsNotPresent() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(TEXT_VIEW_RULER));
   }
 
-  /** click on 'Download sources' link in the editor */
+  /** Clicks on 'Download sources' link in the editor. */
   public void clickOnDownloadSourcesLink() {
     seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.DOWNLOAD_SOURCES_LINK));
   }
 
   /**
-   * Change width of window for the Editor.
+   * Changes width of the editor's window.
    *
    * @param xOffset horizontal move offset.
    */
@@ -1694,24 +1846,28 @@ public class CodenvyEditor {
     actionsFactory.createAction(seleniumWebDriver).dragAndDropBy(moveElement, xOffset, 0).perform();
   }
 
-  /** Open list of the tabs Note: This possible if opened tabs don't fit in the tab bar. */
+  /**
+   * Opens list of the tabs.
+   *
+   * <p>Note! This is possible if opened tabs don't fit in the tab bar.
+   */
   public void openTabList() {
     seleniumWebDriverHelper.waitAndClick(By.id(TAB_LIST_BUTTON));
   }
 
   /**
-   * Wait the tab is present in the tab list
+   * Waits until the editor's tab with specified {@code tabName} is present in the tab list.
    *
-   * @param tabName name of tab
+   * @param tabName title of the editor's tab which should be checked
    */
   public void waitTabIsPresentInTabList(String tabName) {
     seleniumWebDriverHelper.waitVisibility(By.xpath(format(ITEM_TAB_LIST, tabName)));
   }
 
   /**
-   * Wait the tab is not present in the tab list
+   * Waits until the tab with specified {@code tabName} is not present in the tab list.
    *
-   * @param tabName name of tab
+   * @param tabName title of the editor's tab which should be checked
    */
   public void waitTabIsNotPresentInTabList(String tabName) {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(format(ITEM_TAB_LIST, tabName)));
@@ -1726,59 +1882,55 @@ public class CodenvyEditor {
   }
 
   /**
-   * Click on tab in the tab list
+   * Clicks on the tab with specified {@code tabName} in the tab list.
    *
-   * @param tabName name of tab
+   * @param tabName title of the editor's tab which should be checked
    */
   public void clickOnTabInTabList(String tabName) {
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(ITEM_TAB_LIST, tabName)));
   }
 
   /**
-   * Select tab by index of editor window after split
+   * Selects window of certain {@code index} of split editor's tab with specified {@code tabName}.
    *
-   * @param index index of editor window
-   * @param tabName name of tab
+   * @param index index of the window of split tab which should be selected, starting from "0"
+   * @param tabName title of the editor's tab which is split
    */
   public void selectTabByIndexEditorWindow(int index, String tabName) {
-    List<WebElement> windowList =
-        webDriverWaitFactory
-            .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(presenceOfAllElementsLocatedBy(By.xpath(format(TAB_FILE_NAME_XPATH, tabName))));
-
-    windowList.get(index).click();
+    seleniumWebDriverHelper
+        .waitPresenceOfAllElements(By.xpath(format(TAB_FILE_NAME_XPATH, tabName)))
+        .get(index)
+        .click();
   }
 
   /**
-   * Select tab by index of editor window after split and open context menu
+   * Selects window of certain {@code index} of split editor's tab with specified {@code tabName}
+   * and opens context menu for this tab.
    *
-   * @param index index of editor window
-   * @param tabName name of tab
+   * @param index index of the window which should be selected, starting from "0"
+   * @param tabName title of the editor's tab for which menu should be opened
    */
   public void selectTabByIndexEditorWindowAndOpenMenu(int index, String tabName) {
     List<WebElement> windowList =
-        webDriverWaitFactory
-            .get()
-            .until(presenceOfAllElementsLocatedBy(By.xpath(format(TAB_FILE_CLOSE_ICON, tabName))));
+        seleniumWebDriverHelper.waitPresenceOfAllElements(
+            By.xpath(format(TAB_FILE_CLOSE_ICON, tabName)));
+
     actionsFactory.createAction(seleniumWebDriver).contextClick(windowList.get(index)).perform();
   }
 
   /**
-   * Check the tab of file is present once in editor
+   * Checks the editor's tab with specified {@code tabName} is present only once in the editor.
    *
-   * @param expectTab expect name of tab
+   * @param tabName title of the editor's tab for which menu should be opened
    */
-  public boolean tabIsPresentOnce(String expectTab) {
-    List<WebElement> windowList =
-        webDriverWaitFactory.get().until(presenceOfAllElementsLocatedBy(By.id(EDITOR_TABS_PANEL)));
-    int counter = 0;
-    for (WebElement webElement : windowList) {
-      if (webElement.getText().contains(expectTab)) {
-        counter++;
-      }
-    }
-
-    return counter == 1;
+  public boolean tabIsPresentOnce(String tabName) {
+    return 1
+        == seleniumWebDriverHelper
+            .waitPresenceOfAllElements(By.id(EDITOR_TABS_PANEL))
+            .stream()
+            .filter(element -> element.getText().contains(tabName))
+            .collect(toList())
+            .size();
   }
 
   /**
@@ -1826,7 +1978,7 @@ public class CodenvyEditor {
     return stringBuilder.deleteCharAt(stringBuilder.length() - 1);
   }
 
-  /** open context menu into editor */
+  /** Opens context menu into editor */
   public void openContextMenuInEditor() {
     actionsFactory
         .createAction(seleniumWebDriver)
@@ -1837,9 +1989,9 @@ public class CodenvyEditor {
   }
 
   /**
-   * open context menu on the selected element into editor
+   * Opens context menu for the specified {@code selectedItem} in the editor.
    *
-   * @param selectedElement is the selected element into editor
+   * @param selectedElement visible text in the editor on which context click should be performed
    */
   public void openContextMenuOnElementInEditor(String selectedElement) {
     actionsFactory
@@ -1852,18 +2004,18 @@ public class CodenvyEditor {
     waitContextMenu();
   }
 
-  /** wait context menu form is open */
+  /** Waits until context menu form is opened. */
   public void waitContextMenu() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(CONTEXT_MENU));
   }
 
-  /** wait context menu form is not present */
+  /** Waits until context menu form is not present. */
   public void waitContextMenuIsNotPresent() {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(CONTEXT_MENU));
   }
 
   /**
-   * Clicks on {@code item} in context menu
+   * Clicks on {@code item} in context menu.
    *
    * @param item editor context menu item which defined in {@link ContextMenuLocator}
    */
@@ -1883,6 +2035,11 @@ public class CodenvyEditor {
     return getJavaDocPopupText();
   }
 
+  /**
+   * Waits until specified {@code expectedText} is present in javadoc.
+   *
+   * @param expectedText text which should be present in javadoc
+   */
   public void waitContextMenuJavaDocText(String expectedText) {
     waitJavaDocPopupSrcAttributeIsNotEmpty();
 

@@ -21,6 +21,7 @@ import com.google.inject.name.Named;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -48,6 +49,7 @@ import org.testng.annotations.Test;
 // This test is disabled because git panel isn't ready for production and hidden
 // Git panel epic: https://github.com/eclipse/che/issues/5128
 // Issue: https://github.com/eclipse/che/issues/7022
+@Test(groups = TestGroup.GITHUB)
 public class GitPanelTest {
 
   private static final String JAVA_PLAIN_NON_GIT_PROJECT_NAME = "non-git-java-project";
@@ -62,7 +64,7 @@ public class GitPanelTest {
   private static final String JAVA_SPRING_DELETED_FILE_NAME = "spring-servlet.xml";
   private static final String JAVA_SPRING_ADDED_FILE_NAME = "test.java";
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
 

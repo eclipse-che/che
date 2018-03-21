@@ -9,7 +9,7 @@
 
 FROM node:8-alpine
 # build dependencies requireed to compile a custom Theia
-RUN apk add --no-cache make gcc g++ python git openssh bash
+RUN apk add --no-cache make gcc g++ python git openssh bash rsync
 WORKDIR /home/theia
 # build Theia with all extensions to persist yarn cache in the image and
 # have default Theia build in the workspace in case no plugins are requested
@@ -21,7 +21,9 @@ RUN yarn && \
     rm -rf * && \
     cd /home/default/theia && \
     yarn && \
-    yarn theia build
+    yarn theia build && \
+    ln -sf /home/default/theia/node_modules /home/theia/node_modules && \
+    ln -sf /home/default/theia/yarn.lock /home/theia/yarn.lock
 EXPOSE 3000
 ARG GITHUB_TOKEN
 ENV USE_LOCAL_GIT=true \

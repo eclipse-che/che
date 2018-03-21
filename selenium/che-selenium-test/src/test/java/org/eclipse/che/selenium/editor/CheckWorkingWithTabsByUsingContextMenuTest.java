@@ -68,7 +68,7 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
 
     // close all tab by using context menu
     openTabsInEditor();
-    editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
+    editor.openAndWaitContextMenuForTabByName(NAME_TO_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(TabActionLocator.CLOSE_ALL);
     editor.waitTabIsNotPresent(NAME_TO_JAVA_CLASS);
     editor.waitTabIsNotPresent(NAME_TO_CSS);
@@ -77,7 +77,7 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
 
     // close one tab by using context menu
     openTabsInEditor();
-    editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
+    editor.openAndWaitContextMenuForTabByName(NAME_TO_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(TabActionLocator.CLOSE);
     editor.waitTabIsNotPresent(NAME_TO_JAVA_CLASS);
     editor.waitTabIsPresent(NAME_TO_CSS);
@@ -87,7 +87,7 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
 
     // close other tabs by using context menu
     openTabsInEditor();
-    editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
+    editor.openAndWaitContextMenuForTabByName(NAME_TO_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(TabActionLocator.CLOSE_OTHER);
     editor.waitTabIsPresent(NAME_TO_JAVA_CLASS);
     editor.waitTabIsNotPresent(NAME_TO_CSS);
@@ -97,7 +97,7 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
 
     // close other tabs by using context menu
     openTabsInEditor();
-    editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
+    editor.openAndWaitContextMenuForTabByName(NAME_TO_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(TabActionLocator.CLOSE_OTHER);
     editor.waitTabIsPresent(NAME_TO_JAVA_CLASS);
     editor.waitTabIsNotPresent(NAME_TO_CSS);
@@ -107,11 +107,11 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
 
     // pin and close all tabs without pinned by using context menu
     openTabsInEditor();
-    editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
+    editor.openAndWaitContextMenuForTabByName(NAME_TO_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(TabActionLocator.PIN_UNPIN_TAB);
-    editor.openContextMenuForTabByName(NAME_TO_CSS);
+    editor.openAndWaitContextMenuForTabByName(NAME_TO_CSS);
     editor.runActionForTabFromContextMenu(TabActionLocator.PIN_UNPIN_TAB);
-    editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
+    editor.openAndWaitContextMenuForTabByName(NAME_TO_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(TabActionLocator.CLOSE_ALL_BUT_PINNED);
     editor.waitTabIsPresent(NAME_TO_JAVA_CLASS);
     editor.waitTabIsPresent(NAME_TO_CSS);
@@ -121,14 +121,14 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
 
     // reopen closed tab by using context menu
     openTabsInEditor();
-    editor.openContextMenuForTabByName(NAME_TO_JAVA_CLASS);
+    editor.openAndWaitContextMenuForTabByName(NAME_TO_JAVA_CLASS);
     editor.runActionForTabFromContextMenu(TabActionLocator.CLOSE);
     editor.waitTabIsNotPresent(NAME_TO_JAVA_CLASS);
     editor.waitTabIsPresent(NAME_TO_CSS);
     editor.waitTabIsPresent(NAME_TO_XML);
     editor.waitTabIsPresent(NAME_TO_HTML);
     editor.selectTabByName(NAME_TO_CSS);
-    editor.openContextMenuForTabByName(NAME_TO_CSS);
+    editor.openAndWaitContextMenuForTabByName(NAME_TO_CSS);
     editor.runActionForTabFromContextMenu(TabActionLocator.REOPEN_CLOSED_TAB);
     editor.waitTabIsPresent(NAME_TO_JAVA_CLASS);
     editor.waitTabIsPresent(NAME_TO_CSS);

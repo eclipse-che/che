@@ -55,8 +55,7 @@ public class MachineLoginFilter implements Filter {
       ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
       throws IOException, ServletException {
     final HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
-    if (httpRequest.getScheme().startsWith("ws")
-        || !nullToEmpty(tokenExtractor.getToken(httpRequest)).startsWith("machine")) {
+    if (!nullToEmpty(tokenExtractor.getToken(httpRequest)).startsWith("machine")) {
       filterChain.doFilter(servletRequest, servletResponse);
       return;
     } else {

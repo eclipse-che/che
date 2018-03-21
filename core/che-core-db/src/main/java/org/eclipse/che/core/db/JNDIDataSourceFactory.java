@@ -60,4 +60,16 @@ public abstract class JNDIDataSourceFactory implements ObjectFactory {
         "This={} obj={} name={} Context={} environment={}", this, obj, name, nameCtx, environment);
     return dataSource;
   }
+
+  /**
+   * Util method to convert string {@code "NULL"} to null reference. Allows to set string {@code
+   * "NULL"} as a value of the property instead of making sure it is unset as it is done in {@link
+   * org.eclipse.che.inject.CheBootstrap}
+   *
+   * @param value value to transform if needed
+   * @return null or passed value
+   */
+  protected static String nullStringToNullReference(String value) {
+    return "NULL".equals(value) ? null : value;
+  }
 }

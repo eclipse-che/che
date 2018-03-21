@@ -74,7 +74,7 @@ public class CheckWorkingWithTabByUsingTabListTest {
     editor.waitTabIsPresentInTabList(NAME_TO_XML);
     editor.waitTabIsPresent(NAME_TO_HTML);
     editor.clickOnTabInTabList(NAME_TO_HTML);
-    editor.openContextMenuForTabByName(NAME_TO_HTML);
+    editor.openAndWaitContextMenuForTabByName(NAME_TO_HTML);
     editor.runActionForTabFromContextMenu(TabActionLocator.CLOSE);
     editor.openTabList();
     editor.waitTabIsNotPresentInTabList(NAME_TO_HTML);

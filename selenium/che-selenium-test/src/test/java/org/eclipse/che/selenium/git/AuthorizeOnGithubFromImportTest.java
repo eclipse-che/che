@@ -41,6 +41,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
+@Test(groups = TestGroup.GITHUB)
 public class AuthorizeOnGithubFromImportTest {
   private static final Logger LOG = LoggerFactory.getLogger(AuthorizeOnGithubFromImportTest.class);
   private static final String GITHUB_COM = "github.com";
@@ -48,11 +49,11 @@ public class AuthorizeOnGithubFromImportTest {
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject
+  @Inject(optional = true)
   @Named("github.password")
   private String gitHubPassword;
 
