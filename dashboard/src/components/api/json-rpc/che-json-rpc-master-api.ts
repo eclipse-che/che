@@ -60,7 +60,9 @@ export class CheJsonRpcMasterApi {
   }
 
   onConnectionOpen(): void {
-    this.$log.log('WebSocket connection is opened.');
+    if (this.reconnectionAttemptNumber !== 0) {
+      this.$log.log('WebSocket connection is opened.');
+    }
     this.reconnectionAttemptNumber = 0;
   }
 
