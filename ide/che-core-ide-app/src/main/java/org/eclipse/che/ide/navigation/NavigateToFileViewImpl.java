@@ -37,6 +37,7 @@ import com.google.inject.Singleton;
 import elemental.dom.Element;
 import elemental.html.TableCellElement;
 import elemental.html.TableElement;
+import java.util.Collections;
 import java.util.List;
 import org.eclipse.che.api.project.shared.dto.SearchResultDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -214,6 +215,9 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
     // Create and show list of items
     final TableElement itemHolder = Elements.createTableElement();
     suggestionsContainer.getElement().appendChild(((com.google.gwt.dom.client.Element) itemHolder));
+    if (list != null) {
+      list.asWidget().removeFromParent();
+    }
     list =
         SimpleList.create(
             suggestionsContainer.getElement().cast(),
@@ -339,7 +343,11 @@ public class NavigateToFileViewImpl extends PopupPanel implements NavigateToFile
           @Override
           public void run() {
             String fileName = NavigateToFileViewImpl.this.fileName.getText();
-            if (!Strings.isNullOrEmpty(fileName) && !fileName.equalsIgnoreCase(previosFileName)) {
+            if (Strings.isNullOrEmpty(fileName)) {
+              showItems(Collections.emptyList());
+              return;
+            }
+            if (!fileName.equalsIgnoreCase(previosFileName)) {
               previosFileName = fileName;
               delegate.onFileNameChanged(fileName);
             }
