@@ -22,7 +22,7 @@ prepareTheia();
 function prepareTheia() {
     process.chdir(theiaRoot);
 
-    const extraPlagins = getExtraTheiaPlugins();
+    const extraPlugins = getExtraTheiaPlugins();
     let currentPlugins = getTheiaPlugins();
     let newPlugins = getDefaultTheiaPlugins();
 
@@ -31,8 +31,8 @@ function prepareTheia() {
         currentPlugins = getTheiaPlugins();
     }
 
-    for (let pluginName in extraPlagins) {
-        newPlugins[pluginName] = extraPlagins[pluginName];
+    for (let pluginName in extraPlugins) {
+        newPlugins[pluginName] = extraPlugins[pluginName];
     }
 
     if (!isPluginsEqual(currentPlugins, newPlugins)) {
