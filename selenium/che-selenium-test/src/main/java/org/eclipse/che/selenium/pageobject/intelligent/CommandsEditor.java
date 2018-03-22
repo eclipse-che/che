@@ -432,21 +432,21 @@ public class CommandsEditor {
     waitMacrosCommandIsSelected(item);
   }
 
-  public void waitMacrosCommandIsSelected(String item) {
+  private void waitMacrosCommandIsSelected(String item) {
     webDriverWaitFactory
         .get()
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> {
-                  return waitVisibilityAndGetMacrosCommand(item)
-                      .getCssValue("background-color")
-                      .contains("rgb(37, 108, 159)");
+                  String backgroundColor =
+                      waitVisibilityAndGetMacrosCommand(item).getCssValue("background-color");
+                  return backgroundColor.contains("rgba(215, 215, 215, 0.2)");
                 });
   }
 
   public WebElement waitVisibilityAndGetMacrosCommand(String item) {
     return seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(COMMAND_MACROS_FORM + "//div[text()='%s']", item)),
+        By.xpath(format(COMMAND_MACROS_FORM + "//div[text()='%s']/parent::td/parent::tr", item)),
         REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
