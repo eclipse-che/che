@@ -368,9 +368,9 @@ public class CommandsEditor {
     editor.waitActive();
   }
 
-  public void waitTextIntoDescriptionMacrosForm(String expText) {
+  public void waitTextIntoDescriptionMacrosForm(String expectedText) {
     seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(DESCRIPTION_MACROS, expText)), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+        By.xpath(format(DESCRIPTION_MACROS, expectedText)), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   public void selectMacrosLinkInCommandsEditor(String macrosLinkType) {
@@ -391,11 +391,8 @@ public class CommandsEditor {
   public void typeTextIntoSearchMacroField(String text) {
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(COMMAND_MACROS_INPUT_FIELD), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
-    seleniumWebDriverHelper.waitAndClick(
-        By.xpath(COMMAND_MACROS_INPUT_FIELD), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
-    seleniumWebDriverHelper
-        .waitVisibility(By.xpath(COMMAND_MACROS_INPUT_FIELD), REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .sendKeys(text);
+
+    seleniumWebDriverHelper.setValue(By.xpath(COMMAND_MACROS_INPUT_FIELD), text);
   }
 
   public void waitTextIntoSearchMacroField(String expectedText) {
@@ -403,12 +400,12 @@ public class CommandsEditor {
         macrosInputField, expectedText, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
-  public void waitTextIntoMacrosContainer(final String expText) {
+  public void waitTextIntoMacrosContainer(final String expectedText) {
     webDriverWaitFactory
         .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
-                webDriver -> getAllVisibleTextFromMacrosContainer().contains(expText));
+                webDriver -> getAllVisibleTextFromMacrosContainer().contains(expectedText));
   }
 
   public String getAllVisibleTextFromMacrosContainer() {
