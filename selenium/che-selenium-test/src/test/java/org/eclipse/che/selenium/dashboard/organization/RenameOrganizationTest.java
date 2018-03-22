@@ -16,7 +16,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.organization.Organiz
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.TestGroup;
@@ -129,13 +128,7 @@ public class RenameOrganizationTest {
     organizationPage.clickBackButton();
     organizationListPage.waitForOrganizationsList();
 
-    try {
-      assertTrue(organizationListPage.getValues(NAME).contains(newChildOrgQualifiedName));
-    } catch (AssertionError ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8668");
-    }
-
+    assertTrue(organizationListPage.getValues(NAME).contains(newChildOrgQualifiedName));
     assertTrue(organizationListPage.getValues(NAME).contains(NEW_PARENT_ORG_NAME));
   }
 
