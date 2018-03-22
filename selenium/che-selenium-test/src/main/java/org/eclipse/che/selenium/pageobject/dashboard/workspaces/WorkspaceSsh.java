@@ -19,13 +19,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.support.PageFactory;
 
 public class WorkspaceSsh {
-  private final SeleniumWebDriver seleniumWebDriver;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
   public WorkspaceSsh(
       SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
-    this.seleniumWebDriver = seleniumWebDriver;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     PageFactory.initElements(seleniumWebDriver, this);
   }
