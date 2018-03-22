@@ -462,7 +462,7 @@ public class CommandsEditor {
 
   public void setCursorToLine(int positionLine) {
     loader.waitOnClosed();
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.chord(CONTROL, "l")).perform();
+    seleniumWebDriverHelper.sendKeys(Keys.chord(CONTROL, "l"));
     askForValueDialog.waitFormToOpen();
     loader.waitOnClosed();
     askForValueDialog.typeAndWaitText(String.valueOf(positionLine));
