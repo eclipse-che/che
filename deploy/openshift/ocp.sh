@@ -71,9 +71,6 @@ export IMAGE_PULL_POLICY=${IMAGE_PULL_POLICY:-${DEFAULT_IMAGE_PULL_POLICY}}
 DEFAULT_CHE_IMAGE_REPO="eclipse/che-server"
 export CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
 
-DEFAULT_CHE_CLI_IMAGE="eclipse/che-cli:nightly"
-export CHE_CLI_IMAGE=${CHE_CLI_IMAGE:-${DEFAULT_CHE_CLI_IMAGE}}
-
 DEFAULT_CONFIG_DIR="/tmp/che-config"
 export CONFIG_DIR=${CONFIG_DIR:-${DEFAULT_CONFIG_DIR}}
 
@@ -228,7 +225,6 @@ parse_args() {
     ===================================
     ENV vars
     CHE_IMAGE_TAG - set che-server image tag, default: nightly
-    CHE_CLI_IMAGE - set che-cli image, default: eclipse/che-cli:nightly 
     CHE_MULTIUSER - set CHE multi user mode, default: false (single user)
     OC_PUBLIC_HOSTNAME - set ocp hostname to admin console, default: host ip
     OC_PUBLIC_IP - set ocp hostname for routing suffix, default: host ip
