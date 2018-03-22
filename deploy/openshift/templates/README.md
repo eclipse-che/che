@@ -50,10 +50,10 @@ oc new-project che
 
 oc apply -f pvc/che-server-pvc.yaml; \
 oc process -f che-server-template.yaml -p ROUTING_SUFFIX=$(minishift ip).nip.io \
-																			 -p PROTOCOL=https \
-																			 -p WS_PROTOCOL=wss \
-																			 -p TLS=true \
-																			 | oc apply -f -; \
+		-p PROTOCOL=https \
+		-p WS_PROTOCOL=wss \
+		-p TLS=true \
+		| oc apply -f -; \
 oc set volume dc/che --add -m /data --name=che-data-volume --claim-name=che-data-volume; \
 oc apply -f https
 ```
@@ -79,11 +79,11 @@ oc process -f multi/keycloak-template.yaml -p ROUTING_SUFFIX=$(minishift ip).nip
 																					 | oc apply -f -; \
 oc apply -f pvc/che-server-pvc.yaml; \
 oc process -f che-server-template.yaml -p ROUTING_SUFFIX=$(minishift ip).nip.io \
-																			 -p CHE_MULTIUSER=true \
- 																			 -p PROTOCOL=https \
-																			 -p WS_PROTOCOL=wss \
-																			 -p TLS=true  \
-																			 | oc apply -f -; \
+	-p CHE_MULTIUSER=true \
+ 	-p PROTOCOL=https \
+	-p WS_PROTOCOL=wss \
+	-p TLS=true  \
+	| oc apply -f -; \
 oc set volume dc/che --add -m /data --name=che-data-volume --claim-name=che-data-volume; \
 oc apply -f https
 ```
@@ -97,9 +97,9 @@ oc new-project che
 oc process -f multi/postgres-template.yaml -p ROUTING_SUFFIX=$(minishift ip).nip.io | oc apply -f -; \
 oc apply -f pvc/che-server-pvc.yaml; \
 oc process -f che-server-template.yaml -p ROUTING_SUFFIX=$(minishift ip).nip.io \
-																			 -p CHE_MULTIUSER=true \
-																			 -p CHE_KEYCLOAK_AUTH__SERVER__URL=$yourURL \
-						 												 	 | oc apply -f -; \
+	-p CHE_MULTIUSER=true \
+	-p CHE_KEYCLOAK_AUTH__SERVER__URL=$yourURL \
+	| oc apply -f -; \
 oc set volume dc/che --add -m /data --name=che-data-volume --claim-name=che-data-volume
 ```
 
@@ -112,10 +112,10 @@ oc new-project che
 
 oc apply -f pvc/che-server-pvc.yaml; \
 oc process -f che-server-template.yaml -p ROUTING_SUFFIX=$(minishift ip).nip.io \
-																	     -p CHE_MULTIUSER=true
-																	     -p CHE_KEYCLOAK_AUTH__SERVER__URL=$yourURL
-																	     -p CHE_JDBC_URL=$yourURL \
-																			 | oc apply -f -; \
+	-p CHE_MULTIUSER=true
+	-p CHE_KEYCLOAK_AUTH__SERVER__URL=$yourURL
+	-p CHE_JDBC_URL=$yourURL \
+	| oc apply -f -; \
 oc set volume dc/che --add -m /data --name=che-data-volume --claim-name=che-data-volume; \
 oc apply -f https
 ```
@@ -128,12 +128,12 @@ oc new-project che
 oc process -f multi/postgres-template.yaml -p ROUTING_SUFFIX=$(minishift ip).nip.io | oc apply -f -; \
 oc apply -f pvc/che-server-pvc.yaml; \
 oc process -f che-server-template.yaml -p ROUTING_SUFFIX=$(minishift ip).nip.io \
-																			 -p CHE_MULTIUSER=true \
-																			 -p CHE_KEYCLOAK_AUTH__SERVER__URL=$yourURL \
-																			 -p PROTOCOL=https \
-																			 -p WS_PROTOCOL=wss \
-																			 -p TLS=true \
-																			 | oc apply -f -; \
+	-p CHE_MULTIUSER=true \
+	-p CHE_KEYCLOAK_AUTH__SERVER__URL=$yourURL \
+	-p PROTOCOL=https \
+	-p WS_PROTOCOL=wss \
+	-p TLS=true \
+	| oc apply -f -; \
 oc set volume dc/che --add -m /data --name=che-data-volume --claim-name=che-data-volume; \
 oc apply -f https
 ```
@@ -144,12 +144,12 @@ If you already have own identity provider and a database ready to work with Che 
 
 ```
 oc process -f che-server-template.yaml -p ROUTING_SUFFIX=$(minishift ip).nip.io \
-																	     -p CHE_MULTIUSER=true
-																	     -p CHE_KEYCLOAK_AUTH__SERVER__URL=$yourURL
-																	     -p CHE_JDBC_URL=$yourURL \
-																			 -p PROTOCOL=https \
-																			 -p WS_PROTOCOL=wss \
-																			 -p TLS=true \
-																			 | oc apply -f -; \
+	-p CHE_MULTIUSER=true
+	-p CHE_KEYCLOAK_AUTH__SERVER__URL=$yourURL
+	-p CHE_JDBC_URL=$yourURL \
+	-p PROTOCOL=https \
+	-p WS_PROTOCOL=wss \
+	-p TLS=true \
+	| oc apply -f -; \
 oc apply -f https
 ```
