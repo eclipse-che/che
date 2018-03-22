@@ -11,4 +11,4 @@ ADD . /scripts/
 USER root
 RUN chgrp -R 0 /scripts && \
     chmod -R g+rwX /scripts
-ENTRYPOINT ["/scripts/keycloak_config.sh"]
+

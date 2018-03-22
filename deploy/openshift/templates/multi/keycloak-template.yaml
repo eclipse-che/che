@@ -58,6 +58,7 @@ objects:
           - name: CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD
             value: "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}"
           image: '${IMAGE_KEYCLOAK}:${CHE_VERSION}'
+          command: ["/scripts/kc_realm_user.sh"]
           imagePullPolicy: Always
           name: keycloak
           livenessProbe:
@@ -168,4 +169,4 @@ parameters:
 - name: IMAGE_KEYCLOAK
   displayName: Keycloak Image
   description: Keycloak Image. Defaults to docker.io/eclipse/che-keycloak
-  value: eivantsov/keycloak
+  value: eclipse/che-keycloak
