@@ -14,7 +14,6 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FILE_STRUCTURE;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -27,7 +26,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -110,14 +108,7 @@ public class FileStructureBaseOperationTest {
     fileStructure.waitExpectedTextInFileStructure(CLASS_MEMBERS_1);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(INHERITED_MEMBERS);
     fileStructure.launchFileStructureFormByKeyboard();
-
-    try {
-      fileStructure.waitExpectedTextInFileStructure(CLASS_MEMBERS_2);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8509");
-    }
-
+    fileStructure.waitExpectedTextInFileStructure(CLASS_MEMBERS_2);
     fileStructure.waitExpectedTextInFileStructure(INHERITED_MEMBERS);
     fileStructure.launchFileStructureFormByKeyboard();
     fileStructure.waitExpectedTextInFileStructure(CLASS_MEMBERS_1);
