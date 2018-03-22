@@ -65,7 +65,7 @@ wait_until_che_is_available() {
     DEPLOYMENT_TIMEOUT_SEC=300
     POLLING_INTERVAL_SEC=5
     end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
-    while [ "${available}" != "\"True\"" ] && [ ${SECONDS} -lt ${end} ]; do
+    while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
       available=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
       progressing=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
       timeout_in=$((end-SECONDS))
