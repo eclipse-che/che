@@ -125,6 +125,7 @@ public class WorkspaceActivityManager {
       expiredList = activityDao.findExpired(System.currentTimeMillis());
     } catch (ServerException e) {
       LOG.error(e.getLocalizedMessage(), e);
+      return;
     }
     for (String workspaceId : expiredList) {
       try {
