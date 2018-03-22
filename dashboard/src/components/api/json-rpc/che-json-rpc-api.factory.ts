@@ -20,20 +20,26 @@ import {WebsocketClient} from './websocket-client';
  */
 export class CheJsonRpcApi {
 
-  static $inject = ['$q', '$websocket', '$log'];
+  static $inject = ['$q', '$websocket', '$log', '$timeout'];
 
   private $q: ng.IQService;
   private $websocket: any;
   private $log: ng.ILogService;
   private jsonRpcApiConnection: Map<string, CheJsonRpcMasterApi>;
 
+  private $timeout: ng.ITimeoutService;
+
   /**
    * Default constructor that is using resource
    */
-  constructor($q: ng.IQService, $websocket: any, $log: ng.ILogService) {
+  constructor($q: ng.IQService,
+              $websocket: any,
+              $log: ng.ILogService,
+              $timeout: ng.ITimeoutService) {
     this.$q = $q;
     this.$websocket = $websocket;
     this.$log = $log;
+    this.$timeout = $timeout;
     this.jsonRpcApiConnection = new Map<string, CheJsonRpcMasterApi>();
   }
 
@@ -42,7 +48,7 @@ export class CheJsonRpcApi {
      return this.jsonRpcApiConnection.get(entrypoint);
    } else {
      let websocketClient = new WebsocketClient(this.$websocket, this.$q);
-     let cheJsonRpcMasterApi: CheJsonRpcMasterApi = new CheJsonRpcMasterApi(websocketClient, entrypoint);
+     let cheJsonRpcMasterApi: CheJsonRpcMasterApi = new CheJsonRpcMasterApi(websocketClient, entrypoint, this.$log, this.$timeout);
      this.jsonRpcApiConnection.set(entrypoint, cheJsonRpcMasterApi);
      return cheJsonRpcMasterApi;
    }

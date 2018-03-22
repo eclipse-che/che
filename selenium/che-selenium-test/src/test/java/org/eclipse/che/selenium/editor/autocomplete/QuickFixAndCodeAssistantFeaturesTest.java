@@ -86,7 +86,7 @@ public class QuickFixAndCodeAssistantFeaturesTest {
 
     editor.typeTextIntoEditor(TEXT_FOR_ERROR);
     editor.launchAutocompleteAndWaitContainer();
-    // ide.getEditor().selectItemIntoAutocompleteAndPasteByDoubleClick("null"); //TODO cursor
+    // ide.getEditor().selectItemIntoAutocompleteAndPerformDoubleClick("null"); //TODO cursor
     // disappears IDEX-3353
     editor.enterAutocompleteProposal("null");
     projectExplorer.waitAndSelectItemByName(

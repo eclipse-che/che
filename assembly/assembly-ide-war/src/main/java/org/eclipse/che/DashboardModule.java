@@ -17,6 +17,7 @@ import org.eclipse.che.inject.DynaModule;
 public class DashboardModule extends ServletModule {
   @Override
   protected void configureServlets() {
+    filter("/api", "/api/*").through(ApiAccessRejectionFilter.class);
     filter("/*").through(DashboardRedirectionFilter.class);
   }
 }
