@@ -121,8 +121,12 @@ services:
       - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/init-che-user.sh:/var/lib/pgsql/init-che-user.sh'
       - '<%= scope.lookupvar('che::che_instance') -%>/config/postgres/init-che-user-and-run.sh:/var/lib/pgsql/init-che-user-and-run.sh'
 <% if scope.lookupvar('che::che_single_port') == 'false' -%>
+    expose:
+      - '5432'
+<% if scope.lookupvar('che::che_env') == 'development' -%>
     ports:
       - '5432:5432'
+<% end -%>
 <% end -%>
     restart: always
     healthcheck:
