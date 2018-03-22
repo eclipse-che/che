@@ -53,7 +53,6 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
 
   @Override
   public List<String> findExpired(long timestamp) throws ServerException {
-    requireNonNull(timestamp, "Required non-null timestamp");
     try {
       return doFindExpired(timestamp);
     } catch (RuntimeException x) {
