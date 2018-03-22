@@ -433,6 +433,7 @@ oc apply -f -
 if [[ "${CHE_MULTIUSER}" == "true" ]] && [[ "${COMMAND}" == "deploy" ]]; then
     if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
         "${BASE_DIR}"/multi-user/deploy_postgres_and_keycloak.sh
+        "${BASE_DIR}"/multi-user/configure_keycloak.sh
     else
         "${BASE_DIR}"/multi-user/deploy_postgres_only.sh
     fi
@@ -535,10 +536,6 @@ fi
 
 if [ "${WAIT_FOR_CHE}" == "true" ]; then
   wait_until_che_is_available
-fi
-
-if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
-"${BASE_DIR}"/multi-user/configure_keycloak.sh
 fi
 
 che_route=$(oc get route che -o jsonpath='{.spec.host}')
