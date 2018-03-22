@@ -11,9 +11,9 @@
 package org.eclipse.che.selenium.workspaces;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.*;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
 import javax.inject.Named;
@@ -50,7 +50,7 @@ public class CheckStoppingWsByTimeoutTest {
     ide.open(testWorkspace);
     projectExplorer.waitProjectExplorer();
     // We should invoke delay without any action for triggering workspace activity checker
-    sleepQuietly(getCommonTimeoutInMillisec(), MILLISECONDS);
+    sleepQuietly(getCommonTimeoutInMilliSec(), MILLISECONDS);
   }
 
   @Test
@@ -66,7 +66,7 @@ public class CheckStoppingWsByTimeoutTest {
     toastLoader.waitStartButtonInToastLoader();
   }
 
-  private int getCommonTimeoutInMillisec() {
+  private int getCommonTimeoutInMilliSec() {
     return cheWorkspaceAgentDevInactiveStopTimeoutMilliseconds
         + TOASTLOADER_WIDGET_LATENCY_TIMEOUT_IN_MILLISEC
         + cheWorkspaceActivityCheckSchedulerPeriodInSeconds * 1000;
