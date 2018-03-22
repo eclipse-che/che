@@ -5,29 +5,29 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-echo "Configuring Keycloak..."
+echo "Configuring Keycloak by modifying realm and user templates..."
 
 cat /scripts/che-users-0.json.erb | \
-				    sed -e "/<% if scope.lookupvar('keycloak::che_keycloak_admin_require_update_password') == 'true' -%>/d" | \
-				    sed -e "/<% else -%>/d" | \
-				    sed -e "/<% end -%>/d" | \
-				    sed -e "/\"requiredActions\" : \[ \],/d" | \
-				    jq .users[] > /scripts/che-user.json
+                                  sed -e "/<% if scope.lookupvar('keycloak::che_keycloak_admin_require_update_password') == 'true' -%>/d" | \
+                                  sed -e "/<% else -%>/d" | \
+                                  sed -e "/<% end -%>/d" | \
+                                  sed -e "/\"requiredActions\" : \[ \],/d" > /scripts/che-users-0.json
+
+cp /scripts/master-users-0.json.erb /scripts/master-users-0.json
+cp /scripts/master-realm.json.erb /scripts/master-realm.json
 
 if [ "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}" == "false" ]; then
-   sed -i -e "s#\"UPDATE_PASSWORD\"##" /scripts/che-user.json
+    sed -i -e "s#\"UPDATE_PASSWORD\"##" /scripts/che-users-0.json
 fi
 
-cat /scripts/che-realm.json.erb | sed -e "s@<%= scope\.lookupvar('che::che_server_url') %>@${HTTP_PROTOCOL}://${CHE_HOST}@" > /scripts/realm.json
+cat /scripts/che-realm.json.erb | \
+                                sed -e "s@<%= scope\.lookupvar('che::che_server_url') %>@${PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}@" \
+                                > /scripts/che-realm.json
 
-echo "Creating Che realm and che-public client..."
+echo "Starting Keycloak server..."
 
-cd /opt/jboss/keycloak/bin
-
-./kcadm.sh create realms -f /scripts/realm.json --no-config --server ${HTTP_PROTOCOL}://${KC_HOST}/auth --realm master --user admin --password admin
-
-echo "Creating default Che user with the following credentials 'admin:admin'"
-
-./kcadm.sh create users -r che -f /scripts/che-user.json --no-config --server ${HTTP_PROTOCOL}://${KC_HOST}/auth --realm master --user admin --password admin
-
-echo "Done!"
+/opt/jboss/keycloak/bin/standalone.sh -Dkeycloak.migration.action=import \
+                                      -Dkeycloak.migration.provider=dir \
+                                      -Dkeycloak.migration.strategy=IGNORE_EXISTING \
+                                      -Dkeycloak.migration.dir=/scripts/ \
+                                      -Djboss.bind.address=0.0.0.0

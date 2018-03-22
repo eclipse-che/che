@@ -1,0 +1,126 @@
+# Copyright (c) 2012-2018 Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+---
+kind: Template
+apiVersion: v1
+metadata:
+  name: che
+  annotations:
+    description: Che
+objects:
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: postgres
+    name: postgres
+  spec:
+    replicas: 1
+    selector:
+      io.kompose.service: postgres
+    strategy:
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          io.kompose.service: postgres
+      spec:
+        containers:
+        - env:
+          - name: POSTGRESQL_USER
+            value: keycloak
+          - name: POSTGRESQL_PASSWORD
+            value: keycloak
+          - name: POSTGRESQL_DATABASE
+            value: keycloak
+          - name: "CHE_POSTGRES_USERNAME"
+            value: "pgche"
+          - name: "CHE_POSTGRES_PASSWORD"
+            value: "pgchepassword"
+          - name: "CHE_POSTGRES_DATABASE"
+            value: "dbche"
+          image: '${IMAGE_POSTGRES}:${CHE_VERSION}'
+          imagePullPolicy: Always
+          name: postgres
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 5432
+            timeoutSeconds: 1
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - '-i'
+                - '-c'
+                - >-
+                  psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d
+                  $POSTGRESQL_DATABASE -c 'SELECT 1'
+            failureThreshold: 10
+            initialDelaySeconds: 5
+            periodSeconds: 3
+            successThreshold: 1
+            timeoutSeconds: 1
+          ports:
+          - containerPort: 5432
+          resources: {}
+          volumeMounts:
+          - mountPath: /var/lib/pgsql/data
+            name: postgres-data
+        restartPolicy: Always
+        volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-data
+    test: false
+  status: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: postgres
+    name: postgres
+  spec:
+    ports:
+    - name: "5432"
+      port: 5432
+      targetPort: 5432
+    selector:
+      io.kompose.service: postgres
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    creationTimestamp: null
+    labels:
+      io.kompose.service: postgres-data
+    name: postgres-data
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+  status: {}
+
+parameters:
+- name: CHE_VERSION
+  displayName: Eclipse Che version
+  description: Eclipse Che version which defaults to nightly
+  value: nightly
+- name: IMAGE_POSTGRES
+  displayName: Postgres DB Image
+  description: Postgres DB Image. Defaults to docker.io/eclipse/che-postgres
+  value: docker.io/eclipse/che-postgres

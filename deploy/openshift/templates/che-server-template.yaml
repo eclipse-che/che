@@ -1,0 +1,279 @@
+# Copyright (c) 2012-2018 Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+---
+kind: Template
+apiVersion: v1
+metadata:
+  name: che
+  annotations:
+    description: Che
+objects:
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    labels:
+      app: che
+    name: che
+- apiVersion: v1
+  kind: RoleBinding
+  metadata:
+    name: che
+  roleRef:
+    name: admin
+  subjects:
+  - kind: ServiceAccount
+    name: che
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: che
+    name: che-host
+  spec:
+    ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: che
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      app: che
+    name: che
+  spec:
+    to:
+      kind: Service
+      name: che-host
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: che
+    name: che
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 2
+    selector:
+      app: che
+    strategy:
+      type: ${STRATEGY}
+    template:
+      metadata:
+        labels:
+          app: che
+      spec:
+        containers:
+        - env:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: CHE_HOST
+            value: che-${NAMESPACE}.${ROUTING_SUFFIX}
+          - name: CHE_PORT
+            value: '8080'
+          - name: CHE_API
+            value: "${PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}/api"
+          - name: CHE_WEBSOCKET_ENDPOINT
+            value: "${WS_PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}/api/websocket"
+          - name: CHE_DEBUG_SERVER
+            value: 'false'
+          - name: CHE_INFRASTRUCTURE_ACTIVE
+            value: openshift
+          - name: CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL
+            value: "${PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}/agent-binaries/linux_amd64/bootstrapper/bootstrapper"
+          - name: CHE_INFRA_KUBERNETES_MACHINE__START__TIMEOUT__MIN
+            value: '5'
+          - name: CHE_INFRA_KUBERNETES_MASTER__URL
+          - name: CHE_INFRA_KUBERNETES_OAUTH__TOKEN
+            value: "${TOKEN}"
+          - name: CHE_INFRA_KUBERNETES_PASSWORD
+            value: "${OPENSHIFT_PASSWORD}"
+          - name: CHE_INFRA_OPENSHIFT_PROJECT
+            value: "${CHE_INFRA_OPENSHIFT_PROJECT}"
+          - name: CHE_INFRA_KUBERNETES_PVC_STRATEGY
+            value: "${CHE_INFRA_KUBERNETES_PVC_STRATEGY}"
+          - name: CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS
+            value: 'true'
+          - name: CHE_INFRA_OPENSHIFT_TLS__ENABLED
+            value: "${TLS}"
+          - name: CHE_INFRA_KUBERNETES_TRUST__CERTS
+            value: "${TLS}"
+          - name: CHE_INFRA_KUBERNETES_USERNAME
+            value: "${OPENSHIFT_USERNAME}"
+          - name: CHE_LOCAL_CONF_DIR
+            value: "/etc/conf"
+          - name: CHE_LOGS_DIR
+            value: "/data/logs"
+          - name: CHE_LOG_LEVEL
+            value: INFO
+          - name: CHE_MULTIUSER
+            value: "${CHE_MULTIUSER}"
+          - name: CHE_KEYCLOAK_AUTH__SERVER__URL
+            value: "${CHE_KEYCLOAK_AUTH__SERVER__URL}"
+          - name: CHE_JDBC_URL
+            value: "${CHE_JDBC_URL}"
+          - name: CHE_OAUTH_GITHUB_CLIENTID
+          - name: CHE_OAUTH_GITHUB_CLIENTSECRET
+          - name: CHE_PREDEFINED_STACKS_RELOAD__ON__START
+            value: 'true'
+          - name: JAVA_OPTS
+            value: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10
+              -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
+              -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true
+              -Xms20m "
+          - name: CHE_WORKSPACE_AUTO_START
+            value: 'false'
+          - name: CHE_INFRA_KUBERNETES_PVC_QUANTITY
+            value: ${CHE_INFRA_KUBERNETES_PVC_QUANTITY}
+          - name: PROTOCOL
+            value: "${PROTOCOL}"
+          - name: ROUTING_SUFFIX
+            value: "${ROUTING_SUFFIX}"
+          image: ${IMAGE_CHE}:${CHE_VERSION}
+          imagePullPolicy: "${PULL_POLICY}"
+          livenessProbe:
+            httpGet:
+              path: /api/system/state
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+          name: che
+          ports:
+          - containerPort: 8080
+            name: http
+          - containerPort: 8000
+            name: http-debug
+          readinessProbe:
+            httpGet:
+              path: /api/system/state
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 15
+            timeoutSeconds: 60
+          name: che
+          ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          - containerPort: 8000
+            name: http-debug
+            protocol: TCP
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              memory: 256Mi
+          terminationMessagePath: "/dev/termination-log"
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: che
+        serviceAccountName: che
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+  status:
+    availableReplicas: 1
+    conditions:
+    - message: replication controller "che-1" successfully rolled out
+      reason: NewReplicationControllerAvailable
+      status: 'True'
+      type: Progressing
+    - message: Deployment config has minimum availability.
+      status: 'True'
+      type: Available
+    details:
+      causes:
+      - type: ConfigChange
+      message: config change
+    latestVersion: 1
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    unavailableReplicas: 0
+    updatedReplicas: 1
+
+parameters:
+- name: ROUTING_SUFFIX
+  displayName: Routing suffix of your OpenShift cluster
+  description: This is the suffix appended to routes in your OpenShift cluster <route>.<project>.<routing_suffix>
+- name: CHE_VERSION
+  displayName: Eclipse Che version
+  description: Eclipse Che version which defaults to nightly
+  value: nightly
+- name: IMAGE_CHE
+  displayName: Eclipse Che server image
+  description: Che server Docker image. Defaults to docker.io/eclipse/che-server
+  value: docker.io/eclipse/che-server
+- name: CHE_MULTIUSER
+  displayName: Single vs Multi User Che
+  description: False ie single user by default. Set to true
+  value: 'false'
+- name: OPENSHIFT_USERNAME
+  displayName: OpenShift Username
+  description: OpenShift username that will be used to create workspace objects
+- name: OPENSHIFT_PASSWORD
+  displayName: OpenShift Password
+  description: OpenShift Password that will be used to create workspace objects
+- name: TOKEN
+  displayName: OpenShift token
+  description: OpenShift token to be used to create workspace objects. Must be set if username/password are impossible to use. Do not set if usrname/pass are provided!
+- name: PROTOCOL
+  displayName: htpps or http protocol
+  description: Protocol to be used in Che communications
+  value: http
+- name: WS_PROTOCOL
+  displayName: wss or ws
+  description: Websocket protocol to be used in Che communications
+  value: ws
+- name: TLS
+  displayName: HTTPS support
+  description: Turn on https support in Che
+  value: 'false'
+- name: CHE_INFRA_OPENSHIFT_PROJECT
+  displayName: OpenShift namespace to create workspace objects
+  description: Che server namespace by default. When empty, each workspace gets own namespace. In this case a privileged sa or credentials/token need to be used.
+  value: '${NAMESPACE}'
+- name: CHE_INFRA_KUBERNETES_PVC_QUANTITY
+  displayName: Default PVC claim
+  description: Default PVC claim for storage. Defaults to 1Gi
+  value: '1Gi'
+- name: CHE_INFRA_KUBERNETES_PVC_STRATEGY
+  displayName: PVC strategy
+  description: PVC strategy. Unique implies creating PVC per workspace. Common uses one PVC with subpaths in PV. Defaults to unique
+  value: 'unique'
+- name: CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD
+  displayName: Admin password update
+  description: Force an admin to update password after 1st login. True by default
+  value: 'true'
+- name: CHE_KEYCLOAK_AUTH__SERVER__URL
+  displayName: Identity provider URL
+  description: URL of a remote identity provider. Defaults to Keycloak bundled with Che multi user
+  value: '${PROTOCOL}://keycloak-${NAMESPACE}.${ROUTING_SUFFIX}/auth'
+- name: CHE_JDBC_URL
+  displayName: JDBC URL
+  description: URL Che server will use to connec tto JDBC. Defaults to Postgres service bundled with Che multi user
+  value: 'jdbc:postgresql://postgres:5432/dbche'
+- name: STRATEGY
+  displayName: Update Strategy
+  description: Che server update strategy. Defaults to Recreate. Use Rolling only if Che deployment does not use PVC
+  value: 'Recreate'
+- name: PULL_POLICY
+  displayName: Che server image pull policy
+  description: Always pull by default. Can be IfNotPresent
+  value: 'Always'
+labels:
+  app: che
+  template: che
