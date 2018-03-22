@@ -130,7 +130,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
                       clickOnPreviewUrlAndCheckTextIsPresentInPageBody(
                           currentWindow, expectedText));
     } catch (WebDriverException e) {
-      terminal.launchScriptAndGetInfo(testWorkspace, PROJECT_NAME, projectService);
+      terminal.logApplicationInfo(PROJECT_NAME, testWorkspace);
     }
   }
 
@@ -147,7 +147,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
                       clickOnPreviewButtonAndCheckTextIsPresentInPageBody(
                           currentWindow, expectedText));
     } catch (WebDriverException e) {
-      terminal.launchScriptAndGetInfo(testWorkspace, PROJECT_NAME, projectService);
+      terminal.logApplicationInfo(PROJECT_NAME, testWorkspace);
     }
   }
 

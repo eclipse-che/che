@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestSshServiceClient;
@@ -39,8 +40,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -48,7 +47,6 @@ import org.testng.annotations.Test;
 /** @author aleksandr shmaraev */
 @Test(groups = TestGroup.GITHUB)
 public class GitPullConflictTest {
-  private static final String REPO_NAME = NameGenerator.generate("PullConflictTest-", 3);
   private static final String PROJECT_NAME = NameGenerator.generate("PullConflictProject-", 4);
   private static final String PATH_TO_JAVA_FILE = "src/main/java/org/eclipse/qa/examples";
   private static final String COMMIT_MSG = "commit_changes";
@@ -71,20 +69,14 @@ public class GitPullConflictTest {
   private static final String HEAD_CONF_PREFIX_CONF_MESS =
       String.format("<<<<<<< HEAD\n//second_change\n=======\n%s\n>>>>>>>", CHANGE_STRING_1);
 
-  private GitHub gitHub;
-  private GHRepository gitHubRepository;
-
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
   @Inject private TestUser productUser;
+  @Inject private TestGitHubRepository testRepo;
 
   @Inject(optional = true)
   @Named("github.username")
   private String gitHubUsername;
-
-  @Inject(optional = true)
-  @Named("github.password")
-  private String gitHubPassword;
 
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private ProjectExplorer projectExplorer;
@@ -100,19 +92,18 @@ public class GitPullConflictTest {
 
   @BeforeClass
   public void prepare() throws Exception {
-    gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
-    gitHubRepository = gitHub.createRepository(REPO_NAME).create();
     String commitMess = String.format("add-new-content %s ", System.currentTimeMillis());
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
+
     Path entryPath =
         Paths.get(getClass().getResource("/projects/default-spring-project").getPath());
-    gitHubClientService.addContentToRepository(entryPath, commitMess, gitHubRepository);
+    testRepo.addContent(entryPath, commitMess);
     ide.open(ws);
   }
 
   @AfterClass
   public void deleteRepo() throws IOException {
-    gitHubRepository.delete();
+    testRepo.delete();
   }
 
   @Test
@@ -126,8 +117,7 @@ public class GitPullConflictTest {
     String pathTextFile = String.format("%s/%s", PROJECT_NAME, textFileChange);
 
     projectExplorer.waitProjectExplorer();
-    String repoUrl = String.format("https://github.com/%s/%s.git", gitHubUsername, REPO_NAME);
-    git.importJavaApp(repoUrl, PROJECT_NAME, MAVEN);
+    git.importJavaApp(testRepo.getHtmlUrl(), PROJECT_NAME, MAVEN);
 
     // change files in the test repo on GitHub
     changeContentOnGithubSide(
@@ -161,9 +151,7 @@ public class GitPullConflictTest {
   }
 
   private void changeContentOnGithubSide(String pathToContent, String content) throws IOException {
-    gitHubRepository
-        .getFileContent(String.format("/%s", pathToContent))
-        .update(content, "add " + content);
+    testRepo.getFileContent(String.format("/%s", pathToContent)).update(content, "add " + content);
   }
 
   private void performPull() {

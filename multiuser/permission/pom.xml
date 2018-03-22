@@ -29,5 +29,6 @@
         <module>che-multiuser-permission-system</module>
         <module>che-multiuser-permission-installer</module>
         <module>che-multiuser-permission-resource</module>
+        <module>che-multiuser-permission-logger</module>
     </modules>
 </project>

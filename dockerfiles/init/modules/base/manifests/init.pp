@@ -27,5 +27,4 @@ class base {
   include traefik
   include postgres
   include keycloak
-  include openshift
 }

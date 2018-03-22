@@ -15,6 +15,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ACTIVE_LINES_XPATH;
@@ -1324,7 +1325,8 @@ public class CodenvyEditor {
    * @param position number of line where breakpoint should be placed
    */
   public void waitActiveBreakpoint(int position) {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(format(DEBUGGER_BREAK_POINT_ACTIVE, position)));
+    seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format(DEBUGGER_BREAK_POINT_ACTIVE, position)), LOADER_TIMEOUT_SEC);
   }
 
   /**
@@ -1334,7 +1336,7 @@ public class CodenvyEditor {
    */
   public void waitInactiveBreakpoint(int position) {
     seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(DEBUGGER_BREAK_POINT_INACTIVE, position)));
+        By.xpath(format(DEBUGGER_BREAK_POINT_INACTIVE, position)), LOADER_TIMEOUT_SEC);
   }
 
   /**
@@ -1347,8 +1349,8 @@ public class CodenvyEditor {
   public void waitConditionalBreakpoint(int lineNumber, boolean activeState) {
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(
-            format(
-                DEBUGGER_BREAKPOINT_CONDITION, activeState ? "active" : "inactive", lineNumber)));
+            format(DEBUGGER_BREAKPOINT_CONDITION, activeState ? "active" : "inactive", lineNumber)),
+        LOADER_TIMEOUT_SEC);
   }
 
   /**
@@ -1359,7 +1361,7 @@ public class CodenvyEditor {
    */
   public void waitDisabledBreakpoint(int lineNumber) {
     seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(DEBUGGER_BREAKPOINT_DISABLED, lineNumber)));
+        By.xpath(format(DEBUGGER_BREAKPOINT_DISABLED, lineNumber)), LOADER_TIMEOUT_SEC);
   }
 
   /** Waits until current editor's tab is without visible text. */
