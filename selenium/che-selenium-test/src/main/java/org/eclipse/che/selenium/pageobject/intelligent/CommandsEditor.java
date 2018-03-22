@@ -41,7 +41,10 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
-/** @author Ihor Okhrimenko */
+/**
+ * @author Ihor Okhrimenko
+ * @author Aleksandr Shmaraiev
+ */
 @Singleton
 public class CommandsEditor {
   private final CodenvyEditor editor;
@@ -424,24 +427,24 @@ public class CommandsEditor {
   }
 
   public void selectMacroCommand(String item) {
-    waitVisibilityAndGetMacrosCommand(item).click();
+    waitVisibilityAndGetMacro(item).click();
 
-    waitMacrosCommandIsSelected(item);
+    waitMacroCommandIsSelected(item);
   }
 
-  private void waitMacrosCommandIsSelected(String item) {
+  private void waitMacroCommandIsSelected(String item) {
     webDriverWaitFactory
         .get()
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> {
-                  String backgroundColor =
-                      waitVisibilityAndGetMacrosCommand(item).getCssValue("background-color");
-                  return backgroundColor.contains("rgba(215, 215, 215, 0.2)");
+                  return waitVisibilityAndGetMacro(item)
+                      .getCssValue("background-color")
+                      .contains("rgba(215, 215, 215, 0.2)");
                 });
   }
 
-  public WebElement waitVisibilityAndGetMacrosCommand(String item) {
+  public WebElement waitVisibilityAndGetMacro(String item) {
     return seleniumWebDriverHelper.waitVisibility(
         By.xpath(format(COMMAND_MACROS_FORM + "//div[text()='%s']/parent::td/parent::tr", item)),
         REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
