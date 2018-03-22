@@ -34,11 +34,11 @@ public class WorkspaceShare {
     String ADD_DEVELOPER_BUTTON_XPATH = "//che-button-primary[@che-button-title='Add Developer']";
     String BULK_SELECTION_ID = "share-workspace-bulk-selection";
     String FILTER_MEMBERS_BY_NAME_FIELD_XPATH = "//input[@ng-placeholder='Search']";
-    String MEMBER_ITEM_XPATH = "//div[@id='member-email-%s']";
-    String MEMBER_NAME_XPATH = MEMBER_ITEM_XPATH + "//span[@name='member-email']";
-    String MEMBER_CHECKBOX_XPATH = MEMBER_ITEM_XPATH + "//md-checkbox";
-    String MEMBER_PERMISSIONS_XPATH = MEMBER_ITEM_XPATH + "//span[@name='member-permissions']";;
-    String REMOVE_MEMBER_ICON_XPATH = MEMBER_ITEM_XPATH + "//div[@name='remove-member']";
+    String MEMBER_ITEM_XPATH_PATTERN = "//div[@id='member-email-%s']";
+    String MEMBER_NAME_XPATH = MEMBER_ITEM_XPATH_PATTERN + "//span[@data-user-email]";
+    String MEMBER_CHECKBOX_XPATH = MEMBER_ITEM_XPATH_PATTERN + "//md-checkbox";
+    String MEMBER_PERMISSIONS_XPATH = MEMBER_ITEM_XPATH_PATTERN + "//span[@data-user-permissions]";;
+    String REMOVE_MEMBER_ICON_XPATH = MEMBER_ITEM_XPATH_PATTERN + "//div[@data-user-action]";
     String INVITE_MEMBER_DIALOG_ID = "add-members-dialog";
     String CLOSE_DIALOG_BUTTON_NAME_ID = "close-dialog-button";
     String SELECT_ALL_MEMBERS_BY_BULK_DIALOG_XPATH = "//md-checkbox[@aria-label='Member list']";

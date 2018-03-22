@@ -20,16 +20,16 @@
            class="che-list-item-name">
         <span class="che-xs-header noselect" hide-gt-xs>Email</span>
         <span><img class="user-face" gravatar-src="userItemController.user.email"></span>
-        <span class="user-email che-hover " name="member-email">{{userItemController.user.email}}</span>
+        <span class="user-email che-hover " data-user-email="{{userItemController.user.email}}">{{userItemController.user.email}}</span>
       </div>
       <div flex-gt-xs="35">
         <span class="che-xs-header noselect" hide-gt-xs>Permissions</span>
-        <span class="user-permissions" name="member-permissions">{{userItemController.getUserActions()}}</span>
+        <span class="user-permissions" data-user-permissions="{{userItemController.getUserActions()}}">{{userItemController.getUserActions()}}</span>
       </div>
       <div flex-gt-xs="25">
         <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
                   <span class="che-list-actions">
-                    <div ng-click="userItemController.removeUser();" uib-tooltip="Remove member" name="remove-member">
+                    <div ng-click="userItemController.removeUser();" uib-tooltip="Remove member" data-user-action="remove-member">
                       <span class="material-design icon-ic_remove_circle_outline_24px"></span>
                     </div>
                   </span>
