@@ -50,7 +50,7 @@ public class CheckStoppingWsByTimeoutTest {
     ide.open(testWorkspace);
     projectExplorer.waitProjectExplorer();
     // We should invoke delay without any action for triggering workspace activity checker
-    sleepQuietly(getCommonTimeout(), MILLISECONDS);
+    sleepQuietly(getCommonTimeoutInMillisec(), MILLISECONDS);
   }
 
   @Test
@@ -66,7 +66,7 @@ public class CheckStoppingWsByTimeoutTest {
     toastLoader.waitStartButtonInToastLoader();
   }
 
-  private int getCommonTimeout() {
+  private int getCommonTimeoutInMillisec() {
     return cheWorkspaceAgentDevInactiveStopTimeoutMilliseconds
         + TOASTLOADER_WIDGET_LATENCY_TIMEOUT_IN_MILLISEC
         + cheWorkspaceActivityCheckSchedulerPeriodInSeconds * 1000;
