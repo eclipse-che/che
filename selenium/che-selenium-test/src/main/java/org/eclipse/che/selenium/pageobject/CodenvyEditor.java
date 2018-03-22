@@ -839,7 +839,7 @@ public class CodenvyEditor {
    *
    * @param item item in the autocomplete proposal container.
    */
-  public void selectItemIntoAutocompleteAndPasteByDoubleClick(String item) {
+  public void selectItemIntoAutocompleteAndPerformDoubleClick(String item) {
     selectAutocompleteProposal(item);
 
     seleniumWebDriverHelper.waitVisibility(By.xpath(format(HIGHLIGHT_ITEM_PATTERN, item)));
@@ -1155,8 +1155,9 @@ public class CodenvyEditor {
             .waitVisibility(By.xpath(format(TAB_FILE_NAME_XPATH + "/parent::div", fileName)))
             .getAttribute("focused");
   }
+
   /**
-   * Waits until editor's tab with specified {@code nameOfFile} is not present.
+   * Waits until editor's tab with specified {@code nameOfFile} is not presented.
    *
    * @param nameOfFile title of editor's tab which should be checked
    */
