@@ -70,14 +70,9 @@ public class WorkspaceActivityDaoTest {
 
     for (int i = 0; i < COUNT; i++) {
       accounts[i] = new AccountImpl("accountId" + i, "accountName" + i, "test");
-    }
-
-    for (int i = 0; i < COUNT; i++) {
       // 2 workspaces share 1 namespace
       workspaces[i] = createWorkspace("ws" + i, accounts[i / 2], "name-" + i);
-    }
 
-    for (int i = 0; i < COUNT; i++) {
       expirations[i] = new WorkspaceExpiration("ws" + i, (i + 1) * 1_000_000);
     }
 
