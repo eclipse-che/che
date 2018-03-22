@@ -8,16 +8,22 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che;
+package org.eclipse.che.api.logger.shared.dto;
 
-import com.google.inject.servlet.ServletModule;
-import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.dto.shared.DTO;
 
-@DynaModule
-public class DashboardModule extends ServletModule {
-  @Override
-  protected void configureServlets() {
-    filter("/api", "/api/*").through(ApiAccessRejectionFilter.class);
-    filter("/*").through(DashboardRedirectionFilter.class);
-  }
+@DTO
+public interface LoggerDto {
+
+  public String getName();
+
+  public void setName(String name);
+
+  public LoggerDto withName(String name);
+
+  public String getLevel();
+
+  public void setLevel(String level);
+
+  public LoggerDto withLevel(String level);
 }
