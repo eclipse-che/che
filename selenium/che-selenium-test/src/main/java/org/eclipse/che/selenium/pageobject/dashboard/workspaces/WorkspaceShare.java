@@ -21,23 +21,21 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
 public class WorkspaceShare {
-  private final SeleniumWebDriver seleniumWebDriver;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
   public WorkspaceShare(
       SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
-    this.seleniumWebDriver = seleniumWebDriver;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
   private interface Locators {
-    String ADD_DEVELOPER_BTN_XPATH = "//che-button-primary[@che-button-title='Add Developer']";
+    String ADD_DEVELOPER_BUTTON_XPATH = "//che-button-primary[@che-button-title='Add Developer']";
     String BULK_SELECTION_ID = "share-workspace-bulk-selection";
     String FILTER_MEMBERS_BY_NAME_FIELD_XPATH = "//input[@ng-placeholder='Search']";
-    String MEMBER_ITEM_XPATH = "//div[@id='member-name-%s']";
-    String MEMBER_NAME_XPATH = MEMBER_ITEM_XPATH + "//span[@name='member-name']";
+    String MEMBER_ITEM_XPATH = "//div[@id='member-email-%s']";
+    String MEMBER_NAME_XPATH = MEMBER_ITEM_XPATH + "//span[@name='member-email']";
     String MEMBER_CHECKBOX_XPATH = MEMBER_ITEM_XPATH + "//md-checkbox";
     String MEMBER_PERMISSIONS_XPATH = MEMBER_ITEM_XPATH + "//span[@name='member-permissions']";;
     String REMOVE_MEMBER_ICON_XPATH = MEMBER_ITEM_XPATH + "//div[@name='remove-member']";
@@ -49,18 +47,18 @@ public class WorkspaceShare {
   }
 
   @FindBy(xpath = Locators.FILTER_MEMBERS_BY_NAME_FIELD_XPATH)
-  WebElement filterMembers;
+  WebElement filterMembersField;
 
   @FindBy(id = Locators.BULK_SELECTION_ID)
   WebElement bulkSelection;
 
-  public void clickOnBulk() {
+  public void clickOnBulkSelection() {
     seleniumWebDriverHelper.waitAndClick(bulkSelection);
   }
 
-  public void typeToSearchInput(String value) {
-    filterMembers.clear();
-    filterMembers.sendKeys(value);
+  public void filterMembers(String value) {
+    filterMembersField.clear();
+    filterMembersField.sendKeys(value);
   }
 
   public void waitMemberNameInShareList(String name) {
@@ -72,7 +70,7 @@ public class WorkspaceShare {
   }
 
   public void clickOnAddDeveloperButton() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.ADD_DEVELOPER_BTN_XPATH));
+    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.ADD_DEVELOPER_BUTTON_XPATH));
   }
 
   public String getMemberPermissions(String name) {

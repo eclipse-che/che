@@ -18,7 +18,6 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -34,7 +33,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.MULTIUSER})
+@Test
 public class ShareWorkspaceTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
@@ -79,9 +78,13 @@ public class ShareWorkspaceTest {
 
   @Test
   public void checkShareWorkspaceTab() {
+    // check workspace owner permissions
     workspaceShare.waitMemberNameInShareList(systemAdminName);
     assertEquals(workspaceShare.getMemberPermissions(systemAdminName), ADMIN_PERMISSIONS);
+  }
 
+  @Test
+  public void checkMembersSelectingByCheckbox() {
     // check selecting member by checkbox
     workspaceShare.clickOnMemberCheckbox(systemAdminName);
     assertTrue(workspaceShare.isMemberCheckedInList(systemAdminName));
@@ -89,24 +92,24 @@ public class ShareWorkspaceTest {
     assertFalse(workspaceShare.isMemberCheckedInList(systemAdminName));
 
     // check selecting members by Bulk
-    workspaceShare.clickOnBulk();
+    workspaceShare.clickOnBulkSelection();
     assertTrue(workspaceShare.isMemberCheckedInList(systemAdminName));
-    workspaceShare.clickOnBulk();
+    workspaceShare.clickOnBulkSelection();
     assertFalse(workspaceShare.isMemberCheckedInList(systemAdminName));
   }
 
   @Test
   public void checkMembersFiltering() {
     // filter members by a full name
-    workspaceShare.typeToSearchInput(systemAdminName);
+    workspaceShare.filterMembers(systemAdminName);
     workspaceShare.waitMemberNameInShareList(systemAdminName);
 
     // filter members by a part name
-    workspaceShare.typeToSearchInput(systemAdminName.substring(systemAdminName.length() / 2));
+    workspaceShare.filterMembers(systemAdminName.substring(systemAdminName.length() / 2));
     workspaceShare.waitMemberNameInShareList(systemAdminName);
 
     // filter members by a nonexistent name
-    workspaceShare.typeToSearchInput(NameGenerator.generate("", 8));
+    workspaceShare.filterMembers(NameGenerator.generate("", 8));
     workspaceShare.waitMemberNameNotExistsInShareList(systemAdminName);
   }
 
