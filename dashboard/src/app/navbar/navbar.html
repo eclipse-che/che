@@ -98,7 +98,8 @@
             <span>Administration</span>
           </div>
           <md-list layout="column">
-            <md-list-item flex class="navbar-subsection-item"
+            <md-list-item ng-hide="navbarController.isKeycloackPresent"
+                          flex class="navbar-subsection-item"
                           ng-if="navbarController.userServices.hasAdminUserService">
               <md-button nav-bar-selected flex che-reload-href
                          href="{{navbarController.menuItemUrl.usermanagement}}"
