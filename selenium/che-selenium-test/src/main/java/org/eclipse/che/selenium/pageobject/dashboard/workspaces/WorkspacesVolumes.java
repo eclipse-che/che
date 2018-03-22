@@ -34,13 +34,13 @@ public class WorkspacesVolumes {
 
   private interface Locators {
     String ADD_VOLUME_BUTTON = "//che-button-primary[@che-button-title='Add Volume']";
-    String VOLUME_ITEM_XPATH = "//div[@id='machine-volume-name-%s']";
-    String VOLUME_NAME_XPATH = VOLUME_ITEM_XPATH + "//span[@variable-name]";
-    String VOLUME_PATH_XPATH = VOLUME_ITEM_XPATH + "//span[@variable-value]";
-    String EDIT_VOLUME_BUTTON_XPATH = VOLUME_ITEM_XPATH + "//div[@edit-variable]";
-    String REMOVE_VOLUME_BUTTON_XPATH = VOLUME_ITEM_XPATH + "//div[@delete-variable]";
+    String VOLUME_ITEM_XPATH_PATTERN = "//div[@id='machine-volume-name-%s']";
+    String VOLUME_NAME_XPATH = VOLUME_ITEM_XPATH_PATTERN + "//span[@variable-name]";
+    String VOLUME_PATH_XPATH = VOLUME_ITEM_XPATH_PATTERN + "//span[@variable-value]";
+    String EDIT_VOLUME_BUTTON_XPATH = VOLUME_ITEM_XPATH_PATTERN + "//div[@edit-variable]";
+    String REMOVE_VOLUME_BUTTON_XPATH = VOLUME_ITEM_XPATH_PATTERN + "//div[@delete-variable]";
     String NEW_VOLUME_NAME_ID = "volume-name-input";
-    String NEW_VOLUME_PATH_XPATH = "//div/textarea[@id='volume-path-input' ]";
+    String NEW_VOLUME_PATH_XPATH = "//textarea[@name='deskpath']";
   }
 
   @FindBy(id = Locators.NEW_VOLUME_NAME_ID)
