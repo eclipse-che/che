@@ -14,6 +14,7 @@ package org.eclipse.che.ide.ext.java.client;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_PROJECT;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_STATUS_PANEL;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -42,6 +43,8 @@ import org.eclipse.che.ide.ext.java.client.action.ProjectClasspathAction;
 import org.eclipse.che.ide.ext.java.client.action.QuickDocumentationAction;
 import org.eclipse.che.ide.ext.java.client.action.QuickFixAction;
 import org.eclipse.che.ide.ext.java.client.action.UnmarkDirAsSourceAction;
+import org.eclipse.che.ide.ext.java.client.progressor.ProgressMessagesHandler;
+import org.eclipse.che.ide.ext.java.client.progressor.background.ProgressMonitorAction;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.CutJavaSourceAction;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.MoveAction;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.RenameRefactoringAction;
@@ -90,6 +93,8 @@ public class JavaExtension {
       MarkDirAsSourceAction markDirAsSourceAction,
       UnmarkDirAsSourceAction unmarkDirAsSourceAction,
       MarkDirectoryAsGroup markDirectoryAsGroup,
+      ProgressMonitorAction progressMonitorAction,
+      ProgressMessagesHandler progressMessagesHandler,
       OrganizeImportsAction organizeImportsAction,
       RenameRefactoringAction renameRefactoringAction,
       QuickDocumentationAction quickDocumentationAction,
@@ -160,6 +165,11 @@ public class JavaExtension {
     mainContextMenuGroup.addSeparator();
     mainContextMenuGroup.add(markDirectoryAsGroup);
     mainContextMenuGroup.addSeparator();
+
+    // add resolver widget on right part of bottom panel
+    final DefaultActionGroup rightStatusPanelGroup =
+        (DefaultActionGroup) actionManager.getAction(GROUP_RIGHT_STATUS_PANEL);
+    rightStatusPanelGroup.add(progressMonitorAction);
 
     DefaultActionGroup editorContextMenuGroup =
         (DefaultActionGroup) actionManager.getAction(IdeActions.GROUP_EDITOR_CONTEXT_MENU);
