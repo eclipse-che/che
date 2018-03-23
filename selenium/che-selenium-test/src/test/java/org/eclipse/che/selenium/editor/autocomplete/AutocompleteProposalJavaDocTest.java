@@ -10,8 +10,6 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
-import static org.testng.Assert.fail;
-
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
@@ -25,7 +23,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
@@ -87,7 +84,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.waitActive();
     loader.waitOnClosed();
     editor.goToCursorPositionVisible(30, 30);
-    launchAutocompleteAndWaitContainer();
+    editor.launchAutocompleteAndWaitContainer();
     editor.selectAutocompleteProposal("concat(String part1, String part2, char divider) : String");
 
     // then
@@ -206,38 +203,5 @@ public class AutocompleteProposalJavaDocTest {
             + "<dl><dt>Parameters:</dt>"
             + "<dd><b>msg</b>"
             + "  the message string to be logged</dd></dl>.*");
-  }
-
-  private void launchAutocompleteAndWaitContainer() throws Exception {
-    try {
-      editor.launchAutocompleteAndWaitContainer();
-    } catch (TimeoutException ex) {
-      logExternalLibraries();
-      logProjectTypeChecking();
-      logProjectLanguageChecking();
-
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7161", ex);
-    }
-  }
-
-  private void logExternalLibraries() throws Exception {
-    testProjectServiceClient
-        .getExternalLibraries(workspace.getId(), PROJECT)
-        .forEach(library -> LOG.info("project external library:  {}", library));
-  }
-
-  private void logProjectTypeChecking() throws Exception {
-    LOG.info(
-        "Project type of the {} project is \"maven\" - {}",
-        PROJECT,
-        testProjectServiceClient.checkProjectType(workspace.getId(), PROJECT, "maven"));
-  }
-
-  private void logProjectLanguageChecking() throws Exception {
-    LOG.info(
-        "Project language of the {} project is \"java\" - {}",
-        PROJECT,
-        testProjectServiceClient.checkProjectLanguage(workspace.getId(), PROJECT, "java"));
   }
 }
