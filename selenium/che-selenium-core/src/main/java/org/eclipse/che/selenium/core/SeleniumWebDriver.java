@@ -12,7 +12,7 @@ package org.eclipse.che.selenium.core;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
@@ -325,12 +325,13 @@ public class SeleniumWebDriver
   public void switchFromDashboardIframeToIde(int timeout) {
     wait(timeout).until(visibilityOfElementLocated(By.id("ide-application-iframe")));
 
-    wait(ATTACHING_ELEM_TO_DOM_SEC)
+    wait(LOADER_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
                 driver ->
                     (((JavascriptExecutor) driver)
-                            .executeScript("return angular.element('body').scope().showIDE"))
+                            .executeScript(
+                                "return angular.element('body').scope().gwt-debug-projectTree"))
                         .toString()
                         .equals("true"));
 
