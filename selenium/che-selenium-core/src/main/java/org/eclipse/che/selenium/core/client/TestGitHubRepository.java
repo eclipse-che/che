@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.kohsuke.github.GHContent;
+import org.kohsuke.github.GHRef;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
@@ -76,6 +77,17 @@ public class TestGitHubRepository {
 
   public String getName() {
     return repoName;
+  }
+
+  /**
+   * Create reference to branch, tag, ... from master branch.
+   *
+   * @param refName
+   * @throws IOException
+   */
+  public GHRef addRefFromMaster(String refName) throws IOException {
+    GHRef master = ghRepository.getRef("heads/master");
+    return ghRepository.createRef("refs/heads/" + refName, master.getObject().getSha());
   }
 
   public void addContent(Path localRepo, String commitMessage) throws IOException {
