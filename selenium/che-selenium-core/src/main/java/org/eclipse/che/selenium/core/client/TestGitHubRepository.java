@@ -51,16 +51,15 @@ public class TestGitHubRepository {
 
   private GHRepository create() throws IOException, InterruptedException {
     GHRepository repo = gitHub.createRepository(repoName).create();
-    ensureRepositoryCreated(repo);
+    ensureRepositoryCreated(repo, System.currentTimeMillis());
 
     LOG.info("GitHub repo {} has been created", repo.getHtmlUrl());
     return repo;
   }
 
-  private void ensureRepositoryCreated(GHRepository repo) throws IOException {
+  private void ensureRepositoryCreated(GHRepository repo, long startCreationTimeInMillisec)
+      throws IOException {
     Throwable lastIOException = null;
-
-    long startTime = System.currentTimeMillis();
     for (int i = 0; i < REPO_CREATION_ATTEMPTS; i++) {
       try {
         gitHub.getRepository(repo.getFullName());
@@ -72,10 +71,13 @@ public class TestGitHubRepository {
       }
     }
 
+    long durationOfRepoCreationInSec =
+        (System.currentTimeMillis() - startCreationTimeInMillisec) / 1000;
+
     throw new IOException(
         format(
             "GitHub repo %s hasn't been created in %s seconds",
-            repo.getHtmlUrl(), (System.currentTimeMillis() - startTime) / 1000),
+            repo.getHtmlUrl(), durationOfRepoCreationInSec),
         lastIOException);
   }
 
@@ -106,7 +108,7 @@ public class TestGitHubRepository {
     } catch (GHFileNotFoundException e) {
       // try to create content once again
       LOG.warn(
-          "Error of creation of {}. Is trying to create it once again...",
+          "Error of creation of {} occurred. Is trying to create it once again...",
           ghRepo.getHtmlUrl() + "/" + relativePath);
       sleepQuietly(GITHUB_OPERATION_TIMEOUT_SEC);
       ghRepo.createContent(contentBytes, commitMessage, relativePath);
