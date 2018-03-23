@@ -152,7 +152,6 @@ objects:
     resources:
       requests:
         storage: 1Gi
-  status: {}
 
 parameters:
 - name: PROTOCOL

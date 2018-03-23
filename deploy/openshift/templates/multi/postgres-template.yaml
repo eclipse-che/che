@@ -113,8 +113,6 @@ objects:
     resources:
       requests:
         storage: 1Gi
-  status: {}
-
 parameters:
 - name: CHE_VERSION
   displayName: Eclipse Che version

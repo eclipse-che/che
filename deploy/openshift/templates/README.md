@@ -57,17 +57,6 @@ Thus, to persist user settings, stacks, factories, workspaces and other objects,
 By default, Che SA is used to create workspace objects in the same namespace with Che server.
 This is configurable - you may provide login and password or token, and set `CHE_INFRA_OPENSHIFT_PROJECT` to an empty string.
 
-## Upgrade from http to https
-
-Self-signed certificates aren't acceptable.
-
-1. Update Che deployment with `PROTOCOL=https, WS_PROTOCOL=wss, TLS=true`
-2. Manually edit or recreate routes for Che and Keycloak `oc apply -f https`
-3. Once done, go to `https://keycloak-${NAMESPACE}.${ROUTING_SUFFIX}`, log in to admin console.
-Default credentials are `admin:admin`.
-Go to Clients, `che-public` client and edit **Valid Redirect URIs** and **Web Origins** URLs so that they use **https** protocol.
-You do not need to do that if you initially deploy Che with https support.
-
 ## Deploy single user Che (http)
 
 ```
@@ -107,6 +96,8 @@ oc set volume dc/che --add -m /data --name=che-data-volume --claim-name=che-data
 ## Deploy multi user Che with bundled Keycloak and Postgres (https)
 
 ```
+oc new-project che
+
 oc new-app -f multi/postgres-template.yaml; \
 oc new-app -f multi/keycloak-template.yaml -p ROUTING_SUFFIX=$(minishift ip).nip.io -p PROTOCOL=https; \
 oc apply -f pvc/che-server-pvc.yaml; \
@@ -171,6 +162,7 @@ oc apply -f https
 If you already have own identity provider and a database ready to work with Che server, you may deploy Che server alone:
 
 ```
+oc new-project che
 oc new-app -f che-server-template.yaml -p ROUTING_SUFFIX=$(minishift ip).nip.io \
 	-p CHE_MULTIUSER=true
 	-p CHE_KEYCLOAK_AUTH__SERVER__URL=$yourURL
@@ -180,3 +172,14 @@ oc new-app -f che-server-template.yaml -p ROUTING_SUFFIX=$(minishift ip).nip.io 
 	-p TLS=true; \
 oc apply -f https
 ```
+
+## Upgrade from http to https
+
+Self-signed certificates aren't acceptable.
+
+1. Update Che deployment with `PROTOCOL=https, WS_PROTOCOL=wss, TLS=true`
+2. Manually edit or recreate routes for Che and Keycloak `oc apply -f https`
+3. Once done, go to `https://keycloak-${NAMESPACE}.${ROUTING_SUFFIX}`, log in to admin console.
+Default credentials are `admin:admin`.
+Go to Clients, `che-public` client and edit **Valid Redirect URIs** and **Web Origins** URLs so that they use **https** protocol.
+You do not need to do that if you initially deploy Che with https support.
