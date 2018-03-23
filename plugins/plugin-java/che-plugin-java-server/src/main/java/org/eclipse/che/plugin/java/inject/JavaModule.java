@@ -35,7 +35,7 @@ public class JavaModule extends AbstractModule {
     bind(ProjectsListener.class).asEagerSingleton();
     Multibinder.newSetBinder(binder(), LanguageServerLauncher.class)
         .addBinding()
-        .toInstance(new JavaLanguageServerLauncher());
+        .to(JavaLanguageServerLauncher.class);
     LanguageDescription javaSource = new LanguageDescription();
     javaSource.setFileExtensions(asList("java"));
     javaSource.setLanguageId(JAVA_SOURCE);
