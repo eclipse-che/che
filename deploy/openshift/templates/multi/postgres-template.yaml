@@ -83,7 +83,6 @@ objects:
           persistentVolumeClaim:
             claimName: postgres-data
     test: false
-  status: {}
 - apiVersion: v1
   kind: Service
   metadata:

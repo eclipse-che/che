@@ -15,7 +15,6 @@ objects:
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
-    creationTimestamp: null
     labels:
       io.kompose.service: keycloak
     name: keycloak
@@ -27,7 +26,6 @@ objects:
       type: Recreate
     template:
       metadata:
-        creationTimestamp: null
         labels:
           io.kompose.service: keycloak
       spec:
@@ -100,8 +98,6 @@ objects:
           persistentVolumeClaim:
             claimName: keycloak-log
     test: false
-  status: {}
-
 - apiVersion: v1
   kind: Service
   metadata:
@@ -138,8 +134,6 @@ objects:
     resources:
       requests:
         storage: 1Gi
-  status: {}
-
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
