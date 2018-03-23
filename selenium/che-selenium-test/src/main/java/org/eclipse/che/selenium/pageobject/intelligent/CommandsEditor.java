@@ -10,14 +10,18 @@
  */
 package org.eclipse.che.selenium.pageobject.intelligent;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ACTIVE_EDITOR_ENTRY_POINT;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ACTIVE_TAB_UNSAVED_FILE_NAME;
+import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsLocators.COMMAND_MACROS_FORM;
+import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsLocators.COMMAND_MACROS_INPUT_FIELD;
+import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsLocators.DESCRIPTION_MACROS;
+import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsLocators.NAME_IN_GOAL_DROP_DOWN;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.DELETE;
-import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
+import static org.openqa.selenium.Keys.ENTER;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -32,24 +36,24 @@ import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.eclipse.che.selenium.pageobject.WebDriverWaitFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-/** @author Aleksandr Shmaraiev */
+/**
+ * @author Ihor Okhrimenko
+ * @author Aleksandr Shmaraiev
+ */
 @Singleton
 public class CommandsEditor {
-
-  private final WebDriverWait redrawWait;
-  private final WebDriverWait elemDriverWait;
   private final CodenvyEditor editor;
   private final ActionsFactory actionsFactory;
   private final SeleniumWebDriver seleniumWebDriver;
   private final AskForValueDialog askForValueDialog;
   private final Loader loader;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final WebDriverWaitFactory webDriverWaitFactory;
 
   @Inject
   public CommandsEditor(
@@ -61,13 +65,14 @@ public class CommandsEditor {
       SeleniumWebDriverHelper seleniumWebDriverHelper,
       WebDriverWaitFactory webDriverWaitFactory,
       CodenvyEditor editor) {
-    redrawWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
-    elemDriverWait = new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC);
     this.editor = editor;
     this.actionsFactory = actionsFactory;
     this.seleniumWebDriver = seleniumWebDriver;
     this.askForValueDialog = askForValueDialog;
     this.loader = loader;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+    this.webDriverWaitFactory = webDriverWaitFactory;
+
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -90,7 +95,7 @@ public class CommandsEditor {
   }
 
   /** Class introduce Xpath locators for DOM navigation inside Commands Editor widget */
-  private static final class CommandsLocators {
+  public static final class CommandsLocators {
     static final String RUN_BUTTON =
         ACTIVE_EDITOR_ENTRY_POINT + "//button[@id='gwt-debug-command-editor-button-run']";
 
@@ -144,10 +149,10 @@ public class CommandsEditor {
   @FindBy(xpath = CommandsLocators.GOAL_DROP_DOWN)
   WebElement goalDropDown;
 
-  @FindBy(xpath = CommandsLocators.COMMAND_MACROS_FORM)
+  @FindBy(xpath = COMMAND_MACROS_FORM)
   WebElement macrosContainer;
 
-  @FindBy(xpath = CommandsLocators.COMMAND_MACROS_INPUT_FIELD)
+  @FindBy(xpath = COMMAND_MACROS_INPUT_FIELD)
   WebElement macrosInputField;
 
   /** Waits until current editor's tab is ready to work. */
@@ -320,15 +325,15 @@ public class CommandsEditor {
   }
 
   public void clickOnRunButton() {
-    redrawWait.until(visibilityOf(runButton)).click();
+    seleniumWebDriverHelper.waitAndClick(runButton, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   public void clickOnCancelCommandEditorButton() {
-    redrawWait.until(visibilityOf(cancelCommandEditorButton)).click();
+    seleniumWebDriverHelper.waitAndClick(cancelCommandEditorButton, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   public void clickOnSaveButtonInTheEditCommand() {
-    redrawWait.until(visibilityOf(saveButtonInCommandEditor)).click();
+    seleniumWebDriverHelper.waitAndClick(saveButtonInCommandEditor, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /**
@@ -337,83 +342,73 @@ public class CommandsEditor {
    * @param nameCommand name of tab command
    */
   public void waitTabCommandWithUnsavedStatus(String nameCommand) {
-    elemDriverWait.until(
-        visibilityOfElementLocated(
-            By.xpath(String.format(Locators.ACTIVE_TAB_UNSAVED_FILE_NAME, nameCommand))));
+    seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format(ACTIVE_TAB_UNSAVED_FILE_NAME, nameCommand)), ELEMENT_TIMEOUT_SEC);
   }
 
   public void typeTextIntoNameCommandField(String nameCommand) {
-    redrawWait.until(visibilityOf(nameCommandField)).clear();
-    redrawWait.until(visibilityOf(nameCommandField)).sendKeys(nameCommand);
+    seleniumWebDriverHelper.setValue(nameCommandField, nameCommand);
   }
 
-  public void waitTextIntoNameCommandField(String expText) {
-    redrawWait.until(
-        (ExpectedCondition<Boolean>)
-            webDriver -> nameCommandField.getAttribute("value").equals(expText));
+  public void waitTextIntoNameCommandField(String expectedText) {
+    seleniumWebDriverHelper.waitValue(
+        nameCommandField, expectedText, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
-  public void waitTextIntoGoalField(String expText) {
-    redrawWait.until(
-        (ExpectedCondition<Boolean>) webDriver -> nameGoalField.getText().equals(expText));
+  public void waitTextIntoGoalField(String expectedText) {
+    seleniumWebDriverHelper.waitText(nameGoalField, expectedText, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   public void selectGoalNameIntoCommandEditor(String goalName) {
-    redrawWait.until(visibilityOf(iconDropDownGoal)).click();
-    redrawWait.until(visibilityOf(goalDropDown));
-    redrawWait
-        .until(
-            visibilityOfElementLocated(
-                By.xpath(String.format(CommandsLocators.NAME_IN_GOAL_DROP_DOWN, goalName))))
-        .click();
+    seleniumWebDriverHelper.waitAndClick(iconDropDownGoal, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    seleniumWebDriverHelper.waitVisibility(goalDropDown, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    seleniumWebDriverHelper.waitAndClick(By.xpath(format(NAME_IN_GOAL_DROP_DOWN, goalName)));
   }
 
   public void setFocusIntoTypeCommandsEditor(String commandsEditorType) {
-    redrawWait.until(visibilityOfElementLocated(By.xpath(commandsEditorType))).click();
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(commandsEditorType), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     editor.waitActive();
   }
 
-  public void waitTextIntoDescriptionMacrosForm(String expText) {
-    redrawWait.until(
-        visibilityOfElementLocated(
-            By.xpath(String.format(CommandsLocators.DESCRIPTION_MACROS, expText))));
+  public void waitTextIntoDescriptionMacrosForm(String expectedText) {
+    seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format(DESCRIPTION_MACROS, expectedText)), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   public void selectMacrosLinkInCommandsEditor(String macrosLinkType) {
-    redrawWait.until(visibilityOfElementLocated(By.xpath(macrosLinkType))).click();
+    seleniumWebDriverHelper.waitAndClick(By.xpath(macrosLinkType), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     waitCommandsMacrosIsOpen();
   }
 
   public void waitCommandsMacrosIsOpen() {
-    redrawWait.until(visibilityOfElementLocated(By.xpath(CommandsLocators.COMMAND_MACROS_FORM)));
+    seleniumWebDriverHelper.waitVisibility(
+        By.xpath(COMMAND_MACROS_FORM), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   public void waitCommandsMacrosIsClosed() {
-    redrawWait.until(invisibilityOfElementLocated(By.xpath(CommandsLocators.COMMAND_MACROS_FORM)));
+    seleniumWebDriverHelper.waitInvisibility(
+        By.xpath(COMMAND_MACROS_FORM), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   public void typeTextIntoSearchMacroField(String text) {
-    redrawWait
-        .until(visibilityOfElementLocated(By.xpath(CommandsLocators.COMMAND_MACROS_INPUT_FIELD)))
-        .click();
-    redrawWait
-        .until(visibilityOfElementLocated(By.xpath(CommandsLocators.COMMAND_MACROS_INPUT_FIELD)))
-        .clear();
-    redrawWait
-        .until(visibilityOfElementLocated(By.xpath(CommandsLocators.COMMAND_MACROS_INPUT_FIELD)))
-        .sendKeys(text);
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(COMMAND_MACROS_INPUT_FIELD), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+
+    seleniumWebDriverHelper.setValue(By.xpath(COMMAND_MACROS_INPUT_FIELD), text);
   }
 
-  public void waitTextIntoSearchMacroField(String expText) {
-    redrawWait.until(
-        (ExpectedCondition<Boolean>)
-            webDriver -> macrosInputField.getAttribute("value").equals(expText));
+  public void waitTextIntoSearchMacroField(String expectedText) {
+    seleniumWebDriverHelper.waitValue(
+        macrosInputField, expectedText, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
-  public void waitTextIntoMacrosContainer(final String expText) {
-    redrawWait.until(
-        (ExpectedCondition<Boolean>)
-            (WebDriver webDriver) -> getAllVisibleTextFromMacrosContainer().contains(expText));
+  public void waitTextIntoMacrosContainer(final String expectedText) {
+    webDriverWaitFactory
+        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver -> getAllVisibleTextFromMacrosContainer().contains(expectedText));
   }
 
   public String getAllVisibleTextFromMacrosContainer() {
@@ -423,33 +418,36 @@ public class CommandsEditor {
 
   public void enterMacroCommandByEnter(String item) {
     selectMacroCommand(item);
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.ENTER.toString()).perform();
+    seleniumWebDriverHelper.sendKeys(ENTER.toString());
   }
 
   public void enterMacroCommandByDoubleClick(String item) {
     selectMacroCommand(item);
-    actionsFactory.createAction(seleniumWebDriver).doubleClick().perform();
+    seleniumWebDriverHelper.doubleClick();
   }
 
   public void selectMacroCommand(String item) {
-    String locator =
-        String.format(CommandsLocators.COMMAND_MACROS_FORM + "//div[text()='%s']", item);
-    redrawWait.until(visibilityOfElementLocated(By.xpath(locator))).click();
-    WebElement highlightEItem = seleniumWebDriver.findElement(By.xpath(locator));
-    redrawWait
-        .until(visibilityOf(highlightEItem))
-        .getCssValue("background-color")
-        .contains("rgb(37, 108, 159)");
+    waitVisibilityAndGetMacro(item).click();
+
+    waitMacroCommandIsSelected(item);
   }
 
-  public void waitMacroCommandIsSelected(String item) {
-    String locator =
-        String.format(CommandsLocators.COMMAND_MACROS_FORM + "//div[text()='%s']", item);
-    WebElement highlightEItem = seleniumWebDriver.findElement(By.xpath(locator));
-    redrawWait
-        .until(visibilityOf(highlightEItem))
-        .getCssValue("background-color")
-        .contains("rgb(37, 108, 159)");
+  private void waitMacroCommandIsSelected(String item) {
+    webDriverWaitFactory
+        .get()
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> {
+                  return waitVisibilityAndGetMacro(item)
+                      .getCssValue("background-color")
+                      .contains("rgba(215, 215, 215, 0.2)");
+                });
+  }
+
+  public WebElement waitVisibilityAndGetMacro(String item) {
+    return seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format(COMMAND_MACROS_FORM + "//div[text()='%s']/parent::td/parent::tr", item)),
+        REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   public void deleteAllContent() {
@@ -464,7 +462,7 @@ public class CommandsEditor {
 
   public void setCursorToLine(int positionLine) {
     loader.waitOnClosed();
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(Keys.chord(CONTROL, "l")).perform();
+    seleniumWebDriverHelper.sendKeys(Keys.chord(CONTROL, "l"));
     askForValueDialog.waitFormToOpen();
     loader.waitOnClosed();
     askForValueDialog.typeAndWaitText(String.valueOf(positionLine));
