@@ -11,7 +11,6 @@
 package org.eclipse.che.plugin.maven.client;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_STATUS_PANEL;
 import static org.eclipse.che.plugin.maven.client.actions.MavenActionsConstants.MAVEN_GROUP_CONTEXT_MENU_ID;
 import static org.eclipse.che.plugin.maven.client.actions.MavenActionsConstants.MAVEN_GROUP_CONTEXT_MENU_NAME;
 
@@ -29,7 +28,6 @@ import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
 import org.eclipse.che.ide.ext.java.client.action.GetEffectivePomAction;
 import org.eclipse.che.ide.ext.java.client.action.ReimportMavenDependenciesAction;
-import org.eclipse.che.plugin.maven.client.comunnication.progressor.background.DependencyResolverAction;
 import org.eclipse.che.plugin.maven.client.editor.ClassFileSourcesDownloader;
 import org.eclipse.che.plugin.maven.client.project.MavenModelImporter;
 import org.eclipse.che.plugin.maven.client.project.ResolvingMavenProjectStateHolder;
@@ -75,7 +73,6 @@ public class MavenExtension {
   @Inject
   private void prepareActions(
       ActionManager actionManager,
-      DependencyResolverAction dependencyResolverAction,
       GetEffectivePomAction getEffectivePomAction,
       ReimportMavenDependenciesAction reimportMavenDependenciesAction) {
     // register actions
@@ -105,11 +102,6 @@ public class MavenExtension {
     // add actions in context menu
     mavenContextMenuGroup.add(reimportMavenDependenciesAction);
     mavenContextMenuGroup.addSeparator();
-
-    // add resolver widget on right part of bottom panel
-    final DefaultActionGroup rightStatusPanelGroup =
-        (DefaultActionGroup) actionManager.getAction(GROUP_RIGHT_STATUS_PANEL);
-    rightStatusPanelGroup.add(dependencyResolverAction);
   }
 
   @Inject
