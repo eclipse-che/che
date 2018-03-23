@@ -43,9 +43,9 @@ public class TestGitHubRepository {
 
   @Inject
   public TestGitHubRepository(
-          @Named("github.username") String gitHubUsername,
-          @Named("github.password") String gitHubPassword)
-          throws IOException, InterruptedException {
+      @Named("github.username") String gitHubUsername,
+      @Named("github.password") String gitHubPassword)
+      throws IOException, InterruptedException {
     gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
     ghRepo = create();
   }
@@ -59,7 +59,7 @@ public class TestGitHubRepository {
   }
 
   private void ensureRepositoryCreated(GHRepository repo, long startCreationTimeInMillisec)
-          throws IOException {
+      throws IOException {
     Throwable lastIOException = null;
     for (int i = 0; i < REPO_CREATION_ATTEMPTS; i++) {
       try {
@@ -73,13 +73,13 @@ public class TestGitHubRepository {
     }
 
     long durationOfRepoCreationInSec =
-            (System.currentTimeMillis() - startCreationTimeInMillisec) / 1000;
+        (System.currentTimeMillis() - startCreationTimeInMillisec) / 1000;
 
     throw new IOException(
-            format(
-                    "GitHub repo %s hasn't been created in %s seconds",
-                    repo.getHtmlUrl(), durationOfRepoCreationInSec),
-            lastIOException);
+        format(
+            "GitHub repo %s hasn't been created in %s seconds",
+            repo.getHtmlUrl(), durationOfRepoCreationInSec),
+        lastIOException);
   }
 
   public String getName() {
@@ -99,15 +99,15 @@ public class TestGitHubRepository {
 
   public void addContent(Path pathToRootContentDirectory) throws IOException {
     Files.walk(pathToRootContentDirectory)
-         .filter(Files::isRegularFile)
-         .forEach(
-                 pathToFile -> {
-                   try {
-                     createFile(pathToRootContentDirectory, pathToFile);
-                   } catch (IOException e) {
-                     throw new UncheckedIOException(e);
-                   }
-                 });
+        .filter(Files::isRegularFile)
+        .forEach(
+            pathToFile -> {
+              try {
+                createFile(pathToRootContentDirectory, pathToFile);
+              } catch (IOException e) {
+                throw new UncheckedIOException(e);
+              }
+            });
   }
 
   private void createFile(Path pathToRootContentDirectory, Path pathToFile) throws IOException {
@@ -120,8 +120,8 @@ public class TestGitHubRepository {
     } catch (GHFileNotFoundException e) {
       // try to create content once again
       LOG.warn(
-              "Error of creation of {} occurred. Is trying to create it once again...",
-              ghRepo.getHtmlUrl() + "/" + relativePath);
+          "Error of creation of {} occurred. Is trying to create it once again...",
+          ghRepo.getHtmlUrl() + "/" + relativePath);
       sleepQuietly(GITHUB_OPERATION_TIMEOUT_SEC);
       ghRepo.createContent(contentBytes, commitMessage, relativePath);
     }
