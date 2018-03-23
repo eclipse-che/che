@@ -19,4 +19,13 @@ public interface JavaLanguageClient {
    */
   @JsonNotification("language/status")
   void sendStatusReport(StatusReport report);
+
+  /**
+   * The actionable notification is sent from a server to a client to ask The show message
+   * notification is sent from a server to a client to ask the the client to display a particular
+   * message in the user interface, and possible client to display a particular message in the user
+   * interface.
+   */
+  @JsonNotification("language/progressReport")
+  void sendProgressReport(ProgressReport report);
 }

@@ -53,6 +53,10 @@ public final class Constants {
   public static final String UPDATE_PREFERENCES = "java/updatePreferences";
   public static final String RECOMPUTE_POM_DIAGNOSTICS = "java/recomputePomDiagnostics";
 
+  public static final String PROGRESS_REPORT_METHOD = "java/progressReport";
+  public static final String PROGRESS_OUTPUT_UNSUBSCRIBE = "progressOutput/unsubscribe";
+  public static final String PROGRESS_OUTPUT_SUBSCRIBE = "progressOutput/subscribe";
+
   private Constants() {
     throw new UnsupportedOperationException("Unused constructor.");
   }
