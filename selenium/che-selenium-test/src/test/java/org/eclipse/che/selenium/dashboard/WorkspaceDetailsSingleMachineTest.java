@@ -19,6 +19,8 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.OVERVIEW;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.PROJECTS;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.SERVERS;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.SSH;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.TabNames.VOLUMES;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -41,7 +43,10 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceMachine
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceServers;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceSsh;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspacesVolumes;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -82,6 +87,8 @@ public class WorkspaceDetailsSingleMachineTest {
   @Inject private WorkspaceOverview workspaceOverview;
   @Inject private TestWorkspace testWorkspace;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private WorkspaceSsh workspaceSsh;
+  @Inject private WorkspacesVolumes workspacesVolumes;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -198,6 +205,56 @@ public class WorkspaceDetailsSingleMachineTest {
     // check that project exists(workspace will restart)
     workspaceProjects.waitProjectIsPresent(WEB_JAVA_SPRING);
     workspaceProjects.waitProjectIsPresent(CONSOLE_JAVA_SIMPLE);
+  }
+
+  @Test
+  public void checkSshTab() {
+    workspaceDetails.selectTabInWorkspaceMenu(SSH);
+
+    // check ssh key exist
+    Assert.assertTrue(workspaceSsh.isPrivateKeyExists());
+    Assert.assertTrue(workspaceSsh.isPublicKeyExists());
+
+    // remove ssh key
+    workspaceSsh.clickOnRemoveDefaultSshKeyButton();
+    workspaceSsh.waitSshKeyNotExists();
+
+    // generate ssh key
+    workspaceSsh.clickOnGenerateButton();
+    Assert.assertTrue(workspaceSsh.isPrivateKeyExists());
+    Assert.assertTrue(workspaceSsh.isPublicKeyExists());
+  }
+
+  @Test
+  public void checkVolumesTab() {
+    String volumeName = "prj";
+    String volumePath = "/" + volumeName;
+    String renamedVolumeName = "project";
+    String renamedVolumePath = "/" + renamedVolumeName;
+
+    workspaceDetails.selectTabInWorkspaceMenu(VOLUMES);
+
+    // create volume
+    workspacesVolumes.clickOnAddVolumeButton();
+    workspacesVolumes.enterVolumeName(volumeName);
+    workspacesVolumes.enterVolumePath(volumePath);
+    workspaceDetails.clickOnAddButtonInDialogWindow();
+    assertTrue(workspacesVolumes.checkVolumeExists(volumeName, volumePath));
+    clickOnSaveButton();
+
+    // edit volume
+    workspacesVolumes.clickOnEditVolumeButton(volumeName);
+    workspacesVolumes.enterVolumeName(renamedVolumeName);
+    workspacesVolumes.enterVolumePath(renamedVolumePath);
+    workspaceDetails.clickOnUpdateButtonInDialogWindow();
+    assertTrue(workspacesVolumes.checkVolumeExists(renamedVolumeName, renamedVolumePath));
+    clickOnSaveButton();
+
+    // remove volume
+    workspacesVolumes.clickOnRemoveVolumeButton(renamedVolumeName);
+    workspaceDetails.clickOnDeleteButtonInDialogWindow();
+    workspacesVolumes.waitVolumeNotExists(renamedVolumeName);
+    clickOnSaveButton();
   }
 
   private void addNewProject(String projectName) {
