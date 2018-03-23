@@ -52,11 +52,14 @@ public class WorkspacesVolumes {
     seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.ADD_VOLUME_BUTTON));
   }
 
-  public void checkVolumeExists(String name, String path) {
-    seleniumWebDriverHelper
+  public Boolean checkVolumeExists(String name) {
+    return seleniumWebDriverHelper
         .waitVisibilityAndGetText(By.xpath(format(Locators.VOLUME_NAME_XPATH_PATTERN, name)))
         .equals(name);
-    seleniumWebDriverHelper
+  }
+
+  public Boolean checkVolumeExists(String name, String path) {
+    return seleniumWebDriverHelper
         .waitVisibilityAndGetText(By.xpath(format(Locators.VOLUME_PATH_XPATH_PATTERN, name)))
         .equals(path);
   }

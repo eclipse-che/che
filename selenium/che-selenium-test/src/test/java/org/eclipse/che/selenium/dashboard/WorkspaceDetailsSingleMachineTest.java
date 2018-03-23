@@ -239,7 +239,7 @@ public class WorkspaceDetailsSingleMachineTest {
     workspacesVolumes.enterVolumeName(volumeName);
     workspacesVolumes.enterVolumePath(volumePath);
     workspaceDetails.clickOnAddButtonInDialogWindow();
-    workspacesVolumes.checkVolumeExists(volumeName, volumePath);
+    assertTrue(workspacesVolumes.checkVolumeExists(volumeName, volumePath));
     clickOnSaveButton();
 
     // edit volume
@@ -247,7 +247,7 @@ public class WorkspaceDetailsSingleMachineTest {
     workspacesVolumes.enterVolumeName(renamedVolumeName);
     workspacesVolumes.enterVolumePath(renamedVolumePath);
     workspaceDetails.clickOnUpdateButtonInDialogWindow();
-    workspacesVolumes.checkVolumeExists(renamedVolumeName, renamedVolumePath);
+    assertTrue(workspacesVolumes.checkVolumeExists(renamedVolumeName, renamedVolumePath));
     clickOnSaveButton();
 
     // remove volume
