@@ -32,7 +32,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
     query = "SELECT e FROM WorkspaceExpiration e WHERE e.expiration < :expiration"
   )
 })
-@Table(name = "workspace_expiration")
+@Table(name = "che_workspace_expiration")
 public class WorkspaceExpiration {
 
   @Id

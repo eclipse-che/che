@@ -9,13 +9,13 @@
 --   Red Hat, Inc. - initial API and implementation
 --
 
-CREATE TABLE workspace_expiration (
+CREATE TABLE che_workspace_expiration (
     workspace_id               VARCHAR(255),
     expiration                 BIGINT          NOT NULL,
 
     PRIMARY KEY (workspace_id)
 );
 --constraints
-ALTER TABLE workspace_expiration ADD CONSTRAINT ws_expiration_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspace (id);
+ALTER TABLE che_workspace_expiration ADD CONSTRAINT ws_expiration_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspace (id);
 --indexes
-CREATE INDEX index_ws_expiration_expiration ON workspace_expiration (expiration);
+CREATE INDEX che_index_ws_expiration_expiration ON che_workspace_expiration (expiration);
