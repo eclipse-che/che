@@ -15,6 +15,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.commons.logback.filter.IdentityIdLoggerFilter;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakAuthenticationFilter;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakEnvironmentInitalizationFilter;
+import org.eclipse.che.multiuser.keycloak.server.UnavailableResourceInMultiUserFilter;
 
 public class KeycloakServletModule extends ServletModule {
   @Override
@@ -29,5 +30,8 @@ public class KeycloakServletModule extends ServletModule {
         .through(KeycloakEnvironmentInitalizationFilter.class);
     filterRegex("^(?!.*(/docs/))(?!.*(/keycloak/settings/?|/api/oauth/callback/?)$).*")
         .through(IdentityIdLoggerFilter.class);
+
+    filterRegex("/user/?.*").through(UnavailableResourceInMultiUserFilter.class);
+    filterRegex("/profile/.*/attributes").through(UnavailableResourceInMultiUserFilter.class);
   }
 }
