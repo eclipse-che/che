@@ -14,8 +14,6 @@ import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -120,32 +118,31 @@ public class WorkspaceActivityManager {
     delayParameterName = "che.workspace.activity_check_scheduler_period_s"
   )
   private void invalidate() {
-    List<String> expiredList = new ArrayList<>();
     try {
-      expiredList = activityDao.findExpired(System.currentTimeMillis());
+      activityDao.findExpired(System.currentTimeMillis()).forEach(this::stopExpired);
     } catch (ServerException e) {
       LOG.error(e.getLocalizedMessage(), e);
-      return;
     }
-    for (String workspaceId : expiredList) {
+  }
+
+  private void stopExpired(String workspaceId) {
+    try {
+      Workspace workspace = workspaceManager.getWorkspace(workspaceId);
+      workspace.getAttributes().put(WORKSPACE_STOPPED_BY, ACTIVITY_CHECKER);
+      workspaceManager.updateWorkspace(workspaceId, workspace);
+      workspaceManager.stopWorkspace(workspaceId, emptyMap());
+    } catch (NotFoundException ignored) {
+      // workspace no longer exists, no need to do anything
+    } catch (ConflictException e) {
+      LOG.warn(e.getLocalizedMessage());
+    } catch (Exception ex) {
+      LOG.error(ex.getLocalizedMessage());
+      LOG.debug(ex.getLocalizedMessage(), ex);
+    } finally {
       try {
-        Workspace workspace = workspaceManager.getWorkspace(workspaceId);
-        workspace.getAttributes().put(WORKSPACE_STOPPED_BY, ACTIVITY_CHECKER);
-        workspaceManager.updateWorkspace(workspaceId, workspace);
-        workspaceManager.stopWorkspace(workspaceId, emptyMap());
-      } catch (NotFoundException ignored) {
-        // workspace no longer exists, no need to do anything
-      } catch (ConflictException e) {
-        LOG.warn(e.getLocalizedMessage());
-      } catch (Exception ex) {
-        LOG.error(ex.getLocalizedMessage());
-        LOG.debug(ex.getLocalizedMessage(), ex);
-      } finally {
-        try {
-          activityDao.removeExpiration(workspaceId);
-        } catch (ServerException e) {
-          LOG.error(e.getLocalizedMessage(), e);
-        }
+        activityDao.removeExpiration(workspaceId);
+      } catch (ServerException e) {
+        LOG.error(e.getLocalizedMessage(), e);
       }
     }
   }
