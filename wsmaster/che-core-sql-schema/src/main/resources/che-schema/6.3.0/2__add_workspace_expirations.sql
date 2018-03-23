@@ -10,7 +10,7 @@
 --
 
 CREATE TABLE che_workspace_expiration (
-    workspace_id               VARCHAR(255),
+    workspace_id               VARCHAR(255)    NOT NULL,
     expiration                 BIGINT          NOT NULL,
 
     PRIMARY KEY (workspace_id)
