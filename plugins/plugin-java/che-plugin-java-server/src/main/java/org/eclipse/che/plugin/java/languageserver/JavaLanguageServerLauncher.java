@@ -49,9 +49,11 @@ public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate
   private static final LanguageServerDescription DESCRIPTION = createServerDescription();
 
   private final Path launchScript;
+  private ProcessorJsonRpcCommunication processorJsonRpcCommunication;
 
   @Inject
-  public JavaLanguageServerLauncher() {
+  public JavaLanguageServerLauncher(ProcessorJsonRpcCommunication processorJsonRpcCommunication) {
+    this.processorJsonRpcCommunication = processorJsonRpcCommunication;
     launchScript = Paths.get(System.getenv("HOME"), "che/ls-java/launch.sh");
   }
 
@@ -87,6 +89,16 @@ public class JavaLanguageServerLauncher extends LanguageServerLauncherTemplate
 
   public void sendStatusReport(StatusReport report) {
     LOG.info("{}: {}", report.getType(), report.getMessage());
+  }
+
+  /**
+   * The show message notification is sent from a server to a client to ask the client to display a
+   * particular message in the user interface.
+   *
+   * @param report information about report
+   */
+  public void sendProgressReport(ProgressReport report) {
+    processorJsonRpcCommunication.sendProgressNotification(report);
   }
 
   protected Process startLanguageServerProcess(String fileUri) throws LanguageServerException {
