@@ -42,11 +42,14 @@ import org.eclipse.che.ide.ext.java.client.command.valueproviders.SourcepathMacr
 import org.eclipse.che.ide.ext.java.client.diagnostics.PomDiagnosticsRequestor;
 import org.eclipse.che.ide.ext.java.client.documentation.QuickDocPresenter;
 import org.eclipse.che.ide.ext.java.client.documentation.QuickDocumentation;
+import org.eclipse.che.ide.ext.java.client.inject.factories.ProgressWidgetFactory;
 import org.eclipse.che.ide.ext.java.client.inject.factories.PropertyWidgetFactory;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationServiceImpl;
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFileView;
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFileViewImpl;
+import org.eclipse.che.ide.ext.java.client.progressor.ProgressView;
+import org.eclipse.che.ide.ext.java.client.progressor.ProgressViewImpl;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.ClasspathPagePresenter;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.libraries.LibEntryPresenter;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.sources.SourceEntryPresenter;
@@ -123,6 +126,12 @@ public class JavaGinModule extends AbstractGinModule {
         new GinFactoryModuleBuilder()
             .implement(PropertyWidget.class, PropertyWidgetImpl.class)
             .build(PropertyWidgetFactory.class));
+
+    install(
+        new GinFactoryModuleBuilder()
+            .implement(ProgressView.class, ProgressViewImpl.class)
+            .build(ProgressWidgetFactory.class));
+
     install(
         new GinFactoryModuleBuilder()
             .build(org.eclipse.che.ide.ext.java.client.search.NodeFactory.class));
