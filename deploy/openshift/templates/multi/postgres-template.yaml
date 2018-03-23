@@ -97,8 +97,6 @@ objects:
       targetPort: 5432
     selector:
       io.kompose.service: postgres
-  status:
-    loadBalancer: {}
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
