@@ -493,4 +493,7 @@ public interface JavaLocalizationConstant extends Messages {
 
   @Key("action.reimportDependencies.description")
   String actionReimportDependenciesDescription();
+
+  @Key("progress.monitor.title")
+  String progressMonitorTitle();
 }
