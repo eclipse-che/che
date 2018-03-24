@@ -15,9 +15,6 @@ import static org.eclipse.che.api.fs.server.WsPathUtils.ROOT;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
@@ -29,13 +26,17 @@ import org.eclipse.che.api.watcher.server.FileWatcherManager;
  */
 @Singleton
 public class RootDirRemovalHandler {
-  private final ProjectManager projectManager;
+  private final ProjectSynchronizer projectSynchronizer;
+  private final ProjectConfigRegistry projectConfigRegistry;
   private final FileWatcherManager fileWatcherManager;
 
   @Inject
   public RootDirRemovalHandler(
-      ProjectManager projectManager, FileWatcherManager fileWatcherManager) {
-    this.projectManager = projectManager;
+      ProjectSynchronizer projectSynchronizer,
+      ProjectConfigRegistry projectConfigRegistry,
+      FileWatcherManager fileWatcherManager) {
+    this.projectSynchronizer = projectSynchronizer;
+    this.projectConfigRegistry = projectConfigRegistry;
     this.fileWatcherManager = fileWatcherManager;
   }
 
@@ -46,10 +47,11 @@ public class RootDirRemovalHandler {
 
   private void consumeDelete(String wsPath) {
     try {
-      if (projectManager.isRegistered(wsPath)) {
-        projectManager.delete(wsPath);
+      if (projectConfigRegistry.isRegistered(wsPath)) {
+        projectConfigRegistry.remove(wsPath);
+        projectSynchronizer.synchronize();
       }
-    } catch (ServerException | ForbiddenException | NotFoundException | ConflictException e) {
+    } catch (ServerException e) {
       // ignore
     }
   }
