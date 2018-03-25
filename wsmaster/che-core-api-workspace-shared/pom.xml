@@ -77,7 +77,7 @@
                         <package>org.eclipse.che.api.workspace.shared.dto</package>
                     </dtoPackages>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                    <genClassName>org.eclipse.che.api.workspace.server.dto.DtoServerImpls</genClassName>
+                    <genClassName>org.eclipse.che.api.workspace.shared.dto.DtoServerImpls</genClassName>
                     <impl>server</impl>
                 </configuration>
             </plugin>
