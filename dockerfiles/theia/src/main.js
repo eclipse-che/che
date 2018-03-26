@@ -58,7 +58,7 @@ function isPluginsEqual(pls1, pls2) {
 }
 
 function copyDefaultTheiaBuild() {
-    cp.execSync(`cp -r ${defaultTheiaRoot}/node_modules ${theiaRoot} && cp ${defaultTheiaRoot}/yarn.lock ${defaultTheiaRoot}/package.json ${theiaRoot}`);
+    cp.execSync(`cp -r ${defaultTheiaRoot}/node_modules ${theiaRoot} && cp -r ${defaultTheiaRoot}/src-gen ${theiaRoot} && cp -r ${defaultTheiaRoot}/lib ${theiaRoot} && cp ${defaultTheiaRoot}/yarn.lock ${defaultTheiaRoot}/package.json ${theiaRoot}`);
 }
 
 function rebuildTheiaWithNewPluginsAndRun(newPlugins) {
