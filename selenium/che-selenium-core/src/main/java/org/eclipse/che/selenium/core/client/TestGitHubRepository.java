@@ -40,12 +40,12 @@ public class TestGitHubRepository {
   public TestGitHubRepository(
       @Named("github.username") String gitHubUsername,
       @Named("github.password") String gitHubPassword)
-      throws IOException, InterruptedException {
+      throws IOException {
     gitHub = GitHub.connectUsingPassword(gitHubUsername, gitHubPassword);
     ghRepository = create();
   }
 
-  private GHRepository create() throws IOException, InterruptedException {
+  private GHRepository create() throws IOException {
     GHRepository repo = gitHub.createRepository(repoName).create();
     ensureRepositoryCreated(repo);
 

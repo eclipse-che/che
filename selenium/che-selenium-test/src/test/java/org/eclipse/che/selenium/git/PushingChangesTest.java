@@ -15,13 +15,22 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.G
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.PUSH;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.BLANK;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.concurrent.ExecutionException;
+
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubKeyUploader;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
+import org.eclipse.che.selenium.core.client.TestProfileServiceClient;
+import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -38,6 +47,7 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.openqa.selenium.Keys;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -73,42 +83,44 @@ public class PushingChangesTest {
   @Inject private org.eclipse.che.selenium.pageobject.git.Git git;
   @Inject private Events events;
   @Inject private Loader loader;
-  @Inject private CodenvyEditor editor;
-  @Inject private Consoles consoles;
-  @Inject private NotificationsPopupPanel notifications;
-  @Inject private Wizard projectWizard;
-  @Inject private ImportProjectFromLocation importProject;
-  @Inject private TestGitHubKeyUploader testGitHubKeyUploader;
+  @Inject private CodenvyEditor                    editor;
+  @Inject private Consoles                         consoles;
+  @Inject private NotificationsPopupPanel          notifications;
+  @Inject private Wizard                           projectWizard;
+  @Inject private ImportProjectFromLocation        importProject;
+  @Inject private TestGitHubKeyUploader            testGitHubKeyUploader;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
-  @Inject private TestGitHubServiceClient gitHubClientService;
+  @Inject private TestGitHubServiceClient          gitHubClientService;
+  @Inject private TestGitHubRepository             testRepo;
+  @Inject private TestProjectServiceClient         testProjectServiceClient;
 
   @BeforeClass
   public void prepare() throws Exception {
-    testGitHubKeyUploader.updateGithubKey();
+    String commitMess = String.format("new_content_was_added %s ", System.currentTimeMillis());
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
+
+    Path entryPath = Paths.get(getClass().getResource("/projects/git-pull-test").getPath());
+    testRepo.addContent(entryPath, commitMess);
+
     ide.open(ws);
+    projectExplorer.waitProjectExplorer();
+  }
+
+  @AfterClass
+  public void deleteRepo() throws IOException {
+    testRepo.delete();
   }
 
   @Test
   public void pushChangesTest() throws Exception {
-    gitHubClientService.hardResetHeadToCommit(
-        REPO_NAME, DEFAULT_COMMIT_SSH, gitHubUsername, gitHubPassword);
-
-    // Clone project
-    projectExplorer.waitProjectExplorer();
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
-    importProject.waitAndTypeImporterAsGitInfo(
-        "git@github.com:" + gitHubUsername + "/pushChangesTest.git", PROJECT_NAME);
-    projectWizard.waitCreateProjectWizardForm();
-    projectWizard.selectTypeProject(Wizard.TypeProject.MAVEN);
-    loader.waitOnClosed();
-    projectWizard.clickSaveButton();
-    loader.waitOnClosed();
-    projectWizard.waitCreateProjectWizardFormIsClosed();
-    projectExplorer.waitProjectExplorer();
+    String newContentForFirstPushing = String.valueOf(System.currentTimeMillis());
+    String pathToHtmlFile = String.format("%s/%s", PROJECT_NAME, "file.html");
+    git.importJavaApp(testRepo.getSshUrl(), PROJECT_NAME, BLANK);
     projectExplorer.waitItem(PROJECT_NAME);
+    changeFileByProjectServiceClient(pathToHtmlFile, newContentForFirstPushing);
+    git.createNewFileAndPushItToGitHub(PROJECT_NAME, "file.html");
+
+    // ----------------------------------
 
     // Create new file and push it.
     git.createNewFileAndPushItToGitHub(PROJECT_NAME, "new.html");
@@ -214,5 +226,8 @@ public class PushingChangesTest {
     git.waitGitStatusBarWithMess("to git@github.com:" + gitHubUsername + "/pushChangesTest.git");
     events.clickEventLogBtn();
     events.waitExpectedMessage(PUSH_MSG);
+  }
+  private void changeFileByProjectServiceClient(String pathToItem, String newContent) throws Exception {
+    testProjectServiceClient.updateFile(ws.getId(), pathToItem, newContent);
   }
 }
