@@ -18,6 +18,7 @@ import static org.testng.Assert.assertNotEquals;
 import com.jayway.restassured.response.Response;
 import org.everrest.assured.EverrestJetty;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -26,37 +27,19 @@ public class UnavailableResourceInMultiUserFilterTest {
   @SuppressWarnings("unused")
   private static final UnavailableResourceInMultiUserFilter FILTER =
       new UnavailableResourceInMultiUserFilter();
-  @Test
-  public void shouldAllowGetUserRequest() {
-    final Response response = given().when().post("/user");
+
+  @Test(dataProvider = "allowedRequests")
+  public void shouldAllowGetRequests(String url) {
+    final Response response = given().when().get(url);
 
     assertNotEquals(response.getStatusCode(), 403);
     assertNotEquals(response.getBody().print().trim(), ERROR_RESPONSE_JSON_MESSAGE);
-  }
-
-  @Test
-  public void shouldAllowGet() {
-    final Response response = given().when().get();
-
-    assertNotEquals(response.getStatusCode(), 403);
-    assertNotEquals(response.getBody().print().trim(), ERROR_RESPONSE_JSON_MESSAGE);
-  }
-
-  @Test
-  public void shouldReturnForbiddenResponseForUserCreation() {
-
-    final Response response =
-        given().when().post("/user/");
-
-    assertEquals(response.getStatusCode(), 403);
-    assertEquals(response.getBody().print().trim(), ERROR_RESPONSE_JSON_MESSAGE);
   }
 
   @Test
   public void shouldReturnForbiddenResponseForUserDeletion() {
 
-    final Response response =
-        given().when().delete("/user/123");
+    final Response response = given().when().delete("/user/123");
 
     assertEquals(response.getStatusCode(), 403);
     assertEquals(response.getBody().print().trim(), ERROR_RESPONSE_JSON_MESSAGE);
@@ -65,8 +48,7 @@ public class UnavailableResourceInMultiUserFilterTest {
   @Test
   public void shouldReturnForbiddenResponseForUserPasswordUpdate() {
 
-    final Response response =
-        given().when().post("/user/password");
+    final Response response = given().when().post("/user/password");
 
     assertEquals(response.getStatusCode(), 403);
     assertEquals(response.getBody().print().trim(), ERROR_RESPONSE_JSON_MESSAGE);
@@ -75,10 +57,7 @@ public class UnavailableResourceInMultiUserFilterTest {
   @Test
   public void shouldReturnForbiddenResponseForCurrentUserProfileUpdate() {
 
-    final Response response =
-        given()
-            .when()
-            .post("/profile/attributes");
+    final Response response = given().when().post("/profile/attributes");
 
     assertEquals(response.getStatusCode(), 403);
     assertEquals(response.getBody().print().trim(), ERROR_RESPONSE_JSON_MESSAGE);
@@ -87,10 +66,7 @@ public class UnavailableResourceInMultiUserFilterTest {
   @Test
   public void shouldReturnForbiddenResponseFortUserProfileUpdate() {
 
-    final Response response =
-        given()
-            .when()
-            .post("/profile/profile123/attributes");
+    final Response response = given().when().post("/profile/profile123/attributes");
 
     assertEquals(response.getStatusCode(), 403);
     assertEquals(response.getBody().print().trim(), ERROR_RESPONSE_JSON_MESSAGE);
@@ -99,12 +75,22 @@ public class UnavailableResourceInMultiUserFilterTest {
   @Test
   public void shouldReturnForbiddenResponseForCurrentUserProfileDelete() {
 
-    final Response response =
-        given()
-            .when()
-            .delete("/profile/attributes");
+    final Response response = given().when().delete("/profile/attributes");
 
     assertEquals(response.getStatusCode(), 403);
     assertEquals(response.getBody().print().trim(), ERROR_RESPONSE_JSON_MESSAGE);
+  }
+
+  @DataProvider(name = "allowedRequests")
+  public Object[][] allowedRequests() {
+    return new Object[][] {
+      {"/user"},
+      {"/user/"},
+      {"/user/user123"},
+      {"/user/find"},
+      {"/user/settings"},
+      {"/profile"},
+      {"/profile/profile123"}
+    };
   }
 }
