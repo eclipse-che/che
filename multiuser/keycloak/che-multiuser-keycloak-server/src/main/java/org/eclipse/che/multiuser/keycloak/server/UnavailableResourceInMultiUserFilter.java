@@ -28,8 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 @Singleton
 public class UnavailableResourceInMultiUserFilter implements Filter {
   protected static final String ERROR_RESPONSE_JSON_MESSAGE =
-      "{\"error\" : \"This resource is disabled."
-          + " User and Profile management operations are done through Keycloak\" }";
+      "{\"error\" : \"This operation is not allowed since third-party user management service is configured\" }";
 
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {}
