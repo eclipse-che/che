@@ -27,6 +27,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      keycloak:
+        condition: service_healthy
     networks:
       - default
       - che-network
@@ -179,6 +181,11 @@ services:
       - '<%= scope.lookupvar('che::che_instance') -%>/data/keycloak:/opt/jboss/keycloak/standalone/data'
       - '<%= scope.lookupvar('che::che_instance') -%>/logs/keycloak:/opt/jboss/keycloak/standalone/log'
     restart: always
+    healthcheck:
+        test: [ "CMD", "curl", "-f", "http://localhost:8080/auth/" ]
+        interval: 10s
+        timeout: 10s
+        retries: 10
 
 networks:
   che-network:
