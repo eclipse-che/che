@@ -87,9 +87,9 @@ public class TestGitHubRepository {
   }
 
   /**
-   * Create reference to branch, tag, ... from master branch.
+   * Creates reference to branch, tag, ... from master branch.
    *
-   * @param refName
+   * @param refName is a name of branch, tag, etc
    * @throws IOException
    */
   public GHRef addRefFromMaster(String refName) throws IOException {
