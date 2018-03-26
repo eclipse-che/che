@@ -69,7 +69,7 @@ public class MacrosCommandsEditorTest {
     createNewJavaCommand();
     commandsEditor.selectMacroLinkInCommandsEditor(EDITOR_MACROS_LINK);
     commandsEditor.cancelFormInEditorByEscape();
-    commandsEditor.waitCommandsMacrosIsClosed();
+    commandsEditor.waitCommandMacrosIsClosed();
     commandsEditor.setFocusIntoTypeCommandsEditor(COMMAND_LINE_EDITOR);
     commandsEditor.setCursorToLine(1);
     commandsEditor.typeTextIntoEditor(Keys.ENTER.toString());

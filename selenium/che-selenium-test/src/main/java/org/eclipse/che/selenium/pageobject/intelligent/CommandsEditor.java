@@ -351,10 +351,7 @@ public class CommandsEditor {
   }
 
   /**
-   * Types specified {@code commandName} to the "Command Name" field, and waits until typed text is
-   * displayed.
-   *
-   * <p>Note! Method clears previous value in the field.
+   * Sets name of command to {@code commandName} and wait until it appears.
    *
    * @param commandName the command name which should be typed
    */
@@ -406,9 +403,6 @@ public class CommandsEditor {
   /**
    * Waits until specified {@code expectedText} is displayed in the popup with macro description.
    *
-   * <p>Note! Popup with description opens after single click on item in the macro autocomplete
-   * list.
-   *
    * @param expectedText text which should be displayed
    */
   public void waitTextIntoDescriptionMacrosForm(String expectedText) {
@@ -424,25 +418,24 @@ public class CommandsEditor {
    */
   public void selectMacroLinkInCommandsEditor(String macroLinkType) {
     seleniumWebDriverHelper.waitAndClick(By.xpath(macroLinkType), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
-    waitCommandsMacrosIsOpen();
+    waitCommandMacrosIsOpen();
   }
 
   /** Waits until "Command Macros" form is opened. */
-  public void waitCommandsMacrosIsOpen() {
+  public void waitCommandMacrosIsOpen() {
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(COMMAND_MACROS_FORM), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** Waits until "Command Macros" form is closed. */
-  public void waitCommandsMacrosIsClosed() {
+  public void waitCommandMacrosIsClosed() {
     seleniumWebDriverHelper.waitInvisibility(
         By.xpath(COMMAND_MACROS_FORM), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /**
-   * Types and waits specified {@code text} to the "Search" field in the "Command Macros" form.
-   *
-   * <p>Note! Method clears previous value.
+   * Sets specified {@code text} to the "Search" field in the "Command Macros" form and waits until
+   * it appears.
    *
    * @param text text which should be typed
    */
@@ -475,7 +468,7 @@ public class CommandsEditor {
         .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
-                webDriver -> getAllVisibleTextFromMacrosContainer().contains(expectedText));
+                webDriver -> getVisibleTextFromMacrosContainer().contains(expectedText));
   }
 
   /**
@@ -483,13 +476,13 @@ public class CommandsEditor {
    *
    * @return visible text from proposal area
    */
-  public String getAllVisibleTextFromMacrosContainer() {
-    waitCommandsMacrosIsOpen();
+  public String getVisibleTextFromMacrosContainer() {
+    waitCommandMacrosIsOpen();
     return macrosContainer.getText();
   }
 
   /**
-   * Performs entering the specified {@code item} by single clicking and sending of the "Enter" key.
+   * Enters macro command {@code item} by pressing Enter key.
    *
    * @param item macro body in format "${current.project.path}" without description
    */
@@ -499,7 +492,7 @@ public class CommandsEditor {
   }
 
   /**
-   * Performs entering the specified {@code item} by single clicking and performing double clicking.
+   * Enters macro command {@code item} by pressing Enter key.
    *
    * @param item macro body in format "${current.project.path}" without description
    */
