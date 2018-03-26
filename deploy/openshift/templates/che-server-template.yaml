@@ -209,7 +209,7 @@ parameters:
   displayName: OpenShift token
   description: OpenShift token to be used to create workspace objects. Must be set if username/password are impossible to use. Do not set if usrname/pass are provided!
 - name: PROTOCOL
-  displayName: htpps or http protocol
+  displayName: https or http protocol
   description: Protocol to be used in Che communications
   value: http
 - name: WS_PROTOCOL
@@ -271,4 +271,3 @@ parameters:
 labels:
   app: che
   template: che
-
