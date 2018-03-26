@@ -12,9 +12,8 @@ package org.eclipse.che.multiuser.keycloak.server;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.eclipse.che.multiuser.keycloak.server.UnavailableResourceInMultiUserFilter.ERROR_RESPONSE_JSON_MESSAGE;
-import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
-import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 
 import com.jayway.restassured.response.Response;
 import org.everrest.assured.EverrestJetty;
@@ -23,16 +22,31 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
-public class UnavailableReourceInMultiUserFilterTest {
+public class UnavailableResourceInMultiUserFilterTest {
   @SuppressWarnings("unused")
   private static final UnavailableResourceInMultiUserFilter FILTER =
       new UnavailableResourceInMultiUserFilter();
+  @Test
+  public void shouldAllowGetUserRequest() {
+    final Response response = given().when().post("/user");
+
+    assertNotEquals(response.getStatusCode(), 403);
+    assertNotEquals(response.getBody().print().trim(), ERROR_RESPONSE_JSON_MESSAGE);
+  }
+
+  @Test
+  public void shouldAllowGet() {
+    final Response response = given().when().get();
+
+    assertNotEquals(response.getStatusCode(), 403);
+    assertNotEquals(response.getBody().print().trim(), ERROR_RESPONSE_JSON_MESSAGE);
+  }
 
   @Test
   public void shouldReturnForbiddenResponseForUserCreation() {
 
     final Response response =
-        given().auth().basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD).when().post("/user/");
+        given().when().post("/user/");
 
     assertEquals(response.getStatusCode(), 403);
     assertEquals(response.getBody().print().trim(), ERROR_RESPONSE_JSON_MESSAGE);
@@ -42,7 +56,7 @@ public class UnavailableReourceInMultiUserFilterTest {
   public void shouldReturnForbiddenResponseForUserDeletion() {
 
     final Response response =
-        given().auth().basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD).when().delete("/user/123");
+        given().when().delete("/user/123");
 
     assertEquals(response.getStatusCode(), 403);
     assertEquals(response.getBody().print().trim(), ERROR_RESPONSE_JSON_MESSAGE);
@@ -52,7 +66,7 @@ public class UnavailableReourceInMultiUserFilterTest {
   public void shouldReturnForbiddenResponseForUserPasswordUpdate() {
 
     final Response response =
-        given().auth().basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD).when().post("/user/password");
+        given().when().post("/user/password");
 
     assertEquals(response.getStatusCode(), 403);
     assertEquals(response.getBody().print().trim(), ERROR_RESPONSE_JSON_MESSAGE);
@@ -63,8 +77,6 @@ public class UnavailableReourceInMultiUserFilterTest {
 
     final Response response =
         given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
             .when()
             .post("/profile/attributes");
 
@@ -77,8 +89,6 @@ public class UnavailableReourceInMultiUserFilterTest {
 
     final Response response =
         given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
             .when()
             .post("/profile/profile123/attributes");
 
@@ -91,8 +101,6 @@ public class UnavailableReourceInMultiUserFilterTest {
 
     final Response response =
         given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
             .when()
             .delete("/profile/attributes");
 
