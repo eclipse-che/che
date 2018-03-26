@@ -39,17 +39,30 @@ public final class Keycloak extends JavaScriptObject {
   }-*/;
 
   public static native Promise<Keycloak> init(
-      String theUrl, String theRealm, String theClientId) /*-{
+      String theUrl,
+      String theRealm,
+      String theClientId,
+      String theOidcProvider,
+      boolean theUseNonce) /*-{
     return new Promise(function (resolve, reject) {
       try {
         console.log('[Keycloak] Initializing');
-        var keycloak = $wnd.Keycloak({
-          url: theUrl,
-          realm: theRealm,
-          clientId: theClientId
-        });
+        var config;
+        if(!theOidcProvider) {
+          config = {
+            url: theUrl,
+            realm: theRealm,
+            clientId: theClientId
+          };
+        } else {
+          config = {
+            oidcProvider: theOidcProvider,
+            clientId: theClientId
+          };
+        }
+        var keycloak = $wnd.Keycloak(config);
         $wnd['_keycloak'] = keycloak;
-        keycloak.init({onLoad: 'login-required', checkLoginIframe: false})
+        keycloak.init({onLoad: 'login-required', checkLoginIframe: false, useNonce: theUseNonce})
             .success(function (authenticated) {
               resolve(keycloak);
             })

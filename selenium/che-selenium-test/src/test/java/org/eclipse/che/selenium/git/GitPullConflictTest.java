@@ -40,7 +40,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -92,18 +91,13 @@ public class GitPullConflictTest {
 
   @BeforeClass
   public void prepare() throws Exception {
-    String commitMess = String.format("add-new-content %s ", System.currentTimeMillis());
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
 
     Path entryPath =
         Paths.get(getClass().getResource("/projects/default-spring-project").getPath());
-    testRepo.addContent(entryPath, commitMess);
-    ide.open(ws);
-  }
+    testRepo.addContent(entryPath);
 
-  @AfterClass
-  public void deleteRepo() throws IOException {
-    testRepo.delete();
+    ide.open(ws);
   }
 
   @Test
