@@ -18,6 +18,8 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Cleans up project config registry when some project is removed bypassing {@link ProjectManager}
@@ -26,6 +28,8 @@ import org.eclipse.che.api.watcher.server.FileWatcherManager;
  */
 @Singleton
 public class RootDirRemovalHandler {
+  private static final Logger LOGGER = LoggerFactory.getLogger(RootDirRemovalHandler.class);
+
   private final ProjectSynchronizer projectSynchronizer;
   private final ProjectConfigRegistry projectConfigRegistry;
   private final FileWatcherManager fileWatcherManager;
@@ -42,7 +46,7 @@ public class RootDirRemovalHandler {
 
   @PostConstruct
   private void registerOperation() {
-    fileWatcherManager.registerByPath(ROOT, null, null, this::consumeDelete);
+    fileWatcherManager.registerByPath(ROOT, arg -> {}, arg -> {}, this::consumeDelete);
   }
 
   private void consumeDelete(String wsPath) {
@@ -52,7 +56,10 @@ public class RootDirRemovalHandler {
         projectSynchronizer.synchronize();
       }
     } catch (ServerException e) {
-      // ignore
+      LOGGER.error(
+          "Removing project '{}' is detected. Cleaning project config registry is failed: {}",
+          wsPath,
+          e.getMessage());
     }
   }
 }
