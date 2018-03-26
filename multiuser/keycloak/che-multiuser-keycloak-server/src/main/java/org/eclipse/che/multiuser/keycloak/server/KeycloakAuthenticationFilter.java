@@ -10,25 +10,23 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.auth0.jwk.GuavaCachedJwkProvider;
+import com.auth0.jwk.Jwk;
+import com.auth0.jwk.JwkException;
+import com.auth0.jwk.JwkProvider;
+import com.auth0.jwk.UrlJwkProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureException;
-import java.io.BufferedReader;
+import io.jsonwebtoken.SigningKeyResolverAdapter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.lang.reflect.Type;
-import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
+import java.security.Key;
 import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
-import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -45,27 +43,25 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
-  private static final Gson GSON = new Gson();
-  private static final Type STRING_MAP_TYPE = new TypeToken<Map<String, String>>() {}.getType();
-
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakAuthenticationFilter.class);
 
-  private String authServerUrl;
-  private String realm;
+  private String jwksUrl;
   private long allowedClockSkewSec;
-  private PublicKey publicKey = null;
   private RequestTokenExtractor tokenExtractor;
+  private JwkProvider jwkProvider;
 
   @Inject
   public KeycloakAuthenticationFilter(
-      @Named(KeycloakConstants.AUTH_SERVER_URL_SETTING) String authServerUrl,
-      @Named(KeycloakConstants.REALM_SETTING) String realm,
+      KeycloakSettings keycloakSettings,
       @Named(KeycloakConstants.ALLOWED_CLOCK_SKEW_SEC) long allowedClockSkewSec,
-      RequestTokenExtractor tokenExtractor) {
-    this.authServerUrl = authServerUrl;
-    this.realm = realm;
+      RequestTokenExtractor tokenExtractor)
+      throws MalformedURLException {
+    this.jwksUrl = keycloakSettings.get().get(KeycloakConstants.JWKS_ENDPOINT_SETTING);
     this.allowedClockSkewSec = allowedClockSkewSec;
     this.tokenExtractor = tokenExtractor;
+    if (jwksUrl != null) {
+      this.jwkProvider = new GuavaCachedJwkProvider(new UrlJwkProvider(new URL(jwksUrl)));
+    }
   }
 
   @Override
@@ -91,69 +87,55 @@ public class KeycloakAuthenticationFilter extends AbstractKeycloakFilter {
       jwt =
           Jwts.parser()
               .setAllowedClockSkewSeconds(allowedClockSkewSec)
-              .setSigningKey(getJwtPublicKey(false))
+              .setSigningKeyResolver(
+                  new SigningKeyResolverAdapter() {
+                    @Override
+                    public Key resolveSigningKey(
+                        @SuppressWarnings("rawtypes") JwsHeader header, Claims claims) {
+                      try {
+                        return getJwtPublicKey(header);
+                      } catch (JwkException e) {
+                        throw new JwtException(
+                            "Error during the retrieval of the public key during JWT token validation",
+                            e);
+                      }
+                    }
+                  })
               .parseClaimsJws(token);
       LOG.debug("JWT = ", jwt);
       // OK, we can trust this JWT
-    } catch (SignatureException
-        | NoSuchAlgorithmException
-        | InvalidKeySpecException
-        | IllegalArgumentException e) {
+    } catch (SignatureException | IllegalArgumentException e) {
       // don't trust the JWT!
       LOG.error("Failed verifying the JWT token", e);
-      try {
-        LOG.info("Retrying after updating the public key", e);
-        jwt =
-            Jwts.parser()
-                .setAllowedClockSkewSeconds(allowedClockSkewSec)
-                .setSigningKey(getJwtPublicKey(true))
-                .parseClaimsJws(token);
-        LOG.debug("JWT = ", jwt);
-        // OK, we can trust this JWT
-      } catch (SignatureException
-          | NoSuchAlgorithmException
-          | InvalidKeySpecException
-          | IllegalArgumentException ee) {
-        // don't trust the JWT!
-        LOG.error("Failed verifying the JWT token after public key update", e);
-        send403(res);
-        return;
-      }
+      send403(res);
+      return;
     }
     request.setAttribute("token", jwt);
     chain.doFilter(req, res);
   }
 
-  private synchronized PublicKey getJwtPublicKey(boolean reset)
-      throws NoSuchAlgorithmException, InvalidKeySpecException {
-    if (reset) {
-      publicKey = null;
+  private synchronized PublicKey getJwtPublicKey(JwsHeader<?> header) throws JwkException {
+    String kid = header.getKeyId();
+    if (kid == null) {
+      LOG.warn(
+          "'kid' is missing in the JWT token header. This is not possible to validate the token with OIDC provider keys");
+      return null;
     }
-    if (publicKey == null) {
-      HttpURLConnection conn = null;
-      try {
-        URL url = new URL(authServerUrl + "/realms/" + realm);
-        LOG.info("Pulling realm public key from URL : {}", url);
-        conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        Map<String, String> realmSettings;
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-          realmSettings = GSON.fromJson(in, STRING_MAP_TYPE);
-        }
-        String encodedPublicKey = realmSettings.get("public_key");
-        byte[] decoded = Base64.getDecoder().decode(encodedPublicKey);
-        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        publicKey = kf.generatePublic(keySpec);
-      } catch (IOException e) {
-        LOG.error("Exception during retrieval of the Keycloak realm public key", e);
-      } finally {
-        if (conn != null) {
-          conn.disconnect();
-        }
-      }
+    String alg = header.getAlgorithm();
+    if (alg == null) {
+      LOG.warn(
+          "'alg' is missing in the JWT token header. This is not possible to validate the token with OIDC provider keys");
+      return null;
     }
-    return publicKey;
+
+    if (jwkProvider == null) {
+      LOG.warn(
+          "JWK provider is not available: This is not possible to validate the token with OIDC provider keys.\n"
+              + "Please look into the startup logs to find out the root cause");
+      return null;
+    }
+    Jwk jwk = jwkProvider.get(kid);
+    return jwk.getPublicKey();
   }
 
   private void send403(ServletResponse res) throws IOException {

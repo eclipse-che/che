@@ -11,7 +11,6 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
@@ -28,7 +27,6 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.machineperspective.MachineTerminal;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -46,7 +44,6 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcess {
   @Inject private TestUser defaultTestUser;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private MachineTerminal terminal;
   @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
@@ -71,7 +68,6 @@ public class CheckRestoringWorkspaceAfterStoppingWsAgentProcess {
 
     notificationsPopupPanel.waitWorkspaceAgentIsNotRunning();
     notificationsPopupPanel.clickOnRestartWorkspaceButton();
-    testWorkspaceServiceClient.waitStatus(workspace.getName(), defaultTestUser.getName(), STOPPING);
     testWorkspaceServiceClient.waitStatus(workspace.getName(), defaultTestUser.getName(), RUNNING);
   }
 

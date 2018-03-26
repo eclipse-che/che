@@ -12,15 +12,15 @@
 
 const JSON_RPC_VERSION: string = '2.0';
 
+/* tslint:disable */
+export type communicationClientEvent = 'close' | 'error' | 'open' | 'response';
+/* tslint:enable */
+
 /**
  * Interface for communication between two entrypoints.
  * The implementation can be through websocket or http protocol.
  */
 export interface ICommunicationClient {
-  /**
-   * Process responses.
-   */
-  onResponse: Function;
   /**
    * Performs connections.
    *
@@ -31,6 +31,17 @@ export interface ICommunicationClient {
    * Close the connection.
    */
   disconnect(): void;
+  /**
+   * Adds listener on client event.
+   */
+  addListener(event: communicationClientEvent, handler: Function): void;
+  /**
+   * Removes listener.
+   *
+   * @param {communicationClientEvent} event
+   * @param {Function} handler
+   */
+  removeListener(event: communicationClientEvent, handler: Function): void;
   /**
    * Send pointed data.
    *
@@ -94,9 +105,9 @@ export class JsonRpcClient {
     this.pendingRequests = new Map<string, ng.IDeferred<any>>();
     this.notificationHandlers = new Map<string, Array<Function>>();
 
-    this.client.onResponse = (message: any): void => {
+    this.client.addListener('response', (message: any) => {
       this.processResponse(message);
-    };
+    });
   }
 
   /**

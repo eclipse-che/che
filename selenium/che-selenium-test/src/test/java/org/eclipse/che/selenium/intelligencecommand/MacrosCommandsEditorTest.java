@@ -101,7 +101,6 @@ public class MacrosCommandsEditorTest {
     commandsEditor.selectMacroCommand("${current.class.fqn}");
     commandsEditor.typeTextIntoEditor(Keys.ARROW_DOWN.toString());
     commandsEditor.typeTextIntoEditor(Keys.SPACE.toString());
-    commandsEditor.waitMacroCommandIsSelected("${current.project.path}");
     commandsEditor.enterMacroCommandByDoubleClick("${current.project.path}");
     commandsEditor.waitTextIntoEditor("echo ${current.project.path}");
     runCommandWithCheckResult();
@@ -142,7 +141,6 @@ public class MacrosCommandsEditorTest {
     commandsEditor.selectMacroCommand("${server.wsagent/http}");
     commandsEditor.typeTextIntoEditor(Keys.ARROW_UP.toString());
     commandsEditor.typeTextIntoEditor(Keys.SPACE.toString());
-    commandsEditor.waitMacroCommandIsSelected("${server.wsagent/http}");
     commandsEditor.enterMacroCommandByDoubleClick("${server.wsagent/http}");
     commandsEditor.waitTextIntoEditor("${server.wsagent/http}");
     commandsEditor.clickOnRunButton();

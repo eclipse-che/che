@@ -60,7 +60,7 @@ export class KeycloakLoader {
             script.type = 'text/javascript';
             (script as any).language = 'javascript';
             script.async = true;
-            script.src = keycloakSettings['che.keycloak.auth_server_url'] + '/js/keycloak.js';
+            script.src = keycloakSettings['che.keycloak.js_adapter_url'];
 
             script.onload = () => {
                 resolve(this.initKeycloak(keycloakSettings));
@@ -79,16 +79,31 @@ export class KeycloakLoader {
      */
     private initKeycloak(keycloakSettings: any): Promise<any> {
         return new Promise((resolve, reject) => {
-            const keycloak = Keycloak({
-                url: keycloakSettings['che.keycloak.auth_server_url'],
-                realm: keycloakSettings['che.keycloak.realm'],
-                clientId: keycloakSettings['che.keycloak.client_id']
-            });
+            function keycloakConfig() {
+            	const theOidcProvider = keycloakSettings['che.keycloak.oidc_provider'];
+            	if (!theOidcProvider) {
+            		return {
+            			url: keycloakSettings['che.keycloak.auth_server_url'],
+            			realm: keycloakSettings['che.keycloak.realm'],
+            			clientId: keycloakSettings['che.keycloak.client_id']
+            		};
+            	} else {
+            		return {
+        				oidcProvider: theOidcProvider,
+        				clientId: keycloakSettings['che.keycloak.client_id']
+            		};
+            	}
+            }
+            const keycloak = Keycloak(keycloakConfig());        	
 
             window['_keycloak'] = keycloak;
 
+            var useNonce;
+            if (typeof keycloakSettings['che.keycloak.use_nonce'] === 'string') {
+            	useNonce = keycloakSettings['che.keycloak.use_nonce'].toLowerCase() === 'true';
+            }
             keycloak
-                .init({onLoad: 'login-required', checkLoginIframe: false})
+                .init({onLoad: 'login-required', checkLoginIframe: false, useNonce: useNonce})
                 .success(() => {
                     resolve(keycloak);
                 })

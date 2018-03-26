@@ -35,7 +35,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -69,18 +68,12 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
 
   @BeforeClass
   public void prepare() throws Exception {
-    String commitMess = String.format("add-new-content-%s ", System.currentTimeMillis());
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
 
     Path entryPath = Paths.get(getClass().getResource("/projects/guess-project").getPath());
-    testRepo.addContent(entryPath, commitMess);
+    testRepo.addContent(entryPath);
 
     ide.open(ws);
-  }
-
-  @AfterClass
-  public void deleteRepo() throws IOException {
-    testRepo.delete();
   }
 
   @Test
