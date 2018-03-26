@@ -77,6 +77,11 @@ function buildPlugin(path) {
 }
 
 function getBinaryPath(pluginRoot, pluginName) {
+    const rootPackageJson = require(`${pluginRoot}/package.json`);
+    if ('theiaExtensions' in rootPackageJson) {
+        return pluginRoot;
+    }
+
     const dirs = fs.readdirSync(pluginRoot).filter(item => !item.startsWith('.') && fs.lstatSync(pluginRoot + '/' + item).isDirectory());
     for (let dirName of dirs) {
         const pluginTargetDir = pluginRoot + '/' + dirName;
