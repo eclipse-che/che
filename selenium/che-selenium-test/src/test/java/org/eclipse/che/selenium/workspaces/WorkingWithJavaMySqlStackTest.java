@@ -38,6 +38,7 @@ import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
@@ -76,6 +77,7 @@ public class WorkingWithJavaMySqlStackTest {
   @Inject private AskDialog askDialog;
   @Inject private MachineTerminal terminal;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Workspaces workspaces;
   @Inject private Ide ide;
@@ -102,7 +104,7 @@ public class WorkingWithJavaMySqlStackTest {
     projectSourcePage.clickOnAddProjectButton();
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
-    seleniumWebDriver.switchFromDashboardIframeToIde(LOADER_TIMEOUT_SEC);
+    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
     currentWindow = seleniumWebDriver.getWindowHandle();
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME, APPLICATION_START_TIMEOUT_SEC);
@@ -131,7 +133,7 @@ public class WorkingWithJavaMySqlStackTest {
     checkWebJavaPetclinicAppl();
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
 
     // Close terminal tab for 'build and deploy' process
     consoles.waitProcessInProcessConsoleTree(BUILD_AND_DEPLOY_PROCESS);

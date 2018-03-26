@@ -27,6 +27,7 @@ import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
@@ -58,6 +59,7 @@ public class WorkingWithNodeWsTest {
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private AskDialog askDialog;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private Workspaces workspaces;
 
@@ -84,7 +86,7 @@ public class WorkingWithNodeWsTest {
     projectSourcePage.clickOnAddProjectButton();
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
     currentWindow = seleniumWebDriver.getWindowHandle();
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
@@ -103,7 +105,7 @@ public class WorkingWithNodeWsTest {
     // Check the preview url is present after refreshing
     consoles.waitPreviewUrlIsPresent();
     seleniumWebDriver.navigate().refresh();
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
     ide.waitOpenedWorkspaceIsReadyToUse();
     consoles.waitPreviewUrlIsPresent();
 
@@ -115,7 +117,7 @@ public class WorkingWithNodeWsTest {
     checkAngularYeomanAppl();
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
 
     // Close terminal tab for 'run' process
     consoles.closeProcessInProcessConsoleTreeByName(RUN_PROCESS);

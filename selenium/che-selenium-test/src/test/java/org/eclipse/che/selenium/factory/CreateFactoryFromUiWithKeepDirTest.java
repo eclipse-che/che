@@ -40,6 +40,7 @@ import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
@@ -78,6 +79,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
   @Inject private Loader loader;
   @Inject private TestIdeUrlProvider ideUrlProvider;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestFactoryServiceClient factoryServiceClient;
   @Inject private PullRequestPanel pullRequestPanel;
@@ -133,7 +135,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
     factoryWidget.clickOnInvokeBtn();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
     try {
       projectExplorer.waitProjectExplorer(80);
     } catch (org.openqa.selenium.TimeoutException ex) {

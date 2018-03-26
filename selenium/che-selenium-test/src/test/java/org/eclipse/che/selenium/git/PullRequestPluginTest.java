@@ -42,6 +42,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -94,6 +95,7 @@ public class PullRequestPluginTest {
   @Inject private AskDialog askDialog;
   @Inject private Preferences preferences;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private TestGitHubServiceClient gitHubClientService;
@@ -218,7 +220,7 @@ public class PullRequestPluginTest {
     seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
     checkGitHubUserPage();
     consumeFactoryOnGitHub();
-    seleniumWebDriver.switchFromDashboardIframeToIde();
+    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
     factoryWsName = seleniumWebDriver.getWorkspaceNameFromBrowserUrl();
     explorer.waitProjectExplorer();
     explorer.waitItem(FIRST_PROJECT_NAME);

@@ -12,7 +12,9 @@ package org.eclipse.che.selenium.pageobject;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfAllElements;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
@@ -765,5 +767,22 @@ public class SeleniumWebDriverHelper {
    */
   public void waitAndSwitchToFrame(WebElement frame) {
     waitAndSwitchToFrame(frame, DEFAULT_TIMEOUT);
+  }
+
+  /** Switch to IDE frame and wait that Project Explorer is visible */
+  public void switchFromDashboardAndWaitProjectExplorer() {
+    webDriverWaitFactory
+        .get(APPLICATION_START_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> {
+                  waitAndSwitchToFrame(By.id("ide-application-iframe"), PREPARING_WS_TIMEOUT_SEC);
+                  if (isVisible(By.id("gwt-debug-projectTree"))) {
+                    return true;
+                  }
+
+                  seleniumWebDriver.switchTo().parentFrame();
+                  return false;
+                });
   }
 }
