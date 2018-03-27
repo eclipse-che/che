@@ -65,13 +65,12 @@ public class TransitiveDependencyTest {
   @Test
   public void transitiveDependencyTest() throws Exception {
     projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.expandPathInProjectExplorer(
+        PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples");
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
     projectExplorer.clickOnItemInContextMenu(MAVEN);
     projectExplorer.clickOnNewContextMenuItem(REIMPORT);
     loader.waitOnClosed();
-    projectExplorer.openItemByPath(PROJECT_NAME);
-    loader.waitOnClosed();
-    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     editor.waitActive();
