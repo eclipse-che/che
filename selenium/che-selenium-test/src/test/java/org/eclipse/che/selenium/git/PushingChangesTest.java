@@ -22,14 +22,11 @@ import com.google.inject.name.Named;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.ExecutionException;
-
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubKeyUploader;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
-import org.eclipse.che.selenium.core.client.TestProfileServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
@@ -83,24 +80,26 @@ public class PushingChangesTest {
   @Inject private org.eclipse.che.selenium.pageobject.git.Git git;
   @Inject private Events events;
   @Inject private Loader loader;
-  @Inject private CodenvyEditor                    editor;
-  @Inject private Consoles                         consoles;
-  @Inject private NotificationsPopupPanel          notifications;
-  @Inject private Wizard                           projectWizard;
-  @Inject private ImportProjectFromLocation        importProject;
-  @Inject private TestGitHubKeyUploader            testGitHubKeyUploader;
+  @Inject private CodenvyEditor editor;
+  @Inject private Consoles consoles;
+  @Inject private NotificationsPopupPanel notifications;
+  @Inject private Wizard projectWizard;
+  @Inject private ImportProjectFromLocation importProject;
+  @Inject private TestGitHubKeyUploader testGitHubKeyUploader;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
-  @Inject private TestGitHubServiceClient          gitHubClientService;
-  @Inject private TestGitHubRepository             testRepo;
-  @Inject private TestProjectServiceClient         testProjectServiceClient;
+  @Inject private TestGitHubServiceClient gitHubClientService;
+  @Inject private TestGitHubRepository testRepo;
+  @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @BeforeClass
   public void prepare() throws Exception {
+
     String commitMess = String.format("new_content_was_added %s ", System.currentTimeMillis());
+    testGitHubKeyUploader.updateGithubKey();
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
 
     Path entryPath = Paths.get(getClass().getResource("/projects/git-pull-test").getPath());
-    testRepo.addContent(entryPath, commitMess);
+    testRepo.addContent(entryPath);
 
     ide.open(ws);
     projectExplorer.waitProjectExplorer();
@@ -119,7 +118,11 @@ public class PushingChangesTest {
     projectExplorer.waitItem(PROJECT_NAME);
     changeFileByProjectServiceClient(pathToHtmlFile, newContentForFirstPushing);
     git.createNewFileAndPushItToGitHub(PROJECT_NAME, "file.html");
-
+    git.waitGitStatusBarWithMess(String.format("Successfully pushed to %s",testRepo.getSshUrl()));
+    consoles.waitProcessInProcessConsoleTree("Git push", LOADER_TIMEOUT_SEC);
+    events.clickEventLogBtn();
+    loader.waitOnClosed();
+    events.waitExpectedMessage(PUSH_MSG);
     // ----------------------------------
 
     // Create new file and push it.
@@ -227,7 +230,9 @@ public class PushingChangesTest {
     events.clickEventLogBtn();
     events.waitExpectedMessage(PUSH_MSG);
   }
-  private void changeFileByProjectServiceClient(String pathToItem, String newContent) throws Exception {
+
+  private void changeFileByProjectServiceClient(String pathToItem, String newContent)
+      throws Exception {
     testProjectServiceClient.updateFile(ws.getId(), pathToItem, newContent);
   }
 }
