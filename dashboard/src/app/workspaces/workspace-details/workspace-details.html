@@ -161,6 +161,24 @@
       </md-tab-body>
     </md-tab>
 
+    <!-- Tools Tab -->
+    <md-tab>
+      <md-tab-label>
+        <span class="che-tab-label-title">Tools</span>
+      </md-tab-label>
+      <md-tab-body>
+        <che-machine-selector content-title="Configuration"
+                              workspace-details="workspaceDetailsController.workspaceDetails"
+                              on-change="workspaceDetailsController.checkEditMode(true)"
+                              filter="workspaceDetailsController.toolsFilter">
+          <workspace-details-tools selected-machine="machine"
+                                   on-change="onChange()"
+                                   environment-manager="environmentManager">
+          </workspace-details-tools>
+        </che-machine-selector>
+      </md-tab-body>
+    </md-tab>
+
     <!-- Other tabs -->
     <md-tab ng-repeat="section in workspaceDetailsController.getPages()"
             ng-init="workspaceDetailsController.addTab(section.title);"
