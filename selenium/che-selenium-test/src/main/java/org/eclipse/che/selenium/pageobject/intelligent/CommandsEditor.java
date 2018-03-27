@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEME
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ACTIVE_EDITOR_ENTRY_POINT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ACTIVE_TAB_UNSAVED_FILE_NAME;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH;
 import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsLocators.COMMAND_MACROS_FORM;
 import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsLocators.COMMAND_MACROS_INPUT_FIELD;
 import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsLocators.DESCRIPTION_MACROS;
@@ -29,7 +30,6 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
@@ -76,22 +76,36 @@ public class CommandsEditor {
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
-  public static final class CommandsEditorType {
-    public static final String COMMAND_LINE_EDITOR =
-        "(" + Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH + ")[1]";
-    public static final String PREVIEW_URL_EDITOR =
-        "(" + Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH + ")[2]";
+  public enum CommandsEditorLocator {
+    COMMAND_LINE_EDITOR("(" + ORION_ACTIVE_EDITOR_CONTAINER_XPATH + ")[1]"),
+    PREVIEW_URL_EDITOR("(" + ORION_ACTIVE_EDITOR_CONTAINER_XPATH + ")[2]");
 
-    private CommandsEditorType() {}
+    private final String locator;
+
+    CommandsEditorLocator(String locator) {
+      this.locator = locator;
+    }
+
+    public String get() {
+      return this.locator;
+    }
   }
 
-  public static final class CommandsMacrosLinkType {
-    public static final String EDITOR_MACROS_LINK =
-        "(" + ACTIVE_EDITOR_ENTRY_POINT + "//a[@id='gwt-debug-link-explore_macros'])[1]";
-    public static final String PREVIEW_MACROS_LINK =
-        "(" + ACTIVE_EDITOR_ENTRY_POINT + "//a[@id='gwt-debug-link-explore_macros'])[2]";
+  public enum CommandsMacrosLinkLocator {
+    EDITOR_MACROS_LINK(
+        "(" + ACTIVE_EDITOR_ENTRY_POINT + "//a[@id='gwt-debug-link-explore_macros'])[1]"),
+    PREVIEW_MACROS_LINK(
+        "(" + ACTIVE_EDITOR_ENTRY_POINT + "//a[@id='gwt-debug-link-explore_macros'])[2]");
 
-    private CommandsMacrosLinkType() {}
+    private final String locator;
+
+    CommandsMacrosLinkLocator(String locator) {
+      this.locator = locator;
+    }
+
+    public String get() {
+      return this.locator;
+    }
   }
 
   /** Class introduce Xpath locators for DOM navigation inside Commands Editor widget */
@@ -390,13 +404,14 @@ public class CommandsEditor {
   }
 
   /**
-   * Clicks on specified {commandsEditorType} in the "Commands Editor".
+   * Clicks on specified {commandsEditorLocator} in the "Commands Editor".
    *
-   * @param commandsEditorType command editor's type which defined in {@link CommandsEditorType}
+   * @param commandsEditorLocator command editor's type which defined in {@link
+   *     CommandsEditorLocator}
    */
-  public void setFocusIntoTypeCommandsEditor(String commandsEditorType) {
+  public void setFocusIntoTypeCommandsEditor(CommandsEditorLocator commandsEditorLocator) {
     seleniumWebDriverHelper.waitAndClick(
-        By.xpath(commandsEditorType), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+        By.xpath(commandsEditorLocator.get()), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     editor.waitActive();
   }
 
@@ -411,13 +426,14 @@ public class CommandsEditor {
   }
 
   /**
-   * Waits visibility and clicks on "Macros" link with specified {@code macroLinkType} in the
+   * Waits visibility and clicks on "Macros" link with specified {@code macroLinkLocator} in the
    * commands editor.
    *
-   * @param macroLinkType type of the "Macros" link, defined in {@link CommandsMacrosLinkType}
+   * @param macroLinkLocator type of the "Macros" link, defined in {@link CommandsMacrosLinkLocator}
    */
-  public void selectMacroLinkInCommandsEditor(String macroLinkType) {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(macroLinkType), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+  public void selectMacroLinkInCommandsEditor(CommandsMacrosLinkLocator macroLinkLocator) {
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(macroLinkLocator.get()), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     waitCommandMacrosIsOpen();
   }
 
