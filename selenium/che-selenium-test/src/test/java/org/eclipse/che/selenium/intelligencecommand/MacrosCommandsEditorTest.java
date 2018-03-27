@@ -67,16 +67,16 @@ public class MacrosCommandsEditorTest {
     projectExplorer.waitItem(PATH_TO_FILE);
     projectExplorer.openItemByPath(PATH_TO_FILE);
     createNewJavaCommand();
-    commandsEditor.selectMacrosLinkInCommandsEditor(EDITOR_MACROS_LINK);
+    commandsEditor.selectMacroLinkInCommandsEditor(EDITOR_MACROS_LINK);
     commandsEditor.cancelFormInEditorByEscape();
-    commandsEditor.waitCommandsMacrosIsClosed();
+    commandsEditor.waitCommandMacrosIsClosed();
     commandsEditor.setFocusIntoTypeCommandsEditor(COMMAND_LINE_EDITOR);
     commandsEditor.setCursorToLine(1);
     commandsEditor.typeTextIntoEditor(Keys.ENTER.toString());
     commandsEditor.typeTextIntoEditor(Keys.ARROW_UP.toString());
     commandsEditor.waitActive();
     commandsEditor.typeTextIntoEditor("echo ");
-    commandsEditor.selectMacrosLinkInCommandsEditor(EDITOR_MACROS_LINK);
+    commandsEditor.selectMacroLinkInCommandsEditor(EDITOR_MACROS_LINK);
     commandsEditor.typeTextIntoSearchMacroField("rel");
     commandsEditor.waitTextIntoSearchMacroField("rel");
     String[] macrosItems = {
@@ -97,7 +97,7 @@ public class MacrosCommandsEditorTest {
     commandsEditor.selectLineAndDelete();
     commandsEditor.waitActive();
     commandsEditor.typeTextIntoEditor("echo ");
-    commandsEditor.selectMacrosLinkInCommandsEditor(EDITOR_MACROS_LINK);
+    commandsEditor.selectMacroLinkInCommandsEditor(EDITOR_MACROS_LINK);
     commandsEditor.selectMacroCommand("${current.class.fqn}");
     commandsEditor.typeTextIntoEditor(Keys.ARROW_DOWN.toString());
     commandsEditor.typeTextIntoEditor(Keys.SPACE.toString());
@@ -112,7 +112,7 @@ public class MacrosCommandsEditorTest {
     commandsEditor.setFocusIntoTypeCommandsEditor(PREVIEW_URL_EDITOR);
     commandsEditor.setCursorToLine(1);
     commandsEditor.waitActive();
-    commandsEditor.selectMacrosLinkInCommandsEditor(PREVIEW_MACROS_LINK);
+    commandsEditor.selectMacroLinkInCommandsEditor(PREVIEW_MACROS_LINK);
     commandsEditor.typeTextIntoSearchMacroField("server.");
     commandsEditor.waitTextIntoSearchMacroField("server.");
     String[] macrosItems = {
@@ -137,7 +137,7 @@ public class MacrosCommandsEditorTest {
     commandsEditor.setCursorToLine(1);
     commandsEditor.selectLineAndDelete();
     commandsEditor.waitActive();
-    commandsEditor.selectMacrosLinkInCommandsEditor(PREVIEW_MACROS_LINK);
+    commandsEditor.selectMacroLinkInCommandsEditor(PREVIEW_MACROS_LINK);
     commandsEditor.selectMacroCommand("${server.wsagent/http}");
     commandsEditor.typeTextIntoEditor(Keys.ARROW_UP.toString());
     commandsEditor.typeTextIntoEditor(Keys.SPACE.toString());
