@@ -12,11 +12,16 @@ package org.eclipse.che.selenium.projectexplorer.dependencies;
 
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.MAVEN;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.REIMPORT;
+import static org.openqa.selenium.Keys.DELETE;
+import static org.openqa.selenium.Keys.DOWN;
+import static org.openqa.selenium.Keys.SHIFT;
 
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Random;
+import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -26,6 +31,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.interactions.Actions;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -50,6 +56,8 @@ public class TransitiveDependencyTest {
   @Inject private Loader loader;
   @Inject private PopupDialogsBrowser popupDialogsBrowser;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private ActionsFactory actionsFactory;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -91,10 +99,17 @@ public class TransitiveDependencyTest {
 
   private void deleteDependency() {
     editor.waitActive();
-    loader.waitOnClosed();
-    for (int i = 36; i <= 40; i++) {
-      editor.setCursorToLine(i);
-      editor.selectLineAndDelete();
-    }
+    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    editor.setCursorToLine(36);
+    action
+        .keyDown(SHIFT)
+        .sendKeys(DOWN)
+        .sendKeys(DOWN)
+        .sendKeys(DOWN)
+        .sendKeys(DOWN)
+        .sendKeys(DOWN)
+        .keyUp(SHIFT)
+        .sendKeys(DELETE)
+        .perform();
   }
 }
