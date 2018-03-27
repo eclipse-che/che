@@ -23,7 +23,6 @@ import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.WarningDialog;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.testng.annotations.AfterClass;
@@ -44,7 +43,6 @@ public class CheckFactoryWithUntilPolicyTest {
   @Inject private PopupDialogsBrowser popupDialogsBrowser;
   @Inject private Dashboard dashboard;
   @Inject private SeleniumWebDriver seleniumWebDriver;
-  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private WarningDialog warningDialog;
   private TestFactory testFactory;
 
@@ -68,7 +66,7 @@ public class CheckFactoryWithUntilPolicyTest {
   public void checkFactoryAcceptingWithUntilPolicy() {
     dashboard.open();
     testFactory.open(seleniumWebDriver);
-    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
+    seleniumWebDriver.switchFromDashboardIframeToIde();
 
     if (System.currentTimeMillis() > initTime + FACTORY_INACTIVITY_TIME) {
       fail("Factory started longer then additional time and next test steps does not make sense");
@@ -86,7 +84,7 @@ public class CheckFactoryWithUntilPolicyTest {
 
     // second
     testFactory.open(seleniumWebDriver);
-    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
+    seleniumWebDriver.switchFromDashboardIframeToIde();
     warningDialog.waitWaitWarnDialogWindowWithSpecifiedTextMess(EXPIRE_MESSAGE);
   }
 }
