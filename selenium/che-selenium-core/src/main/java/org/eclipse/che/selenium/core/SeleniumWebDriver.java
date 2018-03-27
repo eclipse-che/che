@@ -330,8 +330,7 @@ public class SeleniumWebDriver
             (ExpectedCondition<Boolean>)
                 driver ->
                     (((JavascriptExecutor) driver)
-                            .executeScript(
-                                "return angular.element('body').scope().gwt-debug-projectTree"))
+                            .executeScript("return angular.element('body').scope().showIDE"))
                         .toString()
                         .equals("true"));
 
