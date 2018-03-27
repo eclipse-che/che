@@ -127,6 +127,21 @@ public class TestGitHubRepository {
     }
   }
 
+  /**
+   * Change content of the file
+   *
+   * @param pathToFile path to specified file
+   * @param content content to change
+   * @throws IOException
+   */
+  public void changeFileContent(String pathToFile, String content) throws IOException {
+    ghRepo.getFileContent(String.format("/%s", pathToFile)).update(content, "change - " + content);
+  }
+
+  public void deleteFile(String pathToContent) throws IOException {
+    ghRepo.getFileContent(pathToContent).delete("delete-file");
+  }
+
   public void deleteFolder(Path folder, String deleteCommitMessage) throws IOException {
     for (GHContent ghContent : ghRepo.getDirectoryContent(folder.toString())) {
       ghContent.delete(deleteCommitMessage);
@@ -137,10 +152,6 @@ public class TestGitHubRepository {
   public void delete() throws IOException {
     ghRepo.delete();
     LOG.info("GitHub repo {} has been removed", ghRepo.getHtmlUrl());
-  }
-
-  public GHContent getFileContent(String path) throws IOException {
-    return ghRepo.getFileContent(path);
   }
 
   public String getHtmlUrl() {

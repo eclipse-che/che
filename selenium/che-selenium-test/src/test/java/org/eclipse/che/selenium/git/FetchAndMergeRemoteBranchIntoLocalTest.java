@@ -20,18 +20,13 @@ import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
-import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
-import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestSshServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
@@ -54,17 +49,12 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
   @Inject private Git git;
   @Inject private Events eventsPanel;
-  @Inject private Loader loader;
   @Inject private CodenvyEditor editor;
-  @Inject private Consoles consoles;
-  @Inject private TestSshServiceClient testSshServiceClient;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
-  @Inject private TestGitHubServiceClient gitHubClientService;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -94,10 +84,10 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
     git.importJavaApp(testRepo.getHtmlUrl(), PROJECT_NAME, MAVEN);
 
     // change content in the test repo on GitHub
-    deleteFileOnGithubSide(String.format("%s/%s", pathToJspFile, jspFile), "delete index.jsp");
-    changeContentOnGithubSide(
+    testRepo.deleteFile(String.format("%s/%s", pathToJspFile, jspFile));
+    testRepo.changeFileContent(
         String.format("%s/%s.java", pathToJavaFile, javaFile), CHANGE_CONTENT);
-    changeContentOnGithubSide(textFile, CHANGE_CONTENT);
+    testRepo.changeFileContent(textFile, CHANGE_CONTENT);
 
     performFetch();
     git.waitGitStatusBarWithMess(fetchMess);
@@ -140,14 +130,6 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
     git.waitTextInHistoryForm(CHANGE_CONTENT);
     git.clickOnHistoryRowInСommitsList(0);
     git.waitContentInHistoryEditor(CHANGE_CONTENT);
-  }
-
-  private void deleteFileOnGithubSide(String pathToContent, String commitMess) throws IOException {
-    testRepo.getFileContent(pathToContent).delete(commitMess);
-  }
-
-  private void changeContentOnGithubSide(String pathToContent, String content) throws IOException {
-    testRepo.getFileContent(String.format("/%s", pathToContent)).update(content, "add " + content);
   }
 
   private void performFetch() {
