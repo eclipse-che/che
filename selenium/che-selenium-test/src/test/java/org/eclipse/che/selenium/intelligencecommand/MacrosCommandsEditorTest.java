@@ -13,10 +13,10 @@ package org.eclipse.che.selenium.intelligencecommand;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.JAVA_TYPE;
-import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsEditorType.COMMAND_LINE_EDITOR;
-import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsEditorType.PREVIEW_URL_EDITOR;
-import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsMacrosLinkType.EDITOR_MACROS_LINK;
-import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsMacrosLinkType.PREVIEW_MACROS_LINK;
+import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsEditorLocator.COMMAND_LINE_EDITOR;
+import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsEditorLocator.PREVIEW_URL_EDITOR;
+import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsMacrosLinkLocator.EDITOR_MACROS_LINK;
+import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsMacrosLinkLocator.PREVIEW_MACROS_LINK;
 
 import com.google.inject.Inject;
 import java.net.URL;
