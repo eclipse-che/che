@@ -324,73 +324,121 @@ public class CommandsEditor {
     editor.waitTabIsNotPresent(nameOfFile);
   }
 
+  /** Waits visibility and performs click on the "Run Command" button. */
   public void clickOnRunButton() {
     seleniumWebDriverHelper.waitAndClick(runButton, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
+  /** Waits visibility and performs click on the "Cancel" button. */
   public void clickOnCancelCommandEditorButton() {
     seleniumWebDriverHelper.waitAndClick(cancelCommandEditorButton, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
+  /** Waits visibility and performs click on the "Save" button. */
   public void clickOnSaveButtonInTheEditCommand() {
     seleniumWebDriverHelper.waitAndClick(saveButtonInCommandEditor, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /**
-   * wait the command tab with specified name with unsaved status
+   * Waits until command tab with specified {@code commandName} is displayed with the unsaved
+   * status.
    *
-   * @param nameCommand name of tab command
+   * @param commandName title of the commands editor's tab
    */
-  public void waitTabCommandWithUnsavedStatus(String nameCommand) {
+  public void waitTabCommandWithUnsavedStatus(String commandName) {
     seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(ACTIVE_TAB_UNSAVED_FILE_NAME, nameCommand)), ELEMENT_TIMEOUT_SEC);
+        By.xpath(format(ACTIVE_TAB_UNSAVED_FILE_NAME, commandName)), ELEMENT_TIMEOUT_SEC);
   }
 
-  public void typeTextIntoNameCommandField(String nameCommand) {
-    seleniumWebDriverHelper.setValue(nameCommandField, nameCommand);
+  /**
+   * Sets name of command to {@code commandName} and wait until it appears.
+   *
+   * @param commandName the command name which should be typed
+   */
+  public void typeTextIntoNameCommandField(String commandName) {
+    seleniumWebDriverHelper.setValue(nameCommandField, commandName);
   }
 
+  /**
+   * Waits until specified {@code expectedText} is displayed in the "Command Name" field.
+   *
+   * @param expectedText text which should be displayed
+   */
   public void waitTextIntoNameCommandField(String expectedText) {
     seleniumWebDriverHelper.waitValue(
         nameCommandField, expectedText, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
+  /**
+   * Waits until specified {@code expectedText} is displayed in the "Goal" field.
+   *
+   * @param expectedText text which should be displayed
+   */
   public void waitTextIntoGoalField(String expectedText) {
     seleniumWebDriverHelper.waitText(nameGoalField, expectedText, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
+  /**
+   * Opens "Goal" drop-down list and clicks on specified {@code goalName}.
+   *
+   * @param goalName item's visible name in the "Goal" drop-down
+   */
   public void selectGoalNameIntoCommandEditor(String goalName) {
     seleniumWebDriverHelper.waitAndClick(iconDropDownGoal, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     seleniumWebDriverHelper.waitVisibility(goalDropDown, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(NAME_IN_GOAL_DROP_DOWN, goalName)));
   }
 
+  /**
+   * Clicks on specified {commandsEditorType} in the "Commands Editor".
+   *
+   * @param commandsEditorType command editor's type which defined in {@link CommandsEditorType}
+   */
   public void setFocusIntoTypeCommandsEditor(String commandsEditorType) {
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(commandsEditorType), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     editor.waitActive();
   }
 
+  /**
+   * Waits until specified {@code expectedText} is displayed in the popup with macro description.
+   *
+   * @param expectedText text which should be displayed
+   */
   public void waitTextIntoDescriptionMacrosForm(String expectedText) {
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(format(DESCRIPTION_MACROS, expectedText)), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
-  public void selectMacrosLinkInCommandsEditor(String macrosLinkType) {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(macrosLinkType), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
-    waitCommandsMacrosIsOpen();
+  /**
+   * Waits visibility and clicks on "Macros" link with specified {@code macroLinkType} in the
+   * commands editor.
+   *
+   * @param macroLinkType type of the "Macros" link, defined in {@link CommandsMacrosLinkType}
+   */
+  public void selectMacroLinkInCommandsEditor(String macroLinkType) {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(macroLinkType), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    waitCommandMacrosIsOpen();
   }
 
-  public void waitCommandsMacrosIsOpen() {
+  /** Waits until "Command Macros" form is opened. */
+  public void waitCommandMacrosIsOpen() {
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(COMMAND_MACROS_FORM), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
-  public void waitCommandsMacrosIsClosed() {
+  /** Waits until "Command Macros" form is closed. */
+  public void waitCommandMacrosIsClosed() {
     seleniumWebDriverHelper.waitInvisibility(
         By.xpath(COMMAND_MACROS_FORM), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
+  /**
+   * Sets specified {@code text} to the "Search" field in the "Command Macros" form and waits until
+   * it appears.
+   *
+   * @param text text which should be typed
+   */
   public void typeTextIntoSearchMacroField(String text) {
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(COMMAND_MACROS_INPUT_FIELD), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
@@ -398,40 +446,77 @@ public class CommandsEditor {
     seleniumWebDriverHelper.setValue(By.xpath(COMMAND_MACROS_INPUT_FIELD), text);
   }
 
+  /**
+   * Waits until specified {@code expectedText} is visible in the "Search" field of the "Command
+   * Macros" form.
+   *
+   * @param expectedText text which should be displayed
+   */
   public void waitTextIntoSearchMacroField(String expectedText) {
     seleniumWebDriverHelper.waitValue(
         macrosInputField, expectedText, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
+  /**
+   * Waits until specified {@code expectedText} is present in the macro proposal area of the
+   * "Command Macros" form.
+   *
+   * @param expectedText visible text of the macros proposal which should be displayed
+   */
   public void waitTextIntoMacrosContainer(final String expectedText) {
     webDriverWaitFactory
         .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
         .until(
             (ExpectedCondition<Boolean>)
-                webDriver -> getAllVisibleTextFromMacrosContainer().contains(expectedText));
+                webDriver -> getVisibleTextFromMacrosContainer().contains(expectedText));
   }
 
-  public String getAllVisibleTextFromMacrosContainer() {
-    waitCommandsMacrosIsOpen();
+  /**
+   * Gets all visible text from proposal area of the "Command Macros" form.
+   *
+   * @return visible text from proposal area
+   */
+  public String getVisibleTextFromMacrosContainer() {
+    waitCommandMacrosIsOpen();
     return macrosContainer.getText();
   }
 
+  /**
+   * Enters macro command {@code item} by pressing Enter key.
+   *
+   * @param item macro body in format "${current.project.path}" without description
+   */
   public void enterMacroCommandByEnter(String item) {
     selectMacroCommand(item);
     seleniumWebDriverHelper.sendKeys(ENTER.toString());
   }
 
+  /**
+   * Enters macro command {@code item} by pressing Enter key.
+   *
+   * @param item macro body in format "${current.project.path}" without description
+   */
   public void enterMacroCommandByDoubleClick(String item) {
     selectMacroCommand(item);
     seleniumWebDriverHelper.doubleClick();
   }
 
+  /**
+   * Waits visibility, clicks on specified {@code item} and waits selection.
+   *
+   * @param item macro body in format "${current.project.path}" without description
+   */
   public void selectMacroCommand(String item) {
     waitVisibilityAndGetMacro(item).click();
 
     waitMacroCommandIsSelected(item);
   }
 
+  /**
+   * Waits until specified {@code item} is selected.
+   *
+   * @param item macro body in format "${current.project.path}" without description
+   */
   private void waitMacroCommandIsSelected(String item) {
     webDriverWaitFactory
         .get()
@@ -444,12 +529,19 @@ public class CommandsEditor {
                 });
   }
 
+  /**
+   * Waits visibility and gets the {@link WebElement} which specified by {@code item}.
+   *
+   * @param item macro body in format "${current.project.path}" without description
+   * @return found {@link WebElement}
+   */
   public WebElement waitVisibilityAndGetMacro(String item) {
     return seleniumWebDriverHelper.waitVisibility(
         By.xpath(format(COMMAND_MACROS_FORM + "//div[text()='%s']/parent::td/parent::tr", item)),
         REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
+  /** Deletes all text in the selected editor area. */
   public void deleteAllContent() {
     actionsFactory
         .createAction(seleniumWebDriver)
@@ -460,6 +552,11 @@ public class CommandsEditor {
         .perform();
   }
 
+  /**
+   * Places cursor to the specified {@code positionLine}.
+   *
+   * @param positionLine number of the line where cursor should be placed
+   */
   public void setCursorToLine(int positionLine) {
     loader.waitOnClosed();
     seleniumWebDriverHelper.sendKeys(Keys.chord(CONTROL, "l"));
