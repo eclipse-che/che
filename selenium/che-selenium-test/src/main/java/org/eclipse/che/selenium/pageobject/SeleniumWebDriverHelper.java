@@ -503,10 +503,10 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits during {@code timeout} until specified {@code element} is contains the defined {@code
+   * Waits during {@code timeout} until specified {@code element} contains the defined {@code
    * expectedText}.
    *
-   * <p>Note! The text extracted by {@link WebElement#getAttribute(String)} method.
+   * <p>Note! The text is extracted by {@link WebElement#getAttribute(String)} method.
    *
    * @param element element which should be checked
    * @param expectedText text which should be presented
@@ -521,9 +521,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until specified {@code element} is contains the defined {@code expectedText}.
+   * Waits until specified {@code element} contains the defined {@code expectedText}.
    *
-   * <p>Note! The text extracted by {@link WebElement#getAttribute(String)} method.
+   * <p>Note! The text is extracted by {@link WebElement#getAttribute(String)} method.
    *
    * @param element element which should be checked
    * @param expectedText text which should be presented
@@ -534,9 +534,9 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during {@code timeout} until {@link WebElement} which defined by {@code elementLocator}
-   * is contains the specified {@code expectedText}.
+   * contains the specified {@code expectedText}.
    *
-   * <p>Note! The text extracted by {@link WebElement#getAttribute(String)} method.
+   * <p>Note! The text is extracted by {@link WebElement#getAttribute(String)} method.
    *
    * @param elementLocator locator of the element which should be checked
    * @param expectedText text which should be present
@@ -547,10 +547,10 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until {@link WebElement} which defined by {@code elementLocator} is contains the
-   * specified {@code expectedText}.
+   * Waits until {@link WebElement} which defined by {@code elementLocator} contains the specified
+   * {@code expectedText}.
    *
-   * <p>Note! The text extracted by {@link WebElement#getAttribute(String)} method.
+   * <p>Note! The text is extracted by {@link WebElement#getAttribute(String)} method.
    *
    * @param elementLocator locator of the element which should be checked
    * @param expectedText text which should be present
@@ -614,10 +614,10 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits during {@code timeout} until specified {@code element} is contains the specified {@code
+   * Waits during {@code timeout} until specified {@code element} contains the specified {@code
    * expectedText}.
    *
-   * <p>Note! Text extracted by {@link WebElement#getText()} method.
+   * <p>Note! Text is extracted by {@link WebElement#getText()} method.
    *
    * @param element element which should be checked
    * @param expectedText text which should be presented
@@ -632,9 +632,9 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until specified {@code element} is contains the specified {@code expectedText}.
+   * Waits until specified {@code element} contains the specified {@code expectedText}.
    *
-   * <p>Note! Text extracted by {@link WebElement#getText()} method.
+   * <p>Note! Text is extracted by {@link WebElement#getText()} method.
    *
    * @param element element which should be checked
    * @param expectedText text which should be presented
@@ -645,9 +645,9 @@ public class SeleniumWebDriverHelper {
 
   /**
    * Waits during {@code timeout} until {@link WebElement} which defined by {@code elementLocator}
-   * is contains the specified {@code expectedText}.
+   * contains the specified {@code expectedText}.
    *
-   * <p>Note! Text extracted by {@link WebElement#getText()} method.
+   * <p>Note! Text is extracted by {@link WebElement#getText()} method.
    *
    * @param elementLocator locator of the element which should be checked
    * @param expectedText text which should be presented
@@ -658,10 +658,10 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Waits until {@link WebElement} which defined by {@code elementLocator} is contains the
-   * specified {@code expectedText}.
+   * Waits until {@link WebElement} which defined by {@code elementLocator} contains the specified
+   * {@code expectedText}.
    *
-   * <p>Note! Text extracted by {@link WebElement#getText()} method.
+   * <p>Note! Text is extracted by {@link WebElement#getText()} method.
    *
    * @param elementLocator locator of the element which should be checked
    * @param expectedText text which should be presented
