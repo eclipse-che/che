@@ -16,6 +16,8 @@ const theiaRoot = '/home/theia';
 const defaultTheiaRoot = '/home/default/theia';
 const gitPluginsRoot = '/tmp/theia-plugins-from-git-repos';
 
+const THEIA_PORT = getTheiaPort();
+
 prepareTheia();
 
 /** Rebuilds if needed and runs Theia */
@@ -188,11 +190,23 @@ function callBuild() {
     return promisify('yarn theia build', cp.spawn('yarn', ['theia', 'build']));
 }
 function callRun() {
-    return promisify('yarn theia start', cp.spawn('yarn', ['theia', 'start', '/projects', '--hostname=0.0.0.0']));
+    return promisify('yarn theia start', cp.spawn('yarn', ['theia', 'start', '/projects', '--hostname=0.0.0.0', "--port=" + THEIA_PORT]));
 }
 function handleError(p) {
     p.catch(error => {
         console.error(error);
     }).catch(() => {
     });
+}
+
+/**
+ * Returns port on which Theia should be run.
+ * If invalid or not specified, then default 3000 port will be returned.
+ */
+function getTheiaPort() {
+    const port = Number(process.env.THEIA_PORT);
+    if (port) {
+        return port;
+    }
+    return 3000;
 }
