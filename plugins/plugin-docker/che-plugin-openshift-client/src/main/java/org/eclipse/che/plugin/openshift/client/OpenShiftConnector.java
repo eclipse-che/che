@@ -270,9 +270,11 @@ public class OpenShiftConnector extends DockerConnector {
       @Nullable @Named("che.openshift.workspace.memory.request") String cheWorkspaceMemoryRequest,
       @Nullable @Named("che.openshift.workspace.memory.override") String cheWorkspaceMemoryLimit,
       @Named("che.openshift.secure.routes") boolean secureRoutes,
-      @Named("che.openshift.precreate.workspace.dirs") boolean createWorkspaceDirs) {
+      @Named("che.openshift.precreate.workspace.dirs") boolean createWorkspaceDirs,
+      @Named("che.docker.build_timeout_sec") long imageBuildTimeoutSec) {
 
     super(
+        imageBuildTimeoutSec,
         connectorConfiguration,
         connectionFactory,
         authResolver,

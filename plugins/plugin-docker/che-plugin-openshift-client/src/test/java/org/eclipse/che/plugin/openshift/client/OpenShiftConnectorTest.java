@@ -62,6 +62,8 @@ public class OpenShiftConnectorTest {
   @Mock private OpenShiftDeploymentCleaner openShiftDeploymentCleaner;
   @Mock private WorkspaceSubjectRegistry workspaceSubjectRegistry;
 
+  private static final int IMAGE_BUILD_TIMEOUT = 300;
+
   private OpenShiftConnector openShiftConnector;
 
   @BeforeMethod
@@ -92,7 +94,8 @@ public class OpenShiftConnectorTest {
             CHE_WORKSPACE_CPU_LIMIT,
             null,
             SECURE_ROUTES,
-            CREATE_WORKSPACE_DIRS);
+            CREATE_WORKSPACE_DIRS,
+            IMAGE_BUILD_TIMEOUT);
   }
 
   @Test
