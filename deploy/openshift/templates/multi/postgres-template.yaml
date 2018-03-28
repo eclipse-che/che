@@ -15,7 +15,6 @@ objects:
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
-    creationTimestamp: null
     labels:
       io.kompose.service: postgres
     name: postgres
@@ -28,7 +27,6 @@ objects:
       type: Recreate
     template:
       metadata:
-        creationTimestamp: null
         labels:
           io.kompose.service: postgres
       spec:
@@ -86,7 +84,6 @@ objects:
 - apiVersion: v1
   kind: Service
   metadata:
-    creationTimestamp: null
     labels:
       io.kompose.service: postgres
     name: postgres
@@ -100,7 +97,6 @@ objects:
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
-    creationTimestamp: null
     labels:
       io.kompose.service: postgres-data
     name: postgres-data
