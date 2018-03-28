@@ -86,8 +86,10 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
     // change content in the test repo on GitHub
     testRepo.deleteFile(String.format("%s/%s", pathToJspFile, jspFile));
     testRepo.changeFileContent(
-        String.format("%s/%s.java", pathToJavaFile, javaFile), CHANGE_CONTENT);
-    testRepo.changeFileContent(textFile, CHANGE_CONTENT);
+        String.format("%s/%s.java", pathToJavaFile, javaFile),
+        CHANGE_CONTENT,
+        "file-" + CHANGE_CONTENT);
+    testRepo.changeFileContent(textFile, CHANGE_CONTENT, "file-" + CHANGE_CONTENT);
 
     performFetch();
     git.waitGitStatusBarWithMess(fetchMess);

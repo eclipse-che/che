@@ -135,11 +135,26 @@ public class TestGitHubRepository {
    * @throws IOException
    */
   public void changeFileContent(String pathToFile, String content) throws IOException {
-    ghRepo.getFileContent(String.format("/%s", pathToFile)).update(content, "change - " + content);
+    ghRepo
+        .getFileContent(String.format("/%s", pathToFile))
+        .update(content, "change - " + pathToFile);
   }
 
-  public void deleteFile(String pathToContent) throws IOException {
-    ghRepo.getFileContent(pathToContent).delete("delete-file");
+  /**
+   * Change content of the file
+   *
+   * @param pathToFile path to specified file
+   * @param content content to change
+   * @param commitMessage message to commit
+   * @throws IOException
+   */
+  public void changeFileContent(String pathToFile, String content, String commitMessage)
+      throws IOException {
+    ghRepo.getFileContent(String.format("/%s", pathToFile)).update(content, commitMessage);
+  }
+
+  public void deleteFile(String pathToFile) throws IOException {
+    ghRepo.getFileContent(pathToFile).delete("delete-file-" + pathToFile);
   }
 
   public void deleteFolder(Path folder, String deleteCommitMessage) throws IOException {
