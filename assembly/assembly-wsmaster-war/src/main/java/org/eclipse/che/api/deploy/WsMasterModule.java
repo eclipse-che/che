@@ -20,6 +20,7 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+import com.google.inject.util.Providers;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -90,6 +91,9 @@ import org.flywaydb.core.internal.util.PlaceholderReplacer;
 /** @author andrew00x */
 @DynaModule
 public class WsMasterModule extends AbstractModule {
+
+  private static final String JGROUPS_CONF_FILE = "jgroups/che-tcp.xml";
+
   @Override
   protected void configure() {
     // db related components modules
@@ -216,20 +220,11 @@ public class WsMasterModule extends AbstractModule {
         PersistenceUnitProperties.NON_JTA_DATASOURCE, "java:/comp/env/jdbc/che");
     bindConstant().annotatedWith(Names.named("jndi.datasource.name")).to("java:/comp/env/jdbc/che");
 
+    // Replication stuff
+    bind(org.eclipse.che.api.core.distributed.DistributedMapComposer.class);
+
     String infrastructure = System.getenv("CHE_INFRASTRUCTURE_ACTIVE");
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {
-      persistenceProperties.put(
-          PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
-          "org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler");
-
-      if (OpenShiftInfrastructure.NAME.equals(infrastructure)
-          || KubernetesInfrastructure.NAME.equals(infrastructure)) {
-        persistenceProperties.put(
-            PersistenceUnitProperties.COORDINATION_PROTOCOL, CacheCoordinationProtocol.JGROUPS);
-        persistenceProperties.put(
-            PersistenceUnitProperties.COORDINATION_JGROUPS_CONFIG, "jgroups/che-tcp.xml");
-      }
-
       configureMultiUserMode(persistenceProperties, infrastructure);
     } else {
       persistenceProperties.put(
@@ -272,10 +267,34 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
+
+    bind(String.class)
+        .annotatedWith(Names.named("jgroups.config.file"))
+        .toProvider(Providers.of(null));
   }
 
   private void configureMultiUserMode(
       Map<String, String> persistenceProperties, String infrastructure) {
+
+    if (OpenShiftInfrastructure.NAME.equals(infrastructure)
+        || KubernetesInfrastructure.NAME.equals(infrastructure)) {
+      persistenceProperties.put(
+          PersistenceUnitProperties.COORDINATION_PROTOCOL, CacheCoordinationProtocol.JGROUPS);
+      persistenceProperties.put(
+          PersistenceUnitProperties.COORDINATION_JGROUPS_CONFIG, JGROUPS_CONF_FILE);
+      bind(String.class)
+          .annotatedWith(Names.named("jgroups.config.file"))
+          .toProvider(Providers.of(JGROUPS_CONF_FILE));
+    } else {
+      bind(String.class)
+          .annotatedWith(Names.named("jgroups.config.file"))
+          .toProvider(Providers.of(null));
+    }
+
+    persistenceProperties.put(
+        PersistenceUnitProperties.EXCEPTION_HANDLER_CLASS,
+        "org.eclipse.che.core.db.postgresql.jpa.eclipselink.PostgreSqlExceptionHandler");
+
     bind(TemplateProcessor.class).to(STTemplateProcessorImpl.class);
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.JndiDataSourceProvider.class);
 
