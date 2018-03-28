@@ -22,11 +22,13 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_OUTPUT_U
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
+import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.plugin.maven.shared.dto.ArchetypeOutput;
 import org.eclipse.che.plugin.maven.shared.dto.PercentMessageDto;
 import org.eclipse.che.plugin.maven.shared.dto.PercentUndefinedMessageDto;
@@ -39,6 +41,7 @@ import org.eclipse.che.plugin.maven.shared.dto.TextMessageDto;
  */
 @Singleton
 public class MavenJsonRpcHandler {
+  private RequestTransmitter requestTransmitter;
   private RequestHandlerConfigurator configurator;
 
   private Set<Consumer<TextMessageDto>> textConsumers = new HashSet<>();
@@ -48,21 +51,19 @@ public class MavenJsonRpcHandler {
   private Set<Consumer<ProjectsUpdateMessage>> projectsUpdateConsumers = new HashSet<>();
   private Set<Consumer<ArchetypeOutput>> archetypeOutputConsumers = new HashSet<>();
 
-  private boolean isSubscribed = false;
-
   @Inject
-  public MavenJsonRpcHandler(RequestHandlerConfigurator configurator) {
+  public MavenJsonRpcHandler(
+      EventBus eventBus,
+      RequestTransmitter requestTransmitter,
+      RequestHandlerConfigurator configurator) {
+    this.requestTransmitter = requestTransmitter;
     this.configurator = configurator;
 
     handleMavenServerMessages();
+    eventBus.addHandler(WorkspaceReadyEvent.getType(), event -> subscribe());
   }
 
-  @Inject
-  private void subscribe(RequestTransmitter requestTransmitter) {
-    if (isSubscribed) {
-      return;
-    }
-
+  private void subscribe() {
     requestTransmitter
         .newRequest()
         .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
@@ -76,8 +77,6 @@ public class MavenJsonRpcHandler {
         .methodName(MAVEN_ARCHETYPE_CHANEL_SUBSCRIBE)
         .noParams()
         .sendAndSkipResult();
-
-    isSubscribed = true;
   }
 
   /**
