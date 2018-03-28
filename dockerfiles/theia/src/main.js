@@ -16,6 +16,7 @@ const theiaRoot = '/home/theia';
 const defaultTheiaRoot = '/home/default/theia';
 const gitPluginsRoot = '/tmp/theia-plugins-from-git-repos';
 
+const DEFAULT_THEIA_PORT = 3000;
 const THEIA_PORT = getTheiaPort();
 
 prepareTheia();
@@ -201,12 +202,12 @@ function handleError(p) {
 
 /**
  * Returns port on which Theia should be run.
- * If invalid or not specified, then default 3000 port will be returned.
+ * If invalid or not specified, then default port will be returned.
  */
 function getTheiaPort() {
     const port = Number(process.env.THEIA_PORT);
     if (port) {
         return port;
     }
-    return 3000;
+    return DEFAULT_THEIA_PORT;
 }
