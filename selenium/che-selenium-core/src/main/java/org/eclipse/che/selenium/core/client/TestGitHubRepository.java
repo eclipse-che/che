@@ -135,7 +135,7 @@ public class TestGitHubRepository {
    * @throws IOException
    */
   public void changeFileContent(String pathToFile, String content) throws IOException {
-    changeFileContent(pathToFile, content, format("Change file-%s", pathToFile));
+    changeFileContent(pathToFile, content, format("Change file %s", pathToFile));
   }
 
   /**
@@ -152,7 +152,7 @@ public class TestGitHubRepository {
   }
 
   public void deleteFile(String pathToFile) throws IOException {
-    ghRepo.getFileContent(pathToFile).delete("delete-file-" + pathToFile);
+    ghRepo.getFileContent(pathToFile).delete("Delete file " + pathToFile);
   }
 
   public void deleteFolder(Path folder, String deleteCommitMessage) throws IOException {
