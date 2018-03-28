@@ -16,9 +16,10 @@ import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
-import javax.inject.Named;
+import com.google.inject.name.Named;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -45,6 +46,8 @@ public class CheckStoppingWsByTimeoutTest {
   @Named("che.workspace.activity_check_scheduler_period_s")
   private int cheWorkspaceActivityCheckSchedulerPeriodInSeconds;
 
+  @Inject TestUserHttpJsonRequestFactory testUserHttpJsonRequestFactory;
+
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(testWorkspace);
@@ -57,7 +60,7 @@ public class CheckStoppingWsByTimeoutTest {
   public void checkStoppingByApi() throws Exception {
     Workspace workspace =
         workspaceServiceClient.getByName(
-            testWorkspace.getName(), testUser.getName(), testUser.getAuthToken());
+            testWorkspace.getName(), testUser.getName());
     assertEquals(workspace.getStatus(), STOPPED);
   }
 
