@@ -41,6 +41,7 @@
         <module>che-core-api-oauth</module>
         <module>che-core-api-testing</module>
         <module>che-core-api-testing-shared</module>
+        <module>che-core-workspace-activity-server</module>
         <module>wsagent-local</module>
         <module>che-wsagent-core</module>
     </modules>
