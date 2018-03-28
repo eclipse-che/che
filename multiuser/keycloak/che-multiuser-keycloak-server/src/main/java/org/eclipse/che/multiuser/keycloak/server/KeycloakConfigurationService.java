@@ -12,6 +12,11 @@ package org.eclipse.che.multiuser.keycloak.server;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -42,5 +47,26 @@ public class KeycloakConfigurationService extends Service {
   @Produces(APPLICATION_JSON)
   public Map<String, String> settings() {
     return keycloakSettings.get();
+  }
+
+  @GET
+  @Path("/OIDCKeycloak.js")
+  @Produces("text/javascript")
+  public String javascriptAdapter() throws IOException {
+    URL resource =
+        Thread.currentThread().getContextClassLoader().getResource("keycloak/OIDCKeycloak.js");
+    if (resource != null) {
+      URLConnection conn = resource.openConnection();
+      try (InputStream is = conn.getInputStream();
+          ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = is.read(buffer)) != -1) {
+          os.write(buffer, 0, length);
+        }
+        return os.toString("UTF-8");
+      }
+    }
+    return "";
   }
 }

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-multiuser-parent</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>6.3.0-SNAPSHOT</version>
+        <version>6.4.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-multiuser-permission</artifactId>
@@ -25,9 +25,11 @@
     <modules>
         <module>che-multiuser-permission-user</module>
         <module>che-multiuser-permission-workspace</module>
+        <module>che-multiuser-permission-workspace-activity</module>
         <module>che-multiuser-permission-factory</module>
         <module>che-multiuser-permission-system</module>
         <module>che-multiuser-permission-installer</module>
         <module>che-multiuser-permission-resource</module>
+        <module>che-multiuser-permission-logger</module>
     </modules>
 </project>

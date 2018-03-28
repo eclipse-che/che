@@ -65,7 +65,7 @@ wait_until_che_is_available() {
     DEPLOYMENT_TIMEOUT_SEC=300
     POLLING_INTERVAL_SEC=5
     end=$((SECONDS+DEPLOYMENT_TIMEOUT_SEC))
-    while [ "${available}" != "\"True\"" ] && [ ${SECONDS} -lt ${end} ]; do
+    while [[ "${available}" != "\"True\"" || "${progressing}" != "\"True\"" ]] && [ ${SECONDS} -lt ${end} ]; do
       available=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Available") | .status')
       progressing=$(oc get dc che -o json | jq '.status.conditions[] | select(.type == "Progressing") | .status')
       timeout_in=$((end-SECONDS))
@@ -93,7 +93,7 @@ wait_until_che_is_available() {
 }
 
 # --------------
-# Print Che logo 
+# Print Che logo
 # --------------
 
 echo
@@ -146,6 +146,7 @@ DEFAULT_OPENSHIFT_FLAVOR="minishift"
 OPENSHIFT_FLAVOR=${OPENSHIFT_FLAVOR:-${DEFAULT_OPENSHIFT_FLAVOR}}
 DEFAULT_DNS_PROVIDER="nip.io"
 DNS_PROVIDER=${DNS_PROVIDER:-${DEFAULT_DNS_PROVIDER}}
+BASE_DIR=$(cd "$(dirname "$0")"; pwd)
 
 # If OpenShift flavor is MiniShift check its availability
 if [ "${OPENSHIFT_FLAVOR}" == "minishift" ]; then
@@ -283,14 +284,41 @@ CHE_IMAGE_SANITIZED=$(echo "${CHE_IMAGE}" | sed 's/\//\\\//g')
 CHE_KEYCLOAK_OSO_ENDPOINT=${CHE_KEYCLOAK_OSO_ENDPOINT:-${DEFAULT_CHE_KEYCLOAK_OSO_ENDPOINT}}
 KEYCLOAK_GITHUB_ENDPOINT=${KEYCLOAK_GITHUB_ENDPOINT:-${DEFAULT_KEYCLOAK_GITHUB_ENDPOINT}}
 
+CHE_MASTER_PVC="\
+- apiVersion: v1\n \
+ kind: PersistentVolumeClaim\n \
+ metadata:\n \
+   labels:\n \
+     app: che\n \
+   name: che-data-volume\n \
+ spec:\n \
+   accessModes:\n \
+   - ReadWriteOnce\n \
+   resources:\n \
+     requests:\n \
+       storage: 1Gi"
+
+CHE_MASTER_VOLUME_MOUNTS="\
+- mountPath: /data\n \
+           name: che-data-volume"
+
+CHE_MASTER_VOLUMES="\
+- name: che-data-volume\n \
+         persistentVolumeClaim:\n \
+           claimName: che-data-volume"
+
 get_che_pod_config() {
-DEFAULT_CHE_DEPLOYMENT_FILE_PATH=./che-openshift.yml
+DEFAULT_CHE_DEPLOYMENT_FILE_PATH=${BASE_DIR}/che-openshift.yml
 CHE_DEPLOYMENT_FILE_PATH=${CHE_DEPLOYMENT_FILE_PATH:-${DEFAULT_CHE_DEPLOYMENT_FILE_PATH}}
-DEFAULT_CHE_CONFIG_FILE_PATH=./che-config
+DEFAULT_CHE_CONFIG_FILE_PATH=${BASE_DIR}/che-config
 CHE_CONFIG_FILE_PATH=${CHE_CONFIG_FILE_PATH:-${DEFAULT_CHE_CONFIG_FILE_PATH}}
 cat "${CHE_DEPLOYMENT_FILE_PATH}" | \
     sed "s/          image:.*/          image: \"${CHE_IMAGE_SANITIZED}\"/" | \
     sed "s/          imagePullPolicy:.*/          imagePullPolicy: \"${IMAGE_PULL_POLICY}\"/" | \
+    if [[ "${CHE_MULTIUSER}" != "true" ]]; then
+    sed "s|#CHE_MASTER_PVC|$CHE_MASTER_PVC|" | \
+    sed "s|#CHE_MASTER_VOLUME_MOUNTS.*|$CHE_MASTER_VOLUME_MOUNTS|" | \
+    sed "s|#CHE_MASTER_VOLUMES.*|$CHE_MASTER_VOLUMES|";else cat -; fi | \
     inject_che_config "#CHE_MASTER_CONFIG" "${CHE_CONFIG_FILE_PATH}"
 }
 
@@ -358,7 +386,7 @@ if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
     echo "Project \"${CHE_OPENSHIFT_PROJECT}\" does not exist...trying to create it."
     DEPLOYMENT_TIMEOUT_SEC=120
     POLLING_INTERVAL_SEC=2
-    timeout_in=$((POLLING_INTERVAL_SEC+DEPLOYMENT_TIMEOUT_SEC))  
+    timeout_in=$((POLLING_INTERVAL_SEC+DEPLOYMENT_TIMEOUT_SEC))
     while $WAIT_FOR_PROJECT_TO_DELETE
     do
     { # try
@@ -366,7 +394,7 @@ if ! oc get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
         if [ "$timeout_in" -le "0" ] ; then
             echo "[CHE] **ERROR**: Timeout of $DEPLOYMENT_TIMEOUT_SEC waiting for project \"${CHE_OPENSHIFT_PROJECT}\" to be deleted."
             exit 1
-        fi  
+        fi
         oc new-project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null && \
         WAIT_FOR_PROJECT_TO_DELETE=false # Only excutes if project creation is successfully
     } || { # catch
@@ -429,13 +457,12 @@ oc apply -f -
 # for postgres and optionally Keycloak
 # -------------------------------------------------------------
 
-COMMAND_DIR=$(dirname "$0")
-
 if [[ "${CHE_MULTIUSER}" == "true" ]] && [[ "${COMMAND}" == "deploy" ]]; then
     if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
-        "${COMMAND_DIR}"/multi-user/deploy_postgres_and_keycloak.sh
+        "${BASE_DIR}"/multi-user/deploy_postgres_and_keycloak.sh
+        "${BASE_DIR}"/multi-user/configure_keycloak.sh
     else
-        "${COMMAND_DIR}"/multi-user/deploy_postgres_only.sh
+        "${BASE_DIR}"/multi-user/deploy_postgres_only.sh
     fi
 fi
 
@@ -536,10 +563,6 @@ fi
 
 if [ "${WAIT_FOR_CHE}" == "true" ]; then
   wait_until_che_is_available
-fi
-
-if [ "${CHE_DEDICATED_KEYCLOAK}" == "true" ]; then
-"${COMMAND_DIR}"/multi-user/configure_keycloak.sh
 fi
 
 che_route=$(oc get route che -o jsonpath='{.spec.host}')

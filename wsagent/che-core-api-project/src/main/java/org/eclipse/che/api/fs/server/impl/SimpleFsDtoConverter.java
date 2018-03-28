@@ -10,7 +10,6 @@
  */
 package org.eclipse.che.api.fs.server.impl;
 
-import static org.eclipse.che.api.fs.server.WsPathUtils.isRoot;
 import static org.eclipse.che.api.fs.server.WsPathUtils.nameOf;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -55,15 +54,7 @@ public class SimpleFsDtoConverter implements FsDtoConverter {
       length = null;
     }
 
-    RegisteredProject project;
-    if (isRoot(wsPath)) {
-      project = null;
-    } else {
-      project =
-          projectManager
-              .getClosest(wsPath)
-              .orElseThrow(() -> new NotFoundException("Can't find project for item " + wsPath));
-    }
+    RegisteredProject project = projectManager.getClosest(wsPath).orElse(null);
 
     String type;
     if (projectManager.isRegistered(wsPath)) {

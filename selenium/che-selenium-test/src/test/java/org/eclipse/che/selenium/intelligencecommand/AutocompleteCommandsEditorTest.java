@@ -14,8 +14,8 @@ import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SU
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.MAVEN_NAME;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.BUILD_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.MAVEN_TYPE;
-import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsEditorType.COMMAND_LINE_EDITOR;
-import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsEditorType.PREVIEW_URL_EDITOR;
+import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsEditorLocator.COMMAND_LINE_EDITOR;
+import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsEditorLocator.PREVIEW_URL_EDITOR;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -91,7 +91,7 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.typeTextIntoEditor("echo ");
     commandsEditor.typeTextIntoEditor("na");
     commandsEditor.launchAutocompleteAndWaitContainer();
-    commandsEditor.selectItemIntoAutocompleteAndPasteByDoubleClick("${explorer.current.project.");
+    commandsEditor.selectItemIntoAutocompleteAndPerformDoubleClick("${explorer.current.project.");
     commandsEditor.waitAutocompleteContainerIsClosed();
     commandsEditor.waitTextIntoEditor("${explorer.current.project.name");
     commandsEditor.clickOnRunButton();
@@ -121,14 +121,14 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.deleteAllContent();
     commandsEditor.typeTextIntoEditor("omcat8");
     commandsEditor.launchAutocompleteAndWaitContainer();
-    commandsEditor.selectItemIntoAutocompleteAndPasteByDoubleClick("-debug}");
+    commandsEditor.selectItemIntoAutocompleteAndPerformDoubleClick("-debug}");
     commandsEditor.waitTextIntoEditor("${server.tomcat8-debug}");
     commandsEditor.typeTextIntoEditor(Keys.ENTER.toString());
     commandsEditor.waitActive();
     commandsEditor.typeTextIntoEditor("wsagent");
     commandsEditor.launchAutocomplete();
     commandsEditor.waitTextIntoAutocompleteContainer("${server.wsagent/ws}");
-    commandsEditor.selectItemIntoAutocompleteAndPasteByDoubleClick("/ws}");
+    commandsEditor.selectItemIntoAutocompleteAndPerformDoubleClick("/ws}");
     commandsEditor.waitTextIntoEditor("${server.wsagent/ws}");
     commandsEditor.clickOnRunButton();
     consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS);
@@ -145,7 +145,7 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.selectLineAndDelete();
     commandsEditor.waitActive();
     commandsEditor.launchAutocompleteAndWaitContainer();
-    commandsEditor.selectItemIntoAutocompleteAndPasteByDoubleClick("${current.class.fqn}");
+    commandsEditor.selectItemIntoAutocompleteAndPerformDoubleClick("${current.class.fqn}");
     commandsEditor.waitAutocompleteContainerIsClosed();
     commandsEditor.waitTextIntoEditor("${current.class.fqn}");
   }

@@ -99,7 +99,7 @@
           </div>
           <md-list layout="column">
             <md-list-item flex class="navbar-subsection-item"
-                          ng-if="navbarController.userServices.hasAdminUserService">
+                          ng-if="navbarController.isKeycloackPresent === false && navbarController.userServices.hasAdminUserService">
               <md-button nav-bar-selected flex che-reload-href
                          href="{{navbarController.menuItemUrl.usermanagement}}"
                          layout-align="left">

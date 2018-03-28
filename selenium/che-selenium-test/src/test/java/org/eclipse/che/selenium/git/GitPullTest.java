@@ -35,7 +35,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -66,18 +65,12 @@ public class GitPullTest {
 
   @BeforeClass
   public void prepare() throws Exception {
-    String commitMess = String.format("new_content_was_added %s ", System.currentTimeMillis());
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
 
     Path entryPath = Paths.get(getClass().getResource("/projects/git-pull-test").getPath());
-    testRepo.addContent(entryPath, commitMess);
+    testRepo.addContent(entryPath);
 
     ide.open(ws);
-  }
-
-  @AfterClass
-  public void deleteRepo() throws IOException {
-    testRepo.delete();
   }
 
   @Test

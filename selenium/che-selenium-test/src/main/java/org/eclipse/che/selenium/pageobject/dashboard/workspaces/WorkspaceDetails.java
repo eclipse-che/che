@@ -51,8 +51,9 @@ public class WorkspaceDetails {
     String INSTALLERS = "Installers";
     String ENV_VARIABLES = "Env Variables";
     String CONFIG = "Config";
-    String SSH = "Ssh";
+    String SSH = "SSH";
     String SHARE = "Share";
+    String VOLUMES = "Volumes";
   }
 
   private interface Locators {
