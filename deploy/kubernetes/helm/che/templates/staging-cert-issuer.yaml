@@ -15,7 +15,7 @@
 #     # The ACME server URL
 #     server: https://acme-staging.api.letsencrypt.org/directory
 #     # Email address used for ACME registration
-#     email: eyal.barlev@sap.com
+#     email: user@example.com
 #     # Name of a secret used to store the ACME account private key
 #     privateKeySecretRef:
 #       name: letsencrypt-staging
