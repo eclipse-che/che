@@ -5,6 +5,7 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
+{{- if not .Values.global.multiuser }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -17,3 +18,4 @@ spec:
   resources:
     requests:
       storage: 1Gi
+{{- end }}
