@@ -135,7 +135,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
     factoryWidget.clickOnInvokeBtn();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
-    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     try {
       projectExplorer.waitProjectExplorer(80);
     } catch (org.openqa.selenium.TimeoutException ex) {

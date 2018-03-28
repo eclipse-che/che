@@ -79,7 +79,7 @@ public class CheckWelcomePanelOnCodenvyTest {
   public void shouldAppearsWelcomePanelAfterUsingFactory() throws Exception {
     dashboard.open();
     testFactory.open(seleniumWebDriver);
-    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitItem("Spring");
     checkWelcomePanel();
   }

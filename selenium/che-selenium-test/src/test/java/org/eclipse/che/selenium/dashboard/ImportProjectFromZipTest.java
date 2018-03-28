@@ -80,7 +80,7 @@ public class ImportProjectFromZipTest {
     projectSourcePage.clickOnAddProjectButton();
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
-    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 
     ide.waitOpenedWorkspaceIsReadyToUse();
     explorer.waitItem(PROJECT_NAME);

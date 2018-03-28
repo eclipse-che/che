@@ -80,7 +80,7 @@ public class CreateWorkspaceOnDashboardTest {
     newWorkspace.selectStack(JAVA.getId());
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
-    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 
     // wait that the workspace is started
     ide.waitOpenedWorkspaceIsReadyToUse();

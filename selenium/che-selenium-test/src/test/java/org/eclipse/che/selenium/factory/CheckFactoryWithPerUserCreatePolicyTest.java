@@ -62,7 +62,7 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
     // accept factory
     testFactory.open(seleniumWebDriver);
 
-    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Project Spring imported");
 
@@ -72,7 +72,7 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
     testFactory.open(seleniumWebDriver);
 
     try {
-      seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
+      seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     } catch (TimeoutException ex) {
       LOG.info(
           String.format(

@@ -220,7 +220,7 @@ public class PullRequestPluginTest {
     seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
     checkGitHubUserPage();
     consumeFactoryOnGitHub();
-    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     factoryWsName = seleniumWebDriver.getWorkspaceNameFromBrowserUrl();
     explorer.waitProjectExplorer();
     explorer.waitItem(FIRST_PROJECT_NAME);

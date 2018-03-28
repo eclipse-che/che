@@ -100,7 +100,7 @@ public class ProjectStateAfterRenameWorkspaceTest {
     // open the IDE, check state of the project
     workspaceDetails.clickOpenInIdeWsBtn();
 
-    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);

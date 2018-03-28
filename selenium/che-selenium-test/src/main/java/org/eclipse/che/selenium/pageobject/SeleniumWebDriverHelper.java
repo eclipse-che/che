@@ -883,10 +883,19 @@ public class SeleniumWebDriverHelper {
     waitAndSwitchToFrame(frame, DEFAULT_TIMEOUT);
   }
 
-  /** Switch to IDE frame and wait that Project Explorer is visible */
-  public void switchFromDashboardAndWaitProjectExplorer() {
+  /** Switches to IDE frame and waits for Project Explorer is available. */
+  public void switchToIdeFrameAndWaitAvailability() {
+    switchFromDashboardAndWaitProjectExplorer(APPLICATION_START_TIMEOUT_SEC);
+  }
+
+  /**
+   * Switches to IDE frame and waits during {@code timeout} for Project Explorer is available.
+   *
+   * @param timeout waiting time in seconds
+   */
+  public void switchFromDashboardAndWaitProjectExplorer(int timeout) {
     webDriverWaitFactory
-        .get(APPLICATION_START_TIMEOUT_SEC)
+        .get(timeout)
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> {

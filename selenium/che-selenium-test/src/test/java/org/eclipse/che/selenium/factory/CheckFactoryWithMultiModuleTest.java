@@ -72,7 +72,7 @@ public class CheckFactoryWithMultiModuleTest {
   public void checkFactoryProcessing() throws Exception {
     dashboard.open();
     testFactory.open(seleniumWebDriver);
-    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitProjectExplorer();
     notifications.waitExpectedMessageOnProgressPanelAndClosed(
         "Project " + PROJECT_NAME + " imported");

@@ -57,7 +57,7 @@ public class CheckFactoryWithPerClickCreatePolicyTest {
     dashboard.open();
     testFactory.open(seleniumWebDriver);
 
-    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitProjectExplorer();
     notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Project Spring imported");
 
@@ -65,7 +65,7 @@ public class CheckFactoryWithPerClickCreatePolicyTest {
 
     // accept factory
     testFactory.open(seleniumWebDriver);
-    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitProjectExplorer();
 
     notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClosed("Project Spring imported");

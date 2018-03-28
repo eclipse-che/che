@@ -86,7 +86,7 @@ public class WorkingWithNodeWsTest {
     projectSourcePage.clickOnAddProjectButton();
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 
-    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     currentWindow = seleniumWebDriver.getWindowHandle();
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
@@ -105,7 +105,7 @@ public class WorkingWithNodeWsTest {
     // Check the preview url is present after refreshing
     consoles.waitPreviewUrlIsPresent();
     seleniumWebDriver.navigate().refresh();
-    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     ide.waitOpenedWorkspaceIsReadyToUse();
     consoles.waitPreviewUrlIsPresent();
 
@@ -117,7 +117,7 @@ public class WorkingWithNodeWsTest {
     checkAngularYeomanAppl();
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
-    seleniumWebDriverHelper.switchFromDashboardAndWaitProjectExplorer();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 
     // Close terminal tab for 'run' process
     consoles.closeProcessInProcessConsoleTreeByName(RUN_PROCESS);
