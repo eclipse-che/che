@@ -20,7 +20,6 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Random;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -31,6 +30,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -55,8 +55,8 @@ public class TransitiveDependencyTest {
   @Inject private Loader loader;
   @Inject private PopupDialogsBrowser popupDialogsBrowser;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private ActionsFactory actionsFactory;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -99,8 +99,8 @@ public class TransitiveDependencyTest {
   private void deleteDependency() {
     editor.waitActive();
     editor.setCursorToLine(36);
-    actionsFactory
-        .createAction(seleniumWebDriver)
+    seleniumWebDriverHelper
+        .getAction()
         .keyDown(SHIFT)
         .sendKeys(DOWN, DOWN, DOWN, DOWN, DOWN)
         .keyUp(SHIFT)
