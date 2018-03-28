@@ -110,15 +110,6 @@ public class TestWorkspaceServiceClient {
         .asDto(WorkspaceDto.class);
   }
 
-  /** Returns workspace by its name. */
-  public Workspace getByName(String workspace, String username, String authToken) throws Exception {
-    return requestFactory
-        .fromUrl(getNameBasedUrl(workspace, username))
-        .setAuthorizationHeader(authToken)
-        .request()
-        .asDto(WorkspaceDto.class);
-  }
-
   /** Indicates if workspace exists. */
   public boolean exists(String workspace, String username) throws Exception {
     try {
