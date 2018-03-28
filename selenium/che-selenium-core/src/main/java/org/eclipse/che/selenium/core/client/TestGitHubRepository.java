@@ -128,7 +128,7 @@ public class TestGitHubRepository {
   }
 
   /**
-   * Change content of the file
+   * Changes content of the file
    *
    * @param pathToFile path to specified file
    * @param content content to change
@@ -141,7 +141,7 @@ public class TestGitHubRepository {
   }
 
   /**
-   * Change content of the file
+   * Changes content of the file
    *
    * @param pathToFile path to specified file
    * @param content content to change
