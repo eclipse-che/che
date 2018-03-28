@@ -59,6 +59,7 @@ export class CheNavBarController {
   private cheKeycloak: CheKeycloak;
   private cheService: CheService;
   private isPermissionServiceAvailable: boolean;
+  private isKeycloackPresent: boolean;
 
   /**
    * Default constructor
@@ -81,6 +82,8 @@ export class CheNavBarController {
     this.chePermissions = chePermissions;
     this.cheKeycloak = cheKeycloak;
     this.cheService = cheService;
+
+    this.isKeycloackPresent = this.cheKeycloak.isPresent();
 
     this.profile = cheAPI.getProfile().getProfile();
 

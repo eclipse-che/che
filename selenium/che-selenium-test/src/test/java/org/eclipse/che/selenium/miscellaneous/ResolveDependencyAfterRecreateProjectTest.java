@@ -17,7 +17,6 @@ import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextM
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -29,7 +28,6 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Wizard;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -78,13 +76,7 @@ public class ResolveDependencyAfterRecreateProjectTest {
     projectExplorer.waitItem(PROJECT_NAME2);
     projectExplorer.waitAndSelectItemByName(PROJECT_NAME2);
     projectExplorer.expandPathInProjectExplorer(PROJECT_NAME2 + PATH_TO_EXPAND);
-
-    try {
-      projectExplorer.openItemByPath(PROJECT_NAME2 + PATH_TO_FILE);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8791");
-    }
+    projectExplorer.openItemByPath(PROJECT_NAME2 + PATH_TO_FILE);
 
     editor.waitActive();
     editor.waitAllMarkersInvisibility(ERROR);

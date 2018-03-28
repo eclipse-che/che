@@ -15,7 +15,6 @@ import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.TestGroup;
@@ -30,7 +29,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationLi
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.openqa.selenium.TimeoutException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -112,12 +110,7 @@ public class AddWorkspaceToOrganizationTest {
     // check that the Namespace link in workspace details correct
     checkNamespaceLink(org1.getName(), WORKSPACE_FOR_ADMIN_1);
     checkNamespaceLink(org2.getName(), WORKSPACE_FOR_ADMIN_2);
-    try {
-      checkNamespaceLink(suborgForAdminName, WORKSPACE_FOR_ADMIN_3);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7925");
-    }
+    checkNamespaceLink(suborgForAdminName, WORKSPACE_FOR_ADMIN_3);
   }
 
   @Test(priority = 1)
@@ -149,13 +142,7 @@ public class AddWorkspaceToOrganizationTest {
 
     // check that the Namespace link in workspace details correct
     checkNamespaceLink(org2.getName(), WORKSPACE_FOR_MEMBER_1);
-
-    try {
-      checkNamespaceLink(suborgForMemberName, WORKSPACE_FOR_MEMBER_2);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7925");
-    }
+    checkNamespaceLink(suborgForMemberName, WORKSPACE_FOR_MEMBER_2);
   }
 
   private void createWorkspace(String organizationName, String workspaceName) {
@@ -169,26 +156,14 @@ public class AddWorkspaceToOrganizationTest {
     newWorkspace.selectStack(JAVA.getId());
     newWorkspace.typeWorkspaceName(workspaceName);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
-
-    try {
-      workspaceDetails.waitToolbarTitleName(workspaceName);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8497");
-    }
+    workspaceDetails.waitToolbarTitleName(workspaceName);
   }
 
   private void checkNamespaceLink(String organizationName, String workspaceName) {
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.selectWorkspaceItemName(workspaceName);
     workspaceDetails.waitToolbarTitleName(workspaceName);
-
-    try {
-      Assert.assertEquals(workspaceDetails.getOrganizationName(), organizationName);
-    } catch (AssertionError ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8776");
-    }
+    Assert.assertEquals(workspaceDetails.getOrganizationName(), organizationName);
 
     workspaceDetails.clickOnOpenOrganizationButton();
     organizationPage.waitOrganizationTitle(organizationName);

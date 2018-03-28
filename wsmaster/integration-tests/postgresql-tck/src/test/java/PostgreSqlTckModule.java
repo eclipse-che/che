@@ -41,6 +41,9 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.api.workspace.activity.JpaWorkspaceActivityDao;
+import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
+import org.eclipse.che.api.workspace.activity.WorkspaceExpiration;
 import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
@@ -118,6 +121,7 @@ public class PostgreSqlTckModule extends TckModule {
                 SshPairImpl.class,
                 InstallerImpl.class,
                 InstallerServerConfigImpl.class,
+                WorkspaceExpiration.class,
                 VolumeImpl.class)
             .addEntityClass(
                 "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
@@ -162,8 +166,11 @@ public class PostgreSqlTckModule extends TckModule {
     // workspace
     bind(WorkspaceDao.class).to(JpaWorkspaceDao.class);
     bind(StackDao.class).to(JpaStackDao.class);
+    bind(WorkspaceActivityDao.class).to(JpaWorkspaceActivityDao.class);
     bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new WorkspaceRepository());
     bind(new TypeLiteral<TckRepository<StackImpl>>() {}).toInstance(new StackRepository());
+    bind(new TypeLiteral<TckRepository<WorkspaceExpiration>>() {})
+        .toInstance(new JpaTckRepository<>(WorkspaceExpiration.class));
 
     // installer
     bind(InstallerDao.class).to(JpaInstallerDao.class);
