@@ -880,4 +880,12 @@ public class SeleniumWebDriverHelper {
   public void waitAndSwitchToFrame(WebElement frame) {
     waitAndSwitchToFrame(frame, DEFAULT_TIMEOUT);
   }
+
+  public Actions getAction(SeleniumWebDriver seleniumWebDriver) {
+    return actionsFactory.createAction(seleniumWebDriver);
+  }
+
+  public Actions getAction() {
+    return getAction(this.seleniumWebDriver);
+  }
 }

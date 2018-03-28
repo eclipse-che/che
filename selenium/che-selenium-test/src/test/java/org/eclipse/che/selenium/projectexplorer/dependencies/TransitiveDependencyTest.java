@@ -31,7 +31,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.openqa.selenium.interactions.Actions;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -99,15 +98,11 @@ public class TransitiveDependencyTest {
 
   private void deleteDependency() {
     editor.waitActive();
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
     editor.setCursorToLine(36);
-    action
+    actionsFactory
+        .createAction(seleniumWebDriver)
         .keyDown(SHIFT)
-        .sendKeys(DOWN)
-        .sendKeys(DOWN)
-        .sendKeys(DOWN)
-        .sendKeys(DOWN)
-        .sendKeys(DOWN)
+        .sendKeys(DOWN, DOWN, DOWN, DOWN, DOWN)
         .keyUp(SHIFT)
         .sendKeys(DELETE)
         .perform();
