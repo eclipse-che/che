@@ -9,13 +9,21 @@ You can list all params before applying a template: `oc process --parameters -f 
 If you miss envs and parameters, you can add them to your template both as a parameters env variables.
 
 Examples below reference `oc-new app` and `oc apply` commands.
-`oc new-app` accepts parameters envs or env file which makes it possible to override default params and pass envs to chosen deployments (even if they are not in a template).
+`oc new-app` accepts parameters envs or env file which makes it possible to override default params and pass envs to chosen deployments (even if they are not in a template):
+
+```
+oc new-app -f example.yaml -p PARAM=VALUE -e ENV=VALUE --env-file=che.env
+```
+More info is available in [OpenShift documentation](https://docs.openshift.com/container-platform/3.7/dev_guide/application_lifecycle/new_app.html#specifying-a-template).
+
+Env file has a simple format - KEY=Value per line.
 
 You can also use `oc process` and then apply the resulted output `| oc apply -f -`, for example:
 
 ```
 oc process -f che-server-template.yaml -p ROUTING_SUFFIX=$(minishift ip).nip.io | oc apply -f -
 ```
+In this case, however, it is not possible to pass envs, only params are available.
 
 IMPORTANT! **ROUTING_SUFFIX** value in the below commands `$(minishift ip).nip.io` works for MiniShift only.
 You MUST provide **own routing suffix** when deploying to OCP cluster.
@@ -172,6 +180,23 @@ oc new-app -f che-server-template.yaml -p ROUTING_SUFFIX=$(minishift ip).nip.io 
 	-p TLS=true; \
 oc apply -f https
 ```
+
+## Update deployments
+
+Updating deployments is easy using oc client:
+
+```
+oc set env dc/che KEY=VALUE
+```
+
+Some of envs that Che server respects are in che.env file, however, it references env variables that are used for Docker infra only. Usually, env names are self explaining.
+
+Additionally, you may look at the property file and convert properties to envs using the following conversion rules:
+
+* `.` becomes `_` (single underscore)
+* `-` becomes `__` (double underscore)
+
+So, property `che.env-name` becomes `CHE_ENV__NAME` environment variable that you can pass to Che deployment.
 
 ## Upgrade from http to https
 
