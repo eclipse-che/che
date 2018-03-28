@@ -108,11 +108,15 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
 
   private User getOrCreateUser(String id, String email, String username)
       throws ServerException, ConflictException {
-    Optional<User> user = getUser(id);
-    if (!user.isPresent()) {
+    Optional<User> userById = getUserById(id);
+    if (!userById.isPresent()) {
       synchronized (this) {
-        user = getUser(id);
-        if (!user.isPresent()) {
+        userById = getUserById(id);
+        if (!userById.isPresent()) {
+          Optional<User> userByEmail = getUserByEmail(email);
+          if (userByEmail.isPresent()) {
+            userManager.remove(userByEmail.get().getId());
+          }
           final UserImpl cheUser = new UserImpl(id, email, username, generate("", 12), emptyList());
           try {
             return userManager.create(cheUser, false);
@@ -123,7 +127,7 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
         }
       }
     }
-    return actualizeUser(user.get(), email);
+    return actualizeUser(userById.get(), email);
   }
   /** Performs check that emails in JWT and local DB are match, and synchronize them otherwise */
   private User actualizeUser(User actualUser, String email) throws ServerException {
@@ -143,9 +147,17 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
     return update;
   }
 
-  private Optional<User> getUser(String id) throws ServerException {
+  private Optional<User> getUserById(String id) throws ServerException {
     try {
       return Optional.of(userManager.getById(id));
+    } catch (NotFoundException e) {
+      return Optional.empty();
+    }
+  }
+
+  private Optional<User> getUserByEmail(String email) throws ServerException {
+    try {
+      return Optional.of(userManager.getByEmail(email));
     } catch (NotFoundException e) {
       return Optional.empty();
     }

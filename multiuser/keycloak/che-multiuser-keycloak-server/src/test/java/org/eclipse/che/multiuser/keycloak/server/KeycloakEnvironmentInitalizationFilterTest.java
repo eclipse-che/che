@@ -137,6 +137,7 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     when(request.getAttribute("token")).thenReturn(jwt);
     when(session.getAttribute(eq("che_subject"))).thenReturn(null);
     when(userManager.getById(anyString())).thenThrow(NotFoundException.class);
+    when(userManager.getByEmail(anyString())).thenThrow(NotFoundException.class);
     when(userManager.create(any(User.class), anyBoolean())).thenReturn(user);
 
     // when
@@ -144,6 +145,44 @@ public class KeycloakEnvironmentInitalizationFilterTest {
 
     // then
     verify(session).setAttribute(eq("che_subject"), captor.capture());
+    verify(userManager).create(captor.capture(), eq(false));
+    assertEquals(jwt.getBody().getSubject(), captor.getValue().getId());
+    assertEquals(jwt.getBody().get("email"), captor.getValue().getEmail());
+    assertEquals(jwt.getBody().get("preferred_username"), captor.getValue().getName());
+  }
+
+  @Test
+  public void shouldRecreateUserIfOneExistsInDBWithSameEmail() throws Exception {
+
+    UserImpl newUser = new UserImpl();
+    DefaultJwt<Claims> jwt = createJwt();
+    newUser.setEmail((String) jwt.getBody().get("email"));
+    newUser.setId(jwt.getBody().getSubject());
+    newUser.setName((String) jwt.getBody().get("preferred_username"));
+
+    UserImpl oldUser = new UserImpl();
+    oldUser.setId("oldId");
+    oldUser.setEmail((String) jwt.getBody().get("email"));
+    oldUser.setName((String) jwt.getBody().get("preferred_username"));
+
+    ArgumentCaptor<UserImpl> captor = ArgumentCaptor.forClass(UserImpl.class);
+
+    // given
+    when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token2");
+    when(request.getScheme()).thenReturn("http");
+    when(request.getSession()).thenReturn(session);
+    when(request.getAttribute("token")).thenReturn(jwt);
+    when(session.getAttribute(eq("che_subject"))).thenReturn(null);
+    when(userManager.getById(anyString())).thenThrow(NotFoundException.class);
+    when(userManager.getByEmail(anyString())).thenReturn(oldUser);
+    when(userManager.create(any(User.class), anyBoolean())).thenReturn(newUser);
+
+    // when
+    filter.doFilter(request, response, chain);
+
+    // then
+    verify(session).setAttribute(eq("che_subject"), captor.capture());
+    verify(userManager).remove(oldUser.getId());
     verify(userManager).create(captor.capture(), eq(false));
     assertEquals(jwt.getBody().getSubject(), captor.getValue().getId());
     assertEquals(jwt.getBody().get("email"), captor.getValue().getEmail());
