@@ -67,6 +67,7 @@ public class DebuggerUtils {
             br.close();
           } catch (Exception e) {
             LOG.error(e.getMessage(), e);
+            return e.getMessage();
           } finally {
             if (connection != null) {
               connection.disconnect();
