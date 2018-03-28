@@ -896,6 +896,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-api-subscription</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
                 <artifactId>che-multiuser-keycloak-ide</artifactId>
                 <version>${che.version}</version>
             </dependency>

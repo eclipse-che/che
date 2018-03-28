@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.sql.DataSource;
 import org.eclipse.che.agent.exec.client.ExecAgentClientFactory;
+import org.eclipse.che.api.core.notification.InmemorySubscriptionStorage;
+import org.eclipse.che.api.core.notification.SubscriptionStorage;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
@@ -220,9 +222,6 @@ public class WsMasterModule extends AbstractModule {
         PersistenceUnitProperties.NON_JTA_DATASOURCE, "java:/comp/env/jdbc/che");
     bindConstant().annotatedWith(Names.named("jndi.datasource.name")).to("java:/comp/env/jdbc/che");
 
-    // Replication stuff
-    bind(org.eclipse.che.api.core.distributed.DistributedMapComposer.class);
-
     String infrastructure = System.getenv("CHE_INFRASTRUCTURE_ACTIVE");
     if (Boolean.valueOf(System.getenv("CHE_MULTIUSER"))) {
       configureMultiUserMode(persistenceProperties, infrastructure);
@@ -267,15 +266,13 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
-
-    bind(String.class)
-        .annotatedWith(Names.named("jgroups.config.file"))
-        .toProvider(Providers.of(null));
+    bind(SubscriptionStorage.class).to(InmemorySubscriptionStorage.class);
   }
 
   private void configureMultiUserMode(
       Map<String, String> persistenceProperties, String infrastructure) {
 
+    // Replication stuff
     if (OpenShiftInfrastructure.NAME.equals(infrastructure)
         || KubernetesInfrastructure.NAME.equals(infrastructure)) {
       persistenceProperties.put(
@@ -285,10 +282,10 @@ public class WsMasterModule extends AbstractModule {
       bind(String.class)
           .annotatedWith(Names.named("jgroups.config.file"))
           .toProvider(Providers.of(JGROUPS_CONF_FILE));
+      bind(SubscriptionStorage.class)
+          .to(org.eclipse.che.multiuser.api.subscription.DistributedSubscriptionStorage.class);
     } else {
-      bind(String.class)
-          .annotatedWith(Names.named("jgroups.config.file"))
-          .toProvider(Providers.of(null));
+      bind(SubscriptionStorage.class).to(InmemorySubscriptionStorage.class);
     }
 
     persistenceProperties.put(

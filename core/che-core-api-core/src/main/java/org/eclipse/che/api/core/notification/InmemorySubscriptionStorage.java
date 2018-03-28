@@ -12,6 +12,7 @@ package org.eclipse.che.api.core.notification;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Singleton;
@@ -20,18 +21,25 @@ import javax.inject.Singleton;
 @Singleton
 public class InmemorySubscriptionStorage implements SubscriptionStorage {
 
-  private final Map<String, Set<SubscriptionContext>> subscriptionContexts =
-      new ConcurrentHashMap<>();
+  private final Map<String, Set<SubscriptionContext>> subscriptions = new ConcurrentHashMap<>();
 
   @Override
   public Set<SubscriptionContext> getByMethod(String method) {
-    return subscriptionContexts.getOrDefault(method, Collections.emptySet());
+    return subscriptions.getOrDefault(method, Collections.emptySet());
   }
 
   @Override
   public void addSubscription(String method, SubscriptionContext subscriptionContext) {
-    subscriptionContexts
+    subscriptions
         .computeIfAbsent(method, k -> ConcurrentHashMap.newKeySet(1))
         .add(subscriptionContext);
+  }
+
+  @Override
+  public void removeSubscription(String method, String endpointId) {
+    subscriptions
+        .getOrDefault(method, Collections.emptySet())
+        .removeIf(
+            subscriptionContext -> Objects.equals(subscriptionContext.getEndpointId(), endpointId));
   }
 }

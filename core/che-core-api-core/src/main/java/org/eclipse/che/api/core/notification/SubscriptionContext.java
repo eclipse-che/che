@@ -13,7 +13,7 @@ package org.eclipse.che.api.core.notification;
 import java.util.Map;
 
 /** @author Max Shaposhnik (mshaposh@redhat.com) */
-class SubscriptionContext {
+public class SubscriptionContext {
 
   private final String endpointId;
   private final Map<String, String> scope;

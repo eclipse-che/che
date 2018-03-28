@@ -18,4 +18,6 @@ public interface SubscriptionStorage {
   Set<SubscriptionContext> getByMethod(String method);
 
   void addSubscription(String method, SubscriptionContext subscriptionContext);
+
+  void removeSubscription(String method, String endpointId);
 }
