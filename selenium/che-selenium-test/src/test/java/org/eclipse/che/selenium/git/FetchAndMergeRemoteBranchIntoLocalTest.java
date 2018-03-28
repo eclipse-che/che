@@ -37,7 +37,7 @@ import org.testng.annotations.Test;
 @Test(groups = TestGroup.GITHUB)
 public class FetchAndMergeRemoteBranchIntoLocalTest {
   private static final String PROJECT_NAME = NameGenerator.generate("FetchAndMergeTest-", 4);
-  private static final String CHANGE_CONTENT =
+  private static final String NEW_CONTENT =
       String.format("//change_content-%s", String.valueOf(System.currentTimeMillis()));
 
   @Inject private TestWorkspace ws;
@@ -86,10 +86,8 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
     // change content in the test repo on GitHub
     testRepo.deleteFile(String.format("%s/%s", pathToJspFile, jspFile));
     testRepo.changeFileContent(
-        String.format("%s/%s.java", pathToJavaFile, javaFile),
-        CHANGE_CONTENT,
-        "file-" + CHANGE_CONTENT);
-    testRepo.changeFileContent(textFile, CHANGE_CONTENT, "file-" + CHANGE_CONTENT);
+        String.format("%s/%s.java", pathToJavaFile, javaFile), NEW_CONTENT, "file-" + NEW_CONTENT);
+    testRepo.changeFileContent(textFile, NEW_CONTENT, "file-" + NEW_CONTENT);
 
     performFetch();
     git.waitGitStatusBarWithMess(fetchMess);
@@ -99,10 +97,10 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
     projectExplorer.openItemByPath(
         String.format("%s/%s/%s.java", PROJECT_NAME, pathToJavaFile, javaFile));
     editor.waitActive();
-    editor.waitTextNotPresentIntoEditor(CHANGE_CONTENT);
+    editor.waitTextNotPresentIntoEditor(NEW_CONTENT);
     projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, textFile));
     editor.waitActive();
-    editor.waitTextNotPresentIntoEditor(CHANGE_CONTENT);
+    editor.waitTextNotPresentIntoEditor(NEW_CONTENT);
     projectExplorer.waitVisibilityByName(jspFile);
 
     mergeRemoteBranch(originMaster);
@@ -115,10 +113,10 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
     // check the content is changed
     editor.selectTabByName(javaFile);
     editor.waitActive();
-    editor.waitTextIntoEditor(CHANGE_CONTENT);
+    editor.waitTextIntoEditor(NEW_CONTENT);
     editor.selectTabByName(textFile);
     editor.waitActive();
-    editor.waitTextIntoEditor(CHANGE_CONTENT);
+    editor.waitTextIntoEditor(NEW_CONTENT);
     projectExplorer.waitItemInvisibility(
         String.format("%s/%s/%s", PROJECT_NAME, "src/main/webapp", jspFile));
 
@@ -129,9 +127,9 @@ public class FetchAndMergeRemoteBranchIntoLocalTest {
     // wait commit in git history
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.SHOW_HISTORY);
-    git.waitTextInHistoryForm(CHANGE_CONTENT);
+    git.waitTextInHistoryForm(NEW_CONTENT);
     git.clickOnHistoryRowInСommitsList(0);
-    git.waitContentInHistoryEditor(CHANGE_CONTENT);
+    git.waitContentInHistoryEditor(NEW_CONTENT);
   }
 
   private void performFetch() {
