@@ -630,8 +630,9 @@ public class InternalRuntimeTest {
     public TestInternalRuntime(URLRewriter urlRewriter, boolean running)
         throws ValidationException, InfrastructureException {
       super(
-          new TestRuntimeContext(null, new RuntimeIdentityImpl("ws", "env", "owner", "id"), null),
+          new TestRuntimeContext(null, new RuntimeIdentityImpl("ws", "env", "id"), null),
           urlRewriter,
+          null,
           emptyList(),
           running);
     }

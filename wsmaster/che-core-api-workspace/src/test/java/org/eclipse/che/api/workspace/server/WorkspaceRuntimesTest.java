@@ -40,6 +40,7 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
@@ -74,6 +75,8 @@ public class WorkspaceRuntimesTest {
 
   @Mock private WorkspaceDao workspaceDao;
 
+  @Mock private UserDao userDao;
+
   @Mock private DBInitializer dbInitializer;
 
   @Mock private WorkspaceSharedPool sharedPool;
@@ -101,11 +104,11 @@ public class WorkspaceRuntimesTest {
 
   @Test
   public void runtimeIsRecovered() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me", "myId");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
 
     mockWorkspace(identity);
     RuntimeContext context = mockContext(identity);
-    when(context.getRuntime()).thenReturn(new TestInternalRuntime(context));
+    when(context.getRuntime()).thenReturn(new TestInternalRuntime(context, userDao));
     doReturn(context).when(infrastructure).prepare(eq(identity), any());
     doReturn(mock(InternalEnvironment.class)).when(testEnvFactory).create(any());
 
@@ -119,7 +122,7 @@ public class WorkspaceRuntimesTest {
 
   @Test
   public void runtimeIsNotRecoveredIfNoWorkspaceFound() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me", "myId");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
     when(workspaceDao.get(identity.getWorkspaceId())).thenThrow(new NotFoundException("no!"));
 
     // try recover
@@ -130,7 +133,7 @@ public class WorkspaceRuntimesTest {
 
   @Test
   public void runtimeIsNotRecoveredIfNoEnvironmentFound() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me", "myId");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
     WorkspaceImpl workspace = mockWorkspace(identity);
     when(workspace.getConfig().getEnvironments()).thenReturn(emptyMap());
 
@@ -142,7 +145,7 @@ public class WorkspaceRuntimesTest {
 
   @Test
   public void runtimeIsNotRecoveredIfInfraPreparationFailed() throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me", "myId");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
 
     mockWorkspace(identity);
     InternalEnvironment internalEnvironment = mock(InternalEnvironment.class);
@@ -160,21 +163,21 @@ public class WorkspaceRuntimesTest {
   @Test
   public void runtimeIsNotRecoveredIfAnotherRuntimeWithTheSameIdentityAlreadyExists()
       throws Exception {
-    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "me", "myId");
+    RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
 
     mockWorkspace(identity);
     RuntimeContext context = mockContext(identity);
 
     // runtime 1(has 1 machine) must be successfully saved
     Map<String, Machine> r1machines = ImmutableMap.of("m1", mock(Machine.class));
-    InternalRuntime runtime1 = spy(new TestInternalRuntime(context, r1machines));
+    InternalRuntime runtime1 = spy(new TestInternalRuntime(context, userDao, r1machines));
     when(context.getRuntime()).thenReturn(runtime1);
     runtimes.recoverOne(infrastructure, identity);
 
     // runtime 2 must not be saved
     Map<String, Machine> r2machines =
         ImmutableMap.of("m1", mock(Machine.class), "m2", mock(Machine.class));
-    InternalRuntime runtime2 = new TestInternalRuntime(context, r2machines);
+    InternalRuntime runtime2 = new TestInternalRuntime(context, userDao, r2machines);
     when(context.getRuntime()).thenReturn(runtime2);
     runtimes.recoverOne(infrastructure, identity);
 
@@ -203,7 +206,6 @@ public class WorkspaceRuntimesTest {
         DtoFactory.newDto(RuntimeIdentityDto.class)
             .withWorkspaceId("workspace123")
             .withEnvName("my-env")
-            .withOwnerName("me")
             .withOwnerId("myId");
     mockWorkspace(identity);
     mockContext(identity);
@@ -277,13 +279,13 @@ public class WorkspaceRuntimesTest {
 
     final Map<String, Machine> machines;
 
-    TestInternalRuntime(RuntimeContext context, Map<String, Machine> machines) {
-      super(context, null, null, false);
+    TestInternalRuntime(RuntimeContext context, UserDao userDao, Map<String, Machine> machines) {
+      super(context, null, userDao, null, false);
       this.machines = machines;
     }
 
-    TestInternalRuntime(RuntimeContext context) {
-      this(context, emptyMap());
+    TestInternalRuntime(RuntimeContext context, UserDao userDao) {
+      this(context, userDao, emptyMap());
     }
 
     @Override

@@ -68,6 +68,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
+import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
@@ -126,7 +127,7 @@ public class KubernetesInternalRuntimeTest {
   private static final String M2_NAME = POD_NAME + '/' + CONTAINER_NAME_2;
 
   private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "usr1", "id1");
+      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
 
   @Mock private KubernetesRuntimeContext<KubernetesEnvironment> context;
   @Mock private EventService eventService;
@@ -137,6 +138,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private KubernetesNamespace namespace;
   @Mock private KubernetesServices services;
   @Mock private KubernetesIngresses ingresses;
+  @Mock private UserDao userDao;
   @Mock private KubernetesPods pods;
   @Mock private KubernetesBootstrapper bootstrapper;
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
@@ -158,6 +160,7 @@ public class KubernetesInternalRuntimeTest {
             13,
             5,
             new URLRewriter.NoOpURLRewriter(),
+            userDao,
             bootstrapperFactory,
             serverCheckerFactory,
             volumesStrategy,

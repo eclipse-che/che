@@ -62,6 +62,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
@@ -105,6 +106,7 @@ public class WorkspaceManagerTest {
   @Mock private EventService eventService;
   @Mock private WorkspaceValidator validator;
   @Mock private RuntimeInfrastructure infrastructure;
+  @Mock private UserDao userDao;
 
   @Captor private ArgumentCaptor<WorkspaceImpl> workspaceCaptor;
 
@@ -527,11 +529,7 @@ public class WorkspaceManagerTest {
   private TestInternalRuntime mockRuntime(WorkspaceImpl workspace, WorkspaceStatus status)
       throws Exception {
     RuntimeIdentity identity =
-        new RuntimeIdentityImpl(
-            workspace.getId(),
-            workspace.getConfig().getDefaultEnv(),
-            workspace.getNamespace(),
-            "id");
+        new RuntimeIdentityImpl(workspace.getId(), workspace.getConfig().getDefaultEnv(), "id");
     //        doAnswer(inv -> {
     //            final WorkspaceImpl ws = (WorkspaceImpl)inv.getArguments()[0];
     //            ws.setStatus(status);
@@ -542,7 +540,7 @@ public class WorkspaceManagerTest {
     Map<String, Machine> machines = new HashMap<>();
     machines.put("machine1", machine1);
     machines.put("machine2", machine2);
-    TestInternalRuntime runtime = new TestInternalRuntime(mockContext(identity), machines);
+    TestInternalRuntime runtime = new TestInternalRuntime(mockContext(identity), userDao, machines);
     doAnswer(
             inv -> {
               workspace.setStatus(status);
@@ -637,8 +635,8 @@ public class WorkspaceManagerTest {
   private static class TestInternalRuntime extends InternalRuntime<RuntimeContext> {
     final Map<String, Machine> machines;
 
-    TestInternalRuntime(RuntimeContext context, Map<String, Machine> machines) {
-      super(context, null, null, false);
+    TestInternalRuntime(RuntimeContext context, UserDao userDao, Map<String, Machine> machines) {
+      super(context, null, userDao, null, false);
       this.machines = machines;
     }
 
