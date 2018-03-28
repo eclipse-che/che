@@ -135,9 +135,7 @@ public class TestGitHubRepository {
    * @throws IOException
    */
   public void changeFileContent(String pathToFile, String content) throws IOException {
-    ghRepo
-        .getFileContent(String.format("/%s", pathToFile))
-        .update(content, "change - " + pathToFile);
+    changeFileContent(pathToFile, content, format("Change file-%s", pathToFile));
   }
 
   /**
