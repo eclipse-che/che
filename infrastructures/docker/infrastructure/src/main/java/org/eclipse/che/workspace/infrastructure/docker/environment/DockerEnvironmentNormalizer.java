@@ -16,11 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.docker.container.ContainerNameGenerator;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
@@ -29,13 +25,10 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
 /** @author Alexander Garagatyi */
 public class DockerEnvironmentNormalizer {
   private final ContainerNameGenerator containerNameGenerator;
-  private final UserDao userDao;
 
   @Inject
-  public DockerEnvironmentNormalizer(
-      ContainerNameGenerator containerNameGenerator, UserDao userDao) {
+  public DockerEnvironmentNormalizer(ContainerNameGenerator containerNameGenerator) {
     this.containerNameGenerator = containerNameGenerator;
-    this.userDao = userDao;
   }
 
   public void normalize(DockerEnvironment dockerEnvironment, RuntimeIdentity identity)
@@ -48,19 +41,11 @@ public class DockerEnvironmentNormalizer {
     for (Map.Entry<String, DockerContainerConfig> containerEntry : containers.entrySet()) {
       DockerContainerConfig containerConfig = containerEntry.getValue();
 
-      String userName;
-      try {
-        User user = userDao.getById(identity.getOwnerId());
-        userName = user == null ? identity.getOwnerId() : user.getName();
-      } catch (NotFoundException | ServerException e) {
-        userName = identity.getOwnerId();
-      }
-
       containerConfig.setContainerName(
           containerNameGenerator.generateContainerName(
               identity.getWorkspaceId(),
               containerConfig.getId(),
-              userName,
+              identity.getOwnerId(),
               containerEntry.getKey()));
     }
     normalizeNames(dockerEnvironment);
