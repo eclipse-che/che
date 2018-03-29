@@ -42,6 +42,7 @@ import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.WarningDialog;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.git.Git;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -220,7 +221,13 @@ public class KeepDirectoryGitImportTest {
   }
 
   private void authorizeGitHubApplication() {
-    askDialog.waitFormToOpen(25);
+    try {
+      askDialog.waitFormToOpen(25);
+    } catch (TimeoutException te) {
+      // consider someone has already authorized before
+      return;
+    }
+
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
     seleniumWebDriver.switchToNoneCurrentWindow(currentWindow);
