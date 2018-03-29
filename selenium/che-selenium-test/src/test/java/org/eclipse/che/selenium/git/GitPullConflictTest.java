@@ -18,15 +18,12 @@ import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
-import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestSshServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
@@ -36,7 +33,6 @@ import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
@@ -82,12 +78,9 @@ public class GitPullConflictTest {
   @Inject private Menu menu;
   @Inject private Git git;
   @Inject private Events eventsPanel;
-  @Inject private Loader loader;
   @Inject private CodenvyEditor editor;
   @Inject private Consoles consoles;
-  @Inject private TestSshServiceClient testSshServiceClient;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
-  @Inject private TestGitHubServiceClient gitHubClientService;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -114,9 +107,9 @@ public class GitPullConflictTest {
     git.importJavaApp(testRepo.getHtmlUrl(), PROJECT_NAME, MAVEN);
 
     // change files in the test repo on GitHub
-    changeContentOnGithubSide(
+    testRepo.changeFileContent(
         String.format("%s/%s.java", PATH_TO_JAVA_FILE, javaFileChange), CHANGE_STRING_1);
-    changeContentOnGithubSide(textFileChange, CHANGE_STRING_1);
+    testRepo.changeFileContent(textFileChange, CHANGE_STRING_1);
 
     // change the java and text files in the editor
     testProjectServiceClient.updateFile(ws.getId(), pathJavaFile, changeContent2);
@@ -142,10 +135,6 @@ public class GitPullConflictTest {
     projectExplorer.openItemByPath(pathTextFile);
     editor.waitActive();
     editor.waitTextIntoEditor(HEAD_CONF_PREFIX_CONF_MESS);
-  }
-
-  private void changeContentOnGithubSide(String pathToContent, String content) throws IOException {
-    testRepo.getFileContent(String.format("/%s", pathToContent)).update(content, "add " + content);
   }
 
   private void performPull() {

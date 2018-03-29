@@ -883,6 +883,25 @@ public class SeleniumWebDriverHelper {
     waitAndSwitchToFrame(frame, DEFAULT_TIMEOUT);
   }
 
+  /**
+   * Creates {@link Actions} by using {@link ActionsFactory}.
+   *
+   * @param seleniumWebDriver webDriver by which actions factory should be initialized
+   * @return created {@link Actions}
+   */
+  public Actions getAction(SeleniumWebDriver seleniumWebDriver) {
+    return actionsFactory.createAction(seleniumWebDriver);
+  }
+
+  /**
+   * Creates {@link Actions} by using {@link ActionsFactory}.
+   *
+   * @return created {@link Actions}
+   */
+  public Actions getAction() {
+    return getAction(this.seleniumWebDriver);
+  }
+
   /** Switches to IDE frame and waits for Project Explorer is available. */
   public void switchToIdeFrameAndWaitAvailability() {
     switchFromDashboardAndWaitProjectExplorer(APPLICATION_START_TIMEOUT_SEC);

@@ -142,7 +142,9 @@ public class CreateFactoryFromUiWithKeepDirTest {
       seleniumWebDriver.switchTo().defaultContent();
       projectExplorer.waitProjectExplorer(50);
     }
+
     events.clickEventLogBtn();
+
     try {
       events.waitExpectedMessage(CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE);
       events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
@@ -150,6 +152,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
       // remove try-catch block after issue has been resolved
       fail("Known issue https://github.com/eclipse/che/issues/7253");
     }
+
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
     projectExplorer.expandPathInProjectExplorerAndOpenFile(

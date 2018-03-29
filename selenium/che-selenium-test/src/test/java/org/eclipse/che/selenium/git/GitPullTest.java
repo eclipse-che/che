@@ -17,22 +17,16 @@ import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.BLANK;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
-import org.eclipse.che.selenium.core.client.TestGitHubServiceClient;
-import org.eclipse.che.selenium.core.client.TestSshServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.Consoles;
-import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.testng.annotations.BeforeClass;
@@ -55,13 +49,8 @@ public class GitPullTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
   @Inject private org.eclipse.che.selenium.pageobject.git.Git git;
-  @Inject private Events events;
-  @Inject private Loader loader;
   @Inject private CodenvyEditor editor;
-  @Inject private Consoles consoles;
-  @Inject private TestSshServiceClient testSshServiceClient;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
-  @Inject private TestGitHubServiceClient gitHubClientService;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -88,9 +77,9 @@ public class GitPullTest {
     prepareFilesForTest(htmlFileName);
     prepareFilesForTest(folderWithPlainFilesPath + "/" + readmeTxtFileName);
 
-    changeContentOnGithubSide(jsFileName, currentTimeInMillis);
-    changeContentOnGithubSide(htmlFileName, currentTimeInMillis);
-    changeContentOnGithubSide(
+    testRepo.changeFileContent(jsFileName, currentTimeInMillis);
+    testRepo.changeFileContent(htmlFileName, currentTimeInMillis);
+    testRepo.changeFileContent(
         String.format("%s/%s", folderWithPlainFilesPath, readmeTxtFileName), currentTimeInMillis);
 
     performPull();
@@ -135,11 +124,5 @@ public class GitPullTest {
       String tabNameOpenedFile, String pathToItemInProjectExplorer) {
     editor.waitTextNotPresentIntoEditor(tabNameOpenedFile);
     projectExplorer.waitLibrariesAreNotPresent(pathToItemInProjectExplorer);
-  }
-
-  private void changeContentOnGithubSide(String pathToContent, String content) throws IOException {
-    testRepo
-        .getFileContent(String.format("/%s", pathToContent))
-        .update(content, "add " + NameGenerator.generate(content, 3));
   }
 }

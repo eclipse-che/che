@@ -99,10 +99,6 @@
             <artifactId>everrest-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.kohsuke</groupId>
-            <artifactId>github-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-api</artifactId>
         </dependency>
@@ -203,6 +199,7 @@
                         <exclude>**/resources/**/new_file</exclude>
                         <exclude>**/resources/**/pom-quick-start-archetype-context</exclude>
                         <exclude>**/resources/**/README.md</exclude>
+                        <exclude>**/resources/**/readme-txt</exclude>
                         <exclude>**/resources/**/replace-all</exclude>
                         <exclude>**/resources/**/replace</exclude>
                         <exclude>**/resources/**/some</exclude>
