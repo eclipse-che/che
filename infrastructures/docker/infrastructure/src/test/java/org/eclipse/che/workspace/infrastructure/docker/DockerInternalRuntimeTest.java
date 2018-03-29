@@ -47,7 +47,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
-import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
@@ -107,7 +106,6 @@ public class DockerInternalRuntimeTest {
   @Mock private DockerMachine dockerMachine;
   @Mock private ParallelDockerImagesBuilderFactory dockerImagesBuilderFactory;
   @Mock private ParallelDockerImagesBuilder dockerImagesBuilder;
-  @Mock private UserDao userDao;
 
   @Captor private ArgumentCaptor<Consumer<ProbeResult>> probeResultConsumerCaptor;
   @Captor private ArgumentCaptor<MachineStatusEvent> eventCaptor;
@@ -147,7 +145,6 @@ public class DockerInternalRuntimeTest {
             runtimeContext,
             emptyList(),
             mock(ExternalIpURLRewriter.class),
-            userDao,
             networks,
             starter,
             eventService,

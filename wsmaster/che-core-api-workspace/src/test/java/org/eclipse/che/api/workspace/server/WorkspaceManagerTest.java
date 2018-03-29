@@ -62,7 +62,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
@@ -106,7 +105,6 @@ public class WorkspaceManagerTest {
   @Mock private EventService eventService;
   @Mock private WorkspaceValidator validator;
   @Mock private RuntimeInfrastructure infrastructure;
-  @Mock private UserDao userDao;
 
   @Captor private ArgumentCaptor<WorkspaceImpl> workspaceCaptor;
 
@@ -540,7 +538,7 @@ public class WorkspaceManagerTest {
     Map<String, Machine> machines = new HashMap<>();
     machines.put("machine1", machine1);
     machines.put("machine2", machine2);
-    TestInternalRuntime runtime = new TestInternalRuntime(mockContext(identity), userDao, machines);
+    TestInternalRuntime runtime = new TestInternalRuntime(mockContext(identity), machines);
     doAnswer(
             inv -> {
               workspace.setStatus(status);
@@ -635,8 +633,8 @@ public class WorkspaceManagerTest {
   private static class TestInternalRuntime extends InternalRuntime<RuntimeContext> {
     final Map<String, Machine> machines;
 
-    TestInternalRuntime(RuntimeContext context, UserDao userDao, Map<String, Machine> machines) {
-      super(context, null, userDao, null, false);
+    TestInternalRuntime(RuntimeContext context, Map<String, Machine> machines) {
+      super(context, null, null, false);
       this.machines = machines;
     }
 

@@ -632,7 +632,6 @@ public class InternalRuntimeTest {
       super(
           new TestRuntimeContext(null, new RuntimeIdentityImpl("ws", "env", "id"), null),
           urlRewriter,
-          null,
           emptyList(),
           running);
     }

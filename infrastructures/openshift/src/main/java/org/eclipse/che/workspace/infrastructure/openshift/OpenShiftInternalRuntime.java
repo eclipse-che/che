@@ -18,7 +18,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Warning;
-import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.URLRewriter.NoOpURLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
@@ -46,7 +45,6 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       @Named("che.infra.kubernetes.workspace_start_timeout_min") int workspaceStartTimeout,
       @Named("che.infra.kubernetes.ingress_start_timeout_min") int ingressStartTimeout,
       NoOpURLRewriter urlRewriter,
-      UserDao userDao,
       KubernetesBootstrapperFactory bootstrapperFactory,
       ServersCheckerFactory serverCheckerFactory,
       WorkspaceVolumesStrategy volumesStrategy,
@@ -61,7 +59,6 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         workspaceStartTimeout,
         ingressStartTimeout,
         urlRewriter,
-        userDao,
         bootstrapperFactory,
         serverCheckerFactory,
         volumesStrategy,

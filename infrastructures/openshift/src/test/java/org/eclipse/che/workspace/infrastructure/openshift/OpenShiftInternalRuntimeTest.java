@@ -54,7 +54,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
-import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
@@ -111,7 +110,6 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private ServersChecker serversChecker;
   @Mock private KubernetesBootstrapperFactory bootstrapperFactory;
   @Mock private OpenShiftEnvironment osEnv;
-  @Mock private UserDao userDao;
   @Mock private OpenShiftProject project;
   @Mock private KubernetesServices services;
   @Mock private OpenShiftRoutes routes;
@@ -136,7 +134,6 @@ public class OpenShiftInternalRuntimeTest {
             13,
             5,
             new URLRewriter.NoOpURLRewriter(),
-            userDao,
             bootstrapperFactory,
             serverCheckerFactory,
             volumesStrategy,

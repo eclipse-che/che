@@ -68,7 +68,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
-import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
@@ -138,7 +137,6 @@ public class KubernetesInternalRuntimeTest {
   @Mock private KubernetesNamespace namespace;
   @Mock private KubernetesServices services;
   @Mock private KubernetesIngresses ingresses;
-  @Mock private UserDao userDao;
   @Mock private KubernetesPods pods;
   @Mock private KubernetesBootstrapper bootstrapper;
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
@@ -160,7 +158,6 @@ public class KubernetesInternalRuntimeTest {
             13,
             5,
             new URLRewriter.NoOpURLRewriter(),
-            userDao,
             bootstrapperFactory,
             serverCheckerFactory,
             volumesStrategy,

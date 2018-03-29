@@ -30,7 +30,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
@@ -90,7 +89,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       @Assisted DockerRuntimeContext context,
       @Assisted List<Warning> warnings,
       URLRewriter urlRewriter,
-      UserDao userDao,
       NetworkLifecycle networks,
       DockerMachineStarter machineStarter,
       EventService eventService,
@@ -104,7 +102,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     this(
         context,
         urlRewriter,
-        userDao,
         warnings,
         false, // <- non running
         networks,
@@ -129,7 +126,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       @Assisted List<ContainerListEntry> containers,
       @Assisted List<Warning> warnings,
       URLRewriter urlRewriter,
-      UserDao userDao,
       NetworkLifecycle networks,
       DockerMachineStarter machineStarter,
       EventService eventService,
@@ -146,7 +142,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     this(
         context,
         urlRewriter,
-        userDao,
         warnings,
         true, // <- running
         networks,
@@ -173,7 +168,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
   private DockerInternalRuntime(
       DockerRuntimeContext context,
       URLRewriter urlRewriter,
-      UserDao userDao,
       List<Warning> warnings,
       boolean running,
       NetworkLifecycle networks,
@@ -186,7 +180,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       WorkspaceProbesFactory probesFactory,
       ParallelDockerImagesBuilderFactory imagesBuilderFactory,
       int bootstrappingTimeoutMinutes) {
-    super(context, urlRewriter, userDao, warnings, running);
+    super(context, urlRewriter, warnings, running);
     this.networks = networks;
     this.containerStarter = machineStarter;
     this.eventService = eventService;

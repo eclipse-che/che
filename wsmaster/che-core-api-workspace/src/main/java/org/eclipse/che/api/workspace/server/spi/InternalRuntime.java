@@ -17,16 +17,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
-import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
@@ -41,19 +37,13 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
 
   private final T context;
   private final URLRewriter urlRewriter;
-  private final UserDao userDao;
   private final List<Warning> warnings;
   private WorkspaceStatus status;
 
   public InternalRuntime(
-      T context,
-      URLRewriter urlRewriter,
-      UserDao userDao,
-      List<Warning> warnings,
-      boolean running) {
+      T context, URLRewriter urlRewriter, List<Warning> warnings, boolean running) {
     this.context = context;
     this.urlRewriter = urlRewriter;
-    this.userDao = userDao;
     this.warnings = new CopyOnWriteArrayList<>();
     if (warnings != null) {
       this.warnings.addAll(warnings);
@@ -70,12 +60,7 @@ public abstract class InternalRuntime<T extends RuntimeContext> implements Runti
 
   @Override
   public String getOwner() {
-    try {
-      User user = userDao.getById(context.getIdentity().getOwnerId());
-      return user == null ? context.getIdentity().getOwnerId() : user.getName();
-    } catch (NotFoundException | ServerException e) {
-      return context.getIdentity().getOwnerId();
-    }
+    return context.getIdentity().getOwnerId();
   }
 
   @Override
