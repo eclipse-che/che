@@ -10,10 +10,15 @@
  */
 package org.eclipse.che.api.core.notification;
 
+import java.io.Serializable;
 import java.util.Map;
 
-/** @author Max Shaposhnik (mshaposh@redhat.com) */
-public class SubscriptionContext {
+/**
+ * Describes single event subscription with limiting scope.
+ *
+ * @author Max Shaposhnik (mshaposh@redhat.com)
+ */
+public class SubscriptionContext implements Serializable {
 
   private final String endpointId;
   private final Map<String, String> scope;

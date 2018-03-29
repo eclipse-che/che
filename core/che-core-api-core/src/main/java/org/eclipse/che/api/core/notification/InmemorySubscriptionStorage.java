@@ -17,7 +17,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Singleton;
 
-/** @author Max Shaposhnik (mshaposh@redhat.com) */
+/**
+ * Imnemory implementation of {@link SubscriptionStorage}
+ *
+ * @author Max Shaposhnik (mshaposh@redhat.com) */
 @Singleton
 public class InmemorySubscriptionStorage implements SubscriptionStorage {
 

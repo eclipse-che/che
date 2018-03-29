@@ -12,12 +12,30 @@ package org.eclipse.che.api.core.notification;
 
 import java.util.Set;
 
-/** @author Max Shaposhnik (mshaposh@redhat.com) */
+/**
+ * Method - based storage of event subscriptions.
+ *
+ * @author Max Shaposhnik (mshaposh@redhat.com) */
 public interface SubscriptionStorage {
 
+  /**
+   * Returns all active subscriptions for the given method
+   * @param method Method name
+   * @return active subscriptions to this method
+   */
   Set<SubscriptionContext> getByMethod(String method);
 
+  /**
+   * Adds new subscription to the given method subscriptions list
+   * @param method Method name
+   * @param subscriptionContext  new subscription
+   */
   void addSubscription(String method, SubscriptionContext subscriptionContext);
 
+  /**
+   * Removes particular subscription from the given method subscriptions list
+   * @param method Method name
+   * @param endpointId id of endpoint to remove
+   */
   void removeSubscription(String method, String endpointId);
 }

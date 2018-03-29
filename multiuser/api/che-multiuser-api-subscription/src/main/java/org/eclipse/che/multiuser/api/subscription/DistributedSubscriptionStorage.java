@@ -25,7 +25,11 @@ import org.jgroups.JChannel;
 import org.jgroups.blocks.ReplicatedHashMap;
 import org.slf4j.Logger;
 
-/** @author Max Shaposhnik (mshaposh@redhat.com) */
+/**
+ * Replicated map-based implementation of {@link SubscriptionStorage}
+ *
+ * @author Max Shaposhnik (mshaposh@redhat.com)
+ */
 public class DistributedSubscriptionStorage implements SubscriptionStorage {
 
   private static final Logger LOG = getLogger(DistributedSubscriptionStorage.class);
@@ -37,36 +41,39 @@ public class DistributedSubscriptionStorage implements SubscriptionStorage {
   @Inject
   public DistributedSubscriptionStorage(@Named("jgroups.config.file") String confFile)
       throws Exception {
-    if (confFile != null) {
-      try {
-        Channel channel = new JChannel(confFile);
-        channel.connect(CHANNEL_NAME);
-        subscriptions = new ReplicatedHashMap<>(channel);
-        subscriptions.start(5000);
-      } catch (Exception e) {
-        LOG.error("Unable to create distributed subscriptions map.", e);
-        throw e;
-      }
+    try {
+      Channel channel = new JChannel(confFile);
+      channel.connect(CHANNEL_NAME);
+      subscriptions = new ReplicatedHashMap<>(channel);
+      subscriptions.start(5000);
+    } catch (Exception e) {
+      LOG.error("Unable to create distributed event subscriptions map.", e);
+      throw e;
     }
   }
 
   @Override
   public Set<SubscriptionContext> getByMethod(String method) {
+    LOG.info("getByMethod, size:" + subscriptions.size() + ",method:" + method +
+        ", size in method=" + subscriptions.getOrDefault(method, Collections.emptySet()).size());
     return subscriptions.getOrDefault(method, Collections.emptySet());
   }
 
   @Override
   public void addSubscription(String method, SubscriptionContext subscriptionContext) {
-    subscriptions
-        .computeIfAbsent(method, k -> ConcurrentHashMap.newKeySet(1))
-        .add(subscriptionContext);
+    LOG.info("addSubscription, size:" + subscriptions.size() + ",method:" + method +
+        ", context=" + subscriptionContext.getEndpointId() + "," + subscriptionContext.getScope());
+    Set<SubscriptionContext> existing = subscriptions
+        .getOrDefault(method, ConcurrentHashMap.newKeySet(1));
+    existing.add(subscriptionContext);
+    subscriptions.put(method, existing);
   }
 
   @Override
   public void removeSubscription(String method, String endpointId) {
-    subscriptions
-        .getOrDefault(method, Collections.emptySet())
-        .removeIf(
-            subscriptionContext -> Objects.equals(subscriptionContext.getEndpointId(), endpointId));
+    Set<SubscriptionContext> existing = subscriptions.getOrDefault(method, Collections.emptySet());
+    existing.removeIf(
+        subscriptionContext -> Objects.equals(subscriptionContext.getEndpointId(), endpointId));
+    subscriptions.put(method, existing);
   }
 }
