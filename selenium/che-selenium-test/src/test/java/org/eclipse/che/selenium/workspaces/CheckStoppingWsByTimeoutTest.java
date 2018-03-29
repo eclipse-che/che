@@ -59,8 +59,7 @@ public class CheckStoppingWsByTimeoutTest {
   @Test
   public void checkStoppingByApi() throws Exception {
     Workspace workspace =
-        workspaceServiceClient.getByName(
-            testWorkspace.getName(), testUser.getName());
+        workspaceServiceClient.getByName(testWorkspace.getName(), testUser.getName());
     assertEquals(workspace.getStatus(), STOPPED);
   }
 
