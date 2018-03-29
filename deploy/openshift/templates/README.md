@@ -16,7 +16,7 @@ oc new-app -f example.yaml -p PARAM=VALUE -e ENV=VALUE --env-file=che.env
 ```
 More info is available in [OpenShift documentation](https://docs.openshift.com/container-platform/3.7/dev_guide/application_lifecycle/new_app.html#specifying-a-template).
 
-Env file has a simple format - KEY=Value per line.
+Env file has a simple format: `KEY=VALUE` per line.
 
 You can also use `oc process` and then apply the resulted output `| oc apply -f -`, for example:
 
@@ -198,9 +198,39 @@ Additionally, you may look at the property file and convert properties to envs u
 
 So, property `che.env-name` becomes `CHE_ENV__NAME` environment variable that you can pass to Che deployment.
 
+## Delete deployments
+
+If you want to completely delete Che and its infrastructure components, deleting a project/namespace is the fastest way - all objects associated with this namespace will be deleted:
+
+`oc delete project che`
+
+If you need to delete particular deployments and associated objects, you can use selectors:
+
+```bash
+# remove all Che server related objects
+oc delete all -l=app=che
+# remove all Keycloak related objects
+oc delete all -l=app=keycloak
+# remove all Postgres related objects
+oc delete all -l=app=postgres
+
+```
+PVCs, service accounts and role bindings should be deleted separately as `oc delete all` does not delete them:
+
+```bash
+# Delete Che server PVC, ServiceAccount and RoleBinding
+oc delete sa -l=app=che
+oc delete rolebinding -l=app=che
+
+# Delete Keycloak and Postgres PVCs
+
+oc delete pvc -l=app=keycloak
+oc delete pvc -l=app=postgres
+```
+
 ## Upgrade from http to https
 
-Self-signed certificates aren't acceptable.
+IMPORTANT! Self-signed certificates aren't acceptable.
 
 1. Update Che deployment with `PROTOCOL=https, WS_PROTOCOL=wss, TLS=true`
 2. Manually edit or recreate routes for Che and Keycloak `oc apply -f https`

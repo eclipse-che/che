@@ -7,13 +7,15 @@
 apiVersion: v1
 kind: Route
 metadata:
-  name: "keycloak"
+  labels:
+    app: keycloak
+  name: keycloak
 spec:
   tls:
     insecureEdgeTerminationPolicy: Allow
     termination: edge
   port:
-    targetPort: '5050'
+    targetPort: 5050
   to:
     kind: Service
-    name: "keycloak"
+    name: keycloak

@@ -8,27 +8,25 @@
 kind: Template
 apiVersion: v1
 metadata:
-  name: che
+  name: postgres
   annotations:
     description: Che
 objects:
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
-    labels:
-      io.kompose.service: postgres
     name: postgres
   spec:
     replicas: 1
     selector:
-      io.kompose.service: postgres
+      app: postgres
     strategy:
       resources: {}
       type: Recreate
     template:
       metadata:
         labels:
-          io.kompose.service: postgres
+          app: postgres
       spec:
         containers:
         - env:
@@ -65,8 +63,8 @@ objects:
                   psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d
                   $POSTGRESQL_DATABASE -c 'SELECT 1'
             failureThreshold: 10
-            initialDelaySeconds: 5
-            periodSeconds: 3
+            initialDelaySeconds: 30
+            periodSeconds: 5
             successThreshold: 1
             timeoutSeconds: 1
           ports:
@@ -84,8 +82,6 @@ objects:
 - apiVersion: v1
   kind: Service
   metadata:
-    labels:
-      io.kompose.service: postgres
     name: postgres
   spec:
     ports:
@@ -93,12 +89,10 @@ objects:
       port: 5432
       targetPort: 5432
     selector:
-      io.kompose.service: postgres
+      app: postgres
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
-    labels:
-      io.kompose.service: postgres-data
     name: postgres-data
   spec:
     accessModes:
@@ -115,3 +109,6 @@ parameters:
   displayName: Postgres DB Image
   description: Postgres DB Image. Defaults to docker.io/eclipse/che-postgres
   value: docker.io/eclipse/che-postgres
+labels:
+  app: postgres
+  template: postgres

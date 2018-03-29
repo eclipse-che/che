@@ -15,8 +15,6 @@ objects:
 - apiVersion: v1
   kind: ServiceAccount
   metadata:
-    labels:
-      app: che
     name: che
 - apiVersion: v1
   kind: RoleBinding
@@ -30,8 +28,6 @@ objects:
 - apiVersion: v1
   kind: Service
   metadata:
-    labels:
-      app: che
     name: che-host
   spec:
     ports:
@@ -44,8 +40,6 @@ objects:
 - apiVersion: v1
   kind: Route
   metadata:
-    labels:
-      app: che
     name: che
   spec:
     to:
@@ -54,8 +48,6 @@ objects:
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
-    labels:
-      app: che
     name: che
   spec:
     replicas: 1
@@ -147,16 +139,18 @@ objects:
               path: /api/system/state
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 120
-            timeoutSeconds: 10
+            initialDelaySeconds: 50
+            failureThreshold: 3
+            timeoutSeconds: 2
           name: che
           readinessProbe:
             httpGet:
               path: /api/system/state
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 15
-            timeoutSeconds: 60
+            initialDelaySeconds: 25
+            timeoutSeconds: 5
+            failureThreshold: 5
           name: che
           ports:
           - containerPort: 8080
@@ -172,14 +166,9 @@ objects:
               memory: 256Mi
           terminationMessagePath: "/dev/termination-log"
           terminationMessagePolicy: File
-        dnsPolicy: ClusterFirst
         restartPolicy: Always
-        schedulerName: default-scheduler
-        securityContext: {}
-        serviceAccount: che
         serviceAccountName: che
         terminationGracePeriodSeconds: 30
-    test: false
     triggers:
     - type: ConfigChange
 

@@ -8,26 +8,24 @@
 kind: Template
 apiVersion: v1
 metadata:
-  name: che
+  name: keycloak
   annotations:
     description: Che
 objects:
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
-    labels:
-      io.kompose.service: keycloak
     name: keycloak
   spec:
     replicas: 1
     selector:
-      io.kompose.service: keycloak
+      app: keycloak
     strategy:
       type: Recreate
     template:
       metadata:
         labels:
-          io.kompose.service: keycloak
+          app: keycloak
       spec:
         containers:
         - env:
@@ -61,7 +59,7 @@ objects:
           name: keycloak
           livenessProbe:
             failureThreshold: 11
-            initialDelaySeconds: 5
+            initialDelaySeconds: 80
             periodSeconds: 5
             successThreshold: 1
             tcpSocket:
@@ -73,7 +71,7 @@ objects:
               path: auth/js/keycloak.js
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 10
+            initialDelaySeconds: 60
             periodSeconds: 3
             successThreshold: 1
             timeoutSeconds: 1
@@ -101,32 +99,28 @@ objects:
 - apiVersion: v1
   kind: Service
   metadata:
-    name: "keycloak"
+    name: keycloak
   spec:
     ports:
     - name: "5050"
       port: 5050
       targetPort: 8080
     selector:
-      io.kompose.service: keycloak
-  status:
-    loadBalancer: {}
+      app: keycloak
 
 - apiVersion: v1
   kind: Route
   metadata:
-    name: "keycloak"
+    name: keycloak
   spec:
     port:
-      targetPort: '5050'
+      targetPort: 5050
     to:
       kind: Service
-      name: "keycloak"
+      name: keycloak
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
-    labels:
-      io.kompose.service: keycloak-data
     name: keycloak-data
   spec:
     accessModes:
@@ -137,8 +131,6 @@ objects:
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
-    labels:
-      io.kompose.service: keycloak-log
     name: keycloak-log
   spec:
     accessModes:
@@ -163,3 +155,6 @@ parameters:
   displayName: Keycloak Image
   description: Keycloak Image. Defaults to docker.io/eclipse/che-keycloak
   value: eclipse/che-keycloak
+labels:
+  app: keycloak
+  template: keycloak
