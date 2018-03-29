@@ -18,24 +18,25 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Singleton;
 
 /**
- * Imnemory implementation of {@link SubscriptionStorage}
+ * Imnemory implementation of {@link RemoteSubscriptionStorage}
  *
- * @author Max Shaposhnik (mshaposh@redhat.com) */
+ * @author Max Shaposhnik (mshaposh@redhat.com)
+ */
 @Singleton
-public class InmemorySubscriptionStorage implements SubscriptionStorage {
+public class InmemoryRemoteSubscriptionStorage implements RemoteSubscriptionStorage {
 
-  private final Map<String, Set<SubscriptionContext>> subscriptions = new ConcurrentHashMap<>();
+  private final Map<String, Set<RemoteSubscriptionContext>> subscriptions = new ConcurrentHashMap<>();
 
   @Override
-  public Set<SubscriptionContext> getByMethod(String method) {
+  public Set<RemoteSubscriptionContext> getByMethod(String method) {
     return subscriptions.getOrDefault(method, Collections.emptySet());
   }
 
   @Override
-  public void addSubscription(String method, SubscriptionContext subscriptionContext) {
+  public void addSubscription(String method, RemoteSubscriptionContext remoteSubscriptionContext) {
     subscriptions
         .computeIfAbsent(method, k -> ConcurrentHashMap.newKeySet(1))
-        .add(subscriptionContext);
+        .add(remoteSubscriptionContext);
   }
 
   @Override
@@ -43,6 +44,7 @@ public class InmemorySubscriptionStorage implements SubscriptionStorage {
     subscriptions
         .getOrDefault(method, Collections.emptySet())
         .removeIf(
-            subscriptionContext -> Objects.equals(subscriptionContext.getEndpointId(), endpointId));
+            remoteSubscriptionContext -> Objects
+                .equals(remoteSubscriptionContext.getEndpointId(), endpointId));
   }
 }

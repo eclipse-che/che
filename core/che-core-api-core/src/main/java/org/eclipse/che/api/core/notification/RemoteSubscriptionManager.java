@@ -24,16 +24,16 @@ public class RemoteSubscriptionManager {
 
   private final EventService eventService;
   private final RequestTransmitter requestTransmitter;
-  private final SubscriptionStorage subscriptionStorage;
+  private final RemoteSubscriptionStorage remoteSubscriptionStorage;
 
   @Inject
   public RemoteSubscriptionManager(
       EventService eventService,
       RequestTransmitter requestTransmitter,
-      SubscriptionStorage subscriptionStorage) {
+      RemoteSubscriptionStorage remoteSubscriptionStorage) {
     this.eventService = eventService;
     this.requestTransmitter = requestTransmitter;
-    this.subscriptionStorage = subscriptionStorage;
+    this.remoteSubscriptionStorage = remoteSubscriptionStorage;
   }
 
   @Inject
@@ -57,7 +57,7 @@ public class RemoteSubscriptionManager {
       String method, Class<T> eventType, BiPredicate<T, Map<String, String>> biPredicate) {
     eventService.subscribe(
         event ->
-            subscriptionStorage
+            remoteSubscriptionStorage
                 .getByMethod(method)
                 .stream()
                 .filter(context -> biPredicate.test(event, context.getScope()))
@@ -66,17 +66,17 @@ public class RemoteSubscriptionManager {
   }
 
   private void consumeSubscriptionRequest(String endpointId, EventSubscription eventSubscription) {
-    subscriptionStorage.addSubscription(
+    remoteSubscriptionStorage.addSubscription(
         eventSubscription.getMethod(),
-        new SubscriptionContext(endpointId, eventSubscription.getScope()));
+        new RemoteSubscriptionContext(endpointId, eventSubscription.getScope()));
   }
 
   private void consumeUnSubscriptionRequest(
       String endpointId, EventSubscription eventSubscription) {
-    subscriptionStorage
+    remoteSubscriptionStorage
         .getByMethod(eventSubscription.getMethod())
         .removeIf(
-            subscriptionContext -> Objects.equals(subscriptionContext.getEndpointId(), endpointId));
+            remoteSubscriptionContext -> Objects.equals(remoteSubscriptionContext.getEndpointId(), endpointId));
   }
 
   private <T> void transmit(String endpointId, String method, T event) {

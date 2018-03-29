@@ -25,8 +25,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.sql.DataSource;
 import org.eclipse.che.agent.exec.client.ExecAgentClientFactory;
-import org.eclipse.che.api.core.notification.InmemorySubscriptionStorage;
-import org.eclipse.che.api.core.notification.SubscriptionStorage;
+import org.eclipse.che.api.core.notification.InmemoryRemoteSubscriptionStorage;
+import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
@@ -70,6 +70,7 @@ import org.eclipse.che.mail.template.TemplateProcessor;
 import org.eclipse.che.multiuser.api.permission.server.AdminPermissionInitializer;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.api.permission.server.PermissionCheckerImpl;
+import org.eclipse.che.multiuser.api.subscription.DistributedRemoteSubscriptionStorage;
 import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakModule;
 import org.eclipse.che.multiuser.machine.authentication.server.MachineAuthModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationApiModule;
@@ -266,7 +267,7 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.security.oauth.shared.OAuthTokenProvider.class)
         .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
-    bind(SubscriptionStorage.class).to(InmemorySubscriptionStorage.class);
+    bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
   }
 
   private void configureMultiUserMode(
@@ -280,10 +281,10 @@ public class WsMasterModule extends AbstractModule {
       persistenceProperties.put(
           PersistenceUnitProperties.COORDINATION_JGROUPS_CONFIG, JGROUPS_CONF_FILE);
       bindConstant().annotatedWith(Names.named("jgroups.config.file")).to(JGROUPS_CONF_FILE);
-      bind(SubscriptionStorage.class)
-          .to(org.eclipse.che.multiuser.api.subscription.DistributedSubscriptionStorage.class);
+      bind(RemoteSubscriptionStorage.class)
+          .to(DistributedRemoteSubscriptionStorage.class);
     } else {
-      bind(SubscriptionStorage.class).to(InmemorySubscriptionStorage.class);
+      bind(RemoteSubscriptionStorage.class).to(InmemoryRemoteSubscriptionStorage.class);
     }
 
     persistenceProperties.put(

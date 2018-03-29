@@ -18,28 +18,28 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.core.notification.SubscriptionContext;
-import org.eclipse.che.api.core.notification.SubscriptionStorage;
+import org.eclipse.che.api.core.notification.RemoteSubscriptionContext;
+import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
 import org.jgroups.Channel;
 import org.jgroups.JChannel;
 import org.jgroups.blocks.ReplicatedHashMap;
 import org.slf4j.Logger;
 
 /**
- * Replicated map-based implementation of {@link SubscriptionStorage}
+ * Replicated map-based implementation of {@link RemoteSubscriptionStorage}
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
-public class DistributedSubscriptionStorage implements SubscriptionStorage {
+public class DistributedRemoteSubscriptionStorage implements RemoteSubscriptionStorage {
 
-  private static final Logger LOG = getLogger(DistributedSubscriptionStorage.class);
+  private static final Logger LOG = getLogger(DistributedRemoteSubscriptionStorage.class);
 
   private static final String CHANNEL_NAME = "RemoteSubscriptionChannel";
 
-  private ReplicatedHashMap<String, Set<SubscriptionContext>> subscriptions;
+  private ReplicatedHashMap<String, Set<RemoteSubscriptionContext>> subscriptions;
 
   @Inject
-  public DistributedSubscriptionStorage(@Named("jgroups.config.file") String confFile)
+  public DistributedRemoteSubscriptionStorage(@Named("jgroups.config.file") String confFile)
       throws Exception {
     try {
       Channel channel = new JChannel(confFile);
@@ -53,27 +53,25 @@ public class DistributedSubscriptionStorage implements SubscriptionStorage {
   }
 
   @Override
-  public Set<SubscriptionContext> getByMethod(String method) {
-    LOG.info("getByMethod, size:" + subscriptions.size() + ",method:" + method +
-        ", size in method=" + subscriptions.getOrDefault(method, Collections.emptySet()).size());
+  public Set<RemoteSubscriptionContext> getByMethod(String method) {
     return subscriptions.getOrDefault(method, Collections.emptySet());
   }
 
   @Override
-  public void addSubscription(String method, SubscriptionContext subscriptionContext) {
-    LOG.info("addSubscription, size:" + subscriptions.size() + ",method:" + method +
-        ", context=" + subscriptionContext.getEndpointId() + "," + subscriptionContext.getScope());
-    Set<SubscriptionContext> existing = subscriptions
+  public void addSubscription(String method, RemoteSubscriptionContext remoteSubscriptionContext) {
+    Set<RemoteSubscriptionContext> existing = subscriptions
         .getOrDefault(method, ConcurrentHashMap.newKeySet(1));
-    existing.add(subscriptionContext);
+    existing.add(remoteSubscriptionContext);
     subscriptions.put(method, existing);
   }
 
   @Override
   public void removeSubscription(String method, String endpointId) {
-    Set<SubscriptionContext> existing = subscriptions.getOrDefault(method, Collections.emptySet());
+    Set<RemoteSubscriptionContext> existing = subscriptions
+        .getOrDefault(method, Collections.emptySet());
     existing.removeIf(
-        subscriptionContext -> Objects.equals(subscriptionContext.getEndpointId(), endpointId));
+        remoteSubscriptionContext -> Objects
+            .equals(remoteSubscriptionContext.getEndpointId(), endpointId));
     subscriptions.put(method, existing);
   }
 }

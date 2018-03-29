@@ -18,12 +18,12 @@ import java.util.Map;
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
  */
-public class SubscriptionContext implements Serializable {
+public class RemoteSubscriptionContext implements Serializable {
 
   private final String endpointId;
   private final Map<String, String> scope;
 
-  SubscriptionContext(String endpointId, Map<String, String> scope) {
+  RemoteSubscriptionContext(String endpointId, Map<String, String> scope) {
     this.endpointId = endpointId;
     this.scope = scope;
   }

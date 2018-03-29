@@ -16,21 +16,21 @@ import java.util.Set;
  * Method - based storage of event subscriptions.
  *
  * @author Max Shaposhnik (mshaposh@redhat.com) */
-public interface SubscriptionStorage {
+public interface RemoteSubscriptionStorage {
 
   /**
    * Returns all active subscriptions for the given method
    * @param method Method name
    * @return active subscriptions to this method
    */
-  Set<SubscriptionContext> getByMethod(String method);
+  Set<RemoteSubscriptionContext> getByMethod(String method);
 
   /**
    * Adds new subscription to the given method subscriptions list
    * @param method Method name
-   * @param subscriptionContext  new subscription
+   * @param remoteSubscriptionContext  new subscription
    */
-  void addSubscription(String method, SubscriptionContext subscriptionContext);
+  void addSubscription(String method, RemoteSubscriptionContext remoteSubscriptionContext);
 
   /**
    * Removes particular subscription from the given method subscriptions list
