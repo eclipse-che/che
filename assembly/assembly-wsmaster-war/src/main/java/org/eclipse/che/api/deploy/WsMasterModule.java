@@ -20,7 +20,6 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
-import com.google.inject.util.Providers;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -280,9 +279,7 @@ public class WsMasterModule extends AbstractModule {
           PersistenceUnitProperties.COORDINATION_PROTOCOL, CacheCoordinationProtocol.JGROUPS);
       persistenceProperties.put(
           PersistenceUnitProperties.COORDINATION_JGROUPS_CONFIG, JGROUPS_CONF_FILE);
-      bind(String.class)
-          .annotatedWith(Names.named("jgroups.config.file"))
-          .toProvider(Providers.of(JGROUPS_CONF_FILE));
+      bindConstant().annotatedWith(Names.named("jgroups.config.file")).to(JGROUPS_CONF_FILE);
       bind(SubscriptionStorage.class)
           .to(org.eclipse.che.multiuser.api.subscription.DistributedSubscriptionStorage.class);
     } else {
