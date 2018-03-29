@@ -40,6 +40,7 @@ public class UnavailableResourceInMultiUserFilter implements Filter {
     if (requestMethod.equals("GET")) {
       // allow request to go through
       chain.doFilter(request, response);
+      return;
     }
 
     HttpServletResponse httpResponse = (HttpServletResponse) response;
