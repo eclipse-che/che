@@ -86,8 +86,6 @@ public class QuickFixAndCodeAssistantFeaturesTest {
 
     editor.typeTextIntoEditor(TEXT_FOR_ERROR);
     editor.launchAutocompleteAndWaitContainer();
-    // ide.getEditor().selectItemIntoAutocompleteAndPerformDoubleClick("null"); //TODO cursor
-    // disappears IDEX-3353
     editor.enterAutocompleteProposal("null");
     projectExplorer.waitAndSelectItemByName(
         "AppController.java"); // TODO because the cursor disappears after click in the autocomplete

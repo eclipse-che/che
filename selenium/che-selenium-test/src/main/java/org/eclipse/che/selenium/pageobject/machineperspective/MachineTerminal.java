@@ -318,9 +318,6 @@ public class MachineTerminal {
         : format(Locators.TERMINAL_TAB_XPATH, "-" + terminalNumber);
   }
 
-  // TODO should be removed after fixing: https://github.com/eclipse/che/issues/8105
-  // this auxiliary method for investigate problem that was described in the issue:
-  // https://github.com/eclipse/che/issues/8105
   public void logApplicationInfo(String projectName, TestWorkspace ws) {
     try {
       String getApplicationInfoCommand = format("ps -up $(pgrep -f \"%s\" | head -1)", projectName);

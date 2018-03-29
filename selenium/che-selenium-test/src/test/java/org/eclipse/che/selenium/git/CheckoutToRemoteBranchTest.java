@@ -10,56 +10,55 @@
  */
 package org.eclipse.che.selenium.git;
 
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.BRANCHES;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.COMMIT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.PULL;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.PUSH;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.SHOW_HISTORY;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.STATUS;
+import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import java.util.Date;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubKeyUploader;
+import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestGitConstants;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.ImportProjectFromLocation;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.Wizard;
+import org.eclipse.che.selenium.pageobject.git.Git;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
-@Test(groups = TestGroup.GITHUB)
 public class CheckoutToRemoteBranchTest {
-  private static final String PROJECT_NAME =
-      NameGenerator.generate("CheckoutToRemoteBranchTest-", 4);
-  private static final String PROJECT_NAME2 =
-      NameGenerator.generate("CheckoutToRemoteBranchTest2-", 4);
+  private static final String PROJECT_NAME = NameGenerator.generate("CheckoutToRemoteBranch-", 4);
+  private static final String PROJECT_NAME2 = NameGenerator.generate("CheckoutToRemoteBranch2-", 4);
+
   private static final String MASTER_BRANCH = "master";
   private static final String ORIGIN_MASTER_BRANCH = "origin/master";
   private static final String ORIGIN_SECOND_BRANCH = "origin/second_branch";
   private static final String SECOND_BRANCH = "second_branch";
   private static final String NAME_REMOTE_REPO = "origin";
-  private static final String GIT_STATUS_MESS =
-      " On branch " + SECOND_BRANCH + "\n" + " nothing to commit, working directory clean";
-
   private static final String PULL_MSG = "Already up-to-date";
-  private static final String PUSH_MSG = "Pushed to origin";
   private static String COMMIT_MESS = "commitchk_remote";
-
-  private String uniqueValue;
-  private String uniqueValue2;
+  private static final String GIT_STATUS_MESS =
+      " On branch second_branch\n" + " nothing to commit, working directory clean";
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
   @Inject private TestUser productUser;
+  @Inject private TestGitHubRepository testRepo;
 
   @Inject(optional = true)
   @Named("github.username")
@@ -67,216 +66,116 @@ public class CheckoutToRemoteBranchTest {
 
   @Inject(optional = true)
   @Named("github.password")
-  private String gitHubPassword;
+  private String gitHubPassword;;
 
+  @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
-  @Inject private org.eclipse.che.selenium.pageobject.git.Git git;
-  @Inject private Events events;
-  @Inject private Loader loader;
+  @Inject private Git git;
   @Inject private CodenvyEditor editor;
-  @Inject private NotificationsPopupPanel notifications;
-  @Inject private ImportProjectFromLocation importFromLocation;
-  @Inject private Wizard projectWizard;
-  @Inject private TestGitHubKeyUploader testGitHubKeyUploader;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
-  @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private TestGitHubKeyUploader testGitHubKeyUploader;
 
   @BeforeClass
   public void prepare() throws Exception {
-    testGitHubKeyUploader.updateGithubKey();
     testUserPreferencesServiceClient.addGitCommitter(gitHubUsername, productUser.getEmail());
+    testGitHubKeyUploader.updateGithubKey();
+
+    Path entryPath =
+        Paths.get(getClass().getResource("/projects/default-spring-project").getPath());
+    testRepo.addContent(entryPath);
+
     ide.open(ws);
+
+    // create other branch in the test repo
+    testRepo.addRefFromMaster(SECOND_BRANCH);
   }
 
   @Test
-  public void checkoutToRemoteBranchTest() throws Exception {
-    // Preconditions and import project
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
-
-    String cloneUrl = "git@github.com:" + gitHubUsername + "/springProjectWithSeveralBranches.git";
-    importProjectFromRemoteRepo(cloneUrl, PROJECT_NAME);
+  public void checkoutToRemoteBranch() throws Exception {
+    // preconditions and import the test repo
+    String pathJavaFile = "/src/main/java/che/eclipse/sample/Aclass.java";
+    String pathJspFile = "/src/main/webapp/index.jsp";
+    String changeContent =
+        String.format("// change_content-%s", String.valueOf(System.currentTimeMillis()));
 
     projectExplorer.waitProjectExplorer();
+    git.importJavaApp(testRepo.getSshUrl(), PROJECT_NAME, MAVEN);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    uniqueValue = String.valueOf(System.currentTimeMillis());
 
-    // Open branches and check it and status
+    // git checkout to the 'second_branch'
     checkoutToSecondRemoteBranch();
-    loader.waitOnClosed();
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
+
+    menu.runCommand(GIT, STATUS);
     git.waitGitStatusBarWithMess(GIT_STATUS_MESS);
 
-    // Check content in package and project explorer
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(
-        PROJECT_NAME + "/src/main/java/helloworld/GreetingController.java");
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
-    projectExplorer.waitVisibilityByName("GreetingController.java");
-    projectExplorer.waitVisibilityByName("index.jsp");
-    editor.closeFileByNameWithSaving("index.jsp");
-    editor.waitWhileFileIsClosed("index.jsp");
+    performGitPull();
 
-    // Make pull
-    menu.runCommand(
-        TestMenuCommandsConstants.Git.GIT,
-        TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP,
-        TestMenuCommandsConstants.Git.Remotes.PULL);
-    makePullSecondRemoteBranch();
-    notifications.waitProgressPopupPanelClose();
-    git.waitGitStatusBarWithMess(PULL_MSG);
-    events.clickEventLogBtn();
-    events.waitExpectedMessage(PULL_MSG);
+    // change content of the files, commit and push
+    testProjectServiceClient.updateFile(ws.getId(), PROJECT_NAME + pathJavaFile, changeContent);
+    testProjectServiceClient.updateFile(ws.getId(), PROJECT_NAME + pathJspFile, changeContent);
 
-    // Make some change in java file
-    uniqueValue2 = String.valueOf(System.currentTimeMillis());
-    projectExplorer.openItemByVisibleNameInExplorer("GreetingController.java");
-    editor.waitActive();
-    editor.selectLineAndDelete(2);
-    editor.typeTextIntoEditor("//" + uniqueValue);
-    editor.waitTextIntoEditor(uniqueValue);
-    loader.waitOnClosed();
-    editor.waitTabFileWithSavedStatus("GreetingController");
-    loader.waitOnClosed();
-    editor.closeFileByNameWithSaving("GreetingController");
-    editor.waitWhileFileIsClosed("GreetingController");
+    commitFiles();
 
-    // Make some change in jsp file
-    projectExplorer.openItemByVisibleNameInExplorer("index.jsp");
-    loader.waitOnClosed();
-    editor.waitActive();
-    editor.selectLineAndDelete(1);
-    editor.typeTextIntoEditor("<!" + uniqueValue2 + ">");
-    editor.waitTextIntoEditor(uniqueValue2);
-    editor.waitTabFileWithSavedStatus("index.jsp");
-    loader.waitOnClosed();
-    editor.closeFileByNameWithSaving("index.jsp");
-    editor.waitWhileFileIsClosed("index.jsp");
+    performGitPush();
 
-    // Add all files to index and commit
-    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main");
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
-    git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
-    events.clickEventLogBtn();
-    events.waitExpectedMessage(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
-    COMMIT_MESS = COMMIT_MESS + new Date().toString();
-    git.waitAndRunCommit(COMMIT_MESS);
-    git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-    events.clickEventLogBtn();
-    events.waitExpectedMessage(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
-
-    // Make push
-    menu.runCommand(
-        TestMenuCommandsConstants.Git.GIT,
-        TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP,
-        TestMenuCommandsConstants.Git.Remotes.PUSH);
-    git.waitPushFormToOpen();
-    git.selectPushRemoteBranchName(SECOND_BRANCH);
-    git.clickPush();
-    git.waitPushFormToClose();
-
-    String pushedMessage =
-        "Successfully pushed to git@github.com:"
-            + gitHubUsername
-            + "/springProjectWithSeveralBranches.git";
-    git.waitGitStatusBarWithMess(pushedMessage);
-
-    events.clickEventLogBtn();
-    events.waitExpectedMessage(PUSH_MSG);
-
-    // import from hosted git repository the second project
-    projectExplorer.openItemByPath(PROJECT_NAME);
-    loader.waitOnClosed();
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.IMPORT_PROJECT);
-    importProjectFromRemoteRepo(cloneUrl, PROJECT_NAME2);
-    projectExplorer.waitItem(PROJECT_NAME2);
+    // import from github to the second project
+    git.importJavaApp(testRepo.getHtmlUrl(), PROJECT_NAME2, MAVEN);
     projectExplorer.waitAndSelectItem(PROJECT_NAME2);
+
     checkoutToSecondRemoteBranch();
 
-    // Checking, that present earlier changes
-    projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        PROJECT_NAME2 + "/src/main/java/helloworld", "GreetingController.java");
-    loader.waitOnClosed();
-    projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        PROJECT_NAME2 + "/src/main/webapp", "index.jsp");
-    loader.waitOnClosed();
-    projectExplorer.openItemByVisibleNameInExplorer("GreetingController.java");
-    editor.waitTextIntoEditor(uniqueValue);
-    editor.closeFileByNameWithSaving("GreetingController");
-    editor.waitWhileFileIsClosed("GreetingController");
-    projectExplorer.openItemByVisibleNameInExplorer("index.jsp");
-    editor.waitTextIntoEditor(uniqueValue2);
-    editor.closeFileByNameWithSaving("index.jsp");
-    editor.waitWhileFileIsClosed("index.jsp");
+    // check the changes are present in the files
+    projectExplorer.quickExpandWithJavaScript();
+    projectExplorer.openItemByPath(PROJECT_NAME2 + "/src/main/java/che/eclipse/sample/Aclass.java");
+    editor.waitTextIntoEditor(changeContent);
+    projectExplorer.openItemByPath(PROJECT_NAME2 + "/src/main/webapp/index.jsp");
+    editor.waitTextIntoEditor(changeContent);
 
     // Call and checking show history
     projectExplorer.waitAndSelectItem(PROJECT_NAME2 + "/src");
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
-    loader.waitOnClosed();
-    git.closeGitInfoPanel();
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.SHOW_HISTORY);
-    loader.waitOnClosed();
+    menu.runCommand(GIT, SHOW_HISTORY);
     git.waitHistoryFormToOpen();
     git.waitCommitInHistoryForm(COMMIT_MESS);
-    git.clickOnCommitInHistoryForm(COMMIT_MESS);
-    loader.waitOnClosed();
-
-    // check the change into git compare form
-    git.clickCompareBtnGitHistory();
-    git.waitGroupGitCompareIsOpen();
-    git.selectFileInChangedFilesTreePanel("GreetingController.java");
-    checkChangesIntoCompareForm(uniqueValue);
-    seleniumWebDriver.switchTo().parentFrame();
-    git.closeGitCompareForm();
-    git.waitGroupGitCompareIsOpen();
-    git.selectFileInChangedFilesTreePanel("index.jsp");
-    checkChangesIntoCompareForm(uniqueValue2);
-  }
-
-  private void importProjectFromRemoteRepo(String urlRepo, String projectName) {
-    importFromLocation.waitAndTypeImporterAsGitInfo(urlRepo, projectName);
-    projectWizard.waitCreateProjectWizardForm();
-    projectWizard.selectTypeProject(Wizard.TypeProject.MAVEN);
-    loader.waitOnClosed();
-    projectWizard.clickSaveButton();
-    loader.waitOnClosed();
-    projectWizard.waitCreateProjectWizardFormIsClosed();
-    projectExplorer.waitItem(projectName);
-    loader.waitOnClosed();
   }
 
   private void checkoutToSecondRemoteBranch() throws Exception {
-    loader.waitOnClosed();
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
+    menu.runCommand(GIT, BRANCHES);
     git.waitBranchInTheList(MASTER_BRANCH);
     git.waitBranchInTheList(ORIGIN_MASTER_BRANCH);
     git.waitBranchInTheList(ORIGIN_SECOND_BRANCH);
     git.selectBranchAndClickCheckoutBtn(ORIGIN_SECOND_BRANCH);
-    loader.waitOnClosed();
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
+    git.waitGitCompareBranchFormIsClosed();
+    menu.runCommand(GIT, BRANCHES);
     git.waitBranchInTheListWithCoState(SECOND_BRANCH);
     git.closeBranchesForm();
   }
 
-  private void makePullSecondRemoteBranch() throws InterruptedException {
+  private void performGitPull() throws InterruptedException {
+    menu.runCommand(GIT, REMOTES_TOP, PULL);
     git.waitPullFormToOpen();
     git.waitPullRemoteRepository(NAME_REMOTE_REPO);
     git.waitPullRemoteBranchName(SECOND_BRANCH);
     git.waitPullLocalBranchName(SECOND_BRANCH);
     git.clickPull();
     git.waitPullFormToClose();
+    git.waitGitStatusBarWithMess(PULL_MSG);
   }
 
-  private void checkChangesIntoCompareForm(String expText) {
-    git.clickOnGroupCompareButton();
-    git.waitGitCompareFormIsOpen();
-    git.waitExpTextIntoCompareLeftEditor(expText);
-    git.waitTextNotPresentIntoCompareRightEditor(expText);
+  private void commitFiles() {
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
+    menu.runCommand(GIT, COMMIT);
+
+    git.waitAndRunCommit(COMMIT_MESS);
+    git.waitGitStatusBarWithMess(TestGitConstants.COMMIT_MESSAGE_SUCCESS);
+  }
+
+  private void performGitPush() {
+    menu.runCommand(GIT, REMOTES_TOP, PUSH);
+    git.waitPushFormToOpen();
+    git.selectPushRemoteBranchName(SECOND_BRANCH);
+    git.clickPush();
+    git.waitPushFormToClose();
+    git.waitGitStatusBarWithMess("Successfully pushed to " + testRepo.getSshUrl());
   }
 }

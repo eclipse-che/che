@@ -35,6 +35,7 @@ spec:
               fieldRef:
                 fieldPath: metadata.namespace
 {{- end }}
+{{- if not .Values.global.multiuser }}
       - name: fmp-volume-permission
         image: busybox
         command: ["chmod", "777", "/data"]
@@ -42,6 +43,7 @@ spec:
               "mountPath": "/data",
               "name": "che-data-volume"
         }]
+{{- end }}
       containers:
       - env:
         - name: CHE_DOMAIN
@@ -233,9 +235,15 @@ spec:
             memory: 600Mi
           requests:
             memory: 256Mi
+{{- if not .Values.global.multiuser }}
         volumeMounts:
         - mountPath: /data
           name: che-data-volume
+      volumes:
+      - name: che-data-volume
+        persistentVolumeClaim:
+          claimName: che-data-volume
+{{- end }}
 {{- if .Values.registry }}
 {{- if and .Values.registry.password .Values.registry.username }}
       imagePullSecrets:
@@ -243,7 +251,3 @@ spec:
 {{- end }}
 {{- end }}
       serviceAccountName: che
-      volumes:
-      - name: che-data-volume
-        persistentVolumeClaim:
-          claimName: che-data-volume

@@ -246,10 +246,6 @@ init() {
 
   [ -z "$CHE_DATABASE" ] && export CHE_DATABASE=${CHE_DATA}/storage
   [ -z "$CHE_TEMPLATE_STORAGE" ] && export CHE_TEMPLATE_STORAGE=${CHE_DATA}/templates
-  [ -z "$CHE_WORKSPACE_AGENT_DEV" ] && export CHE_WORKSPACE_AGENT_DEV=${CHE_DATA_HOST}/lib/ws-agent.tar.gz
-  [ -z "$CHE_WORKSPACE_TERMINAL__LINUX__AMD64" ] && export CHE_WORKSPACE_TERMINAL__LINUX__AMD64=${CHE_DATA_HOST}/lib/linux_amd64/terminal
-  [ -z "$CHE_WORKSPACE_TERMINAL__LINUX__ARM7" ] && export CHE_WORKSPACE_TERMINAL__LINUX__ARM7=${CHE_DATA_HOST}/lib/linux_arm7/terminal
-  [ -z "$CHE_WORKSPACE_EXEC__LINUX__AMD64" ] && export CHE_WORKSPACE_EXEC__LINUX__AMD64=${CHE_DATA_HOST}/lib/linux_amd64/exec
 
   perform_database_migration
 
@@ -264,10 +260,8 @@ init() {
   [ -z "$CHE_WORKSPACE_STORAGE" ] && export CHE_WORKSPACE_STORAGE="${CHE_DATA_HOST}/workspaces"
   [ -z "$CHE_WORKSPACE_STORAGE_CREATE_FOLDERS" ] && export CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false
 
-  # Move files from /lib to /lib-copy.  This puts files onto the host.
-  rm -rf ${CHE_DATA}/lib/*
-  mkdir -p ${CHE_DATA}/lib  
-  cp -rf ${CHE_HOME}/lib/* "${CHE_DATA}"/lib
+  #Recursively removes the legacy che-data/lib folder with agents inside(will be removed in future versions)
+  rm -rf ${CHE_DATA}/lib
 
   # Cleanup no longer in use stacks folder, accordance to a new loading policy.
   if [[ -d "${CHE_DATA}"/stacks ]];then

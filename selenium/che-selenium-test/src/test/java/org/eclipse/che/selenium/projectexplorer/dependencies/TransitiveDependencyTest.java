@@ -12,6 +12,9 @@ package org.eclipse.che.selenium.projectexplorer.dependencies;
 
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.MAVEN;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.REIMPORT;
+import static org.openqa.selenium.Keys.DELETE;
+import static org.openqa.selenium.Keys.DOWN;
+import static org.openqa.selenium.Keys.SHIFT;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -19,13 +22,13 @@ import java.nio.file.Paths;
 import java.util.Random;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
-import org.eclipse.che.selenium.core.user.TestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.SeleniumWebDriverHelper;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -43,13 +46,13 @@ public class TransitiveDependencyTest {
       "spring-core-3.0.5.RELEASE.jar";
 
   @Inject private TestWorkspace testWorkspace;
-  @Inject private TestUser defaultTestUser;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
   @Inject private Loader loader;
   @Inject private PopupDialogsBrowser popupDialogsBrowser;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -65,13 +68,12 @@ public class TransitiveDependencyTest {
   @Test
   public void transitiveDependencyTest() throws Exception {
     projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.expandPathInProjectExplorer(
+        PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples");
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
     projectExplorer.clickOnItemInContextMenu(MAVEN);
     projectExplorer.clickOnNewContextMenuItem(REIMPORT);
     loader.waitOnClosed();
-    projectExplorer.openItemByPath(PROJECT_NAME);
-    loader.waitOnClosed();
-    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
     editor.waitActive();
@@ -92,10 +94,13 @@ public class TransitiveDependencyTest {
 
   private void deleteDependency() {
     editor.waitActive();
-    loader.waitOnClosed();
-    for (int i = 36; i <= 40; i++) {
-      editor.setCursorToLine(i);
-      editor.selectLineAndDelete();
-    }
+    editor.setCursorToLine(36);
+    seleniumWebDriverHelper
+        .getAction()
+        .keyDown(SHIFT)
+        .sendKeys(DOWN, DOWN, DOWN, DOWN, DOWN)
+        .keyUp(SHIFT)
+        .sendKeys(DELETE)
+        .perform();
   }
 }
