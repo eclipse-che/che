@@ -174,7 +174,7 @@ oc new-project che
 oc new-app -f che-server-template.yaml -p ROUTING_SUFFIX=$(minishift ip).nip.io \
 	-p CHE_MULTIUSER=true
 	-p CHE_KEYCLOAK_AUTH__SERVER__URL=$yourURL
-	-p CHE_JDBC_URL=$yourURL \
+	-e CHE_JDBC_URL=$yourURL \
 	-p PROTOCOL=https \
 	-p WS_PROTOCOL=wss \
 	-p TLS=true; \

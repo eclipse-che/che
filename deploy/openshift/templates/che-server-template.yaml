@@ -111,8 +111,6 @@ objects:
             value: "INFO"
           - name: CHE_KEYCLOAK_AUTH__SERVER__URL
             value: "${CHE_KEYCLOAK_AUTH__SERVER__URL}"
-          - name: CHE_JDBC_URL
-            value: "${CHE_JDBC_URL}"
           - name: CHE_OAUTH_GITHUB_CLIENTID
             value: "${CHE_OAUTH_GITHUB_CLIENTID}"
           - name: CHE_OAUTH_GITHUB_CLIENTSECRET
@@ -229,10 +227,6 @@ parameters:
   displayName: Identity provider URL
   description: URL of a remote identity provider. Defaults to Keycloak bundled with Che multi user
   value: '${PROTOCOL}://keycloak-${NAMESPACE}.${ROUTING_SUFFIX}/auth'
-- name: CHE_JDBC_URL
-  displayName: JDBC URL
-  description: URL Che server will use to connect to JDBC. Defaults to Postgres service bundled with Che multi user
-  value: 'jdbc:postgresql://postgres:5432/dbche'
 - name: STRATEGY
   displayName: Update Strategy
   description: Che server update strategy. Defaults to Recreate. Use Rolling only if Che deployment does not use PVC
