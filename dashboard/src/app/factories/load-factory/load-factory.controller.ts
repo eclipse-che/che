@@ -14,7 +14,7 @@ import {LoadFactoryService} from './load-factory.service';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {RouteHistory} from '../../../components/routing/route-history.service';
 import {CheJsonRpcApi} from '../../../components/api/json-rpc/che-json-rpc-api.factory';
-import {CheJsonRpcMasterApi} from '../../../components/api/json-rpc/che-json-rpc-master-api';
+import {IWorkspaceMasterApi} from '../../../components/api/workspace/che-workspace-json-rpc-client.service';
 
 const WS_AGENT_STEP: number = 3;
 
@@ -42,7 +42,7 @@ export class LoadFactoryController {
   private projectsToImport: number;
 
   private factory: che.IFactory;
-  private jsonRpcMasterApi: CheJsonRpcMasterApi;
+  private jsonRpcMasterApi: IWorkspaceMasterApi;
 
   /**
    * Default constructor that is using resource

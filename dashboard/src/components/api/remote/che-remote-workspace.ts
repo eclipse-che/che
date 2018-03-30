@@ -9,8 +9,8 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {CheJsonRpcMasterApi} from '../json-rpc/che-json-rpc-master-api';
 import {CheJsonRpcApi} from '../json-rpc/che-json-rpc-api.factory';
+import {IWorkspaceMasterApi} from '../workspace/che-workspace-json-rpc-client.service';
 
 interface IRemoteWorkspaceResource<T> extends ng.resource.IResourceClass<T> {
   create: any;
@@ -27,7 +27,7 @@ export class CheRemoteWorkspace {
   private $resource: ng.resource.IResourceService;
   private $q: ng.IQService;
   private remoteWorkspaceAPI: IRemoteWorkspaceResource<any>;
-  private cheJsonRpcMasterApi: CheJsonRpcMasterApi;
+  private cheJsonRpcMasterApi: IWorkspaceMasterApi;
   private authData: any;
   private cheJsonRpcApi: CheJsonRpcApi;
 

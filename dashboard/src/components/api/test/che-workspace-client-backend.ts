@@ -10,25 +10,25 @@
  */
 'use strict';
 
-import {CheWorkspaceClientService, IBackend} from '../workspace/che-workspace-client.service';
+import {CheWorkspaceRestClientService, IBackend} from '../workspace/che-workspace-rest-client.service';
 
 /**
  * todo
  */
 export class CheWorkspaceClientBackend {
 
-  static $inject = ['cheWorkspaceClient'];
+  static $inject = ['cheWorkspaceRestClient'];
 
-  private cheWorkspaceClient: CheWorkspaceClientService;
+  private cheWorkspaceRestClient: CheWorkspaceRestClientService;
   private workspaceClientBackend: IBackend;
 
   private projectsPerWorkspace: Map<string, che.IProject[]> = new Map();
   private workspaceAgentMap: Map<string, string> = new Map();
   private workspaces: Map<string, che.IWorkspace> = new Map();
 
-  constructor(cheWorkspaceClient: CheWorkspaceClientService) {
-    this.cheWorkspaceClient = cheWorkspaceClient;
-    this.workspaceClientBackend = cheWorkspaceClient.backend;
+  constructor(cheWorkspaceRestClient: CheWorkspaceRestClientService) {
+    this.cheWorkspaceRestClient = cheWorkspaceRestClient;
+    this.workspaceClientBackend = cheWorkspaceRestClient.backend;
   }
 
   public getBackend(): IBackend {

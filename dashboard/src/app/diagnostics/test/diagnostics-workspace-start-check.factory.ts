@@ -14,7 +14,7 @@ import {CheWorkspace} from '../../../components/api/workspace/che-workspace.fact
 import {DiagnosticsRunningWorkspaceCheck} from './diagnostics-workspace-check-workspace.factory';
 import {CheBranding} from '../../../components/branding/che-branding.factory';
 import {CheJsonRpcApi} from '../../../components/api/json-rpc/che-json-rpc-api.factory';
-import {CheJsonRpcMasterApi} from '../../../components/api/json-rpc/che-json-rpc-master-api';
+import {IWorkspaceMasterApi} from '../../../components/api/workspace/che-workspace-json-rpc-client.service';
 
 /**
  * Test the start of a workspace
@@ -82,7 +82,7 @@ export class DiagnosticsWorkspaceStartCheck {
   /**
    * Workspace master interceptions.
    */
-  private cheJsonRpcMasterApi: CheJsonRpcMasterApi;
+  private cheJsonRpcMasterApi: IWorkspaceMasterApi;
 
   /**
    * Default constructor

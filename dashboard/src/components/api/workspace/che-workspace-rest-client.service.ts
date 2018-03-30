@@ -10,14 +10,21 @@
  */
 'use strict';
 
-export import WorkspaceClient = require('workspace-client');
+import {
+  getBackend,
+  getRestApi,
+  IBackend,
+  IRemoteAPI,
+  IRequestError,
+  IResourceCreateQueryParams
+} from 'workspace-client';
 
-export interface IBackend extends WorkspaceClient.IBackend { }
-export interface IRemoteAPI extends WorkspaceClient.IRemoteAPI { }
-export interface IRequestError extends WorkspaceClient.IRequestError { }
-export interface IWorkspaceCreateQueryParams extends WorkspaceClient.IResourceCreateQueryParams { }
+export type IBackend = IBackend;
+export type IRemoteAPI = IRemoteAPI;
+export type IRequestError = IRequestError;
+export type IWorkspaceCreateQueryParams = IResourceCreateQueryParams;
 
-export class CheWorkspaceClientService {
+export class CheWorkspaceRestClientService {
   static $inject = ['$q', '$rootScope', 'keycloakAuth'];
 
   private $q: ng.IQService;
@@ -36,9 +43,9 @@ export class CheWorkspaceClientService {
     if (keycloakAuth && keycloakAuth.keycloak) {
       headers.Authorization = 'Bearer ' + keycloakAuth.keycloak.token;
     }
-    const restApi = WorkspaceClient.getRestApi({headers});
+    const restApi = getRestApi({headers});
     this._restApi = new RestAPIWrapper(this.$q, this.$rootScope, restApi);
-    this._backend = WorkspaceClient.getBackend();
+    this._backend = getBackend();
   }
 
   get restClient(): IRestAPIWrapper {

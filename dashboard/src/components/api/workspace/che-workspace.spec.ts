@@ -12,7 +12,7 @@
 import {CheWorkspace} from './che-workspace.factory';
 import {CheAPIBuilder} from '../builder/che-api-builder.factory';
 import {CheWorkspaceClientBackend} from '../test/che-workspace-client-backend';
-import {IBackend} from './che-workspace-client.service';
+import {IBackend} from './che-workspace-rest-client.service';
 import {CheHttpBackend} from '../test/che-http-backend';
 
 /**

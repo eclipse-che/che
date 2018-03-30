@@ -12,18 +12,18 @@
 
 import {CheWorkspaceAgent} from '../che-workspace-agent';
 import {CheEnvironmentRegistry} from '../environment/che-environment-registry.factory';
-import {CheJsonRpcMasterApi} from '../json-rpc/che-json-rpc-master-api';
 import {CheJsonRpcApi} from '../json-rpc/che-json-rpc-api.factory';
 import {IObservableCallbackFn, Observable} from '../../utils/observable';
 import {CheBranding} from '../../branding/che-branding.factory';
 import {CheEnvironmentManager} from '../environment/che-environment-manager.factory';
 import {CheRecipeTypes} from '../recipe/che-recipe-types';
 import {
-  CheWorkspaceClientService,
+  CheWorkspaceRestClientService,
   IRequestError,
   IRestAPIWrapper,
   IWorkspaceCreateQueryParams
-} from './che-workspace-client.service';
+} from './che-workspace-rest-client.service';
+import {IWorkspaceMasterApi} from './che-workspace-json-rpc-client.service';
 
 const WS_AGENT_HTTP_LINK: string = 'wsagent/http';
 const WS_AGENT_WS_LINK: string = 'wsagent/ws';
@@ -62,13 +62,13 @@ export enum WorkspaceStatus {
  */
 export class CheWorkspace {
 
-  static $inject = ['$resource', '$http', '$q', 'cheJsonRpcApi', '$websocket', '$location', 'proxySettings', 'userDashboardConfig', 'lodash', 'cheEnvironmentRegistry', 'cheBranding', 'keycloakAuth', 'cheEnvironmentManager', 'cheWorkspaceClient'];
+  static $inject = ['$resource', '$http', '$q', 'cheJsonRpcApi', '$websocket', '$location', 'proxySettings', 'userDashboardConfig', 'lodash', 'cheEnvironmentRegistry', 'cheBranding', 'keycloakAuth', 'cheEnvironmentManager', 'cheWorkspaceRestClient'];
 
   private $resource: ng.resource.IResourceService;
   private $http: ng.IHttpService;
   private $q: ng.IQService;
   private $websocket: any;
-  private cheJsonRpcMasterApi: CheJsonRpcMasterApi;
+  private cheJsonRpcMasterApi: IWorkspaceMasterApi;
   private listeners: Array<any>;
   private workspaceStatuses: Array<string>;
   private workspaces: Array<che.IWorkspace>;
@@ -109,8 +109,8 @@ export class CheWorkspace {
               cheBranding: CheBranding,
               keycloakAuth: any,
               cheEnvironmentManager: CheEnvironmentManager,
-              cheWorkspaceClient: CheWorkspaceClientService) {
-    this.workspaceRestClient = cheWorkspaceClient.restClient;
+              cheWorkspaceRestClient: CheWorkspaceRestClientService) {
+    this.workspaceRestClient = cheWorkspaceRestClient.restClient;
 
     this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR'];
     // keep resource

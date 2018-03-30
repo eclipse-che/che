@@ -76,6 +76,6 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "workspace-client": "git://github.com/akurinnoy/workspace-client.git"
+    "workspace-client": "git+https://github.com/akurinnoy/workspace-client.git"
   }
 }

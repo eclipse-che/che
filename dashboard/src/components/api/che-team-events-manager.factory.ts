@@ -11,7 +11,7 @@
 'use strict';
 import {CheAPI} from './che-api.factory';
 import {CheJsonRpcApi} from './json-rpc/che-json-rpc-api.factory';
-import {CheJsonRpcMasterApi} from './json-rpc/che-json-rpc-master-api';
+import {IWorkspaceMasterApi} from './workspace/che-workspace-json-rpc-client.service';
 
 enum TEAM_EVENTS {
   MEMBER_ADDED,
@@ -30,7 +30,7 @@ export class CheTeamEventsManager implements che.api.ICheTeamEventsManager {
   static $inject = ['cheAPI', 'cheJsonRpcApi', 'applicationNotifications', '$log', 'cheUser'];
 
   cheUser: any;
-  cheJsonRpcMasterApi: CheJsonRpcMasterApi;
+  cheJsonRpcMasterApi: IWorkspaceMasterApi;
   $log: ng.ILogService;
   applicationNotifications: any;
   subscribers: Array<string>;
@@ -101,7 +101,7 @@ export class CheTeamEventsManager implements che.api.ICheTeamEventsManager {
    * @param teamId
    */
   unSubscribeTeamNotifications(teamId: string): void {
-    this.cheJsonRpcMasterApi.unSubscribeOrganizationStatus(teamId);
+    this.cheJsonRpcMasterApi.unSubscribeOrganizationStatus(teamId, () => { return; });
   }
 
   /**
