@@ -206,8 +206,7 @@ public class WorkspaceRuntimes {
     }
 
     Subject subject = EnvironmentContext.getCurrent().getSubject();
-    RuntimeIdentity runtimeId =
-        new RuntimeIdentityImpl(workspaceId, envName, subject.getUserName(), subject.getUserId());
+    RuntimeIdentity runtimeId = new RuntimeIdentityImpl(workspaceId, envName, subject.getUserId());
     try {
       InternalEnvironment internalEnv = createInternalEnvironment(environment);
       RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv);

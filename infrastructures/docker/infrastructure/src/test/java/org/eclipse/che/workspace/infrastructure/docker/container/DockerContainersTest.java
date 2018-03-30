@@ -48,8 +48,8 @@ public class DockerContainersTest {
 
   @Test
   public void findsIdentifiers() throws Exception {
-    RuntimeIdentity id1 = new RuntimeIdentityImpl("workspace123", "default", "test", "id");
-    RuntimeIdentity id2 = new RuntimeIdentityImpl("workspace234", "default", "test", "id");
+    RuntimeIdentity id1 = new RuntimeIdentityImpl("workspace123", "default", "id");
+    RuntimeIdentity id2 = new RuntimeIdentityImpl("workspace234", "default", "id");
 
     List<ContainerListEntry> entries =
         asList(mockContainer(id1, "container1"), mockContainer(id2, "container2"));
@@ -81,7 +81,7 @@ public class DockerContainersTest {
 
   @Test
   public void findContainers() throws Exception {
-    RuntimeIdentity id = new RuntimeIdentityImpl("workspace123", "default", "test", "id");
+    RuntimeIdentity id = new RuntimeIdentityImpl("workspace123", "default", "id");
     ContainerListEntry entry1 = mockContainer(id, "container1");
     ContainerListEntry entry2 = mockContainer(id, "container2");
 
@@ -113,7 +113,7 @@ public class DockerContainersTest {
           throws Exception {
     when(docker.listContainers(anyObject())).thenThrow(new IOException("oops"));
 
-    containers.find(new RuntimeIdentityImpl("workspace123", "default", "test", "id"));
+    containers.find(new RuntimeIdentityImpl("workspace123", "default", "id"));
   }
 
   private ContainerListEntry mockContainer(RuntimeIdentity runtimeId, String containerId)
