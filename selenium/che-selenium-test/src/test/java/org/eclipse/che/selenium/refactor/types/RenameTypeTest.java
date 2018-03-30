@@ -46,7 +46,7 @@ public class RenameTypeTest {
   private static final String NAME_OF_PROJECT =
       NameGenerator.generate(RenameTypeTest.class.getSimpleName(), 2);
   private static final String pathToPackageInChePrefix =
-      NAME_OF_PROJECT + "/src" + "/main" + "/java" + "/renametype";
+      NAME_OF_PROJECT + "/src/main/java/renametype";
 
   private String pathToCurrentPackage;
   private String contentFromInA;
